@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-11 19:16:27 +0100 (Thu, May 11, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-15 19:14:48 +0100 (Mon, May 15, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -34,7 +34,7 @@ from ccpn.core.NmrAtom import NmrAtom
 # from ccpn.core.Project import Project
 from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, navigateToNmrAtomsInStrip
-from ccpn.core.lib.ContextManagers import undoStackBlocking
+from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlockWithoutSideBar
 from ccpn.util.Logging import getLogger
 
 
@@ -232,8 +232,9 @@ def resetPeakLabelPositions(spectrumDisplay: GuiSpectrumDisplay, selected: bool 
             getLogger().debug('resetPeakLabelPositions: There are no selected peaks in the spectrumDisplay')
         return
 
-    for view in views:
-        view.textOffset = (0.0, 0.0)
+    with undoBlockWithoutSideBar(app):
+        for view in views:
+            view.textOffset = (0.0, 0.0)
 
 
 def arrangePeakLabelPositions(spectrumDisplay: GuiSpectrumDisplay, selected: bool = False) -> None:
@@ -346,11 +347,12 @@ def arrangePeakLabelPositions(spectrumDisplay: GuiSpectrumDisplay, selected: boo
 
     non_over, over_ind = output
 
-    # need to check which over_ind are bad and discard
-    for posx, posy, moved, (view, ss) in zip(posnX, posnY, non_over, labels):
-        # view.textOffset = (moved[0] - posx, moved[1] - posy)  # pixels
-        # offset is always orientated +ve to the top-right
-        view.textOffset = (moved[0] - posx) * np.abs(px), (moved[1] - posy) * np.abs(py)  # ppm
+    with undoBlockWithoutSideBar(app):
+        # need to check which over_ind are bad and discard
+        for posx, posy, moved, (view, ss) in zip(posnX, posnY, non_over, labels):
+            # offset is always orientated +ve to the top-right
+            view.textOffset = (moved[0] - posx, moved[1] - posy)  # pixels
+            # view.textOffset = (moved[0] - posx) * np.abs(px), (moved[1] - posy) * np.abs(py)  # ppm
 
-    if over_ind:
-        getLogger().debug(f'Contains bad label indices {over_ind}')
+    # if over_ind:
+    #     getLogger().debug(f'Contains bad label indices {over_ind}')

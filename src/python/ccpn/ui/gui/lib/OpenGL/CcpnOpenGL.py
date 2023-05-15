@@ -306,6 +306,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._drawSelectionBox = False
         self._drawMouseMoveLine = False
         self._drawDeltaOffset = False
+        self._mouseInLabel = False
         self._selectionMode = 0
         self._startCoordinate = None
         self._endCoordinate = None
@@ -2331,6 +2332,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._startCoordinate = self.mouseTransform.dot([mx, my, 0.0, 1.0])
         self._startMiddleDrag = False
         self._validRegionPick = False
+        self._mouseInLabel = False
 
         self._endCoordinate = self._startCoordinate
 
@@ -2340,8 +2342,39 @@ class CcpnGLWidget(QOpenGLWidget):
                 # drag a peak
                 xPosition = cursorCoordinate[0]  # self.mapSceneToView(event.pos()).x()
                 yPosition = cursorCoordinate[1]  #
-                objs = self._mouseInPeak(xPosition, yPosition, firstOnly=True)
-                if objs:
+                if objs := self._mouseInPeakLabel(xPosition, yPosition, firstOnly=True):
+                    # move from the mouse position
+                    # NOTE:ED - need stacking offset!
+                    # try:
+                    #     if self.spectrumDisplay.is1D:  # and \
+                    #             # (specViews := [spectrumView for spectrumView in self.strip.spectrumViews
+                    #             #                for plv in spectrumView.peakListViews if spectrumView.isDisplayed and plv.isDisplayed
+                    #             #                for pv in plv.peakViews if pv.peak in objs]) and \
+                    #             # (_coord := self._spectrumSettings[specViews[0]].get(GLDefs.SPECTRUM_STACKEDMATRIXOFFSET)) is not None:
+                    #
+                    #         specViews = [spectrumView for spectrumView in self.strip.spectrumViews
+                    #                        for plv in spectrumView.peakListViews if spectrumView.isDisplayed and plv.isDisplayed
+                    #                        for pv in plv.peakViews if pv.peak in objs]
+                    #         _coord = self._spectrumSettings[specViews[0]].get(GLDefs.SPECTRUM_STACKEDMATRIXOFFSET)
+                    #
+                    #         xOffset, yOffset = _coord
+                    #         # self._startCoordinate = [cursorCoordinate[0] + xOffset, cursorCoordinate[1] + yOffset]
+                    #         self._startCoordinate = cursorCoordinate[:2]
+                    #
+                    #     else:
+                    #         self._startCoordinate = cursorCoordinate[:2]
+                    #
+                    # except Exception as es:
+                    # DUH! always the screen co-ordinate
+                    self._startCoordinate = cursorCoordinate[:2]
+
+                    # set the flags for middle mouse dragging
+                    self._startMiddleDrag = True
+                    self._drawMouseMoveLine = True
+                    self._drawDeltaOffset = True
+                    self._mouseInLabel = True
+
+                elif objs := self._mouseInPeak(xPosition, yPosition, firstOnly=True):
                     # move from the centre of the clicked peak
                     self.getPeakPositionFromMouse(objs[0], self._startCoordinate, cursorCoordinate)
 
@@ -6459,6 +6492,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
         peaks = set()
         originalxPositions = xPositions
+        _data2Obj = self.strip.project._data2Obj
+        pixX, pixY = self.strip._CcpnGLWidget.pixelX, self.strip._CcpnGLWidget.pixelY
+
         for spectrumView in self._ordering:  # strip.spectrumViews:
             if spectrumView.isDeleted:
                 continue
@@ -6472,49 +6508,76 @@ class CcpnGLWidget(QOpenGLWidget):
                     continue
 
                 if len(spectrumView.spectrum.axisCodes) == 1:
+                    # should be sub-classed somewhere!
+                    xOffset, yOffset = self._spectrumSettings[spectrumView].get(GLDefs.SPECTRUM_STACKEDMATRIXOFFSET)
                     y0 = self._startCoordinate[1]
                     y1 = self._endCoordinate[1]
                     y0, y1 = min(y0, y1), max(y0, y1)
                     # add offsets for when in stack-mode
-                    xOffset, yOffset = self._spectrumSettings[spectrumView].get(GLDefs.SPECTRUM_STACKEDMATRIXOFFSET)
                     y0, y1 = np.array([y0, y1]) - yOffset
                     xPositions = np.array(originalxPositions) - xOffset
-                    xAxis = 0
+                    # xAxis = 0
 
-                    for peak in peakList.peaks:
-                        try:
-                            height = peak.height  # * scale # TBD: is the scale already taken into account in peak.height???
-                            if xPositions[0] < float(peak.position[xAxis]) < xPositions[1] and y0 < height < y1:
-                                peaks.add(peak)
+                    # for peak in peakList.peaks:
+                    if labelling := self._GLPeaks._GLLabels.get(peakListView):
+                        for drawList in labelling.stringList:
+                            try:
+                                peak = drawList.stringObject
+                                pView = peak.getPeakView(peakListView)
+                                px, py = float(peak.position[0]), float(peak.height)
+                                tx, ty = pView.textOffset
+                                if not tx and not ty:
+                                    # TODO: ED - nasty :|
+                                    tx, ty = self.symbolX, self.symbolY
+                                mx, my = px + (tx + drawList.width / 2) * pixX, py + (ty + drawList.height / 2) * pixY
 
-                        except Exception:
-                            # NOTE:ED - skip for now
-                            continue
-
-                else:
-                    spectrumIndices = spectrumView.dimensionIndices
-                    xAxis = spectrumIndices[0]
-                    yAxis = spectrumIndices[1]
-
-                    for peak in peakList.peaks:
-                        try:
-                            if (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]
-                                    and yPositions[0] < float(peak.position[yAxis]) < yPositions[1]):
-                                if len(peak.axisCodes) > 2 and zPositions is not None:
-                                    zAxis = spectrumIndices[2]
-
-                                    # within the XY bounds so check whether inPlane
-                                    _isInPlane, _isInFlankingPlane, planeIndex, fade = self._GLPeaks.objIsInVisiblePlanes(spectrumView, peak)
-
-                                    # if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
-                                    if _isInPlane:
-                                        peaks.add(peak)
-                                else:
+                                # height = peak.height  # * scale # TBD: is the scale already taken into account in peak.height???
+                                if (xPositions[0] < px < xPositions[1] and y0 < py < y1) or \
+                                        (xPositions[0] < mx < xPositions[1] and y0 < my < y1):
                                     peaks.add(peak)
 
-                        except Exception:
-                            # NOTE:ED - skip for now
-                            continue
+                            except Exception as es:
+                                # NOTE:ED - skip for now
+                                print(f'mouse in label error {es}')
+                                continue
+
+                else:
+                    if labelling := self._GLPeaks._GLLabels.get(peakListView):
+                        spectrumIndices = spectrumView.dimensionIndices
+                        xAxis = spectrumIndices[0]
+                        yAxis = spectrumIndices[1]
+
+                        # for peak in peakList.peaks:
+                        for drawList in labelling.stringList:
+
+                            try:
+                                peak = drawList.stringObject
+                                # NOTE:ED - need to speed this up
+                                pView = peak.getPeakView(peakListView)
+                                _pos = peak.position
+                                px, py = float(_pos[xAxis]), float(_pos[yAxis])
+                                tx, ty = pView.textOffset
+                                if not tx and not ty:
+                                    tx, ty = self.symbolX, self.symbolY
+                                mx, my = px + (tx + drawList.width / 2) * pixX, py + (ty + drawList.height / 2) * pixY
+
+                                if (xPositions[0] < px < xPositions[1] and yPositions[0] < py < yPositions[1]) or \
+                                        (xPositions[0] < mx < xPositions[1] and yPositions[0] < my < yPositions[1]):
+                                    if len(peak.axisCodes) > 2 and zPositions is not None:
+                                        # zAxis = spectrumIndices[2]
+
+                                        # within the XY bounds so check whether inPlane
+                                        _isInPlane, _isInFlankingPlane, planeIndex, fade = self._GLPeaks.objIsInVisiblePlanes(spectrumView, peak)
+
+                                        # if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
+                                        if _isInPlane:
+                                            peaks.add(peak)
+                                    else:
+                                        peaks.add(peak)
+
+                            except Exception:
+                                # NOTE:ED - skip for now
+                                continue
 
         self.current.peaks = list(currentPeaks | peaks)
 
@@ -6628,14 +6691,34 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 deltaPosition = [cursorCoordinate[0] - self._startCoordinate[0],
                                  cursorCoordinate[1] - self._startCoordinate[1]]
-                for peak in peaks:
-                    peak.startPosition = peak.position
 
-                with undoBlockWithoutSideBar():
+                if self._mouseInLabel:
+                    # # NOTE:ED - not very nice again, needs cleaning up
+                    # plvs = [plv._wrappedData.peakListView for spectrumView in self.strip.spectrumViews
+                    #             for plv in spectrumView.peakListViews
+                    #                 if spectrumView.isDisplayed and plv.isDisplayed]
+                    # pvs = [pv for pk in peaks for pv in pk.peakViews if pv._wrappedData.peakListView in plvs]
+
+                    pvs = {pv for spectrumView in self.strip.spectrumViews
+                           for plv in spectrumView.peakListViews if spectrumView.isDisplayed and plv.isDisplayed
+                           for pv in plv.peakViews if pv.peak in peaks}
+
+                    with undoBlockWithoutSideBar():
+                        for pv in pvs:
+                            pos = list(pv.textOffset)
+                            pos[0] += (deltaPosition[0] / self.pixelX)
+                            pos[1] += (deltaPosition[1] / self.pixelY)
+                            pv.textOffset = pos
+
+                else:
                     for peak in peaks:
-                        self._movePeak(peak, deltaPosition)
+                        peak.startPosition = peak.position
 
-                self.current.peaks = peaks
+                    with undoBlockWithoutSideBar():
+                        for peak in peaks:
+                            self._movePeak(peak, deltaPosition)
+
+                    self.current.peaks = peaks
 
         elif shiftLeftMouse(event):
             # zoom into the region - yellow box

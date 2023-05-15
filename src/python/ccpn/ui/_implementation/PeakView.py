@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-11 19:16:27 +0100 (Thu, May 11, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-15 19:14:46 +0100 (Mon, May 15, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -132,14 +132,27 @@ def getTextOffset(self: Peak, peakListView: PeakListView) -> tuple:
     """Get textOffset for the peak for the specified peakListView
     """
     if view := self._wrappedData.findFirstPeakView(peakListView=peakListView._wrappedData.peakListView):
+        # bypass the v3-operator in superclass
         tOffset = view.textOffset
-        if any(val for val in tOffset):
+        if any(tOffset):
             return view.textOffset
 
 
 Peak.getTextOffset = getTextOffset
 
 del getTextOffset
+
+
+def getPeakView(self: Peak, peakListView: PeakListView) -> tuple:
+    """Get peakView for the peak for the specified peakListView
+    """
+    if view := self._wrappedData.findFirstPeakView(peakListView=peakListView._wrappedData.peakListView):
+        return self.project._data2Obj.get(view)
+
+
+Peak.getPeakView = getPeakView
+
+del getPeakView
 
 
 def _peakAddPeakViews(project: Project, apiPeak: Nmr.Peak):

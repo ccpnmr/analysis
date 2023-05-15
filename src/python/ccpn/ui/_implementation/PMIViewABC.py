@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-11 19:16:27 +0100 (Thu, May 11, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-15 19:14:46 +0100 (Mon, May 15, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,8 @@ import typing
 
 from ccpn.core.lib import Pid
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.core.lib.ContextManagers import undoStackBlocking
+from ccpn.core.lib.ContextManagers import ccpNmrV3CoreSetter  #, undoStackBlocking
+from ccpn.util.decorators import logCommand
 
 
 class PMIViewABC(AbstractWrapperObject):
@@ -84,13 +85,15 @@ class PMIViewABC(AbstractWrapperObject):
         return self._wrappedData.textOffset
 
     @textOffset.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def textOffset(self, value: tuple):
         """Set the textOffset for the view.
         """
         try:
-            with undoStackBlocking():
-                # this is a gui operation and shouldn't need an undo
-                self._wrappedData.textOffset = value
+            # with undoStackBlocking():
+            # this is a gui operation and shouldn't need an undo? if no undo, remove core decorator above
+            self._wrappedData.textOffset = value
 
         except Exception as es:
             raise TypeError(f'{self.__class__.__name__}:textOffset must be a tuple of int/floats') from es

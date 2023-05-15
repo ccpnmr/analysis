@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-11 19:16:27 +0100 (Thu, May 11, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-15 19:14:47 +0100 (Mon, May 15, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -315,27 +315,27 @@ class GLLabelling():
         pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
         vPP = spectrumView.spectrum.ppmPerPoints
 
-        # try:
-        #     r = tx * abs(self._GLParent.pixelX)  # change from pixels to ppm
-        #     pr = r / vPP[pIndex[0]]              # change from ppm to points
-        # except Exception:
-        #     pr = r
-        # try:
-        #     w = ty * abs(self._GLParent.pixelY)
-        #     pw = w / vPP[pIndex[1]]
-        # except Exception:
-        #     pw = w
-
         try:
-            r = tx  #* np.sign(self._GLParent.pixelX)  # change from pixels to ppm
-            pr = r / vPP[pIndex[0]]  # change from ppm to points
+            r = tx * abs(self._GLParent.pixelX)  # change from pixels to ppm
+            pr = r / vPP[pIndex[0]]              # change from ppm to points
         except Exception:
             pr = r
         try:
-            w = ty  #* np.sign(self._GLParent.pixelY)
+            w = ty * abs(self._GLParent.pixelY)
             pw = w / vPP[pIndex[1]]
         except Exception:
             pw = w
+
+        # try:
+        #     r = tx  #* np.sign(self._GLParent.pixelX)  # change from pixels to ppm
+        #     pr = r / vPP[pIndex[0]]  # change from ppm to points
+        # except Exception:
+        #     pr = r
+        # try:
+        #     w = ty  #* np.sign(self._GLParent.pixelY)
+        #     pw = w / vPP[pIndex[1]]
+        # except Exception:
+        #     pw = w
 
         return r, w, symbolType, symbolWidth, pr, pw
 

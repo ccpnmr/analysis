@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-22 17:48:51 +0000 (Wed, February 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-15 19:14:49 +0100 (Mon, May 15, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -66,42 +66,139 @@ class GuiNdWidget(CcpnGLWidget):
             zPositions = None
 
         peaks = []
+        _data2Obj = self.strip.project._data2Obj
+        pixX, pixY = self.strip._CcpnGLWidget.pixelX, self.strip._CcpnGLWidget.pixelY
 
         for spectrumView in self.strip.spectrumViews:
             for peakListView in spectrumView.peakListViews:
                 if spectrumView.isDisplayed and peakListView.isDisplayed:
 
-                    peakList = peakListView.peakList
+                    # peakList = peakListView.peakList
+                    # pks = np.array(peakList.peaks)
+                    # labels = [(_data2Obj.get(pLabel.stringObject._wrappedData.findFirstPeakView(peakListView=plv._wrappedData.peakListView)),
+                    #            pLabel)
+                    #           for plv, ss in self.strip._CcpnGLWidget._GLPeaks._GLLabels.items() if plv.isDisplayed
+                    #           for pLabel in ss.stringList]
 
-                    spectrumIndices = spectrumView.dimensionIndices
-                    xAxis = spectrumIndices[0]
-                    yAxis = spectrumIndices[1]
+                    if labelling := self._GLPeaks._GLLabels.get(peakListView):
+                        spectrumIndices = spectrumView.dimensionIndices
+                        xAxis = spectrumIndices[0]
+                        yAxis = spectrumIndices[1]
 
-                    for peak in peakList.peaks:
-                        try:
-                            if len(peak.axisCodes) > 2 and zPositions is not None:
-                                zAxis = spectrumIndices[2]
+                        for drawList in labelling.stringList:
 
-                                if (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]
-                                        and yPositions[0] < float(peak.position[yAxis]) < yPositions[1]):
+                            try:
+                                peak = drawList.stringObject
+                                # NOTE:ED - need to speed this up
+                                pView = peak.getPeakView(peakListView)  #  _data2Obj.get(peak._wrappedData.findFirstPeakView(peakListView=peakListView._wrappedData.peakListView))
+                                _pos = peak.position
+                                px, py = float(_pos[xAxis]), float(_pos[yAxis])
+                                tx, ty = pView.textOffset
+                                if not tx and not ty:
+                                    tx, ty = self.symbolX, self.symbolY
 
-                                    # within the XY bounds so check whether inPlane
-                                    _isInPlane, _isInFlankingPlane, planeIndex, fade = self._GLPeaks.objIsInVisiblePlanes(spectrumView, peak)
+                                # find the bounds of the label
+                                minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
+                                minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
 
-                                    # if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
-                                    if _isInPlane:
-                                        peaks.append(peak)
-                                        if firstOnly:
-                                            return peaks
-                            elif (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]
-                                  and yPositions[0] < float(peak.position[yAxis]) < yPositions[1]):
-                                peaks.append(peak)
-                                if firstOnly:
-                                    return peaks if peak in self.current.peaks else []
+                                if len(peak.axisCodes) > 2 and zPositions is not None:
+                                    # zAxis = spectrumIndices[2]
 
-                        except Exception:
-                            # NOTE:ED - skip for now
-                            continue
+                                    if (xPositions[0] < px < xPositions[1]
+                                        and yPositions[0] < py < yPositions[1]) or \
+                                            (minX < xPosition < maxX and minY < yPosition < maxY):
+
+                                        # within the XY bounds so check whether inPlane
+                                        _isInPlane, _isInFlankingPlane, planeIndex, fade = self._GLPeaks.objIsInVisiblePlanes(spectrumView, peak)
+
+                                        # if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
+                                        if _isInPlane:
+                                            peaks.append(peak)
+                                            if firstOnly:
+                                                return peaks
+
+                                elif (xPositions[0] < px < xPositions[1]
+                                      and yPositions[0] < py < yPositions[1]) or \
+                                            (minX < xPosition < maxX and minY < yPosition < maxY):
+                                    peaks.append(peak)
+                                    if firstOnly:
+                                        return peaks if peak in self.current.peaks else []
+
+                            except Exception:
+                                # NOTE:ED - skip for now
+                                continue
+
+        return peaks
+
+    def _mouseInPeakLabel(self, xPosition, yPosition, firstOnly=False):
+        """Find the peaks under the mouse.
+        If firstOnly is true, return only the first item, else an empty list
+        """
+        # xPositions = [xPosition - self.symbolX, xPosition + self.symbolX]
+        # yPositions = [yPosition - self.symbolY, yPosition + self.symbolY]
+        if len(self._orderedAxes) > 2:
+            zPositions = self._orderedAxes[2].region
+        else:
+            zPositions = None
+
+        peaks = []
+        _data2Obj = self.strip.project._data2Obj
+        pixX, pixY = self.strip._CcpnGLWidget.pixelX, self.strip._CcpnGLWidget.pixelY
+
+        for spectrumView in self.strip.spectrumViews:
+            for peakListView in spectrumView.peakListViews:
+                if spectrumView.isDisplayed and peakListView.isDisplayed:
+
+                    # peakList = peakListView.peakList
+                    # pks = np.array(peakList.peaks)
+                    # labels = [(_data2Obj.get(pLabel.stringObject._wrappedData.findFirstPeakView(peakListView=plv._wrappedData.peakListView)),
+                    #            pLabel)
+                    #           for plv, ss in self.strip._CcpnGLWidget._GLPeaks._GLLabels.items() if plv.isDisplayed
+                    #           for pLabel in ss.stringList]
+
+                    if labelling := self._GLPeaks._GLLabels.get(peakListView):
+                        spectrumIndices = spectrumView.dimensionIndices
+                        xAxis = spectrumIndices[0]
+                        yAxis = spectrumIndices[1]
+
+                        for drawList in labelling.stringList:
+
+                            try:
+                                peak = drawList.stringObject
+                                # NOTE:ED - need to speed this up
+                                pView = peak.getPeakView(peakListView)  #  _data2Obj.get(peak._wrappedData.findFirstPeakView(peakListView=peakListView._wrappedData.peakListView))
+                                _pos = peak.position
+                                px, py = float(_pos[xAxis]), float(_pos[yAxis])
+                                tx, ty = pView.textOffset
+                                if not tx and not ty:
+                                    tx, ty = self.symbolX, self.symbolY
+
+                                # find the bounds of the label
+                                minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
+                                minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
+
+                                if len(peak.axisCodes) > 2 and zPositions is not None:
+                                    # zAxis = spectrumIndices[2]
+
+                                    if (minX < xPosition < maxX and minY < yPosition < maxY):
+
+                                        # within the XY bounds so check whether inPlane
+                                        _isInPlane, _isInFlankingPlane, planeIndex, fade = self._GLPeaks.objIsInVisiblePlanes(spectrumView, peak)
+
+                                        # if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
+                                        if _isInPlane:
+                                            peaks.append(peak)
+                                            if firstOnly:
+                                                return peaks
+
+                                elif (minX < xPosition < maxX and minY < yPosition < maxY):
+                                    peaks.append(peak)
+                                    if firstOnly:
+                                        return peaks if peak in self.current.peaks else []
+
+                            except Exception:
+                                # NOTE:ED - skip for now
+                                continue
 
         return peaks
 
@@ -234,8 +331,8 @@ class GuiNdWidget(CcpnGLWidget):
                     minimumValuePerPoint=minimumValuePerPoint)
 
             self.visiblePlaneList[visibleSpecView], \
-            self.visiblePlaneListPointValues[visibleSpecView], \
-            self.visiblePlaneDimIndices[visibleSpecView] = visValues
+                self.visiblePlaneListPointValues[visibleSpecView], \
+                self.visiblePlaneDimIndices[visibleSpecView] = visValues
 
         # update the labelling lists
         self._GLPeaks.setListViews(self._ordering)
@@ -1223,6 +1320,9 @@ class Gui1dWidget(CcpnGLWidget):
         originalyPositions = yPositions
 
         peaks = []
+        _data2Obj = self.strip.project._data2Obj
+        pixX, pixY = self.strip._CcpnGLWidget.pixelX, self.strip._CcpnGLWidget.pixelY
+
         for spectrumView in self.strip.spectrumViews:
             for peakListView in spectrumView.peakListViews:
                 xOffset, yOffset = self._spectrumSettings[spectrumView].get(GLDefs.SPECTRUM_STACKEDMATRIXOFFSET)
@@ -1230,19 +1330,78 @@ class Gui1dWidget(CcpnGLWidget):
                 yPositions = np.array(originalyPositions) - yOffset
                 if spectrumView.isDisplayed and peakListView.isDisplayed:
 
-                    peakList = peakListView.peakList
-                    for peak in peakList.peaks:
-                        try:
-                            if (xPositions[0] < float(peak.position[0]) < xPositions[1]
-                                    and yPositions[0] < float(peak.height) < yPositions[1]):
+                    # peakList = peakListView.peakList
+                    if labelling := self._GLPeaks._GLLabels.get(peakListView):
+                        for drawList in labelling.stringList:
+                            try:
+                                peak = drawList.stringObject
+                                pView = peak.getPeakView(peakListView)  # _data2Obj.get(peak._wrappedData.findFirstPeakView(peakListView=peakListView._wrappedData.peakListView))
+                                px, py = float(peak.position[0]), float(peak.height)
+                                tx, ty = pView.textOffset
+                                if not tx and not ty:
+                                    tx, ty = self.symbolX, self.symbolY
 
-                                peaks.append(peak)
-                                if firstOnly:
-                                    return peaks if peak in self.current.peaks else []
+                                # find the bounds of the label
+                                minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
+                                minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
 
-                        except Exception:
-                            # NOTE:ED - skip for now
-                            continue
+                                if (xPositions[0] < px < xPositions[1]
+                                    and yPositions[0] < py < yPositions[1]) or \
+                                        (minX < xPosition - xOffset < maxX and minY < yPosition - yOffset < maxY):
+
+                                    peaks.append(peak)
+                                    if firstOnly:
+                                        return peaks if peak in self.current.peaks else []
+
+                            except Exception:
+                                # NOTE:ED - skip for now
+                                continue
+
+        return peaks
+
+    def _mouseInPeakLabel(self, xPosition, yPosition, firstOnly=False):
+        """Find the peaks under the mouse.
+        If firstOnly is true, return only the first item, else an empty list
+        """
+        # xPositions = [xPosition - self.symbolX, xPosition + self.symbolX]
+        # yPositions = [yPosition - self.symbolY, yPosition + self.symbolY]
+        # originalxPositions = xPositions
+        # originalyPositions = yPositions
+
+        peaks = []
+        _data2Obj = self.strip.project._data2Obj
+        pixX, pixY = self.strip._CcpnGLWidget.pixelX, self.strip._CcpnGLWidget.pixelY
+
+        for spectrumView in self.strip.spectrumViews:
+            for peakListView in spectrumView.peakListViews:
+                xOffset, yOffset = self._spectrumSettings[spectrumView].get(GLDefs.SPECTRUM_STACKEDMATRIXOFFSET)
+                # xPositions = np.array(originalxPositions) - xOffset
+                # yPositions = np.array(originalyPositions) - yOffset
+                if spectrumView.isDisplayed and peakListView.isDisplayed:
+
+                    # peakList = peakListView.peakList
+                    if labelling := self._GLPeaks._GLLabels.get(peakListView):
+                        for drawList in labelling.stringList:
+                            try:
+                                peak = drawList.stringObject
+                                pView = peak.getPeakView(peakListView)  # _data2Obj.get(peak._wrappedData.findFirstPeakView(peakListView=peakListView._wrappedData.peakListView))
+                                px, py = float(peak.position[0]), float(peak.height)
+                                tx, ty = pView.textOffset
+                                if not tx and not ty:
+                                    tx, ty = self.symbolX, self.symbolY
+
+                                # find the bounds of the label
+                                minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
+                                minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
+
+                                if (minX < xPosition - xOffset < maxX and minY < yPosition - yOffset < maxY):
+                                    peaks.append(peak)
+                                    if firstOnly:
+                                        return peaks if peak in self.current.peaks else []
+
+                            except Exception:
+                                # NOTE:ED - skip for now
+                                continue
 
         return peaks
 

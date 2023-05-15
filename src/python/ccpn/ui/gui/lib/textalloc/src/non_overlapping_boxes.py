@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-11 19:16:28 +0100 (Thu, May 11, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-15 19:14:48 +0100 (Mon, May 15, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -75,6 +75,8 @@ def get_non_overlapping_boxes(
     Returns:
         Tuple[List[Tuple[float, float, float, float, str, int]], List[int]]: data of non-overlapping boxes and indices of overlapping boxes.
     """
+    from ccpn.core.lib.ContextManagers import progressHandler
+
     xmin_bound, xmax_bound = xlims
     ymin_bound, ymax_bound = ylims
 
@@ -90,108 +92,87 @@ def get_non_overlapping_boxes(
     # Iterate original boxes and find ones that do not overlap by creating multiple candidates
     non_overlapping_boxes = []
     overlapping_boxes_inds = []
-    for i, box in enumerate(original_boxes):
-        x_original, y_original, w, h, s = box
 
-        candidates = generate_candidates(
-                w,
-                h,
-                x_original,
-                y_original,
-                xmindistance,
-                ymindistance,
-                xmaxdistance,
-                ymaxdistance,
-                nbr_candidates=nbr_candidates,
-                )
+    with progressHandler(text='Auto-arranging...', maximum=len(original_boxes), autoClose=True,
+                         raiseErrors=False) as progress:
 
-        # Check for overlapping
-        if scatter_xy is None:
-            non_op = np.zeros((candidates.shape[0],)) == 0
-        else:
-            non_op = non_overlapping_with_points(
-                    scatter_xy, candidates, xmargin, ymargin
-                    )
-        if lines_xyxy is None:
-            non_ol = np.zeros((candidates.shape[0],)) == 0
-        else:
-            non_ol = non_overlapping_with_lines(
-                    lines_xyxy, candidates, xmargin, ymargin
+        for ii, box in enumerate(original_boxes):
+            progress.checkCancelled()
+            progress.setValue(ii)
+
+            x_original, y_original, w, h, s = box
+
+            candidates = generate_candidates(
+                    w,
+                    h,
+                    x_original,
+                    y_original,
+                    xmindistance,
+                    ymindistance,
+                    xmaxdistance,
+                    ymaxdistance,
+                    nbr_candidates=nbr_candidates,
                     )
 
-        if boxes_xyxy is None:
-            non_ob = np.zeros((candidates.shape[0],)) == 0
-        else:
-            non_ob = non_overlapping_with_boxes(
-                    boxes_xyxy, candidates, xmargin, ymargin
-                    )
-
-        if box_arr.shape[0] == 0:
-            non_orec = np.zeros((candidates.shape[0],)) == 0
-        else:
-            non_orec = non_overlapping_with_boxes(box_arr, candidates, xmargin, ymargin)
-
-        inside = inside_plot(xmin_bound, ymin_bound, xmax_bound, ymax_bound, candidates)
-        inside |= True  # NOTE:ED - HACK, all inside the window
-
-        # Validate (could use logical_and here, not sure which is quicker)
-        ok_candidates = np.where(
-                np.bitwise_and(
-                        non_ob, np.bitwise_and(
-                                non_ol, np.bitwise_and(
-                                        non_op, np.bitwise_and(non_orec, inside))
-                                )
+            # Check for overlapping
+            if scatter_xy is None:
+                non_op = np.zeros((candidates.shape[0],)) == 0
+            else:
+                non_op = non_overlapping_with_points(
+                        scatter_xy, candidates, xmargin, ymargin
                         )
-                )[0]
+            if lines_xyxy is None:
+                non_ol = np.zeros((candidates.shape[0],)) == 0
+            else:
+                non_ol = non_overlapping_with_lines(
+                        lines_xyxy, candidates, xmargin, ymargin
+                        )
 
-        if len(ok_candidates) > 0:
-            # find the index of the nearest candidate to the original-point
-            centres = np.tile(np.array([x_original, y_original, 0.0, 0.0]).transpose(), (len(ok_candidates), 1))
-            offset = candidates[ok_candidates] - centres
-            min_dists = np.linalg.norm(offset[:, :2], axis=1)
-            ind = np.argmin(min_dists)
+            if boxes_xyxy is None:
+                non_ob = np.zeros((candidates.shape[0],)) == 0
+            else:
+                non_ob = non_overlapping_with_boxes(
+                        boxes_xyxy, candidates, xmargin, ymargin
+                        )
 
-            # # plot a figure to check the size
-            # import matplotlib
-            #
-            # matplotlib.use('Qt5Agg')
-            # from mpl_toolkits import mplot3d
-            # import matplotlib.pyplot as plt
-            #
-            # fig = plt.figure(figsize=(10, 8), dpi=100)
-            # axS = fig.gca()
-            #
-            # axS.plot(offset[:, 0], offset[:, 1], label = 'Offset')
+            if box_arr.shape[0] == 0:
+                non_orec = np.zeros((candidates.shape[0],)) == 0
+            else:
+                non_orec = non_overlapping_with_boxes(box_arr, candidates, xmargin, ymargin)
 
-            best_candidate = candidates[ok_candidates[ind], :]
-            box_arr = np.vstack(
-                    [
-                        box_arr,
-                        np.array(
-                                [
-                                    best_candidate[0],
-                                    best_candidate[1],
-                                    best_candidate[0] + w,
-                                    best_candidate[1] + h,
-                                    ]
-                                ),
-                        ]
-                    )
-            non_overlapping_boxes.append(
-                    (best_candidate[0], best_candidate[1], w, h, s, i)
-                    )
+            inside = inside_plot(xmin_bound, ymin_bound, xmax_bound, ymax_bound, candidates)
+            inside |= True  # NOTE:ED - HACK, all inside the window
 
-            if include_arrows:
-                # add a new line to exclude between the symbol and the best candidate position
-                # NOTE:ED - this only accounts for previous edges, does not check if the new edge would overlay an existing label
-                #   needs another validate check for that - doesn't actually make much difference :|
-                new_line = np.array([[x_original, y_original, best_candidate[0] + w / 2, best_candidate[1] + h / 2]])
-                lines_xyxy = new_line if lines_xyxy is None else np.vstack([lines_xyxy, new_line])
+            # Validate (could use logical_and here, not sure which is quicker)
+            ok_candidates = np.where(
+                    np.bitwise_and(
+                            non_ob, np.bitwise_and(
+                                    non_ol, np.bitwise_and(
+                                            non_op, np.bitwise_and(non_orec, inside))
+                                    )
+                            )
+                    )[0]
 
-        elif draw_all:
-            ok_candidates = np.where(np.bitwise_and(non_orec, inside))[0]
             if len(ok_candidates) > 0:
-                best_candidate = candidates[ok_candidates[0], :]
+                # find the index of the nearest candidate to the original-point
+                centres = np.tile(np.array([x_original, y_original, 0.0, 0.0]).transpose(), (len(ok_candidates), 1))
+                offset = candidates[ok_candidates] - centres
+                min_dists = np.linalg.norm(offset[:, :2], axis=1)
+                ind = np.argmin(min_dists)
+
+                # # plot a figure to check the size
+                # import matplotlib
+                #
+                # matplotlib.use('Qt5Agg')
+                # from mpl_toolkits import mplot3d
+                # import matplotlib.pyplot as plt
+                #
+                # fig = plt.figure(figsize=(10, 8), dpi=100)
+                # axS = fig.gca()
+                #
+                # axS.plot(offset[:, 0], offset[:, 1], label = 'Offset')
+
+                best_candidate = candidates[ok_candidates[ind], :]
                 box_arr = np.vstack(
                         [
                             box_arr,
@@ -206,17 +187,45 @@ def get_non_overlapping_boxes(
                             ]
                         )
                 non_overlapping_boxes.append(
-                        (best_candidate[0], best_candidate[1], w, h, s, i)
+                        (best_candidate[0], best_candidate[1], w, h, s, ii)
                         )
 
                 if include_arrows:
                     # add a new line to exclude between the symbol and the best candidate position
+                    # NOTE:ED - this only accounts for previous edges, does not check if the new edge would overlay an existing label
+                    #   needs another validate check for that - doesn't actually make much difference :|
                     new_line = np.array([[x_original, y_original, best_candidate[0] + w / 2, best_candidate[1] + h / 2]])
                     lines_xyxy = new_line if lines_xyxy is None else np.vstack([lines_xyxy, new_line])
 
+            elif draw_all:
+                ok_candidates = np.where(np.bitwise_and(non_orec, inside))[0]
+                if len(ok_candidates) > 0:
+                    best_candidate = candidates[ok_candidates[0], :]
+                    box_arr = np.vstack(
+                            [
+                                box_arr,
+                                np.array(
+                                        [
+                                            best_candidate[0],
+                                            best_candidate[1],
+                                            best_candidate[0] + w,
+                                            best_candidate[1] + h,
+                                            ]
+                                        ),
+                                ]
+                            )
+                    non_overlapping_boxes.append(
+                            (best_candidate[0], best_candidate[1], w, h, s, ii)
+                            )
+
+                    if include_arrows:
+                        # add a new line to exclude between the symbol and the best candidate position
+                        new_line = np.array([[x_original, y_original, best_candidate[0] + w / 2, best_candidate[1] + h / 2]])
+                        lines_xyxy = new_line if lines_xyxy is None else np.vstack([lines_xyxy, new_line])
+
+                else:
+                    overlapping_boxes_inds.append(ii)
             else:
-                overlapping_boxes_inds.append(i)
-        else:
-            overlapping_boxes_inds.append(i)
+                overlapping_boxes_inds.append(ii)
 
     return non_overlapping_boxes, overlapping_boxes_inds

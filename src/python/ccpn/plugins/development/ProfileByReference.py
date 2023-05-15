@@ -103,10 +103,11 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         # Create ORDERED dictionary to store all parameters for the run
         # deepcopy doesn't work on dictionaries with the qt widgets, so to get a separation of gui widgets and values for storage
         # it is needed to create the two dictionaries alongside each other
-        self.guiDict = OD([('Spectra', OD()), ('CoreWidgets', OD()), ('TemporaryWidgets', OD())])
-        self.settings = OD([('Spectra', OD()), ('Current', OD()), ('Databases', OD()), ('Simulators', OD()), ('ResultsTables', OD())])
+        self.guiDict = OD([('CoreWidgets', OD()), ('TemporaryWidgets', OD())])
+        self.settings = OD([('Spectra', OD()), ('Current', OD()), ('ResultsTables', OD())])
         self.metaboliteSimulations = OD()
         self.sumSpectra = OD()
+        self.subSpectra = OD()
 
         # # Input check
         # validInput = self._inputDataCheck()
@@ -289,8 +290,8 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.display = self.project.application.mainWindow.newSpectrumDisplay([spectrum for spectrum in spectrumGroup.spectra], axisCodes=('H',), stripDirection='Y', position='top', relativeTo='MO:Profile by Reference')
         self.display.rename("Profile_By_Reference_Display")
         tableName = f'deconv_{spectrumGroupID}'
+        spectra = [spectrum.name for spectrum in spectrumGroup.spectra]
         if tableName not in self.settings['ResultsTables']:
-            spectra = [spectrum.name for spectrum in spectrumGroup.spectra]
             tableData = pd.DataFrame(spectra, columns=['spectrum'], index=spectra)
             resultsTable = self.project.newDataTable(name=tableName, data=tableData)
             self.settings['ResultsTables'][tableName] = resultsTable
@@ -299,9 +300,24 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         if 'Reference_Spectra' not in self.project.spectrumGroups:
             self.settings['Current']['referenceSpectrumGroup'] = self.project.newSpectrumGroup(
                 name='Reference_Spectra')
+        for spectrumId in spectra:
+            spectrum = self.project.getByPid('SP:' + spectrumId)
+            limits = (max(spectrum.positions), min(spectrum.positions))
+            points = len(spectrum.positions)
+            frequency = spectrum.spectrometerFrequencies[0]
+            x = numpy.linspace(limits[0], limits[1], points)
+            y = numpy.zeros(points)
+            if spectrumId not in self.sumSpectra:
+                self.sumSpectra[spectrumId] = self.project.newEmptySpectrum(['1H'], name=f'Reference_Sum_{spectrumId}',
+                                                                            intensities=y, positions=x,
+                                                                            spectrometerFrequencies=[frequency])
+            if spectrumId not in self.subSpectra:
+                self.subSpectra[spectrumId] = self.project.newEmptySpectrum(['1H'], name=f'Reference_Subtraction_{spectrumId}',
+                                                                            intensities=y, positions=x,
+                                                                            spectrometerFrequencies=[frequency])
 
-    def _selectSpectrum(self, spectrumID):
-        spectrum = self.project.getByPid('SP:' + spectrumID)
+    def _selectSpectrum(self, spectrumId):
+        spectrum = self.project.getByPid('SP:' + spectrumId)
         limits = (max(spectrum.positions), min(spectrum.positions))
         points = len(spectrum.positions)
         frequency = spectrum.spectrometerFrequencies[0]
@@ -309,14 +325,8 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.settings['Current']['ActiveSpectrumScale'] = log10(numpy.mean(spectrum.intensities[spectrum.intensities > 1]))
         self.settings['Current']['referenceSumSpectrumLimits'] = limits
         self.settings['Current']['referenceSumSpectrumPoints'] = points
-        self.settings['Current']['currentSpectrumId'] = spectrumID
+        self.settings['Current']['currentSpectrumId'] = spectrumId
         self.settings['Current']['referenceSumSpectrumFrequency'] = frequency
-        x = numpy.linspace(limits[0], limits[1], points)
-        y = numpy.zeros(points)
-        if spectrumID not in self.sumSpectra:
-            self.sumSpectra[spectrumID] = self.project.newEmptySpectrum(['1H'], name=f'Reference_Sum_{spectrumID}', intensities=y, positions=x)
-            self.settings['Current']['referenceSumSpectrum'] = self.sumSpectra[spectrumID]
-            self.settings['Current']['referenceSpectrumGroup'].addSpectrum(self.settings['Current']['referenceSumSpectrum'])
 
     def _selectMetabolite(self, newRow, previousRow, selectedRow, lastRow):
         metaboliteName = selectedRow.name.iloc[0]
@@ -328,8 +338,8 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         widget.updateDf(data)
 
     def _addUnknownSignal(self):
-        self.settings["Current"]["UnknownSignalCount"] += 1
-        self.settings['Current']['metabolite'] = f'Unknown_Substance_{self.settings["Current"]["UnknownSignalCount"]}'
+        self.settings['Current']['UnknownSignalCount'] += 1
+        self.settings['Current']['metabolite'] = f"Unknown_Substance_{self.settings['Current']['UnknownSignalCount']}"
         widget = self.guiDict['CoreWidgets']['Simulation']
         data = pd.DataFrame({'name': self.settings['Current']['metabolite'],
                              'metabolite_id': None,
@@ -551,6 +561,9 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         for spectrum in self.settings['Spectra']['SimulatedSpectra']:
             sumIntensities += spectrum.spectrum.intensities
         self.settings['Current']['referenceSumSpectrum'].intensities = sumIntensities
+
+    def refreshSubSpectrum(self):
+        pass
 
     def _getValue(self, widget):
         # Get the current value of the widget:

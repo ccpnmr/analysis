@@ -210,10 +210,12 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             shift = widget.value()
             update = self.multipletUpdateStatus
             self.simspec.moveMultiplet(multipletId, shift, update)
+            lineWidget.setValue(shift)
             self.refreshSumAndSubSpectrum()
         def lineValueChange():
             shift = lineWidget.values
-            widget.setValue(shift)
+            if self._getValue(widget) != shift:
+                widget.setValue(shift)
         def resetMultiplet():
             widget.setValue(self.simspec.originalMultiplets[multipletId]['center'] + self.simspec.globalShift)
         def navigateToMultiplet():

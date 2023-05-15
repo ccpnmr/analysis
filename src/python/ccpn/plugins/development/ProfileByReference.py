@@ -223,7 +223,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text=f'Multiplet {index+1} Chemical Shift', grid=grid)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
-        self.guiDict['TemporaryWidgets'][f'Multiplet{index}Label'] = widget
+        self.guiDict['TemporaryWidgets'][f'Multiplet{index+1}Label'] = widget
 
         grid = _addColumn(grid)
         widget = DoubleSpinbox(self.scrollAreaLayout, value=self.simspec.multiplets[multipletId]['center'], decimals=4,
@@ -276,6 +276,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
 
     def globalShiftChange(self):
         shift = self.guiDict['TemporaryWidgets']['GlobalShift'].value()
+        self.current['GlobalShift'] = shift
         difference = shift - self.simspec.globalShift
         multipletWidgetList = [widget for widget in self.guiDict['TemporaryWidgets'] if widget.endswith('ChemicalShift')]
         if len(multipletWidgetList) > 0:
@@ -285,7 +286,8 @@ class ProfileByReferenceGuiPlugin(PluginModule):
                     self.multipletUpdateStatus = True
                 self.guiDict['TemporaryWidgets'][widget].setValue(self.guiDict['TemporaryWidgets'][widget].value() + difference)
         else:
-            self.simspec.globalShift(difference)
+            self.simspec.peakList = [(peak[0]+difference, peak[1], peak[2], peak[3]) for peak in self.simspec.peakList]
+            self.simspec.setSpectrumLineshape()
         self.simspec.globalShift = shift
         self.refreshSumAndSubSpectrum()
 
@@ -564,6 +566,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             raise Exception(f"Please pick at least one peak in spectrum {self.current['ActiveSpectrum'].pid}")
         self.simspec.peakList = peakList
         self.simspec.setSpectrumLineshape()
+        self.refreshSumAndSubSpectrum()
 
     def addSimSpectrumToList(self, spectrum):
         spectrumId = self.settings['CoreWidgets']['SpectrumId']

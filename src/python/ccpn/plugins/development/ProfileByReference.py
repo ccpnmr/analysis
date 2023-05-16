@@ -69,7 +69,7 @@ from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySelectionWidget
 
 # Widths in pixels for nice widget alignments, length depends on the number of fixed columns in the plugin.
 # Variable number of columns will take the last value in the list
-columnWidths = [200]
+columnWidths = [200, 150]
 
 # Set some tooltip texts
 help = {'SpectrumGroup' : 'Select spectrum group',
@@ -185,8 +185,8 @@ class ProfileByReferenceGuiPlugin(PluginModule):
 
         grid = _addColumn(grid)
         df = self.metabolites.data.sort_values('name')[['name', 'hmdb_accession', 'bmrb_id', 'chemical_formula', 'average_molecular_weight', 'smiles', 'inchi', 'metabolite_id', 'description']]
-        widget = Table(self.scrollAreaLayout, df=df, grid=grid, gridSpan=(1, 2), selectionCallback=self._selectMetabolite, borderWidth=4)
-        _setWidgetProperties(widget, _setWidth([500], grid), 300)
+        widget = Table(self.scrollAreaLayout, df=df, grid=grid, gridSpan=(1, 4), selectionCallback=self._selectMetabolite, borderWidth=4)
+        _setWidgetProperties(widget, _setWidth([600], grid), 300)
         self.guiDict['CoreWidgets']['Metabolite'] = widget
 
         grid = _addColumn(_addColumn(grid))
@@ -207,8 +207,8 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         df = pd.DataFrame(columns=['pH', 'amount', 'reference', 'sample_id', 'metabolite_id', 'frequency',
                                    'temperature', 'data_source', 'validation_scores', 'methods', 'spectrum_id',
                                    'origin'])
-        widget = Table(self.scrollAreaLayout, df=df, grid=grid, gridSpan=(1, 2), selectionCallback=self._setupSimulatedSpectrum, borderWidth=4)
-        _setWidgetProperties(widget, _setWidth([500], grid), 300)
+        widget = Table(self.scrollAreaLayout, df=df, grid=grid, gridSpan=(1, 4), selectionCallback=self._setupSimulatedSpectrum, borderWidth=4)
+        _setWidgetProperties(widget, _setWidth([600], grid), 300)
         self.guiDict['CoreWidgets']['Simulation'] = widget
 
         self.multipletUpdateStatus = True
@@ -237,24 +237,24 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             self.project.application.current.strip.navigateToPosition([target])
         grid = (index+8, index+8)
         grid = _addRow(grid)
-        widget = Label(self.scrollAreaLayout, text=f'Multiplet {index+1} Chemical Shift', grid=grid)
-        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
-        self.guiDict['TemporaryWidgets'][f'Multiplet{index+1}Label'] = widget
+        labelWidget = Label(self.scrollAreaLayout, text=f'Multiplet {index+1} Chemical Shift', grid=grid)
+        _setWidgetProperties(labelWidget, _setWidth(columnWidths, grid))
+        self.guiDict['TemporaryWidgets'][f'Multiplet{index+1}Label'] = labelWidget
 
         grid = _addColumn(grid)
         widget = DoubleSpinbox(self.scrollAreaLayout, value=self.simspec.multiplets[multipletId]['center'], decimals=4,
-                               step=0.0001, grid=grid, gridSpan=(1, 2))
+                               step=0.0001, grid=grid, gridSpan=(1, 1))
         widget.setRange(0, 10)
-        _setWidgetProperties(widget, _setWidth([200], grid), hAlign='r')
+        _setWidgetProperties(widget, _setWidth([150], grid), hAlign='l')
         widget.setButtonSymbols(2)
         widget.valueChanged.connect(valueChange)
         self.guiDict['TemporaryWidgets'][f'Multiplet{index+1}ChemicalShift'] = widget
         self.settings['TemporaryWidgets'][f'Multiplet{index+1}ChemicalShift'] = self._getValue(widget)
 
         grid = _addColumn(grid)
-        widget = Label(self.scrollAreaLayout, text='ppm', grid=grid)
-        _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='l')
-        self.guiDict['TemporaryWidgets'][f'Multiplet{index+1}PpmLabel'] = widget
+        labelWidget = Label(self.scrollAreaLayout, text='ppm', grid=grid)
+        _setWidgetProperties(labelWidget, _setWidth(columnWidths, grid), hAlign='l')
+        self.guiDict['TemporaryWidgets'][f'Multiplet{index+1}PpmLabel'] = labelWidget
 
         grid = _addColumn(grid)
         buttonWidget = Button(parent=self.scrollAreaLayout, text='Reset', grid=grid)
@@ -388,7 +388,8 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         data = pd.DataFrame({'name': self.current['metabolite'],
                              'metabolite_id': None,
                              'spectrum_id': None,
-                             'origin': 'unknown_substance'}, index=[len(self.metabolites.data)])
+                             'origin': 'unknown_substance',
+                             'spectrum_type': 'peak_list'}, index=[len(self.metabolites.data)])
         widget.updateDf(data)
         data = {'name': self.current['metabolite']}
         row = pd.DataFrame(data, columns=self.metabolites.data.columns, index=[len(self.metabolites.data)])
@@ -414,7 +415,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             width = 1
             scale = self.current['ActiveSpectrumScale']
             globalShift = 0
-            if spectrumType == 'spin_system':
+            if spectrumType == 'spin_system' or origin == 'unknown_substance':
                 frequency = round(self.current['ReferenceSumSpectrumFrequency']/10)*10
             else:
                 frequency = round(float(selectedRow.frequency.iloc[0])/10)*10
@@ -472,9 +473,9 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.guiDict['TemporaryWidgets']['WidthLabel'] = widget
 
         grid = _addColumn(grid)
-        widget = DoubleSpinbox(self.scrollAreaLayout, value=width, decimals=1, step=0.1, grid=grid, gridSpan=(1, 2))
+        widget = DoubleSpinbox(self.scrollAreaLayout, value=width, decimals=1, step=0.1, grid=grid, gridSpan=(1, 1))
         widget.setRange(0.1, 5)
-        _setWidgetProperties(widget, _setWidth([200], grid), hAlign='r')
+        _setWidgetProperties(widget, _setWidth([150], grid), hAlign='r')
         widget.setButtonSymbols(2)
         widget.valueChanged.connect(self.widthChange)
         self.guiDict['TemporaryWidgets']['Width'] = widget
@@ -482,7 +483,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
 
         grid = _addColumn(grid)
         widget = Label(self.scrollAreaLayout, text='Hz', grid=grid)
-        _setWidgetProperties(widget, _setWidth([200], grid), hAlign='l')
+        _setWidgetProperties(widget, _setWidth([150], grid), hAlign='l')
         self.guiDict['TemporaryWidgets']['WidthHzLabel'] = widget
 
         # Adds widgets for the simulated spectrum scale.
@@ -492,9 +493,9 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.guiDict['TemporaryWidgets']['ScaleLabel'] = widget
 
         grid = _addColumn(grid)
-        widget = DoubleSpinbox(self.scrollAreaLayout, value=scale, decimals=3, step=0.001, grid=grid, gridSpan=(1, 2))
+        widget = DoubleSpinbox(self.scrollAreaLayout, value=scale, decimals=3, step=0.001, grid=grid, gridSpan=(1, 1))
         widget.setRange(-7, 7)
-        _setWidgetProperties(widget, _setWidth([200], grid), hAlign='r')
+        _setWidgetProperties(widget, _setWidth([150], grid), hAlign='r')
         widget.setButtonSymbols(2)
         widget.valueChanged.connect(self.scaleChange)
         self.guiDict['TemporaryWidgets']['Scale'] = widget
@@ -510,9 +511,9 @@ class ProfileByReferenceGuiPlugin(PluginModule):
 
         grid = _addColumn(grid)
         widget = DoubleSpinbox(self.scrollAreaLayout, value=frequency, decimals=1, step=10,
-                               grid=grid, gridSpan=(1, 2))
-        widget.setRange(10, 1200)
-        _setWidgetProperties(widget, _setWidth([200], grid), hAlign='r')
+                               grid=grid, gridSpan=(1, 1))
+        widget.setRange(10, 1150)
+        _setWidgetProperties(widget, _setWidth([150], grid), hAlign='r')
         widget.setButtonSymbols(2)
         widget.valueChanged.connect(self.frequencyChange)
         self.guiDict['TemporaryWidgets']['Frequency'] = widget
@@ -533,9 +534,9 @@ class ProfileByReferenceGuiPlugin(PluginModule):
 
         grid = _addColumn(grid)
         widget = DoubleSpinbox(self.scrollAreaLayout, value=globalShift, decimals=4, step=0.0001,
-                               grid=grid, gridSpan=(1, 2))
+                               grid=grid, gridSpan=(1, 1))
         widget.setRange(-10, 10)
-        _setWidgetProperties(widget, _setWidth([200], grid), hAlign='r')
+        _setWidgetProperties(widget, _setWidth([150], grid), hAlign='r')
         widget.setButtonSymbols(2)
         widget.valueChanged.connect(self.globalShiftChange)
         self.guiDict['TemporaryWidgets']['GlobalShift'] = widget
@@ -613,7 +614,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
 
         grid = _addColumn(grid)
         shiftWidget = DoubleSpinbox(self.scrollAreaLayout, value=0, decimals=4, step=0.0001, grid=grid, gridSpan=(1, 1))
-        shiftWidget.setRange(0, 10)
+        shiftWidget.setRange(0, 100)
         _setWidgetProperties(shiftWidget, _setWidth(columnWidths, grid), hAlign='r')
         shiftWidget.valueChanged.connect(shiftChange)
         self.current[f'Signal_{count}_Shift'] = self._getValue(shiftWidget)

@@ -220,7 +220,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             widget.setValue(self.simspec.originalMultiplets[multipletId]['center'] + self.simspec.globalShift)
         def navigateToMultiplet():
             target = widget.value()
-            # todo code here to move the view to the target value above
+            self.project.application.current.strip.navigateToPosition([target])
         grid = (index+8, index+8)
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text=f'Multiplet {index+1} Chemical Shift', grid=grid)
@@ -316,11 +316,11 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             x = numpy.linspace(limits[0], limits[1], points)
             y = numpy.zeros(points)
             if spectrumId not in self.sumSpectra:
-                self.sumSpectra[spectrumId] = self.project.newEmptySpectrum(['1H'], name=f'Reference_Sum_{spectrumId}',
+                self.sumSpectra[spectrumId] = self.project.newEmptySpectrum(['1H'], name=f"Sum_Reference_{spectrumId}",
                                                                             intensities=y, positions=x,
                                                                             spectrometerFrequencies=[frequency])
             if spectrumId not in self.subSpectra:
-                self.subSpectra[spectrumId] = self.project.newEmptySpectrum(['1H'], name=f'Reference_Subtraction_{spectrumId}',
+                self.subSpectra[spectrumId] = self.project.newEmptySpectrum(['1H'], name=f"Subtraction_Reference_{spectrumId}",
                                                                             intensities=y, positions=x,
                                                                             spectrometerFrequencies=[frequency])
 

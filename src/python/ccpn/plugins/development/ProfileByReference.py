@@ -369,13 +369,17 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         spectrumId = selectedRow.spectrum_id.iloc[0]
         origin = selectedRow.origin.iloc[0]
         metaboliteName = metaboliteData.name.iloc[0]
+        spectrumType = selectedRow.spectrum_type.iloc[0]
         self.current['CurrentSimulatedSpectrumId'] = spectrumId
         self.current['CurrentMetaboliteName'] = metaboliteName
         if spectrumId not in self.metaboliteSimulations:
             width = 1
             scale = self.current['ActiveSpectrumScale']
             globalShift = 0
-            frequency = round(self.current['ReferenceSumSpectrumFrequency']/10)*10
+            if spectrumType == 'spin_system':
+                frequency = round(self.current['ReferenceSumSpectrumFrequency']/10)*10
+            else:
+                frequency = round(float(selectedRow.frequency.iloc[0])/10)*10
             if origin != 'unknown_substance':
                 simulationData = self.caller.getSimulationData(spectrumId)
                 sampleData = self.caller.getSampleData(simulationData['SpectrumData'].sample_id.iloc[0])
@@ -455,21 +459,22 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.scaleChange()
 
         # Add a widget for the simulated spectrum frequency
-        if origin != 'bmrb':
-            grid = _addRow(grid)
-            widget = Label(self.scrollAreaLayout, text=f'Frequency', grid=grid)
-            _setWidgetProperties(widget, _setWidth(columnWidths, grid))
-            self.guiDict['TemporaryWidgets']['FrequencyLabel'] = widget
+        grid = _addRow(grid)
+        widget = Label(self.scrollAreaLayout, text=f'Frequency', grid=grid)
+        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
+        self.guiDict['TemporaryWidgets']['FrequencyLabel'] = widget
 
-            grid = _addColumn(grid)
-            widget = DoubleSpinbox(self.scrollAreaLayout, value=frequency, decimals=1, step=10,
-                                   grid=grid, gridSpan=(1, 2), suffix='MHz')
-            widget.setRange(10, 1200)
-            _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
-            widget.setButtonSymbols(2)
-            widget.valueChanged.connect(self.frequencyChange)
-            self.guiDict['TemporaryWidgets']['Frequency'] = widget
-            self.current['Frequency'] = self._getValue(widget)
+        grid = _addColumn(grid)
+        widget = DoubleSpinbox(self.scrollAreaLayout, value=frequency, decimals=1, step=10,
+                               grid=grid, gridSpan=(1, 2), suffix='MHz')
+        widget.setRange(10, 1200)
+        _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
+        widget.setButtonSymbols(2)
+        widget.valueChanged.connect(self.frequencyChange)
+        self.guiDict['TemporaryWidgets']['Frequency'] = widget
+        self.current['Frequency'] = self._getValue(widget)
+        if spectrumType != 'spin_system':
+            widget.setEnabled(False)
 
         # Add a widget for the simulated spectrum global shift
         grid = _addRow(grid)

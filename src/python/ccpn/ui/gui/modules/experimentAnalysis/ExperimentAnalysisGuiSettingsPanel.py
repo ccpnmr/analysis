@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-04 19:17:56 +0100 (Thu, May 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-16 16:28:35 +0100 (Tue, May 16, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -574,7 +574,7 @@ class GuiInputDataPanel(GuiSettingPanel):
         ## add as first selection in the datatable. clear first.
         dtSelectionWidget = self.getWidget(guiNameSpaces.WidgetVarName_DataTablesSelection)
         if dtSelectionWidget:
-            dtSelectionWidget.clearList()
+            # dtSelectionWidget.clearList()
             dtSelectionWidget.updatePulldown()
             dtSelectionWidget.select(newDataTable.pid)
 

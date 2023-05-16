@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-05 16:08:04 +0100 (Fri, May 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-16 16:28:35 +0100 (Tue, May 16, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -177,7 +177,7 @@ class BarPlotPanel(GuiPanel):
 
     def _mainTableChanged(self, resetZoom=False):
         if self.viewMode == guiNameSpaces.PlotViewMode_SecondaryStructure:
-            getLogger().debug2(f'BarGraph-view {self.viewMode}: Sorting/Filtering on the main table does not change the Plot.')
+            getLogger().debug2(f'BarGraph-view {self.viewMode}: Sorting/Filtering on the main table does not change the plot.')
             return
         self.updatePanel()
         if resetZoom:

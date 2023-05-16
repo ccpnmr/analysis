@@ -278,7 +278,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
 
     def globalShiftChange(self):
         shift = self.guiDict['TemporaryWidgets']['GlobalShift'].value()
-        self.current['GlobalShift'] = shift
+        self.settings['TemporaryWidgets']['GlobalShift'] = shift
         difference = shift - self.simspec.globalShift
         multipletWidgetList = [widget for widget in self.guiDict['TemporaryWidgets'] if widget.endswith('ChemicalShift')]
         if len(multipletWidgetList) > 0:
@@ -485,7 +485,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         widget.setButtonSymbols(2)
         widget.valueChanged.connect(self.globalShiftChange)
         self.guiDict['TemporaryWidgets']['GlobalShift'] = widget
-        self.current['GlobalShift'] = self._getValue(widget)
+        self.settings['TemporaryWidgets']['GlobalShift'] = self._getValue(widget)
 
         if self.simspec.multiplets and origin != 'unknown_substance':
             for index, multipletId in enumerate(self.simspec.multiplets):
@@ -513,6 +513,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         def shiftChange():
             shift = shiftWidget.value()
             self.simspec.moveMultiplet(str(count), shift)
+            lineWidget.setValue(shift)
             self.refreshSumAndSubSpectrum()
         def heightChange():
             height = heightWidget.value()
@@ -520,7 +521,9 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             self.refreshSumAndSubSpectrum()
         def lineValueChange():
             shift = lineWidget.values
-            shiftWidget.setValue(shift)
+            if self._getValue(shiftWidget) != shift:
+                shiftWidget.setValue(shift)
+
         grid = self.current['Grid']
         grid = _addRow(grid)
 
@@ -552,7 +555,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         _setWidgetProperties(shiftWidget, _setWidth(columnWidths, grid), hAlign='r')
         shiftWidget.valueChanged.connect(shiftChange)
         self.current[f'Signal_{count}_Shift'] = self._getValue(shiftWidget)
-        self.guiDict['TemporaryWidgets'][f'Signal_{count}_Shift'] = shiftWidget
+        self.guiDict['TemporaryWidgets'][f'Signal_{count}_ChemicalShift'] = shiftWidget
 
         grid = _addColumn(grid)
         heightWidget = DoubleSpinbox(self.scrollAreaLayout, value=1, decimals=2, step=0.01, grid=grid, gridSpan=(1, 1))

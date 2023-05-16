@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-23 12:28:10 +0000 (Thu, February 23, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-16 16:28:01 +0100 (Tue, May 16, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -37,7 +37,7 @@ import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.util.Logging import getLogger
 from ccpn.core.DataTable import TableFrame
 from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, MinimiserModel, MinimiserResult, CalculationModel
-from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import RelaxationOutputFrame, HetNoeOutputFrame, R2R1OutputFrame, RSDMOutputFrame
+from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import ETAOutputFrame, HetNoeOutputFrame, R2R1OutputFrame, RSDMOutputFrame
 
 #####################################################
 ###########        Minimisers        ################
@@ -160,8 +160,9 @@ class _RelaxationBaseFittingModel(FittingModelABC):
         getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
         ## Keep only one IsotopeCode as we are using only Height/Volume 15N?
         inputData = inputData[inputData[sv.ISOTOPECODE] == inputData[sv.ISOTOPECODE].iloc[0]]
-        inputData[self.ySeriesStepHeader] = inputData[self.PeakProperty]
-        self._ySeriesLabel = self.PeakProperty
+        if not all(inputData[self.ySeriesStepHeader].values):
+            inputData[self.ySeriesStepHeader] = inputData[self.PeakProperty]
+            self._ySeriesLabel = self.PeakProperty
         grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
         for collectionId, groupDf in grouppedByCollectionsId:
             groupDf.sort_values([self.xSeriesStepHeader], inplace=True)
@@ -181,8 +182,11 @@ class _RelaxationBaseFittingModel(FittingModelABC):
                     inputData.loc[ix, resultName] = resulValue
                 inputData.loc[ix, sv.MODEL_NAME] = self.ModelName
                 inputData.loc[ix, sv.MINIMISER_METHOD] = minimiser.method
-                nmrAtomNames = inputData._getAtomNamesFromGroupedByHeaders(groupDf)
-                inputData.loc[ix, sv.NMRATOMNAMES] = nmrAtomNames[0] if len(nmrAtomNames) > 0 else ''
+                try:
+                    nmrAtomNames = inputData._getAtomNamesFromGroupedByHeaders(groupDf)
+                    inputData.loc[ix, sv.NMRATOMNAMES] = nmrAtomNames[0] if len(nmrAtomNames) > 0 else ''
+                except:
+                    inputData.loc[ix, sv.NMRATOMNAMES] = ''
 
         return inputData
 
@@ -310,9 +314,8 @@ class HetNoeCalculation(CalculationModel):
 
     def calculateValues(self, inputDataTables) -> TableFrame:
         """
-        Calculate the DeltaDeltas for an input SeriesTable.
-        :param inputData: CSMInputFrame
-        :return: outputFrame
+        :param inputDataTables: Generic input DataFrames created from the SeriesAnalysisABC "newInputDataTableFromSpectrumGroup"
+        :return: outputFrame. A new outputframe with the required Columns defined by the modelArgumentNames
         """
         inputData = self._getFirstData(inputDataTables)
         outputFrame = self._getHetNoeOutputFrame(inputData)
@@ -379,6 +382,112 @@ class HetNoeCalculation(CalculationModel):
             outputFrame.loc[collectionId, sv.CALCULATION_MODEL] = self.ModelName
         return outputFrame
 
+
+class ETACalculation(CalculationModel):
+    """
+    Calculate ETA Values for HSQC series
+    """
+    ModelName = 'CHANGETHIS'
+    Info = ''''''
+
+    Description = '''Model:
+    Measure cross-correlation rates by calculating the ratio of two separate series: in-phase (IP) and anti-phase (AP) (IP/AP) 
+                 '''
+    References = '''
+              
+                '''
+    FullDescription = f'{Info}\n{Description}'
+    PeakProperty = sv._HEIGHT
+    _allowedIntensityTypes = (sv._HEIGHT, sv._VOLUME)
+
+    @property
+    def modelArgumentNames(self):
+        """ The list of parameters as str used in the calculation model.
+            These names will appear as column headers in the output result frames.
+            This model does not have argument names. """
+
+        return []
+
+    def calculateValues(self, inputDataTables) -> TableFrame:
+        """
+        This model requires two inputDataTables created using the  In-phase and Anti-phase spectrumGroups.
+        :param inputDataTables: Generic input DataFrames created from the SeriesAnalysisABC "newInputDataTableFromSpectrumGroup"
+        :return: outputFrame. A new outputframe with the required Columns defined by the modelArgumentNames
+        """
+        if not len(inputDataTables) == 2:
+            getLogger().warning('This model requires two inputDataTables created using the  In-phase and Anti-phase spectrumGroups.')
+            return ETAOutputFrame()
+        outputFrame = self._getOutputFrame(inputDataTables)
+        return outputFrame
+
+    #########################
+    ### Private functions ###
+    #########################
+
+    def _getOutputFrame(self, inputDataTables):
+        """
+
+        :param inputData: SeriesInputFrame
+        :return: outputFrame
+        """
+
+        _IP = '_IP'  # in-phase suffix
+        _AP = '_AP'  # anti-phase suffix
+        PHASE = 'PHASE'
+        
+        inPhaseData = inputDataTables[0].data
+        antiPhaseData = inputDataTables[1].data
+        outputFrame = ETAOutputFrame()
+        # join the two tables in one big one. use suffix _IP, _AP
+
+        inPhaseData.loc[inPhaseData.index, PHASE] = _IP
+        antiPhaseData.loc[antiPhaseData.index, PHASE]  = _AP
+        inputData = pd.concat([inPhaseData, antiPhaseData], ignore_index=True)
+        ## Keep only one IsotopeCode as we are using only 15N
+        inputData = inputData[inputData[sv.ISOTOPECODE] == '15N']
+        isSeriesAscending = all(inputData.get(sv._isSeriesAscending, [False]))
+        groupped = inputData.groupby(sv.GROUPBYAssignmentHeaders)
+        index = 1
+        for ix, groupDf in groupped:
+            inphase = groupDf[groupDf[PHASE] == _IP]
+            antiphase = groupDf[groupDf[PHASE] == _AP]
+            # makesure the sorting is correct
+
+            groupDf.sort_values([self.xSeriesStepHeader], inplace=True, ascending=isSeriesAscending)
+            xs = []
+            ys = []
+
+            for (inx, iphase), (anx, aphase) in zip(inphase.iterrows(), antiphase.iterrows()):
+                inphaseValue = iphase[self.PeakProperty]
+                antiphaseValue = aphase[self.PeakProperty]
+                inphaseSNR = iphase[sv._SNR]
+                antiphaseSNR = aphase[sv._SNR]
+                ratio = inphaseValue / antiphaseValue
+                error = lf.peakErrorBySNRs([inphaseSNR, antiphaseSNR], factor=ratio, power=-2, method='sum')
+                # build the outputFrame
+                # nmrAtomNames = inputData._getAtomNamesFromGroupedByHeaders(groupDf)  # join the atom names from different rows in a list
+                seriesUnits = groupDf[sv.SERIESUNIT].unique()
+                # outputFrame.loc[collectionId, sv.COLLECTIONID] = collectionId
+                outputFrame.loc[index, sv.PEAKPID] = groupDf[sv.PEAKPID].values[0]
+                outputFrame.loc[index, sv.COLLECTIONID] = groupDf[sv.COLLECTIONID].values[-1]
+                outputFrame.loc[index, sv.COLLECTIONPID] = groupDf[sv.COLLECTIONPID].values[-1]
+                outputFrame.loc[index, sv.NMRRESIDUEPID] = groupDf[sv.NMRRESIDUEPID].values[-1]
+                outputFrame.loc[index, sv.SERIESUNIT] = seriesUnits[-1]
+                outputFrame.loc[index, sv.CROSSRELAXRATIO_VALUE] = ratio
+                outputFrame.loc[index, sv.CROSSRELAXRATIO_VALUE_ERR] = error
+                outputFrame.loc[index, sv.SERIES_STEP_X] = iphase[sv.SERIES_STEP_X]
+                outputFrame.loc[index, sv.SERIES_STEP_Y] = ratio
+                outputFrame.loc[index, sv.ISOTOPECODE] =  iphase[sv.ISOTOPECODE]
+                xs.append(iphase[sv.SERIES_STEP_X])
+                ys.append(ratio)
+                outputFrame.loc[index, sv.CALCULATION_MODEL] = self.ModelName
+                outputFrame.loc[index, sv.GROUPBYAssignmentHeaders] = \
+                    groupDf[sv.GROUPBYAssignmentHeaders].values[0]
+                outputFrame.loc[index, sv.NMRATOMNAMES] = 'H,N'
+                index += 1
+            print(ix, xs, ys)
+            print('--'*20)
+        return outputFrame
 
 class R2R1RatesCalculation(CalculationModel):
     """
@@ -617,6 +726,7 @@ FittingModels            = [
 CalculationModels = [
                     HetNoeCalculation,
                     R2R1RatesCalculation,
+                    ETACalculation,
                     SDMCalculation
                     ]
 

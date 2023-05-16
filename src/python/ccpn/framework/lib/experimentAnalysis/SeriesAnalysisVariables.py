@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-04 09:08:52 +0100 (Thu, May 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-16 16:25:50 +0100 (Tue, May 16, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -140,6 +140,10 @@ UNSAT = 'unSat'
 UNSAT_OPTIONS =  [UNSAT, 'unsaturated', 'nosat', 'noNOE'] # key options to set from a spectrumGroup
 SAT_OPTIONS = [SAT,  'saturated', 'NOE']
 
+CROSSCORRELRATIO = 'Cross-CorrelationRatio'
+INPHASE = 'in-phase'
+ANTIPHASE = 'anti-phase'
+
 RX = 'R(x)'
 R1 = 'R1'
 R2 = 'R2'
@@ -186,6 +190,7 @@ SERIESANALYSISOUTPUTDATA    = 'SeriesAnalysisResultsData'
 SERIESANALYSISINPUTDATA     = 'SeriesAnalysisInputData'
 RELAXATION_OUTPUT_FRAME     = 'RelaxationOutputFrame'
 HetNoe_OUTPUT_FRAME         = 'HetNoeOutputFrame'
+CROSSCORRELRATIO_OUTPUT_FRAME         = 'Cross-CorrelationRatesOutputFrame'
 R2R1_OUTPUT_FRAME         = 'R2R1OutputFrame'
 RSDM_OUTPUT_FRAME         = 'RSDMOutputFrame'
 CSM_OUTPUT_FRAME            = 'CSMOutputFrame'
@@ -193,7 +198,7 @@ SERIESFRAMETYPE             = 'SERIESFRAMETYPE'
 _assignmentHeaders          = '_assignmentHeaders'
 _valuesHeaders              = '_valuesHeaders'
 _peakPidHeaders             = '_peakPidHeaders'
-
+_isSeriesAscending = '_isSeriesAscending'
 _SpectrumPropertiesHeaders = 'spectrumPropertiesHeaders'
 
 
@@ -258,6 +263,9 @@ ARGB_VALUE_ERR = f'{ARGB}{_ERR}'
 ### Relaxation Calculation Models
 HETNOE_VALUE = f'{HETNOE}'
 HETNOE_VALUE_ERR = f'{HETNOE_VALUE}{_ERR}'
+
+CROSSRELAXRATIO_VALUE = f'{CROSSCORRELRATIO}'
+CROSSRELAXRATIO_VALUE_ERR = f'{CROSSCORRELRATIO}{_ERR}'
 
 R_VALUE = f'{RX}'
 R_VALUE_ERR = f'{RX}{_ERR}'

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-02 17:01:13 +0000 (Thu, February 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-16 16:26:55 +0100 (Tue, May 16, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -38,6 +38,7 @@ import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import flattenLists
 from ccpn.core.Peak import Peak
+from ccpn.util.Sorting import isListAscending
 
 class SeriesFrameBC(TableFrame):
     """
@@ -211,7 +212,7 @@ class InputSeriesFrameBC(SeriesFrameBC):
     def buildFromSpectrumGroup(self, spectrumGroup, parentCollection=None, peakListIndices=None, filteredPeaks=None,
                                experimentName=None):
         """
-        :param spectrumGroup: A core object containg the spectra ans series information
+        :param spectrumGroup: A core object containg the spectra and series information
         :param peakListIndices: list of int, same length of spectra. Define which peakList index to use.
                                If None, use -1 (last created) as default for all spectra
         :param filteredPeaks: Use only this subset of peaks. Used when a peak has changed, to avoid rebuild all.
@@ -226,6 +227,7 @@ class InputSeriesFrameBC(SeriesFrameBC):
             peakListIndices = [-1] * len(spectra)
         collectionDict = InputSeriesFrameBC._getCollectionDict4SpectrumGroup(spectrumGroup,
                                                                              parentCollection=parentCollection)
+        # isSeriesAscending = isListAscending(spectrumGroup.series)
         i = 1
         while True: ## This because we don't know how many rows we need
             for spectrum, peakListIndex in zip(spectra, peakListIndices):
@@ -273,6 +275,7 @@ class InputSeriesFrameBC(SeriesFrameBC):
                             getLogger().warn(f'Cannot add row {i} for peak {pk.pid}. Skipping with error: {e}')
             break
 
+        # self.loc[self.index, sv._isSeriesAscending] = isSeriesAscending
 
 
 ########################################################################################################################
@@ -303,6 +306,26 @@ class HetNoeOutputFrame(SeriesFrameBC):
     SERIESFRAMENAME = sv.HetNoe_OUTPUT_FRAME
     SERIESFRAMETYPE = sv.HetNoe_OUTPUT_FRAME
 
+
+class ETAOutputFrame(SeriesFrameBC):
+
+    """
+    A TableData used to store the Data(frame) valid for the CrossCorrelation analysis.
+    Note. This is created using two inputDataTables. See the "ETACalculation" Model
+
+    Mandatory Column names are:
+        ## --------- Columns definitions --------- ##
+        # Group with calculation/calculated values
+        - seriesUnit        : str,
+        - seriesStep        : float,
+        - seriesStepValue   : float,
+        - value             : float,
+        - value_err         : float,
+
+    """
+
+    SERIESFRAMENAME = sv.CROSSCORRELRATIO_OUTPUT_FRAME
+    SERIESFRAMETYPE = sv.CROSSCORRELRATIO_OUTPUT_FRAME
 
 class R2R1OutputFrame(SeriesFrameBC):
 

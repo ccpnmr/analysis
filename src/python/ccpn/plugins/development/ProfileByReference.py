@@ -515,7 +515,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             self.simspec.moveMultiplet(str(count), shift)
             self.refreshSumAndSubSpectrum()
         def heightChange():
-            height = 10 ** heightWidget.value()
+            height = heightWidget.value()
             self.simspec.scaleMultiplet(str(count), height)
             self.refreshSumAndSubSpectrum()
         def lineValueChange():
@@ -523,6 +523,19 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             shiftWidget.setValue(shift)
         grid = self.current['Grid']
         grid = _addRow(grid)
+
+        if 'UnknownSignalChemicalShiftLabel' not in self.guiDict['TemporaryWidgets']:
+            grid = _addRow(grid)
+            grid = _addColumn(grid)
+            widget = Label(self.scrollAreaLayout, text=f'Chemical Shift (ppm)', grid=grid)
+            _setWidgetProperties(widget, _setWidth(columnWidths, grid))
+            self.guiDict['TemporaryWidgets']['UnknownSignalChemicalShiftLabel'] = widget
+            grid = _addColumn(grid)
+            widget = Label(self.scrollAreaLayout, text=f'Relative Intensity', grid=grid)
+            _setWidgetProperties(widget, _setWidth(columnWidths, grid))
+            self.guiDict['TemporaryWidgets']['UnknownSignalRelativeIntensityLabel'] = widget
+            grid = _addRow(grid)
+
         self.current['Grid'] = grid
         count = self.current['SignalCount'] + 1
         self.current['SignalCount'] = count
@@ -542,7 +555,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.guiDict['TemporaryWidgets'][f'Signal_{count}_Shift'] = shiftWidget
 
         grid = _addColumn(grid)
-        heightWidget = DoubleSpinbox(self.scrollAreaLayout, value=0, decimals=3, step=0.001, grid=grid, gridSpan=(1, 1))
+        heightWidget = DoubleSpinbox(self.scrollAreaLayout, value=1, decimals=2, step=0.01, grid=grid, gridSpan=(1, 1))
         heightWidget.setRange(-7, 7)
         _setWidgetProperties(heightWidget, _setWidth(columnWidths, grid), hAlign='r')
         heightWidget.valueChanged.connect(heightChange)

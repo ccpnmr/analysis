@@ -130,7 +130,11 @@ class ProfileByReferenceGuiPlugin(PluginModule):
 
         grid = (0, 4)
 
-        # pull down list for selecting the spectrum group to overlay on
+        # Pull down list for selecting the spectrum group to overlay on.
+        # Simple pull down list of all the spectrum groups in the project.
+        # Callback sets up the spectrum pull down widget and all the sum and subtraction simulations. Also opens the
+        # spectrum display.
+        # This callback is automatically made upon plugin opening.
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text='Spectrum Group', grid=grid)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
@@ -148,7 +152,10 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         if self.spectrumGroups:
             self._selectSpectrumGroup(self.spectrumGroups[0])
 
-        # pull down list for selecting the spectrum to overlay on
+        # Pull down list for selecting the spectrum to overlay on
+        # Simple pull down list of all the spectra in the spectrum group selected earlier.
+        # Callback sets up the variables for which spectrum the user is basing on.
+        # This callback is automatically made upon plugin opening.
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text='Spectrum', grid=grid)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
@@ -169,9 +176,11 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         if spectra:
             self._selectSpectrum(spectra[0])
 
-        # table widget for selecting the current metabolite by name
+        # Table widget for selecting the current metabolite by name.
+        # The table is made up of the relevant metabolite data from the metabolites table in the database.
+        # Callback sets up the data in the simulation table for the user to choose what spectrum to simulate.
         grid = _addRow(grid)
-        widget = Label(self.scrollAreaLayout, text='Metabolite', grid=grid)
+        widget = Label(self.scrollAreaLayout, text='Substance', grid=grid)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
 
         grid = _addColumn(grid)
@@ -186,7 +195,10 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.guiDict['CoreWidgets']['AddUnknownSignalButton'] = widget
         self.current['UnknownSignalCount'] = 0
 
-        # table widget for selecting the simulation of the metabolite
+        # Table widget for selecting the simulation of the metabolite.
+        # The table is made up of the sample and spectrum data for all gathered spectra for the metabolite of interest.
+        # Callback creates the simulated spectrum objects and creates the temporary widgets for manipulating said
+        # simulations.
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text='Simulation', grid=grid)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
@@ -206,6 +218,8 @@ class ProfileByReferenceGuiPlugin(PluginModule):
                gridSpan=(1, 1))'''
 
     def addDoubleSpinbox(self, index, multipletId):
+        # Method for creating the widgets required to manipulate a simulated multiplet.
+        # Creates a spinbox, a vertical infinite line, a reset button and a navigate-to button.
         def valueChange():
             shift = widget.value()
             update = self.multipletUpdateStatus
@@ -261,6 +275,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.guiDict['TemporaryWidgets'][f'Multiplet{index + 1}Line'] = lineWidget
 
     def widthChange(self):
+        # Sets the width of the peaks of the current simulation and updates the results table.
         width = self.guiDict['TemporaryWidgets']['Width'].value()
         integration = self.simspec.scale * width
         resultsTableName = f"deconv_{self.settings['CoreWidgets']['SpectrumGroupId']}"
@@ -269,6 +284,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.refreshSumAndSubSpectrum()
 
     def scaleChange(self):
+        # Sets the scale of the current simulation and updates the results table.
         scale = 10**self.guiDict['TemporaryWidgets']['Scale'].value()
         integration = scale * self.simspec.width
         resultsTableName = f"deconv_{self.settings['CoreWidgets']['SpectrumGroupId']}"
@@ -277,11 +293,17 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.refreshSumAndSubSpectrum()
 
     def frequencyChange(self):
+        # Sets the frequency of the current simulation.
+        # Is not used unless the simulation is spin-system-based.
         frequency = self.guiDict['TemporaryWidgets']['Frequency'].value()
         self.simspec.setFrequency(frequency)
         self.refreshSumAndSubSpectrum()
 
     def globalShiftChange(self):
+        # Moves all multiplet signals simultaneously.
+        # Works by changing the values of each multiplet spinbox.
+        # Has the multipletUpdateStatus variable to prevent multiple recreations of the same simulation, thus speeding
+        # up the process.
         shift = self.guiDict['TemporaryWidgets']['GlobalShift'].value()
         self.settings['TemporaryWidgets']['GlobalShift'] = shift
         difference = shift - self.simspec.globalShift
@@ -299,6 +321,8 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.refreshSumAndSubSpectrum()
 
     def _selectSpectrumGroup(self, spectrumGroupID):
+        # Call back for selecting the spectrum group to work with.
+        # Is called upon plugin launch.
         self.settings['CoreWidgets']['SpectrumGroupId'] = spectrumGroupID
         spectrumGroup = self.project.getByPid('SG:' + spectrumGroupID)
         self.display = self.project.application.mainWindow.newSpectrumDisplay([spectrum for spectrum in spectrumGroup.spectra], axisCodes=('H',), stripDirection='Y', position='top', relativeTo='MO:Profile by Reference')
@@ -330,6 +354,9 @@ class ProfileByReferenceGuiPlugin(PluginModule):
                                                                             spectrometerFrequencies=[frequency])
 
     def _selectSpectrum(self, spectrumId):
+        # Callback for choosing which spectrum to overlay onto.
+        # Stores some useful variables for simulation creation.
+        # Is called upon plugin launch.
         self.settings['CoreWidgets']['SpectrumId'] = spectrumId
         spectrum = self.project.getByPid('SP:' + spectrumId)
         limits = (max(spectrum.positions), min(spectrum.positions))
@@ -342,6 +369,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.current['ReferenceSumSpectrumFrequency'] = frequency
 
     def _selectMetabolite(self, newRow, previousRow, selectedRow, lastRow):
+        # Call back for choosing which metabolite to make simulations of.
         metaboliteName = selectedRow.name.iloc[0]
         self.current['metabolite'] = metaboliteName
         self.current['metaboliteData'] = selectedRow
@@ -351,6 +379,9 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         widget.updateDf(data)
 
     def _addUnknownSignal(self):
+        # Call back for creating a simulation object to represent an unknown signal.
+        # Works as an alternative to _selectMetabolite as the user can't select unknown from the database table.
+        # Adds a row to the database table so the user can reselect the unknown signal later.
         self.current['UnknownSignalCount'] += 1
         self.current['metabolite'] = f"Unknown_Substance_{self.current['UnknownSignalCount']}"
         widget = self.guiDict['CoreWidgets']['Simulation']
@@ -369,6 +400,8 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.current['metaboliteData'] = row
 
     def _setupSimulatedSpectrum(self, newRow, previousRow, selectedRow, lastRow):
+        # Call back to create the simulation and all the necessary Analysis objects, including substances and samples.
+        # Also builds the widgets for overall spectrum modifications, i.e. scale.
         metaboliteData = self.current['metaboliteData']
         metaboliteID = selectedRow.metabolite_id.iloc[0]
         spectrumId = selectedRow.spectrum_id.iloc[0]
@@ -432,7 +465,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.guiDict['TemporaryWidgets'] = OD()
 
         grid = (4, 1)
-        # Add a widget for the simulated spectrum peak width
+        # Adds widgets for the simulated spectrum peak width.
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text=f'Width', grid=grid)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
@@ -452,7 +485,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         _setWidgetProperties(widget, _setWidth([200], grid), hAlign='l')
         self.guiDict['TemporaryWidgets']['WidthHzLabel'] = widget
 
-        # Add a widget for the simulated spectrum scale
+        # Adds widgets for the simulated spectrum scale.
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text=f'Scale (10^n)', grid=grid)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
@@ -468,7 +501,8 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.current['Scale'] = self._getValue(widget)
         self.scaleChange()
 
-        # Add a widget for the simulated spectrum frequency
+        # Adds widgets for the simulated spectrum frequency.
+        # This widget is disabled unless the simulation is spin-system-based.
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text=f'Frequency', grid=grid)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
@@ -491,7 +525,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='l')
         self.guiDict['TemporaryWidgets']['FrequencyMHzLabel'] = widget
 
-        # Add a widget for the simulated spectrum global shift
+        # Adds widgets for the simulated spectrum global shift.
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text=f'Global Shift', grid=grid)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
@@ -512,6 +546,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='l')
         self.guiDict['TemporaryWidgets']['GlobalShiftPpmLabel'] = widget
 
+        # Decision to either generate multiplet widgets or unknown signal widgets.
         if self.simspec.multiplets and origin != 'unknown_substance':
             for index, multipletId in enumerate(self.simspec.multiplets):
                 self.addDoubleSpinbox(index, multipletId)
@@ -535,6 +570,8 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.project.widgetDict = self.guiDict['TemporaryWidgets']
 
     def _addSignalFromScratch(self):
+        # Creates a row of spin-box widgets and a vertical infinite line for manipulating a single unknown signal.
+        # Also builds the unit labels if it's the first call.
         def shiftChange():
             shift = shiftWidget.value()
             self.simspec.moveMultiplet(str(count), shift)
@@ -598,6 +635,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.guiDict['TemporaryWidgets'][f'Multiplet{count}Line'] = lineWidget
 
     def _addSignalFromPeaks(self):
+        # Sets the simulated spectrum peak-list to match the peaks picked in the current real spectrum.
         if len(self.current['ActiveSpectrum'].multiplets) > 0:
             peakList = []
             for i, multiplet in enumerate(self.current['ActiveSpectrum'].multiplets):
@@ -612,6 +650,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.refreshSumAndSubSpectrum()
 
     def addSimSpectrumToList(self, spectrum):
+        # Stores the simulated spectrum in a list or creates one if the list isn't present.
         spectrumId = self.settings['CoreWidgets']['SpectrumId']
         if 'SimulatedSpectra' not in self.spectra['SimulatedSpectra']:
             self.spectra['SimulatedSpectra'][spectrumId] = [spectrum]
@@ -619,6 +658,8 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             self.spectra['SimulatedSpectra'][spectrumId].append(spectrum)
 
     def refreshSumAndSubSpectrum(self):
+        # Collects the intensity arrays of all the simulated spectra and regenerates the sum and subtraction spectra.
+        # Allows real-time updates of the sum and subtraction spectra.
         spectrumId = self.settings['CoreWidgets']['SpectrumId']
         realSpectrum = self.project.getByPid('SP:' + spectrumId)
         sumIntensities = numpy.zeros(self.current['ReferenceSumSpectrumPoints'])

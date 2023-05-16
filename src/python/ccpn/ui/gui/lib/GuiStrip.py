@@ -78,6 +78,7 @@ class GuiStrip(Frame):
 
     optionsChanged = QtCore.pyqtSignal(dict)
     stripResized = QtCore.pyqtSignal(tuple)
+    pixelSizeChanged = QtCore.pyqtSignal(tuple)
 
     # MAXPEAKLABELTYPES = 6
     # MAXPEAKSYMBOLTYPES = 4

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-11 19:16:27 +0100 (Thu, May 11, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-16 15:34:58 +0100 (Tue, May 16, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -47,6 +47,9 @@ class GuiListViewABC(QtWidgets.QGraphicsItem):
         # flags to initiate updates to the GL windows
         self.buildSymbols = True
         self.buildLabels = True
+
+        self._pixelSize = None
+        self._parent.strip.pixelSizeChanged.connect(self._updatePixelSize)
 
     def boundingRect(self):
         return NULL_RECT
@@ -90,3 +93,14 @@ class GuiListViewABC(QtWidgets.QGraphicsItem):
 
         GLSignals = GLNotifier(parent=self)
         GLSignals.emitPaintEvent()
+
+    @property
+    def pixelSize(self):
+        """Return the pixel size for the view in ppm.
+        """
+        return self._pixelSize
+
+    def _updatePixelSize(self, value):
+        """Update the pixel size from the strip signal.
+        """
+        self._pixelSize = value

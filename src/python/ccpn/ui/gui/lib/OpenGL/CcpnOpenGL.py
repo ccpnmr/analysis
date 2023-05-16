@@ -782,6 +782,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.pixelY = (self.axisT - self.axisB) / vpheight
         self.deltaX = 1.0 / vpwidth
         self.deltaY = 1.0 / vpheight
+        self.strip.pixelSizeChanged.emit((self.pixelX, self.pixelY))
 
         self.symbolX = abs(self._symbolSize * self.pixelX)
         self.symbolY = abs(self._symbolSize * self.pixelY)
@@ -6494,6 +6495,7 @@ class CcpnGLWidget(QOpenGLWidget):
         originalxPositions = xPositions
         _data2Obj = self.strip.project._data2Obj
         pixX, pixY = self.strip._CcpnGLWidget.pixelX, self.strip._CcpnGLWidget.pixelY
+        sgnX, sgnY = np.sign(pixX), np.sign(pixY)
 
         for spectrumView in self._ordering:  # strip.spectrumViews:
             if spectrumView.isDeleted:
@@ -6528,8 +6530,15 @@ class CcpnGLWidget(QOpenGLWidget):
                                 tx, ty = pView.textOffset
                                 if not tx and not ty:
                                     # TODO: ED - nasty :|
-                                    tx, ty = self.symbolX, self.symbolY
+                                    # pixels
+                                    tx, ty = self._symbolSize, self._symbolSize
+                                    # ppm
+                                    # tx, ty = self.symbolX, self.symbolY
+
+                                # pixels
                                 mx, my = px + (tx + drawList.width / 2) * pixX, py + (ty + drawList.height / 2) * pixY
+                                # ppms
+                                # mx, my = px + tx * sgnX + drawList.width * pixX / 2, py + ty * sgnY + drawList.height * pixY / 2
 
                                 # height = peak.height  # * scale # TBD: is the scale already taken into account in peak.height???
                                 if (xPositions[0] < px < xPositions[1] and y0 < py < y1) or \
@@ -6558,8 +6567,15 @@ class CcpnGLWidget(QOpenGLWidget):
                                 px, py = float(_pos[xAxis]), float(_pos[yAxis])
                                 tx, ty = pView.textOffset
                                 if not tx and not ty:
-                                    tx, ty = self.symbolX, self.symbolY
+                                    # pixels
+                                    tx, ty = self._symbolSize, self._symbolSize
+                                    # ppm
+                                    # tx, ty = self.symbolX, self.symbolY
+
+                                # pixels
                                 mx, my = px + (tx + drawList.width / 2) * pixX, py + (ty + drawList.height / 2) * pixY
+                                # ppms
+                                # mx, my = px + tx * sgnX + drawList.width * pixX / 2, py + ty * sgnY + drawList.height * pixY / 2
 
                                 if (xPositions[0] < px < xPositions[1] and yPositions[0] < py < yPositions[1]) or \
                                         (xPositions[0] < mx < xPositions[1] and yPositions[0] < my < yPositions[1]):
@@ -6706,8 +6722,12 @@ class CcpnGLWidget(QOpenGLWidget):
                     with undoBlockWithoutSideBar():
                         for pv in pvs:
                             pos = list(pv.textOffset)
+                            # pixels
                             pos[0] += (deltaPosition[0] / self.pixelX)
                             pos[1] += (deltaPosition[1] / self.pixelY)
+                            # ppms
+                            # pos[0] += deltaPosition[0] * np.sign(self.pixelX)
+                            # pos[1] += deltaPosition[1] * np.sign(self.pixelY)
                             pv.textOffset = pos
 
                 else:

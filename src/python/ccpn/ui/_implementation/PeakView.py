@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-15 19:14:46 +0100 (Mon, May 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-16 15:34:58 +0100 (Tue, May 16, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -29,6 +29,8 @@ import typing
 
 from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
+from ccpn.core.lib.ContextManagers import ccpNmrV3CoreSetter  #, undoStackBlocking
+from ccpn.util.decorators import logCommand
 from ccpn.ui._implementation.PeakListView import PeakListView
 from ccpn.ui._implementation.PMIViewABC import PMIViewABC
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import PeakView as ApiPeakView
@@ -90,8 +92,39 @@ class PeakView(PMIViewABC):
 
     @property
     def peak(self) -> Peak:
-        """Peak that PeakView refers to"""
+        """Peak that PeakView refers to.
+        """
         return self._project._data2Obj.get(self._wrappedData.peak)
+
+    @property
+    def ppmOffset(self) -> tuple:
+        """X,Y text annotation offset in ppm.
+        """
+        if not (pixelSize := self.peakListView.pixelSize):
+            raise TypeError(f'{self.__class__.__name__}:ppmOffset - peakListView pizelSize is undefined')
+        if 0.0 in pixelSize:
+            raise ValueError(f'{self.__class__.__name__}:ppmOffset - peakListView pizelSize contains 0.0')
+
+        return tuple(to * ps for to, ps in zip(self._wrappedData.textOffset, pixelSize))
+
+    @ppmOffset.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
+    def ppmOffset(self, value: tuple):
+        """Set the visible offset for the text annotation in ppm.
+        """
+        if not (pixelSize := self.peakListView.pixelSize):
+            raise TypeError(f'{self.__class__.__name__}:ppmOffset - peakListView pizelSize is undefined')
+        if 0.0 in pixelSize:
+            raise ValueError(f'{self.__class__.__name__}:ppmOffset - peakListView pizelSize contains 0.0')
+
+        try:
+            # with undoStackBlocking():
+            # this is a gui operation and shouldn't need an undo? if no undo, remove core decorator above
+            self._wrappedData.textOffset = tuple(to / ps for to, ps in zip(value, pixelSize))
+
+        except Exception as es:
+            raise TypeError(f'{self.__class__.__name__}:ppmOffset must be a tuple of int/floats') from es
 
     #=========================================================================================
     # Implementation functions
@@ -144,7 +177,7 @@ del getTextOffset
 
 
 def getPeakView(self: Peak, peakListView: PeakListView) -> tuple:
-    """Get peakView for the peak for the specified peakListView
+    """Get peakView for the peak for the specified peakListView.
     """
     if view := self._wrappedData.findFirstPeakView(peakListView=peakListView._wrappedData.peakListView):
         return self.project._data2Obj.get(view)

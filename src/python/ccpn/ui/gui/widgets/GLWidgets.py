@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-15 19:14:49 +0100 (Mon, May 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-16 15:34:58 +0100 (Tue, May 16, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -68,6 +68,7 @@ class GuiNdWidget(CcpnGLWidget):
         peaks = []
         _data2Obj = self.strip.project._data2Obj
         pixX, pixY = self.strip._CcpnGLWidget.pixelX, self.strip._CcpnGLWidget.pixelY
+        sgnX, sgnY = np.sign(pixX), np.sign(pixY)
 
         for spectrumView in self.strip.spectrumViews:
             for peakListView in spectrumView.peakListViews:
@@ -95,11 +96,18 @@ class GuiNdWidget(CcpnGLWidget):
                                 px, py = float(_pos[xAxis]), float(_pos[yAxis])
                                 tx, ty = pView.textOffset
                                 if not tx and not ty:
-                                    tx, ty = self.symbolX, self.symbolY
+                                    # pixels
+                                    tx, ty = self._symbolSize, self._symbolSize
+                                    # ppm
+                                    # tx, ty = self.symbolX, self.symbolY
 
                                 # find the bounds of the label
+                                # pixels
                                 minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
                                 minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
+                                # ppm
+                                # minX, maxX = min(_ll := px + tx * sgnX, _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
+                                # minY, maxY = min(_ll := py + ty * sgnY, _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
 
                                 if len(peak.axisCodes) > 2 and zPositions is not None:
                                     # zAxis = spectrumIndices[2]
@@ -144,6 +152,7 @@ class GuiNdWidget(CcpnGLWidget):
         peaks = []
         _data2Obj = self.strip.project._data2Obj
         pixX, pixY = self.strip._CcpnGLWidget.pixelX, self.strip._CcpnGLWidget.pixelY
+        sgnX, sgnY = np.sign(pixX), np.sign(pixY)
 
         for spectrumView in self.strip.spectrumViews:
             for peakListView in spectrumView.peakListViews:
@@ -171,11 +180,18 @@ class GuiNdWidget(CcpnGLWidget):
                                 px, py = float(_pos[xAxis]), float(_pos[yAxis])
                                 tx, ty = pView.textOffset
                                 if not tx and not ty:
-                                    tx, ty = self.symbolX, self.symbolY
+                                    # pixels
+                                    tx, ty = self._symbolSize, self._symbolSize
+                                    # ppm
+                                    # tx, ty = self.symbolX, self.symbolY
 
                                 # find the bounds of the label
+                                # pixels
                                 minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
                                 minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
+                                # ppm
+                                # minX, maxX = min(_ll := px + tx * sgnX, _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
+                                # minY, maxY = min(_ll := py + ty * sgnY, _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
 
                                 if len(peak.axisCodes) > 2 and zPositions is not None:
                                     # zAxis = spectrumIndices[2]
@@ -1322,6 +1338,7 @@ class Gui1dWidget(CcpnGLWidget):
         peaks = []
         _data2Obj = self.strip.project._data2Obj
         pixX, pixY = self.strip._CcpnGLWidget.pixelX, self.strip._CcpnGLWidget.pixelY
+        sgnX, sgnY = np.sign(pixX), np.sign(pixY)
 
         for spectrumView in self.strip.spectrumViews:
             for peakListView in spectrumView.peakListViews:
@@ -1339,11 +1356,18 @@ class Gui1dWidget(CcpnGLWidget):
                                 px, py = float(peak.position[0]), float(peak.height)
                                 tx, ty = pView.textOffset
                                 if not tx and not ty:
-                                    tx, ty = self.symbolX, self.symbolY
+                                    # pixels
+                                    tx, ty = self._symbolSize, self._symbolSize
+                                    # ppm
+                                    # tx, ty = self.symbolX, self.symbolY
 
                                 # find the bounds of the label
+                                # pixels
                                 minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
                                 minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
+                                # ppm
+                                # minX, maxX = min(_ll := px + tx * sgnX, _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
+                                # minY, maxY = min(_ll := py + ty * sgnY, _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
 
                                 if (xPositions[0] < px < xPositions[1]
                                     and yPositions[0] < py < yPositions[1]) or \
@@ -1371,6 +1395,7 @@ class Gui1dWidget(CcpnGLWidget):
         peaks = []
         _data2Obj = self.strip.project._data2Obj
         pixX, pixY = self.strip._CcpnGLWidget.pixelX, self.strip._CcpnGLWidget.pixelY
+        sgnX, sgnY = np.sign(pixX), np.sign(pixY)
 
         for spectrumView in self.strip.spectrumViews:
             for peakListView in spectrumView.peakListViews:
@@ -1388,11 +1413,18 @@ class Gui1dWidget(CcpnGLWidget):
                                 px, py = float(peak.position[0]), float(peak.height)
                                 tx, ty = pView.textOffset
                                 if not tx and not ty:
-                                    tx, ty = self.symbolX, self.symbolY
+                                    # pixels
+                                    tx, ty = self._symbolSize, self._symbolSize
+                                    # ppm
+                                    # tx, ty = self.symbolX, self.symbolY
 
                                 # find the bounds of the label
+                                # pixels
                                 minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
                                 minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
+                                # ppm
+                                # minX, maxX = min(_ll := px + tx * sgnX, _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
+                                # minY, maxY = min(_ll := py + ty * sgnY, _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
 
                                 if (minX < xPosition - xOffset < maxX and minY < yPosition - yOffset < maxY):
                                     peaks.append(peak)

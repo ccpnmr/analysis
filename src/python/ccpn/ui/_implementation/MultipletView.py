@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-11 19:16:26 +0100 (Thu, May 11, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-16 15:34:58 +0100 (Tue, May 16, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -29,6 +29,8 @@ import typing
 
 from ccpn.core.Project import Project
 from ccpn.core.Multiplet import Multiplet
+from ccpn.core.lib.ContextManagers import ccpNmrV3CoreSetter  #, undoStackBlocking
+from ccpn.util.decorators import logCommand
 from ccpn.ui._implementation.MultipletListView import MultipletListView
 from ccpn.ui._implementation.PMIViewABC import PMIViewABC
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import MultipletView as ApiMultipletView
@@ -81,8 +83,39 @@ class MultipletView(PMIViewABC):
 
     @property
     def multiplet(self) -> Multiplet:
-        """Multiplet that MultipletView refers to"""
+        """Multiplet that MultipletView refers to.
+        """
         return self._project._data2Obj.get(self._wrappedData.multiplet)
+
+    @property
+    def ppmOffset(self) -> tuple:
+        """X,Y text annotation offset in ppm.
+        """
+        if not (pixelSize := self.multipletListView.pixelSize):
+            raise TypeError(f'{self.__class__.__name__}:ppmOffset - multipletListView pizelSize is undefined')
+        if 0.0 in pixelSize:
+            raise ValueError(f'{self.__class__.__name__}:ppmOffset - multipletListView pizelSize contains 0.0')
+
+        return tuple(to * ps for to, ps in zip(self._wrappedData.textOffset, pixelSize))
+
+    @ppmOffset.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
+    def ppmOffset(self, value: tuple):
+        """Set the visible offset for the text annotation in ppm.
+        """
+        if not (pixelSize := self.multipletListView.pixelSize):
+            raise TypeError(f'{self.__class__.__name__}:ppmOffset - multipletListView pizelSize is undefined')
+        if 0.0 in pixelSize:
+            raise ValueError(f'{self.__class__.__name__}:ppmOffset - multipletListView pizelSize contains 0.0')
+
+        try:
+            # with undoStackBlocking():
+            # this is a gui operation and shouldn't need an undo? if no undo, remove core decorator above
+            self._wrappedData.textOffset = tuple(to / ps for to, ps in zip(value, pixelSize))
+
+        except Exception as es:
+            raise TypeError(f'{self.__class__.__name__}:ppmOffset must be a tuple of int/floats') from es
 
     #=========================================================================================
     # Implementation functions
@@ -120,17 +153,30 @@ del getter
 
 
 def getTextOffset(self: Multiplet, multipletListView: MultipletListView) -> tuple:
-    """Get textOffset for the multiplet for the specified multipletListView
+    """Get textOffset for the multiplet for the specified multipletListView in ppm.
     """
     if view := self._wrappedData.findFirstMultipletView(multipletListView=multipletListView._wrappedData.multipletListView):
+        # bypass the v3-operator in superclass
         tOffset = view.textOffset
-        if any(val for val in tOffset):
+        if any(tOffset):
             return view.textOffset
 
 
 Multiplet.getTextOffset = getTextOffset
 
 del getTextOffset
+
+
+def getMultipletView(self: Multiplet, multipletListView: MultipletListView) -> tuple:
+    """Get multipletView for the multiplet for the specified multipletListView.
+    """
+    if view := self._wrappedData.findFirstMultipletView(multipletListView=multipletListView._wrappedData.multipletListView):
+        return self.project._data2Obj.get(view)
+
+
+Multiplet.getMultipletView = getMultipletView
+
+del getMultipletView
 
 
 def _multipletAddMultipletViews(project: Project, apiMultiplet: Nmr.Multiplet):

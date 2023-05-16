@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-15 19:14:46 +0100 (Mon, May 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-16 15:34:58 +0100 (Tue, May 16, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -81,14 +81,15 @@ class PMIViewABC(AbstractWrapperObject):
 
     @property
     def textOffset(self) -> tuple:
-        """X,Y text annotation offset."""
+        """X,Y text annotation offset in pixels.
+        """
         return self._wrappedData.textOffset
 
     @textOffset.setter
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
     def textOffset(self, value: tuple):
-        """Set the textOffset for the view.
+        """Set the visible offset for the text annotation in pixels.
         """
         try:
             # with undoStackBlocking():
@@ -97,6 +98,20 @@ class PMIViewABC(AbstractWrapperObject):
 
         except Exception as es:
             raise TypeError(f'{self.__class__.__name__}:textOffset must be a tuple of int/floats') from es
+
+    @property
+    def ppmOffset(self) -> tuple:
+        """X,Y text annotation offset in ppm.
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError("Code error: function not implemented")
+
+    @ppmOffset.setter
+    def ppmOffset(self, value: tuple):
+        """Set the visible offset for the text annotation in ppm.
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError("Code error: function not implemented")
 
     #=========================================================================================
     # Implementation functions

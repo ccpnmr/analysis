@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-11 19:16:26 +0100 (Thu, May 11, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-16 15:34:58 +0100 (Tue, May 16, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -29,6 +29,8 @@ import typing
 
 from ccpn.core.Project import Project
 from ccpn.core.Integral import Integral
+from ccpn.core.lib.ContextManagers import ccpNmrV3CoreSetter  #, undoStackBlocking
+from ccpn.util.decorators import logCommand
 from ccpn.ui._implementation.IntegralListView import IntegralListView
 from ccpn.ui._implementation.PMIViewABC import PMIViewABC
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import IntegralView as ApiIntegralView
@@ -81,8 +83,39 @@ class IntegralView(PMIViewABC):
 
     @property
     def integral(self) -> Integral:
-        """Integral that IntegralView refers to"""
+        """Integral that IntegralView refers to.
+        """
         return self._project._data2Obj.get(self._wrappedData.integral)
+
+    @property
+    def ppmOffset(self) -> tuple:
+        """X,Y text annotation offset in ppm.
+        """
+        if not (pixelSize := self.integralListView.pixelSize):
+            raise TypeError(f'{self.__class__.__name__}:ppmOffset - integralListView pizelSize is undefined')
+        if 0.0 in pixelSize:
+            raise ValueError(f'{self.__class__.__name__}:ppmOffset - integralListView pizelSize contains 0.0')
+
+        return tuple(to * ps for to, ps in zip(self._wrappedData.textOffset, pixelSize))
+
+    @ppmOffset.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
+    def ppmOffset(self, value: tuple):
+        """Set the visible offset for the text annotation in ppm.
+        """
+        if not (pixelSize := self.integralListView.pixelSize):
+            raise TypeError(f'{self.__class__.__name__}:ppmOffset - integralListView pizelSize is undefined')
+        if 0.0 in pixelSize:
+            raise ValueError(f'{self.__class__.__name__}:ppmOffset - integralListView pizelSize contains 0.0')
+
+        try:
+            # with undoStackBlocking():
+            # this is a gui operation and shouldn't need an undo? if no undo, remove core decorator above
+            self._wrappedData.textOffset = tuple(to / ps for to, ps in zip(value, pixelSize))
+
+        except Exception as es:
+            raise TypeError(f'{self.__class__.__name__}:ppmOffset must be a tuple of int/floats') from es
 
     #=========================================================================================
     # Implementation functions
@@ -120,17 +153,30 @@ del getter
 
 
 def getTextOffset(self: Integral, integralListView: IntegralListView) -> tuple:
-    """Get textOffset for the integral for the specified integralListView
+    """Get textOffset for the integral for the specified integralListView in ppm.
     """
     if view := self._wrappedData.findFirstIntegralView(integralListView=integralListView._wrappedData.integralListView):
+        # bypass the v3-operator in superclass
         tOffset = view.textOffset
-        if any(val for val in tOffset):
+        if any(tOffset):
             return view.textOffset
 
 
 Integral.getTextOffset = getTextOffset
 
 del getTextOffset
+
+
+def getIntegralView(self: Integral, integralListView: IntegralListView) -> tuple:
+    """Get integralView for the integral for the specified integralListView.
+    """
+    if view := self._wrappedData.findFirstIntegralView(integralListView=integralListView._wrappedData.integralListView):
+        return self.project._data2Obj.get(view)
+
+
+Integral.getIntegralView = getIntegralView
+
+del getIntegralView
 
 
 def _integralAddIntegralViews(project: Project, apiIntegral: Nmr.Integral):

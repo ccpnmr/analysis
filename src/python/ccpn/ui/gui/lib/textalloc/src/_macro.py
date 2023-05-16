@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-11 19:16:27 +0100 (Thu, May 11, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-16 15:34:58 +0100 (Tue, May 16, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -881,9 +881,9 @@ if current.strip:
 
     # need to check which over_ind are bad and discard
     for posx, posy, moved, (view, ss) in zip(posnX, posnY, non_over, labels):
-        # view.textOffset = (moved[0] - posx, moved[1] - posy)  # pixels
         # offset is always orientated +ve to the top-right
-        view.textOffset = (moved[0] - posx) * np.abs(px), (moved[1] - posy) * np.abs(py)  # ppm
+        view.pixelOffset = (moved[0] - posx, moved[1] - posy)  # pixels
+        # view.ppmOffset = (moved[0] - posx) * np.abs(px), (moved[1] - posy) * np.abs(py)  # ppm
 
     if over_ind:
         print(f'Contains bad labels {over_ind}')

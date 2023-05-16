@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-15 19:14:47 +0100 (Mon, May 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-16 15:34:58 +0100 (Tue, May 16, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -98,6 +98,7 @@ class GLLabelling():
         self._objectStore = {}
 
         self._GLSymbols = {}
+        self._GLArrows = {}
         self._GLLabels = {}
         self._ordering = ()
         self._visibleOrdering = ()
@@ -564,7 +565,7 @@ class GLLabelling():
     _squareSymbol = ((np.array((0, 1, 2, 3), dtype=np.uint32), np.array((0, 1, 2, 3, 0, 2, 2, 1, 0, 3, 3, 1), dtype=np.uint32)),
                      (np.array((0, 4, 4, 3, 3, 0), dtype=np.uint32), np.array((0, 4, 4, 3, 3, 0, 0, 2, 2, 1, 3, 1), dtype=np.uint32)),
                      (np.array((2, 4, 4, 1, 1, 2), dtype=np.uint32), np.array((2, 4, 4, 1, 1, 2, 0, 2, 0, 3, 3, 1), dtype=np.uint32)))
-    _squareSymbolLen = tuple(tuple(len(sq) for sq in squareList) for squareList in _squareSymbol)
+    _squareSymbolLen = tuple(tuple(len(sym) for sym in symList) for symList in _squareSymbol)
 
     def _getSquareSymbolCount(self, planeIndex, obj):
         """returns the number of indices required for the symbol based on the planeIndex
@@ -596,7 +597,7 @@ class GLLabelling():
     _plusSymbol = ((np.array((5, 6, 7, 8), dtype=np.uint32), np.array((5, 6, 7, 8, 0, 2, 2, 1, 0, 3, 3, 1), dtype=np.uint32)),
                    (np.array((6, 4, 4, 5, 4, 8), dtype=np.uint32), np.array((6, 4, 4, 5, 4, 8, 0, 2, 2, 1, 3, 1, 0, 3), dtype=np.uint32)),
                    (np.array((6, 4, 4, 5, 4, 7), dtype=np.uint32), np.array((6, 4, 4, 5, 4, 7, 0, 2, 2, 1, 3, 1, 0, 3), dtype=np.uint32)))
-    _plusSymbolLen = tuple(tuple(len(sq) for sq in squareList) for squareList in _plusSymbol)
+    _plusSymbolLen = tuple(tuple(len(sym) for sym in symList) for symList in _plusSymbol)
 
     def _getPlusSymbolCount(self, planeIndex, obj):
         """returns the number of indices required for the symbol based on the planeIndex
@@ -863,7 +864,8 @@ class GLLabelling():
             else:
                 raise ValueError('GL Error: bad symbol type')
 
-    def _insertSymbolItemVertices(self, _isInFlankingPlane, _isInPlane, _selected, cols, drawList, fade, iCount, indexing, obj,
+    def _insertSymbolItemVertices(self, _isInFlankingPlane, _isInPlane, _selected, cols,
+                                  drawList, fade, iCount, indexing, obj,
                                   objNum, p0, pIndex, planeIndex, r, vertexPtr, w, alias):
 
         drawList.vertices[vertexPtr:vertexPtr + self.LENSQ2] = (p0[0] - r, p0[1] - w,
@@ -1122,7 +1124,8 @@ class GLLabelling():
             else:
                 raise ValueError('GL Error: bad symbol type')
 
-    def _appendSymbolItemVertices(self, _isInFlankingPlane, _isInPlane, _selected, cols, drawList, fade, iCount, indexing, obj, p0, pIndex,
+    def _appendSymbolItemVertices(self, _isInFlankingPlane, _isInPlane, _selected, cols,
+                                  drawList, fade, iCount, indexing, obj, p0, pIndex,
                                   planeIndex, r, w, alias):
 
         drawList.vertices = np.append(drawList.vertices, np.array((p0[0] - r, p0[1] - w,

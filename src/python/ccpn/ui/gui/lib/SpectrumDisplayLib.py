@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-15 19:14:48 +0100 (Mon, May 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-16 15:34:58 +0100 (Tue, May 16, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -234,7 +234,7 @@ def resetPeakLabelPositions(spectrumDisplay: GuiSpectrumDisplay, selected: bool 
 
     with undoBlockWithoutSideBar(app):
         for view in views:
-            view.textOffset = (0.0, 0.0)
+            view.ppmOffset = (0.0, 0.0)
 
 
 def arrangePeakLabelPositions(spectrumDisplay: GuiSpectrumDisplay, selected: bool = False) -> None:
@@ -352,7 +352,7 @@ def arrangePeakLabelPositions(spectrumDisplay: GuiSpectrumDisplay, selected: boo
         for posx, posy, moved, (view, ss) in zip(posnX, posnY, non_over, labels):
             # offset is always orientated +ve to the top-right
             view.textOffset = (moved[0] - posx, moved[1] - posy)  # pixels
-            # view.textOffset = (moved[0] - posx) * np.abs(px), (moved[1] - posy) * np.abs(py)  # ppm
+            # view.ppmOffset = (moved[0] - posx) * np.abs(px), (moved[1] - posy) * np.abs(py)  # ppm
 
     # if over_ind:
     #     getLogger().debug(f'Contains bad label indices {over_ind}')

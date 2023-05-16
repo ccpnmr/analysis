@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-04-25 17:42:32 +0100 (Tue, April 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-16 16:21:30 +0100 (Tue, May 16, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -349,11 +349,13 @@ class _TableModel(QtCore.QAbstractTableModel):
                 # need to discard columns that include check-boxes
                 val = self._df.iat[row, col]
 
-                # float/np.float - round to 3 decimal places
+                # float/np.float - round to 3 decimal places. This should be settable, ideally even by the user,
                 if isinstance(val, (float, np.floating)):
-                    # make it scientific annotation if a huge/tiny number
                     try:
-                        value = f'{val:.3f}' if (1e-6 < val < 1e6) or val == 0.0 else f'{val:.3e}'
+                        if abs(val) > 1e6:  # make it scientific annotation if a huge/tiny number
+                            value =  f'{val:.3e}'
+                        else:
+                            value =  f'{val:.3f}'
                     except Exception:
                         value = str(val)
                 else:

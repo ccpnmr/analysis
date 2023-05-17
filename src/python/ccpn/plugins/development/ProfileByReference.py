@@ -189,7 +189,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         _setWidgetProperties(widget, _setWidth([600], grid), 300)
         self.guiDict['CoreWidgets']['Metabolite'] = widget
 
-        grid = _addColumn(_addColumn(grid))
+        grid = (grid[0], grid[-1]+4)
         widget = Button(self.scrollAreaLayout, text='Add Unknown Signal', grid=grid, gridSpan=(1, 2), callback=self._addUnknownSignal)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
         self.guiDict['CoreWidgets']['AddUnknownSignalButton'] = widget

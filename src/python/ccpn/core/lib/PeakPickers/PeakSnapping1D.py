@@ -23,8 +23,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-04-04 17:14:17 +0100 (Tue, April 04, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-05-17 13:10:02 +0100 (Wed, May 17, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -36,10 +36,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import numpy as np
-from scipy.spatial.distance import cdist
+# from scipy.spatial.distance import cdist
 from collections import defaultdict
-from scipy.optimize import linear_sum_assignment
-from scipy.optimize import curve_fit
+# from scipy.optimize import linear_sum_assignment
+# from scipy.optimize import curve_fit
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.ContextManagers import  undoBlockWithoutSideBar, notificationEchoBlocking
 from ccpn.core.lib.PeakPickers.PeakPicker1D import _find1DMaxima

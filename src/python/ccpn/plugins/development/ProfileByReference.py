@@ -338,6 +338,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             self.spectra['ReferenceSpectrumGroup'] = self.project.newSpectrumGroup(
                 name='Reference_Spectra')
         for spectrumId in spectra:
+            self.spectra['SimulatedSpectra'][spectrumId] = []
             spectrum = self.project.getByPid('SP:' + spectrumId)
             limits = (max(spectrum.positions), min(spectrum.positions))
             points = len(spectrum.positions)
@@ -560,13 +561,13 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             self.current['Grid'] = grid
             self.current['SignalCount'] = 0
             buttonWidget = Button(parent=self.scrollAreaLayout, text='Add Signal From Scratch', grid=grid, callback=self._addSignalFromScratch)
-            _setWidgetProperties(buttonWidget, heightType='Minimum')
+            _setWidgetProperties(buttonWidget, 200, heightType='Minimum')
             self.guiDict['TemporaryWidgets'][f'AddSignalFromScratch'] = buttonWidget
 
             grid = _addColumn(grid)
             buttonWidget = Button(parent=self.scrollAreaLayout, text='Add Signal From Peaks', grid=grid,
                                   callback=self._addSignalFromPeaks)
-            _setWidgetProperties(buttonWidget, heightType='Minimum')
+            _setWidgetProperties(buttonWidget, 200, heightType='Minimum')
             self.guiDict['TemporaryWidgets'][f'AddSignalFromPeaks'] = buttonWidget
         self.project.widgetDict = self.guiDict['TemporaryWidgets']
 
@@ -651,11 +652,8 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.refreshSumAndSubSpectrum()
 
     def addSimSpectrumToList(self, spectrum):
-        # Stores the simulated spectrum in a list or creates one if the list isn't present.
-        spectrumId = self.settings['CoreWidgets']['SpectrumId']
-        if 'SimulatedSpectra' not in self.spectra['SimulatedSpectra']:
-            self.spectra['SimulatedSpectra'][spectrumId] = [spectrum]
-        else:
+        # Stores the simulated spectrum in a list for future reference.
+        for spectrumId in self.spectra['SimulatedSpectra']:
             self.spectra['SimulatedSpectra'][spectrumId].append(spectrum)
 
     def refreshSumAndSubSpectrum(self):

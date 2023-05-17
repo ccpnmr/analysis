@@ -376,7 +376,14 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.current['metaboliteData'] = selectedRow
         metabolite_id = selectedRow.metabolite_id.iloc[0]
         widget = self.guiDict['CoreWidgets']['Simulation']
-        data = self.caller.getSpectra(metabolite_id)
+        if not metaboliteName.startswith('Unknown'):
+            data = self.caller.getSpectra(metabolite_id)
+        else:
+            data = pd.DataFrame({'name': metaboliteName,
+                             'metabolite_id': f"SU:Unknown{metaboliteName.split('_')[-1]}",
+                             'spectrum_id': f"SP:Unknown{metaboliteName.split('_')[-1]}",
+                             'origin': 'unknown_substance',
+                             'spectrum_type': 'peak_list'}, index=[1])
         widget.updateDf(data)
 
     def _addUnknownSignal(self):
@@ -392,7 +399,10 @@ class ProfileByReferenceGuiPlugin(PluginModule):
                              'origin': 'unknown_substance',
                              'spectrum_type': 'peak_list'}, index=[len(self.metabolites.data)])
         widget.updateDf(data)
-        data = {'name': self.current['metabolite']}
+        data = {value: None for value in
+                ['name', 'hmdb_accession', 'bmrb_id', 'chemical_formula', 'average_molecular_weight', 'smiles', 'inchi',
+                 'metabolite_id', 'description']}
+        data['name'] = self.current['metabolite']
         row = pd.DataFrame(data, columns=self.metabolites.data.columns, index=[len(self.metabolites.data)])
         self.metabolites.data = pd.concat([self.metabolites.data, row])
         df = self.metabolites.data.sort_values('name')[

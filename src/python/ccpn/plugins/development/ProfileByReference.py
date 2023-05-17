@@ -387,8 +387,8 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.current['metabolite'] = f"Unknown_Substance_{self.current['UnknownSignalCount']}"
         widget = self.guiDict['CoreWidgets']['Simulation']
         data = pd.DataFrame({'name': self.current['metabolite'],
-                             'metabolite_id': None,
-                             'spectrum_id': None,
+                             'metabolite_id': f"SU:Unknown{self.current['UnknownSignalCount']}",
+                             'spectrum_id': f"SP:Unknown{self.current['UnknownSignalCount']}",
                              'origin': 'unknown_substance',
                              'spectrum_type': 'peak_list'}, index=[len(self.metabolites.data)])
         widget.updateDf(data)

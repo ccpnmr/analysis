@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-13 13:15:04 +0000 (Fri, January 13, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-18 18:49:18 +0100 (Thu, May 18, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -52,8 +52,8 @@ from ccpn.ui.gui.popups.AttributeEditorPopupABC import _attribContainer
 
 
 # define two groups of buttons for above/below the merit checkbox
-BUTTONOPTIONS1 = (PMIListABC._SYMBOLCOLOUR, PMIListABC._TEXTCOLOUR, PMIListABC._LINECOLOUR, None)
-BUTTONOPTIONS2 = (None, None, None, PMIListABC._MERITCOLOUR)
+BUTTONOPTIONS1 = (PMIListABC._SYMBOLCOLOUR, PMIListABC._TEXTCOLOUR, PMIListABC._LINECOLOUR, PMIListABC._ARROWCOLOUR, None)
+BUTTONOPTIONS2 = (None, None, None, None, PMIListABC._MERITCOLOUR)
 BUTTONOPTIONS = tuple(b1 or b2 for b1, b2 in zip(BUTTONOPTIONS1, BUTTONOPTIONS2))
 
 
@@ -69,6 +69,7 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
     _lineColourOption = False
     _meritColourOption = False
     _meritOptions = False
+    _arrowColourOption = False
     LIVEDIALOG = True  # changes are reflected instantly
     EDITMODE = True
 
@@ -131,7 +132,7 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
             row += 1
 
         # add first set of default colours as required
-        for colButton, enabled in zip(BUTTONOPTIONS1, (self._symbolColourOption, self._textColourOption, self._lineColourOption, self._meritColourOption)):
+        for colButton, enabled in zip(BUTTONOPTIONS1, (self._symbolColourOption, self._textColourOption, self._lineColourOption, self._arrowColourOption, self._meritColourOption)):
             if colButton and enabled:
                 row += 1
                 self._addButtonOption(self._colourPulldowns, colButton, row)
@@ -156,7 +157,7 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
             self.meritThresholdData.valueChanged.connect(self._queueSetMeritThreshold)
 
             # add second set of default colours as required
-            for colButton, enabled in zip(BUTTONOPTIONS2, (self._symbolColourOption, self._textColourOption, self._lineColourOption, self._meritColourOption)):
+            for colButton, enabled in zip(BUTTONOPTIONS2, (self._symbolColourOption, self._textColourOption, self._lineColourOption, self._arrowColourOption, self._meritColourOption)):
                 if colButton and enabled:
                     row += 1
                     self._addButtonOption(self._colourPulldowns, colButton, row)
@@ -447,6 +448,6 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
         """Populate the initial values for an empty object
         """
         # add second set of default colours as required
-        for colButton, enabled in zip(BUTTONOPTIONS, (self._symbolColourOption, self._textColourOption, self._lineColourOption, self._meritColourOption)):
+        for colButton, enabled in zip(BUTTONOPTIONS, (self._symbolColourOption, self._textColourOption, self._lineColourOption, self._arrowColourOption, self._meritColourOption)):
             if colButton and enabled:
                 setattr(self.ccpnList, colButton, '#')

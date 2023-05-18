@@ -1500,6 +1500,7 @@ class GuiStrip(Frame):
                 for peakListView in sV.peakListViews:
                     # peakListView.buildSymbols = True
                     peakListView.buildLabels = True
+                    # peakListView.buildArrows = True
 
             # spawn a redraw event of the GL windows
             self._CcpnGLWidget.GLSignals.emitPaintEvent()
@@ -1563,6 +1564,7 @@ class GuiStrip(Frame):
                 for peakListView in sV.peakListViews:
                     peakListView.buildSymbols = True
                     peakListView.buildLabels = True
+                    peakListView.buildArrows = True
 
                 for multipletListView in sV.multipletListViews:
                     multipletListView.buildSymbols = True

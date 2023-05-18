@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-11 19:16:27 +0100 (Thu, May 11, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-18 18:49:17 +0100 (Thu, May 18, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -48,7 +48,7 @@ def allocate_text(
         y_scatter: Union[np.ndarray, List[float]] = None,
         x_lines: List[Union[np.ndarray, List[float]]] = None,
         y_lines: List[Union[np.ndarray, List[float]]] = None,
-        x_boxes: List[Union[np.ndarray, List[float]]] = None,  # merge then separate in method?
+        x_boxes: List[Union[np.ndarray, List[float]]] = None,
         y_boxes: List[Union[np.ndarray, List[float]]] = None,
         textsize: int = 10,
         margin: float = 0.01,
@@ -60,14 +60,14 @@ def allocate_text(
         draw_lines: bool = True,
         linecolor: str = "r",
         draw_all: bool = True,
-        nbr_candidates: int = 100,
         linewidth: float = 1,
         textcolor: str = "k",
         xlims: tuple = (0, 1),
         ylims: tuple = (0, 1),
-        include_arrows=False,
+        include_new_lines=False,
+        include_new_boxes=False,
         ):
-    """Main function of allocating text-boxes in matplotlib plot
+    """Main function of allocating text-boxes.
 
     Args:
         x (Union[np.ndarray, List[float]]): x-coordinates of texts 1d array/list.
@@ -89,10 +89,10 @@ def allocate_text(
         draw_lines (bool, optional): draws lines from original points to textboxes. Defaults to True.
         linecolor (str, optional): color code of the lines between points and text-boxes. Defaults to "r".
         draw_all (bool, optional): Draws all texts after allocating as many as possible despit overlap. Defaults to True.
-        nbr_candidates (int, optional): Sets the number of candidates used. Defaults to 0.
         linewidth (float, optional): width of line. Defaults to 1.
         textcolor (str, optional): color code of the text. Defaults to "k".
-        include_arrows (bool): successively add line segments between points and labels as new labels are found.
+        include_new_lines (bool): Avoid the newly added line-segments between points and labels as new labels are found.
+        include_new_boxes (bool): Avoid the newly added boxes between points and labels as new labels are found.
     """
     t0 = time.time()
 
@@ -163,9 +163,9 @@ def allocate_text(
             miny_distance,
             maxy_distance,
             verbose,
-            nbr_candidates,
             draw_all,
-            include_arrows,
+            include_new_lines,
+            include_new_boxes,
             scatter_xy=scatterxy,
             lines_xyxy=lines_xyxy,
             boxes_xyxy=boxes_xyxy,

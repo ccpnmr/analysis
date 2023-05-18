@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-09 11:46:34 +0000 (Thu, March 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-18 18:49:17 +0100 (Thu, May 18, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -84,3 +84,61 @@ def restrictedPick(peakListView, axisCodes, peak=None, nmrResidue=None):
             allPeaks += peaks
 
     return peakList, allPeaks
+
+
+def line_rectangle_intersection(line_start, line_end, rect_top_left, rect_bottom_right, firstIntersect=True):
+    """
+    Calculate the intersection points between a line and a rectangle.
+    """
+    x1, y1 = line_start
+    x2, y2 = line_end
+    rect_x1, rect_y1 = rect_top_left
+    rect_x2, rect_y2 = rect_bottom_right
+
+    # Ensure rectangle coordinates are in the correct order
+    rect_left = min(rect_x1, rect_x2)
+    rect_right = max(rect_x1, rect_x2)
+    rect_top = min(rect_y1, rect_y2)
+    rect_bottom = max(rect_y1, rect_y2)
+
+    # Calculate line slope and y-intercept
+    if x1 != x2:
+        m = (y2 - y1) / (x2 - x1)
+        b = y1 - m * x1
+    else:
+        m = None
+        b = None
+
+    intersections = []
+
+    # Check for intersection with left or right sides of the rectangle
+    if x1 <= rect_left <= x2 or x1 >= rect_left >= x2:
+        y = m * rect_left + b if m is not None else y1
+        if rect_top <= y <= rect_bottom:
+            if firstIntersect:
+                return (rect_left, y)
+            intersections.append((rect_left, y))
+
+    if x1 <= rect_right <= x2 or x1 >= rect_right >= x2:
+        y = m * rect_right + b if m is not None else y1
+        if rect_top <= y <= rect_bottom:
+            if firstIntersect:
+                return (rect_right, y)
+            intersections.append((rect_right, y))
+
+    # Check for intersection with top or bottom sides of the rectangle
+    if y1 <= rect_top <= y2 or y1 >= rect_top >= y2:
+        x = (rect_top - b) / m if m != 0 else x1
+        if rect_left <= x <= rect_right:
+            if firstIntersect:
+                return (x, rect_top)
+            intersections.append((x, rect_top))
+
+    if y1 <= rect_bottom <= y2 or y1 >= rect_bottom >= y2:
+        x = (rect_bottom - b) / m if m != 0 else x1
+        if rect_left <= x <= rect_right:
+            if firstIntersect:
+                return (x, rect_bottom)
+            intersections.append((x, rect_bottom))
+
+    return intersections

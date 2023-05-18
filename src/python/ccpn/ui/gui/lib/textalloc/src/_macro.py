@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-16 15:34:58 +0100 (Tue, May 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-18 18:49:17 +0100 (Thu, May 18, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -295,7 +295,6 @@ def generate_candidates(
         ymindistance: float,
         xmaxdistance: float,
         ymaxdistance: float,
-        nbr_candidates: int,
         ) -> np.ndarray:
     """Generates 36 candidate boxes
 
@@ -308,7 +307,6 @@ def generate_candidates(
         ymindistance (float): fraction of the y-dimension to use as margins for text bboxes
         xmaxdistance (float): fraction of the x-dimension to use as max distance for text bboxes
         ymaxdistance (float): fraction of the y-dimension to use as max distance for text bboxes
-        nbr_candidates (int): nbr of candidates to use. If <1 or >36 uses all 36
 
     Returns:
         np.ndarray: candidate boxes array
@@ -350,7 +348,6 @@ def get_non_overlapping_boxes(
         miny_distance: float,
         maxy_distance: float,
         verbose: bool,
-        nbr_candidates: int,
         draw_all: bool,
         include_arrows: bool,
         scatter_xy: np.ndarray = None,
@@ -369,7 +366,6 @@ def get_non_overlapping_boxes(
         miny_distance (float): parameter for max distance between text and origin.
         maxy_distance (float): parameter for max distance between text and origin.
         verbose (bool): prints progress using tqdm.
-        nbr_candidates (int): Sets the number of candidates used.
         draw_all (bool): Draws all texts after allocating as many as possible despit overlap.
         include_arrows (bool): Successively add line-segments between points and labels as new labels are found.
         scatter_xy (np.ndarray, optional): 2d array of scattered points in plot.
@@ -406,7 +402,6 @@ def get_non_overlapping_boxes(
                 ymindistance,
                 xmaxdistance,
                 ymaxdistance,
-                nbr_candidates=nbr_candidates,
                 )
 
         # Check for overlapping
@@ -558,7 +553,6 @@ def allocate_text(
         draw_lines: bool = True,
         linecolor: str = "r",
         draw_all: bool = True,
-        nbr_candidates: int = 100,
         linewidth: float = 1,
         textcolor: str = "k",
         xlims: tuple = (0, 1),
@@ -587,7 +581,6 @@ def allocate_text(
         draw_lines (bool, optional): draws lines from original points to textboxes. Defaults to True.
         linecolor (str, optional): color code of the lines between points and text-boxes. Defaults to "r".
         draw_all (bool, optional): Draws all texts after allocating as many as possible despit overlap. Defaults to True.
-        nbr_candidates (int, optional): Sets the number of candidates used. Defaults to 0.
         linewidth (float, optional): width of line. Defaults to 1.
         textcolor (str, optional): color code of the text. Defaults to "k".
         include_arrows (bool): successively add line segments between points and labels as new labels are found.
@@ -673,7 +666,6 @@ def allocate_text(
             miny_distance,
             maxy_distance,
             verbose,
-            nbr_candidates,
             draw_all,
             include_arrows,
             scatter_xy=scatterxy,
@@ -868,7 +860,6 @@ if current.strip:
                            ylims=ylims,
                            x_boxes=x_boxes, y_boxes=y_boxes,  # boxes to avoid
                            textsize=15,
-                           nbr_candidates=300,
                            margin=0.0,
                            minx_distance=0.02,  # sort this, have changed internally to pixels
                            maxx_distance=0.2,
@@ -882,7 +873,7 @@ if current.strip:
     # need to check which over_ind are bad and discard
     for posx, posy, moved, (view, ss) in zip(posnX, posnY, non_over, labels):
         # offset is always orientated +ve to the top-right
-        view.pixelOffset = (moved[0] - posx, moved[1] - posy)  # pixels
+        view.textOffset = (moved[0] - posx, moved[1] - posy)  # pixels
         # view.ppmOffset = (moved[0] - posx) * np.abs(px), (moved[1] - posy) * np.abs(py)  # ppm
 
     if over_ind:

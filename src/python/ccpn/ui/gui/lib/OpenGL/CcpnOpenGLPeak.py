@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:41 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-05-18 18:49:17 +0100 (Thu, May 18, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -157,14 +157,17 @@ class GLpeakListMethods():
             if trigger == Notifier.DELETE:
                 self._deleteSymbol(obj, data.get('_list'), data.get('_spectrum'))
                 self._deleteLabel(obj, data.get('_list'), data.get('_spectrum'))
+                self._deleteArrow(obj, data.get('_list'), data.get('_spectrum'))
 
             if trigger == Notifier.CREATE:
                 self._createSymbol(obj)
                 self._createLabel(obj)
+                self._createArrow(obj)
 
             if trigger == Notifier.CHANGE and not obj.isDeleted:
                 self._changeSymbol(obj)
                 self._changeLabel(obj)
+                self._changeArrow(obj)
 
         elif isinstance(obj, NmrAtom):  # and not obj.isDeleted:
 
@@ -173,16 +176,22 @@ class GLpeakListMethods():
                 for peak in obj._oldAssignedPeaks:  # use the deleted attribute
                     self._changeSymbol(peak)
                     self._changeLabel(peak)
+                    self._changeArrow(peak)
             else:
                 for peak in obj.assignedPeaks:
                     self._changeSymbol(peak)
                     self._changeLabel(peak)
+                    self._changeArrow(peak)
 
         elif isinstance(obj, PeakList):
             if trigger in [Notifier.DELETE]:
 
                 # clear the vertex arrays
                 for pList, glArray in self._GLSymbols.items():
+                    if pList.isDeleted:
+                        glArray.clearArrays()
+                # clear the vertex arrays
+                for pList, glArray in self._GLArrows.items():
                     if pList.isDeleted:
                         glArray.clearArrays()
 

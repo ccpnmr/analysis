@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-11 19:16:26 +0100 (Thu, May 11, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-18 18:49:15 +0100 (Thu, May 18, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -69,6 +69,7 @@ class PMIListABC(AbstractWrapperObject):
     _LINECOLOUR = 'lineColour'
     _SYMBOLCOLOUR = 'symbolColour'
     _TEXTCOLOUR = 'textColour'
+    _ARROWCOLOUR = 'arrowColour'
 
     # Special error-raising functions as this is a container for a list
     def __iter__(self):
@@ -255,6 +256,25 @@ class PMIListABC(AbstractWrapperObject):
         value = value.upper()
         self._setInternalParameter(self._LINECOLOUR, value)
 
+    @property
+    def arrowColour(self) -> Optional[str]:
+        """arrow colour for annotation display in all displays.
+        arrowColour must be a valid hex colour string '#ABCDEF' or '#' to denote an auto-colour (take colour from spectrum).
+        Lowercase will be changed to uppercase.
+        """
+        return self._getInternalParameter(self._ARROWCOLOUR)
+
+    @arrowColour.setter
+    @logCommand(get='self', isProperty=True)
+    def arrowColour(self, value: str):
+        if not isinstance(value, str):
+            raise TypeError(f"arrowColour must be a hex colour string (e.g. '#ABCDEF' or '{INHERITCOLOUR}')")
+        if not (re.findall(COLOURCHECK, value) or value == INHERITCOLOUR):
+            raise ValueError(f"arrowColour {value} not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '{INHERITCOLOUR}')")
+
+        value = value.upper()
+        self._setInternalParameter(self._ARROWCOLOUR, value)
+
     #=========================================================================================
     # Implementation functions
     #=========================================================================================
@@ -271,6 +291,7 @@ class PMIListABC(AbstractWrapperObject):
         LINECOLOUR = 'lineColour'
         SYMBOLCOLOUR = 'symbolColour'
         TEXTCOLOUR = 'textColour'
+        ARROWCOLOUR = 'arrowColour'
 
         result = super()._restoreObject(project, apiObj)
 
@@ -280,6 +301,7 @@ class PMIListABC(AbstractWrapperObject):
                                          (LINESETTINGS, LINECOLOUR, cls._LINECOLOUR),
                                          (LINESETTINGS, SYMBOLCOLOUR, cls._SYMBOLCOLOUR),
                                          (LINESETTINGS, TEXTCOLOUR, cls._TEXTCOLOUR),
+                                         (LINESETTINGS, ARROWCOLOUR, cls._ARROWCOLOUR),
                                          ]:
             if result.hasParameter(namespace, param):
                 # move the internal parameter to the correct namespace

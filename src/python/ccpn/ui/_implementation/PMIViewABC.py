@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-16 15:34:58 +0100 (Tue, May 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-18 18:49:16 +0100 (Thu, May 18, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -57,6 +57,11 @@ class PMIViewABC(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = None
 
+    # TODO:ED - should be in Gui class :|
+    _width = 18
+    _height = 18
+    _text = ''
+
     #=========================================================================================
     # CCPN properties
     #=========================================================================================
@@ -81,7 +86,8 @@ class PMIViewABC(AbstractWrapperObject):
 
     @property
     def textOffset(self) -> tuple:
-        """X,Y text annotation offset in pixels.
+        """X,Y text annotation offset in ppm.
+        Positive is always towards the top-right irrespective of axis direction.
         """
         return self._wrappedData.textOffset
 
@@ -89,7 +95,7 @@ class PMIViewABC(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
     def textOffset(self, value: tuple):
-        """Set the visible offset for the text annotation in pixels.
+        """Set the visible offset for the text annotation in ppm.
         """
         try:
             # with undoStackBlocking():
@@ -99,19 +105,19 @@ class PMIViewABC(AbstractWrapperObject):
         except Exception as es:
             raise TypeError(f'{self.__class__.__name__}:textOffset must be a tuple of int/floats') from es
 
-    @property
-    def ppmOffset(self) -> tuple:
-        """X,Y text annotation offset in ppm.
-        """
-        # MUST BE SUBCLASSED
-        raise NotImplementedError("Code error: function not implemented")
+    ppmOffset = textOffset
 
-    @ppmOffset.setter
-    def ppmOffset(self, value: tuple):
-        """Set the visible offset for the text annotation in ppm.
+    @property
+    def size(self):
+        """X,Y text annotation size in pixels.
         """
-        # MUST BE SUBCLASSED
-        raise NotImplementedError("Code error: function not implemented")
+        return (self._width, self._height)
+
+    @size.setter
+    def size(self, value):
+        """Set the X,Y text annotation size in pixels.
+        """
+        self._width, self._height = value
 
     #=========================================================================================
     # Implementation functions
@@ -142,7 +148,7 @@ class PMIViewABC(AbstractWrapperObject):
 
         className = self.className
 
-        _id = '%s%s%s' % (parentId, Pid.IDSEP, self._key)
+        _id = f'{parentId}{Pid.IDSEP}{self._key}'
         sortKey = list(parent._ccpnSortKey[2:] + self._localCcpnSortKey)
         # strip the 'strip' identifier as above
         del sortKey[1]
@@ -167,10 +173,8 @@ class PMIViewABC(AbstractWrapperObject):
         raise RuntimeError(f"{str(self._pluralLinkName)} cannot be deleted.")
 
     def _finaliseAction(self, action: str, **actionKwds):
-        if super()._finaliseAction(action, **actionKwds):
-
-            if action == 'change':
-                self.peak._finaliseAction(action)
+        if super()._finaliseAction(action, **actionKwds) and action == 'change':
+            self.peak._finaliseAction(action)
 
     #=========================================================================================
     # CCPN functions

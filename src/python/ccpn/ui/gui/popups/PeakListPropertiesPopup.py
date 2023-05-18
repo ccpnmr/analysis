@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:46 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-05-18 18:49:18 +0100 (Thu, May 18, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -46,10 +46,17 @@ class PeakListPropertiesPopup(PMIListPropertiesPopupABC):
     _lineColourOption = False
     _meritColourOption = True
     _meritOptions = True
+    _arrowColourOption = True
 
     def __init__(self, parent=None, mainWindow=None, peakList=None, spectrum=None, title=None, **kwds):
-        super().__init__(parent=parent, mainWindow=mainWindow, ccpnList=peakList, spectrum=spectrum,
-                         title='%s Properties' % self.klass.className, **kwds)
+        super().__init__(
+            parent=parent,
+            mainWindow=mainWindow,
+            ccpnList=peakList,
+            spectrum=spectrum,
+            title=f'{self.klass.className} Properties',
+            **kwds,
+        )
 
         # initialise the buttons and dialog size
         self._postInit()
@@ -82,7 +89,7 @@ class PeakListPropertiesPopup(PMIListPropertiesPopupABC):
         """
         super()._populateInitialValues()
 
-        # need to get the next available peaklist name
+        # need to get the next available peak-list name
         _num = len(self.spectrum.peakLists) + 1
-        self.ccpnList.id = '{}.{}'.format(self.spectrum.name, _num)
+        self.ccpnList.id = f'{self.spectrum.name}.{_num}'
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-11 19:16:26 +0100 (Thu, May 11, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-18 18:49:15 +0100 (Thu, May 18, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -69,7 +69,8 @@ class PMIListViewABC(AbstractWrapperObject):
     _LINECOLOUR = 'lineColour'
     _SYMBOLCOLOUR = 'symbolColour'
     _TEXTCOLOUR = 'textColour'
-
+    _ARROWCOLOUR = 'arrowColour'
+    
     def _setListClasses(self):
         """Set the primary classType for the child list attached to this container
         """
@@ -339,6 +340,38 @@ class PMIListViewABC(AbstractWrapperObject):
             value = value.upper()
 
         self._setInternalParameter(self._LINECOLOUR, value or INHERITCOLOUR)
+
+    @property
+    def arrowColour(self) -> str:
+        """Arrow colour for displayed markers.
+
+        arrowColour must be a valid hex colour string '#ABCDEF' or '#' to denote an auto-colour (take colour from spectrum).
+        Can also be None or ''. Lowercase will be changed to uppercase.
+
+        If not set for ListView gives you the value for List.
+        If set for ListView overrides List value.
+        Set ListView value to None to return to non-local value"""
+        result = self._getInternalParameter(self._ARROWCOLOUR)
+        if result in (INHERITCOLOUR, None):
+            obj = self._childClass
+            result = obj and obj.arrowColour
+        return result
+
+    @arrowColour.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreUndoBlock()
+    def arrowColour(self, value: typing.Optional[str]):
+        if not isinstance(value, (str, type(None))):
+            raise TypeError(f"arrowColour must be a hex colour string (e.g. '#ABCDEF' or '{INHERITCOLOUR}') or None")
+
+        if value:
+            # a non-empty string
+            if not (re.findall(COLOURCHECK, value) or value == INHERITCOLOUR):
+                raise ValueError(f"arrowColour {value} not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '{INHERITCOLOUR}')")
+
+            value = value.upper()
+
+        self._setInternalParameter(self._ARROWCOLOUR, value or INHERITCOLOUR)
 
     #=========================================================================================
     # Implementation functions

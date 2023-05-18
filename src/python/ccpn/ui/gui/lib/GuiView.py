@@ -21,7 +21,7 @@ __version__ = "$Revision: 3.1.1 $"
 # Created
 #=========================================================================================
 __author__ = "$Author: Ed Brooksbank $"
-__date__ = "$Date: 2018-12-20 15:44:35 +0000 (Thu, December 20, 2018) $"
+__date__ = "$Date: 2023-05-17 11:01:41 +0100 (Wed, May 17, 2023) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -32,8 +32,8 @@ from PyQt5 import QtCore, QtWidgets
 NULL_RECT = QtCore.QRectF()
 
 
-class GuiListViewABC(QtWidgets.QGraphicsItem):
-    """Base class for gui<Type>ListView objects
+class GuiViewABC(QtWidgets.QGraphicsItem):
+    """Base class for gui<Type>View objects
     """
 
     def __init__(self):
@@ -42,66 +42,14 @@ class GuiListViewABC(QtWidgets.QGraphicsItem):
         QtWidgets.QGraphicsItem.__init__(self)
 
         self.application = self.spectrumView.application
-        self.setFlag(QtWidgets.QGraphicsItem.ItemHasNoContents, True)
+        self.setFlag(self.ItemHasNoContents, True)
 
-        # flags to initiate updates to the GL windows
-        self.buildSymbols = True
-        self.buildLabels = True
-        self.buildArrows = True
-
-        self._pixelSize = None
-        self._parent.strip.pixelSizeChanged.connect(self._updatePixelSize)
+        self._width = None
+        self._height = None
+        self._centre = None
 
     def boundingRect(self):
         return NULL_RECT
 
     def paint(self, *args):
         pass
-
-    def setVisible(self, visible):
-        super().setVisible(visible)
-
-        self.isDisplayed = visible
-
-        # print(f'    setVisible {self}')
-        #
-        self.isDisplayed = visible
-
-        # change visibility list for the strip
-        self.spectrumView.strip._updateVisibility()
-
-        self._notifyChange()
-
-    # # just use the same behaviour for the minute
-    # setDisplayed = setVisible
-
-    def setDisplayed(self, visible):
-        # super().setVisible(visible)
-
-        # print(f'    setDisplayed {self}')
-        #
-        self.isDisplayed = visible
-
-        # change visibility list for the strip
-        self.spectrumView.strip._updateVisibility()
-
-        self._notifyChange()
-
-    def _notifyChange(self):
-        # repaint all displays - this is called for each spectrumView in the spectrumDisplay
-        # all are attached to the same click
-        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-
-        GLSignals = GLNotifier(parent=self)
-        GLSignals.emitPaintEvent()
-
-    @property
-    def pixelSize(self):
-        """Return the pixel size for the view in ppm.
-        """
-        return self._pixelSize
-
-    def _updatePixelSize(self, value):
-        """Update the pixel size from the strip signal.
-        """
-        self._pixelSize = value

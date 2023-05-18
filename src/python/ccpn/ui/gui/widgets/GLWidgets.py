@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-16 15:34:58 +0100 (Tue, May 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-18 18:49:18 +0100 (Thu, May 18, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -103,11 +103,11 @@ class GuiNdWidget(CcpnGLWidget):
 
                                 # find the bounds of the label
                                 # pixels
-                                minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
-                                minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
+                                # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
+                                # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
                                 # ppm
-                                # minX, maxX = min(_ll := px + tx * sgnX, _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
-                                # minY, maxY = min(_ll := py + ty * sgnY, _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
+                                minX, maxX = min(_ll := px + tx * sgnX, _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
+                                minY, maxY = min(_ll := py + ty * sgnY, _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
 
                                 if len(peak.axisCodes) > 2 and zPositions is not None:
                                     # zAxis = spectrumIndices[2]
@@ -187,11 +187,11 @@ class GuiNdWidget(CcpnGLWidget):
 
                                 # find the bounds of the label
                                 # pixels
-                                minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
-                                minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
+                                # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
+                                # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
                                 # ppm
-                                # minX, maxX = min(_ll := px + tx * sgnX, _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
-                                # minY, maxY = min(_ll := py + ty * sgnY, _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
+                                minX, maxX = min(_ll := px + tx * sgnX, _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
+                                minY, maxY = min(_ll := py + ty * sgnY, _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
 
                                 if len(peak.axisCodes) > 2 and zPositions is not None:
                                     # zAxis = spectrumIndices[2]
@@ -602,6 +602,7 @@ class GuiNdWidget(CcpnGLWidget):
                     _shader.setAliasPosition(ii, jj)
 
                     self._GLPeaks.drawSymbols(specView)
+                    self._GLPeaks.drawArrows(specView)
                     self._GLMultiplets.drawSymbols(specView)
 
         GL.glLineWidth(GLDefs.GLDEFAULTLINETHICKNESS * self.viewports.devicePixelRatio)
@@ -1363,11 +1364,11 @@ class Gui1dWidget(CcpnGLWidget):
 
                                 # find the bounds of the label
                                 # pixels
-                                minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
-                                minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
+                                # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
+                                # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
                                 # ppm
-                                # minX, maxX = min(_ll := px + tx * sgnX, _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
-                                # minY, maxY = min(_ll := py + ty * sgnY, _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
+                                minX, maxX = min(_ll := px + tx * sgnX, _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
+                                minY, maxY = min(_ll := py + ty * sgnY, _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
 
                                 if (xPositions[0] < px < xPositions[1]
                                     and yPositions[0] < py < yPositions[1]) or \
@@ -1420,11 +1421,11 @@ class Gui1dWidget(CcpnGLWidget):
 
                                 # find the bounds of the label
                                 # pixels
-                                minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
-                                minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
+                                # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
+                                # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
                                 # ppm
-                                # minX, maxX = min(_ll := px + tx * sgnX, _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
-                                # minY, maxY = min(_ll := py + ty * sgnY, _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
+                                minX, maxX = min(_ll := px + tx * sgnX, _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
+                                minY, maxY = min(_ll := py + ty * sgnY, _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
 
                                 if (minX < xPosition - xOffset < maxX and minY < yPosition - yOffset < maxY):
                                     peaks.append(peak)
@@ -1587,6 +1588,7 @@ class Gui1dWidget(CcpnGLWidget):
                     for peakListView in spectrumView.peakListViews:
                         peakListView.buildSymbols = True
                         peakListView.buildLabels = True
+                        peakListView.buildArrows = True
                     for integralListView in spectrumView.integralListViews:
                         integralListView.buildSymbols = True
                         integralListView.buildLabels = True
@@ -1814,6 +1816,7 @@ class Gui1dWidget(CcpnGLWidget):
 
                     # draw the symbols
                     self._GLPeaks.drawSymbols(specView)
+                    self._GLPeaks.drawArrows(specView)
                     self._GLMultiplets.drawSymbols(specView)
 
         GL.glLineWidth(GLDefs.GLDEFAULTLINETHICKNESS * self.viewports.devicePixelRatio)

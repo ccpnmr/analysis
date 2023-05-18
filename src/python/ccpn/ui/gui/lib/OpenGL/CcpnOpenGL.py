@@ -3036,6 +3036,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._GLIntegrals._spectrumSettings = self._spectrumSettings
 
         self._GLPeaks.buildSymbols()
+        self._GLPeaks.buildArrows()
         self._GLMultiplets.buildSymbols()
         if not self._stackingMode:
             self._GLIntegrals.buildSymbols()
@@ -3361,6 +3362,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     for peakListView in spectrumView.peakListViews:
                         peakListView.buildSymbols = True
                         peakListView.buildLabels = True
+                        peakListView.buildArrows = True
                     for integralListView in spectrumView.integralListViews:
                         integralListView.buildSymbols = True
                         integralListView.buildLabels = True
@@ -5916,6 +5918,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                 for peakList in targets:
                                     if peakList == peakListView.peakList:
                                         peakListView.buildSymbols = True
+                                        peakListView.buildArrows = True
                         # self.buildPeakLists()
 
                     if GLNotifier.GLPEAKLISTLABELS in triggers:
@@ -5928,6 +5931,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                 for peakList in targets:
                                     if peakList == peakListView.peakList:
                                         peakListView.buildLabels = True
+                                        peakListView.buildArrows = True
                         # self.buildPeakListLabels()
 
                     if GLNotifier.GLMARKS in triggers:
@@ -6536,9 +6540,9 @@ class CcpnGLWidget(QOpenGLWidget):
                                     # tx, ty = self.symbolX, self.symbolY
 
                                 # pixels
-                                mx, my = px + (tx + drawList.width / 2) * pixX, py + (ty + drawList.height / 2) * pixY
+                                # mx, my = px + (tx + drawList.width / 2) * pixX, py + (ty + drawList.height / 2) * pixY
                                 # ppms
-                                # mx, my = px + tx * sgnX + drawList.width * pixX / 2, py + ty * sgnY + drawList.height * pixY / 2
+                                mx, my = px + tx * sgnX + drawList.width * pixX / 2, py + ty * sgnY + drawList.height * pixY / 2
 
                                 # height = peak.height  # * scale # TBD: is the scale already taken into account in peak.height???
                                 if (xPositions[0] < px < xPositions[1] and y0 < py < y1) or \
@@ -6573,9 +6577,9 @@ class CcpnGLWidget(QOpenGLWidget):
                                     # tx, ty = self.symbolX, self.symbolY
 
                                 # pixels
-                                mx, my = px + (tx + drawList.width / 2) * pixX, py + (ty + drawList.height / 2) * pixY
+                                # mx, my = px + (tx + drawList.width / 2) * pixX, py + (ty + drawList.height / 2) * pixY
                                 # ppms
-                                # mx, my = px + tx * sgnX + drawList.width * pixX / 2, py + ty * sgnY + drawList.height * pixY / 2
+                                mx, my = px + tx * sgnX + drawList.width * pixX / 2, py + ty * sgnY + drawList.height * pixY / 2
 
                                 if (xPositions[0] < px < xPositions[1] and yPositions[0] < py < yPositions[1]) or \
                                         (xPositions[0] < mx < xPositions[1] and yPositions[0] < my < yPositions[1]):
@@ -6723,11 +6727,11 @@ class CcpnGLWidget(QOpenGLWidget):
                         for pv in pvs:
                             pos = list(pv.textOffset)
                             # pixels
-                            pos[0] += (deltaPosition[0] / self.pixelX)
-                            pos[1] += (deltaPosition[1] / self.pixelY)
+                            # pos[0] += (deltaPosition[0] / self.pixelX)
+                            # pos[1] += (deltaPosition[1] / self.pixelY)
                             # ppms
-                            # pos[0] += deltaPosition[0] * np.sign(self.pixelX)
-                            # pos[1] += deltaPosition[1] * np.sign(self.pixelY)
+                            pos[0] += deltaPosition[0] * np.sign(self.pixelX)
+                            pos[1] += deltaPosition[1] * np.sign(self.pixelY)
                             pv.textOffset = pos
 
                 else:

@@ -567,6 +567,7 @@ from ccpn.ui.gui.lib.PeakListView import PeakListView
 PeakListView._registerCoreClass()
 
 from ccpn.ui._implementation.PeakView import PeakView
+# from ccpn.ui.gui.lib.PeakView import PeakView
 
 
 PeakView._registerCoreClass()

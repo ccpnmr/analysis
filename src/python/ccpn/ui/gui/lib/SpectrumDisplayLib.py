@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-16 15:34:58 +0100 (Tue, May 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-18 18:49:17 +0100 (Thu, May 18, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -234,7 +234,7 @@ def resetPeakLabelPositions(spectrumDisplay: GuiSpectrumDisplay, selected: bool 
 
     with undoBlockWithoutSideBar(app):
         for view in views:
-            view.ppmOffset = (0.0, 0.0)
+            view.textOffset = (0.0, 0.0)
 
 
 def arrangePeakLabelPositions(spectrumDisplay: GuiSpectrumDisplay, selected: bool = False) -> None:
@@ -327,32 +327,33 @@ def arrangePeakLabelPositions(spectrumDisplay: GuiSpectrumDisplay, selected: boo
 
     texts = [val.text for _, val in labels]  # grab the labels
 
-    HALF_POINTSIZE = 12 // 2
+    HALF_POINTSIZE = 20 // 2
     x_boxes = [np.array([xx - HALF_POINTSIZE, xx + HALF_POINTSIZE]) for xx in posnX]
     y_boxes = [np.array([yy - HALF_POINTSIZE, yy + HALF_POINTSIZE]) for yy in posnY]
 
-    output = allocate_text(posnX, posnY, text_list=texts,
+    valid_boxes = allocate_text(posnX, posnY, text_list=texts,
                            xlims=xlims,
                            ylims=ylims,
                            x_boxes=x_boxes, y_boxes=y_boxes,  # boxes to avoid
                            textsize=15,
-                           nbr_candidates=300,
                            margin=0.0,
                            minx_distance=0.02,  # sort this, have changed internally to pixels
                            maxx_distance=0.2,
                            miny_distance=0.03,
                            maxy_distance=1.0,
-                           include_arrows=False,
+                           include_new_lines=True,
+                           include_new_boxes=True,
+                           verbose=False,
                            )
 
-    non_over, over_ind = output
+    non_over, over_ind = valid_boxes
 
     with undoBlockWithoutSideBar(app):
         # need to check which over_ind are bad and discard
         for posx, posy, moved, (view, ss) in zip(posnX, posnY, non_over, labels):
             # offset is always orientated +ve to the top-right
-            view.textOffset = (moved[0] - posx, moved[1] - posy)  # pixels
-            # view.ppmOffset = (moved[0] - posx) * np.abs(px), (moved[1] - posy) * np.abs(py)  # ppm
+            # view.textOffset = (moved[0] - posx, moved[1] - posy)  # pixels
+            view.textOffset = (moved[0] - posx) * np.abs(px), (moved[1] - posy) * np.abs(py)  # ppm
 
     # if over_ind:
     #     getLogger().debug(f'Contains bad label indices {over_ind}')

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-16 15:34:58 +0100 (Tue, May 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-18 18:49:16 +0100 (Thu, May 18, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -35,6 +35,9 @@ from ccpn.ui._implementation.PeakListView import PeakListView
 from ccpn.ui._implementation.PMIViewABC import PMIViewABC
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import PeakView as ApiPeakView
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
+
+# TODO:ED - should be in a Gui-class
+from ccpn.ui.gui.lib.PeakListLib import line_rectangle_intersection
 
 
 class PeakView(PMIViewABC):
@@ -81,15 +84,6 @@ class PeakView(PMIViewABC):
         """Local sorting key, in context of parent."""
         return (self._wrappedData.peak.serial,)
 
-    # @property
-    # def textOffset(self) -> tuple:
-    #     """Peak X,Y text annotation offset"""
-    #     return self._wrappedData.textOffset
-    #
-    # @textOffset.setter
-    # def textOffset(self, value: tuple):
-    #     self._wrappedData.textOffset = value
-
     @property
     def peak(self) -> Peak:
         """Peak that PeakView refers to.
@@ -97,34 +91,78 @@ class PeakView(PMIViewABC):
         return self._project._data2Obj.get(self._wrappedData.peak)
 
     @property
-    def ppmOffset(self) -> tuple:
-        """X,Y text annotation offset in ppm.
+    def pixelOffset(self) -> tuple:
+        """X,Y text annotation offset in pixels.
         """
         if not (pixelSize := self.peakListView.pixelSize):
-            raise TypeError(f'{self.__class__.__name__}:ppmOffset - peakListView pizelSize is undefined')
+            raise TypeError(f'{self.__class__.__name__}:pixelOffset - peakListView pixelSize is undefined')
         if 0.0 in pixelSize:
-            raise ValueError(f'{self.__class__.__name__}:ppmOffset - peakListView pizelSize contains 0.0')
+            raise ValueError(f'{self.__class__.__name__}:pixelOffset - peakListView pixelSize contains 0.0')
 
-        return tuple(to * ps for to, ps in zip(self._wrappedData.textOffset, pixelSize))
+        return tuple(to / abs(ps) for to, ps in zip(self._wrappedData.textOffset, pixelSize))
 
-    @ppmOffset.setter
+    @pixelOffset.setter
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
-    def ppmOffset(self, value: tuple):
-        """Set the visible offset for the text annotation in ppm.
+    def pixelOffset(self, value: tuple):
+        """Set the visible offset for the text annotation in pixels.
         """
-        if not (pixelSize := self.peakListView.pixelSize):
-            raise TypeError(f'{self.__class__.__name__}:ppmOffset - peakListView pizelSize is undefined')
+        if not (pixelSize := self._parent.pixelSize):
+            raise TypeError(f'{self.__class__.__name__}:pixelOffset - {self._parent.classname} pixelSize is undefined')
         if 0.0 in pixelSize:
-            raise ValueError(f'{self.__class__.__name__}:ppmOffset - peakListView pizelSize contains 0.0')
+            raise ValueError(f'{self.__class__.__name__}:pixelOffset - {self._parent.classname} pixelSize contains 0.0')
 
         try:
             # with undoStackBlocking():
             # this is a gui operation and shouldn't need an undo? if no undo, remove core decorator above
-            self._wrappedData.textOffset = tuple(to / ps for to, ps in zip(value, pixelSize))
+            self._wrappedData.textOffset = tuple(to * abs(ps) for to, ps in zip(value, pixelSize))
 
         except Exception as es:
-            raise TypeError(f'{self.__class__.__name__}:ppmOffset must be a tuple of int/floats') from es
+            raise TypeError(f'{self.__class__.__name__}:pixelOffset must be a tuple of int/floats') from es
+
+    @property
+    def textCentre(self) -> tuple:
+        """X,Y text annotation centre in ppm.
+        """
+        if not (pixelSize := self._parent.pixelSize):
+            raise TypeError(f'{self.__class__.__name__}:pixelOffset - {self._parent.classname} pixelSize is undefined')
+        if 0.0 in pixelSize:
+            raise ValueError(f'{self.__class__.__name__}:pixelOffset - {self._parent.classname} pixelSize contains 0.0')
+
+        offset = self._wrappedData.textOffset
+        return (offset[0] + abs(pixelSize[0] * self._width / 2.0), offset[1] + abs(pixelSize[1] * self._height / 2.0))
+
+    ppmCentre = textCentre
+
+    @property
+    def pixelCentre(self) -> tuple:
+        """X,Y text annotation centre in pixels.
+        """
+        offset = self.pixelOffset
+        return (offset[0] + self._width / 2, offset[1] + self._height / 2)
+
+    def getIntersect(self, ppmPoint):
+        """X,Y text annotation co-ordinates to nearest point of bounding box from start-point in ppm.
+        """
+        if not (pixelSize := self._parent.pixelSize):
+            raise TypeError(f'{self.__class__.__name__}:getIntersect - {self._parent.classname} pixelSize is undefined')
+        if 0.0 in pixelSize:
+            raise ValueError(f'{self.__class__.__name__}:getIntersect - {self._parent.classname} pixelSize contains 0.0')
+
+        bLeft = self._wrappedData.textOffset
+        tRight = (bLeft[0] + abs(self._width * pixelSize[0]), bLeft[1] + abs(self._height * pixelSize[1]))
+
+        return line_rectangle_intersection(ppmPoint, self.textCentre, bLeft, tRight)
+
+    getPpmIntersect = getIntersect
+
+    def getPixelIntersect(self, pixelPoint):
+        """X,Y text annotation co-ordinates to nearest point of bounding box from start-point in pixels.
+        """
+        bLeft = self.pixelOffset
+        tRight = (bLeft[0] + self._width, bLeft[1] + self._height)
+
+        return line_rectangle_intersection(pixelPoint, self.textCentre, bLeft, tRight)
 
     #=========================================================================================
     # Implementation functions

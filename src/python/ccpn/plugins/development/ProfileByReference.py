@@ -581,7 +581,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             self.guiDict['TemporaryWidgets'][f'AddSignalFromPeaks'] = buttonWidget
         self.project.widgetDict = self.guiDict['TemporaryWidgets']
 
-    def _addSignalFromScratch(self):
+    def _addSignalFromScratch(self, shift=0, intensity=1):
         # Creates a row of spin-box widgets and a vertical infinite line for manipulating a single unknown signal.
         # Also builds the unit labels if it's the first call.
         def shiftChange():
@@ -616,15 +616,15 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.current['Grid'] = grid
         count = self.current['SignalCount'] + 1
         self.current['SignalCount'] = count
-        self.simspec.multiplets[f'{count}'] = {'center': 0, 'indices': [count-1]}
-        self.simspec.peakList.append((0, 1, self.simspec.width/self.simspec.frequency, str(count)))
+        self.simspec.multiplets[f'{count}'] = {'center': shift, 'indices': [count-1]}
+        self.simspec.peakList.append((shift, intensity, self.simspec.width/self.simspec.frequency, str(count)))
 
         labelWidget = Label(self.scrollAreaLayout, text=f'Signal_{count}', grid=grid)
         _setWidgetProperties(labelWidget, _setWidth(columnWidths, grid))
         self.guiDict['TemporaryWidgets'][f'Signal_{count}_label'] = labelWidget
 
         grid = _addColumn(grid)
-        shiftWidget = DoubleSpinbox(self.scrollAreaLayout, value=0, decimals=4, step=0.0001, grid=grid, gridSpan=(1, 1))
+        shiftWidget = DoubleSpinbox(self.scrollAreaLayout, value=shift, decimals=4, step=0.0001, grid=grid, gridSpan=(1, 1))
         shiftWidget.setRange(0, 100)
         _setWidgetProperties(shiftWidget, _setWidth(columnWidths, grid), hAlign='r')
         shiftWidget.valueChanged.connect(shiftChange)
@@ -632,7 +632,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.guiDict['TemporaryWidgets'][f'Signal_{count}_ChemicalShift'] = shiftWidget
 
         grid = _addColumn(grid)
-        heightWidget = DoubleSpinbox(self.scrollAreaLayout, value=1, decimals=2, step=0.01, grid=grid, gridSpan=(1, 1))
+        heightWidget = DoubleSpinbox(self.scrollAreaLayout, value=intensity, decimals=2, step=0.01, grid=grid, gridSpan=(1, 1))
         heightWidget.setRange(-7, 7)
         _setWidgetProperties(heightWidget, _setWidth(columnWidths, grid), hAlign='r')
         heightWidget.valueChanged.connect(heightChange)
@@ -648,16 +648,17 @@ class ProfileByReferenceGuiPlugin(PluginModule):
 
     def _addSignalFromPeaks(self):
         # Sets the simulated spectrum peak-list to match the peaks picked in the current real spectrum.
+        peakMax = max([peak.height for peak in self.current['ActiveSpectrum'].peaks])
         if len(self.current['ActiveSpectrum'].multiplets) > 0:
-            peakList = []
             for i, multiplet in enumerate(self.current['ActiveSpectrum'].multiplets):
                 for peak in multiplet.peaks:
-                    peakList.append((peak.position[0], peak.height/(10**self.current['Scale']), self.simspec.width/self.simspec.frequency, str(i)))
+                    self._addSignalFromScratch(shift=peak.position[0], intensity=peak.height/peakMax)
         else:
-            peakList = [(peak.position[0], peak.height/(10**self.current['Scale']), self.simspec.width/self.simspec.frequency, '1') for peak in self.current['ActiveSpectrum'].peaks]
-        if len(peakList) < 1:
+
+            for peak in self.current['ActiveSpectrum'].peaks:
+                self._addSignalFromScratch(shift=peak.position[0], intensity=peak.height/peakMax)
+        if len(self.current['ActiveSpectrum'].peaks) < 1:
             raise Exception(f"Please pick at least one peak in spectrum {self.current['ActiveSpectrum'].pid}")
-        self.simspec.peakList = peakList
         self.simspec.setSpectrumLineshape()
         self.refreshSumAndSubSpectrum()
 

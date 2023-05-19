@@ -436,7 +436,10 @@ class CcpnGLWidget(QOpenGLWidget):
         self._aliasShade = 0.0
         self._aliasLabelsEnabled = True
         self._peakLabelsEnabled = True
+        self._peakArrowsEnabled = True
         self._multipletLabelsEnabled = True
+        self._arrowType = 0
+        self._arrowSize = 0
 
         self._contourList = {}
 
@@ -3242,7 +3245,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.drawBoundingBoxes()
 
         # draw all the aliased symbols
-        self.drawAliasedSymbols()
+        self.drawAliasedSymbols(self._peakArrowsEnabled)
 
         self.globalGL._shaderProgram1.makeCurrent()
 

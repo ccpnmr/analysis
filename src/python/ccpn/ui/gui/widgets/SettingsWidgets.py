@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-12 15:31:27 +0100 (Fri, May 12, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-19 16:58:08 +0100 (Fri, May 19, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -50,8 +50,10 @@ from ccpn.ui._implementation.SpectrumView import SpectrumView
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, \
-    SYMBOLTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, ANNOTATIONTYPES, AXISASPECTRATIOS, \
-    AXISASPECTRATIOMODE, ALIASENABLED, ALIASSHADE, ALIASLABELSENABLED, CONTOURTHICKNESS, PEAKLABELSENABLED, MULTIPLETLABELSENABLED
+    SYMBOLTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, ARROWTYPES, ARROWSIZE, \
+    ANNOTATIONTYPES, AXISASPECTRATIOS, \
+    AXISASPECTRATIOMODE, ALIASENABLED, ALIASSHADE, ALIASLABELSENABLED, CONTOURTHICKNESS, \
+    PEAKLABELSENABLED, PEAKARROWSENABLED, MULTIPLETLABELSENABLED
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.ui.gui.widgets.Base import SignalBlocking
@@ -97,9 +99,11 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                  xAxisUnits=0, xTexts=[], showXAxis=True,
                  yAxisUnits=0, yTexts=[], showYAxis=True,
                  symbolType=0, annotationType=0, symbolSize=0, symbolThickness=0,
+                 arrowType=0, arrowSize=0,
                  aliasEnabled=False, aliasShade=0,
                  aliasLabelsEnabled=False,
                  peakLabelsEnabled=False,
+                 peakArrowsEnabled=False,
                  multipletLabelsEnabled=False,
                  stripArrangement=0,
                  _baseAspectRatioAxisCode='H', _aspectRatios={},
@@ -133,8 +137,10 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
         # populate the widgets
         self._populateWidgets(_aspectRatioMode, _aspectRatios, annotationType, stripArrangement,
-                              symbolSize, symbolThickness, symbolType, xAxisUnits, yAxisUnits,
-                              aliasEnabled, aliasShade, aliasLabelsEnabled, peakLabelsEnabled, multipletLabelsEnabled,
+                              symbolSize, symbolThickness, symbolType, arrowType, arrowSize,
+                              xAxisUnits, yAxisUnits,
+                              aliasEnabled, aliasShade, aliasLabelsEnabled, 
+                              peakLabelsEnabled, peakArrowsEnabled, multipletLabelsEnabled,
                               contourThickness, zPlaneNavigationMode)
 
         # connect to the lock/symbol/ratio changed pyqtSignals
@@ -371,7 +377,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self.multipletLabelsEnabledData.clicked.connect(self._symbolsChanged)
 
         row += 1
-        Label(parent, text="Aliased Peaks", hAlign='l', grid=(row, 0))
+        Label(parent, text="Aliased peaks", hAlign='l', grid=(row, 0))
 
         row += 1
         self.aliasEnabledLabel = Label(parent, text="Show peaks", hAlign='r', grid=(row, 0))
@@ -398,14 +404,50 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self.aliasShadeData.valueChanged.connect(self._symbolsChanged)
 
         row += 1
+        self.peakArrowsEnabledLabel = Label(parent, text="Show peak arrows", grid=(row, 0))
+        self.peakArrowsEnabledData = CheckBox(parent,
+                                              # checked=peakArrowsEnabled,
+                                              grid=(row, 1), objectName='SDS_peakArrowsEnabled')
+        self.peakArrowsEnabledData.clicked.connect(self._symbolsChanged)
+
+        if self._spectrumDisplay.MAXARROWTYPES:
+            # if not self._spectrumDisplay.is1D:
+            row += 1
+            _texts = ['Line', 'Wedge', 'Arrow']
+            _names = ['arrSDS_Line', 'arrSDS_Wedge', 'arrSDS_Arrow']
+            _texts = _texts[:self._spectrumDisplay.MAXARROWTYPES]
+            _names = _names[:self._spectrumDisplay.MAXARROWTYPES]
+
+            self.arrowsLabel = Label(parent, text="Arrow", hAlign='r', grid=(row, 0))
+            self.arrow = RadioButtons(parent, texts=_texts,
+                                       objectNames=_names,
+                                       objectName='arrSDS',
+                                       # selectedInd=arrowType,
+                                       callback=self._symbolsChanged,
+                                       direction='h',
+                                       grid=(row, 1), gridSpan=(1, 3), hAlign='l',
+                                       tipTexts=None,
+                                       )
+
+        row += 1
+        self.arrowSizeLabel = Label(parent, text="Size (pixel)", hAlign='r', grid=(row, 0))
+        self.arrowSizeData = Spinbox(parent, step=1,
+                                           min=1, max=20, grid=(row, 1), hAlign='l', objectName='SDS_arrowSize')
+        self.arrowSizeData.setMinimumWidth(LineEditsMinimumWidth)
+        # self.arrowSizeData.setValue(int(arrowSize))
+        self.arrowSizeData.valueChanged.connect(self._symbolsChanged)
+
+        row += 1
         self._spacer = Spacer(parent, 5, 5,
                               QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
                               grid=(row, 4), gridSpan=(1, 1))
         self._parent.setContentsMargins(5, 5, 5, 5)
 
     def _populateWidgets(self, aspectRatioMode, aspectRatios, annotationType, stripArrangement,
-                         symbolSize, symbolThickness, symbolType, xAxisUnits, yAxisUnits,
-                         aliasEnabled, aliasShade, aliasLabelsEnabled, peakLabelsEnabled, multipletLabelsEnabled,
+                         symbolSize, symbolThickness, symbolType, arrowType, arrowSize,
+                         xAxisUnits, yAxisUnits,
+                         aliasEnabled, aliasShade, aliasLabelsEnabled,
+                         peakLabelsEnabled, peakArrowsEnabled, multipletLabelsEnabled,
                          contourThickness, zPlaneNavigationMode):
         """Populate the widgets
         """
@@ -440,7 +482,12 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             self.aliasShadeData.setEnabled(aliasEnabled)
 
             self.peakLabelsEnabledData.set(peakLabelsEnabled)
+            self.peakArrowsEnabledData.set(peakArrowsEnabled)
             self.multipletLabelsEnabledData.set(multipletLabelsEnabled)
+
+            if self._spectrumDisplay.MAXARROWTYPES:
+                self.arrow.setIndex(arrowType)
+            self.arrowSizeData.setValue(int(arrowSize))
 
     def _setAxesUnits(self, xAxisUnits, yAxisUnits):
         """Set the unit's checkboxes
@@ -470,7 +517,10 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                 ALIASSHADE            : int(self.aliasShadeData.get()),
                 ALIASLABELSENABLED    : self.aliasLabelsEnabledData.isChecked(),
                 PEAKLABELSENABLED     : self.peakLabelsEnabledData.isChecked(),
+                PEAKARROWSENABLED     : self.peakArrowsEnabledData.isChecked(),
                 MULTIPLETLABELSENABLED: self.multipletLabelsEnabledData.isChecked(),
+                ARROWTYPES            : self.arrow.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
+                ARROWSIZE             : int(self.arrowSizeData.text()),
                 }
 
     def _aspectRatioModeChanged(self):
@@ -601,7 +651,11 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             self.aliasLabelsEnabledData.set(values[ALIASLABELSENABLED])
 
             self.peakLabelsEnabledData.set(values[PEAKLABELSENABLED])
+            self.peakArrowsEnabledData.set(values[PEAKARROWSENABLED])
             self.multipletLabelsEnabledData.set(values[MULTIPLETLABELSENABLED])
+
+            self.arrow.setIndex(values[ARROWTYPES])
+            self.arrowSizeData.set(values[ARROWSIZE])
 
             _enabled = self.aliasEnabledData.get()
             self.aliasLabelsEnabledData.setEnabled(_enabled)

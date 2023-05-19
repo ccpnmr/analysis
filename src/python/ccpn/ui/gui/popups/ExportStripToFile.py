@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:45 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-05-19 16:58:07 +0100 (Fri, May 19, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -54,7 +54,8 @@ from ccpn.ui.gui.widgets.HighlightBox import HighlightBox
 from ccpn.ui.gui.widgets.Font import getFontHeight, getSystemFonts
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, \
     GLINTEGRALLABELS, GLINTEGRALSYMBOLS, GLMULTIPLETLABELS, \
-    GLMULTIPLETSYMBOLS, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLPAGETYPE, GLPAGESIZE, GLSELECTEDPIDS, \
+    GLMULTIPLETSYMBOLS, GLPEAKLABELS, GLPEAKSYMBOLS, GLPEAKARROWS, \
+    GLPRINTTYPE, GLPAGETYPE, GLPAGESIZE, GLSELECTEDPIDS, \
     GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, \
     GLSPECTRUMDISPLAY, GLSTRIP, \
     GLWIDGET, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS, GLFOREGROUND, \
@@ -63,7 +64,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, \
     GLFULLLIST, GLEXTENDEDLIST, GLDIAGONALLINE, GLCURSORS, GLDIAGONALSIDEBANDS, \
     GLALIASENABLED, GLALIASSHADE, GLALIASLABELSENABLED, GLSTRIPREGIONS, \
     GLSCALINGMODE, GLSCALINGOPTIONS, GLSCALINGPERCENT, GLSCALINGBYUNITS, \
-    GLPRINTFONT, GLUSEPRINTFONT, GLSCALINGAXIS, GLPEAKLABELSENABLED, GLMULTIPLETLABELSENABLED
+    GLPRINTFONT, GLUSEPRINTFONT, GLSCALINGAXIS, GLPEAKLABELSENABLED, GLPEAKARROWSENABLED, GLMULTIPLETLABELSENABLED
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState
 from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString, hexToRgbRatio, colourNameNoSpace
 from ccpn.util.Constants import SCALING_MODES, POSINFINITY
@@ -1407,6 +1408,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                     child.setCheckState(0, QtCore.Qt.Checked if pp.isDisplayed else QtCore.Qt.Unchecked)
 
                 printItems.extend((GLPEAKSYMBOLS,
+                                   GLPEAKARROWS,
                                    GLPEAKLABELS))
 
             if integralLists:
@@ -1539,6 +1541,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         # aliasShade = strip.aliasShade
         # aliasLabelsEnabled = strip.aliasLabelsEnabled
         # peakLabelsEnabled = strip.peakLabelsEnabled
+        # peakArrowsEnabled = strip.peakArrowsEnabled
         # multipletLabelsEnabled = strip.multipletLabelsEnabled
         # stripPadding = self.stripPaddingBox.getValue()
         # exportDpi = self.exportDpiBox.getValue()
@@ -1569,6 +1572,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                       GLALIASSHADE            : strip.aliasShade,
                       GLALIASLABELSENABLED    : strip.aliasLabelsEnabled,
                       GLPEAKLABELSENABLED     : strip.peakLabelsEnabled,
+                      GLPEAKARROWSENABLED     : strip.peakArrowsEnabled,
                       GLMULTIPLETLABELSENABLED: strip.multipletLabelsEnabled,
                       GLSTRIPDIRECTION        : stripDirection,
                       GLSTRIPPADDING          : self.stripPaddingBox.getValue(),

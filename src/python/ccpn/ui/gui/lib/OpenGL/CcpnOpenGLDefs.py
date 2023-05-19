@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-18 18:49:16 +0100 (Thu, May 18, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-19 16:58:07 +0100 (Fri, May 19, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -92,15 +92,15 @@ LENOFFSETS = 4
 LENSQ = 9
 LENSQ2 = 2 * LENSQ
 LENSQ4 = 4 * LENSQ
-LENARR = 3
+LENARR = 6
 LENARR2 = 2 * LENARR
 LENARR4 = 4 * LENARR
 LENSQMULT = 17
 LENSQ2MULT = 2 * LENSQMULT
 LENSQ4MULT = 4 * LENSQMULT
-POINTCOLOURS = 9
+POINTCOLOURS = LENSQ
 POINTCOLOURSMULT = LENSQMULT
-ARROWCOLOURS = 3
+ARROWCOLOURS = LENARR
 
 DEFAULTCOLOUR = '#7f7f7f'
 DEFAULTFADE = 0.3
@@ -120,6 +120,7 @@ GLSELECTEDPIDS = 'selectedPids'
 # check box items
 GLPEAKSYMBOLS = 'Peak Symbols'
 GLPEAKLABELS = 'Peak Labels'
+GLPEAKARROWS = 'Peak Arrows'
 GLINTEGRALSYMBOLS = 'Integral Symbols'
 GLINTEGRALLABELS = 'Integral Labels'
 GLMULTIPLETSYMBOLS = 'Multiplet Symbols'
@@ -157,6 +158,7 @@ GLALIASENABLED = 'Alias Peaks Enabled'
 GLALIASSHADE = 'Alias Shade'
 GLALIASLABELSENABLED = 'Alias Labels Enabled'
 GLPEAKLABELSENABLED = 'Peak Labels Enabled'
+GLPEAKARROWSENABLED = 'Peak Arrows Enabled'
 GLMULTIPLETLABELSENABLED = 'Multiplet Labels Enabled'
 GLSTRIPDIRECTION = 'Strip Direction'
 GLSTRIPPADDING = 'Strip Padding'
@@ -175,6 +177,7 @@ AXISDRAWOFFSET = 0.001
 
 GLFULLLIST = (GLPEAKSYMBOLS,
               GLPEAKLABELS,
+              GLPEAKARROWS,
               GLINTEGRALSYMBOLS,
               GLINTEGRALLABELS,
               GLMULTIPLETSYMBOLS,
@@ -267,7 +270,10 @@ ALIASENABLED = 'aliasEnabled'
 ALIASSHADE = 'aliasShade'
 ALIASLABELSENABLED = 'aliasLabelsEnabled'
 PEAKLABELSENABLED = 'peakLabelsEnabled'
+PEAKARROWSENABLED = 'peakArrowsEnabled'
 MULTIPLETLABELSENABLED = 'multipletLabelsEnabled'
+ARROWTYPES = 'arrowTypes'
+ARROWSIZE = 'arrowSize'
 STRINGSCALE = 0.7
 
 PEAKLABEL_MINIMAL = 'peaklabelMinimal'

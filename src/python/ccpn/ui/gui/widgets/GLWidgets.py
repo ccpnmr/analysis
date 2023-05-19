@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-18 18:49:18 +0100 (Thu, May 18, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-19 16:58:08 +0100 (Fri, May 19, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -529,7 +529,7 @@ class GuiNdWidget(CcpnGLWidget):
                     if self._multipletLabelsEnabled:
                         self._GLMultiplets.drawLabels(specView)
 
-    def drawAliasedSymbols(self):
+    def drawAliasedSymbols(self, arrowsEnabled):
         """Draw all the symbols that require aliasing to multiple regions
         """
         _shader = self.globalGL._shaderProgramAlias.makeCurrent()
@@ -601,8 +601,9 @@ class GuiNdWidget(CcpnGLWidget):
                     _shader.setMVMatrix(specMatrix)
                     _shader.setAliasPosition(ii, jj)
 
+                    if arrowsEnabled:
+                        self._GLPeaks.drawArrows(specView)
                     self._GLPeaks.drawSymbols(specView)
-                    self._GLPeaks.drawArrows(specView)
                     self._GLMultiplets.drawSymbols(specView)
 
         GL.glLineWidth(GLDefs.GLDEFAULTLINETHICKNESS * self.viewports.devicePixelRatio)
@@ -1759,7 +1760,7 @@ class Gui1dWidget(CcpnGLWidget):
                     if self._multipletLabelsEnabled:
                         self._GLMultiplets.drawLabels(specView)
 
-    def drawAliasedSymbols(self):
+    def drawAliasedSymbols(self, arrowsEnabled):
         """Draw all the symbols that require aliasing to multiple regions
         """
         _shader = self.globalGL._shaderProgramAlias.makeCurrent()
@@ -1814,9 +1815,10 @@ class Gui1dWidget(CcpnGLWidget):
                     _shader.setMVMatrix(_matrix)
                     _shader.setAliasPosition(ii, 0)
 
+                    if arrowsEnabled:
+                        self._GLPeaks.drawArrows(specView)
                     # draw the symbols
                     self._GLPeaks.drawSymbols(specView)
-                    self._GLPeaks.drawArrows(specView)
                     self._GLMultiplets.drawSymbols(specView)
 
         GL.glLineWidth(GLDefs.GLDEFAULTLINETHICKNESS * self.viewports.devicePixelRatio)

@@ -57,7 +57,8 @@ from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, \
     SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, AXISASPECTRATIOS, AXISASPECTRATIOMODE, \
     BOTTOMAXIS, RIGHTAXIS, ALIASENABLED, ALIASSHADE, ALIASLABELSENABLED, CONTOURTHICKNESS, \
-    PEAKLABELSENABLED, MULTIPLETLABELSENABLED, SPECTRUM_STACKEDMATRIXOFFSET
+    PEAKLABELSENABLED, PEAKARROWSENABLED, MULTIPLETLABELSENABLED, SPECTRUM_STACKEDMATRIXOFFSET, \
+    ARROWTYPES, ARROWSIZE
 from ccpn.util.Constants import AXISUNIT_PPM, AXISUNIT_HZ, AXISUNIT_POINT
 
 
@@ -82,6 +83,7 @@ class GuiStrip(Frame):
 
     # MAXPEAKLABELTYPES = 6
     # MAXPEAKSYMBOLTYPES = 4
+    # MAXARROWTYPES = 3
 
     # set the queue handling parameters
     _maximumQueueLength = 40
@@ -191,7 +193,10 @@ class GuiStrip(Frame):
             self.aliasLabelsEnabled = _firstStrip.aliasLabelsEnabled
             self.contourThickness = _firstStrip.contourThickness
             self.peakLabelsEnabled = _firstStrip.peakLabelsEnabled
+            self.peakArrowsEnabled = _firstStrip.peakArrowsEnabled
             self.multipletLabelsEnabled = _firstStrip.multipletLabelsEnabled
+            self.arrowType = min(_firstStrip.arrowType, self.spectrumDisplay.MAXARROWTYPES - 1)
+            self.arrowSize = _firstStrip.arrowSize
 
             self.gridVisible = _firstStrip.gridVisible
             self.crosshairVisible = _firstStrip.crosshairVisible
@@ -230,7 +235,10 @@ class GuiStrip(Frame):
             self.aliasShade = settings[ALIASSHADE]
             self.aliasLabelsEnabled = settings[ALIASLABELSENABLED]
             self.peakLabelsEnabled = settings[PEAKLABELSENABLED]
+            self.peakArrowsEnabled = settings[PEAKARROWSENABLED]
             self.multipletLabelsEnabled = settings[MULTIPLETLABELSENABLED]
+            self.arrowType = min(settings[ARROWTYPES], self.spectrumDisplay.MAXARROWTYPES - 1)
+            self.arrowSize = settings[ARROWSIZE]
 
             self.spectrumDisplay._setFloatingAxes(xUnits=settings[AXISXUNITS],
                                                   yUnits=settings[AXISYUNITS],
@@ -1547,7 +1555,10 @@ class GuiStrip(Frame):
                                                                      ALIASSHADE            : self.aliasShade,
                                                                      ALIASLABELSENABLED    : self.aliasLabelsEnabled,
                                                                      PEAKLABELSENABLED     : self.peakLabelsEnabled,
+                                                                     PEAKARROWSENABLED     : self.peakArrowsEnabled,
                                                                      MULTIPLETLABELSENABLED: self.multipletLabelsEnabled,
+                                                                     ARROWTYPES            : self.arrowType,
+                                                                     ARROWSIZE        : self.arrowSize,
                                                                      })
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1626,8 +1637,11 @@ class GuiStrip(Frame):
         _aliasShade = aDict[ALIASSHADE]
         _aliasLabelsEnabled = aDict[ALIASLABELSENABLED]
         _peakLabelsEnabled = aDict[PEAKLABELSENABLED]
+        _peakArrowsEnabled = aDict[PEAKARROWSENABLED]
         _multipletLabelsEnabled = aDict[MULTIPLETLABELSENABLED]
         _contourThickness = aDict[CONTOURTHICKNESS]
+        _arrowType = aDict[ARROWTYPES]
+        _arrowSize = aDict[ARROWSIZE]
 
         if self.isDeleted:
             return
@@ -1668,8 +1682,19 @@ class GuiStrip(Frame):
                 self.peakLabelsEnabled = _peakLabelsEnabled
                 self._setSymbolsPaintEvent()
 
+            elif _peakArrowsEnabled != self.peakArrowsEnabled:
+                self.peakArrowsEnabled = _peakArrowsEnabled
+                self._setSymbolsPaintEvent()
+
             elif _multipletLabelsEnabled != self.multipletLabelsEnabled:
                 self.multipletLabelsEnabled = _multipletLabelsEnabled
+                self._setSymbolsPaintEvent()
+
+            elif _arrowType != self.arrowType:
+                self.setPeakArrows(_arrowType)
+
+            elif _arrowSize != self.arrowSize:
+                self.arrowSize = _arrowSize
                 self._setSymbolsPaintEvent()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1715,6 +1740,90 @@ class GuiStrip(Frame):
 
         oldValue = self._CcpnGLWidget._symbolThickness
         self._CcpnGLWidget._symbolThickness = value if (value and value >= 0) else oldValue
+        if value != oldValue:
+            self._setSymbolLabelling()
+            if self.spectrumViews:
+                self._emitSymbolChanged()
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # arrowTypes
+
+    # def _setArrowType(self):
+    #     if self.spectrumViews:
+    #         for sV in self.spectrumViews:
+    #
+    #             # NOTE:ED - rebuild the peaks here?
+    #             #   ...and then notify the GL to copy the new lists to the graphics card
+    #             #   so rebuild will be inside the progress manager
+    #
+    #             for peakListView in sV.peakListViews:
+    #                 peakListView.buildArrows = True
+    #                 peakListView.buildLabels = True
+    #                 peakListView.buildArrows = True
+    #
+    #             for multipletListView in sV.multipletListViews:
+    #                 multipletListView.buildArrows = True
+    #                 multipletListView.buildLabels = True
+    #
+    #         # spawn a redraw event of the GL windows
+    #         self._CcpnGLWidget.GLSignals.emitPaintEvent()
+
+    @property
+    def arrowType(self):
+        """Get the arrow type for the strip
+        """
+        return self._CcpnGLWidget._arrowType
+
+    @arrowType.setter
+    def arrowType(self, value):
+        """Set the arrow type for the strip
+        """
+        if not isinstance(value, int):
+            raise TypeError('Error: arrowType not an int')
+
+        oldValue = self._CcpnGLWidget._arrowType
+        self._CcpnGLWidget._arrowType = value if (value in range(self.spectrumDisplay.MAXARROWTYPES)) else 0
+        if value != oldValue:
+            self._setSymbolType()
+            if self.spectrumViews:
+                self._emitSymbolChanged()
+
+    def cyclePeakArrows(self):
+        """Cycle through arrow types.
+        """
+        self.arrowType += 1
+
+    def setPeakArrows(self, value):
+        """set the arrow type.
+        """
+        self.arrowType = value
+
+    def _setArrowsPaintEvent(self):
+        # prompt the GLwidgets to update
+        self._CcpnGLWidget.GLSignals.emitEvent(triggers=[self._CcpnGLWidget.GLSignals.GLRESCALE,
+                                                         self._CcpnGLWidget.GLSignals.GLALLPEAKS,
+                                                         self._CcpnGLWidget.GLSignals.GLALLMULTIPLETS,
+                                                         ])
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # arrowSize
+
+    @property
+    def arrowSize(self):
+        """Get the arrow thickness for the strip
+        """
+        return self._CcpnGLWidget._arrowSize
+
+    @arrowSize.setter
+    def arrowSize(self, value):
+        """Set the arrow thickness for the strip
+        """
+        if not isinstance(value, (int, float)):
+            raise TypeError('Error: arrowSize not an (int, float)')
+        value = int(value)
+
+        oldValue = self._CcpnGLWidget._arrowSize
+        self._CcpnGLWidget._arrowSize = value if (value and value >= 0) else oldValue
         if value != oldValue:
             self._setSymbolLabelling()
             if self.spectrumViews:
@@ -1830,6 +1939,29 @@ class GuiStrip(Frame):
 
         oldValue = self._CcpnGLWidget._peakLabelsEnabled
         self._CcpnGLWidget._peakLabelsEnabled = value
+        if value != oldValue:
+            self._setSymbolLabelling()
+            if self.spectrumViews:
+                self._emitSymbolChanged()
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # peakArrowsEnabled
+
+    @property
+    def peakArrowsEnabled(self):
+        """Get peakArrowsEnabled for the strip
+        """
+        return self._CcpnGLWidget._peakArrowsEnabled
+
+    @peakArrowsEnabled.setter
+    def peakArrowsEnabled(self, value):
+        """Set peakArrowsEnabled for the strip
+        """
+        if not isinstance(value, bool):
+            raise TypeError('Error: peakArrowsEnabled not a bool')
+
+        oldValue = self._CcpnGLWidget._peakArrowsEnabled
+        self._CcpnGLWidget._peakArrowsEnabled = value
         if value != oldValue:
             self._setSymbolLabelling()
             if self.spectrumViews:

@@ -177,6 +177,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
     MAXPEAKLABELTYPES = 0
     MAXPEAKSYMBOLTYPES = 0
+    MAXARROWSYMBOLTYPES = 0
 
     # Sub-classed in the 1d/nD implementations
     # NB: 'self' is added to the callback in _fillToolbar using partial
@@ -301,10 +302,13 @@ class GuiSpectrumDisplay(CcpnModule):
                                                                     annotationType=_general.annotationType,
                                                                     symbolSize=_general.symbolSizePixel,
                                                                     symbolThickness=_general.symbolThickness,
+                                                                    arrowType=_general.arrowType,
+                                                                    arrowSize=_general.arrowSize,
                                                                     aliasEnabled=_general.aliasEnabled,
                                                                     aliasShade=_general.aliasShade,
                                                                     aliasLabelsEnabled=_general.aliasLabelsEnabled,
                                                                     peakLabelsEnabled=_general.peakLabelsEnabled,
+                                                                    peakArrowsEnabled=_general.peakArrowsEnabled,
                                                                     multipletLabelsEnabled=_general.multipletLabelsEnabled,
                                                                     stripArrangement=_general.stripArrangement,
                                                                     _aspectRatioMode=_general.aspectRatioMode,
@@ -327,10 +331,13 @@ class GuiSpectrumDisplay(CcpnModule):
                                                                     annotationType=_general.annotationType,
                                                                     symbolSize=_general.symbolSizePixel,
                                                                     symbolThickness=_general.symbolThickness,
+                                                                    arrowType=_general.arrowType,
+                                                                    arrowSize=_general.arrowSize,
                                                                     aliasEnabled=_general.aliasEnabled,
                                                                     aliasShade=_general.aliasShade,
                                                                     aliasLabelsEnabled=_general.aliasLabelsEnabled,
                                                                     peakLabelsEnabled=_general.peakLabelsEnabled,
+                                                                    peakArrowsEnabled=_general.peakArrowsEnabled,
                                                                     multipletLabelsEnabled=_general.multipletLabelsEnabled,
                                                                     stripArrangement=_general.stripArrangement,
                                                                     _aspectRatioMode=_general.aspectRatioMode,
@@ -504,9 +511,10 @@ class GuiSpectrumDisplay(CcpnModule):
         self._spectrumDisplaySettings._populateWidgets(prefsGen.aspectRatioMode, prefsGen.aspectRatios,
                                                        prefsGen.annotationType, prefsGen.stripArrangement,
                                                        prefsGen.symbolSizePixel, prefsGen.symbolThickness, prefsGen.symbolType,
+                                                       prefsGen.arrowType, prefsGen.arrowSize,
                                                        prefsGen.xAxisUnits, prefsGen.yAxisUnits,
                                                        prefsGen.aliasEnabled, prefsGen.aliasShade, prefsGen.aliasLabelsEnabled,
-                                                       prefsGen.peakLabelsEnabled, prefsGen.multipletLabelsEnabled,
+                                                       prefsGen.peakLabelsEnabled, prefsGen.peakArrowsEnabled, prefsGen.multipletLabelsEnabled,
                                                        prefsGen.contourThickness,
                                                        prefsGen.zPlaneNavigationMode)
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-12 15:31:27 +0100 (Fri, May 12, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-19 16:58:07 +0100 (Fri, May 19, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -63,6 +63,7 @@ class SpectrumDisplay1d(SpectrumDisplay, GuiSpectrumDisplay):
 
     MAXPEAKLABELTYPES = 7
     MAXPEAKSYMBOLTYPES = 4
+    MAXARROWTYPES = 3
 
     # NB: 'self' is added to the callback in _fillToolbar using partial
     _toolbarItems = [
@@ -118,6 +119,7 @@ class SpectrumDisplayNd(SpectrumDisplay, GuiSpectrumDisplay):
 
     MAXPEAKLABELTYPES = 7
     MAXPEAKSYMBOLTYPES = 4
+    MAXARROWTYPES = 3
 
     # NB: 'self' is added to the callback in _fillToolbar using partial
     _toolbarItems = [

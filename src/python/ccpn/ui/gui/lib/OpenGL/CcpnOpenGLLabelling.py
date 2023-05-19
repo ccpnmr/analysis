@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-18 18:49:16 +0100 (Thu, May 18, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-19 16:58:07 +0100 (Fri, May 19, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -210,7 +210,7 @@ class GLLabelling():
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # New Arrow list - separate from symbols and labels, more control
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
+
     def _deleteArrow(self, obj, parentList, spectrum):
         if pls := parentList:
             # spectrum = pls.spectrum
@@ -331,7 +331,7 @@ class GLLabelling():
         # find the correct scale to draw square pixels
         # don't forget to change when the axes change
 
-        _, _, arrowType, arrowWidth, r, w = self._getArrowWidths(spectrumView)
+        _, _, arrowType, arrowSize, arrowWidth, r, w = self._getArrowWidths(spectrumView)
 
         # change the ratio on resize
         drawList.refreshMode = GLREFRESHMODE_REBUILD
@@ -359,10 +359,10 @@ class GLLabelling():
 
         strip = spectrumView.strip
         self._appendArrowItem(strip, obj, listCol, indexing, r, w,
-                              spectrumFrequency, arrowType, drawList, spectrumView, objListView)
+                              spectrumFrequency, arrowType, arrowSize, drawList, spectrumView, objListView)
 
     def _appendArrowItem(self, strip, obj, listCol, indexing, r, w,
-                         spectrumFrequency, arrowType, drawList, spectrumView, objListView):
+                         spectrumFrequency, arrowType, arrowSize, drawList, spectrumView, objListView):
         """append a single arrow to the end of the arrow list
         """
         # indexStart, indexEnd are indexes into the drawList.indices for the indices for this arrow
@@ -389,6 +389,7 @@ class GLLabelling():
 
         sx, sy = 0, 0  # keep the original label co-ord
         rx, ry = 0.0, 0.0
+        tnx, tny = 0.0, 0.0
         inr, inw = r, w
         try:
             # nightmare to find the intersections between the symbol box and the bounding-box of the text
@@ -410,10 +411,16 @@ class GLLabelling():
             # generate the end-vector perpendicular to the line
             rx, ry = -ty * abs(pixX), tx * abs(pixY)  # back to pixels, rotated 90degrees
             denom = (rx**2 + ry**2)**0.5
-            rx = (2 * rx / denom) * abs(pixX) / vPP[pIndex[0]]  # pixels-points for display
-            ry = (2 * ry / denom) * abs(pixY) / vPP[pIndex[1]]
+            rx = (arrowSize * rx / denom) * abs(pixX) / vPP[pIndex[0]]  # pixels-points for display
+            ry = (arrowSize * ry / denom) * abs(pixY) / vPP[pIndex[1]]
 
-        except Exception:
+            tnx, tny = tx / abs(pixX), ty / abs(pixY)  # back to pixels, rotated 90degrees
+            denom = (tnx**2 + tny**2)**0.5
+            tnx = (arrowSize * tnx / denom) * abs(pixX) / vPP[pIndex[0]]  # pixels-points for display
+            tny = (arrowSize * tny / denom) * abs(pixY) / vPP[pIndex[1]]
+
+        except Exception as es:
+            print(es)
             r, w = 0.0, 0.0
 
         # try:
@@ -441,18 +448,21 @@ class GLLabelling():
         _selected = False
         iCount = 0
         if _isInPlane or _isInFlankingPlane:
-            iCount, _selected = self._appendArrowIndices(drawList, vertexStart, planeIndex, obj)
+            iCount, _selected = self._appendArrowIndices(drawList, vertexStart, planeIndex, obj, arrowType)
 
         self._appendArrowItemVertices(_isInFlankingPlane, _isInPlane, _selected, cols, drawList, fade, iCount, indexing,
-                                      obj, p0, pIndex, planeIndex, r, w, alias, sx, sy, rx, ry)
+                                      obj, p0, pIndex, planeIndex, r, w, alias, sx, sy, rx, ry, tnx, tny)
 
     def _appendArrowItemVertices(self, _isInFlankingPlane, _isInPlane, _selected, cols,
                                  drawList, fade, iCount, indexing, obj, p0, pIndex,
-                                 planeIndex, r, w, alias, sx, sy, rx, ry):
+                                 planeIndex, r, w, alias, sx, sy, rx, ry, tnx, tny):
 
         drawList.vertices = np.append(drawList.vertices, np.array((p0[0] + sx, p0[1] + sy,
                                                                    p0[0] + r + rx, p0[1] + w + ry,
                                                                    p0[0] + r - rx, p0[1] + w - ry,
+                                                                   p0[0] + r, p0[1] + w,
+                                                                   p0[0] + sx + rx + tnx, p0[1] + sy + ry + tny,
+                                                                   p0[0] + sx - rx + tnx, p0[1] + sy - ry + tny,
                                                                    ),
                                                                   dtype=np.float32))
         drawList.colors = np.append(drawList.colors, np.array((*cols, fade) * self.LENARR, dtype=np.float32))
@@ -474,36 +484,46 @@ class GLLabelling():
         drawList.numVertices += (self.LENARR + extraVertices)
         indexing.vertexStart += (self.LENARR + extraVertices)
 
-    _arrow = ((np.array((0, 1, 1, 2, 2, 0), dtype=np.uint32), np.array((0, 1, 1, 2, 2, 0), dtype=np.uint32)),
-              (np.array((0, 1, 1, 2, 2, 0), dtype=np.uint32), np.array((0, 1, 1, 2, 2, 0), dtype=np.uint32)),
-              (np.array((0, 1, 1, 2, 2, 0), dtype=np.uint32), np.array((0, 1, 1, 2, 2, 0), dtype=np.uint32)))  # no difference
-    _arrowLen = tuple(tuple(len(sym) for sym in symList) for symList in _arrow)
+    # _arrow = ((np.array((0, 1, 1, 2, 2, 0), dtype=np.uint32), np.array((0, 1, 1, 2, 2, 0), dtype=np.uint32)),
+    #           (np.array((0, 1, 1, 2, 2, 0), dtype=np.uint32), np.array((0, 1, 1, 2, 2, 0), dtype=np.uint32)),
+    #           (np.array((0, 1, 1, 2, 2, 0), dtype=np.uint32), np.array((0, 1, 1, 2, 2, 0), dtype=np.uint32)))  # no difference
+    _arrow = (
+        # strange bug, need to pad with zeros for the minute :|
+        #   must be re-allocating to new smaller size, but trying to fill as previous size
+        ((np.array((0, 3, 0, 0, 0, 0), dtype=np.uint32), np.array((0, 3, 0, 0, 0, 0), dtype=np.uint32)),
+         (np.array((0, 3, 0, 0, 0, 0), dtype=np.uint32), np.array((0, 3, 0, 0, 0, 0), dtype=np.uint32)),
+         (np.array((0, 3, 0, 0, 0, 0), dtype=np.uint32), np.array((0, 3, 0, 0, 0, 0), dtype=np.uint32))),
+        ((np.array((0, 1, 1, 2, 2, 0), dtype=np.uint32), np.array((0, 1, 1, 2, 2, 0), dtype=np.uint32)),
+         (np.array((0, 1, 1, 2, 2, 0), dtype=np.uint32), np.array((0, 1, 1, 2, 2, 0), dtype=np.uint32)),
+         (np.array((0, 1, 1, 2, 2, 0), dtype=np.uint32), np.array((0, 1, 1, 2, 2, 0), dtype=np.uint32))),
+        ((np.array((0, 3, 0, 4, 0, 5), dtype=np.uint32), np.array((0, 3, 0, 4, 0, 5), dtype=np.uint32)),
+         (np.array((0, 3, 0, 4, 0, 5), dtype=np.uint32), np.array((0, 3, 0, 4, 0, 5), dtype=np.uint32)),
+         (np.array((0, 3, 0, 4, 0, 5), dtype=np.uint32), np.array((0, 3, 0, 4, 0, 5), dtype=np.uint32))),
+        )
+    _arrowLen = tuple(tuple(tuple(len(sym) for sym in symList) for symList in symType) for symType in _arrow)
 
-    def _getArrowCount(self, planeIndex, obj):
+    def _getArrowCount(self, planeIndex, obj, arrowType):
         """returns the number of indices required for the arrow based on the planeIndex
         type of planeIndex - currently 0/1/2 indicating whether normal, infront or behind
         currently visible planes
         """
-        return self._arrowLen[planeIndex % 3][self._isSelected(obj)]
+        return self._arrowLen[arrowType][planeIndex % 3][self._isSelected(obj)]
 
-    def _makeArrowIndices(self, drawList, indexEnd, vertexStart, planeIndex, obj):
+    def _makeArrowIndices(self, drawList, indexEnd, vertexStart, planeIndex, obj, arrowType):
         """Make a new square arrow based on the planeIndex type.
         """
         _selected = self._isSelected(obj)
-        _indices = self._arrow[planeIndex % 3][_selected] + vertexStart
+        _indices = self._arrow[arrowType][planeIndex % 3][_selected] + vertexStart
         iCount = len(_indices)
-        try:
-            drawList.indices[indexEnd:indexEnd + iCount] = _indices
-        except Exception as es:
-            print(es)
+        drawList.indices[indexEnd:indexEnd + iCount] = _indices
 
         return iCount, _selected
 
-    def _appendArrowIndices(self, drawList, vertexStart, planeIndex, obj):
+    def _appendArrowIndices(self, drawList, vertexStart, planeIndex, obj, arrowType):
         """Append a new square arrow based on the planeIndex type.
         """
         _selected = self._isSelected(obj)
-        _indices = self._arrow[planeIndex % 3][_selected] + vertexStart
+        _indices = self._arrow[arrowType][planeIndex % 3][_selected] + vertexStart
         iCount = len(_indices)
         drawList.indices = np.append(drawList.indices, _indices)
 
@@ -535,7 +555,7 @@ class GLLabelling():
             # find the correct scale to draw square pixels
             # don't forget to change when the axes change
 
-            _, _, arrowType, arrowWidth, r, w = self._getArrowWidths(spectrumView)
+            _, _, arrowType, arrowSize, arrowWidth, r, w = self._getArrowWidths(spectrumView)
 
             # change the ratio on resize
             drawList.refreshMode = GLREFRESHMODE_REBUILD
@@ -573,7 +593,7 @@ class GLLabelling():
                         cols = listCol
 
                     self._insertArrowItem(strip, obj, cols, indexing, r, w,
-                                          spectrumFrequency, arrowType, drawList,
+                                          spectrumFrequency, arrowType, arrowSize, drawList,
                                           spectrumView, objListView, tCount)
 
             drawList.defineAliasedIndexVBO()
@@ -610,7 +630,8 @@ class GLLabelling():
     def _getArrowWidths(self, spectrumView):
         """return the required r, w, symbolWidth for the current screen scaling.
         """
-        symbolType = self.strip.symbolType
+        arrowType = self.strip.arrowType
+        arrowSize = self.strip.arrowSize
         symbolWidth = self.strip.symbolSize / 2.0
 
         pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
@@ -627,9 +648,9 @@ class GLLabelling():
         except Exception:
             pw = w
 
-        return r, w, symbolType, symbolWidth, pr, pw
+        return r, w, arrowType, arrowSize, symbolWidth, pr, pw
 
-    def _buildArrowsCountItem(self, strip, spectrumView, obj, symbolType, tCount):
+    def _buildArrowsCountItem(self, strip, spectrumView, obj, arrowType, tCount):
         """return the number of indices and vertices for the object
         """
         # get visible/plane status
@@ -639,7 +660,7 @@ class GLLabelling():
         if not _isInPlane and not _isInFlankingPlane:
             return 0, 0
 
-        ind = self._getArrowCount(planeIndex, obj)
+        ind = self._getArrowCount(planeIndex, obj, arrowType)
         # ind += self.extraIndicesCount(obj)
         extraVertices = 0  # self.extraVerticesCount(obj)
 
@@ -659,7 +680,7 @@ class GLLabelling():
         vertCount = 0
         objCount = 0
         for tCount, obj in enumerate(self.objects(pls)):
-            ind, vert = self._buildArrowsCountItem(self.strip, spectrumView, obj, self.strip.symbolType, tCount)
+            ind, vert = self._buildArrowsCountItem(self.strip, spectrumView, obj, self.strip.arrowType, tCount)
             indCount += ind
             vertCount += vert
             if ind:
@@ -677,7 +698,7 @@ class GLLabelling():
         return indCount, vertCount
 
     def _insertArrowItem(self, strip, obj, listCol, indexing, r, w,
-                         spectrumFrequency, arrowType, drawList, spectrumView, objListView, tCount):
+                         spectrumFrequency, arrowType, arrowSize, drawList, spectrumView, objListView, tCount):
         """insert a single arrow to the end of the arrow list
         """
 
@@ -706,6 +727,7 @@ class GLLabelling():
 
         sx, sy = 0, 0
         rx, ry = 0, 0
+        tnx, tny = 0.0, 0.0
         inr, inw = r, w
         try:
             vPP = spectrumView.spectrum.ppmPerPoints
@@ -726,8 +748,13 @@ class GLLabelling():
             # generate the end-vector perpendicular to the line
             rx, ry = -ty * abs(pixX), tx * abs(pixY)  # back to pixels, rotated 90degrees
             denom = (rx**2 + ry**2)**0.5
-            rx = (2 * rx / denom) * abs(pixX) / vPP[pIndex[0]]  # pixels-points for display
-            ry = (2 * ry / denom) * abs(pixY) / vPP[pIndex[1]]
+            rx = (arrowSize * rx / denom) * abs(pixX) / vPP[pIndex[0]]  # pixels-points for display
+            ry = (arrowSize * ry / denom) * abs(pixY) / vPP[pIndex[1]]
+
+            tnx, tny = tx / abs(pixX), ty / abs(pixY)  # back to pixels, rotated 90degrees
+            denom = (tnx**2 + tny**2)**0.5
+            tnx = (arrowSize * tnx / denom) * abs(pixX) / vPP[pIndex[0]]  # pixels-points for display
+            tny = (arrowSize * tny / denom) * abs(pixY) / vPP[pIndex[1]]
 
         except Exception:
             r, w = 0.0, 0.0
@@ -758,19 +785,22 @@ class GLLabelling():
         iCount = 0
         # unselected
         if _isInPlane or _isInFlankingPlane:
-            iCount, _selected = self._makeArrowIndices(drawList, indexEnd, vertexStart, planeIndex, obj)
+            iCount, _selected = self._makeArrowIndices(drawList, indexEnd, vertexStart, planeIndex, obj, arrowType)
 
         # add extra indices
         self._insertArrowItemVertices(_isInFlankingPlane, _isInPlane, _selected, cols, drawList, fade, iCount, indexing, obj,
-                                      objNum, p0, pIndex, planeIndex, r, vertexPtr, w, alias, sx, sy, rx, ry)
+                                      objNum, p0, pIndex, planeIndex, r, vertexPtr, w, alias, sx, sy, rx, ry, tnx, tny)
 
     def _insertArrowItemVertices(self, _isInFlankingPlane, _isInPlane, _selected, cols,
                                  drawList, fade, iCount, indexing, obj,
-                                 objNum, p0, pIndex, planeIndex, r, vertexPtr, w, alias, sx, sy, rx, ry):
+                                 objNum, p0, pIndex, planeIndex, r, vertexPtr, w, alias, sx, sy, rx, ry, tnx, tny):
 
         drawList.vertices[vertexPtr:vertexPtr + self.LENARR2] = (p0[0] + sx, p0[1] + sy,
                                                                  p0[0] + r + rx, p0[1] + w + ry,
                                                                  p0[0] + r - rx, p0[1] + w - ry,
+                                                                 p0[0] + r, p0[1] + w,
+                                                                 p0[0] + sx + rx + tnx, p0[1] + sy + ry + tny,
+                                                                 p0[0] + sx - rx + tnx, p0[1] + sy - ry + tny,
                                                                  )
         drawList.colors[2 * vertexPtr:2 * vertexPtr + self.LENARR4] = (*cols, fade) * self.LENARR
         drawList.attribs[vertexPtr // 2:(vertexPtr // 2) + self.LENARR] = (alias,) * self.LENARR
@@ -805,41 +835,39 @@ class GLLabelling():
                 self._GLArrows[objListView].drawAliasedIndexVBO()
 
     def _rescaleArrowOffsets(self, r, w):
-        return np.array([0.0, 0.0, r, w, r, w], np.float32), self.LENARR2
+        return np.array([0.0, 0.0, r, w, r, w, r, w, r, w], np.float32), self.LENARR2
 
     def _rescaleArrows(self, spectrumView, objListView):
         """rescale arrows when the screen dimensions change
         """
-        drawList = self._GLArrows[objListView]
-
-        if not drawList.numVertices:
-            return
-
-        # if drawList.refreshMode == GLREFRESHMODE_REBUILD:
-
-        _, _, arrowType, arrowWidth, r, w = self._getArrowWidths(spectrumView)
-        offsets, offsetsLENARR2 = self._rescaleArrowOffsets(r, w)
-
         return
 
-        # TODO:ED - not working yet :|
+        # drawList = self._GLArrows[objListView]
+        #
+        # if not drawList.numVertices:
+        #     return
+        #
+        # # if drawList.refreshMode == GLREFRESHMODE_REBUILD:
+        #
+        # _, _, arrowType, arrowSize, arrowWidth, r, w = self._getArrowWidths(spectrumView)
+        # offsets, offsetsLENARR2 = self._rescaleArrowOffsets(r, w)
 
-        for pp in range(0, len(drawList.pids), GLDefs.LENPID):
-
-            try:
-                vPP = spectrumView.spectrum.ppmPerPoints
-                pView = drawList.pids[0].getPeakView(objListView)
-                tx, ty = pView.textOffset
-                pixX, pixY = objListView.pixelSize
-                r, w = tx * abs(pixX) / vPP[pIndex[0]], ty * abs(pixY) / vPP[pIndex[1]]
-            except Exception as es:
-                r, w = 0.0, 0.0
-
-            indexStart = 2 * drawList.pids[pp + 1]
-            try:
-                drawList.vertices[indexStart:indexStart + offsetsLENARR2] = drawList.offsets[indexStart:indexStart + offsetsLENARR2] + offsets
-            except Exception as es:
-                raise RuntimeError(f'Error _rescaleArrows {es}')
+        # for pp in range(0, len(drawList.pids), GLDefs.LENPID):
+        #
+        #     try:
+        #         vPP = spectrumView.spectrum.ppmPerPoints
+        #         pView = drawList.pids[0].getPeakView(objListView)
+        #         tx, ty = pView.textOffset
+        #         pixX, pixY = objListView.pixelSize
+        #         r, w = tx * abs(pixX) / vPP[pIndex[0]], ty * abs(pixY) / vPP[pIndex[1]]
+        #     except Exception as es:
+        #         r, w = 0.0, 0.0
+        #
+        #     indexStart = 2 * drawList.pids[pp + 1]
+        #     try:
+        #         drawList.vertices[indexStart:indexStart + offsetsLENARR2] = drawList.offsets[indexStart:indexStart + offsetsLENARR2] + offsets
+        #     except Exception as es:
+        #         raise RuntimeError(f'Error _rescaleArrows {es}') from es
 
     def _updateHighlightedArrows(self, spectrumView, objListView):
         """update the highlighted arrows
@@ -862,6 +890,8 @@ class GLLabelling():
         meritEnabled = objListView.meritEnabled
         meritThreshold = objListView.meritThreshold
 
+        _, _, arrowType, arrowSize, arrowWidth, r, w = self._getArrowWidths(spectrumView)
+
         _indexCount = 0
         for pp in range(0, len(drawList.pids), GLDefs.LENPID):
 
@@ -878,7 +908,7 @@ class GLLabelling():
                 _isInPlane, _isInFlankingPlane, planeIndex, fade = self.objIsInVisiblePlanes(spectrumView, obj)
 
                 if _isInPlane or _isInFlankingPlane:
-                    iCount, _selected = self._appendArrowIndices(drawList, vertexStart, planeIndex, obj)
+                    iCount, _selected = self._appendArrowIndices(drawList, vertexStart, planeIndex, obj, arrowType)
 
                     if _selected:
                         cols = self._GLParent.highlightColour[:3]
@@ -1088,22 +1118,22 @@ class GLLabelling():
         except Exception:
             alias = 0
 
+        stringOffset = None
         if textOffset := obj.getTextOffset(objListView):
             tx, ty = textOffset
             _, _, symbolType, symbolWidth, r, w = self._getLabelOffsets(spectrumView, tx, ty)
         else:
             _, _, symbolType, symbolWidth, r, w = self._getSymbolWidths(spectrumView)
 
-        stringOffset = None
-        if symbolType in (1, 2):
-            # put to the top-right corner of the lineWidth
-            if pointLineWidths[0] and pointLineWidths[1]:
-                r = GLDefs.STRINGSCALE * 0.5 * pointLineWidths[0]  #/ frequency[0]
-                w = GLDefs.STRINGSCALE * 0.5 * pointLineWidths[1]  #/ frequency[1]
-                stringOffset = (r, w)
-            else:
-                r = GLDefs.STRINGSCALE * r
-                w = GLDefs.STRINGSCALE * w
+            if symbolType in (1, 2):
+                # put to the top-right corner of the lineWidth
+                if pointLineWidths[0] and pointLineWidths[1]:
+                    r = GLDefs.STRINGSCALE * 0.5 * pointLineWidths[0]  #/ frequency[0]
+                    w = GLDefs.STRINGSCALE * 0.5 * pointLineWidths[1]  #/ frequency[1]
+                    stringOffset = (r, w)
+                else:
+                    r = GLDefs.STRINGSCALE * r
+                    w = GLDefs.STRINGSCALE * w
 
         if True:  # pIndex:
             # get visible/plane status
@@ -1176,21 +1206,22 @@ class GLLabelling():
         except Exception:
             alias = 0
 
+        stringOffset = None
         if textOffset := obj.getTextOffset(objListView):
             tx, ty = textOffset
             _, _, symbolType, symbolWidth, r, w = self._getLabelOffsets(spectrumView, tx, ty)
         else:
             _, _, symbolType, symbolWidth, r, w = self._getSymbolWidths(spectrumView)
 
-        stringOffset = None
-        if symbolType in (1, 2):
-            if pointLineWidths[0] and pointLineWidths[1]:
-                r = - GLDefs.STRINGSCALE * 0.5 * pointLineWidths[0]  #/ frequency[0]
-                w = - GLDefs.STRINGSCALE * 0.5 * pointLineWidths[1]  #/ frequency[1]
-                stringOffset = (r, w)
-            else:
-                r = GLDefs.STRINGSCALE * r
-                w = GLDefs.STRINGSCALE * w
+            if symbolType in (1, 2):
+                # put to the top-right corner of the lineWidth
+                if pointLineWidths[0] and pointLineWidths[1]:
+                    r = - GLDefs.STRINGSCALE * 0.5 * pointLineWidths[0]  #/ frequency[0]
+                    w = - GLDefs.STRINGSCALE * 0.5 * pointLineWidths[1]  #/ frequency[1]
+                    stringOffset = (r, w)
+                else:
+                    r = GLDefs.STRINGSCALE * r
+                    w = GLDefs.STRINGSCALE * w
 
         if True:  # pIndex:
             # get visible/plane status
@@ -2700,7 +2731,7 @@ class GL1dLabelling():
         # find the correct scale to draw square pixels
         # don't forget to change when the axes change
 
-        _, _, arrowType, arrowWidth, r, w = self._getArrowWidths(spectrumView)
+        _, _, arrowType, arrowSize, arrowWidth, r, w = self._getArrowWidths(spectrumView)
 
         # change the ratio on resize
         drawList.refreshMode = GLREFRESHMODE_REBUILD
@@ -2733,6 +2764,7 @@ class GL1dLabelling():
 
         sx, sy = 0, 0
         rx, ry = 0.0, 0.0
+        tnx, tny = 0.0, 0.0
         inr, inw = r, w
         try:
             vPP = spectrumView.spectrum.ppmPerPoints
@@ -2752,8 +2784,13 @@ class GL1dLabelling():
             # generate the end-vector perpendicular to the line
             rx, ry = -ty * abs(pixX), tx * abs(pixY)  # back to pixels, rotated 90degrees
             denom = (rx**2 + ry**2)**0.5
-            rx = (2 * rx / denom) * abs(pixX) / vPP[0]  # pixels-points for display
-            ry = (2 * ry / denom) * abs(pixY)
+            rx = (arrowSize * rx / denom) * abs(pixX) / vPP[0]  # pixels-points for display
+            ry = (arrowSize * ry / denom) * abs(pixY)
+
+            tnx, tny = tx / abs(pixX), ty / abs(pixY)  # back to pixels, rotated 90degrees
+            denom = (tnx**2 + tny**2)**0.5
+            tnx = (arrowSize * tnx / denom) * abs(pixX) / vPP[0]  # pixels-points for display
+            tny = (arrowSize * tny / denom) * abs(pixY)
 
         except Exception:
             r, w = 0.0, 0.0
@@ -2774,12 +2811,12 @@ class GL1dLabelling():
         except Exception:
             alias = 0
 
-        iCount, _selected = self._appendArrowIndices(drawList, indexing.vertexStart, 0, obj)
+        iCount, _selected = self._appendArrowIndices(drawList, indexing.vertexStart, 0, obj, arrowType)
         self._appendArrowItemVertices(True, True, _selected, cols, drawList, 1.0, iCount, indexing, obj, p0, pIndex,
-                                       0, r, w, alias, sx, sy, rx, ry)
+                                      0, r, w, alias, sx, sy, rx, ry, tnx, tny)
 
     def _insertArrowItem(self, strip, obj, listCol, indexing, r, w,
-                          spectrumFrequency, arrowType, drawList, spectrumView, objListView):
+                         spectrumFrequency, arrowType, arrowSize, drawList, spectrumView, objListView):
         """insert a single arrow to the end of the arrow list
         """
 
@@ -2803,6 +2840,7 @@ class GL1dLabelling():
 
         sx, sy = 0, 0
         rx, ry = 0.0, 0.0
+        tnx, tny = 0.0, 0.0
         inr, inw = r, w
         try:
             vPP = spectrumView.spectrum.ppmPerPoints
@@ -2822,8 +2860,13 @@ class GL1dLabelling():
             # generate the end-vector perpendicular to the line
             rx, ry = -ty * abs(pixX), tx * abs(pixY)  # back to pixels, rotated 90degrees
             denom = (rx**2 + ry**2)**0.5
-            rx = (2 * rx / denom) * abs(pixX) / vPP[0]  # pixels-points for display
-            ry = (2 * ry / denom) * abs(pixY)
+            rx = (arrowSize * rx / denom) * abs(pixX) / vPP[0]  # pixels-points for display
+            ry = (arrowSize * ry / denom) * abs(pixY)
+
+            tnx, tny = tx / abs(pixX), ty / abs(pixY)  # back to pixels, rotated 90degrees
+            denom = (tnx**2 + tny**2)**0.5
+            tnx = (arrowSize * tnx / denom) * abs(pixX) / vPP[0]  # pixels-points for display
+            tny = (arrowSize * tny / denom) * abs(pixY)
 
         except Exception:
             r, w = 0.0, 0.0
@@ -2841,9 +2884,9 @@ class GL1dLabelling():
         except Exception:
             alias = 0
 
-        iCount, _selected = self._makeArrowIndices(drawList, indexEnd, vertexStart, 0, obj)
+        iCount, _selected = self._makeArrowIndices(drawList, indexEnd, vertexStart, 0, obj, arrowType)
         self._insertArrowItemVertices(True, True, _selected, cols, drawList, 1.0, iCount,
-                                       indexing, obj, objNum, p0, 0, 0, r, vertexPtr, w, alias, sx, sy, rx, ry)
+                                      indexing, obj, objNum, p0, 0, 0, r, vertexPtr, w, alias, sx, sy, rx, ry, tnx, tny)
 
     def _removeArrow(self, spectrumView, objListView, delObj):
         """Remove an arrow from the list
@@ -2914,6 +2957,8 @@ class GL1dLabelling():
         meritEnabled = objListView.meritEnabled
         meritThreshold = objListView.meritThreshold
 
+        _, _, arrowType, arrowSize, arrowWidth, r, w = self._getArrowWidths(spectrumView)
+
         _indexCount = 0
         for pp in range(0, len(drawList.pids), GLDefs.LENPID):
 
@@ -2924,7 +2969,7 @@ class GL1dLabelling():
 
             if not obj.isDeleted:
 
-                iCount, _selected = self._appendArrowIndices(drawList, vertexStart, 0, obj)
+                iCount, _selected = self._appendArrowIndices(drawList, vertexStart, 0, obj, arrowType)
                 if _selected:
                     cols = self._GLParent.highlightColour[:3]
                 elif obj.pointPositions and None in obj.pointPositions:
@@ -2956,8 +3001,8 @@ class GL1dLabelling():
 
         if objListView not in self._GLArrows:
             self._GLArrows[objListView] = GLSymbolArray(GLContext=self,
-                                                         spectrumView=spectrumView,
-                                                         objListView=objListView)
+                                                        spectrumView=spectrumView,
+                                                        objListView=objListView)
 
         drawList = self._GLArrows[objListView]
 
@@ -2978,7 +3023,7 @@ class GL1dLabelling():
             # find the correct scale to draw square pixels
             # don't forget to change when the axes change
 
-            _, _, arrowType, arrowWidth, r, w = self._getArrowWidths(spectrumView)
+            _, _, arrowType, arrowSize, arrowWidth, r, w = self._getArrowWidths(spectrumView)
 
             # change the ratio on resize
             drawList.refreshMode = GLREFRESHMODE_REBUILD
@@ -3019,13 +3064,13 @@ class GL1dLabelling():
                         cols = listCol
 
                     self._insertArrowItem(strip, obj, cols, indexing, r, w,
-                                           spectrumFrequency, arrowType, drawList,
-                                           spectrumView, objListView)
+                                          spectrumFrequency, arrowType, arrowSize, drawList,
+                                          spectrumView, objListView)
 
             drawList.defineAliasedIndexVBO()
 
     #=================================================================================
-    
+
     def _updateHighlightedSymbols(self, spectrumView, objListView):
         """update the highlighted symbols
         """

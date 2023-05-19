@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-18 18:49:17 +0100 (Thu, May 18, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-19 16:58:07 +0100 (Fri, May 19, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -345,7 +345,6 @@ def arrangePeakLabelPositions(spectrumDisplay: GuiSpectrumDisplay, selected: boo
                            include_new_boxes=True,
                            verbose=False,
                            )
-
     non_over, over_ind = valid_boxes
 
     with undoBlockWithoutSideBar(app):

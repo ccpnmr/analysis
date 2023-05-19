@@ -215,6 +215,26 @@ class GuiStrip1d(GuiStrip):
             if self.spectrumViews:
                 self._emitSymbolChanged()
 
+    @property
+    def arrowType(self):
+        """Get the arrow type for the strip
+        """
+        return self._CcpnGLWidget._arrowType
+
+    @arrowType.setter
+    def arrowType(self, value):
+        """Set the arrow type for the strip
+        """
+        if not isinstance(value, int):
+            raise TypeError('Error: arrowType not an int')
+
+        oldValue = self._CcpnGLWidget._arrowType
+        self._CcpnGLWidget._arrowType = value if (value in range(self.spectrumDisplay.MAXARROWTYPES)) else 0
+        if value != oldValue:
+            self._setSymbolType()
+            if self.spectrumViews:
+                self._emitSymbolChanged()
+
     def _resize(self):
         """Resize event to handle resizing of frames that overlay the OpenGL frame
         """

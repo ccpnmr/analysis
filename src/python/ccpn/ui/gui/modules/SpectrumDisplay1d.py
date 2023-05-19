@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:42 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-05-19 16:58:07 +0100 (Fri, May 19, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -36,6 +36,7 @@ from ccpn.util.Logging import getLogger
 class SpectrumDisplay1d(GuiSpectrumDisplay):
     MAXPEAKLABELTYPES = 7
     MAXPEAKSYMBOLTYPES = 4
+    MAXARROWTYPES = 3
 
     #GWV 26Jan2023: removed
 

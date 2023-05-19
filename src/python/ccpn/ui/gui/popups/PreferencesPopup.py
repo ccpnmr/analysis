@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-18 16:08:03 +0100 (Tue, April 18, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-19 16:58:08 +0100 (Fri, May 19, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -283,24 +283,29 @@ class PreferencesPopup(CcpnDialogMainWidget):
                 with strip.blockWidgetSignals():
                     # NOTE:ED - should only set those values that have changed
 
-                    strip.symbolLabelling = self.application.preferences.general.annotationType
-                    strip.symbolType = self.application.preferences.general.symbolType
-                    strip.symbolSize = self.application.preferences.general.symbolSizePixel
+                    _prefsGen = self.application.preferences.general
+                    strip.symbolLabelling = _prefsGen.annotationType
+                    strip.symbolType = _prefsGen.symbolType
+                    strip.symbolSize = _prefsGen.symbolSizePixel
 
-                    strip.symbolThickness = self.application.preferences.general.symbolThickness
-                    strip.gridVisible = self.application.preferences.general.showGrid
-                    strip.contourThickness = self.application.preferences.general.contourThickness
-                    strip.crosshairVisible = self.application.preferences.general.showCrosshair
-                    strip.sideBandsVisible = self.application.preferences.general.showSideBands
+                    strip.symbolThickness = _prefsGen.symbolThickness
+                    strip.gridVisible = _prefsGen.showGrid
+                    strip.contourThickness = _prefsGen.contourThickness
+                    strip.crosshairVisible = _prefsGen.showCrosshair
+                    strip.sideBandsVisible = _prefsGen.showSideBands
 
-                    strip.spectrumBordersVisible = self.application.preferences.general.showSpectrumBorder
+                    strip.spectrumBordersVisible = _prefsGen.showSpectrumBorder
 
-                    strip.aliasEnabled = self.application.preferences.general.aliasEnabled
-                    strip.aliasShade = self.application.preferences.general.aliasShade
-                    strip.aliasLabelsEnabled = self.application.preferences.general.aliasLabelsEnabled
+                    strip.aliasEnabled = _prefsGen.aliasEnabled
+                    strip.aliasShade = _prefsGen.aliasShade
+                    strip.aliasLabelsEnabled = _prefsGen.aliasLabelsEnabled
 
-                    strip.peakLabelsEnabled = self.application.preferences.general.peakLabelsEnabled
-                    strip.multipletLabelsEnabled = self.application.preferences.general.multipletLabelsEnabled
+                    strip.peakLabelsEnabled = _prefsGen.peakLabelsEnabled
+                    strip.peakArrowsEnabled = _prefsGen.peakArrowsEnabled
+                    strip.multipletLabelsEnabled = _prefsGen.multipletLabelsEnabled
+
+                    strip.arrowType = _prefsGen.arrowType
+                    strip.arrowSize = _prefsGen.arrowSize
 
                 strip._frameGuide.resetColourTheme()
 
@@ -986,6 +991,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.symbolSizePixelData.setValue(int('%i' % self.preferences.general.symbolSizePixel))
         self.symbolThicknessData.setValue(int(self.preferences.general.symbolThickness))
 
+        self.arrow.setIndex(self.preferences.general.arrowType)
+        self.arrowSizeData.setValue(int(self.preferences.general.arrowSize))
+
         # _enabled = self.preferences.general.aliasEnabled
         # self.aliasEnabledData.setChecked(_enabled)
         # self.aliasShadeData.setValue(self.preferences.general.aliasShade)
@@ -1051,6 +1059,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.aliasShadeData.setEnabled(_enabled)
 
         self.peakLabelsEnabledData.setChecked(self.preferences.general.peakLabelsEnabled)
+        self.peakArrowsEnabledData.setChecked(self.preferences.general.peakArrowsEnabled)
         self.multipletLabelsEnabledData.setChecked(self.preferences.general.multipletLabelsEnabled)
 
     def _populateExternalProgramsTab(self):
@@ -1438,6 +1447,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.aliasShadeData.setMinimumWidth(LineEditsMinimumWidth)
         self.aliasShadeData.valueChanged.connect(self._queueSetAliasShade)
 
+        row += 1
+        self.peakArrowsEnabledLabel = _makeLabel(parent, text="Show arrows", grid=(row, 0))
+        self.peakArrowsEnabledData = CheckBox(parent, grid=(row, 1))
+        self.peakArrowsEnabledData.toggled.connect(partial(self._queueToggleGeneralOptions, 'peakArrowsEnabled'))
+
         #====== Peak Fitting ======
         row += 1
         _makeLine(parent, grid=(row, 0), text="Peak Fitting")
@@ -1525,6 +1539,23 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                            min=1, max=20, grid=(row, 1), hAlign='l')
         self.symbolThicknessData.setMinimumWidth(LineEditsMinimumWidth)
         self.symbolThicknessData.valueChanged.connect(self._queueSetSymbolThickness)
+
+        #======  Peak Arrows ======
+        row += 1
+        self.arrowsLabel = _makeLabel(parent, text="Arrow", grid=(row, 0))
+        self.arrow = RadioButtons(parent, texts=['Line', 'Wedge', 'Arrow'],
+                                   callback=self._queueSetArrow,
+                                   direction='h',
+                                   grid=(row, 1), hAlign='l', gridSpan=(1, 2),
+                                   tipTexts=None,
+                                   )
+
+        row += 1
+        self.arrowSizeLabel = _makeLabel(parent, text="Size (pixel)", grid=(row, 0))
+        self.arrowSizeData = Spinbox(parent, step=1,
+                                           min=1, max=20, grid=(row, 1), hAlign='l')
+        self.arrowSizeData.setMinimumWidth(LineEditsMinimumWidth)
+        self.arrowSizeData.valueChanged.connect(self._queueSetArrowSize)
 
         #====== Multiplets ======
         row += 1
@@ -2020,9 +2051,20 @@ class PreferencesPopup(CcpnDialogMainWidget):
             return partial(self._setSymbolThickness, value)
 
     def _setSymbolThickness(self, value):
-        """Set the Thickness of the peak symbols (ppm)
+        """Set the Thickness of the peak symbols (pixel)
         """
         self.preferences.general.symbolThickness = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetArrowSize(self, _value):
+        value = self.arrowSizeData.get()
+        if value != self.preferences.general.arrowSize:
+            return partial(self._setArrowSize, value)
+
+    def _setArrowSize(self, value):
+        """Set the Thickness of the peak arrows (pixel)
+        """
+        self.preferences.general.arrowSize = value
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetContourThickness(self, _value):
@@ -2111,6 +2153,17 @@ class PreferencesPopup(CcpnDialogMainWidget):
         """Set the peak symbol type - current a cross or lineWidths
         """
         self.preferences.general.symbolType = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetArrow(self):
+        value = self.arrow.getIndex()
+        if value != self.preferences.general.arrowType:
+            return partial(self._setArrow, value)
+
+    def _setArrow(self, value):
+        """Set the arrow type.
+        """
+        self.preferences.general.arrowType = value
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetStripArrangement(self):

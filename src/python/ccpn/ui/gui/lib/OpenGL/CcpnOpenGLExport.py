@@ -5,7 +5,7 @@ Code for exporting OpenGL stripDisplay to pdf and svg files.
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:44 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-05-19 16:58:07 +0100 (Fri, May 19, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -67,7 +67,8 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import SPECTRUM_STACKEDMATRIX, SPECTR
 from ccpn.ui.gui.lib.OpenGL import GL
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLGRIDLINES, GLAXISLABELS, GLAXISMARKS, \
     GLINTEGRALLABELS, GLINTEGRALSYMBOLS, GLMARKLABELS, GLMARKLINES, GLMULTIPLETLABELS, GLREGIONS, \
-    GLMULTIPLETSYMBOLS, GLOTHERLINES, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLSELECTEDPIDS, \
+    GLMULTIPLETSYMBOLS, GLOTHERLINES, GLPEAKLABELS, GLPEAKSYMBOLS, GLPEAKARROWS, \
+    GLPRINTTYPE, GLSELECTEDPIDS, \
     GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, GLSPECTRUMLABELS, \
     GLSTRIP, GLSTRIPLABELLING, GLTRACES, GLACTIVETRACES, GLPLOTBORDER, \
     GLPAGETYPE, GLPAGESIZE, GLSPECTRUMDISPLAY, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS, \
@@ -802,6 +803,7 @@ class GLExporter():
             if not self._parent._stackingMode:
                 if self.params[GLINTEGRALSYMBOLS]: self._addIntegralAreas()
                 if self.params[GLINTEGRALSYMBOLS]: self._addIntegralLines()
+                if self.params[GLPEAKARROWS]: self._addPeakArrows()
                 if self.params[GLPEAKSYMBOLS]: self._addPeakSymbols()
                 if self.params[GLMULTIPLETSYMBOLS]: self._addMultipletSymbols()
                 if self.params[GLMARKLINES]: self._addMarkLines()
@@ -811,6 +813,7 @@ class GLExporter():
                 if self.params[GLMULTIPLETLABELS]: self._addMultipletLabels()
                 if self.params[GLMARKLABELS]: self._addMarkLabels()
             else:
+                if self.params[GLPEAKARROWS]: self._addPeakArrows()
                 if self.params[GLPEAKSYMBOLS]: self._addPeakSymbols()
                 if self.params[GLMULTIPLETSYMBOLS]: self._addMultipletSymbols()
                 if self.params[GLPEAKLABELS]: self._addPeakLabels()
@@ -1230,6 +1233,36 @@ class GLExporter():
                                            fillMode=None,
                                            splitGroups=False,
                                            lineWidth=0.5 * self.baseThickness * self.symbolThickness,
+                                           alias=data.alias)
+
+    def _addPeakArrows(self):
+        """
+        Add the peak arrows to the main drawing area.
+        """
+        _arrows = self._parent._GLPeaks._GLArrows
+
+        # iterate through the visible regions with the viewManager
+        for data in self._addSpectrumViewManager('peakArrows'):
+            attribList = data.spectrumView.peakListViews
+            validListViews = [_arrows[pp] for pp in attribList
+                              if pp in _arrows.keys()
+                              and pp.isDisplayed
+                              and data.spectrumView.isDisplayed
+                              and pp.peakList.pid in self.params[GLSELECTEDPIDS]
+                              ]
+
+            for GLObject in validListViews:
+                self._appendIndexLineGroup(indArray=GLObject,
+                                           colourGroups=data.colourGroups,
+                                           plotDim={PLOTLEFT  : data.x,
+                                                    PLOTBOTTOM: data.y,
+                                                    PLOTWIDTH : data.width,
+                                                    PLOTHEIGHT: data.height},
+                                           name=f'spectrumViewpeakArrows{data.index}{data.spectrumView.pid}',
+                                           mat=data.matrixSymbols,
+                                           fillMode=None,
+                                           splitGroups=False,
+                                           lineWidth=0.5 * self.baseThickness,
                                            alias=data.alias)
 
     def _addMultipletSymbols(self):

@@ -62,6 +62,7 @@ import numpy as np
 from Functions.LineshapeCreator import createLineshape
 from .pluginAddons import _addRow, _addColumn, _addVerticalSpacer, _setWidth, _setWidgetProperties
 from ccpn.util.Colour import hexToRgbRatio
+from math import log10
 
 
 ############
@@ -176,6 +177,7 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
         points = len(referenceSpectrum.positions)
         limits = (max(referenceSpectrum.positions), min(referenceSpectrum.positions))
         temperature = referenceSpectrum.temperature
+        scale = log10(max(referenceSpectrum.intensities))
         simulatedSpectrum = self.simulator.spectrumFromScratch(frequency, points, limits)
         spectrum, sample, substance = self.simulator.buildCcpnObjects(simulatedSpectrum,
                                                                       metaboliteName=name,
@@ -184,7 +186,7 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
         simulatedSpectrum.spectrum = spectrum
         self.display.displaySpectrum(spectrum)
         self.settings['Current']['SimulatedSpectrum'] = simulatedSpectrum
-        simulatedSpectrum.scaleSpectrum(10)
+        simulatedSpectrum.scaleSpectrum(max(referenceSpectrum.intensities))
 
         self.settings['Current']['MetaboliteName'] = name
         self.settings['Current']['Sample'] = sample
@@ -220,7 +222,7 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
         _setWidgetProperties(widget, 200)
         self.guiDict['TemporaryWidgets']['SpectrumWidgets']['ScaleLabel'] = widget
         grid = _addColumn(_addColumn(grid))
-        widget = DoubleSpinbox(self.scrollAreaLayout, value=1, decimals=3, step=0.001, grid=grid, gridSpan=(1, 2), callback=self._scaleChange)
+        widget = DoubleSpinbox(self.scrollAreaLayout, value=scale, decimals=3, step=0.001, grid=grid, gridSpan=(1, 2), callback=self._scaleChange)
         widget.setRange(-10, 10)
         _setWidgetProperties(widget, 200)
         self.guiDict['TemporaryWidgets']['SpectrumWidgets']['Scale'] = widget

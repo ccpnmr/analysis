@@ -61,6 +61,7 @@ from Classes.DatabaseCaller import DatabaseCaller
 import numpy as np
 from Functions.LineshapeCreator import createLineshape
 from .pluginAddons import _addRow, _addColumn, _addVerticalSpacer, _setWidth, _setWidgetProperties
+from ccpn.util.Colour import hexToRgbRatio
 
 
 ############
@@ -110,6 +111,7 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
         # setup database metabolite tables
         self.simulator = Simulator(self.project)
         self.caller = DatabaseCaller('/Users/mh653/Documents/PhD/Database/Merged_Databases/merged_database.db')
+        self.display = None
 
         grid = (0, 0)
 
@@ -148,17 +150,25 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
         self.guiDict['CoreWidgets']['SaveToDatabaseButton'] = widget
 
     def _selectSpectrum(self, spectrumID):
-        self.settings['Current']['ReferenceSpectrum'] = self.project.getByPid('SP:' + spectrumID)
+        spectrum = self.project.getByPid('SP:' + spectrumID)
+        self.settings['Current']['ReferenceSpectrum'] = spectrum
+        if not self.display:
+            self.display = self.project.application.mainWindow.newSpectrumDisplay(
+                [spectrum], axisCodes=('H',), stripDirection='Y', position='top',
+                relativeTo='MO:Create Database Reference')
+            self.display.rename("Create_Database_Reference_Display")
+        else:
+            for spectrumView in self.display.spectrumViews:
+                self.display.removeSpectrum(spectrumView.spectrum)
+            self.display.displaySpectrum(spectrum)
+        self.clearTemporaryWidgets()
+
 
     def _chooseSimulationType(self, type):
         self.settings['Current']['SimulationType'] = type
 
     def _createNewSimulation(self):
-        for dictkey in self.guiDict['TemporaryWidgets']:
-            for widgetkey in self.guiDict['TemporaryWidgets'][dictkey]:
-                self.guiDict['TemporaryWidgets'][dictkey][widgetkey].deleteLater()
-        self.guiDict['TemporaryWidgets'] = OD()
-        self.guiDict['TemporaryWidgets']['SpectrumWidgets'] = OD()
+        self.clearTemporaryWidgets()
         type = self.settings['Current']['SimulationType']
         referenceSpectrum = self.settings['Current']['ReferenceSpectrum']
         name = 'User_Defined_Metabolite'
@@ -172,6 +182,7 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
                                                                       frequency=frequency, temperature=temperature)
         self.settings['Current']['Spectrum'] = spectrum
         simulatedSpectrum.spectrum = spectrum
+        self.display.displaySpectrum(spectrum)
         self.settings['Current']['SimulatedSpectrum'] = simulatedSpectrum
         simulatedSpectrum.scaleSpectrum(10)
 
@@ -270,10 +281,11 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
             for key in self.guiDict['TemporaryWidgets']['Spinboxes']:
                 self.guiDict['TemporaryWidgets']['Spinboxes'][key].deleteLater()
         self.guiDict['TemporaryWidgets']['Spinboxes'] = OD()
-        self.guiDict['TemporaryWidgets']['Checkboxes'] = OD()
+        for key in self.guiDict['TemporaryWidgets']['Lines']:
+            self.display.strips[0]._CcpnGLWidget.removeInfiniteLine(self.guiDict['TemporaryWidgets']['Lines'][key])
+        self.guiDict['TemporaryWidgets']['Lines'] = OD()
         multiplets = self.settings['Current']['SsmSize']
         self._guiGridToRealSsm()
-        # self.settings['Current']['SimulatedSpectrum'].spinSystemMatrix = self.settings['Current']['Values'][:multiplets, :multiplets]
         grid = (7, 0)
         for i in range(multiplets):
             self.createProtonCountSpinbox(i)
@@ -291,7 +303,7 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
             self.settings['Current']['ProtonCounts'] = protonCounts
             self._guiGridToRealSsm()
             self.settings['Current']['SimulatedSpectrum'].updateLineshapeFromSpinSystem()
-        widget = Spinbox(self.scrollAreaLayout, value=1, step=1, grid=(7, column+1), gridSpan=(1, 1))
+        widget = Spinbox(self.scrollAreaLayout, value=self.settings['Current']['ProtonCounts'][column], step=1, grid=(7, column+1), gridSpan=(1, 1))
         widget.setRange(1, 6)
         widget.valueChanged.connect(changeProtonCount)
         self.guiDict['TemporaryWidgets']['Spinboxes'][f'ProtonSpinbox-{column}'] = widget
@@ -305,20 +317,31 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
             self._guiGridToRealSsm()
             self.settings['Current']['SimulatedSpectrum'].updateLineshapeFromSpinSystem()
             self.settings['Current']['SimulatedSpectrum'].multiplets[multipletId]['center'] = shift
+            lineWidget.setValue(shift)
         def changeCouplingConstant():
             coupling = widget.value()
             self.settings['Current']['Values'][column][row] = coupling
             self.settings['Current']['Values'][row][column] = coupling
             self._guiGridToRealSsm()
             self.settings['Current']['SimulatedSpectrum'].updateLineshapeFromSpinSystem()
+        def lineValueChange():
+            shift = lineWidget.values
+            if self._getValue(widget) != shift:
+                widget.setValue(shift)
         grid = (row + 8, column + 1)
-        widget = DoubleSpinbox(self.scrollAreaLayout, value=self.settings['Current']['Values'][column][row], decimals=4, step=0.0001, grid=grid, gridspan=(1, 1))
+        widget = DoubleSpinbox(self.scrollAreaLayout, value=self.settings['Current']['Shifts'][column], decimals=4, step=0.0001, grid=grid, gridspan=(1, 1))
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
         self.guiDict['TemporaryWidgets']['Spinboxes'][f'Spinbox-{column}-{row}'] = widget
         if row == column:
             multipletId = str(column)
             widget.valueChanged.connect(changeMultipletCenter)
             widget.setRange(-2, 12)
+            brush = hexToRgbRatio(self.settings['Current']['SimulatedSpectrum'].spectrum.sliceColour) + (0.3,)
+            lineWidget = self.display.strips[0]._CcpnGLWidget.addInfiniteLine(
+                values=widget.value(), colour=brush, movable=True, lineStyle='dashed',
+                lineWidth=2.0, obj=self.settings['Current']['SimulatedSpectrum'].spectrum, orientation='v', )
+            lineWidget.valuesChanged.connect(lineValueChange)
+            self.guiDict['TemporaryWidgets']['Lines'][f'Line-{column}'] = lineWidget
         else:
             widget.valueChanged.connect(changeCouplingConstant)
             widget.setRange(0, 20)
@@ -350,6 +373,17 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
 
     def _saveToDatabase(self):
         caller = self.simulator.caller
+
+    def clearTemporaryWidgets(self):
+        for dictkey in self.guiDict['TemporaryWidgets']:
+            for widgetkey in self.guiDict['TemporaryWidgets'][dictkey]:
+                if dictkey == 'Lines':
+                    self.display.strips[0]._CcpnGLWidget.removeInfiniteLine(self.guiDict['TemporaryWidgets'][dictkey][widgetkey])
+                else:
+                    self.guiDict['TemporaryWidgets'][dictkey][widgetkey].deleteLater()
+        self.guiDict['TemporaryWidgets'] = OD()
+        self.guiDict['TemporaryWidgets']['SpectrumWidgets'] = OD()
+        self.guiDict['TemporaryWidgets']['Lines'] = OD()
 
     def _getValue(self, widget):
         # Get the current value of the widget:

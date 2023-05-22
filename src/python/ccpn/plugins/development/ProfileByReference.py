@@ -61,6 +61,7 @@ from Classes.DatabaseCaller import DatabaseCaller
 from .pluginAddons import _addRow, _addColumn, _addVerticalSpacer, _setWidth, _setWidgetProperties
 from ccpn.util.Colour import hexToRgbRatio
 from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySelectionWidget
+from scipy import spatial
 
 
 ############
@@ -235,6 +236,20 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         def navigateToMultiplet():
             target = widget.value()
             self.project.application.current.strip.navigateToPosition([target])
+        def autoFitMultiplet():
+            multipletCenter = widget.value()
+            minShift, maxShift = (multipletCenter-0.05, multipletCenter+0.05)
+            minIndex = (numpy.abs(self.current['ActiveSpectrum'].positions - minShift)).argmin()
+            maxIndex = (numpy.abs(self.current['ActiveSpectrum'].positions - maxShift)).argmin()
+            bestShift = multipletCenter
+            bestScore = self.scoreSumSpectrumToReal(minIndex, maxIndex)
+            for value in numpy.arange(minShift, maxShift, 0.001):
+                widget.setValue(value)
+                score = self.scoreSumSpectrumToReal(minIndex, maxIndex)
+                if score > bestScore:
+                    bestScore = score
+                    bestShift = value
+            widget.setValue(bestShift)
         grid = (index+8, index+8)
         grid = _addRow(grid)
         labelWidget = Label(self.scrollAreaLayout, text=f'Multiplet {index+1} Chemical Shift', grid=grid)
@@ -267,6 +282,12 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         _setWidgetProperties(buttonWidget, heightType='Minimum')
         buttonWidget.clicked.connect(navigateToMultiplet)
         self.guiDict['TemporaryWidgets'][f'Multiplet{index+1}NavigateTo'] = buttonWidget
+
+        grid = _addColumn(grid)
+        buttonWidget = Button(parent=self.scrollAreaLayout, text='Auto-Fit', grid=grid)
+        _setWidgetProperties(buttonWidget, heightType='Minimum')
+        buttonWidget.clicked.connect(autoFitMultiplet)
+        self.guiDict['TemporaryWidgets'][f'Multiplet{index + 1}AutoFit'] = buttonWidget
 
         brush = hexToRgbRatio(self.simspec.spectrum.sliceColour) + (0.3,)
         lineWidget = self.display.strips[0]._CcpnGLWidget.addInfiniteLine(values=self.simspec.multiplets[multipletId]['center'], colour=brush, movable=True, lineStyle='dashed',
@@ -677,6 +698,13 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             sumIntensities += simulatedSpectrum.spectrum.intensities
         self.sumSpectra[spectrumId].intensities = sumIntensities
         self.subSpectra[spectrumId].intensities = realSpectrum.intensities - sumIntensities
+
+    def scoreSumSpectrumToReal(self, minIndex, maxIndex):
+        spectrumId = self.settings['CoreWidgets']['SpectrumId']
+        realSpectrumArray = self.project.getByPid('SP:' + spectrumId).intensities[maxIndex:minIndex]
+        sumSpectrumArray = self.sumSpectra[spectrumId].intensities[maxIndex:minIndex]
+        score = 1 - spatial.distance.cosine(realSpectrumArray, sumSpectrumArray)
+        return score
 
     def _getValue(self, widget):
         # Get the current value of the widget:

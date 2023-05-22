@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-23 12:28:10 +0000 (Thu, February 23, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-22 11:52:49 +0100 (Mon, May 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -43,23 +43,16 @@ class BlankCalculationModel(CalculationModel):
     Blank Calculation model for Series Analysis
     """
 
-    ModelName = 'Blank'
+    ModelName = sv.BLANKMODELNAME
     Info = 'Blank Model'
     Description = 'A blank model containing no calculation. This will show only raw data.'
+    _minimisedProperty = None
 
     def calculateValues(self, inputDataTables):
         """Return a frame with Collection Pids and value/error as Nones"""
         inputData = self._getFirstData(inputDataTables)
-        outputFrame = SeriesFrameBC()
-        inputData = inputData[inputData[sv.ISOTOPECODE] == inputData[sv.ISOTOPECODE].iloc[0]]
-        grouppedByCollectionsPid = inputData.groupby([sv.COLLECTIONPID])
-        for collectionPid, groupDf in grouppedByCollectionsPid:
-            # build the outputFrame
-            outputFrame.loc[collectionPid, sv.COLLECTIONPID] = collectionPid
-            outputFrame.loc[collectionPid, sv.NMRRESIDUEPID] = groupDf[sv.NMRRESIDUEPID].values[-1]
-            for arg in self.modelArgumentNames:
-                outputFrame.loc[collectionPid, arg] = None
-
+        outputFrame = inputData[inputData[sv.ISOTOPECODE] == inputData[sv.ISOTOPECODE].iloc[0]]
+        outputFrame.loc[outputFrame.index, self.modelArgumentNames] = None
         return outputFrame
 
     @property
@@ -109,7 +102,8 @@ class BlankFittingModel(FittingModelABC):
                 '''
     MaTex = ''
     Minimiser = BlankMinimiser
-    PeakProperty = sv._HEIGHT
+    PeakProperty = None
+    _minimisedProperty = None
 
     def fitSeries(self, inputData: TableFrame, rescale=True, *args, **kwargs) -> TableFrame:
         """
@@ -120,21 +114,21 @@ class BlankFittingModel(FittingModelABC):
         :return:
         """
         getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
-        ## Keep only one IsotopeCode
-        inputData = inputData[inputData[sv.ISOTOPECODE] == inputData[sv.ISOTOPECODE].iloc[0]]
-        inputData[self.ySeriesStepHeader] = inputData[self.PeakProperty]
-        grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
-        for collectionId, groupDf in grouppedByCollectionsId:
-            groupDf.sort_values([self.xSeriesStepHeader], inplace=True)
-            minimiser = self.Minimiser()
-            params = minimiser.params
-            result = MinimiserResult(minimiser, params) #Don't do the fitting. Just return a mock of results as np.nan
-            for ix, row in groupDf.iterrows():
-                for resultName, resulValue in result.getAllResultsAsDict().items():
-                    inputData.loc[ix, resultName] = resulValue
-                inputData.loc[ix, sv.MODEL_NAME] = self.ModelName
-                inputData.loc[ix, sv.MINIMISER_METHOD] = minimiser.method
-        return inputData
+        getLogger().info('Performing a blank fitting model. No new output expected.')
+
+        if sv.ISOTOPECODE not in inputData.columns:
+            raise RuntimeError(f'Impossible to perform any fitting routine. Missing {sv.ISOTOPECODE} mandatory colum ')
+
+        minimiser = self.Minimiser()
+        params = minimiser.params
+        outputFrame = inputData[inputData[sv.ISOTOPECODE] == inputData[sv.ISOTOPECODE].iloc[0]]
+        result = MinimiserResult(minimiser, params) #Don't do the fitting. Just return a mock of results as np.nan
+        for resultName, resulValue in result.getAllResultsAsDict().items():
+            outputFrame.loc[outputFrame.index, resultName] = resulValue
+            outputFrame.loc[outputFrame.index, sv.MODEL_NAME] = self.ModelName
+            outputFrame.loc[outputFrame.index, sv.MINIMISER_METHOD] = minimiser.method
+
+        return outputFrame
 
 
 

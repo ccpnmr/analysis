@@ -105,15 +105,6 @@ class RelaxationAppearancePanel(AppearancePanel):
         """ Get the threshold value based on selected Y axis. called from _setThresholdValueForData"""
         return super()._getThresholdValueFromBackend(columnName, calculationMode, factor)
 
-    def _preselectDefaultYaxisBarGraph(self):
-        """ TO BE REMOVED"""
-        yAxisWidget = self.getWidget(guiNameSpaces.WidgetVarName_BarGraphYcolumnName)
-        backend = self.guiModule.backendHandler
-        model = backend.currentFittingModel
-        if model is not None and model.ModelName != sv.BLANKMODELNAME:
-            firstArg, secondArg, *_ = model.modelArgumentNames or [None, None]
-            if yAxisWidget:
-                yAxisWidget.select(secondArg)
 
 #####################################################################
 #####################   Filtering Panel   ###########################

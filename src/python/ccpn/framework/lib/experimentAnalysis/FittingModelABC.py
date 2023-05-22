@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-23 12:28:10 +0000 (Thu, February 23, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-22 11:52:49 +0100 (Mon, May 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -50,16 +50,18 @@ pd.set_option('display.max_rows', 50)  # or 1000
 
 class FittingModelABC(ABC):
 
-    ModelName       = 'ModelName'       # The Model name.
-    Info            = ''                # A brief description of the fitting model.
-    Description     = ''                # A simplified representation of the used equation(s).
-    MaTex           = r''               # MaTex representation of the used equation(s). see https://matplotlib.org/3.5.0/tutorials/text/mathtext.html
-    References      = ''                # A list of journal article references. E.g.: DOIs or title/authors/year/journal; web-pages.
-    Minimiser       = None              # The fitting minimiser model object (initiated)
-    FullDescription = f'{Info} \n {Description}\nSee References: {References}'
-    PeakProperty    = sv._HEIGHT        # The peak property to fit. One of ['height', 'lineWidth', 'volume', 'ppmPosition']
-    isEnabled       = True              # True to enable on the GUI and be selected/used
-    RequiredInputData = 1  # ensure there is the correct amount of input data. Should also check the types (?)
+    ModelName                  = 'ModelName'           # The Model name.
+    Info                               = ''                               # A brief description of the fitting model.
+    Description                   = ''                                # A simplified representation of the used equation(s).
+    MaTex                          = r''                              # MaTex representation of the used equation(s). see https://matplotlib.org/3.5.0/tutorials/text/mathtext.html
+    References                   = ''                               # A list of journal article references. E.g.: DOIs or title/authors/year/journal; web-pages.
+    Minimiser                      = None                        # The fitting minimiser model object (initiated)
+    FullDescription              = f'{Info} \n {Description}\nSee References: {References}'
+    PeakProperty                = sv._HEIGHT             # The peak property to fit. One of ['height', 'lineWidth', 'volume', 'ppmPosition']
+    _minimisedProperty      = sv._HEIGHT             # Similarly to peakProperty, The same as peakProperty for most of the models.
+                                                                             # Added because models can be fitted using other properties e.g. ratios.  This will appear as  Y label in the fitting plot.
+    isEnabled                        = True                       # True to enable on the GUI and be selected/used
+    RequiredInputData          = 1                            # ensure there is the correct amount of input data. Should also check the types (?)
 
     def __init__(self, *args, **kwargs):
 
@@ -123,42 +125,6 @@ class FittingModelABC(ABC):
         """
         pass
 
-    def getRawData(self, inputData:TableFrame, dimensionSeparator='F') -> TableFrame:
-        """
-
-        :param inputData: TableFrame.
-        :param dimensionSeparator: String to separate DimensionColumns for ppmPosition or linewidth.
-        :return: TableFrame
-        Transform an inputData frame to a minimal Frame containing only the rawData and common assignment columns.
-        Sorted by CollectionPid and series values.
-        Note: this resulting table is NOT used as input for calculation or fitting models.
-        """
-        outputFrame = SeriesFrameBC()
-        self._rawDataHeaders = OrderedSet()
-        if self.PeakProperty in [sv._HEIGHT, sv._VOLUME]:
-            inputData = inputData[inputData[sv.ISOTOPECODE] == inputData[sv.ISOTOPECODE].iloc[0]]
-        commonHeaders = sv.MERGINGHEADERS
-        grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
-        for collectionId, groupDf in grouppedByCollectionsId:
-            groupDf.sort_values([self.xSeriesStepHeader], inplace=True)
-            seriesSteps = groupDf[self.xSeriesStepHeader]
-            ## Build columns
-            for ix, row in groupDf.iterrows():
-                pid = row[sv.COLLECTIONPID]
-                for commonHeader in commonHeaders:
-                    outputFrame.loc[pid, commonHeader] = row[commonHeader]
-                for xValue in seriesSteps.values:
-                    if xValue == row[self.xSeriesStepHeader]:
-                        valueHeader = f'{dimensionSeparator}{int(row[sv.DIMENSION])}_{xValue}'
-                        if self.PeakProperty in [sv._HEIGHT, sv._VOLUME]:
-                            valueHeader = f'{self.PeakProperty}_{xValue}'
-                        outputFrame.loc[pid, valueHeader] = row[self.PeakProperty]
-                        self._rawDataHeaders.add(valueHeader)
-        self._rawDataHeaders = list(self._rawDataHeaders)
-        outputFrame.columns = commonHeaders + self._rawDataHeaders
-        outputFrame.set_index(sv.COLLECTIONPID, drop=False, inplace=True)
-
-        return outputFrame
 
     def _getFirstData(self, inputDataTables):
         """ _INTERNAL. Used to get the first available
@@ -203,6 +169,8 @@ class CalculationModel(FittingModelABC):
     References  = 'References'      ## A list of journal article references that help to identify the employed calculation equations. E.g.: DOIs or title/authors/year/journal; web-pages.
     _disableFittingModels = False  # If True, a fitting models are not applied to the resulting calculation mode. E.g. for R2/R1 Model
     RequiredInputData = 1
+    _minimisedProperty = None
+
 
     @abstractmethod
     def calculateValues(self, inputDataTables) -> TableFrame:

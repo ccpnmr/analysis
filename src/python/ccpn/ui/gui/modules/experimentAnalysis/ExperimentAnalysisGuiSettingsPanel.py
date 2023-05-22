@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-16 16:28:35 +0100 (Tue, May 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-22 11:52:50 +0100 (Mon, May 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -518,10 +518,6 @@ class GuiInputDataPanel(GuiSettingPanel):
             outputPulldown.update() #there seems to be a bug on pulldown not updating straight-away
             outputPulldown.select(outputDataTable.pid)
 
-        # preselect the NmrResidue code if available in the bar graph
-        appearancePanel = self.guiModule.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)
-        appearancePanel._preselectDefaultXaxisBarGraph()
-
         self.guiModule.updateAll()
 
     def _filterOutputDataOnPulldown(self, pids, *args):
@@ -539,10 +535,9 @@ class GuiInputDataPanel(GuiSettingPanel):
         # TODO check leaking notifiers  after closing the module
         selectedDataTable = self.guiModule.project.getByPid(selectedName)
         self.guiModule.backendHandler.resultDataTable = selectedDataTable
-        appearanceTab = self.guiModule.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)
-        appearanceTab._resetXYBarPlotOptions()
+
         self.guiModule.updateAll()
-        appearanceTab._refitYZoomOnBarPlot(None, updateGuiModule=False)
+
 
     def _filterInputCollections(self, pids, *args):
         """ Add collections only if contain a subset of other collections. Avoid massive lists! """
@@ -956,7 +951,7 @@ class AppearancePanel(GuiSettingPanel):
 
             (guiNameSpaces.WidgetVarName_BarGraphXcolumnName,
              {'label': guiNameSpaces.Label_XcolumnName,
-              'callBack': self._commonCallback,
+              'callBack': self._changeBarAxis,
               'tipText': guiNameSpaces.TipText_XcolumnName,
               'type': compoundWidget.PulldownListCompoundWidget,
               'enabled': True,
@@ -966,7 +961,7 @@ class AppearancePanel(GuiSettingPanel):
                        'fixedWidths': SettingsWidgetFixedWidths}}),
             (guiNameSpaces.WidgetVarName_BarGraphYcolumnName,
              {'label': guiNameSpaces.Label_YcolumnName,
-              'callBack': self._refitYZoomOnBarPlot,
+              'callBack': self._changeBarAxis,
               'tipText': guiNameSpaces.TipText_YcolumnName,
               'type': compoundWidget.PulldownListCompoundWidget,
               'enabled': True,
@@ -1149,37 +1144,6 @@ class AppearancePanel(GuiSettingPanel):
         ))
         return self.widgetDefinitions
 
-    def postInitWidgets(self):
-        self._preselectDefaultXaxisBarGraph()
-        self._preselectDefaultYaxisBarGraph()
-
-    def _refitYZoomOnBarPlot(self, selection, updateGuiModule=True, *args):
-        if updateGuiModule:
-            self.guiModule.updateAll()
-        barPlot = self.guiModule.panelHandler.getPanel(guiNameSpaces.BarPlotPanel)
-        if barPlot is not None:
-            try:
-                barPlot.fitYZoom()
-            except Exception as err:
-                getLogger().debug(f'BarPlot not found or not ready to zoom {err}')
-
-    def _preselectDefaultXaxisBarGraph(self):
-        """ Preselect the NmrResidue code if available """
-        xAxisWidget = self.getWidget(guiNameSpaces.WidgetVarName_BarGraphXcolumnName)
-        valueToSelect = guiNameSpaces.ASHTAG
-        dataFrame = self.guiModule.getGuiResultDataFrame()
-        if dataFrame is None:
-            return
-        codes = dataFrame.get(sv.NMRRESIDUECODE)
-        if codes is None:
-            return
-        if codes.all():
-            valueToSelect = sv.NMRRESIDUECODE
-        if xAxisWidget:
-            xAxisWidget.select(valueToSelect)
-
-    def _preselectDefaultYaxisBarGraph(self):
-        pass
 
     def _viewModeChanged(self, *args):
         barGraphPanel = self.guiModule.panelHandler.getPanel(guiNameSpaces.BarPlotPanel)
@@ -1188,69 +1152,6 @@ class AppearancePanel(GuiSettingPanel):
             viewMode = viewModeWidget.getByText()
             barGraphPanel.setViewMode(viewMode)
             self._commonCallback()
-
-
-    def _getModelNameFromData(self, data, modelNameColumn):
-        modelName = None
-        if modelNameColumn in data.columns:
-            modelNames = data[modelNameColumn].values
-            if len(modelNames) > 0:
-                modelName = modelNames[0]
-            else:
-                modelName = None
-        return modelName
-
-    def _getAxisYOptions(self):
-        """ Get the columns names for plottable data. E.g.: the Fitting results and stats. """
-        allOptions = []
-        preferredSelection = None
-        backend = self.guiModule.backendHandler
-        data = backend.getMergedResultDataFrame()
-        if data is None:
-            return allOptions, preferredSelection
-
-        modelName = self._getModelNameFromData(data, sv.MODEL_NAME)
-        calModelName = self._getModelNameFromData(data, sv.CALCULATION_MODEL)
-
-        _model = backend.getFittingModelByName(modelName)
-        _calcModel = backend.getCalculationModelByName(calModelName)
-
-        if _model is not None:
-            model = _model()
-            if model.ModelName != sv.BLANKMODELNAME:
-                allArgs = model.getAllArgNames()
-                allOptions.extend(allArgs)
-                preferredSelection = model._preferredYPlotArgName
-        if _calcModel is not None: # if we have the calculation model, then it's the preferred
-            model = _calcModel()
-            if model.ModelName != sv.BLANKMODELNAME:
-                moArgs = model.modelArgumentNames
-                allOptions.extend(moArgs)
-                preferredSelection = model._preferredYPlotArgName
-
-        if len(allOptions) == 0:
-            # fallback options
-            data.dropna(axis=1, how='all', inplace=False) # remove all non plottable columns. remove columns with all None values
-            fallbackColumns = data.select_dtypes(include=[float, int])  # remove all non plottable columns. remove columns with non Int or float values
-            fallbackOptions = list(fallbackColumns.columns)
-            excludedFromPreferred = guiNameSpaces._ExcludedFromPreferredYAxisOptions
-            fallbackOptions = [i for i in fallbackOptions if i not in excludedFromPreferred]
-            allOptions = fallbackOptions
-            preferredSelection = allOptions[0] if len (allOptions)>0 else None
-
-        return allOptions, preferredSelection
-
-    def _getAxisXOptions(self):
-        """ Get the columns names for plottable data. E.g.: the Fitting results and stats. """
-
-        allowed = [
-                   sv.INDEX,
-                   sv.COLLECTIONID,
-                   sv.COLLECTIONPID,
-                   sv.NMRRESIDUECODE,
-                   sv.NMRRESIDUECODETYPE
-                ]
-        return allowed, sv.NMRRESIDUECODE
 
     def _setThresholdValueForData(self, *args):
         mode = None
@@ -1277,24 +1178,118 @@ class AppearancePanel(GuiSettingPanel):
 
         """ Get the threshold value based on selected Y axis. called from _setThresholdValueForData"""
         mo = self.guiModule
-        value = mo.backendHandler.getThresholdValueForData(data=mo.getGuiResultDataFrame(), columnName=columnName,
+        data = mo.getVisibleDataFrame(includeHiddenColumns=True)
+        value = mo.backendHandler.getThresholdValueForData(data=data, columnName=columnName,
                                                            calculationMode=calculationMode, factor=factor)
         return value
 
-    def _resetXYBarPlotOptions(self,):
-        """ """
-        # reset the XYwidget options
-        xColumnNameW = self.getWidget(guiNameSpaces.WidgetVarName_BarGraphXcolumnName)
-        xOptions, xPreferredSelection = self._getAxisXOptions()
-        xColumnNameW.setTexts(xOptions)
-        if len(xOptions) > 0:
-            xColumnNameW.select(xPreferredSelection)
 
+    ######################################################################################
+    #######  Set the pulldown options for the X-Y axis in the bar/scatter plot    ######
+    ######################################################################################
+
+    def _changeBarAxis(self, *args, **kwargs):
+        barPlot = self.guiModule.panelHandler.getPanel(guiNameSpaces.BarPlotPanel)
+        if barPlot is not None:
+            barPlot.updatePanel()
+
+    def _getNumericColumnsFromData(self):
+        allOptions = []
+        df = self.guiModule.getVisibleDataFrame(includeHiddenColumns=True)
+        if df is None:
+            return allOptions
+        numericDf = df.select_dtypes(include= [int, float]) # filter only columns with numbers
+        columns = numericDf.columns
+        return list(columns)
+
+    def _getXaxisData(self):
+        """
+        Get a dict of plottable columns from visible data
+        :return: dict
+        """
+        availableColumns = self._getNumericColumnsFromData()
+        topSelection = guiNameSpaces.XBarGraphColumnNameOptions
+        preferred = [sv.NMRRESIDUECODE,]
+        # Scatter plot only
+        scatterOnly = [i for i in availableColumns if i not in topSelection]
+        #  make the order
+        data = {
+                'preferred': preferred,
+                '-- Default --' : topSelection,
+                '-- Others -- (scatter only)': scatterOnly,
+            }
+        return data
+
+    def _getYaxisData(self):
+        """
+        Get a dict of plottable columns from visible data
+        top selection are taken from the current models, with top priority to the calculation model.
+        Rest of the columns are taken from the available numeric columns in the dataframe
+        :return: dict
+        """
+        availableColumns = self._getNumericColumnsFromData()
+        topSelection = [ ]
+        preferred = []
+        otherFromFittingDisabled = []
+        backend = self.guiModule.backendHandler
+        fittingModel = backend.currentFittingModel
+        calcModel = backend.currentCalculationModel
+
+        if calcModel is not None:  # the calculation model has priority
+            if calcModel.ModelName != sv.BLANKMODELNAME:
+                moArgs = calcModel.modelArgumentNames
+                topSelection.extend(moArgs)
+                preferredSelection = calcModel._preferredYPlotArgName
+                preferred.append(preferredSelection)
+
+        if fittingModel is not None:
+            if fittingModel.ModelName != sv.BLANKMODELNAME:
+                allArgs = fittingModel.getAllArgNames()
+                if calcModel is not None and not calcModel._disableFittingModels:
+                    topSelection.extend(allArgs)
+                    preferred.append(fittingModel._preferredYPlotArgName)
+                elif calcModel is not None and calcModel._disableFittingModels:
+                    otherFromFittingDisabled.extend(allArgs)
+
+        # add all available
+        otherFromFittingDisabled = list(set(otherFromFittingDisabled))
+        excludedFromPreferred = guiNameSpaces._ExcludedFromPreferredYAxisOptions
+        others = [i for i in availableColumns if i not in topSelection]
+        others += otherFromFittingDisabled
+
+        data = {
+                'preferred': preferred,
+                '-- Default --' : topSelection,
+                '-- Others --': others,
+
+            }
+        return data
+
+    def _addDataToAxisSelectors(self, pulldown, aDict):
+        with pulldown.blockWidgetSignals():
+            pulldown.clear()
+            preferred = aDict.pop('preferred', [None]) #don't add to the list
+            for groupText, values in aDict.items():
+                pulldown.addItem(groupText)
+                headerItem = pulldown.model().item(pulldown.getItemIndex(groupText))
+                headerItem.setEnabled(False)
+                for value in values:
+                    pulldown.addItem(value)
+            pulldown.select(preferred[-1])
+
+    def _setXYAxisSelectors(self):
+
+        Xdata= self._getXaxisData()
+        Ydata = self._getYaxisData()
+        xColumnNameW = self.getWidget(guiNameSpaces.WidgetVarName_BarGraphXcolumnName)
         yColumnNameW = self.getWidget(guiNameSpaces.WidgetVarName_BarGraphYcolumnName)
-        yOptions, yPreferredSelection = self._getAxisYOptions()
-        yColumnNameW.setTexts(yOptions)
-        if len(yOptions)>0:
-            yColumnNameW.select(yPreferredSelection)
+
+        if xColumnNameW is not None:
+            self._addDataToAxisSelectors(xColumnNameW.pulldownList, Xdata)
+        if yColumnNameW is not None:
+            self._addDataToAxisSelectors(yColumnNameW.pulldownList, Ydata)
+
+    ##################
 
     def _getSelectedDisplays(self):
         displays = []

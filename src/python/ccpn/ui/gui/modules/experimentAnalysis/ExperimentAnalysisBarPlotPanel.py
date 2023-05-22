@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-16 16:28:35 +0100 (Tue, May 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-22 11:52:50 +0100 (Mon, May 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -56,6 +56,7 @@ class BarPlotPanel(GuiPanel):
         self._toolbarPanel = self.guiModule.panelHandler.getToolBarPanel()
         self._viewMode = guiNameSpaces.PlotViewMode_Mirrored
         self._plottedDf = None
+        self._scatterViewOnly = False
         self._aboveX = []
         self._belowX = []
         self._untraceableX = []
@@ -92,14 +93,14 @@ class BarPlotPanel(GuiPanel):
 
     def initWidgets(self):
         ## this colour def could go in an higher position as they are same for all possible plots
-        colour = rgbaRatioToHex(*getColours()[CCPNGLWIDGET_LABELLING])
+        self.penColour = rgbaRatioToHex(*getColours()[CCPNGLWIDGET_LABELLING])
         self.backgroundColour = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
-        self.gridPen = pg.functions.mkPen(colour, width=1, style=QtCore.Qt.SolidLine)
+        self.gridPen = pg.functions.mkPen(self.penColour, width=1, style=QtCore.Qt.SolidLine)
         self.gridFont = getFont()
         self.originAxesPen = pg.functions.mkPen(hexToRgb(getColours()[GUISTRIP_PIVOT]), width=1,
                                                 style=QtCore.Qt.DashLine)
         self.fittingLinePen = pg.functions.mkPen(hexToRgb(getColours()[DIVIDER]), width=0.5, style=QtCore.Qt.DashLine)
-        self.scatterPen = pg.functions.mkPen(colour, width=0.5, style=QtCore.Qt.SolidLine)
+        self.scatterPen = pg.functions.mkPen(self.penColour, width=0.5, style=QtCore.Qt.SolidLine)
 
         self.selectedPointPen = pg.functions.mkPen(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
         self.selectedLabelPen = pg.functions.mkBrush(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
@@ -127,7 +128,6 @@ class BarPlotPanel(GuiPanel):
             raise RuntimeError(f'View Mode {mode} not implemented')
         self._viewMode = mode
 
-
     def _isItemToggledOn(self, itemName):
         action = self.toolbar.getButton(itemName)
         if action is not None:
@@ -140,7 +140,7 @@ class BarPlotPanel(GuiPanel):
 
         if includeSortingLabel:
             sortingLabel, sortOrder = self.guiModule._getSortingHeaderFromMainTable()
-            if self.viewMode == guiNameSpaces.PlotViewMode_SecondaryStructure:
+            if self.viewMode == guiNameSpaces.PlotViewMode_Backbone:
                 sortingLabel, sortOrder = sv.NMRRESIDUECODE, 0  # this viewmode is only sorted by ResidueCode (ascending)
 
             if sortingLabel not in [label, '', ' ', None] :
@@ -176,7 +176,7 @@ class BarPlotPanel(GuiPanel):
         self.updatePanel()
 
     def _mainTableChanged(self, resetZoom=False):
-        if self.viewMode == guiNameSpaces.PlotViewMode_SecondaryStructure:
+        if self.viewMode == guiNameSpaces.PlotViewMode_Backbone:
             getLogger().debug2(f'BarGraph-view {self.viewMode}: Sorting/Filtering on the main table does not change the plot.')
             return
         self.updatePanel()
@@ -295,13 +295,17 @@ class BarPlotPanel(GuiPanel):
             self.barGraphWidget.clear()
             return
 
-        if self.viewMode == guiNameSpaces.PlotViewMode_SecondaryStructure:
+        if self.viewMode == guiNameSpaces.PlotViewMode_Backbone:
             chainWidget = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_Chain)
             if chainWidget is not None:
                 pid = chainWidget.getText()
                 chain = self.project.getByPid(pid)
+                if chain is None:
+                    getLogger().warning(f'Changed view mode. Impossible to display by {self.viewMode}. No chains available in the project.')
+                    return
                 dataFrame =  self.filterBySecondaryStructure(dataFrame, chain)
         self.plotDataFrame(dataFrame)
+        self.fitXYZoom()
 
 
     def _updateThresholdValueFromSettings(self, value, *args):
@@ -337,7 +341,7 @@ class BarPlotPanel(GuiPanel):
         return filteredDf
 
 
-    def _setPlottingData(self, dataFrame, xColumnName, yColumnName):
+    def _setBarPlottingData(self, dataFrame, xColumnName, yColumnName):
         """Set the plotting variables from the current Dataframe.\
         """
         if not xColumnName in dataFrame:
@@ -390,13 +394,16 @@ class BarPlotPanel(GuiPanel):
             yError = dataFrame[yColumnName].values
             topError = dataFrame[errorColumn].values
             self._errorHeights = {'xError': xError.values, 'yError': yError, 'topError': topError}
-        ## set ticks for the xAxis. As they Xs are strs, Need to create a dict Index:Value
-        labels = dataFrame[xColumnName].values
-        coordinates = dataFrame[xColumnName].index
-        self._setTicks(labels, coordinates)
-        ## update labels on axes
-        self._updateAxisLabels()
+
         return True
+
+    def _resetTicks(self):
+        """
+        Reset tick to default
+        :return:
+        """
+        xaxis = self._getAxis('bottom')
+        xaxis.setTicks(None)
 
     def _setTicks(self, labels, coordinates):
         """
@@ -416,6 +423,10 @@ class BarPlotPanel(GuiPanel):
             xaxis.setTicks([list(ticks.items())[::1],
                             list(ticks.items())[::1],
                             list(ticks.items())[::1]])
+
+    def _setCurrentCollectionsFromPids(self, pids):
+        collections = self.project.getByPids(pids)
+        self.current.collections = collections
 
     def _setCurrentObjs(self, df, ix):
         from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import getPeaksFromCollection
@@ -459,6 +470,9 @@ class BarPlotPanel(GuiPanel):
     def fitXZoom(self):
         self.barGraphWidget.fitXZoom()
 
+    def fitXYZoom(self):
+        self.barGraphWidget.fitXYZoom()
+
     def plotDataFrame(self, dataFrame):
         """ Plot the given columns of dataframe as bars
          """
@@ -466,60 +480,99 @@ class BarPlotPanel(GuiPanel):
         self._updateAxisLabels()
         self.barGraphWidget.hideButtons()
 
-        if not self.xColumnName and not self.yColumnName in dataFrame.columns:
-            getLogger().warning(f'Column names  not found in dataFrame: {self.xColumnName}, {self.yColumnName}')
+        if not self.xColumnName in dataFrame.columns:
+            getLogger().warning(f'Column name  not found in dataFrame: {self.xColumnName}')
+            return
+        if not self.yColumnName in dataFrame.columns:
+            getLogger().warning(f'Column name  not found in dataFrame: {self.xColumnName}')
             return
 
-        success = self._setPlottingData(dataFrame, self.xColumnName, self.yColumnName)
-        if not success:
-            return
-        self.barGraphWidget._lineMoved(aboveX=self._aboveX,
-                                       belowX=self._belowX,
-                                       disappearedX=self._untraceableX,
-                                       ## Y
-                                       aboveY=self._aboveY,
-                                       belowY=self._belowY,
-                                       disappearedY=self._untraceableY,
-                                       ## errors
-                                       errorHeight = self._errorHeights,
-                                       ## Objects
-                                       aboveObjects=self._aboveObjects,
-                                       belowObjects=self._belowObjects,
-                                       disappearedObjects=self._untraceableObjects,
-                                       ## Brush
-                                       aboveBrush=self._aboveBrush,
-                                       aboveBrushes=self._gradientbrushes,
-                                       belowBrush=self._belowBrush,
-                                       disappearedBrush=self._untraceableBrush,
-                                       )
-        self.barGraphWidget.xLine.setPen(self._tresholdLineBrush)
+        # plot bars. Only if xAxis is in allowed columns []
+        if self.xColumnName in guiNameSpaces.XBarGraphColumnNameOptions:
+            self._scatterViewOnly = False
+            success = self._setBarPlottingData(dataFrame, self.xColumnName, self.yColumnName)
+            if not success:
+                return
+            self.barGraphWidget._lineMoved(aboveX=self._aboveX,
+                                           belowX=self._belowX,
+                                           disappearedX=self._untraceableX,
+                                           ## Y
+                                           aboveY=self._aboveY,
+                                           belowY=self._belowY,
+                                           disappearedY=self._untraceableY,
+                                           ## errors
+                                           errorHeight=self._errorHeights,
+                                           ## Objects
+                                           aboveObjects=self._aboveObjects,
+                                           belowObjects=self._belowObjects,
+                                           disappearedObjects=self._untraceableObjects,
+                                           ## Brush
+                                           aboveBrush=self._aboveBrush,
+                                           aboveBrushes=self._gradientbrushes,
+                                           belowBrush=self._belowBrush,
+                                           disappearedBrush=self._untraceableBrush,
+                                           )
+            self.barGraphWidget.xLine.setPen(self._tresholdLineBrush)
+            ## set ticks for the xAxis. As they Xs are strs, Need to create a dict Index:Value
+            labels = dataFrame[self.xColumnName].values
+            coordinates = dataFrame[self.xColumnName].index
+            self._setTicks(labels, coordinates)
+        else:
+            self._scatterViewOnly = True
+            #  need to toggle off/ disable bar icon
 
-        x = dataFrame.index.values
+        # plot scatters
+
+
+        x = dataFrame[self.xColumnName].values
         y = dataFrame[self.yColumnName].values
-        brushes = dataFrame.get(guiNameSpaces.BRUSHLABEL, pd.Series([], dtype='str')).values
-        brushes = [fn.mkBrush(brush) for brush in brushes]
-        self.scattersItem = self.barGraphWidget.plotWidget.plotItem.plot(x, y, symbol='o', pen=None, symbolPen=self.scatterPen, symbolBrush=brushes) #pen=None will not plot a line connecting scatters
-        self.scattersItem.sigPointsClicked.connect(self._scatterMouseClickEvent)
 
+        # check if it can be plotted as scatter (only numerics)
+        isScatterPlottable = True
+        if not x.dtype in (int, float) and self.xColumnName in guiNameSpaces.XBarGraphColumnNameOptions:
+            x = dataFrame[self.xColumnName].index # plottable but use the index
+        if not y.dtype in (int, float):
+            isScatterPlottable = False
+
+        if isScatterPlottable:
+            if sv.COLLECTIONPID in dataFrame:
+                pids = dataFrame[sv.COLLECTIONPID].values
+            else:
+                pids = [None for i in range(len(x))]
+            brushes = dataFrame.get(guiNameSpaces.BRUSHLABEL, pd.Series([], dtype='str')).values
+            brushes = [fn.mkBrush(brush) for brush in brushes]
+            if len(brushes) == 0:
+                brushes = [fn.mkBrush(self.penColour) for i in range(len(x))]
+            self.scattersItem = self.barGraphWidget.plotWidget.plotItem.plot(x, y,
+                                                                             symbol='o', pen=None, symbolPen=self.scatterPen,
+                                                                             symbolBrush=brushes,
+                                                                             data = pids) #pen=None will not plot a line connecting scatters
+            self.scattersItem.sigPointsClicked.connect(self._scatterMouseClickEvent)
+        # plot other lines
         windowRollingAverage =  self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_WindowRollingAverage).getValue()
         rollingAverage = calculateRollingAverage(y, windowRollingAverage)
         self._rollingAverageBrush = colourNameToHexDict.get(self.rollingAverageBrushColour, guiNameSpaces.BAR_rollingAvLine)
         xR = np.arange(1,len(rollingAverage)+1)
         self.rollingAverageLine = self.barGraphWidget.plotWidget.plotItem.plot(xR, rollingAverage, pen=self._rollingAverageBrush)
 
-        self.toggleBars(self._isItemToggledOn(guiNameSpaces.BARITEM))
+        if self._scatterViewOnly:
+            self._resetTicks()
+            self.barGraphWidget.setLimits(xMin=None, xMax=None, yMin=None, yMax=None)
+            #     need grey out bar option
+
         self.toggleErrorBars(self._isItemToggledOn(guiNameSpaces.ERRORBARITEM))
         self.toggleScatters(self._isItemToggledOn(guiNameSpaces.SCATTERITEM))
         self.toggleRollingAverage(self._isItemToggledOn(guiNameSpaces.ROLLINGLINEITEM))
+        self._updateAxisLabels()
 
     def _scatterMouseClickEvent(self, item, points):
 
-        selectedIndices = []
+        pids = []
         for i in points:
-            x,y = i.pos().x(), i.pos().y()
-            selectedIndices.append(y)
-            self._mouseSingleClickEvent(x,y)
-
+            pid = i.data()
+            if pid is not None:
+                pids.append(pid)
+        self._setCurrentCollectionsFromPids(pids)
 
 
     def toggleErrorBars(self, setVisible=True):

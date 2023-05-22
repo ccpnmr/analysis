@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-16 16:28:01 +0100 (Tue, May 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-22 11:52:49 +0100 (Mon, May 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -148,7 +148,6 @@ class _RelaxationBaseFittingModel(FittingModelABC):
     """
     PeakProperty =  sv._HEIGHT
 
-
     def fitSeries(self, inputData:TableFrame, rescale=True, *args, **kwargs) -> TableFrame:
         """
         :param inputData:
@@ -158,11 +157,13 @@ class _RelaxationBaseFittingModel(FittingModelABC):
         :return:
         """
         getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
-        ## Keep only one IsotopeCode as we are using only Height/Volume 15N?
+        ## Keep only one IsotopeCode as we are using only Height/Volume
         inputData = inputData[inputData[sv.ISOTOPECODE] == inputData[sv.ISOTOPECODE].iloc[0]]
-        if not all(inputData[self.ySeriesStepHeader].values):
+        minimisedProperty = self.PeakProperty
+        if not self.ySeriesStepHeader in inputData.columns:
             inputData[self.ySeriesStepHeader] = inputData[self.PeakProperty]
-            self._ySeriesLabel = self.PeakProperty
+
+
         grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
         for collectionId, groupDf in grouppedByCollectionsId:
             groupDf.sort_values([self.xSeriesStepHeader], inplace=True)
@@ -305,6 +306,8 @@ class HetNoeCalculation(CalculationModel):
     FullDescription = f'{Info}\n{Description}'
     PeakProperty = sv._HEIGHT
     _allowedIntensityTypes = (sv._HEIGHT, sv._VOLUME)
+    _minimisedProperty = None
+    _disableFittingModels = True  # Don't apply any fitting models to this output frame
 
     @property
     def modelArgumentNames(self):
@@ -361,25 +364,29 @@ class HetNoeCalculation(CalculationModel):
         for collectionId, groupDf in grouppedByCollectionsId:
             groupDf.sort_values([self.xSeriesStepHeader], inplace=True)
             seriesValues = groupDf[self.PeakProperty]
-            nmrAtomNames = inputData._getAtomNamesFromGroupedByHeaders(groupDf) # join the atom names from different rows in a list
-            seriesUnits = groupDf[sv.SERIESUNIT].unique()
+
+            ## make the calculation required by the model
             satPeakSNR = groupDf[sv._SNR].values[satIndex]
             unSatPeakSNR = groupDf[sv._SNR].values[unSatIndex]
             unSatValue = seriesValues.values[unSatIndex]
             satValue = seriesValues.values[satIndex]
-            ratio = satValue/unSatValue
+            ratio = satValue / unSatValue
             error = lf.peakErrorBySNRs([satPeakSNR, unSatPeakSNR], factor=ratio, power=-2, method='sum')
-            # build the outputFrame
-            outputFrame.loc[collectionId, sv.COLLECTIONID] = collectionId
-            outputFrame.loc[collectionId, sv.PEAKPID] = groupDf[sv.PEAKPID].values[0]
-            outputFrame.loc[collectionId, sv.COLLECTIONPID] = groupDf[sv.COLLECTIONPID].values[-1]
-            outputFrame.loc[collectionId, sv.NMRRESIDUEPID] = groupDf[sv.NMRRESIDUEPID].values[-1]
-            outputFrame.loc[collectionId, sv.SERIESUNIT] = seriesUnits[-1]
-            outputFrame.loc[collectionId,self.modelArgumentNames[0]] = ratio
+
+            ##  Build the outputFrame
+            ## 1) step: add the new results to the frame
+            outputFrame.loc[collectionId, self.modelArgumentNames[0]] = ratio
             outputFrame.loc[collectionId, self.modelArgumentNames[1]] = error
-            outputFrame.loc[collectionId, sv.GROUPBYAssignmentHeaders] = groupDf[sv.GROUPBYAssignmentHeaders].values[0]
-            outputFrame.loc[collectionId, sv.NMRATOMNAMES] = nmrAtomNames[0] if len(nmrAtomNames)>0 else ''
+
+            ## 2) step: add the model metadata
             outputFrame.loc[collectionId, sv.CALCULATION_MODEL] = self.ModelName
+
+            ## 3) step: add all the other columns as the input data
+            firstRow = groupDf.iloc[0]
+            outputFrame.loc[collectionId, firstRow.index.values] = firstRow.values
+            nmrAtomNames = inputData._getAtomNamesFromGroupedByHeaders(groupDf) # join the atom names from different rows in a list
+            outputFrame.loc[collectionId, sv.NMRATOMNAMES] = nmrAtomNames[0] if len(nmrAtomNames)>0 else ''
+
         return outputFrame
 
 
@@ -387,18 +394,20 @@ class ETACalculation(CalculationModel):
     """
     Calculate ETA Values for HSQC series
     """
-    ModelName = 'CHANGETHIS'
+    ModelName = 'CSA Cross-Correlation Ratios'
     Info = ''''''
 
     Description = '''Model:
     Measure cross-correlation rates by calculating the ratio of two separate series: in-phase (IP) and anti-phase (AP) (IP/AP) 
                  '''
     References = '''
-              
+              1) Direct measurement of the 15 N CSA/dipolar relaxation interference from coupled HSQC spectra. 
+              Jennifer B. Hall , Kwaku T. Dayie & David Fushman. Journal of Biomolecular NMR, 26: 181–186, 2003
                 '''
     FullDescription = f'{Info}\n{Description}'
     PeakProperty = sv._HEIGHT
     _allowedIntensityTypes = (sv._HEIGHT, sv._VOLUME)
+    _minimisedProperty = ModelName
 
     @property
     def modelArgumentNames(self):
@@ -444,7 +453,7 @@ class ETACalculation(CalculationModel):
         antiPhaseData.loc[antiPhaseData.index, PHASE]  = _AP
         inputData = pd.concat([inPhaseData, antiPhaseData], ignore_index=True)
         ## Keep only one IsotopeCode as we are using only 15N
-        inputData = inputData[inputData[sv.ISOTOPECODE] == '15N']
+        inputData = inputData[inputData[sv.ISOTOPECODE] == inputData[sv.ISOTOPECODE].iloc[0]]
         isSeriesAscending = all(inputData.get(sv._isSeriesAscending, [False]))
         groupped = inputData.groupby(sv.GROUPBYAssignmentHeaders)
         index = 1
@@ -478,6 +487,7 @@ class ETACalculation(CalculationModel):
                 outputFrame.loc[index, sv.SERIES_STEP_X] = iphase[sv.SERIES_STEP_X]
                 outputFrame.loc[index, sv.SERIES_STEP_Y] = ratio
                 outputFrame.loc[index, sv.ISOTOPECODE] =  iphase[sv.ISOTOPECODE]
+
                 xs.append(iphase[sv.SERIES_STEP_X])
                 ys.append(ratio)
                 outputFrame.loc[index, sv.CALCULATION_MODEL] = self.ModelName
@@ -508,6 +518,7 @@ class R2R1RatesCalculation(CalculationModel):
                 '''
     FullDescription = f'{Info}\n{Description}'
     _disableFittingModels = True  # Don't apply any fitting models to this output frame
+    _minimisedProperty = None
 
     @property
     def modelArgumentNames(self):
@@ -605,6 +616,7 @@ class SDMCalculation(CalculationModel):
     FullDescription = f'{Info}\n{Description}'
     _disableFittingModels = True  # Don't apply any fitting models to this output frame
     _spectrometerFrequency = 600.130  # hardcoded for development only. default will be taken from 1st spectrum in a series . todo need a way to set options model specific
+    _minimisedProperty = None
 
     @property
     def modelArgumentNames(self):
@@ -711,6 +723,7 @@ class SDMCalculation(CalculationModel):
         outputFrame[sv.SpectrumPropertiesHeaders] = None
         outputFrame[sv.PeakPropertiesHeaders] = None
         outputFrame[sv.CALCULATION_MODEL] = self.ModelName
+
         return outputFrame
 
 #####################################################

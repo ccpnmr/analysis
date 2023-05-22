@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-05 13:50:06 +0100 (Fri, May 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-22 11:52:50 +0100 (Mon, May 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -249,6 +249,9 @@ class BarGraphWidget(Widget):
         :return:
         """
         self.plotWidget.setLimits(**kwargs)
+
+    def fitXYZoom(self):
+        self.zoomFull()
 
     def fitXZoom(self):
         xs, ys = self._getPlotData()

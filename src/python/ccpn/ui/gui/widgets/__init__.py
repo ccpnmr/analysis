@@ -43,4 +43,12 @@ from ccpn.ui.gui.widgets.ToolButton import ToolButton
 from ccpn.ui.gui.widgets.VerticalLabel import  VerticalLabel
 from ccpn.ui.gui.widgets.Widget import Widget
 
+
+
+Notes
+If you want to activate a flag of an item you must use the operator |:
+     it.setFlags(it.flags() | Qt.ItemIsSelectable)
+If you want to deactivate it you must use & ~:
+    it.setFlags(it.flags() & ~Qt.ItemIsSelectable)
+
 '''

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-05 13:50:06 +0100 (Fri, May 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-22 11:52:50 +0100 (Mon, May 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -282,14 +282,14 @@ TipText_Mirrored = ''' In this view mode the plot is mirrored to the main Table.
  Note, molecular structure(s) information is not taken into consideration. Plotting as function of ResidueCode is not recommended as it might contain duplicated codes, for example for sidechains or multiple chains.'''
 
 WidgetVarName_PlotSecondaryStructure = 'PlotBySS'
-PlotViewMode_SecondaryStructure = 'Secondary Structure'
-TipText_SS = ''' In this view mode the plot is built following the molecular information of the selected Chain.
+PlotViewMode_Backbone = 'Backbone'
+TipText_SS = ''' Experimental. In this view mode the plot is built following the molecular information of the selected Chain.
  Each residue corresponds to a plot item.
  Assignments must be present in the data, missing assignments result in gaps in the plot. Unassigned or non-secondary structure data is not displayed '''
 
 WidgetVarName_Chain = 'ChainSelector'
 Label_Chain = 'Chain'
-TipText_Chain = f'Select the chain to display on plots. Only available for the {PlotViewMode_SecondaryStructure} view mode.'
+TipText_Chain = f'Select the chain to display on plots. Only available for the {PlotViewMode_Backbone} view mode.'
 
 WidgetVarName_BarGraphXcolumnName = 'XcolumnName'
 Label_XcolumnName = 'X Axis Data'
@@ -427,17 +427,17 @@ TableGrouppingHeaders = [_Assignments, _SeriesSteps, _Calculation, _Fitting, _St
 
 ### Appearance BarGraph
 
-PlotViewModes = [PlotViewMode_Mirrored, PlotViewMode_SecondaryStructure]
+PlotViewModes = [PlotViewMode_Mirrored, PlotViewMode_Backbone]
 PlotViewModesVars = [WidgetVarName_PlotMirrored, WidgetVarName_PlotSecondaryStructure]
 PlotViewModesTT = [TipText_Mirrored, TipText_SS]
 
 XBarGraphColumnNameOptions = [
-    seriesVariables.INDEX,
-    ColumnID,
-    ColumnCollectionPid,
-    ColumnResidueCode,
-    ColumnCodeType,
-]
+                               seriesVariables.INDEX,
+                               seriesVariables.COLLECTIONID,
+                               seriesVariables.COLLECTIONPID,
+                               seriesVariables.NMRRESIDUECODE,
+                               seriesVariables.NMRRESIDUECODETYPE
+                                ]
 
 _ExcludedFromPreferredYAxisOptions = [
                                          seriesVariables.INDEX,

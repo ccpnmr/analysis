@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-16 16:26:55 +0100 (Tue, May 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-22 11:52:50 +0100 (Mon, May 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -83,6 +83,8 @@ class SeriesFrameBC(TableFrame):
     def joinNmrResidueCodeType(self):
         """ Merge the nmrResidue SequenceCode and ResidueType columns in a new colum (NMRRESIDUECODETYPE)"""
         ## convert the sequenceCode to str. This because pandas Automatically tries to make floats.!!
+        if not sv.NMRRESIDUECODE in self.columns:
+            return
         self[sv.NMRRESIDUECODE] = self[sv.NMRRESIDUECODE].astype(str).apply(lambda x: x.replace('.0', ''))
         self._joinTwoColumnsAsStr(sv.NMRRESIDUECODE, sv.NMRRESIDUETYPE, newColumName=sv.NMRRESIDUECODETYPE, separator='-')
 
@@ -246,6 +248,7 @@ class InputSeriesFrameBC(SeriesFrameBC):
                             self.loc[i, sv.DIMENSION] = dimension
                             self.loc[i, sv.ISOTOPECODE] = spectrum.getByDimensions(sv.ISOTOPECODES, [dimension])[0]
                             self.loc[i, sv.SERIES_STEP_X] = spectrum.getSeriesItem(spectrumGroup)
+                            self.loc[i, sv.SERIES_STEP_Y] = pk.height  # default
                             self.loc[i, sv.SERIESUNIT] = spectrumGroup.seriesUnits
                             self.loc[i, sv.SPECTRUMPID] = spectrum.pid
                             self.loc[i, sv.EXPERIMENT] = experimentName
@@ -268,8 +271,8 @@ class InputSeriesFrameBC(SeriesFrameBC):
                                 self.loc[i, sv.NMRATOMNAME] = nmrAtom.name
                                 self.loc[i, sv.NMRATOMPID] = nmrAtom.pid
                                 self.loc[i, sv.NMRRESIDUEPID] = nmrAtom.nmrResidue.pid
-                            for excludedFlag in sv.EXCLUDED_OBJECTS:
-                                self.loc[i, excludedFlag] = False
+                            # for excludedFlag in sv.EXCLUDED_OBJECTS:
+                            #     self.loc[i, excludedFlag] = False
                             i += 1
                         except Exception as e:
                             getLogger().warn(f'Cannot add row {i} for peak {pk.pid}. Skipping with error: {e}')

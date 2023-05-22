@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-22 20:02:40 +0000 (Wed, February 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-22 11:52:49 +0100 (Mon, May 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -61,6 +61,7 @@ class EuclideanCalculationModel(CalculationModel):
                        FEBS J. 286, 2035–2042 (2019).
                   '''
     FullDescription = f'{Info} \n {Description}\nReferences: {References}'
+    _minimisedProperty = sv.RELDISPLACEMENT
 
     def __init__(self):
         super().__init__()
@@ -170,7 +171,7 @@ class CSMBindingModelBC(FittingModelABC):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._ySeriesLabel = sv.RELDISPLACEMENT
+        self._ySeriesLabel = 'sv.RELDISPLACEMENT'
 
     def fitSeries(self, inputData:TableFrame, *args, **kwargs) -> TableFrame:
         """

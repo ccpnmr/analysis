@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-04 09:08:52 +0100 (Thu, May 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-22 11:52:49 +0100 (Mon, May 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -48,6 +48,7 @@ class SeriesAnalysisABC(ABC):
     """
     seriesAnalysisName = ''
     _allowedPeakProperties = [sv._HEIGHT, sv._VOLUME, sv._PPMPOSITION, sv._LINEWIDTH]
+    _minimisedProperty = None  # the property currently used to perform the fitting routines. Default height, but can be anything.
 
     @property
     def inputDataTables(self) -> list:
@@ -148,7 +149,7 @@ class SeriesAnalysisABC(ABC):
 
         # drop columns that should not be on the Gui. To remove: peak properties (dim, height, ppm etc)
         toDrop = sv.PeakPropertiesHeaders + [sv._SNR, sv.DIMENSION, sv.ISOTOPECODE, sv.NMRATOMNAME, sv.NMRATOMPID]
-        toDrop += sv.ALL_EXCLUDED
+        # toDrop += sv.ALL_EXCLUDED
         toDrop += ['None',  'None_'] #not sure yet where they come from
         outDataFrame.drop(toDrop, axis=1, errors='ignore', inplace=True)
 
@@ -212,8 +213,14 @@ class SeriesAnalysisABC(ABC):
 
     def fitInputData(self) -> DataTable:
         """
-        Perform calculation using the currentFittingModel and currentCalculationModel to the inputDataTables
+        Perform calculations using the currentFittingModel and currentCalculationModel to the inputDataTables
         and save outputs to a single newDataTable.
+        1) Perform the CalculationModel routines (which do not do any fitting (e.g.: exponential decay)  but only a plain calculation)
+        2) Use the result frame from the Calculation model as input for the FittingModel.
+        We must follow this order.
+
+        Sometime only a calculation model is necessary, in that case set calculationModel._disableFittingModels to True.
+
         Resulting dataTables are available in the outputDataTables.
         :return: output dataTable . Creates a new output dataTable in outputDataTables
         """
@@ -222,25 +229,45 @@ class SeriesAnalysisABC(ABC):
         if len(self.inputDataTables) == 0:
             raise RuntimeError('Cannot run any fitting models. Add a valid inputData first')
 
-        calculationFrame = self.currentCalculationModel.calculateValues(self.inputDataTables)
-        if self.currentCalculationModel._disableFittingModels:
-            data = calculationFrame
+        outputFrame = self.currentCalculationModel.calculateValues(self.inputDataTables)
+        self._minimisedProperty =  self.currentCalculationModel._minimisedProperty
+        if not self.currentCalculationModel._disableFittingModels:
+            outputFrame = self.currentFittingModel.fitSeries(outputFrame)
 
-        else:
-            # merge the frames on CollectionPid/id, Assignment, model-results/statistics and calculation
-            # keep only minimal info and not duplicates to the fitting frame (except the collectionPid)
-            inputFrame = self.inputDataTables[-1].data
-            fittingFrame = self.currentFittingModel.fitSeries(inputFrame)
-            if sv.CALCULATION_MODEL in calculationFrame.columns:
-                cdf = calculationFrame[[ sv.COLLECTIONPID, sv.CALCULATION_MODEL] + self.currentCalculationModel.modelArgumentNames]
-            else:
-                cdf = calculationFrame[[sv.COLLECTIONPID] + self.currentCalculationModel.modelArgumentNames]
-            data = pd.merge(fittingFrame, cdf, on=[sv.COLLECTIONPID], how='left')
-        data.joinNmrResidueCodeType()
+        outputFrame.joinNmrResidueCodeType()
+        outputDataTable = self._fetchOutputDataTable(name=self._outputDataTableName)
+        outputDataTable.data = outputFrame
+        self._setMinimisedPropertyFromModels()
+        return outputDataTable
+
+        # if self.currentCalculationModel._disableFittingModels:
+        #     data = calculationFrame
+        # else:
+        #     # merge the frames on CollectionPid/id, Assignment, model-results/statistics and calculation
+        #     # keep only minimal info and not duplicates to the fitting frame (except the collectionPid)
+        #     if self.currentCalculationModel.ModelName == sv.BLANKMODELNAME:
+        #         inputFrame = self.inputDataTables[-1].data
+        #     else:
+        #         inputFrame = calculationFrame
+        #     fittingFrame = self.currentFittingModel.fitSeries(inputFrame)
+        #     if sv.CALCULATION_MODEL in calculationFrame.columns:
+        #         cdf = calculationFrame[[ sv.COLLECTIONPID, sv.CALCULATION_MODEL] + self.currentCalculationModel.modelArgumentNames]
+        #     else:
+        #         cdf = calculationFrame[[sv.COLLECTIONPID] + self.currentCalculationModel.modelArgumentNames]
+        #     data = pd.merge(fittingFrame, cdf, on=[sv.COLLECTIONPID], how='left')
+        fittingFrame.joinNmrResidueCodeType()
         outputDataTable = self._fetchOutputDataTable(name=self._outputDataTableName)
         outputDataTable.data = data
         self.resultDataTable = outputDataTable
         return outputDataTable
+
+    def _setMinimisedPropertyFromModels(self):
+        """ Set the _minimisedProperty from the current models.
+         Calculation model has priority, otherwise use the fitting model unless disabled."""
+
+        self._minimisedProperty =  self.currentCalculationModel._minimisedProperty
+        if self._minimisedProperty is None and not self.currentCalculationModel._disableFittingModels:
+            self._minimisedProperty = self.currentFittingModel._minimisedProperty
 
     def _rebuildInputData(self):
         """Rebuild all the inputData tables from the defined SpectrumGroups."""

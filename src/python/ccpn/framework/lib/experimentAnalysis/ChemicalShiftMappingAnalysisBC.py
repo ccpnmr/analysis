@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-02 14:29:03 +0100 (Tue, May 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-22 11:52:49 +0100 (Mon, May 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -98,4 +98,5 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         fittingFrame.joinNmrResidueCodeType()
         outputDataTable = self._fetchOutputDataTable(name=self._outputDataTableName)
         outputDataTable.data = fittingFrame
+        self._setMinimisedPropertyFromModels()
         return outputDataTable

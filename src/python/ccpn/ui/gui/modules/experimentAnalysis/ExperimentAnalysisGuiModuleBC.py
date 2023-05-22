@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-04 14:06:22 +0100 (Thu, May 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-22 11:52:50 +0100 (Mon, May 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -110,8 +110,10 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         return pd.DataFrame()
 
 
-    def getGuiResultDataFrame(self):
-        """Get the SelectedOutputDataTable and transform the raw data to a displayable table for the main widgets.
+    def _getGuiResultDataFrame(self):
+        """_INTERNAL. Used only to input the main widget table.
+        Get the SelectedOutputDataTable and transform the raw data to be displayed in the main table.
+        To get the table as dataframe exactly as displayed in the GUI use:  'getVisibleDataFrame'.
         """
         dataTable = self.backendHandler.getMergedResultDataFrame()
 
@@ -175,8 +177,10 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         appearance = self.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)
         allSettings = self.settingsPanelHandler.getAllSettings()
         appearance._settingsChangedCallback(allSettings)
+        appearance._setXYAxisSelectors()
         for panelName, panel in self.panelHandler.panels.items():
             panel.updatePanel(**{guiNameSpaces.SETTINGS: allSettings})
+
         ## make sure all is selected as before the update
         self.current.collections = []
         self.current.collections = currentCollections

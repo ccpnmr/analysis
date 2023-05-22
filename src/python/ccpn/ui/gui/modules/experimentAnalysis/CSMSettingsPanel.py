@@ -173,14 +173,7 @@ class CSMGuiFittingPanel(GuiFittingPanel):
 
 class CSMAppearancePanel(AppearancePanel):
 
-    def _preselectDefaultYaxisBarGraph(self):
-        yAxisWidget = self.getWidget(guiNameSpaces.WidgetVarName_BarGraphYcolumnName)
-        backend = self.guiModule.backendHandler
-        model = backend.currentCalculationModel
-        if model is not None and model.ModelName != sv.BLANKMODELNAME:
-            firstArg, *_ = model.modelArgumentNames or [None]
-            if yAxisWidget:
-                yAxisWidget.select(firstArg)
+    pass
 
 
 #####################################################################

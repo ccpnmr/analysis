@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-04 14:06:22 +0100 (Thu, May 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-22 11:52:50 +0100 (Mon, May 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -229,11 +229,11 @@ class _ExperimentalAnalysisTableABC(Table):
         if self.current.collection is None:
             self.clearSelection()
             return
-        df = self.guiModule.getGuiResultDataFrame()
+        df = self.guiModule.getVisibleDataFrame(includeHiddenColumns=True)
         if df is None:
             return
         pids = [co.pid for co in self.current.collections]
-        filtered = df.getByHeader(sv.COLLECTIONPID, pids)
+        filtered = df[df[sv.COLLECTIONPID].isin(pids)]
         if filtered.empty:
             return
 
@@ -360,7 +360,7 @@ class TablePanel(GuiPanel):
         self.mainTable.dataFrame = dataFrame
 
     def updatePanel(self, *args, **kwargs):
-        dataFrame = self.guiModule.getGuiResultDataFrame()
+        dataFrame = self.guiModule._getGuiResultDataFrame()
         self.setInputData(dataFrame)
 
 

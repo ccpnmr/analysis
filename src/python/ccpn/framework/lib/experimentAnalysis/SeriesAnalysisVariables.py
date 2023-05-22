@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-16 16:25:50 +0100 (Tue, May 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-22 11:52:50 +0100 (Mon, May 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -49,7 +49,7 @@ INDEX           = 'Index'                   # -> int   | incremental serial
 VALUE            = 'Value'               # -> str   | The column header  prefix in a SeriesTable. Used to store data after the CONSTANT_TABLE_COLUMNS
 TIME             = 'Time'                # -> str   | A general prefix in a SeriesTable.
 
-NA = 'NA'
+NA = 'Not Applicable'
 SEP              =  '_'   # the prefix-name-suffix global separator. E.g., used in Value columns: Value_height_at_0
 VALUE_           = f'{VALUE}{SEP}'
 TIME_            = f'{TIME}{SEP}'
@@ -84,6 +84,7 @@ COLLECTIONPID    = 'collectionPid'
 PID              = 'pid'
 ASSIGNEDNMRATOMS = 'assignedNmrAtoms'
 
+# NOT yet enbled.
 EXCLUDED_PEAKPID        = f'{EXCLUDED_}{PEAKPID}'
 EXCLUDED_SPECTRUMPID    = f'{EXCLUDED_}{SPECTRUMPID}'
 EXCLUDED_NMRATOMPID     = f'{EXCLUDED_}{NMRATOMPID}'

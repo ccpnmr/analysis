@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-22 15:02:07 +0000 (Wed, February 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-22 11:52:50 +0100 (Mon, May 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -93,7 +93,11 @@ class LeftAxisItem(pg.AxisItem):
     def tickStrings(self, values, scale, spacing):
         """ Overridden method to show minimal decimals.
         """
-        return [f'{v:.2e}' for v in values]
+        newValues = []
+        for val in values:
+            value = f'{val:.3f}' if (1e-6 < val < 1e6) or val == 0.0 else f'{val:.3e}'
+            newValues.append(value)
+        return newValues
 
 class FittingHandle(Handle):
     """Experimental.  A class to allow manual refitting of a curve based.  """
@@ -348,16 +352,17 @@ class FitPlotPanel(GuiPanel):
          Get Plotting data from the Output-GUI-dataTable (getSelectedOutputDataTable)"""
 
         self.clearData()
-
-        ## Get the current Collections if any or return
-        collections = self.current.collections
-        if not collections:
+        if not self._isOkToPlot():
             return
 
+        backend = self.guiModule.backendHandler
         ## Get the raw data from the output DataTable if any or return
-        outputData = self.guiModule.backendHandler.resultDataTable
+        outputData = backend.resultDataTable
         if outputData is None:
             return
+
+        ## Grab the Fitting Model, to recreate the fitted Curve from the fitting results.
+        model = backend.currentFittingModel
 
         ## Check if the current Collection pids are in the Table. If Pids not on table, return.
         dataFrame = outputData.data
@@ -374,22 +379,6 @@ class FitPlotPanel(GuiPanel):
         peakPids = filteredDf[sv.PEAKPID].values
         objs = [self.project.getByPid(pid) for pid in peakPids]
 
-        ## Grab the Fitting Model, to recreate the fitted Curve from the fitting results.
-        if sv.MODEL_NAME not in filteredDf.columns:
-            return
-        modelNames = filteredDf[sv.MODEL_NAME].values
-        if len(modelNames) > 0:
-            modelName = modelNames[0]
-        else:
-            modelName = None
-        model = self.guiModule.backendHandler.getFittingModelByName(modelName)
-        if model is None:  ## get it from settings
-            model = self.guiModule.backendHandler.currentFittingModel
-        else:
-            model = model()
-
-        if model.ModelName == sv.BLANKMODELNAME:
-            return
         ## Grab the columns to plot the raw data, the header name from the model
         Xs = filteredDf[model.xSeriesStepHeader].values
         Ys = filteredDf[model.ySeriesStepHeader].values
@@ -416,8 +405,7 @@ class FitPlotPanel(GuiPanel):
         else:
             seriesUnit = 'X (Series Unit Not Given)'
         xAxisLabel = seriesUnit
-        yAxisLabel = model._ySeriesLabel
-
+        yAxisLabel =  backend._minimisedProperty or 'Y'
         ## Setup the various labels.
         self.currentCollectionLabel.setText('')
         self.setXLabel(label=xAxisLabel)
@@ -456,6 +444,29 @@ class FitPlotPanel(GuiPanel):
         self.bindingPlot.scene().sigMouseMoved.connect(self.bindingPlot.mouseMoved)
         self.bindingPlot.zoomFull()
 
+
+    def _isOkToPlot(self):
+        """ Do the initial check if is ok to continue ith the plotting """
+        ## Get the current Collections if any or return
+        collections = self.current.collections
+        if not collections:
+            return False
+
+        backend = self.guiModule.backendHandler
+        ## Grab the Fitting Model, to recreate the fitted Curve from the fitting results.
+        model = backend.currentFittingModel
+        calcModel = backend.currentCalculationModel
+        if model.ModelName == sv.BLANKMODELNAME:
+            getLogger().info(f'Fitting results not displayed/permitted on Calculation Model: {calcModel.ModelName} and Fitting Model: {model.ModelName}')
+            return False
+
+        if calcModel is not None:
+            if calcModel._disableFittingModels:
+                getLogger().info(f'Fitting results not displayed/permitted on Calculation Model: {calcModel.ModelName} and Fitting Model: {model.ModelName}')
+                return False
+
+        return True
+
     def setXLabel(self, label=''):
         self.bindingPlot.setLabel('bottom', label)
 
@@ -477,7 +488,7 @@ class FitPlotPanel(GuiPanel):
         if self.current.collection is None:
             self.clearData()
             return
-        df = self.guiModule.getGuiResultDataFrame()
+        df = self.guiModule.getVisibleDataFrame(includeHiddenColumns=True)
         if df is None or df.empty:
             self.clearData()
             return

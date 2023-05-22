@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-04 17:21:59 +0100 (Thu, May 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-22 11:52:50 +0100 (Mon, May 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -157,7 +157,7 @@ class ToolBarPanel(GuiPanel):
         coloursDict = barGraph.getPlottedColoursDict()
         import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
         # get the match  index-residueCode so that can be mapped to the PDB and pymol
-        df = self.guiModule.getGuiResultDataFrame()
+        df = self.guiModule.getVisibleDataFrame(includeHiddenColumns=True)
         if df is None or df.empty:
             showWarning('No Data available', f'To start calculations, set the input Data from the Settings Panel')
             return

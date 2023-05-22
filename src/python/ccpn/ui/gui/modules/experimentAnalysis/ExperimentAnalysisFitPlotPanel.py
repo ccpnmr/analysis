@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-22 11:52:50 +0100 (Mon, May 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-22 13:46:08 +0100 (Mon, May 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -45,6 +45,7 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
+from ccpn.util.floatUtils import numZeros
 
 
 class FittingPlotToolBar(ExperimentAnalysisPlotToolBar):
@@ -95,7 +96,19 @@ class LeftAxisItem(pg.AxisItem):
         """
         newValues = []
         for val in values:
-            value = f'{val:.3f}' if (1e-6 < val < 1e6) or val == 0.0 else f'{val:.3e}'
+            try:
+                maxDecimalToShow = 3
+                if abs(val) > 1e6:  # make it scientific annotation if a huge/tiny number
+                    value = f'{val:.{maxDecimalToShow}e}'
+                elif numZeros(val) >= maxDecimalToShow:
+                    #e.g.:  if is 0.0001 will show as 1e-4 instead of 0.000
+                    value = f'{val:.{maxDecimalToShow}e}'
+                else:
+                    # just rounds to the third decimal
+                    value = f'{val:.{maxDecimalToShow}f}'
+            except Exception:
+                value = str(val)
+
             newValues.append(value)
         return newValues
 

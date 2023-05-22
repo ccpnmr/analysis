@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-22 11:52:49 +0100 (Mon, May 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-22 13:46:08 +0100 (Mon, May 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -101,7 +101,7 @@ class OnePhaseDecayMinimiser(MinimiserModel):
             sval, oval = np.polyfit(x, np.log(abs(data)+1.e-15), 1)
         except TypeError:
             sval, oval = 1., np.log(abs(max(data)+1.e-9))
-        params = self.make_params(amplitude=np.exp(oval), decay=-1.0/sval)
+        params = self.make_params(amplitude=np.exp(oval), rate=abs(sval))
         return update_param_vals(params, self.prefix, **kwargs)
 
 ################
@@ -214,6 +214,8 @@ class OnePhaseDecayModel(_RelaxationBaseFittingModel):
         if len(self.modelArgumentNames) >1:
             return self.modelArgumentNames[1]
         return None
+
+
 
 class ExponentialDecayModel(_RelaxationBaseFittingModel):
     """

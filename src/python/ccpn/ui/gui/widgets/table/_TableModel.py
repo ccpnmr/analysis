@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-16 16:21:30 +0100 (Tue, May 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-22 11:50:14 +0100 (Mon, May 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,7 @@ import numpy as np
 import pandas as pd
 from PyQt5 import QtCore, QtGui
 from contextlib import suppress
-
+from ccpn.util.floatUtils import numZeros
 from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.ui.gui.guiSettings import getColours, GUITABLE_ITEM_FOREGROUND
 from ccpn.ui.gui.widgets.Icon import Icon
@@ -352,10 +352,15 @@ class _TableModel(QtCore.QAbstractTableModel):
                 # float/np.float - round to 3 decimal places. This should be settable, ideally even by the user,
                 if isinstance(val, (float, np.floating)):
                     try:
+                        maxDecimalToShow = 3
                         if abs(val) > 1e6:  # make it scientific annotation if a huge/tiny number
-                            value =  f'{val:.3e}'
+                            value =  f'{val:.{maxDecimalToShow}e}'
+                        elif numZeros(val) >= maxDecimalToShow:
+                            #e.g.:  if is 0.0001 will show as 1e-4 instead of 0.000
+                            value = f'{val:.{maxDecimalToShow}e}'
                         else:
-                            value =  f'{val:.3f}'
+                            # just rounds to the third decimal
+                            value =  f'{val:.{maxDecimalToShow}f}'
                     except Exception:
                         value = str(val)
                 else:

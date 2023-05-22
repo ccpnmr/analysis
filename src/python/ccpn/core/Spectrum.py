@@ -53,8 +53,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-26 19:19:14 +0100 (Wed, April 26, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-05-22 13:48:12 +0100 (Mon, May 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -2800,6 +2800,15 @@ class Spectrum(AbstractWrapperObject):
         return _pickPeaksByRegion(self,
                                   sliceTuples=sliceTuples, peakList=peakList,
                                   positiveThreshold=positiveThreshold, negativeThreshold=negativeThreshold)
+
+    @logCommand(get='self')
+    def toHdf5(self, path):
+        """
+        Save the spectrum as HDF5 format in a new path
+        :param path:
+        :return: None
+        """
+        self._extractToFile(axisCodes=self.axisCodes, position=[1]*self.dimensionCount, path=path, dataFormat='Hdf5', tag='toHdf5')
 
     def _extractToFile(self, axisCodes, position, path, dataFormat, tag):
         """Local helper routine to prevent code duplication across extractSliceToFile, extractPlaneToFile,

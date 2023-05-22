@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-22 11:52:49 +0100 (Mon, May 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-22 14:51:54 +0100 (Mon, May 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -497,7 +497,7 @@ class SeriesAnalysisABC(ABC):
         self._exclusionHandler = ExclusionHandler()
 
     def close(self):
-        self.exclusionHandler.save()
+        # self.exclusionHandler.save()
         self.clearInputDataTables()
         self._currentCalculationModel = None
         self._currentFittingModel = None

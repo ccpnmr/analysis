@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-22 13:46:08 +0100 (Mon, May 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-22 14:51:54 +0100 (Mon, May 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -211,9 +211,8 @@ class OnePhaseDecayModel(_RelaxationBaseFittingModel):
     @property
     def _preferredYPlotArgName(self):
         """  Private only used in UI mode."""
-        if len(self.modelArgumentNames) >1:
-            return self.modelArgumentNames[1]
-        return None
+
+        return self.Minimiser.RATEstr
 
 
 
@@ -234,6 +233,12 @@ class ExponentialDecayModel(_RelaxationBaseFittingModel):
     Minimiser = ExpDecayMinimiser
     FullDescription = f'{Info}\n{Description}'
 
+    @property
+    def _preferredYPlotArgName(self):
+        """  Private only used in UI mode."""
+
+        return self.Minimiser.DECAYstr
+
 class InversionRecoveryFittingModel(_RelaxationBaseFittingModel):
     """
     InversionRecovery model class containing fitting equation and fitting information
@@ -252,6 +257,10 @@ class InversionRecoveryFittingModel(_RelaxationBaseFittingModel):
     # MaTex =  r'$amplitude*(1 - e^{-time/decay})$'
     FullDescription = f'{Info}\n{Description}'
 
+    @property
+    def _preferredYPlotArgName(self):
+        """  Private only used in UI mode."""
+        return self.Minimiser.DECAYstr
 
 #####################################################
 ##########  Calculation Models   ####################

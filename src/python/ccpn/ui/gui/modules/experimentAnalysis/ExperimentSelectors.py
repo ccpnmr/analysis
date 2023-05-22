@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-06 12:41:51 +0000 (Mon, March 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-22 14:51:55 +0100 (Mon, May 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -200,13 +200,13 @@ class ExperimentSelectorHandler():
         _calculationTab = self._getCalculationTab()
         widget = _calculationTab.getWidget(guiNameSpaces.WidgetVarName_CalcMode)
         if widget is not None and self.experimentSelector is not None:
-            widget.setByText(self.experimentSelector.calculationOption, silent=True)
+            widget.setByText(self.experimentSelector.calculationOption, silent=False)
 
     def _setFittingWidgets(self):
         _fittingTab = self._getFittingTab()
         widget = _fittingTab.getWidget(guiNameSpaces.WidgetVarName_FittingModel)
         if widget is not None and self.experimentSelector is not None:
-            widget.setByText(self.experimentSelector.fittingOption, silent=True)
+            widget.setByText(self.experimentSelector.fittingOption, silent=False)
 
     def _populateAll(self):
         if self.experimentSelector is not None:

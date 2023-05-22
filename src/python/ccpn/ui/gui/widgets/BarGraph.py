@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-05 16:08:05 +0100 (Fri, May 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-22 14:51:55 +0100 (Mon, May 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -455,7 +455,7 @@ class CustomViewBox(pg.ViewBox):
             self._raiseContextMenu(event)
 
         elif event.button() == QtCore.Qt.LeftButton:
-
+            print('HEFf')
             event.accept()
 
     def mouseDragEvent(self, event):

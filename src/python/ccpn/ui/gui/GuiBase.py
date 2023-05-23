@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-04-25 17:41:51 +0100 (Tue, April 25, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-05-23 15:27:39 +0100 (Tue, May 23, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -288,6 +288,8 @@ class GuiBase(object):
             ("Residue Information", self.showResidueInformation, [('shortcut', 'ri')]),
             (),
             ("Reference Chemical Shifts", self.showReferenceChemicalShifts, [('shortcut', 'rc')]),
+            (),
+            ("Edit Molecular Bonds", self.showMolecularBondsPopup, ),
             ]
                    ))
 

@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-06 12:41:51 +0000 (Mon, March 06, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-05-23 15:27:39 +0100 (Tue, May 23, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -258,9 +258,13 @@ class ListCompoundWidget(CompoundBaseWidget):
             return
         self.listWidget.addItem(text)
 
-    def removeTexts(self, texts):
+    def removeTexts(self, texts, blockSignals=False):
         """Convenience: Remove texts to listWidget"""
-        self.listWidget.removeTexts(texts)
+        if blockSignals:
+            with self.blockWidgetSignals(recursive=False, additionalWidgets=[self.pulldownList, self.listWidget]):
+                self.listWidget.removeTexts(texts)
+        else:
+            self.listWidget.removeTexts(texts)
 
     def renameText(self, oldText, newText):
         self.listWidget.renameItem(oldText, newText)

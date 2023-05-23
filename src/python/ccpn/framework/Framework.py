@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-04-25 17:41:51 +0100 (Tue, April 25, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-05-23 15:27:39 +0100 (Tue, May 23, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1920,6 +1920,15 @@ class Framework(NotifierBase, GuiBase):
         refChemShifts = ReferenceChemicalShifts(mainWindow=mainWindow)
         mainWindow.moduleArea.addModule(refChemShifts, position=position, relativeTo=relativeTo)
         return refChemShifts
+
+    @logCommand('gui.')
+    def showMolecularBondsPopup(self):
+        """Displays the molecular-bonds popup.
+        """
+        from ccpn.ui.gui.popups.MolecularBondsPopup import MolecularBondsPopup
+
+        popup = MolecularBondsPopup(parent=self.mainWindow, mainWindow=self.mainWindow)
+        popup.exec_()
 
     ###################################################################################################################
     ## MENU callbacks:  VIEW

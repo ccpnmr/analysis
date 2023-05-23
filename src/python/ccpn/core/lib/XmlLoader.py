@@ -422,7 +422,7 @@ class TopObject(XmlLoaderABC):
             _apiTopObjects = forceGetattr(self.root.memopsRoot, 'topObjects')
             self.apiTopObject = _apiTopObjects.get(self.guid)
             if not self.apiTopObject:
-                getLogger().debug(f'{consoleStyle.fg.darkyellow}Undefined apiTopObject {self.guid}{consoleStyle.reset}')
+                getLogger().debug2(f'{consoleStyle.fg.darkyellow}Undefined apiTopObject {self.guid}{consoleStyle.reset}')
 
         _stack = self.root.loadingStack
         _stack.append(self)
@@ -1870,7 +1870,7 @@ def _refreshTopObjects(memopsRoot, packageName):
         pass
 
     else:
-        getLogger().debug(f'No Package instance found for "{packageName}"; skipping')
+        getLogger().debug2(f'No Package instance found for "{packageName}"; skipping')
         return
 
     # print(f'>DEBUG refreshTopObjects> {pkg}: loaded:{pkg.isLoaded}')

@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-27 16:38:07 +0100 (Thu, April 27, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-23 15:26:51 +0100 (Tue, May 23, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -279,6 +279,16 @@ class Project(AbstractWrapperObject):
     @_collectionData.setter
     def _collectionData(self, value):
         self._wrappedData.collectionData = value
+
+    @property
+    def bonds(self) -> list:
+        """STUB: hot-fixed later"""
+        return []
+
+    def getBonds(self, bondType: typing.Optional[str] = None):
+        """Get the bonds of a specific bondType.
+        """
+        return tuple(bnd for bnd in self.bonds if bnd.bondType == bondType)
 
     #-----------------------------------------------------------------------------------------
     # (Sub-)directories of the project
@@ -2348,6 +2358,18 @@ class Project(AbstractWrapperObject):
         from ccpn.core.Collection import _fetchCollection
 
         return _fetchCollection(self, name=name)
+
+    @logCommand('project.')
+    def newBond(self, **kwds):
+        """Create new Bond.
+        See the Bond class for details.
+        Optional keyword arguments can be passed in; see Bond._newBond for details.
+
+        :return: a new Bond instance.
+        """
+        from ccpn.core.Bond import _newBond
+
+        return _newBond(self, **kwds)
 
     def __repr__(self):
         """String representation"""

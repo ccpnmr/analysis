@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-02 14:33:41 +0100 (Tue, May 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-05-23 15:26:51 +0100 (Tue, May 23, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -171,9 +171,8 @@ class Chain(AbstractWrapperObject):
                 newApiChain = copySubTree(apiChain, apiMolSystem, maySkipCrosslinks=True,
                                           topObjectParameters=topObjectParameters)
             except Exception as es:
-
                 # put in an error trap but now doesn't seem to re-create the error
-                raise ValueError('Error cloning chain - %s' % str(es))
+                raise ValueError('Error cloning chain - %s' % str(es)) from es
 
             result = self._project._data2Obj.get(newApiChain)
 
@@ -186,7 +185,7 @@ class Chain(AbstractWrapperObject):
                 if len(ll) == 2:
                     relativeIds = list(x._id.split(Pid.IDSEP, 1)[1] for x in ll)
                     newAtoms = list(result.getAtom(x) for x in relativeIds)
-                    newAtoms[0].addInterAtomBond(newAtoms[1])
+                    newAtoms[0].addInterAtomBond(newAtoms[1], apiGenericBond.bondType)
 
             return result
 

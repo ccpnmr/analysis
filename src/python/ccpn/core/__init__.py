@@ -381,6 +381,9 @@ Residue._registerCoreClass()
 from ccpn.core.Atom import Atom
 Atom._registerCoreClass()
 
+from ccpn.core.Bond import Bond
+Bond._registerCoreClass()
+
 from ccpn.core.Complex import Complex
 Complex._registerCoreClass()
 

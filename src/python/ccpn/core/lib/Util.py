@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:39 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-05-23 15:26:51 +0100 (Tue, May 23, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -26,6 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import contextlib
 import collections
 import inspect
 from typing import Optional
@@ -73,15 +74,13 @@ def getParentObjectFromPid(project, pid):
         getParentObjectFromPid(pid) -> 'NR:A.40.ALA'
     """
     if not isinstance(pid, (str, Pid.Pid)):
-        raise ValueError('Invalid pid "%s"' % pid)
+        raise ValueError(f'Invalid pid {pid!r}')
 
     obj = None
     # First try if the object defined by pid still exists
-    try:
+    with contextlib.suppress(Exception):
         if (obj := project.getByPid(pid)) is not None:
             return obj._parent
-    except:
-        pass
 
     if obj is None:
         # Assure pid to be a Pid object

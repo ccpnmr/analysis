@@ -4,19 +4,19 @@ Module documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:36 +0100 (Tue, July 05, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-05-23 15:26:51 +0100 (Tue, May 23, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -104,6 +104,15 @@ class Atom(AbstractWrapperObject):
         return tuple(sorted(x for x in boundAtoms if x is not None))
 
     @property
+    def bonds(self) -> typing.Tuple['Bond']:
+        """Bonds that contain this Atom.
+        """
+        getDataObj = self._project._data2Obj.get
+        apiAtom = self._wrappedData
+
+        return tuple(getDataObj(x) for x in apiAtom.sortedGenericBonds())
+
+    @property
     def componentAtoms(self) -> typing.Tuple['Atom']:
         """Atoms that are combined to make up this atom - reverse of 'compoundAtoms'
 
@@ -171,14 +180,14 @@ class Atom(AbstractWrapperObject):
     def elementSymbol(self):
         return self._wrappedData.elementSymbol
 
-    def addInterAtomBond(self, atom: 'Atom'):
+    def addInterAtomBond(self, atom: 'Atom', bondType: typing.Optional[str] = None):
         """ADVANCED Add generic bond between atoms - for creating disulfides or other crosslinks
         The bound-to atom will appear in self.boundAtoms.
 
         NB This function does not remove superfluous atoms (like CYS HG),
-        or check for chemical plausibility. Programmer beware!"""
-        project = self._project
-        project._wrappedData.molSystem.newGenericBond(atoms=(self._wrappedData, atom._wrappedData))
+        or check for chemical plausibility. Programmer beware!
+        """
+        self._project.newBond(atoms=(self, atom), bondType=bondType)
 
     @property
     def nmrAtom(self) -> typing.Optional['NmrAtom']:
@@ -189,7 +198,7 @@ class Atom(AbstractWrapperObject):
         """
         try:
             return self._project.getNmrAtom(self._id)
-        except:
+        except Exception:
             return None
 
     @property
@@ -210,7 +219,7 @@ class Atom(AbstractWrapperObject):
         """get wrappedData (MolSystem.Atoms) for all Atom children of parent Residue"""
         return parent._wrappedData.sortedAtoms()
 
-    def _finaliseAction(self, action: str):
+    def _finaliseAction(self, action: str, **actionKwds):
         """Subclassed to handle delete/create
         """
         if action == 'delete':
@@ -221,6 +230,10 @@ class Atom(AbstractWrapperObject):
 
         if not super()._finaliseAction(action):
             return
+
+        for bond in self.bonds:
+            # need to rename the bonds as their pids rely on the atom-ids
+            bond._finaliseAction(action, **actionKwds)
 
     #=========================================================================================
     # CCPN functions
@@ -250,7 +263,8 @@ def _newAtom(self: Residue, name: str, elementSymbol: str = None) -> 'Atom':
 
     lastAtom = self.getAtom(name)
     if lastAtom is not None:
-        raise ValueError("Cannot create %s, atom name %s already in use" % (lastAtom.longPid, name))
+        raise ValueError(f"Cannot create {lastAtom.longPid}, atom name {name} already in use")
+
     if elementSymbol is None:
         elementSymbol = name2ElementSymbol(name)
 

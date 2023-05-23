@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 18:46:14 +0100 (Tue, March 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-23 15:26:51 +0100 (Tue, May 23, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -32,6 +32,8 @@ import sys
 from collections import OrderedDict
 from ccpn.core.Chain import Chain
 from ccpn.core.Residue import Residue
+from ccpn.core.Atom import Atom
+from ccpn.core.Bond import Bond
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrAtom import NmrAtom
@@ -75,6 +77,8 @@ _currentClasses = {
     Strip            : {SingularOnly: True},
     Chain            : {},
     Residue          : {},
+    Atom             : {},
+    Bond             : {},
     ChemicalShiftList: {},
     _OldChemicalShift: {},
     ChemicalShift    : {},

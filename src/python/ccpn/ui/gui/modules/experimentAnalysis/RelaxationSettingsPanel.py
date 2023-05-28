@@ -86,7 +86,7 @@ class RelaxationFittingPanel(GuiFittingPanel):
          Auto-set the BarGraph Y widget to show the first Argument Result based on the model"""
         self._commonCallback(*args)
         appearancePanel = self.guiModule.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)
-        yAxisWidget = appearancePanel.getWidget(guiNameSpaces.WidgetVarName_BarGraphYcolumnName)
+        yAxisWidget = appearancePanel.getWidget(guiNameSpaces.WidgetVarName_MainPlotYcolumnName)
         backend = self.guiModule.backendHandler
         model = backend.currentFittingModel
         if model is not None and model.ModelName != sv.BLANKMODELNAME:

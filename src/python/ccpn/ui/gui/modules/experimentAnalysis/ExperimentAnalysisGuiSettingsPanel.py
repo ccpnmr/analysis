@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-22 11:52:50 +0100 (Mon, May 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-28 11:06:25 +0100 (Sun, May 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -718,7 +718,7 @@ class GuiCalculationPanel(GuiSettingPanel):
          Auto-set the BarGraph to show the first Argument Result based on the model"""
         self._commonCallback(*args)
         appearancePanel = self.guiModule.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)
-        yAxisWidget = appearancePanel.getWidget(guiNameSpaces.WidgetVarName_BarGraphYcolumnName)
+        yAxisWidget = appearancePanel.getWidget(guiNameSpaces.WidgetVarName_MainPlotYcolumnName)
         backend = self.guiModule.backendHandler
         currentCalculationModel = backend.currentCalculationModel
         if currentCalculationModel is not None and currentCalculationModel.ModelName != sv.BLANKMODELNAME:
@@ -868,6 +868,8 @@ TABPOS += 1
 #####################################################################
 
 class AppearancePanel(GuiSettingPanel):
+
+    """ All changes in appearance will be reflected straight away on the gui. Do not put on the queue for the update button. """
     tabPosition = TABPOS
     tabName = guiNameSpaces.Label_GeneralAppearance
     tabTipText = ''
@@ -912,14 +914,30 @@ class AppearancePanel(GuiSettingPanel):
                                         'selectedInd': 0,
                                         }}}),
 
-            (guiNameSpaces.WidgetVarName_BarGraphSeparator,
-             {'label': guiNameSpaces.Label_BarGraphAppearance,
+            (guiNameSpaces.WidgetVarName_MainPlotSeparator,
+             {'label': guiNameSpaces.Label_MainPlotAppearance,
               'type': LabeledHLine,
-              'kwds': {'text': guiNameSpaces.Label_BarGraphAppearance,
+              'kwds': {'text': guiNameSpaces.Label_MainPlotAppearance,
                        'height': 30,
                        'colour': DividerColour,
                        'gridSpan': (1, 2),
-                       'tipText': guiNameSpaces.TipText_BarGraphAppearance}}),
+                       'tipText': guiNameSpaces.TipText_MainPlotAppearance}}),
+
+            (guiNameSpaces.WidgetVarName_PlotType,
+             {'label': guiNameSpaces.Label_PlotType,
+              'type': compoundWidget.RadioButtonsCompoundWidget,
+              'postInit': None,
+              'callBack': self._plotTypeChanged,
+              'enabled': True,
+              'kwds': {'labelText': guiNameSpaces.Label_PlotType,
+                       'hAlign': 'l',
+                       'tipText': '',
+                       'fixedWidths': SettingsWidgetFixedWidths,
+                       'compoundKwds': {'texts': guiNameSpaces.PlotTypes,
+                                        'tipTexts': ['',''],
+                                        'direction': 'v',
+                                        'selectedInd': 0,
+                                        }}}),
 
             (guiNameSpaces.WidgetVarName_PlotViewMode,
              {'label': guiNameSpaces.Label_PlotViewMode,
@@ -939,29 +957,29 @@ class AppearancePanel(GuiSettingPanel):
 
             (guiNameSpaces.WidgetVarName_Chain,
              {'label': guiNameSpaces.Label_Chain,
-              'callBack': self._commonCallback,
+              'callBack': self._updateMainPlotPanel,
               'tipText': guiNameSpaces.TipText_Chain,
               'type': objectPulldowns.ChainPulldown,
               'enabled': True,
               'kwds': {'labelText': guiNameSpaces.Label_Chain,
                        'tipText': guiNameSpaces.TipText_Chain,
-                       'callback': self._commonCallback,
+                       'callback': self._updateMainPlotPanel,
                        'objectName': guiNameSpaces.WidgetVarName_Chain,
                        'fixedWidths': SettingsWidgetFixedWidths}}),
 
-            (guiNameSpaces.WidgetVarName_BarGraphXcolumnName,
-             {'label': guiNameSpaces.Label_XcolumnName,
-              'callBack': self._changeBarAxis,
-              'tipText': guiNameSpaces.TipText_XcolumnName,
+            (guiNameSpaces.WidgetVarName_MainPlotXcolumnName,
+             {'label': guiNameSpaces.Label_MainPlotXcolumnName,
+              'callBack':self._updateMainPlotPanel,
+              'tipText': guiNameSpaces.TipText_MainPlotXcolumnName,
               'type': compoundWidget.PulldownListCompoundWidget,
               'enabled': True,
-              'kwds': {'labelText': guiNameSpaces.Label_XcolumnName,
-                       'tipText': guiNameSpaces.TipText_XcolumnName,
+              'kwds': {'labelText': guiNameSpaces.Label_MainPlotXcolumnName,
+                       'tipText': guiNameSpaces.TipText_MainPlotXcolumnName,
                        'texts': [],
                        'fixedWidths': SettingsWidgetFixedWidths}}),
-            (guiNameSpaces.WidgetVarName_BarGraphYcolumnName,
+            (guiNameSpaces.WidgetVarName_MainPlotYcolumnName,
              {'label': guiNameSpaces.Label_YcolumnName,
-              'callBack': self._changeBarAxis,
+              'callBack': self._updateMainPlotPanel,
               'tipText': guiNameSpaces.TipText_YcolumnName,
               'type': compoundWidget.PulldownListCompoundWidget,
               'enabled': True,
@@ -998,7 +1016,7 @@ class AppearancePanel(GuiSettingPanel):
             (guiNameSpaces.WidgetVarName_ThreshValue,
              {'label': guiNameSpaces.Label_ThreshValue,
               'tipText': guiNameSpaces.TipText_ThreshValue,
-              'callBack': self._commonCallback,
+              'callBack': self._thresholdValueChangedCallback,
               'enabled': True,
               'type': compoundWidget.DoubleSpinBoxCompoundWidget,
               '_init': None,
@@ -1012,8 +1030,8 @@ class AppearancePanel(GuiSettingPanel):
             (guiNameSpaces.WidgetVarName_WindowRollingAverage,
              {'label': guiNameSpaces.Label_WindowRollingAverage,
               'tipText': guiNameSpaces.TipText_WindowRollingAverage,
-              'callBack': self._commonCallback,
-              'enabled': True,
+              'callBack': self._updateMainPlotPanel,
+              'enabled': False,
               'type': compoundWidget.DoubleSpinBoxCompoundWidget,
               '_init': None,
               'kwds': {'labelText': guiNameSpaces.Label_WindowRollingAverage,
@@ -1024,7 +1042,8 @@ class AppearancePanel(GuiSettingPanel):
 
             (guiNameSpaces.WidgetVarName_AboveThrColour,
              {'label': guiNameSpaces.Label_AboveThrColour,
-              'callBack': self._commonCallback,
+              'callBack': self._updateMainPlotPanel,
+              'enabled': True,
               'tipText': guiNameSpaces.TipText_AboveThrColour,
               'type': compoundWidget.ColourSelectionCompoundWidget,
               'kwds': {'labelText': guiNameSpaces.Label_AboveThrColour,
@@ -1035,8 +1054,8 @@ class AppearancePanel(GuiSettingPanel):
                                         }}}),
             (guiNameSpaces.WidgetVarName_BelowThrColour,
              {'label': guiNameSpaces.Label_BelowThrColour,
-              'callBack': self._commonCallback,
-
+              'callBack':self._updateMainPlotPanel,
+              'enabled': True,
               'tipText': guiNameSpaces.TipText_BelowThrColour,
               'type': compoundWidget.ColourSelectionCompoundWidget,
               'kwds': {'labelText': guiNameSpaces.Label_BelowThrColour,
@@ -1046,8 +1065,8 @@ class AppearancePanel(GuiSettingPanel):
                        'compoundKwds': {'includeGradients': False}}}),
             (guiNameSpaces.WidgetVarName_UntraceableColour,
              {'label': guiNameSpaces.Label_UntraceableColour,
-              'callBack': self._commonCallback,
-
+              'callBack': self._updateMainPlotPanel,
+              'enabled': True,
               'tipText': guiNameSpaces.TipText_UntraceableColour,
               'type': compoundWidget.ColourSelectionCompoundWidget,
               'kwds': {'labelText': guiNameSpaces.Label_UntraceableColour,
@@ -1057,7 +1076,8 @@ class AppearancePanel(GuiSettingPanel):
                        'compoundKwds': {'includeGradients': False}}}),
             (guiNameSpaces.WidgetVarName_ThrColour,
              {'label': guiNameSpaces.Label_ThrColour,
-              'callBack': self._commonCallback,
+              'enabled': True,
+              'callBack': self._updateMainPlotPanel,
               'tipText': guiNameSpaces.TipText_ThrColour,
               'type': compoundWidget.ColourSelectionCompoundWidget,
               'kwds': {'labelText': guiNameSpaces.Label_ThrColour,
@@ -1068,8 +1088,9 @@ class AppearancePanel(GuiSettingPanel):
                                         }}}),
             (guiNameSpaces.WidgetVarName_RALColour,
              {'label': guiNameSpaces.Label_RALColour,
-              'callBack': self._commonCallback,
+              'callBack': self._updateMainPlotPanel,
               'tipText': guiNameSpaces.TipText_RALColour,
+              'enabled': False,
               'type': compoundWidget.ColourSelectionCompoundWidget,
               'kwds': {'labelText': guiNameSpaces.Label_RALColour,
                        'tipText': guiNameSpaces.TipText_RALColour,
@@ -1144,14 +1165,20 @@ class AppearancePanel(GuiSettingPanel):
         ))
         return self.widgetDefinitions
 
+    def _plotTypeChanged(self):
+
+        panel = self.guiModule.panelHandler.getPanel(guiNameSpaces.MainPlotPanel)
+        w = self.getWidget(guiNameSpaces.WidgetVarName_PlotType)
+        t = w.getByText()
+        panel.setPlotType(t)
+        self._updateMainPlotPanel()
 
     def _viewModeChanged(self, *args):
-        barGraphPanel = self.guiModule.panelHandler.getPanel(guiNameSpaces.BarPlotPanel)
-        if barGraphPanel is not None:
-            viewModeWidget = self.getWidget(guiNameSpaces.WidgetVarName_PlotViewMode)
-            viewMode = viewModeWidget.getByText()
-            barGraphPanel.setViewMode(viewMode)
-            self._commonCallback()
+        panel = self.guiModule.panelHandler.getPanel(guiNameSpaces.MainPlotPanel)
+        viewModeWidget = self.getWidget(guiNameSpaces.WidgetVarName_PlotViewMode)
+        viewMode = viewModeWidget.getByText()
+        panel.setViewMode(viewMode)
+        self._updateMainPlotPanel()
 
     def _setThresholdValueForData(self, *args):
         mode = None
@@ -1162,7 +1189,7 @@ class AppearancePanel(GuiSettingPanel):
         factorW = self.getWidget(guiNameSpaces.WidgetVarName_ThreshValueFactor)
         if factorW:
             factor = factorW.getValue()
-        yColumnNameW = self.getWidget(guiNameSpaces.WidgetVarName_BarGraphYcolumnName)
+        yColumnNameW = self.getWidget(guiNameSpaces.WidgetVarName_MainPlotYcolumnName)
         if yColumnNameW:
             yColumnName = yColumnNameW.getText()
         else:
@@ -1173,7 +1200,17 @@ class AppearancePanel(GuiSettingPanel):
                 thresholdValueW = self.getWidget(guiNameSpaces.WidgetVarName_ThreshValue)
                 if thresholdValueW and value:
                     thresholdValueW.setValue(round(value, 3))
-
+    
+    def _thresholdValueChangedCallback(self, *args, **kwargs):
+        """ Called from doubleSpinBox"""
+        thresholdValueW = self.getWidget(guiNameSpaces.WidgetVarName_ThreshValue)
+        if thresholdValueW:
+            value = thresholdValueW.getValue()
+            panel = self.guiModule.panelHandler.getPanel(guiNameSpaces.MainPlotPanel)
+            panel.thresholdValue = value
+            panel.updatePanel()
+            
+    
     def _getThresholdValueFromBackend(self, columnName, calculationMode, factor):
 
         """ Get the threshold value based on selected Y axis. called from _setThresholdValueForData"""
@@ -1188,10 +1225,10 @@ class AppearancePanel(GuiSettingPanel):
     #######  Set the pulldown options for the X-Y axis in the bar/scatter plot    ######
     ######################################################################################
 
-    def _changeBarAxis(self, *args, **kwargs):
-        barPlot = self.guiModule.panelHandler.getPanel(guiNameSpaces.BarPlotPanel)
-        if barPlot is not None:
-            barPlot.updatePanel()
+    def _updateMainPlotPanel(self, *args, **kwargs):
+        panel = self.guiModule.panelHandler.getPanel(guiNameSpaces.MainPlotPanel)
+        if panel is not None:
+            panel.updatePanel()
 
     def _getNumericColumnsFromData(self):
         allOptions = []
@@ -1208,7 +1245,7 @@ class AppearancePanel(GuiSettingPanel):
         :return: dict
         """
         availableColumns = self._getNumericColumnsFromData()
-        topSelection = guiNameSpaces.XBarGraphColumnNameOptions
+        topSelection = guiNameSpaces.XMainPlotColumnNameOptions
         preferred = [sv.NMRRESIDUECODE,]
         # Scatter plot only
         scatterOnly = [i for i in availableColumns if i not in topSelection]
@@ -1275,14 +1312,15 @@ class AppearancePanel(GuiSettingPanel):
                 headerItem.setEnabled(False)
                 for value in values:
                     pulldown.addItem(value)
-            pulldown.select(preferred[-1])
+            if len(preferred)>0:
+                pulldown.select(preferred[-1])
 
     def _setXYAxisSelectors(self):
 
         Xdata= self._getXaxisData()
         Ydata = self._getYaxisData()
-        xColumnNameW = self.getWidget(guiNameSpaces.WidgetVarName_BarGraphXcolumnName)
-        yColumnNameW = self.getWidget(guiNameSpaces.WidgetVarName_BarGraphYcolumnName)
+        xColumnNameW = self.getWidget(guiNameSpaces.WidgetVarName_MainPlotXcolumnName)
+        yColumnNameW = self.getWidget(guiNameSpaces.WidgetVarName_MainPlotYcolumnName)
 
         if xColumnNameW is not None:
             self._addDataToAxisSelectors(xColumnNameW.pulldownList, Xdata)
@@ -1305,12 +1343,11 @@ class AppearancePanel(GuiSettingPanel):
             table = tablePanel.mainTable
             return table
 
-    def _getMainBarGraphWidget(self):
+    def _getMainPlotWidget(self):
 
-        barGraphPanel = self.guiModule.panelHandler.getPanel(guiNameSpaces.BarPlotPanel)
-        if barGraphPanel is not None:
-            barGraphWidget = barGraphPanel.barGraphWidget
-            return barGraphWidget
+        panel = self.guiModule.panelHandler.getPanel(guiNameSpaces.MainPlotPanel)
+        if panel is not None:
+            return panel.mainPlotWidget
 
     def _mainTableColumnViewCallback(self, *args):
 
@@ -1337,9 +1374,9 @@ class AppearancePanel(GuiSettingPanel):
         widget = self.getWidget(guiNameSpaces.WidgetVarName_BarXTickOpt)
         if widget:
             value = widget.getByText()
-            barGraph = self._getMainBarGraphWidget()
-            barGraph.setTickOption(value)
-            self._commonCallback()
+            panel = self.guiModule.panelHandler.getPanel(guiNameSpaces.MainPlotPanel)
+            panel.setXAxisTickOption(value)
+            self._updateMainPlotPanel()
 
 
 TABPOS += 1

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-22 11:52:50 +0100 (Mon, May 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-28 11:06:25 +0100 (Sun, May 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -132,7 +132,7 @@ class ToolBarPanel(GuiPanel):
         pymolScriptsPath = fetchDir(scriptsPath, guiNameSpaces.PYMOL)
         settingsDict = self.guiModule.settingsPanelHandler.getAllSettings().get(guiNameSpaces.Label_GeneralAppearance,
                                                                                 {})
-        barPanel = self.guiModule.panelHandler.getPanel(guiNameSpaces.BarPlotPanel)
+        barPanel = self.guiModule.panelHandler.getPanel(guiNameSpaces.MainPlotPanel)
         barGraph = barPanel.barGraphWidget
         moleculeFilePath = settingsDict.get(guiNameSpaces.WidgetVarName_MolStructureFile, '')
         moleculeFilePath = aPath(moleculeFilePath)
@@ -250,7 +250,7 @@ class ExperimentAnalysisPlotToolBar(ToolBar):
     def getButton(self, name):
         return self.toolButtons.get(name)
 
-class BarPlotToolBar(ExperimentAnalysisPlotToolBar):
+class MainPlotToolBar(ExperimentAnalysisPlotToolBar):
 
     def __init__(self, parent, plotItem, guiModule, **kwds):
         super().__init__(parent, plotItem=plotItem, guiModule=guiModule, **kwds)

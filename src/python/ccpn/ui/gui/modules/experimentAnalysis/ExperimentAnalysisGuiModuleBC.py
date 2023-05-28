@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-22 11:52:50 +0100 (Mon, May 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-28 11:06:25 +0100 (Sun, May 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -42,7 +42,7 @@ import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiSettingsPanel as settingsPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBars import ToolBarPanel, PanelUpdateState
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiTable import TablePanel
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisBarPlotPanel import BarPlotPanel
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisMainPlotPanel import MainPlotPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisFitPlotPanel import FitPlotPanel
 
 
@@ -150,7 +150,7 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         self.panelHandler.addToolBar(ToolBarPanel(self))
         self.panelHandler.addPanel(TablePanel(self))
         self.panelHandler.addPanel(FitPlotPanel(self))
-        self.panelHandler.addPanel(BarPlotPanel(self))
+        self.panelHandler.addPanel(MainPlotPanel(self))
 
     def _addCommonSettingsPanels(self):
         """

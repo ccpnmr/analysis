@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-22 11:52:50 +0100 (Mon, May 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-28 11:06:25 +0100 (Sun, May 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -38,14 +38,14 @@ TRIANGLE_DOWN_HTML = '&#9660;'
 #### colours
 BackgroundColour = gs.getColours()[gs.CCPNGLWIDGET_HEXBACKGROUND]
 
-## Default fallback colours for BarGraph.
+## Default fallback colours for MainPlot.
 BRUSHLABEL = 'brush'
 BAR_aboveBrushHex = '#1020aa'  # dark blue
 BAR_belowBrushHex = '#FF0000'  # red
 BAR_untracBrushHex = '#b0b0b0'  # light grey
 BAR_thresholdLineHex = '#0000FF'  # blue
 
-## Startup colour-names for BarGraph-settings.
+## Startup colour-names for MainPlot-settings.
 BAR_aboveBrush = 'CCPNgreen'
 BAR_belowBrush = 'CCPNyellow'
 BAR_untracBrush = 'CCPNpurple'
@@ -266,9 +266,13 @@ WidgetVarName_NavigateToOpt = 'NavigateToOnClick'
 Label_NavigateToOpt = 'Navigate trigger'
 TipText_NavigateToOpt = 'Navigate to Peaks/NmrResidues in the selected SpectrumDisplay(s) using Single or Double click on the main table'
 
-WidgetVarName_BarGraphSeparator = 'GeneralAppearanceSeparator'
-Label_BarGraphAppearance = 'BarGraph'
-TipText_BarGraphAppearance = 'General Appearance settings for the BarGraph'
+WidgetVarName_MainPlotSeparator = 'MainPlotSeparator'
+Label_MainPlotAppearance = 'MainPlot'
+TipText_MainPlotAppearance = 'General Appearance settings for the Main Plot Widget'
+
+WidgetVarName_PlotType = 'PlotTypeSelection'
+Label_PlotType = 'Plot Type'
+TipText_PlotType = 'Select the plot Type.'
 
 WidgetVarName_PlotViewMode = 'PlotViewModeSelection'
 Label_PlotViewMode = 'View Mode'
@@ -291,13 +295,13 @@ WidgetVarName_Chain = 'ChainSelector'
 Label_Chain = 'Chain'
 TipText_Chain = f'Select the chain to display on plots. Only available for the {PlotViewMode_Backbone} view mode.'
 
-WidgetVarName_BarGraphXcolumnName = 'XcolumnName'
-Label_XcolumnName = 'X Axis Data'
-TipText_XcolumnName = 'Set the BarGraph X Axis Data'
+WidgetVarName_MainPlotXcolumnName = 'XcolumnName'
+Label_MainPlotXcolumnName = 'X Axis Data'
+TipText_MainPlotXcolumnName = 'Set the Main Plot X Axis Data'
 
-WidgetVarName_BarGraphYcolumnName = 'YcolumnName'
+WidgetVarName_MainPlotYcolumnName = 'YcolumnName'
 Label_YcolumnName = 'Y Axis Data'
-TipText_YcolumnName = 'Set the BarGraph Y Axis Data'
+TipText_YcolumnName = 'Set the Main Plot Y Axis Data'
 
 WidgetVarName_ThreshValue = 'ThreshValue'
 Label_ThreshValue = 'Threshold Value'
@@ -326,15 +330,15 @@ WidgetVarName_BarXTickOpt = 'BarXTickOpt'
 Label_BarXTickOpt = 'X axis Ticks'
 TipText_BarXTickOpt = 'Display X axis ticks option. Display all ticks or show major/minor depending on zoom levels'
 
-### Threshold Values for BarGraph options
+### Threshold Values for MainPlot options
 
 WidgetVarName_AboveThrColour = 'AboveThrColour'
 Label_AboveThrColour = 'Above Threshold Colour'
-TipText_AboveThrColour = 'Select the colour for bars above a threshold line value in the BarPlot'
+TipText_AboveThrColour = 'Select the colour for bars above a threshold line value in the MainPlot'
 
 WidgetVarName_BelowThrColour = 'BelowThrColour'
 Label_BelowThrColour = 'Below Threshold Colour'
-TipText_BelowThrColour = 'Select the colour for bars below a threshold line value in the BarPlot'
+TipText_BelowThrColour = 'Select the colour for bars below a threshold line value in the MainPlot'
 
 WidgetVarName_UntraceableColour = 'UntraceableColour'
 Label_UntraceableColour = 'Untraceable Observation Colour'
@@ -342,11 +346,11 @@ TipText_UntraceableColour = 'Select the colour for for Untraceable Observations.
 
 WidgetVarName_ThrColour = 'ThresholdColour'
 Label_ThrColour = 'Threshold Line Colour'
-TipText_ThrColour = 'Select the colour for the threshold line in the BarPlot'
+TipText_ThrColour = 'Select the colour for the threshold line in the MainPlot'
 
 WidgetVarName_RALColour = 'RollingAverageColour'
 Label_RALColour = 'Rolling Average Line Colour'
-TipText_RALColour = 'Select the colour for the rolling average line in the BarPlot'
+TipText_RALColour = 'Select the colour for the rolling average line in the MainPlot'
 
 WidgetVarName_MolStrucSeparator = 'MolStructureSeparator'
 Label_MolStrucSeparator = 'Molecular Viewer'
@@ -402,7 +406,7 @@ ShowStructureButton = 'showStructureButton'
 Callback = 'Callback'
 RefitButton = 'refitButton'
 
-BarPlotPanel = 'BarPlotPanel'
+MainPlotPanel = 'MainPlotPanel'
 RelaxationFittingPlotPanel = 'RelaxationFittingPlotPanel'
 
 CSMFittingPlotPanel = 'CSMFittingPlotPanel'
@@ -425,13 +429,14 @@ _Errors = 'Errors'
 _Fitting = 'Fitting'
 TableGrouppingHeaders = [_Assignments, _SeriesSteps, _Calculation, _Fitting, _Stats, _Errors]
 
-### Appearance BarGraph
+### Appearance MainPlot
 
+PlotTypes = ['scatter', 'bar']
 PlotViewModes = [PlotViewMode_Mirrored, PlotViewMode_Backbone]
 PlotViewModesVars = [WidgetVarName_PlotMirrored, WidgetVarName_PlotSecondaryStructure]
 PlotViewModesTT = [TipText_Mirrored, TipText_SS]
 
-XBarGraphColumnNameOptions = [
+XMainPlotColumnNameOptions = [
                                seriesVariables.INDEX,
                                seriesVariables.COLLECTIONID,
                                seriesVariables.COLLECTIONPID,

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-28 11:06:25 +0100 (Sun, May 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-28 11:53:18 +0100 (Sun, May 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -108,6 +108,31 @@ class MainPlotPanel(GuiPanel):
         self.toolbar = MainPlotToolBar(parent=self, plotItem=self.mainPlotWidget, guiModule=self.guiModule, grid=(0, 0), hAlign='l', hPolicy='preferred')
         self.currentCollectionLabel = Label(self , text='', grid=(0, 1), hAlign='r',)
 
+    ###################################################################
+    #########################     Public methods     #########################
+    ###################################################################
+
+    def updatePanel(self, *args, **kwargs):
+        getLogger().debug('Updating  barPlot panel')
+        dataFrame = self.guiModule.getVisibleDataFrame(includeHiddenColumns=True)
+
+        if dataFrame is None:
+            self.mainPlotWidget.clear()
+            return
+
+        if self.viewMode == guiNameSpaces.PlotViewMode_Backbone:
+            chainWidget = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_Chain)
+            if chainWidget is not None:
+                pid = chainWidget.getText()
+                chain = self.project.getByPid(pid)
+                if chain is None:
+                    getLogger().warning(f'Changed view mode. Impossible to display by {self.viewMode}. No chains available in the project.')
+                    return
+                dataFrame =  self._filterBySecondaryStructure(dataFrame, chain)
+        self._plotDataFrame(dataFrame)
+        self.fitXYZoom()
+
+
     @property
     def plotType(self):
         return self._plotType
@@ -115,14 +140,6 @@ class MainPlotPanel(GuiPanel):
     def setPlotType(self, plotType):
         if plotType not in self.mainPlotWidget.allowedPlotTypes:
             raise RuntimeError(f'Plot type {plotType} not implemented')
-
-        # called by the toolbar
-        # check if the selected columns can perform the plot
-        # if not raise popup warning, revert
-        # switch the toggle buttons
-        # clear/reset the plot.
-        # plot again the data
-
         self._plotType = plotType
         self.updatePanel()
 
@@ -135,32 +152,75 @@ class MainPlotPanel(GuiPanel):
             raise RuntimeError(f'View Mode {mode} not implemented')
         self._viewMode = mode
 
+    @property
+    def xColumnName(self):
+        """Returns selected X axis  Column  name from the settings widget """
+        w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_MainPlotXcolumnName)
+        return w.getText()
+
+    @property
+    def yColumnName(self):
+        """Returns selected y Column name """
+        w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_MainPlotYcolumnName)
+        return w.getText()
+
+    @property
+    def thresholdValue(self):
+        return self._hThresholdValue
+
+    @thresholdValue.setter
+    def thresholdValue(self, value):
+        self._hThresholdValue = value
+
+    def setYLabel(self, label=''):
+        self.mainPlotWidget.plotWidget.setLabel('left', label)
+
+    def setXLabel(self, label='', includeSortingLabel=True):
+        htmlLabel = f'''<p><strong>{label}</strong></p> '''
+        if includeSortingLabel:
+            sortingLabel, sortOrder = self.guiModule._getSortingHeaderFromMainTable()
+            if self.viewMode == guiNameSpaces.PlotViewMode_Backbone:
+                sortingLabel, sortOrder = sv.NMRRESIDUECODE, 0  # this viewmode is only sorted by ResidueCode (ascending)
+            if sortingLabel not in [label, '', ' ', None]:
+                upSymbol = guiNameSpaces.TRIANGLE_UP_HTML
+                downSymbol = guiNameSpaces.TRIANGLE_DOWN_HTML
+                sortOrderIcon = upSymbol if sortOrder == 0 else downSymbol
+                sortingLabel = f' (Sorted by {sortingLabel} {sortOrderIcon})'
+                htmlLabel = f''' <p><strong>{label}</strong> <em>{sortingLabel}</em></p> '''  #Use HTML to have different fonts in the same label.
+
+        self.mainPlotWidget.plotWidget.setLabel('bottom', htmlLabel)
+
+
+    ####################################################################
+    #########################     Private methods     #########################
+    ####################################################################
+
+    def _plotDataFrame(self, dataFrame):
+        """ Plot the dataframe using information from the settings panel.
+            Data is plotted in exactly the same sorting order as given as it usually mirrored to the main table view.
+            See/use updatePanel.
+         """
+        dataFrame.set_index(sv.INDEX, drop=False, inplace=True)
+        dataFrame = self._setColoursByThreshold(dataFrame)
+        dataFrame.loc[dataFrame.index, sv.INDEX] = dataFrame.index
+        self._plottedDf = dataFrame
+
+        self.mainPlotWidget.plotData(dataFrame,
+                                     plotName=self.plotType,
+                                     plotType=self.plotType,
+                                     xColumnName= self.xColumnName,
+                                     yColumnName=self.yColumnName,
+                                     objectColumnName=seriesVariables.COLLECTIONPID,
+                                     colourColumnName=guiNameSpaces.BRUSHLABEL,
+                                     clearPlot=True,
+                                     )
+        self._updateAxisLabels()
+
     def _isItemToggledOn(self, itemName):
         action = self.toolbar.getButton(itemName)
         if action is not None:
             return action.isChecked()
         return False
-
-    def setXLabel(self, label='', includeSortingLabel=True):
-
-        htmlLabel = f'''<p><strong>{label}</strong></p> '''
-
-        if includeSortingLabel:
-            sortingLabel, sortOrder = self.guiModule._getSortingHeaderFromMainTable()
-            if self.viewMode == guiNameSpaces.PlotViewMode_Backbone:
-                sortingLabel, sortOrder = sv.NMRRESIDUECODE, 0  # this viewmode is only sorted by ResidueCode (ascending)
-
-            if sortingLabel not in [label, '', ' ', None] :
-                upSymbol = guiNameSpaces.TRIANGLE_UP_HTML
-                downSymbol =  guiNameSpaces.TRIANGLE_DOWN_HTML
-                sortOrderIcon = upSymbol if sortOrder == 0 else downSymbol
-                sortingLabel = f' (Sorted by {sortingLabel} {sortOrderIcon})'
-                htmlLabel = f''' <p><strong>{label}</strong> <em>{sortingLabel}</em></p> ''' #Use HTML to have different fonts in the same label.
-
-        self.mainPlotWidget.plotWidget.setLabel('bottom', htmlLabel)
-
-    def setYLabel(self, label=''):
-        self.mainPlotWidget.plotWidget.setLabel('left', label)
 
 
     def _thresholdLineMoved(self):
@@ -182,209 +242,59 @@ class MainPlotPanel(GuiPanel):
             self.mainPlotWidget.zoomFull()
 
     @property
-    def xColumnName(self):
+    def _aboveThresholdBrushColour(self):
         """Returns selected colour name """
-        value = None
-        if self._appearancePanel:
-            w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_MainPlotXcolumnName)
-            if w:
-                value = w.getText()
-        return value
+        return self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_AboveThrColour).getText()
 
-    @property
-    def yColumnName(self):
-        """Returns selected y Column name """
-        value = None
-        if self._appearancePanel:
-            w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_MainPlotYcolumnName)
-            if w:
-                value = w.getText()
-        return value
-
-    @property
-    def thresholdValue(self):
-        return self._hThresholdValue
-
-    @thresholdValue.setter
-    def thresholdValue(self, value):
-        self._hThresholdValue = value
-
-    @property
-    def aboveThresholdBrushColour(self):
-        """Returns selected colour name """
-        value = None
-        if self._appearancePanel:
-            w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_AboveThrColour)
-            if w:
-                value = w.getText()
-        return value
-
-    @aboveThresholdBrushColour.setter
-    def aboveThresholdBrushColour(self, colourName):
-        if self._appearancePanel:
+    @_aboveThresholdBrushColour.setter
+    def _aboveThresholdBrushColour(self, colourName):
             w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_AboveThrColour)
             if w:
                 w.select(colourName)
 
     @property
-    def belowThresholdBrushColour(self):
+    def _belowThresholdBrushColour(self):
         """Returns selected colour name"""
-        value = None
-        if self._appearancePanel:
-            w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_BelowThrColour)
-            if w:
-                value = w.getText()
-        return value
+        return self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_BelowThrColour).getText()
 
-    @belowThresholdBrushColour.setter
-    def belowThresholdBrushColour(self, colourName):
-        if self._appearancePanel:
-            w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_BelowThrColour)
-            if w:
-                w.select(colourName)
+    @_belowThresholdBrushColour.setter
+    def _belowThresholdBrushColour(self, colourName):
+        w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_BelowThrColour)
+        if w:
+            w.select(colourName)
 
     @property
-    def untraceableBrushColour(self):
+    def _untraceableBrushColour(self):
         """Returns selected colour name"""
-        value = None
-        if self._appearancePanel:
-            w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_UntraceableColour)
-            if w:
-                value = w.getText()
-        return value
+        return self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_UntraceableColour).getText()
 
-    @untraceableBrushColour.setter
-    def untraceableBrushColour(self, colourName):
-        if self._appearancePanel:
+    @_untraceableBrushColour.setter
+    def _untraceableBrushColour(self, colourName):
             w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_UntraceableColour)
             if w:
                 w.select(colourName)
 
     @property
-    def thresholdBrushColour(self):
+    def _thresholdBrushColour(self):
         """Returns selected colour name"""
-        value = None
-        if self._appearancePanel:
-            w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_ThrColour)
-            if w:
-                value = w.getText()
-        return value
+        return self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_ThrColour).getText()
 
-    @thresholdBrushColour.setter
-    def thresholdBrushColour(self, colourName):
+    @_thresholdBrushColour.setter
+    def _thresholdBrushColour(self, colourName):
         if self._appearancePanel:
             w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_ThrColour)
             if w:
                 w.select(colourName)
 
     @property
-    def rollingAverageBrushColour(self):
+    def _rollingAverageBrushColour(self):
         """Returns selected colour name"""
-        value = None
-        if self._appearancePanel:
-            w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_RALColour)
-            if w:
-                value = w.getText()
-        return value
-
-    def updatePanel(self, *args, **kwargs):
-        getLogger().debug('Updating  barPlot panel')
-        dataFrame = self.guiModule.getVisibleDataFrame(includeHiddenColumns=True)
-
-        if dataFrame is None:
-            self.mainPlotWidget.clear()
-            return
-
-        if self.viewMode == guiNameSpaces.PlotViewMode_Backbone:
-            chainWidget = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_Chain)
-            if chainWidget is not None:
-                pid = chainWidget.getText()
-                chain = self.project.getByPid(pid)
-                if chain is None:
-                    getLogger().warning(f'Changed view mode. Impossible to display by {self.viewMode}. No chains available in the project.')
-                    return
-                dataFrame =  self.filterBySecondaryStructure(dataFrame, chain)
-        self.plotDataFrame(dataFrame)
-        self.fitXYZoom()
-
-
-    def _updateThresholdValueFromSettings(self, value, *args):
-        self.thresholdValue = value
-
-    def filterBySecondaryStructure(self, dataFrame, chain):
-        df = dataFrame
-        backboneAtomsComb = ['H,N', 'Hn,Nh'] # hack while developing the feature. This has to be replaced with information from the MoleculeDefinitions
-        codes = chain._sequenceCodesAsIntegers
-        expandedSequenceResCodes = np.arange(min(codes), max(codes) + 1)  #make sure we have all residues codes ( chain can have gaps if altered by the users)
-        filteredDf = pd.DataFrame()
-        bbRows = []
-        # filterDataFrame by the chain code first
-        chainCode = chain.name
-        df = df[df[seriesVariables.NMRCHAINNAME] == chainCode]
-        for resCode in expandedSequenceResCodes:
-            availableResiduesCodes = df[seriesVariables.NMRRESIDUECODE].values
-            if not str(resCode) in availableResiduesCodes:
-                filteredDf.loc[resCode, df.columns] = 0
-                filteredDf.loc[resCode, seriesVariables.NMRRESIDUECODE] = str(resCode)
-                filteredDf.loc[resCode, seriesVariables.NMRCHAINNAME] = chainCode
-                continue
-            nmrResiduesCodeDF = df[df[seriesVariables.NMRRESIDUECODE] == str(resCode)]
-            # search for the BB atoms
-            for ix, row in nmrResiduesCodeDF.iterrows():
-                atomNames = row[seriesVariables.NMRATOMNAMES]
-                if not isinstance(atomNames, str):
-                    continue
-                if atomNames in backboneAtomsComb:
-                    bbRows.append(row)
-                    filteredDf.loc[resCode, df.columns] = row.values
-        filteredDf[sv.INDEX] = np.arange(1, len(filteredDf) + 1)
-        return filteredDf
-
+        return self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_RALColour).getText()
 
     def _setBarPlottingData(self, dataFrame, xColumnName, yColumnName):
-        """Set the plotting variables from the current Dataframe.\
+        """TO BE REMOVED
         """
-        if not xColumnName in dataFrame:
-            return False
-        if not yColumnName in dataFrame:
-            return False
 
-        # set the index exactly in the same order as given (sorted by Gui Table)
-        # dataFrame[sv.ASHTAG] = np.arange(1, len(dataFrame)+1)
-        dataFrame.set_index(sv.INDEX, drop=False, inplace=True)
-        self._plottedDf = dataFrame
-
-        ## group by threshold value
-        aboveDf = dataFrame[dataFrame[yColumnName] >= self.thresholdValue]
-        belowDf = dataFrame[dataFrame[yColumnName] < self.thresholdValue]
-        untraceableDd = dataFrame[dataFrame[yColumnName].isnull()]
-        _aboveXdf = aboveDf[xColumnName]
-        self._aboveX = _aboveXdf.index
-        self._aboveY = aboveDf[yColumnName]
-        self._aboveObjects = [self.project.getByPid(x) for x in aboveDf[sv.COLLECTIONPID]]
-        ## below threshold values
-        _belowX = belowDf[xColumnName]
-        self._belowX = _belowX.index
-        self._belowY = belowDf[yColumnName]
-        self._belowObjects = [self.project.getByPid(x) for x in belowDf[sv.COLLECTIONPID]]
-        ## untraceable values
-        _untraceableX = untraceableDd[xColumnName]
-        self._untraceableX = _untraceableX.index
-        self._untraceableY = [self.guiModule.backendHandler.untraceableValue] * len(untraceableDd[yColumnName])
-        self._untraceableObjects = [self.project.getByPid(x) for x in untraceableDd[sv.COLLECTIONPID]]
-        ## Brushes
-        self._aboveBrush = colourNameToHexDict.get(self.aboveThresholdBrushColour, guiNameSpaces.BAR_aboveBrushHex)
-        self._belowBrush = colourNameToHexDict.get(self.belowThresholdBrushColour, guiNameSpaces.BAR_belowBrushHex)
-        self._untraceableBrush = colourNameToHexDict.get(self.untraceableBrushColour, guiNameSpaces.BAR_untracBrushHex)
-        self._tresholdLineBrush = colourNameToHexDict.get(self.thresholdBrushColour, guiNameSpaces.BAR_thresholdLineHex)
-        self._gradientbrushes = colorSchemeTable.get(self.aboveThresholdBrushColour, []) #in case there is one.
-        if len(self._gradientbrushes)>0:
-            _aboveBrush = splitDataByColours(self._aboveY, self._gradientbrushes)
-        else:
-            _aboveBrush = self._aboveBrush
-        self._plottedDf.loc[aboveDf.index, guiNameSpaces.BRUSHLABEL] = _aboveBrush
-        self._plottedDf.loc[belowDf.index, guiNameSpaces.BRUSHLABEL] = self._belowBrush
-        self._plottedDf.loc[untraceableDd.index, guiNameSpaces.BRUSHLABEL] = self._untraceableBrush
 
         index = dataFrame[xColumnName].index
         # get the errors
@@ -490,11 +400,11 @@ class MainPlotPanel(GuiPanel):
         untraceableDd = dataFrame[dataFrame[self.yColumnName].isnull()]
 
         ## Brushes
-        self._aboveBrush = colourNameToHexDict.get(self.aboveThresholdBrushColour, guiNameSpaces.BAR_aboveBrushHex)
-        self._belowBrush = colourNameToHexDict.get(self.belowThresholdBrushColour, guiNameSpaces.BAR_belowBrushHex)
-        self._untraceableBrush = colourNameToHexDict.get(self.untraceableBrushColour, guiNameSpaces.BAR_untracBrushHex)
-        self._tresholdLineBrush = colourNameToHexDict.get(self.thresholdBrushColour, guiNameSpaces.BAR_thresholdLineHex)
-        self._gradientbrushes = colorSchemeTable.get(self.aboveThresholdBrushColour, []) #in case there is one.
+        self._aboveBrush = colourNameToHexDict.get(self._aboveThresholdBrushColour, guiNameSpaces.BAR_aboveBrushHex)
+        self._belowBrush = colourNameToHexDict.get(self._belowThresholdBrushColour, guiNameSpaces.BAR_belowBrushHex)
+        self._untraceableBrush = colourNameToHexDict.get(self._untraceableBrushColour, guiNameSpaces.BAR_untracBrushHex)
+        self._tresholdLineBrush = colourNameToHexDict.get(self._thresholdBrushColour, guiNameSpaces.BAR_thresholdLineHex)
+        self._gradientbrushes = colorSchemeTable.get(self._aboveThresholdBrushColour, []) #in case there is one.
         if len(self._gradientbrushes)>0:
             aboveValues = aboveDf[self.yColumnName].values
             _aboveBrush = splitDataByColours(aboveValues, self._gradientbrushes)
@@ -505,52 +415,58 @@ class MainPlotPanel(GuiPanel):
         dataFrame.loc[untraceableDd.index, guiNameSpaces.BRUSHLABEL] = self._untraceableBrush
         return dataFrame
 
-    def plotDataFrame(self, dataFrame):
-        """ Plot the given columns of dataframe as bars
-         """
-        # define the colours by threshold.
 
-        dataFrame.set_index(sv.INDEX, drop=False, inplace=True)
-        dataFrame = self._setColoursByThreshold(dataFrame)
-        dataFrame.loc[dataFrame.index, sv.INDEX] = dataFrame.index
-        self._plottedDf = dataFrame
+        # windowRollingAverage =  self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_WindowRollingAverage).getValue()
+        # rollingAverage = calculateRollingAverage(y, windowRollingAverage)
+        # self._rollingAverageBrush = colourNameToHexDict.get(self.rollingAverageBrushColour, guiNameSpaces.BAR_rollingAvLine)
+        # xR = np.arange(1,len(rollingAverage)+1)
+        # self.rollingAverageLine = self.barGraphWidget.plotWidget.plotItem.plot(xR, rollingAverage, pen=self._rollingAverageBrush)
 
-        self.mainPlotWidget.plotData(dataFrame,
-                                     plotName=self.plotType,
-                                     plotType=self.plotType,
-                                     xColumnName= self.xColumnName,
-                                     yColumnName=self.yColumnName,
-                                     objectColumnName=seriesVariables.COLLECTIONPID,
-                                     colourColumnName=guiNameSpaces.BRUSHLABEL,
-                                     clearPlot=True,
-                                     )
-        self._updateAxisLabels()
+    def _updateThresholdValueFromSettings(self, value, *args):
+        self.thresholdValue = value
 
-        return
+    def _filterBySecondaryStructure(self, dataFrame, chain):
+        df = dataFrame
+        backboneAtomsComb = ['H,N', 'Hn,Nh']  # hack while developing the feature. This has to be replaced with information from the MoleculeDefinitions
+        codes = chain._sequenceCodesAsIntegers
+        expandedSequenceResCodes = np.arange(min(codes), max(codes) + 1)  #make sure we have all residues codes ( chain can have gaps if altered by the users)
+        filteredDf = pd.DataFrame()
+        bbRows = []
+        # filterDataFrame by the chain code first
+        chainCode = chain.name
+        df = df[df[seriesVariables.NMRCHAINNAME] == chainCode]
+        for resCode in expandedSequenceResCodes:
+            availableResiduesCodes = df[seriesVariables.NMRRESIDUECODE].values
+            if not str(resCode) in availableResiduesCodes:
+                filteredDf.loc[resCode, df.columns] = 0
+                filteredDf.loc[resCode, seriesVariables.NMRRESIDUECODE] = str(resCode)
+                filteredDf.loc[resCode, seriesVariables.NMRCHAINNAME] = chainCode
+                continue
+            nmrResiduesCodeDF = df[df[seriesVariables.NMRRESIDUECODE] == str(resCode)]
+            # search for the BB atoms
+            for ix, row in nmrResiduesCodeDF.iterrows():
+                atomNames = row[seriesVariables.NMRATOMNAMES]
+                if not isinstance(atomNames, str):
+                    continue
+                if atomNames in backboneAtomsComb:
+                    bbRows.append(row)
+                    filteredDf.loc[resCode, df.columns] = row.values
+        filteredDf[sv.INDEX] = np.arange(1, len(filteredDf) + 1)
+        return filteredDf
 
-
-        windowRollingAverage =  self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_WindowRollingAverage).getValue()
-        rollingAverage = calculateRollingAverage(y, windowRollingAverage)
-        self._rollingAverageBrush = colourNameToHexDict.get(self.rollingAverageBrushColour, guiNameSpaces.BAR_rollingAvLine)
-        xR = np.arange(1,len(rollingAverage)+1)
-        self.rollingAverageLine = self.barGraphWidget.plotWidget.plotItem.plot(xR, rollingAverage, pen=self._rollingAverageBrush)
-
-
-
-
-    def setXAxisTickOption(self, value):
+    def _setXAxisTickOption(self, value):
         self.mainPlotWidget._setTickOption(value)
 
-    def toggleBars(self, setVisible=True):
+    def _toggleBars(self, setVisible=True):
         self.mainPlotWidget.barsHandler.setItemsVisible(setVisible)
 
-    def toggleScatters(self, setVisible=True):
+    def _toggleScatters(self, setVisible=True):
         self.mainPlotWidget.scattersHandler.setItemsVisible(setVisible)
 
-    def toggleErrorBars(self, setVisible=True):
+    def _toggleErrorBars(self, setVisible=True):
         self.mainPlotWidget.errorBarsHandler.setItemsVisible(setVisible)
 
-    def toggleRollingAverage(self, setVisible=True):
+    def _toggleRollingAverage(self, setVisible=True):
         self.rollingAverageLine.setVisible(setVisible)
 
     def _currentCollectionCallback(self, *args):

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-22 11:52:50 +0100 (Mon, May 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-28 11:53:18 +0100 (Sun, May 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -281,7 +281,7 @@ FITTING_MODELS = f'{FITTING_MODEL}s'
 OVERRIDE_OUTPUT_DATATABLE = 'overrideOutputDataTables'
 OUTPUT_DATATABLE_NAME = 'outputDataTableName'
 BLANKMODELNAME = 'Blank'
-
+ETAS_CALCULATION_MODEL = 'ETAs Ratio'
 ## Receptor Binding Models
 ONE_SITE_BINDING_MODEL = 'One-Site (Specific) Binding'
 ONE_SITE_TOTAL_BINDING_MODEL = 'One-Site (Total) Binding'

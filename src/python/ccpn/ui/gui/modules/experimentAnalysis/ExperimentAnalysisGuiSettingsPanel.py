@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-28 11:06:25 +0100 (Sun, May 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-28 11:53:18 +0100 (Sun, May 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1375,7 +1375,7 @@ class AppearancePanel(GuiSettingPanel):
         if widget:
             value = widget.getByText()
             panel = self.guiModule.panelHandler.getPanel(guiNameSpaces.MainPlotPanel)
-            panel.setXAxisTickOption(value)
+            panel._setXAxisTickOption(value)
             self._updateMainPlotPanel()
 
 

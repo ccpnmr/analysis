@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-22 14:51:54 +0100 (Mon, May 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-28 11:53:18 +0100 (Sun, May 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -405,7 +405,7 @@ class ETACalculation(CalculationModel):
     """
     Calculate ETA Values for HSQC series
     """
-    ModelName = 'CSA Cross-Correlation Ratios'
+    ModelName =sv.ETAS_CALCULATION_MODEL
     Info = ''''''
 
     Description = '''Model:

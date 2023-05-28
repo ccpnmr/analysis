@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-28 11:06:25 +0100 (Sun, May 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-28 11:53:18 +0100 (Sun, May 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -303,13 +303,13 @@ class MainPlotToolBar(ExperimentAnalysisPlotToolBar):
 
 
     def _toggleErrorBars(self):
-        self.parentPanel.toggleErrorBars(self.sender().isChecked())
+        self.parentPanel._toggleErrorBars(self.sender().isChecked())
 
     def _toggleBars(self):
-        self.parentPanel.toggleBars(self.sender().isChecked())
+        self.parentPanel._toggleBars(self.sender().isChecked())
 
     def _toggleScatters(self):
-        self.parentPanel.toggleScatters(self.sender().isChecked())
+        self.parentPanel._toggleScatters(self.sender().isChecked())
 
     def _toggleRollingAverage(self):
-        self.parentPanel.toggleRollingAverage(self.sender().isChecked())
+        self.parentPanel._toggleRollingAverage(self.sender().isChecked())

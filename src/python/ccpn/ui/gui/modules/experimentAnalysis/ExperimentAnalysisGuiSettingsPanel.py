@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-29 10:46:29 +0100 (Mon, May 29, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-29 23:06:08 +0100 (Mon, May 29, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -594,7 +594,7 @@ class GuiCalculationPanel(GuiSettingPanel):
              {'label': guiNameSpaces.Label_CalculationOptions,
               'type': compoundWidget.RadioButtonsCompoundWidget,
               'postInit': None,
-              'callBack': self._calculationModeChanged,
+              'callBack': self._commonCallback,
               'kwds': {'labelText': guiNameSpaces.Label_CalculationOptions,
                        'hAlign': 'l',
                        'tipText': '',
@@ -630,7 +630,6 @@ class GuiCalculationPanel(GuiSettingPanel):
                                         'direction': 'v',
                                         'selectedInd': 4,
                                         }}}),
-
             (guiNameSpaces.WidgetVarName_IncludeAtoms,
              {'label': guiNameSpaces.Label_IncludeAtoms,
               'tipText': guiNameSpaces.TipText_IncludeAtoms,
@@ -685,19 +684,6 @@ class GuiCalculationPanel(GuiSettingPanel):
         """ Update the backend """
         getLogger().info('_setCalculationOptionsToBackend: NIY...')
         pass
-
-    def _calculationModeChanged(self, *args):
-        """Triggered after a change in the Calculation widget.
-         Auto-set the BarGraph to show the first Argument Result based on the model"""
-        self._commonCallback(*args)
-        appearancePanel = self.guiModule.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)
-        yAxisWidget = appearancePanel.getWidget(guiNameSpaces.WidgetVarName_MainPlotYcolumnName)
-        backend = self.guiModule.backendHandler
-        currentCalculationModel = backend.currentCalculationModel
-        if currentCalculationModel is not None and currentCalculationModel.ModelName != sv.BLANKMODELNAME:
-            firstArg, *_ = currentCalculationModel.modelArgumentNames or [None]
-            if yAxisWidget:
-                yAxisWidget.select(firstArg)
 
     def _commonCallback(self, *args):
         calculationSettings = self.getSettingsAsDict()
@@ -786,7 +772,7 @@ class GuiFittingPanel(GuiSettingPanel):
              {'label': guiNameSpaces.Label_FittingModel,
               'type': compoundWidget.RadioButtonsCompoundWidget,
               'postInit': None,
-              'callBack': self._fittingModeChanged,
+              'callBack': self._commonCallback,
               'tipText': guiNameSpaces.TipText_FittingModel,
               'enabled': True,
               'kwds': {'labelText': guiNameSpaces.Label_FittingModel,
@@ -809,11 +795,6 @@ class GuiFittingPanel(GuiSettingPanel):
         """ Update FittingModel Settings at Backend"""
         self._setFittingSettingToBackend()
         super()._commonCallback(self, *args)
-
-    def _fittingModeChanged(self, *args):
-        """Triggered after a change in the fitting widget.
-         Auto-set the BarGraph Y widget to show the first Argument Result based on the model"""
-        self._commonCallback(*args)
 
     def _setFittingSettingToBackend(self):
         """ Update the backend """
@@ -1217,13 +1198,16 @@ class AppearancePanel(GuiSettingPanel):
         """
         availableColumns = self._getNumericColumnsFromData()
         topSelection = guiNameSpaces.XMainPlotColumnNameOptions
+        xColumnNameW = self.getWidget(guiNameSpaces.WidgetVarName_MainPlotXcolumnName)
+        selected = xColumnNameW.getText()
         preferred = [sv.NMRRESIDUECODE,]
         # Scatter plot only
         scatterOnly = [i for i in availableColumns if i not in topSelection]
         #  make the order
         data = {
-                'preferred': preferred,
-                '-- Default --' : topSelection,
+            'selected': selected,
+            'preferred': preferred,
+                '-- Default for X Axis--' : topSelection,
                 '-- Others -- (scatter only)': scatterOnly,
             }
         return data
@@ -1243,19 +1227,24 @@ class AppearancePanel(GuiSettingPanel):
         fittingModel = backend.currentFittingModel
         calcModel = backend.currentCalculationModel
 
+        yColumnNameW = self.getWidget(guiNameSpaces.WidgetVarName_MainPlotYcolumnName)
+        selected = yColumnNameW.getText()
+
         if calcModel is not None:  # the calculation model has priority
             if calcModel.ModelName != sv.BLANKMODELNAME:
                 moArgs = calcModel.modelArgumentNames
                 topSelection.extend(moArgs)
                 preferredSelection = calcModel._preferredYPlotArgName
-                preferred.append(preferredSelection)
+                if preferred in availableColumns:
+                    preferred.append(preferredSelection)
 
         if fittingModel is not None:
             if fittingModel.ModelName != sv.BLANKMODELNAME:
                 allArgs = fittingModel.getAllArgNames()
                 if calcModel is not None and not calcModel._disableFittingModels:
                     topSelection.extend(allArgs)
-                    preferred.append(fittingModel._preferredYPlotArgName)
+                    if preferred in availableColumns:
+                        preferred.append(fittingModel._preferredYPlotArgName)
                 elif calcModel is not None and calcModel._disableFittingModels:
                     otherFromFittingDisabled.extend(allArgs)
 
@@ -1264,35 +1253,56 @@ class AppearancePanel(GuiSettingPanel):
         excludedFromPreferred = guiNameSpaces._ExcludedFromPreferredYAxisOptions
         others = [i for i in availableColumns if i not in topSelection]
         others += otherFromFittingDisabled
-
         data = {
+                'selected': selected,
                 'preferred': preferred,
-                '-- Default --' : topSelection,
+                '-- Default for Selected Models --' : topSelection,
                 '-- Others --': others,
-
             }
         return data
 
     def _addDataToAxisSelectors(self, pulldown, aDict):
-        with pulldown.blockWidgetSignals():
+        tableData = self.guiModule.getVisibleDataFrame(True)
+        availableFromTable = tableData.columns
+        selectableValues = []
+        empty = ''
+        if True:
+        # with pulldown.blockWidgetSignals():
             pulldown.clear()
             preferred = aDict.pop('preferred', [None]) #don't add to the list
+            selected = aDict.pop('selected', None)
             for groupText, values in aDict.items():
+                pulldown.addItem(empty)
                 pulldown.addItem(groupText)
                 headerItem = pulldown.model().item(pulldown.getItemIndex(groupText))
                 headerItem.setEnabled(False)
                 for value in values:
                     pulldown.addItem(value)
-            if len(preferred)>0:
-                pulldown.select(preferred[-1])
+                    if value not in availableFromTable:
+                        item = pulldown.model().item(pulldown.getItemIndex(value))
+                        item.setEnabled(False)
+                    else:
+                        selectableValues.append(value)
+            if selected in availableFromTable:
+                pulldown.select(selected) #keep the previously selected if possible.
+                return
+            else:
+                for vv in preferred+selectableValues:
+                    if vv in availableFromTable:
+                        pulldown.select(vv)
+                        return
+            pulldown.select(empty)
+
 
     def _setXYAxisSelectors(self):
-
+        """
+        Set the X and Y selectors based on models and table data.
+        :return:
+        """
         Xdata= self._getXaxisData()
         Ydata = self._getYaxisData()
         xColumnNameW = self.getWidget(guiNameSpaces.WidgetVarName_MainPlotXcolumnName)
         yColumnNameW = self.getWidget(guiNameSpaces.WidgetVarName_MainPlotYcolumnName)
-
         if xColumnNameW is not None:
             self._addDataToAxisSelectors(xColumnNameW.pulldownList, Xdata)
         if yColumnNameW is not None:

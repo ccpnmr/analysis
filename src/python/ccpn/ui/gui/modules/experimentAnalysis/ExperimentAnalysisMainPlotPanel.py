@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-28 11:53:18 +0100 (Sun, May 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-29 23:06:09 +0100 (Mon, May 29, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -115,7 +115,8 @@ class MainPlotPanel(GuiPanel):
     def updatePanel(self, *args, **kwargs):
         getLogger().debug('Updating  barPlot panel')
         dataFrame = self.guiModule.getVisibleDataFrame(includeHiddenColumns=True)
-
+        plotType = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_PlotType).getByText()
+        self._plotType = plotType
         if dataFrame is None:
             self.mainPlotWidget.clear()
             return
@@ -156,13 +157,24 @@ class MainPlotPanel(GuiPanel):
     def xColumnName(self):
         """Returns selected X axis  Column  name from the settings widget """
         w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_MainPlotXcolumnName)
-        return w.getText()
+        selected = w.getText()
+        tableDf = self.guiModule.getVisibleDataFrame(True)
+        if not str(selected) in tableDf.columns:
+            txt = f'No data for the selected item "{"Empty" if not selected else selected}". Selected a valid entry for plotting the the X Axis values '
+            getLogger().warning(txt)
+            return
+        return selected
 
     @property
     def yColumnName(self):
         """Returns selected y Column name """
         w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_MainPlotYcolumnName)
-        return w.getText()
+        selected = w.getText()
+        tableDf = self.guiModule.getVisibleDataFrame(True)
+        if not str(selected) in tableDf.columns:
+            txt = f'No data for the selected item "{"Empty" if not selected else selected}". Selected a valid entry for plotting the the Y Axis values '
+            getLogger().warning(txt)
+        return selected
 
     @property
     def thresholdValue(self):
@@ -200,6 +212,12 @@ class MainPlotPanel(GuiPanel):
             Data is plotted in exactly the same sorting order as given as it usually mirrored to the main table view.
             See/use updatePanel.
          """
+        if not self.xColumnName:
+            return
+        if not self.yColumnName:
+            return
+        if dataFrame is None or len(dataFrame)==0:
+            return
         dataFrame.set_index(sv.INDEX, drop=False, inplace=True)
         dataFrame = self._setColoursByThreshold(dataFrame)
         dataFrame.loc[dataFrame.index, sv.INDEX] = dataFrame.index
@@ -476,9 +494,9 @@ class MainPlotPanel(GuiPanel):
         if df is None:
             return
         pids = [co.pid for co in self.current.collections]
-        tablePids =  df[df[sv.COLLECTIONPID].isin(pids)]
-        if tablePids.empty:
-            return
+        # tablePids =  df[df[sv.COLLECTIONPID].isin(pids)]
+        # if tablePids.empty:
+        #     return
 
         self.mainPlotWidget.selectByPids(pids)
 

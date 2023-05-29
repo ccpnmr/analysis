@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-29 10:46:29 +0100 (Mon, May 29, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-29 23:06:08 +0100 (Mon, May 29, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -174,7 +174,17 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
     def updateAll(self, refit=False, rebuildInputData=False):
         """ Update all Gui panels"""
         getLogger().info(f'{self}. Updating data and GUI items...')
-        currentCollections = self.current.collections
+        currentCollections = self.current.collections #grab the current collection to reset later the same selections
+        self. _updateBackendHandler(refit=refit, rebuildInputData=rebuildInputData)
+        self._updatePanels()
+        self.current.collections = currentCollections ## make sure all is selected as before the update
+        self._setUpdateDone()
+
+    def _updateBackendHandler(self, refit=False, rebuildInputData=False):
+        """
+        _internal called ONLY from _updateAll
+        :return:
+        """
         if rebuildInputData or self.backendHandler._needsRebuildingInputDataTables:
             self.backendHandler._rebuildInputData()
             self.backendHandler._needsRebuildingInputDataTables = False
@@ -182,17 +192,16 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
             getLogger().info(f'{self}. Nothing to refit. Skipping...')
             self.backendHandler.fitInputData()
             self.backendHandler._needsRefitting = False
-        appearance = self.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)
+
+    def _updatePanels(self):
+        """
+        _internal called ONLY from _updateAll
+        :return:
+        """
         allSettings = self.settingsPanelHandler.getAllSettings()
-        appearance._settingsChangedCallback(allSettings)
-        appearance._setXYAxisSelectors()
+
         for panelName, panel in self.panelHandler.panels.items():
             panel.updatePanel(**{guiNameSpaces.SETTINGS: allSettings})
-
-        ## make sure all is selected as before the update
-        self.current.collections = []
-        self.current.collections = currentCollections
-        self._setUpdateDone()
 
     def setNeedRefitting(self):
         self.backendHandler._needsRefitting = True

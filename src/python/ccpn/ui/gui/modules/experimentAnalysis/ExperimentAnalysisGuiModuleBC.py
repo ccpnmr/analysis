@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-28 11:06:25 +0100 (Sun, May 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-29 10:46:29 +0100 (Mon, May 29, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -37,7 +37,7 @@ import pandas as pd
 from PyQt5 import QtWidgets
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiManagers import PanelHandler,\
-    SettingsPanelHandler, IOHandler, ExtensionsHandler
+    SettingsPanelHandler, IOHandler, PluginsHandler
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiSettingsPanel as settingsPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBars import ToolBarPanel, PanelUpdateState
@@ -45,12 +45,31 @@ from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiTable import Ta
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisMainPlotPanel import MainPlotPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisFitPlotPanel import FitPlotPanel
 
-
 #####################################################################
 #######################  The main GUI Module ########################
 #####################################################################
 
 class ExperimentAnalysisGuiModuleBC(CcpnModule):
+    """
+    Top class for the Experiment analysis module.
+    This module is controlled by several handlers.
+    Currently, they are:
+        - backendHandler              -->  Link to the No-UI module containing data, calculation and fitting models
+        - settingsPanelHandler      -->  Link to the settings widgets, getter and setters
+        - panelHandler                   -->  Link to the main panels and widgets
+        - ioHandler                         -->  Link to Input-Output from-to external programs. (Not yet implemented, NYI)
+        - pluginsHandler                -->  Link to the Plugins  (Not yet implemented, NYI)
+
+    The settingsPanelHandler contains tabs.
+        The easiest way to get the selected values from the widgets is to get all as a dictionary.
+        Use  settingsPanelHandler.getAllSettings() or see the class for more info.
+
+    The panelHandler contains GUI panels.
+        Each represents a frame and contains particular widget(s) such as the mainTable or mainPlot widget.
+        See the handler for more information or add/create panels in a plugin.
+
+    """
+
     includeSettingsWidget = True
     maxSettingsState = 2
     settingsPosition = 'left'
@@ -60,7 +79,6 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
     settingsChanged = pyqtSignal(dict)
     mainTableSortingChanged = pyqtSignal()
     mainTableChanged = pyqtSignal()
-
 
     def __init__(self, mainWindow, name='Experiment Analysis', backendHandler=None, **kwds):
         super(ExperimentAnalysisGuiModuleBC, self)
@@ -87,12 +105,12 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         ## link to Input/output. (NYI)
         self.ioHandler = IOHandler(guiModule=self)
 
-        ## link to user extestions - external programs. (NYI)
-        self.extensionsHandler = ExtensionsHandler(guiModule=self)
+        ## link to user plugins - external programs. (NYI)
+        self.pluginsHandler = PluginsHandler(guiModule=self)
 
-    #################################################################
+    ##########################################################
     #####################      Data       ###########################
-    #################################################################
+    ##########################################################
 
     ### Get the input/output dataTables via the backendHandler.
     @property
@@ -108,16 +126,6 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
             dataFrame[sv.INDEX] = np.arange(1, len(dataFrame) + 1)
             return dataFrame
         return pd.DataFrame()
-
-
-    def _getGuiResultDataFrame(self):
-        """_INTERNAL. Used only to input the main widget table.
-        Get the SelectedOutputDataTable and transform the raw data to be displayed in the main table.
-        To get the table as dataframe exactly as displayed in the GUI use:  'getVisibleDataFrame'.
-        """
-        dataTable = self.backendHandler.getMergedResultDataFrame()
-
-        return dataTable
 
     def getSettings(self, grouped=True) -> dict:
         """
@@ -236,7 +244,7 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         self.backendHandler.close()
         self.coreNotifiersHandler.close()
         self.panelHandler.close()
-        self.extensionsHandler.close()
+        self.pluginsHandler.close()
         self.settingsPanelHandler.close()
         super()._closeModule()
 

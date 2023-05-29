@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-28 11:53:18 +0100 (Sun, May 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-29 10:46:29 +0100 (Mon, May 29, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -24,7 +24,7 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 #=========================================================================================
 
 """
-This module contains the GUI Settings panels.
+This module contains the GUI Settings tabs.
 """
 
 from collections import OrderedDict as od
@@ -144,31 +144,6 @@ class GuiSettingPanel(Frame):
         :param settingsDict: dict with settings {widgetVarName:value}
         To be Subclassed"""
         self._setUpdatedDetectedState()
-
-    def _getCoreSettings(self):
-        """
-        Get a dict of core settings used in the generation of Fitting/calculation data.
-        Used to set as metaData in the OutputDataTable
-        :return: orderedDict
-
-        NIY
-
-        """
-
-        dd = {
-            'spectrumGroups' : [],
-            'inputDataTables' : [],
-            'calculationPeakProperty' : '',
-            'calculationOption' : '',
-            'filteringNmrGroup' : '',
-            'excludedNmrResidues' : [],
-            'fittingOptimiser' : '',
-            'fittingErrorMethod' : '',
-            'fittingModel' : '',
-            'thresholdValueMode' : '',
-            'thresholdValue' : ''
-            }
-        return dd
 
 
 TABPOS = 0
@@ -535,9 +510,7 @@ class GuiInputDataPanel(GuiSettingPanel):
         # TODO check leaking notifiers  after closing the module
         selectedDataTable = self.guiModule.project.getByPid(selectedName)
         self.guiModule.backendHandler.resultDataTable = selectedDataTable
-
         self.guiModule.updateAll()
-
 
     def _filterInputCollections(self, pids, *args):
         """ Add collections only if contain a subset of other collections. Avoid massive lists! """
@@ -747,7 +720,6 @@ class GuiCalculationPanel(GuiSettingPanel):
         backend._needsRefitting = True
         self._setUpdatedDetectedState()
         self.guiModule.settingsChanged.emit(self.getSettingsAsDict())
-
 
 TABPOS += 1
 
@@ -1209,8 +1181,7 @@ class AppearancePanel(GuiSettingPanel):
             panel = self.guiModule.panelHandler.getPanel(guiNameSpaces.MainPlotPanel)
             panel.thresholdValue = value
             panel.updatePanel()
-            
-    
+
     def _getThresholdValueFromBackend(self, columnName, calculationMode, factor):
 
         """ Get the threshold value based on selected Y axis. called from _setThresholdValueForData"""
@@ -1382,8 +1353,8 @@ class AppearancePanel(GuiSettingPanel):
 TABPOS += 1
 
 
-#####################################################################
+##############################################################
 #####################   Filtering Panel   ###########################
-#####################################################################
+##############################################################
 
 ## Not yet Implemeted

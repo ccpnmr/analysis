@@ -81,18 +81,6 @@ class RelaxationFittingPanel(GuiFittingPanel):
     tabName = guiNameSpaces.Label_Fitting
     tabTipText = 'Set the various Fitting modes and options for the Relaxation module'
 
-    def _fittingModeChanged(self, *args):
-        """Triggered after a change in the fitting widget.
-         Auto-set the BarGraph Y widget to show the first Argument Result based on the model"""
-        self._commonCallback(*args)
-        appearancePanel = self.guiModule.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)
-        yAxisWidget = appearancePanel.getWidget(guiNameSpaces.WidgetVarName_MainPlotYcolumnName)
-        backend = self.guiModule.backendHandler
-        model = backend.currentFittingModel
-        if model is not None and model.ModelName != sv.BLANKMODELNAME:
-            firstArg, *_ = model.modelArgumentNames or [None]
-            if yAxisWidget:
-                yAxisWidget.select(firstArg)
 
 
 #####################################################################

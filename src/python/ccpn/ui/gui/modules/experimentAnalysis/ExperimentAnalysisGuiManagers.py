@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-06 12:41:51 +0000 (Mon, March 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-29 10:46:29 +0100 (Mon, May 29, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -108,7 +108,7 @@ class PanelHandler(ExperimentAnalysisHandlerABC):
         self._toolBarPanel = None
 
     def start(self):
-        """ Set-up the 2 main Frames:
+        """ Set up the 2 main Frames:
         1) toolbar. reserved for Buttons etc
         2) main panels: Top, Bottom, Left, Right. Used for anything"""
 
@@ -275,8 +275,8 @@ class IOHandler(ExperimentAnalysisHandlerABC):
     """
     pass
 
-class ExtensionsHandler(ExperimentAnalysisHandlerABC):
+class PluginsHandler(ExperimentAnalysisHandlerABC):
     """
-    Manages extensions of the GuiModule.
+    Manages plugins for  the GuiModule. NYI
     """
     pass

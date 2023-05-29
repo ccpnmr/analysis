@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-28 11:53:18 +0100 (Sun, May 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-29 10:46:29 +0100 (Mon, May 29, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -44,7 +44,6 @@ class PanelUpdateState(DataEnum):
     DONE        = 0, 'icons/update_done'
     DETECTED    = 1, 'icons/update_detected'
     SUSPENDED   = 2, 'icons/update_suspended'
-
 
 class ToolBarPanel(GuiPanel):
     """
@@ -130,8 +129,7 @@ class ToolBarPanel(GuiPanel):
         from ccpn.ui.gui.widgets.MessageDialog import showOkCancelWarning, showWarning
         scriptsPath = self.application.scriptsPath
         pymolScriptsPath = fetchDir(scriptsPath, guiNameSpaces.PYMOL)
-        settingsDict = self.guiModule.settingsPanelHandler.getAllSettings().get(guiNameSpaces.Label_GeneralAppearance,
-                                                                                {})
+        settingsDict = self.guiModule.settingsPanelHandler.getAllSettings().get(guiNameSpaces.Label_GeneralAppearance,  {})
         barPanel = self.guiModule.panelHandler.getPanel(guiNameSpaces.MainPlotPanel)
         barGraph = barPanel.barGraphWidget
         moleculeFilePath = settingsDict.get(guiNameSpaces.WidgetVarName_MolStructureFile, '')
@@ -197,7 +195,6 @@ class ToolBarPanel(GuiPanel):
                 iconValue = dataEnum.description
                 updateButton.setIcon(Icon(iconValue))
 
-
 class ExperimentAnalysisPlotToolBar(ToolBar):
     toolButtons = {}
 
@@ -257,8 +254,6 @@ class MainPlotToolBar(ExperimentAnalysisPlotToolBar):
 
         self.parentPanel = parent
 
-
-
     def getToolBarDefs(self):
         toolBarDefs = super().getToolBarDefs()
         extraDefs = (
@@ -300,7 +295,6 @@ class MainPlotToolBar(ExperimentAnalysisPlotToolBar):
             )
         toolBarDefs.update(extraDefs)
         return toolBarDefs
-
 
     def _toggleErrorBars(self):
         self.parentPanel._toggleErrorBars(self.sender().isChecked())

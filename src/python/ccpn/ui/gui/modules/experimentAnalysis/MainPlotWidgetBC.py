@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-28 11:06:25 +0100 (Sun, May 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-30 09:51:16 +0100 (Tue, May 30, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -382,8 +382,6 @@ class PlotItemHandlerABC(object):
                     'mousePos': []
                     }
 
-
-
     def __init__(self, parent, actionCallback=None,
                  selectionCallback=None, hoverCallback=None, *args, **kwds):
 
@@ -399,7 +397,7 @@ class PlotItemHandlerABC(object):
         self.penColour = rgbaRatioToHex(*getColours()[CCPNGLWIDGET_LABELLING])
 
         self._selectedPenColour =  rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT])
-        self._selectedPen =  pg.functions.mkPen(self._selectedPenColour, width=0.5, style=QtCore.Qt.SolidLine)
+        self._selectedPen =  pg.functions.mkPen(self._selectedPenColour, width=2, style=QtCore.Qt.SolidLine)
         self._unselectedPen = None
 
 
@@ -477,9 +475,7 @@ class BarsHandler(PlotItemHandlerABC):
     plotType = PlotType.BAR.description
 
     def __init__(self, parent, *args, **kwds):
-
         super().__init__(parent, **kwds)
-
 
     def plotData(self, dataFrame, columnsDict, clear=True, **kwargs):
         if clear:
@@ -497,16 +493,16 @@ class BarsHandler(PlotItemHandlerABC):
                                        xValues=xValues, yValues=yValues,
                                        selectionCallback=self.defaultSelectionCallback,
                                        actionCallback=self.defaultActionCallback,
-                                       hoverCallback=self.defaultHoverCallback,
+                                       #hoverCallback=self.defaultHoverCallback,
                                         brushes=coloursValues,
-                                        objects=objectValues,
+                                        pids=objectValues,
                                       )
         self.viewBox.addItem(bars)
         self.items.append(bars)
 
     def _getDataForCallback(self, data):
         return {
-                        'pids': [data.get('object'), []],
+                        'pids': [data.get('pid'), []],
                         'xs': [data.get('index'), []],
                         'ys': [data.get('height'), []],
                         'items': [data.get('item'), []],
@@ -531,8 +527,6 @@ class BarsHandler(PlotItemHandlerABC):
                     selected.append(bar.index)
             item.drawPicture(selected=selected)
 
-
-
 class ScattersHandler(PlotItemHandlerABC):
 
     plotType = PlotType.SCATTER.description
@@ -556,34 +550,31 @@ class ScattersHandler(PlotItemHandlerABC):
 
         if not yValues.dtype in [int, float]:
             yValues = np.arange(1, len(yValues)+1)
-            print('Impossible to plot Y values. dType not allowed. Used array index instead.')
+            getLogger().warning('Impossible to plot Y values. dType not allowed. Used array index instead.')
 
         if not xValues.dtype in [int, float]:
             xValues = np.arange(1, len(yValues)+1)
-            print('Impossible to plot X values. dType not allowed. Used array index instead.')
+            getLogger().warning('Impossible to plot X values. dType not allowed. Used array index instead.')
 
         curve = self.plotItem.plot(xValues, yValues,
                                                          symbol='o', pen=noPen,
                                                          symbolPen=scatterPen,
                                                          symbolBrush=brushes,
                                                          data=objectValues)
-                                                        #pen=None will not plot a line connecting scatters
         scattersItem = curve.scatter
         self.items.append(scattersItem)
         curve.sigPointsClicked.connect(self.defaultSelectionCallback)
 
     def selectData(self, pids):
-        print('SELECTION Scatter', pids)
-
-        for i in self.items:
-            individualScatters = i.points()
-            for scatterPoint in individualScatters:
+        """Highlight the item by changing the pen colour """
+        for i in self.items: #loop over the scatter curves
+            individualScatterPoints = i.points()
+            for scatterPoint in individualScatterPoints:
                 scatterObject =  scatterPoint.data()
-
-                if scatterObject in pids:
-                    i.setPen(self._selectedPen)
+                if str(scatterObject) in pids:
+                    scatterPoint.setPen(self._selectedPen)
                 else:
-                    i.setPen(self._unselectedPen)
+                    scatterPoint.setPen(self._unselectedPen)
 
     def defaultSelectionCallback(self, item, points, *args, **kwargs):
         """ Parse the callback and get the selected objects"""

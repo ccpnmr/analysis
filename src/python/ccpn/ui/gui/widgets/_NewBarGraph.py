@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-28 11:06:25 +0100 (Sun, May 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-30 09:51:16 +0100 (Tue, May 30, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -246,8 +246,6 @@ class BarGraph(pg.BarGraphItem):
         x1 = asarray(self.opts.get('x1'))
         width = asarray(self.opts.get('width'))
 
-
-
         if x0 is None:
             if width is None:
                 raise Exception('must specify either x0 or width')
@@ -289,10 +287,9 @@ class BarGraph(pg.BarGraphItem):
             pids = [None]*len(x)
 
         for i in range(len(x0 if not np.isscalar(x0) else y0)):
-
             if pens is not None:
                 pen = pens[i]
-                p.setPen(fn.mkPen(pen))
+                p.setPen(fn.mkPen(pen,  width=2,))
             if brushes is not None:
                 brush = brushes[i]
                 try:
@@ -352,16 +349,10 @@ class BarGraph(pg.BarGraphItem):
                 ('width', w)])
             barItem = BarItem(data, index=index)
             self._barsDict.update({int(index) : barItem})
-
         p.end()
         self.prepareGeometryChange()
 
-
-
 #  Testing
-
-
-
 
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication

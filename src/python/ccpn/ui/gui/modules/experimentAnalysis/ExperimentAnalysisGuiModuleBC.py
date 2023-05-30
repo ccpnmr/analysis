@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-29 23:06:08 +0100 (Mon, May 29, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-30 14:27:58 +0100 (Tue, May 30, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -199,7 +199,6 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         :return:
         """
         allSettings = self.settingsPanelHandler.getAllSettings()
-
         for panelName, panel in self.panelHandler.panels.items():
             panel.updatePanel(**{guiNameSpaces.SETTINGS: allSettings})
 

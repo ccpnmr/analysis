@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-28 11:53:18 +0100 (Sun, May 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-30 14:27:58 +0100 (Tue, May 30, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -315,4 +315,4 @@ NIY_WARNING = f'''This functionality has not been implemented yet.'''
 OMIT_MODE = 'omit'
 RAISE_MODE = 'raise'
 
-
+XTHRESHOLD = 'xThreshold'

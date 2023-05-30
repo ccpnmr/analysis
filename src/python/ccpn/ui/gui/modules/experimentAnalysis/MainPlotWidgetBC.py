@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-30 09:51:16 +0100 (Tue, May 30, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-30 14:27:58 +0100 (Tue, May 30, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -38,6 +38,7 @@ from ccpn.util.DataEnum import DataEnum
 from typing import Optional, List, Tuple, Any, Sequence, Union
 from ccpn.util.Logging import getLogger
 from collections import defaultdict
+from functools import partial
 
 AllTicks  = 'All Ticks'
 MinimalTicks = 'Minimal Ticks'
@@ -57,7 +58,7 @@ XERRCOLUMNNAME =  f'{X}{ERR}{COLUMNNAME}'
 YERRCOLUMNNAME =  f'{Y}{ERR}{COLUMNNAME}'
 COLOURCOLUMNNAME = f'colour{COLUMNNAME}'
 OBJECTCOLUMNNAME = f'object{COLUMNNAME}'
-
+THRESHOLDCOLUMNNAME = f'threshold{COLUMNNAME}'
 
 class PlotType(DataEnum):
     """
@@ -66,7 +67,6 @@ class PlotType(DataEnum):
     SCATTER = 0, _SCATTER
     BAR = 1, _BAR
     LINE = 2, _LINE
-
 
 class MainPlotWidget(Widget):
     """
@@ -89,11 +89,11 @@ class MainPlotWidget(Widget):
     allowedPlotTypes = PlotType.descriptions()
 
     def __init__(self, parent, application=None, name=None, title=None, actionCallback=None,
-                 selectionCallback=None, hoverCallback=None,
+                 selectionCallback=None, hoverCallback=None, lineMovedCallback = None,
                  **kwds):
 
         super().__init__(parent, setLayout=True, acceptDrops=False, **kwds)
-
+        self.parent = parent
         self.application = application
         self.name = name
         self.title = title
@@ -101,7 +101,9 @@ class MainPlotWidget(Widget):
         self._selectionCallback = selectionCallback
         self._hoverCallback = hoverCallback
         self._actionCallback = actionCallback
+        self._lineMovedCallback = lineMovedCallback
         self._plottedDataFrames = None
+
 
         # Background/canvas items.
         self.viewBox = ViewBox(self)
@@ -115,15 +117,14 @@ class MainPlotWidget(Widget):
         layout.setContentsMargins(1, 1, 1, 1)
 
         # children items and handlers
+        self._plottingHandlers = set() # automatically registered (if the registerToParent flag is set to True)
         self.barsHandler = BarsHandler(self, selectionCallback=self._selectionCallback, hoverCallback=self._hoverCallback)
         self.scattersHandler = ScattersHandler(self, selectionCallback=self._selectionCallback, hoverCallback=self._hoverCallback)
-        self.thresholdsLineHandler = ThresholdLinesHandler(self, selectionCallback=self._selectionCallback)
+        self.thresholdsLineHandler = ThresholdLinesHandler(self, lineMovedCallback=self._lineMovedCallback)
         self.linesHandler = LinesHandler(self, selectionCallback=self._selectionCallback)
         self.errorBarsHandler = ErrorBarsHandler(self)
         self.legendHandler = LegendHandler(self)
         self.selectionBoxHandler = SelectionBoxHandler(self)
-        self.plottingHandlers = [self.barsHandler, self.scattersHandler, self.linesHandler]
-
         self._postInitOptions()
 
 
@@ -142,6 +143,7 @@ class MainPlotWidget(Widget):
                  yErrColumnName: str = None,
                  colourColumnName: str = None,
                  errColourColumnName: str = None,
+                 thresholdColumnName: str = None,
                  objectColumnName: str = None,
                  clearPlot=True,
                  resetAxes=True,
@@ -188,6 +190,10 @@ class MainPlotWidget(Widget):
         """
         _plottedDataFrames = self._plottedDataFrames
         return _plottedDataFrames
+
+    @property
+    def plottingHandlers(self):
+        return list(self._plottingHandlers)
 
     ############  Graphics behaviours. Zoom and panning  ############
 
@@ -302,6 +308,9 @@ class MainPlotWidget(Widget):
         self._tickOption = MinimalTicks
         self._setColoursFromPreferences()
 
+    def _registerHandler(self, handler):
+        self._plottingHandlers.add(handler)
+
     def _isColumnNamesValid(self, dataFrame, xColumnName, yColumnName,  otherColumnNames):
         """
         Check if the columnName is present in dataFrame.
@@ -329,8 +338,10 @@ class MainPlotWidget(Widget):
         return True
 
     def _dispatchDataToHandler(self, dataFrame, plotType, columnNameDict):
-        for handler in self.plottingHandlers:
-            if handler.plotType == plotType:
+
+        for handler in list(self._plottingHandlers):
+            if handler.plotType == plotType or handler.plotType is None:
+                handler.items = []
                 handler.plotData(dataFrame, columnNameDict)
 
 
@@ -362,9 +373,8 @@ class MainPlotWidget(Widget):
         pass
 
     def selectByPids(self, pids):
-        for handler in self.plottingHandlers:
+        for handler in self._plottingHandlers:
             handler.selectData(pids)
-
 
     def __repr__(self):
         return f'<{self.__class__.__name__}_{self.name}>'
@@ -374,6 +384,8 @@ class MainPlotWidget(Widget):
 class PlotItemHandlerABC(object):
 
     plotType = None
+    registerToParent = True
+
     callbackData = {
                     'pids':[],
                     'xs': [],
@@ -393,16 +405,15 @@ class PlotItemHandlerABC(object):
         self._actionCallback = actionCallback
         self._selectionCallback = selectionCallback
         self._hoverCallback = hoverCallback
-
         self.penColour = rgbaRatioToHex(*getColours()[CCPNGLWIDGET_LABELLING])
-
         self._selectedPenColour =  rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT])
         self._selectedPen =  pg.functions.mkPen(self._selectedPenColour, width=2, style=QtCore.Qt.SolidLine)
         self._unselectedPen = None
-
+        if self.registerToParent:
+            self.parent._registerHandler(self)
 
     def plotData(self, dataFrame, columnsDict, **kwargs):
-        "remem to Check columns dtype is ok for plotType"
+        "Override in subclasses"
         pass
 
     def _getValuesForColumn(self, dataFrame, columnArgName, columnsDict):
@@ -473,11 +484,12 @@ class PlotItemHandlerABC(object):
 class BarsHandler(PlotItemHandlerABC):
 
     plotType = PlotType.BAR.description
+    registerToParent = True
 
     def __init__(self, parent, *args, **kwds):
         super().__init__(parent, **kwds)
 
-    def plotData(self, dataFrame, columnsDict, clear=True, **kwargs):
+    def plotData(self, dataFrame, columnsDict, clear=False, **kwargs):
         if clear:
             self.viewBox.clear()
             self.items = []
@@ -502,11 +514,11 @@ class BarsHandler(PlotItemHandlerABC):
 
     def _getDataForCallback(self, data):
         return {
-                        'pids': [data.get('pid'), []],
-                        'xs': [data.get('index'), []],
-                        'ys': [data.get('height'), []],
-                        'items': [data.get('item'), []],
-                        'mousePos': [data.get('mousePos'), []]
+                        'pids': [data.get('pid')],
+                        'xs': [data.get('index')],
+                        'ys': [data.get('height')],
+                        'items': [data.get('item')],
+                        'mousePos': [data.get('mousePos')]
                     }
 
     def defaultSelectionCallback(self, data, *args, **kwargs):
@@ -528,7 +540,7 @@ class BarsHandler(PlotItemHandlerABC):
             item.drawPicture(selected=selected)
 
 class ScattersHandler(PlotItemHandlerABC):
-
+    registerToParent = True
     plotType = PlotType.SCATTER.description
 
     def __init__(self, parent, *args, **kwds):
@@ -593,36 +605,81 @@ class ScattersHandler(PlotItemHandlerABC):
 
 class ErrorBarsHandler(PlotItemHandlerABC):
 
+    plotType = None
+    registerToParent = True
+
     def __init__(self, parent, *args, **kwds):
         super().__init__(parent, **kwds)
 
+    def plotData(self, dataFrame, columnsDict, clearPlot=False, **kwargs):
+        if clearPlot:
+            self.viewBox.clear()
+            self.items.clear()
+        xValues = self._getValuesForColumn(dataFrame, XCOLUMNNAME, columnsDict)
+        yValues = self._getValuesForColumn(dataFrame, YCOLUMNNAME, columnsDict)
+        yErrorValues = self._getValuesForColumn(dataFrame, YERRCOLUMNNAME, columnsDict)
+        penColour = rgbaRatioToHex(*getColours()[CCPNGLWIDGET_LABELLING])
+
+        if not xValues.dtype in [int, float]:
+            xValues = np.arange(1, len(yValues) + 1)
+            getLogger().warning('Impossible to plot X values. dType not allowed. Used array index instead.')
+
+        errorsItem = pg.ErrorBarItem(x=xValues, y=yValues, top=yErrorValues, beam=0.5, pen=penColour)
+
+        self.viewBox.addItem(errorsItem)
+        self.items.append(errorsItem)
+        #
 
 class LinesHandler(PlotItemHandlerABC):
 
     plotType = PlotType.LINE.description
+    registerToParent = True
 
     def __init__(self, parent, *args, **kwds):
         super().__init__(parent, **kwds)
 
-    def plotData(self, dataFrame, columnsDict, **kwargs):
-        xValues = self._getValuesForColumn(dataFrame, XCOLUMNNAME, columnsDict)
+    def plotData(self, dataFrame, columnsDict, clear=False, **kwargs):
+        return
+        xValues = np.arange(1, len(dataFrame) + 1)
         yValues = self._getValuesForColumn(dataFrame, YCOLUMNNAME, columnsDict)
+        item = self.plotItem.plot(xValues, yValues)
+        self.items.append(item)
 
-        self.plotItem.plot(xValues, yValues)
 
 class ThresholdLinesHandler(PlotItemHandlerABC):
+    registerToParent = True
 
-    def __init__(self, parent, *args, **kwds):
+    def __init__(self, parent, lineMovedCallback=None, *args, **kwds):
+        """ For now is implemented for one H line. """
         super().__init__(parent, **kwds)
+        self._lineMovedCallback = lineMovedCallback
 
+    def plotData(self, dataFrame, columnsDict, **kwargs):
+        yValues = self._getValuesForColumn(dataFrame, THRESHOLDCOLUMNNAME, columnsDict)
+        item = pg.InfiniteLine(angle=0, movable=True, pen='b')
+        item.sigPositionChangeFinished.connect(partial(self._moved, item))
+        if len(yValues)>0:
+            pos = yValues[-1]
+        else:
+            pos = 0
+        item.setPos(pos)
+        self.viewBox.addItem(item)
+        self.items.append(item)
+
+    def _moved(self, item, *args, **kwargs):
+        if self._lineMovedCallback is not None:
+            self._lineMovedCallback(position=item.getYPos(), name=item._name)
 
 class LegendHandler(PlotItemHandlerABC):
-    # NOT sure bout this yet
+    # NOT sure if we are implementing this
+    registerToParent = False
+
     def __init__(self, parent, *args, **kwds):
         super().__init__(parent, **kwds)
 
 class SelectionBoxHandler(PlotItemHandlerABC):
     # NOT sure bout this yet
+    registerToParent = False
 
     def __init__(self, parent, *args, **kwds):
         super().__init__(parent, **kwds)

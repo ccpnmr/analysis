@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-30 09:51:16 +0100 (Tue, May 30, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-30 14:27:58 +0100 (Tue, May 30, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -73,9 +73,6 @@ class MainPlotPanel(GuiPanel):
         self._hThresholdValue = 1
         if _thresholdValueW:
             self._hThresholdValue = _thresholdValueW.getValue()
-            # self.barGraphWidget.xLine.setPos(_thresholdValueW.getValue())
-            # self.barGraphWidget.showThresholdLine(True)
-            # _thresholdValueW.doubleSpinBox.valueChanged.connect(self._updateThresholdValueFromSettings)
 
         #     current
         self._selectCurrentCONotifier = Notifier(self.current, [Notifier.CURRENT], targetName='collections',
@@ -102,6 +99,7 @@ class MainPlotPanel(GuiPanel):
                                              actionCallback=self._actionCallback,
                                              selectionCallback=self._selectionCallback,
                                              hoverCallback=self._mouseHoverCallbackEvent,
+                                             lineMovedCallback = self._lineMovedCallback,
                                              grid=(1,0), gridSpan=(1, 2))
 
 
@@ -218,6 +216,7 @@ class MainPlotPanel(GuiPanel):
         if dataFrame is None or len(dataFrame)==0:
             return
         dataFrame.set_index(sv.INDEX, drop=False, inplace=True)
+        # add threshold values/colours  to the dataframe  on-the-fly .
         dataFrame = self._setColoursByThreshold(dataFrame)
         dataFrame.loc[dataFrame.index, sv.INDEX] = dataFrame.index
         self._plottedDf = dataFrame
@@ -227,6 +226,8 @@ class MainPlotPanel(GuiPanel):
                                      plotType=self.plotType,
                                      xColumnName= self.xColumnName,
                                      yColumnName=self.yColumnName,
+                                     yErrColumnName=f'{self.yColumnName}{seriesVariables._ERR}',
+                                     thresholdColumnName = seriesVariables.XTHRESHOLD,
                                      objectColumnName=seriesVariables.COLLECTIONPID,
                                      colourColumnName=guiNameSpaces.BRUSHLABEL,
                                      clearPlot=True,
@@ -308,20 +309,6 @@ class MainPlotPanel(GuiPanel):
         """Returns selected colour name"""
         return self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_RALColour).getText()
 
-    def _setBarPlottingData(self, dataFrame, xColumnName, yColumnName):
-        """TO BE REMOVED
-        """
-
-        index = dataFrame[xColumnName].index
-        # get the errors
-        errorColumn = f'{yColumnName}{sv._ERR}'
-        if errorColumn in dataFrame.columns:
-            xError = index
-            yError = dataFrame[yColumnName].values
-            topError = dataFrame[errorColumn].values
-            self._errorHeights = {'xError': xError.values, 'yError': yError, 'topError': topError}
-
-        return True
 
     def _setTicks(self, labels, coordinates):
         """
@@ -392,6 +379,15 @@ class MainPlotPanel(GuiPanel):
         else:
             self.currentCollectionLabel.clear()
 
+    def _lineMovedCallback(self, position, name, *args, **kwargs):
+        self.thresholdValue = float(position)
+        self.updatePanel()
+        # update the widgets as well
+        tw =  self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_ThreshValue)
+        if tw is not None:
+            tw.setValue(float(position))
+
+
     def _updateAxisLabels(self):
         self.setXLabel(label=self.xColumnName)
         self.setYLabel(label=self.yColumnName)
@@ -429,6 +425,8 @@ class MainPlotPanel(GuiPanel):
         dataFrame.loc[aboveDf.index, guiNameSpaces.BRUSHLABEL] = _aboveBrush
         dataFrame.loc[belowDf.index, guiNameSpaces.BRUSHLABEL] = self._belowBrush
         dataFrame.loc[untraceableDd.index, guiNameSpaces.BRUSHLABEL] = self._untraceableBrush
+        dataFrame.loc[dataFrame.index, seriesVariables.XTHRESHOLD] = self.thresholdValue
+
         return dataFrame
 
 

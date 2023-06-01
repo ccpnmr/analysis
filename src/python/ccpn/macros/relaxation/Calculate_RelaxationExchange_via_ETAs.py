@@ -27,17 +27,13 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-01 18:57:28 +0100 (Thu, June 01, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-01 19:23:07 +0100 (Thu, June 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: Luca Mureddu $"
 __date__ = "$Date: 2023-02-03 10:04:03 +0000 (Fri, February 03, 2023) $"
-
-import pandas as pd
-
-
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -90,19 +86,13 @@ outputPath = None
 ##################   End User Settings     ########################
 ############################################################
 
-
+import pandas as pd
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-from ccpn.framework.lib.experimentAnalysis.RelaxationAnalysisBC import RelaxationAnalysisBC
-from ccpn.framework.lib.experimentAnalysis.RelaxationAnalysisBC import RelaxationAnalysisBC
 from ccpn.framework.lib.experimentAnalysis.experimentConstants import N15gyromagneticRatio, HgyromagneticRatio
 import ccpn.framework.lib.experimentAnalysis.spectralDensityLib as sdl
 import numpy as np
-from scipy import stats
 import matplotlib.pyplot as plt
-from ccpn.util.Path import aPath
 from matplotlib.backends.backend_pdf import PdfPages
-from ccpn.util.Common import percentage
-import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 from ccpn.ui.gui.widgets.DrawSS import plotSS
 import ccpn.macros.relaxation._macrosLib as macrosLib
 

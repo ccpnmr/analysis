@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-30 14:27:58 +0100 (Tue, May 30, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-01 19:23:07 +0100 (Thu, June 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -40,7 +40,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from pyqtgraph import functions as fn
 import numpy as np
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as seriesVariables
-from ccpn.framework.lib.experimentAnalysis.fitFunctionsLib import calculateRollingAverage
+from ccpn.ui.gui.widgets.MessageDialog import showMessage
 import pandas as pd
 from functools import partial
 from ccpn.util.Colour import hexToRgb, splitDataByColours
@@ -58,6 +58,7 @@ class MainPlotPanel(GuiPanel):
         self._appearancePanel = self.guiModule.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)
         self._toolbarPanel = self.guiModule.panelHandler.getToolBarPanel()
         self._viewMode = guiNameSpaces.PlotViewMode_Mirrored
+        self._lastViewMode = None
         self._plotType = PlotType.BAR.description
         self._plottedDf = None
 
@@ -125,7 +126,14 @@ class MainPlotPanel(GuiPanel):
                 pid = chainWidget.getText()
                 chain = self.project.getByPid(pid)
                 if chain is None:
-                    getLogger().warning(f'Changed view mode. Impossible to display by {self.viewMode}. No chains available in the project.')
+                    msg = f'Changed view mode. Impossible to display by {self.viewMode}. No chains available in the project.'
+                    getLogger().warning(msg)
+                    showMessage('', msg)
+                    plotTypeW = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_PlotViewMode)
+                    _lastViewMode = self._lastViewMode
+                    if _lastViewMode is None:
+                        _lastViewMode = guiNameSpaces.PlotViewMode_Mirrored
+                    plotTypeW.setByText(_lastViewMode)
                     return
                 dataFrame =  self._filterBySecondaryStructure(dataFrame, chain)
         self._plotDataFrame(dataFrame)
@@ -148,6 +156,7 @@ class MainPlotPanel(GuiPanel):
     def setViewMode(self, mode):
         if mode not in guiNameSpaces.PlotViewModes:
             raise RuntimeError(f'View Mode {mode} not implemented')
+        self._lastViewMode = self._viewMode
         self._viewMode = mode
 
     @property

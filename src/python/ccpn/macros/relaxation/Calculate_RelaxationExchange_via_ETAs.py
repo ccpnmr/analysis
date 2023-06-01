@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-01 12:40:19 +0100 (Thu, June 01, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-01 18:57:28 +0100 (Thu, June 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -51,8 +51,7 @@ import pandas as pd
 
 ETAxyDataName = 'ETAxyResultData'
 ETAzDataName = 'ETAzResultData'
-RSDMdataTableName = 'RSDM_results'
-
+RSDMdataTableName = 'RSDMResults'
 
 ##  demo sequence for the GB1 protein . Replace with an empty str if not available, e.g.: sequence  = ''
 sequence  = 'KLILNGKTLKGETTTEAVDAATAEKVFKQYANDNGVDGEWTYDAATKTFTVTE'
@@ -61,9 +60,10 @@ ss_sequence   =  'BBBBBCCCCBBBBBBCCCCHHHHHHHHHHHHHHCCCCCBBBBCCCCCBBBBBC'
 
 NOE_limitExclusion = 0.65
 spectrometerFrequency=600.13
-# R$_{ex}$ via σ$_{NH}$ ' δ-NH
+
+
 ## Some Graphics Settings
-titlePdf  = 'Relaxation Exchange determination via δ$_{NH}$  and η$_{xy/z}$ analysis'
+titlePdf  = 'Relaxation Exchange determination via η$_{xy/z}$ analysis'
 figureTitleFontSize = 8
 showInteractivePlot = False # True if you want the plot to popup as a new windows, to allow the zooming and panning of the figure.
 scatterColor = 'navy'

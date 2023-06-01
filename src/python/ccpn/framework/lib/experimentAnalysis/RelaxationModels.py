@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-28 11:53:18 +0100 (Sun, May 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-01 18:57:28 +0100 (Thu, June 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -458,8 +458,6 @@ class ETACalculation(CalculationModel):
         inPhaseData = inputDataTables[0].data
         antiPhaseData = inputDataTables[1].data
         outputFrame = ETAOutputFrame()
-        # join the two tables in one big one. use suffix _IP, _AP
-
         inPhaseData.loc[inPhaseData.index, PHASE] = _IP
         antiPhaseData.loc[antiPhaseData.index, PHASE]  = _AP
         inputData = pd.concat([inPhaseData, antiPhaseData], ignore_index=True)
@@ -506,8 +504,6 @@ class ETACalculation(CalculationModel):
                     groupDf[sv.GROUPBYAssignmentHeaders].values[0]
                 outputFrame.loc[index, sv.NMRATOMNAMES] = 'H,N'
                 index += 1
-            print(ix, xs, ys)
-            print('--'*20)
         return outputFrame
 
 class R2R1RatesCalculation(CalculationModel):

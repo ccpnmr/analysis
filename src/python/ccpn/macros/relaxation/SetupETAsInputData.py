@@ -1,5 +1,5 @@
 """
-This macro is used to set up the ETAs experiments in a CPMG relaxation analysis . See Relaxation Tutorial.
+This macro is used to set up the ETAs experiments in a CPMG relaxation analysis . See Relaxation Tutorial for where to find the example input spectra.
 
 This analysis requires 4 different spectrum groups:
     -  Inphase ETAz
@@ -36,7 +36,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-28 11:06:25 +0100 (Sun, May 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-01 18:57:28 +0100 (Thu, June 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -78,6 +78,7 @@ ETAzResultDataName = 'ETAzResultData'
 
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.framework.lib.experimentAnalysis.RelaxationAnalysisBC import RelaxationAnalysisBC
+from ccpn.ui.gui.widgets.MessageDialog import  showMessage
 
 ## get the objects
 ETAz_IP_SG = get(ETAz_IP_SGpid)
@@ -136,3 +137,5 @@ backend.addInputDataTable(project.getDataTable(ETAxy_AP_InputData))
 ## Create  the ETAxy Result Data
 backend.outputDataTableName = ETAxyResultDataName
 ETAxyResultData = backend.fitInputData()
+
+showMessage('Done', 'ETA input dataTable setup completed')

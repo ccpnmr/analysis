@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-18 18:49:16 +0100 (Thu, May 18, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-01 19:39:56 +0100 (Thu, June 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -32,6 +32,9 @@ from ccpn.core.lib import Pid
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib.ContextManagers import ccpNmrV3CoreSetter  #, undoStackBlocking
 from ccpn.util.decorators import logCommand
+
+# TODO:ED - should be in a Gui-class
+from ccpn.ui.gui.lib.PeakListLib import line_rectangle_intersection
 
 
 class PMIViewABC(AbstractWrapperObject):
@@ -119,6 +122,80 @@ class PMIViewABC(AbstractWrapperObject):
         """
         self._width, self._height = value
 
+    @property
+    def pixelOffset(self) -> tuple:
+        """X,Y text annotation offset in pixels.
+        """
+        if not (pixelSize := self._parent.pixelSize):
+            raise TypeError(f'{self.__class__.__name__}:pixelOffset - {self._parent.className} pixelSize is undefined')
+        if 0.0 in pixelSize:
+            raise ValueError(f'{self.__class__.__name__}:pixelOffset - {self._parent.className} pixelSize contains 0.0')
+
+        return tuple(to / abs(ps) for to, ps in zip(self._wrappedData.textOffset, pixelSize))
+
+    @pixelOffset.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
+    def pixelOffset(self, value: tuple):
+        """Set the visible offset for the text annotation in pixels.
+        """
+        if not (pixelSize := self._parent.pixelSize):
+            raise TypeError(f'{self.__class__.__name__}:pixelOffset - {self._parent.classname} pixelSize is undefined')
+        if 0.0 in pixelSize:
+            raise ValueError(f'{self.__class__.__name__}:pixelOffset - {self._parent.classname} pixelSize contains 0.0')
+
+        try:
+            # with undoStackBlocking():
+            # this is a gui operation and shouldn't need an undo? if no undo, remove core decorator above
+            self._wrappedData.textOffset = tuple(to * abs(ps) for to, ps in zip(value, pixelSize))
+
+        except Exception as es:
+            raise TypeError(f'{self.__class__.__name__}:pixelOffset must be a tuple of int/floats') from es
+
+    @property
+    def textCentre(self) -> tuple:
+        """X,Y text annotation centre in ppm.
+        """
+        if not (pixelSize := self._parent.pixelSize):
+            raise TypeError(f'{self.__class__.__name__}:pixelOffset - {self._parent.classname} pixelSize is undefined')
+        if 0.0 in pixelSize:
+            raise ValueError(f'{self.__class__.__name__}:pixelOffset - {self._parent.classname} pixelSize contains 0.0')
+
+        offset = self._wrappedData.textOffset
+        return (offset[0] + abs(pixelSize[0] * self._width / 2.0), offset[1] + abs(pixelSize[1] * self._height / 2.0))
+
+    ppmCentre = textCentre
+
+    @property
+    def pixelCentre(self) -> tuple:
+        """X,Y text annotation centre in pixels.
+        """
+        offset = self.pixelOffset
+        return (offset[0] + self._width / 2, offset[1] + self._height / 2)
+
+    def getIntersect(self, ppmPoint):
+        """X,Y text annotation co-ordinates to nearest point of bounding box from start-point in ppm.
+        """
+        if not (pixelSize := self._parent.pixelSize):
+            raise TypeError(f'{self.__class__.__name__}:getIntersect - {self._parent.classname} pixelSize is undefined')
+        if 0.0 in pixelSize:
+            raise ValueError(f'{self.__class__.__name__}:getIntersect - {self._parent.classname} pixelSize contains 0.0')
+
+        bLeft = self._wrappedData.textOffset
+        tRight = (bLeft[0] + abs(self._width * pixelSize[0]), bLeft[1] + abs(self._height * pixelSize[1]))
+
+        return line_rectangle_intersection(ppmPoint, self.textCentre, bLeft, tRight)
+
+    getPpmIntersect = getIntersect
+
+    def getPixelIntersect(self, pixelPoint):
+        """X,Y text annotation co-ordinates to nearest point of bounding box from start-point in pixels.
+        """
+        bLeft = self.pixelOffset
+        tRight = (bLeft[0] + self._width, bLeft[1] + self._height)
+
+        return line_rectangle_intersection(pixelPoint, self.textCentre, bLeft, tRight)
+
     #=========================================================================================
     # Implementation functions
     #=========================================================================================
@@ -171,10 +248,6 @@ class PMIViewABC(AbstractWrapperObject):
         """PeakViews cannot be deleted, except as a consequence of deleting other things.
         """
         raise RuntimeError(f"{str(self._pluralLinkName)} cannot be deleted.")
-
-    def _finaliseAction(self, action: str, **actionKwds):
-        if super()._finaliseAction(action, **actionKwds) and action == 'change':
-            self.peak._finaliseAction(action)
 
     #=========================================================================================
     # CCPN functions

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-19 16:58:07 +0100 (Fri, May 19, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-01 19:39:57 +0100 (Thu, June 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -34,6 +34,7 @@ from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.Multiplet import Multiplet
 from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Integral import Integral
+from ccpn.core.NmrAtom import NmrAtom
 from ccpn.util.Colour import getAutoColourRgbRatio
 from ccpn.util.AttrDict import AttrDict
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_FOREGROUND, getColours
@@ -90,8 +91,6 @@ class GLLabelling():
     LENARR2 = GLDefs.LENARR2
     LENARR4 = GLDefs.LENARR4
     ARROWCOLOURS = GLDefs.ARROWCOLOURS
-
-    LINE_LIMIT = 400
 
     def __init__(self, parent=None, strip=None, name=None, enableResize=False):
         """Initialise the class
@@ -169,20 +168,43 @@ class GLLabelling():
             if trigger == Notifier.DELETE:
                 self._deleteSymbol(obj, data.get('_list'), data.get('_spectrum'))
                 self._deleteLabel(obj, data.get('_list'), data.get('_spectrum'))
+                self._deleteArrow(obj, data.get('_list'), data.get('_spectrum'))
 
             if trigger == Notifier.CREATE:
                 self._createSymbol(obj)
                 self._createLabel(obj)
+                self._createArrow(obj)
 
             if trigger == Notifier.CHANGE and not obj.isDeleted:
                 self._changeSymbol(obj)
                 self._changeLabel(obj)
+                self._changeArrow(obj)
+
+        elif isinstance(obj, NmrAtom):  # and not obj.isDeleted:
+            if obj.isDeleted:
+                # update the labels on the peaks
+                for peak in obj._oldAssignedPeaks:  # use the deleted attribute
+                    for mlt in peak.multiplets:
+                        self._changeSymbol(mlt)
+                        self._changeLabel(mlt)
+                        self._changeArrow(mlt)
+            else:
+                for peak in obj.assignedPeaks:
+                    for mlt in peak.multiplets:
+                        # should only be one now
+                        self._changeSymbol(mlt)
+                        self._changeLabel(mlt)
+                        self._changeArrow(mlt)
 
         elif isinstance(obj, MultipletList):
             if trigger in [Notifier.DELETE]:
 
                 # clear the vertex arrays
                 for pList, glArray in self._GLSymbols.items():
+                    if pList.isDeleted:
+                        glArray.clearArrays()
+                # clear the vertex arrays
+                for pList, glArray in self._GLArrows.items():
                     if pList.isDeleted:
                         glArray.clearArrays()
 
@@ -331,7 +353,7 @@ class GLLabelling():
         # find the correct scale to draw square pixels
         # don't forget to change when the axes change
 
-        _, _, arrowType, arrowSize, arrowWidth, r, w = self._getArrowWidths(spectrumView)
+        _, _, arrowType, arrowSize, arrowMinimum, arrowWidth, r, w = self._getArrowWidths(spectrumView)
 
         # change the ratio on resize
         drawList.refreshMode = GLREFRESHMODE_REBUILD
@@ -359,10 +381,10 @@ class GLLabelling():
 
         strip = spectrumView.strip
         self._appendArrowItem(strip, obj, listCol, indexing, r, w,
-                              spectrumFrequency, arrowType, arrowSize, drawList, spectrumView, objListView)
+                              spectrumFrequency, arrowType, arrowSize, arrowMinimum, drawList, spectrumView, objListView)
 
     def _appendArrowItem(self, strip, obj, listCol, indexing, r, w,
-                         spectrumFrequency, arrowType, arrowSize, drawList, spectrumView, objListView):
+                         spectrumFrequency, arrowType, arrowSize, arrowMinimum, drawList, spectrumView, objListView):
         """append a single arrow to the end of the arrow list
         """
         # indexStart, indexEnd are indexes into the drawList.indices for the indices for this arrow
@@ -394,7 +416,8 @@ class GLLabelling():
         try:
             # nightmare to find the intersections between the symbol box and the bounding-box of the text
             vPP = spectrumView.spectrum.ppmPerPoints
-            pView = obj.getPeakView(objListView)
+            # pView = obj.getPeakView(objListView)
+            pView = self.getViewFromListView(objListView, obj)
             tx, ty = pView.getIntersect((0, 0))  # ppm intersect
 
             pixX, pixY = objListView.pixelSize
@@ -403,24 +426,25 @@ class GLLabelling():
 
             px, py = (tx - (sx * vPP[pIndex[0]])) / abs(pixX), (ty - (sy * vPP[pIndex[1]])) / abs(pixY)
             _ll = px**2 + py**2
-            if _ll < self.LINE_LIMIT:  # check in pixels?
+            if _ll < arrowMinimum:
                 # line is too short
                 sx, sy = 0, 0
-                raise
+                r, w = 0.0, 0.0
 
-            # generate the end-vector perpendicular to the line
-            rx, ry = -ty * abs(pixX), tx * abs(pixY)  # back to pixels, rotated 90degrees
-            denom = (rx**2 + ry**2)**0.5
-            rx = (arrowSize * rx / denom) * abs(pixX) / vPP[pIndex[0]]  # pixels-points for display
-            ry = (arrowSize * ry / denom) * abs(pixY) / vPP[pIndex[1]]
+            else:
+                # generate the end-vector perpendicular to the line
+                rx, ry = -ty * abs(pixX), tx * abs(pixY)  # back to pixels, rotated 90degrees
+                denom = (rx**2 + ry**2)**0.5
+                rx = (arrowSize * rx / denom) * abs(pixX) / vPP[pIndex[0]]  # pixels-points for display
+                ry = (arrowSize * ry / denom) * abs(pixY) / vPP[pIndex[1]]
 
-            tnx, tny = tx / abs(pixX), ty / abs(pixY)  # back to pixels, rotated 90degrees
-            denom = (tnx**2 + tny**2)**0.5
-            tnx = (arrowSize * tnx / denom) * abs(pixX) / vPP[pIndex[0]]  # pixels-points for display
-            tny = (arrowSize * tny / denom) * abs(pixY) / vPP[pIndex[1]]
+                tnx, tny = tx / abs(pixX), ty / abs(pixY)  # back to pixels, rotated 90degrees
+                denom = (tnx**2 + tny**2)**0.5
+                tnx = (arrowSize * tnx / denom) * abs(pixX) / vPP[pIndex[0]]  # pixels-points for display
+                tny = (arrowSize * tny / denom) * abs(pixY) / vPP[pIndex[1]]
 
-        except Exception as es:
-            print(es)
+        except Exception:
+            sx, sy = 0, 0
             r, w = 0.0, 0.0
 
         # try:
@@ -461,8 +485,8 @@ class GLLabelling():
                                                                    p0[0] + r + rx, p0[1] + w + ry,
                                                                    p0[0] + r - rx, p0[1] + w - ry,
                                                                    p0[0] + r, p0[1] + w,
-                                                                   p0[0] + sx + rx + tnx, p0[1] + sy + ry + tny,
-                                                                   p0[0] + sx - rx + tnx, p0[1] + sy - ry + tny,
+                                                                   p0[0] + sx + rx + 2 * tnx, p0[1] + sy + ry + 2 * tny,
+                                                                   p0[0] + sx - rx + 2 * tnx, p0[1] + sy - ry + 2 * tny,
                                                                    ),
                                                                   dtype=np.float32))
         drawList.colors = np.append(drawList.colors, np.array((*cols, fade) * self.LENARR, dtype=np.float32))
@@ -555,7 +579,7 @@ class GLLabelling():
             # find the correct scale to draw square pixels
             # don't forget to change when the axes change
 
-            _, _, arrowType, arrowSize, arrowWidth, r, w = self._getArrowWidths(spectrumView)
+            _, _, arrowType, arrowSize, arrowMinimum, arrowWidth, r, w = self._getArrowWidths(spectrumView)
 
             # change the ratio on resize
             drawList.refreshMode = GLREFRESHMODE_REBUILD
@@ -593,7 +617,7 @@ class GLLabelling():
                         cols = listCol
 
                     self._insertArrowItem(strip, obj, cols, indexing, r, w,
-                                          spectrumFrequency, arrowType, arrowSize, drawList,
+                                          spectrumFrequency, arrowType, arrowSize, arrowMinimum, drawList,
                                           spectrumView, objListView, tCount)
 
             drawList.defineAliasedIndexVBO()
@@ -632,6 +656,7 @@ class GLLabelling():
         """
         arrowType = self.strip.arrowType
         arrowSize = self.strip.arrowSize
+        arrowMinimum = self.strip.arrowMinimum**2  # a bit quicker
         symbolWidth = self.strip.symbolSize / 2.0
 
         pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
@@ -648,7 +673,7 @@ class GLLabelling():
         except Exception:
             pw = w
 
-        return r, w, arrowType, arrowSize, symbolWidth, pr, pw
+        return r, w, arrowType, arrowSize, arrowMinimum, symbolWidth, pr, pw
 
     def _buildArrowsCountItem(self, strip, spectrumView, obj, arrowType, tCount):
         """return the number of indices and vertices for the object
@@ -698,7 +723,7 @@ class GLLabelling():
         return indCount, vertCount
 
     def _insertArrowItem(self, strip, obj, listCol, indexing, r, w,
-                         spectrumFrequency, arrowType, arrowSize, drawList, spectrumView, objListView, tCount):
+                         spectrumFrequency, arrowType, arrowSize, arrowMinimum, drawList, spectrumView, objListView, tCount):
         """insert a single arrow to the end of the arrow list
         """
 
@@ -731,7 +756,8 @@ class GLLabelling():
         inr, inw = r, w
         try:
             vPP = spectrumView.spectrum.ppmPerPoints
-            pView = obj.getPeakView(objListView)
+            # pView = obj.getPeakView(objListView)
+            pView = self.getViewFromListView(objListView, obj)
             tx, ty = pView.getIntersect((0, 0))
 
             pixX, pixY = objListView.pixelSize
@@ -740,23 +766,25 @@ class GLLabelling():
 
             px, py = (tx - (sx * vPP[pIndex[0]])) / abs(pixX), (ty - (sy * vPP[pIndex[1]])) / abs(pixY)
             _ll = px**2 + py**2
-            if _ll < self.LINE_LIMIT:  # check in pixels?
+            if _ll < arrowMinimum:  # check in pixels?
                 # line is too short
                 sx, sy = 0, 0
-                raise
+                r, w = 0.0, 0.0
 
-            # generate the end-vector perpendicular to the line
-            rx, ry = -ty * abs(pixX), tx * abs(pixY)  # back to pixels, rotated 90degrees
-            denom = (rx**2 + ry**2)**0.5
-            rx = (arrowSize * rx / denom) * abs(pixX) / vPP[pIndex[0]]  # pixels-points for display
-            ry = (arrowSize * ry / denom) * abs(pixY) / vPP[pIndex[1]]
+            else:
+                # generate the end-vector perpendicular to the line
+                rx, ry = -ty * abs(pixX), tx * abs(pixY)  # back to pixels, rotated 90degrees
+                denom = (rx**2 + ry**2)**0.5
+                rx = (arrowSize * rx / denom) * abs(pixX) / vPP[pIndex[0]]  # pixels-points for display
+                ry = (arrowSize * ry / denom) * abs(pixY) / vPP[pIndex[1]]
 
-            tnx, tny = tx / abs(pixX), ty / abs(pixY)  # back to pixels, rotated 90degrees
-            denom = (tnx**2 + tny**2)**0.5
-            tnx = (arrowSize * tnx / denom) * abs(pixX) / vPP[pIndex[0]]  # pixels-points for display
-            tny = (arrowSize * tny / denom) * abs(pixY) / vPP[pIndex[1]]
+                tnx, tny = tx / abs(pixX), ty / abs(pixY)  # back to pixels, rotated 90degrees
+                denom = (tnx**2 + tny**2)**0.5
+                tnx = (arrowSize * tnx / denom) * abs(pixX) / vPP[pIndex[0]]  # pixels-points for display
+                tny = (arrowSize * tny / denom) * abs(pixY) / vPP[pIndex[1]]
 
         except Exception:
+            sx, sy = 0, 0
             r, w = 0.0, 0.0
 
         if self._isSelected(obj):
@@ -799,17 +827,18 @@ class GLLabelling():
                                                                  p0[0] + r + rx, p0[1] + w + ry,
                                                                  p0[0] + r - rx, p0[1] + w - ry,
                                                                  p0[0] + r, p0[1] + w,
-                                                                 p0[0] + sx + rx + tnx, p0[1] + sy + ry + tny,
-                                                                 p0[0] + sx - rx + tnx, p0[1] + sy - ry + tny,
+                                                                 p0[0] + sx + rx + 2 * tnx, p0[1] + sy + ry + 2 * tny,
+                                                                 p0[0] + sx - rx + 2 * tnx, p0[1] + sy - ry + 2 * tny,
                                                                  )
         drawList.colors[2 * vertexPtr:2 * vertexPtr + self.LENARR4] = (*cols, fade) * self.LENARR
         drawList.attribs[vertexPtr // 2:(vertexPtr // 2) + self.LENARR] = (alias,) * self.LENARR
         drawList.offsets[vertexPtr:vertexPtr + self.LENARR2] = (p0[0], p0[1]) * self.LENARR
 
-        # add extra indices
-        extraIndices, extraIndexCount = self.insertExtraIndices(drawList, indexing.end + iCount, indexing.start + self.LENARR, obj)
-        # add extra vertices for the multiplet
-        extraVertices = self.insertExtraVertices(drawList, vertexPtr + self.LENARR2, pIndex, obj, p0, (*cols, fade), fade)
+        # # add extra indices
+        # extraIndices, extraIndexCount = self.insertExtraIndices(drawList, indexing.end + iCount, indexing.start + self.LENARR, obj)
+        # # add extra vertices for the multiplet
+        # extraVertices = self.insertExtraVertices(drawList, vertexPtr + self.LENARR2, pIndex, obj, p0, (*cols, fade), fade)
+        extraIndices, extraIndexCount, extraVertices = 0, 0, 0
 
         # keep a pointer to the obj
         drawList.pids[objNum:objNum + GLDefs.LENPID] = (obj, drawList.numVertices, (self.LENARR + extraVertices),
@@ -849,7 +878,7 @@ class GLLabelling():
         #
         # # if drawList.refreshMode == GLREFRESHMODE_REBUILD:
         #
-        # _, _, arrowType, arrowSize, arrowWidth, r, w = self._getArrowWidths(spectrumView)
+        # _, _, arrowType, arrowSize, arrowMinimum, arrowWidth, r, w = self._getArrowWidths(spectrumView)
         # offsets, offsetsLENARR2 = self._rescaleArrowOffsets(r, w)
 
         # for pp in range(0, len(drawList.pids), GLDefs.LENPID):
@@ -890,7 +919,7 @@ class GLLabelling():
         meritEnabled = objListView.meritEnabled
         meritThreshold = objListView.meritThreshold
 
-        _, _, arrowType, arrowSize, arrowWidth, r, w = self._getArrowWidths(spectrumView)
+        _, _, arrowType, arrowSize, arrowMinimum, arrowWidth, r, w = self._getArrowWidths(spectrumView)
 
         _indexCount = 0
         for pp in range(0, len(drawList.pids), GLDefs.LENPID):
@@ -1157,7 +1186,7 @@ class GLLabelling():
                                                 self.autoColour,
                                                 getColours()[CCPNGLWIDGET_FOREGROUND])
 
-            text = self.getLabelling(obj, self._GLParent._symbolLabelling)
+            text = self.getLabelling(obj, self._GLParent)
 
             newString = GLString(text=text,
                                  font=self._GLParent.getSmallFont(),
@@ -1172,9 +1201,10 @@ class GLLabelling():
 
             try:
                 # update the size in the peakView
-                pView = obj.getPeakView(objListView)
+                # pView = obj.getPeakView(objListView)
+                pView = self.getViewFromListView(objListView, obj)
                 pView.size = (newString.width, newString.height)
-            except Exception:
+            except Exception as es:
                 pass
 
     def _fillLabels(self, spectrumView, objListView, pls, objectList):
@@ -1245,7 +1275,7 @@ class GLLabelling():
                                                 self.autoColour,
                                                 getColours()[CCPNGLWIDGET_FOREGROUND])
 
-            text = self.getLabelling(obj, self._GLParent._symbolLabelling)
+            text = self.getLabelling(obj, self._GLParent)
 
             outString = GLString(text=text,
                                  font=self._GLParent.getSmallFont(),
@@ -1258,9 +1288,10 @@ class GLLabelling():
             outString.stringOffset = stringOffset
 
             try:
-                pView = obj.getPeakView(objListView)
+                # pView = obj.getPeakView(objListView)
+                pView = self.getViewFromListView(objListView, obj)
                 pView.size = (outString.width, outString.height)
-            except Exception:
+            except Exception as es:
                 pass
 
             return outString
@@ -2731,7 +2762,7 @@ class GL1dLabelling():
         # find the correct scale to draw square pixels
         # don't forget to change when the axes change
 
-        _, _, arrowType, arrowSize, arrowWidth, r, w = self._getArrowWidths(spectrumView)
+        _, _, arrowType, arrowSize, arrowMinimum, arrowWidth, r, w = self._getArrowWidths(spectrumView)
 
         # change the ratio on resize
         drawList.refreshMode = GLREFRESHMODE_REBUILD
@@ -2768,7 +2799,8 @@ class GL1dLabelling():
         inr, inw = r, w
         try:
             vPP = spectrumView.spectrum.ppmPerPoints
-            pView = obj.getPeakView(objListView)
+            # pView = obj.getPeakView(objListView)
+            pView = self.getViewFromListView(objListView, obj)
             tx, ty = pView.getIntersect((0, 0))  # ppm intersect
 
             pixX, pixY = objListView.pixelSize
@@ -2776,23 +2808,25 @@ class GL1dLabelling():
             sx, sy = line_rectangle_intersection((0, 0), (tx / vPP[0], ty), (-inr, -inw), (inr, inw))
 
             _ll = ((tx - (sx * vPP[0])) / abs(pixX))**2 + ((ty - sy) / abs(pixY))**2
-            if _ll < self.LINE_LIMIT:  # check in pixels?
+            if _ll < arrowMinimum:  # check in pixels?
                 # line is too short
                 sx, sy = 0, 0
-                raise
+                r, w = 0.0, 0.0
 
-            # generate the end-vector perpendicular to the line
-            rx, ry = -ty * abs(pixX), tx * abs(pixY)  # back to pixels, rotated 90degrees
-            denom = (rx**2 + ry**2)**0.5
-            rx = (arrowSize * rx / denom) * abs(pixX) / vPP[0]  # pixels-points for display
-            ry = (arrowSize * ry / denom) * abs(pixY)
+            else:
+                # generate the end-vector perpendicular to the line
+                rx, ry = -ty * abs(pixX), tx * abs(pixY)  # back to pixels, rotated 90degrees
+                denom = (rx**2 + ry**2)**0.5
+                rx = (arrowSize * rx / denom) * abs(pixX) / vPP[0]  # pixels-points for display
+                ry = (arrowSize * ry / denom) * abs(pixY)
 
-            tnx, tny = tx / abs(pixX), ty / abs(pixY)  # back to pixels, rotated 90degrees
-            denom = (tnx**2 + tny**2)**0.5
-            tnx = (arrowSize * tnx / denom) * abs(pixX) / vPP[0]  # pixels-points for display
-            tny = (arrowSize * tny / denom) * abs(pixY)
+                tnx, tny = tx / abs(pixX), ty / abs(pixY)  # back to pixels, rotated 90degrees
+                denom = (tnx**2 + tny**2)**0.5
+                tnx = (arrowSize * tnx / denom) * abs(pixX) / vPP[0]  # pixels-points for display
+                tny = (arrowSize * tny / denom) * abs(pixY)
 
         except Exception:
+            sx, sy = 0, 0
             r, w = 0.0, 0.0
 
         if self._isSelected(obj):
@@ -2816,7 +2850,7 @@ class GL1dLabelling():
                                       0, r, w, alias, sx, sy, rx, ry, tnx, tny)
 
     def _insertArrowItem(self, strip, obj, listCol, indexing, r, w,
-                         spectrumFrequency, arrowType, arrowSize, drawList, spectrumView, objListView):
+                         spectrumFrequency, arrowType, arrowSize, arrowMinimum, drawList, spectrumView, objListView):
         """insert a single arrow to the end of the arrow list
         """
 
@@ -2844,7 +2878,8 @@ class GL1dLabelling():
         inr, inw = r, w
         try:
             vPP = spectrumView.spectrum.ppmPerPoints
-            pView = obj.getPeakView(objListView)
+            # pView = obj.getPeakView(objListView)
+            pView = self.getViewFromListView(objListView, obj)
             tx, ty = pView.getIntersect((0, 0))  # ppm intersect
 
             pixX, pixY = objListView.pixelSize
@@ -2852,23 +2887,25 @@ class GL1dLabelling():
             sx, sy = line_rectangle_intersection((0, 0), (tx / vPP[0], ty), (-inr, -inw), (inr, inw))
 
             _ll = ((tx - (sx * vPP[0])) / abs(pixX))**2 + ((ty - sy) / abs(pixY))**2
-            if _ll < self.LINE_LIMIT:  # check in pixels?
+            if _ll < arrowMinimum:  # check in pixels?
                 # line is too short
                 sx, sy = 0, 0
-                raise
+                r, w = 0.0, 0.0
 
-            # generate the end-vector perpendicular to the line
-            rx, ry = -ty * abs(pixX), tx * abs(pixY)  # back to pixels, rotated 90degrees
-            denom = (rx**2 + ry**2)**0.5
-            rx = (arrowSize * rx / denom) * abs(pixX) / vPP[0]  # pixels-points for display
-            ry = (arrowSize * ry / denom) * abs(pixY)
+            else:
+                # generate the end-vector perpendicular to the line
+                rx, ry = -ty * abs(pixX), tx * abs(pixY)  # back to pixels, rotated 90degrees
+                denom = (rx**2 + ry**2)**0.5
+                rx = (arrowSize * rx / denom) * abs(pixX) / vPP[0]  # pixels-points for display
+                ry = (arrowSize * ry / denom) * abs(pixY)
 
-            tnx, tny = tx / abs(pixX), ty / abs(pixY)  # back to pixels, rotated 90degrees
-            denom = (tnx**2 + tny**2)**0.5
-            tnx = (arrowSize * tnx / denom) * abs(pixX) / vPP[0]  # pixels-points for display
-            tny = (arrowSize * tny / denom) * abs(pixY)
+                tnx, tny = tx / abs(pixX), ty / abs(pixY)  # back to pixels, rotated 90degrees
+                denom = (tnx**2 + tny**2)**0.5
+                tnx = (arrowSize * tnx / denom) * abs(pixX) / vPP[0]  # pixels-points for display
+                tny = (arrowSize * tny / denom) * abs(pixY)
 
         except Exception:
+            sx, sy = 0, 0
             r, w = 0.0, 0.0
 
         if self._isSelected(obj):
@@ -2957,7 +2994,7 @@ class GL1dLabelling():
         meritEnabled = objListView.meritEnabled
         meritThreshold = objListView.meritThreshold
 
-        _, _, arrowType, arrowSize, arrowWidth, r, w = self._getArrowWidths(spectrumView)
+        _, _, arrowType, arrowSize, arrowMinimum, arrowWidth, r, w = self._getArrowWidths(spectrumView)
 
         _indexCount = 0
         for pp in range(0, len(drawList.pids), GLDefs.LENPID):
@@ -3023,7 +3060,7 @@ class GL1dLabelling():
             # find the correct scale to draw square pixels
             # don't forget to change when the axes change
 
-            _, _, arrowType, arrowSize, arrowWidth, r, w = self._getArrowWidths(spectrumView)
+            _, _, arrowType, arrowSize, arrowMinimum, arrowWidth, r, w = self._getArrowWidths(spectrumView)
 
             # change the ratio on resize
             drawList.refreshMode = GLREFRESHMODE_REBUILD
@@ -3064,7 +3101,7 @@ class GL1dLabelling():
                         cols = listCol
 
                     self._insertArrowItem(strip, obj, cols, indexing, r, w,
-                                          spectrumFrequency, arrowType, arrowSize, drawList,
+                                          spectrumFrequency, arrowType, arrowSize, arrowMinimum, drawList,
                                           spectrumView, objListView)
 
             drawList.defineAliasedIndexVBO()
@@ -3451,7 +3488,7 @@ class GL1dLabelling():
             else:
                 cols = listCol
 
-        text = self.getLabelling(obj, self._GLParent._symbolLabelling)
+        text = self.getLabelling(obj, self._GLParent)
 
         newString = GLString(text=text,
                              font=self._GLParent.getSmallFont(),
@@ -3466,9 +3503,10 @@ class GL1dLabelling():
         newString.stringOffset = None
 
         try:
-            pView = obj.getPeakView(objListView)
+            # pView = obj.getPeakView(objListView)
+            pView = self.getViewFromListView(objListView, obj)
             pView.size = (newString.width, newString.height)
-        except Exception:
+        except Exception as es:
             pass
 
         stringList.append(newString)

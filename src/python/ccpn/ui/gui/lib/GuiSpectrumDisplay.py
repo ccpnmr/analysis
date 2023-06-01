@@ -177,6 +177,8 @@ class GuiSpectrumDisplay(CcpnModule):
 
     MAXPEAKLABELTYPES = 0
     MAXPEAKSYMBOLTYPES = 0
+    MAXMULTIPLETLABELTYPES = 0
+    MAXMULTIPLETSYMBOLTYPES = 0
     MAXARROWSYMBOLTYPES = 0
 
     # Sub-classed in the 1d/nD implementations
@@ -304,12 +306,18 @@ class GuiSpectrumDisplay(CcpnModule):
                                                                     symbolThickness=_general.symbolThickness,
                                                                     arrowType=_general.arrowType,
                                                                     arrowSize=_general.arrowSize,
+                                                                    arrowMinimum=_general.arrowMinimum,
+                                                                    multipletAnnotationType=_general.multipletAnnotationType,
+                                                                    multipletType=_general.multipletType,
                                                                     aliasEnabled=_general.aliasEnabled,
                                                                     aliasShade=_general.aliasShade,
                                                                     aliasLabelsEnabled=_general.aliasLabelsEnabled,
+                                                                    peakSymbolsEnabled=_general.peakSymbolsEnabled,
                                                                     peakLabelsEnabled=_general.peakLabelsEnabled,
                                                                     peakArrowsEnabled=_general.peakArrowsEnabled,
+                                                                    multipletSymbolsEnabled=_general.multipletSymbolsEnabled,
                                                                     multipletLabelsEnabled=_general.multipletLabelsEnabled,
+                                                                    multipletArrowsEnabled=_general.multipletArrowsEnabled,
                                                                     stripArrangement=_general.stripArrangement,
                                                                     _aspectRatioMode=_general.aspectRatioMode,
                                                                     contourThickness=_general.contourThickness,
@@ -333,12 +341,18 @@ class GuiSpectrumDisplay(CcpnModule):
                                                                     symbolThickness=_general.symbolThickness,
                                                                     arrowType=_general.arrowType,
                                                                     arrowSize=_general.arrowSize,
+                                                                    arrowMinimum=_general.arrowMinimum,
+                                                                    multipletAnnotationType=_general.multipletAnnotationType,
+                                                                    multipletType=_general.multipletType,
                                                                     aliasEnabled=_general.aliasEnabled,
                                                                     aliasShade=_general.aliasShade,
                                                                     aliasLabelsEnabled=_general.aliasLabelsEnabled,
+                                                                    peakSymbolsEnabled=_general.peakSymbolsEnabled,
                                                                     peakLabelsEnabled=_general.peakLabelsEnabled,
                                                                     peakArrowsEnabled=_general.peakArrowsEnabled,
+                                                                    multipletSymbolsEnabled=_general.multipletSymbolsEnabled,
                                                                     multipletLabelsEnabled=_general.multipletLabelsEnabled,
+                                                                    multipletArrowsEnabled=_general.multipletArrowsEnabled,
                                                                     stripArrangement=_general.stripArrangement,
                                                                     _aspectRatioMode=_general.aspectRatioMode,
                                                                     contourThickness=_general.contourThickness,
@@ -511,10 +525,12 @@ class GuiSpectrumDisplay(CcpnModule):
         self._spectrumDisplaySettings._populateWidgets(prefsGen.aspectRatioMode, prefsGen.aspectRatios,
                                                        prefsGen.annotationType, prefsGen.stripArrangement,
                                                        prefsGen.symbolSizePixel, prefsGen.symbolThickness, prefsGen.symbolType,
-                                                       prefsGen.arrowType, prefsGen.arrowSize,
+                                                       prefsGen.arrowType, prefsGen.arrowSize, prefsGen.arrowMinimum,
+                                                       prefsGen.multipletAnnotationType, prefsGen.multipletType,
                                                        prefsGen.xAxisUnits, prefsGen.yAxisUnits,
                                                        prefsGen.aliasEnabled, prefsGen.aliasShade, prefsGen.aliasLabelsEnabled,
-                                                       prefsGen.peakLabelsEnabled, prefsGen.peakArrowsEnabled, prefsGen.multipletLabelsEnabled,
+                                                       prefsGen.peakSymbolsEnabled, prefsGen.peakLabelsEnabled, prefsGen.peakArrowsEnabled,
+                                                       prefsGen.multipletSymbolsEnabled, prefsGen.multipletLabelsEnabled, prefsGen.multipletArrowsEnabled,
                                                        prefsGen.contourThickness,
                                                        prefsGen.zPlaneNavigationMode)
 
@@ -1701,16 +1717,16 @@ class GuiSpectrumDisplay(CcpnModule):
     def arrangeLabels(self, selected: bool = False):
         """Auto-arrange the peak/multiplet labels to minimise any overlaps.
         """
-        from ccpn.ui.gui.lib.SpectrumDisplayLib import arrangePeakLabelPositions
+        from ccpn.ui.gui.lib.SpectrumDisplayLib import arrangeLabelPositions
 
-        arrangePeakLabelPositions(self, selected=selected)
+        arrangeLabelPositions(self, selected=selected)
 
     def resetLabels(self, selected: bool = False):
         """Reset arrangement of peak/multiplet labels.
         """
-        from ccpn.ui.gui.lib.SpectrumDisplayLib import resetPeakLabelPositions
+        from ccpn.ui.gui.lib.SpectrumDisplayLib import resetLabelPositions
 
-        resetPeakLabelPositions(self, selected=selected)
+        resetLabelPositions(self, selected=selected)
 
     def _closeModule(self):
         """

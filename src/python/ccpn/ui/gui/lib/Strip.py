@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-06 13:14:30 +0000 (Mon, March 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-01 19:39:57 +0100 (Thu, June 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -26,9 +26,12 @@ __date__ = "$Date: 2023-01-24 10:28:48 +0000 (Tue, January 24, 2023) $"
 # Start of code
 #=========================================================================================
 
+from copy import deepcopy
+
 from ccpn.ui._implementation.Strip import Strip as _CoreClassStrip
 from ccpn.ui.gui.lib.GuiStrip1d import GuiStrip1d as _GuiStrip1d
 from ccpn.ui.gui.lib.GuiStripNd import GuiStripNd as _GuiStripNd
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISASPECTRATIOS, AXISASPECTRATIOMODE
 
 from ccpn.core.Project import Project
 from ccpn.util.Logging import getLogger
@@ -45,6 +48,21 @@ class Strip(_CoreClassStrip):
             return Strip1d(project, apiObj)
         else:
             return StripNd(project, apiObj)
+
+    def _postRestore(self):
+        """Handle post-initialising children after all children have been restored
+        """
+        settings = self.spectrumDisplay._getSettingsDict()
+        prefs = self._preferences
+
+        # copy values from preferences
+        glWidget = self._CcpnGLWidget
+        glWidget._aspectRatioMode = settings[AXISASPECTRATIOMODE]
+        glWidget._aspectRatios = deepcopy(settings[AXISASPECTRATIOS])
+        glWidget._applyXLimit = prefs.zoomXLimitApply
+        glWidget._applyYLimit = prefs.zoomYLimitApply
+
+        super()._postRestore()
 
 
 class Strip1d(Strip, _GuiStrip1d):

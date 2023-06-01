@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-23 15:26:51 +0100 (Tue, May 23, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-01 19:39:56 +0100 (Thu, June 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -3552,7 +3552,7 @@ class CcpnNefReader(CcpnNefContent):
                 self.warning("Unknown atom %s for bond to %s. Skipping..." % (id2, id1), loop)
             else:
                 result.append((atom1, atom2))
-                atom1.addInterAtomBond(atom2, 'covalent')
+                atom1.addInterAtomBond(atom2, 'disulfide')
         #
         return result
 
@@ -4970,10 +4970,10 @@ class CcpnNefReader(CcpnNefContent):
 
                 result.append(shift)
 
-            except ValueError:
+            except ValueError as es:
                 self.warning("Cannot produce NmrAtom for assignment %s. Skipping ChemicalShift" % (tt,), loop)
                 # Should eventually be removed - raise while still testing
-                raise
+                # raise
         #
         return result
 
@@ -6365,7 +6365,7 @@ class CcpnNefReader(CcpnNefContent):
 
             # NOTE:ED - there is a problem with cross-spectra peaks
             if mlts and peak and peak not in mlts[0].peaks:
-                mlts[0].addPeaks(peak)
+                mlts[0]._forcePeaks(peak)
 
     importers['ccpn_multiplet_peaks'] = load_ccpn_multiplet_peaks
 

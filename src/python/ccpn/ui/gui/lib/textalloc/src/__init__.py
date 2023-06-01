@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-18 18:49:17 +0100 (Thu, May 18, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-01 19:39:57 +0100 (Thu, June 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -32,7 +32,7 @@ __date__ = "$Date: 2022 $"
 from PyQt5 import QtGui
 import numpy as np
 import time
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Optional
 from .non_overlapping_boxes import get_non_overlapping_boxes
 
 
@@ -44,26 +44,29 @@ def allocate_text(
         x: Union[np.ndarray, List[float]],
         y: Union[np.ndarray, List[float]],
         text_list: List[str],
-        x_scatter: Union[np.ndarray, List[float]] = None,
-        y_scatter: Union[np.ndarray, List[float]] = None,
+        x_points: Union[np.ndarray, List[float]] = None,
+        y_points: Union[np.ndarray, List[float]] = None,
         x_lines: List[Union[np.ndarray, List[float]]] = None,
         y_lines: List[Union[np.ndarray, List[float]]] = None,
         x_boxes: List[Union[np.ndarray, List[float]]] = None,
         y_boxes: List[Union[np.ndarray, List[float]]] = None,
+        a_ellipses: Union[np.ndarray, List[float]] = None,
+        b_ellipses: Union[np.ndarray, List[float]] = None,
         textsize: int = 10,
-        margin: float = 0.01,
-        minx_distance: float = 0.015,
-        maxx_distance: float = 0.07,
-        miny_distance: float = 0.015,
-        maxy_distance: float = 0.07,
+        x_margin: float = 2,
+        y_margin: float = 2,
+        minx_distance: float = 2,
+        maxx_distance: float = 100,
+        miny_distance: float = 2,
+        maxy_distance: float = 100,
         verbose: bool = False,
         draw_lines: bool = True,
         linecolor: str = "r",
         draw_all: bool = True,
         linewidth: float = 1,
         textcolor: str = "k",
-        xlims: tuple = (0, 1),
-        ylims: tuple = (0, 1),
+        x_lims: Optional[Tuple] = (0, 1),
+        y_lims: Optional[Tuple] = (0, 1),
         include_new_lines=False,
         include_new_boxes=False,
         ):
@@ -73,24 +76,29 @@ def allocate_text(
         x (Union[np.ndarray, List[float]]): x-coordinates of texts 1d array/list.
         y (Union[np.ndarray, List[float]]): y-coordinates of texts 1d array/list.
         text_list (List[str]): list of texts.
-        x_scatter (Union[np.ndarray, List[float]], optional): x-coordinates of all scattered points in plot 1d array/list. Defaults to None.
-        y_scatter (Union[np.ndarray, List[float]], optional): y-coordinates of all scattered points in plot 1d array/list. Defaults to None.
+        x_points (Union[np.ndarray, List[float]], optional): x-coordinates of all scattered points in plot 1d array/list. Defaults to None.
+        y_points (Union[np.ndarray, List[float]], optional): y-coordinates of all scattered points in plot 1d array/list. Defaults to None.
         x_lines (List[Union[np.ndarray, List[float]]], optional): x-coordinates of all lines in plot list of 1d arrays/lists. Defaults to None.
         y_lines (List[Union[np.ndarray, List[float]]], optional): y-coordinates of all lines in plot list of 1d arrays/lists. Defaults to None.
         x_boxes (List[Union[np.ndarray, List[float]]], optional): x-coordinates of all boxes in plot list of 1d arrays/lists. Defaults to None.
         y_boxes (List[Union[np.ndarray, List[float]]], optional): y-coordinates of all boxes in plot list of 1d arrays/lists. Defaults to None.
+        a_ellipses (Union[np.ndarray, List[float]], optional): axis size for ellipses in the x-direction, maps to x_points. Defaults to None.
+        b_ellipses (Union[np.ndarray, List[float]], optional): axis size for ellipses in the y-direction, maps to y_points. Defaults to None.
         textsize (int, optional): size of text. Defaults to 10.
-        margin (float, optional): parameter for margins between objects. Increase for larger margins to points and lines. Defaults to 0.01.
-        minx_distance (float, optional): parameter for min distance between text and origin. Defaults to 0.015.
-        maxx_distance (float, optional): parameter for max distance between text and origin. Defaults to 0.07.
-        miny_distance (float, optional): parameter for min distance between text and origin. Defaults to 0.015.
-        maxy_distance (float, optional): parameter for max distance between text and origin. Defaults to 0.07.
+        x_margin (float, optional): x-axis margin between objects in pixels. Defaults to 2.
+        y_margin (float, optional): y-axis margin between objects in pixels. Defaults to 2.
+        minx_distance (float, optional): parameter for min distance between text and origin in pixels. Defaults to 2.
+        maxx_distance (float, optional): parameter for max distance between text and origin in pixels. Defaults to 100.
+        miny_distance (float, optional): parameter for min distance between text and origin in pixels. Defaults to 2.
+        maxy_distance (float, optional): parameter for max distance between text and origin in pixels. Defaults to 100.
         verbose (bool, optional): prints progress using tqdm. Defaults to False.
         draw_lines (bool, optional): draws lines from original points to textboxes. Defaults to True.
         linecolor (str, optional): color code of the lines between points and text-boxes. Defaults to "r".
         draw_all (bool, optional): Draws all texts after allocating as many as possible despit overlap. Defaults to True.
         linewidth (float, optional): width of line. Defaults to 1.
         textcolor (str, optional): color code of the text. Defaults to "k".
+        x_lims (Tuple[float, float]): x-limits of plot in pixels.
+        y_lims (Tuple[float, float]): y-limits of plot in pixels.
         include_new_lines (bool): Avoid the newly added line-segments between points and labels as new labels are found.
         include_new_boxes (bool): Avoid the newly added boxes between points and labels as new labels are found.
     """
@@ -101,13 +109,27 @@ def allocate_text(
     x = np.array(x)
     y = np.array(y)
 
-    if x_scatter is not None:
-        assert y_scatter is not None
-    if y_scatter is not None:
-        assert x_scatter is not None
-        assert len(y_scatter) == len(x_scatter)
-        x_scatter = np.array(x_scatter)
-        y_scatter = np.array(y_scatter)
+    if x_points is not None:
+        assert y_points is not None
+    if y_points is not None:
+        assert x_points is not None
+        assert len(y_points) == len(x_points)
+        x_points = np.array(x_points)
+        y_points = np.array(y_points)
+
+    if a_ellipses is not None:
+        assert x_points is not None
+        assert b_ellipses is not None
+    if b_ellipses is not None:
+        assert a_ellipses is not None
+        assert len(b_ellipses) == len(a_ellipses)
+        a_ellipses = np.array(a_ellipses)
+        b_ellipses = np.array(b_ellipses)
+
+    if a_ellipses is None and x_points is not None:
+        # create ellipses of size 1-pixel
+        a_ellipses = np.ones_like(x_points)
+        b_ellipses = np.ones_like(y_points)
 
     if x_lines is not None:
         assert y_lines is not None
@@ -126,9 +148,9 @@ def allocate_text(
         y_boxes = [np.array(y_box) for y_box in y_boxes]
 
     assert minx_distance <= maxy_distance
-    assert minx_distance >= margin
+    assert minx_distance >= x_margin
     assert miny_distance <= maxy_distance
-    assert miny_distance >= margin
+    assert miny_distance >= y_margin
 
     # Create boxes in original plot
     if verbose:
@@ -145,19 +167,25 @@ def allocate_text(
     # Process extracted text-boxes
     if verbose:
         print("Processing")
-    if x_scatter is None:
-        scatterxy = None
+    if x_points is None:
+        scatter_xy = None
     else:
-        scatterxy = np.transpose(np.vstack([x_scatter, y_scatter]))
+        scatter_xy = np.transpose(np.vstack([x_points, y_points]))
+
+    if a_ellipses is None:
+        ellipses_xyab = None
+    else:
+        ellipses_xyab = np.transpose(np.vstack([x_points, y_points, a_ellipses, b_ellipses]))
 
     lines_xyxy = None if x_lines is None else lines_to_segments(x_lines, y_lines)
     boxes_xyxy = None if x_boxes is None else boxes_to_segments(x_boxes, y_boxes)
 
     non_overlapping_boxes, overlapping_boxes_inds = get_non_overlapping_boxes(
             original_boxes,
-            xlims,
-            ylims,
-            margin,
+            x_lims,
+            y_lims,
+            x_margin,
+            y_margin,
             minx_distance,
             maxx_distance,
             miny_distance,
@@ -166,9 +194,10 @@ def allocate_text(
             draw_all,
             include_new_lines,
             include_new_boxes,
-            scatter_xy=scatterxy,
+            scatter_xy=scatter_xy,
             lines_xyxy=lines_xyxy,
             boxes_xyxy=boxes_xyxy,
+            ellipses_xyab=ellipses_xyab,
             )
 
     if verbose:

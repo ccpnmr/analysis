@@ -4,19 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:40 +0100 (Tue, July 05, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-06-01 19:39:57 +0100 (Thu, June 01, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,12 +27,12 @@ __date__ = "$Date: 2020-12-11 17:51:39 +0000 (Fri, December 11, 2020) $"
 #=========================================================================================
 
 import numpy as np
-from ccpn.util.Colour import getAutoColourRgbRatio
-from ccpn.util.Logging import getLogger
+from ccpn.core.lib.peakUtils import _getScreenPeakAnnotation, _getPeakAnnotation, _getPeakClusterId
 from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_MULTIPLETLINK
 from ccpn.ui.gui.lib.OpenGL import CcpnOpenGLDefs as GLDefs
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLLabelling import DEFAULTLINECOLOUR, GLLabelling, GL1dLabelling
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import getAliasSetting
+from ccpn.util.Colour import getAutoColourRgbRatio
 
 
 class GLmultipletListMethods():
@@ -115,10 +115,47 @@ class GLmultipletListMethods():
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     @staticmethod
-    def getLabelling(obj, labelType):
+    def getLabelling(obj, parent):
         """get the object label based on the current labelling method
         """
-        return obj.pid
+        labelType = parent._multipletLabelling
+
+        text = '---'
+        if pks := obj.peaks:
+
+            # grab the information from the first peak (they should all be the same)
+            pk = pks[0]
+            if labelType == 0:
+                # return the short code form
+                text = _getScreenPeakAnnotation(pk, useShortCode=True)
+            elif labelType == 1:
+                # return the long form
+                text = _getScreenPeakAnnotation(pk, useShortCode=False)
+            elif labelType == 2:
+                # return the original pid
+                # text = _getPeakAnnotation(obj)
+                text = _getScreenPeakAnnotation(pk, useShortCode=False, usePid=True)
+            elif labelType == 3:
+                # return the minimal form
+                text = _getScreenPeakAnnotation(pk, useShortCode=True, useMinimalCode=True)
+            elif labelType == 4:
+                # return the pid for the multiplet rather than the id - clearer when mixed
+                text = obj.pid
+            elif labelType == 5:
+                text = _getPeakClusterId(pk)
+            elif labelType == 6:
+                # return the peak annotation
+                text = _getPeakAnnotation(obj)
+
+        # no peak assignment from here
+        elif labelType == 4:
+            # return the minimal form
+            text = obj.pid
+        elif labelType == 6:
+            # return the multiplet annotation
+            text = _getPeakAnnotation(obj)
+
+        return text
 
     @staticmethod
     def extraIndicesCount(multiplet):
@@ -386,6 +423,12 @@ class GLmultipletListMethods():
         indexing.end += (iCount + _indexCount)
         drawList.numVertices += (self.LENSQ + extraVertices)
         indexing.vertexStart += (self.LENSQ + extraVertices)
+
+    @staticmethod
+    def getViewFromListView(multipletListView, obj):
+        """Get the multipletView from the MultipletListView.
+        """
+        return obj.getMultipletView(multipletListView)
 
 
 class GLmultipletNdLabelling(GLmultipletListMethods, GLLabelling):  #, GLpeakNdLabelling):

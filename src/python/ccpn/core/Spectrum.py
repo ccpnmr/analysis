@@ -53,8 +53,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-22 13:48:12 +0100 (Mon, May 22, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-06-01 19:39:56 +0100 (Thu, June 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -3235,37 +3235,63 @@ class Spectrum(AbstractWrapperObject):
         # NOTE:ED - metadata may not have been saved if project was read-only
         self._saveSpectrumMetaData()
 
-    @classmethod
-    def _restoreObject(cls, project, apiObj):
-        """Subclassed to allow for initialisations on restore, not on creation via newSpectrum
-        """
-        spectrum = super()._restoreObject(project, apiObj)
-        #
-        # # NOTE - version 3.0.4 -> 3.1.0 update was executed by the wrapper
-        # # move parameters from _ccpnInternal to the correct namespace, delete old parameters
+    # @classmethod
+    # def _restoreObject(cls, project, apiObj):
+    #     """Subclassed to allow for initialisations on restore, not on creation via newSpectrum
+    #     """
+    #     spectrum = super()._restoreObject(project, apiObj)
+    #     #
+    #     # # NOTE - version 3.0.4 -> 3.1.0 update was executed by the wrapper
+    #     # # move parameters from _ccpnInternal to the correct namespace, delete old parameters
+    #
+    #     # This will set all Spectrum traits, including dataStore, dataSource and peakPicker
+    #     spectrum._spectrumTraits._restoreFromSpectrum()
+    #
+    #     # Assure at least one peakList
+    #     if len(spectrum.peakLists) == 0:
+    #         spectrum.newPeakList()
+    #         getLogger().warning(f'{spectrum} had no peakList; created one')
+    #
+    #     # This will fix any spurious settings on the aliasing (also in update_3_0_4 code)
+    #     _aIndices = spectrum.aliasingIndices
+    #     spectrum.aliasingIndices = _aIndices
+    #
+    #     # Assure a setting of crucial attributes
+    #     spectrum._updateParameterValues()
+    #
+    #     # save the spectrum metadata
+    #     spectrum._saveSpectrumMetaData()
+    #
+    #     # set the initial axis ordering
+    #     specLib._getDefaultOrdering(spectrum)
+    #
+    #     return spectrum
 
+    def _postRestore(self):
+        """Handle post-initialising children after all children have been restored
+        """
         # This will set all Spectrum traits, including dataStore, dataSource and peakPicker
-        spectrum._spectrumTraits._restoreFromSpectrum()
+        self._spectrumTraits._restoreFromSpectrum()
 
         # Assure at least one peakList
-        if len(spectrum.peakLists) == 0:
-            spectrum.newPeakList()
-            getLogger().warning(f'{spectrum} had no peakList; created one')
+        if len(self.peakLists) == 0:
+            self.newPeakList()
+            getLogger().warning(f'{self} had no peakList; created one')
 
         # This will fix any spurious settings on the aliasing (also in update_3_0_4 code)
-        _aIndices = spectrum.aliasingIndices
-        spectrum.aliasingIndices = _aIndices
+        _aIndices = self.aliasingIndices
+        self.aliasingIndices = _aIndices
 
         # Assure a setting of crucial attributes
-        spectrum._updateParameterValues()
+        self._updateParameterValues()
 
-        # # save the spectrum metadata
-        # spectrum._saveSpectrumMetaData()
+        # # save the self metadata
+        # self._saveSpectrumMetaData()
 
         # set the initial axis ordering
-        specLib._getDefaultOrdering(spectrum)
+        specLib._getDefaultOrdering(self)
 
-        return spectrum
+        super()._postRestore()
 
     def _cleanSpectrumReferences(self):
         """Clean and update the cross-references on restoring project
@@ -3560,8 +3586,10 @@ class Spectrum(AbstractWrapperObject):
 
     @logCommand(get='self')
     def newPeakList(self, title: str = None, comment: str = None,
-                    isSimulated: bool = False, symbolStyle: str = None, symbolColour: str = None,
-                    textColour: str = None, **kwds):
+                    isSimulated: bool = False,
+                    symbolStyle: str = None, symbolColour: str = None,
+                    textColour: str = None, arrowColour: str = None,
+                    **kwds):
         """Create new empty PeakList within Spectrum
 
         See the PeakList class for details.
@@ -3579,12 +3607,14 @@ class Spectrum(AbstractWrapperObject):
         from ccpn.core.PeakList import _newPeakList
 
         return _newPeakList(self, title=title, comment=comment, isSimulated=isSimulated,
-                            symbolStyle=symbolStyle, symbolColour=symbolColour, textColour=textColour,
+                            symbolStyle=symbolStyle, symbolColour=symbolColour,
+                            textColour=textColour, arrowColour=arrowColour,
                             **kwds)
 
     @logCommand(get='self')
     def newIntegralList(self, title: str = None, symbolColour: str = None,
-                        textColour: str = None, comment: str = None, **kwds):
+                        textColour: str = None, arrowColour: str = None,
+                        comment: str = None, **kwds):
         """Create new IntegralList within Spectrum.
 
         See the IntegralList class for details.
@@ -3601,12 +3631,13 @@ class Spectrum(AbstractWrapperObject):
         from ccpn.core.IntegralList import _newIntegralList
 
         return _newIntegralList(self, title=title, comment=comment,
-                                symbolColour=symbolColour, textColour=textColour,
+                                symbolColour=symbolColour, textColour=textColour, arrowColour=arrowColour,
                                 **kwds)
 
     @logCommand(get='self')
     def newMultipletList(self, title: str = None,
-                         symbolColour: str = None, textColour: str = None, lineColour: str = None,
+                         symbolColour: str = None, textColour: str = None,
+                         lineColour: str = None, arrowColour: str = None,
                          multipletAveraging=None,
                          comment: str = None, multiplets: Sequence[Union['Multiplet', str]] = None, **kwds):
         """Create new MultipletList within Spectrum.
@@ -3627,7 +3658,8 @@ class Spectrum(AbstractWrapperObject):
         from ccpn.core.MultipletList import _newMultipletList
 
         return _newMultipletList(self, title=title, comment=comment,
-                                 lineColour=lineColour, symbolColour=symbolColour, textColour=textColour,
+                                 lineColour=lineColour, symbolColour=symbolColour,
+                                 textColour=textColour, arrowColour=arrowColour,
                                  multipletAveraging=multipletAveraging,
                                  multiplets=multiplets,
                                  **kwds)

@@ -79,6 +79,7 @@ class Peak(AbstractWrapperObject):
     _tempPosition = None
     _tempHeight = None
     _tempHeightError = None
+    _tempAssignment = 0
 
     # CCPN properties
     @property
@@ -610,6 +611,25 @@ class Peak(AbstractWrapperObject):
             with undoStackBlocking() as addUndoItem:
                 addUndoItem(redo=partial(self._recalculatePeakShifts, nmrResidues, newShifts))
 
+            self._copyDimAssignment(value)
+
+    def _copyDimAssignment(self, value):
+        """Copy the assignment to the other peaks in the multiplet.
+        """
+        if not self.multiplets or self._tempAssignment:
+            # stop recursion
+            return
+
+        pks = {pk for mlt in self.multiplets for pk in mlt.peaks if pk != self}
+        for pk in pks:
+            pk._tempAssignment += 1
+        for pk in pks:
+            pk.dimensionNmrAtoms = value
+        for pk in pks:
+            pk._tempAssignment -= 1
+        if any(pk._tempAssignment < 0 for pk in pks):
+            raise RuntimeError(f'{self}:  Counter below 0')
+
     @property
     def assignedNmrAtoms(self) -> Tuple[Tuple[Optional['NmrAtom'], ...], ...]:
         """Peak assignment - a tuple of tuples of NmrAtom combinations.
@@ -732,9 +752,28 @@ class Peak(AbstractWrapperObject):
             with undoStackBlocking() as addUndoItem:
                 addUndoItem(redo=partial(self._recalculatePeakShifts, nmrResidues, newShifts))
 
+            self._copyAssignment(value)
+
     # alternativeNames
     assignments = assignedNmrAtoms
     assignmentsByDimensions = dimensionNmrAtoms
+
+    def _copyAssignment(self, value):
+        """Copy the assignment to the other peaks in the multiplet.
+        """
+        if not self.multiplets or self._tempAssignment:
+            # stop recursion
+            return
+
+        pks = {pk for mlt in self.multiplets for pk in mlt.peaks if pk != self}
+        for pk in pks:
+            pk._tempAssignment += 1
+        for pk in pks:
+            pk.assignedNmrAtoms = value
+        for pk in pks:
+            pk._tempAssignment -= 1
+        if any(pk._tempAssignment < 0 for pk in pks):
+            raise RuntimeError(f'{self}:  Counter below 0')
 
     @property
     def multiplets(self) -> Optional[Tuple[Any]]:
@@ -751,7 +790,7 @@ class Peak(AbstractWrapperObject):
 
         if len(value) != self.peakList.spectrum.dimensionCount:
             raise ValueError(
-                    f"Length of assignment value {value} does not match peak dimensionality {self.peakList.spectrum.dimensionCount} "
+                    f"Length of assignment value {value} does not match peak dimensionality {self.peakList.spectrum.dimensionCount}"
                     )
 
         # Convert to tuple and check for non-existing pids
@@ -929,7 +968,9 @@ class Peak(AbstractWrapperObject):
             newValues = _getParameterValues(self, parameterName,
                                             dimensions=dimensions, dimensionCount=self.spectrum.dimensionCount)
         except ValueError as es:
-            raise ValueError(f'{self.__class__.__name__}.getByDimensions: {str(es)}') from es
+            raise ValueError(
+                    f'{self.__class__.__name__}.getByDimensions: {str(es)}'
+                    ) from es
 
         return newValues
 
@@ -990,12 +1031,14 @@ class Peak(AbstractWrapperObject):
     def _finaliseAction(self, action: str, **actionKwds):
         """Subclassed to handle associated multiplets
         """
-        if not super()._finaliseAction(action):
+        if not super()._finaliseAction(action, **actionKwds):
             return
 
         # if this peak is changed or deleted then it's multiplets/integral need to CHANGE
         # create required as undo may return peak to a multiplet list
-        if action in {'change', 'create', 'delete'}:
+        # use fromPeak/Multiplet to stop infinite loops
+        actionKwds['fromPeak'] = self
+        if action in {'change', 'create', 'delete'} and not actionKwds.get('fromMultiplet'):
             for mt in self.multiplets:
                 mt._finaliseAction('change', **actionKwds)
             # NOTE:ED does integral need to be notified? - and reverse notifiers in multiplet/integral
@@ -1234,7 +1277,7 @@ class Peak(AbstractWrapperObject):
         from ccpn.core.PeakList import PICKINGMETHODS
         from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
 
-        if not fitMethod in PICKINGMETHODS:
+        if fitMethod not in PICKINGMETHODS:
             fitMethod = self._project.application.preferences.general.peakFittingMethod
         peak = self
         peakList = peak.peakList
@@ -1256,8 +1299,7 @@ class Peak(AbstractWrapperObject):
                         consecutiveSameLWsCount = 0
                     lastLWsFound = peak.lineWidths
                     iterations -= 1
-        getLogger().info('Peak fit completed for %s' % peak)
-        return
+        getLogger().info(f'Peak fit completed for {peak}')
 
     def getAsDataFrame(self) -> pd.DataFrame:
         """Get the peak properties as a dataframe """

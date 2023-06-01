@@ -961,7 +961,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
         obj = cls._newInstanceFromApiData(project=project, apiObj=apiObj)
         if obj is None:
-            raise RuntimeError('Error restoring object encoded by %s' % apiObj)
+            raise RuntimeError(f'Error restoring object encoded by {apiObj}')
 
         # update _objectVersion from internal parameter store to model (if exists)
         if obj._hasInternalParameter(obj._OBJECT_VERSION):
@@ -969,8 +969,14 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
             obj._deleteInternalParameter(obj._OBJECT_VERSION)
             obj._objectVersion = _version
 
+        # indented debugging just to be sure is running in the correct order
+        _indent = getattr(AbstractWrapperObject, '__indent', 1)
+        getLogger().debug2(f'{"-" * _indent}>  _restoreObject  {apiObj}')
+        setattr(AbstractWrapperObject, '__indent', _indent + 4)
+
         # restore the children
         obj._restoreChildren()
+        obj._postRestore()
 
         # call any post-initialisation updates
         cls._updater.update(UPDATE_POST_OBJECT_INITIALISATION, obj)
@@ -1005,6 +1011,15 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
                         _text = 'Error restoring api-child %r of %s (%s)' % (apiObj.qualifiedName, self, es)
                         getLogger().warning(_text)
                         # raise RuntimeError(_text)
+
+    def _postRestore(self):
+        """Handle post-initialising children after all children have been restored
+        CCPN-Internal - subclass and call this at the end
+        """
+        # indented debugging just to be sure is running in the correct order
+        _indent = max(getattr(AbstractWrapperObject, '__indent', 5) - 4, 1)
+        setattr(AbstractWrapperObject, '__indent', _indent)
+        getLogger().debug2(f'<{"-" * _indent}  _postRestore  {self}')
 
     #  For restore 3.2 branch
 

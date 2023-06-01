@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-19 16:58:07 +0100 (Fri, May 19, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-01 19:39:58 +0100 (Thu, June 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -37,6 +37,8 @@ class SpectrumDisplay1d(GuiSpectrumDisplay):
     MAXPEAKLABELTYPES = 7
     MAXPEAKSYMBOLTYPES = 4
     MAXARROWTYPES = 3
+    MAXMULTIPLETLABELTYPES = 7
+    MAXMULTIPLETSYMBOLTYPES = 1
 
     #GWV 26Jan2023: removed
 

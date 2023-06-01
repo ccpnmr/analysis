@@ -3,19 +3,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:37 +0100 (Tue, July 05, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-06-01 19:39:56 +0100 (Thu, June 01, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -164,7 +164,8 @@ def _newMultipletList(self: Spectrum, title: str = None, comment: str = None,
                       symbolStyle: str = None, symbolColour: str = None,
                       textColour: str = None,
                       meritColour: str = None, meritEnabled: bool = False, meritThreshold: float = None,
-                      lineColour: str = _MULTIPLETLINECOLOURDEFAULT, multipletAveraging=MULTIPLETAVERAGE,
+                      lineColour: str = _MULTIPLETLINECOLOURDEFAULT, arrowColour: str = None,
+                      multipletAveraging=MULTIPLETAVERAGE,
                       multiplets: Sequence[Union['Multiplet', str]] = None,
                       ) -> MultipletList:
     """Create new MultipletList within Spectrum.
@@ -206,6 +207,8 @@ def _newMultipletList(self: Spectrum, title: str = None, comment: str = None,
         result.meritThreshold = meritThreshold
     if lineColour is not None:
         result.lineColour = lineColour
+    if arrowColour is not None:
+        result.arrowColour = arrowColour
     if multipletAveraging is not None:
         result.multipletAveraging = multipletAveraging
 

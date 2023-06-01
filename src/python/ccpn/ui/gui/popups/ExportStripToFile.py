@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-19 16:58:07 +0100 (Fri, May 19, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-01 19:39:58 +0100 (Thu, June 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -54,7 +54,7 @@ from ccpn.ui.gui.widgets.HighlightBox import HighlightBox
 from ccpn.ui.gui.widgets.Font import getFontHeight, getSystemFonts
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, \
     GLINTEGRALLABELS, GLINTEGRALSYMBOLS, GLMULTIPLETLABELS, \
-    GLMULTIPLETSYMBOLS, GLPEAKLABELS, GLPEAKSYMBOLS, GLPEAKARROWS, \
+    GLMULTIPLETSYMBOLS, GLPEAKLABELS, GLPEAKSYMBOLS, GLPEAKARROWS, GLMULTIPLETARROWS, \
     GLPRINTTYPE, GLPAGETYPE, GLPAGESIZE, GLSELECTEDPIDS, \
     GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, \
     GLSPECTRUMDISPLAY, GLSTRIP, \
@@ -64,7 +64,9 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, \
     GLFULLLIST, GLEXTENDEDLIST, GLDIAGONALLINE, GLCURSORS, GLDIAGONALSIDEBANDS, \
     GLALIASENABLED, GLALIASSHADE, GLALIASLABELSENABLED, GLSTRIPREGIONS, \
     GLSCALINGMODE, GLSCALINGOPTIONS, GLSCALINGPERCENT, GLSCALINGBYUNITS, \
-    GLPRINTFONT, GLUSEPRINTFONT, GLSCALINGAXIS, GLPEAKLABELSENABLED, GLPEAKARROWSENABLED, GLMULTIPLETLABELSENABLED
+    GLPRINTFONT, GLUSEPRINTFONT, GLSCALINGAXIS, \
+    GLPEAKSYMBOLSENABLED, GLPEAKLABELSENABLED, GLPEAKARROWSENABLED, GLMULTIPLETSYMBOLSENABLED, \
+    GLMULTIPLETLABELSENABLED, GLMULTIPLETARROWSENABLED
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState
 from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString, hexToRgbRatio, colourNameNoSpace
 from ccpn.util.Constants import SCALING_MODES, POSINFINITY
@@ -1439,7 +1441,8 @@ class ExportStripToFilePopup(ExportDialogABC):
                     child.setCheckState(0, QtCore.Qt.Checked if pp.isDisplayed else QtCore.Qt.Unchecked)
 
                 printItems.extend((GLMULTIPLETSYMBOLS,
-                                   GLMULTIPLETLABELS))
+                                   GLMULTIPLETLABELS,
+                                   GLMULTIPLETARROWS))
 
             # populate the treeview with the currently selected peak/integral/multiplet lists
             self.treeView._uncheckAll()
@@ -1571,9 +1574,12 @@ class ExportStripToFilePopup(ExportDialogABC):
                       GLALIASENABLED          : strip.aliasEnabled,
                       GLALIASSHADE            : strip.aliasShade,
                       GLALIASLABELSENABLED    : strip.aliasLabelsEnabled,
+                      GLPEAKSYMBOLSENABLED    : strip.peakSymbolsEnabled,
                       GLPEAKLABELSENABLED     : strip.peakLabelsEnabled,
                       GLPEAKARROWSENABLED     : strip.peakArrowsEnabled,
+                      GLMULTIPLETSYMBOLSENABLED: strip.multipletSymbolsEnabled,
                       GLMULTIPLETLABELSENABLED: strip.multipletLabelsEnabled,
+                      GLMULTIPLETARROWSENABLED: strip.multipletArrowsEnabled,
                       GLSTRIPDIRECTION        : stripDirection,
                       GLSTRIPPADDING          : self.stripPaddingBox.getValue(),
                       GLEXPORTDPI             : self.exportDpiBox.getValue(),

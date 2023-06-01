@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-19 16:58:08 +0100 (Fri, May 19, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-01 19:39:58 +0100 (Thu, June 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -287,6 +287,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
                     strip.symbolLabelling = _prefsGen.annotationType
                     strip.symbolType = _prefsGen.symbolType
                     strip.symbolSize = _prefsGen.symbolSizePixel
+                    strip.multipletLabelling = _prefsGen.multipletAnnotationType
+                    strip.multipletType = _prefsGen.multipletType
 
                     strip.symbolThickness = _prefsGen.symbolThickness
                     strip.gridVisible = _prefsGen.showGrid
@@ -300,12 +302,16 @@ class PreferencesPopup(CcpnDialogMainWidget):
                     strip.aliasShade = _prefsGen.aliasShade
                     strip.aliasLabelsEnabled = _prefsGen.aliasLabelsEnabled
 
+                    strip.peakSymbolsEnabled = _prefsGen.peakSymbolsEnabled
                     strip.peakLabelsEnabled = _prefsGen.peakLabelsEnabled
                     strip.peakArrowsEnabled = _prefsGen.peakArrowsEnabled
+                    strip.multipletSymbolsEnabled = _prefsGen.multipletSymbolsEnabled
                     strip.multipletLabelsEnabled = _prefsGen.multipletLabelsEnabled
-
+                    strip.multipletArrowsEnabled = _prefsGen.multipletArrowsEnabled
+                    
                     strip.arrowType = _prefsGen.arrowType
                     strip.arrowSize = _prefsGen.arrowSize
+                    strip.arrowMinimum = _prefsGen.arrowMinimum
 
                 strip._frameGuide.resetColourTheme()
 
@@ -991,8 +997,12 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.symbolSizePixelData.setValue(int('%i' % self.preferences.general.symbolSizePixel))
         self.symbolThicknessData.setValue(int(self.preferences.general.symbolThickness))
 
+        self.multipletAnnotationData.setIndex(self.preferences.general.multipletAnnotationType)
+        self.multipletSymbol.setIndex(self.preferences.general.multipletType)
+
         self.arrow.setIndex(self.preferences.general.arrowType)
         self.arrowSizeData.setValue(int(self.preferences.general.arrowSize))
+        self.arrowMinimumData.setValue(int(self.preferences.general.arrowMinimum))
 
         # _enabled = self.preferences.general.aliasEnabled
         # self.aliasEnabledData.setChecked(_enabled)
@@ -1058,10 +1068,13 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.aliasLabelsEnabledData.setEnabled(_enabled)
         self.aliasShadeData.setEnabled(_enabled)
 
+        self.peakSymbolsEnabledData.setChecked(self.preferences.general.peakSymbolsEnabled)
         self.peakLabelsEnabledData.setChecked(self.preferences.general.peakLabelsEnabled)
         self.peakArrowsEnabledData.setChecked(self.preferences.general.peakArrowsEnabled)
+        self.multipletSymbolsEnabledData.setChecked(self.preferences.general.multipletSymbolsEnabled)
         self.multipletLabelsEnabledData.setChecked(self.preferences.general.multipletLabelsEnabled)
-
+        self.multipletArrowsEnabledData.setChecked(self.preferences.general.multipletArrowsEnabled)
+    
     def _populateExternalProgramsTab(self):
         """Populate the widgets in the externalProgramsTab
         """
@@ -1418,9 +1431,19 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.volumeIntegralLimitData.valueChanged.connect(self._queueSetVolumeIntegralLimit)
 
         row += 1
+        self.peakSymbolsEnabledLabel = _makeLabel(parent, text="Show peak symbols", grid=(row, 0))
+        self.peakSymbolsEnabledData = CheckBox(parent, grid=(row, 1))
+        self.peakSymbolsEnabledData.toggled.connect(partial(self._queueToggleGeneralOptions, 'peakSymbolsEnabled'))
+
+        row += 1
         self.peakLabelsEnabledLabel = _makeLabel(parent, text="Show peak labels", grid=(row, 0))
         self.peakLabelsEnabledData = CheckBox(parent, grid=(row, 1))
         self.peakLabelsEnabledData.toggled.connect(partial(self._queueToggleGeneralOptions, 'peakLabelsEnabled'))
+
+        row += 1
+        self.multipletSymbolsEnabledLabel = _makeLabel(parent, text="Show multiplet symbols", grid=(row, 0))
+        self.multipletSymbolsEnabledData = CheckBox(parent, grid=(row, 1))
+        self.multipletSymbolsEnabledData.toggled.connect(partial(self._queueToggleGeneralOptions, 'multipletSymbolsEnabled'))
 
         row += 1
         self.multipletLabelsEnabledLabel = _makeLabel(parent, text="Show multiplet labels", grid=(row, 0))
@@ -1448,9 +1471,14 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.aliasShadeData.valueChanged.connect(self._queueSetAliasShade)
 
         row += 1
-        self.peakArrowsEnabledLabel = _makeLabel(parent, text="Show arrows", grid=(row, 0))
+        self.peakArrowsEnabledLabel = _makeLabel(parent, text="Show peak arrows", grid=(row, 0))
         self.peakArrowsEnabledData = CheckBox(parent, grid=(row, 1))
         self.peakArrowsEnabledData.toggled.connect(partial(self._queueToggleGeneralOptions, 'peakArrowsEnabled'))
+
+        row += 1
+        self.multipletArrowsEnabledLabel = _makeLabel(parent, text="Show multiplet arrows", grid=(row, 0))
+        self.multipletArrowsEnabledData = CheckBox(parent, grid=(row, 1))
+        self.multipletArrowsEnabledData.toggled.connect(partial(self._queueToggleGeneralOptions, 'multipletArrowsEnabled'))
 
         #====== Peak Fitting ======
         row += 1
@@ -1551,11 +1579,18 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                    )
 
         row += 1
-        self.arrowSizeLabel = _makeLabel(parent, text="Size (pixel)", grid=(row, 0))
+        self.arrowSizeLabel = _makeLabel(parent, text="Size (pixels)", grid=(row, 0))
         self.arrowSizeData = Spinbox(parent, step=1,
                                            min=1, max=20, grid=(row, 1), hAlign='l')
         self.arrowSizeData.setMinimumWidth(LineEditsMinimumWidth)
         self.arrowSizeData.valueChanged.connect(self._queueSetArrowSize)
+
+        row += 1
+        self.arrowMinimumLabel = _makeLabel(parent, text="Minimum length (pixels)", grid=(row, 0))
+        self.arrowMinimumData = Spinbox(parent, step=1,
+                                           min=1, max=100, grid=(row, 1), hAlign='l')
+        self.arrowMinimumData.setMinimumWidth(LineEditsMinimumWidth)
+        self.arrowMinimumData.valueChanged.connect(self._queueSetArrowMinimum)
 
         #====== Multiplets ======
         row += 1
@@ -2067,6 +2102,17 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.arrowSize = value
 
     @queueStateChange(_verifyPopupApply)
+    def _queueSetArrowMinimum(self, _value):
+        value = self.arrowMinimumData.get()
+        if value != self.preferences.general.arrowMinimum:
+            return partial(self._setArrowMinimum, value)
+
+    def _setArrowMinimum(self, value):
+        """Set the visibility threshold of the peak arrows (pixel)
+        """
+        self.preferences.general.arrowMinimum = value
+
+    @queueStateChange(_verifyPopupApply)
     def _queueSetContourThickness(self, _value):
         value = self.contourThicknessData.get()
         if value != self.preferences.general.contourThickness:
@@ -2150,9 +2196,31 @@ class PreferencesPopup(CcpnDialogMainWidget):
             return partial(self._setSymbol, value)
 
     def _setSymbol(self, value):
-        """Set the peak symbol type - current a cross or lineWidths
+        """Set the peak symbol type - currently a cross or lineWidths
         """
         self.preferences.general.symbolType = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetMultipletAnnotation(self):
+        value = self.multipletAnotationsData.getIndex()
+        if value != self.preferences.general.multipletAnnotationType:
+            return partial(self._setMultipletAnnotation, value)
+
+    def _setMultipletAnnotation(self, value):
+        """Set the multiplet annotation type for the labels
+        """
+        self.preferences.general.multipletAnnotationType = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetMultipletSymbol(self):
+        value = self.multipletSymbol.getIndex()
+        if value != self.preferences.general.multipletType:
+            return partial(self._setMultipletSymbol, value)
+
+    def _setMultipletSymbol(self, value):
+        """Set the multiplet symbol type
+        """
+        self.preferences.general.multipletType = value
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetArrow(self):

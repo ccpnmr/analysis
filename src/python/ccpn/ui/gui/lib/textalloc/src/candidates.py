@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-18 18:49:17 +0100 (Thu, May 18, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-01 19:39:57 +0100 (Thu, June 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -32,8 +32,36 @@ __date__ = "$Date: 2022 $"
 import numpy as np
 
 
-MAX_ANGS = 16
-LOOPS = 24
+MIN_ANGS = 16
+MAX_ANGS = 64
+LOOPS = 16
+
+
+def generate_coordinates(w, h, minx_distance, maxx_distance, miny_distance, maxy_distance):
+    """Generate the coordinates for the candidates locations.
+    Returns sin/cos coordinates in concentric circles.
+    """
+    # angs = np.tile(np.linspace(0.0, np.pi * 2.0 - (2 * np.pi / MAX_ANGS), MAX_ANGS), LOOPS)
+    # ll = np.linspace(min(minx_distance, miny_distance), max(maxx_distance, maxy_distance), LOOPS)
+    # distx = np.tile(ll, (MAX_ANGS, 1)).transpose().reshape(MAX_ANGS * LOOPS)
+    # disty = np.tile(ll, (MAX_ANGS, 1)).transpose().reshape(MAX_ANGS * LOOPS)
+    # ss = np.sin(angs) * (distx + min(w, h) / 2)
+    # cc = np.cos(angs) * (disty + min(w, h) / 2)
+    #
+    all_points = np.zeros((0, 2))
+
+    num_points_per_ring = np.linspace(MIN_ANGS, MAX_ANGS, LOOPS)
+    radii = np.linspace(min(minx_distance, miny_distance) + min(w, h) / 2, max(maxx_distance, maxy_distance), LOOPS)
+
+    for ring_idx, num_points, radius in zip(range(LOOPS), num_points_per_ring, radii):
+        int_points = int(num_points)
+        theta = np.linspace(0, 2 * np.pi - (2 * np.pi / int_points), int_points)
+        x = radius * np.sin(theta)
+        y = radius * np.cos(theta)
+        points = np.column_stack((x, y))
+        all_points = np.vstack([all_points, points])
+
+    return all_points[:, 0], all_points[:, 1]
 
 
 def generate_candidates(
@@ -41,48 +69,32 @@ def generate_candidates(
         h: float,
         x: float,
         y: float,
-        xmindistance: float,
-        ymindistance: float,
-        xmaxdistance: float,
-        ymaxdistance: float,
+        minx_distance: float,
+        miny_distance: float,
+        maxx_distance: float,
+        maxy_distance: float,
         ) -> np.ndarray:
     """Generates MAX_ANGS*LOOPS candidate boxes, in concentric rings from the target point.
+
+    Candidates boxes are centred on the coordinates, ordered bottom-left -> top-right.
 
     Args:
         w (float): width of box
         h (float): height of box
         x (float): xmin of box
         y (float): ymin of box
-        xmindistance (float): fraction of the x-dimension to use as margins for text bboxes
-        ymindistance (float): fraction of the y-dimension to use as margins for text bboxes
-        xmaxdistance (float): fraction of the x-dimension to use as max distance for text bboxes
-        ymaxdistance (float): fraction of the y-dimension to use as max distance for text bboxes
+        minx_distance (float): fraction of the x-dimension to use as margins for text bboxes
+        miny_distance (float): fraction of the y-dimension to use as margins for text bboxes
+        maxx_distance (float): fraction of the x-dimension to use as max distance for text bboxes
+        maxy_distance (float): fraction of the y-dimension to use as max distance for text bboxes
 
     Returns:
         np.ndarray: candidate boxes array
     """
-    angs = np.tile(np.linspace(0.0, np.pi * 2.0 - (2 * np.pi / MAX_ANGS), MAX_ANGS), LOOPS)
-    ll = np.linspace(min(xmindistance, ymindistance), max(xmaxdistance, ymaxdistance), LOOPS)
+    ss, cc = generate_coordinates(w, h, minx_distance, maxx_distance, miny_distance, maxy_distance)
 
-    distx = np.tile(ll, (MAX_ANGS, 1)).transpose().reshape(MAX_ANGS * LOOPS)
-    disty = np.tile(ll, (MAX_ANGS, 1)).transpose().reshape(MAX_ANGS * LOOPS)
-
-    ss = x + np.sin(angs) * (distx + min(w, h) / 2)
-    cc = y + np.cos(angs) * (disty + min(w, h) / 2)
-
-    # # plot a figure to check the size
-    # import matplotlib
-    #
-    # matplotlib.use('Qt5Agg')
-    # from mpl_toolkits import mplot3d
-    # import matplotlib.pyplot as plt
-    #
-    # fig = plt.figure(figsize=(10, 8), dpi=100)
-    # axS = fig.gca()
-    #
-    # axS.plot(ss, cc, label = 'Best Fit')
-
-    return np.vstack([ss - w / 2, cc - h / 2, ss + w / 2, cc + h / 2]).transpose()
+    # return np.column_stack([ss + (x - w / 2), cc + (y - h / 2), ss + (x + w / 2), cc + (y + h / 2)])
+    return np.column_stack([ss + x, cc + y, ss + (x + w), cc + (y + h)])
 
 
 def generate_candidate_lines(
@@ -90,10 +102,10 @@ def generate_candidate_lines(
         h: float,
         x: float,
         y: float,
-        xmindistance: float,
-        ymindistance: float,
-        xmaxdistance: float,
-        ymaxdistance: float,
+        minx_distance: float,
+        miny_distance: float,
+        maxx_distance: float,
+        maxy_distance: float,
         ) -> np.ndarray:
     """Generates MAX_ANGS*LOOPS candidate lines, from concentric rings to the target point.
 
@@ -102,33 +114,42 @@ def generate_candidate_lines(
         h (float): height of box
         x (float): xmin of box
         y (float): ymin of box
-        xmindistance (float): fraction of the x-dimension to use as margins for text bboxes
-        ymindistance (float): fraction of the y-dimension to use as margins for text bboxes
-        xmaxdistance (float): fraction of the x-dimension to use as max distance for text bboxes
-        ymaxdistance (float): fraction of the y-dimension to use as max distance for text bboxes
+        minx_distance (float): fraction of the x-dimension to use as margins for text bboxes
+        miny_distance (float): fraction of the y-dimension to use as margins for text bboxes
+        maxx_distance (float): fraction of the x-dimension to use as max distance for text bboxes
+        maxy_distance (float): fraction of the y-dimension to use as max distance for text bboxes
 
     Returns:
         np.ndarray: candidate boxes array
     """
-    angs = np.tile(np.linspace(0.0, np.pi * 2.0 - (2 * np.pi / MAX_ANGS), MAX_ANGS), LOOPS)
-    ll = np.linspace(min(xmindistance, ymindistance), max(xmaxdistance, ymaxdistance), LOOPS)
+    ss, cc = generate_coordinates(w, h, minx_distance, maxx_distance, miny_distance, maxy_distance)
 
-    distx = np.tile(ll, (MAX_ANGS, 1)).transpose().reshape(MAX_ANGS * LOOPS)
-    disty = np.tile(ll, (MAX_ANGS, 1)).transpose().reshape(MAX_ANGS * LOOPS)
+    ones = np.ones_like(ss)
+    # return np.column_stack([x * ones, y * ones, x + ss, y + cc])
+    return np.column_stack([x * ones, y * ones, ss + (x + w / 2), cc + (y + h / 2)])
 
-    ss = x + np.sin(angs) * (distx + min(w, h) / 2)
-    cc = y + np.cos(angs) * (disty + min(w, h) / 2)
 
-    # # plot a figure to check the size
-    # import matplotlib
-    #
-    # matplotlib.use('Qt5Agg')
-    # from mpl_toolkits import mplot3d
-    # import matplotlib.pyplot as plt
-    #
-    # fig = plt.figure(figsize=(10, 8), dpi=100)
-    # axS = fig.gca()
-    #
-    # axS.plot(ss, cc, label = 'Best Fit')
+def main():
+    _TESTPLOT = True
 
-    return np.vstack([np.tile([x, y], (ss.shape[0], 1)).transpose(), ss, cc]).transpose()
+    # plot a figure to check the size
+    import matplotlib
+
+    matplotlib.use('Qt5Agg')
+    import matplotlib.pyplot as plt
+
+    fig = plt.figure(figsize=(10, 10), dpi=100)
+    axS = fig.gca()
+    # axS.plot(ss, cc, label='Best Fit')
+
+    lines_xyxy = generate_candidate_lines(70, 20, 90, 90, 10, 10, 300, 300)
+
+    for ii in range(lines_xyxy.shape[0]):
+        row = lines_xyxy[ii, :]
+        axS.plot(row[::2], row[1::2], linewidth=3)
+
+    plt.show()
+
+
+if __name__ == '__main__':
+    main()

@@ -31,6 +31,7 @@ from typing import List, Tuple, Sequence
 from copy import deepcopy
 from functools import partial
 import numpy as np
+import contextlib
 from time import time_ns
 from PyQt5 import QtWidgets, QtCore, QtGui
 from collections import OrderedDict
@@ -55,10 +56,12 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, \
-    SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, AXISASPECTRATIOS, AXISASPECTRATIOMODE, \
+    SYMBOLTYPE, ANNOTATIONTYPE, SYMBOLSIZE, SYMBOLTHICKNESS, AXISASPECTRATIOS, AXISASPECTRATIOMODE, \
     BOTTOMAXIS, RIGHTAXIS, ALIASENABLED, ALIASSHADE, ALIASLABELSENABLED, CONTOURTHICKNESS, \
-    PEAKLABELSENABLED, PEAKARROWSENABLED, MULTIPLETLABELSENABLED, SPECTRUM_STACKEDMATRIXOFFSET, \
-    ARROWTYPES, ARROWSIZE
+    PEAKSYMBOLSENABLED, PEAKLABELSENABLED, PEAKARROWSENABLED, \
+    MULTIPLETSYMBOLSENABLED, MULTIPLETLABELSENABLED, MULTIPLETARROWSENABLED, \
+    SPECTRUM_STACKEDMATRIXOFFSET, \
+    ARROWTYPES, ARROWSIZE, ARROWMINIMUM, MULTIPLETANNOTATIONTYPE, MULTIPLETTYPE
 from ccpn.util.Constants import AXISUNIT_PPM, AXISUNIT_HZ, AXISUNIT_POINT
 
 
@@ -178,79 +181,98 @@ class GuiStrip(Frame):
         self._preferences = self.application.preferences.general
 
         # set symbolLabelling to the default from preferences or strip to the left
-        settings = spectrumDisplay._getSettingsDict()
-        if len(spectrumDisplay.strips) > 1:
+        # settings = spectrumDisplay._getSettingsDict()
+        # if len(spectrumDisplay.strips) > 1:
+        #
+        #     _firstStrip = spectrumDisplay.strips[0]
+        #
+        #     # copy the values from the first strip
+        #     self.symbolLabelling = min(_firstStrip.symbolLabelling, self.spectrumDisplay.MAXPEAKLABELTYPES - 1)
+        #     self.symbolType = min(_firstStrip.symbolType, self.spectrumDisplay.MAXPEAKSYMBOLTYPES - 1)
+        #     self.symbolSize = _firstStrip.symbolSize
+        #     self.symbolThickness = _firstStrip.symbolThickness
+        #     self.multipletLabelling = min(_firstStrip.multipletLabelling, self.spectrumDisplay.MAXMULTIPLETLABELTYPES - 1)
+        #     self.multipletType = min(_firstStrip.multipletType, self.spectrumDisplay.MAXMULTIPLETSYMBOLTYPES - 1)
+        #
+        #     self.aliasEnabled = _firstStrip.aliasEnabled
+        #     self.aliasShade = _firstStrip.aliasShade
+        #     self.aliasLabelsEnabled = _firstStrip.aliasLabelsEnabled
+        #     self.contourThickness = _firstStrip.contourThickness
+        #
+        #     self.peakSymbolsEnabled = _firstStrip.peakSymbolsEnabled
+        #     self.peakLabelsEnabled = _firstStrip.peakLabelsEnabled
+        #     self.peakArrowsEnabled = _firstStrip.peakArrowsEnabled
+        #     self.multipletSymbolsEnabled = _firstStrip.multipletSymbolsEnabled
+        #     self.multipletLabelsEnabled = _firstStrip.multipletLabelsEnabled
+        #     self.multipletArrowsEnabled = _firstStrip.multipletArrowsEnabled
+        #     self.arrowType = min(_firstStrip.arrowType, self.spectrumDisplay.MAXARROWTYPES - 1)
+        #     self.arrowSize = _firstStrip.arrowSize
+        #     self.arrowMinimum = _firstStrip.arrowMinimum
+        #
+        #     self.gridVisible = _firstStrip.gridVisible
+        #     self.crosshairVisible = _firstStrip.crosshairVisible
+        #     self.sideBandsVisible = _firstStrip.sideBandsVisible
+        #
+        #     self.showSpectraOnPhasing = _firstStrip.showSpectraOnPhasing
+        #     self._spectrumBordersVisible = _firstStrip._spectrumBordersVisible
+        #
+        #     if spectrumDisplay.stripArrangement == 'Y':
+        #         if self.spectrumDisplay.lastAxisOnly:
+        #             self.setAxesVisible(False, True)
+        #         else:
+        #             self.setAxesVisible(True, True)
+        #     elif spectrumDisplay.stripArrangement == 'X':
+        #         if self.spectrumDisplay.lastAxisOnly:
+        #             self.setAxesVisible(True, False)
+        #         else:
+        #             self.setAxesVisible(True, True)
+        #
+        # else:
+        #     # get the values from the preferences
+        #     self.gridVisible = self._preferences.showGrid
+        #     self.crosshairVisible = self._preferences.showCrosshair
+        #     self.sideBandsVisible = self._preferences.showSideBands
+        #
+        #     self.showSpectraOnPhasing = self._preferences.showSpectraOnPhasing
+        #     self._spectrumBordersVisible = self._preferences.showSpectrumBorder
+        #
+        #     # get the values from the settings (check in case the number of states has changed)
+        #     self.symbolLabelling = min(settings[ANNOTATIONTYPE], self.spectrumDisplay.MAXPEAKLABELTYPES - 1)
+        #     self.symbolType = min(settings[SYMBOLTYPE], self.spectrumDisplay.MAXPEAKSYMBOLTYPES - 1)
+        #     self.symbolSize = settings[SYMBOLSIZE]
+        #     self.symbolThickness = settings[SYMBOLTHICKNESS]
+        #     self.multipletLabelling = min(settings[MULTIPLETANNOTATIONTYPE], self.spectrumDisplay.MAXMULTIPLETLABELTYPES - 1)
+        #     self.multipletType = min(settings[MULTIPLETTYPE], self.spectrumDisplay.MAXMULTIPLETSYMBOLTYPES - 1)
+        #
+        #     self.contourThickness = settings[CONTOURTHICKNESS]
+        #     self.aliasEnabled = settings[ALIASENABLED]
+        #     self.aliasShade = settings[ALIASSHADE]
+        #     self.aliasLabelsEnabled = settings[ALIASLABELSENABLED]
+        #
+        #     self.peakSymbolsEnabled = settings[PEAKSYMBOLSENABLED]
+        #     self.peakLabelsEnabled = settings[PEAKLABELSENABLED]
+        #     self.peakArrowsEnabled = settings[PEAKARROWSENABLED]
+        #     self.multipletSymbolsEnabled = settings[MULTIPLETSYMBOLSENABLED]
+        #     self.multipletLabelsEnabled = settings[MULTIPLETLABELSENABLED]
+        #     self.multipletArrowsEnabled = settings[MULTIPLETARROWSENABLED]
+        #
+        #     self.arrowType = min(settings[ARROWTYPES], self.spectrumDisplay.MAXARROWTYPES - 1)
+        #     self.arrowSize = settings[ARROWSIZE]
+        #     self.arrowMinimum = settings[ARROWMINIMUM]
+        #
+        #     self.spectrumDisplay._setFloatingAxes(xUnits=settings[AXISXUNITS],
+        #                                           yUnits=settings[AXISYUNITS],
+        #                                           aspectRatioMode=settings[AXISASPECTRATIOMODE],
+        #                                           aspectRatios=settings[AXISASPECTRATIOS])
+        #
+        #     self.setAxesVisible(True, True)
+        #
+        # self._CcpnGLWidget._aspectRatioMode = settings[AXISASPECTRATIOMODE]
+        # self._CcpnGLWidget._aspectRatios = deepcopy(settings[AXISASPECTRATIOS])
+        # self._CcpnGLWidget._applyXLimit = self._preferences.zoomXLimitApply
+        # self._CcpnGLWidget._applyYLimit = self._preferences.zoomYLimitApply
 
-            _firstStrip = spectrumDisplay.strips[0]
-
-            # copy the values from the first strip
-            self.symbolLabelling = min(_firstStrip.symbolLabelling, self.spectrumDisplay.MAXPEAKLABELTYPES - 1)
-            self.symbolType = min(_firstStrip.symbolType, self.spectrumDisplay.MAXPEAKSYMBOLTYPES - 1)
-            self.symbolSize = _firstStrip.symbolSize
-            self.symbolThickness = _firstStrip.symbolThickness
-            self.aliasEnabled = _firstStrip.aliasEnabled
-            self.aliasShade = _firstStrip.aliasShade
-            self.aliasLabelsEnabled = _firstStrip.aliasLabelsEnabled
-            self.contourThickness = _firstStrip.contourThickness
-            self.peakLabelsEnabled = _firstStrip.peakLabelsEnabled
-            self.peakArrowsEnabled = _firstStrip.peakArrowsEnabled
-            self.multipletLabelsEnabled = _firstStrip.multipletLabelsEnabled
-            self.arrowType = min(_firstStrip.arrowType, self.spectrumDisplay.MAXARROWTYPES - 1)
-            self.arrowSize = _firstStrip.arrowSize
-
-            self.gridVisible = _firstStrip.gridVisible
-            self.crosshairVisible = _firstStrip.crosshairVisible
-            self.sideBandsVisible = _firstStrip.sideBandsVisible
-
-            self.showSpectraOnPhasing = _firstStrip.showSpectraOnPhasing
-            self._spectrumBordersVisible = _firstStrip._spectrumBordersVisible
-
-            if spectrumDisplay.stripArrangement == 'Y':
-                if self.spectrumDisplay.lastAxisOnly:
-                    self.setAxesVisible(False, True)
-                else:
-                    self.setAxesVisible(True, True)
-            elif spectrumDisplay.stripArrangement == 'X':
-                if self.spectrumDisplay.lastAxisOnly:
-                    self.setAxesVisible(True, False)
-                else:
-                    self.setAxesVisible(True, True)
-
-        else:
-            # get the values from the preferences
-            self.gridVisible = self._preferences.showGrid
-            self.crosshairVisible = self._preferences.showCrosshair
-            self.sideBandsVisible = self._preferences.showSideBands
-
-            self.showSpectraOnPhasing = self._preferences.showSpectraOnPhasing
-            self._spectrumBordersVisible = self._preferences.showSpectrumBorder
-
-            # get the values from the settings (check in case the number of states has changed)
-            self.symbolLabelling = min(settings[ANNOTATIONTYPES], self.spectrumDisplay.MAXPEAKLABELTYPES - 1)
-            self.symbolType = min(settings[SYMBOLTYPES], self.spectrumDisplay.MAXPEAKSYMBOLTYPES - 1)
-            self.symbolSize = settings[SYMBOLSIZE]
-            self.symbolThickness = settings[SYMBOLTHICKNESS]
-            self.contourThickness = settings[CONTOURTHICKNESS]
-            self.aliasEnabled = settings[ALIASENABLED]
-            self.aliasShade = settings[ALIASSHADE]
-            self.aliasLabelsEnabled = settings[ALIASLABELSENABLED]
-            self.peakLabelsEnabled = settings[PEAKLABELSENABLED]
-            self.peakArrowsEnabled = settings[PEAKARROWSENABLED]
-            self.multipletLabelsEnabled = settings[MULTIPLETLABELSENABLED]
-            self.arrowType = min(settings[ARROWTYPES], self.spectrumDisplay.MAXARROWTYPES - 1)
-            self.arrowSize = settings[ARROWSIZE]
-
-            self.spectrumDisplay._setFloatingAxes(xUnits=settings[AXISXUNITS],
-                                                  yUnits=settings[AXISYUNITS],
-                                                  aspectRatioMode=settings[AXISASPECTRATIOMODE],
-                                                  aspectRatios=settings[AXISASPECTRATIOS])
-
-            self.setAxesVisible(True, True)
-
-        self._CcpnGLWidget._aspectRatioMode = settings[AXISASPECTRATIOMODE]
-        self._CcpnGLWidget._aspectRatios = deepcopy(settings[AXISASPECTRATIOS])
-        self._CcpnGLWidget._applyXLimit = self._preferences.zoomXLimitApply
-        self._CcpnGLWidget._applyYLimit = self._preferences.zoomYLimitApply
+        self.showSpectraOnPhasing = False
 
         self._storedPhasingData = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
         self.showActivePhaseTrace = True
@@ -1508,7 +1530,7 @@ class GuiStrip(Frame):
                 for peakListView in sV.peakListViews:
                     # peakListView.buildSymbols = True
                     peakListView.buildLabels = True
-                    # peakListView.buildArrows = True
+                    peakListView.buildArrows = True
 
             # spawn a redraw event of the GL windows
             self._CcpnGLWidget.GLSignals.emitPaintEvent()
@@ -1546,43 +1568,52 @@ class GuiStrip(Frame):
     def _emitSymbolChanged(self):
         # spawn a redraw event of the GL windows
         self._CcpnGLWidget.GLSignals._emitSymbolsChanged(source=None, strip=self,
-                                                         symbolDict={SYMBOLTYPES           : self.symbolType,
-                                                                     ANNOTATIONTYPES       : self.symbolLabelling,
+                                                         symbolDict={SYMBOLTYPE           : self.symbolType,
+                                                                     ANNOTATIONTYPE       : self.symbolLabelling,
                                                                      SYMBOLSIZE            : self.symbolSize,
                                                                      SYMBOLTHICKNESS       : self.symbolThickness,
+                                                                     MULTIPLETANNOTATIONTYPE: self.multipletLabelling,
+                                                                     MULTIPLETTYPE        : self.multipletType,
                                                                      CONTOURTHICKNESS      : self.contourThickness,
                                                                      ALIASENABLED          : self.aliasEnabled,
                                                                      ALIASSHADE            : self.aliasShade,
                                                                      ALIASLABELSENABLED    : self.aliasLabelsEnabled,
+                                                                     PEAKSYMBOLSENABLED    : self.peakSymbolsEnabled,
                                                                      PEAKLABELSENABLED     : self.peakLabelsEnabled,
                                                                      PEAKARROWSENABLED     : self.peakArrowsEnabled,
+                                                                     MULTIPLETSYMBOLSENABLED: self.multipletSymbolsEnabled,
                                                                      MULTIPLETLABELSENABLED: self.multipletLabelsEnabled,
+                                                                     MULTIPLETARROWSENABLED: self.multipletArrowsEnabled,
                                                                      ARROWTYPES            : self.arrowType,
-                                                                     ARROWSIZE        : self.arrowSize,
+                                                                     ARROWSIZE             : self.arrowSize,
+                                                                     ARROWMINIMUM          : self.arrowMinimum,
                                                                      })
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # symbolTypes
 
     def _setSymbolType(self):
-        if self.spectrumViews:
-            for sV in self.spectrumViews:
+        if not self.spectrumViews:
+            return
 
-                # NOTE:ED - rebuild the peaks here?
-                #   ...and then notify the GL to copy the new lists to the graphics card
-                #   so rebuild will be inside the progress manager
+        for sV in self.spectrumViews:
 
-                for peakListView in sV.peakListViews:
-                    peakListView.buildSymbols = True
-                    peakListView.buildLabels = True
-                    peakListView.buildArrows = True
+            # NOTE:ED - rebuild the peaks here?
+            #   ...and then notify the GL to copy the new lists to the graphics card
+            #   so rebuild will be inside the progress manager
 
-                for multipletListView in sV.multipletListViews:
-                    multipletListView.buildSymbols = True
-                    multipletListView.buildLabels = True
+            for peakListView in sV.peakListViews:
+                peakListView.buildSymbols = True
+                peakListView.buildLabels = True
+                peakListView.buildArrows = True
 
-            # spawn a redraw event of the GL windows
-            self._CcpnGLWidget.GLSignals.emitPaintEvent()
+            for multipletListView in sV.multipletListViews:
+                multipletListView.buildSymbols = True
+                multipletListView.buildLabels = True
+                multipletListView.buildArrows = True
+
+        # spawn a redraw event of the GL windows
+        self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
     @property
     def symbolType(self):
@@ -1614,6 +1645,71 @@ class GuiStrip(Frame):
         """
         self.symbolType = value
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # multipletLabelling
+
+    def _setMultipletLabelling(self):
+        if self.spectrumViews:
+            for sV in self.spectrumViews:
+
+                for multipletListView in sV.multipletListViews:
+                    # multipletListView.buildSymbols = True
+                    multipletListView.buildLabels = True
+                    multipletListView.buildArrows = True
+
+            # spawn a redraw event of the GL windows
+            self._CcpnGLWidget.GLSignals.emitPaintEvent()
+
+    @property
+    def multipletLabelling(self):
+        """Get the multiplet labelling for the strip
+        """
+        return self._CcpnGLWidget._multipletLabelling
+
+    @multipletLabelling.setter
+    def multipletLabelling(self, value):
+        """Set the multiplet labelling for the strip
+        """
+        if not isinstance(value, int):
+            raise TypeError('Error: multipletLabelling not an int')
+
+        oldValue = self._CcpnGLWidget._multipletLabelling
+        self._CcpnGLWidget._multipletLabelling = value if (value in range(self.spectrumDisplay.MAXMULTIPLETLABELTYPES)) else 0
+        if value != oldValue:
+            self._setMultipletLabelling()
+            if self.spectrumViews:
+                self._emitSymbolChanged()
+
+    @property
+    def multipletType(self):
+        """Get the multiplet type for the strip
+        """
+        return self._CcpnGLWidget._multipletType
+
+    @multipletType.setter
+    def multipletType(self, value):
+        """Set the multiplet type for the strip
+        """
+        if not isinstance(value, int):
+            raise TypeError('Error: multipletType not an int')
+
+        oldValue = self._CcpnGLWidget._multipletType
+        self._CcpnGLWidget._multipletType = value if (value in range(self.spectrumDisplay.MAXMULTIPLETSYMBOLTYPES)) else 0
+        if value != oldValue:
+            self._setSymbolType()
+            if self.spectrumViews:
+                self._emitSymbolChanged()
+
+    def cycleMultipletLabelling(self):
+        """Toggles whether multiplet labelling is minimal is visible in the strip.
+        """
+        self.multipletLabelling += 1
+
+    def setMultipletLabelling(self, value):
+        """Toggles whether multiplet labelling is minimal is visible in the strip.
+        """
+        self.multipletLabelling = value
+
     def _setSymbolsPaintEvent(self):
         # prompt the GLwidgets to update
         self._CcpnGLWidget.GLSignals.emitEvent(triggers=[self._CcpnGLWidget.GLSignals.GLRESCALE,
@@ -1629,19 +1725,29 @@ class GuiStrip(Frame):
     def _symbolsChangedInSettings(self, aDict):
         """Respond to change in the symbol values in the settings widget
         """
-        _symbolType = aDict[SYMBOLTYPES]
-        _annotationsType = aDict[ANNOTATIONTYPES]
+        _symbolType = aDict[SYMBOLTYPE]
+        _annotationsType = aDict[ANNOTATIONTYPE]
         _symbolSize = aDict[SYMBOLSIZE]
         _symbolThickness = aDict[SYMBOLTHICKNESS]
+
+        _multipletType = aDict[MULTIPLETTYPE]
+        _multipletAnnotationType = aDict[MULTIPLETANNOTATIONTYPE]
+
         _aliasEnabled = aDict[ALIASENABLED]
         _aliasShade = aDict[ALIASSHADE]
         _aliasLabelsEnabled = aDict[ALIASLABELSENABLED]
+
+        _peakSymbolsEnabled = aDict[PEAKSYMBOLSENABLED]
         _peakLabelsEnabled = aDict[PEAKLABELSENABLED]
         _peakArrowsEnabled = aDict[PEAKARROWSENABLED]
+        _multipletSymbolsEnabled = aDict[MULTIPLETSYMBOLSENABLED]
         _multipletLabelsEnabled = aDict[MULTIPLETLABELSENABLED]
+        _multipletArrowsEnabled = aDict[MULTIPLETARROWSENABLED]
+
         _contourThickness = aDict[CONTOURTHICKNESS]
         _arrowType = aDict[ARROWTYPES]
         _arrowSize = aDict[ARROWSIZE]
+        _arrowMinimum = aDict[ARROWMINIMUM]
 
         if self.isDeleted:
             return
@@ -1653,6 +1759,12 @@ class GuiStrip(Frame):
 
             elif _annotationsType != self.symbolLabelling:
                 self.setSymbolLabelling(_annotationsType)
+
+            elif _multipletType != self.multipletType:
+                self.setMultipletSymbols(_multipletType)
+
+            elif _multipletAnnotationType != self.multipletLabelling:
+                self.setMultipletLabelling(_multipletAnnotationType)
 
             elif _symbolSize != self.symbolSize:
                 self.symbolSize = _symbolSize
@@ -1678,6 +1790,10 @@ class GuiStrip(Frame):
                 self.contourThickness = _contourThickness
                 self._setContoursPaintEvent()
 
+            elif _peakSymbolsEnabled != self.peakSymbolsEnabled:
+                self.peakSymbolsEnabled = _peakSymbolsEnabled
+                self._setSymbolsPaintEvent()
+
             elif _peakLabelsEnabled != self.peakLabelsEnabled:
                 self.peakLabelsEnabled = _peakLabelsEnabled
                 self._setSymbolsPaintEvent()
@@ -1686,15 +1802,27 @@ class GuiStrip(Frame):
                 self.peakArrowsEnabled = _peakArrowsEnabled
                 self._setSymbolsPaintEvent()
 
+            elif _multipletSymbolsEnabled != self.multipletSymbolsEnabled:
+                self.multipletSymbolsEnabled = _multipletSymbolsEnabled
+                self._setSymbolsPaintEvent()
+
             elif _multipletLabelsEnabled != self.multipletLabelsEnabled:
                 self.multipletLabelsEnabled = _multipletLabelsEnabled
                 self._setSymbolsPaintEvent()
 
+            elif _multipletArrowsEnabled != self.multipletArrowsEnabled:
+                self.multipletArrowsEnabled = _multipletArrowsEnabled
+                self._setSymbolsPaintEvent()
+
             elif _arrowType != self.arrowType:
-                self.setPeakArrows(_arrowType)
+                self.setArrowType(_arrowType)
 
             elif _arrowSize != self.arrowSize:
                 self.arrowSize = _arrowSize
+                self._setSymbolsPaintEvent()
+
+            elif _arrowMinimum != self.arrowMinimum:
+                self.arrowMinimum = _arrowMinimum
                 self._setSymbolsPaintEvent()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1748,26 +1876,6 @@ class GuiStrip(Frame):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # arrowTypes
 
-    # def _setArrowType(self):
-    #     if self.spectrumViews:
-    #         for sV in self.spectrumViews:
-    #
-    #             # NOTE:ED - rebuild the peaks here?
-    #             #   ...and then notify the GL to copy the new lists to the graphics card
-    #             #   so rebuild will be inside the progress manager
-    #
-    #             for peakListView in sV.peakListViews:
-    #                 peakListView.buildArrows = True
-    #                 peakListView.buildLabels = True
-    #                 peakListView.buildArrows = True
-    #
-    #             for multipletListView in sV.multipletListViews:
-    #                 multipletListView.buildArrows = True
-    #                 multipletListView.buildLabels = True
-    #
-    #         # spawn a redraw event of the GL windows
-    #         self._CcpnGLWidget.GLSignals.emitPaintEvent()
-
     @property
     def arrowType(self):
         """Get the arrow type for the strip
@@ -1788,12 +1896,12 @@ class GuiStrip(Frame):
             if self.spectrumViews:
                 self._emitSymbolChanged()
 
-    def cyclePeakArrows(self):
+    def cycleArrowType(self):
         """Cycle through arrow types.
         """
         self.arrowType += 1
 
-    def setPeakArrows(self, value):
+    def setArrowType(self, value):
         """set the arrow type.
         """
         self.arrowType = value
@@ -1824,6 +1932,30 @@ class GuiStrip(Frame):
 
         oldValue = self._CcpnGLWidget._arrowSize
         self._CcpnGLWidget._arrowSize = value if (value and value >= 0) else oldValue
+        if value != oldValue:
+            self._setSymbolLabelling()
+            if self.spectrumViews:
+                self._emitSymbolChanged()
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # arrowMinimum
+
+    @property
+    def arrowMinimum(self):
+        """Get the arrow minimum visibility threshold for the strip
+        """
+        return self._CcpnGLWidget._arrowMinimum
+
+    @arrowMinimum.setter
+    def arrowMinimum(self, value):
+        """Set the arrow thickness for the strip
+        """
+        if not isinstance(value, (int, float)):
+            raise TypeError('Error: arrowMinimum not an (int, float)')
+        value = int(value)
+
+        oldValue = self._CcpnGLWidget._arrowMinimum
+        self._CcpnGLWidget._arrowMinimum = value if (value and value >= 0) else oldValue
         if value != oldValue:
             self._setSymbolLabelling()
             if self.spectrumViews:
@@ -1922,6 +2054,29 @@ class GuiStrip(Frame):
                 self._emitSymbolChanged()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # peakSymbolsEnabled
+
+    @property
+    def peakSymbolsEnabled(self):
+        """Get peakSymbolsEnabled for the strip
+        """
+        return self._CcpnGLWidget._peakSymbolsEnabled
+
+    @peakSymbolsEnabled.setter
+    def peakSymbolsEnabled(self, value):
+        """Set peakSymbolsEnabled for the strip
+        """
+        if not isinstance(value, bool):
+            raise TypeError('Error: peakSymbolsEnabled not a bool')
+
+        oldValue = self._CcpnGLWidget._peakSymbolsEnabled
+        self._CcpnGLWidget._peakSymbolsEnabled = value
+        if value != oldValue:
+            self._setSymbolLabelling()
+            if self.spectrumViews:
+                self._emitSymbolChanged()
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # peakLabelsEnabled
 
     @property
@@ -1968,6 +2123,29 @@ class GuiStrip(Frame):
                 self._emitSymbolChanged()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # multipletSymbolsEnabled
+
+    @property
+    def multipletSymbolsEnabled(self):
+        """Get multipletSymbolsEnabled for the strip
+        """
+        return self._CcpnGLWidget._multipletSymbolsEnabled
+
+    @multipletSymbolsEnabled.setter
+    def multipletSymbolsEnabled(self, value):
+        """Set multipletSymbolsEnabled for the strip
+        """
+        if not isinstance(value, bool):
+            raise TypeError('Error: multipletSymbolsEnabled not a bool')
+
+        oldValue = self._CcpnGLWidget._multipletSymbolsEnabled
+        self._CcpnGLWidget._multipletSymbolsEnabled = value
+        if value != oldValue:
+            self._setSymbolLabelling()
+            if self.spectrumViews:
+                self._emitSymbolChanged()
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # multipletLabelsEnabled
 
     @property
@@ -1985,6 +2163,29 @@ class GuiStrip(Frame):
 
         oldValue = self._CcpnGLWidget._multipletLabelsEnabled
         self._CcpnGLWidget._multipletLabelsEnabled = value
+        if value != oldValue:
+            self._setSymbolLabelling()
+            if self.spectrumViews:
+                self._emitSymbolChanged()
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # multipletArrowsEnabled
+
+    @property
+    def multipletArrowsEnabled(self):
+        """Get multipletArrowsEnabled for the strip
+        """
+        return self._CcpnGLWidget._multipletArrowsEnabled
+
+    @multipletArrowsEnabled.setter
+    def multipletArrowsEnabled(self, value):
+        """Set multipletArrowsEnabled for the strip
+        """
+        if not isinstance(value, bool):
+            raise TypeError('Error: multipletArrowsEnabled not a bool')
+
+        oldValue = self._CcpnGLWidget._multipletArrowsEnabled
+        self._CcpnGLWidget._multipletArrowsEnabled = value
         if value != oldValue:
             self._setSymbolLabelling()
             if self.spectrumViews:

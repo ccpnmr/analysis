@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-18 18:49:17 +0100 (Thu, May 18, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-01 19:39:57 +0100 (Thu, June 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -81,10 +81,12 @@ class GLpeakListMethods():
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     @staticmethod
-    def getLabelling(obj, labelType):
+    def getLabelling(obj, parent):
         """Get the object label based on the current labelling method
         For peaks, this is constructed from the pids of the attached nmrAtoms
         """
+        labelType = parent._symbolLabelling
+
         if labelType == 0:
             # return the short code form
             text = _getScreenPeakAnnotation(obj, useShortCode=True)
@@ -194,6 +196,12 @@ class GLpeakListMethods():
                 for pList, glArray in self._GLArrows.items():
                     if pList.isDeleted:
                         glArray.clearArrays()
+
+    @staticmethod
+    def getViewFromListView(peakListView, obj):
+        """Get the peakView from the PeakListView.
+        """
+        return obj.getPeakView(peakListView)
 
 
 class GLpeakNdLabelling(GLpeakListMethods, GLLabelling):

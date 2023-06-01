@@ -53,8 +53,8 @@ class MolecularBondsPopup(CcpnDialogMainWidget):
                 },
                {BONDNAME      : 'Disulfide Bonds',
                 VALIDATOMS    : ['SG', ],
-                VALIDBONDTYPES: ['covalent', ],
-                NEWBONDTYPE   : 'covalent',
+                VALIDBONDTYPES: ['disulfide', ],
+                NEWBONDTYPE   : 'disulfide',
                 },
                ]
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-19 16:58:08 +0100 (Fri, May 19, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-01 19:39:58 +0100 (Thu, June 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -997,17 +997,24 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         # self.diffMouseString = None
         self._symbolLabelling = 0
         self._symbolType = 0
-        self._symbolSize = 0
-        self._symbolThickness = 0
+        self._symbolSize = 12
+        self._symbolThickness = 1
+        self._multipletLabelling = 0
+        self._multipletType = 0
         self._aliasEnabled = True
         self._aliasShade = 0.0
         self._aliasLabelsEnabled = True
+        self._peakSymbolsEnabled = True
         self._peakLabelsEnabled = True
         self._peakArrowsEnabled = True
+        self._multipletSymbolsEnabled = True
         self._multipletLabelsEnabled = True
-        self._contourThickness = 0
+        self._multipletArrowsEnabled = True
+
+        self._contourThickness = 1
         self._arrowType = 0
         self._arrowSize = 0
+        self._arrowMinimum = 0
 
         self._contourList = {}
         self._hTraces = {}

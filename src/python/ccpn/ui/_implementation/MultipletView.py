@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-18 18:49:15 +0100 (Thu, May 18, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-01 19:39:56 +0100 (Thu, June 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -29,8 +29,6 @@ import typing
 
 from ccpn.core.Project import Project
 from ccpn.core.Multiplet import Multiplet
-from ccpn.core.lib.ContextManagers import ccpNmrV3CoreSetter  #, undoStackBlocking
-from ccpn.util.decorators import logCommand
 from ccpn.ui._implementation.MultipletListView import MultipletListView
 from ccpn.ui._implementation.PMIViewABC import PMIViewABC
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import MultipletView as ApiMultipletView
@@ -98,10 +96,8 @@ class MultipletView(PMIViewABC):
         return parent._wrappedData.multipletListView.sortedMultipletViews()
 
     def _finaliseAction(self, action: str, **actionKwds):
-        if super()._finaliseAction(action, **actionKwds):
-
-            if action == 'change':
-                self.multiplet._finaliseAction(action)
+        if super()._finaliseAction(action, **actionKwds) and action == 'change':
+            self.multiplet._finaliseAction(action)
 
     #=========================================================================================
     # CCPN functions

@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:04 +0100 (Wed, October 12, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-06-01 19:39:56 +0100 (Thu, June 01, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -37,6 +37,7 @@ from ccpn.core._implementation.PMIListABC import PMIListABC
 from ccpn.util.decorators import logCommand
 from ccpn.util import Common as commonUtil
 from ccpn.util.Logging import getLogger
+
 
 GAUSSIANMETHOD = 'gaussian'
 LORENTZIANMETHOD = 'lorentzian'
@@ -78,9 +79,10 @@ class PeakList(PMIListABC):
         """
         from ccpn.core.Peak import Peak as klass
 
-        if not klass in self._childClasses:
-            raise TypeError('PrimaryChildClass %s does not exist as child of %s' % (klass.className,
-                                                                                    self.className))
+        if klass not in self._childClasses:
+            raise TypeError(
+                    f'PrimaryChildClass {klass.className} does not exist as child of {self.className}'
+                    )
         self._primaryChildClass = klass
 
     @property
@@ -105,11 +107,11 @@ class PeakList(PMIListABC):
 
         # this is a can-of-worms for undelete at the minute
         try:
-            if action in ['change']:
+            if action in {'change'}:
                 for plv in self.peakListViews:
                     plv._finaliseAction(action)
         except Exception as es:
-            raise RuntimeError('Error _finalising peakListViews: %s' % str(es))
+            raise RuntimeError(f'Error _finalising peakListViews: {str(es)}') from es
 
     def delete(self):
         """Delete peakList
@@ -176,7 +178,7 @@ class PeakList(PMIListABC):
                 if lineWidths and None not in lineWidths and height:
                     pp.estimateVolume(volumeIntegralLimit=volumeIntegralLimit)
                 elif not noWarning:
-                    getLogger().warning('Peak %s contains undefined height/lineWidths' % str(pp))
+                    getLogger().warning(f'Peak {str(pp)} contains undefined height/lineWidths')
 
     @logCommand(get='self')
     def copyTo(self, targetSpectrum: Spectrum, targetPeakList=None, includeAllPeakProperties=True,
@@ -205,9 +207,9 @@ class PeakList(PMIListABC):
         # TODO enable copying across different dimensionalities
         dimensionCount = self.spectrum.dimensionCount
         if dimensionCount < targetSpectrum.dimensionCount:
-            raise ValueError("Cannot copy %sD %s to %sD %s"
-                             % (dimensionCount, self.longPid,
-                                targetSpectrum.dimensionCount, targetSpectrum.longPid))
+            raise ValueError(
+                    f"Cannot copy {dimensionCount}D {self.longPid} to {targetSpectrum.dimensionCount}D {targetSpectrum.longPid}"
+                    )
 
         dimensionMapping = _axisCodeMapIndices(self.spectrum.axisCodes, targetSpectrum.axisCodes)
         if None in dimensionMapping:
@@ -218,18 +220,18 @@ class PeakList(PMIListABC):
             targetPeakList = self.project.getByPid(targetPeakList) if isinstance(targetPeakList, str) else targetPeakList
             if not isinstance(targetPeakList, PeakList):
                 raise TypeError('targetPeakList is not of type PeakList')
-            if not targetPeakList in targetSpectrum.peakLists:
-                raise TypeError('targetPeakList is not a PeakList of: %s' % targetSpectrum.pid)
+            if targetPeakList not in targetSpectrum.peakLists:
+                raise TypeError(f'targetPeakList is not a PeakList of: {targetSpectrum.pid}')
 
         else:
             # make a dictionary with parameters of self to be copied to new targetPeakList (if created)
-            params = dict(((tag, getattr(self, tag)) for tag in singleValueTags))
+            params = {tag: getattr(self, tag) for tag in singleValueTags}
             params['comment'] = "Copy of %s\n" % self.longPid + (params['comment'] or '')
             for key, val in kwargs.items():
                 if key in singleValueTags:
                     params[key] = val
                 else:
-                    raise ValueError("PeakList has no attribute %s" % key)
+                    raise ValueError(f"PeakList has no attribute {key}")
 
         with undoBlockWithoutSideBar():
             if not targetPeakList:
@@ -316,20 +318,18 @@ class PeakList(PMIListABC):
             # peaks = self.pickPeaksNd(regionToPick, doPos=doPos, doNeg=doNeg, minDropFactor=minDropFactor)
 
             # axisCodeDict = dict((code, selectedRegion[ii]) for ii, code in enumerate(self.spectrum.axisCodes))
-            axisCodeDict = dict((code, region) for ii, (code, region) in enumerate(zip(self.spectrum.axisCodes, selectedRegion)))
+            axisCodeDict = dict(zip(self.spectrum.axisCodes, selectedRegion))
 
             _spectrum = self.spectrum
-            # may create a peakPicker instance if not defined, subject to settings in preferences
-            _peakPicker = _spectrum.peakPicker
-            if _peakPicker:
+            if _peakPicker := _spectrum.peakPicker:
                 _peakPicker.dropFactor = minDropFactor
                 _peakPicker.setLineWidths = True
-                peaks = _spectrum.pickPeaks(self,
-                                            _spectrum.positiveContourBase if doPos else None,
-                                            _spectrum.negativeContourBase if doNeg else None,
-                                            **axisCodeDict)
-                return peaks
-
+                return _spectrum.pickPeaks(
+                        self,
+                        _spectrum.positiveContourBase if doPos else None,
+                        _spectrum.negativeContourBase if doNeg else None,
+                        **axisCodeDict
+                        )
         return []
 
     def reorderValues(self, values, newAxisCodeOrder):
@@ -501,13 +501,13 @@ class PeakList(PMIListABC):
         return _newPickedPeak(self, pointPositions=pointPositions, height=height,
                               lineWidths=lineWidths, fitMethod=fitMethod, **kwds)
 
-
     def getAsDataFrame(self) -> pd.DataFrame:
         """ Get the peakList as a DataFrame. """
         dfs = []
         for peak in self.peaks:
             dfs.append(peak.getAsDataFrame())
         return pd.concat(dfs, axis=0)
+
 
 #=========================================================================================
 # Connections to parents:
@@ -519,6 +519,7 @@ def _newPeakList(self: Spectrum, title: str = None, comment: str = None,
                  textColour: str = None,
                  meritColour: str = None, meritEnabled: bool = False, meritThreshold: float = None,
                  lineColour: str = None,
+                 arrowColour: str = None,
                  isSimulated: bool = False) -> PeakList:
     """Create new empty PeakList within Spectrum
 
@@ -556,6 +557,8 @@ def _newPeakList(self: Spectrum, title: str = None, comment: str = None,
         result.meritThreshold = meritThreshold
     if lineColour is not None:
         result.lineColour = lineColour
+    if arrowColour is not None:
+        result.arrowColour = arrowColour
 
     return result
 

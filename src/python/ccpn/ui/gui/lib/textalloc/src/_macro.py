@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-18 18:49:17 +0100 (Thu, May 18, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-01 19:39:57 +0100 (Thu, June 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -57,12 +57,12 @@ def non_overlapping_with_points(
     return np.invert(
             np.bitwise_or.reduce(
                     np.bitwise_and(
-                            candidates[:, 0][:, None] - xmargin < scatter_xy[:, 0],
+                            candidates[:, 0:1] - xmargin < scatter_xy[:, 0],
                             np.bitwise_and(
-                                    candidates[:, 2][:, None] + xmargin > scatter_xy[:, 0],
+                                    candidates[:, 2:3] + xmargin > scatter_xy[:, 0],
                                     np.bitwise_and(
-                                            candidates[:, 1][:, None] - ymargin < scatter_xy[:, 1],
-                                            candidates[:, 3][:, None] + ymargin > scatter_xy[:, 1],
+                                            candidates[:, 1:2] - ymargin < scatter_xy[:, 1],
+                                            candidates[:, 3:] + ymargin > scatter_xy[:, 1],
                                             ),
                                     ),
                             ),
@@ -144,22 +144,22 @@ def non_overlapping_with_lines(
     non_inside = np.invert(
             np.any(
                     np.bitwise_and(
-                            candidates[:, 0][:, None] - xmargin < lines_xyxy[:, 0],
+                            candidates[:, 0:1] - xmargin < lines_xyxy[:, 0],
                             np.bitwise_and(
-                                    candidates[:, 1][:, None] - ymargin < lines_xyxy[:, 1],
+                                    candidates[:, 1:2] - ymargin < lines_xyxy[:, 1],
                                     np.bitwise_and(
-                                            candidates[:, 2][:, None] + xmargin > lines_xyxy[:, 0],
+                                            candidates[:, 2:3] + xmargin > lines_xyxy[:, 0],
                                             np.bitwise_and(
-                                                    candidates[:, 3][:, None] + ymargin > lines_xyxy[:, 1],
+                                                    candidates[:, 3:] + ymargin > lines_xyxy[:, 1],
                                                     np.bitwise_and(
-                                                            candidates[:, 0][:, None] - xmargin < lines_xyxy[:, 2],
+                                                            candidates[:, 0:1] - xmargin < lines_xyxy[:, 2],
                                                             np.bitwise_and(
-                                                                    candidates[:, 1][:, None] - ymargin
+                                                                    candidates[:, 1:2] - ymargin
                                                                     < lines_xyxy[:, 3],
                                                                     np.bitwise_and(
-                                                                            candidates[:, 2][:, None] + xmargin
+                                                                            candidates[:, 2:3] + xmargin
                                                                             > lines_xyxy[:, 2],
-                                                                            candidates[:, 3][:, None] + ymargin
+                                                                            candidates[:, 3:] + ymargin
                                                                             > lines_xyxy[:, 3],
                                                                             ),
                                                                     ),
@@ -207,15 +207,15 @@ def ccw(x1y1: np.ndarray, x2y2: np.ndarray, x3y3: np.ndarray, cand: bool) -> np.
     """
     if cand:
         return (
-                (-(x1y1[:, 1][:, None] - x3y3[:, 1]))
+                (-(x1y1[:, 1:2] - x3y3[:, 1]))
                 * np.repeat(x2y2[:, 0:1] - x1y1[:, 0:1], x3y3.shape[0], axis=1)
         ) > (
                 np.repeat(x2y2[:, 1:2] - x1y1[:, 1:2], x3y3.shape[0], axis=1)
-                * (-(x1y1[:, 0][:, None] - x3y3[:, 0]))
+                * (-(x1y1[:, 0:1] - x3y3[:, 0]))
         )
     return (
-            (-(x1y1[:, 1][:, None] - x3y3[:, 1])) * (-(x1y1[:, 0][:, None] - x2y2[:, 0]))
-    ) > ((-(x1y1[:, 1][:, None] - x2y2[:, 1])) * (-(x1y1[:, 0][:, None] - x3y3[:, 0])))
+            (-(x1y1[:, 1:2] - x3y3[:, 1])) * (-(x1y1[:, 0:1] - x2y2[:, 0]))
+    ) > ((-(x1y1[:, 1:2] - x2y2[:, 1])) * (-(x1y1[:, 0:1] - x3y3[:, 0])))
 
 
 def non_overlapping_with_boxes(
@@ -236,12 +236,12 @@ def non_overlapping_with_boxes(
             np.any(
                     np.invert(
                             np.bitwise_or(
-                                    candidates[:, 0][:, None] - xmargin > box_arr[:, 2],
+                                    candidates[:, 0:1] - xmargin > box_arr[:, 2],
                                     np.bitwise_or(
-                                            candidates[:, 2][:, None] + xmargin < box_arr[:, 0],
+                                            candidates[:, 2:3] + xmargin < box_arr[:, 0],
                                             np.bitwise_or(
-                                                    candidates[:, 1][:, None] - ymargin > box_arr[:, 3],
-                                                    candidates[:, 3][:, None] + ymargin < box_arr[:, 1],
+                                                    candidates[:, 1:2] - ymargin > box_arr[:, 3],
+                                                    candidates[:, 3:] + ymargin < box_arr[:, 1],
                                                     ),
                                             ),
                                     )
@@ -537,8 +537,8 @@ def allocate_text(
         x: Union[np.ndarray, List[float]],
         y: Union[np.ndarray, List[float]],
         text_list: List[str],
-        x_scatter: Union[np.ndarray, List[float]] = None,
-        y_scatter: Union[np.ndarray, List[float]] = None,
+        x_points: Union[np.ndarray, List[float]] = None,
+        y_points: Union[np.ndarray, List[float]] = None,
         x_lines: List[Union[np.ndarray, List[float]]] = None,
         y_lines: List[Union[np.ndarray, List[float]]] = None,
         x_boxes: List[Union[np.ndarray, List[float]]] = None,  # merge then separate in method?
@@ -565,8 +565,8 @@ def allocate_text(
         x (Union[np.ndarray, List[float]]): x-coordinates of texts 1d array/list.
         y (Union[np.ndarray, List[float]]): y-coordinates of texts 1d array/list.
         text_list (List[str]): list of texts.
-        x_scatter (Union[np.ndarray, List[float]], optional): x-coordinates of all scattered points in plot 1d array/list. Defaults to None.
-        y_scatter (Union[np.ndarray, List[float]], optional): y-coordinates of all scattered points in plot 1d array/list. Defaults to None.
+        x_points (Union[np.ndarray, List[float]], optional): x-coordinates of all scattered points in plot 1d array/list. Defaults to None.
+        y_points (Union[np.ndarray, List[float]], optional): y-coordinates of all scattered points in plot 1d array/list. Defaults to None.
         x_lines (List[Union[np.ndarray, List[float]]], optional): x-coordinates of all lines in plot list of 1d arrays/lists. Defaults to None.
         y_lines (List[Union[np.ndarray, List[float]]], optional): y-coordinates of all lines in plot list of 1d arrays/lists. Defaults to None.
         x_boxes (List[Union[np.ndarray, List[float]]], optional): x-coordinates of all boxes in plot list of 1d arrays/lists. Defaults to None.
@@ -592,13 +592,13 @@ def allocate_text(
     x = np.array(x)
     y = np.array(y)
 
-    if x_scatter is not None:
-        assert y_scatter is not None
-    if y_scatter is not None:
-        assert x_scatter is not None
-        assert len(y_scatter) == len(x_scatter)
-        x_scatter = np.array(x_scatter)
-        y_scatter = np.array(y_scatter)
+    if x_points is not None:
+        assert y_points is not None
+    if y_points is not None:
+        assert x_points is not None
+        assert len(y_points) == len(x_points)
+        x_points = np.array(x_points)
+        y_points = np.array(y_points)
 
     if x_lines is not None:
         assert y_lines is not None
@@ -641,10 +641,10 @@ def allocate_text(
     # Process extracted text-boxes
     if verbose:
         print("Processing")
-    if x_scatter is None:
-        scatterxy = None
+    if x_points is None:
+        scatter_xy = None
     else:
-        scatterxy = np.transpose(np.vstack([x_scatter, y_scatter]))
+        scatter_xy = np.transpose(np.vstack([x_points, y_points]))
 
     if x_lines is None:
         lines_xyxy = None
@@ -668,7 +668,7 @@ def allocate_text(
             verbose,
             draw_all,
             include_arrows,
-            scatter_xy=scatterxy,
+            scatter_xy=scatter_xy,
             lines_xyxy=lines_xyxy,
             boxes_xyxy=boxes_xyxy,
             )

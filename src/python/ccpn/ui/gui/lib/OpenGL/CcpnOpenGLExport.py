@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-19 16:58:07 +0100 (Fri, May 19, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-01 19:39:57 +0100 (Thu, June 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -67,7 +67,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import SPECTRUM_STACKEDMATRIX, SPECTR
 from ccpn.ui.gui.lib.OpenGL import GL
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLGRIDLINES, GLAXISLABELS, GLAXISMARKS, \
     GLINTEGRALLABELS, GLINTEGRALSYMBOLS, GLMARKLABELS, GLMARKLINES, GLMULTIPLETLABELS, GLREGIONS, \
-    GLMULTIPLETSYMBOLS, GLOTHERLINES, GLPEAKLABELS, GLPEAKSYMBOLS, GLPEAKARROWS, \
+    GLMULTIPLETSYMBOLS, GLOTHERLINES, GLPEAKLABELS, GLPEAKSYMBOLS, GLPEAKARROWS, GLMULTIPLETARROWS, \
     GLPRINTTYPE, GLSELECTEDPIDS, \
     GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, GLSPECTRUMLABELS, \
     GLSTRIP, GLSTRIPLABELLING, GLTRACES, GLACTIVETRACES, GLPLOTBORDER, \
@@ -804,6 +804,7 @@ class GLExporter():
                 if self.params[GLINTEGRALSYMBOLS]: self._addIntegralAreas()
                 if self.params[GLINTEGRALSYMBOLS]: self._addIntegralLines()
                 if self.params[GLPEAKARROWS]: self._addPeakArrows()
+                if self.params[GLMULTIPLETARROWS]: self._addMultipletArrows()
                 if self.params[GLPEAKSYMBOLS]: self._addPeakSymbols()
                 if self.params[GLMULTIPLETSYMBOLS]: self._addMultipletSymbols()
                 if self.params[GLMARKLINES]: self._addMarkLines()
@@ -814,6 +815,7 @@ class GLExporter():
                 if self.params[GLMARKLABELS]: self._addMarkLabels()
             else:
                 if self.params[GLPEAKARROWS]: self._addPeakArrows()
+                if self.params[GLMULTIPLETARROWS]: self._addMultipletArrows()
                 if self.params[GLPEAKSYMBOLS]: self._addPeakSymbols()
                 if self.params[GLMULTIPLETSYMBOLS]: self._addMultipletSymbols()
                 if self.params[GLPEAKLABELS]: self._addPeakLabels()
@@ -1292,6 +1294,36 @@ class GLExporter():
                                            fillMode=None,
                                            splitGroups=False,
                                            lineWidth=0.5 * self.baseThickness * self.symbolThickness,
+                                           alias=data.alias)
+
+    def _addMultipletArrows(self):
+        """
+        Add the multiplet arrows to the main drawing area.
+        """
+        _arrows = self._parent._GLMultiplets._GLArrows
+
+        # iterate through the visible regions with the viewManager
+        for data in self._addSpectrumViewManager('multipletArrows'):
+            attribList = data.spectrumView.multipletListViews
+            validListViews = [_arrows[pp] for pp in attribList
+                              if pp in _arrows.keys()
+                              and pp.isDisplayed
+                              and data.spectrumView.isDisplayed
+                              and pp.multipletList.pid in self.params[GLSELECTEDPIDS]
+                              ]
+
+            for GLObject in validListViews:
+                self._appendIndexLineGroup(indArray=GLObject,
+                                           colourGroups=data.colourGroups,
+                                           plotDim={PLOTLEFT  : data.x,
+                                                    PLOTBOTTOM: data.y,
+                                                    PLOTWIDTH : data.width,
+                                                    PLOTHEIGHT: data.height},
+                                           name=f'spectrumViewmultipletArrows{data.index}{data.spectrumView.pid}',
+                                           mat=data.matrixSymbols,
+                                           fillMode=None,
+                                           splitGroups=False,
+                                           lineWidth=0.5 * self.baseThickness,
                                            alias=data.alias)
 
     def _addMarkLines(self):

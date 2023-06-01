@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-30 08:44:40 +0100 (Tue, May 30, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-06-01 19:39:55 +0100 (Thu, June 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -70,8 +70,8 @@ def _calculateCenterOfMass(multiplet):
 
                     position += (sum(peakPositions) / _lenPeaks,)
             else:
-                position = (sum([peak.position[0] for peak in _peaks]) / _lenPeaks,
-                            sum([peak.height for peak in _peaks]) / _lenPeaks)
+                position = (sum(peak.position[0] for peak in _peaks) / _lenPeaks,
+                            sum(peak.height for peak in _peaks) / _lenPeaks,)
             return position
     except Exception:
         return None
@@ -97,9 +97,10 @@ def _calculateCenterOfMassPoints(multiplet):
                 # 1d multiplet - add the height for the other dimension
                 peakPoints = list(filter(lambda vv: vv is not None, [peak.pointPositions[0] for peak in pks]))
                 heights = list(filter(lambda vv: vv is not None, [peak.height for peak in pks]))
-                position = (sum(peakPoints) / len(peakPoints), sum(heights) / len(heights))
+                position = (sum(peakPoints) / len(peakPoints),
+                            sum(heights) / len(heights))
             return position
-    except:
+    except Exception:
         return None
 
 
@@ -170,10 +171,17 @@ class Multiplet(AbstractWrapperObject):
     multipletList = _parent
 
     @property
+    def spectrum(self):
+        """Convenience property to get the spectrum, equivalent to peak.peakList.spectrum
+        """
+        return self.multipletList.spectrum
+
+    @property
     def height(self) -> Optional[float]:
         """height of Multiplet."""
-        height = _getMultipletHeight(self)
-        return height
+        if pks := self.peaks:
+            heights = [(peak.height or 0.0) for peak in pks]
+            return sum(heights)
 
     # # cannot set the height - derived from peaks
     # @height.setter
@@ -183,8 +191,9 @@ class Multiplet(AbstractWrapperObject):
     @property
     def heightError(self) -> Optional[float]:
         """height error of Multiplet."""
-        heightError = _getMultipletHeightError(self)
-        return heightError
+        if pks := self.peaks:
+            errors = [(peak.heightError or 0.0) for peak in pks]
+            return sum(errors)
 
     # # cannot set the heightError - derived from peaks
     # @heightError.setter
@@ -193,35 +202,46 @@ class Multiplet(AbstractWrapperObject):
 
     @property
     def volume(self) -> Optional[float]:
-        """volume of Multiplet."""
-        if self._wrappedData.volume is None:
-            return None
+        """Volume of multiplet."""
+        if pks := self.peaks:
+            errors = [(peak.volume or 0.0) for peak in pks]
+            return sum(errors)
 
-        scale = self.multipletList.spectrum.scale
-        scale = scale if scale is not None else 1.0
-        if -SCALETOLERANCE < scale < SCALETOLERANCE:
-            getLogger().warning('Scaling {}.volume by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
-
-        return self._wrappedData.volume * scale
-
-    @volume.setter
-    @logCommand(get='self', isProperty=True)
-    def volume(self, value: Union[float, int, None]):
-        if not isinstance(value, (float, int, type(None))):
-            raise TypeError('volume must be a float, integer or None')
-        elif value is not None and (value - value) != 0.0:
-            raise TypeError('volume cannot be NaN or Infinity')
-
-        if value is None:
-            self._wrappedData.volume = None
-        else:
-            scale = self.multipletList.spectrum.scale
-            scale = scale if scale is not None else 1.0
-            if -SCALETOLERANCE < scale < SCALETOLERANCE:
-                getLogger().warning('Scaling {}.volume by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
-                self._wrappedData.volume = None
-            else:
-                self._wrappedData.volume = float(value) / scale
+    # @property
+    # def volume(self) -> Optional[float]:
+    #     """volume of Multiplet."""
+    #     if self._wrappedData.volume is None:
+    #         return None
+    #
+    #     scale = self.multipletList.spectrum.scale
+    #     scale = scale if scale is not None else 1.0
+    #     if -SCALETOLERANCE < scale < SCALETOLERANCE:
+    #         getLogger().warning(
+    #             f'Scaling {self}.volume by minimum tolerance (±{SCALETOLERANCE})'
+    #         )
+    #
+    #     return self._wrappedData.volume * scale
+    #
+    # @volume.setter
+    # @logCommand(get='self', isProperty=True)
+    # def volume(self, value: Union[float, int, None]):
+    #     if not isinstance(value, (float, int, type(None))):
+    #         raise TypeError('volume must be a float, integer or None')
+    #     elif value is not None and (value - value) != 0.0:
+    #         raise TypeError('volume cannot be NaN or Infinity')
+    #
+    #     if value is None:
+    #         self._wrappedData.volume = None
+    #     else:
+    #         scale = self.multipletList.spectrum.scale
+    #         scale = scale if scale is not None else 1.0
+    #         if -SCALETOLERANCE < scale < SCALETOLERANCE:
+    #             getLogger().warning(
+    #                 f'Scaling {self}.volume by minimum tolerance (±{SCALETOLERANCE})'
+    #             )
+    #             self._wrappedData.volume = None
+    #         else:
+    #             self._wrappedData.volume = float(value) / scale
 
     @property
     def offset(self) -> Optional[float]:
@@ -246,34 +266,45 @@ class Multiplet(AbstractWrapperObject):
     @property
     def volumeError(self) -> Optional[float]:
         """volume error of Multiplet."""
-        if self._wrappedData.volumeError is None:
-            return None
+        if pks := self.peaks:
+            errors = [(peak.volumeError or 0.0) for peak in pks]
+            return sum(errors)
 
-        scale = self.multipletList.spectrum.scale
-        scale = scale if scale is not None else 1.0
-        if -SCALETOLERANCE < scale < SCALETOLERANCE:
-            getLogger().warning('Scaling {}.volumeError by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
-
-        return self._wrappedData.volumeError * scale
-
-    @volumeError.setter
-    @logCommand(get='self', isProperty=True)
-    def volumeError(self, value: Union[float, int, None]):
-        if not isinstance(value, (float, int, type(None))):
-            raise TypeError('volumeError must be a float, integer or None')
-        elif value is not None and (value - value) != 0.0:
-            raise TypeError('volumeError cannot be NaN or Infinity')
-
-        if value is None:
-            self._wrappedData.volumeError = None
-        else:
-            scale = self.multipletList.spectrum.scale
-            scale = scale if scale is not None else 1.0
-            if -SCALETOLERANCE < scale < SCALETOLERANCE:
-                getLogger().warning('Scaling {}.volumeError by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
-                self._wrappedData.volumeError = None
-            else:
-                self._wrappedData.volumeError = float(value) / scale
+    # @property
+    # def volumeError(self) -> Optional[float]:
+    #     """volume error of Multiplet."""
+    #     if self._wrappedData.volumeError is None:
+    #         return None
+    #
+    #     scale = self.multipletList.spectrum.scale
+    #     scale = scale if scale is not None else 1.0
+    #     if -SCALETOLERANCE < scale < SCALETOLERANCE:
+    #         getLogger().warning(
+    #             f'Scaling {self}.volumeError by minimum tolerance (±{SCALETOLERANCE})'
+    #         )
+    #
+    #     return self._wrappedData.volumeError * scale
+    #
+    # @volumeError.setter
+    # @logCommand(get='self', isProperty=True)
+    # def volumeError(self, value: Union[float, int, None]):
+    #     if not isinstance(value, (float, int, type(None))):
+    #         raise TypeError('volumeError must be a float, integer or None')
+    #     elif value is not None and (value - value) != 0.0:
+    #         raise TypeError('volumeError cannot be NaN or Infinity')
+    #
+    #     if value is None:
+    #         self._wrappedData.volumeError = None
+    #     else:
+    #         scale = self.multipletList.spectrum.scale
+    #         scale = scale if scale is not None else 1.0
+    #         if -SCALETOLERANCE < scale < SCALETOLERANCE:
+    #             getLogger().warning(
+    #                 f'Scaling {self}.volumeError by minimum tolerance (±{SCALETOLERANCE})'
+    #             )
+    #             self._wrappedData.volumeError = None
+    #         else:
+    #             self._wrappedData.volumeError = float(value) / scale
 
     @property
     def figureOfMerit(self) -> Optional[float]:
@@ -292,8 +323,12 @@ class Multiplet(AbstractWrapperObject):
 
     @annotation.setter
     @logCommand(get='self', isProperty=True)
-    def annotation(self, value: str):
-        self._wrappedData.annotation = value
+    @ccpNmrV3CoreSetter()
+    def annotation(self, value: Optional[str]):
+        if not isinstance(value, (str, type(None))):
+            raise ValueError("annotation must be a string or None")
+        else:
+            self._wrappedData.annotation = value
 
     @property
     def slopes(self) -> List[float]:
@@ -334,11 +369,15 @@ class Multiplet(AbstractWrapperObject):
         return self.multipletList.spectrum.axisCodes
 
     @property
-    def peaks(self) -> Optional[Tuple[Any, ...]]:
+    def peaks(self) -> Tuple[Any, ...]:
         """List of peaks attached to the multiplet."""
         if self._wrappedData:
-            return tuple([self._project._data2Obj[pk] for pk in self._wrappedData.sortedPeaks()
-                          if pk in self._project._data2Obj])
+            _data2Obj = self._project._data2Obj
+            return tuple(
+                    _data2Obj[pk]
+                    for pk in self._wrappedData.sortedPeaks()
+                    if pk in _data2Obj
+                    )
         else:
             return ()
 
@@ -346,17 +385,19 @@ class Multiplet(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
     def peaks(self, ll: list):
-        if ll:
-            pll = makeIterableList(ll)
-            pks = [self.project.getByPid(peak) if isinstance(peak, str) else peak for peak in pll]
-            for pp in pks:
-                if not isinstance(pp, Peak):
-                    raise TypeError('%s is not of type Peak' % pp)
+        if not ll:
+            return
 
-            toRemove = [pk for pk in self.peaks if pk not in pks]
-            toAdd = [pk for pk in pks if pk not in self.peaks]
-            self.removePeaks(toRemove)
-            self.addPeaks(toAdd)
+        pll = makeIterableList(ll)
+        pks = [self.project.getByPid(peak) if isinstance(peak, str) else peak for peak in pll]
+        for pp in pks:
+            if not isinstance(pp, Peak):
+                raise TypeError(f'{pp} is not of type Peak')
+
+        toRemove = [pk for pk in self.peaks if pk not in pks]
+        toAdd = [pk for pk in pks if pk not in self.peaks]
+        self.removePeaks(toRemove)
+        self.addPeaks(toAdd)
 
     @property
     def numPeaks(self) -> int:
@@ -390,7 +431,7 @@ class Multiplet(AbstractWrapperObject):
     def positionError(self) -> Tuple[Optional[float], ...]:
         """Peak position error in ppm (or other relevant unit)."""
         # TODO:LUCA calculate this :)
-        return tuple()  # tuple(x.valueError for x in self._wrappedData.sortedPeaks())
+        return ()  # tuple(x.valueError for x in self._wrappedData.sortedPeaks())
 
     @property
     def pointPositions(self) -> Optional[Tuple[float, ...]]:
@@ -406,8 +447,9 @@ class Multiplet(AbstractWrapperObject):
 
     @property
     def lineWidths(self) -> Tuple[Optional[float], ...]:
-        """Full-width-half-height of peak/multiplet for each dimension. """
-        result = tuple()
+        """Full-width-half-height of peak/multiplet for each dimension.
+        """
+        result = ()
         pks = self.peaks
         pksWidths = [pp.lineWidths for pp in pks]
         try:
@@ -437,7 +479,7 @@ class Multiplet(AbstractWrapperObject):
     def pointLineWidths(self) -> Tuple[Optional[float], ...]:
         """Full-width-half-height of peak for each dimension, in points."""
         # assumes that internal storage is in ppm
-        result = tuple()
+        result = ()
         pks = self.peaks
         pksWidths = [pp.pointLineWidths for pp in pks]
         try:
@@ -488,6 +530,36 @@ class Multiplet(AbstractWrapperObject):
         """get wrappedData (Multiplets) for all Multiplet children of parent MultipletList"""
         return parent._wrappedData.sortedMultiplets()
 
+    def _finaliseAction(self, action: str, **actionKwds):
+        """Subclassed to handle associated multiplets
+        """
+        if not super()._finaliseAction(action, **actionKwds):
+            return
+
+        # use fromPeak/Multiplet to stop infinite loops
+        actionKwds['fromMultiplet'] = self
+        if action in {'change', 'create', 'delete'} and not actionKwds.get('fromPeak'):
+            for pk in self.peaks:
+                pk._finaliseAction('change', **actionKwds)
+
+    # @classmethod
+    # def _restoreObject(cls, project, apiObj):
+    #     """Restore the object and update peaks.
+    #     """
+    #     from functools import reduce
+    #     from operator import add
+    #
+    #     result = super()._restoreObject(project, apiObj)
+    #
+    #     dims = result.spectrum.dimensionCount
+    #     try:
+    #         print(f'assignments   {result}    {[pk.assignedNmrAtoms for pk in result.peaks]}')
+    #         if any(pk.assignedNmrAtoms for pk in result.peaks):
+    #         # ss = [reduce(add, (pk.assignedNmrAtoms[ind] for pk in result.peaks if pk.assignedNmrAtoms)) for ind in range(dims)]
+    #             print(f'{result}    {dims}  {result.peaks}')
+    #     except Exception as es:
+    #         print(es)
+
     #=========================================================================================
     # CCPN functions
     #=========================================================================================
@@ -502,15 +574,69 @@ class Multiplet(AbstractWrapperObject):
         """
         spectrum = self._parent.spectrum
         peakList = makeIterableList(peaks)
-        pks = []
-        for peak in peakList:
-            pks.append(self.project.getByPid(peak) if isinstance(peak, str) else peak)
-
+        pks = [
+            self.project.getByPid(peak) if isinstance(peak, str) else peak
+            for peak in peakList
+            ]
         for pp in pks:
             if not isinstance(pp, Peak):
-                raise TypeError('%s is not of type Peak' % pp)
+                raise TypeError(f'addPeaks: {pp} is not of type Peak')
             if pp not in spectrum.peaks:
-                raise ValueError('%s does not belong to spectrum: %s' % (pp.pid, spectrum.pid))
+                raise ValueError(f'addPeaks: {pp.pid} does not belong to spectrum: {spectrum.pid}')
+            if pp.multiplets:
+                raise ValueError(f'addPeaks: {pp.pid} is already in a multiplet')
+
+        with undoBlock():
+            for pk in pks:
+                if pk not in self.peaks:
+                    # ignore duplicates
+                    self._wrappedData.addPeak(pk._wrappedData)
+
+    @logCommand(get='self')
+    def _forcePeaks(self, peaks: Sequence[Union['Peak', str]]):
+        """
+        Add a peak or list of peaks to the Multiplet.
+        The peaks must belong to the spectrum containing the multipletList.
+
+        :param peaks: single peak or list of peaks as objects or pids.
+        """
+        spectrum = self._parent.spectrum
+        peakList = makeIterableList(peaks)
+        pks = [
+            self.project.getByPid(peak) if isinstance(peak, str) else peak
+            for peak in peakList
+            ]
+        for pp in pks:
+            if not isinstance(pp, Peak):
+                raise TypeError(f'addPeaks: {pp} is not of type Peak')
+            if pp not in spectrum.peaks:
+                raise ValueError(f'addPeaks: {pp.pid} does not belong to spectrum: {spectrum.pid}')
+
+        with undoBlock():
+            for pk in pks:
+                if pk not in self.peaks:
+                    # ignore duplicates
+                    self._wrappedData.addPeak(pk._wrappedData)
+
+    @logCommand(get='self')
+    def _forcePeaks(self, peaks: Sequence[Union['Peak', str]]):
+        """
+        Add a peak or list of peaks to the Multiplet.
+        The peaks must belong to the spectrum containing the multipletList.
+
+        :param peaks: single peak or list of peaks as objects or pids.
+        """
+        spectrum = self._parent.spectrum
+        peakList = makeIterableList(peaks)
+        pks = [
+            self.project.getByPid(peak) if isinstance(peak, str) else peak
+            for peak in peakList
+            ]
+        for pp in pks:
+            if not isinstance(pp, Peak):
+                raise TypeError(f'addPeaks: {pp} is not of type Peak')
+            if pp not in spectrum.peaks:
+                raise ValueError(f'addPeaks: {pp.pid} does not belong to spectrum: {spectrum.pid}')
 
         with undoBlock():
             for pk in pks:
@@ -528,17 +654,17 @@ class Multiplet(AbstractWrapperObject):
         """
         spectrum = self._parent.spectrum
         peakList = makeIterableList(peaks)
-        pks = []
-        for peak in peakList:
-            pks.append(self.project.getByPid(peak) if isinstance(peak, str) else peak)
-
+        pks = [
+            self.project.getByPid(peak) if isinstance(peak, str) else peak
+            for peak in peakList
+            ]
         for pp in pks:
             if not isinstance(pp, Peak):
-                raise TypeError('%s is not of type Peak' % pp)
+                raise TypeError(f'removePeaks: {pp} is not of type Peak')
             if pp not in self.peaks:
-                raise ValueError('%s does not belong to multiplet: %s' % (pp.pid, self.pid))
+                raise ValueError(f'removePeaks: {pp.pid} does not belong to multiplet: {self.pid}')
             if pp not in spectrum.peaks:
-                raise ValueError('%s does not belong to spectrum: %s' % (pp.pid, spectrum.pid))
+                raise ValueError(f'removePeaks: {pp.pid} does not belong to spectrum: {spectrum.pid}')
 
         with undoBlock():
             for pk in pks:
@@ -594,15 +720,16 @@ def _newMultiplet(self: MultipletList,
 
     spectrum = self.spectrum
     peakList = makeIterableList(peaks)
-    pks = []
-    for peak in peakList:
-        pks.append(self.project.getByPid(peak) if isinstance(peak, str) else peak)
+    pks = [self.project.getByPid(peak) if isinstance(peak, str) else peak
+           for peak in peakList]
 
     for pp in pks:
         if not isinstance(pp, Peak):
-            raise TypeError('%s is not of type Peak' % pp)
+            raise TypeError(f'newMultiplet: {pp} is not of type Peak')
         if pp not in spectrum.peaks:
-            raise ValueError('%s does not belong to spectrum: %s' % (pp.pid, spectrum.pid))
+            raise ValueError(f'newMultiplet: {pp.pid} does not belong to spectrum {spectrum.pid}')
+        if pp.multiplets:
+            raise ValueError(f'newMultiplet: {pp.pid} is already in a multiplet')
 
     dd = {'height'    : height, 'heightError': heightError,
           'volume'    : volume, 'volumeError': volumeError, 'offset': offset, 'slopes': slopes,

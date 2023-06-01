@@ -586,8 +586,8 @@ class Project(AbstractWrapperObject):
             # Call any updates
             self._update()
 
-            # Clean any deleted/invalid pids from cross-references and enforce consistency
-            self._cleanCrossReferences()
+            # finalise restoration of project
+            self._postRestore()
 
     @classmethod
     def _restoreObject(cls, project, apiObj):
@@ -636,6 +636,17 @@ class Project(AbstractWrapperObject):
         # don't need to call super here
         return project
 
+    def _postRestore(self):
+        """Finalise restoration of core objects.
+        """
+        # Clean any deleted/invalid pids from cross-references and enforce consistency
+        self._cleanCrossReferences()
+
+        # Clean any inconsistencies in peak-assignments attached to multiplets
+        self._cleanMultipletAssignments()
+
+        super()._postRestore()
+
     def _cleanCrossReferences(self):
         """Clean any deleted/invalid pids from cross-references and enforce consistency
         """
@@ -644,6 +655,42 @@ class Project(AbstractWrapperObject):
             sp._cleanSpectrumReferences()
         for su in self.substances:
             su._cleanSubstanceReferences()
+
+    def _cleanMultipletAssignments(self):
+        """Clean any inconsistencies in peak-assignments attached to multiplets.
+        """
+        for sp in self.spectra:
+            dims = sp.dimensionCount
+
+            for mlts in sp.multipletLists:
+                for mlt in mlts.multiplets:
+
+                    consistent = True
+                    assigns = [None] * dims
+                    for pk in mlt.peaks:
+                        pAssigns = pk.dimensionNmrAtoms
+                        for ind, val in enumerate(pAssigns):
+
+                            # merge all the assignments per dimension
+                            val = set(val)
+                            try:
+                                if assigns[ind] is None:
+                                    assigns[ind] = val
+                                elif val != assigns[ind]:
+                                    assigns[ind] |= val
+                                    consistent = False
+
+                            except Exception as es:
+                                getLogger().warning(f'There was a problem cleaning {mlt}:{pk} - {es}')
+
+                    if not consistent:
+                        getLogger().warning(f'Merging inconsistent peak-assignments for {mlt}')
+                        for pk in mlt.peaks:
+                            pk.dimensionNmrAtoms = [list(val) or [] for val in assigns]
+
+        for pk in self.peaks:
+            if len(pk.multiplets) > 1:
+                getLogger().warning(f'Peak {pk} is contained in several multiplets, only one allowed: {pk.multiplets}')
 
     #-----------------------------------------------------------------------------------------
     # Save, SaveAs, Close
@@ -1525,10 +1572,7 @@ class Project(AbstractWrapperObject):
             dd[obj.id] = obj
         elif action == 'delete':
             # should never fail
-            try:
-                del dd[obj.id]
-            except Exception as es:
-                print(es)
+            del dd[obj.id]
 
     def _modifiedLink(self, dummy, classNames: typing.Tuple[str, str]):
         """ call link-has-changed notifiers

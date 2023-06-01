@@ -350,6 +350,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisLabelling = {'0': [], '1': []}
 
         self._axesVisible = True
+        self._aspectRatioMode = 0
         self._aspectRatios = {}
         self._lockedAspectRatios = {}
 
@@ -397,7 +398,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._infiniteLines = []
         self._buildTextFlag = True
 
-        # define a new class holding the entire peaklist symbols and labelling
+        # define a new class holding the entire peak-list symbols and labelling
         if self.is1D:
             self._drawRightAxis = True
             self._drawBottomAxis = True
@@ -429,17 +430,23 @@ class CcpnGLWidget(QOpenGLWidget):
         # self.diffMouseString = None
         self._symbolLabelling = 0
         self._symbolType = 0
-        self._symbolSize = 0
-        self._symbolThickness = 0
-        self._contourThickness = 0
+        self._symbolSize = 12
+        self._symbolThickness = 1
+        self._multipletLabelling = 0
+        self._multipletType = 0
+        self._contourThickness = 1
         self._aliasEnabled = True
         self._aliasShade = 0.0
         self._aliasLabelsEnabled = True
+        self._peakSymbolsEnabled = True
         self._peakLabelsEnabled = True
         self._peakArrowsEnabled = True
+        self._multipletSymbolsEnabled = True
         self._multipletLabelsEnabled = True
+        self._multipletArrowsEnabled = True
         self._arrowType = 0
         self._arrowSize = 0
+        self._arrowMinimum = 0
 
         self._contourList = {}
 
@@ -2346,7 +2353,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 # drag a peak
                 xPosition = cursorCoordinate[0]  # self.mapSceneToView(event.pos()).x()
                 yPosition = cursorCoordinate[1]  #
-                if objs := self._mouseInPeakLabel(xPosition, yPosition, firstOnly=True):
+                if self._mouseInPeakLabel(xPosition, yPosition, firstOnly=True) or self._mouseInMultipletLabel(xPosition, yPosition, firstOnly=True):
                     # move from the mouse position
                     # NOTE:ED - need stacking offset!
                     # try:
@@ -2939,6 +2946,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def _processNmrAtomNotifier(self, data):
         self._updateVisibleSpectrumViews()
         self._GLPeaks._processNotifier(data)
+        self._GLMultiplets._processNotifier(data)
         self._nmrAtomsNotifier(data)
 
         self.update()
@@ -2982,10 +2990,12 @@ class CcpnGLWidget(QOpenGLWidget):
 
             self.update()
 
-    def _round_sig(self, x, sig=6, small_value=1.0e-9):
+    @staticmethod
+    def _round_sig(x, sig=6, small_value=1.0e-9):
         return 0 if x == 0 else round(x, sig - int(math.floor(math.log10(max(abs(x), abs(small_value))))) - 1)
 
-    def between(self, val, l, r):
+    @staticmethod
+    def between(val, l, r):
         return (l - val) * (r - val) <= 0
 
     def _setViewPortFontScale(self):
@@ -3041,6 +3051,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._GLPeaks.buildSymbols()
         self._GLPeaks.buildArrows()
         self._GLMultiplets.buildSymbols()
+        self._GLMultiplets.buildArrows()
         if not self._stackingMode:
             self._GLIntegrals.buildSymbols()
             self.buildRegions()
@@ -3244,8 +3255,10 @@ class CcpnGLWidget(QOpenGLWidget):
         self.drawSpectra()
         self.drawBoundingBoxes()
 
-        # draw all the aliased symbols
-        self.drawAliasedSymbols(self._peakArrowsEnabled)
+        if self._peakSymbolsEnabled or self._peakArrowsEnabled or self._multipletSymbolsEnabled or self._multipletArrowsEnabled:
+            # draw all the aliased symbols
+            self.drawAliasedSymbols(self._peakSymbolsEnabled, self._peakArrowsEnabled,
+                                    self._multipletSymbolsEnabled, self._multipletArrowsEnabled)
 
         self.globalGL._shaderProgram1.makeCurrent()
 
@@ -3372,6 +3385,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     for multipletListView in spectrumView.multipletListViews:
                         multipletListView.buildSymbols = True
                         multipletListView.buildLabels = True
+                        multipletListView.buildArrows = True
 
                 spectrumView.buildContours = False
                 spectrumView.buildContoursOnly = False
@@ -5996,6 +6010,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                 for multipletList in targets:
                                     if multipletList == multipletListView.multipletList:
                                         multipletListView.buildSymbols = True
+                                        multipletListView.buildArrows = True
 
                     if GLNotifier.GLMULTIPLETLISTLABELS in triggers:
                         for spectrumView in self._ordering:  # strip.spectrumViews:
@@ -6007,6 +6022,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                 for multipletList in targets:
                                     if multipletList == multipletListView.multipletList:
                                         multipletListView.buildLabels = True
+                                        multipletListView.buildArrows = True
 
                     if GLNotifier.GLCLEARPHASING in triggers:
                         if self.spectrumDisplay == aDict[GLNotifier.GLSPECTRUMDISPLAY]:
@@ -6709,7 +6725,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
             if self._startMiddleDrag:
                 peaks = list(self.current.peaks)
-                if not peaks:
+                multiplets = list(self.current.multiplets)
+                if not (peaks or multiplets):
                     return
 
                 deltaPosition = [cursorCoordinate[0] - self._startCoordinate[0],
@@ -6725,6 +6742,9 @@ class CcpnGLWidget(QOpenGLWidget):
                     pvs = {pv for spectrumView in self.strip.spectrumViews
                            for plv in spectrumView.peakListViews if spectrumView.isDisplayed and plv.isDisplayed
                            for pv in plv.peakViews if pv.peak in peaks}
+                    mltvs = {mv for spectrumView in self.strip.spectrumViews
+                             for mlv in spectrumView.multipletListViews if spectrumView.isDisplayed and mlv.isDisplayed
+                             for mv in mlv.multipletViews if mv.multiplet in multiplets}
 
                     with undoBlockWithoutSideBar():
                         for pv in pvs:
@@ -6736,6 +6756,16 @@ class CcpnGLWidget(QOpenGLWidget):
                             pos[0] += deltaPosition[0] * np.sign(self.pixelX)
                             pos[1] += deltaPosition[1] * np.sign(self.pixelY)
                             pv.textOffset = pos
+
+                        for mv in mltvs:
+                            pos = list(mv.textOffset)
+                            # pixels
+                            # pos[0] += (deltaPosition[0] / self.pixelX)
+                            # pos[1] += (deltaPosition[1] / self.pixelY)
+                            # ppms
+                            pos[0] += deltaPosition[0] * np.sign(self.pixelX)
+                            pos[1] += deltaPosition[1] * np.sign(self.pixelY)
+                            mv.textOffset = pos
 
                 else:
                     for peak in peaks:

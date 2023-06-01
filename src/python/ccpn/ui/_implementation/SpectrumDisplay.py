@@ -109,25 +109,54 @@ class SpectrumDisplay(AbstractWrapperObject):
         AbstractWrapperObject.__init__(self, project, wrappedData)
         self._isNew = False  # Only set by newSpectrumDisplay
 
-    @classmethod
-    def _restoreObject(cls, project, apiObj):
-        """Subclassed to allow for initialisations on restore
+    # @classmethod
+    # def _restoreObject(cls, project, apiObj):
+    #     """Subclassed to allow for initialisations on restore
+    #     """
+    #     result = super()._restoreObject(project, apiObj)
+    #
+    #     # debug
+    #     _strips = result.strips
+    #
+    #     # getting value will induce an update in the internal parameters
+    #     _tmp = result.isotopeCodes
+    #     _tmp2 = result.dimensionTypes
+    #
+    #     # update the plane axes settings
+    #     for strip in _strips:
+    #         strip._updatePlaneAxes()
+    #
+    #     if not result.is1D:
+    #         result.setVisibleAxes()
+    #
+    #     # check that the spectrumView indexing has been set, or is populated correctly
+    #     if len(_strips) > 0 and \
+    #        (specViews := _strips[0].getSpectrumViews()):
+    #         indexing = [v._index for v in specViews]
+    #         if None in indexing or len(indexing) != len(set(indexing)):
+    #             # set new indexing
+    #             for ind, sv in enumerate(specViews):
+    #                 sv._index = ind
+    #         result._spectrumViewVisibleChanged()
+    #
+    #     return result
+
+    def _postRestore(self):
+        """Handle post-initialising children after all children have been restored
         """
-        result = super()._restoreObject(project, apiObj)
-
         # debug
-        _strips = result.strips
+        _strips = self.strips
 
-        # getting value will induce an update in the internal parameters
-        _tmp = result.isotopeCodes
-        _tmp2 = result.dimensionTypes
+        # getting value will spawn an update of the internal parameters
+        _tmp = self.isotopeCodes
+        _tmp2 = self.dimensionTypes
 
         # update the plane axes settings
         for strip in _strips:
             strip._updatePlaneAxes()
 
-        # if not result.is1D:
-        result.setVisibleAxes()
+        if not self.is1D:
+            self.setVisibleAxes()
 
         # check that the spectrumView indexing has been set, or is populated correctly
         if len(_strips) > 0 and \
@@ -137,9 +166,9 @@ class SpectrumDisplay(AbstractWrapperObject):
                 # set new indexing
                 for ind, sv in enumerate(specViews):
                     sv._index = ind
-            result._spectrumViewVisibleChanged()
+            self._spectrumViewVisibleChanged()
 
-        return result
+        super()._postRestore()
 
     #-----------------------------------------------------------------------------------------
     # CCPN properties

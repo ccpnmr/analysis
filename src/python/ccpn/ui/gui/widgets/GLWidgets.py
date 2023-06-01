@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-19 16:58:08 +0100 (Fri, May 19, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-01 19:39:58 +0100 (Thu, June 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -218,54 +218,218 @@ class GuiNdWidget(CcpnGLWidget):
 
         return peaks
 
+    # def _mouseInMultiplet(self, xPosition, yPosition, firstOnly=False):
+    #     """Find the multiplets under the mouse.
+    #     If firstOnly is true, return only the first item, else an empty list
+    #     """
+    #     xPositions = [xPosition - self.symbolX, xPosition + self.symbolX]
+    #     yPositions = [yPosition - self.symbolY, yPosition + self.symbolY]
+    #
+    #     if len(self._orderedAxes) > 2:
+    #         zPositions = self._orderedAxes[2].region
+    #     else:
+    #         zPositions = None
+    #
+    #     multiplets = []
+    #
+    #     for spectrumView in self.strip.spectrumViews:
+    #
+    #         for multipletListView in spectrumView.multipletListViews:
+    #             if spectrumView.isDisplayed and multipletListView.isDisplayed:
+    #
+    #                 multipletList = multipletListView.multipletList
+    #
+    #                 spectrumIndices = spectrumView.dimensionIndices
+    #                 xAxis = spectrumIndices[0]
+    #                 yAxis = spectrumIndices[1]
+    #
+    #                 for multiplet in multipletList.multiplets:
+    #                     if not multiplet.position:
+    #                         continue
+    #
+    #                     if len(multiplet.axisCodes) > 2 and zPositions is not None:
+    #                         zAxis = spectrumIndices[2]
+    #
+    #                         if (xPositions[0] < float(multiplet.position[xAxis]) < xPositions[1]
+    #                                 and yPositions[0] < float(multiplet.position[yAxis]) < yPositions[1]):
+    #
+    #                             # within the XY bounds so check whether inPlane
+    #                             _isInPlane, _isInFlankingPlane, planeIndex, fade = self._GLMultiplets.objIsInVisiblePlanes(spectrumView, multiplet)
+    #
+    #                             # if zPositions[0] < float(multiplet.position[zAxis]) < zPositions[1]:
+    #                             if _isInPlane:
+    #                                 multiplets.append(multiplet)
+    #                                 if firstOnly:
+    #                                     return multiplets
+    #                     elif (xPositions[0] < float(multiplet.position[xAxis]) < xPositions[1]
+    #                           and yPositions[0] < float(multiplet.position[yAxis]) < yPositions[1]):
+    #                         multiplets.append(multiplet)
+    #                         if firstOnly:
+    #                             return multiplets if multiplet in self.current.multiplets else []
+    #
+    #     return multiplets
+
     def _mouseInMultiplet(self, xPosition, yPosition, firstOnly=False):
         """Find the multiplets under the mouse.
         If firstOnly is true, return only the first item, else an empty list
         """
         xPositions = [xPosition - self.symbolX, xPosition + self.symbolX]
         yPositions = [yPosition - self.symbolY, yPosition + self.symbolY]
-
         if len(self._orderedAxes) > 2:
             zPositions = self._orderedAxes[2].region
         else:
             zPositions = None
 
         multiplets = []
+        _data2Obj = self.strip.project._data2Obj
+        pixX, pixY = self.strip._CcpnGLWidget.pixelX, self.strip._CcpnGLWidget.pixelY
+        sgnX, sgnY = np.sign(pixX), np.sign(pixY)
 
         for spectrumView in self.strip.spectrumViews:
-
             for multipletListView in spectrumView.multipletListViews:
                 if spectrumView.isDisplayed and multipletListView.isDisplayed:
 
-                    multipletList = multipletListView.multipletList
+                    # multipletList = multipletListView.multipletList
+                    # pks = np.array(multipletList.multiplets)
+                    # labels = [(_data2Obj.get(pLabel.stringObject._wrappedData.findFirstMultipletView(multipletListView=plv._wrappedData.multipletListView)),
+                    #            pLabel)
+                    #           for plv, ss in self.strip._CcpnGLWidget._GLMultiplets._GLLabels.items() if plv.isDisplayed
+                    #           for pLabel in ss.stringList]
 
-                    spectrumIndices = spectrumView.dimensionIndices
-                    xAxis = spectrumIndices[0]
-                    yAxis = spectrumIndices[1]
+                    if labelling := self._GLMultiplets._GLLabels.get(multipletListView):
+                        spectrumIndices = spectrumView.dimensionIndices
+                        xAxis = spectrumIndices[0]
+                        yAxis = spectrumIndices[1]
 
-                    for multiplet in multipletList.multiplets:
-                        if not multiplet.position:
-                            continue
+                        for drawList in labelling.stringList:
 
-                        if len(multiplet.axisCodes) > 2 and zPositions is not None:
-                            zAxis = spectrumIndices[2]
+                            try:
+                                multiplet = drawList.stringObject
+                                # NOTE:ED - need to speed this up
+                                pView = multiplet.getMultipletView(multipletListView)  #  _data2Obj.get(multiplet._wrappedData.findFirstMultipletView(multipletListView=multipletListView._wrappedData.multipletListView))
+                                _pos = multiplet.position
+                                px, py = float(_pos[xAxis]), float(_pos[yAxis])
+                                tx, ty = pView.textOffset
+                                if not tx and not ty:
+                                    # pixels
+                                    tx, ty = self._symbolSize, self._symbolSize
+                                    # ppm
+                                    # tx, ty = self.symbolX, self.symbolY
 
-                            if (xPositions[0] < float(multiplet.position[xAxis]) < xPositions[1]
-                                    and yPositions[0] < float(multiplet.position[yAxis]) < yPositions[1]):
+                                # find the bounds of the label
+                                # pixels
+                                # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
+                                # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
+                                # ppm
+                                minX, maxX = min(_ll := px + tx * sgnX, _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
+                                minY, maxY = min(_ll := py + ty * sgnY, _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
 
-                                # within the XY bounds so check whether inPlane
-                                _isInPlane, _isInFlankingPlane, planeIndex, fade = self._GLMultiplets.objIsInVisiblePlanes(spectrumView, multiplet)
+                                if len(multiplet.axisCodes) > 2 and zPositions is not None:
+                                    # zAxis = spectrumIndices[2]
 
-                                # if zPositions[0] < float(multiplet.position[zAxis]) < zPositions[1]:
-                                if _isInPlane:
+                                    if (xPositions[0] < px < xPositions[1]
+                                        and yPositions[0] < py < yPositions[1]) or \
+                                            (minX < xPosition < maxX and minY < yPosition < maxY):
+
+                                        # within the XY bounds so check whether inPlane
+                                        _isInPlane, _isInFlankingPlane, planeIndex, fade = self._GLMultiplets.objIsInVisiblePlanes(spectrumView, multiplet)
+
+                                        # if zPositions[0] < float(multiplet.position[zAxis]) < zPositions[1]:
+                                        if _isInPlane:
+                                            multiplets.append(multiplet)
+                                            if firstOnly:
+                                                return multiplets
+
+                                elif (xPositions[0] < px < xPositions[1]
+                                      and yPositions[0] < py < yPositions[1]) or \
+                                        (minX < xPosition < maxX and minY < yPosition < maxY):
                                     multiplets.append(multiplet)
                                     if firstOnly:
-                                        return multiplets
-                        elif (xPositions[0] < float(multiplet.position[xAxis]) < xPositions[1]
-                              and yPositions[0] < float(multiplet.position[yAxis]) < yPositions[1]):
-                            multiplets.append(multiplet)
-                            if firstOnly:
-                                return multiplets if multiplet in self.current.multiplets else []
+                                        return multiplets if multiplet in self.current.multiplets else []
+
+                            except Exception:
+                                # NOTE:ED - skip for now
+                                continue
+
+        return multiplets
+
+    def _mouseInMultipletLabel(self, xPosition, yPosition, firstOnly=False):
+        """Find the multiplets under the mouse.
+        If firstOnly is true, return only the first item, else an empty list
+        """
+        # xPositions = [xPosition - self.symbolX, xPosition + self.symbolX]
+        # yPositions = [yPosition - self.symbolY, yPosition + self.symbolY]
+        if len(self._orderedAxes) > 2:
+            zPositions = self._orderedAxes[2].region
+        else:
+            zPositions = None
+
+        multiplets = []
+        _data2Obj = self.strip.project._data2Obj
+        pixX, pixY = self.strip._CcpnGLWidget.pixelX, self.strip._CcpnGLWidget.pixelY
+        sgnX, sgnY = np.sign(pixX), np.sign(pixY)
+
+        for spectrumView in self.strip.spectrumViews:
+            for multipletListView in spectrumView.multipletListViews:
+                if spectrumView.isDisplayed and multipletListView.isDisplayed:
+
+                    # multipletList = multipletListView.multipletList
+                    # pks = np.array(multipletList.multiplets)
+                    # labels = [(_data2Obj.get(pLabel.stringObject._wrappedData.findFirstMultipletView(multipletListView=plv._wrappedData.multipletListView)),
+                    #            pLabel)
+                    #           for plv, ss in self.strip._CcpnGLWidget._GLMultiplets._GLLabels.items() if plv.isDisplayed
+                    #           for pLabel in ss.stringList]
+
+                    if labelling := self._GLMultiplets._GLLabels.get(multipletListView):
+                        spectrumIndices = spectrumView.dimensionIndices
+                        xAxis = spectrumIndices[0]
+                        yAxis = spectrumIndices[1]
+
+                        for drawList in labelling.stringList:
+
+                            try:
+                                multiplet = drawList.stringObject
+                                # NOTE:ED - need to speed this up
+                                pView = multiplet.getMultipletView(multipletListView)  #  _data2Obj.get(multiplet._wrappedData.findFirstMultipletView(multipletListView=multipletListView._wrappedData.multipletListView))
+                                _pos = multiplet.position
+                                px, py = float(_pos[xAxis]), float(_pos[yAxis])
+                                tx, ty = pView.textOffset
+                                if not tx and not ty:
+                                    # pixels
+                                    tx, ty = self._symbolSize, self._symbolSize
+                                    # ppm
+                                    # tx, ty = self.symbolX, self.symbolY
+
+                                # find the bounds of the label
+                                # pixels
+                                # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
+                                # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
+                                # ppm
+                                minX, maxX = min(_ll := px + tx * sgnX, _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
+                                minY, maxY = min(_ll := py + ty * sgnY, _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
+
+                                if len(multiplet.axisCodes) > 2 and zPositions is not None:
+                                    # zAxis = spectrumIndices[2]
+
+                                    if (minX < xPosition < maxX and minY < yPosition < maxY):
+
+                                        # within the XY bounds so check whether inPlane
+                                        _isInPlane, _isInFlankingPlane, planeIndex, fade = self._GLMultiplets.objIsInVisiblePlanes(spectrumView, multiplet)
+
+                                        # if zPositions[0] < float(multiplet.position[zAxis]) < zPositions[1]:
+                                        if _isInPlane:
+                                            multiplets.append(multiplet)
+                                            if firstOnly:
+                                                return multiplets
+
+                                elif (minX < xPosition < maxX and minY < yPosition < maxY):
+                                    multiplets.append(multiplet)
+                                    if firstOnly:
+                                        return multiplets if multiplet in self.current.multiplets else []
+
+                            except Exception:
+                                # NOTE:ED - skip for now
+                                continue
 
         return multiplets
 
@@ -529,7 +693,7 @@ class GuiNdWidget(CcpnGLWidget):
                     if self._multipletLabelsEnabled:
                         self._GLMultiplets.drawLabels(specView)
 
-    def drawAliasedSymbols(self, arrowsEnabled):
+    def drawAliasedSymbols(self, peakSymbolsEnabled, peakArrowsEnabled, multipletSymbolsEnabled, multipletArrowsEnabled):
         """Draw all the symbols that require aliasing to multiple regions
         """
         _shader = self.globalGL._shaderProgramAlias.makeCurrent()
@@ -601,10 +765,14 @@ class GuiNdWidget(CcpnGLWidget):
                     _shader.setMVMatrix(specMatrix)
                     _shader.setAliasPosition(ii, jj)
 
-                    if arrowsEnabled:
+                    if peakArrowsEnabled:
                         self._GLPeaks.drawArrows(specView)
-                    self._GLPeaks.drawSymbols(specView)
-                    self._GLMultiplets.drawSymbols(specView)
+                    if multipletArrowsEnabled:
+                        self._GLMultiplets.drawArrows(specView)
+                    if peakSymbolsEnabled:
+                        self._GLPeaks.drawSymbols(specView)
+                    if multipletSymbolsEnabled:
+                        self._GLMultiplets.drawSymbols(specView)
 
         GL.glLineWidth(GLDefs.GLDEFAULTLINETHICKNESS * self.viewports.devicePixelRatio)
 
@@ -1459,30 +1627,141 @@ class Gui1dWidget(CcpnGLWidget):
 
         return integrals
 
+    # def _mouseInMultiplet(self, xPosition, yPosition, firstOnly=False):
+    #     """Find the multiplets under the mouse.
+    #     If firstOnly is true, return only the first item, else an empty list
+    #     """
+    #     xPositions = [xPosition - self.symbolX, xPosition + self.symbolX]
+    #     yPositions = [yPosition - self.symbolY, yPosition + self.symbolY]
+    #
+    #     multiplets = []
+    #     for spectrumView in self.strip.spectrumViews:
+    #         for multipletListView in spectrumView.multipletListViews:
+    #             if spectrumView.isDisplayed and multipletListView.isDisplayed:
+    #
+    #                 multipletList = multipletListView.multipletList
+    #
+    #                 for multiplet in multipletList.multiplets:
+    #                     if not multiplet.position:
+    #                         continue
+    #
+    #                     if (xPositions[0] < float(multiplet.position[0]) < xPositions[1]
+    #                             and yPositions[0] < float(multiplet.height) < yPositions[1]):
+    #
+    #                         multiplets.append(multiplet)
+    #                         if firstOnly:
+    #                             return multiplets if multiplet in self.current.multiplets else []
+    #
+    #     return multiplets
+
     def _mouseInMultiplet(self, xPosition, yPosition, firstOnly=False):
         """Find the multiplets under the mouse.
         If firstOnly is true, return only the first item, else an empty list
         """
         xPositions = [xPosition - self.symbolX, xPosition + self.symbolX]
         yPositions = [yPosition - self.symbolY, yPosition + self.symbolY]
+        originalxPositions = xPositions
+        originalyPositions = yPositions
 
         multiplets = []
+        _data2Obj = self.strip.project._data2Obj
+        pixX, pixY = self.strip._CcpnGLWidget.pixelX, self.strip._CcpnGLWidget.pixelY
+        sgnX, sgnY = np.sign(pixX), np.sign(pixY)
+
         for spectrumView in self.strip.spectrumViews:
             for multipletListView in spectrumView.multipletListViews:
+                xOffset, yOffset = self._spectrumSettings[spectrumView].get(GLDefs.SPECTRUM_STACKEDMATRIXOFFSET)
+                xPositions = np.array(originalxPositions) - xOffset
+                yPositions = np.array(originalyPositions) - yOffset
                 if spectrumView.isDisplayed and multipletListView.isDisplayed:
 
-                    multipletList = multipletListView.multipletList
+                    # multipletList = multipletListView.multipletList
+                    if labelling := self._GLMultiplets._GLLabels.get(multipletListView):
+                        for drawList in labelling.stringList:
+                            try:
+                                multiplet = drawList.stringObject
+                                pView = multiplet.getMultipletView(multipletListView)  # _data2Obj.get(multiplet._wrappedData.findFirstMultipletView(multipletListView=multipletListView._wrappedData.multipletListView))
+                                px, py = float(multiplet.position[0]), float(multiplet.height)
+                                tx, ty = pView.textOffset
+                                if not tx and not ty:
+                                    # pixels
+                                    tx, ty = self._symbolSize, self._symbolSize
+                                    # ppm
+                                    # tx, ty = self.symbolX, self.symbolY
 
-                    for multiplet in multipletList.multiplets:
-                        if not multiplet.position:
-                            continue
+                                # find the bounds of the label
+                                # pixels
+                                # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
+                                # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
+                                # ppm
+                                minX, maxX = min(_ll := px + tx * sgnX, _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
+                                minY, maxY = min(_ll := py + ty * sgnY, _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
 
-                        if (xPositions[0] < float(multiplet.position[0]) < xPositions[1]
-                                and yPositions[0] < float(multiplet.height) < yPositions[1]):
+                                if (xPositions[0] < px < xPositions[1]
+                                    and yPositions[0] < py < yPositions[1]) or \
+                                        (minX < xPosition - xOffset < maxX and minY < yPosition - yOffset < maxY):
 
-                            multiplets.append(multiplet)
-                            if firstOnly:
-                                return multiplets if multiplet in self.current.multiplets else []
+                                    multiplets.append(multiplet)
+                                    if firstOnly:
+                                        return multiplets if multiplet in self.current.multiplets else []
+
+                            except Exception:
+                                # NOTE:ED - skip for now
+                                continue
+
+        return multiplets
+
+    def _mouseInMultipletLabel(self, xPosition, yPosition, firstOnly=False):
+        """Find the multiplets under the mouse.
+        If firstOnly is true, return only the first item, else an empty list
+        """
+        # xPositions = [xPosition - self.symbolX, xPosition + self.symbolX]
+        # yPositions = [yPosition - self.symbolY, yPosition + self.symbolY]
+        # originalxPositions = xPositions
+        # originalyPositions = yPositions
+
+        multiplets = []
+        _data2Obj = self.strip.project._data2Obj
+        pixX, pixY = self.strip._CcpnGLWidget.pixelX, self.strip._CcpnGLWidget.pixelY
+        sgnX, sgnY = np.sign(pixX), np.sign(pixY)
+
+        for spectrumView in self.strip.spectrumViews:
+            for multipletListView in spectrumView.multipletListViews:
+                xOffset, yOffset = self._spectrumSettings[spectrumView].get(GLDefs.SPECTRUM_STACKEDMATRIXOFFSET)
+                # xPositions = np.array(originalxPositions) - xOffset
+                # yPositions = np.array(originalyPositions) - yOffset
+                if spectrumView.isDisplayed and multipletListView.isDisplayed:
+
+                    # multipletList = multipletListView.multipletList
+                    if labelling := self._GLMultiplets._GLLabels.get(multipletListView):
+                        for drawList in labelling.stringList:
+                            try:
+                                multiplet = drawList.stringObject
+                                pView = multiplet.getMultipletView(multipletListView)  # _data2Obj.get(multiplet._wrappedData.findFirstMultipletView(multipletListView=multipletListView._wrappedData.multipletListView))
+                                px, py = float(multiplet.position[0]), float(multiplet.height)
+                                tx, ty = pView.textOffset
+                                if not tx and not ty:
+                                    # pixels
+                                    tx, ty = self._symbolSize, self._symbolSize
+                                    # ppm
+                                    # tx, ty = self.symbolX, self.symbolY
+
+                                # find the bounds of the label
+                                # pixels
+                                # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
+                                # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
+                                # ppm
+                                minX, maxX = min(_ll := px + tx * sgnX, _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
+                                minY, maxY = min(_ll := py + ty * sgnY, _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
+
+                                if (minX < xPosition - xOffset < maxX and minY < yPosition - yOffset < maxY):
+                                    multiplets.append(multiplet)
+                                    if firstOnly:
+                                        return multiplets if multiplet in self.current.multiplets else []
+
+                            except Exception:
+                                # NOTE:ED - skip for now
+                                continue
 
         return multiplets
 
@@ -1596,6 +1875,7 @@ class Gui1dWidget(CcpnGLWidget):
                     for multipletListView in spectrumView.multipletListViews:
                         multipletListView.buildSymbols = True
                         multipletListView.buildLabels = True
+                        multipletListView.buildArrows = True
 
                 spectrumView.buildContours = False
                 spectrumView.buildContoursOnly = False
@@ -1760,7 +2040,7 @@ class Gui1dWidget(CcpnGLWidget):
                     if self._multipletLabelsEnabled:
                         self._GLMultiplets.drawLabels(specView)
 
-    def drawAliasedSymbols(self, arrowsEnabled):
+    def drawAliasedSymbols(self, peakSymbolsEnabled, peakArrowsEnabled, multipletSymbolsEnabled, multipletArrowsEnabled):
         """Draw all the symbols that require aliasing to multiple regions
         """
         _shader = self.globalGL._shaderProgramAlias.makeCurrent()
@@ -1815,11 +2095,15 @@ class Gui1dWidget(CcpnGLWidget):
                     _shader.setMVMatrix(_matrix)
                     _shader.setAliasPosition(ii, 0)
 
-                    if arrowsEnabled:
+                    if peakArrowsEnabled:
                         self._GLPeaks.drawArrows(specView)
-                    # draw the symbols
-                    self._GLPeaks.drawSymbols(specView)
-                    self._GLMultiplets.drawSymbols(specView)
+                    if multipletArrowsEnabled:
+                        self._GLMultiplets.drawArrows(specView)
+                    if peakSymbolsEnabled:
+                        # draw the symbols
+                        self._GLPeaks.drawSymbols(specView)
+                    if multipletSymbolsEnabled:
+                        self._GLMultiplets.drawSymbols(specView)
 
         GL.glLineWidth(GLDefs.GLDEFAULTLINETHICKNESS * self.viewports.devicePixelRatio)
 

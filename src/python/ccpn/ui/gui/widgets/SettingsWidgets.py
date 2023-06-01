@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-19 16:58:08 +0100 (Fri, May 19, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-01 19:39:58 +0100 (Thu, June 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -50,10 +50,11 @@ from ccpn.ui._implementation.SpectrumView import SpectrumView
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, \
-    SYMBOLTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, ARROWTYPES, ARROWSIZE, \
-    ANNOTATIONTYPES, AXISASPECTRATIOS, \
+    SYMBOLTYPE, SYMBOLSIZE, SYMBOLTHICKNESS, ARROWTYPES, ARROWSIZE, ARROWMINIMUM, \
+    ANNOTATIONTYPE, AXISASPECTRATIOS, \
     AXISASPECTRATIOMODE, ALIASENABLED, ALIASSHADE, ALIASLABELSENABLED, CONTOURTHICKNESS, \
-    PEAKLABELSENABLED, PEAKARROWSENABLED, MULTIPLETLABELSENABLED
+    PEAKSYMBOLSENABLED, PEAKLABELSENABLED, PEAKARROWSENABLED, \
+    MULTIPLETSYMBOLSENABLED, MULTIPLETLABELSENABLED, MULTIPLETARROWSENABLED, MULTIPLETANNOTATIONTYPE, MULTIPLETTYPE
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.ui.gui.widgets.Base import SignalBlocking
@@ -99,12 +100,16 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                  xAxisUnits=0, xTexts=[], showXAxis=True,
                  yAxisUnits=0, yTexts=[], showYAxis=True,
                  symbolType=0, annotationType=0, symbolSize=0, symbolThickness=0,
-                 arrowType=0, arrowSize=0,
+                 arrowType=0, arrowSize=0, arrowMinimum=0,
+                 multipletAnnotationType=0, multipletType=0,
                  aliasEnabled=False, aliasShade=0,
                  aliasLabelsEnabled=False,
+                 peakSymbolsEnabled=False,
                  peakLabelsEnabled=False,
                  peakArrowsEnabled=False,
+                 multipletSymbolsEnabled=False,
                  multipletLabelsEnabled=False,
+                 multipletArrowsEnabled=False,
                  stripArrangement=0,
                  _baseAspectRatioAxisCode='H', _aspectRatios={},
                  _aspectRatioMode=0, contourThickness=0, zPlaneNavigationMode=0,
@@ -137,10 +142,12 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
         # populate the widgets
         self._populateWidgets(_aspectRatioMode, _aspectRatios, annotationType, stripArrangement,
-                              symbolSize, symbolThickness, symbolType, arrowType, arrowSize,
+                              symbolSize, symbolThickness, symbolType, arrowType, arrowSize, arrowMinimum,
+                              multipletAnnotationType, multipletType,
                               xAxisUnits, yAxisUnits,
                               aliasEnabled, aliasShade, aliasLabelsEnabled, 
-                              peakLabelsEnabled, peakArrowsEnabled, multipletLabelsEnabled,
+                              peakSymbolsEnabled, peakLabelsEnabled, peakArrowsEnabled,
+                              multipletSymbolsEnabled, multipletLabelsEnabled, multipletArrowsEnabled,
                               contourThickness, zPlaneNavigationMode)
 
         # connect to the lock/symbol/ratio changed pyqtSignals
@@ -363,11 +370,73 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         HLine(parent, grid=(row, 0), gridSpan=(1, 5), colour=getColours()[DIVIDER], height=15)
 
         row += 1
+        Label(parent, text="Multiplets", hAlign='l', grid=(row, 0))
+
+        if self._spectrumDisplay.MAXMULTIPLETLABELTYPES:
+            row += 1
+            _texts = ['Short', 'Full', 'NmrAtom Pid', 'Minimal', 'Multiplet Pid', 'ClusterId', 'Annotation']
+            _names = ['annMDS_Short', 'annMDS_Full', 'annMDS_Pid', 'annMDS_Minimal', 'annMDS_Id', 'annMDS_ClusterId', 'annMDS_Annotation']
+            _texts = _texts[:self._spectrumDisplay.MAXMULTIPLETLABELTYPES]
+            _names = _names[:self._spectrumDisplay.MAXMULTIPLETLABELTYPES]
+
+            self.multipletAnnotationLabel = Label(parent, text="Label", hAlign='r', grid=(row, 0))
+            self.multipletAnnotationData = RadioButtons(parent, texts=_texts,
+                                                objectNames=_names,
+                                                objectName='annMDS',
+                                                # selectedInd=annotationType,
+                                                callback=self._symbolsChanged,
+                                                direction='v',
+                                                grid=(row, 1), gridSpan=(1, 3), hAlign='l',
+                                                tipTexts=None,
+                                                )
+        self.multipletAnnotationData.radioButtons[2].setVisible(False)
+        self.multipletAnnotationData.radioButtons[5].setVisible(False)
+
+        if self._spectrumDisplay.MAXMULTIPLETSYMBOLTYPES:
+            # if not self._spectrumDisplay.is1D:
+            row += 1
+            _texts = ['Cross']
+            _names = ['symMDS_Cross']
+            _texts = _texts[:self._spectrumDisplay.MAXMULTIPLETSYMBOLTYPES]
+            _names = _names[:self._spectrumDisplay.MAXMULTIPLETSYMBOLTYPES]
+
+            self.multipletLabel = Label(parent, text="Symbol", hAlign='r', grid=(row, 0))
+            self.multipletSymbol = RadioButtons(parent, texts=_texts,
+                                       objectNames=_names,
+                                       objectName='symMDS',
+                                       # selectedInd=symbolType,
+                                       callback=self._symbolsChanged,
+                                       direction='h',
+                                       grid=(row, 1), gridSpan=(1, 3), hAlign='l',
+                                       tipTexts=None,
+                                       )
+
+        self.multipletLabel.setVisible(False)
+        self.multipletSymbol.setVisible(False)
+
+        row += 1
+        HLine(parent, grid=(row, 0), gridSpan=(1, 5), colour=getColours()[DIVIDER], height=15)
+
+        row += 1
+        self.peakSymbolsEnabledLabel = Label(parent, text="Show peak symbols", grid=(row, 0))
+        self.peakSymbolsEnabledData = CheckBox(parent,
+                                              # checked=peakSymbolsEnabled,
+                                              grid=(row, 1), objectName='SDS_peakSymbolsEnabled')
+        self.peakSymbolsEnabledData.clicked.connect(self._symbolsChanged)
+
+        row += 1
         self.peakLabelsEnabledLabel = Label(parent, text="Show peak labels", grid=(row, 0))
         self.peakLabelsEnabledData = CheckBox(parent,
                                               # checked=peakLabelsEnabled,
                                               grid=(row, 1), objectName='SDS_peakLabelsEnabled')
         self.peakLabelsEnabledData.clicked.connect(self._symbolsChanged)
+
+        row += 1
+        self.multipletSymbolsEnabledLabel = Label(parent, text="Show multiplet symbols", grid=(row, 0))
+        self.multipletSymbolsEnabledData = CheckBox(parent,
+                                              # checked=multipletSymbolsEnabled,
+                                              grid=(row, 1), objectName='SDS_multipletSymbolsEnabled')
+        self.multipletSymbolsEnabledData.clicked.connect(self._symbolsChanged)
 
         row += 1
         self.multipletLabelsEnabledLabel = Label(parent, text="Show multiplet labels", grid=(row, 0))
@@ -410,6 +479,13 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                                               grid=(row, 1), objectName='SDS_peakArrowsEnabled')
         self.peakArrowsEnabledData.clicked.connect(self._symbolsChanged)
 
+        row += 1
+        self.multipletArrowsEnabledLabel = Label(parent, text="Show multiplet arrows", grid=(row, 0))
+        self.multipletArrowsEnabledData = CheckBox(parent,
+                                              # checked=multipletArrowsEnabled,
+                                              grid=(row, 1), objectName='SDS_multipletArrowsEnabled')
+        self.multipletArrowsEnabledData.clicked.connect(self._symbolsChanged)
+
         if self._spectrumDisplay.MAXARROWTYPES:
             # if not self._spectrumDisplay.is1D:
             row += 1
@@ -430,12 +506,20 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                                        )
 
         row += 1
-        self.arrowSizeLabel = Label(parent, text="Size (pixel)", hAlign='r', grid=(row, 0))
+        self.arrowSizeLabel = Label(parent, text="Size (pixels)", hAlign='r', grid=(row, 0))
         self.arrowSizeData = Spinbox(parent, step=1,
                                            min=1, max=20, grid=(row, 1), hAlign='l', objectName='SDS_arrowSize')
         self.arrowSizeData.setMinimumWidth(LineEditsMinimumWidth)
         # self.arrowSizeData.setValue(int(arrowSize))
         self.arrowSizeData.valueChanged.connect(self._symbolsChanged)
+
+        row += 1
+        self.arrowMinimumLabel = Label(parent, text="Minimum length (pixels)", hAlign='r', grid=(row, 0))
+        self.arrowMinimumData = Spinbox(parent, step=1,
+                                           min=1, max=100, grid=(row, 1), hAlign='l', objectName='SDS_arrowMinimum')
+        self.arrowMinimumData.setMinimumWidth(LineEditsMinimumWidth)
+        # self.arrowMinimumData.setValue(int(arrowMinimum))
+        self.arrowMinimumData.valueChanged.connect(self._symbolsChanged)
 
         row += 1
         self._spacer = Spacer(parent, 5, 5,
@@ -444,10 +528,12 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self._parent.setContentsMargins(5, 5, 5, 5)
 
     def _populateWidgets(self, aspectRatioMode, aspectRatios, annotationType, stripArrangement,
-                         symbolSize, symbolThickness, symbolType, arrowType, arrowSize,
+                         symbolSize, symbolThickness, symbolType, arrowType, arrowSize, arrowMinimum,
+                         multipletAnnotationType, multipletType,
                          xAxisUnits, yAxisUnits,
                          aliasEnabled, aliasShade, aliasLabelsEnabled,
-                         peakLabelsEnabled, peakArrowsEnabled, multipletLabelsEnabled,
+                         peakSymbolsEnabled, peakLabelsEnabled, peakArrowsEnabled,
+                         multipletSymbolsEnabled, multipletLabelsEnabled, multipletArrowsEnabled,
                          contourThickness, zPlaneNavigationMode):
         """Populate the widgets
         """
@@ -467,6 +553,10 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                 self.annotationsData.setIndex(annotationType)
             if self._spectrumDisplay.MAXPEAKSYMBOLTYPES:
                 self.symbol.setIndex(symbolType)
+            if self._spectrumDisplay.MAXMULTIPLETLABELTYPES:
+                self.multipletAnnotationData.setIndex(multipletAnnotationType)
+            if self._spectrumDisplay.MAXMULTIPLETSYMBOLTYPES:
+                self.multipletSymbol.setIndex(multipletType)
 
             self.symbolSizePixelData.setValue(int(symbolSize))
             self.symbolThicknessData.setValue(int(symbolThickness))
@@ -481,13 +571,17 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             self.aliasLabelsEnabledData.setEnabled(aliasEnabled)
             self.aliasShadeData.setEnabled(aliasEnabled)
 
+            self.peakSymbolsEnabledData.set(peakSymbolsEnabled)
             self.peakLabelsEnabledData.set(peakLabelsEnabled)
             self.peakArrowsEnabledData.set(peakArrowsEnabled)
+            self.multipletSymbolsEnabledData.set(multipletSymbolsEnabled)
             self.multipletLabelsEnabledData.set(multipletLabelsEnabled)
+            self.multipletArrowsEnabledData.set(multipletArrowsEnabled)
 
             if self._spectrumDisplay.MAXARROWTYPES:
                 self.arrow.setIndex(arrowType)
             self.arrowSizeData.setValue(int(arrowSize))
+            self.arrowMinimumData.setValue(int(arrowMinimum))
 
     def _setAxesUnits(self, xAxisUnits, yAxisUnits):
         """Set the unit's checkboxes
@@ -508,19 +602,25 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                 AXISYUNITS            : self.yAxisUnitsData.getIndex(),
                 AXISASPECTRATIOMODE   : self.useAspectRatioModeButtons.getIndex(),
                 AXISASPECTRATIOS      : aspectRatios,
-                SYMBOLTYPES           : self.symbol.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
-                ANNOTATIONTYPES       : self.annotationsData.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
+                SYMBOLTYPE           : self.symbol.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
+                ANNOTATIONTYPE       : self.annotationsData.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
                 SYMBOLSIZE            : int(self.symbolSizePixelData.text()),
                 SYMBOLTHICKNESS       : int(self.symbolThicknessData.text()),
                 CONTOURTHICKNESS      : int(self.contourThicknessData.text()),
+                MULTIPLETANNOTATIONTYPE: self.multipletAnnotationData.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
+                MULTIPLETTYPE         : self.multipletSymbol.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
                 ALIASENABLED          : self.aliasEnabledData.isChecked(),
                 ALIASSHADE            : int(self.aliasShadeData.get()),
                 ALIASLABELSENABLED    : self.aliasLabelsEnabledData.isChecked(),
+                PEAKSYMBOLSENABLED    : self.peakSymbolsEnabledData.isChecked(),
                 PEAKLABELSENABLED     : self.peakLabelsEnabledData.isChecked(),
                 PEAKARROWSENABLED     : self.peakArrowsEnabledData.isChecked(),
+                MULTIPLETSYMBOLSENABLED: self.multipletSymbolsEnabledData.isChecked(),
                 MULTIPLETLABELSENABLED: self.multipletLabelsEnabledData.isChecked(),
+                MULTIPLETARROWSENABLED: self.multipletArrowsEnabledData.isChecked(),
                 ARROWTYPES            : self.arrow.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
                 ARROWSIZE             : int(self.arrowSizeData.text()),
+                ARROWMINIMUM          : int(self.arrowMinimumData.text()),
                 }
 
     def _aspectRatioModeChanged(self):
@@ -640,8 +740,8 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
             # if not self._spectrumDisplay.is1D:
             # only update if Nd
-            self.symbol.setIndex(values[SYMBOLTYPES])
-            self.annotationsData.setIndex(values[ANNOTATIONTYPES])
+            self.symbol.setIndex(values[SYMBOLTYPE])
+            self.annotationsData.setIndex(values[ANNOTATIONTYPE])
             self.symbolSizePixelData.set(values[SYMBOLSIZE])
             self.symbolThicknessData.set(values[SYMBOLTHICKNESS])
             self.contourThicknessData.set(values[CONTOURTHICKNESS])
@@ -650,12 +750,16 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             self.aliasShadeData.set(values[ALIASSHADE])
             self.aliasLabelsEnabledData.set(values[ALIASLABELSENABLED])
 
+            self.peakSymbolsEnabledData.set(values[PEAKSYMBOLSENABLED])
             self.peakLabelsEnabledData.set(values[PEAKLABELSENABLED])
             self.peakArrowsEnabledData.set(values[PEAKARROWSENABLED])
+            self.multipletSymbolsEnabledData.set(values[MULTIPLETSYMBOLSENABLED])
             self.multipletLabelsEnabledData.set(values[MULTIPLETLABELSENABLED])
+            self.multipletArrowsEnabledData.set(values[MULTIPLETARROWSENABLED])
 
             self.arrow.setIndex(values[ARROWTYPES])
             self.arrowSizeData.set(values[ARROWSIZE])
+            self.arrowMinimumData.set(values[ARROWMINIMUM])
 
             _enabled = self.aliasEnabledData.get()
             self.aliasLabelsEnabledData.setEnabled(_enabled)

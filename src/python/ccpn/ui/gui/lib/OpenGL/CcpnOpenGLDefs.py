@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-19 16:58:07 +0100 (Fri, May 19, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-01 19:39:57 +0100 (Thu, June 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -125,6 +125,7 @@ GLINTEGRALSYMBOLS = 'Integral Symbols'
 GLINTEGRALLABELS = 'Integral Labels'
 GLMULTIPLETSYMBOLS = 'Multiplet Symbols'
 GLMULTIPLETLABELS = 'Multiplet Labels'
+GLMULTIPLETARROWS = 'Multiplet Arrows'
 GLGRIDLINES = 'Grid Lines'
 GLDIAGONALLINE = 'Diagonal'
 GLDIAGONALSIDEBANDS = 'SpinningRate SideBands'
@@ -157,9 +158,12 @@ GLCONTOURTHICKNESS = 'Contour Thickness'
 GLALIASENABLED = 'Alias Peaks Enabled'
 GLALIASSHADE = 'Alias Shade'
 GLALIASLABELSENABLED = 'Alias Labels Enabled'
+GLPEAKSYMBOLSENABLED = 'Peak Symbols Enabled'
 GLPEAKLABELSENABLED = 'Peak Labels Enabled'
 GLPEAKARROWSENABLED = 'Peak Arrows Enabled'
+GLMULTIPLETSYMBOLSENABLED = 'Multiplet Symbols Enabled'
 GLMULTIPLETLABELSENABLED = 'Multiplet Labels Enabled'
+GLMULTIPLETARROWSENABLED = 'Multiplet Arrows Enabled'
 GLSTRIPDIRECTION = 'Strip Direction'
 GLSTRIPPADDING = 'Strip Padding'
 GLEXPORTDPI = 'Image dpi'
@@ -182,6 +186,7 @@ GLFULLLIST = (GLPEAKSYMBOLS,
               GLINTEGRALLABELS,
               GLMULTIPLETSYMBOLS,
               GLMULTIPLETLABELS,
+              GLMULTIPLETARROWS,
               GLGRIDLINES,
               GLDIAGONALLINE,
               GLDIAGONALSIDEBANDS,
@@ -252,10 +257,12 @@ AXISYUNITS = 'yUnits'
 AXISASPECTRATIOMODE = 'aspectRatioMode'
 AXISASPECTRATIOS = 'aspectRatios'
 
-ANNOTATIONTYPES = 'annotationTypes'
-SYMBOLTYPES = 'symbolTypes'
+ANNOTATIONTYPE = 'annotationType'
+SYMBOLTYPE = 'symbolType'
 SYMBOLSIZE = 'symbolSize'
 SYMBOLTHICKNESS = 'symbolThickness'
+MULTIPLETANNOTATIONTYPE = 'multipletAnnotationType'
+MULTIPLETTYPE = 'multipletType'
 CONTOURTHICKNESS = 'contourThickness'
 STRIPGRID = 'stripGrid'
 STRIPCONTOURS = 'stripContours'
@@ -269,11 +276,16 @@ SIDEBANDSVISIBLE = 'sideBandsVisible'
 ALIASENABLED = 'aliasEnabled'
 ALIASSHADE = 'aliasShade'
 ALIASLABELSENABLED = 'aliasLabelsEnabled'
+PEAKSYMBOLSENABLED = 'peakSymbolsEnabled'
 PEAKLABELSENABLED = 'peakLabelsEnabled'
 PEAKARROWSENABLED = 'peakArrowsEnabled'
+MULTIPLETSYMBOLSENABLED = 'multipletSymbolsEnabled'
 MULTIPLETLABELSENABLED = 'multipletLabelsEnabled'
+MULTIPLETARROWSENABLED = 'multipletArrowsEnabled'
 ARROWTYPES = 'arrowTypes'
 ARROWSIZE = 'arrowSize'
+ARROWMINIMUM = 'arrowMinimum'
+
 STRINGSCALE = 0.7
 
 PEAKLABEL_MINIMAL = 'peaklabelMinimal'

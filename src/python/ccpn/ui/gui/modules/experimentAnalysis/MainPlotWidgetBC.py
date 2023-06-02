@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-02 12:10:46 +0100 (Fri, June 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-02 13:40:39 +0100 (Fri, June 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -235,15 +235,15 @@ class MainPlotWidget(Widget):
         """
         self.plotWidget.setLimits(minXRange=xMin, maxXRange=xMax, minYRange=yMin, maxYRange=yMax)
 
-    def setXZoom(self, xMin, xMax, padding=None, update=True):
+    def setXZoom(self, xMin, xMax):
         """ Set the visible x region of the plot.
         Does not constrain the view. Use setZoomLimits/setPanLimits to restrict the zooming/viewing level"""
-        pass
+        self.plotWidget.setXRange(xMin, xMax)
 
-    def setYZoom(self, yMin, yMax, padding=None, update=True):
+    def setYZoom(self, yMin, yMax):
         """ Set the visible y region of the plot.
         Does not constrain the view. Use setZoomLimits/setPanLimits to restrict the zooming/viewing level"""
-        pass
+        self.plotWidget.setYRange(yMin, yMax )
 
     def setBestPlotLimits(self):
         pass
@@ -270,13 +270,45 @@ class MainPlotWidget(Widget):
         """
         :return:
         """
-        pass
+        limits = self.getMinMaxValues()
+        xRange, yRange = limits
+        self.setXZoom(*xRange)
 
     def setBestFitYZoom(self):
         """
         :return:
+        get the currently plotted data for the view range for each handler and fit by min-max Y plus few percent
+
         """
-        pass
+        limits = self.getMinMaxValues()
+        xRange, yRange = limits
+        self.setYZoom(*yRange)
+
+    def getMinMaxValues(self):
+        """ Get the min max values for each XY axis"""
+        maxYs = []
+        minYs = []
+        maxXs = []
+        minXs = []
+        xMin = None
+        xMax = None
+        yMin = None
+        yMax = None
+        for handler in self.plottingHandlers:
+            data = handler.getRawPlotData()
+            for coords in data:
+                x, y = coords
+                maxYs.append(np.max(y))
+                minYs.append(np.min(y))
+                maxXs.append(np.max(x))
+                minXs.append(np.min(x))
+        if len(maxYs) > 0:
+            yMax = np.max(maxYs)
+            yMin = np.min(minYs)
+        if len(maxXs) > 0:
+            xMax = np.max(maxXs)
+            xMin = np.min(minXs)
+        return [(xMin, xMax), (yMin, yMax)]
 
     ############  Graphics behaviours. Colours ############
 
@@ -354,6 +386,7 @@ class MainPlotWidget(Widget):
         for handler in list(self._plottingHandlers):
             if handler.plotType == plotType or handler.plotType is None:
                 handler.items = []
+                handler._rawData = []
                 handler.plotData(dataFrame, columnNameDict)
 
     def _checkValidArrays(self, arrays):
@@ -445,6 +478,7 @@ class PlotItemHandlerABC(object):
         self.plotItem = parent.plotItem
         self.viewBox = parent.viewBox
         self.items = []
+        self._rawData = []
         self._actionCallback = actionCallback
         self._selectionCallback = selectionCallback
         self._hoverCallback = hoverCallback
@@ -477,30 +511,6 @@ class PlotItemHandlerABC(object):
             if item is not None:
                 item.setVisible(value)
 
-    def _getPlotData(self):
-        xs = []
-        ys = []
-        plotItems = self.plotWidget.items()
-        for item in plotItems:
-            if hasattr(item, 'getData'):
-                x,y = item.getData()
-                xs.append(x)
-                if isinstance(y, pd.Series):
-                    ys.append(y.values)
-                else:
-                    ys.append(y)
-        return xs,ys
-
-    def getPlotData(self):
-        """ Return X and Y data as tuple"""
-        xs, ys = self._getPlotData()
-        if len(xs) == len(ys) and len(xs)>0:
-            yAll = [a for j in ys for a in j]
-            yAll = np.array(yAll)
-            xAll = [a for j in xs for a in j]
-            xAll = np.array(xAll)
-            return xAll, yAll
-        return np.array([]), np.array([])
 
     def defaultSelectionCallback(self, *args, **kwargs):
         """This has to be subclassed to handle the various signals depending on the item and fire a common callback dictionary of values"""
@@ -524,6 +534,13 @@ class PlotItemHandlerABC(object):
         """
         pass
 
+
+    def getRawPlotData(self):
+        """
+        for each item plotted in the self.items, return their x,y coordinates as  a list of tuples for, with each item in the tuple (x,y) being an array of same length"""
+
+        return  self._rawData
+
 class BarsHandler(PlotItemHandlerABC):
 
     plotType = PlotType.BAR.description
@@ -535,7 +552,8 @@ class BarsHandler(PlotItemHandlerABC):
     def plotData(self, dataFrame, columnsDict, clear=False, **kwargs):
         if clear:
             self.viewBox.clear()
-            self.items = []
+            self.items.clear()
+            self._rawData.clear()
 
         indices = self._getValuesForColumn(dataFrame, INDICESCOLUMNNAME, columnsDict)
         xValues = self._getValuesForColumn(dataFrame, XCOLUMNNAME, columnsDict)
@@ -561,6 +579,7 @@ class BarsHandler(PlotItemHandlerABC):
                                       )
         self.viewBox.addItem(bars)
         self.items.append(bars)
+        self._rawData.append((xValues, yValues))
 
     def _getDataForCallback(self, data):
         return {
@@ -600,6 +619,7 @@ class ScattersHandler(PlotItemHandlerABC):
         if clearPlot:
             self.viewBox.clear()
             self.items.clear()
+            self._rawData.clear()
 
         indices = self._getValuesForColumn(dataFrame, INDICESCOLUMNNAME, columnsDict)
         xValues = self._getValuesForColumn(dataFrame, XCOLUMNNAME, columnsDict)
@@ -614,14 +634,14 @@ class ScattersHandler(PlotItemHandlerABC):
         brushes = [pg.fn.mkBrush(c) for c in coloursValues]
 
         if not yValues.dtype in [int, float]:
-            getLogger().warning('Impossible to plot Y values. dType not allowed. Used array index instead.')
+            getLogger().debug('Impossible to plot Y values. dType not allowed. Used array index instead.')
             self.parent._setTicks(self.parent.yAxis, yValues, indices)
             yValues = indices
         else:
             self.parent._resetAxisTicks(self.parent.yAxis)
 
         if not xValues.dtype in [int, float]:
-            getLogger().warning('Impossible to plot X values. dType not allowed. Used array index instead.')
+            getLogger().debug('Impossible to plot X values. dType not allowed. Used array index instead.')
             self.parent._setTicks(self.parent.xAxis, xValues, indices)
             xValues = indices
         else:
@@ -634,6 +654,7 @@ class ScattersHandler(PlotItemHandlerABC):
                                                          data=objectValues)
         scattersItem = curve.scatter
         self.items.append(scattersItem)
+        self._rawData.append((xValues, yValues))
         curve.sigPointsClicked.connect(self.defaultSelectionCallback)
 
     def selectData(self, pids):
@@ -674,6 +695,7 @@ class ErrorBarsHandler(PlotItemHandlerABC):
         if clearPlot:
             self.viewBox.clear()
             self.items.clear()
+            self._rawData.clear()
 
         indices = self._getValuesForColumn(dataFrame, INDICESCOLUMNNAME, columnsDict)
         xValues = self._getValuesForColumn(dataFrame, XCOLUMNNAME, columnsDict)
@@ -684,19 +706,16 @@ class ErrorBarsHandler(PlotItemHandlerABC):
             return
 
         if not xValues.dtype in [int, float]:
-            getLogger().warning('Impossible to plot X values. dType not allowed. Used array index instead.')
+            getLogger().debug('Impossible to plot X values. dType not allowed. Used array index instead.')
             self.parent._setTicks(self.parent.xAxis, xValues, indices)
             xValues = indices
         else:
             self.parent._resetAxisTicks(self.parent.xAxis)
 
-
         errorsItem = pg.ErrorBarItem(x=xValues, y=yValues, top=yErrorValues, beam=0.5, pen=penColour)
-
         self.viewBox.addItem(errorsItem)
         self.items.append(errorsItem)
-        #
-
+        self._rawData.append((xValues, yValues+yErrorValues))
 
 
 class LinesHandler(PlotItemHandlerABC):

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-01 19:23:07 +0100 (Thu, June 01, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-02 12:10:46 +0100 (Fri, June 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -229,10 +229,15 @@ class MainPlotPanel(GuiPanel):
         dataFrame = self._setColoursByThreshold(dataFrame)
         dataFrame.loc[dataFrame.index, sv.INDEX] = dataFrame.index
         self._plottedDf = dataFrame
+        hideThresholdLines = False
+        if abs(self.thresholdValue) > np.abs(np.max(dataFrame[self.yColumnName]))*10:
+            hideThresholdLines = True
+            getLogger().warning(f'Threshold value of {self.thresholdValue} is way larger the currently plotted data. Please reset from settings to re-enable the threshold line.' )
 
         self.mainPlotWidget.plotData(dataFrame,
                                      plotName=self.plotType,
                                      plotType=self.plotType,
+                                     indicesColumnName=sv.INDEX,
                                      xColumnName= self.xColumnName,
                                      yColumnName=self.yColumnName,
                                      yErrColumnName=f'{self.yColumnName}{seriesVariables._ERR}',
@@ -240,6 +245,7 @@ class MainPlotPanel(GuiPanel):
                                      objectColumnName=seriesVariables.COLLECTIONPID,
                                      colourColumnName=guiNameSpaces.BRUSHLABEL,
                                      clearPlot=True,
+                                     hideThresholdLines = hideThresholdLines
                                      )
         self._updateAxisLabels()
 
@@ -318,25 +324,6 @@ class MainPlotPanel(GuiPanel):
         """Returns selected colour name"""
         return self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_RALColour).getText()
 
-
-    def _setTicks(self, labels, coordinates):
-        """
-        :param labels: list or 1d array of strings.  the values to be shown on the x-axis of the plot
-        :param coordinates:  list or 1d array of int or floats.  the coordinates where to place the labels
-        :return:
-        """
-        ticks = dict(zip(coordinates, labels))
-        xaxis = self.mainPlotWidget.xAxis
-        if self.mainPlotWidget._tickOption == MinimalTicks:
-            # setTicks uses a list of 3 dicts. Major, minor, sub minors ticks. (used for when zooming in-out)
-            xaxis.setTicks([list(ticks.items())[9::10],  # define steps of 10, show only 10 labels (max zoomed out)
-                            list(ticks.items())[4::5],  # steps of 5
-                            list(ticks.items())[::1]])  # steps of 1, show all labels
-        else:
-            ## setTicks show all (equivalent to 1 for each Major, minor or sub minor
-            xaxis.setTicks([list(ticks.items())[::1],
-                            list(ticks.items())[::1],
-                            list(ticks.items())[::1]])
 
     def _setCurrentCollectionsFromPids(self, pids):
         collections = self.project.getByPids(pids)

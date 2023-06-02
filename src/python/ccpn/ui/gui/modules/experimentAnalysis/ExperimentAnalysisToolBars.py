@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-29 10:46:29 +0100 (Mon, May 29, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-02 12:10:46 +0100 (Fri, June 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -130,8 +130,7 @@ class ToolBarPanel(GuiPanel):
         scriptsPath = self.application.scriptsPath
         pymolScriptsPath = fetchDir(scriptsPath, guiNameSpaces.PYMOL)
         settingsDict = self.guiModule.settingsPanelHandler.getAllSettings().get(guiNameSpaces.Label_GeneralAppearance,  {})
-        barPanel = self.guiModule.panelHandler.getPanel(guiNameSpaces.MainPlotPanel)
-        barGraph = barPanel.barGraphWidget
+        mainPlotPanel = self.guiModule.panelHandler.getPanel(guiNameSpaces.MainPlotPanel)
         moleculeFilePath = settingsDict.get(guiNameSpaces.WidgetVarName_MolStructureFile, '')
         moleculeFilePath = aPath(moleculeFilePath)
         pymolScriptsPath = aPath(pymolScriptsPath)
@@ -152,21 +151,18 @@ class ToolBarPanel(GuiPanel):
                 pp.exec_()
                 return
 
-        coloursDict = barGraph.getPlottedColoursDict()
         import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
         # get the match  index-residueCode so that can be mapped to the PDB and pymol
         df = self.guiModule.getVisibleDataFrame(includeHiddenColumns=True)
         if df is None or df.empty:
             showWarning('No Data available', f'To start calculations, set the input Data from the Settings Panel')
             return
-        sequenceCodeColoursDict = {}
-        for i, row in df.iterrows():
-            num = row[sv.INDEX]
-            code = row[sv.NMRRESIDUECODE]
-            vv = coloursDict.get(num, '')
-            sequenceCodeColoursDict[code] = vv
+        dataFrame = mainPlotPanel._setColoursByThreshold(df)
+        seqCodes = dataFrame[sv.NMRRESIDUECODE].values
+        colours = dataFrame[guiNameSpaces.BRUSHLABEL].values
+        coloursDict =  dict(zip(seqCodes, colours))
         selection = "+".join([str(x.sequenceCode) for x in self.current.nmrResidues])  # FIXME this is broken
-        scriptPath = _CSMSelection2PyMolFileNew(scriptFilePath, moleculeFilePath, sequenceCodeColoursDict, selection)
+        scriptPath = _CSMSelection2PyMolFileNew(scriptFilePath, moleculeFilePath, coloursDict, selection)
         try:
             self.pymolProcess = subprocess.Popen(str(pymolPath) + ' -r ' + str(scriptPath),
                                                  shell=True,
@@ -262,15 +258,16 @@ class MainPlotToolBar(ExperimentAnalysisPlotToolBar):
                 ('toolTip', 'Toggle the Bars from the plot'),
                 ('icon', Icon('icons/bars-icon')),
                 ('callback', self._toggleBars),
-                ('enabled', True),
-                ('checkable', True)
+                ('enabled', False),
+                ('checkable', True),
+                ('checked', False)
                 ))),
             (guiNameSpaces.SCATTERITEM, od((
                 ('text', 'Toggle Scatters'),
                 ('toolTip', 'Toggle the Scatters from the plot'),
                 ('icon', Icon('icons/Scatters')),
                 ('callback', self._toggleScatters),
-                ('enabled', True),
+                ('enabled', False),
                 ('checkable', True),
                 ('checked', False)
                 ))),
@@ -281,14 +278,14 @@ class MainPlotToolBar(ExperimentAnalysisPlotToolBar):
                 ('callback', self._toggleErrorBars),
                 ('enabled', True),
                 ('checkable', True),
-                ('checked', False)
+                ('checked', True)
                 ))),
             (guiNameSpaces.ROLLINGLINEITEM, od((
                 ('text', 'Toggle Rolling Average Line'),
                 ('toolTip',  'Toggle the Rolling Average Line from the plot'),
                 ('icon', Icon('icons/rollingAverage-icon')),
                 ('callback', self._toggleRollingAverage),
-                ('enabled', True),
+                ('enabled', False),
                 ('checkable', True),
                 ('checked',False),
                 ))),

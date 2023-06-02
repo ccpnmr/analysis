@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-30 14:27:58 +0100 (Tue, May 30, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-02 12:10:46 +0100 (Fri, June 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -51,7 +51,9 @@ _BAR = 'bar'
 ERR = 'Err'
 X = 'x'
 Y = 'y'
+INDICES = 'indices'
 COLUMNNAME = 'ColumnName'
+INDICESCOLUMNNAME = f'{INDICES}{COLUMNNAME}'
 XCOLUMNNAME = f'{X}{COLUMNNAME}'
 YCOLUMNNAME =  f'{Y}{COLUMNNAME}'
 XERRCOLUMNNAME =  f'{X}{ERR}{COLUMNNAME}'
@@ -137,6 +139,7 @@ class MainPlotWidget(Widget):
                  dataFrame,
                  plotName: str,
                  plotType: Union[str, int],
+                 indicesColumnName: str,
                  xColumnName: str,
                  yColumnName: str,
                  xErrColumnName: str = None,
@@ -147,6 +150,7 @@ class MainPlotWidget(Widget):
                  objectColumnName: str = None,
                  clearPlot=True,
                  resetAxes=True,
+                 hideThresholdLines = False,
                  **kwargs):
         """
         Plot data on the main widget.
@@ -182,6 +186,9 @@ class MainPlotWidget(Widget):
             self.clearPlot()
         ###  Dispatch data to the relative handler to do the actual plotting
         self._dispatchDataToHandler(dataFrame, plotType=plotType, columnNameDict=columnNameDict )
+        if hideThresholdLines:
+            self.thresholdsLineHandler.setItemsVisible(False)
+            self.zoomFull()
 
     def getPlottedDataFrames(self):
         """
@@ -242,7 +249,10 @@ class MainPlotWidget(Widget):
         pass
 
     def setBestFitXYZoom(self):
-        self.plotWidget.autoRange()
+        try:
+            self.plotWidget.autoRange()
+        except Exception as error:
+            getLogger().warning(f'Cannot reset zoom to the mainPlot {error}')
 
     def zoomFull(self):
         """ back-compatibility"""
@@ -294,6 +304,8 @@ class MainPlotWidget(Widget):
 
     def clearPlot(self, excludedItems:list=None):
         self.viewBox.clear()
+        # self._resetAxisTicks(self.xAxis)
+        # self._resetAxisTicks(self.yAxis)
 
     def closePlot(self):
         pass
@@ -344,6 +356,37 @@ class MainPlotWidget(Widget):
                 handler.items = []
                 handler.plotData(dataFrame, columnNameDict)
 
+    def _checkValidArrays(self, arrays):
+        for a in arrays:
+            a = np.array(a, dtype=float)  #this will ensure arrays are in the right type and Nones are converted to nan
+            if np.isnan(a).any():
+                return False
+        return True
+
+    #     temporary
+
+    def _resetAxisTicks(self, axis):
+        """ Revert ticks to original (numeric)"""
+        axis.setTicks(None)
+
+    def _setTicks(self, axis, labels, coordinates):
+        """
+        :param labels: list or 1d array of strings.  the values to be shown on the x-axis of the plot
+        :param coordinates:  list or 1d array of int or floats.  the coordinates where to place the labels
+        :return:
+        """
+        ticks = dict(zip(coordinates, labels))
+
+        if self._tickOption == MinimalTicks:
+            # setTicks uses a list of 3 dicts. Major, minor, sub minors ticks. (used for when zooming in-out)
+            axis.setTicks([list(ticks.items())[9::10],  # define steps of 10, show only 10 labels (max zoomed out)
+                            list(ticks.items())[4::5],  # steps of 5
+                            list(ticks.items())[::1]])  # steps of 1, show all labels
+        else:
+            ## setTicks show all (equivalent to 1 for each Major, minor or sub minor
+            axis.setTicks([list(ticks.items())[::1],
+                            list(ticks.items())[::1],
+                            list(ticks.items())[::1]])
 
     def _setColoursFromPreferences(self, *args, **kwargs):
         """ Reset the colour. Called from notifiers when the general preferences get changed"""
@@ -493,13 +536,20 @@ class BarsHandler(PlotItemHandlerABC):
         if clear:
             self.viewBox.clear()
             self.items = []
+
+        indices = self._getValuesForColumn(dataFrame, INDICESCOLUMNNAME, columnsDict)
         xValues = self._getValuesForColumn(dataFrame, XCOLUMNNAME, columnsDict)
         yValues = self._getValuesForColumn(dataFrame, YCOLUMNNAME, columnsDict)
         coloursValues = self._getValuesForColumn(dataFrame, COLOURCOLUMNNAME, columnsDict)
         objectValues = self._getValuesForColumn(dataFrame, OBJECTCOLUMNNAME, columnsDict)
-
+        if not self.parent._checkValidArrays([xValues, yValues]):
+            return
         if not xValues.dtype in [int]:
-            xValues = np.arange(1, len(yValues)+1)
+             ## We are plotting strings. If  indices are provided then it assumes xValues are strings and xValues are used to set the ticks and indices become the new xValues.
+            self.parent._setTicks(self.parent.xAxis, xValues, indices)
+            xValues = indices
+        else:
+            self.parent._resetAxisTicks(self.parent.xAxis)
 
         bars = BarGraph(
                                        xValues=xValues, yValues=yValues,
@@ -550,23 +600,32 @@ class ScattersHandler(PlotItemHandlerABC):
         if clearPlot:
             self.viewBox.clear()
             self.items.clear()
+
+        indices = self._getValuesForColumn(dataFrame, INDICESCOLUMNNAME, columnsDict)
         xValues = self._getValuesForColumn(dataFrame, XCOLUMNNAME, columnsDict)
         yValues = self._getValuesForColumn(dataFrame, YCOLUMNNAME, columnsDict)
         coloursValues = self._getValuesForColumn(dataFrame, COLOURCOLUMNNAME, columnsDict)
         objectValues = self._getValuesForColumn(dataFrame, OBJECTCOLUMNNAME, columnsDict)
-
+        if not self.parent._checkValidArrays([xValues, yValues]):
+            return
         noPen = None  # pen defined as None will not plot a line connecting scatters
         self.penColour = rgbaRatioToHex(*getColours()[CCPNGLWIDGET_LABELLING])
         scatterPen = pg.functions.mkPen(self.penColour, width=0.5, style=QtCore.Qt.SolidLine)
         brushes = [pg.fn.mkBrush(c) for c in coloursValues]
 
         if not yValues.dtype in [int, float]:
-            yValues = np.arange(1, len(yValues)+1)
             getLogger().warning('Impossible to plot Y values. dType not allowed. Used array index instead.')
+            self.parent._setTicks(self.parent.yAxis, yValues, indices)
+            yValues = indices
+        else:
+            self.parent._resetAxisTicks(self.parent.yAxis)
 
         if not xValues.dtype in [int, float]:
-            xValues = np.arange(1, len(yValues)+1)
             getLogger().warning('Impossible to plot X values. dType not allowed. Used array index instead.')
+            self.parent._setTicks(self.parent.xAxis, xValues, indices)
+            xValues = indices
+        else:
+            self.parent._resetAxisTicks(self.parent.xAxis)
 
         curve = self.plotItem.plot(xValues, yValues,
                                                          symbol='o', pen=noPen,
@@ -615,20 +674,30 @@ class ErrorBarsHandler(PlotItemHandlerABC):
         if clearPlot:
             self.viewBox.clear()
             self.items.clear()
+
+        indices = self._getValuesForColumn(dataFrame, INDICESCOLUMNNAME, columnsDict)
         xValues = self._getValuesForColumn(dataFrame, XCOLUMNNAME, columnsDict)
         yValues = self._getValuesForColumn(dataFrame, YCOLUMNNAME, columnsDict)
         yErrorValues = self._getValuesForColumn(dataFrame, YERRCOLUMNNAME, columnsDict)
         penColour = rgbaRatioToHex(*getColours()[CCPNGLWIDGET_LABELLING])
+        if not self.parent._checkValidArrays([xValues, yValues, yErrorValues]):
+            return
 
         if not xValues.dtype in [int, float]:
-            xValues = np.arange(1, len(yValues) + 1)
             getLogger().warning('Impossible to plot X values. dType not allowed. Used array index instead.')
+            self.parent._setTicks(self.parent.xAxis, xValues, indices)
+            xValues = indices
+        else:
+            self.parent._resetAxisTicks(self.parent.xAxis)
+
 
         errorsItem = pg.ErrorBarItem(x=xValues, y=yValues, top=yErrorValues, beam=0.5, pen=penColour)
 
         self.viewBox.addItem(errorsItem)
         self.items.append(errorsItem)
         #
+
+
 
 class LinesHandler(PlotItemHandlerABC):
 
@@ -640,11 +709,6 @@ class LinesHandler(PlotItemHandlerABC):
 
     def plotData(self, dataFrame, columnsDict, clear=False, **kwargs):
         return
-        xValues = np.arange(1, len(dataFrame) + 1)
-        yValues = self._getValuesForColumn(dataFrame, YCOLUMNNAME, columnsDict)
-        item = self.plotItem.plot(xValues, yValues)
-        self.items.append(item)
-
 
 class ThresholdLinesHandler(PlotItemHandlerABC):
     registerToParent = True

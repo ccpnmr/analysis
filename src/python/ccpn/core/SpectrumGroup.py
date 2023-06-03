@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-02 14:34:08 +0100 (Tue, May 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-03 16:10:16 +0100 (Sat, June 03, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -413,7 +413,8 @@ class SpectrumGroup(AbstractWrapperObject):
         return peakLists
 
     def copyAndCollectPeaksInSeries(self, sourcePeakList, refit=False, useSliceColour=True,
-                                    newTargetPeakList=False, topCollectionName=None):
+                                    newTargetPeakList=False, topCollectionName=None,
+                                    progressHandlerTitle='Busy...', progressHandlerText='Copying and refitting peaks', ):
         """
         Given a source PeakList with peaks, copy all peaks in-place to each spectrum of the series.
         Peaks are then grouped together in new collections.
@@ -439,7 +440,7 @@ class SpectrumGroup(AbstractWrapperObject):
                 totalCopies = len(sourcePeakList.peaks)
                 text = 'Copying and refitting peaks' if refit else 'Copying peaks'
 
-                with progressHandler(title='busy', maximum=totalCopies, text=text, autoClose=True,
+                with progressHandler(title=progressHandlerTitle, maximum=totalCopies, text=progressHandlerText, autoClose=True,
                                      hideCancelButton=True, ) as progress:
 
                     for i, peak in enumerate(sourcePeakList.peaks):

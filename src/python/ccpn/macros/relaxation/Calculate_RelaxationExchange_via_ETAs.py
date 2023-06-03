@@ -1,7 +1,7 @@
 """
 This macro is used to calculate the RelaxationExchange via the ETAs and reduced Spectral density mapping and Sigma-NH.
 See Relaxation Tutorial.
-Reference: DOI: 10.1002/mrc.1253. Hall and Fushman 2003. Magn Reson. Chem. 2003, 41:837-842
+Reference: see below
 
 This analysis requires 2 dataTables obtained from the RelaxationAnalysis tools:
     -  RSDM
@@ -12,6 +12,9 @@ Calculation model:
 - rex = r2 - r20
  """
 
+reference = """ Reference: DOI: https://doi.org/10.1002/mrc.1253. 
+Direct measurement of the transverse and longitudinal 15N chemical shift anisotropy–dipolar cross-correlation rate constants using 1H-coupled HSQC spectra.
+Hall and Fushman 2003. Magn Reson. Chem. 2003, 41:837-842 """
 
 #=========================================================================================
 # Licence, Reference and Credits
@@ -27,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-01 19:23:07 +0100 (Thu, June 01, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-03 16:10:16 +0100 (Sat, June 03, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -48,6 +51,8 @@ __date__ = "$Date: 2023-02-03 10:04:03 +0000 (Fri, February 03, 2023) $"
 ETAxyDataName = 'ETAxyResultData'
 ETAzDataName = 'ETAzResultData'
 RSDMdataTableName = 'RSDMResults'
+ETAzScalingFactor = 1.07
+ETAxyScalingFactor = 1.08
 
 ##  demo sequence for the GB1 protein . Replace with an empty str if not available, e.g.: sequence  = ''
 sequence  = 'KLILNGKTLKGETTTEAVDAATAEKVFKQYANDNGVDGEWTYDAATKTFTVTE'
@@ -95,6 +100,9 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from ccpn.ui.gui.widgets.DrawSS import plotSS
 import ccpn.macros.relaxation._macrosLib as macrosLib
+from ccpn.ui.gui.widgets.MessageDialog import  showMessage, showMulti
+from ccpn.framework.PathsAndUrls import CCPN_SUMMARIES_DIRECTORY
+from ccpn.util.Path import aPath, joinPath
 
 ## get the objects
 ETAxyData = project.getDataTable(ETAxyDataName)
@@ -136,6 +144,11 @@ ETAz_err = ETAzdf[sv.CROSSRELAXRATIO_VALUE_ERR].values
 ETAxy = ETAxydf[sv.CROSSRELAXRATIO_VALUE].values
 ETAxy_err = ETAxydf[sv.CROSSRELAXRATIO_VALUE_ERR].values
 
+# apply scaling factor
+ETAz = ETAz * ETAzScalingFactor
+ETAxy = ETAxy * ETAxyScalingFactor
+
+
 x = RSDMdf[sv.NMRRESIDUECODE]
 x = x.astype(int)
 x = x.values
@@ -143,18 +156,24 @@ startSequenceCode = x[0]
 endSequenceCode = startSequenceCode + len(ss_sequence)
 xSequence = np.arange(startSequenceCode, endSequenceCode)
 
-r2o = (R1-JWH7over4) * (ETAxy/ETAz) + JWH13over8
-rex = R2 - r2o
+
+r2o_from_RSDM = (R1-JWH7over4) * (ETAxy/ETAz) + JWH13over8
+rex_from_RSDM = R2 - r2o_from_RSDM
+
+r20FromExpR2 = sdl._calculateR20viaETAxy(R2, ETAxy)
+rexFromExpR2 = (R2 - r20FromExpR2)
+
+r20FromExpR1 = sdl._calculateR20viaETAxy(R2, R1)
+rexFromExpR1 = (R2 - r20FromExpR1)
 
 sigmaNH = sdl.calculateSigmaNOE(NOE, R1, N15gyromagneticRatio, HgyromagneticRatio)
 SigmaNHErr = ((R1_ERR/R1) + (NOE_ERR/NOE)) * sigmaNH
 r2oSigma = (R1-(1.249*sigmaNH)) * ((ETAxy/ETAz) + (1.097*sigmaNH))
-rexSigma = R2 - r2o
+rexSigma = R2 - r2oSigma
 
 r2o_error = (R1_ERR+(1.249*SigmaNHErr) + (1.079*SigmaNHErr) + (((ETAxy_err/ETAxy) + (ETAz_err/ETAz)) * (ETAxy/ETAz)))
 rexSigma_error = R2_ERR + r2o_error
 
-resultDf = pd.DataFrame(rex)
 
 ############################################################
 ##############                Plotting              #########################
@@ -174,11 +193,12 @@ def _ploteExchangeRates(pdf):
     axRex.legend(loc='lower right', prop={'size': 4})
     axRex.spines[['right', 'top']].set_visible(False)
 
-    axRexSDM.errorbar(x, rex, yerr=rexSigma_error, color=scatterColor, ms=scatterSize, fmt='o', ecolor=scatterColorError, elinewidth=scatterErrorLinewidth, capsize=scatterErrorCapSize)
-    axRexSDM.set_title('R$_{ex}$ via RSDM', fontsize=fontTitleSize, color=titleColor, pad=1)
+    axRexSDM.plot(x, [0]*len(x), '--', linewidth=0.5)
+    axRexSDM.errorbar(x, rexFromExpR2, yerr=rexSigma_error, color=scatterColor, ms=scatterSize, fmt='o', ecolor=scatterColorError, elinewidth=scatterErrorLinewidth, capsize=scatterErrorCapSize)
+    axRexSDM.set_title('R$_{ex}$ via Experimental R2 and η$_{xy}$', fontsize=fontTitleSize, color=titleColor, pad=1)
     axRexSDM.set_ylabel('R$_{ex}$', fontsize=fontYSize)
     macrosLib._setXTicks(axRexSDM, labelMajorSize, labelMinorSize)
-    macrosLib._setCommonYLim(axRexSDM, rexSigma)
+    # macrosLib._setCommonYLim(axRexSDM, rexSigma)
     axRexSDM.legend(loc='lower right', prop={'size': 4})
     axRexSDM.spines[['right', 'top']].set_visible(False)
 
@@ -209,7 +229,8 @@ globals().update(args.__dict__)
 
 ##  init the plot and save to pdf
 
-filePath = macrosLib._getExportingPath(__file__, outputPath)
+directory = joinPath(project.path, CCPN_SUMMARIES_DIRECTORY, 'Rex')
+filePath = macrosLib._getExportingPath(__file__, directory)
 
 with PdfPages(filePath) as pdf:
     fig1 = _ploteExchangeRates(pdf)
@@ -220,6 +241,19 @@ if showInteractivePlot:
 else:
     plt.close(fig1)
 
+copy = 'Copy Path to Clipboard'
+open = 'Open File'
+close = 'Close'
+reply = showMulti('Report Ready',
+                  f'Report saved in {filePath}',
+                  texts=[copy, open, close],
+                  )
+if reply == open:
+    application._systemOpen(filePath)
+
+if reply == copy:
+    from ccpn.util.Common import copyToClipboard
+    copyToClipboard([filePath])
 
 ###################      end macro        #########################
 

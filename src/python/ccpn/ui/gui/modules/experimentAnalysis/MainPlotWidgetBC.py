@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-02 13:40:39 +0100 (Fri, June 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-03 16:10:16 +0100 (Sat, June 03, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -389,15 +389,6 @@ class MainPlotWidget(Widget):
                 handler._rawData = []
                 handler.plotData(dataFrame, columnNameDict)
 
-    def _checkValidArrays(self, arrays):
-        for a in arrays:
-            a = np.array(a, dtype=float)  #this will ensure arrays are in the right type and Nones are converted to nan
-            if np.isnan(a).any():
-                return False
-        return True
-
-    #     temporary
-
     def _resetAxisTicks(self, axis):
         """ Revert ticks to original (numeric)"""
         axis.setTicks(None)
@@ -560,14 +551,16 @@ class BarsHandler(PlotItemHandlerABC):
         yValues = self._getValuesForColumn(dataFrame, YCOLUMNNAME, columnsDict)
         coloursValues = self._getValuesForColumn(dataFrame, COLOURCOLUMNNAME, columnsDict)
         objectValues = self._getValuesForColumn(dataFrame, OBJECTCOLUMNNAME, columnsDict)
-        if not self.parent._checkValidArrays([xValues, yValues]):
-            return
+
         if not xValues.dtype in [int]:
              ## We are plotting strings. If  indices are provided then it assumes xValues are strings and xValues are used to set the ticks and indices become the new xValues.
             self.parent._setTicks(self.parent.xAxis, xValues, indices)
             xValues = indices
         else:
             self.parent._resetAxisTicks(self.parent.xAxis)
+
+        xValues = np.array(xValues, dtype=float)
+        yValues = np.array(yValues, dtype=float)
 
         bars = BarGraph(
                                        xValues=xValues, yValues=yValues,
@@ -626,8 +619,7 @@ class ScattersHandler(PlotItemHandlerABC):
         yValues = self._getValuesForColumn(dataFrame, YCOLUMNNAME, columnsDict)
         coloursValues = self._getValuesForColumn(dataFrame, COLOURCOLUMNNAME, columnsDict)
         objectValues = self._getValuesForColumn(dataFrame, OBJECTCOLUMNNAME, columnsDict)
-        if not self.parent._checkValidArrays([xValues, yValues]):
-            return
+
         noPen = None  # pen defined as None will not plot a line connecting scatters
         self.penColour = rgbaRatioToHex(*getColours()[CCPNGLWIDGET_LABELLING])
         scatterPen = pg.functions.mkPen(self.penColour, width=0.5, style=QtCore.Qt.SolidLine)
@@ -646,6 +638,9 @@ class ScattersHandler(PlotItemHandlerABC):
             xValues = indices
         else:
             self.parent._resetAxisTicks(self.parent.xAxis)
+
+        xValues = np.array(xValues, dtype=float)
+        yValues = np.array(yValues, dtype=float)
 
         curve = self.plotItem.plot(xValues, yValues,
                                                          symbol='o', pen=noPen,
@@ -702,8 +697,6 @@ class ErrorBarsHandler(PlotItemHandlerABC):
         yValues = self._getValuesForColumn(dataFrame, YCOLUMNNAME, columnsDict)
         yErrorValues = self._getValuesForColumn(dataFrame, YERRCOLUMNNAME, columnsDict)
         penColour = rgbaRatioToHex(*getColours()[CCPNGLWIDGET_LABELLING])
-        if not self.parent._checkValidArrays([xValues, yValues, yErrorValues]):
-            return
 
         if not xValues.dtype in [int, float]:
             getLogger().debug('Impossible to plot X values. dType not allowed. Used array index instead.')
@@ -711,6 +704,10 @@ class ErrorBarsHandler(PlotItemHandlerABC):
             xValues = indices
         else:
             self.parent._resetAxisTicks(self.parent.xAxis)
+
+        xValues = np.array(xValues, dtype=float)
+        yValues = np.array(yValues, dtype=float)
+        yErrorValues = np.array(yErrorValues, dtype=float)
 
         errorsItem = pg.ErrorBarItem(x=xValues, y=yValues, top=yErrorValues, beam=0.5, pen=penColour)
         self.viewBox.addItem(errorsItem)

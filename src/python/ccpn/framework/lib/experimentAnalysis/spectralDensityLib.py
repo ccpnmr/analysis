@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-08 15:36:28 +0000 (Wed, March 08, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-03 16:10:16 +0100 (Sat, June 03, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -308,6 +308,33 @@ def _calculateR2(A, C, j0, jH, jHmN, jHpN, jN, rex=0):
     """
     r2 = 0.5 * A * ((4 * j0) + (3 * jN) + (6 * jHpN) + (6 * jH) + jHmN) + C * (2 * j0 / 3.0 + 0.5 * jN) + rex
     return r2
+
+def _calculateR20(d, c, J0, JWH, JWN):
+    """
+    d, c:  constants, float.
+    J0, JWH, JWN,  arrays of floats
+    Calculate the transverse relaxation rate R20 in the absence of chemical exchange processes
+    from the  spectral  density  function properties.
+    :return: r20 array
+    """
+    r20 = 1/8 * (d**2) * ((4*J0 + 3*JWN + (JWH -JWN) + 6*JWH + 6*(JWH +JWN)) + 1/6 * (c**2) *  (4* J0) + 3 * JWN)
+    return r20
+
+def _calculateR20viaETAxy(r2, ETAxy):
+    """
+    Here the R20 is estimated ETA xy and the averageR2/ETAxy ratio
+    :return: r20 array
+    """
+    r20 = ETAxy * np.mean((r2/ETAxy))
+    return r20
+
+def _calculateR20viaR1(r2, r1):
+    """
+    Here the R20 is estimated ETA xy and the average R2/R1 ratio
+    :return: R20
+    """
+    r20 = r1 * np.mean((r2/r1))
+    return r20
 
 def _calculateNOEp(A, gammaHN, t1, jHpN, jHmN):
     """

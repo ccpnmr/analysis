@@ -20,7 +20,9 @@ The executed  steps are as following:
     All these steps can be reproduced on the Gui.
 
  """
-
+reference = """ Reference: DOI: https://doi.org/10.1002/mrc.1253. 
+Direct measurement of the transverse and longitudinal 15N chemical shift anisotropy–dipolar cross-correlation rate constants using 1H-coupled HSQC spectra.
+Hall and Fushman 2003. Magn Reson. Chem. 2003, 41:837-842 """
 
 #=========================================================================================
 # Licence, Reference and Credits
@@ -36,7 +38,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-01 18:57:28 +0100 (Thu, June 01, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-03 16:10:16 +0100 (Sat, June 03, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -79,6 +81,7 @@ ETAzResultDataName = 'ETAzResultData'
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.framework.lib.experimentAnalysis.RelaxationAnalysisBC import RelaxationAnalysisBC
 from ccpn.ui.gui.widgets.MessageDialog import  showMessage
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking, progressHandler, busyHandler
 
 ## get the objects
 ETAz_IP_SG = get(ETAz_IP_SGpid)
@@ -106,36 +109,59 @@ if not all( spectrumGroups + [sourcePL]):
 
 ## create a RelaxationAnalysis instance
 backend = RelaxationAnalysisBC()
-for spectrumGroup in spectrumGroups:
-    collectionName = f'{spectrumGroup.name}{CollectionNameSuffix}'
-    dataTableName = mapSpectrumGroupsToInputData.get(spectrumGroup)
-    ## Create collections
-    newCollection = spectrumGroup.copyAndCollectPeaksInSeries(sourcePL,  refit=True,  useSliceColour=True,  newTargetPeakList=False, topCollectionName=collectionName)
-    backend.inputCollection = newCollection
-    ## Create Input Data
-    newDataTable = backend.newInputDataTableFromSpectrumGroup(spectrumGroup, dataTableName=dataTableName, experimentName=sv.USERDEFINEDEXPERIMENT)
+totalCopies = len(spectrumGroups)
+title = 'Setting up the inputData for the ETAs analysis'
+text= f"""
+This macro is used to set up the ETAs experiments in a CPMG relaxation analysis.
+The executed  steps are as following:
+    -  Create a RelaxationAnalysis instance 
+    -  Copy and fit peaks from the source PeakList {SourcePeakListPid}
+    -  Create 4 collectionLists of peaks grouped by assignments (one collectionLists for each series) 
+    -  Create 4 input data. (ETAxy/z inphase/antiphase)
+    -  Run the calculation/fitting models
+    - Create 2 Result datatables. {(ETAxyResultDataName, ETAzResultDataName)}
+Note: All these steps can also be reproduced on the Relaxation analysis Gui Module.
 
-## set calculation/fitting model to backend
-calculationModel = backend.getCalculationModelByName(sv.ETAS_CALCULATION_MODEL)
-fittingModel = backend.getFittingModelByName(sv.OnePhaseDecay)
-backend.currentCalculationModel = calculationModel()
-backend.currentFittingModel = fittingModel()
+For more details see: {reference}
 
-########## Fit ETAz #############
-## get the inputDataTables for the ETAz and set to the backend
-backend.addInputDataTable(project.getDataTable(ETAz_IP_InputData))
-backend.addInputDataTable(project.getDataTable(ETAz_AP_InputData))
-## Create  the ETAz Result Data
-backend.outputDataTableName = ETAzResultDataName
-ETAz_ResultData = backend.fitInputData()
+Calculating... Please wait until this window closes.
+"""
 
-########## Fit ETAxy #############
-## get the inputDataTables for the ETAxy and set to the backend
-backend.clearInputDataTables()
-backend.addInputDataTable(project.getDataTable(ETAxy_IP_InputData))
-backend.addInputDataTable(project.getDataTable(ETAxy_AP_InputData))
-## Create  the ETAxy Result Data
-backend.outputDataTableName = ETAxyResultDataName
-ETAxyResultData = backend.fitInputData()
+
+
+with busyHandler(title=title, text=text):
+    for i, spectrumGroup in enumerate(spectrumGroups):
+        collectionName = f'{spectrumGroup.name}{CollectionNameSuffix}'
+        dataTableName = mapSpectrumGroupsToInputData.get(spectrumGroup)
+        ## Create collections
+        msg = f'Progress {i+1}/{len(spectrumGroups)}'
+        newCollection = spectrumGroup.copyAndCollectPeaksInSeries(sourcePL,  refit=True,  useSliceColour=True,  newTargetPeakList=False, topCollectionName=collectionName, progressHandlerTitle=msg)
+        backend.inputCollection = newCollection
+        ## Create Input Data
+        newDataTable = backend.newInputDataTableFromSpectrumGroup(spectrumGroup, dataTableName=dataTableName, experimentName=sv.USERDEFINEDEXPERIMENT)
+
+    ## set calculation/fitting model to backend
+    calculationModel = backend.getCalculationModelByName(sv.ETAS_CALCULATION_MODEL)
+    fittingModel = backend.getFittingModelByName(sv.OnePhaseDecay)
+    backend.currentCalculationModel = calculationModel()
+    backend.currentFittingModel = fittingModel()
+
+    ########## Fit ETAz #############
+    ## get the inputDataTables for the ETAz and set to the backend
+    backend.addInputDataTable(project.getDataTable(ETAz_IP_InputData))
+    backend.addInputDataTable(project.getDataTable(ETAz_AP_InputData))
+    ## Create  the ETAz Result Data
+    backend.outputDataTableName = ETAzResultDataName
+    ETAz_ResultData = backend.fitInputData()
+
+
+    ########## Fit ETAxy #############
+    ## get the inputDataTables for the ETAxy and set to the backend
+    backend.clearInputDataTables()
+    backend.addInputDataTable(project.getDataTable(ETAxy_IP_InputData))
+    backend.addInputDataTable(project.getDataTable(ETAxy_AP_InputData))
+    ## Create  the ETAxy Result Data
+    backend.outputDataTableName = ETAxyResultDataName
+    ETAxyResultData = backend.fitInputData()
 
 showMessage('Done', 'ETA input dataTable setup completed')

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-30 14:27:58 +0100 (Tue, May 30, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-05 15:19:55 +0100 (Mon, June 05, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -52,6 +52,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.ui.gui.widgets.SettingsWidgets import ALL, UseCurrent
 from ccpn.ui.gui.widgets.BarGraphWidget import TICKOPTIONS
+from ccpn.ui.gui.modules.experimentAnalysis.MainPlotWidgetBC import MainPlotWidget, PlotType
 
 SettingsWidgeMinimumWidths =  (180, 180, 180)
 SettingsWidgetFixedWidths = (200, 350, 350)
@@ -922,7 +923,7 @@ class AppearancePanel(GuiSettingPanel):
 
             (guiNameSpaces.WidgetVarName_MainPlotXcolumnName,
              {'label': guiNameSpaces.Label_MainPlotXcolumnName,
-              'callBack':self._updateMainPlotPanel,
+              'callBack':self._selectXAxisMainPlot,
               'tipText': guiNameSpaces.TipText_MainPlotXcolumnName,
               'type': compoundWidget.PulldownListCompoundWidget,
               'enabled': True,
@@ -1306,6 +1307,22 @@ class AppearancePanel(GuiSettingPanel):
             self._addDataToAxisSelectors(xColumnNameW.pulldownList, Xdata)
         if yColumnNameW is not None:
             self._addDataToAxisSelectors(yColumnNameW.pulldownList, Ydata)
+
+    def _selectXAxisMainPlot(self, sel, *args, **kwargs):
+        """ Check if the selected data is plottable in the x-Axis"""
+        availableColumns = self._getNumericColumnsFromData()
+        topSelection = guiNameSpaces.XMainPlotColumnNameOptions
+        xColumnNameW = self.getWidget(guiNameSpaces.WidgetVarName_MainPlotXcolumnName)
+        # Scatter plot only
+        scatterOnly = [i for i in availableColumns if i not in topSelection]
+        panel = self.guiModule.panelHandler.getPanel(guiNameSpaces.MainPlotPanel)
+        mainPlotWidget = panel.mainPlotWidget
+        plotTypeW = self.getWidget(guiNameSpaces.WidgetVarName_PlotType)
+        if sel in scatterOnly and panel.plotType == PlotType.BAR.description:
+            showWarning('Scatter Only', 'The selected axis data is available only as a scatter plot')
+            panel.setPlotType(PlotType.SCATTER.description)
+            plotTypeW.setByText(PlotType.SCATTER.description, silent=True)
+        self._updateMainPlotPanel()
 
     ##################
 

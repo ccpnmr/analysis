@@ -35,7 +35,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-17 12:17:56 +0100 (Mon, April 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-05 12:34:18 +0100 (Mon, June 05, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -177,7 +177,7 @@ class GuiStripNd(GuiStrip):
         # self._frameGuide.setFixedSize(200, 200)
 
         # add spacer to the top left corner
-        self._frameGuide.addSpacer(8, 8, grid=(1, 0))
+        # self._frameGuide.addSpacer(8, 8, grid=(1, 0))
         row = 2
 
         self.stripLabel = StripLabelWidget(qtParent=self._frameGuide, mainWindow=self.mainWindow, strip=self, grid=(row, 1), gridSpan=(1, 1))
@@ -396,7 +396,7 @@ class GuiStripNd(GuiStrip):
             result.append(plane)
 
         if openInSpectrumDisplay:
-            display.mainWindow.newSpectrumDisplay(spectra=result, axisCodes=self.axisCodes[0:2])
+            display.mainWindow.newSpectrumDisplay(spectra=result, axisCodes=self.axisCodes[:2])
 
         return result
 
@@ -574,8 +574,9 @@ class GuiStripNd(GuiStrip):
         :param stripAxisIndex: an index, defining an Z, A, ... plane; i.e. >= 2
         """
         if stripAxisIndex < 0 or stripAxisIndex >= self.spectrumDisplay.dimensionCount:
-            raise ValueError('%s._updatePlaneToolBarWidgets: invalid stripAxisIndex "%s"' %
-                             (self.__class__.__name__, stripAxisIndex))
+            raise ValueError(
+                f'{self.__class__.__name__}._updatePlaneToolBarWidgets: invalid stripAxisIndex "{stripAxisIndex}"'
+            )
         _axis = self.axes[stripAxisIndex]
 
         # for Z,A,.. axis: update the PlaneSelectorWidget values; BUT "unit" argument is ignored (GWV)
@@ -601,8 +602,9 @@ class GuiStripNd(GuiStrip):
         :param refresh: optionally refresh strip after setting values
         """
         if stripAxisIndex < 0 or stripAxisIndex >= self.spectrumDisplay.dimensionCount:
-            raise ValueError('%s._changePlane: invalid stripAxisIndex "%s"' %
-                             (self.__class__.__name__, stripAxisIndex))
+            raise ValueError(
+                f'{self.__class__.__name__}._changePlane: invalid stripAxisIndex "{stripAxisIndex}"'
+            )
 
         if stripAxisIndex < 2:
             # X or Y; do nothing
@@ -639,7 +641,7 @@ class GuiStripNd(GuiStrip):
             width = _incrementByUnit * _axis._planeCount
 
         elif _axis.unit == AXISUNIT_HZ:
-            raise RuntimeError('Units "Hz" option not yet implemented for axis %s' % _axis)
+            raise RuntimeError(f'Units "Hz" option not yet implemented for axis {_axis}')
 
         else:
             getLogger().debug(f'Axis {_axis.unit} not found')
@@ -786,12 +788,12 @@ class GuiStripNd(GuiStrip):
             if self.calibrateXNDWidgets is None:
                 self._addCalibrateXNDSpectrumWidget()
             self.calibrateXNDWidgets.setVisible(True)
-            self.calibrateXNDWidgets._toggleLines()
             # self.calibrateXNDWidgets.resetUndos()
 
         else:
             self.calibrateXNDWidgets.setVisible(False)
-            self.calibrateXNDWidgets._toggleLines()
+
+        self.calibrateXNDWidgets._toggleLines()
 
     def _addCalibrateYNDSpectrumWidget(self):
         """add a new widget for calibrateY
@@ -808,12 +810,12 @@ class GuiStripNd(GuiStrip):
             if self.calibrateYNDWidgets is None:
                 self._addCalibrateYNDSpectrumWidget()
             self.calibrateYNDWidgets.setVisible(True)
-            self.calibrateYNDWidgets._toggleLines()
             # self.calibrateYNDWidgets.resetUndos()
 
         else:
             self.calibrateYNDWidgets.setVisible(False)
-            self.calibrateYNDWidgets._toggleLines()
+
+        self.calibrateYNDWidgets._toggleLines()
 
     def toggleCalibrateXY(self):
         """Toggle widgets for both axes
@@ -828,14 +830,14 @@ class GuiStripNd(GuiStrip):
             if self.calibrateYNDWidgets is None:
                 self._addCalibrateYNDSpectrumWidget()
             self.calibrateYNDWidgets.setVisible(True)
-            self.calibrateYNDWidgets._toggleLines()
             # self.calibrateYNDWidgets.resetUndos()
 
         else:
             self.calibrateXNDWidgets.setVisible(False)
             self.calibrateXNDWidgets._toggleLines()
             self.calibrateYNDWidgets.setVisible(False)
-            self.calibrateYNDWidgets._toggleLines()
+
+        self.calibrateYNDWidgets._toggleLines()
 
     def _closeCalibrateX(self):
         self.calibrateXYAction.setChecked(False)
@@ -857,7 +859,7 @@ class GuiStripNd(GuiStrip):
                 _prefsGeneral._defaultMarksCount = _prefsGeneral._defaultMarksCount % len(colourList)
                 defaultColour = colourList[_prefsGeneral._defaultMarksCount]
                 _prefsGeneral._defaultMarksCount += 1
-        except:
+        except Exception:
             defaultColour = '#FF0000'
 
         try:
@@ -881,26 +883,25 @@ class GuiStripNd(GuiStrip):
                 ppmPositions = obj.ppmPositions
                 axisCodes = obj.axisCodes
 
-                if axisIndex is not None:
-
-                    if (0 <= axisIndex < 2):
-                        # get the same position in the opposite axisCode
-                        doubleIndex = 1 - axisIndex
-
-                        objAxisIndex = indices[axisIndex]
-                        objDoubleAxisIndex = indices[doubleIndex]
-
-                        if objAxisIndex is not None and objDoubleAxisIndex is not None:
-                            position = (ppmPositions[objAxisIndex],)
-                            axisCode = (axisCodes[objDoubleAxisIndex],)
-                            self.mainWindow.newMark(defaultColour, position, axisCode)
-                else:
+                if axisIndex is None:
                     # flip the XY axes for the peak
                     if None not in indices:
                         ppmPositions = [ppmPositions[ii] for ii in indices]
                         axisCodes = [axisCodes[ii] for ii in indices]
                         ppmPositions = [ppmPositions[1], ppmPositions[0]] + ppmPositions[2:]
                         self.mainWindow.newMark(defaultColour, ppmPositions, axisCodes)
+
+                elif (0 <= axisIndex < 2):
+                    # get the same position in the opposite axisCode
+                    doubleIndex = 1 - axisIndex
+
+                    objAxisIndex = indices[axisIndex]
+                    objDoubleAxisIndex = indices[doubleIndex]
+
+                    if objAxisIndex is not None and objDoubleAxisIndex is not None:
+                        position = (ppmPositions[objAxisIndex],)
+                        axisCode = (axisCodes[objDoubleAxisIndex],)
+                        self.mainWindow.newMark(defaultColour, position, axisCode)
 
         except Exception as es:
             getLogger().warning('Error setting mark at position')

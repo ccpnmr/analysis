@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:40 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-06-05 12:34:18 +0100 (Mon, June 05, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -38,12 +38,13 @@ from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundStrip as ApiBoundStrip
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, newObject
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, newObject, ccpNmrV3CoreSetter
 
 from ccpn.util.Constants import AXISUNIT_PPM, AXISUNIT_HZ, AXISUNIT_POINT
 
 from ccpn.core._implementation.updates.update_3_0_4 import _updateStrip_3_0_4_to_3_1_0
 from ccpn.core._implementation.Updater import updateObject, UPDATE_POST_OBJECT_INITIALISATION
+
 
 @updateObject(fromVersion='3.0.4',
               toVersion='3.1.0',
@@ -75,6 +76,7 @@ class Strip(AbstractWrapperObject):
 
     # internal namespace
     _STRIPTILEPOSITION = '_stripTilePosition'
+    _PINNED = '_pinned'
 
     #-----------------------------------------------------------------------------------------
 
@@ -103,13 +105,13 @@ class Strip(AbstractWrapperObject):
     def spectrumViews(self) -> list:
         """SpectrumViews shown in Strip"""
         # STUB for now; hot-fixed later
-        pass
+        return []
 
     @property
     def axes(self) -> list:
         """The axes of Strip"""
         # STUB for now; hot-fixed later
-        pass
+        return []
 
     #GWV: moved here from _implementation/Axis.py
     @property
@@ -166,12 +168,12 @@ class Strip(AbstractWrapperObject):
     def units(self) -> Tuple[str, ...]:
         """Axis units, in display order"""
         # return self._wrappedData.units
-        return tuple([ax.unit for ax in self.orderedAxes])
+        return tuple(ax.unit for ax in self.orderedAxes)
 
     @property
     def _unitIndices(self) -> Tuple[int, ...]:
         """Axis units indices, in display order"""
-        return tuple([ax._unitIndex for ax in self.orderedAxes])
+        return tuple(ax._unitIndex for ax in self.orderedAxes)
 
     @property
     def spectra(self) -> Tuple[Spectrum, ...]:
@@ -227,7 +229,7 @@ class Strip(AbstractWrapperObject):
         """
         _allSpecs = [DisplayedSpectrum(strip=self, spectrumView=sv)
                      for sv in self.spectrumViews
-                    ]
+                     ]
         _valsPerSpecView = [ds.minAxisLimitsByUnit
                             for ds in _allSpecs]
 
@@ -235,12 +237,12 @@ class Strip(AbstractWrapperObject):
         result = []
         for axisIndex, axis in enumerate(self.axes):
             _tmp = [val[axisIndex] for val in _valsPerSpecView
-                        if val[axisIndex] is not None
-                   ]
-            _minVal = None if len(_tmp) == 0 else min(_tmp)
+                    if val[axisIndex] is not None
+                    ]
+            _minVal = min(_tmp, default=None)
             result.append(_minVal)
 
-        return result    \
+        return result
 
     @property
     def _maxAxisLimitsByUnit(self) -> list:
@@ -248,7 +250,7 @@ class Strip(AbstractWrapperObject):
         """
         _allSpecs = [DisplayedSpectrum(strip=self, spectrumView=sv)
                      for sv in self.spectrumViews
-                    ]
+                     ]
         _valsPerSpecView = [ds.maxAxisLimitsByUnit
                             for ds in _allSpecs]
 
@@ -256,9 +258,9 @@ class Strip(AbstractWrapperObject):
         result = []
         for axisIndex, axis in enumerate(self.axes):
             _tmp = [val[axisIndex] for val in _valsPerSpecView
-                        if val[axisIndex] is not None
-                   ]
-            _maxVal = None if len(_tmp) == 0 else max(_tmp)
+                    if val[axisIndex] is not None
+                    ]
+            _maxVal = max(_tmp, default=None)
             result.append(_maxVal)
 
         return result
@@ -269,7 +271,7 @@ class Strip(AbstractWrapperObject):
         """
         _allSpecs = [DisplayedSpectrum(strip=self, spectrumView=sv)
                      for sv in self.spectrumViews
-                    ]
+                     ]
         _valsPerSpecView = [ds.axisIncrementsByUnit
                             for ds in _allSpecs]
 
@@ -277,9 +279,9 @@ class Strip(AbstractWrapperObject):
         result = []
         for axisIndex, axis in enumerate(self.axes):
             _tmp = [val[axisIndex] for val in _valsPerSpecView
-                        if val[axisIndex] is not None
-                   ]
-            _minVal = None if len(_tmp) == 0 else min(_tmp)
+                    if val[axisIndex] is not None
+                    ]
+            _minVal = min(_tmp, default=None)
             result.append(_minVal)
 
         return result
@@ -313,22 +315,22 @@ class Strip(AbstractWrapperObject):
         """
         return parent._wrappedData.sortedStrips()
 
-    def _finaliseAction(self, action: str):
+    def _finaliseAction(self, action: str, **actionKwds):
         """Spawn _finaliseAction notifiers for spectrumView tree attached to this strip.
         """
-        if not super()._finaliseAction(action):
+        if not super()._finaliseAction(action, **actionKwds):
             return
 
-        if action in ['create', 'delete']:
+        if action in {'create', 'delete'}:
             for sv in self.spectrumViews:
-                sv._finaliseAction(action)
+                sv._finaliseAction(action, **actionKwds)
 
                 for plv in sv.peakListViews:
-                    plv._finaliseAction(action)
+                    plv._finaliseAction(action, **actionKwds)
                 for ilv in sv.integralListViews:
-                    ilv._finaliseAction(action)
+                    ilv._finaliseAction(action, **actionKwds)
                 for mlv in sv.multipletListViews:
-                    mlv._finaliseAction(action)
+                    mlv._finaliseAction(action, **actionKwds)
 
     # @deleteObject()         # - doesn't work here
     def _delete(self):
@@ -378,7 +380,7 @@ class Strip(AbstractWrapperObject):
 
     @tilePosition.setter
     def tilePosition(self, value):
-        """Setter for tilePosition
+        """Setter for tilePosition.
         tilePosition must be a tuple of int (x, y)
         """
         if not isinstance(value, tuple):
@@ -389,6 +391,23 @@ class Strip(AbstractWrapperObject):
             raise ValueError('Tuple must be of type int')
 
         self._setInternalParameter(self._STRIPTILEPOSITION, value)
+
+    @property
+    def pinned(self) -> Tuple[int, int]:
+        """Get/set the pinned state of the strip.
+        This facilitates marking a strip of interest.
+        """
+        return self._getInternalParameter(self._PINNED) or False
+
+    @pinned.setter
+    @ccpNmrV3CoreSetter(pinnedChanged=True)
+    def pinned(self, value):
+        """Setter for pinned.
+        """
+        if not isinstance(value, bool):
+            raise ValueError('Expected a bool')
+
+        self._setInternalParameter(self._PINNED, value)
 
     #=========================================================================================
     # CCPN functions
@@ -409,7 +428,7 @@ class Strip(AbstractWrapperObject):
         """Move strip to index newIndex in orderedStrips
         """
         if not isinstance(newIndex, int):
-            raise TypeError('newIndex %s is not of type Int' % str(newIndex))
+            raise TypeError(f'newIndex {newIndex} is not of type Int')
 
         currentIndex = self._wrappedData.index
         if currentIndex == newIndex:
@@ -421,8 +440,9 @@ class Strip(AbstractWrapperObject):
         if newIndex >= stripCount:
             # Put strip at the right, which means newIndex should be stripCount - 1
             if newIndex > stripCount:
-                raise TypeError("Attempt to copy strip to position %s in display with only %s strips"
-                                % (newIndex, stripCount))
+                raise TypeError(
+                        f"Attempt to copy strip to position {newIndex} in display with only {stripCount} strips"
+                        )
             newIndex = stripCount - 1
 
         # move the strip
@@ -526,6 +546,8 @@ class Strip(AbstractWrapperObject):
     #     result = tuple(result)
     #     self.current.peaks = result
     #     return result
+
+
 #end class
 
 
@@ -558,8 +580,8 @@ def _copyStrip(self: SpectrumDisplay, strip: Strip, newIndex=None) -> Strip:
         if newIndex > stripCount:
             # warning
             self._project._logger.warning(
-                    "Attempt to copy strip to position %s in display with only %s strips"
-                    % (newIndex, stripCount))
+                    f"Attempt to copy strip to position {newIndex} in display with only {stripCount} strips"
+                    )
         newIndex = None
 
     # with logCommandBlock(prefix='newStrip=', get='self') as log:
@@ -579,25 +601,26 @@ def _copyStrip(self: SpectrumDisplay, strip: Strip, newIndex=None) -> Strip:
         else:
             mapIndices = _axisCodeMapIndices(strip.axisOrder, self.axisOrder)
             if mapIndices is None:
-                raise ValueError("Strip %s not compatible with window %s" % (strip.pid, self.pid))
-            else:
-                positions = strip.positions
-                widths = strip.widths
-                # newStrip = self.orderedStrips[0].clone()
+                raise ValueError(f"Strip {strip.pid} not compatible with window {self.pid}")
 
-                # clone the first strip
-                newStrip = strip.spectrumDisplay.addStrip(self.orderedStrips[0])
+            positions = strip.positions
+            widths = strip.widths
+            # newStrip = self.orderedStrips[0].clone()
 
-                if newIndex is not None:
-                    newStrip.moveTo(newIndex)
-                for ii, axis in enumerate(newStrip.orderedAxes):
-                    ind = mapIndices[ii]
-                    if ind is not None and axis._wrappedData.axis.stripSerial != 0:
-                        # Override if there is a mapping and axis is not shared for all strips
-                        axis.position = positions[ind]
-                        axis.widths = widths[ind]
+            # clone the first strip
+            newStrip = strip.spectrumDisplay.addStrip(self.orderedStrips[0])
+
+            if newIndex is not None:
+                newStrip.moveTo(newIndex)
+            for ii, axis in enumerate(newStrip.orderedAxes):
+                ind = mapIndices[ii]
+                if ind is not None and axis._wrappedData.axis.stripSerial != 0:
+                    # Override if there is a mapping and axis is not shared for all strips
+                    axis.position = positions[ind]
+                    axis.widths = widths[ind]
 
     return newStrip
+
 
 # GWV 10/12/21: in SpectrumDisplay
 # SpectrumDisplay.copyStrip = _copyStrip
@@ -609,6 +632,7 @@ class DisplayedSpectrum(object):
     Used to map any data/axis/parameter actions in a SpectrumView dependent fashion
     Only to be used internally
     """
+
     def __init__(self, strip, spectrumView):
         self.strip = strip
         self.spectrumView = spectrumView
@@ -625,8 +649,10 @@ class DisplayedSpectrum(object):
         spectra (e.g. a 2D mapped onto a 3D)
         """
         result = self.spectrumView.spectrumDimensions
-        for idx in range(len(result), self.strip.spectrumDisplay.dimensionCount):
-            result.append(None)
+        result.extend(
+                None
+                for _ in range(len(result), self.strip.spectrumDisplay.dimensionCount)
+                )
         return tuple(result)
 
     @property
@@ -637,8 +663,10 @@ class DisplayedSpectrum(object):
         spectra (e.g. a 2D mapped onto a 3D)
         """
         result = self.spectrumView.ppmPerPoints
-        for idx in range(len(result), self.strip.spectrumDisplay.dimensionCount):
-            result.append(None)
+        result.extend(
+                None
+                for _ in range(len(result), self.strip.spectrumDisplay.dimensionCount)
+                )
         return tuple(result)
 
     @property
@@ -649,8 +677,10 @@ class DisplayedSpectrum(object):
         """
         axes = self.strip.orderedAxes
         result = [ax.position for ax in axes]
-        for idx in range(len(result), self.strip.spectrumDisplay.dimensionCount):
-            result.append(None)
+        result.extend(
+                None
+                for _ in range(len(result), self.strip.spectrumDisplay.dimensionCount)
+                )
         return tuple(result)
 
     @property
@@ -660,8 +690,10 @@ class DisplayedSpectrum(object):
         """
         axes = self.strip.orderedAxes
         result = [ax.width for ax in axes]
-        for idx in range(len(result), self.strip.spectrumDisplay.dimensionCount):
-            result.append(None)
+        result.extend(
+                None
+                for _ in range(len(result), self.strip.spectrumDisplay.dimensionCount)
+                )
         return tuple(result)
 
     @property
@@ -671,8 +703,10 @@ class DisplayedSpectrum(object):
         """
         axes = self.strip.orderedAxes
         result = [ax.region for ax in axes]
-        for idx in range(len(result), self.strip.spectrumDisplay.dimensionCount):
-            result.append( (None, None) )
+        result.extend(
+                (None, None)
+                for _ in range(len(result), self.strip.spectrumDisplay.dimensionCount)
+                )
         return tuple(result)
 
     def _getRegionsInPoints(self, regions):
@@ -683,9 +717,11 @@ class DisplayedSpectrum(object):
             minPpm, maxPpm = regions[indx]
             minPoint = specDim.ppmToPoint(minPpm)
             maxPoint = specDim.ppmToPoint(maxPpm)
-            result.append( tuple(sorted((minPoint,maxPoint))) )
-        for idx in range(len(result), self.strip.spectrumDisplay.dimensionCount):
-            result.append( (None, None) )
+            result.append(tuple(sorted((minPoint, maxPoint))))
+        result.extend(
+                (None, None)
+                for _ in range(len(result), self.strip.spectrumDisplay.dimensionCount)
+                )
         return tuple(result)
 
     @property
@@ -706,12 +742,11 @@ class DisplayedSpectrum(object):
         spectra (e.g. a 2D mapped onto a 3D)
         """
         result = []
-        for axis, ppmPerPoint, specFreq, points in \
-                zip(self.strip.orderedAxes,
-                    self.spectrumView.ppmPerPoints,
-                    self.spectrumView.spectrometerFrequencies,
-                    self.spectrumView.pointCounts
-                   ):
+        for axis, ppmPerPoint, specFreq, points in zip(self.strip.orderedAxes,
+                                                       self.spectrumView.ppmPerPoints,
+                                                       self.spectrumView.spectrometerFrequencies,
+                                                       self.spectrumView.pointCounts
+                                                       ):
 
             if axis.unit == AXISUNIT_PPM:
                 result.append(ppmPerPoint)
@@ -720,13 +755,13 @@ class DisplayedSpectrum(object):
                 result.append(1.0)
 
             elif axis.unit == AXISUNIT_HZ:
-                result.append(ppmPerPoint*specFreq)
+                result.append(ppmPerPoint * specFreq)
 
             else:
-                raise RuntimeError('axisIncrementsByUnit: undefined axis unit "%s"' % axis.unit)
+                raise RuntimeError(f'axisIncrementsByUnit: undefined axis unit "{axis.unit}"')
 
-        for idx in range(len(result), self.strip.spectrumDisplay.dimensionCount):
-            result.append( None )
+        result.extend(None for _ in range(len(result), self.strip.spectrumDisplay.dimensionCount))
+
         return tuple(result)
 
     @property
@@ -738,13 +773,12 @@ class DisplayedSpectrum(object):
         spectra (e.g. a 2D mapped onto a 3D)
         """
         result = []
-        for axis, specDim, limits, specFreq, points in \
-                zip(self.strip.orderedAxes,
-                    self.spectrumView.spectrumDimensions,
-                    self.spectrumView.aliasingLimits,
-                    self.spectrumView.spectrometerFrequencies,
-                    self.spectrumView.pointCounts
-                   ):
+        for axis, specDim, limits, specFreq, points in zip(self.strip.orderedAxes,
+                                                           self.spectrumView.spectrumDimensions,
+                                                           self.spectrumView.aliasingLimits,
+                                                           self.spectrumView.spectrometerFrequencies,
+                                                           self.spectrumView.pointCounts
+                                                           ):
 
             if axis.unit == AXISUNIT_PPM:
                 result.append((min(limits), max(limits)))
@@ -753,14 +787,16 @@ class DisplayedSpectrum(object):
                 result.append((1.0, float(points)))
 
             elif axis.unit == AXISUNIT_HZ:
-                limits = [val*specFreq for val in limits]
+                limits = [val * specFreq for val in limits]
                 result.append((min(limits), max(limits)))
 
             else:
-                raise RuntimeError('axisLimitsByUnit: undefined axis unit "%s"' % axis.unit)
+                raise RuntimeError(f'axisLimitsByUnit: undefined axis unit "{axis.unit}"')
 
-        for idx in range(len(result), self.strip.spectrumDisplay.dimensionCount):
-            result.append( (None, None) )
+        result.extend(
+                (None, None)
+                for _ in range(len(result), self.strip.spectrumDisplay.dimensionCount)
+                )
         return tuple(result)
 
     @property
@@ -792,9 +828,12 @@ class DisplayedSpectrum(object):
         by adding None's if necessary. This compensates for lower dimensional
         spectra (e.g. a 2D mapped onto a 3D).
         """
-        result = self.spectrumView.aliasingLimits
-        for idx in range(len(result), self.strip.spectrumDisplay.dimensionCount):
-            result.append( (None, None) )
+        result = list(self.spectrumView.aliasingLimits)
+        result.extend(
+                (None, None)
+                for _ in range(len(result), self.strip.spectrumDisplay.dimensionCount)
+                )
+        return tuple(result)
 
     def getSliceTuples(self, regions) -> list:
         """Return a list of (startPoint,endPoint) slice tuples for regions in spectrum order.
@@ -803,7 +842,7 @@ class DisplayedSpectrum(object):
         # first assemble the result in display order
         result = []
         for points in regionInPoints[:self.spectrumView.dimensionCount]:
-            for i in (0,1):
+            for i in (0, 1):
                 points[i] = int(points[i] + 0.5)
             result.append(tuple(points))
 
@@ -831,10 +870,7 @@ class DisplayedSpectrum(object):
 
         return tuple(result)
 
-
     def __str__(self):
-        return "<DisplayedSpectrum: strip: %s; spectrumView: %s>" % (
-            self.strip.pid, self.spectrumView.pid
-        )
+        return f"<DisplayedSpectrum: strip: {self.strip.pid}; spectrumView: {self.spectrumView.pid}>"
 
     __repr__ = __str__

@@ -4,8 +4,9 @@ The NmrResidueLabel allows drag and drop of the ids displayed in them
 
 """
 
-
 import contextlib
+
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -20,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-17 12:17:56 +0100 (Mon, April 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-05 12:34:18 +0100 (Mon, June 05, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -106,7 +107,7 @@ class _StripLabel(ActiveLabel):  #  VerticalLabel): could use Vertical label so 
         """
         if not self.project.getByPid(self.text()):
             # label does not point to an object
-            getLogger().warning('%s is not a draggable object' % self.text())
+            getLogger().warning(f'{self.text()} is not a draggable object')
             return
 
         # mimeData = QtCore.QMimeData()
@@ -174,9 +175,15 @@ class _StripLabel(ActiveLabel):  #  VerticalLabel): could use Vertical label so 
         """
         self._mousePressed = False
         if event.button() == QtCore.Qt.RightButton:
-            pass
             # NOTE:ED - popup 'close headers' not required now
-            # self._rightButtonPressed(event)
+            self._rightButtonPressed(event)
+
+        elif event.button() == QtCore.Qt.LeftButton:
+            # get the keyboard state
+            keyModifiers = QtWidgets.QApplication.keyboardModifiers()
+            if (keyModifiers & QtCore.Qt.ShiftModifier):
+                # toggle the pin state
+                self._pinStripToggle()
 
     def _handleMouseClicked(self, mouseDict):
         """handle a single mouse event, but ignore double click events
@@ -216,29 +223,75 @@ class _StripLabel(ActiveLabel):  #  VerticalLabel): could use Vertical label so 
         contextMenu = Menu('', self, isFloatWidget=True)
 
         contextMenu.addSeparator()
-        contextMenu.addAction('Close Strip Header', self._closeStrip)
-        contextMenu.addAction('Close All Strip Headers in SpectrumDisplay', self._closeSpectrumDisplay)
-        contextMenu.addAction('Close All Headers in All SpectrumDisplays', self._closeAll)
+        # contextMenu.addAction('Close Strip Header', self._closeStrip)
+        # contextMenu.addAction('Close All Strip Headers in SpectrumDisplay', self._closeSpectrumDisplay)
+        # contextMenu.addAction('Close All Headers in All SpectrumDisplays', self._closeAll)
+
+        contextMenu.addAction('Pin/unpin Strip', self._pinStripToggle)
+        contextMenu.addAction('Close Strip', self._closeStrip)
+        contextMenu.addAction('Close Other Strips', partial(self._closeOther, left=True, right=True))
+        contextMenu.addAction('Close Strips to the Left', partial(self._closeOther, left=True))
+        contextMenu.addAction('Close Strips to the Right', partial(self._closeOther, right=True))
+        contextMenu.addAction('Close All but Pinned', self._closeUnpinned)
+
         return contextMenu
 
+    # def _closeStrip(self):
+    #     """Close header in this strip
+    #     """
+    #     self.strip.header.reset()
+    #
+    # def _closeSpectrumDisplay(self):
+    #     """Close all headers in this spectrumDisplay
+    #     """
+    #     for strip in self.spectrumDisplay.strips:
+    #         strip.header.reset()
+    #
+    # def _closeAll(self):
+    #     """Close all headers in all spectrumDisplays
+    #     """
+    #     displays = self.mainWindow.spectrumDisplays
+    #     for display in displays:
+    #         for strip in display.strips:
+    #             strip.header.reset()
+
+    def _pinStripToggle(self):
+        """Toggle the pinned state of the strip.
+        """
+        if this := self._parent.strip:
+            this.pinned = not this.pinned
+
     def _closeStrip(self):
-        """Close header in this strip
+        """Close this strip.
         """
-        self.strip.header.reset()
+        if this := self._parent.strip:
+            this.spectrumDisplay.deleteStrip(self._parent.strip)
 
-    def _closeSpectrumDisplay(self):
-        """Close all headers in this spectrumDisplay
+    def _closeOther(self, left=False, right=False):
+        """Close strips to the left or right.
         """
-        for strip in self.spectrumDisplay.strips:
-            strip.header.reset()
+        if this := self._parent.strip:
+            spDisplay = this.spectrumDisplay
+            strips = spDisplay.orderedStrips
+            ind = strips.index(this)
+            leftStrips = strips[:ind]
+            rightStrips = strips[ind + 1:]
 
-    def _closeAll(self):
-        """Close all headers in all spectrumDisplays
+            if left:
+                for strip in leftStrips:
+                    spDisplay.deleteStrip(strip)
+            if right:
+                for strip in rightStrips:
+                    spDisplay.deleteStrip(strip)
+
+    def _closeUnpinned(self):
+        """Close the unpinned strips in the spectrumDisplay.
         """
-        displays = self.mainWindow.spectrumDisplays
-        for display in displays:
-            for strip in display.strips:
-                strip.header.reset()
+        if this := self._parent.strip:
+            spDisplay = this.spectrumDisplay
+            for strip in spDisplay.strips:
+                if not strip.pinned:
+                    spDisplay.deleteStrip(strip)
 
 
 #TODO:GEERTEN: complete this and replace
@@ -295,9 +348,9 @@ class PlaneSelectorWidget(Frame):
 
         strip = self.project.getByPid(strip) if isinstance(strip, str) else strip
         if not isinstance(strip, GuiStrip):
-            raise TypeError("%s is not of type Strip" % str(strip))
+            raise TypeError(f"{str(strip)} is not of type Strip")
         if not isinstance(axis, int):
-            raise TypeError("%s is not of type int" % str(axis))
+            raise TypeError(f"{str(axis)} is not of type int")
         if not (0 <= axis < len(strip.axisCodes)):
             raise ValueError("axis %s is out of range (0, %i)" % (str(axis), len(self.axisCodes) - 1))
 
@@ -307,7 +360,7 @@ class PlaneSelectorWidget(Frame):
         self.spinBox.setToolTip(str(self.strip.axisCodes[self.axis]))
 
     def setCallbacks(self, callbacks):
-        "callbacks a dict with (key, callbackFunction) items"
+        """callbacks a dict with (key, callbackFunction) items."""
         self._callbacks = callbacks
 
     def _planeCountChanged(self, value: int = 1):
@@ -399,7 +452,7 @@ class _OpenGLFrameABC(OpenGLOverlayFrame):
             (or possibly revert - not fully implemented yet)
 
     """
-    BUTTONS = tuple()
+    BUTTONS = ()
     AUTOFILLBACKGROUND = True
 
     def __init__(self, qtParent, mainWindow, *args, **kwds):
@@ -1165,22 +1218,21 @@ class StripHeaderWidget(_OpenGLFrameABC):
         if position in STRIPPOSITIONS:
             return self._labels[position].obj
         else:
-            raise ValueError('Error: %s is not a valid position' % str(position))
+            raise ValueError(f'Error: {str(position)} is not a valid position')
 
     def setLabelObject(self, obj=None, position=STRIPPOSITION_CENTRE):
         """Set the object attached to the header label at the given position and store its pid
         """
         # NOTE:ED not sure I need this now - check rename nmrResidue, etc.
         self.show()
-        if position in STRIPPOSITIONS:
-            self._labels[position].obj = obj
+        if position not in STRIPPOSITIONS:
+            raise ValueError(f'Error: {str(position)} is not a valid position')
 
-            # SHOULD have a pid if an object
-            if obj and hasattr(obj, 'pid'):
-                self._setPositionParameter(position, STRIPOBJECT, str(obj.pid))
-        else:
-            raise ValueError('Error: %s is not a valid position' % str(position))
+        self._labels[position].obj = obj
 
+        # SHOULD have a pid if an object
+        if obj and hasattr(obj, 'pid'):
+            self._setPositionParameter(position, STRIPOBJECT, str(obj.pid))
         self._resize()
 
     def getLabelText(self, position=STRIPPOSITION_CENTRE):
@@ -1189,19 +1241,18 @@ class StripHeaderWidget(_OpenGLFrameABC):
         if position in STRIPPOSITIONS:
             return self._labels[position].text()
         else:
-            raise ValueError('Error: %s is not a valid position' % str(position))
+            raise ValueError(f'Error: {str(position)} is not a valid position')
 
     def setLabelText(self, text=None, position=STRIPPOSITION_CENTRE):
         """Set the text for header label at the given position
         """
         self.show()
-        if position in STRIPPOSITIONS:
-            self._labels[position].setText(str(text))
-            self._setPositionParameter(position, STRIPTEXT, str(text))
-            self.setLabelVisible(position, True if text else False)
-        else:
-            raise ValueError('Error: %s is not a valid position' % str(position))
+        if position not in STRIPPOSITIONS:
+            raise ValueError(f'Error: {str(position)} is not a valid position')
 
+        self._labels[position].setText(str(text))
+        self._setPositionParameter(position, STRIPTEXT, str(text))
+        self.setLabelVisible(position, bool(text))
         self._resize()
 
     def getLabel(self, position=STRIPPOSITION_CENTRE):
@@ -1218,21 +1269,16 @@ class StripHeaderWidget(_OpenGLFrameABC):
         if position in STRIPPOSITIONS:
             return self._labels[position].isVisible()
         else:
-            raise ValueError('Error: %s is not a valid position' % str(position))
+            raise ValueError(f'Error: {str(position)} is not a valid position')
 
     def setLabelVisible(self, position=STRIPPOSITION_CENTRE, visible: bool = True):
         """show/hide the header label at the given position
         """
-        if position in STRIPPOSITIONS:
-            # if visible:
-            #     self.show()
-            # else:
-            #     self.hide()
-            self._labels[position].setVisible(visible)
-            self._setPositionParameter(position, STRIPVISIBLE, visible)
+        if position not in STRIPPOSITIONS:
+            raise ValueError(f'Error: {str(position)} is not a valid position')
 
-        else:
-            raise ValueError('Error: %s is not a valid position' % str(position))
+        self._labels[position].setVisible(visible)
+        self._setPositionParameter(position, STRIPVISIBLE, visible)
 
         lv = [self._getPositionParameter(pp, STRIPVISIBLE, False) for pp in STRIPPOSITIONS]
         headerVisible = any(lv)
@@ -1243,12 +1289,11 @@ class StripHeaderWidget(_OpenGLFrameABC):
     def setLabelEnabled(self, position=STRIPPOSITION_CENTRE, enable: bool = True):
         """Enable/disable the header label at the given position
         """
-        if position in STRIPPOSITIONS:
-            self._labels[position].setEnabled(enable)
-            self._setPositionParameter(position, STRIPENABLED, enable)
-        else:
-            raise ValueError('Error: %s is not a valid position' % str(position))
+        if position not in STRIPPOSITIONS:
+            raise ValueError(f'Error: {str(position)} is not a valid position')
 
+        self._labels[position].setEnabled(enable)
+        self._setPositionParameter(position, STRIPENABLED, enable)
         self._resize()
 
     def getLabelEnabled(self, position=STRIPPOSITION_CENTRE):
@@ -1257,7 +1302,7 @@ class StripHeaderWidget(_OpenGLFrameABC):
         if position in STRIPPOSITIONS:
             return self._labels[position].isEnabled()
         else:
-            raise ValueError('Error: %s is not a valid position' % str(position))
+            raise ValueError(f'Error: {str(position)} is not a valid position')
 
     def getLabelConnectDir(self, position=STRIPPOSITION_CENTRE):
         """Return the connectDir attribute of the header label at the given position
@@ -1265,17 +1310,16 @@ class StripHeaderWidget(_OpenGLFrameABC):
         if position in STRIPPOSITIONS:
             return self._labels[position]._connectDir
         else:
-            raise ValueError('Error: %s is not a valid position' % str(position))
+            raise ValueError(f'Error: {str(position)} is not a valid position')
 
     def setLabelConnectDir(self, position=STRIPPOSITION_CENTRE, connectDir: str = STRIPCONNECT_NONE):
         """set the connectDir attribute of the header label at the given position
         """
-        if position in STRIPPOSITIONS:
-            self._labels[position]._connectDir = connectDir
-            self._setPositionParameter(position, STRIPCONNECT, connectDir)
-        else:
-            raise ValueError('Error: %s is not a valid position' % str(position))
+        if position not in STRIPPOSITIONS:
+            raise ValueError(f'Error: {str(position)} is not a valid position')
 
+        self._labels[position]._connectDir = connectDir
+        self._setPositionParameter(position, STRIPCONNECT, connectDir)
         self._resize()
 
     def setLabelIcon(self, iconName=None, iconSize=(18, 18), position=STRIPPOSITION_CENTRE):
@@ -1285,9 +1329,9 @@ class StripHeaderWidget(_OpenGLFrameABC):
         if position in STRIPPOSITIONS:
             self._labels[position].setPixmap(Icon(iconName).pixmap(*iconSize))
             self._setPositionParameter(position, STRIPICONNAME, str(iconName))
-            self.setLabelVisible(position, True if iconName else False)
+            self.setLabelVisible(position, bool(iconName))
         else:
-            raise ValueError('Error: %s is not a valid position' % str(position))
+            raise ValueError(f'Error: {str(position)} is not a valid position')
 
         self._resize()
 
@@ -1335,12 +1379,13 @@ class StripHeaderWidget(_OpenGLFrameABC):
 class StripLabelWidget(_OpenGLFrameABC):
 
     def _setStripLabel(self, *args):
-        """Set the label of the strip, called from _populate
+        """Set the label of the strip, called from _populate.
         """
         self.setLabelText(self.strip.pid if self.strip else '')
         self._resize()
 
-    BUTTONS = (('_stripLabel', _StripLabel, None, _setStripLabel, (0, 0), (1, 1)),
+    BUTTONS = (('_stripPin', ActiveLabel, None, None, (0, 0), (1, 1)),
+               ('_stripLabel', _StripLabel, None, _setStripLabel, (0, 1), (1, 1)),
                )
 
     def _processDroppedLabel(self, data, toLabel=None, plusChain=None):
@@ -1363,6 +1408,12 @@ class StripLabelWidget(_OpenGLFrameABC):
         headerColour = self._getPositionParameter(STRIPCOLOUR, DEFAULTCOLOUR)
         self.setLabel(headerText, headerColour)
 
+        self._PIXMAPWIDTH = getFontHeight()
+        self._icon = Icon('icons/pin-grey')
+        self._stripPin.setVisible(strip.pinned)
+        # self._stripPin.setFixedSize(self._PIXMAPWIDTH - 4, self._PIXMAPWIDTH - 4)
+        self._stripPin.setPixmap(self._icon.pixmap(self._PIXMAPWIDTH - 4, self._PIXMAPWIDTH - 4))
+
         # get the visible state of the header
         self.setVisible(True)
         self._resize()
@@ -1381,12 +1432,9 @@ class StripLabelWidget(_OpenGLFrameABC):
     def _getPositionParameter(self, subParameterName, default):
         """Return the item from the position dict
         """
-        params = self.strip._getInternalParameter(STRIPLABELPOS)
-        if params:
+        if params := self.strip._getInternalParameter(STRIPLABELPOS):
             if subParameterName in params:
-                value = params.get(subParameterName)
-                return value
-
+                return params.get(subParameterName)
         return default
 
     def reset(self):
@@ -1406,7 +1454,7 @@ class StripLabelWidget(_OpenGLFrameABC):
         self._setStyle(self._stripLabel, foregroundColour=colour)
         self._setPositionParameter(STRIPTEXT, str(text))
         self._setPositionParameter(STRIPCOLOUR, colour)
-        self._stripLabel.setVisible(True if text else False)
+        self._stripLabel.setVisible(bool(text))
         self._resize()
 
     def setLabelText(self, text=None):
@@ -1415,7 +1463,7 @@ class StripLabelWidget(_OpenGLFrameABC):
         self.show()
         self._stripLabel.setText(str(text))
         self._setPositionParameter(STRIPTEXT, str(text))
-        self._stripLabel.setVisible(True if text else False)
+        self._stripLabel.setVisible(bool(text))
         self._resize()
 
     def setLabelColour(self, colour=DEFAULTCOLOUR):
@@ -1428,6 +1476,11 @@ class StripLabelWidget(_OpenGLFrameABC):
 
     def setHighlighted(self, value):
         self._stripLabel.highlighted = value
+
+    def setPinned(self, state):
+        self._stripPin.setVisible(state)
+        if state:
+            self._resize()
 
 
 class TestPopup(Frame):

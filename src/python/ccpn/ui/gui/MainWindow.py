@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-04-25 17:42:32 +0100 (Tue, April 25, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-06-05 12:34:18 +0100 (Mon, June 05, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -155,6 +155,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         self._setupNotifiers()
 
         self.feedbackPopup = None
+        self._previousStrip = None
+        self._currentStrip = None
 
         self.setWindowIcon(Icon('icons/ccpn-icon'))
         # self.fileIcon = self.style().standardIcon(QtWidgets.QStyle.SP_FileIcon, None, self)
@@ -324,6 +326,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         self.setNotifier(self.application.current, [Notifier.CURRENT], 'integrals', GuiStrip._updateSelectedIntegrals)
         self.setNotifier(self.application.current, [Notifier.CURRENT], 'multiplets', GuiStrip._updateSelectedMultiplets)
         self.setNotifier(self.application.project, [Notifier.CHANGE], 'SpectrumDisplay', self._spectrumDisplayChanged)
+        self.setNotifier(self.application.project, [Notifier.CHANGE], 'Strip', self._stripPinnedChanged)
 
         self.setNotifier(self.application.project, [Notifier.CHANGE], 'Project', self._projectNotifierCallback)
 
@@ -434,7 +437,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         for a in topMenuAction.actions():
             # print ('>>>', menuString, a.text())
             if a.text() == splitMenuString[-1]:
-                found = a.menu() if a.menu() else a
+                found = a.menu() or a
                 break
             else:
                 if a.menu():
@@ -455,7 +458,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                           'undo'                    : self.application.undo,
 
                           'get'                     : self.application.get,
-                          'getGid'              : self.application.ui.getByGid,
+                          'getGid'                  : self.application.ui.getByGid,
                           'ui'                      : self.application.ui,
                           'mainWindow'              : self,
                           'project'                 : self.application.project,
@@ -1268,6 +1271,10 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         if previousStrip and not previousStrip.isDeleted:
             previousStrip._highlightStrip(False)
             previousStrip.spectrumDisplay._highlightAxes(previousStrip, False)
+            if previousStrip != currentStrip:
+                self._previousStrip = previousStrip
+        else:
+            self._previousStrip = None
 
         if currentStrip and not currentStrip.isDeleted:
             currentStrip._highlightStrip(True)
@@ -1281,10 +1288,24 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         spectrumDisplay = data[Notifier.OBJECT]
 
         if trigger == Notifier.CHANGE:
-            getLogger().debug(f'>>> SPECTRUMDISPLAY CHANGED  -  {spectrumDisplay}')
+            getLogger().debug(f'>>> SpectrumDisplay changed - {spectrumDisplay}')
             for strip in self.strips:
                 strip._updatePlaneAxes()
             # spectrumDisplay._setPlaneAxisWidgets()
+
+    def _stripPinnedChanged(self, data):
+        """Callback on strip pinned state change
+        """
+        trigger = data[Notifier.TRIGGER]
+        strip = data[Notifier.OBJECT]
+
+        if trigger == Notifier.CHANGE and data[Notifier.SPECIFIERS].get('pinnedChanged'):
+            getLogger().debug(f'>>> Strip changed - {strip} {strip.pinned}')
+            strip._updateStripLabelState()
+            if strip.pinned:
+                for st in self.project.strips:
+                    if st != strip:
+                        st.pinned = False
 
     def printToFile(self):
         self.application.showPrintSpectrumDisplayPopup()

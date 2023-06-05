@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-12 15:31:27 +0100 (Fri, May 12, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-05 12:34:18 +0100 (Mon, June 05, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -128,7 +128,7 @@ class GuiStrip1d(GuiStrip):
                                    IntegralMenu : self._integralMenu,
                                    MultipletMenu: self._multipletMenu,
                                    AxisMenu     : self._axisMenu
-                                  })
+                                   })
 
         # self.plotWidget.plotItem.setAcceptDrops(True)
         self.spectrumIndex = 0
@@ -154,7 +154,7 @@ class GuiStrip1d(GuiStrip):
         # self._frameGuide.setFixedSize(400, 400)
 
         # add spacer to the top left corner
-        self._frameGuide.addSpacer(8, 8, grid=(1, 0))
+        # self._frameGuide.addSpacer(8, 8, grid=(1, 0))
         row = 2
 
         self.stripLabel = StripLabelWidget(qtParent=self._frameGuide, mainWindow=self.mainWindow, strip=self, grid=(row, 1), gridSpan=(1, 1))
@@ -350,17 +350,18 @@ class GuiStrip1d(GuiStrip):
     def _initNoiseThresholdLines(self):
         from ccpn.util.Colour import hexToRgbRatio
         from functools import partial
+
         if not self._noiseThresholdLinesActive:
             return
         visibleSpectrumViews = [sv.spectrum for sv in self.spectrumViews if sv.isDisplayed]
         for spectrum in visibleSpectrumViews:
             posValue = spectrum.noiseLevel or spectrum.estimateNoise()
             negValue = spectrum.negativeNoiseLevel or -posValue
-            brush = hexToRgbRatio(spectrum.sliceColour) + (0.3,) # sliceCol plus an offset
+            brush = hexToRgbRatio(spectrum.sliceColour) + (0.3,)  # sliceCol plus an offset
             positiveLine = self._CcpnGLWidget.addInfiniteLine(values=posValue, colour=brush, movable=True, lineStyle='dashed',
-                                                              lineWidth=2.0, obj=spectrum, orientation='h',)
+                                                              lineWidth=2.0, obj=spectrum, orientation='h', )
             negativeLine = self._CcpnGLWidget.addInfiniteLine(values=negValue, colour=brush, movable=True,
-                                                              lineStyle='dashed', obj=spectrum, orientation='h',lineWidth=2.0)
+                                                              lineStyle='dashed', obj=spectrum, orientation='h', lineWidth=2.0)
             positiveLine.valuesChanged.connect(partial(self._lineThresholdChanged, positiveLine, spectrum, setPositiveThreshold=True))
             negativeLine.valuesChanged.connect(partial(self._lineThresholdChanged, negativeLine, spectrum, setPositiveThreshold=False))
             self._noiseThresholdLines.add(positiveLine)
@@ -375,7 +376,6 @@ class GuiStrip1d(GuiStrip):
                 spectrum.noiseLevel = value
             else:
                 spectrum.negativeNoiseLevel = value
-
 
     def toggleCalibrateY(self):
         if self.calibrateYAction.isChecked():

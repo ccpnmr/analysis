@@ -3,6 +3,8 @@ Module Documentation here
 """
 
 import contextlib
+
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -17,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-17 12:17:56 +0100 (Mon, April 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-05 12:34:18 +0100 (Mon, June 05, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -51,6 +53,8 @@ from ccpn.ui.gui.guiSettings import GUISTRIP_PIVOT, ZPlaneNavigationModes
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.DropBase import DropBase
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, \
@@ -716,11 +720,11 @@ class GuiStrip(Frame):
         text = f'{prefix} ({item})'
         toolTip = f'Show cursor in strip {str(strip.id)} at {label} position ({item})'
         # if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) > 0:
-        menuFunc.addItem(text=text,
-                         callback=partial(navigateToPositionInStrip, strip=strip,
-                                          positions=navigatePos,
-                                          axisCodes=navigateAxes, ),
-                         toolTip=toolTip)
+        return menuFunc.addItem(text=text,
+                                callback=partial(navigateToPositionInStrip, strip=strip,
+                                                 positions=navigatePos,
+                                                 axisCodes=navigateAxes, ),
+                                toolTip=toolTip)
         # else:
         #     print('skipping axisCodes %s %s' % (strip.axisCodes, currentStrip.axisCodes))
 
@@ -735,8 +739,8 @@ class GuiStrip(Frame):
                 navigateAxes.append(strip.axisCodes[jj])
             else:
                 showPos.append(' - ')
-        self._createMenuItemForNavigate(currentStrip, navigateAxes, navigatePos, showPos, strip, menuFunc, label,
-                                        includeAxisCodes=includeAxisCodes, prefix=prefix)
+        return self._createMenuItemForNavigate(currentStrip, navigateAxes, navigatePos, showPos, strip, menuFunc, label,
+                                               includeAxisCodes=includeAxisCodes, prefix=prefix)
 
     def _addItemsToNavigateMenu(self, position, axisCodes, label, menuFunc, includeAxisCodes=True):
         """Adds item to navigate to section of context menu.
@@ -756,7 +760,9 @@ class GuiStrip(Frame):
 
         menuFunc.setEnabled(True)
         # quick way to set headings colour - for all disabled items
-        menuFunc.setStyleSheet("QMenu::item:!enabled { color: dodgerblue; }")
+        menuFunc.setStyleSheet("QMenu::item:!enabled { color: dodgerblue; }"
+                               "QFrame::hover { background-color: dodgerblue; }"
+                               )
 
         # add the opposite diagonals for matching axisCodes - always at the top of the list
         indices = getAxisCodeMatchIndices(currentStrip.axisCodes, axisCodes, allMatches=False)
@@ -770,13 +776,40 @@ class GuiStrip(Frame):
 
         menuFunc.addSeparator()
 
+        from ccpn.ui.gui.widgets.Icon import Icon
+
+        _icon = Icon('icons/pin-black')  # use the black as gets disabled
+        _previousMenuItem = None
+        _currentMenuItem = None
+        permItem = None
+
         # add the permutations for the other strips
         for spectrumDisplay in self.current.project.spectrumDisplays:
             if spectrumDisplay == currentStrip.spectrumDisplay:
                 continue
 
             specCount = 0
-            specItem = menuFunc.addItem(text=spectrumDisplay.pid)
+            specAction = QtWidgets.QWidgetAction(self)
+            _frame = Frame(self, setLayout=True, hAlign='left', margins=(2, 2, 2, 2))
+
+            # make a frame inside the menu to allow setting colours/properties
+            if len(spectrumDisplay.strips) == 1 and spectrumDisplay.strips[0].pinned:
+                _iconLabel = Label(_frame, grid=(0, 0))
+                _iconLabel.setPixmap(_icon.pixmap(QtCore.QSize(18, 18)))
+                _iconLabel.setFixedSize(18, 18)
+            else:
+                Spacer(_frame, 18, 18, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed, grid=(0, 0))
+            _label = Label(_frame, text=spectrumDisplay.pid, grid=(0, 1), hPolicy='fixed', hAlign='left')
+
+            _strip = spectrumDisplay.strips[0]
+            if self.mainWindow._previousStrip == _strip:
+                _previousMenuItem = _label
+            elif self.current.strip == _strip:
+                # duh, this should never be in the list
+                _currentMenuItem = _label
+
+            specAction.setDefaultWidget(_frame)
+            menuFunc.addAction(specAction)
 
             prefix = '    ' if len(spectrumDisplay.strips) > 1 else '  '
             for strip in spectrumDisplay.strips:
@@ -784,7 +817,27 @@ class GuiStrip(Frame):
                     continue
 
                 strCount = 0
-                strItem = menuFunc.addItem(text=f'  {strip.pid}')
+                strAction = QtWidgets.QWidgetAction(self)
+                _frame = Frame(self, setLayout=True, hAlign='left', margins=(2, 2, 2, 2))
+
+                if strip.pinned:
+                    _iconLabel = Label(_frame, grid=(0, 0))
+                    _iconLabel.setPixmap(_icon.pixmap(QtCore.QSize(18, 18)))
+                    _iconLabel.setFixedSize(18, 18)
+                else:
+                    Spacer(_frame, 18, 18, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed, grid=(0, 0))
+                _label = Label(_frame, text='    ' + strip.pid, grid=(0, 1), hPolicy='fixed', hAlign='left')
+
+                if len(spectrumDisplay.strips) > 1:
+                    # otherwise the strips are hidden and the spectrumDisplay label holds the pin/colour
+                    if self.mainWindow._previousStrip == strip:
+                        _previousMenuItem = _label
+                    elif self.current.strip == strip:
+                        # duh, this should never be in the list
+                        _currentMenuItem = _label
+
+                strAction.setDefaultWidget(_frame)
+                menuFunc.addAction(strAction)
 
                 # get a list of all isotope code matches for each axis code in 'strip'
                 indices = getAxisCodeMatchIndices(strip.axisCodes, axisCodes, allMatches=True)
@@ -819,20 +872,31 @@ class GuiStrip(Frame):
                 for perm2 in newPerms.values():
                     # ignore all Nones
                     if perm2.count(None) != len(perm2):
-                        self._createCommonMenuItem(currentStrip, includeAxisCodes, label, menuFunc, perm2, position, strip, prefix=prefix)
+                        permItem = self._createCommonMenuItem(currentStrip, includeAxisCodes, label, menuFunc, perm2, position, strip, prefix=prefix)
                         strCount += 1
                         specCount += 1
 
                 # hide the spectrumDisplay/strip menu items if nothing added
-                strItem.setEnabled(False)
+                strAction.setEnabled(False)
                 if not strCount or len(spectrumDisplay.strips) == 1:
-                    strItem.setVisible(False)
+                    strAction.setVisible(False)
 
-            specItem.setEnabled(False)
+            specAction.setEnabled(False)
             if not specCount:
-                specItem.setVisible(False)
+                specAction.setVisible(False)
 
             menuFunc.addSeparator()
+
+        if _previousMenuItem:
+            _previousMenuItem.setStyleSheet("QLabel { color: orange; }")
+        if _currentMenuItem:
+            # duh, this should never be in the list
+            _currentMenuItem.setStyleSheet("QLabel { color: mediumseagreen; }")
+
+        # # required if setProperty is used for the styleSheets
+        # menuFunc.style().unpolish(menuFunc)
+        # menuFunc.style().polish(menuFunc)
+        # menuFunc.update()
 
     def _addItemsToNavigateToPeakMenu(self, peaks):
         """Adds item to navigate to peak position from context menu.
@@ -1137,6 +1201,11 @@ class GuiStrip(Frame):
         if self.stripLabel:
             self.stripLabel.setLabelColour(CCPNGLWIDGET_HEXHIGHLIGHT if flag else CCPNGLWIDGET_HEXFOREGROUND)
             self.stripLabel.setHighlighted(flag)
+
+    def _updateStripLabelState(self, *args):
+        """Update the visible state of the pinned icon.
+        """
+        self.stripLabel.setPinned(self.pinned)
 
     def _attachZPlaneWidgets(self):
         """Attach the ZPlane widgets for the current strip into the spectrumDisplay axis frame

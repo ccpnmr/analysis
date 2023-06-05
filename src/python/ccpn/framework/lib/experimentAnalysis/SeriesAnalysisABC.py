@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-22 14:51:54 +0100 (Mon, May 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-05 09:40:47 +0100 (Mon, June 05, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -400,6 +400,8 @@ class SeriesAnalysisABC(ABC):
         Note, MAD and AAD are often abbreviated the same way, in fact, in scipy MAD is Median absolute deviation,
         whereas in Pandas MAD is Mean absolute deviation!
         """
+        if columnName not in data:
+            return
         factor = factor if factor and factor >0 else 1
         thresholdValue = None
         if data is not None:

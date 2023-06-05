@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-02 12:10:46 +0100 (Fri, June 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-05 09:40:47 +0100 (Mon, June 05, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -61,6 +61,7 @@ class MainPlotPanel(GuiPanel):
         self._lastViewMode = None
         self._plotType = PlotType.BAR.description
         self._plottedDf = None
+        self._plotTitle = None
 
         ## Brush
         self._aboveBrush = guiNameSpaces.BAR_aboveBrushHex
@@ -116,6 +117,7 @@ class MainPlotPanel(GuiPanel):
         dataFrame = self.guiModule.getVisibleDataFrame(includeHiddenColumns=True)
         plotType = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_PlotType).getByText()
         self._plotType = plotType
+        self._plotTitle = None # to reset
         if dataFrame is None:
             self.mainPlotWidget.clear()
             return
@@ -148,6 +150,18 @@ class MainPlotPanel(GuiPanel):
             raise RuntimeError(f'Plot type {plotType} not implemented')
         self._plotType = plotType
         self.updatePanel()
+
+    @property
+    def plotTitle(self):
+        if not self._plotTitle:
+            resultDataTable = self.guiModule.backendHandler.resultDataTable
+            if resultDataTable:
+                self._plotTitle = resultDataTable.pid
+        return self._plotTitle
+
+    @plotTitle.setter
+    def plotTitle(self, title:str):
+        self._plotTitle = title
 
     @property
     def viewMode(self):
@@ -232,7 +246,7 @@ class MainPlotPanel(GuiPanel):
         hideThresholdLines = False
         if abs(self.thresholdValue) > np.abs(np.max(dataFrame[self.yColumnName]))*10:
             hideThresholdLines = True
-            getLogger().warning(f'Threshold value of {self.thresholdValue} is way larger the currently plotted data. Please reset from settings to re-enable the threshold line.' )
+            getLogger().warning(f'Threshold value of {self.thresholdValue} is too large to be displayed for the currently plotted data. Please reset from settings to re-enable the threshold line.' )
 
         self.mainPlotWidget.plotData(dataFrame,
                                      plotName=self.plotType,
@@ -245,7 +259,8 @@ class MainPlotPanel(GuiPanel):
                                      objectColumnName=seriesVariables.COLLECTIONPID,
                                      colourColumnName=guiNameSpaces.BRUSHLABEL,
                                      clearPlot=True,
-                                     hideThresholdLines = hideThresholdLines
+                                     hideThresholdLines = hideThresholdLines,
+                                    plotTitle = self.plotTitle
                                      )
         self._updateAxisLabels()
 

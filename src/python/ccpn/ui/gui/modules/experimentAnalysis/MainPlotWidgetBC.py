@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-03 16:10:16 +0100 (Sat, June 03, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-05 12:35:47 +0100 (Mon, June 05, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -151,6 +151,7 @@ class MainPlotWidget(Widget):
                  clearPlot=True,
                  resetAxes=True,
                  hideThresholdLines = False,
+                 plotTitle=None,
                  **kwargs):
         """
         Plot data on the main widget.
@@ -189,6 +190,8 @@ class MainPlotWidget(Widget):
         if hideThresholdLines:
             self.thresholdsLineHandler.setItemsVisible(False)
             self.zoomFull()
+        if plotTitle:
+            self.plotItem.setTitle(plotTitle)
 
     def getPlottedDataFrames(self):
         """
@@ -709,7 +712,7 @@ class ErrorBarsHandler(PlotItemHandlerABC):
         yValues = np.array(yValues, dtype=float)
         yErrorValues = np.array(yErrorValues, dtype=float)
 
-        errorsItem = pg.ErrorBarItem(x=xValues, y=yValues, top=yErrorValues, beam=0.5, pen=penColour)
+        errorsItem = pg.ErrorBarItem(x=xValues, y=yValues, top=yErrorValues, beam=None, pen=penColour)
         self.viewBox.addItem(errorsItem)
         self.items.append(errorsItem)
         self._rawData.append((xValues, yValues+yErrorValues))

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-01 18:57:28 +0100 (Thu, June 01, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-05 12:35:47 +0100 (Mon, June 05, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -574,9 +574,10 @@ class R2R1RatesCalculation(CalculationModel):
         er1 = merged[f'{sv.RATE_ERR}{suffix1}'].values
         er2 = merged[f'{sv.RATE_ERR}{suffix2}'].values
         ratesRatio = r2 / r1
-
+        ratesProd = r2 * r1
         ## Error calculated as = (E1/R1 + E2/R2) * R2/R1
         ratesErrorRatio = (er1 / r1 + er2 / r2) * r2 / r1
+        r1r2_err = lf.calculateUncertaintiesProductError(r1, r2, er1, er2)
 
         # clean up suffixes
         merged.columns = merged.columns.str.rstrip(suffix1)
@@ -591,6 +592,8 @@ class R2R1RatesCalculation(CalculationModel):
             outputFrame[hh] = merged[hh].values
         outputFrame[sv.R2R1] = ratesRatio
         outputFrame[sv.R2R1_ERR] = ratesErrorRatio
+        outputFrame[sv.R1R2] = ratesProd
+        outputFrame[sv.R1R2_ERR] = r1r2_err
         outputFrame[sv._ROW_UID] = merged[sv._ROW_UID].values
         outputFrame[sv.PEAKPID] = merged[sv.PEAKPID].values
         outputFrame[sv.SERIES_STEP_X] = None

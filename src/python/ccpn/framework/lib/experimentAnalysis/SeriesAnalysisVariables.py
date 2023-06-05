@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-30 14:27:58 +0100 (Tue, May 30, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-05 12:35:47 +0100 (Mon, June 05, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -150,6 +150,9 @@ R1 = 'R1'
 R2 = 'R2'
 R2R1 = 'R2/R1'
 R2R1_ERR = f'{R2R1}{_ERR}'
+R1R2 = 'R1*R2'
+R1R2_ERR = f'{R1R2}{_ERR}'
+
 RSDM = 'Reduced_Spectral_Density_Mapping'
 J0 = 'J0'
 JwX = 'JwX'

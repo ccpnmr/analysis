@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-03 16:10:16 +0100 (Sat, June 03, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-05 12:35:47 +0100 (Mon, June 05, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -111,7 +111,9 @@ RSDMdata =  project.getDataTable(RSDMdataTableName)
 
 ## check all data is in the project
 if not all([ETAxyData, ETAzData, RSDMdata]):
-    raise RuntimeError(f'Cannot run the macro. Ensure you have all required data in the project')
+    msg = f'Cannot run the macro. Ensure your dataTables are named: {ETAxyDataName, ETAzDataName, RSDMdataTableName}'
+    showMessage('Error with input data', msg)
+    raise RuntimeError(msg)
 
 ## calculate the model values.
 

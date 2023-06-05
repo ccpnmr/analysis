@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-05 13:50:51 +0100 (Mon, June 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-05 13:51:12 +0100 (Mon, June 05, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -244,7 +244,6 @@ rexSigma_error = R2_ERR + r2o_error
 ############################################################
 ##############                Plotting              #########################
 ############################################################
-
 
 
 def _ploteExchangeRates(pdf):

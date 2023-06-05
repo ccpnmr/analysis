@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-05 15:19:55 +0100 (Mon, June 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-05 16:13:36 +0100 (Mon, June 05, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -48,7 +48,7 @@ from ccpn.ui.gui.widgets.HLine import LabeledHLine, HLine
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER, setColourScheme, FONTLIST, ZPlaneNavigationModes
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBars import PanelUpdateState
-from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning
+from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning, showYesNo
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.ui.gui.widgets.SettingsWidgets import ALL, UseCurrent
 from ccpn.ui.gui.widgets.BarGraphWidget import TICKOPTIONS
@@ -1319,7 +1319,7 @@ class AppearancePanel(GuiSettingPanel):
         mainPlotWidget = panel.mainPlotWidget
         plotTypeW = self.getWidget(guiNameSpaces.WidgetVarName_PlotType)
         if sel in scatterOnly and panel.plotType == PlotType.BAR.description:
-            showWarning('Scatter Only', 'The selected axis data is available only as a scatter plot')
+            getLogger().info(f'MainPlot settings changed. The selected axis data {sel} is available only as a scatter plot')
             panel.setPlotType(PlotType.SCATTER.description)
             plotTypeW.setByText(PlotType.SCATTER.description, silent=True)
         self._updateMainPlotPanel()

@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-05 12:35:47 +0100 (Mon, June 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-05 13:50:51 +0100 (Mon, June 05, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -40,6 +40,7 @@ __date__ = "$Date: 2023-02-03 10:04:03 +0000 (Fri, February 03, 2023) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
 
 
 ############################################################
@@ -103,11 +104,76 @@ import ccpn.macros.relaxation._macrosLib as macrosLib
 from ccpn.ui.gui.widgets.MessageDialog import  showMessage, showMulti
 from ccpn.framework.PathsAndUrls import CCPN_SUMMARIES_DIRECTORY
 from ccpn.util.Path import aPath, joinPath
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
+import ccpn.ui.gui.widgets.PulldownListsForObjects as cw
+from ccpn.core.lib.Pid import Pid, createPid
+# create a very simple popup to get the dataTable names
 
+ETAxyDataPid = createPid('DT', ETAxyDataName)
+ETAzDataPid = createPid('DT', ETAzDataName)
+RSDMDataPid = createPid('DT', RSDMdataTableName)
+
+
+class DataTableSelection(CcpnDialogMainWidget):
+    def __init__(self, parent=None, mainWindow=None, title='Select DataTable',  **kwds):
+        super().__init__(parent, setLayout=True, minimumSize=(450, 250), windowTitle=title, **kwds)
+        self.mainWindow = mainWindow
+        self.application = self.mainWindow.application
+        self.project = self.mainWindow.project
+
+        self.setOkButton(callback=self._okClicked, tipText='Run Calculation')
+        self.setCloseButton(callback=self.reject, tipText='Close popup')
+        self.setDefaultButton(CcpnDialogMainWidget.CLOSEBUTTON)
+        # # initialise the buttons and dialog size
+        self._postInit()
+
+        self.widgetETAxy = cw.DataTablePulldown(self.mainWidget,
+                                                mainWindow=self.mainWindow,
+                                                labelText='Select the ETAxy DataTable',
+                                                showSelectName=True,
+                                                grid=(0, 0), callback=None)
+        self.widgetETAz = cw.DataTablePulldown(self.mainWidget,
+                                               mainWindow=self.mainWindow,
+                                               labelText='Select the ETAz DataTable',
+                                               showSelectName=True,
+                                               grid=(1, 0), callback=None)
+        self.widgetRSDM = cw.DataTablePulldown(self.mainWidget,
+                                               mainWindow=self.mainWindow,
+                                               labelText='Select the RSDM DataTable',
+                                               showSelectName=True,
+                                               grid=(2, 0), callback=None)
+        self.widgetETAxy.pulldownList.select(f'DT:{ETAxyDataName}')
+        self.widgetETAz.pulldownList.select(f'DT:{ETAzDataName}')
+
+        for i in self.widgetRSDM.pulldownList.texts:
+            if 'RSDM' in i:
+                self.widgetRSDM.pulldownList.select(i)
+                break
+
+
+    def _okClicked(self):
+        global ETAxyDataPid
+        global ETAzDataPid
+        global RSDMDataPid
+        ETAxyDataPid =self.widgetETAxy.getText()
+        ETAzDataPid = self.widgetETAz.getText()
+        RSDMDataPid = self.widgetRSDM.getText()
+        self.accept()
+
+    def _cancelClicked(self):
+        """ Set the objs to None so to don't proceed.
+        """""
+        global RSDMDataPid
+        RSDMDataPid = None
+
+popup = DataTableSelection(None, mainWindow=mainWindow)
+popup.exec_()
 ## get the objects
-ETAxyData = project.getDataTable(ETAxyDataName)
-ETAzData =  project.getDataTable(ETAzDataName)
-RSDMdata =  project.getDataTable(RSDMdataTableName)
+ETAxyData = get(ETAxyDataPid)
+ETAzData =  get(ETAzDataPid)
+RSDMdata =  get(RSDMDataPid)
 
 ## check all data is in the project
 if not all([ETAxyData, ETAzData, RSDMdata]):
@@ -117,9 +183,7 @@ if not all([ETAxyData, ETAzData, RSDMdata]):
 
 ## calculate the model values.
 
-
 RSDMdf = RSDMdata.data
-
 ETAzdf = ETAzData.data.groupby([sv.COLLECTIONID]).first()
 ETAxydf = ETAxyData.data.groupby([sv.COLLECTIONID]).first()
 
@@ -186,23 +250,16 @@ rexSigma_error = R2_ERR + r2o_error
 def _ploteExchangeRates(pdf):
     """ Plot  Rel Exchange with the Sequence """
     fig, axes  = macrosLib._makeFigureLayoutWithOneColumn(3, height_ratios=[3, 3, 1])
-    axRex, axRexSDM, axss = axes
-    axRex.errorbar(x, rexSigma,  yerr=rexSigma_error, color = scatterColor, ms=scatterSize, fmt='o', ecolor=scatterColorError, elinewidth=scatterErrorLinewidth, capsize=scatterErrorCapSize )
-    axRex.set_title('R$_{ex}$ via σ$_{NH}$ ', fontsize=fontTitleSize, color=titleColor, pad=1)
-    axRex.set_ylabel('R$_{ex}$', fontsize=fontYSize)
-    macrosLib._setXTicks(axRex, labelMajorSize, labelMinorSize)
-    macrosLib._setCommonYLim(axRex, rexSigma)
-    axRex.legend(loc='lower right', prop={'size': 4})
-    axRex.spines[['right', 'top']].set_visible(False)
+    ax, ax2, axss = axes
 
-    axRexSDM.plot(x, [0]*len(x), '--', linewidth=0.5)
-    axRexSDM.errorbar(x, rexFromExpR2, yerr=rexSigma_error, color=scatterColor, ms=scatterSize, fmt='o', ecolor=scatterColorError, elinewidth=scatterErrorLinewidth, capsize=scatterErrorCapSize)
-    axRexSDM.set_title('R$_{ex}$ via Experimental R2 and η$_{xy}$', fontsize=fontTitleSize, color=titleColor, pad=1)
-    axRexSDM.set_ylabel('R$_{ex}$', fontsize=fontYSize)
-    macrosLib._setXTicks(axRexSDM, labelMajorSize, labelMinorSize)
+    ax.plot(x, [0]*len(x), '--', linewidth=0.5)
+    ax.errorbar(x, rexFromExpR2, yerr=rexSigma_error, color=scatterColor, ms=scatterSize, fmt='o', ecolor=scatterColorError, elinewidth=scatterErrorLinewidth, capsize=scatterErrorCapSize)
+    ax.set_title('R$_{ex}$ via Experimental R2 and η$_{xy}$', fontsize=fontTitleSize, color=titleColor, pad=1)
+    ax.set_ylabel('R$_{ex}$', fontsize=fontYSize)
+    macrosLib._setXTicks(ax, labelMajorSize, labelMinorSize)
     # macrosLib._setCommonYLim(axRexSDM, rexSigma)
-    axRexSDM.legend(loc='lower right', prop={'size': 4})
-    axRexSDM.spines[['right', 'top']].set_visible(False)
+    ax.legend(loc='lower right', prop={'size': 4})
+    ax.spines[['right', 'top']].set_visible(False)
 
     ## plot Secondary structure
     if macrosLib._isSequenceValid(sequence, ss_sequence):
@@ -210,7 +267,7 @@ def _ploteExchangeRates(pdf):
            showSequenceNumber=False, )
     else:
            axss.remove()
-
+    ax2.remove()
     plt.tight_layout()
     fig.suptitle(titlePdf, fontsize=figureTitleFontSize, )
     plt.subplots_adjust(top=0.85)
@@ -220,11 +277,6 @@ def _ploteExchangeRates(pdf):
 ###################      start inline macro       #####################
 args = macrosLib.getArgs().parse_args()
 globals().update(args.__dict__)
-
-## data preparation
-## get the various values  and perform the needed calculations
-
-
 
 
 ####################     end data preparation     ##################

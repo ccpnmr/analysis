@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-03 16:10:16 +0100 (Sat, June 03, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-05 13:50:51 +0100 (Mon, June 05, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -322,7 +322,10 @@ def _calculateR20(d, c, J0, JWH, JWN):
 
 def _calculateR20viaETAxy(r2, ETAxy):
     """
-    Here the R20 is estimated ETA xy and the averageR2/ETAxy ratio
+    Here the R20 is estimated ETA xy and the averageR2/ETAxy ratio.
+    Ref: eq. 5 from Evaluation of two simplified15N-NMR methods fordeterminingμs–ms dynamics of proteins.
+    Mathias A. S. Hass and Jens J. Led. Magn. Reson. Chem.2006;44: 761 – 769. DOI: 10.1002/mrc.1845
+
     :return: r20 array
     """
     r20 = ETAxy * np.mean((r2/ETAxy))
@@ -331,6 +334,8 @@ def _calculateR20viaETAxy(r2, ETAxy):
 def _calculateR20viaR1(r2, r1):
     """
     Here the R20 is estimated ETA xy and the average R2/R1 ratio
+    Ref: eq. 6 from Evaluation of two simplified15N-NMR methods fordeterminingμs–ms dynamics of proteins.
+    Mathias A. S. Hass and Jens J. Led. Magn. Reson. Chem.2006;44: 761 – 769. DOI: 10.1002/mrc.1845
     :return: R20
     """
     r20 = r1 * np.mean((r2/r1))

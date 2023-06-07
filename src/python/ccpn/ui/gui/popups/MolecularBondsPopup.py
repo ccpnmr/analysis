@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-23 15:27:39 +0100 (Tue, May 23, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-07 15:13:00 +0100 (Wed, June 07, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -28,7 +28,7 @@ __date__ = "$Date: 2023-05-22 15:42:58 +0100 (Mon, May 22, 2023) $"
 
 from PyQt5 import QtWidgets
 from collections import OrderedDict
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
+from ccpn.core.lib.ContextManagers import undoBlockWithSideBar
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget, \
     ListCompoundWidget, ButtonCompoundWidget
@@ -270,8 +270,14 @@ class MolecularBondsPopup(CcpnDialogMainWidget):
         atm1 = self._atoms.get(self._group1Pulldown.getText())
         atm2 = self._atoms.get(self._group2Pulldown.getText())
         if atm1 and atm2:
-            # create new bond from project
-            self.project.newBond(atoms=(atm1, atm2), bondType=opt.get(NEWBONDTYPE))
+            with undoBlockWithSideBar():
+                # create new bond from project
+                self.project.newBond(atoms=(atm1, atm2), bondType=opt.get(NEWBONDTYPE))
+                # remove existing HG atoms
+                if atm := atm1.residue.getAtom('HG'):
+                    atm.delete()
+                if atm := atm2.residue.getAtom('HG'):
+                    atm.delete()
 
         # repopulate the widgets
         self._selectBondTypeCallback()
@@ -284,11 +290,18 @@ class MolecularBondsPopup(CcpnDialogMainWidget):
         preTexts = OrderedSet(preTexts)
         postTexts = OrderedSet(self._bondsList.getTexts())
 
-        with undoBlockWithoutSideBar():
+        with undoBlockWithSideBar():
             for txt in preTexts - postTexts:
                 if bnd := self._bonds.get(txt):
+
+                    for atm in bnd.atoms:
+                        if not atm.residue.getAtom('HG'):
+                            # replace the HG atom in the CYS
+                            atm.residue.newAtom('HG')
                     bnd.delete()
+
                     del self._bonds[txt]
+
 
         self._enablePulldownItems(self._group1Pulldown)
         self._enablePulldownItems(self._group2Pulldown)
@@ -301,10 +314,16 @@ class MolecularBondsPopup(CcpnDialogMainWidget):
         """
         selectedTexts = self._bondsList.listWidget.getSelectedTexts()
 
-        with undoBlockWithoutSideBar():
+        with undoBlockWithSideBar():
             for txt in selectedTexts:
                 if bnd := self._bonds.get(txt):
+
+                    for atm in bnd.atoms:
+                        if not atm.residue.getAtom('HG'):
+                            # replace the HG atom in the CYS
+                            atm.residue.newAtom('HG')
                     bnd.delete()
+
                     del self._bonds[txt]
 
         # remove items from list-widget without emitting spurious signals

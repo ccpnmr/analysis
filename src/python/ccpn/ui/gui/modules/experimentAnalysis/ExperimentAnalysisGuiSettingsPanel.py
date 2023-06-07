@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-05 16:13:36 +0100 (Mon, June 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-07 16:50:12 +0100 (Wed, June 07, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1120,10 +1120,16 @@ class AppearancePanel(GuiSettingPanel):
         return self.widgetDefinitions
 
     def _plotTypeChanged(self):
-
+        """ Callback for changing the plot type. Set the type in the mainWidget but only if the x/y axes are allowed in the selected widget. e.g.: cannot plot float as X axis in a barchart """
         panel = self.guiModule.panelHandler.getPanel(guiNameSpaces.MainPlotPanel)
         w = self.getWidget(guiNameSpaces.WidgetVarName_PlotType)
         t = w.getByText()
+        if  panel._xColumnType in [float] and t == PlotType.BAR.description:
+            msg = f'The selected X axis data {panel.xColumnName} can only be displayed as a scatter plot.'
+            getLogger().warning(msg)
+            showWarning('Plot not permitted', msg)
+            w.setByText(PlotType.SCATTER.description, silent=True) #revert the selection to the previous
+            return
         panel.setPlotType(t)
         self._updateMainPlotPanel()
 

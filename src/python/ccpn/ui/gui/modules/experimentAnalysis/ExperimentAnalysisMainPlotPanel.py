@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-05 09:40:47 +0100 (Mon, June 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-07 16:50:12 +0100 (Wed, June 07, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -146,6 +146,7 @@ class MainPlotPanel(GuiPanel):
         return self._plotType
 
     def setPlotType(self, plotType):
+
         if plotType not in self.mainPlotWidget.allowedPlotTypes:
             raise RuntimeError(f'Plot type {plotType} not implemented')
         self._plotType = plotType
@@ -255,13 +256,16 @@ class MainPlotPanel(GuiPanel):
                                      xColumnName= self.xColumnName,
                                      yColumnName=self.yColumnName,
                                      yErrColumnName=f'{self.yColumnName}{seriesVariables._ERR}',
-                                     thresholdColumnName = seriesVariables.XTHRESHOLD,
+                                     thresholdColumnName = guiNameSpaces.XTHRESHOLD,
                                      objectColumnName=seriesVariables.COLLECTIONPID,
                                      colourColumnName=guiNameSpaces.BRUSHLABEL,
                                      clearPlot=True,
                                      hideThresholdLines = hideThresholdLines,
-                                    plotTitle = self.plotTitle
+                                     plotTitle = self.plotTitle
                                      )
+
+        thresholdColour = dataFrame[guiNameSpaces.XthresholdBrush].values[-1]
+        self.mainPlotWidget.thresholdsLineHandler.setColour(thresholdColour)
         self._updateAxisLabels()
 
     def _isItemToggledOn(self, itemName):
@@ -269,6 +273,28 @@ class MainPlotPanel(GuiPanel):
         if action is not None:
             return action.isChecked()
         return False
+
+    def _checkColumnType(self, selected):
+        """Checks the column name from the settings and the main data. Returns the selected X axis data type.
+        :return:  one of  float, int, str, None  """
+        tableDf = self.guiModule.getVisibleDataFrame(True)
+        if not str(selected) in tableDf.columns:
+            txt = f'No data for the selected item "{"Empty" if not selected else selected}". Selected a valid entry for plotting the the X Axis values '
+            getLogger().warning(txt)
+            return
+        return tableDf[selected].values.dtype
+
+    @property
+    def _xColumnType(self):
+        """Checks the column name from the settings and the main data. Returns the selected X axis data type.
+        :return:  one of  float, int, str, None  """
+        return self._checkColumnType(self.xColumnName)
+
+    @property
+    def _yColumnType(self):
+        """Checks the column name from the settings and the main data. Returns the selected X axis data type.
+        :return:  one of  float, int, str, None  """
+        return self._checkColumnType(self.yColumnName)
 
 
     def _thresholdLineMoved(self):
@@ -436,7 +462,8 @@ class MainPlotPanel(GuiPanel):
         dataFrame.loc[aboveDf.index, guiNameSpaces.BRUSHLABEL] = _aboveBrush
         dataFrame.loc[belowDf.index, guiNameSpaces.BRUSHLABEL] = self._belowBrush
         dataFrame.loc[untraceableDd.index, guiNameSpaces.BRUSHLABEL] = self._untraceableBrush
-        dataFrame.loc[dataFrame.index, seriesVariables.XTHRESHOLD] = self.thresholdValue
+        dataFrame.loc[dataFrame.index, guiNameSpaces.XTHRESHOLD] = self.thresholdValue
+        dataFrame.loc[dataFrame.index, guiNameSpaces.XthresholdBrush] = self._tresholdLineBrush
 
         return dataFrame
 

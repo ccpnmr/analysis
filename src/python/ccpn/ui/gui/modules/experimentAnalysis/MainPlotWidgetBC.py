@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-05 12:35:47 +0100 (Mon, June 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-07 16:50:12 +0100 (Wed, June 07, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -39,6 +39,7 @@ from typing import Optional, List, Tuple, Any, Sequence, Union
 from ccpn.util.Logging import getLogger
 from collections import defaultdict
 from functools import partial
+import itertools
 
 AllTicks  = 'All Ticks'
 MinimalTicks = 'Minimal Ticks'
@@ -69,6 +70,15 @@ class PlotType(DataEnum):
     SCATTER = 0, _SCATTER
     BAR = 1, _BAR
     LINE = 2, _LINE
+
+    @property
+    def _allowedPlotTypes(self):
+        """ Might be overkilled. """
+        allowedCombinations = []
+        for s in self.descriptions():
+            allowedCombinations += list(map(''.join, itertools.product(*zip(s.upper(), s.lower()))))
+        return allowedCombinations
+
 
 class MainPlotWidget(Widget):
     """
@@ -738,8 +748,11 @@ class ThresholdLinesHandler(PlotItemHandlerABC):
         self._lineMovedCallback = lineMovedCallback
 
     def plotData(self, dataFrame, columnsDict, **kwargs):
+
         yValues = self._getValuesForColumn(dataFrame, THRESHOLDCOLUMNNAME, columnsDict)
-        item = pg.InfiniteLine(angle=0, movable=True, pen='b')
+        colour = '#0000FF'  # blue
+        pen = pg.functions.mkPen(colour)
+        item = pg.InfiniteLine(angle=0, movable=True, pen=pen)
         item.sigPositionChangeFinished.connect(partial(self._moved, item))
         if len(yValues)>0:
             pos = yValues[-1]
@@ -752,6 +765,11 @@ class ThresholdLinesHandler(PlotItemHandlerABC):
     def _moved(self, item, *args, **kwargs):
         if self._lineMovedCallback is not None:
             self._lineMovedCallback(position=item.getYPos(), name=item._name)
+
+    def setColour(self, hexColour, width=1):
+        pen = pg.functions.mkPen(hexColour, width=width)
+        for item in self.items:
+            item.setPen(pen)
 
 class LegendHandler(PlotItemHandlerABC):
     # NOT sure if we are implementing this

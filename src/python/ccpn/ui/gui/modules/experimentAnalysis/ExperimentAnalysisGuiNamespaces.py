@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-02 12:10:45 +0100 (Fri, June 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-07 16:50:12 +0100 (Wed, June 07, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -44,6 +44,8 @@ BAR_aboveBrushHex = '#1020aa'  # dark blue
 BAR_belowBrushHex = '#FF0000'  # red
 BAR_untracBrushHex = '#b0b0b0'  # light grey
 BAR_thresholdLineHex = '#0000FF'  # blue
+XthresholdBrush = 'xThresholdBrush'
+XTHRESHOLD = 'xThreshold'
 
 ## Startup colour-names for MainPlot-settings.
 BAR_aboveBrush = 'CCPNgreen'

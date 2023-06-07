@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-07 13:57:27 +0100 (Wed, June 07, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-07 14:56:27 +0100 (Wed, June 07, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -78,13 +78,13 @@ class GLGlobalData(QtWidgets.QWidget):
         self.fonts = {}
         self.shaders = None
 
-        # _ver = QtGui.QOpenGLVersionProfile()
-        # self._GLVersion = GL.glGetString(GL.GL_VERSION)
-        # self._GLShaderVersion = GL.glGetString(GL.GL_SHADING_LANGUAGE_VERSION)
-        # getLogger().debug(f"OpenGL: {self._GLVersion.decode('utf-8')}")
-        # getLogger().debug(f"GLSL: {self._GLShaderVersion.decode('utf-8')}")
-        # _format = QtGui.QSurfaceFormat()
-        # getLogger().debug(f"Surface: {_format.version()}")
+        _ver = QtGui.QOpenGLVersionProfile()
+        self._GLVersion = GL.glGetString(GL.GL_VERSION)
+        self._GLShaderVersion = GL.glGetString(GL.GL_SHADING_LANGUAGE_VERSION)
+        getLogger().debug(f"OpenGL: {self._GLVersion.decode('utf-8')}")
+        getLogger().debug(f"GLSL: {self._GLShaderVersion.decode('utf-8')}")
+        _format = QtGui.QSurfaceFormat()
+        getLogger().debug(f"Surface: {_format.version()}")
 
         self.loadFonts()
         self.initialiseShaders()

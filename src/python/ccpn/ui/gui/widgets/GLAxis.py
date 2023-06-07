@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-07 13:49:04 +0100 (Wed, June 07, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-07 13:57:27 +0100 (Wed, June 07, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1480,17 +1480,17 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                                                dimension=2,
                                                GLContext=self))
 
-        # get the current buffering mode and set the required length to the number of buffers
-        fmt = self.format()
-        self._numBuffers = int(fmt.swapBehavior()) or 2
-        self._glCursorQueue = ()
-        for buf in range(self._numBuffers):
-            self._glCursorQueue += (GLVertexArray(numLists=1,
-                                                  renderMode=GLRENDERMODE_REBUILD,
-                                                  blendMode=False,
-                                                  drawMode=GL.GL_LINES,
-                                                  dimension=2,
-                                                  GLContext=self),)
+        # # get the current buffering mode and set the required length to the number of buffers
+        # fmt = self.format()
+        # self._numBuffers = int(fmt.swapBehavior()) or 2
+        # self._glCursorQueue = ()
+        # for buf in range(self._numBuffers):
+        #     self._glCursorQueue += (GLVertexArray(numLists=1,
+        #                                           renderMode=GLRENDERMODE_REBUILD,
+        #                                           blendMode=False,
+        #                                           drawMode=GL.GL_LINES,
+        #                                           dimension=2,
+        #                                           GLContext=self),)
 
         self.viewports = GLViewports()
         self._initialiseViewPorts()

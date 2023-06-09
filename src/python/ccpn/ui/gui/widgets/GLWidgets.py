@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-01 19:39:58 +0100 (Thu, June 01, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-09 18:15:52 +0100 (Fri, June 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -122,21 +122,25 @@ class GuiNdWidget(CcpnGLWidget):
                                         # if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
                                         if _isInPlane:
                                             peaks.append(peak)
-                                            if firstOnly:
-                                                return peaks
+                                            # if firstOnly:
+                                            #     return peaks
 
                                 elif (xPositions[0] < px < xPositions[1]
                                       and yPositions[0] < py < yPositions[1]) or \
                                             (minX < xPosition < maxX and minY < yPosition < maxY):
                                     peaks.append(peak)
-                                    if firstOnly:
-                                        return peaks if peak in self.current.peaks else []
+                                    # if firstOnly:
+                                    #     return peaks if peak in self.current.peaks else []
 
                             except Exception:
                                 # NOTE:ED - skip for now
                                 continue
 
-        return peaks
+        # put the selected peaks to the front of the list
+        currentPeaks = set(self.current.peaks)
+        peaks = [pk for pk in peaks if pk in currentPeaks] + [pk for pk in peaks if pk not in currentPeaks]
+
+        return peaks[:1] if firstOnly else peaks
 
     def _mouseInPeakLabel(self, xPosition, yPosition, firstOnly=False):
         """Find the peaks under the mouse.
@@ -204,19 +208,23 @@ class GuiNdWidget(CcpnGLWidget):
                                         # if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
                                         if _isInPlane:
                                             peaks.append(peak)
-                                            if firstOnly:
-                                                return peaks
+                                            # if firstOnly:
+                                            #     return peaks
 
                                 elif (minX < xPosition < maxX and minY < yPosition < maxY):
                                     peaks.append(peak)
-                                    if firstOnly:
-                                        return peaks if peak in self.current.peaks else []
+                                    # if firstOnly:
+                                    #     return peaks if peak in self.current.peaks else []
 
                             except Exception:
                                 # NOTE:ED - skip for now
                                 continue
 
-        return peaks
+        # put the selected peaks to the front of the list
+        currentPeaks = set(self.current.peaks)
+        peaks = [pk for pk in peaks if pk in currentPeaks] + [pk for pk in peaks if pk not in currentPeaks]
+
+        return peaks[:1] if firstOnly else peaks
 
     # def _mouseInMultiplet(self, xPosition, yPosition, firstOnly=False):
     #     """Find the multiplets under the mouse.

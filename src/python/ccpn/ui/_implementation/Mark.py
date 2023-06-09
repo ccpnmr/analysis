@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 17:01:44 +0100 (Fri, June 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-09 19:13:22 +0100 (Fri, June 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -29,7 +29,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import collections
-from typing import Sequence, Tuple
+from typing import Sequence, Tuple, Union
 from itertools import zip_longest
 
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Mark as ApiMark
@@ -229,7 +229,10 @@ class Mark(AbstractWrapperObject):
 # Connections to parents:
 #=========================================================================================
 
-def _removeMarkAxes(self: Window, positions: Sequence[float], axisCodes: Sequence[str], labels: Sequence[str] = ()) -> Tuple[Tuple, ...]:
+def _removeMarkAxes(parent: Union[Window, 'SpectrumDisplay', 'Strip'],
+                    positions: Sequence[float],
+                    axisCodes: Sequence[str],
+                    labels: Sequence[str] = ()) -> Tuple[Tuple, ...]:
     """Remove existing Mark rulers based on position, axisCode and label.
 
     :param tuple/list positions: Position in unit (default ppm) of all lines in the mark
@@ -243,18 +246,19 @@ def _removeMarkAxes(self: Window, positions: Sequence[float], axisCodes: Sequenc
 
     indices = list(axisCodes)
     for pos, axis, label in markList:
-        for mark in self.marks:
+        for mark in parent.marks:
             for mPos, mAxis, mLabel in zip_longest(mark.positions, mark.axisCodes, mark.labels):
                 try:
                     posClose = (-MARKTOLERANCE < (mPos - pos) < MARKTOLERANCE)
                     if mAxis == axis and mLabel == label and posClose and axis in indices:
                         # remove this axis from the list
                         indices.remove(axis)
-                except Exception:
+                        ...
+                except Exception as es:
                     # mark may not be defined correctly.
                     continue
 
-    return tuple(tuple(mark[ind] for mark in markList if mark[1] in indices) for ind in range(3))
+    return tuple(tuple(mark[ind] for mark in markList if mark[1] in indices) for ind in range(3) if indices)
 
 
 #=========================================================================================

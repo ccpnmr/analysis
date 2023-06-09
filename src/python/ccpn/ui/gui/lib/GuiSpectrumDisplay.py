@@ -15,13 +15,14 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 12:06:25 +0100 (Fri, June 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-09 19:13:22 +0100 (Fri, June 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
+import typing
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -1327,10 +1328,10 @@ class GuiSpectrumDisplay(CcpnModule):
 
             else:
                 showWarning(
-                    f'Dropped item {obj!r}',
-                    'Wrong kind; drop Spectrum, SpectrumGroup, Peak, PeakList,'
-                    ' NmrChain, NmrResidue, NmrAtom or Strip',
-                )
+                        f'Dropped item {obj!r}',
+                        'Wrong kind; drop Spectrum, SpectrumGroup, Peak, PeakList,'
+                        ' NmrChain, NmrResidue, NmrAtom or Strip',
+                        )
         if nmrChains:
             with undoBlockWithoutSideBar():
                 self._handleNmrChains(nmrChains)
@@ -3026,18 +3027,19 @@ class GuiSpectrumDisplay(CcpnModule):
         :param tuple/list labels: Ruler labels for all lines in the mark. Default: None.
         :return a new Mark instance.
         """
-        from ccpn.ui._implementation.Mark import _newMark, _removeMarkAxes
-
         with undoBlockWithoutSideBar():
-            if marks := _removeMarkAxes(self.mainWindow, positions=positions, axisCodes=axisCodes, labels=labels):
-                pos, axes, lbls = marks
-                result = _newMark(self.mainWindow, colour=colour, positions=pos, axisCodes=axes,
-                                  style=style, units=units, labels=lbls,
-                                  )
-                # add strip to the new mark
-                result.strips = self.strips
-
-                return result
+            marks = [
+                strip.newMark(
+                        colour=colour,
+                        positions=positions,
+                        axisCodes=axisCodes,
+                        style=style,
+                        units=units,
+                        labels=labels,
+                        )
+                for strip in self.strips
+                ]
+            return tuple(filter(None, marks))
 
 #=========================================================================================
 

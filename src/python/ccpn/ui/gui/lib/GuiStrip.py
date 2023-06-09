@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 12:06:25 +0100 (Fri, June 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-09 19:13:22 +0100 (Fri, June 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1568,25 +1568,25 @@ class GuiStrip(Frame):
     def _emitSymbolChanged(self):
         # spawn a redraw event of the GL windows
         self._CcpnGLWidget.GLSignals._emitSymbolsChanged(source=None, strip=self,
-                                                         symbolDict={SYMBOLTYPE           : self.symbolType,
-                                                                     ANNOTATIONTYPE       : self.symbolLabelling,
-                                                                     SYMBOLSIZE            : self.symbolSize,
-                                                                     SYMBOLTHICKNESS       : self.symbolThickness,
+                                                         symbolDict={SYMBOLTYPE             : self.symbolType,
+                                                                     ANNOTATIONTYPE         : self.symbolLabelling,
+                                                                     SYMBOLSIZE             : self.symbolSize,
+                                                                     SYMBOLTHICKNESS        : self.symbolThickness,
                                                                      MULTIPLETANNOTATIONTYPE: self.multipletLabelling,
-                                                                     MULTIPLETTYPE        : self.multipletType,
-                                                                     CONTOURTHICKNESS      : self.contourThickness,
-                                                                     ALIASENABLED          : self.aliasEnabled,
-                                                                     ALIASSHADE            : self.aliasShade,
-                                                                     ALIASLABELSENABLED    : self.aliasLabelsEnabled,
-                                                                     PEAKSYMBOLSENABLED    : self.peakSymbolsEnabled,
-                                                                     PEAKLABELSENABLED     : self.peakLabelsEnabled,
-                                                                     PEAKARROWSENABLED     : self.peakArrowsEnabled,
+                                                                     MULTIPLETTYPE          : self.multipletType,
+                                                                     CONTOURTHICKNESS       : self.contourThickness,
+                                                                     ALIASENABLED           : self.aliasEnabled,
+                                                                     ALIASSHADE             : self.aliasShade,
+                                                                     ALIASLABELSENABLED     : self.aliasLabelsEnabled,
+                                                                     PEAKSYMBOLSENABLED     : self.peakSymbolsEnabled,
+                                                                     PEAKLABELSENABLED      : self.peakLabelsEnabled,
+                                                                     PEAKARROWSENABLED      : self.peakArrowsEnabled,
                                                                      MULTIPLETSYMBOLSENABLED: self.multipletSymbolsEnabled,
-                                                                     MULTIPLETLABELSENABLED: self.multipletLabelsEnabled,
-                                                                     MULTIPLETARROWSENABLED: self.multipletArrowsEnabled,
-                                                                     ARROWTYPES            : self.arrowType,
-                                                                     ARROWSIZE             : self.arrowSize,
-                                                                     ARROWMINIMUM          : self.arrowMinimum,
+                                                                     MULTIPLETLABELSENABLED : self.multipletLabelsEnabled,
+                                                                     MULTIPLETARROWSENABLED : self.multipletArrowsEnabled,
+                                                                     ARROWTYPES             : self.arrowType,
+                                                                     ARROWSIZE              : self.arrowSize,
+                                                                     ARROWMINIMUM           : self.arrowMinimum,
                                                                      })
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -3173,8 +3173,11 @@ class GuiStrip(Frame):
         from ccpn.ui._implementation.Mark import _newMark, _removeMarkAxes
 
         with undoBlockWithoutSideBar():
-            if marks := _removeMarkAxes(self.mainWindow, positions=positions, axisCodes=axisCodes, labels=labels):
+            if marks := _removeMarkAxes(self, positions=positions, axisCodes=axisCodes, labels=labels):
                 pos, axes, lbls = marks
+                if not pos:
+                    return
+
                 result = _newMark(self.mainWindow, colour=colour, positions=pos, axisCodes=axes,
                                   style=style, units=units, labels=lbls,
                                   )

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 12:06:25 +0100 (Fri, June 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-09 16:15:59 +0100 (Fri, June 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -43,7 +43,6 @@ import ccpn.core.lib.SpectrumLib as specLib
 from ccpn.core.lib import Pid
 
 from ccpn.util import Common as commonUtil
-from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, renameObject
 from ccpn.util.Logging import getLogger
 
@@ -568,6 +567,17 @@ class SpectrumDisplay(AbstractWrapperObject):
     @property
     def isIdle(self):
         return all(ss._scheduler.isIdle for ss in self.strips)
+
+    def _finaliseAction(self, action: str, **actionKwds):
+        """Notifiers on creation/deletion.
+        """
+        if not super()._finaliseAction(action, **actionKwds):
+            return
+
+        if action in {'create', 'delete'}:
+            for strip in self.strips:
+                # notify the strips to create their cross-references
+                strip._finaliseAction(action, **actionKwds)
 
     #===========================================================================================
     # new<Object> and other methods

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-05 15:28:42 +0000 (Thu, January 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-09 12:01:42 +0100 (Fri, June 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -170,7 +170,7 @@ class Test_Substance_SpectrumLink(WrapperTesting):
             self.substance2 = self.chain2.substances[0]
 
     def test_Substance_SpectrumLink(self):
-        checkGetSetAttr(self, obj=self.spectrum1, attrib='referenceSubstances', value=[self.substance1])
+        checkGetSetAttr(self, obj=self.spectrum1, attrib='referenceSubstances', value=(self.substance1,))
 
         ref1 = self.substance1.referenceSpectra
         self.assertEqual(ref1[0], self.spectrum1)

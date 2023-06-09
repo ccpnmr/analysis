@@ -23,8 +23,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-17 13:10:02 +0100 (Wed, May 17, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-06-09 12:05:21 +0100 (Fri, June 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -366,7 +366,7 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1,  doNeg=False,
 
     maxValues, minValues = _find1DMaxima(y_filtered, x_filtered, positiveThreshold=noiseLevel, negativeThreshold=negativeNoiseLevel, findNegative=doNeg)
     allValues = maxValues + minValues
-    allValues =  _filterLowSNFromNewMaxima(allValues, noiseLevel, negativeNoiseLevel,  snThreshold=2)
+    allValues =  _filterLowSNFromNewMaxima(allValues, noiseLevel, negativeNoiseLevel,  snThreshold=0.5)
     allValues = _filterShouldersFromNewMaxima(allValues, x_filtered, y_filtered)
     allValues = _filterKnownPeakPositionsFromNewMaxima(allValues, peak, rounding=4)
 
@@ -409,14 +409,14 @@ def _filterKnownPeakPositionsFromNewMaxima(newMaxima, peak,   rounding=4):
             newMaxima.remove(maximum)
     return newMaxima
 
-def _filterLowSNFromNewMaxima(newMaxima, noiseLevel, negativeNoise,  snThreshold=1.5):
-    """Remove known positions from the newly found maxima to avoid snapping to an existing peak"""
+def _filterLowSNFromNewMaxima(newMaxima, noiseLevel, negativeNoise,  snThreshold=0.5):
+    """Remove los s/n maxima from the newly found maxima to avoid snapping to noise"""
     for maximum in newMaxima:
         pos, intens = maximum
         ratio = None
         if intens > 0:
             ratio = intens/noiseLevel
-        if intens <0:
+        if intens < 0:
             ratio = intens/negativeNoise
         if ratio is None:
             continue

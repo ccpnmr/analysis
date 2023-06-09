@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 12:06:25 +0100 (Fri, June 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-09 17:01:44 +0100 (Fri, June 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1970,7 +1970,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                             defaultColour = '#FF0000'
 
                         try:
-                            self.mainWindow.newMark(defaultColour, [chemicalShift.value], [atomId], strips=strips)
+                            self.newMark(defaultColour, [chemicalShift.value], [atomId], strips=strips)
                         except Exception as es:
                             getLogger().warning('Error setting mark at position')
                             raise (es)

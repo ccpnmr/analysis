@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 12:58:57 +0100 (Fri, June 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-09 17:01:44 +0100 (Fri, June 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -177,12 +177,16 @@ class Mark(AbstractWrapperObject):
     def strips(self, values):
         """Set the associated strips for the mark.
         """
+        if not isinstance(values, (tuple, list, type(None))):
+            raise TypeError(f'{self.__class__.__name__}.strips must be a list or tuple, or None')
+        values = values or []
+
         try:
             refHandler = self._project._crossReferencing
             refHandler.setValues(self, 'MarkStrip', 0, values)
 
-        except Exception:
-            raise RuntimeError('Mark.strips is not implemented') from None
+        except Exception as es:
+            raise RuntimeError(f'{self.__class__.__name__}.strips: Error setting strips {es}') from es
 
     #=========================================================================================
     # Implementation functions

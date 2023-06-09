@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-01 19:39:58 +0100 (Thu, June 01, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-09 17:53:13 +0100 (Fri, June 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1568,7 +1568,50 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.symbolThicknessData.setMinimumWidth(LineEditsMinimumWidth)
         self.symbolThicknessData.valueChanged.connect(self._queueSetSymbolThickness)
 
-        #======  Peak Arrows ======
+        #======  Multiplet Symbols ======
+        row += 1
+        _makeLine(parent, grid=(row, 0), text='Multiplet Symbols')
+
+        row += 1
+        _texts = ['Short', 'Full', 'NmrAtom Pid', 'Minimal', 'Multiplet Pid', 'ClusterId', 'Annotation']
+        _names = ['annMDS_Short', 'annMDS_Full', 'annMDS_Pid', 'annMDS_Minimal', 'annMDS_Id', 'annMDS_ClusterId', 'annMDS_Annotation']
+
+        self.multipletAnnotationLabel = Label(parent, text="Label", hAlign='r', grid=(row, 0))
+        self.multipletAnnotationData = RadioButtons(parent, texts=_texts,
+                                            objectNames=_names,
+                                            objectName='annMDS',
+                                            # selectedInd=annotationType,
+                                            callback=self._queueSetMultipletAnnotation,
+                                            direction='h',
+                                            grid=(row, 1), gridSpan=(1, 3), hAlign='l',
+                                            tipTexts=None,
+                                            )
+        self.multipletAnnotationData.radioButtons[2].setVisible(False)
+        self.multipletAnnotationData.radioButtons[5].setVisible(False)
+
+        row += 1
+        _texts = ['Cross']
+        _names = ['symMDS_Cross']
+
+        self.multipletLabel = Label(parent, text="Symbol", hAlign='r', grid=(row, 0))
+        self.multipletSymbol = RadioButtons(parent, texts=_texts,
+                                   objectNames=_names,
+                                   objectName='symMDS',
+                                   # selectedInd=symbolType,
+                                   callback=self._queueSetMultipletSymbol,
+                                   direction='h',
+                                   grid=(row, 1), gridSpan=(1, 3), hAlign='l',
+                                   tipTexts=None,
+                                   )
+
+        # only one symbol - will add more later
+        # self.multipletLabel.setVisible(False)
+        # self.multipletSymbol.setVisible(False)
+
+        #======  Peak/Multiplet Arrows ======
+        row += 1
+        _makeLine(parent, grid=(row, 0), text='Arrows')
+
         row += 1
         self.arrowsLabel = _makeLabel(parent, text="Arrow", grid=(row, 0))
         self.arrow = RadioButtons(parent, texts=['Line', 'Wedge', 'Arrow'],
@@ -1592,7 +1635,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.arrowMinimumData.setMinimumWidth(LineEditsMinimumWidth)
         self.arrowMinimumData.valueChanged.connect(self._queueSetArrowMinimum)
 
-        #====== Multiplets ======
+        #====== Multiplets other ======
         row += 1
         _makeLine(parent, grid=(row, 0), text="Multiplets")
 
@@ -2202,7 +2245,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetMultipletAnnotation(self):
-        value = self.multipletAnotationsData.getIndex()
+        value = self.multipletAnnotationData.getIndex()
         if value != self.preferences.general.multipletAnnotationType:
             return partial(self._setMultipletAnnotation, value)
 

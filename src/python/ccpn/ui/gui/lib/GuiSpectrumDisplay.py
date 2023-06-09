@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-12 15:31:27 +0100 (Fri, May 12, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-09 12:06:25 +0100 (Fri, June 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -30,11 +30,9 @@ import numpy as np
 from PyQt5 import QtWidgets, QtCore, QtGui
 from functools import partial
 from copy import deepcopy
-# from collections import namedtuple
 from contextlib import contextmanager
-from typing import Tuple
+from typing import Tuple, Sequence
 
-# from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Spectrum import Spectrum
@@ -45,6 +43,7 @@ from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.lib.SpectrumLib import DIMENSION_TIME, DIMENSION_SAMPLED
+from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.AssignmentLib import _assignNmrAtomsToPeaks, _assignNmrResiduesToPeaks
@@ -58,8 +57,6 @@ from ccpn.ui.gui.widgets.SpectrumGroupToolBar import SpectrumGroupToolBar
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea, SpectrumDisplayScrollArea
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.DropBase import DropBase
-# from ccpn.ui.gui.widgets.Label import Label
-# from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
@@ -72,7 +69,6 @@ from ccpn.ui.gui.widgets.SpectrumGroupToolBar import _spectrumGroupViewHasChange
 from ccpn.util.Constants import AXISUNITS
 from ccpn.util.Logging import getLogger
 from ccpn.util import Colour
-
 
 from ccpn.ui._implementation.PeakListView import PeakListView
 from ccpn.ui._implementation.IntegralListView import IntegralListView
@@ -93,7 +89,6 @@ STRIP_SPACING = 5
 AXIS_WIDTH = 30
 
 STRIPDIRECTIONS = ['Y', 'X', 'T']
-
 
 MAXTILEBOUND = 65536
 INCLUDE_AXIS_WIDGET = True
@@ -210,7 +205,7 @@ class GuiSpectrumDisplay(CcpnModule):
                               So for now add option below to have it turned off (False) or on (True).
         """
         if self.MAXPEAKLABELTYPES == 0:
-                raise RuntimeError(f'MAXPEAKLABELTYPES == 0: cannot initialise')
+            raise RuntimeError(f'MAXPEAKLABELTYPES == 0: cannot initialise')
 
         moduleTitle = str(self.id)  # the name that appears on the GUI Module
         getLogger().debug('GuiSpectrumDisplay.__init__>> mainWindow %s; name: %s' % (mainWindow, moduleTitle))
@@ -240,7 +235,7 @@ class GuiSpectrumDisplay(CcpnModule):
         # notifier to respond to items being dropped onto the spectrumDisplay
         self.setAcceptDrops(True)
         self._droppedNotifier = self.setGuiNotifier(self, [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
-                                                   self._processDroppedItems)
+                                                    self._processDroppedItems)
 
         # GWV: This assures that a 'hoverbar' is visible over the strip when dragging
         # the module to another location
@@ -448,6 +443,7 @@ class GuiSpectrumDisplay(CcpnModule):
         #     self.setVisibleAxes()
 
         from ccpn.ui.gui.widgets.PlaneToolbar import ZPlaneToolbar
+
         self._stripToolBarWidget = Frame(parent=self.qtParent, setLayout=True, grid=(axisRow, 0), gridSpan=(1, 7),
                                          hAlign='c', hPolicy='ignored')
         self.zPlaneFrame = ZPlaneToolbar(self._stripToolBarWidget, mainWindow, self, showHeader=True, showLabels=True,
@@ -539,11 +535,8 @@ class GuiSpectrumDisplay(CcpnModule):
 
     def renameModule(self, name):
 
-        success = super(GuiSpectrumDisplay, self).renameModule(name)
-        if success:
-            self.rename(name)  # rename the Core Object
-            for strip in self.strips:
-                strip.stripLabel._populate()
+        if super(GuiSpectrumDisplay, self).renameModule(name):
+            self.rename(name)  # rename the core-object, use notifier to update
 
     def clearSpectra(self):
         """
@@ -590,6 +583,13 @@ class GuiSpectrumDisplay(CcpnModule):
                                                        SpectrumGroup.className,
                                                        self._spectrumGroupChanged,
                                                        onceOnly=True)
+
+        self._spectrumDisplayNotifier = self.setNotifier(self.project,
+                                                         [Notifier.RENAME],
+                                                         SpectrumDisplay.className,
+                                                         self._spectrumDisplayChanged,
+                                                         onceOnly=True)
+
         # self._currentPeakNotifier = self.setNotifier(self.current,
         #                           [Notifier.CURRENT],
         #                           targetName=Peak._currentAttributeName,
@@ -743,6 +743,16 @@ class GuiSpectrumDisplay(CcpnModule):
                     spectrum = spectrumView.spectrum
                     if spectrum in self.current.spectra:
                         spectrum.scale += step
+
+    def _spectrumDisplayChanged(self, data):
+        """Respond to spectrumDisplay being renamed, update contents of label.
+        """
+        if data:
+            trigger = data[Notifier.TRIGGER]
+            if trigger == Notifier.RENAME and data[Notifier.OBJECT] == self:
+                self.label.setText(self._name)
+                self.label.updateGeometry()
+                self.label.repaint()
 
     def _spectrumGroupChanged(self, data):
         """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame
@@ -931,7 +941,6 @@ class GuiSpectrumDisplay(CcpnModule):
                         spectra.add(spectrum)
                         break
         return list(spectra)
-
 
     # GWV 07/01/2022: replace by getVisibleSpectra() fro naming consistency
     # @property
@@ -1293,8 +1302,11 @@ class GuiSpectrumDisplay(CcpnModule):
                 self._handleStrip(obj, strip)
 
             else:
-                showWarning('Dropped item "%s"' % obj, 'Wrong kind; drop Spectrum, SpectrumGroup, Peak, PeakList,'
-                                                           ' NmrChain, NmrResidue, NmrAtom or Strip')
+                showWarning(
+                    f'Dropped item "{obj}"',
+                    'Wrong kind; drop Spectrum, SpectrumGroup, Peak, PeakList,'
+                    ' NmrChain, NmrResidue, NmrAtom or Strip',
+                )
         if nmrChains:
             with undoBlockWithoutSideBar():
                 self._handleNmrChains(nmrChains)
@@ -2379,12 +2391,10 @@ class GuiSpectrumDisplay(CcpnModule):
     def _setZoom(self):
         """Changes to the next zoom of current strip."""
         if not self.strips:
-            showWarning('Set Zoom', 'SpectrumDisplay "%s" does not contain any strips'  % self.pid)
+            showWarning('Set Zoom', 'SpectrumDisplay "%s" does not contain any strips' % self.pid)
             return
         strip = self.strips[0]
         strip._setZoomPopup()
-
-
 
     def _zoomIn(self):
         """zoom in to the current strip."""
@@ -2964,6 +2974,32 @@ class GuiSpectrumDisplay(CcpnModule):
     def updateTraces(self):
         for strip in self.strips:
             strip._updateTraces()
+
+    @logCommand(get='self')
+    def newMark(self, colour: str, positions: Sequence[float], axisCodes: Sequence[str],
+                style: str = 'simple', units: Sequence[str] = (), labels: Sequence[str] = ()):
+        """Create new Mark in a strip.
+
+        :param str colour: Mark colour.
+        :param tuple/list positions: Position in unit (default ppm) of all lines in the mark.
+        :param tuple/list axisCodes: Axis codes for all lines in the mark.
+        :param str style: Mark drawing style (dashed line etc.) default: full line ('simple').
+        :param tuple/list units: Axis units for all lines in the mark, Default: all ppm.
+        :param tuple/list labels: Ruler labels for all lines in the mark. Default: None.
+        :return a new Mark instance.
+        """
+        from ccpn.ui._implementation.Mark import _newMark, _removeMarkAxes
+
+        with undoBlockWithoutSideBar():
+            if marks := _removeMarkAxes(self.mainWindow, positions=positions, axisCodes=axisCodes, labels=labels):
+                pos, axes, lbls = marks
+                result = _newMark(self.mainWindow, colour=colour, positions=pos, axisCodes=axes,
+                                  style=style, units=units, labels=lbls,
+                                  )
+                # add strip to the new mark
+                result.strips = self.strips
+
+                return result
 
 #=========================================================================================
 

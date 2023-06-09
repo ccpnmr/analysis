@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-13 11:40:49 +0000 (Mon, March 13, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-09 12:06:24 +0100 (Fri, June 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -41,6 +41,7 @@ from ccpn.util.isotopes import isotopeCode2Nucleus, getIsotopeRecords
 from ccpn.core.lib.ContextManagers import newObject, renameObject, undoBlock, ccpNmrV3CoreSetter
 from ccpn.util.Logging import getLogger
 from collections import defaultdict
+
 
 UnknownIsotopeCode = '?'
 
@@ -176,10 +177,11 @@ class NmrAtom(AbstractWrapperObject):
         CCPNINTERNAL: used in _newNmrAtom, Peak.assignDimension
         """
         if not isinstance(value, (str, type(None))):
-            raise ValueError('isotopeCode must be of type string (or None); got {}'.format(value))
-        if value is not None and value not in list(getIsotopeRecords().keys())+[UnknownIsotopeCode]:
-            raise ValueError('Invalid isotopeCode {}'.format(value))
-        self._wrappedData.isotopeCode = value if value else UnknownIsotopeCode
+            raise ValueError(f'isotopeCode must be of type string (or None); got {value}')
+        if value is not None and value not in list(getIsotopeRecords().keys()) + [UnknownIsotopeCode]:
+            raise ValueError(f'Invalid isotopeCode {value}')
+
+        self._wrappedData.isotopeCode = value or UnknownIsotopeCode
 
     @property
     def boundNmrAtoms(self) -> 'NmrAtom':
@@ -191,7 +193,7 @@ class NmrAtom(AbstractWrapperObject):
 
         nmrResidue = self.nmrResidue
         if nmrResidue.residue is None:
-            # NmrResidue is unassigned. Add ad-hoc protein interresidue bonds
+            # NmrResidue is unassigned. Add ad-hoc protein inter-residue bonds
             if self.name == 'N':
                 for rx in (nmrResidue.previousNmrResidue, nmrResidue.getOffsetNmrResidue(-1)):
                     if rx is not None:
@@ -292,9 +294,9 @@ class NmrAtom(AbstractWrapperObject):
 
             for ss in chainCode, sequenceCode, residueType, name:
                 if ss and Pid.altCharacter in ss:
-                    raise ValueError("Character %s not allowed in ccpn.NmrAtom id : %s.%s.%s.%s"
-                                     % (Pid.altCharacter, chainCode, sequenceCode, residueType, name))
-
+                    raise ValueError(
+                            f"Character {Pid.altCharacter} not allowed in ccpn.NmrAtom id : {chainCode}.{sequenceCode}.{residueType}.{name}"
+                            )
 
             oldNmrResidue = self.nmrResidue
             nmrChain = self._project.fetchNmrChain(chainCode)
@@ -389,7 +391,7 @@ class NmrAtom(AbstractWrapperObject):
         if hasattr(self._wrappedData, attrName):
             return getattr(self._wrappedData, attrName)
 
-        raise TypeError('nmrAtom does not have attribute {}'.format(attrName))
+        raise TypeError(f'nmrAtom does not have attribute {attrName}')
 
     @property
     def chemicalShifts(self) -> tuple:
@@ -425,7 +427,7 @@ class NmrAtom(AbstractWrapperObject):
         CCPN Internal - should only be used during nef import
         """
         oldName = self._wrappedData.name
-        self._oldPid = self.pid
+        # self._oldPid = self.pid
 
         self._wrappedData.name = value
         self._resetIds()
@@ -455,7 +457,7 @@ class NmrAtom(AbstractWrapperObject):
             name = '%s_%d' % (cls._defaultName(), _id)
         return super(NmrAtom, cls)._uniqueName(project=project, name=name)
 
-    def _finaliseAction(self, action: str):
+    def _finaliseAction(self, action: str, **actionKwds):
         """Subclassed to handle associated offsetNMrResidues
         """
         if action == 'rename':
@@ -471,7 +473,7 @@ class NmrAtom(AbstractWrapperObject):
             self._oldNmrResidue = None
             self._oldAssignedPeaks = ()
 
-        if not super()._finaliseAction(action):
+        if not super()._finaliseAction(action, **actionKwds):
             return
 
     @renameObject()
@@ -484,23 +486,25 @@ class NmrAtom(AbstractWrapperObject):
 
         if value is None:
             value = self._makeUniqueName()
-            getLogger().debug('Renaming an %s without a specified value. Name set to the auto-generated option: %s.' % (self, value))
+            getLogger().debug(
+                    f'Renaming an {self} without a specified value. Name set to the auto-generated option: {value}.'
+                    )
         NmrAtom._validateStringValue('name', value)
 
         previous = self._parent.getNmrAtom(value.translate(Pid.remapSeparators))
         if previous is not None:
-            raise ValueError('NmrAtom.rename: "%s" conflicts with %s' % (value, previous))
+            raise ValueError(f'NmrAtom.rename: "{value}" conflicts with {previous}')
 
         # with renameObjectContextManager(self) as addUndoItem:
         isotopeCode = self.isotopeCode
         oldName = self.name
-        self._oldPid = self.pid
+        # self._oldPid = self.pid
 
         # clear the isotopeCode so that the name may be changed (model restriction)
         self._wrappedData.isotopeCode = UnknownIsotopeCode
         self._wrappedData.name = value
         # set isotopeCode to the correct value
-        self._wrappedData.isotopeCode = isotopeCode if isotopeCode else UnknownIsotopeCode  # self._UNKNOWN_VALUE_STRING
+        self._wrappedData.isotopeCode = isotopeCode or UnknownIsotopeCode  # self._UNKNOWN_VALUE_STRING
 
         # now handled by _finaliseAction
         # self._childActions.append(self._renameChemicalShifts)
@@ -554,7 +558,7 @@ class NmrAtom(AbstractWrapperObject):
                 continue
             peakDim = contrib.peakDim
             apiPeak = peakDim.peak
-            if apiPeak.isDeleted or peakDim.isDeleted and apiPeak.figOfMerit == 0.0: #figure of merit shouldn't be filtered here!?
+            if apiPeak.isDeleted or peakDim.isDeleted and apiPeak.figOfMerit == 0.0:  #figure of merit shouldn't be filtered here!?
                 continue
             apiPeakList = apiPeak.peakList
             peakList = self.project._data2Obj[apiPeakList]
@@ -562,15 +566,15 @@ class NmrAtom(AbstractWrapperObject):
             if peakList not in peakLists:
                 continue
             propertyDict = {
-                            _POINTPOSITION  :   peakDim.position,
-                            _PPMPOSITION    :   peakDim.realValue,
-                            _LINEWIDTH      :   peakDim.lineWidth,
-                            HEIGHT          :   apiPeak.height,
-                            VOLUME          :   apiPeak.volume,
-                            }
-            valuesDict[spectrum].append(propertyDict.get(theProperty, None))
-        return valuesDict
+                _POINTPOSITION: peakDim.position,
+                _PPMPOSITION  : peakDim.realValue,
+                _LINEWIDTH    : peakDim.lineWidth,
+                HEIGHT        : apiPeak.height,
+                VOLUME        : apiPeak.volume,
+                }
+            valuesDict[spectrum].append(propertyDict.get(theProperty))
 
+        return valuesDict
 
     def _recalculateShiftValue(self, spectra, simulatedPeakScale: float = 0.0001):
         """Get a new shift value from the assignedPeaks
@@ -724,21 +728,23 @@ def _produceNmrAtom(self: Project, atomId: str = None, chainCode: str = None,
         if atomId:
             if any(params):
                 raise ValueError("_produceNmrAtom: other parameters only allowed if atomId is None")
-            else:
-                #TODO: use .fields attribute of Pid instance
 
-                # Remove colon prefix, if any
-                atomId = atomId.split(Pid.PREFIXSEP, 1)[-1]
-                for ii, val in enumerate(Pid.splitId(atomId)):
-                    if val:
-                        params[ii] = val
-                chainCode, sequenceCode, residueType, name = params
+            #TODO: use .fields attribute of Pid instance
+
+            # Remove colon prefix, if any
+            atomId = atomId.split(Pid.PREFIXSEP, 1)[-1]
+            for ii, val in enumerate(Pid.splitId(atomId)):
+                if val:
+                    params[ii] = val
+            chainCode, sequenceCode, residueType, name = params
 
         if name is None:
             raise ValueError("NmrAtom name must be set")
 
         elif Pid.altCharacter in name:
-            raise ValueError("Character %s not allowed in ccpn.NmrAtom.name" % Pid.altCharacter)
+            raise ValueError(
+                    f"Character {Pid.altCharacter} not allowed in ccpn.NmrAtom.name"
+                    )
 
         # Produce chain
         nmrChain = self.fetchNmrChain(shortName=chainCode or Constants.defaultNmrChainCode)

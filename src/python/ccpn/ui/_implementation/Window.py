@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-27 15:58:57 +0100 (Thu, April 27, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-09 12:06:25 +0100 (Fri, June 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -27,17 +27,15 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from functools import partial
-from typing import Sequence, Tuple
+from typing import Sequence, Tuple, List, Union
 
-from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
-from ccpn.core.lib.SpectrumLib import DIMENSION_FREQUENCY
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, undoBlockWithoutSideBar, undoStackBlocking, \
     logCommandManager
@@ -450,7 +448,9 @@ class Window(AbstractWrapperObject):
 
     @logCommand('mainWindow.')
     def newMark(self, colour: str, positions: Sequence[float], axisCodes: Sequence[str],
-                style: str = 'simple', units: Sequence[str] = (), labels: Sequence[str] = ()):
+                style: str = 'simple', units: Sequence[str] = (), labels: Sequence[str] = (),
+                strips: List[Union[str, 'Strip']] = None,
+                ):
         """Create new Mark.
 
         :param str colour: Mark colour.
@@ -459,16 +459,20 @@ class Window(AbstractWrapperObject):
         :param str style: Mark drawing style (dashed line etc.) default: full line ('simple').
         :param tuple/list units: Axis units for all lines in the mark, Default: all ppm.
         :param tuple/list labels: Ruler labels for all lines in the mark. Default: None.
-
+        :param tuple/list strips: List of strips or pids.
         :return Mark instance.
         """
         from ccpn.ui._implementation.Mark import _newMark, _removeMarkAxes
 
         if marks := _removeMarkAxes(self, positions=positions, axisCodes=axisCodes, labels=labels):
             pos, axes, lbls = marks
-            return _newMark(self, colour=colour, positions=pos, axisCodes=axes,
-                            style=style, units=units, labels=lbls
-                            )
+            with undoBlockWithoutSideBar():
+                result = _newMark(self, colour=colour, positions=pos, axisCodes=axes,
+                                  style=style, units=units, labels=lbls,
+                                  )
+                result.strips = strips
+
+                return result
 
 
 #=========================================================================================

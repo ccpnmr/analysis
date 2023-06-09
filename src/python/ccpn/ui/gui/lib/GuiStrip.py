@@ -1,10 +1,6 @@
 """
 Module Documentation here
 """
-
-import contextlib
-
-
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -19,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-05 12:34:18 +0100 (Mon, June 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-09 12:06:25 +0100 (Fri, June 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -30,6 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import contextlib
 from typing import List, Tuple, Sequence
 from copy import deepcopy
 from functools import partial
@@ -387,8 +384,10 @@ class GuiStrip(Frame):
                          self._updateSpectrumLabels,
                          onceOnly=True)
 
-        # # Notifier for change of stripLabel
-        # self.setNotifier(self.project, [Notifier.RENAME], 'NmrResidue', self._updateStripLabel)
+        # Notifier for change of stripLabel
+        self.setNotifier(self.project, [Notifier.RENAME], 'Strip',
+                         self._updateStripLabel,
+                         onceOnly=True)
 
         # For now, all dropEvents are not strip specific, use spectrumDisplay's handling
         self.setGuiNotifier(self, [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
@@ -574,8 +573,9 @@ class GuiStrip(Frame):
     def _updateStripLabel(self, callbackDict):
         """Update the striplabel if it represented a NmrResidue that has changed its id.
         """
-        # self.header.processNotifier(callbackDict)
-        pass
+        # change the label and resize the bounding box
+        self.stripLabel._populate()
+        QtCore.QTimer.singleShot(0, self._resize)
 
     def createMark(self):
         """Sets the marks at current position
@@ -1890,7 +1890,7 @@ class GuiStrip(Frame):
         except:
             defaultColour = '#FF0000'
 
-        self.mainWindow.newMark(defaultColour, positions, axisCodes)
+        self.newMark(defaultColour, positions, axisCodes)
 
     def _copyAxisFromStrip(self, axisId, fromStrip):
         try:
@@ -1947,7 +1947,7 @@ class GuiStrip(Frame):
             positions = [(pos, ax) for ax in self.axisCodes for pos in mouseDict.get(ax, []) if pos is not None]
 
             for pos, ax in positions:
-                self.mainWindow.newMark(defaultColour, [pos], [ax])
+                self.newMark(defaultColour, [pos], [ax])
 
         except Exception as es:
             getLogger().warning('Error setting mark at current cursor position')
@@ -2820,6 +2820,32 @@ class GuiStrip(Frame):
                                                       )
         # init the GL
         self._CcpnGLWidget.initialiseAxes(strip=self)
+
+    @logCommand(get='self')
+    def newMark(self, colour: str, positions: Sequence[float], axisCodes: Sequence[str],
+                style: str = 'simple', units: Sequence[str] = (), labels: Sequence[str] = ()):
+        """Create new Mark in a strip.
+
+        :param str colour: Mark colour.
+        :param tuple/list positions: Position in unit (default ppm) of all lines in the mark.
+        :param tuple/list axisCodes: Axis codes for all lines in the mark.
+        :param str style: Mark drawing style (dashed line etc.) default: full line ('simple').
+        :param tuple/list units: Axis units for all lines in the mark, Default: all ppm.
+        :param tuple/list labels: Ruler labels for all lines in the mark. Default: None.
+        :return a new Mark instance.
+        """
+        from ccpn.ui._implementation.Mark import _newMark, _removeMarkAxes
+
+        with undoBlockWithoutSideBar():
+            if marks := _removeMarkAxes(self.mainWindow, positions=positions, axisCodes=axisCodes, labels=labels):
+                pos, axes, lbls = marks
+                result = _newMark(self.mainWindow, colour=colour, positions=pos, axisCodes=axes,
+                                  style=style, units=units, labels=lbls,
+                                  )
+                # add strip to the new mark
+                result.strips = [self]
+
+                return result
 
     #-----------------------------------------------------------------------------------------
     # Subclassed in nD

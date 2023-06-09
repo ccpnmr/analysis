@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-05 15:28:41 +0000 (Thu, January 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-09 12:06:24 +0100 (Fri, June 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -359,7 +359,7 @@ class NmrChain(AbstractWrapperObject):
 
         # rename functions from here
         oldName = self.shortName
-        self._oldPid = self.pid
+        # self._oldPid = self.pid
 
         wrappedData.code = value
         for nmrRes in self.nmrResidues:
@@ -367,12 +367,12 @@ class NmrChain(AbstractWrapperObject):
 
         return (oldName,)
 
-    def _finaliseAction(self, action):
+    def _finaliseAction(self, action, **actionKwds):
         if action in ['delete']:
             if self._wrappedData.implCode == '@-' and self._wrappedData.nmrProject:
                 raise TypeError("NmrChain '@-' cannot be deleted")
 
-        if not super()._finaliseAction(action):
+        if not super()._finaliseAction(action, **actionKwds):
             return
 
     #=========================================================================================

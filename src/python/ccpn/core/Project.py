@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-23 15:26:51 +0100 (Tue, May 23, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-09 12:06:24 +0100 (Fri, June 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -457,6 +457,7 @@ class Project(AbstractWrapperObject):
 
         # reference to special v3 core lists without abstractWrapperObject
         self._collectionList = None
+        self._crossReferencing = None
 
     #-----------------------------------------------------------------------------------------
     # Attributes
@@ -593,6 +594,7 @@ class Project(AbstractWrapperObject):
         """Process data that must always be performed after updating all children
         """
         from ccpn.core._implementation.CollectionList import CollectionList
+        from ccpn.core._implementation.CrossReferenceHandler import CrossReferenceHandler
 
         if project.application.hasGui:
             # strange bug that v2 window is missing and needs replacing
@@ -609,6 +611,12 @@ class Project(AbstractWrapperObject):
 
         # create new collections from table
         project._collectionList._restoreObject(project, None)
+
+        # create new collection table
+        project._crossReferencing = CrossReferenceHandler(project=project)
+
+        # create new collections from table
+        project._crossReferencing._restoreObject(project, None)
 
         # check that strips have been recovered correctly
         try:
@@ -1517,7 +1525,10 @@ class Project(AbstractWrapperObject):
             dd[obj.id] = obj
         elif action == 'delete':
             # should never fail
-            del dd[obj.id]
+            try:
+                del dd[obj.id]
+            except Exception as es:
+                print(es)
 
     def _modifiedLink(self, dummy, classNames: typing.Tuple[str, str]):
         """ call link-has-changed notifiers

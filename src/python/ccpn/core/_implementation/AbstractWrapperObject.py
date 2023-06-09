@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-04 09:08:12 +0100 (Thu, May 04, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-06-09 12:06:24 +0100 (Fri, June 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -192,7 +192,8 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         self._resetIds()
 
         # keep last value for undo/redo
-        self._oldPid = None
+        # self._oldPid = None
+        self._oldRenamePid = self.pid
 
         # tuple to hold children that explicitly need finalising after atomic operations
         self._finaliseChildren = []
@@ -598,10 +599,28 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         """Set the non-api attributes that are stored in ccpnInternal
         """
         if not isinstance(attribs, dict):
-            raise TypeError('ERROR: %s must be a dict' % str(attribs))
+            raise TypeError(f'ERROR: {str(attribs)} must be a dict')
 
         for att, value in attribs.items():
             setattr(self, att, value)
+
+    def _getInternalParameterRef(self, parameterName: str):
+        """Gets reference of parameterName for CCPNINTERNAL namespace without making deepcopy.
+        See _getParameterRef below.
+        """
+        return self._getParameterRef(self._CCPNMR_NAMESPACE, parameterName)
+
+    def _getParameterRef(self, namespace: str, parameterName: str):
+        """Returns value of parameterName for namespace; returns None if not present
+        CCPNINTERNAL: does not return a copy so do not change.
+        Use sparingly!
+        Required as some objects in ccpnInternal might contain core objects that deepcopy will interpret as infinitely deep :|
+        At the current time -> cross-referencing during run-time,
+            but this is conterted to pids when loading/saving.
+        """
+        space = self._ccpnInternalData.get(namespace)
+        if space is not None:
+            return space.get(parameterName)
 
     @staticmethod
     def _str2none(value):
@@ -855,7 +874,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
         # rename functions from here
         oldName = self.name
-        self._oldPid = self.pid
+        # self._oldPid = self.pid
 
         self._wrappedData.name = name
 
@@ -867,7 +886,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
            Some Objects (Chain, Residue, Atom) cannot be renamed"""
         raise ValueError(f'{self.__class__.__name__} objects cannot be renamed')
 
-    # In addition each class (except for Project) must define a  newClass method
+    # In addition, each class (except for Project) must define a  newClass method
     # The function (e.g. Project.newMolecule), ... must create a new child object
     # AND ALL UNDERLYING DATA, taking in all parameters necessary to do so.
 
@@ -1375,25 +1394,30 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
     def _finaliseAction(self, action: str, **actionKwds):
         """Do wrapper level finalisation, and execute all notifiers
-        action is one of: 'create', 'delete', 'change', 'rename'"""
-
+        action is one of: 'create', 'delete', 'change', 'rename'
+        """
+        oldPid = None
         # Special case - always update _ids
         if action == 'rename':
-            try:
-                # get the stored value BEFORE renaming - valid for undo/redo
-                oldPid = self._oldPid or _RENAME_SENTINEL
-            except Exception:
-                oldPid = self.pid
+            oldPid = self._oldRenamePid
+
             # Wrapper-level processing
             self._resetIds()
-            if oldPid not in [_RENAME_SENTINEL, self.pid]:
-                # update the collections
-                self._project._collectionList._resetItemPids(oldPid, self.pid)
+
+            # update pids on collections and cross-referencing
+            newPid = self._oldRenamePid = self.pid
+            if oldPid not in [_RENAME_SENTINEL, newPid]:  # the pid after renaming
+                self._project._collectionList._resetItemPids(oldPid, newPid)
+                self._project._crossReferencing._resetItemPids(self, oldPid=oldPid, action=action)
+
+        elif action in {'create', 'delete'}:
+            if self._project._crossReferencing:
+                self._project._crossReferencing._resetItemPids(self, action=action)
 
         if self._childActions:
             # operations that MUST be performed during _finalise
             # irrespective of whether notifiers fire to external objects
-            # print(f'CHILDACTIONS {self.className}   {self}    {self._childActions}')
+            # print(f' CHILD-ACTIONS {self.className}   {self}    {self._childActions}')
             # propagate the action to explicitly associated (generally child) instances
             for func in self._childActions:
                 func()
@@ -1403,21 +1427,15 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         if project._notificationBlanking:
             return
 
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # no blanking
+
         className = self.className
         # NB 'AbstractWrapperObject' not currently in use (Sep 2016), but kept for future needs
         iterator = (project._context2Notifiers.setdefault((name, action), OrderedDict())
                     for name in (className, 'AbstractWrapperObject'))
-        # iterator = list(iterator)
-        # pendingNotifications = project._pendingNotifications
 
         if action == 'rename':
-            # # Call notifiers with special signature
-            # if project._notificationSuspension:
-            #     for dd in iterator:
-            #         for notifier, onceOnly in dd.items():
-            #             pendingNotifications.append((notifier, onceOnly, self, oldPid))
-            # else:
-
             for dd in iterator:
                 for notifier in tuple(dd):
                     notifier(self, oldPid, **actionKwds)
@@ -1427,13 +1445,6 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
         else:
             # Normal case - just call notifiers
-            # if project._notificationSuspension and action != 'delete':
-            #     # NB Deletion notifiers must currently be executed immediately
-            #     for dd in iterator:
-            #         for notifier, onceOnly in dd.items():
-            #             pendingNotifications.append((notifier, onceOnly, self))
-            # else:
-
             for dd in iterator:
                 for notifier in tuple(dd):
                     notifier(self, **actionKwds)

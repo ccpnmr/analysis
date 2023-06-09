@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-12 18:44:56 +0000 (Thu, January 12, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-09 12:06:24 +0100 (Fri, June 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -708,7 +708,7 @@ class Substance(AbstractWrapperObject):
         if name is None:
             name = self.name
         oldName = self.name
-        self._oldPid = self.pid
+        # self._oldPid = self.pid
         self._validateStringValue(attribName='name', value=name)
         # name = self._uniqueName(project=self.project, name=name)
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-23 15:26:51 +0100 (Tue, May 23, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-09 12:06:23 +0100 (Fri, June 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -330,7 +330,7 @@ class Chain(AbstractWrapperObject):
 
         # rename functions from here
         oldName = self.shortName
-        self._oldPid = self.pid
+        # self._oldPid = self.pid
         self._apiChain.renameChain(name)
 
         return (oldName,)

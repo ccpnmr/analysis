@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-14 16:30:18 +0100 (Fri, April 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-09 12:06:25 +0100 (Fri, June 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -235,7 +235,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self._borderOverlay = BorderOverlay(self)
         self._borderOverlay.raise_()
 
-        Logging.getLogger().debug('CcpnModule>>> %s %s' % (type(self), mainWindow))
+        Logging.getLogger().debug(f'CcpnModule>>> {type(self)} {mainWindow}')
 
         # Logging.getLogger().debug('module:"%s"' % (name,))
         self.closeFunc = closeFunc
@@ -479,10 +479,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         """ rename the Gui module a  """
         from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, nullContext
 
-        if self.mainWindow:
-            context = undoBlockWithoutSideBar
-        else:
-            context = nullContext
+        context = undoBlockWithoutSideBar if self.mainWindow else nullContext
 
         with context():
             if self.area:
@@ -490,13 +487,14 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                 validator.validate(newName, 0, )
                 _isValidState, _messageState = validator._isValidState, validator._messageState
                 if _isValidState:
-                    self.label.setText(newName)
-                    self._name = newName
+                    self._name = newName  # gui is handled by notifier
                     self.moduleName = self._name
                     return True
+
                 else:
-                    showWarning('Cannot rename module %s' % self.titleName, _messageState)
-                    self.label.nameEditor.set(self._name)  #reset the original name
+                    showWarning(f'Cannot rename module {self.titleName}', _messageState)
+                    self.label.nameEditor.set(self._name)  # reset the original name
+
             return False
 
     def _isNameAvailable(self, name):
@@ -525,7 +523,9 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                 if isinstance(widget, Base):
                     widget._setSavedState(value)
             except Exception as e:
-                getLogger().debug('Impossible to restore %s value for %s. %s' % (variableName, self.name(), e))
+                getLogger().debug(
+                        f'Impossible to restore {variableName} value for {self.name()}. {e}'
+                        )
 
     def _closeModule(self):
         """Close the module
@@ -606,14 +606,9 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     #     self.updateStyle()
 
     def getDockArea(self, target=None):
-        if target is None:
-            current = self
-        else:
-            current = target
+        current = self if target is None else target
 
-        while current.parent() is not None:
-            if isinstance(current, DockArea):
-                break
+        while current.parent() is not None and not isinstance(current, DockArea):
             current = current.parent()
         return current
 
@@ -812,10 +807,11 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         """
         try:
             if event.type() == QtCore.QEvent.WindowStateChange:
-                if event.oldState() & QtCore.Qt.WindowMinimized:
-
-                    if self._maximiseFunc:
-                        self._maximiseFunc()
+                if (
+                        event.oldState() & QtCore.Qt.WindowMinimized
+                        and self._maximiseFunc
+                ):
+                    self._maximiseFunc()
 
             elif event.type() == QtCore.QEvent.Close:
 
@@ -904,9 +900,12 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         super().enterEvent(event)
 
     def leaveEvent(self, event):
-        if self.mainWindow:
-            if self.mainWindow.application.preferences.general.focusFollowsMouse:
-                self.label.setModuleHighlight(False)
+        if (
+                self.mainWindow
+                and self.mainWindow.application.preferences.general.focusFollowsMouse
+        ):
+            self.label.setModuleHighlight(False)
+
         super().enterEvent(event)
 
     def dragMoveEvent(self, *args):
@@ -1102,22 +1101,25 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         globalDockRect = self.getDockArea().frameGeometry()
 
         targetWidget = QtWidgets.QApplication.instance().widgetAt(endPosition)
-        if (self.drag.target() is None) and (not globalDockRect.contains(endPosition)):
-            if targetWidget is None:
-                self.float()
-                window = self.findWindow()
-                window.move(endPosition)
+        if (
+                (self.drag.target() is None)
+                and (not globalDockRect.contains(endPosition))
+                and targetWidget is None
+        ):
+            self.float()
+            window = self.findWindow()
+            window.move(endPosition)
 
-                # this is because we could have have dragged into another application
-                # this may not work under windows
-                originalWindow = self.findWindow()
-                originalWindow.raise_()
-                originalWindow.show()
-                originalWindow.activateWindow()
+            # this is because we could have have dragged into another application
+            # this may not work under windows
+            originalWindow = self.findWindow()
+            originalWindow.raise_()
+            originalWindow.show()
+            originalWindow.activateWindow()
 
-                window.raise_()
-                window.show()
-                window.activateWindow()
+            window.raise_()
+            window.show()
+            window.activateWindow()
 
     def _destroyed(self, ev):
         self._selectedOverlay.setDropArea(None)
@@ -1143,7 +1145,7 @@ class CcpnModuleLabel(DockLabel):
 
     # TODO:GEERTEN check colours handling
     # defined here, as the updateStyle routine is called from the
-    # DockLabel instanciation; changed later on
+    # DockLabel instantiation; changed later on
 
     sigDragEntered = QtCore.pyqtSignal(object, object)
 
@@ -1168,9 +1170,9 @@ class CcpnModuleLabel(DockLabel):
         self.labelSize = _fontSize  # (getWidgetFontHeight(size='LARGE') or 16)
 
         self.setAlignment(QtCore.Qt.AlignVCenter | QtCore.Qt.AlignHCenter)
-        self.closeButton.setStyleSheet('border: 0px solid %s;'
-                                       'border-radius: 1px;'
-                                       'background-color: transparent;' % BORDERNOFOCUS_COLOUR)
+        self.closeButton.setStyleSheet(
+                f'border: 0px solid {BORDERNOFOCUS_COLOUR};border-radius: 1px;background-color: transparent;'
+                )
 
         from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 
@@ -1220,11 +1222,11 @@ class CcpnModuleLabel(DockLabel):
 
     def _renameLabel(self, name=None):
         name = name or self.nameEditor.get()
-        self.module.renameModule(name)
         self.nameEditor.hide()
+        self.module.renameModule(name)
 
     def setupLabelButton(self, button, iconName, position):
-        icon = Icon('icons/%s' % iconName)
+        icon = Icon(f'icons/{iconName}')
 
         button.setIcon(icon)
         # retinaIconSize = self.getMaxIconSize(icon) // 2
@@ -1237,7 +1239,9 @@ class CcpnModuleLabel(DockLabel):
         elif position == CcpnModuleLabel.TOP_LEFT:
             styleInfo = (self.buttonBorderWidth, self.buttonCornerRadius, 0)
         else:
-            raise Exception('button position must be one of %s' % ', '.join([CcpnModule.TOP_LEFT, CcpnModule.TOP_RIGHT]))
+            raise TypeError(
+                    f"button position must be one of {', '.join([CcpnModule.TOP_LEFT, CcpnModule.TOP_RIGHT])}"
+                    )
 
         # GST colours are hard coded... help please I need  a central source for
         # these presumably a color palette or scheme
@@ -1342,8 +1346,7 @@ class CcpnModuleLabel(DockLabel):
             self.module.area._finaliseAllNameEditing()  # so to close the on-going operation
 
         if event.button() == QtCore.Qt.RightButton:
-            menu = self._createContextMenu()
-            if menu:
+            if menu := self._createContextMenu():
                 menu.move(event.globalPos().x(), event.globalPos().y() + 10)
                 menu.exec()
         else:
@@ -1468,7 +1471,7 @@ class LabelNameValidator(QtGui.QValidator):
             'Space_At_End'      : '\s$',
             'Empty_Spaces'      : '\s',
             'Non-Alphanumeric'  : '\W',
-            'Illegal_Characters': '[^A-Za-z0-9%s]+' % extras  # exclude non-alpha but include the extras
+            'Illegal_Characters': f'[^A-Za-z0-9{extras}]+',
             }
         valids = [True]
         if value is None:

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-05 12:34:18 +0100 (Mon, June 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-09 12:06:25 +0100 (Fri, June 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1894,7 +1894,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         """
         self.project.deleteObjects(*self.marks)
 
-    def markPositions(self, axisCodes, chemicalShifts):
+    def markPositions(self, axisCodes, chemicalShifts, strips=None):
         """
         Create marks based on the axisCodes and adds annotations where appropriate.
 
@@ -1918,13 +1918,12 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                     colour = colourMarks.get(guiSettings.DEFAULT)
 
                 # exit if mark exists
-                found = False
-                for mm in project.marks:
-                    if atomName in mm.labels and \
-                            colour == mm.colour and \
-                            abs(chemicalShift.value - mm.positions[0]) < 1e-6:
-                        found = True
-                        break
+                found = any(
+                        atomName in mm.labels
+                        and colour == mm.colour
+                        and abs(chemicalShift.value - mm.positions[0]) < 1e-6
+                        for mm in project.marks
+                        )
                 if found:
                     continue
 
@@ -1933,7 +1932,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                 with undoBlockWithoutSideBar():
                     # GWV 20181030: changed from atomName to id
                     if colour:
-                        self.newMark(colour, [chemicalShift.value], [axisCode], labels=[atomId])
+                        self.newMark(colour, [chemicalShift.value], [axisCode], labels=[atomId], strips=strips)
                     else:
                         # just use default mark colour rather than checking colourScheme
                         defaultColour = self.application.preferences.general.defaultMarksColour
@@ -1946,11 +1945,11 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                                 _prefsGeneral._defaultMarksCount = _prefsGeneral._defaultMarksCount % len(colourList)
                                 defaultColour = colourList[_prefsGeneral._defaultMarksCount]
                                 _prefsGeneral._defaultMarksCount += 1
-                        except:
+                        except Exception:
                             defaultColour = '#FF0000'
 
                         try:
-                            self.mainWindow.newMark(defaultColour, [chemicalShift.value], [atomId])
+                            self.mainWindow.newMark(defaultColour, [chemicalShift.value], [atomId], strips=strips)
                         except Exception as es:
                             getLogger().warning('Error setting mark at position')
                             raise (es)

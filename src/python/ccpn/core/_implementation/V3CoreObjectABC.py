@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:38 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-06-09 12:06:25 +0100 (Fri, June 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -97,7 +97,8 @@ class V3CoreObjectABC(CoreModel, NotifierBase):
         self._resetUniqueId(_uniqueId)
 
         # keep last value for undo/redo
-        self._oldPid = None
+        # self._oldPid = None
+        self._oldRenamePid = self.pid
 
         # tuple to hold children that explicitly need finalising after atomic operations
         self._finaliseChildren = []
@@ -108,7 +109,7 @@ class V3CoreObjectABC(CoreModel, NotifierBase):
     def __str__(self):
         """Readable string representation; potentially subclassed
         """
-        return ("<%s-Deleted>" % self.pid) if self._isDeleted else ("<%s>" % self.pid)
+        return f"<{self.pid}-Deleted>" if self._isDeleted else f"<{self.pid}>"
 
     def __repr__(self):
         """Object string representation; compatible with application.get()
@@ -284,7 +285,7 @@ class V3CoreObjectABC(CoreModel, NotifierBase):
                 raise ValueError('%s: %r must be a string' %
                                  (cls.__name__, attribName))
 
-            if len(value) == 0 and not allowEmpty:
+            if not value and not allowEmpty:
                 raise ValueError('%s: %r must be set' %
                                  (cls.__name__, attribName))
 
@@ -300,7 +301,7 @@ class V3CoreObjectABC(CoreModel, NotifierBase):
     def _defaultName(cls) -> str:
         """default name to use for objects with a name/title
         """
-        return 'my%s' % cls.className
+        return f'my{cls.className}'
 
     @classmethod
     def _uniqueName(cls, project, name=None) -> str:
@@ -351,24 +352,52 @@ class V3CoreObjectABC(CoreModel, NotifierBase):
         action is one of: 'create', 'delete', 'change', 'rename'
         """
         project = self.project
+        # housekeeping -
+        #   handle the modifying of __str__/__repr__ here so that it does not require
+        #   extra calls to _isDeleted which may crash on loose objects in the undo-deque (or elsewhere)
+        #   update the pid2Obj list
         if action == 'create':
-            # housekeeping -
-            #   handle the modifying of __str__/__repr__ here so that it does not require
-            #   extra calls to _isDeleted which may crash on loose objects in the undo-deque (or elsewhere)
-            #   update the pid2Obj list
             self._deleted = False
-            self._isDeleted = False
+            self._isDeleted = False  # need both flags because deleted object may not have attached _wrappedList
             project._finalisePid2Obj(self, 'create')
         elif action == 'delete':
-            self._deletedId = str(self.id)
+            self._deletedId = str(self.id)  # MUST be called before setting _deleted/_isDeleted as these alter the _id
             self._deleted = True
             self._isDeleted = True
-            project._finalisePid2Obj(self, 'delete')
+            project._finalisePid2Obj(self, 'delete')  # and MUST be called after.
+
+        oldPid = None
+        if action == 'rename':
+            oldPid = self._oldRenamePid
+
+            self._resetIds(oldPid.id)
+
+            # update pids on collections and cross-referencing
+            newPid = self._oldRenamePid = self.pid
+            if oldPid not in [_RENAME_SENTINEL, newPid]:  # the pid after renaming
+                self._project._collectionList._resetItemPids(oldPid, newPid)
+                self._project._crossReferencing._resetItemPids(self, oldPid=oldPid, action=action)
+
+        elif action in {'create', 'delete'}:
+            if self._project._crossReferencing:
+                self._project._crossReferencing._resetItemPids(self, action=action)
+
+        if self._childActions:
+            # operations that MUST be performed during _finalise
+            # irrespective of whether notifiers fire to external objects
+            # print(f' CHILD-ACTIONS {self.className}   {self}    {self._childActions}')
+            # propagate the action to explicitly associated (generally child) instances
+            for func in self._childActions:
+                func()
+            self._childActions = []
 
         if project._notificationBlanking:
             # do not call external notifiers
             # structures should be in a valid state at this point
             return
+
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # no blanking
 
         # notify any external objects - these should NOT modify any objects/structures
         className = self.className
@@ -377,22 +406,9 @@ class V3CoreObjectABC(CoreModel, NotifierBase):
                     for name in (className, 'AbstractWrapperObject'))
 
         if action == 'rename':
-            try:
-                # get the stored value BEFORE renaming - valid for undo/redo
-                oldPid = self._oldPid or _RENAME_SENTINEL
-            except Exception:
-                oldPid = self.pid
-            if oldPid not in [_RENAME_SENTINEL, self.pid]:
-                self._resetIds(oldPid.id)
-                self._project._collectionList._resetItemPids(oldPid, self.pid)
-
             for dd in iterator:
                 for notifier in tuple(dd):
                     notifier(self, oldPid, **actionKwds)
-
-            # for reference - as per AbstractWrapperObject
-            # for obj in self._getDirectChildren():  # no children defined for anything yet - consider later
-            #     obj._finaliseAction('rename')
 
         else:
             # Normal case - just call notifiers - as per AbstractWrapperObject
@@ -400,6 +416,7 @@ class V3CoreObjectABC(CoreModel, NotifierBase):
                 for notifier in tuple(dd):
                     notifier(self, **actionKwds)
 
+        # print(f'  {self} ACTIONS   {self._finaliseChildren}')
         # propagate the action to explicitly associated (generally child) instances
         for obj, action in self._finaliseChildren:
             obj._finaliseAction(action)
@@ -422,16 +439,13 @@ class V3CoreObjectABC(CoreModel, NotifierBase):
         if pid is None or len(pid) is None:
             return None
 
-        obj = None
-
         # return if the pid does not conform to a pid definition
         if not Pid.isValid(pid):
             return None
 
         pid = Pid(pid)
         dd = self._project._pid2Obj.get(pid.type)
-        if dd is not None:
-            obj = dd.get(pid.id)
+        obj = dd.get(pid.id) if dd is not None else None
         if obj is not None and obj._isDeleted:
             raise RuntimeError(f'{self.className}.getByPid "%s" defined a deleted object' % pid)
         return obj

@@ -55,8 +55,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-04-25 15:41:44 +0100 (Tue, April 25, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-06-09 12:06:25 +0100 (Fri, June 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1586,7 +1586,7 @@ class CcpnGLWidget(QOpenGLWidget):
             if restoredZooms:
                 # only update if a zoom as been stored
                 self.axisL, self.axisR, self.axisB, self.axisT = restoredZooms[0], restoredZooms[1], restoredZooms[2], \
-                                                                 restoredZooms[3]
+                    restoredZooms[3]
                 # use this because it rescales all the symbols
                 self._rescaleXAxis()
 
@@ -1600,7 +1600,7 @@ class CcpnGLWidget(QOpenGLWidget):
             if restoredZooms:
                 # only update if a zoom as been stored
                 self.axisL, self.axisR, self.axisB, self.axisT = restoredZooms[0], restoredZooms[1], restoredZooms[2], \
-                                                                 restoredZooms[3]
+                    restoredZooms[3]
                 # use this because it rescales all the symbols
                 self._rescaleXAxis()
 
@@ -1625,7 +1625,7 @@ class CcpnGLWidget(QOpenGLWidget):
             if restoredZooms:
                 # only update if a zoom as been stored
                 self.axisL, self.axisR, self.axisB, self.axisT = restoredZooms[0], restoredZooms[1], restoredZooms[2], \
-                                                                 restoredZooms[3]
+                    restoredZooms[3]
                 # use this because it rescales all the symbols
                 self._rescaleXAxis()
 
@@ -3817,7 +3817,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # build the marks VBO
             index = 0
-            for mark in self.project.marks:
+            # for mark in self.project.marks:
+            for mark in self.strip.marks:
 
                 # find the matching axisCodes to the display
                 exactMatch = (self._preferences.matchAxisCode == AXIS_FULLATOMNAME)
@@ -3857,7 +3858,7 @@ class CcpnGLWidget(QOpenGLWidget):
                             drawList.attribs = np.append(drawList.attribs, (axisIndex, pos, axisIndex, pos))
 
                             # build the string and add the extra axis code
-                            label = rr.label if rr.label else rr.axisCode
+                            label = rr.label or rr.axisCode
 
                             newMarkString = GLString(text=label,
                                                      font=self.getSmallFont(),
@@ -5332,9 +5333,9 @@ class CcpnGLWidget(QOpenGLWidget):
                         # skip if one of the axes is zero
                         continue
 
-                    nlTarget = 10. ** i
+                    nlTarget = 10.**i
                     _pow = np.log10(abs(dist / nlTarget)) + 0.5
-                    d = 10. ** np.floor(_pow)
+                    d = 10.**np.floor(_pow)
 
                     ul1 = np.floor(ul / d) * d
                     br1 = np.ceil(br / d) * d

@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-09 15:09:09 +0000 (Thu, February 09, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-06-09 12:06:26 +0100 (Fri, June 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -34,6 +34,15 @@ import numpy
 import pandas
 import contextlib
 from collections import OrderedDict
+
+
+ORDEREDDICT = 'OrderedDict'
+DATAFRAME = 'pandas.DataFrame'
+SERIES = 'pandas.Series'
+NDARRAY = 'numpy.ndarray'
+CROSSREFERENCE = 'ccpn.cross-reference'
+TENSOR = 'ccpncore.Tensor'
+PANEL = 'pandas.Panel'
 
 
 def load(fp, **kwds):
@@ -55,6 +64,7 @@ def dumps(obj: object, indent: int = 2, **kwds):
     """Dump object to json string with extended object type support"""
     return json.dumps(obj, indent=indent, cls=_CcpnMultiEncoder, **kwds)
 
+
 def _dataFrameToDict(df) -> dict:
     """
     Ensure a dataframe is  properly converted to a dict
@@ -67,8 +77,8 @@ def _dataFrameToDict(df) -> dict:
     index = list(df.index)
     columns = list(df.columns)
     values = df.values.tolist()
-    data = {'index': index, 'columns': columns, 'data': values}
-    return data
+    return {'index': index, 'columns': columns, 'data': values}
+
 
 class _CcpnMultiEncoder(json.JSONEncoder):
     """Overrides normal JSON encoder, supporting additional types.
@@ -82,9 +92,10 @@ class _CcpnMultiEncoder(json.JSONEncoder):
 
         # stop circular imports
         from ccpn.core._implementation.DataFrameABC import DataFrameABC
+        from ccpn.core._implementation.CrossReference import _CrossReference
 
         if isinstance(obj, OrderedDict):
-            typ = 'OrderedDict'
+            typ = ORDEREDDICT
             data = list(obj.items())
 
         elif isinstance(obj, DataFrameABC):
@@ -98,19 +109,19 @@ class _CcpnMultiEncoder(json.JSONEncoder):
             # data = obj.to_json(orient='split')
 
         elif isinstance(obj, pandas.DataFrame):
-            # NB this converts both None and NaN to 'null'
+            # NOTE:ED - this converts both None and NaN to 'null'
             # We assume that pandas will get back the correct value from the type of the array
             # (NaN in numeric data, None in object data).
-            typ = 'pandas.DataFrame'
+            typ = DATAFRAME
             dataDict = _dataFrameToDict(obj)
             data = json.dumps(dataDict)
             # data = obj.to_json(orient='split')
 
         elif isinstance(obj, pandas.Series):
-            # NB this converts both None and NaN to 'null'
+            # NOTE:ED - this converts both None and NaN to 'null'
             # We assume that pandas will get back the correct value from the type of teh array
             # (NaN in numeric data, None in object data).
-            typ = 'pandas.Series'
+            typ = SERIES
             data = obj.to_json(orient='split')
 
         # elif isinstance(obj, pandas.Panel):
@@ -119,8 +130,12 @@ class _CcpnMultiEncoder(json.JSONEncoder):
         #     data = frame.to_json(orient='split')
 
         elif isinstance(obj, numpy.ndarray):
-            typ = 'numpy.ndarray'
+            typ = NDARRAY
             data = obj.tolist()
+
+        elif isinstance(obj, _CrossReference):
+            typ = CROSSREFERENCE
+            data = obj.toJson()
 
         else:
             with contextlib.suppress(ImportError):
@@ -128,7 +143,7 @@ class _CcpnMultiEncoder(json.JSONEncoder):
                 from ccpn.util.Tensor import Tensor
 
                 if isinstance(obj, Tensor):
-                    typ = 'ccpncore.Tensor'
+                    typ = TENSOR
                     data = obj._toDict()
 
         # We are done.
@@ -148,8 +163,9 @@ def _ccpnObjectPairHook(pairs):
         if tag1 == '__type__' and tag2 == '__data__':
 
             from ccpn.core._implementation.DataFrameABC import DataFrameABC
+            from ccpn.core._implementation.CrossReference import _CrossReference
 
-            if typ == 'OrderedDict':
+            if typ == ORDEREDDICT:
                 return OrderedDict(data)
 
             elif typ in DataFrameABC.registeredJsonTypes():
@@ -164,19 +180,19 @@ def _ccpnObjectPairHook(pairs):
                 finally:
                     return result
 
-            elif typ == 'pandas.DataFrame':
+            elif typ == DATAFRAME:
                 # return pandas.DataFrame(data=data.get('data'), index=data.get('index'),
                 #                         columns=data.get('columns'))
                 # return pandas.read_json(data, orient='split')
                 return pandas.DataFrame(**json.loads(data))
 
-            elif typ == 'pandas.Panel':
+            elif typ == PANEL:
                 # NBNB NOT TESTED
                 # return pandas.read_json(data, orient='split').to_panel()
                 # pandas.Panel is deprecated so return as a DataFrame
                 return pandas.read_json(data, orient='split')
 
-            elif typ == 'pandas.Series':
+            elif typ == SERIES:
                 # columns = data.get('columns')
                 # # Does the series name get stored in columns? Presumably. Let us try
                 # name = columns[0] if columns else None
@@ -184,14 +200,18 @@ def _ccpnObjectPairHook(pairs):
                 #                      name=name)
                 return pandas.read_json(data, typ='series', orient='split')
 
-            elif typ == 'numpy.ndarray':
+            elif typ == NDARRAY:
                 return numpy.array(data)
 
-            elif typ == 'ccpncore.Tensor':
+            elif typ == TENSOR:
                 # Put here to avoid circular imports
                 from ccpn.util.Tensor import Tensor
 
                 return Tensor._fromDict(data)
 
-    # default option, std json behaviour
+            elif typ == CROSSREFERENCE:
+                # return a sparse matrix for use in cross-referencing
+                return _CrossReference._newFromJson(data)
+
+                # default option, std json behaviour
     return dict(pairs)

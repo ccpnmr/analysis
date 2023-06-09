@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-04-04 17:14:17 +0100 (Tue, April 04, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-06-09 12:06:24 +0100 (Fri, June 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -43,7 +43,7 @@ from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, \
     undoBlock, undoBlockWithoutSideBar, undoStackBlocking, ccpNmrV3CoreUndoBlock
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import makeIterableList
-from ccpn.util.Constants import SCALETOLERANCE
+# from ccpn.util.Constants import SCALETOLERANCE
 from ccpn.core.NmrAtom import UnknownIsotopeCode
 
 
@@ -270,7 +270,12 @@ class Peak(AbstractWrapperObject):
 
         # recalculate the shifts
         assigned = set(makeIterableList(self.assignments))
-        shifts = set(cs for nmrAt in assigned for cs in nmrAt.chemicalShifts if cs and not cs.isDeleted)
+        shifts = {
+            cs
+            for nmrAt in assigned
+            for cs in nmrAt.chemicalShifts
+            if cs and not cs.isDeleted
+            }
 
         self._childActions.extend(sh._recalculateShiftValue for sh in shifts)
         self._finaliseChildren.extend((sh, 'change') for sh in shifts)
@@ -374,8 +379,12 @@ class Peak(AbstractWrapperObject):
 
             # log any peak assignments that have moved in this axis
             if peakDim.position != _old:
-                assigned = set([ff(pdc.resonance) for pdc in peakDim.mainPeakDimContribs if hasattr(pdc, 'resonance')])
-                shifts |= set(sh for nmrAt in assigned for sh in nmrAt.chemicalShifts)
+                assigned = {
+                    ff(pdc.resonance)
+                    for pdc in peakDim.mainPeakDimContribs
+                    if hasattr(pdc, 'resonance')
+                    }
+                shifts |= {sh for nmrAt in assigned for sh in nmrAt.chemicalShifts}
 
         self._childActions.extend(sh._recalculateShiftValue for sh in shifts)
         self._finaliseChildren.extend((sh, 'change') for sh in shifts)
@@ -451,9 +460,9 @@ class Peak(AbstractWrapperObject):
         aliasing = []
         for peakDim in self._wrappedData.sortedPeakDims():
             axisReversed = -1
-            expDimRef = peakDim.dataDim.expDim.findFirstExpDimRef(serial=1)
-            if expDimRef:
+            if expDimRef := peakDim.dataDim.expDim.findFirstExpDimRef(serial=1):
                 axisReversed = -1 if expDimRef.isAxisReversed else 1
+
             aliasing.append(axisReversed * peakDim.numAliasing)
         return tuple(aliasing)
 
@@ -462,7 +471,7 @@ class Peak(AbstractWrapperObject):
     @ccpNmrV3CoreSetter()
     def aliasing(self, value: Sequence):
         if len(value) != len(self._wrappedData.sortedPeakDims()):
-            raise ValueError("Length of %s does not match number of dimensions." % str(value))
+            raise ValueError(f"Length of {str(value)} does not match number of dimensions.")
         if not all(isinstance(dimVal, int) for dimVal in value):
             raise ValueError("Aliasing values must be integer.")
 
@@ -472,10 +481,14 @@ class Peak(AbstractWrapperObject):
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
             # log any peak assignments that have moved in this axis
             if peakDim.numAliasing != -1 * value[ii]:
-                assigned = set([ff(pdc.resonance) for pdc in peakDim.mainPeakDimContribs if hasattr(pdc, 'resonance')])
+                assigned = {
+                    ff(pdc.resonance)
+                    for pdc in peakDim.mainPeakDimContribs
+                    if hasattr(pdc, 'resonance')
+                    }
                 peakDim.numAliasing = -1 * value[ii]
 
-                shifts |= set(sh for nmrAt in assigned for sh in nmrAt.chemicalShifts)
+                shifts |= {sh for nmrAt in assigned for sh in nmrAt.chemicalShifts}
 
         self._childActions.extend(sh._recalculateShiftValue for sh in shifts)
         self._finaliseChildren.extend((sh, 'change') for sh in shifts)
@@ -673,13 +686,14 @@ class Peak(AbstractWrapperObject):
                 if isinstance(atom, NmrAtom):
                     resonance = atom._wrappedData
                     if isotopeCodes[ii] and resonance.isotopeCode not in (isotopeCodes[ii], UnknownIsotopeCode, None):
-                        raise ValueError("NmrAtom %s, isotope %s, assigned to dimension %s must have isotope %s or %s"
-                                         % (atom, resonance.isotopeCode, ii + 1, isotopeCodes[ii], UnknownIsotopeCode))
+                        raise ValueError(
+                                f"NmrAtom {atom}, isotope {resonance.isotopeCode}, assigned to dimension {ii + 1} must have isotope {isotopeCodes[ii]} or {UnknownIsotopeCode}"
+                                )
 
                     ll[ii] = resonance
 
                 elif atom is not None:
-                    raise TypeError('Error assigning NmrAtom %s to dimension %s' % (str(atom), ii + 1))
+                    raise TypeError(f'Error assigning NmrAtom {str(atom)} to dimension {ii + 1}')
 
         # store the currently attached nmrAtoms
         _assigned = set(makeIterableList(self.assignedNmrAtoms))
@@ -693,13 +707,13 @@ class Peak(AbstractWrapperObject):
 
         _pre = set(makeIterableList(self.assignedNmrAtoms))
         _post = set(makeIterableList(value))
-        nmrResidues = set(nmr.nmrResidue for nmr in (_pre | _post))
-        shifts = list(set(cs for nmrAt in (_pre | _post) for cs in nmrAt.chemicalShifts))
+        nmrResidues = {nmr.nmrResidue for nmr in (_pre | _post)}
+        shifts = list({cs for nmrAt in (_pre | _post) for cs in nmrAt.chemicalShifts})
         newShifts = shifts.copy()
 
         _thisNmrPids = self.spectrum.chemicalShiftList._getNmrAtomPids()
-        _pre = set(atm.pid for atm in _pre)
-        _post = set(atm.pid for atm in _post)
+        _pre = {atm.pid for atm in _pre}
+        _post = {atm.pid for atm in _post}
 
         with undoBlock():
             with undoStackBlocking() as addUndoItem:
@@ -709,9 +723,10 @@ class Peak(AbstractWrapperObject):
             self._assignedNmrAtoms = value
 
             # add those that are not already in the list - otherwise recalculate
-            for nmrAtom in (_post - _pre - _thisNmrPids):
-                newShifts.append(self.spectrum.chemicalShiftList.newChemicalShift(nmrAtom=nmrAtom))
-
+            newShifts.extend(
+                    self.spectrum.chemicalShiftList.newChemicalShift(nmrAtom=nmrAtom)
+                    for nmrAtom in (_post - _pre - _thisNmrPids)
+                    )
             # update the chemicalShift value/valueError
             self._recalculatePeakShifts(nmrResidues, newShifts)
             with undoStackBlocking() as addUndoItem:
@@ -724,16 +739,20 @@ class Peak(AbstractWrapperObject):
     @property
     def multiplets(self) -> Optional[Tuple[Any]]:
         """List of multiplets containing the Peak."""
-        return tuple([self._project._data2Obj[mt] for mt in self._wrappedData.sortedMultiplets()
-                      if mt in self._project._data2Obj])
+        return tuple(
+                self._project._data2Obj[mt]
+                for mt in self._wrappedData.sortedMultiplets()
+                if mt in self._project._data2Obj
+                )
 
     @logCommand(get='self')
     def addAssignment(self, value: Sequence[Union[str, 'NmrAtom']]):
         """Add a peak assignment - a list of one NmrAtom or Pid for each dimension"""
 
         if len(value) != self.peakList.spectrum.dimensionCount:
-            raise ValueError("Length of assignment value %s does not match peak dimensionality %s "
-                             % (value, self.peakList.spectrum.dimensionCount))
+            raise ValueError(
+                    f"Length of assignment value {value} does not match peak dimensionality {self.peakList.spectrum.dimensionCount} "
+                    )
 
         # Convert to tuple and check for non-existing pids
         ll = []
@@ -741,7 +760,7 @@ class Peak(AbstractWrapperObject):
             if isinstance(val, str):
                 vv = self.getByPid(val)
                 if vv is None:
-                    raise ValueError("No NmrAtom matching string pid %s" % val)
+                    raise ValueError(f"No NmrAtom matching string pid {val}")
                 else:
                     ll.append(vv)
             else:
@@ -750,15 +769,16 @@ class Peak(AbstractWrapperObject):
 
         assignedNmrAtoms = list(self.assignedNmrAtoms)
         if value in assignedNmrAtoms:
-            self._project._logger.warning("Attempt to add already existing Peak Assignment: %s - ignored"
-                                          % value)
+            self._project._logger.warning(
+                    f"Attempt to add already existing Peak Assignment: {value} - ignored"
+                    )
         else:
             assignedNmrAtoms.append(value)
             self.assignedNmrAtoms = assignedNmrAtoms
 
     @logCommand(get='self')
     def assignDimension(self, axisCode: str, value: Union[Union[str, 'NmrAtom'],
-                                                          Sequence[Union[str, 'NmrAtom']]] = None):
+    Sequence[Union[str, 'NmrAtom']]] = None):
         """Assign dimension with axisCode to value (NmrAtom, or Pid or sequence of either, or None)."""
 
         axisCodes = self.spectrum.axisCodes
@@ -856,7 +876,7 @@ class Peak(AbstractWrapperObject):
             newValues = _getParameterValues(self, parameterName,
                                             dimensions=dimensions, dimensionCount=self.spectrum.dimensionCount)
         except ValueError as es:
-            raise ValueError('%s.getByAxisCodes: %s' % (self.__class__.__name__, str(es)))
+            raise ValueError(f'{self.__class__.__name__}.getByAxisCodes: {str(es)}') from es
 
         return newValues
 
@@ -885,7 +905,7 @@ class Peak(AbstractWrapperObject):
             newValues = _setParameterValues(self, parameterName, values,
                                             dimensions=dimensions, dimensionCount=self.spectrum.dimensionCount)
         except ValueError as es:
-            raise ValueError('%s.setByAxisCodes: %s' % (self.__class__.__name__, str(es)))
+            raise ValueError(f'{self.__class__.__name__}.setByAxisCodes: {str(es)}') from es
 
         return newValues
 
@@ -909,7 +929,7 @@ class Peak(AbstractWrapperObject):
             newValues = _getParameterValues(self, parameterName,
                                             dimensions=dimensions, dimensionCount=self.spectrum.dimensionCount)
         except ValueError as es:
-            raise ValueError('%s.getByDimensions: %s' % (self.__class__.__name__, str(es)))
+            raise ValueError(f'{self.__class__.__name__}.getByDimensions: {str(es)}') from es
 
         return newValues
 
@@ -932,7 +952,7 @@ class Peak(AbstractWrapperObject):
         try:
             newValues = _setParameterValues(self, parameterName, values, dimensions=dimensions, dimensionCount=self.spectrum.dimensionCount)
         except ValueError as es:
-            raise ValueError('%s.setByDimensions: %s' % (self.__class__.__name__, str(es)))
+            raise ValueError(f'{self.__class__.__name__}.setByDimensions: {str(es)}') from es
 
         return newValues
 
@@ -962,7 +982,7 @@ class Peak(AbstractWrapperObject):
         """Get wrappedData (Peaks) for all Peak children of parent PeakList."""
         return parent._wrappedData.sortedPeaks()
 
-    def _finaliseAction(self, action: str):
+    def _finaliseAction(self, action: str, **actionKwds):
         """Subclassed to handle associated multiplets
         """
         if not super()._finaliseAction(action):
@@ -970,9 +990,9 @@ class Peak(AbstractWrapperObject):
 
         # if this peak is changed or deleted then it's multiplets/integral need to CHANGE
         # create required as undo may return peak to a multiplet list
-        if action in ['change', 'create', 'delete']:
+        if action in {'change', 'create', 'delete'}:
             for mt in self.multiplets:
-                mt._finaliseAction('change')
+                mt._finaliseAction('change', **actionKwds)
             # NOTE:ED does integral need to be notified? - and reverse notifiers in multiplet/integral
 
     def delete(self):
@@ -1022,27 +1042,27 @@ class Peak(AbstractWrapperObject):
         dimensionCount = peakList.spectrum.dimensionCount
 
         if dimensionCount < targetPeakList.spectrum.dimensionCount:
-            raise ValueError("Cannot copy %sD %s to %sD %s. Incompatible dimensionality."
-                             % (dimensionCount, self.longPid,
-                                targetPeakList.spectrum.dimensionCount, targetPeakList.longPid))
+            raise ValueError(
+                    f"Cannot copy {dimensionCount}D {self.longPid} to {targetPeakList.spectrum.dimensionCount}D {targetPeakList.longPid}. Incompatible dimensionality."
+                    )
 
         destinationAxisCodes = targetPeakList.spectrum.axisCodes
         dimensionMapping = peakList.spectrum.getByAxisCodes('dimensions', destinationAxisCodes, exactMatch=False)
 
         if None in dimensionMapping:
-            raise ValueError("%s axisCodes %s not compatible with targetSpectrum axisCodes %s"
-                             % (self, peakList.spectrum.axisCodes, targetPeakList.spectrum.axisCodes))
+            raise ValueError(
+                    f"{self} axisCodes {peakList.spectrum.axisCodes} not compatible with targetSpectrum axisCodes {targetPeakList.spectrum.axisCodes}"
+                    )
 
         with undoBlockWithoutSideBar():
-            params = dict((tag, getattr(self, tag)) for tag in singleValueTags)
+            params = {tag: getattr(self, tag) for tag in singleValueTags}
             for tag in dimensionValueTags:
                 value = self.getByDimensions(tag, dimensions=dimensionMapping)
                 params[tag] = value
 
             newPeak = targetPeakList.newPeak(**params)
 
-            assignments = self.getByDimensions('assignedNmrAtoms', dimensionMapping)
-            if assignments:
+            if assignments := self.getByDimensions('assignedNmrAtoms', dimensionMapping):
                 newPeak.assignedNmrAtoms = assignments
 
             return newPeak
@@ -1066,7 +1086,7 @@ class Peak(AbstractWrapperObject):
         """Get attributeName in order defined by axisCodes :
            (default order if None)"""
         if not hasattr(self, attributeName):
-            raise AttributeError('Peak object does not have attribute "%s"' % attributeName)
+            raise AttributeError(f'Peak object does not have attribute "{attributeName}"')
 
         values = getattr(self, attributeName)
         if axisCodes is None:
@@ -1079,7 +1099,7 @@ class Peak(AbstractWrapperObject):
         """Set attributeName from values in order defined by axisCodes
            (default order if None)"""
         if not hasattr(self, attributeName):
-            raise AttributeError('Peak object does not have attribute "%s"' % attributeName)
+            raise AttributeError(f'Peak object does not have attribute "{attributeName}"')
 
         if axisCodes is not None:
             # change values to the order appropriate for spectrum
@@ -1109,15 +1129,17 @@ class Peak(AbstractWrapperObject):
     def integral(self, value: Union['Integral'] = None):
         """Link an integral to the peak.
         The peak must belong to the spectrum containing the peakList.
-        :param integral: single integral."""
-        spectrum = self._parent.spectrum
+        :param value: single integral.
+        """
         if value:
             from ccpn.core.Integral import Integral
 
             if not isinstance(value, Integral):
-                raise TypeError('%s is not of type Integral' % value)
+                raise TypeError(f'{value} is not of type Integral')
+
+            spectrum = self._parent.spectrum
             if value not in spectrum.integrals:
-                raise ValueError('%s does not belong to spectrum: %s' % (value.pid, spectrum.pid))
+                raise ValueError(f'{value.pid} does not belong to spectrum: {spectrum.pid}')
 
         self._wrappedData.integral = value._wrappedData if value else None
 
@@ -1295,6 +1317,8 @@ class Peak(AbstractWrapperObject):
     @_temporaryPosition.setter
     def _temporaryPosition(self, value):
         self._tempPosition = value
+
+
 #=========================================================================================
 # Connections to parents:
 #=========================================================================================

@@ -3,19 +3,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-27 14:36:44 +0100 (Wed, July 27, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-06-09 12:06:24 +0100 (Fri, June 09, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -68,7 +68,6 @@ class RestraintTable(AbstractWrapperObject):
 
     #TODO: this needs to be explicit here
     restraintTypes = tuple(coreConstants.constraintListType2ItemLength.keys())
-
 
     def __init__(self, project, wrappedData):
 
@@ -286,7 +285,7 @@ class RestraintTable(AbstractWrapperObject):
 
         # rename functions from here
         oldName = self.name
-        self._oldPid = self.pid
+        # self._oldPid = self.pid
 
         self._wrappedData.name = name
 

@@ -482,6 +482,9 @@ MultipletListView._registerCoreClass()
 from ccpn.ui.gui.lib.IntegralListView import IntegralListView
 IntegralListView._registerCoreClass()
 
+from ccpn.core._implementation._PeakCluster import _PeakCluster
+_PeakCluster._registerCoreClass()
+
 
 _allGetters = []
 Project._linkWrapperClasses(_allGetters=_allGetters)

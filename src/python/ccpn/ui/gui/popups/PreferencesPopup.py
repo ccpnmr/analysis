@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 17:53:13 +0100 (Fri, June 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-09 17:58:32 +0100 (Fri, June 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1605,8 +1605,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                    )
 
         # only one symbol - will add more later
-        # self.multipletLabel.setVisible(False)
-        # self.multipletSymbol.setVisible(False)
+        self.multipletLabel.setVisible(False)
+        self.multipletSymbol.setVisible(False)
 
         #======  Peak/Multiplet Arrows ======
         row += 1

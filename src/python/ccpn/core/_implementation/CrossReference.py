@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 17:01:44 +0100 (Fri, June 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-09 19:34:58 +0100 (Fri, June 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -225,7 +225,7 @@ class _CrossReference():
 
     def _makeIndexing(self, project: Project,
                       rowClassName: str, columnClassName: str,
-                      rowPids: list[str], columnPids: list[str]):
+                      rowPids: List[str], columnPids: List[str]):
         """Make the indexing from the current list of indexes and pids.
         """
         # should handle empty lists

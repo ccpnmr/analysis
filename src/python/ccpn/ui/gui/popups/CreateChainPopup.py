@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:11 +0100 (Wed, October 12, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-06-12 17:57:05 +0100 (Mon, June 12, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -40,8 +40,6 @@ from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
 from ccpn.util.AttrDict import AttrDict
 from ccpn.ui.gui.popups.Dialog import _verifyPopupApply
 from ccpn.core.lib.ContextManagers import queueStateChange, catchExceptions
-import ccpn.ui.gui.widgets.CompoundWidgets as cw
-from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
 
 
 DefaultAddAtomGroups = True
@@ -49,13 +47,14 @@ DefaultAddPseudoAtoms = False
 DefaultAddNonstereoAtoms = True
 DefaultSetBoundsForAtomGroups = False
 
+
 def _nextChainCode(project):
     """This gives a "next" available chain code.
        First does A-Z, then A1-Z1, then A2-Z2, etc.
     """
 
     possibleChainCodes = list(string.ascii_uppercase)
-    existingChainCodes = set([chain.shortName for chain in project.chains])
+    existingChainCodes = {chain.shortName for chain in project.chains}
 
     n = 0
     code = possibleChainCodes[n]
@@ -116,6 +115,7 @@ class CreateChainPopup(AttributeEditorPopupABC):
         self.expandAtomsFromAtomSetW.clicked.connect(self._queueSetExpandAtomsFromAtomSets)
         self.addNonstereoAtomsW.clicked.connect(self._queueSetAddNonstereoAtomsW)
         self.addPseudoAtomsW.clicked.connect(self._queueSetAddPseudoAtomsW)
+        self.makeCyclicPolymer.clicked.connect(self._queueSetMakeCyclic)
 
         self._popupReady = True
         self._populate()
@@ -131,6 +131,7 @@ class CreateChainPopup(AttributeEditorPopupABC):
         row += 1
         comment = Label(self.mainWidget, text="Comment", grid=(row, 0))
         self.commentName = LineEdit(self.mainWidget, text="", grid=(row, 1), gridSpan=(1, 1), textAlignment='l', backgroundText='> Optional <')
+
         row += 1
         self.molTypes = ['protein', 'DNA', 'RNA', 'other']
         self.molTypePulldown.setData(self.molTypes)
@@ -138,12 +139,14 @@ class CreateChainPopup(AttributeEditorPopupABC):
         tipText = "Sequence may be entered a set of one letter codes without\n" \
                   "spaces or a set of three letter codes with spaces inbetween"
         self.sequenceEditor = TextEditor(self.mainWidget, grid=(row, 1), gridSpan=(1, 3), tipText=tipText)
+
         row += 1
         label4a = Label(self.mainWidget, 'Sequence Start', grid=(row, 0))
         self.lineEdit1a = Spinbox(self.mainWidget, grid=(row, 1), value=1, min=-1000000, max=1000000)
         label5a = Label(self.mainWidget, 'Chain code', grid=(row, 2))
         self._code = _nextChainCode(self.project)
         self.lineEdit2a = LineEdit(self.mainWidget, grid=(row, 3), text=self._code)
+
         row += 1
         tipText6a = "E.g., for a VAL residue, the set of HG11, HG12, HG13 (NMR equivalent) atoms will create a new atom HG1%;\n" \
                     "        also the set HG1%, HG2% will create a new atom HG%"
@@ -167,6 +170,13 @@ class CreateChainPopup(AttributeEditorPopupABC):
                                         tipText=tipText8a, grid=(row, 1), )
         self._togglePseudoAtomOptions(self.expandAtomsFromAtomSetW.get())
 
+        row += 1
+        tipText9a = "Make a cyclic polymer;\n" \
+                    "    H1, H2, H3 and OXT atoms will be removed."
+        label8a = Label(self.mainWidget, 'Cyclic Polymer', tipText=tipText9a, grid=(row, 0))
+        self.makeCyclicPolymer = CheckBox(self.mainWidget, checked=False,
+                                          tipText=tipText9a, grid=(row, 1), )
+
     def _defineObject(self):
         """Initialise the new object
         """
@@ -181,6 +191,7 @@ class CreateChainPopup(AttributeEditorPopupABC):
         self.obj.expandFromAtomSets = DefaultAddAtomGroups
         self.obj.addPseudoAtoms = DefaultAddPseudoAtoms
         self.obj.addNonstereoAtoms = DefaultAddNonstereoAtoms
+        self.obj.isCyclic = False
 
     def _applyAllChanges(self, changes):
         """Apply all changes and create sequence from self.obj
@@ -203,6 +214,7 @@ class CreateChainPopup(AttributeEditorPopupABC):
                 self.expandAtomsFromAtomSetW.set(self.obj.expandFromAtomSets)
                 self.addNonstereoAtomsW.set(self.obj.addNonstereoAtoms)
                 self.addPseudoAtomsW.set(self.obj.addPseudoAtoms)
+                self.makeCyclicPolymer.set(self.obj.isCyclic)
 
     def _createSequence(self):
         """Creates a sequence using the values specified in the text widget.
@@ -314,11 +326,11 @@ class CreateChainPopup(AttributeEditorPopupABC):
         """Queue changes to sequence
         """
         value = self.sequenceEditor.toPlainText()
-        if not ' ' in value:
-            value = self.sequenceEditor.toPlainText()
-        else:
-            value = tuple(value.split())
-
+        value = (
+            tuple(value.split())
+            if ' ' in value
+            else self.sequenceEditor.toPlainText()
+        )
         prefValue = self.obj.sequence or None
         if value != prefValue:
             return partial(self._setSequence, value)
@@ -340,3 +352,16 @@ class CreateChainPopup(AttributeEditorPopupABC):
         """Sets the molecule type
         """
         self.obj.molType = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetMakeCyclic(self, value):
+        """Queue changes to the SetV
+        """
+        prefValue = self.obj.isCyclic
+        if value != prefValue:
+            return partial(self._setMakeCyclic, value)
+
+    def _setMakeCyclic(self, value: str):
+        """Sets cyclic state of molecule being created.
+        """
+        self.obj.isCyclic = value

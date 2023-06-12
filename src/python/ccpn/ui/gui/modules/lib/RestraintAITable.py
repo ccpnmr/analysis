@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-06 14:12:16 +0000 (Mon, March 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-12 12:21:42 +0100 (Mon, June 12, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -537,6 +537,7 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
 
         # need to remove the 'str' and use pd.MultiIndex.from_tuples(list[tuple, ...])
 
+        # set the default column information
         self._columnDefs = [
             Column(INDEXCOL, lambda row: _getValueByHeader(row, HeaderIndex), tipText='TipTex1', format=int),
             Column(PEAKSERIALCOL, lambda row: _getValueByHeader(row, HeaderMatch), tipText='TipTex2'),
@@ -578,6 +579,7 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                                   columns=[PEAKSERIALCOL, OBJCOL])
 
             # make matching length tables for each of the restraintTables for each peak so the rows match up in the table
+            #   must be a pandas way of doing this
             dfs = {}
             for lCount, cSet in enumerate(cSetLists):
                 cSetName = cSet.comparisonSetName
@@ -645,7 +647,7 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                     # if not cSet.getTreeTables(depth=1, selected=True):
                     #     continue
 
-                    if violationResults.get(cSetName, None):
+                    if violationResults.get(cSetName):
 
                         HEADERSCOL = (cSetName, f'{HeaderRestraint}')
                         ATOMSCOL = (cSetName, 'Atoms')
@@ -682,16 +684,7 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
 
                                 _out.append(_new)
 
-                                for _colID, fmt in self._subgroupColumns:
-                                    if (cSetName, _colID) in list(_new.columns):
-                                        # check whether all the columns exist - discard otherwise
-                                        # columns should have been renamed and post-fixed with _<num>. above
-                                        self._columnDefs.append(Column((cSetName, _colID),
-                                                                       # lambda row: _getValueByHeader(row, f'{_colID}_{ii + 1}'),
-                                                                       None,
-                                                                       tipText=f'{_colID}_Tip{ii + 1}',
-                                                                       format=fmt
-                                                                       ))
+                                self._addColumnDefs(_new, cSetName, ii)
 
                         #~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -736,9 +729,11 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                         _new = dfs[cSetName].drop(columns=[PEAKSERIALCOL]).fillna(0.0)
                         _out.append(_new)
 
-                        # # creat new column headings
+                        # # create new column headings
                         # for _colID in (HeaderRestraint, HeaderAtoms):
                         #     _cols.append((f'{_colID}_{ii + 1}', lambda row: _getValueByHeader(row, f'{_colID}_{ii + 1}'), f'{_colID}_Tip{ii + 1}', None, None))
+
+                        self._addColumnDefs(_new, cSetName, ii)
 
                 # concatenate the final dataFrame
                 # _table = pd.concat([index, allPks, *_out.values()], axis=1)
@@ -764,9 +759,11 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                     _new = dfs[cSetName].drop(columns=[PEAKSERIALCOL]).fillna(0.0)
                     _out.append(_new)
 
-                    # # creat new column headings
+                    # # create new column headings
                     # for _colID in (HeaderRestraint, HeaderAtoms):
                     #     _cols.append((f'{_colID}_{ii + 1}', lambda row: _getValueByHeader(row, f'{_colID}_{ii + 1}'), f'{_colID}_Tip{ii + 1}', None, None))
+
+                    self._addColumnDefs(_new, cSetName, ii)
 
                 # concatenate to give the final table
                 _table = pd.concat(_out, axis=1)
@@ -810,6 +807,20 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
             self.headerColumnMenu.setInternalColumns(set(hCols) | set(extraDefaultHiddenColumns))
 
         return _table
+
+    def _addColumnDefs(self, _new, cSetName, ii):
+        """Add column-definitions for the new restraints.
+        """
+        for _colID, fmt in self._subgroupColumns:
+            if (cSetName, _colID) in list(_new.columns):
+                # check whether all the columns exist - discard otherwise
+                # columns should have been renamed and post-fixed with _<num>. above
+                self._columnDefs.append(Column((cSetName, _colID),
+                                               # lambda row: _getValueByHeader(row, f'{_colID}_{ii + 1}'),
+                                               None,
+                                               tipText=f'{_colID}_Tip{ii + 1}',
+                                               format=fmt
+                                               ))
 
     #=========================================================================================
     # Updates

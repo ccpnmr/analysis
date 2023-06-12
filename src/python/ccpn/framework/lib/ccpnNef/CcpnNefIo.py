@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-01 19:39:56 +0100 (Thu, June 01, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-12 13:12:58 +0100 (Mon, June 12, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1430,6 +1430,8 @@ class CcpnNefWriter:
         if peakListSerial > 1:  # add a new saveframe only for the additional peakLists
             self.ccpn2SaveFrameName[spectrum] = result['sf_framecode']
 
+        self.ccpn2SaveFrameName[peakList] = result['sf_framecode']  # also keep the peak-list
+
         result['chemical_shift_list'] = self.ccpn2SaveFrameName.get(obj.chemicalShiftList)  # NOTE:ED - was peakList
         result['ccpn_sample'] = self.ccpn2SaveFrameName.get(obj.sample)
 
@@ -1782,7 +1784,7 @@ class CcpnNefWriter:
             if restraintListFrame is not None:
                 for restraint in sorted(restraintList.restraints):
                     for peak in sorted(restraint.peaks):
-                        peakListFrame = self.ccpn2SaveFrameName.get(peak.peakList.spectrum)
+                        peakListFrame = self.ccpn2SaveFrameName.get(peak.peakList)  # .spectrum)
                         if peakListFrame is not None:
                             data.append((peakListFrame, peak.serial, restraintListFrame, restraint.serial))
 

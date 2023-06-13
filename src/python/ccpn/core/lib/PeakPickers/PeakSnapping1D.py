@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-09 12:05:21 +0100 (Fri, June 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-13 12:23:23 +0100 (Tue, June 13, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -366,7 +366,7 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1,  doNeg=False,
 
     maxValues, minValues = _find1DMaxima(y_filtered, x_filtered, positiveThreshold=noiseLevel, negativeThreshold=negativeNoiseLevel, findNegative=doNeg)
     allValues = maxValues + minValues
-    allValues =  _filterLowSNFromNewMaxima(allValues, noiseLevel, negativeNoiseLevel,  snThreshold=0.5)
+    allValues =  _filterLowSNFromNewMaxima(allValues, noiseLevel, negativeNoiseLevel,  snThreshold=0.1)
     allValues = _filterShouldersFromNewMaxima(allValues, x_filtered, y_filtered)
     allValues = _filterKnownPeakPositionsFromNewMaxima(allValues, peak, rounding=4)
 

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-15 15:25:01 -0400 (Thu, June 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-15 16:45:55 -0400 (Thu, June 15, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -155,9 +155,10 @@ class PulldownList(QtWidgets.QComboBox, Base):
         ind = super().currentIndex()
 
         # remove number of preceding separators
-        cc = len([filter(None, (self.model().index(rr, 0).data(QtCore.Qt.AccessibleDescriptionRole)
-                                for rr in range(ind)))])
-        return ind - cc
+        filt = list(filter(None, (self.model().index(rr, 0).data(QtCore.Qt.AccessibleDescriptionRole)
+                                for rr in range(ind))))
+
+        return ind - len(filt)
 
     def currentObject(self):
 

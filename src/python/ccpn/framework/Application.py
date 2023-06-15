@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-16 14:43:46 +0000 (Thu, March 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-15 12:44:07 -0400 (Thu, June 15, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -153,6 +153,10 @@ def defineProgramArguments():
 
     # log information at end of undo/redo if exception occurs (not called if --disable-undo-exception set), calls _logObjects
     parser.add_argument('--ccpn-logging', dest='ccpnLogging', action='store_true', help='Additional logging of some ccpn objects, reserved for high-level debugging.')
+
+    # skip the update check at start-up
+    parser.add_argument('--skip-updates', dest='_skipUpdates', action='store_true',
+                        help='Skip the initial checking for updates')
 
     parser.add_argument('projectPath', nargs='?', help='Project path')
 

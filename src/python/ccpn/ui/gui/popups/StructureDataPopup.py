@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-02 10:56:13 +0000 (Thu, February 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-15 09:09:10 -0400 (Thu, June 15, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -28,7 +28,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 
 from ccpn.core.StructureData import StructureData
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
-from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget
+from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, EntryPathCompoundWidget
 
 
 class StructureDataPopup(AttributeEditorPopupABC):
@@ -37,13 +37,13 @@ class StructureDataPopup(AttributeEditorPopupABC):
     FIXEDWIDTH = False
 
     klass = StructureData
-    attributes = [('Name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
-                  ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
-                  ('Program Name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
-                  ('Program Version', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
-                  ('Data Path', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
-                  ('Uuid', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
-                  ('Molecule FilePath', EntryCompoundWidget, getattr, setattr, None, None, {})
+    attributes = [('Name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <', 'addSpacer': True}),
+                  ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <', 'addSpacer': True}),
+                  ('Program Name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <', 'addSpacer': True}),
+                  ('Program Version', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <', 'addSpacer': True}),
+                  ('Data Path', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <', 'addSpacer': True}),
+                  ('Uuid', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <', 'addSpacer': True}),
+                  ('Molecule FilePath', EntryPathCompoundWidget, getattr, setattr, None, None, {})
                   ]
 
     def _applyAllChanges(self, changes):

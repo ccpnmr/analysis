@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:30 +0100 (Wed, October 26, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-06-15 09:09:11 -0400 (Thu, June 15, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -535,33 +535,20 @@ class LineEditButtonDialog(Widget):
         super().__init__(parent, setLayout=True, **kwds)
         self.openPathIcon = Icon('icons/directory')
 
-        if textDialog is None:
-            self.textDialog = 'Select File'
-        else:
-            self.textDialog = textDialog
-
-        if textLineEdit is None:
-            self.textLineEdit = expanduser("~")
-        else:
-            self.textLineEdit = textLineEdit
-
-        if fileMode is None:
-            self.fileMode = 'anyFile'
-        else:
-            self.fileMode = fileMode
-
+        self.textDialog = 'Select File' if textDialog is None else textDialog
+        self.textLineEdit = expanduser("~") if textLineEdit is None else textLineEdit
+        self.fileMode = 'anyFile' if fileMode is None else fileMode
         self.fileFilter = fileFilter
         self.directory = directory
 
         tipText = 'Click the icon to select'
-        self.lineEdit = LineEdit(self, text=self.textLineEdit, textAlignment='l', hAlign='l', minimumWidth=lineEditMinimumWidth,
+        self.lineEdit = LineEdit(parent=self, text=self.textLineEdit,
+                                 textAlignment='l',
                                  tipText=tipText, grid=(0, 0))
         self.lineEdit.setEnabled(True)
-        self.lineEdit.setSizePolicy(QtWidgets.QSizePolicy.Maximum,
-                                    QtWidgets.QSizePolicy.Maximum)
-        button = Button(self, text='', icon=self.openPathIcon, callback=self._openFileDialog, grid=(0, 1), hAlign='l')
+        button = Button(parent=self, text='', icon=self.openPathIcon, callback=self._openFileDialog, grid=(0, 1),
+                        )
         button.setStyleSheet("border: 0px solid transparent")
-        self.getLayout().setAlignment(QtCore.Qt.AlignLeft)
 
     def _openFileDialog(self):
         self.fileDialog = LineButtonFileDialog(self, fileMode=self.fileMode, dialogText=self.textDialog,

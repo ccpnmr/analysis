@@ -1,7 +1,6 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-import contextlib
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
@@ -13,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-23 15:27:39 +0100 (Tue, May 23, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-15 09:09:10 -0400 (Thu, June 15, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -25,6 +24,7 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtGui, QtWidgets, QtCore
+import contextlib
 from functools import partial
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
@@ -47,6 +47,7 @@ from ccpn.ui.gui.widgets.CompoundView import CompoundView
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
+from ccpn.ui.gui.widgets.Font import getFontHeight
 from ccpn.util.Colour import spectrumColours, fillColourPulldown
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
@@ -333,7 +334,7 @@ class EntryCompoundWidget(CompoundBaseWidget):
                  showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
                  labelText='', entryText='', callback=None, default=None, editable=True,
-                 sizeAdjustPolicy=None, compoundKwds={}, tipText=None,
+                 sizeAdjustPolicy=None, compoundKwds=None, tipText=None,
                  **kwds):
         """
         :param parent: parent widget
@@ -351,6 +352,9 @@ class EntryCompoundWidget(CompoundBaseWidget):
 
         CompoundBaseWidget.__init__(self, parent=parent, layoutDict=self.layoutDict, orientation=orientation,
                                     showBorder=showBorder, **kwds)
+
+        compoundKwds = compoundKwds or {}
+        spacer = compoundKwds.get('addSpacer')
 
         self.label = Label(parent=self, text=labelText, vAlign='center')
         self._addWidget(self.label)
@@ -374,6 +378,10 @@ class EntryCompoundWidget(CompoundBaseWidget):
 
         # if sizeAdjustPolicy is not None:
         #     self.Entry.setSizeAdjustPolicy(sizeAdjustPolicy)
+
+        if spacer:
+            Spacer(self, getFontHeight() + 8, 5,
+                            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed, grid=(0, 2))
 
     def getText(self):
         """Convenience: Return text of Entry"""

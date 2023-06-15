@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-30 08:42:37 +0100 (Tue, May 30, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-06-15 15:25:01 -0400 (Thu, June 15, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -150,6 +150,14 @@ class PulldownList(QtWidgets.QComboBox, Base):
         self.popupAboutToBeShown.emit()
         self._list.setMinimumSize(self.sizeHint())
         super(PulldownList, self).showPopup()
+
+    def currentIndex(self) -> int:
+        ind = super().currentIndex()
+
+        # remove number of preceding separators
+        cc = len([filter(None, (self.model().index(rr, 0).data(QtCore.Qt.AccessibleDescriptionRole)
+                                for rr in range(ind)))])
+        return ind - cc
 
     def currentObject(self):
 

@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:27 +0100 (Wed, October 26, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-06-21 11:19:09 -0400 (Wed, June 21, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -168,8 +168,11 @@ class MacroEditor(CcpnModule):
                 self._tempFile.close()
                 self.filePath = self._tempFile.name
 
-            with open(aPath(self.filePath), 'w'):
-                pass
+            try:
+                with open(aPath(self.filePath), 'w'):
+                    pass
+            except (PermissionError, FileNotFoundError):
+                getLogger().debug2('folder may be read-only')
 
         self._setupWidgets()
         self.openPath(self.filePath)
@@ -541,15 +544,18 @@ class MacroEditor(CcpnModule):
     def _createTemporaryFile(self, name=None):
         if name is None:
             dateTime = datetime.datetime.now().strftime("%y-%m-%d-%H:%M:%S")
-            tempName = 'Macro' + dateTime
+            tempName = f'Macro{dateTime}'
             name = tempName
-        filePath = self.application.tempMacrosPath + '/' + name
+        filePath = f'{self.application.tempMacrosPath}/{name}'
         if filePath:
             if not filePath.endswith('.py'):
                 filePath += '.py'
-            with open(filePath, 'w') as f:
-                f.write('')
-                f.close()
+            try:
+                with open(filePath, 'w') as f:
+                    f.write('')
+            except (PermissionError, FileNotFoundError):
+                getLogger().debug2('folder may be read-only')
+
         self.filePath = filePath
         return filePath
 
@@ -584,13 +590,15 @@ class MacroEditor(CcpnModule):
             getLogger().debug("Trying to remove a temporary Macro file which does not exist")
 
     def _saveTextToFile(self):
-        filePath = self.filePath
-        if filePath:
+        if filePath := self.filePath:
             if not filePath.endswith('.py'):
                 filePath += '.py'
-            with open(aPath(filePath), 'w') as f:
-                f.write(self.textEditor.toPlainText())
-                f.close()
+            try:
+                with open(aPath(filePath), 'w') as f:
+                    f.write(self.textEditor.toPlainText())
+            except (PermissionError, FileNotFoundError):
+                getLogger().debug2('folder may be read-only')
+
         if self.filePath:
             self._lastSaved = self.textEditor.toPlainText()
             self._lastTimestp = os.stat(self.filePath).st_mtime
@@ -631,9 +639,7 @@ class MacroEditor(CcpnModule):
     def _isDirty(self):
 
         if self._preEditorText != self.textEditor.get():
-            if self._lastSaved == self.textEditor.get():
-                return False
-            return True
+            return self._lastSaved != self.textEditor.get()
         return False
 
     def _deleteTempFile(self):

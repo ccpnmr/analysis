@@ -451,6 +451,10 @@ class Window(AbstractWrapperObject):
 
             # this makes it unrecoverable - okay, as strips not allowed to undo
             for st in _strips:
+                # marks are not automatically deleted by the model when deleting strips
+                for mark in st.marks:
+                    mark.delete()
+
                 st.close()
 
             # Update the list of opened GUI SpectrumDisplays modules

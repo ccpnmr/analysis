@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 12:06:26 +0100 (Fri, June 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-21 11:50:59 -0400 (Wed, June 21, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -67,7 +67,7 @@ def dumps(obj: object, indent: int = 2, **kwds):
 
 def _dataFrameToDict(df) -> dict:
     """
-    Ensure a dataframe is  properly converted to a dict
+    Ensure a dataframe is properly converted to a dict
     so that can be dumped correctly to a Json.
     Note has to be done this way to avoid data-loss with tiny/large floats.
     Cannot  use simply dataframe.to_dict(), won't restore correctly.

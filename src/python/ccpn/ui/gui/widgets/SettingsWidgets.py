@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-01 19:39:58 +0100 (Thu, June 01, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-21 11:50:59 -0400 (Wed, June 21, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -97,8 +97,8 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                  mainWindow=None,
                  spectrumDisplay=None,
                  callback=None, returnCallback=None, applyCallback=None,
-                 xAxisUnits=0, xTexts=[], showXAxis=True,
-                 yAxisUnits=0, yTexts=[], showYAxis=True,
+                 xAxisUnits=0, xTexts=None, showXAxis=True,
+                 yAxisUnits=0, yTexts=None, showYAxis=True,
                  symbolType=0, annotationType=0, symbolSize=0, symbolThickness=0,
                  arrowType=0, arrowSize=0, arrowMinimum=0,
                  multipletAnnotationType=0, multipletType=0,
@@ -111,13 +111,17 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                  multipletLabelsEnabled=False,
                  multipletArrowsEnabled=False,
                  stripArrangement=0,
-                 _baseAspectRatioAxisCode='H', _aspectRatios={},
+                 _baseAspectRatioAxisCode='H', _aspectRatios=None,
                  _aspectRatioMode=0, contourThickness=0, zPlaneNavigationMode=0,
                  **kwds):
         super().__init__(parent, setLayout=True, **kwds)
 
         self._parent = parent
         self._spectrumDisplay = spectrumDisplay
+
+        xTexts = xTexts or []
+        yTexts = yTexts or []
+        _aspectRatios = _aspectRatios or {}
 
         # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow
@@ -145,7 +149,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                               symbolSize, symbolThickness, symbolType, arrowType, arrowSize, arrowMinimum,
                               multipletAnnotationType, multipletType,
                               xAxisUnits, yAxisUnits,
-                              aliasEnabled, aliasShade, aliasLabelsEnabled, 
+                              aliasEnabled, aliasShade, aliasLabelsEnabled,
                               peakSymbolsEnabled, peakLabelsEnabled, peakArrowsEnabled,
                               multipletSymbolsEnabled, multipletLabelsEnabled, multipletArrowsEnabled,
                               contourThickness, zPlaneNavigationMode)
@@ -381,14 +385,14 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
             self.multipletAnnotationLabel = Label(parent, text="Label", hAlign='r', grid=(row, 0))
             self.multipletAnnotationData = RadioButtons(parent, texts=_texts,
-                                                objectNames=_names,
-                                                objectName='annMDS',
-                                                # selectedInd=annotationType,
-                                                callback=self._symbolsChanged,
-                                                direction='v',
-                                                grid=(row, 1), gridSpan=(1, 3), hAlign='l',
-                                                tipTexts=None,
-                                                )
+                                                        objectNames=_names,
+                                                        objectName='annMDS',
+                                                        # selectedInd=annotationType,
+                                                        callback=self._symbolsChanged,
+                                                        direction='v',
+                                                        grid=(row, 1), gridSpan=(1, 3), hAlign='l',
+                                                        tipTexts=None,
+                                                        )
         self.multipletAnnotationData.radioButtons[2].setVisible(False)
         self.multipletAnnotationData.radioButtons[5].setVisible(False)
 
@@ -402,14 +406,14 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
             self.multipletLabel = Label(parent, text="Symbol", hAlign='r', grid=(row, 0))
             self.multipletSymbol = RadioButtons(parent, texts=_texts,
-                                       objectNames=_names,
-                                       objectName='symMDS',
-                                       # selectedInd=symbolType,
-                                       callback=self._symbolsChanged,
-                                       direction='h',
-                                       grid=(row, 1), gridSpan=(1, 3), hAlign='l',
-                                       tipTexts=None,
-                                       )
+                                                objectNames=_names,
+                                                objectName='symMDS',
+                                                # selectedInd=symbolType,
+                                                callback=self._symbolsChanged,
+                                                direction='h',
+                                                grid=(row, 1), gridSpan=(1, 3), hAlign='l',
+                                                tipTexts=None,
+                                                )
 
         self.multipletLabel.setVisible(False)
         self.multipletSymbol.setVisible(False)
@@ -420,8 +424,8 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         row += 1
         self.peakSymbolsEnabledLabel = Label(parent, text="Show peak symbols", grid=(row, 0))
         self.peakSymbolsEnabledData = CheckBox(parent,
-                                              # checked=peakSymbolsEnabled,
-                                              grid=(row, 1), objectName='SDS_peakSymbolsEnabled')
+                                               # checked=peakSymbolsEnabled,
+                                               grid=(row, 1), objectName='SDS_peakSymbolsEnabled')
         self.peakSymbolsEnabledData.clicked.connect(self._symbolsChanged)
 
         row += 1
@@ -434,8 +438,8 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         row += 1
         self.multipletSymbolsEnabledLabel = Label(parent, text="Show multiplet symbols", grid=(row, 0))
         self.multipletSymbolsEnabledData = CheckBox(parent,
-                                              # checked=multipletSymbolsEnabled,
-                                              grid=(row, 1), objectName='SDS_multipletSymbolsEnabled')
+                                                    # checked=multipletSymbolsEnabled,
+                                                    grid=(row, 1), objectName='SDS_multipletSymbolsEnabled')
         self.multipletSymbolsEnabledData.clicked.connect(self._symbolsChanged)
 
         row += 1
@@ -482,8 +486,8 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         row += 1
         self.multipletArrowsEnabledLabel = Label(parent, text="Show multiplet arrows", grid=(row, 0))
         self.multipletArrowsEnabledData = CheckBox(parent,
-                                              # checked=multipletArrowsEnabled,
-                                              grid=(row, 1), objectName='SDS_multipletArrowsEnabled')
+                                                   # checked=multipletArrowsEnabled,
+                                                   grid=(row, 1), objectName='SDS_multipletArrowsEnabled')
         self.multipletArrowsEnabledData.clicked.connect(self._symbolsChanged)
 
         if self._spectrumDisplay.MAXARROWTYPES:
@@ -496,19 +500,19 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
             self.arrowsLabel = Label(parent, text="Arrow", hAlign='r', grid=(row, 0))
             self.arrow = RadioButtons(parent, texts=_texts,
-                                       objectNames=_names,
-                                       objectName='arrSDS',
-                                       # selectedInd=arrowType,
-                                       callback=self._symbolsChanged,
-                                       direction='h',
-                                       grid=(row, 1), gridSpan=(1, 3), hAlign='l',
-                                       tipTexts=None,
-                                       )
+                                      objectNames=_names,
+                                      objectName='arrSDS',
+                                      # selectedInd=arrowType,
+                                      callback=self._symbolsChanged,
+                                      direction='h',
+                                      grid=(row, 1), gridSpan=(1, 3), hAlign='l',
+                                      tipTexts=None,
+                                      )
 
         row += 1
         self.arrowSizeLabel = Label(parent, text="Size (pixels)", hAlign='r', grid=(row, 0))
         self.arrowSizeData = Spinbox(parent, step=1,
-                                           min=1, max=20, grid=(row, 1), hAlign='l', objectName='SDS_arrowSize')
+                                     min=1, max=20, grid=(row, 1), hAlign='l', objectName='SDS_arrowSize')
         self.arrowSizeData.setMinimumWidth(LineEditsMinimumWidth)
         # self.arrowSizeData.setValue(int(arrowSize))
         self.arrowSizeData.valueChanged.connect(self._symbolsChanged)
@@ -516,7 +520,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         row += 1
         self.arrowMinimumLabel = Label(parent, text="Minimum length (pixels)", hAlign='r', grid=(row, 0))
         self.arrowMinimumData = Spinbox(parent, step=1,
-                                           min=1, max=100, grid=(row, 1), hAlign='l', objectName='SDS_arrowMinimum')
+                                        min=1, max=100, grid=(row, 1), hAlign='l', objectName='SDS_arrowMinimum')
         self.arrowMinimumData.setMinimumWidth(LineEditsMinimumWidth)
         # self.arrowMinimumData.setValue(int(arrowMinimum))
         self.arrowMinimumData.valueChanged.connect(self._symbolsChanged)
@@ -598,29 +602,29 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         aspectRatios = {axis: data.get() for axis, data in self.aspectData.items()}
 
         # NOTE:ED - should really use an intermediate data structure here
-        return {AXISXUNITS            : self.xAxisUnitsData.getIndex(),
-                AXISYUNITS            : self.yAxisUnitsData.getIndex(),
-                AXISASPECTRATIOMODE   : self.useAspectRatioModeButtons.getIndex(),
-                AXISASPECTRATIOS      : aspectRatios,
-                SYMBOLTYPE           : self.symbol.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
-                ANNOTATIONTYPE       : self.annotationsData.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
-                SYMBOLSIZE            : int(self.symbolSizePixelData.text()),
-                SYMBOLTHICKNESS       : int(self.symbolThicknessData.text()),
-                CONTOURTHICKNESS      : int(self.contourThicknessData.text()),
+        return {AXISXUNITS             : self.xAxisUnitsData.getIndex(),
+                AXISYUNITS             : self.yAxisUnitsData.getIndex(),
+                AXISASPECTRATIOMODE    : self.useAspectRatioModeButtons.getIndex(),
+                AXISASPECTRATIOS       : aspectRatios,
+                SYMBOLTYPE             : self.symbol.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
+                ANNOTATIONTYPE         : self.annotationsData.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
+                SYMBOLSIZE             : int(self.symbolSizePixelData.text()),
+                SYMBOLTHICKNESS        : int(self.symbolThicknessData.text()),
+                CONTOURTHICKNESS       : int(self.contourThicknessData.text()),
                 MULTIPLETANNOTATIONTYPE: self.multipletAnnotationData.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
-                MULTIPLETTYPE         : self.multipletSymbol.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
-                ALIASENABLED          : self.aliasEnabledData.isChecked(),
-                ALIASSHADE            : int(self.aliasShadeData.get()),
-                ALIASLABELSENABLED    : self.aliasLabelsEnabledData.isChecked(),
-                PEAKSYMBOLSENABLED    : self.peakSymbolsEnabledData.isChecked(),
-                PEAKLABELSENABLED     : self.peakLabelsEnabledData.isChecked(),
-                PEAKARROWSENABLED     : self.peakArrowsEnabledData.isChecked(),
+                MULTIPLETTYPE          : self.multipletSymbol.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
+                ALIASENABLED           : self.aliasEnabledData.isChecked(),
+                ALIASSHADE             : int(self.aliasShadeData.get()),
+                ALIASLABELSENABLED     : self.aliasLabelsEnabledData.isChecked(),
+                PEAKSYMBOLSENABLED     : self.peakSymbolsEnabledData.isChecked(),
+                PEAKLABELSENABLED      : self.peakLabelsEnabledData.isChecked(),
+                PEAKARROWSENABLED      : self.peakArrowsEnabledData.isChecked(),
                 MULTIPLETSYMBOLSENABLED: self.multipletSymbolsEnabledData.isChecked(),
-                MULTIPLETLABELSENABLED: self.multipletLabelsEnabledData.isChecked(),
-                MULTIPLETARROWSENABLED: self.multipletArrowsEnabledData.isChecked(),
-                ARROWTYPES            : self.arrow.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
-                ARROWSIZE             : int(self.arrowSizeData.text()),
-                ARROWMINIMUM          : int(self.arrowMinimumData.text()),
+                MULTIPLETLABELSENABLED : self.multipletLabelsEnabledData.isChecked(),
+                MULTIPLETARROWSENABLED : self.multipletArrowsEnabledData.isChecked(),
+                ARROWTYPES             : self.arrow.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
+                ARROWSIZE              : int(self.arrowSizeData.text()),
+                ARROWMINIMUM           : int(self.arrowMinimumData.text()),
                 }
 
     def _aspectRatioModeChanged(self):
@@ -1644,12 +1648,17 @@ class ObjectSelectionWidget(ListCompoundWidget):
                  vPolicy='minimal', fixedWidths=(None, None, None), orientation='left',
                  labelText=None, tipText=None,
                  texts=None, callback=None, objectWidgetChangedCallback=None,
-                 defaultListItem=None, displayText=[],
-                 standardListItems=[ALL],
+                 defaultListItem=None, displayText=None,
+                 standardListItems=None,
                  **kwds):
 
         if not self.KLASS:
             raise RuntimeError('Klass must be specified')
+
+        if displayText is None:
+            displayText = []
+        if standardListItems is None:
+            standardListItems = [ALL]
 
         if not texts:
             texts = standardListItems + defaultListItem.pid if defaultListItem \
@@ -1917,21 +1926,18 @@ class SpectrumDisplaySelectionWidget(ObjectSelectionWidget):
         currentTexts = self.getTexts()
         toRemoveTexts = []
         for i in currentTexts:
-            if i not in self.standardListItems:
-                if not self.application.getByGid(i):
-                    toRemoveTexts.append(i)
+            if i not in self.standardListItems and not self.application.getByGid(i):
+                toRemoveTexts.append(i)
         self.removeTexts(toRemoveTexts)
         self.addText(obj.pid)
 
 
-if __name__ == '__main__':
+def main():
     import os
     import sys
 
-
     def myCallback(ph0, ph1, pivot, direction):
         print(ph0, ph1, pivot, direction)
-
 
     qtApp = QtWidgets.QApplication(['Test Phase Frame'])
 
@@ -1944,3 +1950,7 @@ if __name__ == '__main__':
     widget.raise_()
 
     os._exit(qtApp.exec_())
+
+
+if __name__ == '__main__':
+    main()

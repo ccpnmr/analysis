@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 19:34:58 +0100 (Fri, June 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-21 11:50:59 -0400 (Wed, June 21, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -26,38 +26,19 @@ __date__ = "$Date: 2023-06-05 13:01:10 +0100 (Mon, June 05, 2023) $"
 # Start of code
 #=========================================================================================
 
-# import pandas as pd
 import json
 import typing
-from typing import Union, List, Tuple, Optional, Any
-# from functools import partial
-# from collections import Counter
-
-# from ccpn.core._implementation.DataFrameABC import DataFrameABC
-from ccpn.core.Project import Project
-# from ccpn.core.lib.Pid import Pid
-# from ccpn.core.lib.ContextManagers import newV3Object, undoBlockWithoutSideBar, undoStackBlocking
-# from ccpn.core._implementation.V3CoreObjectABC import _UNIQUEID, _ISDELETED, _NAME, _COMMENT
-# from ccpn.util.decorators import logCommand
-from ccpn.util.Logging import getLogger
-# from ccpn.util.Common import makeIterableList
-
-# import time
 import numpy as np
-# import scipy
-# import math
 import warnings
-from operator import mul
-from scipy.sparse import csr_matrix, csc_matrix, SparseEfficiencyWarning
-# from collections import OrderedDict
 from functools import reduce
-# from contextlib import contextmanager, suppress
-from ccpn.util.Common import NOTHING
+from operator import mul
+from typing import Union, List, Tuple, Any
+from collections import OrderedDict
+from scipy.sparse import csr_matrix, csc_matrix, SparseEfficiencyWarning
+from ccpn.core.Project import Project
 from ccpn.framework.Application import getProject
-
-
-# from ccpn.util.FrozenDict import FrozenDict
-# from ccpn.util.OrderedSet import OrderedSet, FrozenOrderedSet
+from ccpn.util.Logging import getLogger
+from ccpn.util.Common import NOTHING
 
 
 VALIDMATRIXTYPES = csr_matrix, csc_matrix
@@ -110,15 +91,121 @@ class _CrossReference():
                                   },
                      }
     """
+    #=========================================================================================
+    # Subclass registration
+    #=========================================================================================
+
+    # A dict that contains the (className, class) mappings for restoring _CrossReferences
+    _registeredClasses = OrderedDict()
+    _registeredDefaultClassName = None
+    _JSON_PREFIX = 'ccpn.'
+
+
+    class _classproperty():
+        """Class to define getter for a class-property, similar to a class method.
+        """
+
+        def __init__(self, func):
+            self._func = func
+
+        def __get__(self, obj, objtype=None):
+            return self._func(objtype)
+
+
+    @staticmethod
+    def isRegistered(className) -> bool:
+        """Return True if className is registered.
+        """
+        if not isinstance(className, str):
+            raise TypeError(f'{className} must be of type str')
+        return className in _CrossReference._registeredClasses
+
+    @staticmethod
+    def isRegisteredInstance(instance) -> bool:
+        """Return True if type of instance is a registered class.
+        """
+        if isinstance(instance, type):
+            raise TypeError(f'{instance} must be an instance of a class')
+        return instance.__class__.__name__ in _CrossReference._registeredClasses
+
+    @classmethod
+    def register(cls, setDefault=False):
+        """Register the class.
+        """
+        className = cls.__name__
+        if cls.isRegistered(className):
+            raise RuntimeError(f'className {className!r} already registered')
+        cls._registeredClasses[className] = cls
+        if setDefault:
+            if name := _CrossReference._registeredDefaultClassName:
+                raise RuntimeError(f'Default class {_CrossReference._registeredClasses[name]} already set')
+
+            # define a default in-case of any unforeseen problems
+            _CrossReference._registeredDefaultClassName = className
+
+    @_classproperty
+    def registeredDefaultClassName(self):
+        """Return the default registered className.
+        """
+        return _CrossReference._registeredDefaultClassName
+
+    @classmethod
+    def registeredJsonTypes(cls) -> tuple:
+        """Return the json-types of the registered classes.
+        Json-types are strings of the form ccpn.<name>; name is the class-name of a registered class.
+        :return: tuple of str.
+        """
+        # return tuple(f'{_CrossReference._JSON_PREFIX}{typ}' for typ in _CrossReference._registeredClasses)
+        return tuple(_CrossReference._classNameToJsonType(typ) for typ in _CrossReference._registeredClasses)
+
+    @staticmethod
+    def _classNameToJsonType(className) -> str:
+        """Return json-type from given className.
+        A json-type is a string of the form ccpn.<className>.
+        """
+        return f'{_CrossReference._JSON_PREFIX}{className}'
+
+    @_classproperty
+    def registeredDefaultJsonType(self):
+        """Return the json-type of the default registered class.
+        A json-type is a string of the form ccpn.<name>; name is the class-name of a registered class.
+        """
+        if _CrossReference.registeredDefaultClassName:
+            return _CrossReference._classNameToJsonType(_CrossReference.registeredDefaultClassName)
+
+    @classmethod
+    def jsonType(cls, instance) -> typing.Optional[str]:
+        """Return the json-type of the given instance if is a registered class, otherwise None.
+        A json-type is a string of the form ccpn.<name>; name is the class-name of a registered class.
+        :return: str or None.
+        """
+        name = instance.__class__.__name__
+        if name in _CrossReference._registeredClasses:
+            return _CrossReference._classNameToJsonType(name)
+
+    @staticmethod
+    def fromJsonType(jsonType) -> typing.Optional[callable]:
+        """Return the registered class from the json-type, or None if not defined.
+        Json-types are strings of the form ccpn.<name>; name is the class-name of a registered class.
+        :return: registered class-type.
+        """
+        return next((klass for typ, klass in _CrossReference._registeredClasses.items() if _CrossReference._classNameToJsonType(typ) == jsonType), None)
+
+    #=========================================================================================
+    # Properties
+    #=========================================================================================
 
     @classmethod
     def _newFromJson(cls, jsonData):
-        """Create a new instance from a json class.
+        """Create a new instance from json data.
         """
         project = getProject()
         values = cls.fromJson(jsonData)
 
-        return _CrossReference(project=project, **values)
+        jType = _CrossReference._classNameToJsonType(f'{values.get("rowClassName")}{values.get("columnClassName")}')
+        if klass := _CrossReference.fromJsonType(jType):
+            # SHOULD always be a defined json-type
+            return klass(project=project, **values)
 
     def __init__(self, project: Project,
                  rowClassName: str = None, columnClassName: str = None,
@@ -322,6 +409,8 @@ class _CrossReference():
         indptr = matrix.indptr.copy()
         data = matrix.data.copy()
 
+        # NOTE:ED - loop to remove list of cols, deleteColumns?
+
         # modify the indices and data arrays to remove the deleted column
         for row in range(matrix.shape[0]):
             row_start = indptr[row]
@@ -338,6 +427,48 @@ class _CrossReference():
 
         # create a new CSR matrix with the modified indices and data arrays
         return self._storageType((data, indices, indptr), shape=(matrix.shape[0], matrix.shape[1] - 1))
+
+    def deleteColumns(self, matrix, columns: Union[List[int], Tuple[int]]) -> Union[csr_matrix, csc_matrix]:
+        """Delete a column from a scipy.sparse-matrix.
+
+        matrix must be a scipy sparse-matrix of type csr_matrix or csc_matrix.
+        columns must be a valid list/tuple of column numbers for the matrix.
+
+        :param sparse matrix: sparse-matrix.
+        :param List[int] columns: list/tuple of column numbers.
+        :return csr_matrix or csc_matrix: modified sparse-matrix.
+        :raise ValueError, TypeError: Incorrect input parameters.
+        """
+        if not isinstance(matrix, VALIDMATRIXTYPES):
+            raise TypeError(f'deleteCol: matrix type is not in ({", ".join(tt.__name__ for tt in VALIDMATRIXTYPES)})')
+        if not isinstance(columns, (list, tuple)):
+            raise TypeError('deleteColumns: columns is not a list/tuple of ints')
+        if not all(0 <= col < matrix.shape[1] for col in columns):
+            raise ValueError(f'deleteColumns: columns {columns} contains out-of-bounds column, all must be [0, {matrix.shape[1] - 1}]')
+
+        # get the indices and data arrays for the remaining elements
+        indices = matrix.indices.copy()
+        indptr = matrix.indptr.copy()
+        data = matrix.data.copy()
+
+        for delete_col in sorted(columns, reverse=True):
+            # modify the indices and data arrays to remove the deleted column
+            for row in range(matrix.shape[0]):
+                row_start = indptr[row]
+                row_end = indptr[row + 1]
+                if row_end > row_start:
+                    if (ind := next((col for col in range(row_start, row_end) if indices[col] == delete_col), -1)) != -1:
+                        # delete row from the data and decrease indptrs
+                        indices = np.delete(indices, ind, 0)
+                        data = np.delete(data, ind, 0)
+                        indptr[row + 1:] = indptr[row + 1:] - 1
+
+            # move the larger columns to the left
+            indices = np.where(indices < delete_col, indices, indices - 1)
+
+        # create a new CSR matrix with the modified indices and data arrays
+        return self._storageType((data, indices, indptr),
+                                 shape=(matrix.shape[0], matrix.shape[1] - len(columns)))
 
     def insertRow(self, matrix, insert_row) -> Union[csr_matrix, csc_matrix]:
         """Insert an empty row into a scipy.sparse-matrix.
@@ -405,6 +536,43 @@ class _CrossReference():
         # create a new CSR matrix with the modified indices and data arrays
         return self._storageType((data, indices, indptr), shape=(matrix.shape[0] - 1, matrix.shape[1]))
 
+    def deleteRows(self, matrix, rows: Union[List[int], Tuple[int]]) -> Union[csr_matrix, csc_matrix]:
+        """Delete a row from a scipy.sparse-matrix.
+
+        matrix must be a scipy sparse-matrix of type csr_matrix or csc_matrix.
+        rows must be a valid list/tuple of row numbers for the matrix.
+
+        :param sparse matrix: sparse-matrix.
+        :param List[int] rows: list/tuple of row numbers.
+        :return csr_matrix or csc_matrix: modified sparse-matrix.
+        :raise ValueError, TypeError: Incorrect input parameters.
+        """
+        if not isinstance(matrix, VALIDMATRIXTYPES):
+            raise TypeError(f'deleteRow: matrix type is not in ({", ".join(tt.__name__ for tt in VALIDMATRIXTYPES)})')
+        if not isinstance(rows, (list, tuple)):
+            raise TypeError('deleteRows: rows is not a list/tuple of ints')
+        if not all(0 <= row < matrix.shape[0] for row in rows):
+            raise ValueError(f'deleteRows: rows {rows} contains out-of-bounds row, all must be [0, {matrix.shape[1] - 1}]')
+
+        indices = matrix.indices.copy()
+        indptr = matrix.indptr.copy()
+        data = matrix.data.copy()
+
+        for delete_row in sorted(rows, reverse=True):
+            row_start = indptr[delete_row]
+            row_end = indptr[delete_row + 1]
+            indptr = np.delete(indptr, delete_row + 1, 0)
+
+            if row_end != row_start:
+                indptr[delete_row + 1:] = indptr[delete_row + 1:] - (row_end - row_start)
+
+                indices = np.delete(indices, range(row_start, row_end), 0)
+                data = np.delete(data, range(row_start, row_end), 0)
+
+        # create a new CSR matrix with the modified indices and data arrays
+        return self._storageType((data, indices, indptr),
+                                 shape=(matrix.shape[0] - len(rows), matrix.shape[1]))
+
     @staticmethod
     def sparseInfo(matrix):
         """Information for sparse-matrix
@@ -449,12 +617,9 @@ class _CrossReference():
 
         # remove the missing columns/rows and update the indexing if there are gaps
         newSparseMatrix = self._matrix.copy()
-        # remove columns from right-to-left
-        for col in reversed(sorted(badColInds)):
-            self.deleteCol(newSparseMatrix, col)
-        # remove rows from bottom-to-top
-        for row in reversed(sorted(badRowInds)):
-            self.deleteRow(newSparseMatrix, row)
+
+        newSparseMatrix = self.deleteColumns(newSparseMatrix, badColInds)
+        newSparseMatrix = self.deleteRows(newSparseMatrix, badRowInds)
         newSparseMatrix.eliminate_zeros()
 
         dd = {INDICES        : newSparseMatrix.indices.tolist(),
@@ -494,6 +659,14 @@ class _CrossReference():
 
             # create matrix from existing data
             self._matrix = self._storageType((self._data, self._indices, self._indptr), shape=self._shape, dtype=self._dtype)
+
+            # check that dimensions are okay, clean-up
+            if len(ddRow[_PIDS]) != self._matrix.shape[0] or \
+                    len(ddCol[_PIDS]) != self._matrix.shape[1]:
+                # there was an error saving, try and recover or reset
+                # NOTE:ED - potentially dangerous, links could disappear, but better than crashing
+                self._matrix = self._storageType((len(ddRow[_PIDS]), len(ddCol[_PIDS])), dtype=self._dtype)
+                getLogger().warning(f'There was an issue recovering cross-references {self.__class__.__name__}')
 
     def _updateClass(self, axis, coreObject, oldPid=None, action='create', func=None):
         """Update the state for a row core-object
@@ -602,7 +775,7 @@ class _CrossReference():
             return tuple(filter(lambda obj: not obj.isDeleted, (ddRow[_PID2OBJ][pid] for pid in outPids)))
 
     def setValues(self, coreObject, axis, values):
-        """Set the cross-reference objects from the class.
+        """Set the cross-reference objects to the class.
         """
         pid = coreObject.pid
         values = values or []
@@ -641,3 +814,25 @@ class _CrossReference():
 
         # quickly clean-up
         self._matrix.eliminate_zeros()
+
+
+#=========================================================================================
+# Start of code
+#=========================================================================================
+
+class MarkStrip(_CrossReference):
+    """Class to handle special case of mark<->strip cross-reference.
+    Marks can also belong to a spectrumDisplay or mainWindow (everywhere).
+
+    Marks in a spectrumDisplay will also appear in new strips within the display.
+    Similarly, marks belonging to mainWindow will appear in all new strips.
+    """
+    #=========================================================================================
+    # Get/set values in cross-reference
+    #=========================================================================================
+
+    ...
+
+
+# register the class with _CrossReference for json loading/saving
+MarkStrip.register()

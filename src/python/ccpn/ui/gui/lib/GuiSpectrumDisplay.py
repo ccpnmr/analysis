@@ -1935,6 +1935,7 @@ class GuiSpectrumDisplay(CcpnModule):
                                                     obj=strip, trigger='delete', preExecution=True)
                                 )
 
+                    marks = strip.marks
                     # delete the strip
                     strip._finaliseAction('delete')
                     with notificationBlanking():
@@ -1943,6 +1944,9 @@ class GuiSpectrumDisplay(CcpnModule):
                         # this makes it unrecoverable
                         #   - okay, as strips not allowed to undo, note that it is not in the undo-list above
                         strip.close()
+
+                    for mark in marks:
+                        mark.delete()
 
                     addUndoItem(redo=partial(self._redrawAxes, deletingStrip=True))
 

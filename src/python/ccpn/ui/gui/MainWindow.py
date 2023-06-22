@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 14:29:32 +0100 (Wed, June 28, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-06-22 18:14:23 +0100 (Thu, June 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -66,8 +66,7 @@ from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 from ccpn.ui.gui.widgets.Label import Label, ActiveLabel
-from ccpn.ui.gui.widgets.MessageDialog import showWarning, progressManager
-
+from ccpn.ui.gui.widgets.MessageDialog import showWarning, progressManager, showInfo, showError
 from ccpn.util.Common import camelCaseToString
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
@@ -466,6 +465,10 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                           # 'newProject' : self.application.newProject, this is a crash!
                           'info'                    : getLogger().info,
                           'warning'                 : getLogger().warning,
+                          'showWarning': showWarning,
+                          'showInfo': showInfo,
+                          'showError': showError,
+
                           #### context managers
                           'undoBlock'               : undoBlockWithoutSideBar,
                           'notificationEchoBlocking': notificationEchoBlocking,

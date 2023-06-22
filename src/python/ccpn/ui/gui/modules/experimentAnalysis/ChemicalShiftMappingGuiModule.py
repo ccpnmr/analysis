@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-29 10:46:29 +0100 (Mon, May 29, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-22 18:14:23 +0100 (Thu, June 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -39,7 +39,7 @@ class ChemicalShiftMappingGuiModule(ExperimentAnalysisGuiModuleBC):
     className = 'ChemicalShiftMapping'
     analysisType = sv.ChemicalShiftMappingAnalysis
 
-    def __init__(self, mainWindow, name='Chemical Shift Mapping (Alpha)', **kwds):
+    def __init__(self, mainWindow, name='Chemical Shift Mapping Analysis (Beta)', **kwds):
         super(ExperimentAnalysisGuiModuleBC, self)
 
         ## link to the Non-Gui backend and its Settings

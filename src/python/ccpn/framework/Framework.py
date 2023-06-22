@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-11 19:16:26 +0100 (Thu, May 11, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-06-22 18:14:22 +0100 (Thu, June 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -37,6 +37,7 @@ import tempfile
 import faulthandler
 import contextlib
 from datetime import datetime
+from ccpn.util.decorators import deprecated
 
 
 try:
@@ -2271,15 +2272,9 @@ class Framework(NotifierBase, GuiBase):
         """
         self.ui.mainWindow.toggleConsole()
 
+    @deprecated('Use showChemicalShiftMappingModule to access the latest implementation')
     def showChemicalShiftMapping(self, position: str = 'top', relativeTo: CcpnModule = None):
-        from ccpn.ui.gui.modules.ChemicalShiftsMappingModule import ChemicalShiftsMapping
-
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-        cs = ChemicalShiftsMapping(mainWindow=mainWindow)
-        mainWindow.moduleArea.addModule(cs, position=position, relativeTo=relativeTo)
-        return cs
+        return self.showChemicalShiftMappingModule(position=position, relativeTo=relativeTo)
 
     def showChemicalShiftMappingModule(self, position: str = 'top', relativeTo: CcpnModule = None):
         from ccpn.ui.gui.modules.experimentAnalysis.ChemicalShiftMappingGuiModule import ChemicalShiftMappingGuiModule

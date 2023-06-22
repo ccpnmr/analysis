@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-07 16:50:12 +0100 (Wed, June 07, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-22 15:53:43 +0100 (Thu, June 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -485,6 +485,8 @@ class MainPlotPanel(GuiPanel):
         filteredDf = pd.DataFrame()
         bbRows = []
         # filterDataFrame by the chain code first
+        if not seriesVariables.NMRCHAINNAME in df:
+            return filteredDf
         chainCode = chain.name
         df = df[df[seriesVariables.NMRCHAINNAME] == chainCode]
         for resCode in expandedSequenceResCodes:

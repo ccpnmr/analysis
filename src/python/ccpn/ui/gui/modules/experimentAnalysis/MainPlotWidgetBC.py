@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-07 16:50:12 +0100 (Wed, June 07, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-22 15:53:10 +0100 (Thu, June 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -144,7 +144,6 @@ class MainPlotWidget(Widget):
     #########################     Public methods     #########################
     ###################################################################
 
-
     def plotData(self,
                  dataFrame,
                  plotName: str,
@@ -179,7 +178,6 @@ class MainPlotWidget(Widget):
 
         String values are allowed only on Bars/Lines.
         If Strings are given in the xValues, then the dataframe index is used as numeric and the xValues will be the ticks.
-
         """
 
         columnNameDict = {k:v for k,v in locals().items() if COLUMNNAME in k}
@@ -901,9 +899,8 @@ if __name__ == '__main__':
 
     df = pd.DataFrame({'a':[1,2,3,4], 'b':[0.1, 1.3, 4.4, 7.9]})
     # widget.plotData(dataFrame=df, plotName='name', plotType=PlotType.LINE.description, xColumnName='a', yColumnName='b')
-    widget.plotData(dataFrame=df, plotName='name', plotType=PlotType.BAR.description, xColumnName='a', yColumnName='b')
+    widget.plotData(dataFrame=df, plotName='name', plotType=PlotType.BAR.description, indicesColumnName='index',xColumnName='a', yColumnName='b')
     # widget.plotData(dataFrame=df, plotName='name', plotType=PlotType.SCATTER.description, xColumnName='a', yColumnName='b')
-    print(widget.allowedPlotTypes)
     moduleArea.addModule(module)
     win.setCentralWidget(moduleArea)
     win.resize(1000, 500)

@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 12:06:25 +0100 (Fri, June 09, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-06-22 16:15:37 +0100 (Thu, June 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -57,6 +57,7 @@ from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
 from ccpn.ui.gui.widgets.Splitter import Splitter
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.ToolButton import ToolButton
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS
@@ -175,6 +176,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     maxSettingsState = 3  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
     defaultSettingsState = 0  # default state of the settings widget
     settingsPosition = 'top'
+    includeHelpWidget = False
     settingsMinimumSizes = (100, 50)
     _restored = False
     _onlySingleInstance = False
@@ -258,7 +260,9 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self.label = CcpnModuleLabel(name, self,
                                      showCloseButton=closable, closeCallback=self._closeModule,
                                      enableSettingsButton=self.includeSettingsWidget,
-                                     settingsCallback=self._settingsCallback
+                                     enableHelpButton=self.includeHelpWidget,
+                                     settingsCallback=self._settingsCallback,
+                                     helpButtonCallback = self._helpButtonCallback,
                                      )
         self.topLayout.addWidget(self.label, 0, 1)  # ejb - swap out the old widget, keeps hierarchy
         # except it doesn't work properly
@@ -826,6 +830,19 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         finally:
             return False
 
+    def _helpButtonCallback(self, htmlFilePath):
+        getLogger().warning('This option is under implementation')
+        return
+        from ccpn.ui.gui.popups.Dialog import CcpnDialog
+        from PyQt5.QtWidgets import QTextBrowser
+        popup = CcpnDialog(windowTitle=f'Help {self.moduleName}', setLayout=True)
+        te = QTextBrowser(popup, )
+        popup.getLayout().addWidget(te)
+        with open(htmlFilePath) as htmlFile:
+            te.setHtml(htmlFile.read())
+        popup.show()
+        popup.raise_()
+
     def _settingsCallback(self):
         """
         Toggles display of settings widget in module.
@@ -1153,7 +1170,8 @@ class CcpnModuleLabel(DockLabel):
         iconSizes = [max((size.height(), size.width())) for size in icon.availableSizes()]
         return max(iconSizes)
 
-    def __init__(self, name, module, showCloseButton=True, closeCallback=None, enableSettingsButton=False, settingsCallback=None):
+    def __init__(self, name, module, showCloseButton=True, closeCallback=None, enableSettingsButton=False, settingsCallback=None,
+                 enableHelpButton=False, helpButtonCallback=None, ):
 
         self.buttonBorderWidth = 1
         self.buttonIconMargin = 1
@@ -1195,14 +1213,20 @@ class CcpnModuleLabel(DockLabel):
             self.setupLabelButton(self.closeButton, 'close-module', CcpnModuleLabel.TOP_RIGHT)
 
         # Settings
-        self.settingsButton = ToolButton(self)
-        self.setupLabelButton(self.settingsButton, 'gearbox', CcpnModuleLabel.TOP_LEFT)
+        self.settingsButtons = ButtonList(self, texts=['', ''],
+                                          icons=['icons/gearbox', 'icons/system-help'],
+                                          callbacks=[settingsCallback, helpButtonCallback]
+                                          )
+        self.settingsButton = self.settingsButtons.buttons[0]
+        self.helpButton = self.settingsButtons.buttons[1]
+        self.setupLabelButton(self.settingsButton, position=CcpnModuleLabel.TOP_LEFT)
+        self.setupLabelButton(self.helpButton,  position=CcpnModuleLabel.TOP_LEFT)
 
-        if settingsCallback is None:
-            raise RuntimeError('Requested settingsButton without callback')
-        else:
-            self.settingsButton.clicked.connect(settingsCallback)
-        self.settingsButton.setEnabled(enableSettingsButton)
+        if not enableHelpButton:
+            self.helpButton.hide()
+        if not enableSettingsButton:
+            self.settingsButton.hide()
+
 
         self.updateStyle()
 
@@ -1225,10 +1249,10 @@ class CcpnModuleLabel(DockLabel):
         self.nameEditor.hide()
         self.module.renameModule(name)
 
-    def setupLabelButton(self, button, iconName, position):
-        icon = Icon(f'icons/{iconName}')
-
-        button.setIcon(icon)
+    def setupLabelButton(self, button, iconName=None, position=None):
+        if iconName:
+            icon = Icon(f'icons/{iconName}')
+            button.setIcon(icon)
         # retinaIconSize = self.getMaxIconSize(icon) // 2
         retinaIconSize = self.labelSize - 4
 
@@ -1420,11 +1444,11 @@ class CcpnModuleLabel(DockLabel):
             else:
                 self.layout().addWidget(self.closeButton, 0, 3, alignment=QtCore.Qt.AlignRight)
 
-        if hasattr(self, 'settingsButton') and self.settingsButton:
+        if hasattr(self, 'settingsButtons') and self.settingsButtons:
             if self.orientation == 'vertical':
-                self.layout().addWidget(self.settingsButton, 0, 0, alignment=QtCore.Qt.AlignBottom)
+                self.layout().addWidget(self.settingsButtons, 0, 0, alignment=QtCore.Qt.AlignBottom)
             else:
-                self.layout().addWidget(self.settingsButton, 0, 0, alignment=QtCore.Qt.AlignLeft)
+                self.layout().addWidget(self.settingsButtons, 0, 0, alignment=QtCore.Qt.AlignLeft)
 
         if hasattr(self, 'nameEditor') and self.nameEditor:
             self.layout().addWidget(self.nameEditor, 0, 1, alignment=QtCore.Qt.AlignCenter)

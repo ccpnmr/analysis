@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-05 13:50:06 +0100 (Fri, May 05, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-06-22 21:02:59 -0400 (Thu, June 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1019,15 +1019,19 @@ def getSpectrumColour(colourName, defaultReturn=None):
 
 
 def getAutoColourRgbRatio(inColour=None, sourceObject=None, colourAttribute=None, defaultColour=None):
-    listColour = inColour
-    if listColour == '#':
-        listColour = getattr(sourceObject, colourAttribute, defaultColour)
-        if listColour in colorSchemeTable:
-            # get the first item from the colour gradient
-            listColour = colorSchemeTable[listColour][0]
+    try:
+        listColour = inColour
+        if listColour == '#':
+            listColour = getattr(sourceObject, colourAttribute, defaultColour)
+            if listColour in colorSchemeTable:
+                # get the first item from the colour gradient
+                listColour = colorSchemeTable[listColour][0]
 
-    return hexToRgbRatio(listColour) or defaultColour
+        return (hexToRgbRatio(listColour) or defaultColour)[:3]
 
+    except Exception:
+        # return red for any error
+        return [1.0, 0.2, 0.1]
 
 def findNearestHex(hexCol, colourHexList):
     weights = (0.3, 0.59, 0.11)  # assuming rgb

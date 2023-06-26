@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-05 12:34:18 +0100 (Mon, June 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-26 18:58:10 +0100 (Mon, June 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -227,12 +227,13 @@ class _StripLabel(ActiveLabel):  #  VerticalLabel): could use Vertical label so 
         # contextMenu.addAction('Close All Strip Headers in SpectrumDisplay', self._closeSpectrumDisplay)
         # contextMenu.addAction('Close All Headers in All SpectrumDisplays', self._closeAll)
 
-        contextMenu.addAction('Pin/unpin Strip', self._pinStripToggle)
+        contextMenu.addAction('Pin/Unpin Strip', self._pinStripToggle)
         contextMenu.addAction('Close Strip', self._closeStrip)
         contextMenu.addAction('Close Other Strips', partial(self._closeOther, left=True, right=True))
         contextMenu.addAction('Close Strips to the Left', partial(self._closeOther, left=True))
         contextMenu.addAction('Close Strips to the Right', partial(self._closeOther, right=True))
         contextMenu.addAction('Close All but Pinned', self._closeUnpinned)
+        contextMenu.addAction('Unpin All Other Strips', self._removePins)
 
         return contextMenu
 
@@ -292,6 +293,14 @@ class _StripLabel(ActiveLabel):  #  VerticalLabel): could use Vertical label so 
             for strip in spDisplay.strips:
                 if not strip.pinned:
                     spDisplay.deleteStrip(strip)
+
+    def _removePins(self):
+        """Remove pins from all other strips.
+        """
+        if this := self._parent.strip:
+            for st in self.project.strips:
+                if st != this:
+                    st.pinned = False
 
 
 #TODO:GEERTEN: complete this and replace

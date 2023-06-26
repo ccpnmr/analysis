@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-18 16:08:03 +0100 (Tue, April 18, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-26 18:58:09 +0100 (Mon, June 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -199,6 +199,9 @@ GUINMRRESIDUE = 'GUINMRRESIDUE'
 
 GUISTRIP_PIVOT = 'GUISTRIP_PIVOT'
 
+FUSION_BACKGROUND = 'FUSION_BACKGROUND'
+FUSION_FOREGROUND = 'FUSION_FOREGROUND'
+
 DRAG_FOREGROUND = 'DRAG_FOREGROUND'
 DRAG_BACKGROUND = 'DRAG_BACKGROUND'
 LABEL_FOREGROUND = 'LABEL_FOREGROUND'
@@ -324,6 +327,9 @@ colourSchemes = {
         GUINMRRESIDUE                     : TEXT_COLOUR,
 
         GUISTRIP_PIVOT                    : MARISHINO,
+
+        FUSION_FOREGROUND                 : 'white',
+        FUSION_BACKGROUND                 : '#73a3f0',
 
         DRAG_FOREGROUND                   : 'white',
         DRAG_BACKGROUND                   : HIGHLIGHT_COLOUR,

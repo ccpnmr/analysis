@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 17:01:44 +0100 (Fri, June 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-26 18:58:09 +0100 (Mon, June 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1302,10 +1302,12 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         if trigger == Notifier.CHANGE and data[Notifier.SPECIFIERS].get('pinnedChanged'):
             getLogger().debug(f'>>> Strip changed - {strip} {strip.pinned}')
             strip._updateStripLabelState()
-            if strip.pinned:
-                for st in self.project.strips:
-                    if st != strip:
-                        st.pinned = False
+
+            # disable the other pinned strips - only allow one strip to be pinned
+            # if strip.pinned:
+            #     for st in self.project.strips:
+            #         if st != strip:
+            #             st.pinned = False
 
     def printToFile(self):
         self.application.showPrintSpectrumDisplayPopup()

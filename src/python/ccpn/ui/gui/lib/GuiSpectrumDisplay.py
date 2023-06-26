@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 19:13:22 +0100 (Fri, June 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-26 18:58:09 +0100 (Mon, June 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -620,6 +620,16 @@ class GuiSpectrumDisplay(CcpnModule):
         #                           targetName=Peak._currentAttributeName,
         #                           callback=self._onCurrentPeak,
         #                           onceOnly=True)
+
+    def setRightOverlayArea(self, value):
+        """Set the overlay state for the right axis.
+        """
+        self._rightGLAxis._overlay.setOverlayArea(value)
+
+    def setBottomOverlayArea(self, value):
+        """Set the overlay state for the bottom axis.
+        """
+        self._bottomGLAxis._overlay.setOverlayArea(value)
 
     def _setFloatingAxes(self, xUnits, yUnits, aspectRatioMode, aspectRatios):
         """Set the aspectRatio and units for the floating axes

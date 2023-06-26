@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 19:39:20 +0100 (Fri, June 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-26 18:58:09 +0100 (Mon, June 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -53,6 +53,59 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLGlobalData
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import GLViewports
 from ccpn.ui.gui.lib.mouseEvents import rightMouse
+
+
+class _AxisOverlay(QtWidgets.QWidget):
+    """Overlay widget that draws highlight over the current strip during a drag-drop/highlight operation
+    """
+
+    def __init__(self, parent):
+        """Initialise widget
+        """
+        QtWidgets.QWidget.__init__(self, parent)
+        self.hide()
+        self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents)
+        self._overlayArea = None
+
+        col = QtGui.QColor('%(FUSION_BACKGROUND)s' % getColours())
+        col.setAlpha(75)
+        self._highlightBrush = QtGui.QBrush(col)
+
+    def setOverlayArea(self, area):
+        """Set the widget coverage, either hidden, or a rectangle covering the module
+        """
+        self._overlayArea = area
+        if area is None:
+            self.hide()
+        else:
+            prgn = self.parent().rect()
+            rgn = QtCore.QRect(prgn).adjusted(-1, -1, 1, 1)
+
+            self.setGeometry(rgn)
+            self.show()
+
+        self.update()
+
+    def _resize(self):
+        """Resize the overlay, sometimes the overlay is temporarily visible while the module is moving
+        """
+        # called from ccpnModule during resize to update rect()
+        self.setOverlayArea(self._overlayArea)
+
+    def paintEvent(self, ev):
+        """Paint the overlay to the screen
+        """
+        if self._overlayArea is None:
+            return
+
+        # create a transparent rectangle and painter over the widget
+        p = QtGui.QPainter(self)
+        rgn = self.rect()
+
+        p.setBrush(self._highlightBrush)
+        p.drawRect(rgn)
+
+        p.end()
 
 
 class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
@@ -153,6 +206,10 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self.lastPixelRatio = None
         # self.setFixedWidth(self.AXIS_MARGINRIGHT+self.AXIS_LINE)
 
+        # create an overlay for drag-drop/highlight operations
+        self._overlay = _AxisOverlay(self)
+        self._overlay.raise_()
+
     @property
     def tilePosition(self) -> Tuple[int, int]:
         """Returns a tuple of the tile coordinates (from top-left)
@@ -225,7 +282,6 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             _font.charWidth = _font.width / scale
 
         return _font
-
 
     def paintGL(self):
         """Handle the GL painting
@@ -480,9 +536,9 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 index = 0
                 for scaleOrder, i in enumerate(scaleGrid):  #  [2,1,0]:   ## Draw three different scales of grid
                     dist = br - ul
-                    nlTarget = 10. ** i
+                    nlTarget = 10.**i
                     _pow = np.log10(abs(dist / nlTarget)) + 0.5
-                    d = 10. ** np.floor(_pow)
+                    d = 10.**np.floor(_pow)
 
                     ul1 = np.floor(ul / d) * d
                     br1 = np.ceil(br / d) * d

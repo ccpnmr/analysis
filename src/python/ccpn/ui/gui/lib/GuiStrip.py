@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 19:13:22 +0100 (Fri, June 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-26 18:58:09 +0100 (Mon, June 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -53,6 +53,7 @@ from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.widgets.Action import WidgetAction
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, \
@@ -76,6 +77,110 @@ MultipletMenu = 'MultipletMenu'
 AxisMenu = 'AxisMenu'
 PhasingMenu = 'PhasingMenu'
 
+
+#=========================================================================================
+# Supporting classes
+#=========================================================================================
+
+class _WidgetFrame(Frame):
+    strip = None
+
+    def enterEvent(self, a0: QtCore.QEvent) -> None:
+        super().enterEvent(a0)
+        # NOTE:ED - need to check for tiling later
+
+        sDisplay = self.strip.spectrumDisplay
+
+        # get the list of actual plotted strips in the scroll-area
+        dStrips = list(filter(lambda st: not st.visibleRegion().isEmpty(), sDisplay.orderedStrips))
+
+        if self.strip in dStrips:
+            self.strip.setOverlayArea(True)
+
+        if sDisplay.stripArrangement == 'Y':
+            if self.strip == dStrips[-1]:
+                sDisplay.setRightOverlayArea(True)
+
+        elif sDisplay.stripArrangement == 'X':
+            if self.strip == dStrips[-1]:
+                sDisplay.setBottomOverlayArea(True)
+
+        # highlight the widget-label in the menu
+        self.label.setStyleSheet('QLabel { '
+                                 'color: %(FUSION_FOREGROUND)s; '
+                                 'background-color: %(FUSION_BACKGROUND)s; }' % getColours())
+
+    def leaveEvent(self, a0: QtCore.QEvent) -> None:
+        super().leaveEvent(a0)
+
+        sDisplay = self.strip.spectrumDisplay
+        # self.strip.setStyleSheet('Frame { border: 0px solid; }')
+        self.strip._overlay.setOverlayArea(None)
+
+        sDisplay.setRightOverlayArea(None)
+        sDisplay.setBottomOverlayArea(None)
+
+        self.label.setStyleSheet('QLabel { '
+                                 'color: black; '
+                                 'background-color: transparent; }' % getColours())
+
+
+class _StripOverlay(QtWidgets.QWidget):
+    """Overlay widget that draws highlight over the current strip during a drag-drop/highlight operation
+    """
+
+    def __init__(self, parent):
+        """Initialise widget
+        """
+        QtWidgets.QWidget.__init__(self, parent)
+        self.hide()
+        self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents)
+        self._overlayArea = None
+
+        col = QtGui.QColor('%(FUSION_BACKGROUND)s' % getColours())
+        col.setAlpha(75)
+        self._highlightBrush = QtGui.QBrush(col)
+
+    def setOverlayArea(self, area):
+        """Set the widget coverage, either hidden, or a rectangle covering the module
+        """
+        self._overlayArea = area
+        if area is None:
+            self.hide()
+        else:
+            prgn = self.parent().rect()
+            rgn = QtCore.QRect(prgn).adjusted(-1, -1, 1, 1)
+
+            self.setGeometry(rgn)
+            self.show()
+
+        self.update()
+
+    def _resize(self):
+        """Resize the overlay, sometimes the overlay is temporarily visible while the module is moving
+        """
+        # called from ccpnModule during resize to update rect()
+        self.setOverlayArea(self._overlayArea)
+
+    def paintEvent(self, ev):
+        """Paint the overlay to the screen
+        """
+        if self._overlayArea is None:
+            return
+
+        # create a transparent rectangle and painter over the widget
+        p = QtGui.QPainter(self)
+        rgn = self.rect()
+
+        p.setBrush(self._highlightBrush)
+        p.drawRect(rgn)
+
+        p.end()
+
+
+#=========================================================================================
+# GuiStrip
+#=========================================================================================
 
 class GuiStrip(Frame):
     # inherits NotifierBase
@@ -285,6 +390,10 @@ class GuiStrip(Frame):
         self._newConsoleDirection = None
         self._noiseThresholdLinesActive = False
 
+        # create an overlay for drag-drop/highlight operations
+        self._overlay = _StripOverlay(self)
+        self._overlay.raise_()
+
         # initialise the notifiers
         self.setStripNotifiers()
 
@@ -337,10 +446,19 @@ class GuiStrip(Frame):
         self.spectrumDisplay._addStrip(self, tilePosition)
 
     def resizeEvent(self, ev):
+        # adjust the overlay to match the resize-event
+        self._overlay._resize()
+
         super().resizeEvent(ev)
         # call subclass _resize event
         self._resize()
         self.stripResized.emit((self.width(), self.height()))
+
+    def _raiseOverlay(self):
+        """Raise the Overlay to apply a colour to the strip.
+        """
+        self._overlay.setOverlayArea(True)
+        self._overlay.raise_()
 
     def _resize(self):
         """Resize event to handle resizing of frames that overlay the OpenGL frame
@@ -750,14 +868,22 @@ class GuiStrip(Frame):
         prefix = strip.pid if prefix is None else prefix
         text = f'{prefix} ({item})'
         toolTip = f'Show cursor in strip {str(strip.id)} at {label} position ({item})'
-        # if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) > 0:
-        return menuFunc.addItem(text=text,
-                                callback=partial(navigateToPositionInStrip, strip=strip,
-                                                 positions=navigatePos,
-                                                 axisCodes=navigateAxes, ),
-                                toolTip=toolTip)
-        # else:
-        #     print('skipping axisCodes %s %s' % (strip.axisCodes, currentStrip.axisCodes))
+
+        action = self._addActiveMenuItem(text=text, toolTip=toolTip, strip=strip)
+        action.triggered.connect(partial(navigateToPositionInStrip, strip=strip,
+                                         positions=navigatePos,
+                                         axisCodes=navigateAxes, ))
+
+        return menuFunc.addAction(action)
+
+        # # if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) > 0:
+        # return menuFunc.addItem(text=text,
+        #                         callback=partial(navigateToPositionInStrip, strip=strip,
+        #                                          positions=navigatePos,
+        #                                          axisCodes=navigateAxes, ),
+        #                         toolTip=toolTip)
+        # # else:
+        # #     print('skipping axisCodes %s %s' % (strip.axisCodes, currentStrip.axisCodes))
 
     def _createCommonMenuItem(self, currentStrip, includeAxisCodes, label, menuFunc, perm, position, strip, prefix=None):
         showPos = []
@@ -772,6 +898,33 @@ class GuiStrip(Frame):
                 showPos.append(' - ')
         return self._createMenuItemForNavigate(currentStrip, navigateAxes, navigatePos, showPos, strip, menuFunc, label,
                                                includeAxisCodes=includeAxisCodes, prefix=prefix)
+
+    def _addActiveMenuItem(self, text, toolTip, strip):
+        """Create a new widfget-item to insert into a QMenu.
+        More control is available to the 'action'.
+        """
+        from ccpn.ui.gui.widgets.Icon import Icon
+
+        _icon = Icon('icons/pin-black')  # use the black as gets disabled
+
+        strAction = QtWidgets.QWidgetAction(self)
+        _frame = _WidgetFrame(self, setLayout=True, hAlign='left', margins=(2, 2, 2, 2), )
+        _frame.setToolTip(toolTip)
+
+        Spacer(_frame, 18, 18, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed, grid=(0, 0))
+        _frame.label = _label = Label(
+                _frame,
+                text=f'    {text}',
+                grid=(0, 1),
+                hPolicy='fixed',
+                hAlign='left',
+                textColour='black',
+                )
+
+        strAction.setDefaultWidget(_frame)
+        _frame.strip = strip
+
+        return strAction
 
     def _addItemsToNavigateMenu(self, position, axisCodes, label, menuFunc, includeAxisCodes=True):
         """Adds item to navigate to section of context menu.
@@ -791,8 +944,8 @@ class GuiStrip(Frame):
 
         menuFunc.setEnabled(True)
         # quick way to set headings colour - for all disabled items
-        menuFunc.setStyleSheet("QMenu::item:!enabled { color: dodgerblue; }"
-                               "QFrame::hover { background-color: dodgerblue; }"
+        menuFunc.setStyleSheet("QFrame:hover {"
+                               "background-color: %(FUSION_BACKGROUND)s; }" % getColours()
                                )
 
         # add the opposite diagonals for matching axisCodes - always at the top of the list
@@ -809,114 +962,128 @@ class GuiStrip(Frame):
 
         from ccpn.ui.gui.widgets.Icon import Icon
 
-        _icon = Icon('icons/pin-black')  # use the black as gets disabled
+        _icon = Icon('icons/pin-black')  # use the black as gets disabled and looks grey
         _previousMenuItem = None
         _currentMenuItem = None
         permItem = None
 
-        # add the permutations for the other strips
-        for spectrumDisplay in self.current.project.spectrumDisplays:
-            if spectrumDisplay == currentStrip.spectrumDisplay:
-                continue
+        for pCheck in (True, False):
 
-            specCount = 0
-            specAction = QtWidgets.QWidgetAction(self)
-            _frame = Frame(self, setLayout=True, hAlign='left', margins=(2, 2, 2, 2))
+            # add the permutations for the other strips
+            for spectrumDisplay in self.current.project.spectrumDisplays:
 
-            # make a frame inside the menu to allow setting colours/properties
-            if len(spectrumDisplay.strips) == 1 and spectrumDisplay.strips[0].pinned:
-                _iconLabel = Label(_frame, grid=(0, 0))
-                _iconLabel.setPixmap(_icon.pixmap(QtCore.QSize(18, 18)))
-                _iconLabel.setFixedSize(18, 18)
-            else:
-                Spacer(_frame, 18, 18, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed, grid=(0, 0))
-            _label = Label(_frame, text=spectrumDisplay.pid, grid=(0, 1), hPolicy='fixed', hAlign='left')
-
-            _strip = spectrumDisplay.strips[0]
-            if self.mainWindow._previousStrip == _strip:
-                _previousMenuItem = _label
-            elif self.current.strip == _strip:
-                # duh, this should never be in the list
-                _currentMenuItem = _label
-
-            specAction.setDefaultWidget(_frame)
-            menuFunc.addAction(specAction)
-
-            prefix = '    ' if len(spectrumDisplay.strips) > 1 else '  '
-            for strip in spectrumDisplay.strips:
-                if strip == currentStrip:
+                # skip the spectrumDisplay containing the current strip (for the minute)
+                if spectrumDisplay == currentStrip.spectrumDisplay:
                     continue
 
-                strCount = 0
-                strAction = QtWidgets.QWidgetAction(self)
+                pStrips = list(filter(lambda st: st.pinned == pCheck, spectrumDisplay.strips))
+                if not pStrips:
+                    continue
+
+                specCount = 0
+                specAction = QtWidgets.QWidgetAction(self)
                 _frame = Frame(self, setLayout=True, hAlign='left', margins=(2, 2, 2, 2))
 
-                if strip.pinned:
+                # make a frame inside the menu to allow setting colours/properties
+                if len(pStrips) == 1 and pStrips[0].pinned:
                     _iconLabel = Label(_frame, grid=(0, 0))
                     _iconLabel.setPixmap(_icon.pixmap(QtCore.QSize(18, 18)))
                     _iconLabel.setFixedSize(18, 18)
                 else:
                     Spacer(_frame, 18, 18, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed, grid=(0, 0))
-                _label = Label(_frame, text='    ' + strip.pid, grid=(0, 1), hPolicy='fixed', hAlign='left')
+                _label = Label(_frame, text=spectrumDisplay.pid, grid=(0, 1), hPolicy='fixed', hAlign='left')
 
-                if len(spectrumDisplay.strips) > 1:
-                    # otherwise the strips are hidden and the spectrumDisplay label holds the pin/colour
-                    if self.mainWindow._previousStrip == strip:
-                        _previousMenuItem = _label
-                    elif self.current.strip == strip:
-                        # duh, this should never be in the list
-                        _currentMenuItem = _label
+                _strip = pStrips[0]
+                if self.mainWindow._previousStrip == _strip:
+                    _previousMenuItem = _label
+                elif self.current.strip == _strip:
+                    # duh, this should never be in the list
+                    _currentMenuItem = _label
 
-                strAction.setDefaultWidget(_frame)
-                menuFunc.addAction(strAction)
+                specAction.setDefaultWidget(_frame)
+                menuFunc.addAction(specAction)
 
-                # get a list of all isotope code matches for each axis code in 'strip'
-                indices = getAxisCodeMatchIndices(strip.axisCodes, axisCodes, allMatches=True)
+                prefix = '    ' if len(pStrips) > 1 else '  '
+                for strip in pStrips:
+                    if strip == currentStrip:
+                        continue
 
-                # generate a permutation list of the axis codes that have unique indices
-                # permutation list is list of tuples
-                # each element is list of indices to fetch from currentStrip and map to strip
+                    strCount = 0
+                    strAction = QtWidgets.QWidgetAction(self)
+                    _frame = Frame(self, setLayout=True, hAlign='left', margins=(2, 2, 2, 2))
 
-                # permutationList1 = [jj for jj in product(*(ii if ii else (None,) for ii in indices)) if len(set(jj)) == len(strip.axisCodes)]
-                permutationList1 = list(product(*(ii or (None,) for ii in indices)))
+                    if strip.pinned:
+                        _iconLabel = Label(_frame, grid=(0, 0))
+                        _iconLabel.setPixmap(_icon.pixmap(QtCore.QSize(18, 18)))
+                        _iconLabel.setFixedSize(18, 18)
+                    else:
+                        Spacer(_frame, 18, 18, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed, grid=(0, 0))
+                    _label = Label(
+                            _frame,
+                            text=f'    {strip.pid}',
+                            grid=(0, 1),
+                            hPolicy='fixed',
+                            hAlign='left',
+                            )
 
-                posMap = []
-                try:
-                    for k in range(1,
-                                   max(len(axisCodes) + 1, len(strip.axisCodes) + 1)):
-                        for perm in permutationList1:
-                            ext = list(combinations(list(enumerate(perm)), k))
-                            posMap.extend(ext)
-                except Exception:
+                    if len(pStrips) > 1:
+                        # otherwise the strips are hidden and the spectrumDisplay label holds the pin/colour
+                        if self.mainWindow._previousStrip == strip:
+                            _previousMenuItem = _label
+                        elif self.current.strip == strip:
+                            # duh, this should never be in the list
+                            _currentMenuItem = _label
+
+                    strAction.setDefaultWidget(_frame)
+                    menuFunc.addAction(strAction)
+
+                    # get a list of all isotope code matches for each axis code in 'strip'
+                    indices = getAxisCodeMatchIndices(strip.axisCodes, axisCodes, allMatches=True)
+
+                    # generate a permutation list of the axis codes that have unique indices
+                    # permutation list is list of tuples
+                    # each element is list of indices to fetch from currentStrip and map to strip
+
+                    # permutationList1 = [jj for jj in product(*(ii if ii else (None,) for ii in indices)) if len(set(jj)) == len(strip.axisCodes)]
+                    permutationList1 = list(product(*(ii or (None,) for ii in indices)))
+
                     posMap = []
+                    try:
+                        for k in range(1,
+                                       max(len(axisCodes) + 1, len(strip.axisCodes) + 1)):
+                            for perm in permutationList1:
+                                ext = list(combinations(list(enumerate(perm)), k))
+                                posMap.extend(ext)
+                    except Exception:
+                        posMap = []
 
-                # remove all the duplicates
-                newPerms = OrderedDict()
-                for perm in posMap:
-                    perm2 = [None] * len(strip.axisCodes)
-                    for cc in perm:
-                        with contextlib.suppress(Exception):
-                            perm2[cc[0]] = cc[1]
+                    # remove all the duplicates
+                    newPerms = OrderedDict()
+                    for perm in posMap:
+                        perm2 = [None] * len(strip.axisCodes)
+                        for cc in perm:
+                            with contextlib.suppress(Exception):
+                                perm2[cc[0]] = cc[1]
 
-                    newPerms[str(perm2)] = perm2
+                        newPerms[str(perm2)] = perm2
 
-                for perm2 in newPerms.values():
-                    # ignore all Nones
-                    if perm2.count(None) != len(perm2):
-                        permItem = self._createCommonMenuItem(currentStrip, includeAxisCodes, label, menuFunc, perm2, position, strip, prefix=prefix)
-                        strCount += 1
-                        specCount += 1
+                    for perm2 in newPerms.values():
+                        # ignore all Nones
+                        if perm2.count(None) != len(perm2):
+                            permItem = self._createCommonMenuItem(currentStrip, includeAxisCodes, label, menuFunc, perm2, position, strip, prefix=prefix)
+                            strCount += 1
+                            specCount += 1
 
-                # hide the spectrumDisplay/strip menu items if nothing added
-                strAction.setEnabled(False)
-                if not strCount or len(spectrumDisplay.strips) == 1:
-                    strAction.setVisible(False)
+                    # hide the spectrumDisplay/strip menu items if nothing added
+                    strAction.setEnabled(False)
+                    if not strCount or len(pStrips) == 1:
+                        strAction.setVisible(False)
 
-            specAction.setEnabled(False)
-            if not specCount:
-                specAction.setVisible(False)
+                specAction.setEnabled(False)
+                if not specCount:
+                    specAction.setVisible(False)
 
-            menuFunc.addSeparator()
+                menuFunc.addSeparator()
 
         if _previousMenuItem:
             _previousMenuItem.setStyleSheet("QLabel { color: orange; }")
@@ -2855,6 +3022,18 @@ class GuiStrip(Frame):
         self.viewStripMenu.exec_(QtCore.QPoint(int(position.x()),
                                                int(position.y())))
         self.contextMenuPosition = self.current.cursorPosition
+
+        # clean up strip highlighting
+        for strip in self.project.strips:
+            strip.setOverlayArea(None)
+        for sDisplay in self.project.spectrumDisplays:
+            sDisplay.setRightOverlayArea(None)
+            sDisplay.setBottomOverlayArea(None)
+
+    def setOverlayArea(self, value):
+        """Set the overlay type.
+        """
+        self._overlay.setOverlayArea(value)
 
     def _updateVisibility(self):
         """Update visibility list in the OpenGL

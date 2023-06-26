@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-22 15:53:43 +0100 (Thu, June 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-26 17:14:46 +0100 (Mon, June 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -296,17 +296,6 @@ class MainPlotPanel(GuiPanel):
         :return:  one of  float, int, str, None  """
         return self._checkColumnType(self.yColumnName)
 
-
-    def _thresholdLineMoved(self):
-        pass
-        pos = self.barGraphWidget.xLine.pos().y()
-        if self._appearancePanel:
-            w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_ThreshValue)
-            if w:
-                with w.blockWidgetSignals():
-                    w.setValue(pos)
-        self.updatePanel()
-
     def _mainTableChanged(self, resetZoom=False):
         if self.viewMode == guiNameSpaces.PlotViewMode_Backbone:
             getLogger().debug2(f'BarGraph-view {self.viewMode}: Sorting/Filtering on the main table does not change the plot.')
@@ -417,13 +406,15 @@ class MainPlotPanel(GuiPanel):
             self.currentCollectionLabel.clear()
 
     def _lineMovedCallback(self, position, name, *args, **kwargs):
+        vr = self.mainPlotWidget.viewBox.viewRect()
         self.thresholdValue = float(position)
         self.updatePanel()
         # update the widgets as well
         tw =  self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_ThreshValue)
         if tw is not None:
             tw.setValue(float(position))
-
+        # restore the range as it was before the line move
+        self.mainPlotWidget.viewBox.setRange(vr, padding=0)
 
     def _updateAxisLabels(self):
         self.setXLabel(label=self.xColumnName)

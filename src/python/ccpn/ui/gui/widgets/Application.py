@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-05 15:28:43 +0000 (Thu, January 05, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-06-26 14:49:21 +0100 (Mon, June 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -35,6 +35,7 @@ from ccpn.util.Logging import getLogger
 logger = getLogger()
 
 ##QT_MAC_WANTS_LAYER: Patch for MacOs >= 11. Without this flag, Testing widgets/windows from PyQt5 don't show at all.
+# Edit: 26-06-2023 With this flag set the QtwebEngine doesn't show/load the html page.
 os.environ['QT_MAC_WANTS_LAYER'] = '1'
 
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-22 15:54:36 +0100 (Thu, June 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-26 14:49:21 +0100 (Mon, June 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -40,7 +40,8 @@ from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.ScrollBarVisibilityWatcher import ScrollBarVisibilityWatcher
-
+from ccpn.util.Path import aPath
+from ccpn.ui.gui.widgets.MessageDialog import  showMessage, showMulti
 
 ATTRIBUTE_CHECK_LIST = ('_mouseStart', '_minimumWidth', '_widthStart', '_minimumHeight', '_heightStart')
 ATTRIBUTE_HEIGHT_LIST = ('_minimumHeight')
@@ -279,6 +280,26 @@ class TextEditor(QtWidgets.QTextEdit, Base):
         """
         return self.set(value)
 
+class TextBrowser(QtWidgets.QTextBrowser, Base):
+    receivedFocus = QtCore.pyqtSignal()
+
+    def __init__(self, parent=None, htmlFilePath=None,  **kwds):
+        super().__init__(parent)
+        Base._init(self, setLayout=True, **kwds)
+        self.htmlFilePath = htmlFilePath
+        if self.htmlFilePath is not None:
+            self.setFile(self.htmlFilePath)
+
+    def setFile(self, htmlFilePath):
+        path  = aPath(htmlFilePath)
+        if not path.exists():
+            showMessage('Path not found', f'Could not load {path}')
+            return
+        try:
+            self.setSource(QtCore.QUrl.fromLocalFile(str(path)))
+        except Exception as err:
+            showMessage('Help file not available', f'Could not load the help browser:  {err}')
+
 
 class PlainTextEditor(QtWidgets.QPlainTextEdit, Base):
     editingFinished = QtCore.pyqtSignal()
@@ -496,7 +517,6 @@ if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
     from ccpn.ui.gui.widgets.Widget import Widget
-
 
     app = TestApplication()
 

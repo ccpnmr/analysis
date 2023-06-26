@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-22 18:14:23 +0100 (Thu, June 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-26 14:49:21 +0100 (Mon, June 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -26,6 +26,8 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 ######## core imports ########
 from ccpn.framework.lib.experimentAnalysis.ChemicalShiftMappingAnalysisBC import ChemicalShiftMappingAnalysisBC
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+from ccpn.framework.PathsAndUrls import ccpnModuleHelpPath
+
 ######## gui/ui imports ########
 import ccpn.ui.gui.modules.experimentAnalysis.CSMSettingsPanel as settingsPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import ExperimentAnalysisGuiModuleBC
@@ -38,6 +40,7 @@ class ChemicalShiftMappingGuiModule(ExperimentAnalysisGuiModuleBC):
 
     className = 'ChemicalShiftMapping'
     analysisType = sv.ChemicalShiftMappingAnalysis
+    # _helpFilePath = ccpnModuleHelpPath /  'ChemicalShiftMappingModuleHelp.html'
 
     def __init__(self, mainWindow, name='Chemical Shift Mapping Analysis (Beta)', **kwds):
         super(ExperimentAnalysisGuiModuleBC, self)

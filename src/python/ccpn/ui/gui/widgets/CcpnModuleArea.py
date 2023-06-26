@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-01 19:39:58 +0100 (Thu, June 01, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-06-26 14:49:21 +0100 (Mon, June 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -483,6 +483,20 @@ class CcpnModuleArea(ModuleArea, DropBase):
         if wasMaximised:
             module.toggleMaximised()
         return module
+
+    def _getHelpModule(self, parentModuleName):
+        """
+        Get the HelpModule for a particular module if already present
+        :return:
+        """
+        from ccpn.ui.gui.modules.HelpModule import HelpModule
+        helpModule = None
+        for modName, module in self.modules.items():
+            if isinstance(module, HelpModule):
+                if module.parentModuleName == parentModuleName:
+                    helpModule = module
+        return helpModule
+
 
     def _restoreAsTheLastSeenModule(self, module):
         """

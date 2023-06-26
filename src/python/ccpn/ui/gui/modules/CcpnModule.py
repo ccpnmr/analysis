@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-22 16:15:37 +0100 (Thu, June 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-26 14:49:21 +0100 (Mon, June 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -75,7 +75,7 @@ from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight, getFont
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.core.lib.Pid import Pid, createPid
 from ccpn.ui.gui.widgets.Base import Base
-
+from ccpn.util.Path import aPath
 
 CommonWidgetsEdits = {
     CheckBox.__name__                       : (CheckBox.get, CheckBox.setChecked, None),
@@ -176,14 +176,13 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     maxSettingsState = 3  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
     defaultSettingsState = 0  # default state of the settings widget
     settingsPosition = 'top'
-    includeHelpWidget = False
     settingsMinimumSizes = (100, 50)
     _restored = False
     _onlySingleInstance = False
     _includeInLastSeen = True  # whether to restore or not after closing it (in the same project)
     _allowRename = False
     _defaultName = MODULENAME  # used only when renaming is allowed, so that its original name is stored in the lastSeen widgetsState.
-
+    _helpFilePath = None
     # After closing a renamed module, any new instance will be named as default.
 
     # _instances = set()
@@ -260,7 +259,6 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self.label = CcpnModuleLabel(name, self,
                                      showCloseButton=closable, closeCallback=self._closeModule,
                                      enableSettingsButton=self.includeSettingsWidget,
-                                     enableHelpButton=self.includeHelpWidget,
                                      settingsCallback=self._settingsCallback,
                                      helpButtonCallback = self._helpButtonCallback,
                                      )
@@ -830,18 +828,25 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         finally:
             return False
 
-    def _helpButtonCallback(self, htmlFilePath):
-        getLogger().warning('This option is under implementation')
-        return
-        from ccpn.ui.gui.popups.Dialog import CcpnDialog
-        from PyQt5.QtWidgets import QTextBrowser
-        popup = CcpnDialog(windowTitle=f'Help {self.moduleName}', setLayout=True)
-        te = QTextBrowser(popup, )
-        popup.getLayout().addWidget(te)
-        with open(htmlFilePath) as htmlFile:
-            te.setHtml(htmlFile.read())
-        popup.show()
-        popup.raise_()
+    def setHelpFilePath(self, htmlFilePath):
+        self._helpFilePath = htmlFilePath
+
+    def _helpButtonCallback(self):
+        """
+        Add a new module displaying its help file
+        :return:
+        """
+        from ccpn.ui.gui.modules.HelpModule import HelpModule
+        htmlFilePath = self._helpFilePath
+        if htmlFilePath is not None:
+            moduleArea = self.mainWindow.moduleArea
+            helpModule = moduleArea._getHelpModule(self.moduleName)
+            if not helpModule:
+                helpModule = HelpModule(mainWindow=self.mainWindow,
+                                        name=f'Help Browser: {self.moduleName}',
+                                        parentModuleName=self.moduleName,
+                                        htmlFilePath=htmlFilePath)
+                moduleArea.addModule(helpModule, position='top', relativeTo=self)
 
     def _settingsCallback(self):
         """
@@ -1127,7 +1132,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
             window = self.findWindow()
             window.move(endPosition)
 
-            # this is because we could have have dragged into another application
+            # this is because we could have dragged into another application
             # this may not work under windows
             originalWindow = self.findWindow()
             originalWindow.raise_()
@@ -1144,6 +1149,9 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     def _raiseSelectedOverlay(self):
         self._selectedOverlay.setDropArea(True)
         self._selectedOverlay.raise_()
+
+    def _hideHelpButton(self):
+        self.label.helpButton.hide()
 
     def resizeEvent(self, ev):
         self._selectedOverlay._resize()
@@ -1171,7 +1179,7 @@ class CcpnModuleLabel(DockLabel):
         return max(iconSizes)
 
     def __init__(self, name, module, showCloseButton=True, closeCallback=None, enableSettingsButton=False, settingsCallback=None,
-                 enableHelpButton=False, helpButtonCallback=None, ):
+                  helpButtonCallback=None, ):
 
         self.buttonBorderWidth = 1
         self.buttonIconMargin = 1
@@ -1221,12 +1229,9 @@ class CcpnModuleLabel(DockLabel):
         self.helpButton = self.settingsButtons.buttons[1]
         self.setupLabelButton(self.settingsButton, position=CcpnModuleLabel.TOP_LEFT)
         self.setupLabelButton(self.helpButton,  position=CcpnModuleLabel.TOP_LEFT)
-
-        if not enableHelpButton:
-            self.helpButton.hide()
-        if not enableSettingsButton:
-            self.settingsButton.hide()
-
+        if self.module._helpFilePath is None or  not aPath(self.module._helpFilePath).exists():
+            self.helpButton.setEnabled(False)
+        self.settingsButton.setEnabled(enableSettingsButton)
 
         self.updateStyle()
 

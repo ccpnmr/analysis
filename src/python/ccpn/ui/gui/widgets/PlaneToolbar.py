@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-27 15:22:39 +0100 (Tue, June 27, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-27 15:25:55 +0100 (Tue, June 27, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -223,13 +223,10 @@ class _StripLabel(ActiveLabel):  #  VerticalLabel): could use Vertical label so 
         contextMenu = Menu('', self, isFloatWidget=True)
 
         contextMenu.addSeparator()
-        # contextMenu.addAction('Close Strip Header', self._closeStrip)
-        # contextMenu.addAction('Close All Strip Headers in SpectrumDisplay', self._closeSpectrumDisplay)
-        # contextMenu.addAction('Close All Headers in All SpectrumDisplays', self._closeAll)
-
         contextMenu.addAction('Pin/Unpin Strip', self._pinStripToggle)
         contextMenu.addAction('Unpin Other Strips', self._removePins)
         contextMenu.addAction('Unpin All Strips', self._removeAllPins)
+
         contextMenu.addSeparator()
         contextMenu.addAction('Close Strip', self._closeStrip)
         contextMenu.addAction('Close Other Strips', partial(self._closeOther, left=True, right=True))
@@ -238,25 +235,6 @@ class _StripLabel(ActiveLabel):  #  VerticalLabel): could use Vertical label so 
         contextMenu.addAction('Close All but Pinned', self._closeUnpinned)
 
         return contextMenu
-
-    # def _closeStrip(self):
-    #     """Close header in this strip
-    #     """
-    #     self.strip.header.reset()
-    #
-    # def _closeSpectrumDisplay(self):
-    #     """Close all headers in this spectrumDisplay
-    #     """
-    #     for strip in self.spectrumDisplay.strips:
-    #         strip.header.reset()
-    #
-    # def _closeAll(self):
-    #     """Close all headers in all spectrumDisplays
-    #     """
-    #     displays = self.mainWindow.spectrumDisplays
-    #     for display in displays:
-    #         for strip in display.strips:
-    #             strip.header.reset()
 
     def _pinStripToggle(self):
         """Toggle the pinned state of the strip.

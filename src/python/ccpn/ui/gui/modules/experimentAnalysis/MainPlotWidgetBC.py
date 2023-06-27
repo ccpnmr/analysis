@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-22 15:53:10 +0100 (Thu, June 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-27 15:06:26 +0100 (Tue, June 27, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -309,6 +309,8 @@ class MainPlotWidget(Widget):
             data = handler.getRawPlotData()
             for coords in data:
                 x, y = coords
+                x = x[~np.isnan(x)] # remove NaN values from array
+                y = y[~np.isnan(y)]
                 maxYs.append(np.max(y))
                 minYs.append(np.min(y))
                 maxXs.append(np.max(x))

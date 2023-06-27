@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 19:13:22 +0100 (Fri, June 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-27 15:22:39 +0100 (Tue, June 27, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -133,6 +133,16 @@ class Window(AbstractWrapperObject):
     @size.setter
     def size(self, value: Sequence):
         self._wrappedData.size = value
+
+    #=========================================================================================
+    # Methods
+    #=========================================================================================
+
+    @property
+    def pinnedStrips(self):
+        """Return the list of pinned strips.
+        """
+        return list(filter(lambda st: st.pinned, self.strips))
 
     #=========================================================================================
     # CCPN Routines

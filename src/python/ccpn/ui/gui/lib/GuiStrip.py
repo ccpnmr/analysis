@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-26 18:58:09 +0100 (Mon, June 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-27 15:22:39 +0100 (Tue, June 27, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -106,23 +106,18 @@ class _WidgetFrame(Frame):
                 sDisplay.setBottomOverlayArea(True)
 
         # highlight the widget-label in the menu
-        self.label.setStyleSheet('QLabel { '
-                                 'color: %(FUSION_FOREGROUND)s; '
-                                 'background-color: %(FUSION_BACKGROUND)s; }' % getColours())
+        self.label.setTextColour(QtGui.QColor('white'))
 
     def leaveEvent(self, a0: QtCore.QEvent) -> None:
         super().leaveEvent(a0)
 
         sDisplay = self.strip.spectrumDisplay
-        # self.strip.setStyleSheet('Frame { border: 0px solid; }')
         self.strip._overlay.setOverlayArea(None)
 
         sDisplay.setRightOverlayArea(None)
         sDisplay.setBottomOverlayArea(None)
 
-        self.label.setStyleSheet('QLabel { '
-                                 'color: black; '
-                                 'background-color: transparent; }' % getColours())
+        self.label.setTextColour(QtGui.QColor('black'))
 
 
 class _StripOverlay(QtWidgets.QWidget):
@@ -868,6 +863,8 @@ class GuiStrip(Frame):
         prefix = strip.pid if prefix is None else prefix
         text = f'{prefix} ({item})'
         toolTip = f'Show cursor in strip {str(strip.id)} at {label} position ({item})'
+        if strip.visibleRegion().isEmpty():
+            toolTip += '\n(strip is not in visible region of spectrumDisplay)'
 
         action = self._addActiveMenuItem(text=text, toolTip=toolTip, strip=strip)
         action.triggered.connect(partial(navigateToPositionInStrip, strip=strip,
@@ -919,6 +916,7 @@ class GuiStrip(Frame):
                 hPolicy='fixed',
                 hAlign='left',
                 textColour='black',
+                italic=strip.visibleRegion().isEmpty(),
                 )
 
         strAction.setDefaultWidget(_frame)
@@ -945,7 +943,8 @@ class GuiStrip(Frame):
         menuFunc.setEnabled(True)
         # quick way to set headings colour - for all disabled items
         menuFunc.setStyleSheet("QFrame:hover {"
-                               "background-color: %(FUSION_BACKGROUND)s; }" % getColours()
+                               "background-color: %(FUSION_BACKGROUND)s; "
+                               "}" % getColours()
                                )
 
         # add the opposite diagonals for matching axisCodes - always at the top of the list

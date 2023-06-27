@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-15 12:25:54 +0000 (Wed, February 15, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-06-27 15:22:39 +0100 (Tue, June 27, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -109,7 +109,7 @@ class Label(QtWidgets.QLabel, Base):
             self.setFont(_font)
 
         colours = guiSettings.getColours()
-        self._colour = textColour if textColour else colours[guiSettings.LABEL_FOREGROUND]
+        self._colour = textColour or colours[guiSettings.LABEL_FOREGROUND]
         self._setStyleSheet()
 
         if isinstance(icon, Icon):
@@ -139,10 +139,16 @@ class Label(QtWidgets.QLabel, Base):
             )
                            )
 
+    def setTextColour(self, colour):
+        """Set the text colour for the label.
+        """
+        self._colour = colour.name()
+        self._setStyleSheet()
+
 
 class DividerLabel(Label):
 
-    def __init__(self, parent=None, text='', icon=None, iconSize=(25, 25),  margins=[10, 1, 10, 1], hAlign='c', **kwds):
+    def __init__(self, parent=None, text='', icon=None, iconSize=(25, 25), margins=[10, 1, 10, 1], hAlign='c', **kwds):
         super().__init__(parent=parent, text=text, icon=icon, iconSize=iconSize, margins=margins, hAlign=hAlign, **kwds)
 
         self.icon = icon

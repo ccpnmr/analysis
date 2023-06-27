@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-26 18:58:10 +0100 (Mon, June 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-27 15:22:39 +0100 (Tue, June 27, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -228,12 +228,14 @@ class _StripLabel(ActiveLabel):  #  VerticalLabel): could use Vertical label so 
         # contextMenu.addAction('Close All Headers in All SpectrumDisplays', self._closeAll)
 
         contextMenu.addAction('Pin/Unpin Strip', self._pinStripToggle)
+        contextMenu.addAction('Unpin Other Strips', self._removePins)
+        contextMenu.addAction('Unpin All Strips', self._removeAllPins)
+        contextMenu.addSeparator()
         contextMenu.addAction('Close Strip', self._closeStrip)
         contextMenu.addAction('Close Other Strips', partial(self._closeOther, left=True, right=True))
         contextMenu.addAction('Close Strips to the Left', partial(self._closeOther, left=True))
         contextMenu.addAction('Close Strips to the Right', partial(self._closeOther, right=True))
         contextMenu.addAction('Close All but Pinned', self._closeUnpinned)
-        contextMenu.addAction('Unpin All Other Strips', self._removePins)
 
         return contextMenu
 
@@ -301,6 +303,13 @@ class _StripLabel(ActiveLabel):  #  VerticalLabel): could use Vertical label so 
             for st in self.project.strips:
                 if st != this:
                     st.pinned = False
+
+    def _removeAllPins(self):
+        """Remove pins from all strips.
+        """
+        if self._parent.strip:
+            for st in self.project.strips:
+                st.pinned = False
 
 
 #TODO:GEERTEN: complete this and replace

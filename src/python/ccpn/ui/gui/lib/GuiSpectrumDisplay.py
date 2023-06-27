@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-26 18:58:09 +0100 (Mon, June 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-27 15:22:39 +0100 (Tue, June 27, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1221,6 +1221,16 @@ class GuiSpectrumDisplay(CcpnModule):
         """get the settings dict from the settingsWidget
         """
         return self._spectrumDisplaySettings.getValues()
+
+    @property
+    def pinnedStrips(self):
+        """Return the list of pinned strips.
+        """
+        return list(filter(lambda st: st.pinned, self.strips))
+
+    #=========================================================================================
+    # Methods
+    #=========================================================================================
 
     def resizeEvent(self, ev):
         if self.isDeleted:

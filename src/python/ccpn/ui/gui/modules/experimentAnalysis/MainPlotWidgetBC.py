@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-27 15:06:26 +0100 (Tue, June 27, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-27 15:48:36 +0100 (Tue, June 27, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -115,7 +115,6 @@ class MainPlotWidget(Widget):
         self._actionCallback = actionCallback
         self._lineMovedCallback = lineMovedCallback
         self._plottedDataFrames = None
-
 
         # Background/canvas items.
         self.viewBox = ViewBox(self)
@@ -308,13 +307,15 @@ class MainPlotWidget(Widget):
         for handler in self.plottingHandlers:
             data = handler.getRawPlotData()
             for coords in data:
-                x, y = coords
-                x = x[~np.isnan(x)] # remove NaN values from array
-                y = y[~np.isnan(y)]
-                maxYs.append(np.max(y))
-                minYs.append(np.min(y))
-                maxXs.append(np.max(x))
-                minXs.append(np.min(x))
+                xs, ys = coords
+                xs = xs[~np.isnan(xs)] # remove NaN values from array
+                ys = ys[~np.isnan(ys)]
+                if len(xs) == 0 or len(ys) == 0:
+                    continue
+                maxYs.append(np.max(ys))
+                minYs.append(np.min(ys))
+                maxXs.append(np.max(xs))
+                minXs.append(np.min(xs))
         if len(maxYs) > 0:
             yMax = np.max(maxYs)
             yMin = np.min(minYs)
@@ -455,6 +456,16 @@ class MainPlotWidget(Widget):
     def selectByPids(self, pids):
         for handler in self._plottingHandlers:
             handler.selectData(pids)
+
+    @property
+    def _viewRect(self):
+        """ The currently displayed ViewRect. Used to restore the same aspect ratio after an update"""
+        return self.viewBox.viewRect()
+
+    def _setViewRect(self, viewRect):
+        """ Set the ViewRect. Used to restore the same aspect ratio after an update. Use padding zero to maintain the same zoom"""
+        return self.viewBox.setRange(viewRect, padding=0)
+
 
     def __repr__(self):
         return f'<{self.__class__.__name__}_{self.name}>'

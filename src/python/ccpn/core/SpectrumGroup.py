@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 12:06:24 +0100 (Fri, June 09, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-06-28 13:02:16 +0100 (Wed, June 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -49,7 +49,19 @@ class SeriesTypes(DataEnum):
     FLOAT = 0, 'Float'
     INTEGER = 1, 'Integer'
     STRING = 2, 'String'
-    PYTHONLITERAL = 3, 'Python Literal'
+
+    @staticmethod
+    def _dataTypesMapping() -> dict:
+        """
+        Create a mapping dictionary of The DataEnum obj description and the relative built-in type
+        :return:  dict
+        """
+        dd = {
+            SeriesTypes.FLOAT.description : float,
+            SeriesTypes.INTEGER.description: int,
+            SeriesTypes.STRING.description: str,
+            }
+        return dd
 
 
 class SpectrumGroup(AbstractWrapperObject):

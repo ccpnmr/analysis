@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-06 14:11:00 +0000 (Mon, March 06, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-06-28 19:17:57 +0100 (Wed, June 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -261,18 +261,18 @@ class _HorizontalMITableHeaderModel(_MITableHeaderModelABC):
                     height = max(len(txt.split('\n')) * int(self._chrHeight) for txt in txts)
 
                     # return the height of the maximum text in the row
-                    return QtCore.QSize(self._chrWidth, height)
+                    return QtCore.QSize(int(self._chrWidth), int(height))
 
                 except Exception:
                     # return the size
-                    return QtCore.QSize(self._chrWidth, self._chrHeight)
+                    return QtCore.QSize(int(self._chrWidth), int(self._chrHeight))
 
             # column-width
             try:
                 width = self._estimateColumnWidth(section)
 
                 # return the size
-                return QtCore.QSize(width, int(self._chrHeight))
+                return QtCore.QSize(int(width), int(self._chrHeight))
 
             except Exception:
                 # return the default QSize
@@ -392,11 +392,11 @@ class _VerticalMITableHeaderModel(_MITableHeaderModelABC):
                     width = max(len(txt.split('\n')) * int(self._chrWidth) for txt in txts)
 
                     # return the width of the maximum text in the row
-                    return QtCore.QSize(width, self._chrHeight)
+                    return QtCore.QSize(int(width), int(self._chrHeight))
 
                 except Exception:
                     # return the size
-                    return QtCore.QSize(self._chrWidth, self._chrHeight)
+                    return QtCore.QSize(int(self._chrWidth), int(self._chrHeight))
 
             # row-height, return the default QSize
             return QtCore.QSize(int(self._chrWidth), int(self._chrHeight))

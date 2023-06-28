@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 14:29:32 +0100 (Wed, June 28, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-06-28 19:17:55 +0100 (Wed, June 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -2116,12 +2116,12 @@ class GuiSpectrumDisplay(CcpnModule):
 
         if len(strips) > 1:
             for strip in strips[:-1]:
-                strip.setMinimumWidth(newWidth)
-            strips[-1].setMinimumWidth(newWidth + axisWidth)
-            self.stripFrame.setMinimumWidth((newWidth + STRIP_SPACING) * len(strips) + axisWidth - STRIP_SPACING)
+                strip.setMinimumWidth(int(newWidth))
+            strips[-1].setMinimumWidth(int(newWidth + axisWidth))
+            self.stripFrame.setMinimumWidth(int((newWidth + STRIP_SPACING) * len(strips) + axisWidth - STRIP_SPACING))
         else:
-            strips[0].setMinimumWidth(newWidth)
-            self.stripFrame.setMinimumWidth(newWidth)
+            strips[0].setMinimumWidth(int(newWidth))
+            self.stripFrame.setMinimumWidth(int(newWidth))
 
         self.stripFrame.show()
 
@@ -2148,12 +2148,12 @@ class GuiSpectrumDisplay(CcpnModule):
 
         if len(strips) > 1:
             for strip in strips[:-1]:
-                strip.setMinimumHeight(newHeight)
-            strips[-1].setMinimumHeight(newHeight + axisHeight)
-            self.stripFrame.setMinimumHeight((newHeight + STRIP_SPACING) * len(strips) + axisHeight - STRIP_SPACING)
+                strip.setMinimumHeight(int(newHeight))
+            strips[-1].setMinimumHeight(int(newHeight + axisHeight))
+            self.stripFrame.setMinimumHeight(int((newHeight + STRIP_SPACING) * len(strips) + axisHeight - STRIP_SPACING))
         else:
-            strips[0].setMinimumHeight(newHeight)
-            self.stripFrame.setMinimumHeight(newHeight)
+            strips[0].setMinimumHeight(int(newHeight))
+            self.stripFrame.setMinimumHeight(int(newHeight))
 
         self.stripFrame.show()
 
@@ -2304,11 +2304,11 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 for col in range(0, maxCol + 1):
                     if widths and thisLayout.itemAt(col):
-                        thisLayout.itemAt(col).widget().setMinimumWidth(firstStripWidth)
+                        thisLayout.itemAt(col).widget().setMinimumWidth(int(firstStripWidth))
                     thisLayout.setColumnStretch(col, 1 if stretchValue else 1)
 
                 if minimumWidth:
-                    self.stripFrame.setMinimumWidth((firstStripWidth + STRIP_SPACING) * len(self.orderedStrips) - STRIP_SPACING)
+                    self.stripFrame.setMinimumWidth(int((firstStripWidth + STRIP_SPACING) * len(self.orderedStrips) - STRIP_SPACING))
                 else:
                     self.stripFrame.setMinimumWidth(self.stripFrame.minimumSizeHint().width())
                 self.stripFrame.setMinimumHeight(STRIP_MINIMUMHEIGHT)
@@ -2371,11 +2371,11 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 for rr in range(0, maxRow + 1):
                     if heights and thisLayout.itemAt(rr):
-                        thisLayout.itemAt(rr).widget().setMinimumHeight(firstStripHeight)
+                        thisLayout.itemAt(rr).widget().setMinimumHeight(int(firstStripHeight))
                     thisLayout.setRowStretch(rr, 1 if stretchValue else 1)
 
                 if minimumHeight:
-                    self.stripFrame.setMinimumHeight((firstStripHeight + STRIP_SPACING) * len(self.orderedStrips) - STRIP_SPACING)
+                    self.stripFrame.setMinimumHeight(int((firstStripHeight + STRIP_SPACING) * len(self.orderedStrips) - STRIP_SPACING))
                 else:
                     self.stripFrame.setMinimumHeight(self.stripFrame.minimumSizeHint().height())
                 self.stripFrame.setMinimumWidth(STRIP_MINIMUMWIDTH)

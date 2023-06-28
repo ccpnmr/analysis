@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 15:25:11 +0100 (Tue, March 28, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-06-28 19:17:57 +0100 (Wed, June 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -413,8 +413,8 @@ class MITableABC(TableABC):
                 # otherwise user-changeable
                 _header.setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
 
-            _header.setDefaultSectionSize(_height)
-            _header.setMinimumSectionSize(_height)
+            _header.setDefaultSectionSize(int(_height))
+            _header.setMinimumSectionSize(int(_height))
 
     def setWidthToColumns(self):
         """Set the width of the table to the column widths

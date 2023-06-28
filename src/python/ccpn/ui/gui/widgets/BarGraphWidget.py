@@ -11,9 +11,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-22 11:52:50 +0100 (Mon, May 22, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-06-28 19:17:56 +0100 (Wed, June 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -58,7 +58,7 @@ TICKOPTIONS = [MinimalTicks, AllTicks]
 class XBarAxisItem(pg.AxisItem):
     def __init__(self, labelRotation=-90, outward=True, *args, **kwargs):
         pg.AxisItem.__init__(self, *args, **kwargs)
-        self.style = {
+        self.style |= {
             'tickTextOffset': [5, 2],  ## (horizontal, vertical) spacing between text and axis
             'tickTextWidth': 30,  ## space reserved for tick text
             'tickTextHeight': 18,
@@ -88,7 +88,7 @@ class XBarAxisItem(pg.AxisItem):
 class YBarAxisItem(pg.AxisItem):
     def __init__(self,  outward=False, *args, **kwargs):
         pg.AxisItem.__init__(self, *args, **kwargs)
-        self.style = {
+        self.style |= {
             'tickTextOffset': [5, 2],  ## (horizontal, vertical) spacing between text and axis
             'tickTextWidth': 30,  ## space reserved for tick text
             'tickTextHeight': 18,

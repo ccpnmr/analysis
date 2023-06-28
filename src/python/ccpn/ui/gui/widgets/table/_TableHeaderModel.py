@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-17 15:38:10 +0000 (Fri, February 17, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-06-28 19:17:57 +0100 (Wed, June 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -47,8 +47,8 @@ class _SimplePandasTableHeaderModel(QtCore.QAbstractTableModel):
         """
         QtCore.QAbstractTableModel.__init__(self)
         # create numpy arrays to match the data that will hold background colour
-        self._colour = np.zeros((row, column), dtype=np.object)
-        self._df = np.zeros((row, column), dtype=np.object)
+        self._colour = np.zeros((row, column), dtype=object)
+        self._df = np.zeros((row, column), dtype=object)
 
     def rowCount(self, parent=None):
         """Return the row count for the dataFrame

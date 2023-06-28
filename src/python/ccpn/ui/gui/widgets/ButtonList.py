@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:42 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-06-28 19:17:56 +0100 (Wed, June 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -279,7 +279,7 @@ class ButtonList(Widget, ButtonListMixin):
 
             width = button.fontMetrics().boundingRect(text).width() + 7
             if setMinimumWidth:
-                button.setMinimumWidth(width * 1.5)
+                button.setMinimumWidth(int(width * 1.5))
 
             self.buttons.append(button)
             self.buttonNames[text] = i + j

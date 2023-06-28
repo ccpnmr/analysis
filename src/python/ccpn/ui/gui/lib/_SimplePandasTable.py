@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-22 17:37:59 +0000 (Wed, February 22, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-06-28 19:17:55 +0100 (Wed, June 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -186,9 +186,10 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
         setWidgetFont(_header, name=TABLEFONT)
 
         _height = getFontHeight(name=TABLEFONT, size='MEDIUM')
-        _header.setDefaultSectionSize(_height)
-        _header.setMinimumSectionSize(_height)
-        self.setMinimumSize(3 * _height, 3 * _height + self.horizontalScrollBar().height())
+        _header.setDefaultSectionSize(int(_height))
+        _header.setMinimumSectionSize(int(_height))
+        self.setMinimumSize(int(3 * _height),
+                            int(3 * _height + self.horizontalScrollBar().height()))
 
         self._setContextMenu()
 

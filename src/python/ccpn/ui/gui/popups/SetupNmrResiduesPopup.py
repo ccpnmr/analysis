@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-21 11:43:49 +0100 (Fri, April 21, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-06-28 19:17:56 +0100 (Wed, June 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -185,10 +185,11 @@ class SetupNmrResiduesPopup(CcpnDialogMainWidget):
                     self.peakListPulldown.set(visiblePkLists[0])
 
         else:
-            self.peakListPulldown.set(SetupNmrResiduesPopup._storedState.get(self._PEAKLIST, False))
-        self.nmrChainPulldown.set(SetupNmrResiduesPopup._storedState.get(self._NMRCHAIN, False))
-        self.assignmentCheckBox.set(SetupNmrResiduesPopup._storedState.get(self._ASSIGNMENT, True))
-        self.useCurrentStrip.set(useCurrent)
+            self.peakListPulldown.set(bool(SetupNmrResiduesPopup._storedState.get(self._PEAKLIST, False)))
+
+        self.nmrChainPulldown.set(bool(SetupNmrResiduesPopup._storedState.get(self._NMRCHAIN, False)))
+        self.assignmentCheckBox.set(bool(SetupNmrResiduesPopup._storedState.get(self._ASSIGNMENT, True)))
+        self.useCurrentStrip.set(bool(useCurrent))
 
 
 #=========================================================================================

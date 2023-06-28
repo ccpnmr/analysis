@@ -11,9 +11,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-07 16:50:12 +0100 (Wed, June 07, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-06-28 19:17:56 +0100 (Wed, June 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -636,7 +636,7 @@ class ScattersHandler(PlotItemHandlerABC):
         noPen = None  # pen defined as None will not plot a line connecting scatters
         self.penColour = rgbaRatioToHex(*getColours()[CCPNGLWIDGET_LABELLING])
         scatterPen = pg.functions.mkPen(self.penColour, width=0.5, style=QtCore.Qt.SolidLine)
-        brushes = [pg.fn.mkBrush(c) for c in coloursValues]
+        brushes = [pg.functions.mkBrush(c) for c in coloursValues]
 
         if not yValues.dtype in [int, float]:
             getLogger().debug('Impossible to plot Y values. dType not allowed. Used array index instead.')
@@ -816,7 +816,7 @@ class PlotItem(pg.PlotItem):
 class XAxisItem(pg.AxisItem):
     def __init__(self,  parentWidget, labelRotation=-90, outward=True, *args, **kwargs):
         pg.AxisItem.__init__(self, *args, **kwargs)
-        self.style = {
+        self.style |= {
             'tickTextOffset': [5, 2],  ## (horizontal, vertical) spacing between text and axis
             'tickTextWidth': 30,  ## space reserved for tick text
             'tickTextHeight': 18,
@@ -846,7 +846,7 @@ class XAxisItem(pg.AxisItem):
 class YAxisItem(pg.AxisItem):
     def __init__(self, parentWidget, outward=False, *args, **kwargs):
         pg.AxisItem.__init__(self, *args, **kwargs)
-        self.style = {
+        self.style |= {
             'tickTextOffset': [5, 2],  ## (horizontal, vertical) spacing between text and axis
             'tickTextWidth': 30,  ## space reserved for tick text
             'tickTextHeight': 18,

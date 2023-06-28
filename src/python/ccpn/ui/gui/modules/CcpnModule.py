@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 12:06:25 +0100 (Fri, June 09, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-06-28 19:17:56 +0100 (Wed, June 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -249,6 +249,8 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self.topLayout.removeWidget(self.label)
         # GST this wasn't deleting the widget it was leaving it still attached to the qt hierrchy which was causing all
         # sorts of graphical hickups later on
+
+        # _dock = self.label.dock  # not carried across from original label
         self.label.deleteLater()
         del self.label
 
@@ -260,6 +262,8 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                                      enableSettingsButton=self.includeSettingsWidget,
                                      settingsCallback=self._settingsCallback
                                      )
+        # self.label.dock = self  # not
+
         self.topLayout.addWidget(self.label, 0, 1)  # ejb - swap out the old widget, keeps hierarchy
         # except it doesn't work properly
         self.setOrientation(o='horizontal')
@@ -1161,9 +1165,11 @@ class CcpnModuleLabel(DockLabel):
         self.labelRadius = 3
 
         _fontSize = getWidgetFontHeight(size='MEDIUM') or 16
-        super().__init__(name, module, showCloseButton=showCloseButton, )  # fontSize=_fontSize)
+        super().__init__(name, closable=showCloseButton, )  # fontSize=_fontSize)
+        # super().__init__(name, module, showCloseButton=showCloseButton, )  # fontSize=_fontSize)
 
         self.module = module
+        self.dock = module
         self.fixedWidth = True
 
         setWidgetFont(self, size='MEDIUM')
@@ -1384,10 +1390,14 @@ class CcpnModuleLabel(DockLabel):
             self.setMaximumHeight(self.labelSize)
 
     def mouseMoveEvent(self, ev):
-        """Handle the mouse move event to spawn a drag event
+        """Handle the mouse move event to spawn a drag event - copied from super-class
         """
         if hasattr(self, 'pressPos') and not self._inDoubleClick:
-            if not self.startedDrag and (ev.pos() - self.pressPos).manhattanLength() > QtWidgets.QApplication.startDragDistance():
+            if not self.mouseMoved:
+                lpos = ev.position() if hasattr(ev, 'position') else ev.localPos()
+                self.mouseMoved = (lpos - self.pressPos).manhattanLength() > QtWidgets.QApplication.startDragDistance()
+
+            if self.mouseMoved and ev.buttons() == QtCore.Qt.MouseButton.LeftButton:
                 # emit a drag started event
                 self.sigDragEntered.emit(self.parent(), ev)
                 self.dock.startDrag()

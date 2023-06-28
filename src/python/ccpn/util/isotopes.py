@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-12 16:56:58 +0000 (Thu, January 12, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-28 19:10:11 +0100 (Wed, June 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -38,7 +38,7 @@ from collections import Counter, OrderedDict
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson, CcpnJsonDirectoryABC
 from ccpn.util.traits.CcpNmrTraits import Unicode, Int, Float, Bool
 
-from ccpn.framework.PathsAndUrls import ccpnConfigPath
+from ccpn.framework.PathsAndUrls import ccpnResourcesPath
 from ccpn.util.Path import aPath
 from ccpn.util.decorators import singleton
 
@@ -98,7 +98,7 @@ class IsotopeRecords(CcpnJsonDirectoryABC):
     """Singleton class to contain all isotopeRecords as (isotopeCode, IsotopeRecord) (key,value) pairs
     """
     attributeName = 'isotopeCode'
-    directory = aPath(ccpnConfigPath) / 'isotopeRecords'
+    directory = aPath(ccpnResourcesPath) / 'referenceIsotopeRecords'
     sorted = True
 
     def isotopesWithSpin(self, minValue=0.5, maxValue=None):

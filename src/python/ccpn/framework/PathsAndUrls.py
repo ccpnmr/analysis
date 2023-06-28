@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-13 16:04:08 +0100 (Thu, April 13, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-06-28 19:23:04 +0100 (Wed, June 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -41,7 +41,7 @@ ccpnDocumentationUrl            = 'https://www.ccpn.ac.uk/api-documentation/v3/h
 # CCPN code
 ccpnCodePath                    = Path.aPath(Path.getTopDirectory())
 ccpnConfigPath                  = ccpnCodePath / 'config'
-ccpnResourcesPath               = ccpnCodePath / 'resources'
+ccpnResourcesPath              = ccpnCodePath / 'resources'
 ccpnRunTerminal                 = ccpnCodePath / 'bin' / 'runTerminal.sh'
 defaultPreferencesPath          = ccpnConfigPath / 'defaultv3settings.json'
 tipOfTheDayConfig               = ccpnConfigPath / 'tipConfig.hjson'
@@ -52,7 +52,7 @@ ccpnmodelDataPythonPath         = _ccpnPythonPath / 'ccpnmodel' / 'data'
 ccpnmodelRefDataPythonPath      = _ccpnPythonPath / 'ccpnmodel' / 'data' / 'ccpnv3'
 
 ccpnPythonPath                  = _ccpnPythonPath / 'ccpn'
-
+ccpnGUIPath                  =  ccpnPythonPath / 'ui' / 'gui'
 analysisAssignPath              = ccpnPythonPath / 'AnalysisAssign'
 analysisScreenPath              = ccpnPythonPath / 'AnalysisScreen'
 analysisStructurePath           = ccpnPythonPath / 'AnalysisStructure'
@@ -63,12 +63,13 @@ macroPath                       = ccpnPythonPath / 'macros'
 pluginPath                      = ccpnPythonPath / 'plugins'
 pipePath                        = ccpnPythonPath / 'pipes'
 pipeTemplates                   = ccpnPythonPath / 'framework' / 'lib' / 'pipeline' / 'templates'
-widgetsPath                     = ccpnPythonPath / 'ui' / 'gui' / 'widgets'
+widgetsPath                     = ccpnGUIPath / 'widgets'
 fontsPath                       = widgetsPath    / 'fonts'
 iconsPath                       = widgetsPath    / 'icons'
 openGLFontsPath                 = fontsPath      / 'Fonts'
 nefValidationPath               = ccpnPythonPath / 'util' / 'nef' / 'NEF' / 'specification' / 'mmcif_nef_v1_1.dic'
 peakPickerPath                  = ccpnPythonPath / 'core' / 'lib' / 'PeakPickers'
+ccpnModuleHelpPath            = ccpnGUIPath / 'modules' / 'moduleHelp'
 
 # Program tutorials and documentation
 shortcutsPath                   = ccpnCodePath / 'doc' / 'static' / 'AnalysisShortcuts.htm'

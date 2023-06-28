@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-28 11:06:25 +0100 (Sun, May 28, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-06-28 19:23:05 +0100 (Wed, June 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -39,7 +39,7 @@ class RelaxationGuiModule(ExperimentAnalysisGuiModuleBC):
     className = 'Relaxation'
     analysisType = sv.RelaxationAnalysis
 
-    def __init__(self, mainWindow, name='Relaxation (Alpha)', **kwds):
+    def __init__(self, mainWindow, name='Relaxation Analysis (Beta)', **kwds):
         super(ExperimentAnalysisGuiModuleBC, self)
 
         ## link to the Non-Gui backend and its Settings

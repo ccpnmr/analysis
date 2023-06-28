@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-15 16:45:55 -0400 (Thu, June 15, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-06-28 19:23:05 +0100 (Wed, June 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -54,6 +54,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
                  headerEnabled=False, headerIcon=None,
                  editable=False, maxVisibleItems=16,
                  iconSize=None, toolTips=None,
+                 disableWheelEvent = True,
                  **kwds):
         """
 
@@ -70,6 +71,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
         :param headerEnabled: True to be selectable, False to disable and be grayed out
         :param editable: If True: allows for editing the value
         :param clickToShowCallback: callback when click to open the pulldown. Used to populate pulldown only when clicked the first time
+        :param disableWheelEvent: bool. Default True to don't modify the selection when scrolling  while hover overing the widget/module.
         :param kwds:
         """
         super().__init__(parent)
@@ -86,6 +88,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
         self.headerEnabled = headerEnabled
         self.headerIcon = headerIcon
         self.backgroundText = backgroundText
+        self.disableWheelEvent = disableWheelEvent
 
         # replace with a simple listView - fixes stylesheet hassle; default QComboBox listview can't be changed
         self._list = QtWidgets.QListView()
@@ -122,6 +125,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
             self.setToolTips(toolTips)
 
         self._list.setItemDelegate(ComboBoxDividerDelegate())
+        self.installEventFilter(self)
 
         # possibly for later if gray 'Select' preferred
         # self.currentIndexChanged.connect(self._highlightCurrentText)
@@ -185,6 +189,11 @@ class PulldownList(QtWidgets.QComboBox, Base):
 
         if indx is not None:
             self.setCurrentIndex(indx)
+
+    def eventFilter(self, source, event):
+        if (event.type() == QtCore.QEvent.Wheel and  self.disableWheelEvent):
+            return True
+        return super(PulldownList, self).eventFilter(source, event)
 
     def paintEvent(self, e: QtGui.QPaintEvent) -> None:
         """Set the colour of the selected pulldown-text

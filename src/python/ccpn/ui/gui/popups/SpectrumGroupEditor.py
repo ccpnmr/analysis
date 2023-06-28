@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-05 15:28:43 +0000 (Thu, January 05, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-06-28 19:23:05 +0100 (Wed, June 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -226,38 +226,14 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         if self._spectrumGroupSeriesTypeEdited is not None:
             self.obj.seriesType = self._spectrumGroupSeriesTypeEdited
 
-        if self.obj.id in self._currentEditorState():
-            specList = self._currentEditorState()[self.obj.id].get('spectra') or []
-            for dim, specPid in enumerate(specList):
-                spec = self.project.getByPid(specPid)
+        df = self.seriesTab._getDFfromSeriesWidgets()
+        if df.empty:
+            return
 
-                # read the value from the edits dict - bit of a hack from _changeSpectrumSeriesValues
-                if spec and dim in self._spectrumGroupSeriesEdited:
-                    self._spectrumGroupSeriesValues[dim] = self._spectrumGroupSeriesEdited[dim]
-
-            if self._spectrumGroupSeriesEdited:
-                try:
-
-                    for ii, val in enumerate(self._spectrumGroupSeriesValues):
-                        try:
-                            tp = self.seriesTab.seriesType.getIndex()
-                            if tp == SeriesTypes.FLOAT.value:
-                                val = float(val)
-                            elif tp == SeriesTypes.INTEGER.value:
-                                val = int(val)
-                            elif tp == SeriesTypes.STRING.value:
-                                val = str(val)
-                            else:
-                                val = repr(val)
-                        except Exception as es:
-                            break
-                        else:
-                            self._spectrumGroupSeriesValues[ii] = val
-                    else:
-                        self.obj.series = tuple(self._spectrumGroupSeriesValues)
-
-                except Exception as es:
-                    raise es
+        seriesType = self.seriesTab.seriesType.getSelectedText()
+        neededType = SeriesTypes._dataTypesMapping().get(seriesType)
+        vv = [neededType(v) if v else None for v in df[_ValuesHeader].values  ]
+        self.obj.series = vv
 
     _groupEditorInitMethod = _groupInit
 
@@ -750,9 +726,12 @@ class SeriesFrame(Frame):
         # unitsLabel = Label(self, text='Series Units', grid=(self._row, self._col), hAlign='l')
         # self.unitsEditor = LineEdit(self, grid=(self._row, self._col + 1))
         # unitsLabel.setFixedHeight(30)
-        reorderLabel = Label(self, text='Reorder spectra by series', grid=(self._row, self._col), hAlign='l')
-        self._orderButtons = ButtonList(self, texts=['Ascending', 'Descending'],
-                                        icons=[Icon('icons/sort-up'), Icon('icons/sort-down')],
+        ascendingDef = ''' Reorder spectra by Ascending series values: smaller value to be on top. i.e. A... Z or 1... 10 '''
+        descendingDef = ''' Reorder spectra by Descending series values: larger value to be on top. i.e. Z.. A or 10... 1 '''
+
+        reorderLabel = Label(self, text='Reorder spectra by series value', grid=(self._row, self._col), hAlign='l')
+        self._orderButtons = ButtonList(self, texts=['Small to Large', 'Large to Small'],
+                                        tipTexts=[ascendingDef, descendingDef],
                                         callbacks=[partial(self._reorderSpectraBySeries, True),
                                                    partial(self._reorderSpectraBySeries, False)],
                                         grid=(self._row, self._col + 1))

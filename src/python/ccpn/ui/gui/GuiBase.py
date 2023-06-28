@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-23 15:27:39 +0100 (Tue, May 23, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-06-28 19:23:05 +0100 (Wed, June 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -216,9 +216,8 @@ class GuiBase(object):
             ("Violation Table", partial(self.showViolationTable, selectFirstItem=True), [('shortcut', 'vt')]),
             (),
             ("Restraint Analysis Inspector", partial(self.showRestraintAnalysisTable, selectFirstItem=True), [('shortcut', 'at')]),
-            ("Chemical Shift Mapping", self.showChemicalShiftMapping, [('shortcut', 'cm')]),
-            # ("Chemical Shift Mapping (Alpha)", self.showChemicalShiftMappingModule),
-            # ("Relaxation Analysis (Alpha)", self.showRelaxationModule),
+            ("Chemical Shift Mapping (Beta)", self.showChemicalShiftMappingModule, [('shortcut', 'cm')]),
+            ("Relaxation Analysis (Beta)", self.showRelaxationModule), [('shortcut', 'ra')],
 
             ("Notes Editor", partial(self.showNotesEditor, selectFirstItem=True), [('shortcut', 'no'),
                                                                                    # ('icon', 'icons/null')

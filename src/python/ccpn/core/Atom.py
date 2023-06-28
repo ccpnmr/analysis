@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-23 15:26:51 +0100 (Tue, May 23, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-06-28 19:23:04 +0100 (Wed, June 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -111,6 +111,11 @@ class Atom(AbstractWrapperObject):
         apiAtom = self._wrappedData
 
         return tuple(getDataObj(x) for x in apiAtom.sortedGenericBonds())
+
+    @property
+    def realAtoms(self):
+        """See componentAtoms"""
+        return self.componentAtoms
 
     @property
     def componentAtoms(self) -> typing.Tuple['Atom']:

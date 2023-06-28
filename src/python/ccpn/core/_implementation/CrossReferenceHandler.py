@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 12:06:25 +0100 (Fri, June 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-28 14:09:00 +0100 (Wed, June 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -55,7 +55,7 @@ class CrossReferenceHandler():
             for refName, ref in self._crossReferences.items():
 
                 # is the core-object type in the reference string
-                if coreObject.className in refName:
+                if coreObject.className in refName and not refName.startswith('_'):
                     ref._resetItemPids(coreObject, oldPid=oldPid, action=action)
 
         except Exception as es:
@@ -93,6 +93,13 @@ class CrossReferenceHandler():
             else:
                 foundRef = references[refName] = _CrossReference(project, rowRefClass.className, colRefClass.className)
                 foundRef._restoreObject(self._project, None)
+
+        # list through the required cross-references and create as required
+        for rowRefClass, colRefClass in ((Mark, Strip),):
+            refName = f'_{rowRefClass.className}{colRefClass.className}'
+
+            if references.get(refName):
+                del references[refName]
 
     #=========================================================================================
     # Get/set values in cross-reference

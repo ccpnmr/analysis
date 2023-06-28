@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-21 11:50:59 -0400 (Wed, June 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-28 14:29:32 +0100 (Wed, June 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -134,7 +134,10 @@ class _CcpnMultiEncoder(json.JSONEncoder):
             data = obj.tolist()
 
         elif isinstance(obj, _CrossReference):
-            typ = CROSSREFERENCE
+            if not (typ := _CrossReference.jsonType(obj)):
+                # in-case of any undefined/unregistered subclasses
+                typ = _CrossReference.registeredDefaultJsonType
+
             data = obj.toJson()
 
         else:
@@ -210,8 +213,16 @@ def _ccpnObjectPairHook(pairs):
                 return Tensor._fromDict(data)
 
             elif typ == CROSSREFERENCE:
-                # return a sparse matrix for use in cross-referencing
-                return _CrossReference._newFromJson(data)
+                # ignore the original type for the minute
+                return _CrossReference._oldFromJson(data)
 
-                # default option, std json behaviour
+            elif typ in _CrossReference.registeredJsonTypes():
+                # check for registered subclasses of DataFrameABC
+                try:
+                    return _CrossReference._newFromJson(data)
+
+                except Exception:
+                    return None
+
+    # default option, std json behaviour
     return dict(pairs)

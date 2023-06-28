@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-21 11:50:59 -0400 (Wed, June 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-28 14:29:32 +0100 (Wed, June 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -202,6 +202,31 @@ class _CrossReference():
         project = getProject()
         values = cls.fromJson(jsonData)
 
+        jType = _CrossReference._classNameToJsonType(f'_{values.get("rowClassName")}{values.get("columnClassName")}')
+        if klass := _CrossReference.fromJsonType(jType):
+            # SHOULD always be a defined json-type
+            return klass(project=project, **values)
+
+    @staticmethod
+    def _new(rowClassName, columnClassName):
+        """Create a new instance from class-names.
+        """
+        project = getProject()
+
+        jType = _CrossReference._classNameToJsonType(f'_{rowClassName}{columnClassName}')
+        if klass := _CrossReference.fromJsonType(jType):
+            # SHOULD always be a defined json-type
+            return klass(project=project, rowClassName=rowClassName, columnClassName=columnClassName)
+
+    @classmethod
+    def _oldFromJson(cls, jsonData=''):
+        """Create an instance from json data.
+        CCPNInternal - deprecated, mistake by Ed :|
+        """
+        project = getProject()
+        values = cls.fromJson(jsonData)
+
+        # note the lack of an underscore
         jType = _CrossReference._classNameToJsonType(f'{values.get("rowClassName")}{values.get("columnClassName")}')
         if klass := _CrossReference.fromJsonType(jType):
             # SHOULD always be a defined json-type
@@ -597,10 +622,12 @@ class _CrossReference():
         """Return the list of indexed core-objects that are not deleted.
         """
         if axis := self._axes.get(axis):
-            pids = axis.get(_PIDS)
-            pid2Obj = axis.get(_PID2OBJ)
-            goodPids = [pid for pid in pids if not pid2Obj[pid].isDeleted]
-            badInds = [ii for ii, pid in enumerate(pids) if pid2Obj[pid].isDeleted]
+            pids = axis.get(_PIDS, [])
+            pid2Obj = axis.get(_PID2OBJ, {})
+            # goodPids = [pid for pid in pids if not pid2Obj[pid].isDeleted]
+            # badInds = [ii for ii, pid in enumerate(pids) if pid2Obj[pid].isDeleted]
+            goodPids = [pid for pid in pids if ((dPid := pid2Obj.get(pid)) and not dPid.isDeleted)]
+            badInds = [ii for ii, pid in enumerate(pids) if ((dPid := pid2Obj.get(pid)) and dPid.isDeleted)]
 
             return goodPids, badInds
 
@@ -826,6 +853,11 @@ class MarkStrip(_CrossReference):
 
     Marks in a spectrumDisplay will also appear in new strips within the display.
     Similarly, marks belonging to mainWindow will appear in all new strips.
+
+    See below for spectrumDisplay-mainWindow classes.
+
+    This is included to recover marks from pre-3.2 projects.
+    Loading a 3.2 project into previous un-updated versions will remove all marks.
     """
     #=========================================================================================
     # Get/set values in cross-reference
@@ -836,3 +868,51 @@ class MarkStrip(_CrossReference):
 
 # register the class with _CrossReference for json loading/saving
 MarkStrip.register()
+
+
+class _MarkStrip(_CrossReference):
+    """Class to handle special case of mark<->strip cross-reference.
+    Marks can also belong to a spectrumDisplay or mainWindow (everywhere).
+
+    Marks in a spectrumDisplay will also appear in new strips within the display.
+    Similarly, marks belonging to mainWindow will appear in all new strips.
+
+    See below for spectrumDisplay-mainWindow classes.
+    """
+    #=========================================================================================
+    # Get/set values in cross-reference
+    #=========================================================================================
+
+    ...
+
+
+# register the class with _CrossReference for json loading/saving
+_MarkStrip.register(setDefault=True)
+
+
+class _MarkSpectrumDisplay(_CrossReference):
+    """Class to handle special case of mark<->spectrumDisplay cross-reference.
+    """
+    #=========================================================================================
+    # Get/set values in cross-reference
+    #=========================================================================================
+
+    ...
+
+
+# register the class with _CrossReference for json loading/saving
+_MarkSpectrumDisplay.register()
+
+
+class _MarkWindow(_CrossReference):
+    """Class to handle special case of mark<->mainWindow cross-reference.
+    """
+    #=========================================================================================
+    # Get/set values in cross-reference
+    #=========================================================================================
+
+    ...
+
+
+# register the class with _CrossReference for json loading/saving
+_MarkWindow.register()

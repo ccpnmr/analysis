@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 16:15:59 +0100 (Fri, June 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-28 14:29:32 +0100 (Wed, June 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -525,6 +525,33 @@ class SpectrumDisplay(AbstractWrapperObject):
     #     """Return the ccpn.Strips in displayed order"""
     #     ff = self._project._data2Obj.get
     #     return tuple(ff(x) for x in self._wrappedData.orderedStrips)
+
+    @property
+    def marks(self) -> tuple:
+        """Return the associated marks for the spectrumDisplay.
+        These are marks that are common to all strips in a given spectrumDisplay.
+        """
+        try:
+            refHandler = self._project._crossReferencing
+            return refHandler.getValues(self, '_MarkSpectrumDisplay', 1)  # index of 1 for strips
+
+        except Exception:
+            return ()
+
+    @marks.setter
+    def marks(self, values):
+        """Set the associated marks for the spectrumDisplay.
+        """
+        if not isinstance(values, (tuple, list, type(None))):
+            raise TypeError(f'{self.__class__.__name__}.marks must be a list or tuple, or None')
+        values = values or []
+
+        try:
+            refHandler = self._project._crossReferencing
+            refHandler.setValues(self, '_MarkSpectrumDisplay', 1, values)
+
+        except Exception as es:
+            raise RuntimeError(f'{self.__class__.__name__}.marks: Error setting marks {es}') from es
 
     #=========================================================================================
     # Implementation functions

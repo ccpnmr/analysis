@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-27 15:22:39 +0100 (Tue, June 27, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-28 14:29:32 +0100 (Wed, June 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -3051,19 +3051,35 @@ class GuiSpectrumDisplay(CcpnModule):
         :param tuple/list labels: Ruler labels for all lines in the mark. Default: None.
         :return a new Mark instance.
         """
+        from ccpn.ui._implementation.Mark import _newMark, _removeMarkAxes
+
         with undoBlockWithoutSideBar():
-            marks = [
-                strip.newMark(
-                        colour=colour,
-                        positions=positions,
-                        axisCodes=axisCodes,
-                        style=style,
-                        units=units,
-                        labels=labels,
-                        )
-                for strip in self.strips
-                ]
-            return tuple(filter(None, marks))
+            if marks := _removeMarkAxes(self, positions=positions, axisCodes=axisCodes, labels=labels):
+                pos, axes, lbls = marks
+                if not pos:
+                    return
+
+                result = _newMark(self.mainWindow, colour=colour, positions=pos, axisCodes=axes,
+                                  style=style, units=units, labels=lbls,
+                                  )
+                # add spectrumDisplay to the new mark
+                result.spectrumDisplays = [self]
+
+                return result
+
+        # with undoBlockWithoutSideBar():
+        #     marks = [
+        #         strip.newMark(
+        #                 colour=colour,
+        #                 positions=positions,
+        #                 axisCodes=axisCodes,
+        #                 style=style,
+        #                 units=units,
+        #                 labels=labels,
+        #                 )
+        #         for strip in self.strips
+        #         ]
+        #     return tuple(filter(None, marks))
 
 #=========================================================================================
 

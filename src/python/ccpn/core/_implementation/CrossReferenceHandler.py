@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 14:09:00 +0100 (Wed, June 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-28 14:29:32 +0100 (Wed, June 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,8 @@ from ccpn.core.Project import Project
 from ccpn.core._implementation.CrossReference import _CrossReference
 from ccpn.ui._implementation.Mark import Mark
 from ccpn.ui._implementation.Strip import Strip
+from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
+from ccpn.ui._implementation.Window import Window
 from ccpn.util.Logging import getLogger
 
 
@@ -40,6 +42,10 @@ class CrossReferenceHandler():
     """
     Class to handle cross-referencing between two sets of core objects.
     """
+    references = ((Mark, Strip),
+                  (Mark, SpectrumDisplay),
+                  (Mark, Window),
+                  )
 
     def __init__(self, project: Project):
         self._project = project
@@ -54,8 +60,8 @@ class CrossReferenceHandler():
         try:
             for refName, ref in self._crossReferences.items():
 
-                # is the core-object type in the reference string
-                if coreObject.className in refName and not refName.startswith('_'):
+                # is the core-object type in the reference string - ignore those without leading underscore
+                if coreObject.className in refName and refName.startswith('_'):
                     ref._resetItemPids(coreObject, oldPid=oldPid, action=action)
 
         except Exception as es:
@@ -83,23 +89,52 @@ class CrossReferenceHandler():
         self._crossReferences = references
 
         # list through the required cross-references and create as required
-        for rowRefClass, colRefClass in ((Mark, Strip),):
-            refName = f'{rowRefClass.className}{colRefClass.className}'
+        for rowRefClass, colRefClass in self.references:
+            refName = f'_{rowRefClass.className}{colRefClass.className}'
 
             if foundRef := references.get(refName):
                 if not isinstance(foundRef, dict):
-                    foundRef._restoreObject(self._project, None)
+                    try:
+                        foundRef._restoreObject(self._project, None)
+
+                    except Exception:
+                        # rebuild as contains an error
+                        getLogger().debug('--> strange error')
+                        foundRef = references[refName] = _CrossReference._new(rowRefClass.className, colRefClass.className)
+                        foundRef._restoreObject(self._project, None)
 
             else:
-                foundRef = references[refName] = _CrossReference(project, rowRefClass.className, colRefClass.className)
+                foundRef = references[refName] = _CrossReference._new(rowRefClass.className, colRefClass.className)
                 foundRef._restoreObject(self._project, None)
 
-        # list through the required cross-references and create as required
-        for rowRefClass, colRefClass in ((Mark, Strip),):
-            refName = f'_{rowRefClass.className}{colRefClass.className}'
+        # load the deprecated ones - mistake by Ed :|
+        for rowRefClass, colRefClass in self.references:
+            refName = f'{rowRefClass.className}{colRefClass.className}'
 
             if references.get(refName):
                 del references[refName]
+
+            # if foundRef := references.get(refName):
+            #     if not isinstance(foundRef, dict):
+            #         foundRef._restoreObject(self._project, None)
+            #
+            #         # recover strip references to the new marks
+            #         # merge with same class with leading underscore
+            #         # remove from _ccpnInternal
+            #         newName = f'_{refName}'
+            #         if not references.get(newName):
+            #             raise RuntimeError(f"{self.__class__.__name__}: {newName} doesn't exist")
+            #
+            #         # # replace with the existing underscore-name
+            #         # values = foundRef.toJson()
+            #         # references[newName] = newRef = _CrossReference._newFromJson(values)
+            #         # newRef._restoreObject(self._project, None)
+            #
+            #         # del references[refName]
+            #         references[refName] = _CrossReference._oldFromJson(f'{{ '
+            #                                                            f'"rowClassName": "{rowRefClass.className}", '
+            #                                                            f'"columnClassName": "{colRefClass.className}" '
+            #                                                            f'}}')
 
     #=========================================================================================
     # Get/set values in cross-reference
@@ -117,65 +152,6 @@ class CrossReferenceHandler():
         """Set the cross-reference objects from the class.
         """
         if not (refClass := self._crossReferences.get(referenceName)):
-            raise RuntimeError(f'{self.__class__.__name__}.getValues: referencing {referenceName} not found')
+            raise RuntimeError(f'{self.__class__.__name__}.setValues: referencing {referenceName} not found')
 
         refClass.setValues(coreObject, axis, values)
-
-#=========================================================================================
-# Add methods to cross-referenced classes?
-#=========================================================================================
-
-# from ccpn.util.decorators import logCommand
-#
-# def getter(self: Mark):
-#     """Return the associated strips for the mark.
-#     """
-#     try:
-#         refHandler = self._project._crossReferencing
-#         return refHandler.getValues(self, 'MarkStrip', 0)
-#
-#     except Exception:
-#         raise RuntimeError('Mark.strips is not implemented') from None
-#
-# @logCommand(get='self', isProperty=True)
-# def strips(self: Mark, value):
-#     """Set the associated strips for the mark.
-#     """
-#     try:
-#         refHandler = self._project._crossReferencing
-#         refHandler.setValues(self, 'MarkStrip', 0, value)
-#
-#     except Exception:
-#         raise RuntimeError('Mark.strips is not implemented') from None
-#
-# Mark.strips = property(getter, strips, None, 'Return the associated strips for the mark.')
-#
-# del getter
-# del strips
-#
-# @property
-# def getter(self: Strip):
-#     """Return the associated marks for the strip.
-#     """
-#     try:
-#         refHandler = self._project._crossReferencing
-#         return refHandler.getValues(self, 'MarkStrip', 1)
-#
-#     except Exception:
-#         raise RuntimeError('Strip.marks is not implemented') from None
-#
-# @logCommand(get='self', isProperty=True)
-# def marks(self: Strip, values):
-#     """Set the associated marks for the strip.
-#     """
-#     try:
-#         refHandler = self._project._crossReferencing
-#         refHandler.setValues(self, 'MarkStrip', 1, values)
-#
-#     except Exception:
-#         raise RuntimeError('Strip.marks is not implemented') from None
-#
-# Strip.marks = property(getter, marks, None, 'Return the associated marks for the strip.')
-#
-# del getter
-# del marks

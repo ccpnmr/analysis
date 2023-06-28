@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-27 15:22:39 +0100 (Tue, June 27, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-28 14:29:32 +0100 (Wed, June 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -78,10 +78,11 @@ class Window(AbstractWrapperObject):
         """STUB: hot-fixed later"""
         return None
 
-    @property
-    def marks(self):
-        """STUB: hot-fixed later"""
-        return None
+    # marks are now contained in project, but groups are accessed through mainWindow/spectrumDisplays
+    # @property
+    # def marks(self):
+    #     """STUB: hot-fixed later"""
+    #     return None
 
     @property
     def strips(self):
@@ -133,6 +134,34 @@ class Window(AbstractWrapperObject):
     @size.setter
     def size(self, value: Sequence):
         self._wrappedData.size = value
+
+    @property
+    def marks(self) -> tuple:
+        """Return the associated marks for the mainWindow.
+        There are marks that are common to all spectrumDisplay/strips.
+        SpectrumDisplays/strips also have specific marks.
+        """
+        try:
+            refHandler = self._project._crossReferencing
+            return refHandler.getValues(self, '_MarkWindow', 1)  # index of 1 for strips
+
+        except Exception:
+            return ()
+
+    @marks.setter
+    def marks(self, values):
+        """Set the associated marks for the mainWindow.
+        """
+        if not isinstance(values, (tuple, list, type(None))):
+            raise TypeError(f'{self.__class__.__name__}.marks must be a list or tuple, or None')
+        values = values or []
+
+        try:
+            refHandler = self._project._crossReferencing
+            refHandler.setValues(self, '_MarkWindow', 1, values)
+
+        except Exception as es:
+            raise RuntimeError(f'{self.__class__.__name__}.marks: Error setting marks {es}') from es
 
     #=========================================================================================
     # Methods
@@ -454,6 +483,9 @@ class Window(AbstractWrapperObject):
                 # marks are not automatically deleted by the model when deleting strips
                 for mark in st.marks:
                     mark.delete()
+            # marks are not automatically deleted by the model when deleting strips
+            for mark in display.marks:
+                mark.delete()
 
                 st.close()
 
@@ -476,20 +508,36 @@ class Window(AbstractWrapperObject):
         :param tuple/list strips: List of strips or pids.
         :return Mark instance.
         """
-        with undoBlockWithoutSideBar():
-            marks = []
-            for specDisplay in self.spectrumDisplays:
-                marks.extend(
-                        specDisplay.newMark(
-                                colour=colour,
-                                positions=positions,
-                                axisCodes=axisCodes,
-                                style=style,
-                                units=units,
-                                labels=labels,
-                                ))
+        from ccpn.ui._implementation.Mark import _newMark, _removeMarkAxes
 
-            return tuple(marks)
+        with undoBlockWithoutSideBar():
+            if marks := _removeMarkAxes(self, positions=positions, axisCodes=axisCodes, labels=labels):
+                pos, axes, lbls = marks
+                if not pos:
+                    return
+
+                result = _newMark(self, colour=colour, positions=pos, axisCodes=axes,
+                                  style=style, units=units, labels=lbls,
+                                  )
+                # add spectrumDisplay to the new mark
+                result.windows = [self]
+
+                return result
+
+        # with undoBlockWithoutSideBar():
+        #     marks = []
+        #     for specDisplay in self.spectrumDisplays:
+        #         marks.extend(
+        #                 specDisplay.newMark(
+        #                         colour=colour,
+        #                         positions=positions,
+        #                         axisCodes=axisCodes,
+        #                         style=style,
+        #                         units=units,
+        #                         labels=labels,
+        #                         ))
+        #
+        #     return tuple(marks)
 
 
 #=========================================================================================

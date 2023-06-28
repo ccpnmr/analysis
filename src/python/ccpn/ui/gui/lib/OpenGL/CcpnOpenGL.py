@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 12:06:25 +0100 (Fri, June 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-28 14:29:32 +0100 (Wed, June 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -3871,7 +3871,9 @@ class CcpnGLWidget(QOpenGLWidget):
             # build the marks VBO
             index = 0
             # for mark in self.project.marks:
-            for mark in self.strip.marks:
+            for mark in self.mainWindow.marks + \
+                        self.strip.spectrumDisplay.marks + \
+                        self.strip.marks:
 
                 # find the matching axisCodes to the display
                 exactMatch = (self._preferences.matchAxisCode == AXIS_FULLATOMNAME)

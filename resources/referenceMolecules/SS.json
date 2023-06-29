@@ -5,7 +5,7 @@
             "NterminalTopology": [],
             "aliases": [],
             "canBeModified": true,
-            "convention": "NEF",
+            "convention": "INTERNAL_1",
             "hasPseudoAtom": false,
             "hetatm": false,
             "isPseudoAtom": false,
@@ -23,7 +23,6 @@
                 "NEF": "N"
             },
             "properties": [
-                "N",
                 "N",
                 "SS",
                 "s",
@@ -84,7 +83,7 @@
                 "H"
             ],
             "canBeModified": true,
-            "convention": "NEF",
+            "convention": "INTERNAL_1",
             "hasPseudoAtom": false,
             "hetatm": false,
             "isPseudoAtom": false,
@@ -102,7 +101,6 @@
                 "NEF": "H"
             },
             "properties": [
-                "H",
                 "H",
                 "SS",
                 "s",
@@ -152,7 +150,7 @@
             "NterminalTopology": [],
             "aliases": [],
             "canBeModified": true,
-            "convention": "NEF",
+            "convention": "INTERNAL_1",
             "hasPseudoAtom": false,
             "hetatm": false,
             "isPseudoAtom": false,
@@ -170,7 +168,6 @@
                 "NEF": "CA"
             },
             "properties": [
-                "CA",
                 "CA",
                 "SS",
                 "s",
@@ -232,7 +229,7 @@
             "NterminalTopology": [],
             "aliases": [],
             "canBeModified": true,
-            "convention": "NEF",
+            "convention": "INTERNAL_1",
             "hasPseudoAtom": false,
             "hetatm": false,
             "isPseudoAtom": false,
@@ -250,7 +247,6 @@
                 "NEF": "HA"
             },
             "properties": [
-                "HA",
                 "HA",
                 "SS",
                 "s",
@@ -300,7 +296,7 @@
             "NterminalTopology": [],
             "aliases": [],
             "canBeModified": true,
-            "convention": "NEF",
+            "convention": "INTERNAL_1",
             "hasPseudoAtom": false,
             "hetatm": false,
             "isPseudoAtom": false,
@@ -318,7 +314,6 @@
                 "NEF": "CB"
             },
             "properties": [
-                "CB",
                 "CB",
                 "SS",
                 "s",
@@ -374,7 +369,7 @@
             "NterminalTopology": [],
             "aliases": [],
             "canBeModified": true,
-            "convention": "NEF",
+            "convention": "INTERNAL_1",
             "hasPseudoAtom": true,
             "hetatm": false,
             "isPseudoAtom": false,
@@ -393,7 +388,6 @@
             },
             "properties": [
                 "HB2",
-                "HB2",
                 "SS",
                 "s",
                 "1H",
@@ -440,7 +434,7 @@
             "NterminalTopology": [],
             "aliases": [],
             "canBeModified": true,
-            "convention": "NEF",
+            "convention": "INTERNAL_1",
             "hasPseudoAtom": true,
             "hetatm": false,
             "isPseudoAtom": false,
@@ -459,7 +453,6 @@
             },
             "properties": [
                 "HB3",
-                "HB3",
                 "SS",
                 "s",
                 "1H",
@@ -506,7 +499,7 @@
             "NterminalTopology": [],
             "aliases": [],
             "canBeModified": true,
-            "convention": "NEF",
+            "convention": "INTERNAL_1",
             "hasPseudoAtom": false,
             "hetatm": false,
             "isPseudoAtom": true,
@@ -524,7 +517,6 @@
                 "NEF": "QB"
             },
             "properties": [
-                "QB",
                 "QB",
                 "SS",
                 "s",
@@ -578,7 +570,7 @@
                 "CO"
             ],
             "canBeModified": true,
-            "convention": "NEF",
+            "convention": "INTERNAL_1",
             "hasPseudoAtom": false,
             "hetatm": false,
             "isPseudoAtom": false,
@@ -596,7 +588,6 @@
                 "NEF": "C"
             },
             "properties": [
-                "C",
                 "C",
                 "SS",
                 "s",
@@ -654,7 +645,7 @@
             "NterminalTopology": [],
             "aliases": [],
             "canBeModified": true,
-            "convention": "NEF",
+            "convention": "INTERNAL_1",
             "hasPseudoAtom": false,
             "hetatm": false,
             "isPseudoAtom": false,
@@ -672,7 +663,6 @@
                 "NEF": "O"
             },
             "properties": [
-                "O",
                 "O",
                 "SS",
                 "s",

@@ -5,7 +5,7 @@
             "NterminalTopology": [],
             "aliases": [],
             "canBeModified": true,
-            "convention": "NEF",
+            "convention": "INTERNAL_1",
             "hasPseudoAtom": false,
             "hetatm": false,
             "isPseudoAtom": false,
@@ -23,7 +23,6 @@
                 "NEF": "N"
             },
             "properties": [
-                "N",
                 "N",
                 "LGLY",
                 "15N",
@@ -67,7 +66,7 @@
             "NterminalTopology": [],
             "aliases": [],
             "canBeModified": true,
-            "convention": "NEF",
+            "convention": "INTERNAL_1",
             "hasPseudoAtom": false,
             "hetatm": false,
             "isPseudoAtom": false,
@@ -86,7 +85,6 @@
             },
             "properties": [
                 "Q1",
-                "Q1",
                 "LGLY",
                 "1H",
                 "isProton",
@@ -127,7 +125,7 @@
             "NterminalTopology": [],
             "aliases": [],
             "canBeModified": true,
-            "convention": "NEF",
+            "convention": "INTERNAL_1",
             "hasPseudoAtom": false,
             "hetatm": false,
             "isPseudoAtom": false,
@@ -146,7 +144,6 @@
             },
             "properties": [
                 "Q2",
-                "Q2",
                 "LGLY",
                 "1H",
                 "isProton",
@@ -187,7 +184,7 @@
             "NterminalTopology": [],
             "aliases": [],
             "canBeModified": true,
-            "convention": "NEF",
+            "convention": "INTERNAL_1",
             "hasPseudoAtom": false,
             "hetatm": false,
             "isPseudoAtom": false,
@@ -206,7 +203,6 @@
             },
             "properties": [
                 "Q21",
-                "Q21",
                 "LGLY",
                 "1H",
                 "isProton",
@@ -247,7 +243,7 @@
             "NterminalTopology": [],
             "aliases": [],
             "canBeModified": true,
-            "convention": "NEF",
+            "convention": "INTERNAL_1",
             "hasPseudoAtom": false,
             "hetatm": false,
             "isPseudoAtom": false,
@@ -266,7 +262,6 @@
             },
             "properties": [
                 "Q22",
-                "Q22",
                 "LGLY",
                 "1H",
                 "isProton",
@@ -307,7 +302,7 @@
             "NterminalTopology": [],
             "aliases": [],
             "canBeModified": true,
-            "convention": "NEF",
+            "convention": "INTERNAL_1",
             "hasPseudoAtom": false,
             "hetatm": false,
             "isPseudoAtom": false,
@@ -325,7 +320,6 @@
                 "NEF": "Q3"
             },
             "properties": [
-                "Q3",
                 "Q3",
                 "LGLY",
                 "1H",
@@ -370,7 +364,7 @@
                 "CO"
             ],
             "canBeModified": true,
-            "convention": "NEF",
+            "convention": "INTERNAL_1",
             "hasPseudoAtom": false,
             "hetatm": false,
             "isPseudoAtom": false,
@@ -388,7 +382,6 @@
                 "NEF": "C"
             },
             "properties": [
-                "C",
                 "C",
                 "LGLY",
                 "13C",
@@ -435,7 +428,7 @@
                 "O'"
             ],
             "canBeModified": true,
-            "convention": "NEF",
+            "convention": "INTERNAL_1",
             "hasPseudoAtom": false,
             "hetatm": false,
             "isPseudoAtom": false,
@@ -453,7 +446,6 @@
                 "NEF": "O"
             },
             "properties": [
-                "O",
                 "O",
                 "LGLY",
                 "16O",
@@ -495,12 +487,13 @@
             "NterminalTopology": [],
             "aliases": [],
             "canBeModified": true,
-            "convention": "NEF",
+            "convention": "INTERNAL_1",
             "hasPseudoAtom": false,
             "hetatm": false,
             "isPseudoAtom": false,
             "name": "H2",
             "nameDict": {
+                "CCPN": "H2",
                 "INTERNAL_0": "H2",
                 "INTERNAL_1": "H2",
                 "IUPAC": "H2",
@@ -508,7 +501,6 @@
                 "NEF": "H2"
             },
             "properties": [
-                "H2",
                 "H2",
                 "LGLY",
                 "1H",
@@ -560,12 +552,13 @@
             "NterminalTopology": [],
             "aliases": [],
             "canBeModified": true,
-            "convention": "NEF",
+            "convention": "INTERNAL_1",
             "hasPseudoAtom": false,
             "hetatm": false,
             "isPseudoAtom": false,
             "name": "H3",
             "nameDict": {
+                "CCPN": "H3",
                 "INTERNAL_0": "H3",
                 "INTERNAL_1": "H3",
                 "IUPAC": "H3",
@@ -573,7 +566,6 @@
                 "NEF": "H3"
             },
             "properties": [
-                "H3",
                 "H3",
                 "LGLY",
                 "1H",
@@ -628,12 +620,13 @@
                 "O''"
             ],
             "canBeModified": true,
-            "convention": "NEF",
+            "convention": "INTERNAL_1",
             "hasPseudoAtom": false,
             "hetatm": false,
             "isPseudoAtom": false,
-            "name": "O''",
+            "name": "OXT",
             "nameDict": {
+                "CCPN": "O''",
                 "INTERNAL_0": "OXT",
                 "INTERNAL_1": "OXT",
                 "IUPAC": "OXT,O''",
@@ -641,7 +634,6 @@
                 "NEF": "O''"
             },
             "properties": [
-                "O''",
                 "OXT",
                 "LGLY",
                 "16O",

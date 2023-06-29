@@ -5,7 +5,7 @@
             "NterminalTopology": [],
             "aliases": [],
             "canBeModified": false,
-            "convention": "NEF",
+            "convention": "INTERNAL_1",
             "hasPseudoAtom": true,
             "hetatm": false,
             "isPseudoAtom": false,
@@ -13,6 +13,7 @@
             "nameDict": {
                 "AQUA": "O",
                 "BMRBd": "O",
+                "CCPN": "O",
                 "CYANA": null,
                 "CYANA2": null,
                 "INTERNAL_0": "O",
@@ -23,7 +24,6 @@
                 "NEF": "O"
             },
             "properties": [
-                "O",
                 "O",
                 "HOH",
                 "16O",
@@ -76,7 +76,7 @@
             "NterminalTopology": [],
             "aliases": [],
             "canBeModified": false,
-            "convention": "NEF",
+            "convention": "INTERNAL_1",
             "hasPseudoAtom": true,
             "hetatm": false,
             "isPseudoAtom": false,
@@ -84,6 +84,7 @@
             "nameDict": {
                 "AQUA": "H1",
                 "BMRBd": "H1",
+                "CCPN": "H1",
                 "CYANA": null,
                 "CYANA2": null,
                 "INTERNAL_0": "H1",
@@ -95,7 +96,6 @@
             },
             "properties": [
                 "H1",
-                "H1",
                 "HOH",
                 "O",
                 "1H",
@@ -144,7 +144,7 @@
             "NterminalTopology": [],
             "aliases": [],
             "canBeModified": false,
-            "convention": "NEF",
+            "convention": "INTERNAL_1",
             "hasPseudoAtom": true,
             "hetatm": false,
             "isPseudoAtom": false,
@@ -152,6 +152,7 @@
             "nameDict": {
                 "AQUA": "H2",
                 "BMRBd": "H2",
+                "CCPN": "H2",
                 "CYANA": null,
                 "CYANA2": null,
                 "INTERNAL_0": "H2",
@@ -163,7 +164,6 @@
             },
             "properties": [
                 "H2",
-                "H2",
                 "HOH",
                 "O",
                 "1H",
@@ -212,14 +212,15 @@
             "NterminalTopology": [],
             "aliases": [],
             "canBeModified": false,
-            "convention": "NEF",
+            "convention": "INTERNAL_1",
             "hasPseudoAtom": false,
             "hetatm": false,
             "isPseudoAtom": true,
-            "name": "H%",
+            "name": "QH",
             "nameDict": {
                 "AQUA": null,
                 "BMRBd": null,
+                "CCPN": "H*",
                 "CYANA": null,
                 "CYANA2": null,
                 "INTERNAL_0": "QH",
@@ -230,7 +231,6 @@
                 "NEF": "H%"
             },
             "properties": [
-                "H%",
                 "QH",
                 "HOH",
                 "O",

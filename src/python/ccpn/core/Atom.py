@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-28 19:23:04 +0100 (Wed, June 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-29 16:27:44 +0100 (Thu, June 29, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -114,8 +114,22 @@ class Atom(AbstractWrapperObject):
 
     @property
     def realAtoms(self):
-        """See componentAtoms"""
-        return self.componentAtoms
+        """Recursively find all real atoms that combined  make up this atom. See componentAtoms"""
+        def _getRealAtoms(atom):
+            atoms = []
+            for i in atom.componentAtoms:
+                if i.componentAtoms:
+                    atoms += _getRealAtoms(i)
+                else:
+                    atoms.append(i)
+            return atoms
+        return _getRealAtoms(self)
+
+    def isRealAtom(self) -> bool:
+        """
+        :return: bool: True if the atom is a basic atom without subcomponents.  False if is a wildcard (e.g. HB%, QB) or non-stereospecific atom (e.g. HBx, HBy, HGx%)
+        """
+        return len(self.componentAtoms) == 0
 
     @property
     def componentAtoms(self) -> typing.Tuple['Atom']:

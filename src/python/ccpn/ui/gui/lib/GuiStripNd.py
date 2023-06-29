@@ -35,8 +35,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 12:06:25 +0100 (Fri, June 09, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-06-29 17:45:28 +0100 (Thu, June 29, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -874,9 +874,9 @@ class GuiStripNd(GuiStrip):
                 if objAxisIndex is not None and (0 <= objAxisIndex < len(ppmPositions)):
                     position = (ppmPositions[objAxisIndex],)
                     axisCode = (axisCodes[objAxisIndex],)
-                    self.newMark(defaultColour, position, axisCode)
+                    self.mainWindow.newMark(defaultColour, position, axisCode)
             else:
-                self.newMark(defaultColour, ppmPositions, axisCodes)
+                self.mainWindow.newMark(defaultColour, ppmPositions, axisCodes)
 
             # add the marks for the double cursor - needs to be enabled in preferences
             if self._CcpnGLWidget._matchingIsotopeCodes:
@@ -889,7 +889,7 @@ class GuiStripNd(GuiStrip):
                         ppmPositions = [ppmPositions[ii] for ii in indices]
                         axisCodes = [axisCodes[ii] for ii in indices]
                         ppmPositions = [ppmPositions[1], ppmPositions[0]] + ppmPositions[2:]
-                        self.newMark(defaultColour, ppmPositions, axisCodes)
+                        self.mainWindow.newMark(defaultColour, ppmPositions, axisCodes)
 
                 elif (0 <= axisIndex < 2):
                     # get the same position in the opposite axisCode
@@ -901,7 +901,7 @@ class GuiStripNd(GuiStrip):
                     if objAxisIndex is not None and objDoubleAxisIndex is not None:
                         position = (ppmPositions[objAxisIndex],)
                         axisCode = (axisCodes[objDoubleAxisIndex],)
-                        self.newMark(defaultColour, position, axisCode)
+                        self.mainWindow.newMark(defaultColour, position, axisCode)
 
         except Exception as es:
             getLogger().warning('Error setting mark at position')

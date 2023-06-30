@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-28 19:23:05 +0100 (Wed, June 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-30 13:12:58 +0100 (Fri, June 30, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -25,11 +25,9 @@ __date__ = "$Date:  2023-06-23 09:48:58 +0100 (Fri, June 23, 2023) $"
 #=========================================================================================
 
 import ccpn.core
-from PyQt5 import QtWidgets
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.widgets.TextEditor import TextBrowser
+from ccpn.ui.gui.widgets.WebBrowser import  WebBrowserWidget
 from ccpn.util.Logging import getLogger
-
 
 logger = getLogger()
 
@@ -39,6 +37,7 @@ DEFAULTMARGINS = (0, 0, 0, 0)  # l, t, r, b
 
 class HelpModule(CcpnModule):
     """
+    Warning: This module is under-development.
     """
     includeSettingsWidget = False
     maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
@@ -73,21 +72,33 @@ class HelpModule(CcpnModule):
         self.parentModuleName = parentModuleName
         self.htmlFilePath = htmlFilePath
         # setup the widgets
-        self._setupWidgets()
+        self.webBrowserWidget = WebBrowserWidget(self.mainWidget, grid=(0, 0), )
+        self.toolbar = self.webBrowserWidget.toolbar
+        self.browser = self.webBrowserWidget.browser
+        if self.htmlFilePath:
+            self.setHtmlFilePath(self.htmlFilePath)
 
-
-    def _setupWidgets(self):
-        """
-        Setup the widgets in module
-        """
-
-        self.textBrowser = TextBrowser(self.mainWidget, htmlFilePath=self.htmlFilePath, grid=(0, 0))
         #  No point in showing the help icon for the help module
         self._hideHelpButton()
 
     def setHtmlFilePath(self, htmlFilePath):
         self.htmlFilePath = htmlFilePath
-        self.textBrowser.setFile(self.htmlFilePath)
+        self.webBrowserWidget.setHtmlFilePath(self.htmlFilePath)
+
+    def goHome(self):
+        self.webBrowserWidget.goHome()
+
+    def forward(self):
+        self.webBrowserWidget.forward()
+
+    def back(self):
+        self.webBrowserWidget.back()
+
+    def reload(self):
+        self.webBrowserWidget.reload()
+
+    def stop(self):
+        self.webBrowserWidget.stop()
 
     def _closeModule(self):
         """CCPN-INTERNAL: used to close the module
@@ -113,7 +124,8 @@ if __name__ == '__main__':
     app = TestApplication()
     win = QtWidgets.QMainWindow()
     moduleArea = CcpnModuleArea(mainWindow=None)
-    module = HelpModule(mainWindow=None, htmlFilePath=htmlFilePath)
+    module = HelpModule(mainWindow=None,  parentModuleName='ff')
+    module.setHtmlFilePath(htmlFilePath)
     moduleArea.addModule(module)
     win.setCentralWidget(moduleArea)
     win.resize(1000, 500)

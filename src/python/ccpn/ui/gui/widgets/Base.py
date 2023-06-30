@@ -18,9 +18,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:42 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-06-30 13:12:58 +0100 (Fri, June 30, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -33,6 +33,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from dataclasses import dataclass
 from functools import partial
 from contextlib import contextmanager
+from PyQt5 import QtWebEngineWidgets ## Warning do not remove:  this import of QtWebEngineWidgets  MUST be here or before creating the Application. Otherwise, the webview doesn't work.
 from PyQt5 import QtWidgets, QtCore
 from pyqtgraph.dockarea import Dock
 from ccpn.ui.gui.widgets.DropBase import DropBase

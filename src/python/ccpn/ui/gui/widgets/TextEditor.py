@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-28 19:23:06 +0100 (Wed, June 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-30 13:12:58 +0100 (Fri, June 30, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -26,22 +26,15 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import sys
-import os
 from PyQt5 import QtGui, QtWidgets, QtCore, QtPrintSupport
 from ccpn.ui.gui.widgets.FileDialog import MacrosFileDialog
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Action import Action
-# from ccpn.ui.gui.guiSettings import fixedWidthFont
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Label import Label, ActiveLabel
-from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
-from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
-from ccpn.ui.gui.widgets.ScrollBarVisibilityWatcher import ScrollBarVisibilityWatcher
-from ccpn.util.Path import aPath
-from ccpn.ui.gui.widgets.MessageDialog import  showMessage, showMulti
+
 
 ATTRIBUTE_CHECK_LIST = ('_mouseStart', '_minimumWidth', '_widthStart', '_minimumHeight', '_heightStart')
 ATTRIBUTE_HEIGHT_LIST = ('_minimumHeight')
@@ -279,26 +272,6 @@ class TextEditor(QtWidgets.QTextEdit, Base):
         Internal. Called for saving/restoring the widget state.
         """
         return self.set(value)
-
-class TextBrowser(QtWidgets.QTextBrowser, Base):
-    receivedFocus = QtCore.pyqtSignal()
-
-    def __init__(self, parent=None, htmlFilePath=None,  **kwds):
-        super().__init__(parent)
-        Base._init(self, setLayout=True, **kwds)
-        self.htmlFilePath = htmlFilePath
-        if self.htmlFilePath is not None:
-            self.setFile(self.htmlFilePath)
-
-    def setFile(self, htmlFilePath):
-        path  = aPath(htmlFilePath)
-        if not path.exists():
-            showMessage('Path not found', f'Could not load {path}')
-            return
-        try:
-            self.setSource(QtCore.QUrl.fromLocalFile(str(path)))
-        except Exception as err:
-            showMessage('Help file not available', f'Could not load the help browser:  {err}')
 
 
 class PlainTextEditor(QtWidgets.QPlainTextEdit, Base):

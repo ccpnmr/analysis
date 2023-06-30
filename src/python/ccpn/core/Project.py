@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-27 15:22:39 +0100 (Tue, June 27, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-06-30 18:47:45 +0100 (Fri, June 30, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -565,7 +565,7 @@ class Project(AbstractWrapperObject):
                 for dd in CCPN_SUB_DIRECTORIES:
                     self.projectPath.fetchDir(dd)
             except (PermissionError, FileNotFoundError):
-                getLogger().warning('Folder may be read-only')
+                getLogger().info('Folder may be read-only')
 
     def _initialiseProject(self):
         """Complete initialisation of project,
@@ -2538,7 +2538,7 @@ def _loadProject(application, path: str) -> Project:
                                                    comment='upgraded from version-2')
                 # project._saveHistory.save()
             except (PermissionError, FileNotFoundError):
-                getLogger().warning('Folder may be read-only')
+                getLogger().info('Folder may be read-only')
 
         project._isNew = True
         project._isTemporary = True
@@ -2558,7 +2558,7 @@ def _loadProject(application, path: str) -> Project:
                 # project._saveHistory.save()
 
             except (PermissionError, FileNotFoundError):
-                getLogger().warning('Folder may be read-only')
+                getLogger().info('Folder may be read-only')
 
         project._isNew = False
         project._isTemporary = False

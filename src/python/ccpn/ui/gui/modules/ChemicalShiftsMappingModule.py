@@ -69,8 +69,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-14 19:17:42 +0000 (Tue, March 14, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-06-30 18:47:45 +0100 (Fri, June 30, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -283,7 +283,7 @@ class ChemicalShiftsMapping(CcpnModule):
             try:
                 self.pymolScriptsPath = fetchDir(self.scriptsPath, 'pymol')
             except (PermissionError, FileNotFoundError):
-                getLogger().warning('Folder may be read-only')
+                getLogger().info('Folder may be read-only')
 
         self.thresholdLinePos = DefaultThreshould
         self._bindingExportDialog = None

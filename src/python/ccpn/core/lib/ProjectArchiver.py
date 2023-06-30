@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 18:46:13 +0100 (Tue, March 28, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-06-30 18:47:45 +0100 (Fri, June 30, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -90,7 +90,7 @@ class ProjectArchiver(object):
         try:
             return self.archiveDirectory and self.archiveDirectory.listdir(suffix=ARCHIVE_SUFFIX)
         except (PermissionError, FileNotFoundError):
-            getLogger().warning('Folder may be read-only, or may not exist')
+            getLogger().info('Folder may be read-only, or may not exist')
 
         return []
 
@@ -114,7 +114,7 @@ class ProjectArchiver(object):
         try:
             return self._projectPath.fetchDir(CCPN_ARCHIVES_DIRECTORY)
         except (PermissionError, FileNotFoundError):
-            getLogger().warning('Folder may be read-only')
+            getLogger().info('Folder may be read-only')
 
     def makeArchive(self) -> Path:
         """Make a new time-stamped archive from project.

@@ -15,6 +15,6 @@ if [[ "$(uname -s)" == "Darwin" ]]; then
     export DYLD_FALLBACK_LIBRARY_PATH=${DYLD_FALLBACK_LIBRARY_PATH}${HOME}/lib:/usr/local/lib:/usr/lib
 fi
 
-if [[ "$(lsb_release -r)" == *"22.04"* ]]; then
+if [[ "$(uname -s)" == "Linux" && "$(lsb_release -r)" == *"22.04"* ]]; then
   export PYOPENGL_PLATFORM=x11
 fi

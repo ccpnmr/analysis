@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-28 19:23:04 +0100 (Wed, June 28, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-06-30 18:47:45 +0100 (Fri, June 30, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -553,7 +553,7 @@ class Framework(NotifierBase, GuiBase):
             # backupDataPath = fetchDir(backupPath, DataDirName)
 
         except (PermissionError, FileNotFoundError):
-            getLogger().warning('Backup failed: Folder may be read-only')
+            getLogger().info('Backup failed: Folder may be read-only')
 
         except Exception as es:
             getLogger().warning(f'Project backup failed with error {es}')
@@ -1096,7 +1096,7 @@ class Framework(NotifierBase, GuiBase):
 
             except (PermissionError, FileNotFoundError):
                 failMessage = 'Folder may be read-only'
-                getLogger().warning(failMessage)
+                getLogger().info(failMessage)
                 raise
 
             except Exception as es:

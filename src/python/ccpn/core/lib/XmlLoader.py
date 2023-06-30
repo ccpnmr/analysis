@@ -513,7 +513,7 @@ class TopObject(XmlLoaderABC):
                     forceSetattr(self.apiTopObject, 'isModified', False)
 
             except (PermissionError, FileNotFoundError):
-                self.logger.warning('Saving: folder may be read-only')
+                self.logger.info('Saving: folder may be read-only')
 
             self.isLoaded = True  # xml-file reflects contents
 
@@ -546,7 +546,7 @@ class TopObject(XmlLoaderABC):
                     forceSetattr(self.apiTopObject, 'isModified', False)
 
             except (PermissionError, FileNotFoundError):
-                self.logger.warning('Backing up: folder may be read-only')
+                self.logger.info('Backing up: folder may be read-only')
 
             # self.isLoaded = True  # xml-file reflects contents
 
@@ -587,7 +587,7 @@ class Package(XmlLoaderABC):
             try:
                 self.path.mkdir(parents=True, exist_ok=False)
             except (PermissionError, FileNotFoundError):
-                self.logger.warning('Folder may be read-only')
+                self.logger.info('Folder may be read-only')
 
         self._name = '.'.join(self._path.parts)
         self._id = (self.repository.name, self.name, None)
@@ -691,7 +691,7 @@ class Package(XmlLoaderABC):
                     self.path.unlink()
                 self.path.symlink_to(oldPath, target_is_directory=True)
             except (PermissionError, FileNotFoundError):
-                self.logger.warning('Folder may be read-only')
+                self.logger.info('Folder may be read-only')
 
         self._id = (self.repository.name, self.name, None)
         # We keep the old _id's in the lookup, as I do not know how the
@@ -1391,7 +1391,7 @@ class XmlLoader(XmlLoaderABC):
                     # xmlProjectFile.removeFile()
                     self._rename(self.name)  # Check below if we save
                 except (PermissionError, FileNotFoundError):
-                    self.logger.warning('Folder may be read-only')
+                    self.logger.info('Folder may be read-only')
 
             # if (self.pathHasChanged or self.nameHasChanged):
             #     try:
@@ -1491,7 +1491,7 @@ class XmlLoader(XmlLoaderABC):
                 forceSetattr(self.memopsRoot, 'isModified', False)
 
         except (PermissionError, FileNotFoundError):
-            self.logger.warning('Saving Memops: folder may be read-only')
+            self.logger.info('Saving Memops: folder may be read-only')
 
         self.memopsXmlPath = _xmlFile
 

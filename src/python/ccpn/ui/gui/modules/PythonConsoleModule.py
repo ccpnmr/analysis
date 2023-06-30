@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-28 19:23:05 +0100 (Wed, June 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-30 14:03:32 +0100 (Fri, June 30, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -45,7 +45,7 @@ class PythonConsoleModule(CcpnModule):
     _onlySingleInstance = True
 
     className = 'PythonConsoleModule'
-    _helpFilePath = ccpnModuleHelpPath / 'PythonConsoleModuleHelp.html'
+    # _helpFilePath = ccpnModuleHelpPath / 'PythonConsoleModuleHelp.html'
 
 
     def __init__(self, mainWindow, name='Python Console', closeFunc=None, **kwds):

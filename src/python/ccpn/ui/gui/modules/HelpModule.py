@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-30 13:12:58 +0100 (Fri, June 30, 2023) $"
+__dateModified__ = "$dateModified: 2023-06-30 14:03:32 +0100 (Fri, June 30, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -26,7 +26,7 @@ __date__ = "$Date:  2023-06-23 09:48:58 +0100 (Fri, June 23, 2023) $"
 
 import ccpn.core
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.widgets.WebBrowser import  WebBrowserWidget
+from ccpn.ui.gui.widgets.TextEditor import  TextBrowser
 from ccpn.util.Logging import getLogger
 
 logger = getLogger()
@@ -72,11 +72,7 @@ class HelpModule(CcpnModule):
         self.parentModuleName = parentModuleName
         self.htmlFilePath = htmlFilePath
         # setup the widgets
-        self.webBrowserWidget = WebBrowserWidget(self.mainWidget, grid=(0, 0), )
-        self.toolbar = self.webBrowserWidget.toolbar
-        self.browser = self.webBrowserWidget.browser
-        if self.htmlFilePath:
-            self.setHtmlFilePath(self.htmlFilePath)
+        self.webBrowserWidget = TextBrowser(self.mainWidget, htmlFilePath=self.htmlFilePath, grid=(0, 0), )
 
         #  No point in showing the help icon for the help module
         self._hideHelpButton()
@@ -85,20 +81,20 @@ class HelpModule(CcpnModule):
         self.htmlFilePath = htmlFilePath
         self.webBrowserWidget.setHtmlFilePath(self.htmlFilePath)
 
-    def goHome(self):
-        self.webBrowserWidget.goHome()
-
-    def forward(self):
-        self.webBrowserWidget.forward()
-
-    def back(self):
-        self.webBrowserWidget.back()
-
-    def reload(self):
-        self.webBrowserWidget.reload()
-
-    def stop(self):
-        self.webBrowserWidget.stop()
+    # def goHome(self):
+    #     self.webBrowserWidget.goHome()
+    #
+    # def forward(self):
+    #     self.webBrowserWidget.forward()
+    #
+    # def back(self):
+    #     self.webBrowserWidget.back()
+    #
+    # def reload(self):
+    #     self.webBrowserWidget.reload()
+    #
+    # def stop(self):
+    #     self.webBrowserWidget.stop()
 
     def _closeModule(self):
         """CCPN-INTERNAL: used to close the module

@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-22 11:50:14 +0100 (Mon, May 22, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-06-28 19:17:57 +0100 (Wed, June 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -210,7 +210,7 @@ class _TableModel(QtCore.QAbstractTableModel):
 
             # sLoc = self._sortIndex[iLoc]  # signals?
             # self.beginInsertRows(QtCore.QModelIndex(), sLoc, sLoc)
-            self._guiState = np.insert(self._guiState, iLoc, np.empty((self.columnCount()), dtype=np.object), axis=0)
+            self._guiState = np.insert(self._guiState, iLoc, np.empty((self.columnCount()), dtype=object), axis=0)
             self._setSortOrder(self._sortColumn, self._sortOrder)
             # self.endInsertRows()
 
@@ -226,7 +226,7 @@ class _TableModel(QtCore.QAbstractTableModel):
             # self._df.loc[row] = newRow
             # iLoc = self._df.index.get_loc(row)
             # self.beginInsertRows(QtCore.QModelIndex(), iLoc, iLoc)
-            # self._guiState = np.insert(self._guiState, iLoc, np.empty((self.columnCount()), dtype=np.object), axis=0)
+            # self._guiState = np.insert(self._guiState, iLoc, np.empty((self.columnCount()), dtype=object), axis=0)
             # self.endInsertRows()
             # indexA = model.index(0, 0)
             # indexB = model.index(n - 1, c - 1)

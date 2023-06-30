@@ -21,8 +21,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-27 15:25:55 +0100 (Tue, June 27, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-06-28 19:17:56 +0100 (Wed, June 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -330,7 +330,7 @@ class PlaneSelectorWidget(Frame):
         self.planeCountSpinBox = Spinbox(parent=self._mainWidget, showButtons=False, grid=(0, 3), min=1, max=1000,
                                          objectName='PlaneSelectorWidget_planeCount'
                                          )
-        self.planeCountSpinBox.setFixedWidth(_size * 2.5)
+        self.planeCountSpinBox.setFixedWidth(int(_size * 2.5))
 
         self.planeCountSpinBox.returnPressed.connect(self._planeCountChanged)
         self.planeCountSpinBox.wheelChanged.connect(self._planeCountChanged)

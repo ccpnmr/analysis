@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-22 11:52:50 +0100 (Mon, May 22, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-06-28 19:17:56 +0100 (Wed, June 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1012,7 +1012,7 @@ class DimensionsTab(Widget):
             dimLabel = Label(self, text='%s' % str(i + 1), grid=(1, i + 1), vAlign='t', hAlign='l')
 
         self.axisCodeEdits = [i for i in range(dimensions)]
-        self.isotopeCodePullDowns = np.empty((dimensions, len(CoherenceOrder)), dtype=np.object)
+        self.isotopeCodePullDowns = np.empty((dimensions, len(CoherenceOrder)), dtype=object)
         self.coherenceOrderPullDowns = [i for i in range(dimensions)]
         self.referenceDimensionPullDowns = [i for i in range(dimensions)]
 

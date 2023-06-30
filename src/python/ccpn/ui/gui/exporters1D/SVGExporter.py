@@ -6,7 +6,7 @@
 
 from ccpn.ui.gui.exporters1D.Exporter import Exporter
 from pyqtgraph.parametertree import Parameter
-from pyqtgraph.python2_3 import asUnicode
+# from pyqtgraph.python2_3 import asUnicode
 
 from PyQt5 import QtGui, QtWidgets, QtCore, QtSvg
 import pyqtgraph.functions as fn
@@ -100,7 +100,7 @@ class SVGExporter(Exporter):
       QtWidgets.QApplication.clipboard().setMimeData(md)
     else:
       with open(fileName, 'wb') as fh:
-        fh.write(asUnicode(xml).encode('utf-8'))
+        fh.write(xml.encode('utf-8'))
 
 
 xmlHeader = """\

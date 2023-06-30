@@ -4,19 +4,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-11 19:05:59 +0000 (Fri, February 11, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-06-30 14:03:32 +0100 (Fri, June 30, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,21 +26,17 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import sys
-import os
+
 from PyQt5 import QtGui, QtWidgets, QtCore, QtPrintSupport
 from ccpn.ui.gui.widgets.FileDialog import MacrosFileDialog
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Action import Action
-# from ccpn.ui.gui.guiSettings import fixedWidthFont
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Label import Label, ActiveLabel
-from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
-from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
-from ccpn.ui.gui.widgets.ScrollBarVisibilityWatcher import ScrollBarVisibilityWatcher
-
+from ccpn.util.Path import aPath
+from ccpn.ui.gui.widgets.MessageDialog import  showMessage, showMulti
 
 ATTRIBUTE_CHECK_LIST = ('_mouseStart', '_minimumWidth', '_widthStart', '_minimumHeight', '_heightStart')
 ATTRIBUTE_HEIGHT_LIST = ('_minimumHeight')
@@ -207,7 +203,7 @@ class TextEditor(QtWidgets.QTextEdit, Base):
         self._changed = state
 
     def setHtml(self, html):
-        self.setHtml(html)
+        super().setHtml(html)
         self._changed = False
 
     def get(self):
@@ -278,6 +274,26 @@ class TextEditor(QtWidgets.QTextEdit, Base):
         Internal. Called for saving/restoring the widget state.
         """
         return self.set(value)
+
+class TextBrowser(QtWidgets.QTextBrowser, Base):
+    receivedFocus = QtCore.pyqtSignal()
+
+    def __init__(self, parent=None, htmlFilePath=None,  **kwds):
+        super().__init__(parent)
+        Base._init(self, setLayout=True, **kwds)
+        self.htmlFilePath = htmlFilePath
+        if self.htmlFilePath is not None:
+            self.setHtmlFilePath(self.htmlFilePath)
+
+    def setHtmlFilePath(self, htmlFilePath):
+        path  = aPath(htmlFilePath)
+        if not path.exists():
+            showMessage('Path not found', f'Could not load {path}')
+            return
+        try:
+            self.setSource(QtCore.QUrl.fromLocalFile(str(path)))
+        except Exception as err:
+            showMessage('Help file not available', f'Could not load the help browser:  {err}')
 
 
 class PlainTextEditor(QtWidgets.QPlainTextEdit, Base):
@@ -496,7 +512,6 @@ if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
     from ccpn.ui.gui.widgets.Widget import Widget
-
 
     app = TestApplication()
 

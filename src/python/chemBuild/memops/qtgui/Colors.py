@@ -16,7 +16,8 @@ def inverseGrey(color):
     m += 128
   elif m<192:
     m -= 128
-  
+
+  m = int(m)
   return QColor(m, m, m)
  
 

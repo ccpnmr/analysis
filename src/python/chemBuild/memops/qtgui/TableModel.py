@@ -240,7 +240,7 @@ class ObjectTableModel(TableModel):
         texts.sort(key=len)
         bbox = self.table.bbox(texts[-1])
         size = max(30, bbox.width() + 32 )
-        return QSize(size, 4 + bbox.height() * 2)
+        return QSize(int(size), 4 + int(bbox.height()) * 2)
       
   def sortRows(self, col, isDescending=False):
     

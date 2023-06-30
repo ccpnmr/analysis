@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-07 16:50:12 +0100 (Wed, June 07, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-06-28 19:23:05 +0100 (Wed, June 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,6 +32,7 @@ from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import ALL_GROUPING
 from ccpn.util.Logging import getLogger
 import numpy as np
 from ccpn.util.OrderedSet import OrderedSet
+from functools import partial
 ######## gui/ui imports ########
 from PyQt5 import QtCore, QtWidgets, QtGui
 from ccpn.ui.gui.widgets.Label import Label, DividerLabel
@@ -996,7 +997,7 @@ class AppearancePanel(GuiSettingPanel):
 
             (guiNameSpaces.WidgetVarName_AboveThrColour,
              {'label': guiNameSpaces.Label_AboveThrColour,
-              'callBack': self._updateMainPlotPanel,
+              'callBack': partial(self._updateMainPlotPanel, True),
               'enabled': True,
               'tipText': guiNameSpaces.TipText_AboveThrColour,
               'type': compoundWidget.ColourSelectionCompoundWidget,
@@ -1008,7 +1009,7 @@ class AppearancePanel(GuiSettingPanel):
                                         }}}),
             (guiNameSpaces.WidgetVarName_BelowThrColour,
              {'label': guiNameSpaces.Label_BelowThrColour,
-              'callBack':self._updateMainPlotPanel,
+              'callBack': partial(self._updateMainPlotPanel, True),
               'enabled': True,
               'tipText': guiNameSpaces.TipText_BelowThrColour,
               'type': compoundWidget.ColourSelectionCompoundWidget,
@@ -1019,7 +1020,7 @@ class AppearancePanel(GuiSettingPanel):
                        'compoundKwds': {'includeGradients': False}}}),
             (guiNameSpaces.WidgetVarName_UntraceableColour,
              {'label': guiNameSpaces.Label_UntraceableColour,
-              'callBack': self._updateMainPlotPanel,
+              'callBack':  partial(self._updateMainPlotPanel, True),
               'enabled': True,
               'tipText': guiNameSpaces.TipText_UntraceableColour,
               'type': compoundWidget.ColourSelectionCompoundWidget,
@@ -1031,7 +1032,7 @@ class AppearancePanel(GuiSettingPanel):
             (guiNameSpaces.WidgetVarName_ThrColour,
              {'label': guiNameSpaces.Label_ThrColour,
               'enabled': True,
-              'callBack': self._updateMainPlotPanel,
+              'callBack': partial(self._updateMainPlotPanel, True),
               'tipText': guiNameSpaces.TipText_ThrColour,
               'type': compoundWidget.ColourSelectionCompoundWidget,
               'kwds': {'labelText': guiNameSpaces.Label_ThrColour,
@@ -1042,7 +1043,7 @@ class AppearancePanel(GuiSettingPanel):
                                         }}}),
             (guiNameSpaces.WidgetVarName_RALColour,
              {'label': guiNameSpaces.Label_RALColour,
-              'callBack': self._updateMainPlotPanel,
+              'callBack':  partial(self._updateMainPlotPanel, True),
               'tipText': guiNameSpaces.TipText_RALColour,
               'enabled': False,
               'type': compoundWidget.ColourSelectionCompoundWidget,
@@ -1131,14 +1132,14 @@ class AppearancePanel(GuiSettingPanel):
             w.setByText(PlotType.SCATTER.description, silent=True) #revert the selection to the previous
             return
         panel.setPlotType(t)
-        self._updateMainPlotPanel()
+        self._updateMainPlotPanel(keepZoom=True)
 
     def _viewModeChanged(self, *args):
         panel = self.guiModule.panelHandler.getPanel(guiNameSpaces.MainPlotPanel)
         viewModeWidget = self.getWidget(guiNameSpaces.WidgetVarName_PlotViewMode)
         viewMode = viewModeWidget.getByText()
         panel.setViewMode(viewMode)
-        self._updateMainPlotPanel()
+        self._updateMainPlotPanel(keepZoom=False) # zoom must be reset as data may have changed order
 
     def _setThresholdValueForData(self, *args):
         mode = None
@@ -1168,7 +1169,7 @@ class AppearancePanel(GuiSettingPanel):
             value = thresholdValueW.getValue()
             panel = self.guiModule.panelHandler.getPanel(guiNameSpaces.MainPlotPanel)
             panel.thresholdValue = value
-            panel.updatePanel()
+            panel.updatePanel(keepZoom=True)
 
     def _getThresholdValueFromBackend(self, columnName, calculationMode, factor):
 
@@ -1187,7 +1188,8 @@ class AppearancePanel(GuiSettingPanel):
     def _updateMainPlotPanel(self, *args, **kwargs):
         panel = self.guiModule.panelHandler.getPanel(guiNameSpaces.MainPlotPanel)
         if panel is not None:
-            panel.updatePanel()
+            keepZoom = kwargs.get('keepZoom', False)
+            panel.updatePanel(keepZoom=keepZoom)
 
     def _getNumericColumnsFromData(self):
         allOptions = []

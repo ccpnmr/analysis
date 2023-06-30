@@ -39,15 +39,17 @@ util_find_library_bk = util.find_library
 
 def util_find_library_OSX11Patch(name):
     res = util_find_library_bk(name)
-    if res: return res
+    if res:
+        return res
     return _OpenGLLibraryPathOSX11 % (name, name)
 
 
 try:
     try:
-        if isLinux() and isUbuntuVersion('22.04'):
-            # fix needed for openGL to work on 22.04
-            os.environ['PYOPENGL_PLATFORM'] = 'x11'
+        # if isLinux() and isUbuntuVersion('22.04'):
+        # NOTE:ED - this now needs to be set BEFORE execution :|
+        #     # fix needed for openGL to work on 22.04
+        #     os.environ['PYOPENGL_PLATFORM'] = 'x11'
         from OpenGL import GL
         import OpenGL.arrays.vbo as VBO
     except ImportError:

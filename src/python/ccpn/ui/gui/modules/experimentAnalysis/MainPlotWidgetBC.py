@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-07 16:50:12 +0100 (Wed, June 07, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-06-28 19:23:05 +0100 (Wed, June 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -116,7 +116,6 @@ class MainPlotWidget(Widget):
         self._lineMovedCallback = lineMovedCallback
         self._plottedDataFrames = None
 
-
         # Background/canvas items.
         self.viewBox = ViewBox(self)
         self.plotItem = PlotItem(self, name=self.name, labels=None, title=self.title, viewBox=self.viewBox,
@@ -143,7 +142,6 @@ class MainPlotWidget(Widget):
     ###################################################################
     #########################     Public methods     #########################
     ###################################################################
-
 
     def plotData(self,
                  dataFrame,
@@ -179,7 +177,6 @@ class MainPlotWidget(Widget):
 
         String values are allowed only on Bars/Lines.
         If Strings are given in the xValues, then the dataframe index is used as numeric and the xValues will be the ticks.
-
         """
 
         columnNameDict = {k:v for k,v in locals().items() if COLUMNNAME in k}
@@ -310,11 +307,15 @@ class MainPlotWidget(Widget):
         for handler in self.plottingHandlers:
             data = handler.getRawPlotData()
             for coords in data:
-                x, y = coords
-                maxYs.append(np.max(y))
-                minYs.append(np.min(y))
-                maxXs.append(np.max(x))
-                minXs.append(np.min(x))
+                xs, ys = coords
+                xs = xs[~np.isnan(xs)] # remove NaN values from array
+                ys = ys[~np.isnan(ys)]
+                if len(xs) == 0 or len(ys) == 0:
+                    continue
+                maxYs.append(np.max(ys))
+                minYs.append(np.min(ys))
+                maxXs.append(np.max(xs))
+                minXs.append(np.min(xs))
         if len(maxYs) > 0:
             yMax = np.max(maxYs)
             yMin = np.min(minYs)
@@ -455,6 +456,16 @@ class MainPlotWidget(Widget):
     def selectByPids(self, pids):
         for handler in self._plottingHandlers:
             handler.selectData(pids)
+
+    @property
+    def _viewRect(self):
+        """ The currently displayed ViewRect. Used to restore the same aspect ratio after an update"""
+        return self.viewBox.viewRect()
+
+    def _setViewRect(self, viewRect):
+        """ Set the ViewRect. Used to restore the same aspect ratio after an update. Use padding zero to maintain the same zoom"""
+        return self.viewBox.setRange(viewRect, padding=0)
+
 
     def __repr__(self):
         return f'<{self.__class__.__name__}_{self.name}>'
@@ -636,7 +647,7 @@ class ScattersHandler(PlotItemHandlerABC):
         noPen = None  # pen defined as None will not plot a line connecting scatters
         self.penColour = rgbaRatioToHex(*getColours()[CCPNGLWIDGET_LABELLING])
         scatterPen = pg.functions.mkPen(self.penColour, width=0.5, style=QtCore.Qt.SolidLine)
-        brushes = [pg.fn.mkBrush(c) for c in coloursValues]
+        brushes = [pg.functions.mkBrush(c) for c in coloursValues]
 
         if not yValues.dtype in [int, float]:
             getLogger().debug('Impossible to plot Y values. dType not allowed. Used array index instead.')
@@ -816,7 +827,7 @@ class PlotItem(pg.PlotItem):
 class XAxisItem(pg.AxisItem):
     def __init__(self,  parentWidget, labelRotation=-90, outward=True, *args, **kwargs):
         pg.AxisItem.__init__(self, *args, **kwargs)
-        self.style = {
+        self.style |= {
             'tickTextOffset': [5, 2],  ## (horizontal, vertical) spacing between text and axis
             'tickTextWidth': 30,  ## space reserved for tick text
             'tickTextHeight': 18,
@@ -846,7 +857,7 @@ class XAxisItem(pg.AxisItem):
 class YAxisItem(pg.AxisItem):
     def __init__(self, parentWidget, outward=False, *args, **kwargs):
         pg.AxisItem.__init__(self, *args, **kwargs)
-        self.style = {
+        self.style |= {
             'tickTextOffset': [5, 2],  ## (horizontal, vertical) spacing between text and axis
             'tickTextWidth': 30,  ## space reserved for tick text
             'tickTextHeight': 18,
@@ -901,9 +912,8 @@ if __name__ == '__main__':
 
     df = pd.DataFrame({'a':[1,2,3,4], 'b':[0.1, 1.3, 4.4, 7.9]})
     # widget.plotData(dataFrame=df, plotName='name', plotType=PlotType.LINE.description, xColumnName='a', yColumnName='b')
-    widget.plotData(dataFrame=df, plotName='name', plotType=PlotType.BAR.description, xColumnName='a', yColumnName='b')
+    widget.plotData(dataFrame=df, plotName='name', plotType=PlotType.BAR.description, indicesColumnName='index',xColumnName='a', yColumnName='b')
     # widget.plotData(dataFrame=df, plotName='name', plotType=PlotType.SCATTER.description, xColumnName='a', yColumnName='b')
-    print(widget.allowedPlotTypes)
     moduleArea.addModule(module)
     win.setCentralWidget(moduleArea)
     win.resize(1000, 500)

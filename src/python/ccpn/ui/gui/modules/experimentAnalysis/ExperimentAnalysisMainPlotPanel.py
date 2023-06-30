@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-07 16:50:12 +0100 (Wed, June 07, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-06-28 19:23:05 +0100 (Wed, June 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -80,7 +80,7 @@ class MainPlotPanel(GuiPanel):
         self._selectCurrentCONotifier = Notifier(self.current, [Notifier.CURRENT], targetName='collections',
                                                  callback=self._currentCollectionCallback, onceOnly=True)
 
-        self.guiModule.mainTableChanged.connect(partial(self._mainTableChanged, True))
+        self.guiModule.mainTableChanged.connect(partial(self._mainTableChanged, False))
         self.guiModule.mainTableSortingChanged.connect(partial(self._mainTableChanged, False))
 
     def _setColours(self):
@@ -112,7 +112,7 @@ class MainPlotPanel(GuiPanel):
     #########################     Public methods     #########################
     ###################################################################
 
-    def updatePanel(self, *args, **kwargs):
+    def updatePanel(self, keepZoom=False, *args, **kwargs):
         getLogger().debug('Updating  barPlot panel')
         dataFrame = self.guiModule.getVisibleDataFrame(includeHiddenColumns=True)
         plotType = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_PlotType).getByText()
@@ -121,7 +121,7 @@ class MainPlotPanel(GuiPanel):
         if dataFrame is None:
             self.mainPlotWidget.clear()
             return
-
+        vr = self.mainPlotWidget._viewRect
         if self.viewMode == guiNameSpaces.PlotViewMode_Backbone:
             chainWidget = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_Chain)
             if chainWidget is not None:
@@ -139,7 +139,11 @@ class MainPlotPanel(GuiPanel):
                     return
                 dataFrame =  self._filterBySecondaryStructure(dataFrame, chain)
         self._plotDataFrame(dataFrame)
-        self.fitXYZoom()
+        if keepZoom:
+            # restore the range as it was before the update
+            self.mainPlotWidget._setViewRect(vr)
+        else:
+            self.fitXYZoom()
 
     @property
     def plotType(self):
@@ -150,7 +154,7 @@ class MainPlotPanel(GuiPanel):
         if plotType not in self.mainPlotWidget.allowedPlotTypes:
             raise RuntimeError(f'Plot type {plotType} not implemented')
         self._plotType = plotType
-        self.updatePanel()
+        self.updatePanel(keepZoom=True)
 
     @property
     def plotTitle(self):
@@ -296,24 +300,11 @@ class MainPlotPanel(GuiPanel):
         :return:  one of  float, int, str, None  """
         return self._checkColumnType(self.yColumnName)
 
-
-    def _thresholdLineMoved(self):
-        pass
-        pos = self.barGraphWidget.xLine.pos().y()
-        if self._appearancePanel:
-            w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_ThreshValue)
-            if w:
-                with w.blockWidgetSignals():
-                    w.setValue(pos)
-        self.updatePanel()
-
-    def _mainTableChanged(self, resetZoom=False):
+    def _mainTableChanged(self, keepZoom=False):
         if self.viewMode == guiNameSpaces.PlotViewMode_Backbone:
-            getLogger().debug2(f'BarGraph-view {self.viewMode}: Sorting/Filtering on the main table does not change the plot.')
+            getLogger().debug2(f'Plot view {self.viewMode}: Sorting/Filtering on the main table does not change the plot.')
             return
-        self.updatePanel()
-        if resetZoom:
-            self.mainPlotWidget.zoomFull()
+        self.updatePanel(keepZoom=keepZoom)  # zoom must be reset as data may have changed order
 
     @property
     def _aboveThresholdBrushColour(self):
@@ -417,8 +408,9 @@ class MainPlotPanel(GuiPanel):
             self.currentCollectionLabel.clear()
 
     def _lineMovedCallback(self, position, name, *args, **kwargs):
+
         self.thresholdValue = float(position)
-        self.updatePanel()
+        self.updatePanel(keepZoom=True)
         # update the widgets as well
         tw =  self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_ThreshValue)
         if tw is not None:
@@ -485,6 +477,8 @@ class MainPlotPanel(GuiPanel):
         filteredDf = pd.DataFrame()
         bbRows = []
         # filterDataFrame by the chain code first
+        if not seriesVariables.NMRCHAINNAME in df:
+            return filteredDf
         chainCode = chain.name
         df = df[df[seriesVariables.NMRCHAINNAME] == chainCode]
         for resCode in expandedSequenceResCodes:

@@ -466,8 +466,8 @@ class ObjectTable(QtWidgets.QTableView, Base):
     header.setStretchLastSection(False)
     
     rowHeight = self.bbox('A').height() + 4
-    header.setMinimumSectionSize(rowHeight)
-    header.setDefaultSectionSize(rowHeight)
+    header.setMinimumSectionSize(int(rowHeight))
+    header.setDefaultSectionSize(int(rowHeight))
     
     if numberRows:
       header.setVisible(True)
@@ -834,7 +834,7 @@ class ObjectTable(QtWidgets.QTableView, Base):
             colSizes[i] = size
  
       for i, width in enumerate(colSizes):
-        setColumnWidth(i, width+12)
+        setColumnWidth(int(i), int(width+12))
       
     if not stretch:
       header.setStretchLastSection(True)

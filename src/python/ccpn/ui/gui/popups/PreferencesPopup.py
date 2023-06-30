@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 17:58:32 +0100 (Fri, June 09, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-06-28 19:17:56 +0100 (Wed, June 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -226,7 +226,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         h = max((h, 800))
         self._size = QtCore.QSize(w, h)
         self.setMinimumWidth(w)
-        self.setMaximumWidth(w * 1.5)
+        self.setMaximumWidth(int(w * 1.5))
 
         # keep a backup of the working paths in the dialogs
         self._tempDialog = ProjectFileDialog()

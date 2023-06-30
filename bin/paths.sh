@@ -11,6 +11,10 @@ export QT_LOGGING_RULES="*=false;qt.qpa.*=false"
 if [[ "$(uname -s)" == "Darwin" ]]; then
     export DYLD_FALLBACK_LIBRARY_PATH=/System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/ImageIO.framework/Versions/A/Resources:
     export DYLD_FALLBACK_LIBRARY_PATH=${DYLD_FALLBACK_LIBRARY_PATH}"${CONDA}"/lib:
-    export DYLD_FALLBACK_LIBRARY_PATH=${DYLD_FALLBACK_LIBRARY_PATH}"${CONDA}"/lib/python3.9/site-packages/PyQt5:
+    export DYLD_FALLBACK_LIBRARY_PATH=${DYLD_FALLBACK_LIBRARY_PATH}"${CONDA}"/lib/python${MAC_PYTHON_VERSION}/site-packages/PyQt5:
     export DYLD_FALLBACK_LIBRARY_PATH=${DYLD_FALLBACK_LIBRARY_PATH}${HOME}/lib:/usr/local/lib:/usr/lib
+fi
+
+if [[ "$(lsb_release -r)" == *"22.04"* ]]; then
+  export PYOPENGL_PLATFORM=x11
 fi

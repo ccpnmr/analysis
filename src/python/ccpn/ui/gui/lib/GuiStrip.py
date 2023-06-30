@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-27 15:22:39 +0100 (Tue, June 27, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-06-29 17:45:28 +0100 (Thu, June 29, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -112,7 +112,7 @@ class _WidgetFrame(Frame):
         super().leaveEvent(a0)
 
         sDisplay = self.strip.spectrumDisplay
-        self.strip._overlay.setOverlayArea(None)
+        self.strip.setOverlayArea(None)
 
         sDisplay.setRightOverlayArea(None)
         sDisplay.setBottomOverlayArea(None)
@@ -148,6 +148,7 @@ class _StripOverlay(QtWidgets.QWidget):
 
             self.setGeometry(rgn)
             self.show()
+            self.raise_()
 
         self.update()
 
@@ -386,8 +387,8 @@ class GuiStrip(Frame):
         self._noiseThresholdLinesActive = False
 
         # create an overlay for drag-drop/highlight operations
-        self._overlay = _StripOverlay(self)
-        self._overlay.raise_()
+        self._overlayArea = _StripOverlay(self)
+        self._overlayArea.raise_()
 
         # initialise the notifiers
         self.setStripNotifiers()
@@ -442,7 +443,7 @@ class GuiStrip(Frame):
 
     def resizeEvent(self, ev):
         # adjust the overlay to match the resize-event
-        self._overlay._resize()
+        self._overlayArea._resize()
 
         super().resizeEvent(ev)
         # call subclass _resize event
@@ -452,8 +453,7 @@ class GuiStrip(Frame):
     def _raiseOverlay(self):
         """Raise the Overlay to apply a colour to the strip.
         """
-        self._overlay.setOverlayArea(True)
-        self._overlay.raise_()
+        self.setOverlayArea(True)
 
     def _resize(self):
         """Resize event to handle resizing of frames that overlay the OpenGL frame
@@ -2392,7 +2392,7 @@ class GuiStrip(Frame):
         except:
             defaultColour = '#FF0000'
 
-        self.newMark(defaultColour, positions, axisCodes)
+        self.mainWindow.newMark(defaultColour, positions, axisCodes)
 
     def _copyAxisFromStrip(self, axisId, fromStrip):
         try:
@@ -2449,7 +2449,7 @@ class GuiStrip(Frame):
             positions = [(pos, ax) for ax in self.axisCodes for pos in mouseDict.get(ax, []) if pos is not None]
 
             for pos, ax in positions:
-                self.newMark(defaultColour, [pos], [ax])
+                self.mainWindow.newMark(defaultColour, [pos], [ax])
 
         except Exception as es:
             getLogger().warning('Error setting mark at current cursor position')
@@ -3032,7 +3032,7 @@ class GuiStrip(Frame):
     def setOverlayArea(self, value):
         """Set the overlay type.
         """
-        self._overlay.setOverlayArea(value)
+        self._overlayArea.setOverlayArea(value)
 
     def _updateVisibility(self):
         """Update visibility list in the OpenGL

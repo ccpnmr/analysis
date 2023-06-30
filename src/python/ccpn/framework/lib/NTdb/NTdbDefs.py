@@ -475,9 +475,9 @@ class NTdbDefs(dict):
 def getNTdbDefs() -> dict:
     """:return the NTdbDefs (i.e. NTdbDefs) instance (singleton)
     """
-    from ccpn.framework.PathsAndUrls import ccpnConfigPath
+    from ccpn.framework.PathsAndUrls import ccpnResourcesPath
     defs = NTdbDefs()
-    _path = ccpnConfigPath / 'NTdb_json'
+    _path = ccpnResourcesPath / 'referenceMolecules'
     defs.fromJson(_path)
     return defs
 

@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:09 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-06-28 19:17:57 +0100 (Wed, June 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -519,13 +519,13 @@ def pdb2df(filename: str) -> pd.DataFrame:
             if l.startswith('MODEL'):
                 if len(pdbString) > 0:
                     df = _pdbStringToDf(pdbString, modelNumber)
-                    dfs = df if dfs is None else dfs.append(df)
+                    dfs = df if dfs is None else pd.concat([dfs, df], axis=0)
                     pdbString = []
                 modelNumber = l.split()[1]
             elif l.startswith('ATOM'):
                 pdbString.append(l)
         df = _pdbStringToDf(pdbString, modelNumber)
-        dfs = df if dfs is None else dfs.append(df)
+        dfs = df if dfs is None else pd.concat([dfs, df], axis=0)
     dfs['idx'] = numpy.arange(dfs.shape[0]) + 1
     dfs.set_index('idx', inplace=True)
     return dfs

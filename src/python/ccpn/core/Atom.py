@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-23 15:26:51 +0100 (Tue, May 23, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-06-29 16:27:44 +0100 (Thu, June 29, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -111,6 +111,25 @@ class Atom(AbstractWrapperObject):
         apiAtom = self._wrappedData
 
         return tuple(getDataObj(x) for x in apiAtom.sortedGenericBonds())
+
+    @property
+    def realAtoms(self):
+        """Recursively find all real atoms that combined  make up this atom. See componentAtoms"""
+        def _getRealAtoms(atom):
+            atoms = []
+            for i in atom.componentAtoms:
+                if i.componentAtoms:
+                    atoms += _getRealAtoms(i)
+                else:
+                    atoms.append(i)
+            return atoms
+        return _getRealAtoms(self)
+
+    def isRealAtom(self) -> bool:
+        """
+        :return: bool: True if the atom is a basic atom without subcomponents.  False if is a wildcard (e.g. HB%, QB) or non-stereospecific atom (e.g. HBx, HBy, HGx%)
+        """
+        return len(self.componentAtoms) == 0
 
     @property
     def componentAtoms(self) -> typing.Tuple['Atom']:

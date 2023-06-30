@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-05 11:27:52 +0100 (Fri, May 05, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-06-28 19:17:57 +0100 (Wed, June 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -204,6 +204,10 @@ class TableABC(QtWidgets.QTableView):
 
         # initialise the table
         self.updateDf(df, _resize, setHeightToRows, setWidthToColumns, setOnHeaderOnly=setOnHeaderOnly)
+
+    # pyqt5.15 does not allow setting by float
+    def setFixedHeight(self, p_int):
+        super().setFixedHeight(int(p_int))
 
     def _setSelectionBehaviour(self, multiSelect):
         """Set the selection-behaiour
@@ -408,8 +412,8 @@ class TableABC(QtWidgets.QTableView):
             # otherwise user-changeable
             _header.setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
 
-        _header.setDefaultSectionSize(_height)
-        _header.setMinimumSectionSize(_height)
+        _header.setDefaultSectionSize(int(_height))
+        _header.setMinimumSectionSize(int(_height))
 
     def _preChangeSelectionOrderCallback(self, *args):
         """Handle updating the selection when the table is about to change, i.e., before sorting

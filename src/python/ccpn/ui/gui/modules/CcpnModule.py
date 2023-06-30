@@ -16,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 12:06:25 +0100 (Fri, June 09, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-06-28 19:23:05 +0100 (Wed, June 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -57,6 +57,7 @@ from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
 from ccpn.ui.gui.widgets.Splitter import Splitter
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.ToolButton import ToolButton
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS
@@ -74,7 +75,7 @@ from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight, getFont
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.core.lib.Pid import Pid, createPid
 from ccpn.ui.gui.widgets.Base import Base
-
+from ccpn.util.Path import aPath
 
 CommonWidgetsEdits = {
     CheckBox.__name__                       : (CheckBox.get, CheckBox.setChecked, None),
@@ -181,7 +182,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     _includeInLastSeen = True  # whether to restore or not after closing it (in the same project)
     _allowRename = False
     _defaultName = MODULENAME  # used only when renaming is allowed, so that its original name is stored in the lastSeen widgetsState.
-
+    _helpFilePath = None
     # After closing a renamed module, any new instance will be named as default.
 
     # _instances = set()
@@ -249,6 +250,8 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self.topLayout.removeWidget(self.label)
         # GST this wasn't deleting the widget it was leaving it still attached to the qt hierrchy which was causing all
         # sorts of graphical hickups later on
+
+        # _dock = self.label.dock  # not carried across from original label
         self.label.deleteLater()
         del self.label
 
@@ -258,8 +261,11 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self.label = CcpnModuleLabel(name, self,
                                      showCloseButton=closable, closeCallback=self._closeModule,
                                      enableSettingsButton=self.includeSettingsWidget,
-                                     settingsCallback=self._settingsCallback
+                                     settingsCallback=self._settingsCallback,
+                                     helpButtonCallback = self._helpButtonCallback,
                                      )
+        # self.label.dock = self  # not
+
         self.topLayout.addWidget(self.label, 0, 1)  # ejb - swap out the old widget, keeps hierarchy
         # except it doesn't work properly
         self.setOrientation(o='horizontal')
@@ -826,6 +832,26 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         finally:
             return False
 
+    def setHelpFilePath(self, htmlFilePath):
+        self._helpFilePath = htmlFilePath
+
+    def _helpButtonCallback(self):
+        """
+        Add a new module displaying its help file
+        :return:
+        """
+        from ccpn.ui.gui.modules.HelpModule import HelpModule
+        htmlFilePath = self._helpFilePath
+        if htmlFilePath is not None:
+            moduleArea = self.mainWindow.moduleArea
+            helpModule = moduleArea._getHelpModule(self.moduleName)
+            if not helpModule:
+                helpModule = HelpModule(mainWindow=self.mainWindow,
+                                        name=f'Help Browser: {self.moduleName}',
+                                        parentModuleName=self.moduleName,
+                                        htmlFilePath=htmlFilePath)
+                moduleArea.addModule(helpModule, position='top', relativeTo=self)
+
     def _settingsCallback(self):
         """
         Toggles display of settings widget in module.
@@ -1110,7 +1136,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
             window = self.findWindow()
             window.move(endPosition)
 
-            # this is because we could have have dragged into another application
+            # this is because we could have dragged into another application
             # this may not work under windows
             originalWindow = self.findWindow()
             originalWindow.raise_()
@@ -1127,6 +1153,9 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     def _raiseSelectedOverlay(self):
         self._selectedOverlay.setDropArea(True)
         self._selectedOverlay.raise_()
+
+    def _hideHelpButton(self):
+        self.label.helpButton.hide()
 
     def resizeEvent(self, ev):
         self._selectedOverlay._resize()
@@ -1153,7 +1182,8 @@ class CcpnModuleLabel(DockLabel):
         iconSizes = [max((size.height(), size.width())) for size in icon.availableSizes()]
         return max(iconSizes)
 
-    def __init__(self, name, module, showCloseButton=True, closeCallback=None, enableSettingsButton=False, settingsCallback=None):
+    def __init__(self, name, module, showCloseButton=True, closeCallback=None, enableSettingsButton=False, settingsCallback=None,
+                  helpButtonCallback=None, ):
 
         self.buttonBorderWidth = 1
         self.buttonIconMargin = 1
@@ -1161,9 +1191,11 @@ class CcpnModuleLabel(DockLabel):
         self.labelRadius = 3
 
         _fontSize = getWidgetFontHeight(size='MEDIUM') or 16
-        super().__init__(name, module, showCloseButton=showCloseButton, )  # fontSize=_fontSize)
+        super().__init__(name, closable=showCloseButton, )  # fontSize=_fontSize)
+        # super().__init__(name, module, showCloseButton=showCloseButton, )  # fontSize=_fontSize)
 
         self.module = module
+        self.dock = module
         self.fixedWidth = True
 
         setWidgetFont(self, size='MEDIUM')
@@ -1195,13 +1227,16 @@ class CcpnModuleLabel(DockLabel):
             self.setupLabelButton(self.closeButton, 'close-module', CcpnModuleLabel.TOP_RIGHT)
 
         # Settings
-        self.settingsButton = ToolButton(self)
-        self.setupLabelButton(self.settingsButton, 'gearbox', CcpnModuleLabel.TOP_LEFT)
-
-        if settingsCallback is None:
-            raise RuntimeError('Requested settingsButton without callback')
-        else:
-            self.settingsButton.clicked.connect(settingsCallback)
+        self.settingsButtons = ButtonList(self, texts=['', ''],
+                                          icons=['icons/gearbox', 'icons/system-help'],
+                                          callbacks=[settingsCallback, helpButtonCallback]
+                                          )
+        self.settingsButton = self.settingsButtons.buttons[0]
+        self.helpButton = self.settingsButtons.buttons[1]
+        self.setupLabelButton(self.settingsButton, position=CcpnModuleLabel.TOP_LEFT)
+        self.setupLabelButton(self.helpButton,  position=CcpnModuleLabel.TOP_LEFT)
+        if self.module._helpFilePath is None or  not aPath(self.module._helpFilePath).exists():
+            self.helpButton.setEnabled(False)
         self.settingsButton.setEnabled(enableSettingsButton)
 
         self.updateStyle()
@@ -1225,10 +1260,10 @@ class CcpnModuleLabel(DockLabel):
         self.nameEditor.hide()
         self.module.renameModule(name)
 
-    def setupLabelButton(self, button, iconName, position):
-        icon = Icon(f'icons/{iconName}')
-
-        button.setIcon(icon)
+    def setupLabelButton(self, button, iconName=None, position=None):
+        if iconName:
+            icon = Icon(f'icons/{iconName}')
+            button.setIcon(icon)
         # retinaIconSize = self.getMaxIconSize(icon) // 2
         retinaIconSize = self.labelSize - 4
 
@@ -1384,10 +1419,14 @@ class CcpnModuleLabel(DockLabel):
             self.setMaximumHeight(self.labelSize)
 
     def mouseMoveEvent(self, ev):
-        """Handle the mouse move event to spawn a drag event
+        """Handle the mouse move event to spawn a drag event - copied from super-class
         """
         if hasattr(self, 'pressPos') and not self._inDoubleClick:
-            if not self.startedDrag and (ev.pos() - self.pressPos).manhattanLength() > QtWidgets.QApplication.startDragDistance():
+            if not self.mouseMoved:
+                lpos = ev.position() if hasattr(ev, 'position') else ev.localPos()
+                self.mouseMoved = (lpos - self.pressPos).manhattanLength() > QtWidgets.QApplication.startDragDistance()
+
+            if self.mouseMoved and ev.buttons() == QtCore.Qt.MouseButton.LeftButton:
                 # emit a drag started event
                 self.sigDragEntered.emit(self.parent(), ev)
                 self.dock.startDrag()
@@ -1420,11 +1459,11 @@ class CcpnModuleLabel(DockLabel):
             else:
                 self.layout().addWidget(self.closeButton, 0, 3, alignment=QtCore.Qt.AlignRight)
 
-        if hasattr(self, 'settingsButton') and self.settingsButton:
+        if hasattr(self, 'settingsButtons') and self.settingsButtons:
             if self.orientation == 'vertical':
-                self.layout().addWidget(self.settingsButton, 0, 0, alignment=QtCore.Qt.AlignBottom)
+                self.layout().addWidget(self.settingsButtons, 0, 0, alignment=QtCore.Qt.AlignBottom)
             else:
-                self.layout().addWidget(self.settingsButton, 0, 0, alignment=QtCore.Qt.AlignLeft)
+                self.layout().addWidget(self.settingsButtons, 0, 0, alignment=QtCore.Qt.AlignLeft)
 
         if hasattr(self, 'nameEditor') and self.nameEditor:
             self.layout().addWidget(self.nameEditor, 0, 1, alignment=QtCore.Qt.AlignCenter)

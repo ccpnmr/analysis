@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-26 18:58:09 +0100 (Mon, June 26, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-06-29 17:45:56 +0100 (Thu, June 29, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -207,8 +207,8 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         # self.setFixedWidth(self.AXIS_MARGINRIGHT+self.AXIS_LINE)
 
         # create an overlay for drag-drop/highlight operations
-        self._overlay = _AxisOverlay(self)
-        self._overlay.raise_()
+        self._overlayArea = _AxisOverlay(self)
+        self._overlayArea.raise_()
 
     @property
     def tilePosition(self) -> Tuple[int, int]:
@@ -1104,7 +1104,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self.vInv = None
         self.mouseTransform = None
 
-        self._useTexture = np.zeros((1,), dtype=np.int)
+        self._useTexture = np.zeros((1,), dtype=int)
         self._axisScale = np.zeros((4,), dtype=np.float32)
         self._background = np.zeros((4,), dtype=np.float32)
         self._parameterList = np.zeros((4,), dtype=np.int32)
@@ -1778,6 +1778,11 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self.globalGL._shaderProgramTexAlias.setBackground(self.background)
         if not silent:
             self.update()
+
+    def setOverlayArea(self, value):
+        """Set the overlay type.
+        """
+        self._overlayArea.setOverlayArea(value)
 
     def enableTextClientState(self):
         _attribArrayIndex = 1

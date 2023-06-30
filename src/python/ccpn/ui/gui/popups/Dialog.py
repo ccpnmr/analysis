@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 15:18:45 +0100 (Tue, March 28, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-06-28 19:17:56 +0100 (Wed, June 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -234,6 +234,19 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Fixed if self.FIXEDWIDTH else QtWidgets.QSizePolicy.Preferred,
                                       QtWidgets.QSizePolicy.Fixed if self.FIXEDHEIGHT else QtWidgets.QSizePolicy.Preferred, )
         self.resize(_size)
+
+    # # pyqt5.15 does not allow setting with a float
+    # def setMinimumWidth(self, p_int):
+    #     super().setMinimumWidth(int(p_int))
+    #
+    # def setMinimumHeight(self, p_int):
+    #     super().setMinimumHeight(int(p_int))
+    #
+    # def setMaximumWidth(self, p_int):
+    #     super().setMaximumWidth(int(p_int))
+    #
+    # def setMaximumHeight(self, p_int):
+    #     super().setMaximumHeight(int(p_int))
 
     def setOkButton(self, callback=None, text=None,
                     tipText='Apply changes and close',

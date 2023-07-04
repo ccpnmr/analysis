@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-04 17:12:47 +0100 (Tue, July 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-04 17:19:50 +0100 (Tue, July 04, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -704,8 +704,7 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                         #
                         #     zeroCols.append(HEADERMEANCOL)
 
-                        except Exception as es:
-                            print(es)
+                        except Exception:
                             continue
 
                         # _right = violationResults[resList].drop_duplicates([f'{HeaderRestraint}_{ii + 1}', f'Atoms_{ii + 1}'])

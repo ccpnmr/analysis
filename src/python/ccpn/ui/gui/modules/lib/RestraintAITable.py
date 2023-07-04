@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-12 12:21:42 +0100 (Mon, June 12, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-07-04 17:12:47 +0100 (Tue, July 04, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -679,8 +679,8 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                                 _new = pd.merge(_left, _vMerge, how='left').drop(columns=[PEAKSERIALCOL])
 
                                 # fill the blank spaces with the correct types
-                                _new.fillna({HEADERSCOL: '-', ATOMSCOL: '-', HEADERVIOLATION: False}, inplace=True)
-                                _new.fillna(0.0, inplace=True)
+                                _new = _new.fillna({HEADERSCOL: '-', ATOMSCOL: '-', HEADERVIOLATION: False})
+                                _new = _new.fillna(0.0)
 
                                 _out.append(_new)
 
@@ -704,7 +704,8 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                         #
                         #     zeroCols.append(HEADERMEANCOL)
 
-                        except Exception:
+                        except Exception as es:
+                            print(es)
                             continue
 
                         # _right = violationResults[resList].drop_duplicates([f'{HeaderRestraint}_{ii + 1}', f'Atoms_{ii + 1}'])

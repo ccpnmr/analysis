@@ -20,9 +20,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:39 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: VickyAH $"
+__dateModified__ = "$dateModified: 2023-07-05 09:35:35 +0100 (Wed, July 05, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -357,6 +357,15 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
             offset = ( self.headerSize + \
                       (position[specLib.X_DIM_INDEX]-1) * self.pointCounts[specLib.X_DIM_INDEX] * self.pointCounts[specLib.Y_DIM_INDEX]
                      ) * self.wordSize
+
+        elif self.dimensionCount == 4 and self.nFiles == 1:
+            path = self.path
+            offset = ( self.headerSize + \
+                      (position[specLib.A_DIM_INDEX]-1) *self.pointCounts[specLib.X_DIM_INDEX] * self.pointCounts[specLib.Y_DIM_INDEX] \
+                       *self.pointCounts[specLib.Z_DIM_INDEX] + \
+                      (position[specLib.Z_DIM_INDEX]-1) *self.pointCounts[specLib.X_DIM_INDEX] * self.pointCounts[specLib.Y_DIM_INDEX]
+                     ) * self.wordSize
+
         else:
             raise RuntimeError('%s: Unable to construct path for position %s' % (self, position))
 

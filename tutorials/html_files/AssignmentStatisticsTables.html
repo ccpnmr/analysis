@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Assignment Statistics Tables</title>
+    <link rel="stylesheet" href="CcpnVideoTutorials.css">
+</head>
+<body>
+<div class="header"><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a href="index.html" class="button">Video<br> Tutorials<br> & Manual</a><a href="https://www.ccpn.ac.uk/forums/"><img src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 15px"></a></div>
+<br>
+<div class="headerBar">Assignment Statistics Tables</div>
+<div class="tutorial">
+
+   
+<h2>Assignment Statistics Tables</h2>
+<p>The aim of the assignment statistic tables is to allow the calculation of the degree of assignment of a protein chain.
+   From this information it can :</p>
+   <ul>
+      <li>Help identify residues with missing assignments</li>
+      <li>Calculate Assignment percentages for atom types</li>
+      <li>Identify some potential assignment issues</li>
+   </ul>
+
+
+<h3>Generated tables</h3>
+
+<h3>AssignedChemicalShifts</h3>
+   <p>Gives an overview of every chemical shift assigned from a chemical shift list for every possible atom/atom group
+      in selected chain, consequently this gives you very large table with a very large number of columns.</p>
+
+   <p><b>Possible values:</b></p>
+<ul>
+   <li>Chemical shift value recorded for atom/atom group</li>
+   <li>empty cells indicate that no data is expected in this location.</li>
+   <li>‘ - ‘ data is expected but not available for this for atom/atom group</li>
+</ul>
+
+   <h3>AssignmentCompleteness</h3>
+   <p>Provides an overview of which atom/atom groups are assigned.</p>
+
+   <p><b>Possible values:</b></p>
+<ul>
+   <li>Number of observed chemical shifts for this atom/atom group. Both integers and fractions can be observed</li>
+   <li>empty cells indicate that no data is expected in this location.</li>
+</ul>
+
+
+   <h3>SummaryAssignment</h3>
+   <p>Provides a list of atom types and their percentage assignment coverage.
+</p>
+
+   <p><b>Possible values:</b></p>
+<ul>
+   <li>Number assigned/unassigned</li>
+   <li>Percentage assigned</li>
+   <li>If no atoms of a type are observed then the percentage column for that value will be empty</li>
+</ul>
+
+
+   <h3>PossibleProblems</h3>
+   <p>This table only lists residues, for which recorded chemical shifts number fall outside excepted number.
+      For instance, if Ile gamma proton has been recorded for HG1x but not for HG1y, this is listed in the HG
+      column as 0.5.<br/>
+<b>NOTE:</b> currently we do not catch errors such as inconsistent assignment, for instance if Ile HG1y and HG12 are
+      both assigned then this will return 1.0</p>
+
+   <p><b>Possible values:</b></p>
+<ul>
+   <li>Number of observed chemical shifts for this atom/atom group. Both integers and fractions can be observed</li>
+   <li>empty cells indicate that no data is expected in this location.</li>
+</ul>
+
+
+
+</div>
+</body>
+</html>

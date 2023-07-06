@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 12:06:25 +0100 (Fri, June 09, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-07-06 18:41:46 +0100 (Thu, July 06, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -50,7 +50,8 @@ def _getCurrentZoomRatio(viewRange):
 def navigateToPositionInStrip(strip,
                               positions: List[float],
                               axisCodes: List[str] = None,
-                              widths: List[float] = None):
+                              widths: List[float] = None,
+                              markPositions: bool = False):
     """
     Takes a strip, a list of positions and optionally, a parallel list of axisCodes.
     Navigates to specified positions in strip using axisCodes, if specified, otherwise it navigates
@@ -100,9 +101,13 @@ def navigateToPositionInStrip(strip,
                                 _setStripAxisWidth(strip, axisIndex=stripAxisIndex, width=5.0, update=True)
                             else:
                                 _setStripAxisWidth(strip, axisIndex=stripAxisIndex, width=0.5, update=True)
+
             except Exception as es:
-                getLogger().debug(f'navigateToPositionInStrip: caught error {es}')
-                continue
+                getLogger().debug(f'navigateToPositionInStrip: {es}')
+
+    if markPositions:
+        # may need to change to strip.mark..
+        strip.spectrumDisplay.mainWindow.markPpmPositions(axisCodes=axisCodes, positions=positions)
 
     strip._updatePlaneAxes()
 

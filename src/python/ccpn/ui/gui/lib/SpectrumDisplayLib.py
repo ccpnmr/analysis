@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-01 19:39:57 +0100 (Thu, June 01, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-07-06 18:41:46 +0100 (Thu, July 06, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -150,7 +150,7 @@ def makeStripPlotFromSingles(spectrumDisplay: GuiSpectrumDisplay, nmrAtoms: List
             navigateToNmrAtomsInStrip(strip, [nmrAtoms[ii]], widths=widths)
 
 
-def navigateToPeakInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, peak, widths=None):
+def navigateToPeakInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, peak, widths=None, markPositions=False):
     from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 
     spCodes = spectrumDisplay.axisCodes
@@ -176,7 +176,7 @@ def navigateToPeakInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, peak, widt
             pos[ii] = peak.position[ind]
             # mappedNewWidths[ii] = newWidths[ind]
 
-    navigateToPositionInStrip(strip, pos, spCodes, widths=newWidths)
+    navigateToPositionInStrip(strip, pos, spCodes, widths=newWidths, markPositions=markPositions)
     strip.header.reset()
     strip.header.setLabelText(position='c', text=peak.pid)
     # strip.header.headerVisible = True

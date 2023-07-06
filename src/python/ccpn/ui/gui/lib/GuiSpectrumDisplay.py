@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-29 17:45:56 +0100 (Thu, June 29, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-06 18:41:46 +0100 (Thu, July 06, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -2744,12 +2744,12 @@ class GuiSpectrumDisplay(CcpnModule):
                 if pks:
                     for ii, pk in enumerate(pks):
                         strip = self.strips[ii]
-                        navigateToPeakInStrip(self, strip, pk)
+                        navigateToPeakInStrip(self, strip, pk, markPositions=markPositions)
 
                 elif nmrs:
                     for ii, nmr in enumerate(nmrs):
                         strip = self.strips[ii]
-                        navigateToNmrResidueInStrip(self, strip, nmr, widths, markPositions)
+                        navigateToNmrResidueInStrip(self, strip, nmr, widths, markPositions=markPositions)
 
                 # _undo._newItem(redoPartial=partial(_updateGl, self, []))
 

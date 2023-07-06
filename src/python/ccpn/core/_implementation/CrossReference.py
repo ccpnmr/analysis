@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 14:29:32 +0100 (Wed, June 28, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-07-06 18:34:46 +0100 (Thu, July 06, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -703,6 +703,9 @@ class _CrossReference():
             return
 
         if action == 'create':
+
+            # NOTE:ED - need to differentiate between 'create' and 'undo-create'
+            #   the first of which should create a clean cross-reference
             pid = coreObject.pid
             if coreObject in dd[_OBJ2PID]:
                 # undo has created the object

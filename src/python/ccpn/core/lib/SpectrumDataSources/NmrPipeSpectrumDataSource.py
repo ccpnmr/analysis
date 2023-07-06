@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-06 12:46:29 +0100 (Thu, July 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-07 00:20:22 +0100 (Fri, July 07, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -524,7 +524,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
         # In a NmrPipe 2D xy plane:
         # - A complex X-axis has n real points followed by n imaginary points (nRnI)
         # - A complex Y-axis has n alternating real, imag points (nRI)
-        if self.isComplex[specLib.Y_AXIS]:
+        if self.dimensionCount >= 2 and self.isComplex[specLib.Y_AXIS]:
             # sort the n-RI data point into nRnI data points
             totalSize = self.pointCounts[specLib.Y_AXIS]
             realSize = self.realPointCounts[specLib.Y_AXIS]
@@ -563,6 +563,25 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
         return writePosition, writeData
 
+    def _bufferXYplane(self, position, fp, hdf5buffer):
+        """Helper function for fillHdf5Buffer() method.
+        Read an XY-plane and store in the hdf5 buffer.
+        :param position: a position tuple (1-based)
+        :param fp: file pointer
+        :param hdf5buffer: Hdf5SpectrumData instance acting as buffer
+        :return (writePosition, writeData) tuple
+        """
+        planeSize = self.pointCounts[specLib.X_DIM_INDEX] * self.pointCounts[specLib.Y_DIM_INDEX]
+        _tmp, offset = self._getPathAndOffset(position)
+        fp.seek(offset, 0)
+        data = numpy.fromfile(file=fp, dtype=self.dtype, count=planeSize)
+        data.resize( (self.pointCounts[specLib.Y_DIM_INDEX], self.pointCounts[specLib.X_DIM_INDEX]))
+
+        writePosition, writeData = self._unshuffleComplex(position, data)
+        hdf5buffer.setPlaneData(writeData, position=writePosition, xDim=specLib.X_DIM, yDim=specLib.Y_DIM)
+
+        return writePosition, writeData
+
     def fillHdf5Buffer(self):
         """Fill hdf5buffer with data from self
         """
@@ -586,37 +605,29 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                 data = numpy.fromfile(file=fp, dtype=self.dtype, count=self.pointCounts[xAxis])
             self.hdf5buffer.setSliceData(data, position=position, sliceDim=xDim)
 
-        # nD's: fill the buffer, reading x,y planes from the nmrPipe files into the hdf5 buffer
+        elif self.dimensionCount == 2:
+            # 2D
+            position = [1,1]
+            path, offset = self._getPathAndOffset(position)
+            with open(path, 'r') as fp:
+                self._bufferXYplane(position, fp, self.hdf5buffer)
 
-        elif self.nFiles == 1:
-            # special case the nFiles == 1 situation to avoid closing/opening same file
-            planeSize = self.pointCounts[xAxis] * self.pointCounts[yAxis]
+        # 3D/4D's: fill the buffer, reading x,y planes from the nmrPipe files into the hdf5 buffer
+        elif self.dimensionCount > 2 and self.nFiles == 1:
+            # single-file 3D/4D
+            # special case the situation to avoid closing/opening same file
             sliceTuples = [(1, p) for p in self.pointCounts]
-
             with open(self.path, 'r') as fp:
                 for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=(xDim, yDim)):
-                    _tmp, offset = self._getPathAndOffset(position)
-                    fp.seek(offset, 0)
-                    data = numpy.fromfile(file=fp, dtype=self.dtype, count=planeSize)
-                    data.resize( (self.pointCounts[yAxis], self.pointCounts[xAxis]))
+                    self._bufferXYplane(position, fp, self.hdf5buffer)
 
-                    writePosition, writeData = self._unshuffleComplex(position, data)
-                    self.hdf5buffer.setPlaneData(writeData, position=writePosition, xDim=xDim, yDim=yDim)
-
-        elif self.nFiles > 1:
+        elif self.dimensionCount > 2 and self.nFiles > 1:
             # Multi-file 3D/4D
-            planeSize = self.pointCounts[xAxis] * self.pointCounts[yAxis]
             sliceTuples = [(1, p) for p in self.pointCounts]
-
             for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=(xDim, yDim)):
-                path, offset = self._getPathAndOffset(position)
+                path, _tmp = self._getPathAndOffset(position)
                 with open(path, 'r') as fp:
-                    fp.seek(offset, 0)
-                    data = numpy.fromfile(file=fp, dtype=self.dtype, count=planeSize)
-                    data.resize( (self.pointCounts[yAxis], self.pointCounts[xAxis]))
-
-                writePosition, writeData = self._unshuffleComplex(position, data)
-                self.hdf5buffer.setPlaneData(writeData, position=writePosition, xDim=xDim, yDim=yDim)
+                    self._bufferXYplane(position, fp, self.hdf5buffer)
 
         else:
             raise RuntimeError(f'Error filling Hdf5 buffer for {self}')
@@ -658,10 +669,14 @@ class NmrPipeInputStreamDataSource(NmrPipeSpectrumDataSource):
     def fillHdf5Buffer(self, hdf5buffer):
         """Fill hdf5 buffer reading all slices from input stream
         """
+        if not self.isBuffered:
+            raise RuntimeError('fillHdf5Buffer: no hdf5Buffer defined')
+
         sliceDim = self.pipeDimension
         if sliceDim is None:
             raise RuntimeError('%s.fillHdf5Buffer: undefined dimension of the input stream')
-        getLogger().debug('Fill hdf5 buffer from sys.stdin reading %d slices along dimension %s' %
+
+        getLogger().debug('fillHdf5Buffer from sys.stdin reading %d slices along dimension %s' %
                           (self.sliceCount, sliceDim))
 
         sliceTuples = [(1, p) for p in self.pointCounts]

@@ -21,8 +21,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:39 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-07-06 12:46:29 +0100 (Thu, July 06, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -205,7 +205,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
             _pointCounts = self.header.getParameterValue('pointCounts')
             # correction for complex types required here
-            if (self.dataTypes[specLib.X_AXIS] != DATA_TYPE_REAL):
+            if self.isComplex[specLib.X_AXIS]:
                 _pointCounts[specLib.X_AXIS] *= 2
 
             if not self.isComplex[specLib.X_AXIS] and \
@@ -255,18 +255,23 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
     def _setBaseDimensionality(self):
         """Set the baseDimensionality depending on dimensionCount, nFiles and template
         """
-        self.baseDimensionality = 2  # The default
-        # nD's stored as a single file
         if self.nFiles == 1:
+            # 1D, 2D, nD's stored as a single file
             self.baseDimensionality = self.dimensionCount
-        # 4D's stored as series of 3D's
-        if self.dimensionCount == 4 and self.nFiles > 1 and \
+        elif self.dimensionCount == 4 and self.nFiles > 1 and \
            self.template is not None and self.template.count('%') == 1:
+            # 4D's stored as series of 3D's
             self.baseDimensionality = 3
+        elif self.nFiles > 1:
+            # The default; Multifile 3D/4D
+            self.baseDimensionality = 2
+        else:
+            raise RuntimeError(f'Unable to establish baseDimensionality for {self}')
 
-    def _guessTemplate(self):
+
+    def _guessTemplate(self) -> Path:
         """Guess and return the template based on self.path and dimensionality
-        Return None if unsuccessful or not applicable
+        :return template as a Path instance or None if unsuccessful or not applicable
         """
         logger = getLogger()
 
@@ -326,31 +331,48 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
     def _getPathAndOffset(self, position):
         """Construct path of NmrPipe file corresponding to position (1-based) from template
         Check presence of result path
-        Return aPath instance of path and offset (in bytes) as a tuple
+        :return aPath instance of path and offset (in bytes) as a tuple
         """
         if self.dimensionCount <= 2:
+            # single file 1D/2D
             path = self.path
             offset = self.headerSize * self.wordSize
 
         elif self.dimensionCount == 3 and self.nFiles == 1:
+            # single-file 3D
             path = self.path
             offset = ( self.headerSize + \
-                      (position[specLib.Z_DIM_INDEX]-1) *self.pointCounts[specLib.X_DIM_INDEX] * self.pointCounts[specLib.Y_DIM_INDEX]
+                      (position[specLib.Z_DIM_INDEX]-1) * self.pointCounts[specLib.X_DIM_INDEX] \
+                                                        * self.pointCounts[specLib.Y_DIM_INDEX] \
                      ) * self.wordSize
 
         elif self.dimensionCount == 3 and self.baseDimensionality == 2:
+            # regular multi-file 3D
             if self.template is None:
                 raise RuntimeError('%s: Undefined template' % self)
             path = self.template % (position[specLib.Z_DIM_INDEX],)
             offset = self.headerSize * self.wordSize
 
+        elif self.dimensionCount == 4 and self.nFiles == 1:
+            # Single-file 4D
+            path = self.path
+            offset = ( self.headerSize + \
+                      (position[specLib.Z_DIM_INDEX]-1) * self.pointCounts[specLib.X_DIM_INDEX] \
+                                                        * self.pointCounts[specLib.Y_DIM_INDEX] + \
+                      (position[specLib.A_DIM_INDEX]-1) * self.pointCounts[specLib.X_DIM_INDEX]  \
+                                                        * self.pointCounts[specLib.Y_DIM_INDEX]  \
+                                                        * self.pointCounts[specLib.Z_DIM_INDEX]  \
+                     ) * self.wordSize
+
         elif self.dimensionCount == 4 and self.baseDimensionality == 2:
+            # regular multi-file 4D
             if self.template is None:
                 raise RuntimeError('%s: Undefined template' % self)
             path =  self.template % (position[specLib.Z_DIM_INDEX], position[specLib.A_DIM_INDEX])
             offset = self.headerSize * self.wordSize
 
         elif self.dimensionCount == 4 and self.baseDimensionality == 3:
+            # multi-file 4D; 3D base dimensionality
             if self.template is None:
                 raise RuntimeError('%s: Undefined template' % self)
             path =  self.template % (position[specLib.A_DIM_INDEX],)
@@ -358,6 +380,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                       (position[specLib.X_DIM_INDEX]-1) * self.pointCounts[specLib.X_DIM_INDEX] * self.pointCounts[specLib.Y_DIM_INDEX]
                      ) * self.wordSize
         else:
+            # Undefined; raise error
             raise RuntimeError('%s: Unable to construct path for position %s' % (self, position))
 
         path = aPath(path)
@@ -486,6 +509,59 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
         self.errorString = ''
         return True
 
+    def _unshuffleComplex(self, position, data):
+        """Helper function for fillHdf5Buffer() method to unshuffle the (complex) data,
+        obtained reading an XY-plane (data) while filling the buffer.
+        :param position: a position tuple (1-based)
+        :param data: a PlaneData (2D numpy array) object containing the xy data
+        :return (writePosition, writeData) tuple
+        """
+
+        # First make a copy of the position tuple and see if changes are requires
+        writePosition = [p for p in position]
+        writeData = data
+
+        # In a NmrPipe 2D xy plane:
+        # - A complex X-axis has n real points followed by n imaginary points (nRnI)
+        # - A complex Y-axis has n alternating real, imag points (nRI)
+        if self.isComplex[specLib.Y_AXIS]:
+            # sort the n-RI data point into nRnI data points
+            totalSize = self.pointCounts[specLib.Y_AXIS]
+            realSize = self.realPointCounts[specLib.Y_AXIS]
+            writeData = numpy.empty(shape=data.shape)
+            _realData = data[0::2,:]  # The real points
+            _imagData = data[1::2,:]  # The imag points
+            writeData[0:realSize, :] = _realData
+            writeData[realSize:totalSize, :] = _imagData
+            self.dataTypes[specLib.Y_AXIS] = specLib.DATA_TYPE_COMPLEX_nRnI
+
+        # For the Z,A dimensions:
+        # - the complex Z,A-axes have n alternating real, imag points (nRI)
+        if self.dimensionCount >= 3 and self.isComplex[specLib.Z_AXIS]:
+            # adjust the Z-position to nRnI ordering
+            zP = writePosition[specLib.Z_AXIS] - 1  # convert to zero-based
+            if zP % 2:
+                # imaginary point
+                zP = zP // 2 + self.realPointCounts[specLib.Z_AXIS]
+            else:
+                # real point
+                zP = zP // 2
+            writePosition[specLib.Z_AXIS] = zP + 1 # convert to one-based
+            self.dataTypes[specLib.Z_AXIS] = specLib.DATA_TYPE_COMPLEX_nRnI
+
+        if self.dimensionCount >= 4 and self.isComplex[specLib.A_AXIS]:
+            # adjust the A-position to nRnI ordering
+            aP = writePosition[specLib.A_AXIS] - 1  # convert to zero-based
+            if aP % 2:
+                # imaginary point
+                aP = aP // 2 + self.realPointCounts[specLib.A_AXIS]
+            else:
+                # real point
+                aP = aP // 2
+            writePosition[specLib.A_AXIS] = aP + 1 # convert to one-based
+            self.dataTypes[specLib.A_AXIS] = specLib.DATA_TYPE_COMPLEX_nRnI
+
+        return writePosition, writeData
 
     def fillHdf5Buffer(self):
         """Fill hdf5buffer with data from self
@@ -510,13 +586,28 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                 data = numpy.fromfile(file=fp, dtype=self.dtype, count=self.pointCounts[xAxis])
             self.hdf5buffer.setSliceData(data, position=position, sliceDim=xDim)
 
-        else:
-            # nD's: fill the buffer, reading x,y planes from the nmrPipe files into the hdf5 buffer
+        # nD's: fill the buffer, reading x,y planes from the nmrPipe files into the hdf5 buffer
+
+        elif self.nFiles == 1:
+            # special case the nFiles == 1 situation to avoid closing/opening same file
             planeSize = self.pointCounts[xAxis] * self.pointCounts[yAxis]
             sliceTuples = [(1, p) for p in self.pointCounts]
-            realPointCounts = self.realPointCounts
 
-            # loop over all the xy-planes
+            with open(self.path, 'r') as fp:
+                for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=(xDim, yDim)):
+                    _tmp, offset = self._getPathAndOffset(position)
+                    fp.seek(offset, 0)
+                    data = numpy.fromfile(file=fp, dtype=self.dtype, count=planeSize)
+                    data.resize( (self.pointCounts[yAxis], self.pointCounts[xAxis]))
+
+                    writePosition, writeData = self._unshuffleComplex(position, data)
+                    self.hdf5buffer.setPlaneData(writeData, position=writePosition, xDim=xDim, yDim=yDim)
+
+        elif self.nFiles > 1:
+            # Multi-file 3D/4D
+            planeSize = self.pointCounts[xAxis] * self.pointCounts[yAxis]
+            sliceTuples = [(1, p) for p in self.pointCounts]
+
             for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=(xDim, yDim)):
                 path, offset = self._getPathAndOffset(position)
                 with open(path, 'r') as fp:
@@ -524,50 +615,11 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                     data = numpy.fromfile(file=fp, dtype=self.dtype, count=planeSize)
                     data.resize( (self.pointCounts[yAxis], self.pointCounts[xAxis]))
 
-                writePosition = [p for p in position]
-                writeData = data
-
-                # For the Z,A dimensions:
-                # - the complex time Z,A-axes have n alternating real, imag points (nRI)
-                if self.dimensionCount >= 3 and self.isComplex[specLib.Z_AXIS] and \
-                   self.dimensionTypes[specLib.Z_AXIS] == DIMENSION_TIME:
-                    # adjust the Z-position to nRnI ordering
-                    zP = writePosition[specLib.Z_AXIS] - 1  # convert to zero-based
-                    if zP % 2:
-                        # imaginary point
-                        zP = zP // 2 + realPointCounts[specLib.Z_AXIS]
-                    else:
-                        # real point
-                        zP = zP // 2
-                    writePosition[specLib.Z_AXIS] = zP + 1 # convert to one-based
-
-                if self.dimensionCount >= 4 and self.isComplex[specLib.A_AXIS] and \
-                   self.dimensionTypes[specLib.A_AXIS] == DIMENSION_TIME:
-                    # adjust the A-position to nRnI ordering
-                    aP = writePosition[specLib.A_AXIS] - 1  # convert to zero-based
-                    if aP % 2:
-                        # imaginary point
-                        aP = aP // 2 + realPointCounts[specLib.A_AXIS]
-                    else:
-                        # real point
-                        aP = aP // 2
-                    writePosition[specLib.A_AXIS] = aP + 1 # convert to one-based
-
-                # In a NmrPipe 2D xy plane:
-                # - A complex X-axis has n real points followed by n imaginary points (nRnI)
-                # - A complex Y-axis has n alternating real, imag points (nRI)
-                if self.isComplex[specLib.Y_AXIS] and \
-                   self.dimensionTypes[specLib.Y_AXIS] == DIMENSION_TIME:
-                    # sort the n-RI data point into nRnI data points
-                    totalSize = self.pointCounts[specLib.Y_AXIS]
-                    realSize = realPointCounts[specLib.Y_AXIS]
-                    writeData = numpy.empty(shape=data.shape)
-                    _realData = data[0::2,:]  # The real points
-                    _imagData = data[1::2,:]  # The imag points
-                    writeData[0:realSize, :] = _realData
-                    writeData[realSize:totalSize, :] = _imagData
-
+                writePosition, writeData = self._unshuffleComplex(position, data)
                 self.hdf5buffer.setPlaneData(writeData, position=writePosition, xDim=xDim, yDim=yDim)
+
+        else:
+            raise RuntimeError(f'Error filling Hdf5 buffer for {self}')
 
         self._bufferFilled = True
 

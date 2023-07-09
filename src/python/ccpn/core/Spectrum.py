@@ -53,8 +53,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-30 18:47:45 +0100 (Fri, June 30, 2023) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-07-09 18:52:54 +0100 (Sun, July 09, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -3773,6 +3773,7 @@ class Spectrum(AbstractWrapperObject):
 def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spectrum:
     """Create a new Spectrum instance with name using the data in dataStore and dataSource
     :returns Spectrum instance or None on error
+    #CCPN_INTERNAL: used in SpectrumDataLoader.load()
     """
     from ccpn.core.SpectrumReference import _newSpectrumReference
 
@@ -3794,7 +3795,7 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
         'x'.join([str(p) for p in dataSource.pointCounts]),
         dataStore
         )
-                      )
+    )
 
     apiProject = project._wrappedData
     apiExperiment = apiProject.newExperiment(name=name, numDim=dataSource.dimensionCount)
@@ -3961,7 +3962,6 @@ def _newSpectrum(project: Project, path: (str, Path), name: str = None) -> (Spec
         logger.error(f'{dataSource.errorString}')
         return None
 
-    dataSource.estimateNoise()
     spectrum = _newSpectrumFromDataSource(project, dataStore, dataSource, name)
 
     return spectrum

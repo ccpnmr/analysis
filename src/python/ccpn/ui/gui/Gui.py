@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-26 16:56:23 +0100 (Wed, April 26, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-07-09 18:52:54 +0100 (Sun, July 09, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -308,7 +308,7 @@ class Gui(Ui):
 
         return (dataLoader, createNewProject, ignore)
 
-    def _getDataLoader(self, path, formatFilter=None):
+    def _getDataLoader(self, path, formatFilter=None, droppedOnSideBar=False):
         """Get dataLoader for path (or None if not present), optionally only testing for
         dataFormats defined in filter.
         Allows for reporting or checking through popups.
@@ -316,6 +316,7 @@ class Gui(Ui):
 
         :param path: the path to get a dataLoader for
         :param formatFilter: a list/tuple of optional dataFormat strings; filter optional dataLoaders for this
+        :param: droppedOnSideBar: flag to indicate path dropped on the sidebar
         :returns a tuple (dataLoader, createNewProject, ignore)
 
         :raises RuntimeError in case of failure to define a proper dataLoader
@@ -327,6 +328,7 @@ class Gui(Ui):
         from ccpn.framework.lib.DataLoaders.SparkyDataLoader import SparkyDataLoader
         from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
         from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
+        from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import NmrPipeSpectrumLoader
 
         _path = aPath(path)
         if not _path.exists():
@@ -431,16 +433,37 @@ class Gui(Ui):
                                                 f'"{dataLoader.path}"\n'
                                                 f'already exists in the project\n'
                                                 '\n'
-                                                'do you want to load?'
+                                                'Do you want to load?'
                                                 )
-            if not ok:
-                ignore = True
+
+        elif dataLoader.dataFormat == NmrPipeSpectrumLoader.dataFormat:
+            # NmrPipe file; check if it is large 3D/4D
+            dims = dataLoader.dataSource.dimensionCount
+            expectedSize = dataLoader.dataSource.expectedFileSizeInBytes / (1024*1024)
+            if (dims > 2 and expectedSize >= 128 and \
+                    not dataLoader.dataSource.bufferIsFilled):
+
+                if droppedOnSideBar:
+                    _txt1 = 'Loading NmrPipe Spectrum'
+                    _txt2 = f'"{dataLoader.path}"\n' \
+                            f'Note that the {dims}D file ({expectedSize:.1f} MB) will be buffered on first display\n' \
+                            '\n' \
+                            'Do you want to load?'
+                else:
+                    _txt1 = 'Displaying NmrPipe Spectrum'
+                    _txt2 = f'"{dataLoader.path}"\n' \
+                            f'The {dims}D file ({expectedSize:.1f} MB) will be buffered first; this may take a (little) while\n' \
+                            '\n' \
+                            'Do you want to display?'
+                ok = MessageDialog.showYesNoWarning(_txt1, _txt2)
+                if not ok:
+                    ignore = True
 
         elif dataLoader.dataFormat == StarDataLoader.dataFormat and dataLoader:
             (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)
             if dataLoader and not ignore:
                 title = 'New project from NmrStar' if createNewProject else \
-                    'Import from NmrStar'
+                        'Import from NmrStar'
                 dataLoader.getDataBlock()  # this will read and parse the file
                 popup = StarImporterPopup(dataLoader=dataLoader,
                                           parent=self.mainWindow,

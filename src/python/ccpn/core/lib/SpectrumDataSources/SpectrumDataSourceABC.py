@@ -93,8 +93,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:39 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-07-09 18:52:54 +0100 (Sun, July 09, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -2116,9 +2116,16 @@ class SpectrumDataSourceABC(CcpNmrJson):
     #=========================================================================================
 
     @property
-    def isBuffered(self):
-        """ReturnTrue if file is buffered"""
+    def isBuffered(self) -> bool:
+        """Return True if file is buffered
+        """
         return self._isBuffered
+
+    @property
+    def bufferIsFilled(self) -> bool:
+        """Return True if file is buffers and buffer is filled
+        """
+        return self.isBuffered and self._bufferFilled
 
     def setBuffering(self, isBuffered:bool, bufferIsTemporary:bool=True, bufferPath=None):
         """Define the SpectrumDataSource buffering status
@@ -2218,6 +2225,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
                 self.hdf5buffer.path.removeFile()
 
         self.hdf5buffer = None
+        self._isBuffered = False
         self._bufferFilled = False
 
     def duplicateDataToHdf5(self, path=None):

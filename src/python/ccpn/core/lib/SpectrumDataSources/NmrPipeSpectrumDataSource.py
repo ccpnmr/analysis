@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-07 00:20:22 +0100 (Fri, July 07, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-09 18:52:54 +0100 (Sun, July 09, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -634,6 +634,41 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
         self._bufferFilled = True
 
+    def estimateNoise(self) -> float:
+        """Estimate and return a noise level
+        Use mean of abs of dataPlane or dataSlice;
+        subclassed to prevent buffer loading on first incorpartion into the project
+        """
+
+        if self.dimensionCount == 1 or self.dimensionCount == 2 or self.bufferIsFilled:
+            # 1D/2D, or if buffer is filled
+            return super().estimateNoise()
+
+        else:
+            # 3D and up: use a xy-plane, 10 planes in
+            position = [1, 1, min(10, self.pointCounts[2]), 1] [0:self.dimensionCount]
+            path, offset = self._getPathAndOffset(position)
+            with open(path, 'r') as fp:
+                fp.seek(offset, 0)
+                planeSize = self.pointCounts[specLib.X_DIM_INDEX]*self.pointCounts[specLib.Y_DIM_INDEX]
+                data = numpy.fromfile(file=fp, dtype=self.dtype, count=planeSize)
+
+            data = data.flatten()
+            stdFactor = 2.0
+
+            absData = numpy.array([v for v in map(abs, data)])
+            absData = absData[numpy.isfinite(absData)]
+            median = numpy.median(absData)
+            _temp = data[numpy.isfinite(data)].astype(numpy.float64)
+            std = numpy.std(_temp)
+            if std != std:
+                # std may still be nan because contains HUGE numbers
+                std = 0
+            noiseLevel = median + stdFactor * std
+            self.noiseLevel = noiseLevel
+
+            return noiseLevel
+
 # Register this format
 NmrPipeSpectrumDataSource._registerFormat()
 
@@ -691,5 +726,6 @@ class NmrPipeInputStreamDataSource(NmrPipeSpectrumDataSource):
         self.fp = None  # Do not close sys.stdin --> set self.fp to None here!
         self.mode = None
         super().closeFile()
+
 
 # NmrPipeInputStreamDataSource._registerFormat()

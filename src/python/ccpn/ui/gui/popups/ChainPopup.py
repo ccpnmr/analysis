@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-12 17:57:05 +0100 (Mon, June 12, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-07-10 17:55:46 +0100 (Mon, July 10, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -36,12 +36,16 @@ from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget
 class ChainPopup(AttributeEditorPopupABC):
     """Chain attributes editor popup
     """
+    @staticmethod
+    def _getNmrChainName(obj, *args):
+        # safely convert the pid to a string for the entry-widget (which should be disabled)
+        return str(obj.pid)
 
     klass = Chain
     attributes = [('Name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
                   ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
                   ('Compound Name', EntryCompoundWidget, getattr, None, None, None, {}),
-                  ('NmrChain', EntryCompoundWidget, getattr, None, None, None, {}),
+                  ('NmrChain', EntryCompoundWidget, _getNmrChainName, None, None, None, {}),
                   ('isCyclic', CheckBoxCompoundWidget, getattr, None, None, None, {}),
                   ]
 

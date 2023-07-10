@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-10 12:04:05 +0100 (Mon, July 10, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-10 14:52:42 +0100 (Mon, July 10, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -71,6 +71,8 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
     - Bruker processed data file, e.g. 1r, 2rr, etc
     """
     dataFormat = 'Bruker'
+    # Conveniances; subclassed in the respective classes
+    isBrukerSpectrum = True
 
     isBlocked = True
     wordSize = 4

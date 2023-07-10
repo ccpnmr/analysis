@@ -19,8 +19,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:39 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-07-10 12:04:05 +0100 (Mon, July 10, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -434,8 +434,8 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         :return: True if ok, False otherwise
         """
 
-        self.isValid = False
-        self.errorString = 'Checking validity'
+        self.isValid = True
+        self.errorString = ''
 
         # if self._path is None or not self._path.exists():
         #     errorMsg = f'Path "{self._path}" does not exist'
@@ -480,8 +480,6 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         if not self._checkValidExtra():
             return False
 
-        self.isValid = True
-        self.errorString = ''
         return super(BrukerSpectrumDataSource, self).checkValid()
 
     def readParameters(self):

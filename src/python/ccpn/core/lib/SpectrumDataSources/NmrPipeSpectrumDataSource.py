@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-09 18:52:54 +0100 (Sun, July 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-10 12:04:05 +0100 (Mon, July 10, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -122,6 +122,9 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
     allowDirectory = True
     openMethod = open
     defaultOpenReadMode = 'rb'
+
+    # File size to show warning (MB); used for loaded/displaying in relation to buffering
+    WARNING_FILE_SIZE = 128.0
 
     #=========================================================================================
 
@@ -296,21 +299,33 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                     path = Path(directory) / (template % self.pointCounts[specLib.Z_DIM_INDEX]) + suffix
                     if path.exists():
                         return str(Path(directory) / (template) + suffix)
+                    else:
+                        self.shouldBeValid = True
+                        self.isValid = False
+                        self.errorString = f'{self};\nExpected path "{path}" not found'
+                        return None
 
         elif self.dimensionCount == 4 and self.nFiles > 1:
             # 4D's stored as series of 2D's
-            templates = (re.sub('\d\d\d\d\d\d\d', '%03d%04d', fileName),
-                         re.sub('\d\d\d\d\d\d',   '%03d%03d', fileName),
-                         re.sub('\d\d\d\d\d\d',   '%02d%04d', fileName),
-                         re.sub('\d\d\d\d\d',     '%02d%03d', fileName),
+            templates = (re.sub('\d\d\d\d\d\d\d',  '%03d%04d', fileName),
+                         re.sub('\d\d\d_\d\d\d\d', '%03d_%04d', fileName),
+                         re.sub('\d\d\d\d\d\d',    '%03d%03d', fileName),
+                         re.sub('\d\d\d_\d\d\d',   '%03d_%03d', fileName),
+                         re.sub('\d\d\d\d\d\d',    '%02d%04d', fileName),
+                         re.sub('\d\d_\d\d\d',     '%02d_%03d', fileName),
             )
             for template in templates:
                 # check if we made a subsititution
                 if template != fileName:
                     # check if we can find the last 4D file of the series
-                    path = Path(directory) / (template % (self.pointCounts[specLib.Z_DIM_INDEX], self.pointCounts[specLib.A_DIM_INDEX])) + suffix
+                    path = Path(directory) / (template % (self.pointCounts[specLib.A_DIM_INDEX], self.pointCounts[specLib.Z_DIM_INDEX])) + suffix
                     if path.exists():
                         return str(Path(directory) / (template) + suffix)
+                    else:
+                        self.shouldBeValid = True
+                        self.isValid = False
+                        self.errorString = f'{self};\nExpected path "{path}" not found'
+                        return None
 
             # 4D's stored as series of 3D's
             templates = (re.sub('\d\d\d\d', '%04d', fileName),
@@ -324,6 +339,11 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                     path = Path(directory) / (template % self.pointCounts[specLib.A_DIM_INDEX]) + suffix
                     if path.exists():
                         return str(Path(directory) / (template) + suffix)
+                    else:
+                        self.shouldBeValid = True
+                        self.isValid = False
+                        self.errorString = f'{self};\nExpected path "{path}" not found'
+                        return None
 
         logger.debug('NmrPipeSpectrumDataSource._guessTemplate: Unable to guess from "%s"' % self.path)
         return None
@@ -368,7 +388,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
             # regular multi-file 4D
             if self.template is None:
                 raise RuntimeError('%s: Undefined template' % self)
-            path =  self.template % (position[specLib.Z_DIM_INDEX], position[specLib.A_DIM_INDEX])
+            path =  self.template % (position[specLib.A_DIM_INDEX], position[specLib.Z_DIM_INDEX])
             offset = self.headerSize * self.wordSize
 
         elif self.dimensionCount == 4 and self.baseDimensionality == 3:
@@ -385,7 +405,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
         path = aPath(path)
         if not path.exists():
-            raise FileNotFoundError('NmrPipe file "%s" not found' % path)
+            raise FileNotFoundError('Required NmrPipe file "%s" not found' % path)
 
         return path, offset
 
@@ -393,6 +413,8 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
         """define valid path to a (binary) data file, if needed appends or substitutes
         the suffix (if defined).
 
+        :param path: See class doc-string for valid paths
+        :param checkSuffix: flag to check the suffix
         :return self or None on error
         """
         if path is None:
@@ -400,25 +422,34 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
             return super().setPath(None)
 
         _path = aPath(path)
+        self._path = _path  # retain the initiating path
+        self.isDirectory = False
 
-        # check for directories
-        if _path.is_dir() and _path.suffix in self.suffixes:
-            self.isDirectory = False
+        if _path.is_file():
+            self._binaryFile = _path
+            return super().setPath(path=_path, checkSuffix=checkSuffix)
+
+        elif _path.is_dir() and _path.suffix in self.suffixes:
             # try to establish if this is a directory with a NmrPipe series of files
             for _suffix in self.suffixes:
                 pattern = f'*001{_suffix}'
                 files = _path.globList(pattern)
                 if len(files) > 0:
-                    self._path = _path  # retain the initiating path
                     _path = files[0]  # define the first binary
                     self.isDirectory = True
-                    break
+                    self._binaryFile = _path
+                    return super().setPath(path=_path, checkSuffix=checkSuffix)
 
-            if not self.isDirectory:
-                # did not find a "001" file
-                return None
+            # Once here: did not find a "001" file
+            self.isValid = False
+            self .errorString = f'setPath: Failed to find an NmrPipe "001" file in {_path}'
+            return None
 
-        return super().setPath(path=_path, checkSuffix=checkSuffix)
+        else:
+            self.isValid = False
+            self._binaryFile = None
+            self .errorString = f'setPath: Invalid path "{_path}"; does not conform to NmrPipe definitions'
+            return None
 
     def getAllFilePaths(self) -> list:
         """
@@ -492,21 +523,18 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
         :return: True if ok, False otherwise
         """
+        if not self.isValid:
+            # An earlier error occurred
+            return False
 
         if not super().checkValid():
             return False
 
-        self.isValid = False
         self.shouldBeValid = True
-
-        self.errorString = 'Checking validity'
-
         if self.nFiles > 1 and self.template is None:
             errorMsg = f'No NmrPipe template defined, in spite of {self.nFiles} files comprising the {self.dimensionCount}D'
             return self._returnFalse(errorMsg)
 
-        self.isValid = True
-        self.errorString = ''
         return True
 
     def _unshuffleComplex(self, position, data):

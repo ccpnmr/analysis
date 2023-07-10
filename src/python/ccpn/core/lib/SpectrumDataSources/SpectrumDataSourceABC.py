@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-09 18:52:54 +0100 (Sun, July 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-10 12:04:06 +0100 (Mon, July 10, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -494,7 +494,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     #=========================================================================================
     # new implementation, using newFromPath method and validity testing later on
     #=========================================================================================
-    isValid = Bool(default_value=False).tag(info='flag to indicate if path denotes a valid dataType')
+    isValid = Bool(default_value=True).tag(info='flag to indicate if path denotes a valid dataType')
     shouldBeValid = Bool(default_value=False).tag(info='flag to indicate that path should denotes a valid dataType, but some elements are missing')
     errorString = CString(default_value='').tag(info='error description for validity testing')
 
@@ -721,6 +721,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """
         if path is None:
             self.dataFile = None  # A reset essentially
+            self._binaryFile = None
             return self
 
         _p = aPath(path)
@@ -1280,11 +1281,12 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     def _returnFalse(self, errMsg) -> False:
         """
-        Helper function to set self.errorString, write to debug2 and return False
+        Helper function to set self.isValid, self.errorString, write to debug2 and return False
         :param errMsg:
         :return: False
         """
         getLogger().debug2(errMsg)
+        self.isValid = False
         self.errorString = errMsg
         return False
 
@@ -1293,13 +1295,17 @@ class SpectrumDataSourceABC(CcpNmrJson):
         check the extra attributes _path, _binaryFile, and_parameterFile.
         Used for Azara, Bruker, Xeasy
         """
-        self.isValid = False
-        self.errorString = 'Checking validity'
+        self.isValid = True
+        self.errorString = ''
 
         _iniTxt = f'{self.dataFormat} spectrum, path "{self._path}"'
         # checking original path and its suffix
-        if self._path is None or not self._path.exists():
-            errorMsg = f'{_iniTxt}: does not exist'
+        if self._path is None:
+            errorMsg = f'{self.dataFormat} spectrum, undefined path'
+            return self._returnFalse(errorMsg)
+
+        if not self._path.exists():
+            errorMsg = f'{_iniTxt}: not found'
             return self._returnFalse(errorMsg)
 
         if not self.checkSuffix(self._path):
@@ -1308,35 +1314,32 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         # checking parameter file
         if self._parameterFile is None:
-            errorMsg = f'{_iniTxt}: parameter file is undefined'
+            errorMsg = f'{_iniTxt}: matching parameter file not found'
             return self._returnFalse(errorMsg)
 
         if not self._parameterFile.exists():
-            errorMsg = f'{_iniTxt}: parameter file does not exist'
+            errorMsg = f'{_iniTxt}: parameter file  "{self._parameterFile.name}" not found'
             return self._returnFalse(errorMsg)
 
         if not self._parameterFile.is_file():
-            errorMsg = f'{_iniTxt}: parameter file is not a file'
+            errorMsg = f'{_iniTxt}: parameter file "{self._parameterFile.name}" is not a file'
             return self._returnFalse(errorMsg)
 
         if self._binaryFile is None:
-            errorMsg = f'{_iniTxt}: binary file is undefined'
+            errorMsg = f'{_iniTxt}: matching binary file not found'
             return self._returnFalse(errorMsg)
 
         if not self._binaryFile.exists():
-            errorMsg = f'{_iniTxt}: binary file does not exist'
+            errorMsg = f'{_iniTxt}: binary file "{self._binaryFile.name}" not found'
             return self._returnFalse(errorMsg)
 
         if not self._binaryFile.is_file():
-            errorMsg = f'{_iniTxt}: binary file is not a file'
+            errorMsg = f'{_iniTxt}: binary file  "{self._binaryFile.name}" is not a file'
             return self._returnFalse(errorMsg)
 
         # if not self.shouldBeValid:
         #     errorMsg = f'{_iniTxt}: should have defined a valid {self.dataFormat} file, but did not'
         #     return self._returnFalse(errorMsg)
-
-        self.isValid = True
-        self.errorString = ''
 
         return True
 
@@ -1347,15 +1350,15 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         :return: True if ok, False otherwise
         """
-        self.isValid = False
-        self.errorString = 'Checking validity'
+        self.isValid = True
+        self.errorString = ''
 
         # checking path
         _p = self.path
-        _iniTxt = f'{self.dataFormat} spectrum, path "{_p}"'
+        _iniTxt = f'{self.dataFormat} spectrum path "{_p}"'
 
         if _p is None:
-            txt = f'{_iniTxt}: undefined'
+            txt = f'{self.dataFormat} spectrum path is undefined'
             return self._returnFalse(txt)
 
         if not self.checkSuffix(_p):
@@ -1373,8 +1376,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
         # checking opening file and reading parameters
         try:
             with self.openExistingFile():  # This will also read the parameters
-                pass
-                # self.readParameters()
+                if not self.isValid:
+                    return self._returnFalse(self.errorString)
         except RuntimeError as es:
             txt = f'{_iniTxt}: Reading parameters failed with error: "{es}"'
             return self._returnFalse(txt)
@@ -1384,8 +1387,6 @@ class SpectrumDataSourceABC(CcpNmrJson):
             txt = f'{_iniTxt}: dimensionCount = 0'
             return self._returnFalse(txt)
 
-        self.isValid = True
-        self.errorString =''
         return True
 
     def checkParameters(self, spectrum) -> bool:

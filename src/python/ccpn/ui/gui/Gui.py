@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-09 18:52:54 +0100 (Sun, July 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-10 12:04:06 +0100 (Mon, July 10, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -438,10 +438,10 @@ class Gui(Ui):
 
         elif dataLoader.dataFormat == NmrPipeSpectrumLoader.dataFormat:
             # NmrPipe file; check if it is large 3D/4D
-            dims = dataLoader.dataSource.dimensionCount
-            expectedSize = dataLoader.dataSource.expectedFileSizeInBytes / (1024*1024)
-            if (dims > 2 and expectedSize >= 128 and \
-                    not dataLoader.dataSource.bufferIsFilled):
+            _ds = dataLoader.dataSource
+            dims = _ds.dimensionCount
+            expectedSize = _ds.expectedFileSizeInBytes / (1024*1024)
+            if dims > 2 and expectedSize >= _ds.WARNING_FILE_SIZE and not _ds.bufferIsFilled:
 
                 if droppedOnSideBar:
                     _txt1 = 'Loading NmrPipe Spectrum'

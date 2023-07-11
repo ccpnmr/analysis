@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-10 14:52:42 +0100 (Mon, July 10, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-11 16:13:16 +0100 (Tue, July 11, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -241,6 +241,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     isNmrPipeSpectrum = False
     isBrukerSpectrum = False
     isEmptySpectrum = False
+    isHdf5Spectrum = False
 
     isBlocked = False  # flag defining if data are blocked
     hasBlockCached = True  # Flag indicating if block data are cached

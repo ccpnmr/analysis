@@ -54,7 +54,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-10 14:52:42 +0100 (Mon, July 10, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-11 16:13:16 +0100 (Tue, July 11, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -807,12 +807,29 @@ class Spectrum(AbstractWrapperObject):
 
     @dataFormat.setter
     def dataFormat(self, value):
-        self._openFile(path=self.filePath, dataFormat=value, checkParameters=True,
-                       dataStore=None, dataSource=None
-        )
+        self._openFile(path=self.filePath, dataFormat=value, checkParameters=True)
+
+    def _openFileHelper(self, newDataStore, newDataSource):
+        """Helper function to allow undo/redo on _openFile; assure linkages are correct
+        """
+        oldDataStore = self._dataStore
+        oldDataSource = self.dataSource
+
+        with undoStackBlocking(self.project.application, self.project) as addUndo:
+
+            self._close()
+            newDataSource.spectrum = self
+            self._spectrumTraits.dataSource = newDataSource
+            newDataStore.spectrum = self
+            self._spectrumTraits.dataStore = newDataStore
+            self._saveObject()
+            addUndo(undo = partial(self._openFileHelper, oldDataStore, oldDataSource),
+                    redo = partial(self._openFileHelper, newDataStore, newDataSource)
+                   )
 
     def _openFile(self, path:str, dataFormat:str, checkParameters:bool = True, dataSource = None) -> bool:
-        """Open the spectrum as defined by path, creating a dataSource object
+        """Open the spectrum as defined by path and dataFormat, creating a dataSource object.
+
         :param path: a path to the spectrum; may contain redirections (e.g. $DATA)
         :param dataFormat: a dataFormat defined by one of the SpectrumDataSource types
         :param checkParameters: flag to check a set of (limited) parameters
@@ -843,13 +860,14 @@ class Spectrum(AbstractWrapperObject):
             getLogger().warning(f'{newDataSource.errorString}')
             return False
 
-        # we defined a new file
-        self._close()
-        self._spectrumTraits.dataSource = newDataSource
-        self._saveSpectrumMetaData()
-        self._spectrumTraits.dataStore = newDataStore
-        self._dataStore._saveInternal()
-        self._saveObject()
+        # we defined dataStore and dataSource defining a new file
+        self._openFileHelper(newDataStore, newDataSource)
+        # self._close()
+        # self._spectrumTraits.dataSource = newDataSource
+        # self._saveSpectrumMetaData()
+        # self._spectrumTraits.dataStore = newDataStore
+        # self._dataStore._saveInternal()
+        # self._saveObject()
         return True
 
     @logCommand(get='self')
@@ -2666,8 +2684,9 @@ class Spectrum(AbstractWrapperObject):
     def convertToHdf5(self, path=None):
         """Convert the binary data of self to an Hdf5 type file
         :param path: optional path, auto-generated from self.path when None
+        :return The newly created Hdf5DataStore instance
         """
-        from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumDataSource
+        from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumDataSource as _Hdf5
 
         if not self.hasValidPath():
             raise RuntimeError('Not valid path for %s ' % self)
@@ -2675,31 +2694,30 @@ class Spectrum(AbstractWrapperObject):
         if not path:
             path = self.path
 
-        suffix = Hdf5SpectrumDataSource.suffixes[0]
-        dataFormat = Hdf5SpectrumDataSource.dataFormat
         # Using the DataStore object will preserve any redirections and assure versioning (i.e. no overwriting)
-        dataStore = DataStore.newFromPath(path=path,
-                                          autoVersioning=True,
-                                          withSuffix=suffix,
-                                          dataFormat=dataFormat)
+        newDataStore = DataStore.newFromPath(path=path,
+                                             autoVersioning=True,
+                                             withSuffix=_Hdf5.suffixes[0],
+                                             dataFormat=_Hdf5.dataFormat)
 
         _ds = self.dataSource
         if _ds.isNmrPipeSpectrum:
             # Special case because of NmrPipe buffering
             _ds.closeHdf5Buffer()
-            _ds.setBuffering(True, bufferIsTemporary=False, bufferPath=dataStore.aPath())
+            _ds.setBuffering(True, bufferIsTemporary=False, bufferPath=newDataStore.aPath())
             _newDs = _ds.initialiseHdf5Buffer()
             _ds.fillHdf5Buffer()
 
         else:
             # Duplicate the data in an Hdf5 file
-            _newDs = _ds.duplicateDataToHdf5(dataStore.aPath())
+            _newDs = _ds.duplicateDataToHdf5(newDataStore.aPath())
 
         # Activate the new binary file
-        self._openFile(dataStore.aPath(), dataFormat=dataFormat,
-                       checkParameters=False, dataSource = _newDs)
+        self._openFileHelper(newDataStore=newDataStore, newDataSource=_newDs)
 
-        getLogger().info(f'Converted "{_ds.path}" to {dataFormat} as "{self.dataSource.path}"')
+        txt = f'Converted "{_ds.path}" to {_newDs.dataFormat} as "{_newDs.path}"'
+        getLogger().info(txt)
+        return _newDs
 
     def _axisDictToSliceTuples(self, axisDict) -> list:
         """Convert dict of (key,value) = (axisCode, (startPpm, stopPpm)) pairs

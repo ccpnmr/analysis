@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-28 19:23:05 +0100 (Wed, June 28, 2023) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-07-11 16:13:16 +0100 (Tue, July 11, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -276,6 +276,7 @@ class GuiBase(object):
             (),
             ("Pseudo Spectrum to SpectrumGroup...", self.showPseudoSpectrumPopup),
             ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj')]),
+            ("Convert Spectrum to Hdf5...", self.showConvertSpectrumPopup, []),
             (),
             ("Print to File...", self.showPrintSpectrumDisplayPopup, [('shortcut', '⌃p')]),
             ]
@@ -524,6 +525,13 @@ class GuiBase(object):
         """Load all the spectra callback
         """
         self.ui.loadSpectra()
+
+    def showConvertSpectrumPopup(self):
+        """Show the convertToHdf5 popup
+        """
+        from ccpn.ui.gui.popups.ConvertToHdf5Popup import ConvertToHdf5Popup
+        popup = ConvertToHdf5Popup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+        popup.exec_()
 
     #-----------------------------------------------------------------------------------------
     # Help -->

@@ -25,8 +25,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:39 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-07-11 16:13:16 +0100 (Tue, July 11, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -82,6 +82,8 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
     #=========================================================================================
 
     dataFormat = 'Hdf5'
+    # Conveniances; subclassed in the respective classes
+    isHdf5Spectrum = True
 
     isBlocked = False  # hdf5 format is inherently blocked, but we do not use the implemented
     # routines in the ABC, but rather have hdf5 do the slicing

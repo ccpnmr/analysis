@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-10 12:04:06 +0100 (Mon, July 10, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-12 17:29:23 +0100 (Wed, July 12, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -444,20 +444,22 @@ class Gui(Ui):
             if dims > 2 and expectedSize >= _ds.WARNING_FILE_SIZE and not _ds.bufferIsFilled:
 
                 if droppedOnSideBar:
-                    _txt1 = 'Loading NmrPipe Spectrum'
-                    _txt2 = f'"{dataLoader.path}"\n' \
-                            f'Note that the {dims}D file ({expectedSize:.1f} MB) will be buffered on first display\n' \
-                            '\n' \
-                            'Do you want to load?'
+                    _txt1 = f'Loading Spectrum "{dataLoader.path}"'
+                    _txt2 = f'The {dims}D NmrPipe file ({expectedSize:.1f} MB) will be automatically buffered when first displayed\n' \
+                            f'Consider converting to Hdf5 format (Menu: Spectrum --> Convert to Hdf5)\n'
+                    ok = MessageDialog.showOkCancel(_txt1, _txt2)
+                    if not ok:
+                        ignore = True
+
                 else:
-                    _txt1 = 'Displaying NmrPipe Spectrum'
-                    _txt2 = f'"{dataLoader.path}"\n' \
-                            f'The {dims}D file ({expectedSize:.1f} MB) will be buffered first; this may take a (little) while\n' \
+                    _txt1 = f'Displaying Spectrum "{dataLoader.path}"'
+                    _txt2 = f'The {dims}D NmrPipe file ({expectedSize:.1f} MB) will be automatically buffered\n' \
+                            f'Consider loading first and converting to Hdf5 format (Menu: Spectrum --> Convert to Hdf5)\n' \
                             '\n' \
-                            'Do you want to display?'
-                ok = MessageDialog.showYesNoWarning(_txt1, _txt2)
-                if not ok:
-                    ignore = True
+                            'Do you want to display now? (the buffering may take a -little- while)'
+                    ok = MessageDialog.showYesNoWarning(_txt1, _txt2)
+                    if not ok:
+                        ignore = True
 
         elif dataLoader.dataFormat == StarDataLoader.dataFormat and dataLoader:
             (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)

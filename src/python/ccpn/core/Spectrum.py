@@ -54,7 +54,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-11 16:13:16 +0100 (Tue, July 11, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-12 17:29:23 +0100 (Wed, July 12, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -956,6 +956,13 @@ class Spectrum(AbstractWrapperObject):
     @checkSpectrumPropertyValue(iterable=True, types=(bool, int, float))
     def isComplex(self, value: Sequence):
         self._setDimensionalAttributes('isComplex', value)
+
+    @property
+    def dataTypes(self) -> List[str]:
+        """Data type identifier (nR, (nR)(nI), n(RI), n(PN)) along each dimension
+        Directly obtained from dataSource object
+        """
+        return self.dataSource.dataTypes
 
     @property
     @_includeInDimensionalCopy

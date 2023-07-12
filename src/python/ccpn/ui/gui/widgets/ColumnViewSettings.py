@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-02 14:44:40 +0000 (Thu, March 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-07-12 16:14:46 +0100 (Wed, July 12, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -70,9 +70,23 @@ class ColumnViewSettingsPopup(CcpnDialogMainWidget):
         # hiddenColumns = self.getHiddenColumns()
         # # self.dataFrameObject.hiddenColumns = hiddenColumns
         # self.tableHandler.setHiddenColumns(hiddenColumns, False)
-        self.reject()
+        self.accept()
 
         return self.getHiddenColumns()
+
+    def accept(self) -> None:
+        # NOTE:ED - these NEED to be cleaned, one causes a threading error if not deleted
+        self.tableHandler = None
+        self.widgetColumnViewSettings.deleteLater()
+
+        super().accept()
+
+    def reject(self) -> None:
+        # NOTE:ED - these NEED to be cleaned, one causes a threading error if not deleted
+        self.tableHandler = None
+        self.widgetColumnViewSettings.deleteLater()
+
+        super().reject()
 
 
 #=========================================================================================

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 19:17:57 +0100 (Wed, June 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-12 16:14:46 +0100 (Wed, July 12, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -29,16 +29,120 @@ __date__ = "$Date: 2022-09-08 17:27:34 +0100 (Thu, September 08, 2022) $"
 import numpy as np
 import pandas as pd
 from PyQt5 import QtCore, QtGui
-from contextlib import suppress
 from ccpn.util.floatUtils import numZeros
 from ccpn.core.lib.CcpnSorting import universalSortKey
-from ccpn.ui.gui.guiSettings import getColours, GUITABLE_ITEM_FOREGROUND
+from ccpn.ui.gui.guiSettings import getColours, GUITABLE_ITEM_FOREGROUND, consoleStyle
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.table._TableCommon import EDIT_ROLE, DISPLAY_ROLE, TOOLTIP_ROLE, \
     BACKGROUND_ROLE, FOREGROUND_ROLE, CHECK_ROLE, ICON_ROLE, SIZE_ROLE, ALIGNMENT_ROLE, \
     FONT_ROLE, CHECKABLE, ENABLED, SELECTABLE, EDITABLE, CHECKED, UNCHECKED, VALUE_ROLE, \
     INDEX_ROLE, BORDER_ROLE, ORIENTATIONS
 from ccpn.util.Logging import getLogger
+
+
+#=========================================================================================
+# Attribute handling
+#=========================================================================================
+
+def _getDisplayRole(self, row, col):
+    # need to discard columns that include check-boxes
+    val = self._df.iat[row, col]
+
+    # float/np.float - round to 3 decimal places. This should be settable, ideally even by the user,
+    if isinstance(val, (float, np.floating)):
+        try:
+            maxDecimalToShow = 3
+            if abs(val) > 1e6:  # make it scientific annotation if a huge/tiny number
+                value = f'{val:.{maxDecimalToShow}e}'
+            elif numZeros(val) >= maxDecimalToShow:
+                #e.g.:  if is 0.0001 will show as 1e-4 instead of 0.000
+                value = f'{val:.{maxDecimalToShow}e}'
+            else:
+                # just rounds to the third decimal
+                value = f'{val:.{maxDecimalToShow}f}'
+        except Exception:
+            value = str(val)
+    else:
+        value = str(val)
+
+    return value
+
+
+def _getValueRole(self, row, col):
+    val = self._df.iat[row, col]
+    try:
+        # convert np.types to python types
+        return val.item()  # type np.generic
+    except Exception:
+        return val
+
+
+def _getBackgroundRole(self, row, col):
+    if (indexGui := self._guiState[row, col]):
+        # get the colour from the dict
+        return indexGui.get(BACKGROUND_ROLE)
+
+
+def _getForegroundRole(self, row, col):
+    if (indexGui := self._guiState[row, col]):
+        # get the colour from the dict
+        return indexGui.get(FOREGROUND_ROLE)
+
+    # return the default foreground colour
+    return self._defaultForegroundColour
+
+
+def _getBorderRole(self, row, col):
+    if (indexGui := self._guiState[row, col]):
+        # get the colour from the dict
+        return bool(indexGui.get(BACKGROUND_ROLE))
+
+
+def _getToolTipRole(self, row, col):
+    if self._view._toolTipsEnabled:
+        data = self._df.iat[row, col]
+
+        return str(data)
+
+
+def _getEditRole(self, row, col):
+    data = self._df.iat[row, col]
+
+    # float/np.float - return float
+    if isinstance(data, (float, np.floating)):
+        return float(data)
+
+    # int/np.integer - return int
+    elif isinstance(data, (int, np.integer)):
+        return int(data)
+
+    return data
+
+
+def _getIndexRole(self, row, col):
+    # return a dict of item-data?
+    return (row, col)
+
+
+def _getFontRole(self, row, col):
+    if (indexGui := self._guiState[row, col]):
+        # get the font from the dict
+        return indexGui.get(FONT_ROLE)
+
+
+def _getCheckRole(self, row, col):
+    # need flags to include CHECKABLE and return QtCore.Qt.checked/unchecked/PartiallyChecked here
+    return CHECKED
+
+
+def _getIconRole(self, row, col):
+    # return the pixmap - this works, transfer to _MultiHeader
+    return self._editableIcon
+
+
+def _getAlignmentRole(self, row, col):
+    # return the pixmap - this works, transfer to _MultiHeader
+    ...
 
 
 #=========================================================================================
@@ -62,6 +166,28 @@ class _TableModel(QtCore.QAbstractTableModel):
     _defaultEditable = True
 
     _guiState = None
+
+    #=========================================================================================
+    # Attribute handling
+    #=========================================================================================
+
+    getAttribRole = {DISPLAY_ROLE   : _getDisplayRole,
+                     VALUE_ROLE     : _getValueRole,
+                     BACKGROUND_ROLE: _getBackgroundRole,
+                     FOREGROUND_ROLE: _getForegroundRole,
+                     BORDER_ROLE    : _getBorderRole,
+                     TOOLTIP_ROLE   : _getToolTipRole,
+                     EDIT_ROLE      : _getEditRole,
+                     INDEX_ROLE     : _getIndexRole,
+                     FONT_ROLE      : _getFontRole,
+                     # CHECK_ROLE     : _getCheckRole,
+                     # ICON_ROLE      : _getIconRole,
+                     # ALIGNMENT_ROLE : _getAlignmentRole,
+                     }
+
+    #=========================================================================================
+    # Class definitions
+    #=========================================================================================
 
     def __init__(self, df, parent=None, view=None):
         """Initialise the pandas model.
@@ -139,35 +265,34 @@ class _TableModel(QtCore.QAbstractTableModel):
         """
         return self._getVisibleDataFrame(includeHiddenColumns=False)
 
-
     def _getVisibleDataFrame(self, includeHiddenColumns=False):
-            """Return the visible dataFrame as displayed, sorted and filtered.
-            includeHiddenColumns: True to return the dataFrame containing  all columns.
-            """
-            from ccpn.util.OrderedSet import OrderedSet
+        """Return the visible dataFrame as displayed, sorted and filtered.
+        includeHiddenColumns: True to return the dataFrame containing  all columns.
+        """
+        from ccpn.util.OrderedSet import OrderedSet
 
-            df = self._df
-            table = self._view
-            rows, cols = df.shape[0], df.shape[1]
+        df = self._df
+        table = self._view
+        rows, cols = df.shape[0], df.shape[1]
 
-            if df.empty:
-                return df
+        if df.empty:
+            return df
 
-            if includeHiddenColumns:
-                colList = list(df.columns)
-            else:
-                colList = [col for ii, col, in enumerate(list(df.columns)) if
-                           not table.horizontalHeader().isSectionHidden(ii)]
+        if includeHiddenColumns:
+            colList = list(df.columns)
+        else:
+            colList = [col for ii, col, in enumerate(list(df.columns)) if
+                       not table.horizontalHeader().isSectionHidden(ii)]
 
-            if self._filterIndex is None:
-                rowList = [self._sortIndex[row] for row in range(rows)]
-            else:
-                #  map to sorted indexes
-                rowList = list(OrderedSet(self._sortIndex[row] for row in range(rows)) &
-                               OrderedSet(self._sortIndex[ii] for ii in self._filterIndex))
+        if self._filterIndex is None:
+            rowList = [self._sortIndex[row] for row in range(rows)]
+        else:
+            #  map to sorted indexes
+            rowList = list(OrderedSet(self._sortIndex[row] for row in range(rows)) &
+                           OrderedSet(self._sortIndex[ii] for ii in self._filterIndex))
 
-            df = df[colList]
-            return df[:].iloc[rowList]
+        df = df[colList]
+        return df[:].iloc[rowList]
 
     def setToolTips(self, orientation, values):
         """Set the tooltips for the horizontal/vertical headers.
@@ -334,6 +459,25 @@ class _TableModel(QtCore.QAbstractTableModel):
         """
         return 1 if type(self._df) == pd.Series else self._df.shape[1]
 
+    # def data(self, index, role=DISPLAY_ROLE):
+    #     """Return the data/roles for the model.
+    #     """
+    #     if not index.isValid():
+    #         return None
+    #
+    #     try:
+    #         if (func := self.getAttribRole.get(role)):
+    #             # get the source cell
+    #             fRow = self._filterIndex[index.row()] if self._filterIndex is not None and 0 <= index.row() < len(self._filterIndex) else index.row()
+    #             row, col = self._sortIndex[fRow], index.column()
+    #
+    #             return func(self, row, col)
+    #
+    #     except Exception as es:
+    #         getLogger().debug(f'{consoleStyle.fg.yellow}--> TABLE ERROR - {es}{consoleStyle.reset}')
+    #
+    #     return None
+
     def data(self, index, role=DISPLAY_ROLE):
         """Return the data/roles for the model.
         """
@@ -354,13 +498,13 @@ class _TableModel(QtCore.QAbstractTableModel):
                     try:
                         maxDecimalToShow = 3
                         if abs(val) > 1e6:  # make it scientific annotation if a huge/tiny number
-                            value =  f'{val:.{maxDecimalToShow}e}'
+                            value = f'{val:.{maxDecimalToShow}e}'
                         elif numZeros(val) >= maxDecimalToShow:
                             #e.g.:  if is 0.0001 will show as 1e-4 instead of 0.000
                             value = f'{val:.{maxDecimalToShow}e}'
                         else:
                             # just rounds to the third decimal
-                            value =  f'{val:.{maxDecimalToShow}f}'
+                            value = f'{val:.{maxDecimalToShow}f}'
                     except Exception:
                         value = str(val)
                 else:
@@ -394,10 +538,11 @@ class _TableModel(QtCore.QAbstractTableModel):
                     # get the colour from the dict
                     return bool(indexGui.get(BACKGROUND_ROLE))
 
-            elif role == TOOLTIP_ROLE and self._view._toolTipsEnabled:
-                data = self._df.iat[row, col]
+            elif role == TOOLTIP_ROLE:
+                if self._view._toolTipsEnabled:
+                    data = self._df.iat[row, col]
 
-                return str(data)
+                    return str(data)
 
             elif role == EDIT_ROLE:
                 data = self._df.iat[row, col]
@@ -432,8 +577,8 @@ class _TableModel(QtCore.QAbstractTableModel):
             # elif role == ALIGNMENT_ROLE:
             #     pass
 
-        except Exception:
-            return None
+        except Exception as es:
+            getLogger().debug(f'{consoleStyle.fg.yellow}--> TABLE ERROR - {es}{consoleStyle.reset}')
 
         return None
 

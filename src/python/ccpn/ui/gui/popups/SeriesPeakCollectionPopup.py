@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-06 12:41:51 +0000 (Mon, March 06, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-07-13 12:22:21 +0100 (Thu, July 13, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,26 +27,18 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
-from collections import OrderedDict as od
-from functools import partial
-from PyQt5 import QtCore, QtGui, QtWidgets
-from ccpn.util.Logging import getLogger
-from ccpn.util.OrderedSet import OrderedSet
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 import ccpn.ui.gui.widgets.CompoundWidgets as cw
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.RadioButton import RadioButton
-from ccpn.ui.gui.widgets.RadioButtons import RadioButtons, RadioButtonsWithSubCheckBoxes
-from ccpn.ui.gui.widgets.RadioButton import CheckBoxCheckedText, CheckBoxCallbacks, CheckBoxTexts, CheckBoxTipTexts
-from ccpn.ui.gui.widgets.MessageDialog import showWarning, _stoppableProgressBar, progressManager
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.Icon import Icon, ICON_DIR
 from ccpn.ui.gui.widgets.PulldownListsForObjects import SpectrumGroupPulldown, PeakListPulldown
-from ccpn.ui.gui.widgets.HLine import HLine, LabeledHLine
+from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.framework.lib.experimentAnalysis.FollowPeakInSeries import AVAILABLEFOLLOWPEAKS
 
 
@@ -64,7 +56,7 @@ def showWarningPopup():
 
 class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
     def __init__(self, parent=None, mainWindow=None, title='Series Peak Collection',
-                 collectionName='collectionName', spectrumGroup = None, **kwds):
+                 collectionName='collectionName', spectrumGroup=None, **kwds):
         super().__init__(parent, setLayout=True, size=(200, 350), minimumSize=None, windowTitle=title, **kwds)
 
         if mainWindow:
@@ -147,7 +139,7 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
         row += 1
         self.refitLabel = Label(self.mainWidget, text='Refitting', grid=(row, 0))
         self.refitOption = CheckBox(self.mainWidget, text='Refit Peaks At Position',
-                                    tipText = 'Recalculate the peak height and linewidths preserving the original peak position',
+                                    tipText='Recalculate the peak height and linewidths preserving the original peak position',
                                     checked=True, grid=(row, 1))
         row += 1
         self.coloursLabel = Label(self.mainWidget, text='Colouring', grid=(row, 0))
@@ -259,24 +251,13 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
         if self.sourcePeakListCW:
             self.sourcePeakListCW.unRegister()
 
-    def accept(self) -> None:
-        self._cleanupDialog()
-        return super().accept()
-
-    def reject(self) -> None:
-        self._cleanupDialog()
-        return super().reject()
-
 
 def main():
     from ccpn.ui.gui.widgets.Application import TestApplication
 
     app = TestApplication()
     popup = SeriesPeakCollectionPopup()
-
-    popup.show()
-    popup.raise_()
-    app.start()
+    popup.exec_()
 
 
 if __name__ == '__main__':

@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-10 18:39:55 +0000 (Fri, March 10, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-07-13 12:22:21 +0100 (Thu, July 13, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,7 +28,6 @@ __date__ = "$Date: 2020-03-30 11:32:43 +0000 (Mon, March 30, 2020) $"
 
 from PyQt5 import QtWidgets
 from itertools import permutations
-# from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
@@ -163,11 +162,3 @@ class ReorderPeakListAxes(CcpnDialogMainWidget):
         """
         if self.pLwidget:
             self.pLwidget.unRegister()
-
-    def accept(self) -> None:
-        self._cleanupDialog()
-        return super().accept()
-
-    def reject(self) -> None:
-        self._cleanupDialog()
-        return super().reject()

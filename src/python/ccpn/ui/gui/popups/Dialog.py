@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 19:17:56 +0100 (Wed, June 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-13 12:22:21 +0100 (Thu, July 13, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -452,9 +452,6 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         # return an error-state here other than None?
         result = None if self.errorFlag else super().exec_()
 
-        # clean-up the notifiers
-        self._cleanupDialog()
-
         return result
 
     @contextmanager
@@ -555,6 +552,10 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
 
         # store the state of any required widgets
         self.storeWidgetState()
+
+        getLogger().debug2(f'Clean up dialog {self} on accept')
+        self._cleanupDialog()
+
         return result
 
     def reject(self) -> None:
@@ -563,6 +564,9 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         if self.storeStateOnReject:
             # store the state of any required widgets
             self.storeWidgetState()
+
+        getLogger().debug2(f'Clean up dialog {self} on reject')
+        self._cleanupDialog()
 
         return result
 

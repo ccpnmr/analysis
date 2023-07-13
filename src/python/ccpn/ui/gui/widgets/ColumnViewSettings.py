@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-12 16:14:46 +0100 (Wed, July 12, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-13 12:22:22 +0100 (Thu, July 13, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -74,19 +74,12 @@ class ColumnViewSettingsPopup(CcpnDialogMainWidget):
 
         return self.getHiddenColumns()
 
-    def accept(self) -> None:
+    def _cleanupDialog(self):
+        """Clean up widgets that are causing seq-fault on garbage-collection.
+        """
         # NOTE:ED - these NEED to be cleaned, one causes a threading error if not deleted
         self.tableHandler = None
         self.widgetColumnViewSettings.deleteLater()
-
-        super().accept()
-
-    def reject(self) -> None:
-        # NOTE:ED - these NEED to be cleaned, one causes a threading error if not deleted
-        self.tableHandler = None
-        self.widgetColumnViewSettings.deleteLater()
-
-        super().reject()
 
 
 #=========================================================================================

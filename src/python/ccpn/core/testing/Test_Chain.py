@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-05 15:28:41 +0000 (Thu, January 05, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-07-13 16:46:09 +0100 (Thu, July 13, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -249,9 +249,25 @@ class ChainTest(WrapperTesting):
     # testCrosslinkAtoms
     #=========================================================================================
 
+    @staticmethod
+    def notifyfunc(obj, value=None, ll=None):
+        # if not hasattr(obj, '_test_notifier_list'):
+        #     obj._test_notifier_list = ll
+        ll.append(str(obj))
+        # print('TestFunc', len(ll), ll[-1], value)
+
     def testCrosslinkAtoms(self):
         project = self.project
         project._wrappedData.checkAllValid(complete=True)
+
+        ll = []
+        not1 = project.registerNotifier('Chain', 'create', self.notifyfunc,
+                                        parameterDict={'value': 'chain', 'll': ll}, onceOnly=True)
+        not2 = project.registerNotifier('Residue', 'create', self.notifyfunc,
+                                        parameterDict={'value': 'residue', 'll': ll}, onceOnly=True)
+        not3 = project.registerNotifier('Atom', 'create', self.notifyfunc,
+                                        parameterDict={'value': 'atom', 'll': ll}, onceOnly=True)
+
         chaina = project.createChain('CDL', compoundName='cdl', molType='protein')
         chainb = project.createChain('FPC', compoundName='fpc', molType='protein')
         project.getByPid('MA:A.1.CYS.HG').delete()
@@ -263,13 +279,14 @@ class ChainTest(WrapperTesting):
         self.assertEqual([x._id for x in atom2.boundAtoms], ['A.1.CYS.SG', 'B.3.CYS.CB'])
 
         chainc = chaina.clone()
-
         # first error here
         # constraint
         # linking_and_descriptor_must_be_consistent_with_Atoms_and_LinkEnds
         # violated: < ccp.molecule.MolSystem.Residue['default', 'C', 3] >
 
         chaind = chainb.clone()
+        print(ll)
+
         duplicateAtomBonds(({chaina: chainc, chainb: chaind}))
         project._wrappedData.checkAllValid(complete=True)
         atom1 = project.getByPid('MA:C.1.CYS.SG')

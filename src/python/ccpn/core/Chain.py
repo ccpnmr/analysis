@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-12 17:57:05 +0100 (Mon, June 12, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-07-13 16:46:09 +0100 (Thu, July 13, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -64,7 +64,10 @@ class Chain(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiChain._metaclass.qualifiedName()
 
+    #=========================================================================================
     # CCPN properties
+    #=========================================================================================
+
     @property
     def _apiChain(self) -> ApiChain:
         """ CCPN chain matching Chain"""
@@ -145,49 +148,17 @@ class Chain(AbstractWrapperObject):
     #   else:
     #     value.chain = self
 
+    #=========================================================================================
     # CCPN functions
+    #=========================================================================================
+
     @logCommand(get='self', prefix='newChain=')
     def clone(self, shortName: str = None):
-        """Make copy of chain."""
-
-        apiChain = self._wrappedData
-        apiMolSystem = apiChain.molSystem
-        dataObj = self._project._data2Obj
-
-        if shortName is None:
-            shortName = apiMolSystem.nextChainCode()
-
-        if apiMolSystem.findFirstChain(code=shortName) is not None:
-            raise ValueError("Project already has one Chain with shortName %s" % shortName)
-
-        topObjectParameters = {'code'            : shortName,
-                               'pdbOneLetterCode': shortName[0]}
-
-        # with logCommandBlock(prefix='newChain=', get='self') as log:
-        #     log('clone')
-
-        with undoBlock():
-            try:
-                newApiChain = copySubTree(apiChain, apiMolSystem, maySkipCrosslinks=True,
-                                          topObjectParameters=topObjectParameters)
-            except Exception as es:
-                # put in an error trap but now doesn't seem to re-create the error
-                raise ValueError('Error cloning chain - %s' % str(es)) from es
-
-            result = self._project._data2Obj.get(newApiChain)
-
-            # Add intra-chain generic bonds
-            for apiGenericBond in apiMolSystem.genericBonds:
-                ll = []
-                for aa in apiGenericBond.atoms:
-                    if aa.residue.chain is apiChain:
-                        ll.append(dataObj[aa])
-                if len(ll) == 2:
-                    relativeIds = list(x._id.split(Pid.IDSEP, 1)[1] for x in ll)
-                    newAtoms = list(result.getAtom(x) for x in relativeIds)
-                    newAtoms[0].addInterAtomBond(newAtoms[1], apiGenericBond.bondType)
-
-            return result
+        """Make copy of chain.
+        """
+        # extracted as function below.
+        # - fires a single notifier for the chain creation
+        _cloneChain(self, shortName=shortName)
 
     def _lock(self):
         """Finalise chain so that it can no longer be modified, and add missing data."""
@@ -333,6 +304,9 @@ class Chain(AbstractWrapperObject):
         return (oldName,)
 
 
+#=========================================================================================
+# new<Object> and other methods
+# Call appropriate routines in their respective locations
 #=========================================================================================
 
 @newObject(Chain)
@@ -663,6 +637,47 @@ def _newChainFromChemComp(project, chemComp,
                                  )
 
             return chain
+
+@newObject(Chain)
+def _cloneChain(self: Chain, shortName: str = None):
+    """Make copy of chain.
+    """
+    # _newApiObject no longer fires a ny notifiers. Single notifier is now handled by the decorator
+    apiChain = self._wrappedData
+    apiMolSystem = apiChain.molSystem
+    dataObj = self._project._data2Obj
+
+    if shortName is None:
+        shortName = apiMolSystem.nextChainCode()
+
+    if apiMolSystem.findFirstChain(code=shortName) is not None:
+        raise ValueError("Project already has one Chain with shortName %s" % shortName)
+
+    topObjectParameters = {'code'            : shortName,
+                           'pdbOneLetterCode': shortName[0]}
+
+    with undoBlock():
+        try:
+            newApiChain = copySubTree(apiChain, apiMolSystem, maySkipCrosslinks=True,
+                                      topObjectParameters=topObjectParameters)
+        except Exception as es:
+            # put in an error trap but now doesn't seem to re-create the error
+            raise ValueError('Error cloning chain - %s' % str(es)) from es
+
+        result = self._project._data2Obj.get(newApiChain)
+
+        # Add intra-chain generic bonds
+        for apiGenericBond in apiMolSystem.genericBonds:
+            ll = []
+            for aa in apiGenericBond.atoms:
+                if aa.residue.chain is apiChain:
+                    ll.append(dataObj[aa])
+            if len(ll) == 2:
+                relativeIds = list(x._id.split(Pid.IDSEP, 1)[1] for x in ll)
+                newAtoms = list(result.getAtom(x) for x in relativeIds)
+                newAtoms[0].addInterAtomBond(newAtoms[1], apiGenericBond.bondType)
+
+    return result
 
 
 def getter(self: Substance) -> Tuple[Chain, ...]:

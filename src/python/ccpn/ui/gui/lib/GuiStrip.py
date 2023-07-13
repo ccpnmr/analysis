@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-29 17:45:28 +0100 (Thu, June 29, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-13 11:52:14 +0100 (Thu, July 13, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -39,6 +39,7 @@ from collections import OrderedDict
 from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList
 from ccpn.core.lib.Notifiers import Notifier, _removeDuplicatedNotifiers
+from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlockWithoutSideBar
 from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_HEXHIGHLIGHT, CCPNGLWIDGET_HEXFOREGROUND
 from ccpn.util.Logging import getLogger
@@ -2448,8 +2449,16 @@ class GuiStrip(Frame):
             mouseDict = self.current.mouseMovedDict[AXIS_FULLATOMNAME]
             positions = [(pos, ax) for ax in self.axisCodes for pos in mouseDict.get(ax, []) if pos is not None]
 
-            for pos, ax in positions:
-                self.mainWindow.newMark(defaultColour, [pos], [ax])
+            if axisIndex is not None:
+                # mark only the required axis, should work for 4D and mark all axes
+                for pos, ax in positions:
+                    if self.axisCodes.index(ax) == axisIndex:
+                        self.mainWindow.newMark(defaultColour, [pos], [ax])
+
+            else:
+                # mark all the axes
+                for pos, ax in positions:
+                    self.mainWindow.newMark(defaultColour, [pos], [ax])
 
         except Exception as es:
             getLogger().warning('Error setting mark at current cursor position')

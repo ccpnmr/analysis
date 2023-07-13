@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 14:29:32 +0100 (Wed, June 28, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-07-13 11:59:18 +0100 (Thu, July 13, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -92,7 +92,7 @@ class _CcpnMultiEncoder(json.JSONEncoder):
 
         # stop circular imports
         from ccpn.core._implementation.DataFrameABC import DataFrameABC
-        from ccpn.core._implementation.CrossReference import _CrossReference
+        from ccpn.core._implementation.CrossReference import _CrossReferenceABC
 
         if isinstance(obj, OrderedDict):
             typ = ORDEREDDICT
@@ -133,10 +133,10 @@ class _CcpnMultiEncoder(json.JSONEncoder):
             typ = NDARRAY
             data = obj.tolist()
 
-        elif isinstance(obj, _CrossReference):
-            if not (typ := _CrossReference.jsonType(obj)):
+        elif isinstance(obj, _CrossReferenceABC):
+            if not (typ := _CrossReferenceABC.jsonType(obj)):
                 # in-case of any undefined/unregistered subclasses
-                typ = _CrossReference.registeredDefaultJsonType
+                typ = _CrossReferenceABC.registeredDefaultJsonType
 
             data = obj.toJson()
 
@@ -166,7 +166,7 @@ def _ccpnObjectPairHook(pairs):
         if tag1 == '__type__' and tag2 == '__data__':
 
             from ccpn.core._implementation.DataFrameABC import DataFrameABC
-            from ccpn.core._implementation.CrossReference import _CrossReference
+            from ccpn.core._implementation.CrossReference import _CrossReferenceABC
 
             if typ == ORDEREDDICT:
                 return OrderedDict(data)
@@ -214,12 +214,12 @@ def _ccpnObjectPairHook(pairs):
 
             elif typ == CROSSREFERENCE:
                 # ignore the original type for the minute
-                return _CrossReference._oldFromJson(data)
+                return _CrossReferenceABC._oldFromJson(data)
 
-            elif typ in _CrossReference.registeredJsonTypes():
+            elif typ in _CrossReferenceABC.registeredJsonTypes():
                 # check for registered subclasses of DataFrameABC
                 try:
-                    return _CrossReference._newFromJson(data)
+                    return _CrossReferenceABC._newFromJson(data)
 
                 except Exception:
                     return None

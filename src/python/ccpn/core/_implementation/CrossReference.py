@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-06 18:34:46 +0100 (Thu, July 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-13 11:59:18 +0100 (Thu, July 13, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -69,7 +69,7 @@ _BUILDFROMPROJECT = '_BUILDFROMPROJECT'
 warnings.simplefilter('ignore', SparseEfficiencyWarning)
 
 
-class _CrossReference():
+class _CrossReferenceABC():
     """
     Class to hold the cross-references between project core-objects.
     
@@ -100,6 +100,10 @@ class _CrossReference():
     _registeredDefaultClassName = None
     _JSON_PREFIX = 'ccpn.'
 
+    # The class-types for the cross-reference, the order must be strictly observed.
+    rowKlass = None
+    columnKlass = None
+
 
     class _classproperty():
         """Class to define getter for a class-property, similar to a class method.
@@ -118,7 +122,7 @@ class _CrossReference():
         """
         if not isinstance(className, str):
             raise TypeError(f'{className} must be of type str')
-        return className in _CrossReference._registeredClasses
+        return className in _CrossReferenceABC._registeredClasses
 
     @staticmethod
     def isRegisteredInstance(instance) -> bool:
@@ -126,28 +130,28 @@ class _CrossReference():
         """
         if isinstance(instance, type):
             raise TypeError(f'{instance} must be an instance of a class')
-        return instance.__class__.__name__ in _CrossReference._registeredClasses
+        return instance.__class__.__name__ in _CrossReferenceABC._registeredClasses
 
     @classmethod
     def register(cls, setDefault=False):
         """Register the class.
         """
         className = cls.__name__
-        if cls.isRegistered(className):
+        if _CrossReferenceABC.isRegistered(className):
             raise RuntimeError(f'className {className!r} already registered')
-        cls._registeredClasses[className] = cls
+        _CrossReferenceABC._registeredClasses[className] = cls
         if setDefault:
-            if name := _CrossReference._registeredDefaultClassName:
-                raise RuntimeError(f'Default class {_CrossReference._registeredClasses[name]} already set')
+            if name := _CrossReferenceABC._registeredDefaultClassName:
+                raise RuntimeError(f'Default class {_CrossReferenceABC._registeredClasses[name]} already set')
 
             # define a default in-case of any unforeseen problems
-            _CrossReference._registeredDefaultClassName = className
+            _CrossReferenceABC._registeredDefaultClassName = className
 
     @_classproperty
     def registeredDefaultClassName(self):
         """Return the default registered className.
         """
-        return _CrossReference._registeredDefaultClassName
+        return _CrossReferenceABC._registeredDefaultClassName
 
     @classmethod
     def registeredJsonTypes(cls) -> tuple:
@@ -155,23 +159,23 @@ class _CrossReference():
         Json-types are strings of the form ccpn.<name>; name is the class-name of a registered class.
         :return: tuple of str.
         """
-        # return tuple(f'{_CrossReference._JSON_PREFIX}{typ}' for typ in _CrossReference._registeredClasses)
-        return tuple(_CrossReference._classNameToJsonType(typ) for typ in _CrossReference._registeredClasses)
+        return tuple(_CrossReferenceABC._classNameToJsonType(typ) for typ in _CrossReferenceABC._registeredClasses)
 
     @staticmethod
     def _classNameToJsonType(className) -> str:
         """Return json-type from given className.
         A json-type is a string of the form ccpn.<className>.
+        :return: str.
         """
-        return f'{_CrossReference._JSON_PREFIX}{className}'
+        return f'{_CrossReferenceABC._JSON_PREFIX}{className}'
 
     @_classproperty
     def registeredDefaultJsonType(self):
         """Return the json-type of the default registered class.
         A json-type is a string of the form ccpn.<name>; name is the class-name of a registered class.
         """
-        if _CrossReference.registeredDefaultClassName:
-            return _CrossReference._classNameToJsonType(_CrossReference.registeredDefaultClassName)
+        if _CrossReferenceABC.registeredDefaultClassName:
+            return _CrossReferenceABC._classNameToJsonType(_CrossReferenceABC.registeredDefaultClassName)
 
     @classmethod
     def jsonType(cls, instance) -> typing.Optional[str]:
@@ -180,8 +184,8 @@ class _CrossReference():
         :return: str or None.
         """
         name = instance.__class__.__name__
-        if name in _CrossReference._registeredClasses:
-            return _CrossReference._classNameToJsonType(name)
+        if name in _CrossReferenceABC._registeredClasses:
+            return _CrossReferenceABC._classNameToJsonType(name)
 
     @staticmethod
     def fromJsonType(jsonType) -> typing.Optional[callable]:
@@ -189,10 +193,17 @@ class _CrossReference():
         Json-types are strings of the form ccpn.<name>; name is the class-name of a registered class.
         :return: registered class-type.
         """
-        return next((klass for typ, klass in _CrossReference._registeredClasses.items() if _CrossReference._classNameToJsonType(typ) == jsonType), None)
+        return next((klass for typ, klass in _CrossReferenceABC._registeredClasses.items() if _CrossReferenceABC._classNameToJsonType(typ) == jsonType), None)
+
+    @staticmethod
+    def registeredReferencePairs():
+        """Return a tuple of tuples of the form ((class A, class B), ...) for all the registered cross-references classes.
+        Class A and Class B are the registered core class types for each cross-reference class.
+        """
+        return tuple((ref.rowKlass, ref.columnKlass) for ref in _CrossReferenceABC._registeredClasses.values() if ref.rowKlass and ref.columnKlass)
 
     #=========================================================================================
-    # Properties
+    # Implementation
     #=========================================================================================
 
     @classmethod
@@ -200,10 +211,10 @@ class _CrossReference():
         """Create a new instance from json data.
         """
         project = getProject()
-        values = cls.fromJson(jsonData)
+        values = _CrossReferenceABC.fromJson(jsonData)
 
-        jType = _CrossReference._classNameToJsonType(f'_{values.get("rowClassName")}{values.get("columnClassName")}')
-        if klass := _CrossReference.fromJsonType(jType):
+        jType = _CrossReferenceABC._classNameToJsonType(f'_{values.get("rowClassName")}{values.get("columnClassName")}')
+        if klass := _CrossReferenceABC.fromJsonType(jType):
             # SHOULD always be a defined json-type
             return klass(project=project, **values)
 
@@ -213,8 +224,8 @@ class _CrossReference():
         """
         project = getProject()
 
-        jType = _CrossReference._classNameToJsonType(f'_{rowClassName}{columnClassName}')
-        if klass := _CrossReference.fromJsonType(jType):
+        jType = _CrossReferenceABC._classNameToJsonType(f'_{rowClassName}{columnClassName}')
+        if klass := _CrossReferenceABC.fromJsonType(jType):
             # SHOULD always be a defined json-type
             return klass(project=project, rowClassName=rowClassName, columnClassName=columnClassName)
 
@@ -224,13 +235,17 @@ class _CrossReference():
         CCPNInternal - deprecated, mistake by Ed :|
         """
         project = getProject()
-        values = cls.fromJson(jsonData)
+        values = _CrossReferenceABC.fromJson(jsonData)
 
         # note the lack of an underscore
-        jType = _CrossReference._classNameToJsonType(f'{values.get("rowClassName")}{values.get("columnClassName")}')
-        if klass := _CrossReference.fromJsonType(jType):
+        jType = _CrossReferenceABC._classNameToJsonType(f'{values.get("rowClassName")}{values.get("columnClassName")}')
+        if klass := _CrossReferenceABC.fromJsonType(jType):
             # SHOULD always be a defined json-type
             return klass(project=project, **values)
+
+    #=========================================================================================
+    # Instance methods
+    #=========================================================================================
 
     def __init__(self, project: Project,
                  rowClassName: str = None, columnClassName: str = None,
@@ -355,7 +370,7 @@ class _CrossReference():
     #=========================================================================================
 
     @staticmethod
-    def sparse_memory_usage(matrix) -> int:
+    def sparseMemoryUsage(matrix) -> int:
         """Return the number of bytes used for a scipy.sparse-matrix.
 
         Returns -1 if the matrix is missing any attributes.
@@ -850,7 +865,13 @@ class _CrossReference():
 # Start of code
 #=========================================================================================
 
-class MarkStrip(_CrossReference):
+from ccpn.ui._implementation.Mark import Mark
+from ccpn.ui._implementation.Strip import Strip
+from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
+from ccpn.ui._implementation.Window import Window
+
+
+class MarkStrip(_CrossReferenceABC):
     """Class to handle special case of mark<->strip cross-reference.
     Marks can also belong to a spectrumDisplay or mainWindow (everywhere).
 
@@ -869,11 +890,11 @@ class MarkStrip(_CrossReference):
     ...
 
 
-# register the class with _CrossReference for json loading/saving
+# register the class with _CrossReferenceABC for json loading/saving
 MarkStrip.register()
 
 
-class _MarkStrip(_CrossReference):
+class _MarkStrip(_CrossReferenceABC):
     """Class to handle special case of mark<->strip cross-reference.
     Marks can also belong to a spectrumDisplay or mainWindow (everywhere).
 
@@ -882,6 +903,9 @@ class _MarkStrip(_CrossReference):
 
     See below for spectrumDisplay-mainWindow classes.
     """
+    rowKlass = Mark
+    columnKlass = Strip
+
     #=========================================================================================
     # Get/set values in cross-reference
     #=========================================================================================
@@ -889,13 +913,16 @@ class _MarkStrip(_CrossReference):
     ...
 
 
-# register the class with _CrossReference for json loading/saving
+# register the class with _CrossReferenceABC for json loading/saving
 _MarkStrip.register(setDefault=True)
 
 
-class _MarkSpectrumDisplay(_CrossReference):
+class _MarkSpectrumDisplay(_CrossReferenceABC):
     """Class to handle special case of mark<->spectrumDisplay cross-reference.
     """
+    rowKlass = Mark
+    columnKlass = SpectrumDisplay
+
     #=========================================================================================
     # Get/set values in cross-reference
     #=========================================================================================
@@ -903,13 +930,16 @@ class _MarkSpectrumDisplay(_CrossReference):
     ...
 
 
-# register the class with _CrossReference for json loading/saving
+# register the class with _CrossReferenceABC for json loading/saving
 _MarkSpectrumDisplay.register()
 
 
-class _MarkWindow(_CrossReference):
+class _MarkWindow(_CrossReferenceABC):
     """Class to handle special case of mark<->mainWindow cross-reference.
     """
+    rowKlass = Mark
+    columnKlass = Window
+
     #=========================================================================================
     # Get/set values in cross-reference
     #=========================================================================================
@@ -917,5 +947,5 @@ class _MarkWindow(_CrossReference):
     ...
 
 
-# register the class with _CrossReference for json loading/saving
+# register the class with _CrossReferenceABC for json loading/saving
 _MarkWindow.register()

@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 14:29:32 +0100 (Wed, June 28, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-07-13 11:59:18 +0100 (Thu, July 13, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,11 +27,7 @@ __date__ = "$Date: 2023-06-05 13:00:50 +0100 (Mon, June 05, 2023) $"
 #=========================================================================================
 
 from ccpn.core.Project import Project
-from ccpn.core._implementation.CrossReference import _CrossReference
-from ccpn.ui._implementation.Mark import Mark
-from ccpn.ui._implementation.Strip import Strip
-from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
-from ccpn.ui._implementation.Window import Window
+from ccpn.core._implementation.CrossReference import _CrossReferenceABC
 from ccpn.util.Logging import getLogger
 
 
@@ -42,10 +38,6 @@ class CrossReferenceHandler():
     """
     Class to handle cross-referencing between two sets of core objects.
     """
-    references = ((Mark, Strip),
-                  (Mark, SpectrumDisplay),
-                  (Mark, Window),
-                  )
 
     def __init__(self, project: Project):
         self._project = project
@@ -71,16 +63,7 @@ class CrossReferenceHandler():
         """Restore the object and cross-references after loading.
         There is no apiObj for this class, but left in to match other core object functionality.
         """
-        # recover objects from project._ccpnInternal for the minute
-        #   move to _postRestore to ensure that all core objects are defined
-        # try:
-        #     # nasty, but get the direct object, not a copy
-        #     references = self._project._getInternalParameterRef(REFERENCES)
-        #
-        # except Exception:
-        #     references = {}
-        #     self._project._setInternalParameter(REFERENCES, references)
-
+        # recover objects from project._ccpnInternal - note the 'ParameterRef', we don't want a copy
         if not (references := self._project._getInternalParameterRef(REFERENCES)):
             references = {}
             self._project._setInternalParameter(REFERENCES, references)
@@ -88,8 +71,11 @@ class CrossReferenceHandler():
         # don't need to keep getting the reference
         self._crossReferences = references
 
+        # generate tuple of (rowKlass, columnKlass) for the registered classes
+        refPairs = _CrossReferenceABC.registeredReferencePairs()
+
         # list through the required cross-references and create as required
-        for rowRefClass, colRefClass in self.references:
+        for rowRefClass, colRefClass in refPairs:
             refName = f'_{rowRefClass.className}{colRefClass.className}'
 
             if foundRef := references.get(refName):
@@ -100,41 +86,19 @@ class CrossReferenceHandler():
                     except Exception:
                         # rebuild as contains an error
                         getLogger().debug('--> strange error')
-                        foundRef = references[refName] = _CrossReference._new(rowRefClass.className, colRefClass.className)
+                        foundRef = references[refName] = _CrossReferenceABC._new(rowRefClass.className, colRefClass.className)
                         foundRef._restoreObject(self._project, None)
 
             else:
-                foundRef = references[refName] = _CrossReference._new(rowRefClass.className, colRefClass.className)
+                foundRef = references[refName] = _CrossReferenceABC._new(rowRefClass.className, colRefClass.className)
                 foundRef._restoreObject(self._project, None)
 
         # load the deprecated ones - mistake by Ed :|
-        for rowRefClass, colRefClass in self.references:
+        for rowRefClass, colRefClass in refPairs:
             refName = f'{rowRefClass.className}{colRefClass.className}'
 
             if references.get(refName):
                 del references[refName]
-
-            # if foundRef := references.get(refName):
-            #     if not isinstance(foundRef, dict):
-            #         foundRef._restoreObject(self._project, None)
-            #
-            #         # recover strip references to the new marks
-            #         # merge with same class with leading underscore
-            #         # remove from _ccpnInternal
-            #         newName = f'_{refName}'
-            #         if not references.get(newName):
-            #             raise RuntimeError(f"{self.__class__.__name__}: {newName} doesn't exist")
-            #
-            #         # # replace with the existing underscore-name
-            #         # values = foundRef.toJson()
-            #         # references[newName] = newRef = _CrossReference._newFromJson(values)
-            #         # newRef._restoreObject(self._project, None)
-            #
-            #         # del references[refName]
-            #         references[refName] = _CrossReference._oldFromJson(f'{{ '
-            #                                                            f'"rowClassName": "{rowRefClass.className}", '
-            #                                                            f'"columnClassName": "{colRefClass.className}" '
-            #                                                            f'}}')
 
     #=========================================================================================
     # Get/set values in cross-reference

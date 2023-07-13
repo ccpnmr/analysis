@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-01 19:39:55 +0100 (Thu, June 01, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-07-13 16:56:35 +0100 (Thu, July 13, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -179,9 +179,14 @@ class Multiplet(AbstractWrapperObject):
     @property
     def height(self) -> Optional[float]:
         """height of Multiplet."""
-        if pks := self.peaks:
-            heights = [(peak.height or 0.0) for peak in pks]
-            return sum(heights)
+        try:
+            if pks := self.peaks:
+                heights = [peak.height for peak in pks]
+                return sum(heights)
+
+        except TypeError:
+            # peaks contains values that are None
+            return None
 
     # # cannot set the height - derived from peaks
     # @height.setter
@@ -191,9 +196,14 @@ class Multiplet(AbstractWrapperObject):
     @property
     def heightError(self) -> Optional[float]:
         """height error of Multiplet."""
-        if pks := self.peaks:
-            errors = [(peak.heightError or 0.0) for peak in pks]
-            return sum(errors)
+        try:
+            if pks := self.peaks:
+                errors = [peak.heightError for peak in pks]
+                return sum(errors)
+
+        except TypeError:
+            # peaks contains values that are None
+            return None
 
     # # cannot set the heightError - derived from peaks
     # @heightError.setter
@@ -203,9 +213,14 @@ class Multiplet(AbstractWrapperObject):
     @property
     def volume(self) -> Optional[float]:
         """Volume of multiplet."""
-        if pks := self.peaks:
-            errors = [(peak.volume or 0.0) for peak in pks]
-            return sum(errors)
+        try:
+            if pks := self.peaks:
+                errors = [peak.volume for peak in pks]
+                return sum(errors)
+
+        except TypeError:
+            # peaks contains values that are None
+            return None
 
     # @property
     # def volume(self) -> Optional[float]:
@@ -266,9 +281,14 @@ class Multiplet(AbstractWrapperObject):
     @property
     def volumeError(self) -> Optional[float]:
         """volume error of Multiplet."""
-        if pks := self.peaks:
-            errors = [(peak.volumeError or 0.0) for peak in pks]
-            return sum(errors)
+        try:
+            if pks := self.peaks:
+                errors = [peak.volumeError for peak in pks]
+                return sum(errors)
+
+        except TypeError:
+            # peaks contains values that are None
+            return None
 
     # @property
     # def volumeError(self) -> Optional[float]:

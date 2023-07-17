@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-11 16:13:16 +0100 (Tue, July 11, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-17 11:12:14 +0100 (Mon, July 17, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -119,6 +119,8 @@ from ccpn.core._implementation.SpectrumData import SliceData, PlaneData, RegionD
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking
 from ccpn.core.lib.Cache import cached, Cache
 
+from ccpn.framework.Application import getApplication
+
 from ccpn.util.Common import isIterable
 from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
@@ -126,7 +128,7 @@ from ccpn.util.decorators import singleton
 
 from ccpn.util.isotopes import findNucleiFromSpectrometerFrequencies, Nucleus
 from ccpn.util.traits.CcpNmrTraits import CFloat, CInt, CBool, Bool, List, \
-    CString, CList, CPath
+    CString, CList, CPath, Any
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson
 
 from ccpn.framework.constants import CCPNMR_PREFIX, NO_SUFFIX, ANY_SUFFIX
@@ -519,6 +521,32 @@ class SpectrumDataSourceABC(CcpNmrJson):
                                                            )
 
     #=========================================================================================
+    # hdf5Buffer related attributes
+    #=========================================================================================
+    _isBuffered = Bool(default_value=False).tag(info =
+                                                'Flag to indicate the spectrumDataSource object to have buffered read/writes',
+                                                saveToJson = False
+                                                )
+    _bufferFilled = Bool(default_value=False).tag(info =
+                                                'Flag to indicate if the buffer is filled',
+                                                saveToJson = False
+                                                )
+    _bufferIsTemporary = Bool(default_value=False).tag(info =
+                                                'Flag to indicate if the buffer is temporary',
+                                                saveToJson = False
+                                                )
+
+    _bufferPath = CPath(default_value=None, allow_none=True).tag(info =
+                                                'an attribute to store the path of the buffer file',
+                                                saveToJson = False
+                                                )
+    # Can't use DataSourceTrait defined below because of the circular nature of the definitions
+    hdf5buffer = Any(default_value=None, allow_none=True).tag(info =
+                                                'The Hdf-buffer instance',
+                                                saveToJson = False
+
+    )
+    #=========================================================================================
     # some default data
     #=========================================================================================
 
@@ -648,22 +676,15 @@ class SpectrumDataSourceABC(CcpNmrJson):
         self.dataFile = None  # Absolute path of the binary data; set by setPath method
         self.fp = None  # File pointer; None indicates closed
         self.mode = None  # Open mode
-
-        # hdf5Buffer related attributes
-        self._isBuffered = False  # Flag to indicate the spectrumDataSource object to have buffered read/writes;
-        self.hdf5buffer = None  # Hdf5SpectrumBuffer instance; None indicates no Hdf5 buffer used
-        self._bufferFilled = False
-        self._bufferIsTemporary = True
-        self._bufferPath = None
-
-        self.spectrum = None  # Spectrum instance
-
+        self.spectrum = None  # Spectrum instance; optionally initialised below
+        # hdf5Buffer related attributes defaults set by traits
         self.setDefaultParameters()
 
         if path is not None:
             self.setPath(path)
         if spectrum is not None:
             self.importFromSpectrum(spectrum, includePath=False)
+            self.spectrum = spectrum
         if dimensionCount is not None:
             self.setDimensionCount(dimensionCount)
 
@@ -2140,13 +2161,26 @@ class SpectrumDataSourceABC(CcpNmrJson):
         :param bufferIsTemporary (True, False): define buffer as temporary (i.e. disgarded on close)
         :param bufferPath: optional path to store the buffer file
         """
+        from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumDataSource
+
         if self.isBuffered:
             self.closeHdf5Buffer()
 
         self._isBuffered = isBuffered
         self._bufferFilled = False
         self._bufferIsTemporary = bufferIsTemporary
-        self._bufferPath = bufferPath
+
+        self._bufferPath = None
+        if isBuffered:
+            if bufferIsTemporary:
+                # Construct a path for temporary buffer using the tempfile methods in _getTemporaryPath
+                prefix = 'hdf5buffer_%s_' % self.nameFromPath()
+                bufferPath = getApplication()._getTemporaryPath(prefix=prefix, suffix=Hdf5SpectrumDataSource.suffixes[0])
+
+            elif bufferPath is None:
+                # construct bufferPath from self.path if None
+                bufferPath = self.path.withSuffix(Hdf5SpectrumDataSource.suffixes[0]).uniqueVersion()
+            self._bufferPath = bufferPath
 
         # close the current file as all will go from the buffer (once filled)
         if self.hasOpenFile():
@@ -2171,22 +2205,13 @@ class SpectrumDataSourceABC(CcpNmrJson):
         if not self.isBuffered:
             raise RuntimeError('initialiseHdf5Buffer: buffering not active, use setBuffering() method first')
 
+        if self._bufferPath is None:
+            raise RuntimeError('initialiseHdf5Buffer: bufferPath not set, use setBuffering() method first')
+
         self.closeHdf5Buffer()
 
-        if self._bufferIsTemporary:
-            # Construct a path for temporary buffer using the tempfile methods in _getTemporaryPath
-            prefix = 'hdf5buffer_%s_' % self.nameFromPath()
-            path = getApplication()._getTemporaryPath(prefix=prefix, suffix=Hdf5SpectrumDataSource.suffixes[0])
-
-        else:
-            # take path as defined in _bufferPath, or construct from self.path if None
-            path = self._bufferPath
-            if self._bufferPath is None:
-                path = self.path.withSuffix(Hdf5SpectrumDataSource.suffixes[0]).uniqueVersion()
-            # tFile = None
-
         # create a hdf5 buffer file instance
-        hdf5buffer = Hdf5SpectrumDataSource(path=path)
+        hdf5buffer = Hdf5SpectrumDataSource(path=self._bufferPath)
         hdf5buffer.copyParametersFrom(self)
         # do not use openNewFile as it has to remain open to allow for filling the buffer
         hdf5buffer.openFile(mode=Hdf5SpectrumDataSource.defaultOpenWriteMode)

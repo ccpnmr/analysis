@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-10 14:52:42 +0100 (Mon, July 10, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-17 11:12:14 +0100 (Mon, July 17, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -100,10 +100,10 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
     NmrPipe nD (n=1-4) binary spectral data reading:
     The NmrPipe files are stored as either:
     - a single file
-    - or for 3D/4D as a series of 2D planes defined by a template name; e.g. 'myFile%003d.ft3'
+    - or for 3D/4D as a series of 2D planes defined by a nmrPipeTemplate name; e.g. 'myFile%003d.ft3'
 
     NmrPipe spectra can be loaded by either:
-    - A nD plane file; if required, the template will be reconstructed
+    - A nD plane file; if required, the nmrPipeTemplate will be reconstructed
     - A folder with a valid NmrPipe suffix and containing a series of numbered 2D planes with a valid
       NmrPipe suffix; e.g. matching *001.dat or *001.pipe or *001.ft3, etc
     """
@@ -130,7 +130,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
     #=========================================================================================
 
-    template = CString(allow_none=True, default_value=None).tag(
+    nmrPipeTemplate = CString(allow_none=True, default_value=None).tag(
                                         info='The template to generate the path of the individual files comprising the nD',
                                        )
     nFiles = CInt(default_value=0).tag(
@@ -237,8 +237,8 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                 _isAcquisition[1] = True
                 self.isAcquisition = _isAcquisition
 
-            if self.template is None and self.dimensionCount > 2:
-                self.template = self._guessTemplate()
+            if self.nmrPipeTemplate is None and self.dimensionCount > 2:
+                self.nmrPipeTemplate = self._guessTemplate()
 
             self._setBaseDimensionality()
             self.blockSizes = [1]*specLib.MAXDIM
@@ -258,13 +258,13 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
         return self
 
     def _setBaseDimensionality(self):
-        """Set the baseDimensionality depending on dimensionCount, nFiles and template
+        """Set the baseDimensionality depending on dimensionCount, nFiles and nmrPipeTemplate
         """
         if self.nFiles == 1:
             # 1D, 2D, nD's stored as a single file
             self.baseDimensionality = self.dimensionCount
         elif self.dimensionCount == 4 and self.nFiles > 1 and \
-           self.template is not None and self.template.count('%') == 1:
+           self.nmrPipeTemplate is not None and self.nmrPipeTemplate.count('%') == 1:
             # 4D's stored as series of 3D's
             self.baseDimensionality = 3
         elif self.nFiles > 1:
@@ -275,8 +275,8 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
 
     def _guessTemplate(self) -> Path:
-        """Guess and return the template based on self.path and dimensionality
-        :return template as a Path instance or None if unsuccessful or not applicable
+        """Guess and return the nmrPipeTemplate based on self.path and dimensionality
+        :return nmrPipeTemplate as a Path instance or None if unsuccessful or not applicable
         """
         logger = getLogger()
 
@@ -351,7 +351,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
         return None
 
     def _getPathAndOffset(self, position):
-        """Construct path of NmrPipe file corresponding to position (1-based) from template
+        """Construct path of NmrPipe file corresponding to position (1-based) from nmrPipeTemplate
         Check presence of result path
         :return aPath instance of path and offset (in bytes) as a tuple
         """
@@ -370,9 +370,9 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
         elif self.dimensionCount == 3 and self.baseDimensionality == 2:
             # regular multi-file 3D
-            if self.template is None:
-                raise RuntimeError('%s: Undefined template' % self)
-            path = self.template % (position[specLib.Z_DIM_INDEX],)
+            if self.nmrPipeTemplate is None:
+                raise RuntimeError('%s: Undefined nmrPipeTemplate' % self)
+            path = self.nmrPipeTemplate % (position[specLib.Z_DIM_INDEX],)
             offset = self.headerSize * self.wordSize
 
         elif self.dimensionCount == 4 and self.nFiles == 1:
@@ -388,16 +388,16 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
         elif self.dimensionCount == 4 and self.baseDimensionality == 2:
             # regular multi-file 4D
-            if self.template is None:
-                raise RuntimeError('%s: Undefined template' % self)
-            path =  self.template % (position[specLib.A_DIM_INDEX], position[specLib.Z_DIM_INDEX])
+            if self.nmrPipeTemplate is None:
+                raise RuntimeError('%s: Undefined nmrPipeTemplate' % self)
+            path = self.nmrPipeTemplate % (position[specLib.A_DIM_INDEX], position[specLib.Z_DIM_INDEX])
             offset = self.headerSize * self.wordSize
 
         elif self.dimensionCount == 4 and self.baseDimensionality == 3:
             # multi-file 4D; 3D base dimensionality
-            if self.template is None:
-                raise RuntimeError('%s: Undefined template' % self)
-            path =  self.template % (position[specLib.A_DIM_INDEX],)
+            if self.nmrPipeTemplate is None:
+                raise RuntimeError('%s: Undefined nmrPipeTemplate' % self)
+            path = self.nmrPipeTemplate % (position[specLib.A_DIM_INDEX],)
             offset = ( self.headerSize + \
                       (position[specLib.X_DIM_INDEX]-1) * self.pointCounts[specLib.X_DIM_INDEX] * self.pointCounts[specLib.Y_DIM_INDEX]
                      ) * self.wordSize
@@ -517,7 +517,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
     def checkValid(self) -> bool:
         """check if valid format corresponding to dataFormat by:
-        - checking template and binary files are defined
+        - checking nmrPipeTemplate and binary files are defined
 
         call super class for:
         - checking suffix and existence of path
@@ -533,8 +533,8 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
             return False
 
         self.shouldBeValid = True
-        if self.nFiles > 1 and self.template is None:
-            errorMsg = f'No NmrPipe template defined, in spite of {self.nFiles} files comprising the {self.dimensionCount}D'
+        if self.nFiles > 1 and self.nmrPipeTemplate is None:
+            errorMsg = f'No NmrPipe nmrPipeTemplate defined, in spite of {self.nFiles} files comprising the {self.dimensionCount}D'
             return self._returnFalse(errorMsg)
 
         return True
@@ -728,7 +728,7 @@ class NmrPipeInputStreamDataSource(NmrPipeSpectrumDataSource):
         self.header = NmrPipeHeader(self.headerSize, self.wordSize).read(self.fp, doSeek=False)
 
     def _guessTemplate(self):
-        "Guess template not active/required for input stream"
+        "Guess nmrPipeTemplate not active/required for input stream"
         return None
 
     def fillHdf5Buffer(self, hdf5buffer):

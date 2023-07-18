@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-17 11:12:14 +0100 (Mon, July 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-18 13:31:56 +0100 (Tue, July 18, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -508,7 +508,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     #=========================================================================================
     # Attributes for more complicated dataFormats that have separate binaries and parameter
-    # files; e.g. Azara, Bruker, Xeasy
+    # files; e.g. Azara, Bruker, Xeasy, NmrPipe
     #=========================================================================================
     _parameterFile = CPath(default_value=None, allow_none=True).tag(info =
                                         'an attribute to store the (parsed) path to a parameter file'
@@ -519,7 +519,9 @@ class SpectrumDataSourceABC(CcpNmrJson):
     _path = CPath(default_value=None, allow_none=True).tag(info =
                                         'an attribute to store the initial path used to define binary/parameter files; used during parsing'
                                                            )
-
+    _isDirectory = Bool(default_value=False).tag(
+                                        info='Initiating path was a directory',
+                                        )
     #=========================================================================================
     # hdf5Buffer related attributes
     #=========================================================================================
@@ -1377,17 +1379,20 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         :return: True if ok, False otherwise
         """
+        if not self.isValid:
+            # An earlier error occured
+            return False
+
         self.isValid = True
         self.errorString = ''
 
         # checking path
         _p = self.path
-        _iniTxt = f'{self.dataFormat} spectrum path "{_p}"'
-
         if _p is None:
             txt = f'{self.dataFormat} spectrum path is undefined'
             return self._returnFalse(txt)
 
+        _iniTxt = f'{self.dataFormat} spectrum path "{_p}"'
         if not self.checkSuffix(_p):
             txt = f'{_iniTxt}: invalid suffix'
             return self._returnFalse(txt)
@@ -2293,10 +2298,42 @@ class SpectrumDataSourceABC(CcpNmrJson):
                     path.write('%15s ' % val)
             path.write('\n')
 
+    @property
+    def _fileInfoString1(self) -> str:
+        """A convenience method to generate an info string about the file
+        in the form: '3D - NMRpipe (96 MB)'
+        CCPNMRINTERNAL: thoughout
+        :return info string
+        """
+        txt = f'{self.dimensionCount}D - {self.dataFormat} ({self.expectedFileSizeInBytes/(1024*1024):.1f} MB)'
+        return txt
+
+    @property
+    def _fileInfoString2(self) -> str:
+        """A convenience method to generate an info string about the file
+        in the form: '3D - 1H (562) x 13C (128)'
+        CCPNMRINTERNAL: thoughout
+        :return info string
+        """
+        _dims = " x ".join(["%s (%s)" % (c, p) for p,c in zip(self.pointCounts, self.axisCodes)])
+        txt = f'{self.dimensionCount}D - {_dims}'
+        return txt
+
+    @property
+    def _fileInfoString3(self) -> str:
+        """A convenience method to generate an info string about the file
+        in the form: '3D - 562 (nR) x 128 (nR)'
+        CCPNMRINTERNAL: thoughout
+        :return info string
+        """
+        _dims = " x ".join(["%s (%s)" % (p, c) for p,c in zip(self.pointCounts, self.dataTypes)])
+        txt = f'{self.dimensionCount}D - {_dims}'
+        return txt
+
     def __str__(self):
         if self.dimensionCount == 0:
             fName = self.path.name if self.path is not None else str(None)
-            return '<%s: _D (), %s>' % (self.__class__.__name__, fName)
+            return '<%s: _D, %s>' % (self.__class__.__name__, fName)
         else:
             if self.isBuffered:
                 fpStatus = '%r' % 'buffered'
@@ -2312,14 +2349,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
                     fpStatus = '%r' % 'closed'
                     pathName = self.path.name
 
-            return '<%s: %dD (%s), (%s,%r)>' % (self.__class__.__name__,
-                                                    self.dimensionCount,
-                                                    'x'.join([str(p) for p in self.pointCounts]),
-                                                    fpStatus,
-                                                    pathName
-                                                    )
+            return f'<{self.__class__.__name__}: {self._fileInfoString3}, ({fpStatus},{pathName!r})>'
 #end class
-
 
 def _fillSlice(sliceData, start, stop, aliasing, resultSlice=None):
     """Helper function for _getRegionData.

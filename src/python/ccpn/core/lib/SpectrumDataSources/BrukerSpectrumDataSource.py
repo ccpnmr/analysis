@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-10 14:52:42 +0100 (Mon, July 10, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-18 13:31:56 +0100 (Tue, July 18, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -367,6 +367,7 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         else:
             _path = Path(path)
             self._path = _path
+            self._isDirectory = _path.is_dir()
 
             if _path.is_file() and _path.stem in self._processedDataFiles:
                 # Bruker binary processed data file

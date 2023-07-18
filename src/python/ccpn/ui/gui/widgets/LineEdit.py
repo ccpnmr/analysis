@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:42 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-07-18 17:54:23 +0100 (Tue, July 18, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -50,7 +50,7 @@ TextAlignment = {
 class LineEdit(QtWidgets.QLineEdit, Base):
 
     def __init__(self, parent, text='', textAlignment='c', backgroundText=None,
-                 textColor=None, editable=True, **kwds):
+                 textColor='black', editable=True, **kwds):
         """
 
         :param parent:
@@ -68,6 +68,7 @@ class LineEdit(QtWidgets.QLineEdit, Base):
 
         self.setText(text)
 
+        self.textColor = textColor
         if textColor:
             self.setStyleSheet('QLabel {color: %s;}' % textColor)
 
@@ -76,23 +77,22 @@ class LineEdit(QtWidgets.QLineEdit, Base):
             self.setPlaceholderText(str(self.backgroundText))
 
         self.setAlignment(TextAlignment[textAlignment])
-
-        # if 'minimumWidth' in kwds:
-        #     self.setMinimumWidth(kwds['minimumWidth'])
-
         self.setStyleSheet('LineEdit { padding: 3px 3px 3px 3px; }')
-
-        if not editable:
-            self.setReadOnly(True)
-            self.setEnabled(False)
+        self.setEditable(editable)
 
     def get(self):
         return self.text()
 
     def set(self, text=''):
-
         #text = translator.translate(text)
         self.setText(text)
+
+    def setEditable(self, flag:bool):
+        """Set the widget to be editable
+        For now implemented using setReadOnly() and setEnabled()
+        """
+        self.setReadOnly(not flag)
+        self.setEnabled(flag)
 
     def _getSaveState(self):
         """

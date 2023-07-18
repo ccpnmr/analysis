@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-14 12:23:14 +0100 (Fri, July 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-18 17:54:23 +0100 (Tue, July 18, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -92,6 +92,7 @@ _alignLabel = dict(vAlign='c', hAlign='r', minimumHeight=25) # Keyword labels
 _align1 = dict(vAlign='c', hAlign='l', textColour='black')  # Data Labels
 _align2 = dict(vAlign='c')  # Dimensional Pulldowns / LineEdits
 
+LIGHTGREY = QtGui.QColor('lightgrey')
 
 def _updateGl(self, spectrumList):
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
@@ -607,6 +608,8 @@ class GeneralTab(Widget):
 
         super().__init__(parent, setLayout=True, spacing=DEFAULTSPACING)  # ejb
         self.setWindowTitle("Spectrum Properties")
+        self.setMinimumHeight(600)
+        self.setMinimumWidth(400)
 
         self._parent = parent
         self._container = container  # master widget that this is attached to
@@ -621,12 +624,11 @@ class GeneralTab(Widget):
 
         self.experimentTypes = spectrum._project._experimentTypeMap
 
-        row = 0
-        # self.layout().addItem(QtWidgets.QSpacerItem(row, 5), 0, 0)
-        # Spacer(self, 5, 1, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum,
-        #        grid=(row, 3))
-        # row += 1
-        Label(self, text="Pid", grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'pid'), **_alignLabel)
+        row = -1
+
+        row += 1
+        Label(self, text="Pid", grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'pid'),
+              bold=True, **_alignLabel)
         self.spectrumPidLabel = Label(self, grid=(row, 1), **_align1)
 
         row += 1
@@ -639,10 +641,9 @@ class GeneralTab(Widget):
         self.commentData = LineEdit(self, textAlignment='left', grid=(row, 1), backgroundText='> Optional <', **_align2)
         self.commentData.textChanged.connect(partial(self._queueSpectrumCommentChange, spectrum))  # ejb - was editingFinished
 
-        # Date; not yet operational
+        #======= HLine ======
         row += 1
-        Label(self, text="Date Recorded", grid=(row, 0), **_alignLabel)
-        self.dateRecordedWidget = Label(self, text='N/A (yet)', grid=(row, 1), **_align1)
+        hLine = HLine(self, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15, divisor=2)
 
         row += 1
         Label(self, text="Path", grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'filePath'), **_alignLabel)
@@ -654,11 +655,40 @@ class GeneralTab(Widget):
                                             )
 
         row += 1
-        # from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
-        # _dataFormats = list(getDataFormats().keys())
-        Label(self, text="Data Format", grid=(row, 0),
-              tipText=getAttributeTipText(Spectrum, 'Format of the binary data defined by path'), **_alignLabel)
-        self.dataFormatWidget = Label(parent=self, grid=(row, 1), **_align1)
+        # Label(self, text="Data Format", grid=(row, 0),
+        #       tipText=getAttributeTipText(Spectrum, 'Format of the binary data defined by path'), **_alignLabel)
+        self.dataInfoWidget = Label(parent=self, grid=(row, 1), text=self.spectrum.dataSource._fileInfoString1, **_align1)
+
+        # Date; not yet operational
+        row += 1
+        Label(self, text="Date Recorded", grid=(row, 0), **_alignLabel)
+        self.dateRecordedWidget = LineEdit(self, text='> Unknown <', textAlignment='left', grid=(row, 1),
+                                           editable=False, **_align2)
+
+        row += 1
+        Label(self, text="Temperature", grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'temperature'), **_alignLabel)
+        self.temperatureData = ScientificDoubleSpinBox(self, grid=(row, 1), min=0, max=1000.0, decimals=1, **_align2)
+        self.temperatureData.valueChanged.connect(partial(self._queueTemperatureChange, spectrum, self.temperatureData.textFromValue))
+
+        row += 1
+        Label(self, text="Noise Level", grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'noiseLevel'), **_alignLabel)
+        self.noiseLevelData = ScientificDoubleSpinBox(self, grid=(row, 1), decimals=3, **_align2)
+        self.noiseLevelData.valueChanged.connect(partial(self._queueNoiseLevelDataChange, spectrum, self.noiseLevelData.textFromValue))
+
+        row += 1
+        Label(self, text="MAS Spinning Rate (Hz)", grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'spinningRate'), **_alignLabel)
+        self.spinningRateData = ScientificDoubleSpinBox(self, grid=(row, 1), min=0, max=100000.0, **_align2)
+        self.spinningRateData.valueChanged.connect(partial(self._queueSpinningRateChange, spectrum, self.spinningRateData.textFromValue))
+
+
+        #======= HLine ======
+        row += 1
+        hLine = HLine(self, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15, divisor=2)
+
+        row += 1
+        Label(self, text='Scaling', grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'scale'), **_alignLabel)
+        self.spectrumScalingData = ScientificDoubleSpinBox(self, grid=(row, 1), min=-1e12, max=1e12, decimals=3, **_align2)
+        self.spectrumScalingData.valueChanged.connect(partial(self._queueSpectrumScaleChange, spectrum, self.spectrumScalingData.textFromValue))
 
         # 1D specific Colour widget
         if spectrum.dimensionCount == 1:
@@ -680,26 +710,6 @@ class GeneralTab(Widget):
         Label(self, text="Sample", grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'sample'), **_alignLabel)
         self.samplesPulldownList = PulldownList(self, grid=(row, 1), **_align2)
         self.samplesPulldownList.currentIndexChanged.connect(partial(self._queueSampleChange, spectrum))
-
-        row += 1
-        Label(self, text="Spinning rate (Hz)", grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'spinningRate'), **_alignLabel)
-        self.spinningRateData = ScientificDoubleSpinBox(self, grid=(row, 1), min=0, max=100000.0, **_align2)
-        self.spinningRateData.valueChanged.connect(partial(self._queueSpinningRateChange, spectrum, self.spinningRateData.textFromValue))
-
-        row += 1
-        Label(self, text="Temperature", grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'temperature'), **_alignLabel)
-        self.temperatureData = ScientificDoubleSpinBox(self, grid=(row, 1), min=0, max=1000.0, decimals=1, **_align2)
-        self.temperatureData.valueChanged.connect(partial(self._queueTemperatureChange, spectrum, self.temperatureData.textFromValue))
-
-        row += 1
-        Label(self, text='Spectrum Scaling', grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'scale'), **_alignLabel)
-        self.spectrumScalingData = ScientificDoubleSpinBox(self, grid=(row, 1), min=-1e12, max=1e12, decimals=3, **_align2)
-        self.spectrumScalingData.valueChanged.connect(partial(self._queueSpectrumScaleChange, spectrum, self.spectrumScalingData.textFromValue))
-
-        row += 1
-        Label(self, text="Noise Level", grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'noiseLevel'), **_alignLabel)
-        self.noiseLevelData = ScientificDoubleSpinBox(self, grid=(row, 1), decimals=3, **_align2)
-        self.noiseLevelData.valueChanged.connect(partial(self._queueNoiseLevelDataChange, spectrum, self.noiseLevelData.textFromValue))
 
         row += 1
         Spacer(self, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
@@ -724,7 +734,6 @@ class GeneralTab(Widget):
             self.spectrumPidLabel.setText(self.spectrum.pid)
             self.nameData.setText(self.spectrum.name)
             self.commentData.setText(self.spectrum.comment)
-            self.dataFormatWidget.setText(self.spectrum.dataFormat)
 
             try:
                 idx = self.spectrum.project.chemicalShiftLists.index(self.spectrum.chemicalShiftList)

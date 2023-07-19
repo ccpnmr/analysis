@@ -15,10 +15,10 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$Author: Luca Mureddu $"
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
 __dateModified__ = "$Date: 2021-07-31 19:34:45 +0000 (,  31, 2021) $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:42 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-07-19 14:32:43 +0100 (Wed, July 19, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -101,7 +101,7 @@ def getJediInterpreter(text, namespaces=None, useImports=False, **kwds):
             _namespaces = list(_getCcpnNamespaceFromApplication())
 
     try:
-        interpreter = jedi.Interpreter(text, namespaces=_namespaces, **kwds)
+        interpreter = jedi.Interpreter(text, namespaces=_namespaces)
         return interpreter
     except ValueError:
         return None
@@ -149,6 +149,7 @@ class CcpnCodeCompletionWorker(object):
         Do the work (this will be called in the child process by the
         SubprocessServer).
         """
+        print(data, 'ENCODERS')
         code = data['code']
         line = data['line']
         column = data['column']
@@ -188,8 +189,9 @@ class CcpnNameSpacesProvider:
         try:
             namespaces = _getCcpnNamespaceFromApplication()
             _namespaceAtts = [k for dd in namespaces for k in dd.keys()]
-            script = getJediInterpreter(text=code, namespaces=namespaces, encoding=encoding)
-            completions = script.completions()
+            interpreter = getJediInterpreter(text=code, namespaces=namespaces,)
+            completions = interpreter.complete(line=line+1, column=column)
+
         except Exception as ex:
             completions = []
             sys.stderr.write('==> Completion warning! %s\n' % ex)
@@ -232,8 +234,8 @@ class CcpnJediCompletionProvider:
         """
         ret_val = []
         try:
-            script = getJediInterpreter(text=code, encoding=encoding)
-            completions = script.completions()
+            interpreter = getJediInterpreter(text=code)
+            completions = interpreter.complete(line=line+1, column=column)
         except RuntimeError:
             completions = []
         for completion in completions:

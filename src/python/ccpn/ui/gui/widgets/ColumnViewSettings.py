@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-13 12:22:22 +0100 (Thu, July 13, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-24 13:14:47 +0100 (Mon, July 24, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -30,8 +30,8 @@ import pandas as pd
 from collections import Counter
 
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.core.lib.DataFrameObject import DataFrameObject
@@ -40,7 +40,6 @@ from ccpn.core.lib.DataFrameObject import DataFrameObject
 class ColumnViewSettingsPopup(CcpnDialogMainWidget):
     FIXEDHEIGHT = False
     FIXEDWIDTH = True
-    USESCROLLWIDGET = True
 
     def __init__(self, table, dataFrameObject=None, parent=None, hiddenColumns=None, title='Column Settings', **kwds):
         super().__init__(parent, setLayout=True, windowTitle=title, minimumSize=(250, 250), **kwds)
@@ -109,14 +108,27 @@ class ColumnViewSettings(Frame):
         self.tableHandler = table
         self.checkBoxes = []
         self._hideColumnWidths = {}
+
+        self._setWidgets()
+
+    def _setWidgets(self):
+
         self.filterLabel = Label(self, text='Display Columns', grid=(0, 0))
-        self.widgetFrame = Frame(self, setLayout=True, margins=(5, 5, 5, 5), grid=(1, 0))
-        Spacer(self, 5, 5, 'fixed', 'expanding', grid=(2, 0))
+        # self.widgetFrame = Frame(self, setLayout=True, margins=(5, 5, 5, 5), grid=(1, 0))
 
-        self.initCheckBoxes()
+        self.widgetFrame = ScrollableFrame(parent=self,
+                                           showBorder=False, setLayout=True,
+                                           grid=(1, 0))
 
-    def initCheckBoxes(self):
+        self.buttonList = ButtonList(self,
+                                     texts=['Set Checkboxes', 'Clear Checkboxes'],
+                                     callbacks=[self._setCheckBoxes, self._clearCheckBoxes],
+                                     grid=(2, 0), gridSpan=(1, 2))
 
+        self._initCheckBoxes()
+
+    def _initCheckBoxes(self):
+        i = 1
         if columns := list(self._df.columns):
             hiddenColumns = self.tableHandler.hiddenColumns or []
 
@@ -137,12 +149,12 @@ class ColumnViewSettings(Frame):
 
                     if self.direction == 'v':
                         i += 1
-                        cb = CheckBox(self.widgetFrame, text=txt, grid=(i, 1), callback=self.checkBoxCallBack,
+                        cb = CheckBox(self.widgetFrame, text=txt, grid=(i, 1), callback=self._checkBoxCallBack,
                                       checked=chcked,
                                       hAlign='l', tipText=CheckboxTipText)
 
                     else:
-                        cb = CheckBox(self.widgetFrame, text=txt, grid=(1, i), callback=self.checkBoxCallBack,
+                        cb = CheckBox(self.widgetFrame, text=txt, grid=(1, i), callback=self._checkBoxCallBack,
                                       checked=chcked,
                                       hAlign='l', tipText=CheckboxTipText)
 
@@ -153,12 +165,33 @@ class ColumnViewSettings(Frame):
     def hiddenColumns(self):
         return self.tableHandler.hiddenColumns
 
-    def checkBoxCallBack(self):
+    def _setCheckBoxes(self, *args):
+        """Tick all the checkboxes to show all the columns.
+        """
+        for cb in reversed(self.checkBoxes):
+            cb.setChecked(True)
+            self._checkBoxUpdate(cb)
+
+    def _clearCheckBoxes(self, *args):
+        """Clear all the checkboxes to hide all the columns.
+        """
+        # first column always becomes the default
+        for cb in reversed(self.checkBoxes):
+            cb.setChecked(False)
+            self._checkBoxUpdate(cb)
+
+    def _checkBoxCallBack(self):
+        """Handle clicking a checkbox.
+        """
         currentCheckBox = self.sender()
-        name = currentCheckBox.text()
-        obj = currentCheckBox.getObject()
-        # i = self._dfObject.headings.index(name)
-        # i = [str(col) for col in self._df.columns].index(name)
+        self._checkBoxUpdate(currentCheckBox)
+
+    def _checkBoxUpdate(self, currentCheckBox):
+        if not self.checkBoxes or not currentCheckBox:
+            return
+
+        if not (obj := currentCheckBox.getObject()):
+            return
         i = self._df.columns.get_loc(obj)
 
         checkedBoxes = []
@@ -166,6 +199,7 @@ class ColumnViewSettings(Frame):
             checkBox.setEnabled(True)
             if checkBox.isChecked():
                 checkedBoxes.append(checkBox)
+
         if checkedBoxes:
             if currentCheckBox.isChecked():
                 self.tableHandler._showColumnName(self._df.columns[i])
@@ -182,7 +216,7 @@ class ColumnViewSettings(Frame):
             for cb in self.checkBoxes:
                 cb.deleteLater()
         self.checkBoxes = []
-        self.initCheckBoxes()
+        self._initCheckBoxes()
 
     # def _hideColumn(self, i, name):
     #     self.tableHandler.hideColumn(i)

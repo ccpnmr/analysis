@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-09 18:52:54 +0100 (Sun, July 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-25 09:33:18 +0100 (Tue, July 25, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -1983,6 +1983,36 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                         except Exception as es:
                             getLogger().warning('Error setting mark at position')
                             raise (es)
+
+    def markPpmPositions(self, axisCodes, positions, strips=None):
+        """
+        Create marks based on the axisCodes and adds annotations where appropriate.
+
+        :param axisCodes: The axisCodes making a mark for.
+        :param positions: A list or tuple of positions at whose values the marks should be made.
+        """
+        with undoBlockWithoutSideBar():
+
+            for ii, (axisCode, position) in enumerate(zip(axisCodes, positions)):
+
+                if position is None:
+                    continue
+
+                try:
+                    _prefsGeneral = self.application.preferences.general
+                    defaultColour = _prefsGeneral.defaultMarksColour
+                    if not defaultColour.startswith('#'):
+                        colourList = colorSchemeTable[defaultColour] if defaultColour in colorSchemeTable else ['#FF0000']
+                        _prefsGeneral._defaultMarksCount = _prefsGeneral._defaultMarksCount % len(colourList)
+                        defaultColour = colourList[_prefsGeneral._defaultMarksCount]
+                        _prefsGeneral._defaultMarksCount += 1
+                except Exception:
+                    defaultColour = '#FF0000'
+
+                try:
+                    self.newMark(defaultColour, [position], [axisCode], strips=strips)
+                except Exception:
+                    getLogger().warning(f'Error setting mark at position {position}')
 
     def toggleGridAll(self):
         """

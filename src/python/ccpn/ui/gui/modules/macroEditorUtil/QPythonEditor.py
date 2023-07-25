@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:42 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-07-25 09:33:19 +0100 (Tue, July 25, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -90,7 +90,8 @@ class PyCodeEditor(PyCodeEdit, Base):
         self._font_size = 10
         self.font_name = ""
 
-    def _requestCompletion(self):
+
+    def _requestCompletion(self, *args, **kwargs):
         """
         re-implemetation of completion to insert ccpn Namespaces from application
         without sending requests to threads.

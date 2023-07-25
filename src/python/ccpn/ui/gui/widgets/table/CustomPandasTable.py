@@ -38,7 +38,8 @@ class CustomDataFrameTable(Table):
         :return: list of Pandas series object corresponding to the selected row(s).
         """
         sRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for idx in self.selectedIndexes())
-
+        if not self._objects:
+            return []
         return [self._objects[row] for row in sRows if row is not None and row is not False]
 
     def getCurrentObject(self):

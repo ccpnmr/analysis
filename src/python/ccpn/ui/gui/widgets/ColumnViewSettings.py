@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-24 13:14:47 +0100 (Mon, July 24, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-25 16:12:23 +0100 (Tue, July 25, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -121,7 +121,7 @@ class ColumnViewSettings(Frame):
                                            grid=(1, 0))
 
         self.buttonList = ButtonList(self,
-                                     texts=['Set Checkboxes', 'Clear Checkboxes'],
+                                     texts=['Select All', 'Deselect All'],
                                      callbacks=[self._setCheckBoxes, self._clearCheckBoxes],
                                      grid=(2, 0), gridSpan=(1, 2))
 
@@ -180,6 +180,9 @@ class ColumnViewSettings(Frame):
             cb.setChecked(False)
             self._checkBoxUpdate(cb)
 
+        # check the last check box and disable if necessary
+        self._checkLastCheckbox()
+
     def _checkBoxCallBack(self):
         """Handle clicking a checkbox.
         """
@@ -209,6 +212,18 @@ class ColumnViewSettings(Frame):
             # always display at least one column, disables the last checkbox
             currentCheckBox.setEnabled(False)
             currentCheckBox.setChecked(True)
+
+        self._checkLastCheckbox()
+
+    def _checkLastCheckbox(self):
+        """Check whether there is a single checkbox remaining and disable as necessary.
+        """
+        checkedBoxes = list(filter(lambda ch: ch.isChecked(), self.checkBoxes))
+
+        if len(checkedBoxes) == 1:
+            # always display at least one column, disables the last checkbox
+            checkedBoxes[0].setEnabled(False)
+            checkedBoxes[0].setChecked(True)
 
     def updateWidgets(self, table):
         self.tableHandler = table

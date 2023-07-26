@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-18 13:31:56 +0100 (Tue, July 18, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-26 14:36:38 +0100 (Wed, July 26, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -2302,7 +2302,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     def _fileInfoString1(self) -> str:
         """A convenience method to generate an info string about the file
         in the form: '3D - NMRpipe (96 MB)'
-        CCPNMRINTERNAL: thoughout
+        CCPNMRINTERNAL: throughout
         :return info string
         """
         txt = f'{self.dimensionCount}D - {self.dataFormat} ({self.expectedFileSizeInBytes/(1024*1024):.1f} MB)'
@@ -2312,10 +2312,15 @@ class SpectrumDataSourceABC(CcpNmrJson):
     def _fileInfoString2(self) -> str:
         """A convenience method to generate an info string about the file
         in the form: '3D - 1H (562) x 13C (128)'
-        CCPNMRINTERNAL: thoughout
+        CCPNMRINTERNAL: throughout
         :return info string
         """
-        _dims = " x ".join(["%s (%s)" % (c, p) for p,c in zip(self.pointCounts, self.axisCodes)])
+        # The routine is also used to report while initialisation is not yet
+        # complete; hence some explicit slicing
+        _ndims = self.dimensionCount
+        if _ndims == 0:
+            raise RuntimeError('Cannot make inforString: Number of dimensions = 0')
+        _dims = " x ".join(["%s (%s)" % (c, p) for p,c in zip(self.pointCounts[0:_ndims], self.axisCodes[0:_ndims])])
         txt = f'{self.dimensionCount}D - {_dims}'
         return txt
 
@@ -2323,10 +2328,15 @@ class SpectrumDataSourceABC(CcpNmrJson):
     def _fileInfoString3(self) -> str:
         """A convenience method to generate an info string about the file
         in the form: '3D - 562 (nR) x 128 (nR)'
-        CCPNMRINTERNAL: thoughout
+        CCPNMRINTERNAL: throughout
         :return info string
         """
-        _dims = " x ".join(["%s (%s)" % (p, c) for p,c in zip(self.pointCounts, self.dataTypes)])
+        # The routine is also used to report while initialisation is not yet
+        # complete; hence some explicit slicing
+        _ndims = self.dimensionCount
+        if _ndims == 0:
+            raise RuntimeError('Cannot make inforString: Number of dimensions = 0')
+        _dims = " x ".join(["%s (%s)" % (p, c) for p,c in zip(self.pointCounts[0:_ndims], self.dataTypes[0:_ndims])])
         txt = f'{self.dimensionCount}D - {_dims}'
         return txt
 

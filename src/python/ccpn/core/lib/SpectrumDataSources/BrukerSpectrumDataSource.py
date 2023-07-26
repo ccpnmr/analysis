@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-18 13:31:56 +0100 (Tue, July 18, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-26 14:36:38 +0100 (Wed, July 26, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -518,6 +518,9 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 self.dataScale = 1.0
 
             self.temperature = self.acqus[0]['TE']
+            if self.temperature == 0.0:
+                self.temperature = None
+                getLogger().warning(f'Acqus defined temperature was 0.0; changed to undefined (None) instead')
 
             # Dimensional parameters
             for dimIndx in range(self.dimensionCount):

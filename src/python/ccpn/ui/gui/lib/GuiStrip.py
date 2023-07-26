@@ -408,6 +408,10 @@ class GuiStrip(Frame):
         self._queueActive = None
         self._lock = QtCore.QMutex()
 
+    def getGLWidget(self):
+        """Get the CcpnGLWidget instance """
+        return self._CcpnGLWidget
+
     def _setStripTiling(self):
         """Set the tiling of the strip
         For now: only horizontal or vertical

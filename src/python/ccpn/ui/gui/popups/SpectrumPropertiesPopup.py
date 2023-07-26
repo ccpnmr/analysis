@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-18 17:54:23 +0100 (Tue, July 18, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-26 18:06:51 +0100 (Wed, July 26, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -672,12 +672,12 @@ class GeneralTab(Widget):
 
         row += 1
         Label(self, text="Noise Level", grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'noiseLevel'), **_alignLabel)
-        self.noiseLevelData = ScientificDoubleSpinBox(self, grid=(row, 1), decimals=3, **_align2)
+        self.noiseLevelData = ContourBaseSpinBox(self, grid=(row, 1), decimals=1, **_align2)
         self.noiseLevelData.valueChanged.connect(partial(self._queueNoiseLevelDataChange, spectrum, self.noiseLevelData.textFromValue))
 
         row += 1
         Label(self, text="MAS Spinning Rate (Hz)", grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'spinningRate'), **_alignLabel)
-        self.spinningRateData = ScientificDoubleSpinBox(self, grid=(row, 1), min=0, max=100000.0, **_align2)
+        self.spinningRateData = ScientificDoubleSpinBox(self, grid=(row, 1), min=0, max=100000.0, decimals=1, **_align2)
         self.spinningRateData.valueChanged.connect(partial(self._queueSpinningRateChange, spectrum, self.spinningRateData.textFromValue))
 
 
@@ -1031,7 +1031,7 @@ class DimensionsTab(Widget):
 
         row += 1
         Label(self, text="Spectral Widths (Hz)", grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'spectralWidthsHz'), **_alignLabel)
-        self.spectralWidthsHzData = [ScientificDoubleSpinBox(self, grid=(row, i + 1), decimals=3, step=0.1, **_align2) for i in _dimIndices]
+        self.spectralWidthsHzData = [ScientificDoubleSpinBox(self, grid=(row, i + 1), decimals=1, step=0.1, **_align2) for i in _dimIndices]
         for i in _dimIndices:
             self.spectralWidthsHzData[i].valueChanged.connect(partial(self._queueSetSpectralWidthsHz, spectrum, i,
                                                                       self.spectralWidthsHzData[i].textFromValue))
@@ -1045,7 +1045,7 @@ class DimensionsTab(Widget):
 
         row += 1
         Label(self, text="Referencing (ppm) ", grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'referenceValues'), **_alignLabel)
-        self.spectralReferencingData = [ScientificDoubleSpinBox(self, grid=(row, i + 1), decimals=1, step=0.1, **_align2) for i in _dimIndices]
+        self.spectralReferencingData = [ScientificDoubleSpinBox(self, grid=(row, i + 1), decimals=3, step=0.1, **_align2) for i in _dimIndices]
         for i in _dimIndices:
             self.spectralReferencingData[i].valueChanged.connect(partial(self._queueSetDimensionReferencing, spectrum, i,
                                                                          self.spectralReferencingData[i].textFromValue))
@@ -1059,14 +1059,14 @@ class DimensionsTab(Widget):
 
         row += 1
         Label(self, text="Assignment Tolerances", grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'assignmentTolerances'), **_alignLabel)
-        self.spectralAssignmentToleranceData = [ScientificDoubleSpinBox(self, grid=(row, i + 1), decimals=3, step=0.1, **_align2) for i in _dimIndices]
+        self.spectralAssignmentToleranceData = [ScientificDoubleSpinBox(self, grid=(row, i + 1), decimals=2, step=0.1, **_align2) for i in _dimIndices]
         for i in _dimIndices:
             self.spectralAssignmentToleranceData[i].valueChanged.connect(partial(self._queueSetAssignmentTolerances, spectrum, i,
                                                                                  self.spectralAssignmentToleranceData[i].textFromValue))
 
         row += 1
         Label(self, text="Second Cursor Offsets (Hz)", grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'doubleCrosshairOffsets'), **_alignLabel)
-        self.spectralDoubleCursorOffset = [ScientificDoubleSpinBox(self, grid=(row, i + 1), decimals=3, step=0.1, **_align2) for i in _dimIndices]
+        self.spectralDoubleCursorOffset = [ScientificDoubleSpinBox(self, grid=(row, i + 1), decimals=1, step=0.1, **_align2) for i in _dimIndices]
         for i in _dimIndices:
             self.spectralDoubleCursorOffset[i].valueChanged.connect(partial(self._queueSetDoubleCursorOffset, spectrum, i,
                                                                             self.spectralDoubleCursorOffset[i].textFromValue))
@@ -1967,7 +1967,7 @@ class ContoursTab(Widget):
 
         row += 1
         _row = ContourTabRow(self, row, text="Multiplier", attrName='positiveContourFactor',
-                             widget = ScientificDoubleSpinBox, min=0.0, decimals=3, step=0.1
+                             widget = ScientificDoubleSpinBox, min=0.0, decimals=2, step=0.1
                             )
         _row.setCallback(partial(self._queueChangePositiveContourFactor, _row))
         # retain old name (for now)
@@ -2031,7 +2031,7 @@ class ContoursTab(Widget):
 
         row += 1
         _row = ContourTabRow(self, row, text="Multiplier", attrName='negativeContourFactor',
-                             widget = ScientificDoubleSpinBox, min=0.0, decimals=3, step=0.1
+                             widget = ScientificDoubleSpinBox, min=0.0, decimals=2, step=0.1
                              )
         _row.setCallback(partial(self._queueChangeRow, _row))
         # retain old name (for now)

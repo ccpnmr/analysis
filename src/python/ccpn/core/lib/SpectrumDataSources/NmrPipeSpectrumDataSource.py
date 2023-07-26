@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-18 13:31:56 +0100 (Tue, July 18, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-26 14:19:53 +0100 (Wed, July 26, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -557,8 +557,8 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
             return False
 
         self.shouldBeValid = True
-        if self.nFiles > 1 and self.nmrPipeTemplate is None:
-            errorMsg = f'No NmrPipe nmrPipeTemplate defined, in spite of {self.nFiles} files comprising the {self.dimensionCount}D'
+        if self.dimensionCount > 2 and self.nFiles > 1 and self.nmrPipeTemplate is None:
+            errorMsg = f'No NmrPipe template defined, in spite of {self.nFiles} files comprising the {self.dimensionCount}D data'
             return self._returnFalse(errorMsg)
 
         # Check if all planes are present

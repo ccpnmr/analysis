@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-27 16:24:12 +0100 (Thu, July 27, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-27 17:56:37 +0100 (Thu, July 27, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -34,7 +34,7 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from ccpn.core.Project import Project
 
 from ccpn.framework.Application import getApplication
-from ccpn.framework.PathsAndUrls import CCPN_DIRECTORY_SUFFIX
+from ccpn.framework.PathsAndUrls import CCPN_DIRECTORY_SUFFIX, CCPN_SAVEAS_SUB_DIRECTORIES
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import _checkPathForDataLoader
 
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking, catchExceptions, \
@@ -689,15 +689,18 @@ class Gui(Ui):
             newName = _nameFromPath
 
         # Checking copy subdirectories
-        msg = f'Also copy sub-directories (data, archives, scripts, ...) of "{self.project.name}" to "{newName}"?\n'
+        _sizeDict = self.project._getSubdirectorySizes(CCPN_SAVEAS_SUB_DIRECTORIES, sizeInMB=True)
+        _totalSize = '%.1f' % sum(_sizeDict.values())
+        msg = f'Also copy sub-directories (data, archives, scripts, ...) ({_totalSize} MB)?\n'
+
         # Check for any inside spectra
         _insideSpectra = [sp for sp in self.project.spectra if sp._isInside]
+        _size = '%.1f' % (sum([sp.dataSource.expectedFileSizeInBytes for sp in _insideSpectra]) / (1024*1024))
         if len(_insideSpectra) == 1:
-            msg += f'\nNote that the (binary) data of "{_insideSpectra[0].pid}" is in "{oldPath.name}/data/spectra"\n' \
-                   f'We suggest you choose "Yes"\n'
+            msg += f'\nNote that the data of {_insideSpectra[0].pid} ({_size} MB) is in "{oldPath.name}/data/spectra"\n'
         elif len(_insideSpectra) > 1:
-            msg += f'\nNote that the (binary) data of {len(_insideSpectra)} spectra are in "{oldPath.name}/data/spectra"\n' \
-                   f'We suggest you choose "Yes"\n'
+            msg += f'\nNote that the data of {len(_insideSpectra)} spectra ({_size} MB) are in "{oldPath.name}/data/spectra"\n'
+
         if (copySubDirs :=  MessageDialog.showYesNoCancel(title, msg)) is None:
             # pressed "cancel"
             return False
@@ -878,28 +881,3 @@ class Gui(Ui):
             result = self.application._loadData(spectrumLoaders)
 
         return result
-
-
-#-----------------------------------------------------------------------------------------
-# Helper code
-#-----------------------------------------------------------------------------------------
-
-# def _getSaveDirectory(mainWindow):
-#     """Opens save Project as dialog box and gets directory specified in
-#     the file dialog.
-#     :return path instance or None
-#     """
-#
-#     dialog = FileDialog.ProjectSaveFileDialog(parent=mainWindow, acceptMode='save')
-#     dialog._show()
-#     newPath = dialog.selectedFile()
-#
-#     # if not iterable then ignore - dialog may return string or tuple(<path>, <fileOptions>)
-#     if isinstance(newPath, tuple) and len(newPath) > 0:
-#         newPath = newPath[0]
-#
-#     # ignore if empty
-#     if not newPath:
-#         return None
-#
-#     return newPath

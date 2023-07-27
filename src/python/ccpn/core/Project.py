@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-27 16:24:12 +0100 (Thu, July 27, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-27 17:56:37 +0100 (Thu, July 27, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -367,6 +367,25 @@ class Project(AbstractWrapperObject):
         _dir, _base, _suffix = self.projectPath.parent.split3()
         bPath = _dir / _base + CCPN_BACKUP_SUFFIX + CCPN_DIRECTORY_SUFFIX
         return bPath
+
+    def _getSubdirectorySizes(self, subDirectories=None, sizeInMB=False) -> dict:
+        """Calculate the sizes of the subDirectories of the project
+        :param subDirectories: a list of sub directories; defaults to CCPN_SUB_DIRECTORIES
+        :param sizeInMB: flag to return size in MB
+        :return a Dict with (subDir, sizeInBytes)
+        """
+        if subDirectories is None:
+            subDirectories = CCPN_SUB_DIRECTORIES
+
+        _MB = 1024*1024
+        result = {}
+        for _subdir in subDirectories:
+            _path = self.projectPath / _subdir
+            _size = sum(file.stat().st_size for file in _path.rglob('*') if not file.is_symlink())
+            if sizeInMB:
+                _size /= _MB
+            result[_subdir] = _size
+        return result
 
     #-----------------------------------------------------------------------------------------
     # Implementation methods

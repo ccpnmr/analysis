@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-25 09:33:18 +0100 (Tue, July 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-27 17:56:37 +0100 (Thu, July 27, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -259,6 +259,7 @@ class GuiBase(object):
             # ("Spectrum Groups...", self.showSpectrumGroupsPopup, [('shortcut', 'ss')]), # multiple edit temporarly disabled
             ("Set Experiment Types...", self.showExperimentTypePopup, [('shortcut', 'et')]),
             ("Validate Paths...", self.showValidateSpectraPopup, [('shortcut', 'vp')]),
+            ("Copy into Project...", self._copyToProjectCallback, []),
             (),
             ("Pick Peaks", (("Pick 1D Peaks...", self.showPeakPick1DPopup, [('shortcut', 'p1')]),
                             ("Pick ND Peaks...", self.showPeakPickNDPopup, [('shortcut', 'pp')])
@@ -532,6 +533,25 @@ class GuiBase(object):
         from ccpn.ui.gui.popups.ConvertToHdf5Popup import ConvertToHdf5Popup
         popup = ConvertToHdf5Popup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
         popup.exec_()
+
+    def _copyToProjectCallback(self):
+        """Callback for Spectrum -> Copy into Project
+        """
+        title = 'Copy Spectra into Project'
+        if len(self.project.spectra) == 0:
+            MessageDialog.showWarning(title, 'No spectra in project', parent=self.mainWindow)
+            return
+
+        _spectra = [sp for sp in self.project.spectra if sp.hasValidPath() and not sp._isInside]
+        if len(_spectra) == 0:
+            MessageDialog.showWarning(title, 'No spectra to be copied', parent=self.mainWindow)
+            return
+
+        _size = '%.1f' % (sum([sp.dataSource.expectedFileSizeInBytes for sp in _spectra]) / (1024*1024))
+        ok = MessageDialog.showOkCancel(title, f'{len(_spectra)} spectra ({_size} MB) to be copied', parent=self.mainWindow)
+        if ok:
+            self.project.copySpectraToProject()
+
 
     #-----------------------------------------------------------------------------------------
     # Help -->

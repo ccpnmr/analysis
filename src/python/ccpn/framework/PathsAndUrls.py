@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-28 19:23:04 +0100 (Wed, June 28, 2023) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-07-27 16:24:12 +0100 (Thu, July 27, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -41,7 +41,7 @@ ccpnDocumentationUrl            = 'https://www.ccpn.ac.uk/api-documentation/v3/h
 # CCPN code
 ccpnCodePath                    = Path.aPath(Path.getTopDirectory())
 ccpnConfigPath                  = ccpnCodePath / 'config'
-ccpnResourcesPath              = ccpnCodePath / 'resources'
+ccpnResourcesPath               = ccpnCodePath / 'resources'
 ccpnRunTerminal                 = ccpnCodePath / 'bin' / 'runTerminal.sh'
 defaultPreferencesPath          = ccpnConfigPath / 'defaultv3settings.json'
 tipOfTheDayConfig               = ccpnConfigPath / 'tipConfig.hjson'
@@ -52,7 +52,7 @@ ccpnmodelDataPythonPath         = _ccpnPythonPath / 'ccpnmodel' / 'data'
 ccpnmodelRefDataPythonPath      = _ccpnPythonPath / 'ccpnmodel' / 'data' / 'ccpnv3'
 
 ccpnPythonPath                  = _ccpnPythonPath / 'ccpn'
-ccpnGUIPath                  =  ccpnPythonPath / 'ui' / 'gui'
+ccpnGUIPath                     =  ccpnPythonPath / 'ui' / 'gui'
 analysisAssignPath              = ccpnPythonPath / 'AnalysisAssign'
 analysisScreenPath              = ccpnPythonPath / 'AnalysisScreen'
 analysisStructurePath           = ccpnPythonPath / 'AnalysisStructure'
@@ -69,7 +69,7 @@ iconsPath                       = widgetsPath    / 'icons'
 openGLFontsPath                 = fontsPath      / 'Fonts'
 nefValidationPath               = ccpnPythonPath / 'util' / 'nef' / 'NEF' / 'specification' / 'mmcif_nef_v1_1.dic'
 peakPickerPath                  = ccpnPythonPath / 'core' / 'lib' / 'PeakPickers'
-ccpnModuleHelpPath            = ccpnGUIPath / 'modules' / 'moduleHelp'
+ccpnModuleHelpPath              = ccpnGUIPath / 'modules' / 'moduleHelp'
 
 # Program tutorials and documentation
 shortcutsPath                   = ccpnCodePath / 'doc' / 'static' / 'AnalysisShortcuts.htm'
@@ -128,6 +128,12 @@ CCPN_SUB_DIRECTORIES = [
     CCPN_SUMMARIES_DIRECTORY, CCPN_LOGS_DIRECTORY, CCPN_DATA_DIRECTORY,
     CCPN_PLUGINS_DIRECTORY, CCPN_SPECTRA_DIRECTORY, CCPN_SCRIPTS_DIRECTORY,
     CCPN_STATE_DIRECTORY, CCPN_STATESPECTRA_DIRECTORY
+]
+
+# The CcpNmr Project's top sub directories (optionally) saved by saveAs
+CCPN_SAVEAS_SUB_DIRECTORIES = [CCPN_ARCHIVES_DIRECTORY, CCPN_BACKUPS_DIRECTORY,
+    CCPN_SUMMARIES_DIRECTORY, CCPN_LOGS_DIRECTORY, CCPN_DATA_DIRECTORY,
+    CCPN_SCRIPTS_DIRECTORY
 ]
 
 ccpnVersionHistory       = 'versionHistory.json'

@@ -4,7 +4,7 @@ This file contains the routines for message dialogues
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:08 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-07-27 16:24:12 +0100 (Thu, July 27, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -336,6 +336,15 @@ def showRetryIgnoreCancel(title, message, parent=None, iconPath=None):
 
 
 def showSaveDiscardCancel(title, message, parent=None, iconPath=None):
+    """Save, Discard, Cancel query box.
+
+    :param title: title of the widget
+    :param message: message to be displayed
+    :param parent: parent widget
+    :param iconPath: optional icon to display
+    :return: True for Save, False for Discard or None for Cancel
+    """
+
     dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
 
     dialog.setStandardButtons(Save | Discard | Cancel)
@@ -353,6 +362,31 @@ def showSaveDiscardCancel(title, message, parent=None, iconPath=None):
     else:
         return None
 
+def showYesNoCancel(title, message, parent=None, iconPath=None):
+    """Yes, No, Cancel query box.
+
+    :param title: title of the widget
+    :param message: message to be displayed
+    :param parent: parent widget
+    :param iconPath: optional icon to display
+    :return: True for Yes, False for No or None for Cancel
+    """
+    dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
+
+    dialog.setStandardButtons(Yes | No | Cancel)
+    dialog.setDefaultButton(Yes)
+
+    dialog.raise_()
+    result = dialog.exec_()
+
+    if result == Yes:
+        return True
+
+    elif result == No:
+        return False
+
+    else:
+        return None
 
 def showWarning(title, message, parent=None, iconPath=None, scrollableMessage=False):
     dialog = MessageDialog(title='Warning', basicText=title, message=message, icon=Warning, iconPath=iconPath, parent=parent,

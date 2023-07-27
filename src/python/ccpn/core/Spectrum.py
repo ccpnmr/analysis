@@ -54,7 +54,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-12 17:29:23 +0100 (Wed, July 12, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-27 16:24:12 +0100 (Thu, July 27, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -726,8 +726,8 @@ class Spectrum(AbstractWrapperObject):
         """
         _dataStore = DataStore.newFromPath(path=self._dataStore.aPath(),
                                            dataFormat=self._dataStore.dataFormat,
-                                           autoRedirect=self._dataStore.autoRedirect,
-                                           autoVersioning=self._dataStore.autoVersioning,
+                                           autoRedirect=False,
+                                           autoVersioning=False,
                                            )
         _dataStore.spectrum = self
         _dataStore._saveInternal()
@@ -746,8 +746,8 @@ class Spectrum(AbstractWrapperObject):
         _path = self._dataStore.redirectPath()
         _dataStore = DataStore.newFromPath(path=_path,
                                            dataFormat=self._dataStore.dataFormat,
-                                           autoRedirect=self._dataStore.autoRedirect,
-                                           autoVersioning=self._dataStore.autoVersioning,
+                                           autoRedirect=False,
+                                           autoVersioning=False
                                            )
         _dataStore.spectrum = self
         _dataStore._saveInternal()
@@ -759,8 +759,14 @@ class Spectrum(AbstractWrapperObject):
         """Return True if the spectrum is already defined as Alongside
         """
         from ccpn.core.lib.DataStore import AlongsideRedirection
-
         return self._dataStore.redirectionIdentifier == AlongsideRedirection.identifier
+
+    @property
+    def _isInside(self) -> bool:
+        """Return True if the spectrum is already defined as Inside
+        """
+        from ccpn.core.lib.DataStore import InsideRedirection
+        return self._dataStore.redirectionIdentifier == InsideRedirection.identifier
 
     def _makeNewRelativePath(self , newPath) -> Path:
         """Insert a possible redirection in the path, as maintained in the dataStore object

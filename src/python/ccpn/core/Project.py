@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-30 18:47:45 +0100 (Fri, June 30, 2023) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-07-27 16:24:12 +0100 (Thu, July 27, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -68,7 +68,8 @@ from ccpn.framework.PathsAndUrls import \
     CCPN_SUB_DIRECTORIES, \
     CCPN_LOGS_DIRECTORY, \
     CCPN_BACKUPS_DIRECTORY, \
-    CCPN_DIRECTORY_SUFFIX
+    CCPN_DIRECTORY_SUFFIX, \
+    CCPN_SAVEAS_SUB_DIRECTORIES
 
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
 from ccpnmodel.ccpncore.memops import Notifiers
@@ -776,8 +777,6 @@ class Project(AbstractWrapperObject):
         """Clean up the wrapper project previous to deleting or replacing
         Cleanup includes wrapped data graphics objects (e.g. Window, Strip, ...)
         """
-        # only update the logger if there have been changes to the project
-        self._updateLoggerState(readOnly=self.readOnly or not self.isModified)
 
         getLogger().info(f"Closing {self.path}")
 
@@ -791,7 +790,10 @@ class Project(AbstractWrapperObject):
         # Remove undo stack:
         self._resetUndo(maxWaypoints=0)
 
+        # only update the logger if there have been changes to the project
+        self._updateLoggerState(readOnly=self.readOnly or not self.isModified)
         Logging._clearLogHandlers()
+
         self._clearAllApiNotifiers()
         self.deleteAllNotifiers()
         # clear the lookup dicts
@@ -799,14 +801,16 @@ class Project(AbstractWrapperObject):
         self._pid2Obj.clear()
         # self.__dict__.clear()  # GWV: dangerous; why done?
 
-    def saveAs(self, newPath: str, overwrite: bool = False):
+    def saveAs(self, newPath: str, overwrite: bool = False, copySubDirectories: bool = True):
         """Save project to newPath (optionally overwrite);
            Derive the new project name from newPath
            :param newPath: new path for storing project files
            :param overwrite: flag to overwrite if path exists
+           :param copySubDirectories: flag to set the copying of the project's subdirectories
         """
         from ccpn.core.lib.XmlLoader import XmlLoader
 
+        _oldPath = aPath(self.path)
         _newPath = aPath(newPath).assureSuffix(CCPN_DIRECTORY_SUFFIX)
         if _newPath.exists() and overwrite:
             parent = _newPath.parent
@@ -814,22 +818,43 @@ class Project(AbstractWrapperObject):
             parent.fetchDir(_newPath)
 
         for sp in self.spectra:
-            # check if any spectra are referenced as ALONGSIDE and update to the new path
-            if sp._isAlongside and sp.hasValidPath() and aPath(self.path).parent != _newPath.parent:
-                getLogger().debug(f'Redirecting spectrum {aPath(self.path).parent} -> {_newPath.parent}')
+            # check if spectrum is referenced as ALONGSIDE and require an update
+            # to absolute path
+            if sp._isAlongside and sp.hasValidPath() and \
+               _oldPath.parent != _newPath.parent:
+                getLogger().warning(f'Redirecting spectrum {sp.name} from {_oldPath.parent} -> {_newPath.parent}')
                 sp._makeAbsolutePath()
+
+            # check if spectrum is referenced as INSIDE and and require an update
+            # to absolute path
+            if sp._isInside and sp.hasValidPath() and \
+               not copySubDirectories:
+                getLogger().warning(f'Redirecting spectrum {sp.name} from {_oldPath.parent} -> {_newPath.parent}')
+                sp._makeAbsolutePath()
+
+        # only update the logger if there have been changes to the project
+        self._updateLoggerState(readOnly=self.readOnly or not self.isModified)
+        # clear the logging handlers, to be opened after all saving and copying
+        Logging._clearLogHandlers()
 
         _newXmlLoader = XmlLoader.newFromLoader(self._xmlLoader, path=_newPath, create=True)
         self._xmlLoader = _newXmlLoader
         self._path = _newXmlLoader.path.asString()
         self._name = _newXmlLoader.name
+
+        # Optionally copy and check subdirectories
+        if copySubDirectories:
+            for _subdir in CCPN_SAVEAS_SUB_DIRECTORIES:
+                _source = _oldPath / _subdir
+                _dest = _newPath / _subdir
+                _source.copyDir(_dest, overwrite=False)
         self._checkProjectSubDirectories()
+
+        # create a new logger
+        self._logger = createLogger(self, now=self.application._created)
+
         self._saveHistory = newProjectSaveHistory(self.path)
         self.save(comment='saveAs')
-
-        # check for application and Gui;
-        if self.application and self.application.hasGui:
-            self.application.mainWindow.sideBar.setProjectName(self)
 
     def save(self, comment='regular save', autoBackup: bool = False):
         """Save project; add optional comment to save records
@@ -1891,8 +1916,8 @@ class Project(AbstractWrapperObject):
         """
         result = []
         with undoBlock():
-            for sp in self.spectra:
-                _files = sp.copyDataToProject()
+            for spec in [sp for sp in self.spectra if sp.hasValidPath() and not sp._isInside]:
+                _files = spec.copyDataToProject()
                 result.extend(_files)
         return result
 

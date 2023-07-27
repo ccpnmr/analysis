@@ -19,8 +19,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:43 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-07-27 16:24:12 +0100 (Thu, July 27, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -185,14 +185,14 @@ class Path(_Path_):
         """
         import shutil
         if not self.exists():
-            raise FileNotFoundError(f'"{self}" does not exist')
+            raise FileNotFoundError(f'Path.copyDir: "{self}" does not exist')
         if not self.is_dir():
-            raise RuntimeError(f'"{self}" is not a directory')
+            raise RuntimeError(f'Path.copyDir: "{self}" is not a directory')
 
         _dest = aPath(destination)
         if _dest.exists():
             if not overwrite:
-                raise FileExistsError(f'"{destination}" already exists and overwrite=False')
+                raise FileExistsError(f'Path.copyDir: "{destination}" already exists and overwrite=False')
             _dest.remove()
 
         _result = shutil.copytree(self, dst=_dest, symlinks=True)

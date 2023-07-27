@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-25 09:33:18 +0100 (Tue, July 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-27 16:24:12 +0100 (Thu, July 27, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -238,12 +238,10 @@ class Framework(NotifierBase, GuiBase):
 
         # register dataLoaders for the first and only time
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders
-
         self._dataLoaders = getDataLoaders()
 
         # register SpectrumDataSource formats for the first and only time
         from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
-
         self._spectrumDataSourceFormats = getDataFormats()
 
         # get a user interface; nb. ui.start() is called by the application
@@ -435,12 +433,10 @@ class Framework(NotifierBase, GuiBase):
         """
         if self.args.interface == 'Gui':
             from ccpn.ui.gui.Gui import Gui
-
             ui = Gui(application=self)
 
         else:
             from ccpn.ui.Ui import NoUi
-
             ui = NoUi(application=self)
 
         return ui
@@ -1037,15 +1033,20 @@ class Framework(NotifierBase, GuiBase):
 
         return result
 
-    def _saveProjectAs(self, newPath=None, overwrite=False) -> bool:
+    def _saveProjectAs(self, newPath=None, overwrite=False, copySubDirectories: bool = True) -> bool:
         """Save project to newPath (optionally overwrite)
+
+        :param newPath: new path for storing project files
+        :param overwrite: flag to overwrite if path exists
+        :param copySubDirectories: flag to set the copying of the project's subdirectories
         :return True if successful
         """
-        if self.preferences.general.keepSpectraInsideProject:
-            self.project.copySpectraToProject()
+        # GWV 27/7/2023: disabled
+        # if self.preferences.general.keepSpectraInsideProject:
+        #     self.project.copySpectraToProject()
 
         try:
-            self.project.saveAs(newPath=newPath, overwrite=overwrite)
+            self.project.saveAs(newPath=newPath, overwrite=overwrite, copySubDirectories=copySubDirectories)
             Layout.saveLayoutToJson(self.ui.mainWindow)
             self.current._dumpStateToFile(self.statePath)
             self._getUndo().markSave()
@@ -1056,7 +1057,7 @@ class Framework(NotifierBase, GuiBase):
             raise
 
         except Exception as es:
-            failMessage = f'saveAs: unable to save {es}'
+            failMessage = f'saveAs: {es}'
             getLogger().warning(failMessage)
             return False
 
@@ -1085,8 +1086,9 @@ class Framework(NotifierBase, GuiBase):
                 getLogger().warning('Project is read-only')
                 return True
 
-            if self.preferences.general.keepSpectraInsideProject:
-                self.project.copySpectraToProject()
+            # GWV 27/7/2023: disabled
+            # if self.preferences.general.keepSpectraInsideProject:
+            #     self.project.copySpectraToProject()
 
             try:
                 self.project.save()
@@ -1097,7 +1099,7 @@ class Framework(NotifierBase, GuiBase):
             except (PermissionError, FileNotFoundError):
                 failMessage = 'Folder may be read-only'
                 getLogger().info(failMessage)
-                raise
+                raise RuntimeError(failMessage)
 
             except Exception as es:
                 failMessage = f'save: unable to save {es}'
@@ -1113,8 +1115,6 @@ class Framework(NotifierBase, GuiBase):
         :param overwrite: flag to indicate overwriting of existing path
         :return True if successful
         """
-        # self._saveOverride = False
-
         with self._setSaveOverride(True):
             # override read-only for a save to a new folder
             #   project can still be read-only for next load

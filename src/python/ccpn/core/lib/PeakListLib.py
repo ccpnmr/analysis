@@ -4,19 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-01 14:43:48 +0100 (Mon, August 01, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-07-28 16:35:56 +0100 (Fri, July 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -418,7 +418,7 @@ def _fitExistingPeaks(peakList, peaks: Sequence['Peak'], fitMethod: str = GAUSSI
     """
     # DEPRECATED
 
-    from ccpn.core.lib.PeakPickers.PeakPickerNd import PeakPickerNd
+    from ccpn.core.lib.SpectrumLib import fetchPeakPicker
     from ccpn.framework.Application import getApplication
 
     getApp = getApplication()
@@ -429,7 +429,7 @@ def _fitExistingPeaks(peakList, peaks: Sequence['Peak'], fitMethod: str = GAUSSI
         if badPeaks:
             raise ValueError('List contains peaks that are not in the same peakList.')
 
-        myPeakPicker = PeakPickerNd(spectrum=peakList.spectrum)
+        myPeakPicker = fetchPeakPicker(spectrum=peakList.spectrum)
         myPeakPicker.setParameters(dropFactor=getApp.preferences.general.peakDropFactor,
                                    fitMethod=fitMethod,
                                    searchBoxMode=getApp.preferences.general.searchBoxMode,

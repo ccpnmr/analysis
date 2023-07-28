@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-04-05 17:06:32 +0100 (Wed, April 05, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-07-28 16:35:56 +0100 (Fri, July 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -2427,11 +2427,13 @@ def fetchPeakPicker(spectrum):
 
     peakPickers = getPeakPickerTypes()
     default1DPickerType = preferences.general.peakPicker1d
-    if default1DPickerType is None or len(default1DPickerType) == 0 or default1DPickerType not in peakPickers:
+    if not default1DPickerType or default1DPickerType not in peakPickers:
+        # default to the hard-coded peak-picker
         default1DPickerType = PeakPicker1D.peakPickerType
 
     defaultNDPickerType = preferences.general.peakPickerNd
-    if defaultNDPickerType is None or len(defaultNDPickerType) == 0 or defaultNDPickerType not in peakPickers:
+    if not defaultNDPickerType or defaultNDPickerType not in peakPickers:
+        # default to the hard-coded peak-picker
         defaultNDPickerType = PeakPickerNd.peakPickerType
 
     _picker = None

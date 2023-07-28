@@ -120,8 +120,8 @@
         "multipletLabelsEnabled"               : true,
         "multipletArrowsEnabled"               : true,
         "arrowMinimum"                         : 25,
-        "peakPicker1d"                         : null,
-        "peakPickerNd"                         : null
+        "peakPicker1d"                         : "PeakPicker1D",
+        "peakPickerNd"                         : "PeakPickerNd"
     },
     "proxySettings"    : {
         "verifySSL"        : true,

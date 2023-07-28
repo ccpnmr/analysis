@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 19:17:56 +0100 (Wed, June 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-28 16:35:56 +0100 (Fri, July 28, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -1031,16 +1031,29 @@ class PreferencesPopup(CcpnDialogMainWidget):
         """Populate the widgets in the PeaksTab
         """
 
-        from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerABC, getPeakPickerTypes
+        from ccpn.core.lib.PeakPickers.PeakPickerABC import getPeakPickerTypes
+        from ccpn.core.lib.PeakPickers.PeakPicker1D import PeakPicker1D
+        from ccpn.core.lib.PeakPickers.PeakPickerNd import PeakPickerNd
 
         self.dropFactorData.set(self.preferences.general.peakDropFactor * 100.0)
         self.peakFactor1D.set(self.preferences.general.peakFactor1D * 100.0)
 
         _peakPickers = getPeakPickerTypes()
-        self.peakPicker1dData.setData(texts=[''] + sorted([pp for pp in _peakPickers.keys()]))
-        self.peakPickerNdData.setData(texts=[''] + sorted([pp for pp in _peakPickers.keys()]))
-        self.peakPicker1dData.set(self.preferences.general.peakPicker1d)
-        self.peakPickerNdData.set(self.preferences.general.peakPickerNd)
+        self.peakPicker1dData.setData(texts=sorted([pp for pp in _peakPickers.keys()]))
+        self.peakPickerNdData.setData(texts=sorted([pp for pp in _peakPickers.keys()]))
+
+        default1DPickerType = self.preferences.general.peakPicker1d
+        if not default1DPickerType or default1DPickerType not in _peakPickers:
+            # default to the hard-coded peak-picker
+            default1DPickerType = PeakPicker1D.peakPickerType
+
+        defaultNDPickerType = self.preferences.general.peakPickerNd
+        if not defaultNDPickerType or defaultNDPickerType not in _peakPickers:
+            # default to the hard-coded peak-picker
+            defaultNDPickerType = PeakPickerNd.peakPickerType
+
+        self.peakPicker1dData.set(default1DPickerType)
+        self.peakPickerNdData.set(defaultNDPickerType)
 
         self.peakFittingMethod.setIndex(PEAKFITTINGDEFAULTS.index(self.preferences.general.peakFittingMethod))
 
@@ -1579,8 +1592,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.multipletAnnotationLabel = Label(parent, text="Label", hAlign='r', grid=(row, 0))
         self.multipletAnnotationData = RadioButtons(parent, texts=_texts,
                                             objectNames=_names,
-                                            objectName='annMDS',
-                                            # selectedInd=annotationType,
                                             callback=self._queueSetMultipletAnnotation,
                                             direction='h',
                                             grid=(row, 1), gridSpan=(1, 3), hAlign='l',
@@ -1596,8 +1607,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.multipletLabel = Label(parent, text="Symbol", hAlign='r', grid=(row, 0))
         self.multipletSymbol = RadioButtons(parent, texts=_texts,
                                    objectNames=_names,
-                                   objectName='symMDS',
-                                   # selectedInd=symbolType,
                                    callback=self._queueSetMultipletSymbol,
                                    direction='h',
                                    grid=(row, 1), gridSpan=(1, 3), hAlign='l',

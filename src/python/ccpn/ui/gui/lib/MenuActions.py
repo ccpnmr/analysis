@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-11 12:23:34 +0100 (Thu, May 11, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-07-28 18:26:16 +0100 (Fri, July 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -478,6 +478,10 @@ class OpenItemABC():
             contextMenu.addAction(self.contextMenuText, self.openAction)
 
         spectra = [obj for obj in objs if isinstance(obj, Spectrum)]
+
+        if spectra:
+            contextMenu.addAction('Reload', partial(Spectrum.reload, objs[0]))
+
         if spectra:
             contextMenu.addAction('Make SpectrumGroup From Selected',
                                   partial(_raiseSpectrumGroupEditorPopup(useNone=True, editMode=False, defaultItems=spectra),

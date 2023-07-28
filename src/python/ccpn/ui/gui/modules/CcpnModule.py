@@ -2,7 +2,6 @@
 This file contains CcpnModule base class
 modified by Geerten 1-12/12/2016
 """
-
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -16,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-28 19:23:05 +0100 (Wed, June 28, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-07-28 16:36:55 +0100 (Fri, July 28, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -58,7 +57,6 @@ from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.ToolButton import ToolButton
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS
 from ccpn.ui.gui.widgets.SideBar import SideBar, SideBarSearchListView
@@ -76,6 +74,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.core.lib.Pid import Pid, createPid
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.util.Path import aPath
+
 
 CommonWidgetsEdits = {
     CheckBox.__name__                       : (CheckBox.get, CheckBox.setChecked, None),
@@ -141,6 +140,10 @@ MIN_PIXMAP = 32
 MAX_PIXMAP = 128
 
 
+#=========================================================================================
+# CcpnModule
+#=========================================================================================
+
 class CcpnModule(Dock, DropBase, NotifierBase):
     """
     Base class for CCPN modules
@@ -183,6 +186,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     _allowRename = False
     _defaultName = MODULENAME  # used only when renaming is allowed, so that its original name is stored in the lastSeen widgetsState.
     _helpFilePath = None
+
     # After closing a renamed module, any new instance will be named as default.
 
     # _instances = set()
@@ -262,7 +266,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                                      showCloseButton=closable, closeCallback=self._closeModule,
                                      enableSettingsButton=self.includeSettingsWidget,
                                      settingsCallback=self._settingsCallback,
-                                     helpButtonCallback = self._helpButtonCallback,
+                                     helpButtonCallback=self._helpButtonCallback,
                                      )
         # self.label.dock = self  # not
 
@@ -353,9 +357,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self._updateStyle()
         self.update()  # make sure that the widgetArea starts the correct size
 
-        self._allChildren = set()
-
-        # set the constaints so the module contracts to the correct size
+        # set the constraints so the module contracts to the correct size
         self.mainWidget.getLayout().setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
         self.setMinimumSize(6 * self.label.labelSize, 5 * self.label.labelSize)
         self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
@@ -431,21 +433,20 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
     @widgetsState.getter
     def widgetsState(self):
-        """return  {"variableName":"value"}  of all gui Variables  """
-        widgetsState = {}
-        self._setNestedWidgetsAttrToModule()
-        for varName, varObj in vars(self).items():
-            if isinstance(varObj, Base):
-                widget = varObj
-                try:  # try because widgets can be dynamically deleted
-                    value = widget._getSaveState()
-                    if value is not None:  # Nones come from non-storable widgets: Splitters, tabs etc..
-                        widgetsState[varName] = value
-                except Exception as es:
-                    getLogger().warn(f'Error {es} - {varName}')
+        """return  {"variableName":"value"}  of all gui Variables.
+        """
+        widgetsState = collections.OrderedDict()
 
-        # self._kwargs = collections.OrderedDict(sorted(widgetsState.items()))
-        return collections.OrderedDict(sorted(widgetsState.items(), key=lambda x: x[0]))
+        wDict = self._setNestedWidgetsAttrToModule()
+        for varName, widget in wDict.items():
+            try:  # try because widgets can be dynamically deleted
+                value = widget._getSaveState()
+                if value is not None:  # Nones come from non-storable widgets: Splitters, tabs etc..
+                    widgetsState[varName] = value
+            except Exception as es:
+                getLogger().debug2(f'state getter not implemented for {varName}: {es}')
+
+        return widgetsState
 
     def _getLastSeenWidgetsState(self):
         """ Internal. Used to restore last closed module in the same program instance. """
@@ -520,17 +521,18 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
         :param widgetsState:
         """
+        wDict = self._setNestedWidgetsAttrToModule()
 
-        self._setNestedWidgetsAttrToModule()
         widgetsState = collections.OrderedDict(sorted(widgetsState.items()))
         for variableName, value in widgetsState.items():
             try:
-                widget = getattr(self, str(variableName))
-                if isinstance(widget, Base):
+                # set parameter if it exists in the module's named widgets
+                if widget := wDict.get(str(variableName)):
                     widget._setSavedState(value)
-            except Exception as e:
+
+            except Exception as es:
                 getLogger().debug(
-                        f'Impossible to restore {variableName} value for {self.name()}. {e}'
+                        f'Impossible to restore {variableName} value for {self.name()}. {es}'
                         )
 
     def _closeModule(self):
@@ -573,44 +575,6 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     # Super class Methods
     #=========================================================================================
 
-    # NOTE:ED Leave this in so I remember ShortcutOverride
-    # def event(self, event):
-    #     if event.type() == QtCore.QEvent.ShortcutOverride:
-    #         event.accept()
-    #         print('>>>Override')
-    #     else:
-    #         super(CcpnModule, self).event(event)
-
-    # @property
-    # def titleBarHidden(self):
-    #     return self.labelHidden
-    #
-    # @titleBarHidden.setter
-    # def titleBarHidden(self, hidden):
-    #     if hidden:
-    #         self.hideTitleBar()
-    #     else:
-    #         self.showTitleBar()
-    #
-    # #GST super class show and hide titlebar have central as an allowed area we don't use it
-    # #    so remove it as a choice
-    # def hideTitleBar(self):
-    #     """
-    #     Hide the title bar for this Dock.
-    #     This will prevent the Dock being moved by the user.
-    #     """
-    #     self.label.hide()
-    #     self.labelHidden = True
-    #     self.updateStyle()
-    #
-    # def showTitleBar(self):
-    #     """
-    #     Show the title bar for this Dock.
-    #     """
-    #     self.label.show()
-    #     self.labelHidden = False
-    #     self.updateStyle()
-
     def getDockArea(self, target=None):
         current = self if target is None else target
 
@@ -618,152 +582,27 @@ class CcpnModule(Dock, DropBase, NotifierBase):
             current = current.parent()
         return current
 
-    # def getDock(self, target=None):
-    #     if target is None:
-    #         current = self
-    #     else:
-    #         current = target
-    #
-    #     while current.parent() != None:
-    #         if isinstance(current, Dock):
-    #             break
-    #         current = current.parent()
-    #
-    #     if not isinstance(current, Dock):
-    #         current = None
-    #     return current
-    #
-    # def docksByDockArea(self):
-    #     result = {}
-    #     docks = list(self.area.docks.values())
-    #     for dock in docks:
-    #         parent = dock.getDockArea()
-    #         result.setdefault(parent, []).append(dock)
-    #     return result
-    #
-    # def float(self):
-    #     if self.maximised:
-    #         self.toggleMaximised()
-    #     super().float()
-    #
-    # def mergeState(self, state):
-    #     result = self.getHome().saveState(docksOnly=True)
-    #
-    #     if state['main'] != None:
-    #         result['main'] = state['main']
-    #
-    #     if len(state['floats']) != 0:
-    #         toMerge = state['floats'][0]
-    #         mergeId = toMerge[2]['id']
-    #
-    #         for i, currentState in enumerate(result['floats']):
-    #             currentId = currentState[2]['id']
-    #
-    #             if currentId == mergeId:
-    #                 result['floats'][i] = toMerge
-    #
-    #     return result
-    #
-    # def filterState(self, state, id_):
-    #
-    #     result = {'main': None, 'floats': []}
-    #
-    #     if state['main'][2]['id'] == id_:
-    #         result['main'] = state['main']
-    #
-    #     for float in state['floats']:
-    #         if float[2]['id'] == id_:
-    #             result['floats'].append(float)
-    #
-    #     return result
-    #
-    # def getDocksInParentArea(self):
-    #     return self.docksByDockArea()[self.getDockArea()]
-    #
-    # def getHome(self):
-    #     result = self.area
-    #     if self.area.home != None:
-    #         result = self.area.home
-    #     return result
-    #
-    # def toggleMaximised(self):
-    #
-    #     docks = self.getDocksInParentArea()
-    #
-    #     if len(docks) < 2:
-    #         self.maximised = False
-    #         self.maximiseRestoreState = None
-    #     elif self.maximised:
-    #         dockArea = self.getDockArea()
-    #         dockAreaId = id(dockArea)
-    #         state = self.mergeState(self.maximiseRestoreState)
-    #         if (self.area.home):
-    #             self.area.home.restoreState(state)
-    #         else:
-    #             self.area.restoreState(state)
-    #         for dock in docks:
-    #             dock.showTitleBar()
-    #         self.maximised = False
-    #         self.maximiseRestoreState = None
-    #     else:
-    #         state = self.getHome().saveState(docksOnly=True)
-    #         dockArea = self.getDockArea()
-    #         dockAreaId = id(dockArea)
-    #         state = self.filterState(state, dockAreaId)
-    #         self.maximiseRestoreState = state
-    #
-    #         docks = self.docksByDockArea()[self.getDockArea()]
-    #         docks.remove(self)
-    #         for dock in docks:
-    #             dock.hideTitleBar()
-    #             self.area.moveDock(dock, 'below', self)
-    #
-    #         self._container.raiseDock(self)
-    #
-    #         self.maximised = True
-
-    def _findChildren(self, widget):
-        for i in widget.children():
-            self._allChildren.update({i})
-            self._findChildren(i)
-
     def _setNestedWidgetsAttrToModule(self):
         """
         :return: nestedWidgets
         """
-        allStorableWidgets = []
-        self._findChildren(self)
-        for num, w in enumerate(self._allChildren):
-            if isinstance(w, Base):
-                allStorableWidgets.append(w)
-        widgetsWithinSelf = []
-        for varName, varObj in vars(self).items():
-            if isinstance(varObj, Base):
-                widgetsWithinSelf.append(varObj)
+        # get all the children that are of ccpn-core Base classes
+        allChildren = list(filter(lambda widg: isinstance(widg, Base), self.findChildren(QtWidgets.QWidget)))
+        grouped = [list(v) for k, v in itertools.groupby(allChildren, lambda x: str(type(x)), )]
 
-        nestedWidgets = [widget for widget in allStorableWidgets if widget not in widgetsWithinSelf]
-        nestedWidgs = []
-        for widg in nestedWidgets:
-            try:
-                if widg.parent() not in widgetsWithinSelf:
-                    nestedWidgs.append(widg)
-            except Exception as es:
-                getLogger().debug2('ignoring bad widget %s - %s' % (str(widg), str(es)))
+        # order the groups, appending numbers if required, and remove any whitespaces
+        _stateWidgets = collections.OrderedDict((re.sub(r"\s+", "", widg.objectName()) if widg.objectName() else
+                                                 (DoubleUnderscore + re.sub(r"\s+", "", widg.objectName()) + widg.__class__.__name__ + (str(count) if count > 0 else '')),
+                                                 widg)
+                                                for grp in grouped
+                                                for count, widg in enumerate(grp))
 
-        nestedWidgs.sort(key=lambda x: str(type(x)), reverse=False)
-        groupednestedWidgets = [list(v) for k, v in itertools.groupby(nestedWidgs, lambda x: str(type(x)), )]
-        for widgetsGroup in groupednestedWidgets:
-            for count, widget in enumerate(widgetsGroup):
-                if isinstance(widget.objectName(), str):
-                    name = widget.objectName().replace(' ', '')
-                    setattr(self, DoubleUnderscore + name, widget)
-                else:
-                    setattr(self, DoubleUnderscore + widget.__class__.__name__ + str(count), widget)
+        return _stateWidgets
 
     def event(self, event):
         """
         CCPNInternal
-        Handle events for switching transparency of modules
+        Handle events for switching transparency of modules.
         Modules become transparent when dragging to another module.
         Ensure that the dropAreas become active
         """
@@ -841,6 +680,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         :return:
         """
         from ccpn.ui.gui.modules.HelpModule import HelpModule
+
         htmlFilePath = self._helpFilePath
         if htmlFilePath is not None:
             moduleArea = self.mainWindow.moduleArea
@@ -860,15 +700,12 @@ class CcpnModule(Dock, DropBase, NotifierBase):
             self.settingsState = (self.settingsState + 1) % self.maxSettingsState
             if self.settingsState == 0:
                 self.mainWidget.show()
-                # self.settingsWidget._sequenceGraphScrollArea.hide()
                 self._settingsScrollArea.hide()
             elif self.settingsState == 1:
                 self.mainWidget.show()
-                # self.settingsWidget._sequenceGraphScrollArea.hide()
                 self._settingsScrollArea.show()
                 self._setSettingsWidgetSize()
             elif self.settingsState == 2:
-                # self.settingsWidget._sequenceGraphScrollArea.hide()
                 self._settingsScrollArea.hide()
                 self.mainWidget.hide()
         else:
@@ -1050,7 +887,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
              probably from paint event
         """
 
-        # Padding apears not to work; overridden somewhere else?
+        # Padding appears not to work; overridden somewhere else?
         colours = getColours()
 
         tempStyle = """CcpnModule {
@@ -1123,7 +960,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self.updateStyle()
 
         # GST we have to assume the drag succeeded currently as we don't get any events
-        # that report on whether the drag has failed. Indeed this effectivley a failed drag...
+        # that report on whether the drag has failed. Indeed this effectively a failed drag...
         globalDockRect = self.getDockArea().frameGeometry()
 
         targetWidget = QtWidgets.QApplication.instance().widgetAt(endPosition)
@@ -1163,6 +1000,10 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         super().resizeEvent(ev)
 
 
+#=========================================================================================
+# CcpnModuleLabel
+#=========================================================================================
+
 class CcpnModuleLabel(DockLabel):
     """
     Subclassing DockLabel to modify appearance and functionality
@@ -1183,7 +1024,7 @@ class CcpnModuleLabel(DockLabel):
         return max(iconSizes)
 
     def __init__(self, name, module, showCloseButton=True, closeCallback=None, enableSettingsButton=False, settingsCallback=None,
-                  helpButtonCallback=None, ):
+                 helpButtonCallback=None, ):
 
         self.buttonBorderWidth = 1
         self.buttonIconMargin = 1
@@ -1234,8 +1075,8 @@ class CcpnModuleLabel(DockLabel):
         self.settingsButton = self.settingsButtons.buttons[0]
         self.helpButton = self.settingsButtons.buttons[1]
         self.setupLabelButton(self.settingsButton, position=CcpnModuleLabel.TOP_LEFT)
-        self.setupLabelButton(self.helpButton,  position=CcpnModuleLabel.TOP_LEFT)
-        if self.module._helpFilePath is None or  not aPath(self.module._helpFilePath).exists():
+        self.setupLabelButton(self.helpButton, position=CcpnModuleLabel.TOP_LEFT)
+        if self.module._helpFilePath is None or not aPath(self.module._helpFilePath).exists():
             self.helpButton.setEnabled(False)
         self.settingsButton.setEnabled(enableSettingsButton)
 
@@ -1482,6 +1323,10 @@ EXTRA_CHARACTERS_ALLOWED = [' ',  # extra characters allowed when renaming a Mod
                             ]
 
 
+#=========================================================================================
+# LabelNameValidator
+#=========================================================================================
+
 class LabelNameValidator(QtGui.QValidator):
     """ Make sure the newly typed module name on a GUI is unique.
     """
@@ -1579,6 +1424,10 @@ class LabelNameValidator(QtGui.QValidator):
         return state
 
 
+#=========================================================================================
+# NameEditor
+#=========================================================================================
+
 class NameEditor(LineEdit):
     """LineEdit widget that contains validator for checking filePaths exists
     """
@@ -1618,6 +1467,10 @@ class NameEditor(LineEdit):
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         super(LineEdit, self).focusOutEvent(ev)
 
+
+#=========================================================================================
+# DropAreaSelectedOverlay
+#=========================================================================================
 
 class DropAreaSelectedOverlay(QtWidgets.QWidget):
     """Overlay widget that draws highlight over the current module during a drag-drop operation
@@ -1667,6 +1520,10 @@ class DropAreaSelectedOverlay(QtWidgets.QWidget):
         p.drawRect(rgn)
         p.end()
 
+
+#=========================================================================================
+# BorderOverlay
+#=========================================================================================
 
 class BorderOverlay(QtWidgets.QWidget):
     """Overlay widget that draws a border around the whole of the module

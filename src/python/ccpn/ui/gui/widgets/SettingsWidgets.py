@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-21 11:50:59 -0400 (Wed, June 21, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-07-28 16:36:55 +0100 (Fri, July 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -169,8 +169,6 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self.xAxisUnits = Label(parent, text="X-axis units", grid=(row, 0))
         self.xAxisUnitsData = RadioButtons(parent, texts=xTexts,
                                            objectNames=[f'xUnitsSDS_{text}' for text in xTexts],
-                                           objectName='xUnitsSDS',
-                                           # selectedInd=xAxisUnits,
                                            callback=self._settingsChanged,
                                            direction='h',
                                            grid=(row, 1), gridSpan=(1, 3), hAlign='l',
@@ -183,8 +181,6 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self.yAxisUnits = Label(parent, text="Y-axis units", grid=(row, 0))
         self.yAxisUnitsData = RadioButtons(parent, texts=yTexts,
                                            objectNames=[f'yUnitsSDS_{text}' for text in xTexts],
-                                           objectName='yUnitsSDS',
-                                           # selectedInd=yAxisUnits,
                                            callback=self._settingsChanged,
                                            direction='h',
                                            grid=(row, 1), gridSpan=(1, 3), hAlign='l',
@@ -200,8 +196,6 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self.stripArrangementLabel = Label(parent, text="Strip Arrangement", grid=(row, 0))
         self.stripArrangementButtons = RadioButtons(parent, texts=['    ', '    ', '    '],
                                                     objectNames=['stripSDS_Row', 'stripSDS_Column', 'stripSDS_Tile'],
-                                                    objectName='stripSDS',
-                                                    # selectedInd=stripArrangement,
                                                     direction='horizontal',
                                                     grid=(row, 1), gridSpan=(1, 3), hAlign='l',
                                                     tipTexts=None,
@@ -225,7 +219,6 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self.zPlaneNavigationModeLabel = Label(parent, text="Plane Navigation Mode", grid=(row, 0))
         self.zPlaneNavigationModeData = RadioButtons(parent, texts=[val.description for val in ZPlaneNavigationModes],
                                                      objectNames=[f'zPlaneSDS_{val.dataValue}' for val in ZPlaneNavigationModes],
-                                                     objectName='zPlaneSDS',
                                                      callback=self._zPlaneNavigationModeChanged,
                                                      direction='h',
                                                      grid=(row, 1), hAlign='l', gridSpan=(1, 2),
@@ -250,8 +243,6 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self.useAspectRatioModeLabel = Label(parent, text="Mode", hAlign='r', grid=(row, 0))
         self.useAspectRatioModeButtons = RadioButtons(parent, texts=['Free', 'Locked', 'Fixed'],
                                                       objectNames=['armSDS_Free', 'armSDS_Locked', 'armSDS_Fixed'],
-                                                      objectName='armSDS',
-                                                      # selectedInd=_aspectRatioMode,
                                                       callback=self._aspectRatioModeChanged,
                                                       direction='horizontal',
                                                       grid=(row, 1), gridSpan=(1, 3), hAlign='l',
@@ -321,8 +312,6 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             self.annotationsLabel = Label(parent, text="Label", hAlign='r', grid=(row, 0))
             self.annotationsData = RadioButtons(parent, texts=_texts,
                                                 objectNames=_names,
-                                                objectName='annSDS',
-                                                # selectedInd=annotationType,
                                                 callback=self._symbolsChanged,
                                                 direction='v',
                                                 grid=(row, 1), gridSpan=(1, 3), hAlign='l',
@@ -340,8 +329,6 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             self.symbolsLabel = Label(parent, text="Symbol", hAlign='r', grid=(row, 0))
             self.symbol = RadioButtons(parent, texts=_texts,
                                        objectNames=_names,
-                                       objectName='symSDS',
-                                       # selectedInd=symbolType,
                                        callback=self._symbolsChanged,
                                        direction='h',
                                        grid=(row, 1), gridSpan=(1, 3), hAlign='l',
@@ -386,8 +373,6 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             self.multipletAnnotationLabel = Label(parent, text="Label", hAlign='r', grid=(row, 0))
             self.multipletAnnotationData = RadioButtons(parent, texts=_texts,
                                                         objectNames=_names,
-                                                        objectName='annMDS',
-                                                        # selectedInd=annotationType,
                                                         callback=self._symbolsChanged,
                                                         direction='v',
                                                         grid=(row, 1), gridSpan=(1, 3), hAlign='l',
@@ -407,8 +392,6 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             self.multipletLabel = Label(parent, text="Symbol", hAlign='r', grid=(row, 0))
             self.multipletSymbol = RadioButtons(parent, texts=_texts,
                                                 objectNames=_names,
-                                                objectName='symMDS',
-                                                # selectedInd=symbolType,
                                                 callback=self._symbolsChanged,
                                                 direction='h',
                                                 grid=(row, 1), gridSpan=(1, 3), hAlign='l',
@@ -501,8 +484,6 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             self.arrowsLabel = Label(parent, text="Arrow", hAlign='r', grid=(row, 0))
             self.arrow = RadioButtons(parent, texts=_texts,
                                       objectNames=_names,
-                                      objectName='arrSDS',
-                                      # selectedInd=arrowType,
                                       callback=self._symbolsChanged,
                                       direction='h',
                                       grid=(row, 1), gridSpan=(1, 3), hAlign='l',

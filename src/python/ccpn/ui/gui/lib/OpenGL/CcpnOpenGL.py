@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 19:17:55 +0100 (Wed, June 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-28 16:36:54 +0100 (Fri, July 28, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -1478,7 +1478,7 @@ class CcpnGLWidget(QOpenGLWidget):
             else:
                 self.axisL = min(region[0], region[1])
                 self.axisR = max(region[0], region[1])
-            self._xUnits = axis._unitIndex
+            # self._xUnits = axis._unitIndex
 
         axis = self.orderedAxes[1]
         if axis:
@@ -1490,8 +1490,8 @@ class CcpnGLWidget(QOpenGLWidget):
             else:
                 self.axisB = min(region[0], region[1])
                 self.axisT = max(region[0], region[1])
-            if not self.spectrumDisplay.is1D:
-                self._yUnits = axis._unitIndex
+            # if not self.spectrumDisplay.is1D:
+            #     self._yUnits = axis._unitIndex
 
         self.update()
 

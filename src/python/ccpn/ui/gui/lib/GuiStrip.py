@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-13 11:52:14 +0100 (Thu, July 13, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-28 16:36:54 +0100 (Fri, July 28, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -283,96 +283,96 @@ class GuiStrip(Frame):
         self._preferences = self.application.preferences.general
 
         # set symbolLabelling to the default from preferences or strip to the left
-        # settings = spectrumDisplay._getSettingsDict()
-        # if len(spectrumDisplay.strips) > 1:
-        #
-        #     _firstStrip = spectrumDisplay.strips[0]
-        #
-        #     # copy the values from the first strip
-        #     self.symbolLabelling = min(_firstStrip.symbolLabelling, self.spectrumDisplay.MAXPEAKLABELTYPES - 1)
-        #     self.symbolType = min(_firstStrip.symbolType, self.spectrumDisplay.MAXPEAKSYMBOLTYPES - 1)
-        #     self.symbolSize = _firstStrip.symbolSize
-        #     self.symbolThickness = _firstStrip.symbolThickness
-        #     self.multipletLabelling = min(_firstStrip.multipletLabelling, self.spectrumDisplay.MAXMULTIPLETLABELTYPES - 1)
-        #     self.multipletType = min(_firstStrip.multipletType, self.spectrumDisplay.MAXMULTIPLETSYMBOLTYPES - 1)
-        #
-        #     self.aliasEnabled = _firstStrip.aliasEnabled
-        #     self.aliasShade = _firstStrip.aliasShade
-        #     self.aliasLabelsEnabled = _firstStrip.aliasLabelsEnabled
-        #     self.contourThickness = _firstStrip.contourThickness
-        #
-        #     self.peakSymbolsEnabled = _firstStrip.peakSymbolsEnabled
-        #     self.peakLabelsEnabled = _firstStrip.peakLabelsEnabled
-        #     self.peakArrowsEnabled = _firstStrip.peakArrowsEnabled
-        #     self.multipletSymbolsEnabled = _firstStrip.multipletSymbolsEnabled
-        #     self.multipletLabelsEnabled = _firstStrip.multipletLabelsEnabled
-        #     self.multipletArrowsEnabled = _firstStrip.multipletArrowsEnabled
-        #     self.arrowType = min(_firstStrip.arrowType, self.spectrumDisplay.MAXARROWTYPES - 1)
-        #     self.arrowSize = _firstStrip.arrowSize
-        #     self.arrowMinimum = _firstStrip.arrowMinimum
-        #
-        #     self.gridVisible = _firstStrip.gridVisible
-        #     self.crosshairVisible = _firstStrip.crosshairVisible
-        #     self.sideBandsVisible = _firstStrip.sideBandsVisible
-        #
-        #     self.showSpectraOnPhasing = _firstStrip.showSpectraOnPhasing
-        #     self._spectrumBordersVisible = _firstStrip._spectrumBordersVisible
-        #
-        #     if spectrumDisplay.stripArrangement == 'Y':
-        #         if self.spectrumDisplay.lastAxisOnly:
-        #             self.setAxesVisible(False, True)
-        #         else:
-        #             self.setAxesVisible(True, True)
-        #     elif spectrumDisplay.stripArrangement == 'X':
-        #         if self.spectrumDisplay.lastAxisOnly:
-        #             self.setAxesVisible(True, False)
-        #         else:
-        #             self.setAxesVisible(True, True)
-        #
-        # else:
-        #     # get the values from the preferences
-        #     self.gridVisible = self._preferences.showGrid
-        #     self.crosshairVisible = self._preferences.showCrosshair
-        #     self.sideBandsVisible = self._preferences.showSideBands
-        #
-        #     self.showSpectraOnPhasing = self._preferences.showSpectraOnPhasing
-        #     self._spectrumBordersVisible = self._preferences.showSpectrumBorder
-        #
-        #     # get the values from the settings (check in case the number of states has changed)
-        #     self.symbolLabelling = min(settings[ANNOTATIONTYPE], self.spectrumDisplay.MAXPEAKLABELTYPES - 1)
-        #     self.symbolType = min(settings[SYMBOLTYPE], self.spectrumDisplay.MAXPEAKSYMBOLTYPES - 1)
-        #     self.symbolSize = settings[SYMBOLSIZE]
-        #     self.symbolThickness = settings[SYMBOLTHICKNESS]
-        #     self.multipletLabelling = min(settings[MULTIPLETANNOTATIONTYPE], self.spectrumDisplay.MAXMULTIPLETLABELTYPES - 1)
-        #     self.multipletType = min(settings[MULTIPLETTYPE], self.spectrumDisplay.MAXMULTIPLETSYMBOLTYPES - 1)
-        #
-        #     self.contourThickness = settings[CONTOURTHICKNESS]
-        #     self.aliasEnabled = settings[ALIASENABLED]
-        #     self.aliasShade = settings[ALIASSHADE]
-        #     self.aliasLabelsEnabled = settings[ALIASLABELSENABLED]
-        #
-        #     self.peakSymbolsEnabled = settings[PEAKSYMBOLSENABLED]
-        #     self.peakLabelsEnabled = settings[PEAKLABELSENABLED]
-        #     self.peakArrowsEnabled = settings[PEAKARROWSENABLED]
-        #     self.multipletSymbolsEnabled = settings[MULTIPLETSYMBOLSENABLED]
-        #     self.multipletLabelsEnabled = settings[MULTIPLETLABELSENABLED]
-        #     self.multipletArrowsEnabled = settings[MULTIPLETARROWSENABLED]
-        #
-        #     self.arrowType = min(settings[ARROWTYPES], self.spectrumDisplay.MAXARROWTYPES - 1)
-        #     self.arrowSize = settings[ARROWSIZE]
-        #     self.arrowMinimum = settings[ARROWMINIMUM]
-        #
-        #     self.spectrumDisplay._setFloatingAxes(xUnits=settings[AXISXUNITS],
-        #                                           yUnits=settings[AXISYUNITS],
-        #                                           aspectRatioMode=settings[AXISASPECTRATIOMODE],
-        #                                           aspectRatios=settings[AXISASPECTRATIOS])
-        #
-        #     self.setAxesVisible(True, True)
-        #
-        # self._CcpnGLWidget._aspectRatioMode = settings[AXISASPECTRATIOMODE]
-        # self._CcpnGLWidget._aspectRatios = deepcopy(settings[AXISASPECTRATIOS])
-        # self._CcpnGLWidget._applyXLimit = self._preferences.zoomXLimitApply
-        # self._CcpnGLWidget._applyYLimit = self._preferences.zoomYLimitApply
+        settings = spectrumDisplay._getSettingsDict()
+        if len(spectrumDisplay.strips) > 1:
+
+            _firstStrip = spectrumDisplay.strips[0]
+
+            # copy the values from the first strip
+            self.symbolLabelling = min(_firstStrip.symbolLabelling, self.spectrumDisplay.MAXPEAKLABELTYPES - 1)
+            self.symbolType = min(_firstStrip.symbolType, self.spectrumDisplay.MAXPEAKSYMBOLTYPES - 1)
+            self.symbolSize = _firstStrip.symbolSize
+            self.symbolThickness = _firstStrip.symbolThickness
+            self.multipletLabelling = min(_firstStrip.multipletLabelling, self.spectrumDisplay.MAXMULTIPLETLABELTYPES - 1)
+            self.multipletType = min(_firstStrip.multipletType, self.spectrumDisplay.MAXMULTIPLETSYMBOLTYPES - 1)
+
+            self.aliasEnabled = _firstStrip.aliasEnabled
+            self.aliasShade = _firstStrip.aliasShade
+            self.aliasLabelsEnabled = _firstStrip.aliasLabelsEnabled
+            self.contourThickness = _firstStrip.contourThickness
+
+            self.peakSymbolsEnabled = _firstStrip.peakSymbolsEnabled
+            self.peakLabelsEnabled = _firstStrip.peakLabelsEnabled
+            self.peakArrowsEnabled = _firstStrip.peakArrowsEnabled
+            self.multipletSymbolsEnabled = _firstStrip.multipletSymbolsEnabled
+            self.multipletLabelsEnabled = _firstStrip.multipletLabelsEnabled
+            self.multipletArrowsEnabled = _firstStrip.multipletArrowsEnabled
+            self.arrowType = min(_firstStrip.arrowType, self.spectrumDisplay.MAXARROWTYPES - 1)
+            self.arrowSize = _firstStrip.arrowSize
+            self.arrowMinimum = _firstStrip.arrowMinimum
+
+            self.gridVisible = _firstStrip.gridVisible
+            self.crosshairVisible = _firstStrip.crosshairVisible
+            self.sideBandsVisible = _firstStrip.sideBandsVisible
+
+            self.showSpectraOnPhasing = _firstStrip.showSpectraOnPhasing
+            self._spectrumBordersVisible = _firstStrip._spectrumBordersVisible
+
+            if spectrumDisplay.stripArrangement == 'Y':
+                if self.spectrumDisplay.lastAxisOnly:
+                    self.setAxesVisible(False, True)
+                else:
+                    self.setAxesVisible(True, True)
+            elif spectrumDisplay.stripArrangement == 'X':
+                if self.spectrumDisplay.lastAxisOnly:
+                    self.setAxesVisible(True, False)
+                else:
+                    self.setAxesVisible(True, True)
+
+        else:
+            # get the values from the preferences
+            self.gridVisible = self._preferences.showGrid
+            self.crosshairVisible = self._preferences.showCrosshair
+            self.sideBandsVisible = self._preferences.showSideBands
+
+            self.showSpectraOnPhasing = self._preferences.showSpectraOnPhasing
+            self._spectrumBordersVisible = self._preferences.showSpectrumBorder
+
+            # get the values from the settings (check in case the number of states has changed)
+            self.symbolLabelling = min(settings[ANNOTATIONTYPE], self.spectrumDisplay.MAXPEAKLABELTYPES - 1)
+            self.symbolType = min(settings[SYMBOLTYPE], self.spectrumDisplay.MAXPEAKSYMBOLTYPES - 1)
+            self.symbolSize = settings[SYMBOLSIZE]
+            self.symbolThickness = settings[SYMBOLTHICKNESS]
+            self.multipletLabelling = min(settings[MULTIPLETANNOTATIONTYPE], self.spectrumDisplay.MAXMULTIPLETLABELTYPES - 1)
+            self.multipletType = min(settings[MULTIPLETTYPE], self.spectrumDisplay.MAXMULTIPLETSYMBOLTYPES - 1)
+
+            self.contourThickness = settings[CONTOURTHICKNESS]
+            self.aliasEnabled = settings[ALIASENABLED]
+            self.aliasShade = settings[ALIASSHADE]
+            self.aliasLabelsEnabled = settings[ALIASLABELSENABLED]
+
+            self.peakSymbolsEnabled = settings[PEAKSYMBOLSENABLED]
+            self.peakLabelsEnabled = settings[PEAKLABELSENABLED]
+            self.peakArrowsEnabled = settings[PEAKARROWSENABLED]
+            self.multipletSymbolsEnabled = settings[MULTIPLETSYMBOLSENABLED]
+            self.multipletLabelsEnabled = settings[MULTIPLETLABELSENABLED]
+            self.multipletArrowsEnabled = settings[MULTIPLETARROWSENABLED]
+
+            self.arrowType = min(settings[ARROWTYPES], self.spectrumDisplay.MAXARROWTYPES - 1)
+            self.arrowSize = settings[ARROWSIZE]
+            self.arrowMinimum = settings[ARROWMINIMUM]
+
+            self.spectrumDisplay._setFloatingAxes(xUnits=settings[AXISXUNITS],
+                                                  yUnits=settings[AXISYUNITS],
+                                                  aspectRatioMode=settings[AXISASPECTRATIOMODE],
+                                                  aspectRatios=settings[AXISASPECTRATIOS])
+
+            self.setAxesVisible(True, True)
+
+        self._CcpnGLWidget._aspectRatioMode = settings[AXISASPECTRATIOMODE]
+        self._CcpnGLWidget._aspectRatios = deepcopy(settings[AXISASPECTRATIOS])
+        self._CcpnGLWidget._applyXLimit = self._preferences.zoomXLimitApply
+        self._CcpnGLWidget._applyYLimit = self._preferences.zoomYLimitApply
 
         self.showSpectraOnPhasing = False
 

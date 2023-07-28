@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-21 11:19:09 -0400 (Wed, June 21, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-07-28 16:36:55 +0100 (Fri, July 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -56,7 +56,8 @@ from ccpn.ui.gui.widgets.Action import Action
 from collections import OrderedDict
 
 
-_filenameLineEdit = '_filenameLineEdit'
+DoubleUnderscore = '__'
+_filenameLineEdit = 'filenameLineEdit'
 SaveMsgTipText = 'Note: macros are automatically saved at every changes'
 
 
@@ -184,7 +185,7 @@ class MacroEditor(CcpnModule):
                                            self._processDroppedItems)
 
     def _setupWidgets(self):
-        """Setup the main widgets
+        """Set up the main widgets
         """
         _spacing = 4
         self.mainWidget.getLayout().setSpacing(_spacing)
@@ -193,10 +194,10 @@ class MacroEditor(CcpnModule):
         self.toolbar = ToolBar(self.mainWidget, grid=(hGrid, 0), gridSpan=(1, 2), hAlign='l', hPolicy='preferred')
         hGrid += 1
         self.filePathLabel = Label(self.mainWidget, tipText='Macro filePath. ' + SaveMsgTipText, hAlign='l', grid=(hGrid, 0))
-        self._filenameLineEdit = LineEdit(self.mainWidget, grid=(hGrid, 1))
+        self._filenameLineEdit = LineEdit(self.mainWidget, grid=(hGrid, 1), objectName=_filenameLineEdit)
         self._filenameLineEdit.hide()
-        setattr(self, _filenameLineEdit, LineEdit(self.mainWidget, grid=(hGrid, 1)))
-        getattr(self, _filenameLineEdit).hide()  #  this is used only to store and restore the widgets
+        # setattr(self, _filenameLineEdit, LineEdit(self.mainWidget, grid=(hGrid, 1)))
+        # getattr(self, _filenameLineEdit).hide()  #  this is used only to store and restore the widgets
         hGrid += 1
         # macro editing area
         self.textEditor = PyCodeEditor(self.mainWidget, application=self.application, grid=(hGrid, 0), acceptDrops=True, gridSpan=(1, 2))
@@ -653,12 +654,31 @@ class MacroEditor(CcpnModule):
         Restore the gui params. To Call it: _setParams(**{"variableName":"value"})
         :param widgetsState:
         """
-        self._setNestedWidgetsAttrToModule()
+        # self._setNestedWidgetsAttrToModule()
+        # widgetsState = od(sorted(widgetsState.items()))
+        # for variableName, value in widgetsState.items():
+        #     try:
+        #         widget = getattr(self, str(variableName))
+        #         if variableName == _filenameLineEdit:
+        #             if isinstance(widget, LineEdit):
+        #                 if value is not None and value != '':
+        #                     if self.filePath != value:
+        #                         self._removeMacroFromCurrent()
+        #                         self._deleteTempFile()
+        #                     self.openPath(value)
+        #                 continue
+        #         else:
+        #             widget._setSavedState(value)
+        #
+        #     except Exception as e:
+        #         getLogger().debug('Impossible to restore %s value for %s. %s' % (variableName, self.name(), e))
+
+        wDict = self._setNestedWidgetsAttrToModule()
         widgetsState = od(sorted(widgetsState.items()))
         for variableName, value in widgetsState.items():
             try:
-                widget = getattr(self, str(variableName))
-                if variableName == _filenameLineEdit:
+                widget = wDict.get(str(variableName))
+                if variableName == DoubleUnderscore + _filenameLineEdit:
                     if isinstance(widget, LineEdit):
                         if value is not None and value != '':
                             if self.filePath != value:
@@ -668,6 +688,7 @@ class MacroEditor(CcpnModule):
                         continue
                 else:
                     widget._setSavedState(value)
+
             except Exception as e:
                 getLogger().debug('Impossible to restore %s value for %s. %s' % (variableName, self.name(), e))
 
@@ -685,7 +706,8 @@ class MacroEditor(CcpnModule):
             getLogger().warning(f'error closing macro editor {err}')
 
         widgetsState = super().widgetsState
-        widgetsState[_filenameLineEdit] = '' # don't save the filename for next time you open a "last-seen" module
+        # widgetsState[_filenameLineEdit] = '' # don't save the filename for next time you open a "last-seen" module
+
         self.area._seenModuleStates[self.className] = {MODULENAME: self.moduleName, WIDGETSTATE: widgetsState}
         self._includeInLastSeen = False # otherwise overrides the saved state.
         super()._closeModule()

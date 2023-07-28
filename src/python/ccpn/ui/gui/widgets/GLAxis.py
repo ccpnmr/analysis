@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-29 17:45:56 +0100 (Thu, June 29, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-28 16:36:55 +0100 (Fri, July 28, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -424,7 +424,8 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             thisSpecView = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[
                 0].isDeleted else None
 
-            if thisSpecView:
+            if thisSpecView and thisSpecView in self._spectrumSettings:
+                # axes are built before _spectrumSettings
                 thisSpec = thisSpecView.spectrum
 
                 # generate different axes depending on units - X Axis

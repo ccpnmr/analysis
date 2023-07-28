@@ -16,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-04-25 17:41:51 +0100 (Tue, April 25, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-07-28 16:36:54 +0100 (Fri, July 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -483,7 +483,7 @@ def restoreLayout(mainWindow, layout, restoreSpectrumDisplay=False):
         if len(openedModulesName) > 0:
             if len(compare) == len(openedModulesName):
                 try:
-                    mainWindow.moduleArea.restoreState(state, restoreSpectrumDisplay=restoreSpectrumDisplay)
+                    mainWindow.moduleArea.restoreState(state, restoreSpectrumDisplay=True)
                 except Exception as e:
                     getLogger().debug2("Layout error: %s" % e)
             else:

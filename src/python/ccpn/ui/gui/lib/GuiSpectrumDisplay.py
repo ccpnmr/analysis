@@ -15,14 +15,13 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-06 18:41:46 +0100 (Thu, July 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-28 16:36:54 +0100 (Fri, July 28, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
-import typing
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -63,10 +62,14 @@ from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip, STRIP_MINIMUMWIDTH, STRIP_MINIMUMHEIGHT
 
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import PEAKSELECT, MULTIPLETSELECT, CcpnGLWidget
 from ccpn.ui.gui.widgets.GLAxis import GuiNdWidgetAxis, Gui1dWidgetAxis
-from ccpn.ui.gui.lib.GuiSpectrumView import _spectrumViewHasChanged
 from ccpn.ui.gui.widgets.SpectrumGroupToolBar import _spectrumGroupViewHasChanged
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import PEAKSELECT, MULTIPLETSELECT, CcpnGLWidget, GLNotifier
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, \
+    SYMBOLTYPE, ANNOTATIONTYPE, SYMBOLSIZE, SYMBOLTHICKNESS, AXISASPECTRATIOS, AXISASPECTRATIOMODE, \
+    ALIASENABLED, ALIASSHADE, ALIASLABELSENABLED, CONTOURTHICKNESS, \
+    PEAKLABELSENABLED, MULTIPLETLABELSENABLED, MULTIPLETTYPE, MULTIPLETANNOTATIONTYPE, PEAKSYMBOLSENABLED, PEAKARROWSENABLED, MULTIPLETSYMBOLSENABLED, MULTIPLETARROWSENABLED, ARROWTYPES, ARROWSIZE, ARROWMINIMUM
+from ccpn.ui.gui.lib.GuiSpectrumView import _spectrumViewHasChanged
 from ccpn.util.Constants import AXISUNITS
 from ccpn.util.Logging import getLogger
 from ccpn.util import Colour
@@ -198,6 +201,14 @@ class GuiSpectrumDisplay(CcpnModule):
     _SPECTRUMGROUPS = 'groupList'
     _STRIPARRANGEMENT = 'stripArrangement'
     _ZPLANENAVIGATIONMODE = 'zPlaneNavigationMode'
+    _RESTORESETTINGS = '_restoreSettings'
+    _WIDGETSSTATE = 'widgets'
+    _PROPERTIESSTATE = 'properties'
+    _GRIDVISIBLE = 'gridVisible'
+    _CROSSHAIRVISIBLE = 'crosshairVisible'
+    _SIDEBANDSVISIBLE = 'sideBandsVisible'
+    _SHOWSPECTRAONPHASING = 'showSpectraOnPhasing'
+    _SPECTRUMBORDERSVISIBLE = '_spectrumBordersVisible'
 
     def __init__(self, mainWindow, useScrollArea=False):
         """
@@ -286,79 +297,18 @@ class GuiSpectrumDisplay(CcpnModule):
         # get the settings from preferences
         _general = self.application.preferences.general
 
+        xAxisUnits = yAxisUnits = 0
         # create settings widget
         if self.is1D:
-            # Can't do for now; Axes do not yet exist
-            # xAxisUnits = AXISUNITS.index(self.axes[0].unit)
-            xAxisUnits = yAxisUnits = 0
-
-            self._spectrumDisplaySettings = SpectrumDisplaySettings(parent=self.settingsWidget,
-                                                                    mainWindow=self.mainWindow, spectrumDisplay=self,
-                                                                    grid=(0, 0),
-                                                                    xTexts=AXISUNITS, xAxisUnits=xAxisUnits,
-                                                                    yTexts=[''],
-                                                                    showYAxis=False,
-                                                                    _baseAspectRatioAxisCode=_general._baseAspectRatioAxisCode,
-                                                                    _aspectRatios=_general.aspectRatios,
-                                                                    yAxisUnits=_general.yAxisUnits,
-                                                                    symbolType=_general.symbolType,
-                                                                    annotationType=_general.annotationType,
-                                                                    symbolSize=_general.symbolSizePixel,
-                                                                    symbolThickness=_general.symbolThickness,
-                                                                    arrowType=_general.arrowType,
-                                                                    arrowSize=_general.arrowSize,
-                                                                    arrowMinimum=_general.arrowMinimum,
-                                                                    multipletAnnotationType=_general.multipletAnnotationType,
-                                                                    multipletType=_general.multipletType,
-                                                                    aliasEnabled=_general.aliasEnabled,
-                                                                    aliasShade=_general.aliasShade,
-                                                                    aliasLabelsEnabled=_general.aliasLabelsEnabled,
-                                                                    peakSymbolsEnabled=_general.peakSymbolsEnabled,
-                                                                    peakLabelsEnabled=_general.peakLabelsEnabled,
-                                                                    peakArrowsEnabled=_general.peakArrowsEnabled,
-                                                                    multipletSymbolsEnabled=_general.multipletSymbolsEnabled,
-                                                                    multipletLabelsEnabled=_general.multipletLabelsEnabled,
-                                                                    multipletArrowsEnabled=_general.multipletArrowsEnabled,
-                                                                    stripArrangement=_general.stripArrangement,
-                                                                    _aspectRatioMode=_general.aspectRatioMode,
-                                                                    contourThickness=_general.contourThickness,
-                                                                    zPlaneNavigationMode=_general.zPlaneNavigationMode,
-                                                                    )
+            _yTexts = ['']
+            _yAx = _general.yAxisUnits
+            _showY = False
         else:
-            # Can't do for now; Axes do not yet exist
-            # xAxisUnits = AXISUNITS.index(self.axes[0].unit)
-            # yAxisUnits = AXISUNITS.index(self.axes[1].unit)
-            xAxisUnits = yAxisUnits = 0
-            self._spectrumDisplaySettings = SpectrumDisplaySettings(parent=self.settingsWidget,
-                                                                    mainWindow=self.mainWindow, spectrumDisplay=self,
-                                                                    grid=(0, 0),
-                                                                    xTexts=AXISUNITS, xAxisUnits=xAxisUnits,
-                                                                    yTexts=AXISUNITS, yAxisUnits=yAxisUnits,
-                                                                    _baseAspectRatioAxisCode=_general._baseAspectRatioAxisCode,
-                                                                    _aspectRatios=_general.aspectRatios,
-                                                                    symbolType=_general.symbolType,
-                                                                    annotationType=_general.annotationType,
-                                                                    symbolSize=_general.symbolSizePixel,
-                                                                    symbolThickness=_general.symbolThickness,
-                                                                    arrowType=_general.arrowType,
-                                                                    arrowSize=_general.arrowSize,
-                                                                    arrowMinimum=_general.arrowMinimum,
-                                                                    multipletAnnotationType=_general.multipletAnnotationType,
-                                                                    multipletType=_general.multipletType,
-                                                                    aliasEnabled=_general.aliasEnabled,
-                                                                    aliasShade=_general.aliasShade,
-                                                                    aliasLabelsEnabled=_general.aliasLabelsEnabled,
-                                                                    peakSymbolsEnabled=_general.peakSymbolsEnabled,
-                                                                    peakLabelsEnabled=_general.peakLabelsEnabled,
-                                                                    peakArrowsEnabled=_general.peakArrowsEnabled,
-                                                                    multipletSymbolsEnabled=_general.multipletSymbolsEnabled,
-                                                                    multipletLabelsEnabled=_general.multipletLabelsEnabled,
-                                                                    multipletArrowsEnabled=_general.multipletArrowsEnabled,
-                                                                    stripArrangement=_general.stripArrangement,
-                                                                    _aspectRatioMode=_general.aspectRatioMode,
-                                                                    contourThickness=_general.contourThickness,
-                                                                    zPlaneNavigationMode=_general.zPlaneNavigationMode,
-                                                                    )
+            _yTexts = AXISUNITS
+            _yAx = yAxisUnits
+            _showY = True
+        self._setDisplaySettings(_general, _showY, _yAx, _yTexts, xAxisUnits)
+
         self._spectrumDisplaySettings.settingsChanged.connect(self._settingsChanged)
         self.settingsWidget.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         # respond to values changed in the containing spectrumDisplay settings widget
@@ -484,6 +434,41 @@ class GuiSpectrumDisplay(CcpnModule):
                                          margins=(2, 2, 2, 2), spacing=(0, 0))
         self.phasingFrame.setVisible(False)
 
+    def _setDisplaySettings(self, _general, _showY, _yAx, _yTexts, xAxisUnits):
+        """Set the default spectrum display settings.
+        """
+        self._spectrumDisplaySettings = SpectrumDisplaySettings(parent=self.settingsWidget,
+                                                                mainWindow=self.mainWindow, spectrumDisplay=self,
+                                                                grid=(0, 0),
+                                                                xTexts=AXISUNITS, xAxisUnits=xAxisUnits,
+                                                                yTexts=_yTexts, yAxisUnits=_yAx,
+                                                                showYAxis=_showY,
+                                                                _baseAspectRatioAxisCode=_general._baseAspectRatioAxisCode,
+                                                                _aspectRatios=_general.aspectRatios,
+                                                                symbolType=_general.symbolType,
+                                                                annotationType=_general.annotationType,
+                                                                symbolSize=_general.symbolSizePixel,
+                                                                symbolThickness=_general.symbolThickness,
+                                                                arrowType=_general.arrowType,
+                                                                arrowSize=_general.arrowSize,
+                                                                arrowMinimum=_general.arrowMinimum,
+                                                                multipletAnnotationType=_general.multipletAnnotationType,
+                                                                multipletType=_general.multipletType,
+                                                                aliasEnabled=_general.aliasEnabled,
+                                                                aliasShade=_general.aliasShade,
+                                                                aliasLabelsEnabled=_general.aliasLabelsEnabled,
+                                                                peakSymbolsEnabled=_general.peakSymbolsEnabled,
+                                                                peakLabelsEnabled=_general.peakLabelsEnabled,
+                                                                peakArrowsEnabled=_general.peakArrowsEnabled,
+                                                                multipletSymbolsEnabled=_general.multipletSymbolsEnabled,
+                                                                multipletLabelsEnabled=_general.multipletLabelsEnabled,
+                                                                multipletArrowsEnabled=_general.multipletArrowsEnabled,
+                                                                stripArrangement=_general.stripArrangement,
+                                                                _aspectRatioMode=_general.aspectRatioMode,
+                                                                contourThickness=_general.contourThickness,
+                                                                zPlaneNavigationMode=_general.zPlaneNavigationMode,
+                                                                )
+
     def _populateWidgets(self):
         """Update the state of spectrumDisplay from the project layout OR from preferences if not found
         """
@@ -551,12 +536,121 @@ class GuiSpectrumDisplay(CcpnModule):
         if self.mainWindow._spectrumModuleLayouts:
             return self.mainWindow.moduleArea.restoreModuleState(self.mainWindow._spectrumModuleLayouts, self, discard=discard)
 
-    def restoreWidgetsState(self, **widgetsState):
-        super(GuiSpectrumDisplay, self).restoreWidgetsState(**widgetsState)
-        getLogger().debug(f'spectrumDisplay {self} - restoreWidgetsState')
+    def _updateStripsFromSettings(self):
 
-        # need to set the values from the restored state
-        self._spectrumDisplaySettings._updateLockedSettings(always=True)
+        from copy import deepcopy
+
+        # copy values from preferences
+        numStrips = len(self.strips)
+
+        settings = self._getSettingsDict()
+
+        self._setFloatingAxes(xUnits=settings[AXISXUNITS],
+                              yUnits=settings[AXISYUNITS],
+                              aspectRatioMode=settings[AXISASPECTRATIOMODE],
+                              aspectRatios=settings[AXISASPECTRATIOS])
+
+        for strip in self.strips:
+            # get the values from the settings (check in case the number of states has changed)
+            strip.symbolLabelling = min(settings[ANNOTATIONTYPE], self.MAXPEAKLABELTYPES - 1)
+            strip.symbolType = min(settings[SYMBOLTYPE], self.MAXPEAKSYMBOLTYPES - 1)
+            strip.symbolSize = settings[SYMBOLSIZE]
+            strip.symbolThickness = settings[SYMBOLTHICKNESS]
+            strip.multipletLabelling = min(settings[MULTIPLETANNOTATIONTYPE], self.MAXMULTIPLETLABELTYPES - 1)
+            strip.multipletType = min(settings[MULTIPLETTYPE], self.MAXMULTIPLETSYMBOLTYPES - 1)
+
+            strip.contourThickness = settings[CONTOURTHICKNESS]
+            strip.aliasEnabled = settings[ALIASENABLED]
+            strip.aliasShade = settings[ALIASSHADE]
+            strip.aliasLabelsEnabled = settings[ALIASLABELSENABLED]
+
+            strip.peakSymbolsEnabled = settings[PEAKSYMBOLSENABLED]
+            strip.peakLabelsEnabled = settings[PEAKLABELSENABLED]
+            strip.peakArrowsEnabled = settings[PEAKARROWSENABLED]
+            strip.multipletSymbolsEnabled = settings[MULTIPLETSYMBOLSENABLED]
+            strip.multipletLabelsEnabled = settings[MULTIPLETLABELSENABLED]
+            strip.multipletArrowsEnabled = settings[MULTIPLETARROWSENABLED]
+
+            strip.arrowType = min(settings[ARROWTYPES], self.MAXARROWTYPES - 1)
+            strip.arrowSize = settings[ARROWSIZE]
+            strip.arrowMinimum = settings[ARROWMINIMUM]
+
+            strip._CcpnGLWidget._xUnits = settings[AXISXUNITS]
+            strip._CcpnGLWidget._yUnits = settings[AXISYUNITS]
+            strip._CcpnGLWidget._aspectRatioMode = settings[AXISASPECTRATIOMODE]
+            strip._CcpnGLWidget._aspectRatios = deepcopy(settings[AXISASPECTRATIOS])
+
+            if numStrips < 2:
+                strip.setAxesVisible(True, True)
+
+            else:
+                if self.stripArrangement == 'Y':
+                    if self.lastAxisOnly:
+                        strip.setAxesVisible(False, True)
+                    else:
+                        strip.setAxesVisible(True, True)
+                elif self.stripArrangement == 'X':
+                    if self.lastAxisOnly:
+                        strip.setAxesVisible(True, False)
+                    else:
+                        strip.setAxesVisible(True, True)
+                else:
+                    strip.setAxesVisible(True, True)
+
+    def _getPropertiesState(self):
+        """Get a dict of the required properties.
+        """
+        pDict = {}
+        if self.strips and (strp := self.strips[0]):
+            # NOTE:ED - not the best way, but can improve later
+            pDict[self._GRIDVISIBLE] = strp.gridVisible
+            pDict[self._CROSSHAIRVISIBLE] = strp.crosshairVisible
+            pDict[self._SIDEBANDSVISIBLE] = strp.sideBandsVisible
+            pDict[self._SHOWSPECTRAONPHASING] = strp.showSpectraOnPhasing
+            pDict[self._SPECTRUMBORDERSVISIBLE] = strp.spectrumBordersVisible
+
+        return pDict
+
+    def _setPropertiesState(self, **widgetsState):
+        """Get a dict of the required properties.
+        """
+        for strp in self.strips:
+            if (value := widgetsState.get(self._GRIDVISIBLE)) is not None:
+                strp.gridVisible = value
+            if (value := widgetsState.get(self._CROSSHAIRVISIBLE)) is not None:
+                strp.crosshairVisible = value
+            if (value := widgetsState.get(self._SIDEBANDSVISIBLE)) is not None:
+                strp.sideBandsVisible = value
+            if (value := widgetsState.get(self._SHOWSPECTRAONPHASING)) is not None:
+                strp.showSpectraOnPhasing = value
+            if (value := widgetsState.get(self._SPECTRUMBORDERSVISIBLE)) is not None:
+                strp.spectrumBordersVisible = value
+
+    def restoreWidgetsState(self, **widgetsState):
+        """Restore the state of the gui-settings and additional properties accessed through menus.
+        """
+        # block the GL-signals from updating the display as not required until first paint
+        GLSignals = GLNotifier(parent=None)
+        with GLSignals.blocking():
+            super().restoreWidgetsState(**widgetsState)
+
+            # set the non-widget properties
+            self._setPropertiesState(**widgetsState)
+
+            # need to set the values from the restored state
+            self._spectrumDisplaySettings._updateLockedSettings(always=True)
+
+            # ensure that the settings-widget and the properties are synced
+            self._updateStripsFromSettings()
+
+    @CcpnModule.widgetsState.getter
+    def widgetsState(self):
+        """Add extra parameters to the state-dict for values handled by the menus.
+        """
+        state = super().widgetsState
+
+        state |= self._getPropertiesState()
+        return state
 
     def renameModule(self, name):
 
@@ -614,12 +708,6 @@ class GuiSpectrumDisplay(CcpnModule):
                                                          SpectrumDisplay.className,
                                                          self._spectrumDisplayChanged,
                                                          onceOnly=True)
-
-        # self._currentPeakNotifier = self.setNotifier(self.current,
-        #                           [Notifier.CURRENT],
-        #                           targetName=Peak._currentAttributeName,
-        #                           callback=self._onCurrentPeak,
-        #                           onceOnly=True)
 
     def setRightOverlayArea(self, value):
         """Set the overlay state for the right axis.
@@ -747,13 +835,6 @@ class GuiSpectrumDisplay(CcpnModule):
         elif trigger == Notifier.CHANGE:
             if spectrumView in self.spectrumViews:
                 _spectrumViewHasChanged({Notifier.OBJECT: spectrumView})
-
-    # def _onCurrentPeak(self, data,):
-    #     """Set current spectra on selected peaks. """
-    #     spectra = set()
-    #     for peak in self.current.peaks:
-    #         spectra.add(peak.spectrum)
-    #     self.current.spectra = tuple(spectra)
 
     def decreaseSpectrumScale(self):
         """
@@ -3066,20 +3147,6 @@ class GuiSpectrumDisplay(CcpnModule):
                 result.spectrumDisplays = [self]
 
                 return result
-
-        # with undoBlockWithoutSideBar():
-        #     marks = [
-        #         strip.newMark(
-        #                 colour=colour,
-        #                 positions=positions,
-        #                 axisCodes=axisCodes,
-        #                 style=style,
-        #                 units=units,
-        #                 labels=labels,
-        #                 )
-        #         for strip in self.strips
-        #         ]
-        #     return tuple(filter(None, marks))
 
 #=========================================================================================
 

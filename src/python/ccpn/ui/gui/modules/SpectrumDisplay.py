@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-01 19:39:58 +0100 (Thu, June 01, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-07-28 16:36:55 +0100 (Fri, July 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,11 +30,6 @@ from ccpn.core.Project import Project
 
 from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay as _CoreClassSpectrumDisplay
 from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, \
-    SYMBOLTYPE, ANNOTATIONTYPE, SYMBOLSIZE, SYMBOLTHICKNESS, AXISASPECTRATIOS, AXISASPECTRATIOMODE, \
-    ALIASENABLED, ALIASSHADE, ALIASLABELSENABLED, CONTOURTHICKNESS, \
-    PEAKLABELSENABLED, MULTIPLETLABELSENABLED, MULTIPLETTYPE, MULTIPLETANNOTATIONTYPE, PEAKSYMBOLSENABLED, PEAKARROWSENABLED, MULTIPLETSYMBOLSENABLED, MULTIPLETARROWSENABLED, ARROWTYPES, ARROWSIZE, ARROWMINIMUM
-
 from ccpn.util.Logging import getLogger
 
 
@@ -53,72 +48,6 @@ class SpectrumDisplay(_CoreClassSpectrumDisplay):
             return SpectrumDisplay1d(project, apiObj)
         else:
             return SpectrumDisplayNd(project, apiObj)
-
-    def _postRestore(self):
-        """Handle post-initialising children after all children have been restored
-        """
-        # copy values from preferences
-        numStrips = len(self.strips)
-        settings = self._getSettingsDict()
-
-        for strip in self.strips:
-            prefs = strip._preferences
-
-            # get the values from the preferences
-            strip.gridVisible = prefs.showGrid
-            strip.crosshairVisible = prefs.showCrosshair
-            strip.sideBandsVisible = prefs.showSideBands
-
-            strip.showSpectraOnPhasing = prefs.showSpectraOnPhasing
-            strip._spectrumBordersVisible = prefs.showSpectrumBorder
-
-            # get the values from the settings (check in case the number of states has changed)
-            strip.symbolLabelling = min(settings[ANNOTATIONTYPE], self.MAXPEAKLABELTYPES - 1)
-            strip.symbolType = min(settings[SYMBOLTYPE], self.MAXPEAKSYMBOLTYPES - 1)
-            strip.symbolSize = settings[SYMBOLSIZE]
-            strip.symbolThickness = settings[SYMBOLTHICKNESS]
-            strip.multipletLabelling = min(settings[MULTIPLETANNOTATIONTYPE], self.MAXMULTIPLETLABELTYPES - 1)
-            strip.multipletType = min(settings[MULTIPLETTYPE], self.MAXMULTIPLETSYMBOLTYPES - 1)
-
-            strip.contourThickness = settings[CONTOURTHICKNESS]
-            strip.aliasEnabled = settings[ALIASENABLED]
-            strip.aliasShade = settings[ALIASSHADE]
-            strip.aliasLabelsEnabled = settings[ALIASLABELSENABLED]
-
-            strip.peakSymbolsEnabled = settings[PEAKSYMBOLSENABLED]
-            strip.peakLabelsEnabled = settings[PEAKLABELSENABLED]
-            strip.peakArrowsEnabled = settings[PEAKARROWSENABLED]
-            strip.multipletSymbolsEnabled = settings[MULTIPLETSYMBOLSENABLED]
-            strip.multipletLabelsEnabled = settings[MULTIPLETLABELSENABLED]
-            strip.multipletArrowsEnabled = settings[MULTIPLETARROWSENABLED]
-
-            strip.arrowType = min(settings[ARROWTYPES], self.MAXARROWTYPES - 1)
-            strip.arrowSize = settings[ARROWSIZE]
-            strip.arrowMinimum = settings[ARROWMINIMUM]
-
-            strip.spectrumDisplay._setFloatingAxes(xUnits=settings[AXISXUNITS],
-                                                   yUnits=settings[AXISYUNITS],
-                                                   aspectRatioMode=settings[AXISASPECTRATIOMODE],
-                                                   aspectRatios=settings[AXISASPECTRATIOS])
-
-            if numStrips < 2:
-                strip.setAxesVisible(True, True)
-
-            else:
-                if self.stripArrangement == 'Y':
-                    if self.lastAxisOnly:
-                        strip.setAxesVisible(False, True)
-                    else:
-                        strip.setAxesVisible(True, True)
-                elif self.stripArrangement == 'X':
-                    if self.lastAxisOnly:
-                        strip.setAxesVisible(True, False)
-                    else:
-                        strip.setAxesVisible(True, True)
-                else:
-                    strip.setAxesVisible(True, True)
-
-        super()._postRestore()
 
 
 class SpectrumDisplay1d(SpectrumDisplay, GuiSpectrumDisplay):
@@ -167,16 +96,6 @@ class SpectrumDisplay1d(SpectrumDisplay, GuiSpectrumDisplay):
         self.application = project.application
         self.mainWindow = self.application.ui.mainWindow
         GuiSpectrumDisplay.__init__(self, mainWindow=self.mainWindow, useScrollArea=True)
-
-    # def setVisibleAxes(self):
-    #     # Not implemented for 1D
-    #     pass
-
-    # def _highlightAxes(self, strip, state):
-    #     """Highlight the last row axis if strip
-    #     """
-    #     # Not implemented for 1D
-    #     pass
 
 
 class SpectrumDisplayNd(SpectrumDisplay, GuiSpectrumDisplay):

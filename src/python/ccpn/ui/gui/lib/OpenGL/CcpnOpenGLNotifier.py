@@ -7,18 +7,19 @@ E.g.  Mouse co-ordinates
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-11 12:14:55 +0100 (Thu, June 11, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2023-07-28 16:36:55 +0100 (Fri, July 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,7 +31,9 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import pyqtSignal
+from contextlib import contextmanager
 from ccpn.util.decorators import singleton
+from ccpn.util.Logging import getLogger
 
 
 @singleton
@@ -100,16 +103,53 @@ class GLNotifier(QtWidgets.QWidget):
     glAxisUnitsChanged = pyqtSignal(dict)
     glSymbolsChanged = pyqtSignal(dict)
     glKeyEvent = pyqtSignal(dict)
+    _blocked = False
 
     def __init__(self, parent=None, strip=None):
-        super(GLNotifier, self).__init__()
+        super().__init__()
         self._parent = parent
         self._strip = strip
 
         # set a global flag for the mouse in any strip
         self._mouseInGLWidget = False
 
+    #=========================================================================================
+    # Properties
+    #=========================================================================================
+
+    @property
+    def blocked(self):
+        return self._blocked
+
+    @blocked.setter
+    def blocked(self, value):
+        self._blocked = value
+
+    @contextmanager
+    def blocking(self):
+        """block all emitters.
+        """
+        _currentBlocking = self.blocked
+        self.blocked = True
+        try:
+            # transfer control to the calling function
+            yield
+
+        except Exception as es:
+            getLogger().warning(f'Error while blocking in GLNotifier {es}')
+
+        finally:
+            # reset blocking
+            self.blocked = _currentBlocking
+
+    #=========================================================================================
+    # Signal control
+    #=========================================================================================
+
     def emitPaintEvent(self, source=None):
+        if self._blocked:
+            return
+
         if source:
             self.glEvent.emit({GLNotifier.GLSOURCE  : source,
                                GLNotifier.GLTARGETS : [],
@@ -118,6 +158,9 @@ class GLNotifier(QtWidgets.QWidget):
             self.glEvent.emit({})
 
     def emitEvent(self, source=None, strip=None, display=None, targets=[], triggers=[], values={}):
+        if self._blocked:
+            return
+
         aDict = {GLNotifier.GLSOURCE         : source,
                  GLNotifier.GLSTRIP          : strip,
                  GLNotifier.GLSPECTRUMDISPLAY: display,
@@ -128,6 +171,9 @@ class GLNotifier(QtWidgets.QWidget):
         self.glEvent.emit(aDict)
 
     def emitEventToSpectrumDisplay(self, source=None, strip=None, display=None, targets=[], triggers=[], values={}):
+        if self._blocked:
+            return
+
         aDict = {GLNotifier.GLSOURCE         : source,
                  GLNotifier.GLSTRIP          : strip,
                  GLNotifier.GLSPECTRUMDISPLAY: display,
@@ -140,6 +186,9 @@ class GLNotifier(QtWidgets.QWidget):
     def _emitAllAxesChanged(self, source=None, strip=None, spectrumDisplay=None,
                             axisB=None, axisT=None, axisL=None, axisR=None,
                             row=None, column=None, stripAxes=None, zoomAll=False):
+        if self._blocked:
+            return
+
         aDict = {GLNotifier.GLSOURCE         : source,
                  GLNotifier.GLSTRIP          : strip,
                  GLNotifier.GLSPECTRUMDISPLAY: spectrumDisplay or (strip.spectrumDisplay if strip else None),
@@ -158,6 +207,9 @@ class GLNotifier(QtWidgets.QWidget):
                           axisB=None, axisT=None, axisL=None, axisR=None,
                           row=None, column=None, stripAxes=None, zoomAll=False,
                           aspectRatios=None):
+        if self._blocked:
+            return
+
         aDict = {GLNotifier.GLSOURCE         : source,
                  GLNotifier.GLSTRIP          : strip,
                  GLNotifier.GLSPECTRUMDISPLAY: spectrumDisplay or (strip.spectrumDisplay if strip else None),
@@ -177,6 +229,9 @@ class GLNotifier(QtWidgets.QWidget):
                           axisB=None, axisT=None, axisL=None, axisR=None,
                           row=None, column=None, stripAxes=None, zoomAll=False,
                           aspectRatios=None):
+        if self._blocked:
+            return
+
         aDict = {GLNotifier.GLSOURCE         : source,
                  GLNotifier.GLSTRIP          : strip,
                  GLNotifier.GLSPECTRUMDISPLAY: spectrumDisplay or (strip.spectrumDisplay if strip else None),
@@ -193,6 +248,9 @@ class GLNotifier(QtWidgets.QWidget):
         self.glYAxisChanged.emit(aDict)
 
     def _emitMouseMoved(self, source=None, coords=None, mouseMovedDict=None, mainWindow=None):
+        if self._blocked:
+            return
+
         aDict = {GLNotifier.GLSOURCE        : source,
                  GLNotifier.GLMOUSECOORDS   : coords,
                  GLNotifier.GLMOUSEMOVEDDICT: mouseMovedDict,
@@ -206,6 +264,9 @@ class GLNotifier(QtWidgets.QWidget):
         #     # specDisplay.stripFrame.update()
 
     def _emitAxisLockChanged(self, source=None, strip=None, lockValues=None):
+        if self._blocked:
+            return
+
         aDict = {GLNotifier.GLSOURCE         : source,
                  GLNotifier.GLSTRIP          : strip,
                  GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay if strip else None,
@@ -214,6 +275,9 @@ class GLNotifier(QtWidgets.QWidget):
         self.glAxisLockChanged.emit(aDict)
 
     def _emitAxisUnitsChanged(self, source=None, strip=None, dataDict={}):
+        if self._blocked:
+            return
+
         aDict = {GLNotifier.GLSOURCE         : source,
                  GLNotifier.GLSTRIP          : strip,
                  GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay if strip else None,
@@ -222,6 +286,9 @@ class GLNotifier(QtWidgets.QWidget):
         self.glAxisUnitsChanged.emit(aDict)
 
     def _emitSymbolsChanged(self, source=None, strip=None, symbolDict={}):
+        if self._blocked:
+            return
+
         aDict = {GLNotifier.GLSOURCE         : source,
                  GLNotifier.GLSTRIP          : strip,
                  GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay if strip else None,
@@ -230,6 +297,9 @@ class GLNotifier(QtWidgets.QWidget):
         self.glSymbolsChanged.emit(aDict)
 
     def _emitSymbolsChanged(self, source=None, strip=None, symbolDict={}):
+        if self._blocked:
+            return
+
         aDict = {GLNotifier.GLSOURCE         : source,
                  GLNotifier.GLSTRIP          : strip,
                  GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay if strip else None,
@@ -238,6 +308,9 @@ class GLNotifier(QtWidgets.QWidget):
         self.glSymbolsChanged.emit(aDict)
 
     def _emitKeyEvent(self, strip=None, key=None, modifier=None):
+        if self._blocked:
+            return
+
         aDict = {GLNotifier.GLSTRIP   : strip,
                  GLNotifier.GLKEY     : key,
                  GLNotifier.GLMODIFIER: modifier

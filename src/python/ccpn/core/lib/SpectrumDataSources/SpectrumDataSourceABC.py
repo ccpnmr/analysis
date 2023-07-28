@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-26 14:36:38 +0100 (Wed, July 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-28 17:24:46 +0100 (Fri, July 28, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -2249,6 +2249,22 @@ class SpectrumDataSourceABC(CcpNmrJson):
             self.fp.close()
             self.fp = None
             self.mode = None
+
+    def openHdf5Buffer(self, bufferIsTemporary:bool=True, bufferPath=None):
+        """Open and activate the SpectrumDataSource buffering.
+        Coveniance: closes any open buffer, sets new buffering and initialises
+
+        :param bufferIsTemporary flag (True, False): define buffer as temporary (i.e. disgarded on close)
+        :param bufferPath: optional path to store the buffer file
+        :return the Hdf5SpectrumDataSource buffer instance
+        """
+        if self.isBuffered:
+            self.closeHdf5Buffer()
+        self.setBuffering(isBuffered=True, bufferIsTemporary=bufferIsTemporary,
+                          bufferPath=bufferPath
+                          )
+        _bufferDs = self.initialiseHdf5Buffer()
+        return _bufferDs
 
     def closeHdf5Buffer(self):
         """Close the hdf5Buffer"""

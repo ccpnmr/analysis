@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-26 14:19:53 +0100 (Wed, July 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-28 17:24:46 +0100 (Fri, July 28, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -746,7 +746,6 @@ class NmrPipeInputStreamDataSource(NmrPipeSpectrumDataSource):
     def __init__(self, spectrum=None, temporaryBuffer=True, bufferPath=None):
         """Initialise; optionally set path or extract from spectrum
 
-        :param path: optional input path
         :param spectrum: associate instance with spectrum and import spectrum's parameters
         :param temporaryBuffer: used temporary file to buffer the data
         :param bufferPath: (optionally) use path to generate buffer file (implies temporaryBuffer=False)
@@ -755,8 +754,7 @@ class NmrPipeInputStreamDataSource(NmrPipeSpectrumDataSource):
         # sys.stdin.reconfigure(encoding='ISO-8859-1')
         self.fp = sys.stdin.buffer
         self.readParameters()
-        self.setBuffering(True, bufferIsTemporary=temporaryBuffer, bufferPath=bufferPath)
-        self.initialiseHdf5Buffer()
+        self.openHdf5Buffer(bufferIsTemporary=temporaryBuffer, bufferPath=bufferPath)
         self.fillHdf5Buffer()
 
     def _readHeader(self):

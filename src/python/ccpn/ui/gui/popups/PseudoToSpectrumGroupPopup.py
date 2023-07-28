@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:42 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-07-28 17:24:46 +0100 (Fri, July 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,44 +32,33 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 # from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
-from ccpn.ui.gui.widgets.MessageDialog import progressManager
+from ccpn.ui.gui.widgets.MessageDialog import progressManager, showWarning
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
+from ccpn.ui.gui.popups._CcpnDialogWithOutputPathPopupABC import CcpnDialogWithOutputPathPopupABC
 from ccpn.ui.gui.popups.ExportDialog import ExportDialogABC
 # from ccpn.util.Path import aPath
 
 
-class PseudoToSpectrumGroupPopup(CcpnDialogMainWidget):
+class PseudoToSpectrumGroupPopup(CcpnDialogWithOutputPathPopupABC):  # ExportDialogABC):
     FIXEDHEIGHT = True
+    FIXEDWIDTH = False
 
     def __init__(self, parent=None, mainWindow=None, title='Pseudo-nD Spectrum to SpectrumGroup', **kwds):
 
         # for CcpnDialogMainWidget:
-        super().__init__(parent=parent, setLayout=True, windowTitle=title,
-                         **kwds)
-
-        # self.errorFlag = False  # moved to base-class
-
-        if mainWindow:
-            self.mainWindow = mainWindow
-            self.project = self.mainWindow.project
-            self.application = self.mainWindow.application
-        else:
-            self.mainWindow = self.project = self.application = None
-
-        self.validSpectra = None
-        self.spectrum = None
-        self.pseudoDimension = None
+        super().__init__(parent=parent, mainWindow=mainWindow, title=title, **kwds)
 
         if self.project:
             # Only select 3D's for now
             self.validSpectra = [sp for sp in self.project.spectra if sp._getPseudoDimension() != 0]
 
-            if not self.validSpectra:
-                from ccpn.ui.gui.widgets.MessageDialog import showWarning
+        if not self.validSpectra:  # not None or len==0
+            showWarning('No valid spectra', 'No 3D spectra in current dataset')
+            self.errorFlag = True
+            return
 
-                showWarning('No valid spectra', 'No pseudo nD spectra in current dataset')
-                self.errorFlag = True
-                return
+        self.pseudoDimension = None
+        self.spectrum = self.validSpectra[0]
 
         # for CcpnDialogMainWidget:
         self.initialise(self.mainWidget)
@@ -79,81 +68,61 @@ class PseudoToSpectrumGroupPopup(CcpnDialogMainWidget):
         # initialise the buttons and dialog size
         self._postInit()
 
-    def actionButtons(self):
-        self.setOkButton(callback=self.makeSpectrumGroup, text='Make SpectrumGroup', tipText='Extract spectra along pseudo dimensions and close dialog')
-        self.setCloseButton(callback=self._rejectDialog, text='Close', tipText='Close')
-        self.setDefaultButton(ExportDialogABC.CLOSEBUTTON)
-
-    def _rejectDialog(self):
-        # NOTE:ED - not required for exportDialogABC
-        self.reject()
-
     def initialise(self, userFrame):
         """Create the widgets for the userFrame
         """
         # spectrum selection
-        row = 0
-        Label(userFrame, 'Spectrum', grid=(row, 0), hAlign='r')
-        self.spectrumPulldown = PulldownList(userFrame, grid=(row, 1), callback=self._setSpectrum, gridSpan=(1, 2))
+        rowIndex = 0
+        rowIndex += self.initialiseSpectrumWidgets(userFrame, rowIndex=rowIndex)
+        # Hide in inPath info as it is not really needed
+        self.inPathLabel.setVisible(False)
+        self.inPathWidget.setVisible(False)
 
-        # pseudo dimensions
-        row += 1
-        Label(userFrame, 'Pseudo dimension', grid=(row, 0), hAlign='r')
-        self.pseudoDimensionWidget = LineEdit(userFrame, grid=(row, 1), gridSpan=(1, 2), editable=False)
+        userFrame.addSpacer(10, 20, grid=(rowIndex, 1), expandX=True, expandY=True)
+        rowIndex += 1
 
-        # real dimensions
-        row += 1
-        Label(userFrame, 'Other dimensions', grid=(row, 0), hAlign='r')
-        self.realDimensionsWidget = LineEdit(userFrame, grid=(row, 1), gridSpan=(1, 2), editable=False)
+        rowIndex += self.initialiseOutputPathWidgets(userFrame, rowIndex=rowIndex)
 
-        # Contour colours checkbox
-        row += 1
-        Label(userFrame, 'Preserve contour settings', grid=(row, 0), hAlign='r')
-        self.contourCheckBox = CheckBox(userFrame, checked=True, grid=(row, 1))
+        # Contour  checkbox
+        Label(userFrame, 'Contours', grid=(rowIndex, 0), **self._alignLabel)
+        self.contourCheckBox = CheckBox(userFrame, text='keep settings', checked=True, grid=(rowIndex, 1))
+        rowIndex += 1
 
-        row += 1
-        userFrame.addSpacer(5, 5, grid=(row, 1), expandX=True, expandY=True)
+        userFrame.addSpacer(5, 5, grid=(rowIndex, 1), expandX=True, expandY=True)
 
-        self.spectrum = None
-        if self.project and self.validSpectra:
-                self.spectrumPulldown.setData([s.pid for s in self.validSpectra])
-                self.spectrum = self.validSpectra[0]
+    def actionButtons(self):
+        self.setOkButton(callback=self.makeSpectrumGroup, text='Make SpectrumGroup', tipText='Extract spectra along pseudo dimensions and close dialog')
+        self.setCloseButton(callback=self.reject, text='Close', tipText='Close')
+        self.setDefaultButton(ExportDialogABC.CLOSEBUTTON)
 
-    def populate(self, userFrame):
-        """populate the widgets
+    def getInfoString(self) -> str:
+        """Return a string for the info widget field
+        Should be subclassed
         """
-        with self.blockWidgetSignals(userFrame):
-            if self.spectrum:
-                # update all widgets to correct settings
-                self.spectrumPulldown.set(self.spectrum.pid)
-                self._setSpectrum(self.spectrum.pid)
+        return self.spectrum.dataSource._fileInfoString2
 
-    def _setSpectrum(self, spectrumPid):
+    def getName(self) -> str:
+        """Return a string for the name of the file
+        Can be subclassed
+        """
+        return f'{self.spectrum.name}_%03d'
+
+    def _setSpectrumCallback(self, spectrumPid):
         """Callback for selecting spectrum
         """
         self.spectrum = self.project.getByPid(spectrumPid)
         self.pseudoDimension = self.spectrum._getPseudoDimension()
-        pseudoAxisCode = self.spectrum.axisCodes[self.pseudoDimension-1]
-
-        # pseudoDimension output widget
-        self.pseudoDimensionWidget.set(f'({self.pseudoDimension},{pseudoAxisCode})')
-
-        # real dimensions output widget
-        ac = list(self.spectrum.axisCodes)
-        ac.remove(pseudoAxisCode)
-        dims = self.spectrum.getByAxisCodes('dimensions', ac)
-        _tmp = [f'({dim},{ac})' for dim,ac in zip(dims,ac)]  # a list of '(dim,ac)' strings
-        self.realDimensionsWidget.set(', '.join(_tmp))
+        super()._setSpectrumCallback(spectrumPid)
 
     def makeSpectrumGroup(self):
-        """Make projection from the specified spectrum.
+        """Make SpectrumGroup from the specified spectrum.
 
         Spectrum is saved alongside the original spectrum, if this folder is not available then
         the spectrum is saved in the project/data/spectra folder.
         """
         if self.spectrum is not None:
             with progressManager(self, f'Making SpectrumGroup from "{self.spectrum.name}"'):
-                spectrumGroup = self.spectrum.pseudoToSpectrumGroup()
+                spectrumGroup = self.spectrum.pseudoToSpectrumGroup(pathTemplate=self.dataStore.path.asString())
 
                 if not self.contourCheckBox.isChecked():
                     # values are copied by default

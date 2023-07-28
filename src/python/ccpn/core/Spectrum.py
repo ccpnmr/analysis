@@ -54,7 +54,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-27 16:24:12 +0100 (Thu, July 27, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-28 17:24:46 +0100 (Fri, July 28, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -2288,35 +2288,34 @@ class Spectrum(AbstractWrapperObject):
 
     def setBuffering(self, isBuffered: bool, path: str = None):
         """Set Hdf5-buffering.
-        Buffering status is retained (upon exit/save) if path is None; i.e. autobuffering, until
-        buffering is disabled by isBuffered=False
+        Buffering status is retained (upon exit/save) if path is None; i.e. auto-buffering,
+        until buffering is disabled by isBuffered=False
 
         :param isBuffered: set the buffering status
         :param path: store hdf5buffer file at path; implies non-temporary buffer
         """
-        if self.dataSource is None:
+        if not self.hasValidPath():
             getLogger().warning('No proper (filePath, dataFormat) set for %s' % self)
             return
 
         if isBuffered:
-            bufferIsTemporary = (path is None)
-            if path is not None:
+            if (bufferIsTemporary := (path is None)):
+                self._dataStore.useBuffer = True
+                self.dataSource.setBuffering(isBuffered=True, bufferIsTemporary=True)
+
+            else:
+                # An explicit path was specified
                 _bufferStore = DataStore.newFromPath(path=path,
                                                      autoVersioning=True,
                                                      dataFormat=Hdf5SpectrumDataSource.dataFormat,
                                                      withSuffix=Hdf5SpectrumDataSource.suffixes[0]
                                                      )
                 path = _bufferStore.aPath()
-                self._dataStore.useBuffer = False  # Explicit path, no autobuffering
-            else:
-                self._dataStore.useBuffer = True
-
-            self.dataSource.setBuffering(isBuffered=True, bufferIsTemporary=bufferIsTemporary, bufferPath=path)
+                self._dataStore.useBuffer = False  # Explicit path, no auto-buffering
+                self.dataSource.setBuffering(isBuffered=True, bufferIsTemporary=bufferIsTemporary, bufferPath=path)
 
         else:
             # Turn off buffering
-            if self.dataSource.isBuffered:
-                self.dataSource.closeHdf5Buffer()
             self.dataSource.setBuffering(isBuffered=False)
             self._dataStore.useBuffer = False
 
@@ -2716,21 +2715,22 @@ class Spectrum(AbstractWrapperObject):
         _ds = self.dataSource
         if _ds.isNmrPipeSpectrum:
             # Special case because of NmrPipe buffering
-            _ds.closeHdf5Buffer()
-            _ds.setBuffering(True, bufferIsTemporary=False, bufferPath=newDataStore.aPath())
-            _newDs = _ds.initialiseHdf5Buffer()
+            # _ds.closeHdf5Buffer()
+            # _ds.setBuffering(True, bufferIsTemporary=False, bufferPath=newDataStore.aPath())
+            # newDataSource = _ds.initialiseHdf5Buffer()
+            newDataSource = _ds.openHdf5Buffer(bufferIsTemporary=False, bufferPath=newDataStore.aPath())
             _ds.fillHdf5Buffer()
 
         else:
             # Duplicate the data in an Hdf5 file
-            _newDs = _ds.duplicateDataToHdf5(newDataStore.aPath())
+            newDataSource = _ds.duplicateDataToHdf5(newDataStore.aPath())
 
         # Activate the new binary file
-        self._openFileHelper(newDataStore=newDataStore, newDataSource=_newDs)
+        self._openFileHelper(newDataStore=newDataStore, newDataSource=newDataSource)
 
-        txt = f'Converted "{_ds.path}" to {_newDs.dataFormat} as "{_newDs.path}"'
+        txt = f'Converted "{_ds.path}" to {newDataSource.dataFormat} as "{newDataSource.path}"'
         getLogger().info(txt)
-        return _newDs
+        return newDataSource
 
     def _axisDictToSliceTuples(self, axisDict) -> list:
         """Convert dict of (key,value) = (axisCode, (startPpm, stopPpm)) pairs
@@ -2947,7 +2947,7 @@ class Spectrum(AbstractWrapperObject):
                     raise RuntimeError(f'Cannot extract to path:\n\n{es}\n\n{es2}') from es2
 
         else:
-            path = aPath(path)
+            path = Path(path)
 
         dataStore = DataStore.newFromPath(path=path.withoutSuffix(),
                                           autoVersioning=True, withSuffix=suffix,
@@ -3061,7 +3061,7 @@ class Spectrum(AbstractWrapperObject):
         # we first establish what the "Pseudo" dimension is; there should only one:
         _tCodes = [(dim, ac) for dimIndex, ac, dim in self.dimensionTriples if self.dimensionTypes[dimIndex] == PSEUDO_AXIS_TYPE]
         if len(_tCodes) != 1:
-            getLogger().debug(f'There should be exactly one pseudo/time dimension; instead they are: {_tCodes}')
+            getLogger().debug(f'{len(_tCodes)} Pseudo dimensions: {_tCodes}')
             return 0
         pseudoDimension = _tCodes[0][0]
         return pseudoDimension
@@ -3079,15 +3079,23 @@ class Spectrum(AbstractWrapperObject):
         from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumDataSource
         from ccpn.core.SpectrumGroup import SpectrumGroup
 
-        if spectrumGroup is not None and not isinstance(spectrumGroup, SpectrumGroup):
-            raise ValueError(f'Invalid spectrumGroup ({spectrumGroup}, type {type(spectrumGroup)}); expected SpectrumGroup instance')
-
-        if pathTemplate is None:
-            pathTemplate = str(self.path.parent / f'{self.name}_%003d')
-
         if not self.hasValidPath():
             getLogger().error(f'Spectrum {self} does not have a valid path to (binary) data defined')
             return None
+
+        if pathTemplate is None:
+            pathTemplate = str(self.path.parent / f'{self.name}_%003d')
+        try:
+            pathTemplate.index('%')
+        except ValueError:
+            raise ValueError(f'Invalid template "{pathTemplate}"; lacking format specifier')
+        try:
+            pathTemplate % 1
+        except TypeError:
+            raise ValueError(f'Invalid template "{pathTemplate}"; invalid format specifier')
+
+        if spectrumGroup is not None and not isinstance(spectrumGroup, SpectrumGroup):
+            raise ValueError(f'Invalid spectrumGroup ({spectrumGroup}, type {type(spectrumGroup)}); expected SpectrumGroup instance')
 
         # we get the "Pseudo" dimension; there should only one:
         if (pseudoDimension := self._getPseudoDimension()) == 0:
@@ -3127,9 +3135,11 @@ class Spectrum(AbstractWrapperObject):
 
                     # info(f'==> extracting {freqAxisCodes} plane at {position}' )
 
-                    path = aPath(pathTemplate % (timePoint,))
-                    sp = self._extractToFile(axisCodes=freqAxisCodes, position=position, path=path,
-                                             dataFormat=Hdf5SpectrumDataSource.dataFormat, tag='fromPseudo')
+                    path = pathTemplate % (timePoint,)
+                    sp = self._extractToFile(axisCodes=freqAxisCodes, position=position,
+                                             path=path,
+                                             dataFormat=Hdf5SpectrumDataSource.dataFormat,
+                                             tag='fromPseudo')
                     spectrumGroup.addSpectrum(sp, seriesValue)
 
                     seriesValue += seriesIncrement
@@ -4080,9 +4090,11 @@ def _extractRegionToFile(spectrum, dimensions, position, dataStore, name=None) -
     if klass is None:
         raise ValueError('Invalid dataStore.dataFormat %r' % dataStore.dataFormat)
 
-    # Create a dataSource object with apath and dimensionCount
-    # Use spectrum and spectrum.dataSource to initialise the dataSource values
+    # Create a dataSource object with a path derived from the dataStore
+    # and dimensionCount from the spectrum (mapping and omitting dimensions
+    # will be done later)
     dataSource = klass(path=dataStore.aPath(), dimensionCount=spectrum.dimensionCount)
+    # Use spectrum and spectrum.dataSource to initialise the dataSource values
     # first get all parameters from the spectrum dataSource object
     dataSource.copyParametersFrom(spectrum.dataSource)
     # update them with current spectrum settings

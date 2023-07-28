@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-28 09:44:29 +0100 (Fri, July 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-28 17:24:46 +0100 (Fri, July 28, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -66,7 +66,7 @@ class GuiBase(object):
     """
 
     def __init__(self):
-        # GWV these attributes should move to the GUI class (in 3.2x ??)
+        # GWV these attributes should move to the GUI class (in 3.x.0 ??)
         # For now, initialised by calls in Gui.__init_ as we need programme
         # arguments and preferences to have been initialised
         self._styleSheet = None
@@ -277,7 +277,7 @@ class GuiBase(object):
             (),
             ("Pseudo Spectrum to SpectrumGroup...", self.showPseudoSpectrumPopup),
             ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj')]),
-            ("Convert Spectrum to Hdf5...", self.showConvertSpectrumPopup, []),
+            ("Convert...", self.showConvertSpectrumPopup, []),
             (),
             ("Print to File...", self.showPrintSpectrumDisplayPopup, [('shortcut', '⌃p')]),
             ]

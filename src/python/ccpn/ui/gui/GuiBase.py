@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-27 17:56:37 +0100 (Thu, July 27, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-28 09:44:29 +0100 (Fri, July 28, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -542,16 +542,19 @@ class GuiBase(object):
             MessageDialog.showWarning(title, 'No spectra in project', parent=self.mainWindow)
             return
 
-        _spectra = [sp for sp in self.project.spectra if sp.hasValidPath() and not sp._isInside]
+        _spectra = [sp for sp in self.project.spectra if sp.hasValidPath() and not sp._isInside and not sp.isEmptySpectrum()]
         if len(_spectra) == 0:
-            MessageDialog.showWarning(title, 'No spectra to be copied', parent=self.mainWindow)
+            MessageDialog.showWarning(title, 'There are no spectra to be copied', parent=self.mainWindow)
             return
 
         _size = '%.1f' % (sum([sp.dataSource.expectedFileSizeInBytes for sp in _spectra]) / (1024*1024))
-        ok = MessageDialog.showOkCancel(title, f'{len(_spectra)} spectra ({_size} MB) to be copied', parent=self.mainWindow)
+        if len(_spectra) == 1:
+            _msg = f'1 spectrum ({_size} MB) to be copied'
+        else:
+            _msg = f'{len(_spectra)} spectra ({_size} MB) to be copied'
+        ok = MessageDialog.showOkCancel(title, _msg, parent=self.mainWindow)
         if ok:
             self.project.copySpectraToProject()
-
 
     #-----------------------------------------------------------------------------------------
     # Help -->

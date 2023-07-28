@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-27 17:56:37 +0100 (Thu, July 27, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-28 09:44:29 +0100 (Fri, July 28, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -381,7 +381,7 @@ class Project(AbstractWrapperObject):
         result = {}
         for _subdir in subDirectories:
             _path = self.projectPath / _subdir
-            _size = sum(file.stat().st_size for file in _path.rglob('*') if not file.is_symlink())
+            _size = _path.getSize()
             if sizeInMB:
                 _size /= _MB
             result[_subdir] = _size

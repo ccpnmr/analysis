@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-27 16:24:12 +0100 (Thu, July 27, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-28 09:44:29 +0100 (Fri, July 28, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -340,6 +340,18 @@ class Path(_Path_):
         """:return True if self starts with prefix"""
         path = self.asString()
         return path.startswith(prefix)
+
+    def getSize(self) -> int:
+        """the size of self in bytes if a file or all files in case of a directory.
+        Does not include sym-links.
+        :return: The size of self in bytes
+        """
+        if self.is_dir():
+            _size = sum(file.stat().st_size for file in self.rglob('*') if not file.is_symlink())
+        else:
+            _size = self.stat().st_size
+
+        return _size
 
     def __len__(self):
         return len(self.asString())

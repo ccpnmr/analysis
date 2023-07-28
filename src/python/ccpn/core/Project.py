@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-28 09:44:29 +0100 (Fri, July 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-28 17:48:08 +0100 (Fri, July 28, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -722,9 +722,6 @@ class Project(AbstractWrapperObject):
     # Save, SaveAs, Close
     #-----------------------------------------------------------------------------------------
 
-    def _close(self):
-        self.close()
-
     def _closeApiObjects(self):
         """Close and purge all api-objects
         WARNING: project is irrecoverable after this
@@ -793,6 +790,9 @@ class Project(AbstractWrapperObject):
         getLogger().debug('done purge')
 
     def close(self):
+        raise RuntimeError('Please use application.closeProject()')
+
+    def _close(self):
         """Clean up the wrapper project previous to deleting or replacing
         Cleanup includes wrapped data graphics objects (e.g. Window, Strip, ...)
         """
@@ -818,7 +818,6 @@ class Project(AbstractWrapperObject):
         # clear the lookup dicts
         self._data2Obj.clear()
         self._pid2Obj.clear()
-        # self.__dict__.clear()  # GWV: dangerous; why done?
 
     def saveAs(self, newPath: str, overwrite: bool = False, copySubDirectories: bool = True):
         """Save project to newPath (optionally overwrite);

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-28 18:26:16 +0100 (Fri, July 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-29 14:13:39 +0100 (Sat, July 29, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -45,7 +45,7 @@ from ccpn.core.ViolationTable import ViolationTable
 from ccpn.core.Collection import Collection
 from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 from ccpn.ui.gui.widgets.Menu import Menu
-from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning
+from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning, showOkCancel
 from ccpn.ui.gui.widgets.Font import setWidgetFont
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.popups.ChainPopup import ChainPopup
@@ -480,7 +480,7 @@ class OpenItemABC():
         spectra = [obj for obj in objs if isinstance(obj, Spectrum)]
 
         if spectra:
-            contextMenu.addAction('Reload', partial(Spectrum.reload, objs[0]))
+            contextMenu.addAction('Reload', partial(self._reloadSpectra, objs))
 
         if spectra:
             contextMenu.addAction('Make SpectrumGroup From Selected',
@@ -538,6 +538,24 @@ class OpenItemABC():
         from ccpn.util.Common import copyToClipboard
 
         copyToClipboard(objs)
+
+    @staticmethod
+    def _reloadSpectra(objs:list):
+        """Reload spectra
+        :param objs: reload the specified objs (spectra)
+        """
+        _spectra = [sp for sp in objs
+                    if isinstance(sp, Spectrum) and sp.hasValidPath() and not sp.isEmptySpectrum()]
+
+        if len(_spectra) == 0:
+            return
+
+        _sp = 'spectrum' if len(_spectra) == 1 else 'spectra'
+        if ok := showOkCancel(f'Reloading {len(_spectra)} {_sp}',
+                              f'\nThis will re-initialise the parameters from the (binary) data!'):
+            with undoBlockWithoutSideBar():
+                for spec in _spectra:
+                    spec.reload()
 
     def _addCollectionMenu(self, menu, objs):
         """Add a quick submenu containing a list of collections

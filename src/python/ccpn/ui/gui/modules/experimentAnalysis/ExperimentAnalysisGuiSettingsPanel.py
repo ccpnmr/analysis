@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-28 19:23:05 +0100 (Wed, June 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-31 15:08:47 +0100 (Mon, July 31, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -739,10 +739,11 @@ class GuiFittingPanel(GuiSettingPanel):
               'callBack': self._commonCallback,
               'tipText': '',
               'type': compoundWidget.PulldownListCompoundWidget,
-              'enabled': False,
+              'enabled': True,
               'kwds': {'labelText': guiNameSpaces.Label_OptimiserMethod,
                        'tipText': guiNameSpaces.TipText_OptimiserMethod,
-                       'texts': ['leastsq', 'differential_evolution', 'ampgo', 'newton'],
+                       'texts': list(sv.MINIMISER_METHODS.keys()),
+                       'tipTexts': list(sv.MINIMISER_METHODS.values()),
                        'fixedWidths': SettingsWidgetFixedWidths}}),
             (guiNameSpaces.WidgetVarName_ErrorMethod,
              {'label': guiNameSpaces.Label_ErrorMethod,
@@ -803,15 +804,15 @@ class GuiFittingPanel(GuiSettingPanel):
         getLogger().info('Setting Fitting changed...')
         fittingSettings = self.getSettingsAsDict()
         selectedFittingModelName = fittingSettings.get(guiNameSpaces.WidgetVarName_FittingModel, None)
-
+        minimiserMethod = fittingSettings.get(guiNameSpaces.WidgetVarName_OptimiserMethod, 'leastsq')
         ## update the backend
         backend = self.guiModule.backendHandler
         currentFittingModel = backend.currentFittingModel
         modelObj = backend.getFittingModelByName(selectedFittingModelName)
         if modelObj is not None:
             currentFittingModel = modelObj()
+            currentFittingModel.setMinimiserMethod(minimiserMethod)
         backend.currentFittingModel = currentFittingModel
-        # todo Add the optimiser options (method, fitting Error etc)
         # set update detected.
         backend._needsRefitting = True
 

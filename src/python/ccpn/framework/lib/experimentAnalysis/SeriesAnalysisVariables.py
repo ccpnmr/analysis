@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-07 16:50:12 +0100 (Wed, June 07, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-07-31 15:08:47 +0100 (Mon, July 31, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -319,3 +319,28 @@ OMIT_MODE = 'omit'
 RAISE_MODE = 'raise'
 
 
+MINIMISER_METHODS = {
+    'leastsq': 'Levenberg-Marquardt (default)',
+    'least_squares': 'Least-Squares minimization, using Trust Region Reflective method',
+    'emcee': 'Maximum likelihood via Monte-Carlo Markov Chain',
+    'differential_evolution': 'differential evolution',
+    'brute': 'brute force method',
+    'basinhopping': 'basinhopping',
+    'ampgo': 'Adaptive Memory Programming for Global Optimization',
+    'nelder': 'Nelder-Mead',
+    'lbfgsb': 'L-BFGS-B',
+    'powell': 'Powell',
+    'cg': 'Conjugate-Gradient',
+    'newton': 'Newton-CG',
+    'cobyla': 'Cobyla',
+    'bfgs': 'BFGS',
+    'tnc': 'Truncated Newton',
+    'trust-ncg': 'Newton-CG trust-region',
+    'trust-exact': 'nearly exact trust-region',
+    'trust-krylov': 'Newton GLTR trust-region',
+    'trust-constr': 'trust-region for constrained optimization',
+    'dogleg': 'Dog-leg trust-region',
+    'slsqp': 'Sequential Linear Squares Programming',
+    'shgo': 'Simplicial Homology Global Optimization',
+    'dual_annealing': 'Dual Annealing optimization',
+    }

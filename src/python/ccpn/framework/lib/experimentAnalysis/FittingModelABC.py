@@ -1,5 +1,32 @@
 """
-This module defines base classes for Series Analysis
+This module defines base classes for Series Analysis.
+
+The fitting models are based on the Lmfit framework.
+Optimisers:
+    ’leastsq’: Levenberg-Marquardt (default)
+    ’least_squares’: Least-Squares minimization, using Trust Region Reflective method
+    ’differential_evolution’: differential evolution
+    ’brute’: brute force method
+    ’basinhopping’: basinhopping
+    ’ampgo’: Adaptive Memory Programming for Global Optimization
+    ’nelder’: Nelder-Mead
+    ’lbfgsb’: L-BFGS-B
+    ’powell’: Powell
+    ’cg’: Conjugate-Gradient
+    ’newton’: Newton-CG
+    ’cobyla’: Cobyla
+    ’bfgs’: BFGS
+    ’tnc’: Truncated Newton
+    ’trust-ncg’: Newton-CG trust-region
+    ’trust-exact’: nearly exact trust-region
+    ’trust-krylov’: Newton GLTR trust-region
+    ’trust-constr’: trust-region for constrained optimization
+    ’dogleg’: Dog-leg trust-region
+    ’slsqp’: Sequential Linear Squares Programming
+    ’emcee’: Maximum likelihood via Monte-Carlo Markov Chain
+    ’shgo’: Simplicial Homology Global Optimization
+    ’dual_annealing’: Dual Annealing optimization
+
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -15,8 +42,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-22 11:52:49 +0100 (Mon, May 22, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-07-31 15:08:47 +0100 (Mon, July 31, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -45,8 +72,10 @@ from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import SeriesFrameBC
 from ccpn.framework.Application import getApplication, getProject
 from ccpn.core.lib.CcpnSorting import stringSortKey
 
-pd.set_option('display.max_columns', None)  # or 1\000
-pd.set_option('display.max_rows', 50)  # or 1000
+# pd.set_option('display.max_columns', None)  # or 1\000
+# pd.set_option('display.max_rows', 50)  # or 1000
+
+
 
 class FittingModelABC(ABC):
 
@@ -69,6 +98,7 @@ class FittingModelABC(ABC):
         self.project = getProject()
         self._applyScaleMinMax = False
         self._applyStandardScaler = False
+        self._minimiserMethod = 'leastsq'
         self._modelArgumentNames = []
         self._rawDataHeaders = [] # strings of columnHeaders
         self.xSeriesStepHeader = sv.SERIES_STEP_X
@@ -125,7 +155,6 @@ class FittingModelABC(ABC):
         """
         pass
 
-
     def _getFirstData(self, inputDataTables):
         """ _INTERNAL. Used to get the first available
         data from a dataTable for models that require only one dataFrame as input"""
@@ -150,6 +179,8 @@ class FittingModelABC(ABC):
     def scaleMinMax(self, data):
         return lf._scaleMinMaxData(data)
 
+    def setMinimiserMethod(self, method:str):
+        self._minimiserMethod = method
 
     def __str__(self):
         return f'<{self.__class__.__name__}: {self.ModelName}>'
@@ -192,8 +223,6 @@ class MinimiserModel(Model):
     The lower base class for the fitting minimisation routines.
     Based on the package LMFIT.
     Called for each row in the input SeriesDataTable.
-
-
     Parameters
     ----------
     independent_vars : :obj:`list` of :obj:`str`, optional
@@ -236,8 +265,8 @@ class MinimiserModel(Model):
     """
     FITTING_FUNC  = None
     MODELNAME     = 'Minimiser'
-    method        = 'leastsq'
-    label         = ''
+    method                = 'leastsq'
+    label                    = ''
     defaultParams = {} # N.B Very important. see docs above.
 
 
@@ -381,17 +410,19 @@ class MinimiserModel(Model):
 
             if fit_kws is None:
                 fit_kws = {}
-
-            result = MinimiserResult(self, params, method=method, iter_cb=iter_cb,
+            print(f'Fitting with: {self.method}')
+            result = MinimiserResult(self, params, method=self.method, iter_cb=iter_cb,
                                  scale_covar=scale_covar, fcn_kws=kwargs,
                                  nan_policy=self.nan_policy, calc_covar=calc_covar,
                                  max_nfev=max_nfev, **fit_kws)
-            result.fit(data=data, weights=weights)
+            result.fit(data=data, weights=weights, method=self.method)
             result.components = self.components
-            self.method = method
             if result.redchi is not None:
                 result.r2 = lf.r2_func(redchi=result.redchi, y=data)
         return result
+
+    def setMethod(self, method):
+        self.method = method
 
     def guess(self, data, x, **kws):
         pass

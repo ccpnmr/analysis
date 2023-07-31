@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-05 12:35:47 +0100 (Mon, June 05, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-07-31 15:08:47 +0100 (Mon, July 31, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -172,6 +172,7 @@ class _RelaxationBaseFittingModel(FittingModelABC):
             minimiser = self.Minimiser()
             try:
                 params = minimiser.guess(Ys, Xs)
+                minimiser.setMethod(self._minimiserMethod)
                 result = minimiser.fit(Ys, params, x=Xs)
             except:
                 getLogger().warning(f'Fitting Failed for collectionId: {collectionId} data. Make sure you are using the right model for your data.')

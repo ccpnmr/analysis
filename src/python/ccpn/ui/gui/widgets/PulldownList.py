@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-28 19:23:05 +0100 (Wed, June 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-31 15:08:13 +0100 (Mon, July 31, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -393,8 +393,14 @@ class PulldownList(QtWidgets.QComboBox, Base):
                 if item := self.model().item(self.getItemIndex(text)):
                     item.setToolTip(toolTip)
 
-    def _callback(self, index):
-
+    def _callback(self, *args):
+        """
+        index is an argument of the args. Don't use it. There is a bug when a separator is inserted between items, so that index is out of range to the objects/texts.
+        Use currentIndex instead.
+        :param args:
+        :return:
+        """
+        index = self.currentIndex()
         if index < 0:
             return
         self.index = index
@@ -403,7 +409,6 @@ class PulldownList(QtWidgets.QComboBox, Base):
             self.object = self.objects[index]
         else:
             self.object = None
-
         if self.callback:
             if self.objects:
                 self.callback(self.objects[index])

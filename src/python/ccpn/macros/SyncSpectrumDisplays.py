@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-07-26 12:15:24 +0100 (Wed, July 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-31 15:08:12 +0100 (Mon, July 31, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -29,9 +29,12 @@ __date__ = "$Date: 2023-07-20 12:45:48 +0100 (Thu, July 20, 2023) $"
 #=========================================================================================
 __title__ = "Synchronise axes among different spectrumDisplays"
 
+import time
 # Start of code
 #=========================================================================================
 
+
+from itertools import combinations
 import uuid
 import pandas as pd
 from functools import partial
@@ -47,9 +50,36 @@ from ccpn.framework.Application import getApplication, getProject, getMainWindow
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Column import Column
 from ccpn.ui.gui.widgets.table.CustomPandasTable import CustomDataFrameTable
+import ccpn.ui.gui.widgets.CompoundWidgets as cw
 from ccpn.ui.gui.widgets.table._TableDelegates import _SmallPulldown as PulldownDelegate
 from ccpn.ui.gui.widgets.table._TableDelegates import _SimplePulldownTableDelegate as PulldownDelegateModel
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+from ccpn.ui.gui.widgets.DropBase import DropBase
+from ccpn.ui.gui.lib.Strip import Strip
+from ccpn.ui.gui.widgets.Menu import Menu
+
+
+# This block is for the macro while is under development - Avoid the singleton to reload the python module and have unexpected behaviours.
+ccpnApplication = getApplication()
+mainWindow = ccpnApplication.mainWindow
+currentModules = [m for m in mainWindow.moduleArea.ccpnModules if m.className == 'SyncSpectrumDisplays']
+if len(currentModules) > 0:
+    showWarning('Already Opened.', 'Cannot open this module twice.')
+    raise RuntimeError('already opened')
+
+
+# ALPHA warning
+
+msg = 'This module is an alpha version and there might be unexpected behaviours. These could require closing the compromised spectrumDisplay(s) or restarting the project.'
+CANCEL = 'Cancel'
+SAVE_AND_CONTINUE = 'Save project and continue'
+CONTINUE = 'Continue without saving'
+# answer = showMulti('Warning', msg, [SAVE_AND_CONTINUE, CONTINUE, CANCEL])
+# if answer == CANCEL:
+#     raise RuntimeError('Operation cancelled by the users')
+# if answer == SAVE_AND_CONTINUE:
+#     application.saveProject()
 
 ROWUID = 'UID'
 SOURCESPECTRUMDISPLAYPID = 'sourceSpectrumDisplayPid'
@@ -61,6 +91,7 @@ _CONNECTIONS = 'connections'
 
 ## GUI placeholder/variables
 _DCTE = 'Double Click to edit'
+
 
 @singleton
 class SpectrumDisplaySyncHandler(object):
@@ -89,6 +120,29 @@ class SpectrumDisplaySyncHandler(object):
                             }
     Key: dataframe index.   inner dict: contains  the (GL) signals and  their active connections.
     This is required so that we can disconnect only what is required. It is not included in the main data, has is not serialisable and only needed at run time.
+
+    Two options: Transitive or direct synchronisation:
+
+    ** Transitive **
+         - For a system composed of  A <-> B and B <-> C,
+         - A is directly synced to B and B is directly synced to C.
+         - C is indirectly synced to A.
+          Any firing display will resul in all displays A,B, and C being synchronised.
+         - If A is the firing display: A sets B, and B sets C
+         - if B is the firing display: B sets A, and B sets C
+         - if C is the firing display: C sets B, and B sets A
+
+         - for a system composed of  A <-> B and B <-> C,  D<->E, E<->A
+          Any firing display will resul in all displays A,B,C,D and E being synchronised.
+
+    ** Direct **
+          - for a system composed of  A <-> B and B <-> C,  D<->E, E<->A (as last example)
+          - If A is the firing display: A sets B and E
+          - If B is the firing display: B sets C and A
+          - If C is the firing display: C sets B only
+          - If D is the firing display: D sets E only
+          - If E is the firing display: E sets D and A
+
     """
 
     columns = [
@@ -101,8 +155,9 @@ class SpectrumDisplaySyncHandler(object):
 
     def __init__(self):
         self._data = pd.DataFrame(columns=self.columns)
+        self._isTransitive = True
         self.project = getProject()
-        self._signalsDict = {} ##
+        self._signalsDict = {}  ##
 
     @property
     def data(self):
@@ -113,6 +168,17 @@ class SpectrumDisplaySyncHandler(object):
     def isEmpty(self):
         """Check if the data is empty and does not contain any syncs """
         return self.data.empty
+
+    @property
+    def isTransitive(self):
+        """Return True if the synchronisation mode is transitive.
+         If transitive,  if A is synced to B, and B is sync to C, then A is sync to C."""
+        return self._isTransitive
+
+    def setTransitive(self, value):
+        if not isinstance(value, bool):
+            raise ValueError(f'{self} setTransitive. Value must be of type boolean. Given {value}.')
+        self._isTransitive = value
 
     def syncSpectrumDisplays(self, **kwargs):
         """
@@ -128,43 +194,37 @@ class SpectrumDisplaySyncHandler(object):
             SpectrumDisplaySyncHandler().syncSpectrumDisplays(**myKwargs)
         :return: A Pandas Series object representing the new added row to the data.
         """
-        newRow = self._addSync(**kwargs)
+        newRow = self._addSyncToData(**kwargs)
         return newRow
-
-    def _unsyncByIndex(self, rowIndex):
-        """ Remove the row from the data and any signals. """
-        ## disconnect signals first
-        mask = self._data[ROWUID].eq(rowIndex)
-        dataToDisconnect = self._data[mask]
-        self._removeGUIConnectionSignals(dataToDisconnect)
-        ## Remove defs from data
-        self._data = self._data[~mask]
-        return self._data
 
     def unsyncSpectrumDisplay(self, spectrumDisplayPid):
         """ Remove the spectrumDisplay from any synchronisation (whether is a target or the source). """
         ## disconnect signals first
-        mask = self.data[SOURCESPECTRUMDISPLAYPID].eq(spectrumDisplayPid) | \
-               self.data[TARGETSPECTRUMDISPLAYPID].eq(spectrumDisplayPid)
-        data = self.data[mask]
+
+        data = self._getBySpectrumDisplay(spectrumDisplayPid)
         for i in list(data.index):
             self._unsyncByIndex(i)
         return self._data
 
-    def fetchEmptyEntry(self, placeHolderValue:str=None):
+    def fetchEmptyEntry(self, placeHolderValue: str = None):
         """ Get or create a row to use as placeholder to start a new sync"""
         df = self.data
         mask = df[SOURCESPECTRUMDISPLAYPID].eq(placeHolderValue) & \
                df[TARGETSPECTRUMDISPLAYPID].eq(placeHolderValue)
-        if len(mask)>0:
+        if len(mask) > 0:
             filteredData = df[mask]
-            if len(filteredData)>0:
+            if len(filteredData) > 0:
                 index = list(filteredData.index)[-1]
                 return self._data.loc[index]
         index = str(uuid.uuid4()).split('-')[-1]
         self._data.loc[index, self.columns] = [placeHolderValue] * len(self.columns)
         self._data.loc[index, ROWUID] = index
         return self._data.loc[index]
+
+    def _removeEmptyEntry(self, placeHolderValue: str = None):
+        row = self.fetchEmptyEntry(placeHolderValue)
+        if row is not None:
+            self._data.drop(index = row.name, inplace=True, errors='ignore')
 
     def cloneSync(self, index):
         row = self._data.loc[index]
@@ -176,85 +236,217 @@ class SpectrumDisplaySyncHandler(object):
         self._data.loc[newIndex, ROWUID] = newIndex
         return self._data.loc[newIndex]
 
+    def _syncAxesOnSpectrumDisplays(self, spectrumDisplays, axisIndex):
+        """
+        :param spectrumDisplays:  list of core objects
+        :param axisIndex: index of the axis object to sync. 0 for the x Axis, 1 for the y Axis
+        :return: None
+        """
+        if axisIndex > 1:
+            raise ValueError('AxisIndex can only be 0 or 1')
+
+        if len(spectrumDisplays)>1:
+            sourceSpectrumDisplay = spectrumDisplays[0]
+            xAxis = sourceSpectrumDisplay.strips[0].axisOrder[axisIndex] #should always be 1 strip and 2 axis
+            for spectrumDisplay in spectrumDisplays[1:]:
+                xTargetAxis = spectrumDisplay.strips[0].axisOrder[axisIndex]
+                index = str(uuid.uuid4()).split('-')[-1]
+                self._data.loc[index, [SOURCESPECTRUMDISPLAYPID, SOURCEAXISCODE]] = [sourceSpectrumDisplay.pid, xAxis]
+                self._data.loc[index, [TARGETSPECTRUMDISPLAYPID, TARGETAXISCODE]] = [spectrumDisplay.pid, xTargetAxis]
+                self._data.loc[index, ROWUID] = index
+        else:
+            getLogger().warning('Cannot sync spectrumDisplay, not enough displays.')
+
+
     def clearAll(self):
         """Remove all sync from the table.
         """
         self._removeGUIConnectionSignals()
         self._data.drop(index=self._data.index, inplace=True, errors='ignore')
+        self._signalsDict.clear()
         return self._data
 
     ## Private helper methods  ##
 
-    def _addSync(self,  **kwargs):
-        """Fill the dataFrame with the Column/Value definitions """
-        dd = {k: kwargs[k] for k in self.columns if k in kwargs} ## make sure we have only needed columns, discard the rest
-        index = str(uuid.uuid4()).split('-')[-1] ## random unique identifier
+    def _unsyncByIndex(self, rowIndex):
+        """ Remove the row from the data and any signals. """
+        ## disconnect signals first
+        mask = self._data[ROWUID].eq(rowIndex)
+        dataToDisconnect = self._data[mask]
+        self._removeGUIConnectionSignals(dataToDisconnect)
+        ## Remove defs from data
+        self._data = self._data[~mask]
+        return self._data
+
+    def _addSyncToData(self, **kwargs):
+        """Fill the dataFrame with the Column/Value definitions.
+        This does NOT add the GUI signal. """
+        dd = {k: kwargs[k] for k in self.columns if k in kwargs}  ## make sure we have only needed columns, discard the rest
+        index = str(uuid.uuid4()).split('-')[-1]  ## random unique identifier
         self._data.loc[index, list(dd.keys())] = list(dd.values())
         return self._data.loc[index]
 
     def _inverseFilterByHeadValue(self, df, header, value):
-      return df[~df[header].eq(value)]
+        return df[~df[header].eq(value)]
 
-    def _syncAxes(self, callbackDict, *, signal, rowIndex:str=None, exactAxisCodeMatch:bool=False, ):
-        """Callback from GLWidget signals. """
+    def _getBySpectrumDisplay(self, spectrumDisplayPid, axisCode=None):
+        """ Get a  filtered dataframe where the spectrumDisplayPid is present or as a source or as a target. Optional : axisCode to filter even further."""
+        df = self.data
+        mask = df[SOURCESPECTRUMDISPLAYPID].eq(spectrumDisplayPid) | \
+               df[TARGETSPECTRUMDISPLAYPID].eq(spectrumDisplayPid)
+        if axisCode is not None:
+            mask = (df[SOURCESPECTRUMDISPLAYPID].eq(spectrumDisplayPid) & df[SOURCEAXISCODE].eq(axisCode)) | \
+                   (df[TARGETSPECTRUMDISPLAYPID].eq(spectrumDisplayPid) & df[TARGETAXISCODE].eq(axisCode))
+        return df[mask].copy()
+
+    def _disconnectSpuriousSignal(self, rowIndex, signal):
+        signalDisconnected = False
         if rowIndex not in self.data.index:
+            signalDict = self._signalsDict.get(rowIndex)
+            # not sure yet why we have left-over signals
             try:
                 signal.disconnect()
             except Exception as err:
                 getLogger().warning(f'Cannot disconnect {signal} for row {rowIndex}. Error: {err}')
-            self._addGUIConnectionSignals(exactAxisCodeMatch=exactAxisCodeMatch) #this is needed to ensure it hasn't disconnected too much!
-            return
+            signalDisconnected = True
+        return signalDisconnected
 
-        firstSourceStrip = callbackDict.get('strip')
-        firingSpectrumDisplay = callbackDict.get('spectrumDisplay')
+    def _getAxisByAxisCode(self, strip, axisCode):
+        for axis in strip.axes:
+            if axis.code == axisCode:
+                return axis
 
-        # do the sync only for the row
-        row = self.data.loc[rowIndex]
-        sourceDisplayPid = row[SOURCESPECTRUMDISPLAYPID]
-        targetDisplayPid = row[TARGETSPECTRUMDISPLAYPID]
-        sourceAxisCode = row[SOURCEAXISCODE]
-        targetAxisCode = row[TARGETAXISCODE]
-        sharingAxis = None
-        sourceDisplay = self.project.getByPid(sourceDisplayPid)
-        targetDisplay = self.project.getByPid(targetDisplayPid)
-        if sourceDisplay is None:
-            return
-        if targetDisplay is None:
-            return
-        if firstSourceStrip is None:
-            firstSourceStrip = sourceDisplay.strips[0]
-        if firingSpectrumDisplay is not None and firingSpectrumDisplay not in [sourceDisplay, targetDisplay]:
-            return
+    def _getAxisIndexByAxisCode(self, strip, axisCode):
+        for i, axis in enumerate(strip.orderedAxes):
+            if axis.code == axisCode:
+                return i
 
-        otherStrips = [s for s in sourceDisplay.strips if s != firstSourceStrip]
-        otherStrips += [s for s in targetDisplay.strips if s != firstSourceStrip]
+    def _getTransitiveGroups(self, data):
+        """ Given a list of tuples representing pairwise relationships, 
+        find transitivity and re-assemble them in common groups
+         e.g.:
+         data = [['GD:A', 'GD:B'],
+                    ['GD:C', 'GD:N'],
+                    ['GD:P', 'GD:X'],
+                    ['GD:B', 'GD:C']]
+        result:
+          >>  [ ('GD:A', 'GD:B', 'GD:C', 'GD:N'),
+              ('GD:P', 'GD:X') ]
+         """
+        sets = [set(x) for x in data]
+        done = False
+        while not done:
+            done = True
+            for left, right in combinations(sets, 2):
+                if left & right:                         # check if they intersect
+                    left |= right                        # move items from rig ht to left
+                    right ^= right                     # empty right
+                    done = False
+            sets = list(filter(None, sets))     # remove empty sets
+        return [sorted(list(x)) for x in sets]
 
-        for axis in firstSourceStrip.axes:
-            if exactAxisCodeMatch:
-                if axis.code == sourceAxisCode:
-                    sharingAxis = axis
-                    break
-            else:
-                if len(sourceAxisCode)>0:
-                    if axis.code.startswith(sourceAxisCode[0]):
-                        sharingAxis = axis
-                        break
-        if sharingAxis is None:
+    def _getDirectConnections(self, data, firingSpectrumDisplayPid):
+        ## get all direct coupled displayes to the firingSpectrumDisplay
+        targetingByAxisCodes = defaultdict(list)
+        for i, row in data.iterrows():
+            aDisplayPid = row[SOURCESPECTRUMDISPLAYPID]
+            bDisplayPid = row[TARGETSPECTRUMDISPLAYPID]
+            aAxisCode = row[SOURCEAXISCODE]
+            bAxisCode = row[TARGETAXISCODE]
+            if firingSpectrumDisplayPid == aDisplayPid:
+                targetingByAxisCodes[aAxisCode].append((bDisplayPid, bAxisCode))
+            if firingSpectrumDisplayPid == bDisplayPid:
+                targetingByAxisCodes[bAxisCode].append((aDisplayPid, aAxisCode))
+        return targetingByAxisCodes
+
+    def _getTransitiveConnections(self, data, firingSpectrumDisplay):
+        """   """
+        pairs = data[[SOURCESPECTRUMDISPLAYPID, TARGETSPECTRUMDISPLAYPID]].values
+        transitiveGroups = self._getTransitiveGroups(pairs)
+        filteredGroups = [g for g in transitiveGroups if firingSpectrumDisplay in g]
+        return filteredGroups
+
+    def _syncByTransitiveGroups(self, firingStrip):
+        """
+         For a system composed of  A <-> B and B <-> C,
+         - A is directly synced to B and B is directly synced to C.
+         - C is indirectly synced to A.
+          If C is the firingSpectrumDisplay  it will resul in all displays A,B, and C being synchronised.
+         Because C sets B, and B sets A
+        :param data:
+        :param firingSpectrumDisplay:
+        :param axisCodes:
+        :return:
+        """
+        firingSpectrumDisplay = firingStrip.spectrumDisplay
+        firingSpectrumDisplayPid = firingSpectrumDisplay.pid
+
+        firingDisplayAxisCodes = list(firingSpectrumDisplay.axisCodes)
+        for i, axisCode in enumerate(firingDisplayAxisCodes):
+            _dataByAxisCode = self._getBySpectrumDisplay(firingSpectrumDisplayPid, axisCode)
+            if _dataByAxisCode.empty:
+                firingDisplayAxisCodes.pop(i)
+
+        transitiveGroups = self._getTransitiveConnections(self.data, firingSpectrumDisplayPid)
+
+        for group in transitiveGroups:
+            targetDisplays = [dd for dd in group if dd != firingSpectrumDisplayPid]
+            for targetingDisplayPid in targetDisplays:
+                # check the axisCode is in data
+                for i, axisCode in enumerate(firingDisplayAxisCodes):
+                    _dataByAxisCode = self._getBySpectrumDisplay(targetingDisplayPid, axisCode )
+                    if _dataByAxisCode.empty:
+                        continue # the axiscode is not in, so skip it
+                    targetingDisplay = self.project.getByPid(targetingDisplayPid)
+                    if targetingDisplay is None:
+                        continue
+                    allTargetingStrips = [s for s in firingSpectrumDisplay.strips if s != firingStrip]
+                    allTargetingStrips += [s for s in targetingDisplay.strips if s != firingStrip]
+                    firingAxis = self._getAxisByAxisCode(firingStrip, axisCode)
+                    sourceRegion = firingAxis.region
+                    for targetingStrip in allTargetingStrips:
+                        targetingAxisIndex = self._getAxisIndexByAxisCode(targetingStrip, axisCode)
+                        targetingStrip.setAxisRegion(targetingAxisIndex, sourceRegion)
+
+
+    def _syncAxes(self, callbackDict, *, signal, rowIndex: str = None):
+        """Callback from GLWidget signals. """
+        if self._disconnectSpuriousSignal(rowIndex, signal):
+            # self._addGUIConnectionSignals(self.data)
             return
-        sourceRegion = sharingAxis.region
+        firingStrip = callbackDict.get('strip')
+        if firingStrip is None:
+            firingSpectrumDisplay = callbackDict.get('spectrumDisplay')
+            if firingSpectrumDisplay is  None: # but  the source could be the GL axis.
+                return
+            firingStrip = firingSpectrumDisplay.strips[0]
 
-        for otherStrip in otherStrips:
-            dd = {}
-            for en, targetAxis in enumerate(otherStrip.orderedAxes):
-                if exactAxisCodeMatch:
-                    if targetAxis.code == targetAxisCode:
-                        dd[en] = sourceRegion
-                else:
-                    if len(targetAxisCode) > 0:
-                        if targetAxis.code.startswith(targetAxisCode[0]):
-                            dd[en] = sourceRegion
-            for index, region in dd.items(): #should be only 1 really
-                otherStrip.setAxisRegion(index, region)
+
+        if self.isTransitive:
+            self._syncByTransitiveGroups(firingStrip)
+        else:
+            firingSpectrumDisplay = firingStrip.spectrumDisplay
+            firingSpectrumDisplayPid = firingSpectrumDisplay.pid
+            ## filter the data so we have only the displays of interest
+            data = self._getBySpectrumDisplay(firingSpectrumDisplayPid)
+            if data.empty:
+                return
+            ## group the targeting displays by axisCodes
+            targetingByAxisCodes = self._getDirectConnections(data, firingSpectrumDisplayPid)
+            ## Perform the synchronisation by setting the axis region from the firing strip to the targeting strips axis
+            for firingAxisCode, targets in targetingByAxisCodes.items():
+                for targetingDefs in targets:
+                    targetingDisplayPid, targetingAxisCode = targetingDefs
+                    targetingDisplay = self.project.getByPid(targetingDisplayPid)
+                    if targetingDisplay is None:
+                        continue
+                    allTargetingStrips = [s for s in firingSpectrumDisplay.strips if s != firingStrip]
+                    allTargetingStrips += [s for s in targetingDisplay.strips if s != firingStrip]
+                    firingAxis = self._getAxisByAxisCode(firingStrip, firingAxisCode)
+                    sourceRegion = firingAxis.region
+                    for targetingStrip in allTargetingStrips:
+                        targetingAxisIndex = self._getAxisIndexByAxisCode(targetingStrip, targetingAxisCode)
+                        targetingStrip.setAxisRegion(targetingAxisIndex, sourceRegion)
 
     def _getStripsBySpectrumDisplayPid(self, spectrumDisplayPid):
         if spectrumDisplay := self.project.getByPid(spectrumDisplayPid):
@@ -271,7 +463,7 @@ class SpectrumDisplaySyncHandler(object):
             strips += self._getStripsBySpectrumDisplayPid(targetDisplayPid)
         return list(set(strips))
 
-    def _addGUIConnectionSignals(self, data=None, exactAxisCodeMatch=False):
+    def _addGUIConnectionSignals(self, data=None):
         """
         Connect the GL widget to a custom method to syncronise the spectrumDisplays.
         :return:
@@ -289,16 +481,16 @@ class SpectrumDisplaySyncHandler(object):
                 # need to find a better way to define these signals without  exposing  _CcpnGLWidget
                 #  RowIndex is extremely important so to ensure precise firing and avoid duplicates/circles.
                 glWidget = strip.getGLWidget()
-                signals = [ glWidget.GLSignals.glXAxisChanged,
-                                glWidget.GLSignals.glYAxisChanged,
-                                glWidget.GLSignals.glAllAxesChanged ]
+                signals = [glWidget.GLSignals.glXAxisChanged,
+                           glWidget.GLSignals.glYAxisChanged,
+                           glWidget.GLSignals.glAllAxesChanged]
                 for signal in signals:
-                   slot = partial(self._syncAxes, signal=signal, rowIndex=index, exactAxisCodeMatch=exactAxisCodeMatch)
-                   connection = signal.connect(slot)
-                   connections.append(connection)
-                   connectedSignals.append(signal)
-            self._signalsDict[index] = {_SIGNALS : connectedSignals,
-                                                    _CONNECTIONS: connections}
+                    slot = partial(self._syncAxes, signal=signal, rowIndex=index)
+                    connection = signal.connect(slot)
+                    connections.append(connection)
+                    connectedSignals.append(signal)
+            self._signalsDict[index] = {_SIGNALS    : connectedSignals,
+                                        _CONNECTIONS: connections}
 
     def _removeGUIConnectionSignals(self, data=None):
         """
@@ -314,16 +506,18 @@ class SpectrumDisplaySyncHandler(object):
                 signals = signalDict.get(_SIGNALS)
                 connections = signalDict.get(_CONNECTIONS)
                 for signal, connection in zip(signals, connections):
-                    try: # it has to be a try/except because the signal might be already disconnected.
+                    try:  # it has to be a try/except because the signal might be already disconnected.
                         signal.disconnect(connection)
                     except Exception as err:
-                        getLogger().debug(f'Sync Handler. Cannot disconnect {signal}, index: {index}. Signal might have been already disconnected. {err}')
+                        getLogger().warn(f'Sync Handler. Cannot disconnect {signal}, index: {index}. Signal might have been already disconnected. {err}')
 
     def __repr__(self):
         return f'<< SpectrumDisplays Sync Handler >>'
 
+
 class _PulldownDelegate(PulldownDelegate):
     """ A delegate which fires a signal when the text is highlighted. (Note the native textHighlighted pyqtSignal doesn't work on Pull"""
+
     def __init__(self, parent, mainWindow=None, textHighlightedCallback=None, *args, **kwds):
         super().__init__(parent, *args, **kwds)
         self.textHighlightedCallback = textHighlightedCallback
@@ -360,6 +554,7 @@ class _PulldownDelegate(PulldownDelegate):
             self.textHighlightedCallback('')
         return super().hidePopup()
 
+
 class SyncSpectrumDisplaysTable(CustomDataFrameTable):
     """A Gui table to contain the list of  synchronised SpectrumDisplays and axisCodes
     """
@@ -378,66 +573,66 @@ class SyncSpectrumDisplaysTable(CustomDataFrameTable):
         self.columnMap = {
             SOURCESPECTRUMDISPLAYPID: 'Source Display',
             TARGETSPECTRUMDISPLAYPID: 'Target Display',
-            SOURCEAXISCODE: 'Source AxisCode',
-            TARGETAXISCODE: 'Target AxisCode',
+            SOURCEAXISCODE          : 'Source AxisCode',
+            TARGETAXISCODE          : 'Target AxisCode',
             }
         columns = [
-            Column(headerText = self.columnMap[SOURCESPECTRUMDISPLAYPID],
-                        getValue = SOURCESPECTRUMDISPLAYPID,
-                        rawDataHeading = SOURCESPECTRUMDISPLAYPID,
-                        editClass = _PulldownDelegate,
-                        tipText = 'Double click to select the Source SpectrumDisplay from where you want to share an axis.',
-                        editKw = {
-                            'texts': [''],
-                            'clickToShowCallback': partial(self._updateSpectrumDisplayPulldownCallback, SOURCESPECTRUMDISPLAYPID),
-                            'callback': partial(self._tableSelectionChanged, SOURCESPECTRUMDISPLAYPID),
-                            'textHighlightedCallback': self._selectionTextChanged,
-                            'objectName':SOURCESPECTRUMDISPLAYPID,
-                            },
-                        columnWidth=200,
-                        ),
+            Column(headerText=self.columnMap[SOURCESPECTRUMDISPLAYPID],
+                   getValue=SOURCESPECTRUMDISPLAYPID,
+                   rawDataHeading=SOURCESPECTRUMDISPLAYPID,
+                   editClass=_PulldownDelegate,
+                   tipText='Double click to select the Source SpectrumDisplay from where you want to share an axis.',
+                   editKw={
+                       'texts'                  : [''],
+                       'clickToShowCallback'    : partial(self._updateSpectrumDisplayPulldownCallback, SOURCESPECTRUMDISPLAYPID),
+                       'callback'               : partial(self._tableSelectionChanged, SOURCESPECTRUMDISPLAYPID),
+                       'textHighlightedCallback': self._selectionTextChanged,
+                       'objectName'             : SOURCESPECTRUMDISPLAYPID,
+                       },
+                   columnWidth=200,
+                   ),
             Column(headerText=self.columnMap[SOURCEAXISCODE],
-                       getValue=SOURCEAXISCODE,
-                       rawDataHeading=SOURCEAXISCODE,
-                       editClass=_PulldownDelegate,
-                       tipText='Double click to select the Source AxisCode you want to sync',
-                       editKw={
-                           'texts'              : [''],
-                           'clickToShowCallback': partial(self._updateAxisCodeCallback, SOURCESPECTRUMDISPLAYPID, SOURCEAXISCODE),
-                           'callback' : partial(self._tableSelectionChanged, SOURCEAXISCODE),
-                           'objectName': SOURCEAXISCODE,
-                           },
-                       columnWidth=150,
-                       ),
-            Column(headerText = self.columnMap[TARGETSPECTRUMDISPLAYPID],
-                       getValue = TARGETSPECTRUMDISPLAYPID,
-                       rawDataHeading = TARGETSPECTRUMDISPLAYPID,
-                       editClass = _PulldownDelegate,
-                       tipText='Double click to select the Target SpectrumDisplay you want to sync with the source SpectrumDisplay Axis.',
-                       editKw = {
-                            'texts': [''],
-                            'clickToShowCallback':partial(self._updateSpectrumDisplayPulldownCallback, TARGETSPECTRUMDISPLAYPID),
-                            'callback': partial(self._tableSelectionChanged, TARGETSPECTRUMDISPLAYPID),
-                           'textHighlightedCallback': self._selectionTextChanged,
-                            'objectName': TARGETSPECTRUMDISPLAYPID,
-                        },
-                    columnWidth = 200,
-                        ),
-            Column(headerText= self.columnMap[TARGETAXISCODE],
-                   getValue = TARGETAXISCODE,
-                   rawDataHeading = TARGETAXISCODE,
-                   editClass = _PulldownDelegate,
-                   tipText = 'Double click to select the Target AxisCode you want to sync with the source',
-                   editKw = {
-                            'texts': [''],
-                            'clickToShowCallback': partial(self._updateAxisCodeCallback, TARGETSPECTRUMDISPLAYPID, TARGETAXISCODE),
-                            'callback':partial(self._tableSelectionChanged, TARGETAXISCODE),
-                            'objectName': TARGETAXISCODE,
-                            },
-                        columnWidth = 100,
-                        ),
+                   getValue=SOURCEAXISCODE,
+                   rawDataHeading=SOURCEAXISCODE,
+                   editClass=_PulldownDelegate,
+                   tipText='Double click to select the Source AxisCode you want to sync',
+                   editKw={
+                       'texts'              : [''],
+                       'clickToShowCallback': partial(self._updateAxisCodeCallback, SOURCESPECTRUMDISPLAYPID, SOURCEAXISCODE),
+                       'callback'           : partial(self._tableSelectionChanged, SOURCEAXISCODE),
+                       'objectName'         : SOURCEAXISCODE,
+                       },
+                   columnWidth=150,
+                   ),
+            Column(headerText=self.columnMap[TARGETSPECTRUMDISPLAYPID],
+                   getValue=TARGETSPECTRUMDISPLAYPID,
+                   rawDataHeading=TARGETSPECTRUMDISPLAYPID,
+                   editClass=_PulldownDelegate,
+                   tipText='Double click to select the Target SpectrumDisplay you want to sync with the source SpectrumDisplay Axis.',
+                   editKw={
+                       'texts'                  : [''],
+                       'clickToShowCallback'    : partial(self._updateSpectrumDisplayPulldownCallback, TARGETSPECTRUMDISPLAYPID),
+                       'callback'               : partial(self._tableSelectionChanged, TARGETSPECTRUMDISPLAYPID),
+                       'textHighlightedCallback': self._selectionTextChanged,
+                       'objectName'             : TARGETSPECTRUMDISPLAYPID,
+                       },
+                   columnWidth=200,
+                   ),
+            Column(headerText=self.columnMap[TARGETAXISCODE],
+                   getValue=TARGETAXISCODE,
+                   rawDataHeading=TARGETAXISCODE,
+                   editClass=_PulldownDelegate,
+                   tipText='Double click to select the Target AxisCode you want to sync with the source',
+                   editKw={
+                       'texts'              : [''],
+                       'clickToShowCallback': partial(self._updateAxisCodeCallback, TARGETSPECTRUMDISPLAYPID, TARGETAXISCODE),
+                       'callback'           : partial(self._tableSelectionChanged, TARGETAXISCODE),
+                       'objectName'         : TARGETAXISCODE,
+                       },
+                   columnWidth=100,
+                   ),
             Column(headerText=ROWUID, getValue=ROWUID, rawDataHeading=ROWUID,
-                   isInternal=True,
+                   isInternal=False,
                    ),
             ]
 
@@ -451,7 +646,7 @@ class SyncSpectrumDisplaysTable(CustomDataFrameTable):
     @property
     def backend(self):
         return SpectrumDisplaySyncHandler()
-    
+
     @property
     def dataFrame(self):
         """ Get the dataframe exactly as displayed on the Table. """
@@ -467,6 +662,7 @@ class SyncSpectrumDisplaysTable(CustomDataFrameTable):
         :return: the displayed dataframe
         """
         self.setDataFrame(self.backend.data)
+        self.backend._addGUIConnectionSignals()
         return self.dataFrame
 
     #=========================================================================================
@@ -479,11 +675,22 @@ class SyncSpectrumDisplaysTable(CustomDataFrameTable):
             return
         rowIndex = currentSelected.name
         pulldown = self.sender()
-        tableHeader = self.columnMap.get(header)
-        currentSelection = self._getValueByHeader(rowIndex, tableHeader)
+        selectedHeader = self.columnMap.get(header)
+        sourceDisplayHeader = self.columnMap.get(SOURCESPECTRUMDISPLAYPID)
+        targetDisplayHeader = self.columnMap.get(TARGETSPECTRUMDISPLAYPID)
+        otherHeader = sourceDisplayHeader if selectedHeader == targetDisplayHeader else targetDisplayHeader
+        currentSelection = self._getValueByHeader(rowIndex, selectedHeader)
+        otherPulldownValue = self._getValueByHeader(rowIndex, otherHeader)
         data = self.project.getPidsByObjects(self.project.spectrumDisplays)
+        alreadySelectedData = [dd for dd in data if dd == otherPulldownValue]
+        filteredData = [dd for dd in data if dd != otherPulldownValue]
+        ordered = filteredData + alreadySelectedData
         index = data.index(currentSelection) if currentSelection in data else None
-        pulldown.setData(data, index=index, headerText=_DCTE, headerEnabled=False,)
+        pulldown.setData(ordered, index=index, headerText=_DCTE, headerEnabled=False, )
+
+        for pid in alreadySelectedData:
+            i = pulldown.getItemIndex(pid)
+            pulldown.insertSeparator(i)
 
     def _updateAxisCodeCallback(self, spectrumDisplayHeader, axisCodeHeader):
         """Callback when changed the axisCode pulldown from table """
@@ -501,7 +708,7 @@ class SyncSpectrumDisplaysTable(CustomDataFrameTable):
         pulldown = self.sender()
         axisCodes = list(display.axisCodes)
         index = axisCodes.index(currentAc) if currentAc in axisCodes else None
-        pulldown.setData(axisCodes, index=index, headerText=_DCTE, headerEnabled=False,)
+        pulldown.setData(axisCodes, index=index, headerText=_DCTE, headerEnabled=False, )
 
     def _tableSelectionChanged(self, headerName, value, *args, **kwargs):
         """ Callback after any pulldown is changed.
@@ -531,7 +738,7 @@ class SyncSpectrumDisplaysTable(CustomDataFrameTable):
         data = backend.data
         data.loc[index, header] = value
 
-    def _getTableColumIndex(self, header,):
+    def _getTableColumIndex(self, header, ):
         for columIndex, columClass in enumerate(self._columnDefs.columns):
             rawDataHeading = columClass.rawDataHeading
             if header == rawDataHeading:
@@ -556,8 +763,8 @@ class SyncSpectrumDisplaysTable(CustomDataFrameTable):
         Check all entries are ok
         :return: tuple of two items: Bool and str. isValid and error text.
         """
-        spectrumDisplayTableHeader =  self.columnMap.get(SOURCESPECTRUMDISPLAYPID)
-        targetDisplayTableHeader =  self.columnMap.get(TARGETSPECTRUMDISPLAYPID)
+        spectrumDisplayTableHeader = self.columnMap.get(SOURCESPECTRUMDISPLAYPID)
+        targetDisplayTableHeader = self.columnMap.get(TARGETSPECTRUMDISPLAYPID)
         sourceAxisCodeTableHeader = self.columnMap.get(SOURCEAXISCODE)
         targetAxisCodeTableHeader = self.columnMap.get(TARGETAXISCODE)
 
@@ -571,7 +778,7 @@ class SyncSpectrumDisplaysTable(CustomDataFrameTable):
         sourceAxisColumIndex = self._getTableColumIndex(SOURCEAXISCODE)
         targetAxisColumIndex = self._getTableColumIndex(TARGETAXISCODE)
         valids = []
-        msg = f'Inspect Row: {rowNumber+1} at Column(s): '
+        msg = f'Inspect Row: {rowNumber + 1} at Column(s): '
         ## Check the source Display Widgets
         if sourceDisplay is None:
             self.setBackground(rowNumber, sourceDisplayColumIndex, self.INVALIDCOLOUR)
@@ -590,7 +797,7 @@ class SyncSpectrumDisplaysTable(CustomDataFrameTable):
 
         ## Check the target Display Widgets
         if targetDisplay is None:
-            self.setBackground(rowNumber, targetDisplayColumIndex,self.INVALIDCOLOUR)
+            self.setBackground(rowNumber, targetDisplayColumIndex, self.INVALIDCOLOUR)
             self.setBackground(rowNumber, targetAxisColumIndex, self.INVALIDCOLOUR)
             valids += [False]
             msg += f'{targetDisplayTableHeader}, {targetAxisCodeTableHeader}; '
@@ -624,7 +831,7 @@ class SyncSpectrumDisplaysTable(CustomDataFrameTable):
 
     def _getSelectedSeries(self):
         ll = self.getSelectedObjects()
-        if len(ll)>0:
+        if len(ll) > 0:
             return ll[-1]
         return
 
@@ -666,7 +873,7 @@ class SyncSpectrumDisplaysTable(CustomDataFrameTable):
             sourceSpectrumDisplay._raiseSelectedOverlay()
             targetSpectrumDisplay._raiseSelectedOverlay()
 
-    def  _removeTimer(self):
+    def _removeTimer(self):
         self._removeModuleOverlay()
         self.timer.stop()
 
@@ -679,25 +886,24 @@ class SyncSpectrumDisplaysTable(CustomDataFrameTable):
         """
         menu = self._thisTableMenu
         self._actions = [
-                                menu.addAction('New Sync', self._newSync),
-                                menu.addAction('Duplicate Selected', self._duplicateSelectedSync),
-                                menu.addAction('Duplicate Opposite Axis', self._duplicateOppositeAxis),
+            menu.addAction('New Sync', self._newSync),
+            menu.addAction('Duplicate Selected', self._duplicateSelectedSync),
+            menu.addAction('Duplicate Opposite Axis', self._duplicateOppositeAxis),
 
-                                menu.addSeparator(),
-                                menu.addAction('Remove Selected', self._removeSelectedSync),
-                                menu.addAction('Remove All', self._removeAllSyncs),
-                                menu.addSeparator(),
-                                menu.addAction('Clear Selection', self.clearSelection),
-                                ]
+            menu.addSeparator(),
+            menu.addAction('Remove Selected', self._removeSelectedSync),
+            menu.addAction('Remove All', self._removeAllSyncs),
+            menu.addSeparator(),
+            menu.addAction('Clear Selection', self.clearSelection),
+            ]
         return menu
 
     def _newSync(self):
         """Add new sync to the table.
         """
-        dcte = 'Double Click to edit'
-        newRow = self.backend.fetchEmptyEntry(dcte)
+        newRow = self.backend.fetchEmptyEntry(_DCTE)
         self.populateTable()
-        self.selectRowsByValues(values=[dcte], headerName=SOURCESPECTRUMDISPLAYPID)
+        self.selectRowsByValues(values=[_DCTE], headerName=SOURCESPECTRUMDISPLAYPID)
 
     def _duplicateSelectedSync(self):
         sel = self.getSelectedObjects()
@@ -733,6 +939,7 @@ class SyncSpectrumDisplaysTable(CustomDataFrameTable):
                 self._amendBackendData(i.name, TARGETAXISCODE, newAxis)
         self.updateTable()
 
+
     def _removeSelectedSync(self):
         """Remove the selected sync from the table.
         """
@@ -753,78 +960,149 @@ class SyncSpectrumDisplaysTable(CustomDataFrameTable):
             self.backend.clearAll()
             self.updateTable()
 
+
 class SpectrumDisplaysSyncEditorModule(CcpnModule):
     """
     """
-    includeSettingsWidget = False
+    includeSettingsWidget = True
+    settingsPosition = 'left'
     _includeInLastSeen = False  # whether to restore or not after closing it (in the same project)
     _allowRename = False
     className = 'SyncSpectrumDisplays'
 
-    def __init__(self, mainWindow, name= 'SpectrumDisplay Sync Editor (Alpha)'):
+    def __init__(self, mainWindow, name='SpectrumDisplay Sync Editor (Alpha)'):
         super().__init__(mainWindow=mainWindow, name=name)
 
         self.mainWindow = getMainWindow()
         self.application = getApplication()
         self.current = getCurrent()
         self.project = getProject()
+        self._backend = SpectrumDisplaySyncHandler()
 
         ## Add GUI
         hgrid = 0
-        self.table = SyncSpectrumDisplaysTable(self.mainWidget,  grid=(hgrid, 0), gridSpan=(2,2))
-        self.editButtons = ButtonList(self.mainWidget, texts=['', '', ''],
-                                  icons=['icons/list-add', 'icons/list-remove', 'icons/window-duplicate', ],
-                                  tipTexts=['Add new sync', 'Remove selected', 'Clone single selected row'],
-                                  callbacks=[
-                                             self.table._newSync,
-                                             self.table._removeSelectedSync,
-                                             self.table._duplicateSelectedSync,
-                                            ],
-                                 direction = 'v',
-                                 setMinimumWidth=False,
-                                 grid=(hgrid, 2),
-                                 vAlign='t')
+        self.table = SyncSpectrumDisplaysTable(self.mainWidget, grid=(hgrid, 0), gridSpan=(2, 2))
+        self.editButtons = ButtonList(self.mainWidget, texts=['', '', '', '...'],
+                                      icons=['icons/list-add', 'icons/list-remove', 'icons/window-duplicate', ''],
+                                      tipTexts=['Add new sync', 'Remove selected', 'Clone single selected row'],
+                                      callbacks=[
+                                          self.table._newSync,
+                                          self.table._removeSelectedSync,
+                                          self.table._duplicateSelectedSync,
+                                          None
+                                          ],
+                                      direction='v',
+                                      setMinimumWidth=False,
+                                      grid=(hgrid, 2),
+                                      vAlign='t')
         self.editButtons.setFixedWidth(30)
         hgrid += 1
         self.syncButtons = ButtonList(self.mainWidget, texts=['', ''],
-                                  icons=['icons/link_done', 'icons/unlink'],
-                                  tipTexts = ['Re-Sync All SpectrumDisplays', 'Unsync All but keep data '],
-                                  callbacks=[
-                                             self._syncAll,
-                                             self._unsyncAll
-                                            ],
+                                      icons=['icons/link_done', 'icons/unlink'],
+                                      tipTexts=['Re-Sync All SpectrumDisplays', 'Unsync All but keep data '],
+                                      callbacks=[
+                                          self._syncAll,
+                                          self._unsyncAll
+                                          ],
                                       direction='v',
                                       setMinimumWidth=False,
                                       grid=(hgrid, 2),
                                       vAlign='b')
         self._updateButton = self.syncButtons.buttons[0]
+        self.moreButton = self.editButtons.buttons[3]
+        menu = self.addMoreButtonMenuOptions()
+        self.moreButton.setMenu(menu)
         self.table.setMinimumHeight(100)
         # self.table.setMinimumWidth(self._minimumWidth)
         self.table.tableChanged.connect(self._tableHasChanged)
+
         self.mainWidget.setContentsMargins(5, 5, 5, 5)
 
+        # add settings:
+        pRow = 0
+        self._setTransitiveMode = cw.CheckBoxCompoundWidget(self.settingsWidget,
+                                                            labelText='Transitive Mode',
+                                                            tipText ='',
+                                                            checked=True,
+                                                            callback=self._setTransitiveModeCallback,
+                                                            grid=(pRow, 0), stretch=(0, 0), hAlign='left',
+                                                             # fixedWidths=(None, 30),
+
+                                                         )
+        self.settingsWidget.setContentsMargins(5, 5, 5, 5)
         ## Add core notifiers
         if self.project:
             self._spectrumDisplayNotifier = Notifier(self.project, [Notifier.DELETE], 'SpectrumDisplay', self._onSpectrumDisplayDeleted)
 
+        self.setGuiNotifier(self.mainWidget, [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+                            callback=self._handleDrops)
+
     @property
-    def backendHandler(self):
-        return SpectrumDisplaySyncHandler()
+    def backend(self):
+        return self._backend
 
     ################################################
     ################ Notification callbacks ###############
     ################################################
 
+    def addMoreButtonMenuOptions(self, ):
+        """Add options to more button menu
+        """
+        menu = Menu('', None, isFloatWidget=True)
+        self._actions = [
+            menu.addAction('X/Y Sync all Spectrum Displays', self._syncAllAxesOnOpenedSpectrumDisplays),
+            menu.addAction('X Sync all Spectrum Displays', self._syncXAxesOnOpenedSpectrumDisplays),
+            menu.addAction('Y Sync all Spectrum Displays', self._syncYAxesOnOpenedSpectrumDisplays),
+            ]
+        return menu
+
     def _updateData(self):
         newData = self.table.dataFrame
-        backend = self.backendHandler
+        backend = self.backend
         backend._data = newData
         self.table.populateTable()
+
+    def _syncXAxesOnOpenedSpectrumDisplays(self):
+        self.backend._syncAxesOnSpectrumDisplays(self.project.spectrumDisplays, axisIndex=0)
+        self._tableHasChanged()
+        self.updateTable()
+
+    def _syncYAxesOnOpenedSpectrumDisplays(self):
+        self.backend._syncAxesOnSpectrumDisplays(self.project.spectrumDisplays, axisIndex=1)
+        self._tableHasChanged()
+        self.updateTable()
+
+    def _syncAllAxesOnOpenedSpectrumDisplays(self):
+        self.backend._syncAxesOnSpectrumDisplays(self.project.spectrumDisplays, axisIndex=0)
+        self.backend._syncAxesOnSpectrumDisplays(self.project.spectrumDisplays, axisIndex=1)
+        self._tableHasChanged()
+        self.updateTable()
+
+    def updateTable(self):
+        self.table.updateTable()
+
+    def _handleDrops(self, dataDict, *args, **kwargs):
+
+        objs = self.project.getObjectsByPids(dataDict.get(DropBase.PIDS))
+        strips = [x for x in objs if isinstance(x, Strip)]
+        if len(strips) == 0:
+            return
+        strip = strips[-1]
+        axes = strip.axisCodes
+        for axis in axes:
+            newRow = self.backend.fetchEmptyEntry(_DCTE)
+            self.backend.data.loc[newRow.name, SOURCESPECTRUMDISPLAYPID] = strip.spectrumDisplay.pid
+            self.backend.data.loc[newRow.name, SOURCEAXISCODE] = axis
+        self.table.updateTable()
+
+    def _setTransitiveModeCallback(self, value):
+        value = self._setTransitiveMode.get()
+        self.backend.setTransitive(value)
 
     def _onSpectrumDisplayDeleted(self, callbackDict, *args):
         """Disconnect any existing signals from the deleted  spectrumDisplay"""
         spectrumDisplay = callbackDict.get(Notifier.OBJECT)
-        backend = self.backendHandler
+        backend = self.backend
         if self.table.dataFrame.empty:
             return
         if spectrumDisplay is None:
@@ -839,12 +1117,12 @@ class SpectrumDisplaysSyncEditorModule(CcpnModule):
         self._updateButton.setIcon(icon)
 
     def _syncAll(self):
-        if self.backendHandler.isEmpty:
+        if self.backend.isEmpty:
             showWarning('Nothing to sync', 'Add a row first')
             return
         allValid, msgs = self.table._validateTable()
         if all(allValid):
-            self.backendHandler._addGUIConnectionSignals()
+            self.backend._addGUIConnectionSignals()
             self._updateButton.setIcon(Icon('icons/link_done'))
         else:
             text = '\n'.join(msgs)
@@ -852,44 +1130,28 @@ class SpectrumDisplaysSyncEditorModule(CcpnModule):
             return
 
     def _unsyncAll(self):
-        if self.backendHandler.isEmpty:
+        if self.backend.isEmpty:
             showWarning('Nothing to unsync', 'The table data is already empty')
             return
-        self.backendHandler._removeGUIConnectionSignals()
+        self.backend._removeGUIConnectionSignals()
         self._updateButton.setIcon(Icon('icons/link_suspended'))
 
     def _closeModule(self):
         # Do all clean up
         # open a popup to close and remove all data or preserve for next time
-        self.backendHandler.clearAll()
+        self.backend.clearAll()
         super()._closeModule()
 
-if __name__ == '__main__':
-    from ccpn.framework.Application import getApplication
 
-    def _start(moduleArea):
-        currentModules = [m for m in moduleArea.ccpnModules if m.className == SpectrumDisplaysSyncEditorModule.className]
-        if len(currentModules)>0:
-            yesToNew = showYesNo('Already opened.', 'Do you want close the existing module and open a new empty module?')
-            if yesToNew:
-                for currentModule in currentModules:
-                    currentModule._closeModule()
-            else:
-                return
-        module = SpectrumDisplaysSyncEditorModule(mainWindow=moduleArea.mainWindow)
-        moduleArea.addModule(module)
+from ccpn.framework.Application import getApplication
 
-    ccpnApplication = getApplication()
-    if ccpnApplication:
-        _start(ccpnApplication.ui.mainWindow.moduleArea)
-    else:
-        from ccpn.ui.gui.widgets.Application import TestApplication
-        app = TestApplication()
-        win = QtWidgets.QMainWindow()
-        moduleArea = CcpnModuleArea(mainWindow=None)
-        _start(moduleArea)
-        win.setCentralWidget(moduleArea)
-        win.resize(1000, 500)
-        win.setWindowTitle('Testing Module')
-        win.show()
-        app.start()
+
+ccpnApplication = getApplication()
+mainWindow = ccpnApplication.mainWindow
+currentModules = [m for m in mainWindow.moduleArea.ccpnModules if m.className == SpectrumDisplaysSyncEditorModule.className]
+if len(currentModules) > 0:
+    showWarning('Already opened.', '')
+    raise RuntimeError('already opened')
+else:
+    module = SpectrumDisplaysSyncEditorModule(mainWindow=mainWindow.moduleArea.mainWindow)
+    mainWindow.moduleArea.addModule(module)

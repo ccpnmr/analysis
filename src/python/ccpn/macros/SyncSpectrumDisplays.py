@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-07-31 15:08:12 +0100 (Mon, July 31, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-31 15:09:38 +0100 (Mon, July 31, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -75,11 +75,11 @@ msg = 'This module is an alpha version and there might be unexpected behaviours.
 CANCEL = 'Cancel'
 SAVE_AND_CONTINUE = 'Save project and continue'
 CONTINUE = 'Continue without saving'
-# answer = showMulti('Warning', msg, [SAVE_AND_CONTINUE, CONTINUE, CANCEL])
-# if answer == CANCEL:
-#     raise RuntimeError('Operation cancelled by the users')
-# if answer == SAVE_AND_CONTINUE:
-#     application.saveProject()
+answer = showMulti('Warning', msg, [SAVE_AND_CONTINUE, CONTINUE, CANCEL])
+if answer == CANCEL:
+    raise RuntimeError('Operation cancelled by the users')
+if answer == SAVE_AND_CONTINUE:
+    application.saveProject()
 
 ROWUID = 'UID'
 SOURCESPECTRUMDISPLAYPID = 'sourceSpectrumDisplayPid'

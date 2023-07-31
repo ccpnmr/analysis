@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-07-31 15:11:02 +0100 (Mon, July 31, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-31 15:17:03 +0100 (Mon, July 31, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -633,6 +633,7 @@ class SyncSpectrumDisplaysTable(CustomDataFrameTable):
                    ),
             Column(headerText=ROWUID, getValue=ROWUID, rawDataHeading=ROWUID,
                    isInternal=False,
+                   isHidden=True,
                    ),
             ]
 

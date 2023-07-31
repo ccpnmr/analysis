@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:42 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-07-31 16:38:54 +0100 (Mon, July 31, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -40,7 +40,6 @@ from ccpn.framework.constants import UNDEFINED_STRING
 
 from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
-EMPTY = EmptySpectrumDataSource.dataFormat
 
 from ccpn.core.lib.SpectrumLib import getSpectrumDataSource
 
@@ -48,7 +47,7 @@ from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList, ButtonBoxList
 from ccpn.ui.gui.widgets.FileDialog import SpectrumFileDialog, OtherFileDialog
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.LineEdit import LineEdit,ValidatedLineEdit
+from ccpn.ui.gui.widgets.LineEdit import LineEdit, ValidatedLineEdit
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
@@ -62,11 +61,12 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning, showOkCancel
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
 
-
 # from ccpn.ui.gui.lib.GuiPath import VALIDROWCOLOUR, ACCEPTROWCOLOUR, REJECTROWCOLOUR, INVALIDROWCOLOUR
 from ccpn.ui.gui.guiSettings import COLOUR_BLIND_LIGHTGREEN, COLOUR_BLIND_MEDIUM, COLOUR_BLIND_DARKGREEN, \
     COLOUR_BLIND_RED, COLOUR_BLIND_ORANGE
 
+
+EMPTY = EmptySpectrumDataSource.dataFormat
 VALID_ROWCOLOUR = COLOUR_BLIND_LIGHTGREEN
 VALID_CHANGED_ROWCOLOUR = COLOUR_BLIND_DARKGREEN
 WARNING_ROWCOLOUR = COLOUR_BLIND_MEDIUM
@@ -76,13 +76,17 @@ INVALID_CHANGED_ROWCOLOUR = COLOUR_BLIND_ORANGE
 LIGHTGREY = QtGui.QColor('lightgrey')
 
 
+#=========================================================================================
+# PathRowABC
+#=========================================================================================
+
 class PathRowABC(object):
     """Implements all functionality for a row with label, text and button to select a file path
     """
 
     dialogFileMode = 1
 
-    LABEL_COLLUMN =0
+    LABEL_COLLUMN = 0
     DATA_COLLUMN = 1
     BUTTON_COLLUMN = 2
 
@@ -101,7 +105,7 @@ class PathRowABC(object):
         self.obj = obj
         self.enabled = enabled
         self._callback = callback  # callback for this row upon change of value /validate()
-                                   # is defined called as: callback(self)
+        # is defined called as: callback(self)
 
         self.rowIndex = None  # Undefined; set by _addRowWidgets
 
@@ -344,8 +348,13 @@ class PathRowABC(object):
 
     __repr__ = __str__
 
+
 # end class
 
+
+#=========================================================================================
+# SpectrumPathRow
+#=========================================================================================
 
 class SpectrumPathRow(PathRowABC):
     """
@@ -394,7 +403,7 @@ class SpectrumPathRow(PathRowABC):
         """Routine for checking value is valid; called from validatorCallback and validate method
         """
         dataFormat = self.dataFormat  # This will get the value from the dataFormatWidget (if defined)
-                                      # or from the spectrum otherwise
+        # or from the spectrum otherwise
 
         # Check if path is valid for dataFormat.
         self.dataStore, self.dataSource = getSpectrumDataSource(path=value, dataFormat=dataFormat)
@@ -477,7 +486,7 @@ class SpectrumPathRow(PathRowABC):
 
         super()._addRowWidgets(parentWidget=parentWidget, rowIndex=rowIndex)
         self.initDone = True  # Statement does not chnage anything as the super class has already reverted it;
-                              # Here for clarity
+        # Here for clarity
 
     def setVisible(self, visible):
         """set visibility of row
@@ -558,7 +567,7 @@ class SpectrumPathRow(PathRowABC):
         """Revert to initial values
         """
         if self.dataFormatWidget is not None:
-            self.dataFormat= self.initialDataFormat
+            self.dataFormat = self.initialDataFormat
         super().revert()
 
     def _selectButtonCallback(self, *args):
@@ -593,7 +602,7 @@ class SpectrumPathRow(PathRowABC):
         if len(_path) == 0:
             showWarning(f'Auto-detect dataFormat for {self.obj.name}',
                         f'Undefined path'
-            )
+                        )
             return
 
         ok = showOkCancel(f'Auto-detect dataFormat for {self.obj.name}',
@@ -607,17 +616,17 @@ class SpectrumPathRow(PathRowABC):
         if dataStore is not None and not dataStore.exists():
             showWarning(f'Auto-detect dataFormat for {self.obj.name}',
                         f'"{_path}" does not exist'
-            )
+                        )
 
         elif dataSource is None:
             showWarning(f'Auto-detect dataFormat for {self.obj.name}',
                         f'Failed to detect valid dataFormat'
-            )
+                        )
 
         elif dataSource is not None and not dataSource.isValid:
             showWarning(f'Auto-detect dataFormat for {self.obj.name}',
                         f'{dataSource.errorString}'
-            )
+                        )
 
     def _revertCallback(self):
         """Callback when pressing revert/undo
@@ -654,8 +663,13 @@ class SpectrumPathRow(PathRowABC):
             _path = aPath('~')
         return str(_path)
 
+
 # end class
 
+
+#=========================================================================================
+# RedirectPathRow
+#=========================================================================================
 
 class RedirectPathRow(PathRowABC):
     """
@@ -677,6 +691,8 @@ class RedirectPathRow(PathRowABC):
 
     def setPath(self, path):
         self.obj.path = path
+
+
 # end class
 
 
@@ -691,9 +707,12 @@ ALL_SPECTRA = 'all'
 buttons = (ALL_SPECTRA, VALID_SPECTRA, INVALID_SPECTRA, WARNING_SPECTRA,
            EMPTY_SPECTRA, CHANGED_SPECTRA, SELECTED_SPECTRA)
 
+_showBorders = False  # for debugging
 
-_showBorders = False # for debugging
 
+#=========================================================================================
+# ValidateSpectraPopup
+#=========================================================================================
 
 class ValidateSpectraPopup(CcpnDialog):
     """
@@ -741,11 +760,11 @@ class ValidateSpectraPopup(CcpnDialog):
         _f = MoreLessFrame(self, mainWindow=self.mainWindow,
                            name='Redirections', bold=True, showMore=True,
                            setLayout=True, grid=(row, 0),
-                           _frameMargins=(0,5,0,5),
+                           _frameMargins=(0, 5, 0, 5),
                            hPolicy='expanding',
-                          )
+                           )
 
-        _frame1 =  Frame(_f.contentsFrame, setLayout=True, grid=(0, 0), showBorder=_showBorders)
+        _frame1 = Frame(_f.contentsFrame, setLayout=True, grid=(0, 0), showBorder=_showBorders)
         self._populateFrame1(_frame1)
         row += 1
 
@@ -754,9 +773,9 @@ class ValidateSpectraPopup(CcpnDialog):
         _f = MoreLessFrame(self, mainWindow=self.mainWindow,
                            name='Spectra', bold=True, showMore=True,
                            setLayout=True, grid=(row, 0),
-                           _frameMargins=(0,5,0,5),
+                           _frameMargins=(0, 5, 0, 5),
                            hPolicy='expanding',
-                          )
+                           )
         _frame2 = Frame(_f.contentsFrame, setLayout=True, grid=(0, 0), showBorder=_showBorders,
                         # hAlignment='left', hPolicy='expanding',  # This messes up the various alignments
                         # vAlignment='top', vPolicy='expanding',
@@ -769,11 +788,11 @@ class ValidateSpectraPopup(CcpnDialog):
         _f = MoreLessFrame(self, mainWindow=self.mainWindow,
                            name='Search / Modify', bold=True, showMore=False,  # closed on default
                            setLayout=True, grid=(row, 0),
-                           _frameMargins=(0,5,0,5),
+                           _frameMargins=(0, 5, 0, 5),
                            hPolicy='expanding',
-                          )
-        _frame3 = Frame(_f.contentsFrame, setLayout=True, grid=(0,0), showBorder=_showBorders,
-                        hAlign = 'left', hPolicy='minimal',  # required to get alignment right
+                           )
+        _frame3 = Frame(_f.contentsFrame, setLayout=True, grid=(0, 0), showBorder=_showBorders,
+                        hAlign='left', hPolicy='minimal',  # required to get alignment right
                         )
         self._populateFrame3(_frame3)
         row += 1
@@ -785,11 +804,11 @@ class ValidateSpectraPopup(CcpnDialog):
 
         self.applyButtons = ButtonList(self,
                                        texts=['Cancel',
-                                              'Apply and Close' ],
+                                              'Apply and Close'],
                                        callbacks=[self._cancelButtonCallback,
-                                                  self._closeButtonCallback ],
+                                                  self._closeButtonCallback],
                                        tipTexts=['Cancel and close',
-                                                 'Apply changes and close the popup' ],
+                                                 'Apply changes and close the popup'],
                                        direction='h',
                                        hAlign='r', grid=(row, 0),
                                        vAlign='b',
@@ -816,13 +835,13 @@ class ValidateSpectraPopup(CcpnDialog):
 
         # radiobuttons
         _bFrame = Frame(frame, setLayout=True, showBorder=_showBorders, fShape='noFrame',
-                                 grid=(specRow, 0), #gridSpan=(1, _colSpan),
-                                 vAlign='top', hAlign='left'
+                        grid=(specRow, 0),  #gridSpan=(1, _colSpan),
+                        vAlign='top', hAlign='left'
                         )
         specRow += 1
 
         _bFrame.addSpacer(25, 40, grid=(0, 0))  # Clears the label and buttons from top of MoreLessFrame and
-                                                # the stat of the spectrum scroll area with rows
+        # the stat of the spectrum scroll area with rows
         _l = Label(_bFrame, text="Show: ", grid=(0, 1), bold=False, hAlign='left')
         self.showValid = RadioButtons(_bFrame,
                                       texts=['%s  ' % b for b in buttons],  # hack to add some space!
@@ -833,14 +852,13 @@ class ValidateSpectraPopup(CcpnDialog):
                                       tipTexts=None,
                                       )
 
-
         # set up a scroll area
         _scrollArea = ScrollArea(frame, setLayout=True,
-                                             grid=(specRow, 0), #gridSpan=(1, _colSpan),
-                                             hPolicy='expanding',
-                                             vAlign='top', vPolicy='expanding',
-                                             resizable=True, minimumSizes=(50,50)
-                                             )
+                                 grid=(specRow, 0),  #gridSpan=(1, _colSpan),
+                                 hPolicy='expanding',
+                                 vAlign='top', vPolicy='expanding',
+                                 resizable=True, minimumSizes=(50, 50)
+                                 )
         # add a Frame
         self.scrollFrame = Frame(frame, setLayout=True, showBorder=_showBorders,
                                  #hAlign = 'left',
@@ -882,15 +900,15 @@ class ValidateSpectraPopup(CcpnDialog):
         mlRow = 0
         _lWidth = 120
 
-        _l = Label(frame, text='DataFormat(s)', grid=(mlRow,0), hAlign='left')
+        _l = Label(frame, text='DataFormat(s)', grid=(mlRow, 0), hAlign='left')
 
-        _b = Button(frame, text='Auto-detect', icon='icons/redo', grid=(mlRow,1),
+        _b = Button(frame, text='Auto-detect', icon='icons/redo', grid=(mlRow, 1),
                     callback=self._reopenAllCallback,
                     tipText='Re-open all path(s), determining and setting dataFormat',
                     hAlign='left', hPolicy='minimal', minimumWidth=150)
         mlRow += 1
 
-        _l = Label(frame, text='Path(s)', grid=(mlRow,0),
+        _l = Label(frame, text='Path(s)', grid=(mlRow, 0),
                    hAlign='left', hPolicy='minimal')
 
         _b = ButtonList(frame,
@@ -899,11 +917,11 @@ class ValidateSpectraPopup(CcpnDialog):
                         callbacks=[self._makeAbsoluteCallback,
                                    self._makeRelativeCallback,
                                    self._revertButtonCallback,
-                                  ],
+                                   ],
                         tipTexts=['Expand any redirections into an absolute path',
                                   'Reduce an absolute path into a relative path using redirections',
                                   'Revert to initial path',
-                                 ],
+                                  ],
                         setLastButtonFocus=False,
                         direction='h',
                         grid=(mlRow, 1), gridSpan=(1, 1),
@@ -912,34 +930,34 @@ class ValidateSpectraPopup(CcpnDialog):
         mlRow += 1
 
         #-------- Search and replace
-        _l = Label(frame, text='Search', grid=(mlRow,0), hAlign='left', hPolicy='minimal')
+        _l = Label(frame, text='Search', grid=(mlRow, 0), hAlign='left', hPolicy='minimal')
         # _l.setFixedWidth(_lWidth)
 
         minWidth = 250
         _sFrame = Frame(frame, setLayout=True, showBorder=_showBorders,
-                               grid=(mlRow,1), gridSpan=(1,1),
-                               hAlign='left', hPolicy='minimal'
+                        grid=(mlRow, 1), gridSpan=(1, 1),
+                        hAlign='left', hPolicy='minimal'
                         )
         sRow = 0
         mlRow += 1
 
-        self.seachLine = ValidatedLineEdit(_sFrame, grid=(sRow,1), minimumWidth=minWidth,
-                                           backgroundText ='> Enter text <',
+        self.seachLine = ValidatedLineEdit(_sFrame, grid=(sRow, 1), minimumWidth=minWidth,
+                                           backgroundText='> Enter text <',
                                            validatorCallback=self._validateSearchCallback
                                            )
         self.seachLine.setClearButtonEnabled(True)
 
-        self.replaceLabel = Label(_sFrame, text='Replace with', grid=(sRow,2))
-        self.replaceLine = ValidatedLineEdit(_sFrame, grid=(sRow,3), minimumWidth=minWidth,
+        self.replaceLabel = Label(_sFrame, text='Replace with', grid=(sRow, 2))
+        self.replaceLine = ValidatedLineEdit(_sFrame, grid=(sRow, 3), minimumWidth=minWidth,
                                              backgroundText='> Enter text <',
                                              validatorCallback=self._validateReplaceCallback
                                              )
         self.replaceLine.setClearButtonEnabled(True)
 
-        self.directoryButton = Button(_sFrame, grid=(sRow,4), callback=self._getDirectoryCallback,
+        self.directoryButton = Button(_sFrame, grid=(sRow, 4), callback=self._getDirectoryCallback,
                                       icon='icons/directory')
 
-        self.goButton = Button(_sFrame, text='Go', grid=(sRow,5), callback=self._goButtonCallback, minimumWidth=50)
+        self.goButton = Button(_sFrame, text='Go', grid=(sRow, 5), callback=self._goButtonCallback, minimumWidth=50)
         sRow += 1
         #-------- End search and replace
 
@@ -998,7 +1016,7 @@ class ValidateSpectraPopup(CcpnDialog):
         self._foundRow = False
         for spectrum, row in self._selectedRows:
             path = row.getText()
-            if _lText and (idx := path.find(searchText)) >=0 :
+            if _lText and (idx := path.find(searchText)) >= 0:
                 row.dataWidget.setSelection(idx, len(searchText))
                 row.isSelected = True
                 self._foundRow = True
@@ -1033,7 +1051,7 @@ class ValidateSpectraPopup(CcpnDialog):
         for spectrum, row in self.spectrumData.items():
             if self._doShow(row):
                 row.setVisible(True)
-                self._selectedRows.append( (spectrum, row) )
+                self._selectedRows.append((spectrum, row))
             else:
                 row.setVisible(False)
 
@@ -1087,11 +1105,11 @@ class ValidateSpectraPopup(CcpnDialog):
             row.hasWarning = True
             row.errorString = f'Path might be invalid because $DATA is not valid'
 
-        _lPath = (len(row.getText()) > 0)  # non empty path
+        _lPath = (len(row.getText()) > 0)  # non-empty path
         dataFormat = row.dataFormat
 
         row.colourRow()  # This needs to be here to function, but does not make sense as
-                         # row.validateCallback should do this too !?
+        # row.validateCallback should do this too !?
 
         # Set state of reload button: path>0, exists and auto-detect
         if _lPath and row.dataStore.exists() and dataFormat is None:
@@ -1133,4 +1151,3 @@ class ValidateSpectraPopup(CcpnDialog):
             row.update()
 
         self.accept()
-

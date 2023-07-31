@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-26 16:56:23 +0100 (Wed, April 26, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-07-31 16:38:53 +0100 (Mon, July 31, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -49,7 +49,7 @@ from ccpn.ui.gui.widgets.Font import getSystemFonts
 from ccpn.ui.gui.popups.ImportStarPopup import StarImporterPopup
 
 # This import initializes relative paths for QT style-sheets.  Do not remove! GWV ????
-from ccpn.ui.gui.guiSettings import FontSettings
+from ccpn.ui.gui.guiSettings import FontSettings, consoleStyle
 from ccpn.ui.gui.widgets.Font import getFontHeight
 from ccpn.ui.gui.widgets.Icon import Icon
 
@@ -94,7 +94,7 @@ sys.excepthook = _ccpnExceptionhook
 
 def qtMessageHandler(*errors):
     for err in errors:
-        Logging.getLogger().warning(f'QT error: {err}')
+        Logging.getLogger().warning(f'{consoleStyle.fg.red}QT error: {err}{consoleStyle.reset}')
 
 
 # un/suppress messages

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-28 16:36:55 +0100 (Fri, July 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-31 16:38:54 +0100 (Mon, July 31, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -537,6 +537,11 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 index = 0
                 for scaleOrder, i in enumerate(scaleGrid):  #  [2,1,0]:   ## Draw three different scales of grid
                     dist = br - ul
+
+                    if 0 in dist:
+                        # skip if one of the axes is zero
+                        continue
+
                     nlTarget = 10.**i
                     _pow = np.log10(abs(dist / nlTarget)) + 0.5
                     d = 10.**np.floor(_pow)

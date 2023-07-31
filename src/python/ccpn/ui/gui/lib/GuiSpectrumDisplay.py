@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-28 16:36:54 +0100 (Fri, July 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-31 16:38:54 +0100 (Mon, July 31, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -757,10 +757,17 @@ class GuiSpectrumDisplay(CcpnModule):
         specViews = [specView for specView in self.spectrumViews if specView.spectrum == spectrum]
         return specViews
 
-    def _refreshSpectrumView(self, spectrum):
-        specViews = self.getSpectrumViewFromSpectrum(spectrum)
+    def _refreshSpectrumView(self, spectrum, specViews):
+        # specViews = self.getSpectrumViewFromSpectrum(spectrum)
         for specView in specViews:
             specView.buildContours = True
+
+            for strp in self.strips:
+                _order = strp._CcpnGLWidget._ordering
+                if specView in _order:
+                    # force an update of the spectrum-view-settings dict for the GLWidget
+                    stackCount = _order.index(specView)
+                    strp._CcpnGLWidget._buildSpectrumSetting(spectrumView=specView, stackCount=stackCount)
 
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
@@ -778,7 +785,6 @@ class GuiSpectrumDisplay(CcpnModule):
         This can also be used after creation of new spectrumView
         """
         # NOTE:ED - this needs a better system to determine which notifiers affect the screen
-
         trigger = data[Notifier.TRIGGER]
         spectrum = data[Notifier.OBJECT]
 
@@ -796,7 +802,13 @@ class GuiSpectrumDisplay(CcpnModule):
             # update's
             for strip in self.strips:
                 strip._updatePlaneAxes()
-            self._refreshSpectrumView(spectrum)
+            self._refreshSpectrumView(spectrum, specViews)
+
+            if (specs := data.get(Notifier.SPECIFIERS)) and specs.get('_openFile'):
+                # scale the axes to the new file
+                for strip in self.strips:
+                    # NOTE:ED - need to execute this in the correct place/time
+                    strip._queueAppend([strip._resetAllZoom, None])
 
         elif trigger == Notifier.RENAME:
             self.spectrumToolBar._spectrumRename(data)

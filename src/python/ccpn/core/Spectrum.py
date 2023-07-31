@@ -54,7 +54,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-30 18:47:45 +0100 (Fri, June 30, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-31 16:38:53 +0100 (Mon, July 31, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -843,6 +843,15 @@ class Spectrum(AbstractWrapperObject):
         self._spectrumTraits.dataStore = newDataStore
         self._dataStore._saveInternal()
         self._saveObject()
+
+        if self.dimensionCount == 1:
+            self._intensities = None
+
+            # NOTE:ED - this is a bit of a hack :|
+            _ = self.intensities
+
+        self._finaliseAction('change', _openFile=True)
+
         return True
 
     @logCommand(get='self')

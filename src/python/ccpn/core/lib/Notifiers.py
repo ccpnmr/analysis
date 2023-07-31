@@ -19,7 +19,7 @@ April 2017: First design by Geerten Vuister
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -30,8 +30,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-27 16:20:48 +0100 (Thu, October 27, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-07-31 16:38:53 +0100 (Mon, July 31, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -676,7 +676,9 @@ def _removeDuplicatedNotifiers(notifierQueue):
 
     # iterate through the queue in reverse order
     for func, data in notifierQueue.items(reverse=True):
-        obj, trigger = data[Notifier.OBJECT], data[Notifier.TRIGGER]
+        # assume that data is a non-empty dict
+        obj = data.get(Notifier.OBJECT) if data else None
+        trigger = data.get(Notifier.TRIGGER) if data else None
 
         match = (obj, trigger)
         if match not in scheduledQueue:

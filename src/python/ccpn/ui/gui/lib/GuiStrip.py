@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-28 16:36:54 +0100 (Fri, July 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-31 16:38:54 +0100 (Mon, July 31, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -3446,7 +3446,8 @@ class GuiStrip(Frame):
                 # process item if different from previous
                 try:
                     func, data = itm
-                    func(data)
+                    # data must be a non-empty dict or None
+                    func(data) if data else func()
                 except Exception as es:
                     getLogger().debug(f'Error in {self.__class__.__name__} update - {es}')
 

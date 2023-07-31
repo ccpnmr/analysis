@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-05 15:28:41 +0000 (Thu, January 05, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-07-31 16:47:51 +0100 (Mon, July 31, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -144,7 +144,9 @@ class SampleComponent(AbstractWrapperObject):
 
     @property
     def concentrationUnit(self) -> str:
-        """Unit of SampleComponent.concentration, one of: 'Molar', 'g/L', 'L/L', 'mol/mol', 'g/g' , 'eq' """
+        """Unit of SampleComponent.concentration, one of:
+        'M', 'mM', 'µM', 'nM', 'pM', 'g/L', 'L/L', 'mol/mol', 'g/g' , 'eq'
+        """
 
         result = self._wrappedData.concentrationUnit
         # if result is not None and result not in Constants.concentrationUnits:

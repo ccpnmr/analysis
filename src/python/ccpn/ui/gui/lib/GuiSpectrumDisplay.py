@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-25 09:33:18 +0100 (Tue, July 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-31 10:40:12 +0200 (Mon, July 31, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -2578,8 +2578,8 @@ class GuiSpectrumDisplay(CcpnModule):
                             raise RuntimeError('Cannot display %s on %s; incompatible dimensionTypes' % (spectrum, self))
                         # For now: no multiple spectra with time/sampled axes (current implementation limit)
                         if dt2 == DIMENSION_SAMPLED or dt2 == DIMENSION_TIME:
-                            raise RuntimeError('Currently cannot display %s with "%s" axis on %s; SpectrumDisplay already contains other spectra with time/sampled axes' %
-                                               (spectrum, dt2, self))
+                            raise RuntimeError(f'It is currently not possible to open two spectra with a time/sampled domain in the same SpectrumDisplay.\n'
+                                               f'Please open {spectrum.pid} in a separate SpectrumDisplay.')
 
                     # check the isotopeCodes exist and check compatibility
                     for ic1, ic2 in zip(self.isotopeCodes or [], spectrum.getByDimensions('isotopeCodes', dims)):

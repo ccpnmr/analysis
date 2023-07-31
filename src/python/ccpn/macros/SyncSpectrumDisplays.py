@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-07-31 15:09:38 +0100 (Mon, July 31, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-31 15:11:02 +0100 (Mon, July 31, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -965,6 +965,7 @@ class SpectrumDisplaysSyncEditorModule(CcpnModule):
     """
     """
     includeSettingsWidget = True
+    maxSettingsState = 2
     settingsPosition = 'left'
     _includeInLastSeen = False  # whether to restore or not after closing it (in the same project)
     _allowRename = False

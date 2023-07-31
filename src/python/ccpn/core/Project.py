@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-28 17:48:08 +0100 (Fri, July 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-31 11:24:52 +0200 (Mon, July 31, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -369,7 +369,7 @@ class Project(AbstractWrapperObject):
         return bPath
 
     def _getSubdirectorySizes(self, subDirectories=None, sizeInMB=False) -> dict:
-        """Calculate the sizes of the subDirectories of the project
+        """Calculate the sizes of the subDirectories (if they exist) of the project
         :param subDirectories: a list of sub directories; defaults to CCPN_SUB_DIRECTORIES
         :param sizeInMB: flag to return size in MB
         :return a Dict with (subDir, sizeInBytes)
@@ -381,10 +381,11 @@ class Project(AbstractWrapperObject):
         result = {}
         for _subdir in subDirectories:
             _path = self.projectPath / _subdir
-            _size = _path.getSize()
-            if sizeInMB:
-                _size /= _MB
-            result[_subdir] = _size
+            if _path.exists():
+                _size = _path.getSize()
+                if sizeInMB:
+                    _size /= _MB
+                result[_subdir] = _size
         return result
 
     #-----------------------------------------------------------------------------------------
@@ -865,7 +866,8 @@ class Project(AbstractWrapperObject):
             for _subdir in CCPN_SAVEAS_SUB_DIRECTORIES:
                 _source = _oldPath / _subdir
                 _dest = _newPath / _subdir
-                _source.copyDir(_dest, overwrite=False)
+                if _source.exists():
+                    _source.copyDir(_dest, overwrite=False)
         self._checkProjectSubDirectories()
 
         # create a new logger

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-27 17:56:37 +0100 (Thu, July 27, 2023) $"
+__dateModified__ = "$dateModified: 2023-07-31 11:24:52 +0200 (Mon, July 31, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -659,14 +659,16 @@ class Gui(Ui):
 
         if newPath is None:
             # try to create a new path from the old one
-            _newName = f'{oldPath.basename}_new'
-            _newPath = oldPath.with_name(_newName).assureSuffix(CCPN_DIRECTORY_SUFFIX)
+            if self.project.isTemporary:
+                _newPath = (aPath('~') / 'myNewProject').assureSuffix(CCPN_DIRECTORY_SUFFIX)
+            else:
+                _newName = f'{oldPath.basename}_new'
+                _newPath = oldPath.with_name(_newName).assureSuffix(CCPN_DIRECTORY_SUFFIX)
             # query for this path
             dialog = FileDialog.ProjectSaveFileDialog(parent=self.mainWindow,
                                                       directory=_newPath.parent.asString(),
                                                       selectFile=_newPath.name,
-                                                      acceptMode='save',
-                                                      _useDirectoryOnly=False)
+                                                      acceptMode='save')
             dialog._show()
             if (newPath := dialog.selectedFile()) is None:
                 return False
@@ -690,8 +692,9 @@ class Gui(Ui):
 
         # Checking copy subdirectories
         _sizeDict = self.project._getSubdirectorySizes(CCPN_SAVEAS_SUB_DIRECTORIES, sizeInMB=True)
-        _totalSize = '%.1f' % sum(_sizeDict.values())
-        msg = f'Also copy sub-directories (data, archives, scripts, ...) ({_totalSize} MB)?\n'
+        _totalSize = sum(_sizeDict.values())
+        _tmp = '%.1f' % _totalSize
+        msg = f'Also copy sub-directories (data, archives, scripts, ...) ({_tmp} MB)?\n'
 
         # Check for any inside spectra
         _insideSpectra = [sp for sp in self.project.spectra if sp._isInside]
@@ -701,9 +704,12 @@ class Gui(Ui):
         elif len(_insideSpectra) > 1:
             msg += f'\nNote that the data of {len(_insideSpectra)} spectra ({_size} MB) are in "{oldPath.name}/data/spectra"\n'
 
-        if (copySubDirs :=  MessageDialog.showYesNoCancel(title, msg)) is None:
-            # pressed "cancel"
-            return False
+        if self.project.isTemporary:
+            copySubDirs = True
+        else:
+            if (copySubDirs :=  MessageDialog.showYesNoCancel(title, msg)) is None:
+                # pressed "cancel"
+                return False
 
         with catchExceptions(errorStringTemplate='Error saving project: %s'):
             with MessageDialog.progressManager(self.mainWindow, f'Saving project as {newPath} ... '):

@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-06 14:11:00 +0000 (Mon, March 06, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-08-01 13:38:21 +0100 (Tue, August 01, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -92,6 +92,33 @@ class _MITableModel(_TableModel):
             except Exception:
                 return None
 
+        elif role == SIZE_ROLE:
+            return QtCore.QSize(16, 24)
+
+            # # get the source cell
+            # fRow = self._filterIndex[index.row()] if self._filterIndex is not None and 0 <= index.row() < len(self._filterIndex) else index.row()
+            # row, col = self._sortIndex[fRow], index.column()
+            #
+            # data = self._df.iat[row, col]
+            #
+            # # float/np.float - round to 3 decimal places
+            # if isinstance(data, (float, np.floating)):
+            #     newLen = len(f'{data:.3f}') + 1
+            # else:
+            #     data = str(data)
+            #     if '\n' in data:
+            #         # get the longest row from the cell
+            #         dataRows = data.split('\n')
+            #         newLen = max(len(_chrs) for _chrs in dataRows) + 1
+            #     else:
+            #         newLen = len(data) + 1
+            #
+            # # update the current maximum
+            # # maxLen = max(newLen, maxLen)
+            # _w = int(min(self._MAXCHARS, max(newLen, self._MINCHARS)) * (self._chrWidth + 1)) + 1
+            #
+            # return QtCore.QSize(_w, int(self._chrHeight))
+
         # check the rest of the role-types
         return super().data(index, role)
 
@@ -131,7 +158,7 @@ class _MITableModel(_TableModel):
                     width = self._estimateColumnWidth(col)
 
                     # return the size
-                    return QtCore.QSize(width, self._chrHeight)
+                    return QtCore.QSize(width, int(self._chrHeight))
 
                 except Exception:
                     # return the default QSize

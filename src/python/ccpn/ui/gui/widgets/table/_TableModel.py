@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-12 16:14:46 +0100 (Wed, July 12, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-01 13:38:21 +0100 (Tue, August 01, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -577,6 +577,10 @@ class _TableModel(QtCore.QAbstractTableModel):
             # elif role == ALIGNMENT_ROLE:
             #     pass
 
+            elif role == SIZE_ROLE:
+                # this is required to disable the bbox calculation for the default QT functionality
+                return QtCore.QSize(16, 24)
+
         except Exception as es:
             getLogger().debug(f'{consoleStyle.fg.yellow}--> TABLE ERROR - {es}{consoleStyle.reset}')
 
@@ -633,14 +637,18 @@ class _TableModel(QtCore.QAbstractTableModel):
             except Exception:
                 return None
 
+        # NOTE:ED - if SIZE_ROLE is defined in both data and headerData, the larger of the two is used for the row/column/cell size
+        #           assuming that both always return a QSize, otherwise QT defaults to calculating the bbox for the cell
         elif role == SIZE_ROLE:
             # process the heights/widths of the headers
             if orientation == QtCore.Qt.Horizontal:
                 try:
+
+                    # get the cell height from the number of lines in the header data
                     txt = str(self.headerData(col, orientation, role=DISPLAY_ROLE))
                     height = len(txt.split('\n')) * int(self._chrHeight)
 
-                    # get the estimated width of the column, also for the last visible column\
+                    # get the estimated width of the column, also for the last visible column
                     if (self._view._columnDefs and self._view._columnDefs._columns):
                         colObj = self._view._columnDefs._columns[col]
                         width = colObj.columnWidth
@@ -656,8 +664,16 @@ class _TableModel(QtCore.QAbstractTableModel):
                     # return the default QSize
                     return QtCore.QSize(int(self._chrWidth), int(self._chrHeight))
 
+            # vertical-header
+            # get the cell height from the number of lines in the header data
+            txts = str(self.headerData(col, orientation, role=DISPLAY_ROLE)).split('\n')
+            height = int(len(txts) * self._chrHeight)
+
+            maxLen = max(len(txt) for txt in txts) + 1
+            width = int(min(self._MAXCHARS, maxLen) * self._chrWidth) + 2
+
             # return the default QSize for vertical header
-            return QtCore.QSize(int(self._chrWidth), int(self._chrHeight))
+            return QtCore.QSize(width, height)
 
         elif role == ICON_ROLE and self._isColumnEditable(col) and self.showEditIcon:
             # return the pixmap
@@ -676,12 +692,11 @@ class _TableModel(QtCore.QAbstractTableModel):
             else:
                 txts = list(self._df.columns)[col].split('\n')
 
-            maxLen = max(len(txt) for txt in txts)
-        except Exception:
-            maxLen = 0
+            maxLen = max(len(txt) for txt in txts) + 1
+            maxLen = max(maxLen, self._MINCHARS)
 
-        # need to check for edit-symbol
-        maxLen = max(maxLen + 3, self._MINCHARS)  # never smaller than _MINCHARS characters
+        except Exception:
+            maxLen = self._MINCHARS
 
         # iterate over a few rows to get an estimate
         for row in range(min(self.rowCount(), self._CHECKROWS)):
@@ -689,20 +704,20 @@ class _TableModel(QtCore.QAbstractTableModel):
 
             # float/np.float - round to 3 decimal places
             if isinstance(data, (float, np.floating)):
-                newLen = len(f'{data:.3f}')
+                newLen = len(f'{data:.3f}') + 1
             else:
                 data = str(data)
                 if '\n' in data:
                     # get the longest row from the cell
                     dataRows = data.split('\n')
-                    newLen = max(len(_chrs) for _chrs in dataRows)
+                    newLen = max(len(_chrs) for _chrs in dataRows) + 1
                 else:
-                    newLen = len(data)
+                    newLen = len(data) + 1
 
             # update the current maximum
             maxLen = max(newLen, maxLen)
 
-        return round(min(self._MAXCHARS, maxLen) * self._chrWidth)
+        return int(min(self._MAXCHARS, maxLen) * self._chrWidth) + 2
 
     def setForeground(self, row, column, colour):
         """Set the foreground colour for dataFrame cell at position (row, column).

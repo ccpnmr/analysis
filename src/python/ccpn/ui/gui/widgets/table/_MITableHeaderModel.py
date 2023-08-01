@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 19:17:57 +0100 (Wed, June 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-01 13:38:21 +0100 (Tue, August 01, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -241,6 +241,10 @@ class _HorizontalMITableHeaderModel(_MITableHeaderModelABC):
             # return the pixmap
             return self._editableIcon
 
+        # not required
+        # elif role == SIZE_ROLE:
+        #     return QtCore.QSize(16, 24)
+
     def headerData(self, section, orientation, role=None):
         # The headers of this table will show the level names of the MultiIndex
         if role in [DISPLAY_ROLE, TOOLTIP_ROLE] and orientation == Qt.Vertical:
@@ -249,34 +253,28 @@ class _HorizontalMITableHeaderModel(_MITableHeaderModelABC):
             else:
                 return str(self._df.columns.name)
 
+        # possibly not needed, but slightly quicker than the default bbox
         elif role == SIZE_ROLE:
             # process the heights/widths of the headers
             if orientation == QtCore.Qt.Vertical:
 
                 try:
+                    # vertical-height of horizontal header
                     if type(self._df.columns) is pd.MultiIndex:
                         txts = [col[section] for col in self._df.columns.values]
                     else:
                         txts = list(self._df.columns)
-                    height = max(len(txt.split('\n')) * int(self._chrHeight) for txt in txts)
+                    height = int(max(len(txt.split('\n') * self._chrHeight) for txt in txts))
 
-                    # return the height of the maximum text in the row
-                    return QtCore.QSize(int(self._chrWidth), int(height))
+                    # return the height of the maximum text in the row, width is discarded
+                    return QtCore.QSize(int(self._chrWidth), height)
 
                 except Exception:
                     # return the size
                     return QtCore.QSize(int(self._chrWidth), int(self._chrHeight))
 
-            # column-width
-            try:
-                width = self._estimateColumnWidth(section)
-
-                # return the size
-                return QtCore.QSize(int(width), int(self._chrHeight))
-
-            except Exception:
-                # return the default QSize
-                return QtCore.QSize(int(self._chrWidth), int(self._chrHeight))
+            # column-width, return the default QSize
+            return QtCore.QSize(int(self._chrWidth), int(self._chrHeight))
 
     def _isColumnEditable(self, index):
         try:
@@ -380,19 +378,22 @@ class _VerticalMITableHeaderModel(_MITableHeaderModelABC):
             else:
                 return str(self._df.index.name)
 
+        # possibly not needed, but slightly quicker than the default bbox
         elif role == SIZE_ROLE:
             # process the heights/widths of the headers
             if orientation == QtCore.Qt.Horizontal:
-
                 try:
+                    # horizontal-width of vertical header
                     if type(self._df.index) is pd.MultiIndex:
                         txts = [row[section] for row in self._df.index.values]
                     else:
                         txts = list(self._df.index)
-                    width = max(len(txt.split('\n')) * int(self._chrWidth) for txt in txts)
 
-                    # return the width of the maximum text in the row
-                    return QtCore.QSize(int(width), int(self._chrHeight))
+                    width = max(len(splt) for txt in txts for splt in txt.split('\n'))
+                    _w = int(min(self._MAXCHARS, width) * self._chrWidth) + 2
+
+                    # return the width of the maximum text in the row, height is discarded
+                    return QtCore.QSize(_w, int(self._chrHeight))
 
                 except Exception:
                     # return the size

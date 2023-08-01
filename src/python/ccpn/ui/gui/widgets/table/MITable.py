@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 15:25:11 +0100 (Tue, March 28, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-08-01 13:38:21 +0100 (Tue, August 01, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,6 +27,7 @@ __date__ = "$Date: 2023-01-27 14:43:33 +0100 (Fri, January 27, 2023) $"
 # Start of code
 #=========================================================================================
 
+import ccpn.core
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.util.Common import NOTHING
 
@@ -207,14 +208,14 @@ def main():
         _reload.columns = pd.MultiIndex.from_tuples([literal_eval(ss) for ss in _reload.columns.tolist()])
         _reload.index = pd.MultiIndex.from_tuples([literal_eval(ss) for ss in _reload.index.tolist()])
 
-    # my class to store python-objects as strings - recovers df exactly
-    pretty = PrintFormatter()
-    pretty.ALLOWPICKLE = True  # useful for passing information between threads
-    _loadPickle = pretty(df)
-    _reloadPickle = pretty.literal_eval(_loadPickle)
-
-    print('PICKLED dataFrame')
-    print(_loadPickle)
+    # # my class to store python-objects as strings - recovers df exactly
+    # pretty = PrintFormatter()
+    # pretty.ALLOWPICKLE = False  # useful for passing information between threads
+    # _loadPickle = pretty(df)
+    # _reloadPickle = pretty.literal_eval(_loadPickle)
+    #
+    # print('PICKLED dataFrame')
+    # print(_loadPickle)
 
     # load the object into the table
     window = QtWidgets.QMainWindow()

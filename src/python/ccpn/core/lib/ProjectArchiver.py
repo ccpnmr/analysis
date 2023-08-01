@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-30 18:47:45 +0100 (Fri, June 30, 2023) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-08-01 16:05:28 +0100 (Tue, August 01, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -116,17 +116,27 @@ class ProjectArchiver(object):
         except (PermissionError, FileNotFoundError):
             getLogger().info('Folder may be read-only')
 
-    def makeArchive(self) -> Path:
+    def makeArchive(self, name=None, overwrite=False) -> Path:
         """Make a new time-stamped archive from project.
+        :param name: use name; generate from project name + timestamp if None
+        :param overwrite: flag for overwriting existing file
         :return: absolute path to the new archives as a Path instance
                  or None on IOerror
         """
         if not self._validFolder:
             raise RuntimeError('Archive is not subfolder of project')
 
-        archivePath = self.archiveDirectory / self._projectPath.basename
-        archivePath = archivePath.addTimeStamp().withSuffix(
-                CCPN_DIRECTORY_SUFFIX + ARCHIVE_SUFFIX)
+        if name is None:
+            archivePath = self.archiveDirectory / self._projectPath.basename
+            archivePath = archivePath.addTimeStamp()
+        else:
+            archivePath = self.archiveDirectory / name
+        archivePath = archivePath.withSuffix(CCPN_DIRECTORY_SUFFIX + ARCHIVE_SUFFIX)
+        if archivePath.exists():
+            if not overwrite:
+                raise RuntimeError(f'{archivePath} exists and overwrite is not allowed')
+            archivePath.remove()
+
         cwd = os.getcwd()
 
         try:

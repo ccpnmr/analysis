@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-31 11:24:52 +0200 (Mon, July 31, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-01 16:05:28 +0100 (Tue, August 01, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -879,6 +879,8 @@ class Project(AbstractWrapperObject):
     def save(self, comment='regular save', autoBackup: bool = False):
         """Save project; add optional comment to save records
         """
+        from ccpn.core.lib.ProjectArchiver import ProjectArchiver
+
         if self.readOnly:
             getLogger().warning('save skipped: Project is read-only')
             return
@@ -914,6 +916,10 @@ class Project(AbstractWrapperObject):
             self._saveHistory.addSaveRecord(comment=f'{self.name}: {comment}')
             self._saveHistory.save()
             self._updateLoggerState(readOnly=self.readOnly, flush=True)
+
+            # make last-saved archive
+            archiver = ProjectArchiver(projectPath=self.path)
+            archiver.makeArchive(name=f'{self.name}_lastSaved', overwrite=True)
 
             self._isTemporary = False
             self._isNew = False
@@ -2533,6 +2539,7 @@ def _loadProject(application, path: str) -> Project:
     """
     from ccpn.core.lib.XmlLoader import XmlLoader
     from ccpn.core._implementation.updates.update_v2 import updateProject_fromV2
+    from ccpn.core.lib.ProjectArchiver import ProjectArchiver
 
     _path = aPath(path)
     if not _path.exists():
@@ -2614,5 +2621,10 @@ def _loadProject(application, path: str) -> Project:
 
     # the initialisation is completed by Framework._initialiseProject when it has done its things
     # project._initialiseProject()
+
+    # make last-opened archive
+    if not project.readOnly:
+        archiver = ProjectArchiver(projectPath=project.path)
+        archiver.makeArchive(name=f'{project.name}_lastOpened', overwrite=True)
 
     return project

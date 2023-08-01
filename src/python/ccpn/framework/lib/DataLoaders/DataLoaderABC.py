@@ -21,9 +21,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 18:46:14 +0100 (Tue, March 28, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-08-01 16:05:45 +0100 (Tue, August 01, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -41,11 +41,6 @@ from ccpn.util.traits.TraitBase import TraitBase
 from ccpn.util.traits.CcpNmrTraits import Unicode, Any, List, Bool, CPath, Odict, CString
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import singleton
-
-
-#--------------------------------------------------------------------------------------------
-#ToDo Need to review former lib/io/Formats.py and ioFormats.analyseUrl(path)
-#--------------------------------------------------------------------------------------------
 
 CCPNMRTGZCOMPRESSED = 'ccpNmrTgzCompressed'
 CCPNMRZIPCOMPRESSED = 'ccpNmrZipCompressed'

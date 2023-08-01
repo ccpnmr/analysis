@@ -4461,11 +4461,6 @@ class CcpnGLWidget(QOpenGLWidget):
                 elif self.XAXES[self._xUnits] == GLDefs.AXISUNITSHZ:
                     if self._ordering:
 
-                        if self.is1D:
-                            cursorX = cursorCoordinate[0] * thisSpec.spectrometerFrequencies[0]
-                            startX = cursorCoordinate[0] * thisSpec.spectrometerFrequencies[0]
-
-                        else:
                             # get the axis ordering from the spectrumDisplay and map to the strip
                             indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
                             cursorX = cursorCoordinate[0] * thisSpec.spectrometerFrequencies[indices[0]]
@@ -4479,14 +4474,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 else:
                     if self._ordering:
 
-                        if self.is1D:
-                            cursorX = thisSpec.spectrumDimensions[0].valueToPoint(cursorCoordinate[0])
-                            startX = thisSpec.spectrumDimensions[0].valueToPoint(cursorCoordinate[0])
-
-                        else:
-                            # get the axis ordering from the spectrumDisplay and map to the strip
                             indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
-
                             # map to a point
                             cursorX = thisSpec.spectrumDimensions[indices[0]].valueToPoint(cursorCoordinate[0])
                             startX = thisSpec.spectrumDimensions[indices[0]].valueToPoint(self._startCoordinate[0])

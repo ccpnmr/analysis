@@ -4,19 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-01 14:43:48 +0100 (Mon, August 01, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-08-01 16:52:31 +0100 (Tue, August 01, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -345,70 +345,68 @@ def _pickPeaksRegion(peakList, regionToPick: dict = {},
     return peaks
 
 
-def _pickPeaksNd(peakList, regionToPick: Sequence[float] = None,
-                doPos: bool = True, doNeg: bool = True,
-                fitMethod: str = GAUSSIANMETHOD, excludedRegions=None,
-                excludedDiagonalDims=None, excludedDiagonalTransform=None,
-                minDropFactor: float = 0.1):
-
-    # TODO NBNB Add doc string and put type annotation on all parameters
-
-    startPoint = []
-    endPoint = []
-    spectrum = peakList.spectrum
-    aliasingLimits = spectrum.aliasingLimits
-    apiPeaks = []
-    spectrumReferences = spectrum.spectrumReferences
-    if None in spectrumReferences:
-        # TODO if we want to pick in Sampeld fo FId dimensions, this must be added
-        raise ValueError("pickPeaksNd() only works for Frequency dimensions"
-                         " with defined primary SpectrumReferences ")
-    if regionToPick is None:
-        regionToPick = peakList.spectrum.aliasingLimits
-    for ii, spectrumReference in enumerate(spectrumReferences):
-        aliasingLimit0, aliasingLimit1 = aliasingLimits[ii]
-        value0 = regionToPick[ii][0]
-        value1 = regionToPick[ii][1]
-        value0, value1 = min(value0, value1), max(value0, value1)
-        if value1 < aliasingLimit0 or value0 > aliasingLimit1:
-            break  # completely outside aliasing region
-        value0 = max(value0, aliasingLimit0)
-        value1 = min(value1, aliasingLimit1)
-        # -1 below because points start at 1 in data model
-        position0 = spectrumReference.valueToPoint(value0) - 1
-        position1 = spectrumReference.valueToPoint(value1) - 1
-        position0, position1 = min(position0, position1), max(position0, position1)
-        # want integer grid points above position0 and below position1
-        # add 1 to position0 because above
-        # add 1 to position1 because doing start <= x < end not <= end
-        # yes, this negates -1 above but they are for different reasons
-        position0 = int(position0 + 1)
-        position1 = int(position1 + 1)
-        startPoint.append((spectrumReference.dimension, position0))
-        endPoint.append((spectrumReference.dimension, position1))
-    else:
-        startPoints = [point[1] for point in sorted(startPoint)]
-        endPoints = [point[1] for point in sorted(endPoint)]
-        # print(isoOrdering, startPoint, startPoints, endPoint, endPoints)
-
-        posLevel = spectrum.positiveContourBase if doPos else None
-        negLevel = spectrum.negativeContourBase if doNeg else None
-
-        # with logCommandBlock(get='peakList') as log:
-        #     log('pickPeaksNd')
-        #     with notificationBlanking():
-
-        apiPeaks = pickNewPeaks(peakList._apiPeakList, startPoint=startPoints, endPoint=endPoints,
-                                posLevel=posLevel, negLevel=negLevel, fitMethod=fitMethod,
-                                excludedRegions=excludedRegions, excludedDiagonalDims=excludedDiagonalDims,
-                                excludedDiagonalTransform=excludedDiagonalTransform, minDropfactor=minDropFactor)
-
-    data2ObjDict = peakList._project._data2Obj
-    result = [data2ObjDict[apiPeak] for apiPeak in apiPeaks]
-    # for peak in result:
-    #     peak._finaliseAction('create')
-
-    return result
+# GWV 1/08/2023; removed from Code
+# def _pickPeaksNd(peakList, regionToPick: Sequence[float] = None,
+#                 doPos: bool = True, doNeg: bool = True,
+#                 fitMethod: str = GAUSSIANMETHOD, excludedRegions=None,
+#                 excludedDiagonalDims=None, excludedDiagonalTransform=None,
+#                 minDropFactor: float = 0.1):
+#
+#     startPoint = []
+#     endPoint = []
+#     spectrum = peakList.spectrum
+#     aliasingLimits = spectrum.aliasingLimits
+#     apiPeaks = []
+#     spectrumReferences = spectrum.spectrumReferences
+#     if None in spectrumReferences:
+#         raise ValueError("pickPeaksNd() only works for Frequency dimensions"
+#                          " with defined primary SpectrumReferences ")
+#     if regionToPick is None:
+#         regionToPick = peakList.spectrum.aliasingLimits
+#     for ii, spectrumReference in enumerate(spectrumReferences):
+#         aliasingLimit0, aliasingLimit1 = aliasingLimits[ii]
+#         value0 = regionToPick[ii][0]
+#         value1 = regionToPick[ii][1]
+#         value0, value1 = min(value0, value1), max(value0, value1)
+#         if value1 < aliasingLimit0 or value0 > aliasingLimit1:
+#             break  # completely outside aliasing region
+#         value0 = max(value0, aliasingLimit0)
+#         value1 = min(value1, aliasingLimit1)
+#         # -1 below because points start at 1 in data model
+#         position0 = spectrumReference.valueToPoint(value0) - 1
+#         position1 = spectrumReference.valueToPoint(value1) - 1
+#         position0, position1 = min(position0, position1), max(position0, position1)
+#         # want integer grid points above position0 and below position1
+#         # add 1 to position0 because above
+#         # add 1 to position1 because doing start <= x < end not <= end
+#         # yes, this negates -1 above but they are for different reasons
+#         position0 = int(position0 + 1)
+#         position1 = int(position1 + 1)
+#         startPoint.append((spectrumReference.dimension, position0))
+#         endPoint.append((spectrumReference.dimension, position1))
+#     else:
+#         startPoints = [point[1] for point in sorted(startPoint)]
+#         endPoints = [point[1] for point in sorted(endPoint)]
+#         # print(isoOrdering, startPoint, startPoints, endPoint, endPoints)
+#
+#         posLevel = spectrum.positiveContourBase if doPos else None
+#         negLevel = spectrum.negativeContourBase if doNeg else None
+#
+#         # with logCommandBlock(get='peakList') as log:
+#         #     log('pickPeaksNd')
+#         #     with notificationBlanking():
+#
+#         apiPeaks = pickNewPeaks(peakList._apiPeakList, startPoint=startPoints, endPoint=endPoints,
+#                                 posLevel=posLevel, negLevel=negLevel, fitMethod=fitMethod,
+#                                 excludedRegions=excludedRegions, excludedDiagonalDims=excludedDiagonalDims,
+#                                 excludedDiagonalTransform=excludedDiagonalTransform, minDropfactor=minDropFactor)
+#
+#     data2ObjDict = peakList._project._data2Obj
+#     result = [data2ObjDict[apiPeak] for apiPeak in apiPeaks]
+#     # for peak in result:
+#     #     peak._finaliseAction('create')
+#
+#     return result
 
 
 def _fitExistingPeaks(peakList, peaks: Sequence['Peak'], fitMethod: str = GAUSSIANMETHOD, singularMode: bool = True,

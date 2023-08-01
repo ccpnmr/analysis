@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-04-05 17:06:32 +0100 (Wed, April 05, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-08-01 16:52:31 +0100 (Tue, August 01, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -822,7 +822,6 @@ def arPLS_Implementation(y, lambdaValue=5.e4, maxValue=1e6, minValue=-1e6, iterm
 #     """
 #
 #     from scipy.interpolate import interp1d
-#     #FIXME: invalid import
 #     import statsmodels.api as sm
 #
 #     # introduce some floats in our x-values

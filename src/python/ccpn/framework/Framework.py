@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-28 16:36:54 +0100 (Fri, July 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-02 15:52:57 +0100 (Wed, August 02, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -23,10 +23,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-
-# if not hasattr(systime, 'clock'):
-#     # NOTE:ED - quick patch to fix bug in pyqt 5.9
-#     systime.clock = systime.process_time
 
 import json
 import os

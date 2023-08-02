@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-08-01 16:05:28 +0100 (Tue, August 01, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-02 15:33:11 +0100 (Wed, August 02, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -85,24 +85,6 @@ from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
 from ccpnmodel.ccpncore.api.memops import Implementation
 
 
-# TODO These should be merged with the same constants in CcpnNefIo
-# (and likely those in ExportNefPopup) and moved elsewhere
-CHAINS = 'chains'
-CHEMICALSHIFTLISTS = 'chemicalShiftLists'
-RESTRAINTTABLES = 'restraintTables'
-PEAKLISTS = 'peakLists'
-INTEGRALLISTS = 'integralLists'
-MULTIPLETLISTS = 'multipletLists'
-SAMPLES = 'samples'
-SUBSTANCES = 'substances'
-NMRCHAINS = 'nmrChains'
-# DATASETS = 'dataSets'
-STRUCTUREDATA = 'structureData'
-COMPLEXES = 'complexes'
-SPECTRUMGROUPS = 'spectrumGroups'
-NOTES = 'notes'
-# _PEAKCLUSTERS = '_peakClusters'
-COLLECTIONS = 'collections'
 
 # define the default chemical-shift-list name
 DEFAULT_CHEMICALSHIFTLIST = 'default'

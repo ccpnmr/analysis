@@ -54,7 +54,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-28 17:24:46 +0100 (Fri, July 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-02 14:32:01 +0100 (Wed, August 02, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -3144,10 +3144,9 @@ class Spectrum(AbstractWrapperObject):
 
                     seriesValue += seriesIncrement
 
-                # TODO: reinstate after inclusion of GWV branch SpectrumDataSource modifications
-                # _values = self.dataSource.sampledValues[pseudoDimensionIndex]
-                # if _values is not None and len(_values) == len(spectrumGroup.spectra):
-                #     spectrumGroup.series = _values
+                _values = self.dataSource.sampledValues[pseudoDimensionIndex]
+                if _values is not None and len(_values) == len(spectrumGroup.spectra):
+                    spectrumGroup.series = _values
 
         return spectrumGroup
 

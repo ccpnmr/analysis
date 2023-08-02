@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:42 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-08-02 17:19:18 +0100 (Wed, August 02, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -111,6 +111,8 @@ _ChemicalShiftListFrame.register()
 from ccpn.core._implementation.Updater import updateObject, UPDATE_POST_OBJECT_INITIALISATION
 from ccpn.core._implementation.updates.update_3_0_4 import _updateChemicalShiftList_3_0_4_to_3_1_0
 
+# define the default chemical-shift-list name
+DEFAULT_CHEMICALSHIFTLIST = 'default'
 
 @updateObject('3.0.4', '3.1.0', _updateChemicalShiftList_3_0_4_to_3_1_0, UPDATE_POST_OBJECT_INITIALISATION)
 class ChemicalShiftList(AbstractWrapperObject):

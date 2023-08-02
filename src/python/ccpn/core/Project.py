@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-08-02 15:33:11 +0100 (Wed, August 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-02 17:19:18 +0100 (Wed, August 02, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -83,11 +83,6 @@ from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.lib import ApiPath
 from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
 from ccpnmodel.ccpncore.api.memops import Implementation
-
-
-
-# define the default chemical-shift-list name
-DEFAULT_CHEMICALSHIFTLIST = 'default'
 
 
 class Project(AbstractWrapperObject):
@@ -576,6 +571,7 @@ class Project(AbstractWrapperObject):
         This routine is called from Framework, as some other machinery first needs to set up
         (linkages, Current, notifiers and such)
         """
+        from ccpn.core.ChemicalShiftList import DEFAULT_CHEMICALSHIFTLIST
 
         self._logger = createLogger(self, now=self.application._created)
 

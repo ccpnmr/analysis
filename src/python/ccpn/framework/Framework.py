@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-27 16:24:12 +0100 (Thu, July 27, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-02 17:19:18 +0100 (Wed, August 02, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -1373,7 +1373,7 @@ class Framework(NotifierBase, GuiBase):
         :return Project instance (either newly created or the existing)
         CCPNINTERNAL: called from NefDataLoader.load()
         """
-        from ccpn.core.Project import DEFAULT_CHEMICALSHIFTLIST
+        from ccpn.core.ChemicalShiftList import DEFAULT_CHEMICALSHIFTLIST
         from ccpn.core.lib.ProjectLib import checkProjectName
 
         TOBEDELETED = '_toBeDeleted'

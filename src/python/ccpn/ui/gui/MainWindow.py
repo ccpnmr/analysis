@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-06 18:41:46 +0100 (Thu, July 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-02 16:51:49 +0100 (Wed, August 02, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -167,10 +167,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
 
         self._project._undo.undoChanged.add(self._undoChangeCallback)
 
-        # TODO:ED - crashes on linux/windows :O
-        # # install handler to resize when moving between displays
-        # self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
-        # # self.setUnifiedTitleAndToolBarOnMac(True) #uncomment this to remove the extra title bar on osx 10.14+
+        # self.setUnifiedTitleAndToolBarOnMac(True) #uncomment this to remove the extra title bar on osx 10.14+
 
         self._initKeyTimer()
         self._initReadOnlyIcon()
@@ -182,6 +179,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         super().show()
 
         # install handler to resize when moving between displays
+        #   cannot be done in __init__ as crashes on linux/windows :O
         self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
 
     def _initReadOnlyIcon(self):

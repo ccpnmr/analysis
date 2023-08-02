@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-07-31 15:17:03 +0100 (Mon, July 31, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-02 16:19:01 +0100 (Wed, August 02, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -87,7 +87,8 @@ TARGETSPECTRUMDISPLAYPID = 'targetSpectrumDisplayPid'
 SOURCEAXISCODE = 'sourceAxisCode'
 TARGETAXISCODE = 'targetAxisCode'
 _SIGNALS = '_signal'
-_CONNECTIONS = 'connections'
+_CONNECTIONS = '_connections'
+_SLOT = '_slots'
 
 ## GUI placeholder/variables
 _DCTE = 'Double Click to edit'
@@ -299,17 +300,25 @@ class SpectrumDisplaySyncHandler(object):
                    (df[TARGETSPECTRUMDISPLAYPID].eq(spectrumDisplayPid) & df[TARGETAXISCODE].eq(axisCode))
         return df[mask].copy()
 
-    def _disconnectSpuriousSignal(self, rowIndex, signal):
-        signalDisconnected = False
+    def _isValidSignal(self, rowIndex, signal, callbackDict):
+        print(f' callbackDict: {callbackDict} ====\nrowIndex: {rowIndex} ===\nSignal: {signal}')
+        valid = True
         if rowIndex not in self.data.index:
-            signalDict = self._signalsDict.get(rowIndex)
-            # not sure yet why we have left-over signals
-            try:
-                signal.disconnect()
-            except Exception as err:
-                getLogger().warning(f'Cannot disconnect {signal} for row {rowIndex}. Error: {err}')
-            signalDisconnected = True
-        return signalDisconnected
+            connection = self._signalsDict.get(rowIndex)
+            if connection is None:
+                # not sure yet why we have left-over signals. But disconnecting here is very dangerous and causes unexpected behaviours.
+                try:
+                    signal.disconnect()
+                except Exception as err:
+                    getLogger().warning(f'Cannot disconnect {signal} for row {rowIndex}. Error: {err}')
+            else:
+                    try:
+                        signal.disconnect(connection)
+                    except Exception as err:
+                        getLogger().warning(f'Cannot disconnect {signal} from connection: {connection}. Invalid row {rowIndex}. Error: {err}')
+            self._signalsDict.pop(rowIndex, None)
+            valid = False
+        return valid
 
     def _getAxisByAxisCode(self, strip, axisCode):
         for axis in strip.axes:
@@ -411,7 +420,7 @@ class SpectrumDisplaySyncHandler(object):
 
     def _syncAxes(self, callbackDict, *, signal, rowIndex: str = None):
         """Callback from GLWidget signals. """
-        if self._disconnectSpuriousSignal(rowIndex, signal):
+        if not self._isValidSignal(rowIndex, signal, callbackDict):
             # self._addGUIConnectionSignals(self.data)
             return
         firingStrip = callbackDict.get('strip')
@@ -477,20 +486,21 @@ class SpectrumDisplaySyncHandler(object):
             strips += self._getStripsBySpectrumDisplayPid(row[TARGETSPECTRUMDISPLAYPID])
             connections = []
             connectedSignals = []
+            slots = []
             for strip in strips:
-                # need to find a better way to define these signals without  exposing  _CcpnGLWidget
                 #  RowIndex is extremely important so to ensure precise firing and avoid duplicates/circles.
                 glWidget = strip.getGLWidget()
-                signals = [glWidget.GLSignals.glXAxisChanged,
-                           glWidget.GLSignals.glYAxisChanged,
-                           glWidget.GLSignals.glAllAxesChanged]
+                signals = [glWidget.GLSignals._syncChanged]
                 for signal in signals:
                     slot = partial(self._syncAxes, signal=signal, rowIndex=index)
                     connection = signal.connect(slot)
                     connections.append(connection)
                     connectedSignals.append(signal)
-            self._signalsDict[index] = {_SIGNALS    : connectedSignals,
-                                        _CONNECTIONS: connections}
+            self._signalsDict[index] = {
+                                                    _SIGNALS               : connectedSignals,
+                                                    _CONNECTIONS    : connections,
+                                                    _SLOT                     : slots
+                                                    }
 
     def _removeGUIConnectionSignals(self, data=None):
         """
@@ -501,7 +511,7 @@ class SpectrumDisplaySyncHandler(object):
         if data is None:
             data = self.data
         for index, row in data.iterrows():
-            signalDict = self._signalsDict.get(index)
+            signalDict = self._signalsDict.pop(index, None)
             if signalDict is not None:
                 signals = signalDict.get(_SIGNALS)
                 connections = signalDict.get(_CONNECTIONS)
@@ -639,10 +649,6 @@ class SyncSpectrumDisplaysTable(CustomDataFrameTable):
 
         self._columnDefs.setColumns(columns)
         self._rightClickedTableIndex = None  # last selected item in a table before raising the context menu. Enabled with mousePress event filter
-
-        ## Add an empty row to start if not any
-        if self.backend.isEmpty:
-            self._newSync()
 
     @property
     def backend(self):
@@ -984,14 +990,15 @@ class SpectrumDisplaysSyncEditorModule(CcpnModule):
         ## Add GUI
         hgrid = 0
         self.table = SyncSpectrumDisplaysTable(self.mainWidget, grid=(hgrid, 0), gridSpan=(2, 2))
-        self.editButtons = ButtonList(self.mainWidget, texts=['', '', '', '...'],
-                                      icons=['icons/list-add', 'icons/list-remove', 'icons/window-duplicate', ''],
-                                      tipTexts=['Add new sync', 'Remove selected', 'Clone single selected row'],
+        sx = 'Sync all open SpectrumDisplays on %s axes'
+        self.editButtons = ButtonList(self.mainWidget, texts=['', '', '', ''],
+                                      icons=['icons/list-add',  'icons/allXY','icons/allX','icons/allY'],
+                                      tipTexts=['Add new sync', sx%'X/Y',sx%'X',sx%'Y', ],
                                       callbacks=[
                                           self.table._newSync,
-                                          self.table._removeSelectedSync,
-                                          self.table._duplicateSelectedSync,
-                                          None
+                                          self._syncAllAxesOnOpenedSpectrumDisplays,
+                                          self._syncXAxesOnOpenedSpectrumDisplays,
+                                          self._syncYAxesOnOpenedSpectrumDisplays
                                           ],
                                       direction='v',
                                       setMinimumWidth=False,
@@ -1011,9 +1018,7 @@ class SpectrumDisplaysSyncEditorModule(CcpnModule):
                                       grid=(hgrid, 2),
                                       vAlign='b')
         self._updateButton = self.syncButtons.buttons[0]
-        self.moreButton = self.editButtons.buttons[3]
-        menu = self.addMoreButtonMenuOptions()
-        self.moreButton.setMenu(menu)
+
         self.table.setMinimumHeight(100)
         # self.table.setMinimumWidth(self._minimumWidth)
         self.table.tableChanged.connect(self._tableHasChanged)
@@ -1064,19 +1069,21 @@ class SpectrumDisplaysSyncEditorModule(CcpnModule):
         backend._data = newData
         self.table.populateTable()
 
-    def _syncXAxesOnOpenedSpectrumDisplays(self):
+    def _syncXAxesOnOpenedSpectrumDisplays(self, update=True):
         self.backend._syncAxesOnSpectrumDisplays(self.project.spectrumDisplays, axisIndex=0)
-        self._tableHasChanged()
-        self.updateTable()
+        if update:
+            self._tableHasChanged()
+            self.updateTable()
 
-    def _syncYAxesOnOpenedSpectrumDisplays(self):
+    def _syncYAxesOnOpenedSpectrumDisplays(self, update=True):
         self.backend._syncAxesOnSpectrumDisplays(self.project.spectrumDisplays, axisIndex=1)
-        self._tableHasChanged()
-        self.updateTable()
+        if update:
+            self._tableHasChanged()
+            self.updateTable()
 
     def _syncAllAxesOnOpenedSpectrumDisplays(self):
-        self.backend._syncAxesOnSpectrumDisplays(self.project.spectrumDisplays, axisIndex=0)
-        self.backend._syncAxesOnSpectrumDisplays(self.project.spectrumDisplays, axisIndex=1)
+        self._syncXAxesOnOpenedSpectrumDisplays(update=False)
+        self._syncYAxesOnOpenedSpectrumDisplays(update=False)
         self._tableHasChanged()
         self.updateTable()
 

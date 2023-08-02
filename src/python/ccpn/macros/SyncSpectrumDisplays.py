@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-02 16:19:01 +0100 (Wed, August 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-02 16:59:25 +0100 (Wed, August 02, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -42,6 +42,7 @@ from collections import defaultdict
 from ccpn.util.decorators import singleton
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.core.lib.Notifiers import Notifier
+from ccpn.util.DataEnum import DataEnum
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
@@ -57,8 +58,6 @@ from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.Strip import Strip
-from ccpn.ui.gui.widgets.Menu import Menu
-
 
 # This block is for the macro while is under development - Avoid the singleton to reload the python module and have unexpected behaviours.
 ccpnApplication = getApplication()
@@ -262,7 +261,7 @@ class SpectrumDisplaySyncHandler(object):
     def clearAll(self):
         """Remove all sync from the table.
         """
-        self._removeGUIConnectionSignals()
+        self._removeGUIConnectionSignals(self.data)
         self._data.drop(index=self._data.index, inplace=True, errors='ignore')
         self._signalsDict.clear()
         return self._data
@@ -301,8 +300,7 @@ class SpectrumDisplaySyncHandler(object):
         return df[mask].copy()
 
     def _isValidSignal(self, rowIndex, signal, callbackDict):
-        print(f' callbackDict: {callbackDict} ====\nrowIndex: {rowIndex} ===\nSignal: {signal}')
-        valid = True
+        valid = False
         if rowIndex not in self.data.index:
             connection = self._signalsDict.get(rowIndex)
             if connection is None:
@@ -318,6 +316,10 @@ class SpectrumDisplaySyncHandler(object):
                         getLogger().warning(f'Cannot disconnect {signal} from connection: {connection}. Invalid row {rowIndex}. Error: {err}')
             self._signalsDict.pop(rowIndex, None)
             valid = False
+        elif self._signalsDict is None or len(self._signalsDict.keys())==0:
+            valid = False
+        else:
+            valid = True
         return valid
 
     def _getAxisByAxisCode(self, strip, axisCode):
@@ -502,14 +504,12 @@ class SpectrumDisplaySyncHandler(object):
                                                     _SLOT                     : slots
                                                     }
 
-    def _removeGUIConnectionSignals(self, data=None):
+    def _removeGUIConnectionSignals(self, data):
         """
         disconnect the GL widgets which synchronise the spectrumDisplays.
-        :param strips: list of strips to be disconnected. If None, it will disconnect all in the data
         :return:
         """
-        if data is None:
-            data = self.data
+
         for index, row in data.iterrows():
             signalDict = self._signalsDict.pop(index, None)
             if signalDict is not None:
@@ -572,12 +572,13 @@ class SyncSpectrumDisplaysTable(CustomDataFrameTable):
     INVALIDCOLOUR = '#f05454'
     VALIDCOLOUR = '#f7f2f2'
 
-    def __init__(self, parent, *args, **kwds):
+    def __init__(self, parent,  parentModule, *args, **kwds):
         super().__init__(parent, *args, **kwds)
         self.project = getProject()
         self.mainWindow = getMainWindow()
         self.application = getApplication()
         self.current = getCurrent()
+        self.parentModule = parentModule
         # define the column definitions
         ## columnMap -> key: the rowdata column name. Value: the displayed text
         self.columnMap = {
@@ -669,6 +670,9 @@ class SyncSpectrumDisplaysTable(CustomDataFrameTable):
         :return: the displayed dataframe
         """
         self.setDataFrame(self.backend.data)
+        if self.parentModule._getSyncState == _SyncState.SUSPENDED:
+            return self.dataFrame
+
         self.backend._addGUIConnectionSignals()
         return self.dataFrame
 
@@ -968,6 +972,17 @@ class SyncSpectrumDisplaysTable(CustomDataFrameTable):
             self.updateTable()
 
 
+class _SyncState(DataEnum):
+    """
+    _SyncState = 0 # status: done, no need to update. icon Green
+    _SyncState = 1 # status: to be done, on the queue and need to update. icon Orange
+    _SyncState = 2 # status: suspended, Might be updates. icon red
+    """
+
+    DONE        = 0, 'icons/link_done'
+    DETECTED    = 1, 'icons/link_needsUpdate'
+    SUSPENDED   = 2, 'icons/link_suspended'
+
 class SpectrumDisplaysSyncEditorModule(CcpnModule):
     """
     """
@@ -986,10 +1001,11 @@ class SpectrumDisplaysSyncEditorModule(CcpnModule):
         self.current = getCurrent()
         self.project = getProject()
         self._backend = SpectrumDisplaySyncHandler()
+        self._syncState = _SyncState.DONE
 
         ## Add GUI
         hgrid = 0
-        self.table = SyncSpectrumDisplaysTable(self.mainWidget, grid=(hgrid, 0), gridSpan=(2, 2))
+        self.table = SyncSpectrumDisplaysTable(self.mainWidget, parentModule=self,  grid=(hgrid, 0), gridSpan=(2, 2))
         sx = 'Sync all open SpectrumDisplays on %s axes'
         self.editButtons = ButtonList(self.mainWidget, texts=['', '', '', ''],
                                       icons=['icons/list-add',  'icons/allXY','icons/allX','icons/allY'],
@@ -997,8 +1013,8 @@ class SpectrumDisplaysSyncEditorModule(CcpnModule):
                                       callbacks=[
                                           self.table._newSync,
                                           self._syncAllAxesOnOpenedSpectrumDisplays,
-                                          self._syncXAxesOnOpenedSpectrumDisplays,
-                                          self._syncYAxesOnOpenedSpectrumDisplays
+                                          partial(self._syncXAxesOnOpenedSpectrumDisplays, update=True),
+                                          partial(self._syncYAxesOnOpenedSpectrumDisplays, update=True)
                                           ],
                                       direction='v',
                                       setMinimumWidth=False,
@@ -1052,36 +1068,25 @@ class SpectrumDisplaysSyncEditorModule(CcpnModule):
     ################ Notification callbacks ###############
     ################################################
 
-    def addMoreButtonMenuOptions(self, ):
-        """Add options to more button menu
-        """
-        menu = Menu('', None, isFloatWidget=True)
-        self._actions = [
-            menu.addAction('X/Y Sync all Spectrum Displays', self._syncAllAxesOnOpenedSpectrumDisplays),
-            menu.addAction('X Sync all Spectrum Displays', self._syncXAxesOnOpenedSpectrumDisplays),
-            menu.addAction('Y Sync all Spectrum Displays', self._syncYAxesOnOpenedSpectrumDisplays),
-            ]
-        return menu
-
     def _updateData(self):
         newData = self.table.dataFrame
         backend = self.backend
         backend._data = newData
         self.table.populateTable()
 
-    def _syncXAxesOnOpenedSpectrumDisplays(self, update=True):
+    def _syncXAxesOnOpenedSpectrumDisplays(self, update=True, **kwargs):
         self.backend._syncAxesOnSpectrumDisplays(self.project.spectrumDisplays, axisIndex=0)
         if update:
             self._tableHasChanged()
             self.updateTable()
 
-    def _syncYAxesOnOpenedSpectrumDisplays(self, update=True):
+    def _syncYAxesOnOpenedSpectrumDisplays(self, update=True, **kwargs):
         self.backend._syncAxesOnSpectrumDisplays(self.project.spectrumDisplays, axisIndex=1)
         if update:
             self._tableHasChanged()
             self.updateTable()
 
-    def _syncAllAxesOnOpenedSpectrumDisplays(self):
+    def _syncAllAxesOnOpenedSpectrumDisplays(self, *args, **kwargs):
         self._syncXAxesOnOpenedSpectrumDisplays(update=False)
         self._syncYAxesOnOpenedSpectrumDisplays(update=False)
         self._tableHasChanged()
@@ -1122,8 +1127,7 @@ class SpectrumDisplaysSyncEditorModule(CcpnModule):
         self.table.updateTable()
 
     def _tableHasChanged(self, *args, **kwargs):
-        icon = Icon('icons/link_needsUpdate')
-        self._updateButton.setIcon(icon)
+        self._setSyncState(_SyncState.DETECTED)
 
     def _syncAll(self):
         if self.backend.isEmpty:
@@ -1132,7 +1136,8 @@ class SpectrumDisplaysSyncEditorModule(CcpnModule):
         allValid, msgs = self.table._validateTable()
         if all(allValid):
             self.backend._addGUIConnectionSignals()
-            self._updateButton.setIcon(Icon('icons/link_done'))
+            self._setSyncState(_SyncState.DONE)
+
         else:
             text = '\n'.join(msgs)
             showWarning('Could not sync', text)
@@ -1142,8 +1147,26 @@ class SpectrumDisplaysSyncEditorModule(CcpnModule):
         if self.backend.isEmpty:
             showWarning('Nothing to unsync', 'The table data is already empty')
             return
-        self.backend._removeGUIConnectionSignals()
-        self._updateButton.setIcon(Icon('icons/link_suspended'))
+        self.backend._removeGUIConnectionSignals(self.backend.data)
+        self._setSyncState(_SyncState.SUSPENDED)
+
+    def _getSyncState(self):
+        return self._syncState
+
+    def _setSyncState(self, value):
+
+        dataEnum = None
+        if isinstance(value, DataEnum):
+            dataEnum = value
+        else:
+            for i in _SyncState:
+                if i.value == value:
+                    dataEnum = value
+
+        if dataEnum:
+            self._updateState = dataEnum.value
+            iconValue = dataEnum.description
+            self._updateButton.setIcon(Icon(iconValue))
 
     def _closeModule(self):
         # Do all clean up

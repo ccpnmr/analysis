@@ -55,8 +55,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-08-02 16:27:32 +0100 (Wed, August 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-08-02 16:18:35 +0100 (Wed, August 02, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -1299,6 +1299,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self._clearAndUpdate()
         self.update()
 
+        self.emitAllAxesChanged(allStrips=True)
+
     def _rescaleAllAxes(self, mouseMoveOnly=False, update=True):
         self._testAxisLimits()
         self.rescale(rescaleStaticHTraces=True, rescaleStaticVTraces=True,
@@ -1655,6 +1657,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisB -= zoomPercent * dy
 
         self._rescaleAllAxes()
+        self.emitAllAxesChanged(allStrips=True)
 
     def zoomOut(self):
         zoomPercent = self._preferences.zoomPercent / 100.0
@@ -1666,6 +1669,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisB -= zoomPercent * dy
 
         self._rescaleAllAxes()
+        self.emitAllAxesChanged(allStrips=True)
+
 
     def _resetAxisRange(self, xAxis=True, yAxis=True):
         """
@@ -6758,6 +6763,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
             self._testAxisLimits(setLimits=True)
             self._resetBoxes()
+            self.emitAllAxesChanged(allStrips=True)
 
             # this also rescales the peaks
             self._rescaleXAxis()

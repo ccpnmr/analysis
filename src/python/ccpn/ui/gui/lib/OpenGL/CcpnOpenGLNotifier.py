@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-28 16:36:55 +0100 (Fri, July 28, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-08-02 16:18:35 +0100 (Wed, August 02, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -98,6 +98,7 @@ class GLNotifier(QtWidgets.QWidget):
     glYAxisChanged = pyqtSignal(dict)
     glAllAxesChanged = pyqtSignal(dict)
     glMouseMoved = pyqtSignal(dict)
+    _syncChanged = pyqtSignal(dict)
     glEvent = pyqtSignal(dict)
     glAxisLockChanged = pyqtSignal(dict)
     glAxisUnitsChanged = pyqtSignal(dict)
@@ -202,6 +203,7 @@ class GLNotifier(QtWidgets.QWidget):
                                                 GLNotifier.GLSTRIPZOOMALL   : zoomAll}
                  }
         self.glAllAxesChanged.emit(aDict)
+        self._syncChanged.emit(aDict)
 
     def _emitXAxisChanged(self, source=None, strip=None, spectrumDisplay=None,
                           axisB=None, axisT=None, axisL=None, axisR=None,
@@ -224,6 +226,8 @@ class GLNotifier(QtWidgets.QWidget):
                                                 GLNotifier.GLSTRIPZOOMALL   : zoomAll}
                  }
         self.glXAxisChanged.emit(aDict)
+        self._syncChanged.emit(aDict)
+
 
     def _emitYAxisChanged(self, source=None, strip=None, spectrumDisplay=None,
                           axisB=None, axisT=None, axisL=None, axisR=None,
@@ -246,6 +250,8 @@ class GLNotifier(QtWidgets.QWidget):
                                                 GLNotifier.GLSTRIPZOOMALL   : zoomAll}
                  }
         self.glYAxisChanged.emit(aDict)
+        self._syncChanged.emit(aDict)
+
 
     def _emitMouseMoved(self, source=None, coords=None, mouseMovedDict=None, mainWindow=None):
         if self._blocked:
@@ -316,3 +322,5 @@ class GLNotifier(QtWidgets.QWidget):
                  GLNotifier.GLMODIFIER: modifier
                  }
         self.glKeyEvent.emit(aDict)
+        self._syncChanged.emit(aDict)
+

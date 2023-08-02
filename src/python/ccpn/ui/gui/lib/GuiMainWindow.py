@@ -16,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:41 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-08-02 16:51:36 +0100 (Wed, August 02, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -285,7 +285,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
     #         elif event.oldState() & QtCore.Qt.WindowMinimized:
     #
     #             self.WindowMaximiseMinimise.emit(True)
-    #             # TODO:ED changeEvent: Normal/Maximised/FullScreen - call populate all modules
+    #             # oldTODO:ED changeEvent: Normal/Maximised/FullScreen - call populate all modules
     #             pass
     #
     #     event.ignore()
@@ -459,7 +459,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
     #     self._fillRecentProjectsMenu()
     #     self._fillPredefinedLayoutMenu()
     #     self._fillRecentMacrosMenu()
-    #     #TODO:ED needs fixing
+    #     #oldTODO:ED needs fixing
     #     self._reloadCcpnPlugins()
     #     # self._fillCcpnPluginsMenu()
     #     # self._fillUserPluginsMenu()
@@ -666,7 +666,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
     #     """
     #     Populates recent macros menu with last ten macros ran.
     #     """
-    #     #TODO: make sure that running a macro adds it to the prefs and calls this function
+    #     #oldTODO: make sure that running a macro adds it to the prefs and calls this function
     #
     #     recentMacrosMenu = self.getMenuAction('Macro->Run Recent')
     #     recentMacrosMenu.clear()
@@ -700,7 +700,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
     # def _fillRecentMacrosMenu(self):
     #     """
     #     Populates recent macros menu with last ten macros ran.
-    #     TODO: make sure that running a macro adds it to the prefs and calls this function
+    #     oldTODO: make sure that running a macro adds it to the prefs and calls this function
     #     """
     #     recentMacrosMenu = self.getMenuAction('Macro->Run Recent')
     #     recentMacros = self.application.preferences.recentMacros
@@ -1035,7 +1035,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
     #     if not pluginModule.aborted:
     #         self.application.ui.pluginModules.append(pluginModule)
     #         self.moduleArea.addModule(pluginModule)
-    #     # TODO: open as pop-out, not as part of MainWindow
+    #     # oldTODO: open as pop-out, not as part of MainWindow
     #     # self.moduleArea.moveModule(pluginModule, position='above', neighbor=None)
     #
     # def _updateRestoreArchiveMenu(self):
@@ -1398,8 +1398,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
     #
     # # def deleteSelectedPeaks(self, parent=None):
     # #
-    # #   # NBNB Moved here from Current
-    # #   # NBNB TODO: more general deletion
+    # #   # oldTODOMoved here from Current
+    # #   # oldTODO: more general deletion
     # #
     # #   current = self.application.current
     # #   peaks = current.peaks
@@ -1824,7 +1824,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
     #         for chemicalShift in chemicalShifts[ii]:
     #             atomId = chemicalShift.nmrAtom.id
     #             atomName = chemicalShift.nmrAtom.name
-    #             # TODO: the below fails, for example, if nmrAtom.name = 'Hn', can that happen?
+    #             # oldTODO: the below fails, for example, if nmrAtom.name = 'Hn', can that happen?
     #
     #             # colour = colourDict.get(atomName[:min(2,len(atomName))])
     #             colourMarks = guiSettings.getColours().get(guiSettings.MARKS_COLOURS)

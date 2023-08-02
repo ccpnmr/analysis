@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 12:06:24 +0100 (Fri, June 09, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-08-02 17:39:49 +0100 (Wed, August 02, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -723,7 +723,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
     def _getChildrenByClass(self, klass) -> list:
         """GWV: Convenience: get the children of type klass of self.
-        klass is string (e.g. 'Peak') or V3 core class
+        klass is string (e.g. 'Peak') or V3 core class instance
         returns empty list if klass is not a child of self
         """
         klass = klass if isinstance(klass, str) else getattr(klass, 'className')

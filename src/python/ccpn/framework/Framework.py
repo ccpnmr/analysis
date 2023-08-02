@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-08-02 17:19:18 +0100 (Wed, August 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-02 17:39:49 +0100 (Wed, August 02, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -1386,7 +1386,8 @@ class Framework(NotifierBase, GuiBase):
 
         # TODO: find a different solution for this
         with rebuildSidebar(application=self):
-            if _newProject and (ch := project.getChemicalShiftList(DEFAULT_CHEMICALSHIFTLIST)):
+            _cslDict = dict((csl.name, csl) for csl in project.chemicalShiftLists)
+            if _newProject and (ch := _cslDict.get(DEFAULT_CHEMICALSHIFTLIST)):
                 # rename the existing chemical-shift-list, hopefully an unused name
                 ch.rename(TOBEDELETED)
 

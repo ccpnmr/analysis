@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-02 11:05:22 +0000 (Thu, March 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-08-02 16:27:32 +0100 (Wed, August 02, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -34,6 +34,7 @@ from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView
 from ccpn.util import Colour
 from ccpn.util.Logging import getLogger
 from ccpn.core.Spectrum import MAXALIASINGRANGE
+from ccpn.core.lib.ContextManagers import notificationEchoBlocking
 from ccpnc.contour import Contourer2d
 
 
@@ -480,3 +481,31 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
         GLSignals = GLNotifier(parent=self)
         GLSignals.emitPaintEvent()
+
+    def _getSliceData(self, points, sliceDim):
+        """Get the slice along sliceDim.
+        Separate routine to allow for caching,
+        uses Spectrum._getSliceDataFromPlane for efficient extraction of slices
+
+        points as integer list, with points[sliceDim-1] set to 1, as this allows
+        the cached _getSliceFromPlane to work best
+
+        return sliceData numpy array
+        """
+
+        # need to block logging
+        with notificationEchoBlocking(self.application):
+            axisCodes = [a.code for a in self.strip.axes][0:2]
+            # planeDims = spectrumView.spectrum.getByAxisCodes('dimensions', axisCodes)
+            pointCounts = self.spectrum.pointCounts
+            pointInt = [int(round(pnt) % pointCounts[ii]) + 1 for ii, pnt in enumerate(points)]
+            pointInt[sliceDim - 1] = 1  # To improve caching; points, dimensions are 1-based
+
+            # GWV: why copy again into numpy array? the routine already returns this
+            # data = np.array(spectrumView.spectrum._getSliceDataFromPlane(position=pointInt,
+            #                                                              xDim=planeDims[0], yDim=planeDims[1], sliceDim=sliceDim))
+            # GWV reverted to getSliceData
+            data = self.spectrum.getSliceData(position=pointInt, sliceDim=sliceDim)
+            if self._traceScale is None:
+                self._traceScale = 1.0 / max(data) * 0.5
+        return data

@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-31 16:38:54 +0100 (Mon, July 31, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-02 16:27:32 +0100 (Wed, August 02, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -4638,35 +4638,6 @@ class CcpnGLWidget(QOpenGLWidget):
             GL.glVertex2d(cursCoord[0], cursCoord[1])
             GL.glEnd()
 
-    def _getSliceData(self, spectrumView, points, sliceDim):
-        """Get the slice along sliceDim, using spectrumView to get to spectrum
-        Separate routine to allow for caching,
-        uses Spectrum._getSliceDataFromPlane for efficient extraction of slices
-
-        points as integer list, with points[sliceDim-1] set to 1, as this allows
-        the cached _getSliceFromPlane to work best
-
-        return sliceData numpy array
-        """
-        #TODO: Move functionality to SpectrumView class
-
-        # need to block logging
-        with notificationEchoBlocking(self.application):
-            axisCodes = [a.code for a in spectrumView.strip.axes][0:2]
-            # planeDims = spectrumView.spectrum.getByAxisCodes('dimensions', axisCodes)
-            pointCounts = spectrumView.spectrum.pointCounts
-            pointInt = [int(round(pnt) % pointCounts[ii]) + 1 for ii, pnt in enumerate(points)]
-            pointInt[sliceDim - 1] = 1  # To improve caching; points, dimensions are 1-based
-
-            # GWV: why copy again into numpy array? the routine already returns this
-            # data = np.array(spectrumView.spectrum._getSliceDataFromPlane(position=pointInt,
-            #                                                              xDim=planeDims[0], yDim=planeDims[1], sliceDim=sliceDim))
-            # GWV reverted to getSliceData
-            data = spectrumView.spectrum.getSliceData(position=pointInt, sliceDim=sliceDim)
-            if spectrumView._traceScale is None:
-                spectrumView._traceScale = 1.0 / max(data) * 0.5
-        return data
-
     def _getSliceDataTest(self, spectrumView, points, sliceDim, ppmPositions, range):
         # quick method for testing
         # need to block logging
@@ -4693,7 +4664,7 @@ class CcpnGLWidget(QOpenGLWidget):
                              point, dim, positionPixel):
 
         try:
-            data = self._getSliceData(spectrumView=spectrumView, points=point, sliceDim=dim)
+            data = spectrumView._getSliceData(points=point, sliceDim=dim)
             x = spectrumView.spectrum.getPpmArray(dimension=dim)
             _posColour = spectrumView.posColours[0]
             colR, colG, colB = _posColour[0:3]
@@ -4734,7 +4705,7 @@ class CcpnGLWidget(QOpenGLWidget):
                              point, dim, positionPixel):
 
         try:
-            data = self._getSliceData(spectrumView=spectrumView, points=point, sliceDim=dim)
+            data = spectrumView._getSliceData(points=point, sliceDim=dim)
             y = spectrumView.spectrum.getPpmArray(dimension=dim)
             _posColour = spectrumView.posColours[0]
             colR, colG, colB = _posColour[0:3]
@@ -4776,7 +4747,7 @@ class CcpnGLWidget(QOpenGLWidget):
                           ph0=None, ph1=None, pivot=None):
 
         try:
-            data = self._getSliceData(spectrumView=spectrumView, points=point, sliceDim=dim)
+            data = spectrumView._getSliceData(points=point, sliceDim=dim)
 
             if ph0 is not None and ph1 is not None and pivot is not None:
                 data = Phasing.phaseRealData(data, ph0, ph1, pivot)
@@ -4834,7 +4805,7 @@ class CcpnGLWidget(QOpenGLWidget):
                           ph0=None, ph1=None, pivot=None):
 
         try:
-            data = self._getSliceData(spectrumView=spectrumView, points=point, sliceDim=dim)
+            data = spectrumView._getSliceData(points=point, sliceDim=dim)
 
             if ph0 is not None and ph1 is not None and pivot is not None:
                 data = Phasing.phaseRealData(data, ph0, ph1, pivot)

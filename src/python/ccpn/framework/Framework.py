@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-08-02 17:39:49 +0100 (Wed, August 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-02 18:07:28 +0100 (Wed, August 02, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -1373,7 +1373,7 @@ class Framework(NotifierBase, GuiBase):
         :return Project instance (either newly created or the existing)
         CCPNINTERNAL: called from NefDataLoader.load()
         """
-        from ccpn.core.ChemicalShiftList import DEFAULT_CHEMICALSHIFTLIST
+        from ccpn.core.ChemicalShiftList import ChemicalShiftList, DEFAULT_CHEMICALSHIFTLIST
         from ccpn.core.lib.ProjectLib import checkProjectName
 
         TOBEDELETED = '_toBeDeleted'
@@ -1386,8 +1386,8 @@ class Framework(NotifierBase, GuiBase):
 
         # TODO: find a different solution for this
         with rebuildSidebar(application=self):
-            _cslDict = dict((csl.name, csl) for csl in project.chemicalShiftLists)
-            if _newProject and (ch := _cslDict.get(DEFAULT_CHEMICALSHIFTLIST)):
+            if _newProject and \
+                (ch := project._getChild(ChemicalShiftList, DEFAULT_CHEMICALSHIFTLIST)):
                 # rename the existing chemical-shift-list, hopefully an unused name
                 ch.rename(TOBEDELETED)
 

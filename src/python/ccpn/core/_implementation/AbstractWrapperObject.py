@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-08-02 17:39:49 +0100 (Wed, August 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-02 18:07:28 +0100 (Wed, August 02, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -712,6 +712,15 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
     #     print(s)
     #     for child in node._childClasses:
     #         self._printClassTree(child, tabs=tabs + 1)
+
+    def _getChild(self, klazz, name):
+        """Get the child of type klazz with name
+        :param klazz: class identifier: either className, shortClassName of a CoreClass
+        :param name: the name of the child object
+        :return the child or None
+        """
+        _pid = Pid.new(klazz, name)
+        return self.project.getByPid(_pid)
 
     def _getAllDecendants(self) -> list:
         """Get all objects descending from self; i.e. children, grandchildren, etc

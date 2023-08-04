@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -11,9 +11,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:11 +0100 (Wed, October 12, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-08-04 15:38:57 +0100 (Fri, August 04, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -39,17 +39,23 @@ from ccpn.ui.gui.widgets.ProgressWidget import ProgressDialog
 from ccpn.util.UpdateScheduler import UpdateScheduler
 from ccpn.util.UpdateQueue import UpdateQueue
 
-
+ALLPEAKS = 'From All Available Peaks In The Project'
+ALLPEAKLISTS = 'From All Available Peaklists In The Project'
+FROMSPECTRUM = 'From An Individual Spectrum'
+SELECTED = 'From Selected Peaks'
+VISIBLESPECTRA = 'From Visible Spectra'
+SELECTANOPTION = '< Select an option to start >'
 class CopyPeaks(CcpnDialog):
 
-    def __init__(self, parent=None, mainWindow=None, title='Copy Peaks to PeakLists', **kwds):
+    def __init__(self, parent=None, mainWindow=None, title='Copy Peaks to PeakLists',
+                 selectedPeak=None, targetPeakLists=None, **kwds):
         CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, size=(700, 600), **kwds)
 
         self.mainWindow = mainWindow
         self.application = mainWindow.application
         self.current = self.application.current
         self.project = mainWindow.project
-
+        self._pulldownDataReady = False
         self._createWidgets()
         self._registerNotifiers()
 
@@ -68,11 +74,18 @@ class CopyPeaks(CcpnDialog):
 
         self.getLayout().setContentsMargins(10, 10, 10, 10)
         row = 0
-        self.spectraLabel1 = Label(self, 'Select Origin Spectra', grid=(row, 0), hAlign='l')
-        self.spectraLabel2 = Label(self, 'Select Destination Spectra', grid=(row, 1), hAlign='l')
+        self.spectraLabel1 = Label(self, 'Filter Source Peaks ', grid=(row, 0), hAlign='l')
+        self.spectraLabel2 = Label(self, 'Filter Destination PeakLists', grid=(row, 1), hAlign='l')
         row += 1
-        self.selectFromPullDown = PulldownList(self, texts=['All'], callback=self._populatePeakWidget, grid=(row, 0))
-        self.selectToPullDown = PulldownList(self, texts=['All'], callback=self._populatePeakListsWidget, grid=(row, 1))
+        self.selectFromPullDownInitialText = [SELECTED, ALLPEAKS, FROMSPECTRUM]
+        self.selectToPullDownInitialText = [VISIBLESPECTRA, ALLPEAKLISTS,  FROMSPECTRUM]
+
+        self.selectFromPullDown = PulldownList(self, texts=self.selectFromPullDownInitialText , callback=self._populatePeakWidget,
+                                               clickToShowCallback=self._setPullDownData, headerText=SELECTANOPTION, grid=(row, 0))
+        self.selectToPullDown = PulldownList(self, texts=self.selectToPullDownInitialText, headerText=SELECTANOPTION,
+                                             callback=self._populatePeakListsWidget,
+                                             clickToShowCallback=self._setPullDownData,
+                                             grid=(row, 1))
         row += 1
         self.inputPeaksWidgetLabel = Label(self, 'Select Peaks To Copy', grid=(row, 0), hAlign='l')
         self.outputPeakListsWidgetLabel = Label(self, 'Select Destination PeakLists', grid=(row, 1), hAlign='l')
@@ -90,34 +103,75 @@ class CopyPeaks(CcpnDialog):
                                       tipTexts=['Close popup', tipText], grid=(row, 1))
 
         self.copyButtons.buttons[1].setDisabled(True)
+        self._initiateSelectionPullDowns()
 
-        self._populatePeakWidget()
-        self._populatePeakListsWidget()
-        self._setPullDownData()
+    def _initiateSelectionPullDowns(self):
+        isOkToEnableCopy = []
+        if len(self.current.peaks)>0:
+            self.selectFromPullDown.select(SELECTED)
+            self.inputPeaksWidget.selectAll()
+            isOkToEnableCopy.append(True)
+        if len(self.project.spectrumDisplays)>0:
+            self.selectToPullDown.select(VISIBLESPECTRA)
+            if self.inputPeaksListWidget.count() == 1:
+                self.inputPeaksListWidget.selectAll()
+                isOkToEnableCopy.append(True)
+        if len(isOkToEnableCopy) == 2 and all(isOkToEnableCopy):
+            self.copyButtons.buttons[1].setDisabled(False)
 
     def _setPullDownData(self):
-        for spectrum in self.project.spectra:
-            self.selectFromPullDown.addItem(text=spectrum.pid, item=spectrum)
-            self.selectToPullDown.addItem(text=spectrum.pid, item=spectrum)
+        if not self._pulldownDataReady:
+            self.selectFromPullDown.disableLabelsOnPullDown([FROMSPECTRUM])
+            self.selectToPullDown.disableLabelsOnPullDown([FROMSPECTRUM])
+            self.selectFromPullDown.insertSeparator(len(self.selectFromPullDownInitialText))
+            self.selectToPullDown.insertSeparator(len(self.selectToPullDownInitialText))
+            for spectrum in self.project.spectra:
+                self.selectFromPullDown.addItem(text=spectrum.pid, item=spectrum)
+                self.selectToPullDown.addItem(text=spectrum.pid, item=spectrum)
+            self._pulldownDataReady = True
 
     def _populatePeakWidget(self, *args):
-        obj = self.selectFromPullDown.getObject()
-
-        if isinstance(obj, Spectrum):
-            peaks = []
-            for peakList in obj.peakLists:
-                peaks.extend(peakList.peaks)
-            self.inputPeaksWidget.setObjects(peaks, name='pid')
+        value = self.selectFromPullDown.getText()
+        peaks = []
+        if value == SELECTED:
+            peaks = self.current.peaks
+        if value == ALLPEAKS:
+            peaks = self.project.peaks
         else:
-            self.inputPeaksWidget.setObjects(self.project.peaks, name='pid')
+            obj = self.project.getByPid(value)
+            if isinstance(obj, Spectrum):
+                peaks = []
+                for peakList in obj.peakLists:
+                    peaks.extend(peakList.peaks)
+        if len(peaks)>0:
+            self.inputPeaksWidget.setObjects(peaks, name='pid')
 
     def _populatePeakListsWidget(self, *args):
 
-        obj = self.selectToPullDown.getObject()
-        if isinstance(obj, Spectrum):
-            self.inputPeaksListWidget.setObjects(obj.peakLists, name='pid')
+        value = self.selectToPullDown.getText()
+        peakLists = []
+        if value == VISIBLESPECTRA:
+
+            if self.current.strip:
+                spectraFromCurrentStrip = self.current.strip.spectrumDisplay.getVisibleSpectra()
+                allOtherVisibleSpectra = [sp for display in self.project.spectrumDisplays for sp in display.getVisibleSpectra() if sp not in spectraFromCurrentStrip]
+                spectra = spectraFromCurrentStrip + allOtherVisibleSpectra
+                ### remove the spectra if the current peaks are in the visible spectra ( avoid duplicating the peaks in the same peakList )
+                selectedPeaks = self.current.peaks
+                peakListsFromCurrentPeaks = [pk.peakList for pk in selectedPeaks]
+                for sp in spectra:
+                    for pl in sp.peakLists:
+                        if pl not in peakListsFromCurrentPeaks:
+                            peakLists.append(pl)
+        if value == ALLPEAKLISTS:
+            peakLists = self.project.peakLists
         else:
-            self.inputPeaksListWidget.setObjects(self.project.peakLists, name='pid')
+            obj = self.project.getByPid(value)
+            if isinstance(obj, Spectrum):
+                peakLists =obj.peakLists
+
+        if len(peakLists)>0:
+            self.inputPeaksListWidget.setObjects(peakLists, name='pid')
 
     def _refreshInputPeaksWidget(self, *args):
         self._populatePeakWidget()
@@ -177,7 +231,7 @@ class CopyPeaks(CcpnDialog):
             # undoManager = self._getUndo()
             # undoManager.undo()
 
-        # self._closePopup()
+        self._closePopup()
 
     def _selectPeaks(self, peaks):
         self.inputPeaksWidget.selectObjects(peaks)

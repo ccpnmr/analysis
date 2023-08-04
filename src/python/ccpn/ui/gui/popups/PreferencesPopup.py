@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-28 16:35:56 +0100 (Fri, July 28, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-08-04 15:42:39 +0100 (Fri, August 04, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -1039,8 +1039,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.peakFactor1D.set(self.preferences.general.peakFactor1D * 100.0)
 
         _peakPickers = getPeakPickerTypes()
-        self.peakPicker1dData.setData(texts=sorted([pp for pp in _peakPickers.keys()]))
-        self.peakPickerNdData.setData(texts=sorted([pp for pp in _peakPickers.keys()]))
+        self.peakPicker1dData.setData(texts=sorted([name for name, pp in _peakPickers.items() if pp.onlyFor1D]))
+        self.peakPickerNdData.setData(texts=sorted([name for name, pp in _peakPickers.items() if not pp.onlyFor1D]))
 
         default1DPickerType = self.preferences.general.peakPicker1d
         if not default1DPickerType or default1DPickerType not in _peakPickers:

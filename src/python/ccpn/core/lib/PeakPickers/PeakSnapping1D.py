@@ -24,8 +24,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-13 12:23:23 +0100 (Tue, June 13, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-08-04 15:40:55 +0100 (Fri, August 04, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -89,10 +89,12 @@ def snap1DPeaksByGroup(peaks, ppmLimit=0.05, unsnappedLimit=1, increaseLimitStep
 
     with undoBlockWithoutSideBar(): # set the final properties.
         with notificationEchoBlocking():
+            _snap1DPeaksToClosestExtremum(peaks ,maximumLimit=0.1, figOfMeritLimit=1, doNeg=doNeg, rawDataDict=rawDataDict, )
             for peak in peaks:
                 peak.position = peak._temporaryPosition
                 peak.height = float(peak._temporaryHeight)
                 peak.heightError = peak._temporaryHeightError
+
 
 ###################################
 ####### Private library functions   #######
@@ -324,6 +326,31 @@ def _correctNegativeHeight(height, doNeg=False):
             return np.nextafter(0, 1)
     return height
 
+def _smooth1D(x, y, windowSize=50, mode="hanning", align=True):
+    smoothingFuncs = {
+                                    "rolling"    : lambda _len: np.ones(_len, "d"), # this is simply a rolling average.
+                                    "hanning" : np.hanning,
+                                    "hamming" : np.hamming,
+                                    "bartlett": np.bartlett,
+                                    "blackman": np.blackman
+                                    }
+    fallbackMode = 'hanning'
+    if mode not in smoothingFuncs.keys():
+        getLogger().warning(f'Smooting function not available. use one of {smoothingFuncs.keys()}. Fallback: {fallbackMode}')
+    s = np.r_[y[windowSize-1: 0 : -1], y, y[-1:-windowSize:-1]]
+    f = smoothingFuncs.get(mode, fallbackMode)
+    w = f(windowSize)
+    ys = np.convolve(w / w.sum(), s, mode="same")
+    xs = x
+    if align: # a quick alignment based on the highest point in the two curves. original and smoothed
+        dd = len(ys) - len(y)
+        ys = ys[:-dd]
+        maxYind = np.argwhere(y == np.max(y))
+        maxYsind = np.argwhere(ys == np.max(ys))
+        shift = (x[maxYsind] - x[maxYind]).flatten()[-1]
+        xs = x - shift
+    return xs, ys
+
 def _get1DClosestExtremum(peak, maximumLimit=0.1,  doNeg=False,
                           figOfMeritLimit=1, rawDataDict=None ):
     """
@@ -363,14 +390,30 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1,  doNeg=False,
         spectrum.negativeNoiseLevel = negativeNoiseLevel
 
     x_filtered, y_filtered = _1DregionsFromLimits(x, y, [a, b])
-
     maxValues, minValues = _find1DMaxima(y_filtered, x_filtered, positiveThreshold=noiseLevel, negativeThreshold=negativeNoiseLevel, findNegative=doNeg)
     allValues = maxValues + minValues
-    allValues =  _filterLowSNFromNewMaxima(allValues, noiseLevel, negativeNoiseLevel,  snThreshold=0.1)
-    allValues = _filterShouldersFromNewMaxima(allValues, x_filtered, y_filtered)
     allValues = _filterKnownPeakPositionsFromNewMaxima(allValues, peak, rounding=4)
 
-    if len(allValues) > 0:
+    if len(allValues) > 1:
+        ## do a linesmoothing to remove noise and shoulder peaks.
+        x_filtered, y_filtered = _smooth1D(x_filtered, y_filtered)
+        maxValues, minValues = _find1DMaxima(y_filtered, x_filtered, positiveThreshold=noiseLevel, negativeThreshold=negativeNoiseLevel, findNegative=doNeg)
+        allValues = maxValues + minValues
+        allValues = _filterKnownPeakPositionsFromNewMaxima(allValues, peak, rounding=4)
+        if allValues.ndim == 2:
+            positions = allValues[:, 0]
+            heights = allValues[:, 1]
+            nearestPosition = find_nearest(positions, peak._temporaryPosition[0])
+            nearestHeight = heights[positions == nearestPosition]
+            position = [float(nearestPosition), ]
+            height = nearestHeight
+            height = _getClosestHeight(x, y, position, height)
+            heightError = 0
+        else:
+            height = _getClosestHeight(x, y, peak._temporaryPosition, peak._temporaryHeight)
+            heightError = 1
+
+    elif len(allValues) == 1: # we found just a sigle maxima
         allValues = np.array(allValues)
         positions = allValues[:, 0]
         heights = allValues[:, 1]
@@ -379,13 +422,13 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1,  doNeg=False,
         position = [float(nearestPosition), ]
         height = nearestHeight
         heightError = 0
-
     else:
         height = _getClosestHeight(x,y, peak._temporaryPosition, peak._temporaryHeight)
         heightError = 1
 
     height = _correctNegativeHeight(height, doNeg)  # Very important. don't return a negative height if doNeg is False.
     return position, float(height), heightError
+
 
 def _getClosestHeight(x,y, pos, currentHeight):
     try:
@@ -407,7 +450,7 @@ def _filterKnownPeakPositionsFromNewMaxima(newMaxima, peak,   rounding=4):
             continue # Don't remove if  a maximum is equal to the current position.
         if round(pos, rounding) in knownPositions:
             newMaxima.remove(maximum)
-    return newMaxima
+    return np.array(newMaxima)
 
 def _filterLowSNFromNewMaxima(newMaxima, noiseLevel, negativeNoise,  snThreshold=0.5):
     """Remove los s/n maxima from the newly found maxima to avoid snapping to noise"""

@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 12:06:24 +0100 (Fri, June 09, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-08-04 15:40:55 +0100 (Fri, August 04, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -75,7 +75,7 @@ class Peak(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = Nmr.Peak._metaclass.qualifiedName()
 
-    # Internal. Used as temporary holder during time-consuming peak snapping routines.
+    # Internal. Used as temporary holder during time-consuming and recursive peak snapping routines.
     _tempPosition = None
     _tempHeight = None
     _tempHeightError = None
@@ -1334,7 +1334,8 @@ class Peak(AbstractWrapperObject):
 
     @property
     def _temporaryHeight(self):
-        """temporary height of Peak."""
+        """Internal. Temporary height of Peak.
+         Used as temporary holder during time-consuming and recursive peak snapping routines."""
         if self._tempHeight is None:
             self._tempHeight = self.height
         return self._tempHeight
@@ -1345,7 +1346,8 @@ class Peak(AbstractWrapperObject):
 
     @property
     def _temporaryHeightError(self):
-        """temporary height Error of Peak."""
+        """Internal. Temporary height Error of Peak.
+         Used as temporary holder during time-consuming and recursive peak snapping routines."""
         if self._tempHeightError is None:
             self._tempHeightError = self.heightError
         return self._tempHeightError
@@ -1356,7 +1358,8 @@ class Peak(AbstractWrapperObject):
 
     @property
     def _temporaryPosition(self):
-        """temporary Position  of Peak."""
+        """Internal. temporary Position of a Peak.
+         Used as temporary holder during time-consuming and recursive peak snapping routines."""
         if self._tempPosition is None:
             self._tempPosition = self.position
         return self._tempPosition

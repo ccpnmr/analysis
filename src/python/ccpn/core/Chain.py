@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-13 16:46:09 +0100 (Thu, July 13, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-07 12:24:22 +0100 (Mon, August 07, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -158,7 +158,7 @@ class Chain(AbstractWrapperObject):
         """
         # extracted as function below.
         # - fires a single notifier for the chain creation
-        _cloneChain(self, shortName=shortName)
+        return _cloneChain(self, shortName=shortName)
 
     def _lock(self):
         """Finalise chain so that it can no longer be modified, and add missing data."""

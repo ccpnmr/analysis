@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-31 16:38:54 +0100 (Mon, July 31, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-07 16:56:15 +0100 (Mon, August 07, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -3300,6 +3300,10 @@ class GuiStrip(Frame):
             axes[0].region = ppmLimits
             axes[0]._positionByUnit = axes[0].position
             axes[0]._widthByUnit = axes[0].width
+
+            if valueLimits == (0.0, 0.0):
+                # make the axes show something for the first show if there is nothing in the spectrumData
+                valueLimits = (-1.0, 1.0)
 
             axes[1].region = valueLimits
             axes[1].unit = AXISUNIT_NUMBER

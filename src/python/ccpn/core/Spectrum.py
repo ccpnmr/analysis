@@ -54,7 +54,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-31 16:38:53 +0100 (Mon, July 31, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-07 16:56:15 +0100 (Mon, August 07, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -1521,8 +1521,8 @@ class Spectrum(AbstractWrapperObject):
             raise RuntimeError('Spectrum.get1Dlimits() is only implemented for 1D spectra')
         ppmLimits = self.spectrumLimits[0]
         sliceData = self.getSliceData()
-        minValue = float(min(sliceData))
-        maxValue = float(max(sliceData))
+        minValue = float(numpy.min(sliceData))
+        maxValue = float(numpy.max(sliceData))
         return (ppmLimits, (minValue, maxValue))
 
     @property

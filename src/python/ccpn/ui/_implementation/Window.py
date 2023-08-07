@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 14:29:32 +0100 (Wed, June 28, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-08-07 16:56:15 +0100 (Mon, August 07, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -295,6 +295,9 @@ class Window(AbstractWrapperObject):
         display.setBlankingAllNotifiers(value)
         for strip in display.strips:
             strip.setBlankingAllNotifiers(value)
+
+            # stop events when the display is being closed
+            strip._CcpnGLWidget._blankDisplay = True
 
     #=========================================================================================
     # Implementation functions

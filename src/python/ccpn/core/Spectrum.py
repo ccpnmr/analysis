@@ -53,8 +53,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-08-07 16:56:15 +0100 (Mon, August 07, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-08-08 18:56:08 +0100 (Tue, August 08, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -1315,6 +1315,9 @@ class Spectrum(AbstractWrapperObject):
     def referencePoints(self, value):
         self._setDimensionalAttributes('referencePoint', value)
 
+        if self.dimensionCount == 1: # make sure the spectrum will shift correctly on the next redraw.
+            self.positions = self.getPpmArray(dimension=1)
+
     @property
     @_includeInDimensionalCopy
     def referenceValues(self) -> List[Optional[float]]:
@@ -1327,6 +1330,8 @@ class Spectrum(AbstractWrapperObject):
     @ccpNmrV3CoreSetter(updateChemicalShifts=True)
     def referenceValues(self, value):
         self._setDimensionalAttributes('referenceValue', value)
+        if self.dimensionCount ==1: # make sure the spectrum will shift correctly on the next redraw.
+            self.positions = self.getPpmArray(dimension=1)
 
     @property
     def referenceSubstances(self) -> tuple:

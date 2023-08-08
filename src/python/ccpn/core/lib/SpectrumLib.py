@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-28 16:35:56 +0100 (Fri, July 28, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-08-08 18:54:14 +0100 (Tue, August 08, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -1572,14 +1572,17 @@ class _1DRawDataDict(dict):
     """
     Class to contain Spectra Raw ppmPosition and Intensities
     """
-    def __init__(self):
+    def __init__(self, spectra=None):
         super(_1DRawDataDict, self).__init__()
         from ccpn.framework.Application import getProject
+
         getLogger().info('Building 1D raw data dictionary...')
         project = getProject()
         dd =  {}
-        for sp in tqdm(project.spectra):
-            dd[sp] = (sp.positions,sp.intensities)
+        spectra = spectra or project.spectra
+        for sp in tqdm(spectra):
+            if sp.dimensionCount == 1:
+                dd[sp] = (sp.positions,sp.intensities)
         self.update(dd)
         getLogger().info('Building 1D raw data dictionary. Completed')
 

@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: VickyAH $"
-__dateModified__ = "$dateModified: 2023-05-12 09:59:29 +0100 (Fri, May 12, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-08-08 14:58:57 +0100 (Tue, August 08, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -895,12 +895,8 @@ def matchingNmrAtomsForPeaks(peaks: typing.List[Peak],
     _shifts = {}
     if (csls := set(pk.peakList.chemicalShiftList for pk in peaks)):
         for csl in csls:
-            _data = csl._data
-
-            if _data is not None and not _data.empty:
-                # get the values from the dataFrame
-                _vals = {_data.iloc[ii]['nmrAtom']: _data.iloc[ii]['value'] for ii in range(_data.shape[0])}
-                _shifts[csl] = _vals
+            if shfts := csl.chemicalShifts:
+                _shifts[csl] = {sh.nmrAtom.pid: sh.value for sh in shfts if sh.nmrAtom}
 
     for dim in range(N_dims):
         # Find and add the NmrAtoms that dimension dim in all peaks

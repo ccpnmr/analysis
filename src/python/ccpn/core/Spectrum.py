@@ -54,7 +54,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-08 18:56:08 +0100 (Tue, August 08, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-14 14:07:38 +0100 (Mon, August 14, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -1314,8 +1314,7 @@ class Spectrum(AbstractWrapperObject):
     @checkSpectrumPropertyValue(iterable=True, allowNone=False, types=(float, int))
     def referencePoints(self, value):
         self._setDimensionalAttributes('referencePoint', value)
-
-        if self.dimensionCount == 1: # make sure the spectrum will shift correctly on the next redraw.
+        if self.dimensionCount == 1 and not self.isEmptySpectrum(): # make sure the spectrum will shift correctly on the next redraw.
             self.positions = self.getPpmArray(dimension=1)
 
     @property
@@ -1330,7 +1329,8 @@ class Spectrum(AbstractWrapperObject):
     @ccpNmrV3CoreSetter(updateChemicalShifts=True)
     def referenceValues(self, value):
         self._setDimensionalAttributes('referenceValue', value)
-        if self.dimensionCount ==1: # make sure the spectrum will shift correctly on the next redraw.
+
+        if self.dimensionCount == 1 and not self.isEmptySpectrum(): # make sure the spectrum will shift correctly on the next redraw.
             self.positions = self.getPpmArray(dimension=1)
 
     @property
@@ -1659,10 +1659,6 @@ class Spectrum(AbstractWrapperObject):
     @ccpNmrV3CoreSetter(allChanged=True)
     def positions(self, value):
         self._positions = value
-
-        # # NOTE:ED - temporary hack for immediately showing the result of intensities change
-        # for spectrumView in self.spectrumViews:
-        #     spectrumView.refreshData()
 
     @property
     @_includeInCopy

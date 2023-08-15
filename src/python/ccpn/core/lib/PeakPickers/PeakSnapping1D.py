@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-04 15:40:55 +0100 (Fri, August 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-15 15:26:15 +0100 (Tue, August 15, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -89,7 +89,7 @@ def snap1DPeaksByGroup(peaks, ppmLimit=0.05, unsnappedLimit=1, increaseLimitStep
 
     with undoBlockWithoutSideBar(): # set the final properties.
         with notificationEchoBlocking():
-            _snap1DPeaksToClosestExtremum(peaks ,maximumLimit=0.1, figOfMeritLimit=1, doNeg=doNeg, rawDataDict=rawDataDict, )
+            # _snap1DPeaksToClosestExtremum(peaks ,maximumLimit=0.1, figOfMeritLimit=1, doNeg=doNeg, rawDataDict=rawDataDict, )
             for peak in peaks:
                 peak.position = peak._temporaryPosition
                 peak.height = float(peak._temporaryHeight)
@@ -336,7 +336,7 @@ def _smooth1D(x, y, windowSize=50, mode="hanning", align=True):
                                     }
     fallbackMode = 'hanning'
     if mode not in smoothingFuncs.keys():
-        getLogger().warning(f'Smooting function not available. use one of {smoothingFuncs.keys()}. Fallback: {fallbackMode}')
+        getLogger().warning(f'Smoothing function not available. use one of {smoothingFuncs.keys()}. Fallback: {fallbackMode}')
     s = np.r_[y[windowSize-1: 0 : -1], y, y[-1:-windowSize:-1]]
     f = smoothingFuncs.get(mode, fallbackMode)
     w = f(windowSize)

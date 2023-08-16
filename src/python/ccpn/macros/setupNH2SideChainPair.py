@@ -36,7 +36,7 @@ with undoBlock():
 
     peak1NNmrAtom.rename(value = NAtom)
     peak1HNmrAtom.rename(value = H1Atom)
-    peak1NmrRes.residueType = resType
+    peak1NmrRes.moveToNmrChain(newNmrChain=peak1NmrRes.nmrChain, sequenceCode=peak1NmrRes.sequenceCode, residueType=resType)
 
     peak2NmrRes.delete()
 

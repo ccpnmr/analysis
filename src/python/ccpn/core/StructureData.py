@@ -3,19 +3,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-28 11:43:53 +0000 (Mon, February 28, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-08-17 14:06:48 +0100 (Thu, August 17, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,7 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import datetime
-import pandas as pd
+# import pandas as pd
 from typing import Optional
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -34,7 +34,7 @@ from ccpn.core.Project import Project
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import NmrConstraintStore as ApiNmrConstraintStore
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import FixedResonance as ApiFixedResonance
 from ccpn.core.lib import Pid
-from ccpn.core.lib.ContextManagers import newObject, renameObject
+from ccpn.core.lib.ContextManagers import newObject, renameObject, ccpNmrV3CoreSetter
 from ccpn.util.decorators import logCommand
 from ccpn.util.isotopes import name2IsotopeCode
 from ccpn.util.Logging import getLogger
@@ -176,6 +176,7 @@ class StructureData(AbstractWrapperObject):
         return path
 
     @moleculeFilePath.setter
+    @ccpNmrV3CoreSetter()
     def moleculeFilePath(self, filePath: str = None):
         """
         :param filePath: a filePath for corresponding molecule
@@ -415,7 +416,7 @@ class StructureData(AbstractWrapperObject):
 
 @newObject(StructureData)
 def _newStructureData(self: Project, name: str = None, title: str = None, programName: str = None, programVersion: str = None,
-                      dataPath: str = None, creationDate: datetime.datetime = None, uuid: str = None,  moleculeFilePath: str = None,
+                      dataPath: str = None, creationDate: datetime.datetime = None, uuid: str = None, moleculeFilePath: str = None,
                       comment: str = None) -> StructureData:
     """Create new StructureData
 

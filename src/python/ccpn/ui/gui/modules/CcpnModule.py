@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-28 16:36:55 +0100 (Fri, July 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-17 14:06:48 +0100 (Thu, August 17, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -67,7 +67,7 @@ from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget, Chec
     ColourSelectionWidget, LineEditPopup, ListCompoundWidget
 from ccpn.core.lib.Notifiers import NotifierBase
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, TextEditorCompoundWidget, \
-    RadioButtonsCompoundWidget, ScientificSpinBoxCompoundWidget, SpinBoxCompoundWidget
+    RadioButtonsCompoundWidget, ScientificSpinBoxCompoundWidget, SpinBoxCompoundWidget, EntryPathCompoundWidget
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight, getFont, DEFAULTFONT
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
@@ -116,7 +116,7 @@ CommonWidgetsEdits = {
     NmrChainPulldown.__name__               : (NmrChainPulldown.getText, NmrChainPulldown.select, 'pulldownList.activated'),
     RadioButtonsCompoundWidget.__name__     : (RadioButtonsCompoundWidget.getIndex, RadioButtonsCompoundWidget.setIndex,
                                                'radioButtons.buttonGroup.buttonClicked'),
-
+    EntryPathCompoundWidget.__name__        : (EntryPathCompoundWidget.getText, EntryPathCompoundWidget.setText, 'entry.lineEdit.textChanged'),
     # ADD TABLES
     # ADD Others
     }

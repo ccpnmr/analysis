@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-15 09:09:10 -0400 (Thu, June 15, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-08-17 14:06:48 +0100 (Thu, August 17, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -36,6 +36,11 @@ class StructureDataPopup(AttributeEditorPopupABC):
     """
     FIXEDWIDTH = False
 
+    @staticmethod
+    def _getMoleculeFilePath(obj, *args):
+        # replace None with empty string
+        return obj.moleculeFilePath or ''
+
     klass = StructureData
     attributes = [('Name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <', 'addSpacer': True}),
                   ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <', 'addSpacer': True}),
@@ -43,7 +48,7 @@ class StructureDataPopup(AttributeEditorPopupABC):
                   ('Program Version', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <', 'addSpacer': True}),
                   ('Data Path', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <', 'addSpacer': True}),
                   ('Uuid', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <', 'addSpacer': True}),
-                  ('Molecule FilePath', EntryPathCompoundWidget, getattr, setattr, None, None, {})
+                  ('Molecule FilePath', EntryPathCompoundWidget, _getMoleculeFilePath, setattr, None, None, {})
                   ]
 
     def _applyAllChanges(self, changes):

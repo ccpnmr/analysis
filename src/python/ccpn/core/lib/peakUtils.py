@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-28 16:35:56 +0100 (Fri, July 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-17 13:03:39 +0100 (Thu, August 17, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -35,6 +35,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.core.PeakList import GAUSSIANMETHOD, PARABOLICMETHOD
 from ccpn.core.lib.ContextManagers import newObject, undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
 from ccpn.util.Common import makeIterableList, percentage
+
 
 # This variables will be moved to SeriesAnalysisVariables.py
 _POSITION = 'position'
@@ -375,13 +376,13 @@ def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atom
                                 weight = _getAtomWeight(axisCode, atomWeights)
                                 if peaks[0] != peak:  # dont' compare to same peak
                                     delta = peak.position[i] - peaks[0].position[i]
-                                    delta = delta ** 2
+                                    delta = delta**2
                                     delta = delta * weight
                                     deltaTemp.append(delta)
                                     # deltaInts.append(((peak.position[i] - list(peaks)[0].position[i]) * weight) ** 2)
                                     # delta += ((list(peaks)[0].position[i] - peak.position[i]) * weight) ** 2
                     if len(deltaTemp) > 0:
-                        delta = sum(deltaTemp) ** 0.5
+                        delta = sum(deltaTemp)**0.5
                         deltas += [delta]
 
                 if mode == VOLUME:
@@ -391,7 +392,7 @@ def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atom
                             break
 
                         delta1Atoms = (peak.volume / list(peaks)[0].volume)
-                        deltas += [((delta1Atoms) ** 2) ** 0.5, ]
+                        deltas += [((delta1Atoms)**2)**0.5, ]
 
                 if mode == HEIGHT:
                     if list(peaks)[0] != peak:  # dont' compare to same peak
@@ -400,7 +401,7 @@ def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atom
                             break
 
                         delta1Atoms = (peak.height / list(peaks)[0].height)
-                        deltas += [((delta1Atoms) ** 2) ** 0.5, ]
+                        deltas += [((delta1Atoms)**2)**0.5, ]
 
                 if mode == LINEWIDTHS:
                     deltaTemp = []
@@ -413,10 +414,10 @@ def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atom
                                         if not peak.lineWidths[i] or not peaks[0].lineWidths[i]:
                                             getLogger().warning('lineWidth has to be set for peaks: %s, %s' % (peak, peaks[0]))
                                             break
-                                        delta = ((peak.lineWidths[i] - list(peaks)[0].lineWidths[i]) * weight) ** 2
+                                        delta = ((peak.lineWidths[i] - list(peaks)[0].lineWidths[i]) * weight)**2
                                         deltaTemp.append(delta)
                     if len(deltaTemp) > 0:
-                        delta = sum(deltaTemp) ** 0.5
+                        delta = sum(deltaTemp)**0.5
                         deltas += [delta]
 
             # except Exception as e:
@@ -776,7 +777,7 @@ def _getSpectralPeakPropertyAsDataFrame(spectra, peakProperty=HEIGHT, NR_ID=NR_I
     :param spectra: list of spectra
     :param peakProperty: 'height'or'volume'
     :param NR_ID: columnName for the NmrResidue ID
-    :param peakListIndex: list of peakList indexes for getting the right peakList from the given spectra,
+    :param peakListIndexes: list of peakList indexes for getting the right peakList from the given spectra,
                          default: the last peakList available
     :return: Pandas DataFrame with the following structure:
             Index: multiIndex => axisCodes as levels;
@@ -815,13 +816,16 @@ def _getSpectralPeakPropertyAsDataFrame(spectra, peakProperty=HEIGHT, NR_ID=NR_I
         _df[NR_ID] = nmrResidues
         _df = _df[~_df.index.duplicated()]
         dfs.append(_df)
-    df = pd.concat(dfs, axis=1, levels=0)
+
+    df = pd.concat(dfs, axis=1)
     df[NR_ID] = df.T[df.columns.values == NR_ID].apply(lambda x: ' '.join(set([item for item in x[x.notnull()]])))
     df = df.loc[:, ~df.columns.duplicated()]
+
     cols = list(df.columns)
     resColumn = cols.pop(cols.index(NR_ID))
     sortedCols = sorted(cols, reverse=False)
     sortedCols.insert(0, resColumn)
+
     return df[sortedCols]
 
 
@@ -861,21 +865,25 @@ def _getPeakSNRatio(peak, factor=2.5):
     snr = estimateSNR(noiseLevels=[noiseLevel, negativeNoiseLevel], signalPoints=[peak.height], factor=factor)
     return snr[0]  ## estimateSNR return a list with a length always > 0
 
+
 def _getPeakId(peak):
     """Get the current id for the peak
     """
     return peak.id
+
 
 def _getPeakAnnotation(peak):
     """Get the current annotation for the peak
     """
     return peak.annotation
 
+
 def _getPeakClusterId(peak):
     """Get the current clusterId for the peak
     """
     v = peak.clusterId
     return str(v) if v else None
+
 
 def _getPeakLabelling(peak):
     """Create the labelling for Pids method
@@ -911,6 +919,7 @@ def _getPeakLabelling(peak):
 
     text = ', '.join(peakLabel)
     return text
+
 
 # GWV 26Jan2023: Moved here from GuiPeakListView
 

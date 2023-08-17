@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-15 15:26:15 +0100 (Tue, August 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-17 19:48:55 +0100 (Thu, August 17, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -47,11 +47,27 @@ from ccpn.core.lib.SpectrumLib import estimateNoiseLevel1D, _1DRawDataDict
 from scipy import spatial
 
 
+def _ensureUniquePeakPosition(peak):
+    """Prevent snapping multiple peaks to the exact ppm position, by adding a random offset around the spectrum-ppmPerPoints value"""
+    position = peak._temporaryPosition
+    height = peak._temporaryHeight
+    rounding = 4
+    ppmOffset = peak.spectrum.ppmPerPoints[0] / 2
+    knownPositions = [round(p._temporaryPosition[0], rounding) for p in peak.peakList.peaks if p != peak]
+    maxIter = 10
+    it = 0
+    while round(position[0], rounding) in knownPositions and it < maxIter:
+        ppmOffset *= np.random.uniform(-1, 1, 1)[0]  # multiply by a random value between -1 and 1
+        getLogger().debug(f'Peak snapping. An existing peak is already present at the best snapping position for {peak.pid}. Offsetting by ppm {ppmOffset}')
+        position = [peak._temporaryPosition[0] + ppmOffset]
+        height = peak.spectrum.getHeight(position)
+        it += 1
+    return position, height
 
 # from ccpn.util.decorators import profile
 # @profile('/Users/luca/Documents/V3-testings/profiling/')
 def snap1DPeaksByGroup(peaks, ppmLimit=0.05, unsnappedLimit=1, increaseLimitStep=0.1, groupPpmLimit=0.2,  figOfMeritLimit=1,
-                       doNeg=False, rawDataDict=None):
+                       doNeg=False, rawDataDict=None, offsetForSamePos=0.0005):
     """
     Snap the peaks by group. Use the ppmLimit to define limits of groups.
     Use the ppmLimit to explore left/right new maxima.
@@ -65,14 +81,17 @@ def snap1DPeaksByGroup(peaks, ppmLimit=0.05, unsnappedLimit=1, increaseLimitStep
     :param increaseLimitStep:
     :return:
     """
-    if rawDataDict is None:
-        rawDataDict = _1DRawDataDict()
+    spectra = set()
+
     _snap1DPeaksByGroup.count = 0
     for peak in peaks: # set the temp properties first.
         peak._temporaryPosition = peak.position
         peak._temporaryHeight = peak.height
         peak._temporaryHeightError = peak.heightError
+        spectra.add(peak.spectrum)
 
+    if rawDataDict is None:
+        rawDataDict = _1DRawDataDict(spectra=spectra)
     ## Do the first snap with initial limits.
     _snap1DPeaksByGroup(peaks, ppmLimit=ppmLimit,  figOfMeritLimit=figOfMeritLimit, doNeg=doNeg, rawDataDict=rawDataDict)
     _snap1DPeaksByGroup.count = 1
@@ -89,10 +108,11 @@ def snap1DPeaksByGroup(peaks, ppmLimit=0.05, unsnappedLimit=1, increaseLimitStep
 
     with undoBlockWithoutSideBar(): # set the final properties.
         with notificationEchoBlocking():
-            # _snap1DPeaksToClosestExtremum(peaks ,maximumLimit=0.1, figOfMeritLimit=1, doNeg=doNeg, rawDataDict=rawDataDict, )
             for peak in peaks:
-                peak.position = peak._temporaryPosition
-                peak.height = float(peak._temporaryHeight)
+                position, height = _ensureUniquePeakPosition(peak)
+                peak.position = position
+                peak._temporaryPosition = None
+                peak.height = float(height)
                 peak.heightError = peak._temporaryHeightError
 
 
@@ -326,7 +346,7 @@ def _correctNegativeHeight(height, doNeg=False):
             return np.nextafter(0, 1)
     return height
 
-def _smooth1D(x, y, windowSize=50, mode="hanning", align=True):
+def lineSmoothing(y, windowSize=50, mode="hanning", ):
     smoothingFuncs = {
                                     "rolling"    : lambda _len: np.ones(_len, "d"), # this is simply a rolling average.
                                     "hanning" : np.hanning,
@@ -341,15 +361,9 @@ def _smooth1D(x, y, windowSize=50, mode="hanning", align=True):
     f = smoothingFuncs.get(mode, fallbackMode)
     w = f(windowSize)
     ys = np.convolve(w / w.sum(), s, mode="same")
-    xs = x
-    if align: # a quick alignment based on the highest point in the two curves. original and smoothed
-        dd = len(ys) - len(y)
-        ys = ys[:-dd]
-        maxYind = np.argwhere(y == np.max(y))
-        maxYsind = np.argwhere(ys == np.max(ys))
-        shift = (x[maxYsind] - x[maxYind]).flatten()[-1]
-        xs = x - shift
-    return xs, ys
+    ys = ys[windowSize:] ## make sure to be properly aligned as the smoothing  shifts by the window size
+    ys = ys[:len(y)] ## make sure to have the same length as the input
+    return ys
 
 def _get1DClosestExtremum(peak, maximumLimit=0.1,  doNeg=False,
                           figOfMeritLimit=1, rawDataDict=None ):
@@ -391,15 +405,14 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1,  doNeg=False,
 
     x_filtered, y_filtered = _1DregionsFromLimits(x, y, [a, b])
     maxValues, minValues = _find1DMaxima(y_filtered, x_filtered, positiveThreshold=noiseLevel, negativeThreshold=negativeNoiseLevel, findNegative=doNeg)
-    allValues = maxValues + minValues
-    allValues = _filterKnownPeakPositionsFromNewMaxima(allValues, peak, rounding=4)
+    allValues = np.array(maxValues + minValues)
+    # allValues = _filterKnownPeakPositionsFromNewMaxima(allValues, peak, rounding=4)
 
     if len(allValues) > 1:
-        ## do a linesmoothing to remove noise and shoulder peaks.
-        x_filtered, y_filtered = _smooth1D(x_filtered, y_filtered)
-        maxValues, minValues = _find1DMaxima(y_filtered, x_filtered, positiveThreshold=noiseLevel, negativeThreshold=negativeNoiseLevel, findNegative=doNeg)
-        allValues = maxValues + minValues
-        allValues = _filterKnownPeakPositionsFromNewMaxima(allValues, peak, rounding=4)
+        ## do a line smoothing to remove noise and shoulder peaks.
+        y_smoothed = lineSmoothing(y_filtered)
+        maxValues, minValues = _find1DMaxima(y_smoothed, x_filtered, positiveThreshold=noiseLevel, negativeThreshold=negativeNoiseLevel, findNegative=doNeg)
+        allValues = np.array(maxValues + minValues)
         if allValues.ndim == 2:
             positions = allValues[:, 0]
             heights = allValues[:, 1]

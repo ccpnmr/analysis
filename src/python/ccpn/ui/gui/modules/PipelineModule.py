@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-10 17:39:25 +0000 (Tue, January 10, 2023) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-08-17 19:48:55 +0100 (Thu, August 17, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,7 +32,7 @@ import collections
 import json
 import time
 import os
-
+from datetime import datetime
 from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking, undoBlockWithoutSideBar
 from collections import OrderedDict as od
 from ccpn.util.Logging import getLogger
@@ -469,7 +469,8 @@ class GuiPipeline(CcpnModule, Pipeline):
 
     def runPipeline(self):
         # self.goButton.setEnabled(False)
-        self.project._logger.info('Pipeline: Started.')
+        initialTime = time.time()
+        self.project._logger.info(f'Pipeline: Started on {datetime.now()}')
         self.queue = []
 
         if self.inputData:
@@ -511,8 +512,8 @@ class GuiPipeline(CcpnModule, Pipeline):
             showWarning('Pipeline', 'No input data')
         if self.updateInputData:
             self._updateGuiInputData()
-
-        self.project._logger.info('Pipeline: Finished.')
+        finalTime = time.time()
+        self.project._logger.info(f'Pipeline: Completed in {int(finalTime-initialTime)}s')
         MessageDialog.showInfo('Pipeline', 'Finished')
         # self.goButton.setEnabled(True)
 

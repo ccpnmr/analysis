@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-17 19:48:55 +0100 (Thu, August 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-18 15:22:59 +0100 (Fri, August 18, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -52,7 +52,7 @@ def _ensureUniquePeakPosition(peak):
     position = peak._temporaryPosition
     height = peak._temporaryHeight
     rounding = 4
-    ppmOffset = peak.spectrum.ppmPerPoints[0] / 2
+    ppmOffset = peak.spectrum.ppmPerPoints[0] / 10
     knownPositions = [round(p._temporaryPosition[0], rounding) for p in peak.peakList.peaks if p != peak]
     maxIter = 10
     it = 0
@@ -357,7 +357,7 @@ def lineSmoothing(y, windowSize=50, mode="hanning", ):
     fallbackMode = 'hanning'
     if mode not in smoothingFuncs.keys():
         getLogger().warning(f'Smoothing function not available. use one of {smoothingFuncs.keys()}. Fallback: {fallbackMode}')
-    s = np.r_[y[windowSize-1: 0 : -1], y, y[-1:-windowSize:-1]]
+    s = np.r_[y[windowSize: 0 : -1], y, y[-1:-windowSize:]]
     f = smoothingFuncs.get(mode, fallbackMode)
     w = f(windowSize)
     ys = np.convolve(w / w.sum(), s, mode="same")

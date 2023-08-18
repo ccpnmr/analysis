@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-07 11:41:59 +0100 (Fri, July 07, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-08-18 09:55:51 +0100 (Fri, August 18, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -42,12 +42,10 @@ from ccpn.util.Common import isWindowsOS
 from ipykernel.inprocess.ipkernel import InProcessKernel
 
 
-with contextlib.suppress(ImportError):
-    # Temporarily disable IPython history. Suspected to be the source of threading issues
-    from IPython.core.history import HistoryManager
-
-
-    HistoryManager.enabled = False
+# with contextlib.suppress(ImportError):
+#     # Temporarily disable IPython history. Suspected to be the source of threading issues
+#     from IPython.core.history import HistoryManager
+#     HistoryManager.enabled = False
 
 
 class SilentKernel(InProcessKernel):

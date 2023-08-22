@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-29 17:45:28 +0100 (Thu, June 29, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-08-22 10:51:25 +0100 (Tue, August 22, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -376,6 +376,8 @@ class GuiStrip1d(GuiStrip):
         visibleSpectrumViews = [sv.spectrum for sv in self.spectrumViews if sv.isDisplayed]
         for spectrum in visibleSpectrumViews:
             posValue = spectrum.noiseLevel or spectrum.estimateNoise()
+            if posValue is None:
+                posValue = 0
             negValue = spectrum.negativeNoiseLevel or -posValue
             brush = hexToRgbRatio(spectrum.sliceColour) + (0.3,)  # sliceCol plus an offset
             positiveLine = self._CcpnGLWidget.addInfiniteLine(values=posValue, colour=brush, movable=True, lineStyle='dashed',

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-08 18:54:14 +0100 (Tue, August 08, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-22 10:51:24 +0100 (Tue, August 22, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -1571,6 +1571,9 @@ def estimateSNR(noiseLevels, signalPoints, factor=2.5):
 class _1DRawDataDict(dict):
     """
     Class to contain Spectra Raw ppmPosition and Intensities
+    This object is extremely important to speed up the execution of peak picking and peak snapping for extremely large 1D datasets.
+    It is a sort of  on-the-fly caching of the raw ppmPositions and intensities array for the requested spectra, without the overhead of looking to the core classes (more than necessary).
+
     """
     def __init__(self, spectra=None):
         super(_1DRawDataDict, self).__init__()

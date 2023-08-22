@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-18 15:22:59 +0100 (Fri, August 18, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-22 10:51:24 +0100 (Tue, August 22, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -346,7 +346,7 @@ def _correctNegativeHeight(height, doNeg=False):
             return np.nextafter(0, 1)
     return height
 
-def lineSmoothing(y, windowSize=50, mode="hanning", ):
+def lineSmoothing(y, windowSize=15, mode="hanning", ):
     smoothingFuncs = {
                                     "rolling"    : lambda _len: np.ones(_len, "d"), # this is simply a rolling average.
                                     "hanning" : np.hanning,
@@ -366,7 +366,7 @@ def lineSmoothing(y, windowSize=50, mode="hanning", ):
     return ys
 
 def _get1DClosestExtremum(peak, maximumLimit=0.1,  doNeg=False,
-                          figOfMeritLimit=1, rawDataDict=None ):
+                          figOfMeritLimit=1, windowSize=15, rawDataDict=None ):
     """
     :param peak:
     :param maximumLimit: don't snap peaks over this threshold in ppm
@@ -410,14 +410,19 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1,  doNeg=False,
 
     if len(allValues) > 1:
         ## do a line smoothing to remove noise and shoulder peaks.
-        y_smoothed = lineSmoothing(y_filtered)
+        y_smoothed = lineSmoothing(y_filtered, windowSize=windowSize)
         maxValues, minValues = _find1DMaxima(y_smoothed, x_filtered, positiveThreshold=noiseLevel, negativeThreshold=negativeNoiseLevel, findNegative=doNeg)
-        allValues = np.array(maxValues + minValues)
-        if allValues.ndim == 2:
+        allValuesSmooth = np.array(maxValues + minValues)
+        if allValuesSmooth.ndim == 2:
             positions = allValues[:, 0]
             heights = allValues[:, 1]
-            nearestPosition = find_nearest(positions, peak._temporaryPosition[0])
+            positionsSmooth = allValuesSmooth[:, 0]
+            heightsSmooth = allValuesSmooth[:, 1]
+            nearestPositionSmooth = find_nearest(positionsSmooth, peak._temporaryPosition[0])
+            #find the real position and not the smoothed pos
+            nearestPosition = find_nearest(positions, nearestPositionSmooth)
             nearestHeight = heights[positions == nearestPosition]
+
             position = [float(nearestPosition), ]
             height = nearestHeight
             height = _getClosestHeight(x, y, position, height)
@@ -455,7 +460,7 @@ def _getClosestHeight(x,y, pos, currentHeight):
 
 def _filterKnownPeakPositionsFromNewMaxima(newMaxima, peak,   rounding=4):
     """Remove known positions from the newly found maxima to avoid snapping to an existing peak except to itself."""
-
+    newMaxima = list(newMaxima)
     knownPositions = [round(p._temporaryPosition[0], rounding) for p in peak.peakList.peaks]
     for maximum in newMaxima:
         pos, intens = maximum

@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-22 12:42:48 +0100 (Tue, August 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-22 12:43:49 +0100 (Tue, August 22, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -46,23 +46,6 @@ from ccpn.core.lib.PeakPickers.PeakPicker1D import _find1DMaxima
 from ccpn.core.lib.SpectrumLib import estimateNoiseLevel1D, _1DRawDataDict
 from scipy import spatial
 
-
-def _ensureUniquePeakPosition(peak):
-    """Prevent snapping multiple peaks to the exact ppm position, by adding a random offset around the spectrum-ppmPerPoints value"""
-    position = peak._temporaryPosition
-    height = peak._temporaryHeight
-    rounding = 4
-    ppmOffset = peak.spectrum.ppmPerPoints[0] / 10
-    knownPositions = [round(p._temporaryPosition[0], rounding) for p in peak.peakList.peaks if p != peak]
-    maxIter = 10
-    it = 0
-    while round(position[0], rounding) in knownPositions and it < maxIter:
-        ppmOffset *= np.random.uniform(-1, 1, 1)[0]  # multiply by a random value between -1 and 1
-        getLogger().debug(f'Peak snapping. An existing peak is already present at the best snapping position for {peak.pid}. Offsetting by ppm {ppmOffset}')
-        position = [peak._temporaryPosition[0] + ppmOffset]
-        height = peak.spectrum.getHeight(position)
-        it += 1
-    return position, height
 
 # from ccpn.util.decorators import profile
 # @profile('/Users/luca/Documents/V3-testings/profiling/')
@@ -286,6 +269,23 @@ def _1DregionsFromLimits(x, y, limits):
     y_filtered = y[x_filtered]
     x_filtered = x[x_filtered]
     return x_filtered, y_filtered
+
+def _ensureUniquePeakPosition(peak):
+    """Prevent snapping multiple peaks to the exact ppm position, by adding a random offset around the spectrum-ppmPerPoints value"""
+    position = peak._temporaryPosition
+    height = peak._temporaryHeight
+    rounding = 4
+    ppmOffset = peak.spectrum.ppmPerPoints[0] / 10
+    knownPositions = [round(p._temporaryPosition[0], rounding) for p in peak.peakList.peaks if p != peak]
+    maxIter = 10
+    it = 0
+    while round(position[0], rounding) in knownPositions and it < maxIter:
+        ppmOffset *= np.random.uniform(-1, 1, 1)[0]  # multiply by a random value between -1 and 1
+        getLogger().debug(f'Peak snapping. An existing peak is already present at the best snapping position for {peak.pid}. Offsetting by ppm {ppmOffset}')
+        position = [peak._temporaryPosition[0] + ppmOffset]
+        height = peak.spectrum.getHeight(position)
+        it += 1
+    return position, height
 
 def find_nearest(array, value):
     array = np.asarray(array)

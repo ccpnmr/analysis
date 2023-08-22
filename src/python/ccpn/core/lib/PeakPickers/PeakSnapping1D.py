@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-22 10:51:24 +0100 (Tue, August 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-22 12:42:48 +0100 (Tue, August 22, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -109,10 +109,9 @@ def snap1DPeaksByGroup(peaks, ppmLimit=0.05, unsnappedLimit=1, increaseLimitStep
     with undoBlockWithoutSideBar(): # set the final properties.
         with notificationEchoBlocking():
             for peak in peaks:
-                position, height = _ensureUniquePeakPosition(peak)
-                peak.position = position
+                peak.position = peak._temporaryPosition
                 peak._temporaryPosition = None
-                peak.height = float(height)
+                peak.height = float(peak._temporaryHeight)
                 peak.heightError = peak._temporaryHeightError
 
 

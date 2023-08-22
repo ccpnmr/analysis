@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-22 10:51:25 +0100 (Tue, August 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-22 14:03:29 +0100 (Tue, August 22, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -2108,7 +2108,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                     if peak.spectrum.dimensionCount ==1 and peak.figureOfMerit <1:
                         showWarning(f'Cannot snap peak', f'Figure of merit below the snapping threshold of 1.')
                     if peak.spectrum.dimensionCount ==1 and peak.spectrum.negativeNoiseLevel < peak.height < peak.spectrum.noiseLevel:
-                        showWarning(f'Cannot snap peak', f'Adjust the noise level thresholds or move the peak closer to a signalse.')
+                        showWarning(f'Cannot snap peak', f'Adjust the noise level thresholds or move the peak closer to a signal.')
                 except Exception as es:
                     showWarning('Snap to Extremum', str(es))
 

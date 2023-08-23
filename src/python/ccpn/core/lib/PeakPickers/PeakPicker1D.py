@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-04-04 17:14:17 +0100 (Tue, April 04, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-08-23 12:57:13 +0100 (Wed, August 23, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -122,8 +122,9 @@ class PeakPicker1D(PeakPickerABC):
     def _isPositionWithinLimits(self, pointValue):
         withinLimits = []
         ppmValue = self.spectrum.point2ppm(pointValue, axisCode=self.spectrum.axisCodes[0])
-        excludePpmRegions = self._excludePpmRegions.get(self.spectrum.axisCodes[0], [[0,0],]) # Default ER [0,0]
-
+        excludePpmRegions = self._excludePpmRegions.get(self.spectrum.axisCodes[0])
+        if excludePpmRegions is None:
+            excludePpmRegions = [[0, 0], ]
         for limits in excludePpmRegions:
             if len(limits)>0:
                 value = min(limits) < ppmValue < max(limits)

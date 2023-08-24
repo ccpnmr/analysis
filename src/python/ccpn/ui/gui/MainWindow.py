@@ -1734,7 +1734,9 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                         multipletList = spectrum.multipletLists[-1]
                     peaks = [peak for peakList in spectrum.peakLists for peak in peakList.peaks if
                              peak in self.application.current.peaks]
-                    multiplet = multipletList.newMultiplet(peaks=peaks)
+                    if peaks:
+                        # only create a multiplet that contains peaks
+                        multiplet = multipletList.newMultiplet(peaks=peaks)
                     self.application.current.multiplet = multiplet
 
     def newCollectionOfCurrentPeaks(self):

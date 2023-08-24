@@ -1683,8 +1683,8 @@ class CcpnGLWidget(QOpenGLWidget):
             if spectrumView.isDeleted:
                 continue
 
-            fxMin, fxMax = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_XLIMITS]
-            fyMin, fyMax = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_YLIMITS]
+            fxMin, fyMin = self._spectrumSettings[spectrumView].minSpectrumFrequency
+            fxMax, fyMax = self._spectrumSettings[spectrumView].maxSpectrumFrequency
 
             if not axisLimits:
                 axisLimits = [fxMax, fxMin, fyMax, fyMin]
@@ -1717,7 +1717,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # initialise a common to all OpenGL windows
         self.globalGL = GLGlobalData(parent=self, mainWindow=self.mainWindow)
 
-        # move outside of GLGlobalData to check threading on windows
+        # move outside GLGlobalData to check threading on windows
         self.globalGL.bindFonts()
 
         # initialise the arrays for the grid and axes
@@ -1839,7 +1839,8 @@ class CcpnGLWidget(QOpenGLWidget):
             self.updateVisibleSpectrumViews()
 
             self.initialiseAxes(self.strip)
-            self.initialiseTraces()
+            # NOTE:ED - why is this called here?
+            # self.initialiseTraces()
 
         # set the painting mode
         self._paintMode = PaintModes.PAINT_ALL
@@ -2435,12 +2436,12 @@ class CcpnGLWidget(QOpenGLWidget):
                 specSettings = self._spectrumSettings[specView]
 
                 if not self.is1D:
-                    pIndex = specSettings[GLDefs.SPECTRUM_POINTINDEX]
+                    pIndex = specSettings.dimensionIndices
                     if None in pIndex:
                         continue
 
                 for ii in range(len(bounds)):
-                    _rb = list(specSettings[GLDefs.SPECTRUM_REGIONBOUNDS][ii])
+                    _rb = list(specSettings.regionBounds[ii])
                     bounds[ii].extend(_rb[1:-1])  # skip the outer ppm values
 
             bounds = [sorted(set([round(b, 12) for b in bnd])) for bnd in bounds]
@@ -3182,7 +3183,8 @@ class CcpnGLWidget(QOpenGLWidget):
             GL.glDisable(GL.GL_MULTISAMPLE)
 
     # @contextmanager
-    def _enableLogicOp(self, logicOp=GL.GL_COPY):
+    @staticmethod
+    def _enableLogicOp(logicOp=GL.GL_COPY):
         """Enable logic operation for the contained routines
         """
         # valid values are: GL_CLEAR, GL_SET, GL_COPY, GL_COPY_INVERTED, GL_NOOP,
@@ -3207,6 +3209,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def _paintGLMouseOnly(self):
         """paintGL event - paint only the mouse in Xor mode
+
+        *** This assumes that the paint-mode is double-buffered and the buffer does not clear between swap-buffers
         """
         # reset the paint mode - need to check the logic here
         # self._paintMode = PaintModes.PAINT_ALL
@@ -3268,7 +3272,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         if not self._stackingMode:
             if not (self.is1D and self.strip._isPhasingOn):  # other mouse buttons checks needed here
-                self._GLIntegrals.drawSymbols(self._spectrumSettings)
+                self._GLIntegrals.drawSymbols(self._spectrumSettings, shader=self.globalGL._shaderProgram1)
                 for _ in self._disableGLAliasing():
                     self._GLIntegrals.drawSymbolRegions(self._spectrumSettings)
                     self.drawRegions()
@@ -3313,7 +3317,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         currentShader = self.globalGL._shaderProgram1.makeCurrent()
 
-        self.drawTraces()
+        self.drawTraces(currentShader)
         currentShader.setMVMatrix(self._IMatrix)
 
         for _ in self._disableGLAliasing():
@@ -3567,9 +3571,20 @@ class CcpnGLWidget(QOpenGLWidget):
         # quick fix to take the set of matching letters from the spectrum axisCodes - append a '*' to denote trailing differences
         if self.spectrumDisplay.is1D:
             # get the x-axis codes for 1d
+            dim = self.spectrumDisplay._flipped
+
             _axisCodes = [spec.spectrum.axisCodes[0] for spec, settings in self._visibleOrderingDict]
-            _axisWildCards = (self._buildSingleWildCard(_axisCodes),
-                              self.axisCodes[1] or '*')
+            if dim:
+                _axisWildCards = (
+                    self.axisCodes[1 - dim] or '*',
+                    self._buildSingleWildCard(_axisCodes),
+                    )
+            else:
+                _axisWildCards = (
+                    self._buildSingleWildCard(_axisCodes),
+                    self.axisCodes[1 - dim] or '*',
+                    )
+
         else:
             dim = len(self.spectrumDisplay.axisCodes)
             _axisWildCards = []
@@ -3578,7 +3593,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 _axisCodes = []
                 for spec, settings in self._visibleOrderingDict:
                     try:
-                        _axisCodes.append(spec.spectrum.axisCodes[settings[GLDefs.SPECTRUM_POINTINDEX][axis]])
+                        _axisCodes.append(spec.spectrum.axisCodes[settings.dimensionIndices[axis]])
                     except Exception as es:
                         # can skip for now
                         pass
@@ -3607,7 +3622,10 @@ class CcpnGLWidget(QOpenGLWidget):
                     axisX = axLabel[2]
                     axisXLabel = axLabel[3]
 
-                    axisXText = self._intFormat(axisXLabel) if axLabel[4] >= 1 else self.XMode(axisXLabel)
+                    if self.YAXISUSEEFORMAT:
+                        axisXText = self.XMode(axisXLabel)
+                    else:
+                        axisXText = self._intFormat(axisXLabel) if axLabel[4] >= 1 else self.XMode(axisXLabel)
 
                     self._axisXLabelling.append(GLString(text=axisXText,
                                                          font=smallFont,
@@ -4454,21 +4472,23 @@ class CcpnGLWidget(QOpenGLWidget):
                 0].isDeleted else None
 
             if thisSpecView:
-                thisSpec = thisSpecView.spectrum
+                specSet = self._spectrumSettings[thisSpecView]
 
                 # generate different axes depending on units - X Axis
-                if self.XAXES[self._xUnits] == GLDefs.AXISUNITSPPM:
+                if self.XAXES[self._xUnits] == GLDefs.AXISUNITSINTENSITY:
+                    cursorX = cursorCoordinate[0]
+                    startX = self._startCoordinate[0]
+
+                elif self.XAXES[self._xUnits] == GLDefs.AXISUNITSPPM:
                     cursorX = cursorCoordinate[0]
                     startX = self._startCoordinate[0]
                     # XMode = '%.3f'
 
                 elif self.XAXES[self._xUnits] == GLDefs.AXISUNITSHZ:
                     if self._ordering:
-
-                        # get the axis ordering from the spectrumDisplay and map to the strip
-                        indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
-                        cursorX = cursorCoordinate[0] * thisSpec.spectrometerFrequencies[indices[0]]
-                        startX = self._startCoordinate[0] * thisSpec.spectrometerFrequencies[indices[0]]
+                        freq = specSet.spectrometerFrequency[0]
+                        cursorX = cursorCoordinate[0] * freq
+                        startX = self._startCoordinate[0] * freq
 
                     else:
                         # error trap all spectra deleted
@@ -4477,11 +4497,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 else:
                     if self._ordering:
-
-                        indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
-                        # map to a point
-                        cursorX = thisSpec.spectrumDimensions[indices[0]].valueToPoint(cursorCoordinate[0])
-                        startX = thisSpec.spectrumDimensions[indices[0]].valueToPoint(self._startCoordinate[0])
+                        ppm2point = specSet.ppmToPoint[0]
+                        cursorX = ppm2point(cursorCoordinate[0])
+                        startX = ppm2point(self._startCoordinate[0])
 
                     else:
                         # error trap all spectra deleted
@@ -4489,7 +4507,7 @@ class CcpnGLWidget(QOpenGLWidget):
                         startX = self._startCoordinate[0]
 
                 # generate different axes depending on units - Y Axis, always use first option for 1d
-                if self.is1D:
+                if self.YAXES[self._yUnits] == GLDefs.AXISUNITSINTENSITY:
                     cursorY = cursorCoordinate[1]
                     startY = self._startCoordinate[1]
 
@@ -4499,11 +4517,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 elif self.YAXES[self._yUnits] == GLDefs.AXISUNITSHZ:
                     if self._ordering:
-
-                        # get the axis ordering from the spectrumDisplay and map to the strip
-                        indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
-                        cursorY = cursorCoordinate[1] * thisSpec.spectrometerFrequencies[indices[1]]
-                        startY = self._startCoordinate[1] * thisSpec.spectrometerFrequencies[indices[1]]
+                        freq = specSet.spectrometerFrequency[1]
+                        cursorY = cursorCoordinate[1] * freq
+                        startY = self._startCoordinate[1] * freq
 
                     else:
                         # error trap all spectra deleted
@@ -4512,13 +4528,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 else:
                     if self._ordering:
-
-                        # get the axis ordering from the spectrumDisplay and map to the strip
-                        indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
-
+                        ppm2point = specSet.ppmToPoint[1]
                         # map to a point
-                        cursorY = thisSpec.spectrumDimensions[indices[1]].valueToPoint(cursorCoordinate[1])
-                        startY = thisSpec.spectrumDimensions[indices[1]].valueToPoint(self._startCoordinate[1])
+                        cursorY = ppm2point(cursorCoordinate[1])
+                        startY = ppm2point(self._startCoordinate[1])
 
                     else:
                         # error trap all spectra deleted
@@ -4939,7 +4952,9 @@ class CcpnGLWidget(QOpenGLWidget):
                 if self.is1D:
                     pivot = spectrumView.spectrum.ppm2point(pivotPpm, dimension=1) - 1
 
-                    self._newStatic1DTraceData(spectrumView, self._staticHTraces, position, ph0, ph1, pivot)
+                    self._newStatic1DTraceData(spectrumView,
+                                               self._staticVTraces if self.spectrumDisplay._flipped else self._staticHTraces,
+                                               position, ph0, ph1, pivot)
 
                 else:
                     # map to the spectrum pointPositions
@@ -4997,63 +5012,66 @@ class CcpnGLWidget(QOpenGLWidget):
             direction = phasingFrame.getDirection()
 
             deleteHList = []
-            for hTrace in self._staticHTraces:
+            for trace in self._staticHTraces:
 
-                specView = hTrace.spectrumView
+                specView = trace.spectrumView
 
                 if specView and specView.isDeleted:
-                    deleteHList.append(hTrace)
+                    deleteHList.append(trace)
                     continue
 
-                if hTrace.renderMode == GLRENDERMODE_RESCALE:
-                    hTrace.renderMode = GLRENDERMODE_DRAW
+                if trace.renderMode == GLRENDERMODE_RESCALE:
+                    trace.renderMode = GLRENDERMODE_DRAW
 
                     axisIndex = specView.dimensionIndices[direction]
                     pivot = specView.spectrum.ppm2point(pivotPpm, dimension=axisIndex + 1)
-                    positionPixel = hTrace.positionPixel
-                    preData = Phasing.phaseRealData(hTrace.data, ph0, ph1, pivot)
+                    positionPixel = trace.positionPixel
+                    preData = Phasing.phaseRealData(trace.data, ph0, ph1, pivot)
 
                     if self.is1D:
-                        hTrace.vertices[1::2] = preData
+                        trace.vertices[1::2] = preData
                     else:
                         y = positionPixel[1] + specView._traceScale * (self.axisT - self.axisB) * preData
                         y = np.append(y, (positionPixel[1], positionPixel[1]))
-                        hTrace.vertices[1::2] = y
+                        trace.vertices[1::2] = y
 
                     # build the VBOs here
-                    hTrace.defineVertexColorVBO()
+                    trace.defineVertexColorVBO()
 
             for dd in deleteHList:
                 self._staticHTraces.remove(dd)
 
             deleteVList = []
-            for vTrace in self._staticVTraces:
+            for trace in self._staticVTraces:
 
-                specView = vTrace.spectrumView
+                specView = trace.spectrumView
 
                 if specView and specView.isDeleted:
-                    deleteVList.append(vTrace)
+                    deleteVList.append(trace)
                     continue
 
-                if vTrace.renderMode == GLRENDERMODE_RESCALE:
-                    vTrace.renderMode = GLRENDERMODE_DRAW
+                if trace.renderMode == GLRENDERMODE_RESCALE:
+                    trace.renderMode = GLRENDERMODE_DRAW
 
                     axisIndex = specView.dimensionIndices[direction]
                     pivot = specView.spectrum.ppm2point(pivotPpm, dimension=axisIndex + 1)
-                    positionPixel = vTrace.positionPixel
-                    preData = Phasing.phaseRealData(vTrace.data, ph0, ph1, pivot)
+                    positionPixel = trace.positionPixel
+                    preData = Phasing.phaseRealData(trace.data, ph0, ph1, pivot)
 
-                    x = positionPixel[0] + specView._traceScale * (self.axisL - self.axisR) * preData
-                    x = np.append(x, (positionPixel[0], positionPixel[0]))
-                    vTrace.vertices[::2] = x
+                    if self.is1D:
+                        trace.vertices[::2] = preData
+                    else:
+                        x = positionPixel[0] + specView._traceScale * (self.axisL - self.axisR) * preData
+                        x = np.append(x, (positionPixel[0], positionPixel[0]))
+                        trace.vertices[::2] = x
 
                     # build the VBOs here
-                    vTrace.defineVertexColorVBO()
+                    trace.defineVertexColorVBO()
 
             for dd in deleteVList:
                 self._staticVTraces.remove(dd)
 
-    def drawTraces(self):
+    def drawTraces(self, shader):
         if self.strip.isDeleted:
             return
 
@@ -5065,18 +5083,15 @@ class CcpnGLWidget(QOpenGLWidget):
 
                     if self._stackingMode:
                         # use the stacking matrix to offset the 1D spectra
-                        self.globalGL._shaderProgram1.setMVMatrix(self._spectrumSettings[hTrace.spectrumView][
-                                                                      GLDefs.SPECTRUM_STACKEDMATRIX])
+                        shader.setMVMatrix(self._spectrumSettings[hTrace.spectrumView].stackedMatrix)
                     hTrace.drawVertexColorVBO()
 
             for vTrace in self._staticVTraces:
                 if vTrace.spectrumView and not vTrace.spectrumView.isDeleted and vTrace.spectrumView.isDisplayed:
-                    # vTrace.drawVertexColor()
 
                     if self._stackingMode:
                         # use the stacking matrix to offset the 1D spectra
-                        self.globalGL._shaderProgram1.setMVMatrix(self._spectrumSettings[vTrace.spectrumView][
-                                                                      GLDefs.SPECTRUM_STACKEDMATRIX])
+                        shader.setMVMatrix(self._spectrumSettings[vTrace.spectrumView].stackedMatrix)
                     vTrace.drawVertexColorVBO()
 
         # only paint if mouse is in the window, or menu has been raised in this strip
@@ -5091,7 +5106,6 @@ class CcpnGLWidget(QOpenGLWidget):
                         continue
 
                     if hTrace and not hTrace.isDeleted and hTrace.isVisible():
-                        # trace.drawVertexColor()
                         trace.defineVertexColorVBO()
                         trace.drawVertexColorVBO()
 
@@ -5107,7 +5121,6 @@ class CcpnGLWidget(QOpenGLWidget):
                         continue
 
                     if vTrace and not vTrace.isDeleted and vTrace.isVisible():
-                        # trace.drawVertexColor()
                         trace.defineVertexColorVBO()
                         trace.drawVertexColorVBO()
 
@@ -5158,17 +5171,20 @@ class CcpnGLWidget(QOpenGLWidget):
     # def sizeHint(self):
     #     return QSize(self.w, self.h)
 
-    def set3DProjection(self):
+    @staticmethod
+    def set3DProjection():
         GL.glMatrixMode(GL.GL_PROJECTION)
         GL.glLoadIdentity()
         GL.glOrtho(-0.5, +0.5, +0.5, -0.5, 4.0, 15.0)
         GL.glMatrixMode(GL.GL_MODELVIEW)
         GL.glLoadIdentity()
 
-    def setClearColor(self, c):
+    @staticmethod
+    def setClearColor(c):
         GL.glClearColor(c.redF(), c.greenF(), c.blueF(), c.alphaF())
 
-    def setColor(self, c):
+    @staticmethod
+    def setColor(c):
         GL.glColor4f(c.redF(), c.greenF(), c.blueF(), c.alphaF())
 
     def highlightCurrentStrip(self, current):
@@ -5236,26 +5252,25 @@ class CcpnGLWidget(QOpenGLWidget):
                 0].isDeleted else None
 
             if thisSpecView:
-                thisSpec = thisSpecView.spectrum
+                # thisSpec = thisSpecView.spectrum
+                specSet = self._spectrumSettings[thisSpecView]
+
+                if self.XAXES[self._xUnits] == GLDefs.AXISUNITSINTENSITY:  # self.is1D:
+                    axisLimitL = self.axisL
+                    axisLimitR = self.axisR
+                    self.XMode = self._eFormat  # '%.6g'
 
                 # generate different axes depending on units - X Axis
-                if self.XAXES[self._xUnits] == GLDefs.AXISUNITSPPM:
+                elif self.XAXES[self._xUnits] == GLDefs.AXISUNITSPPM:
                     axisLimitL = self.axisL
                     axisLimitR = self.axisR
                     self.XMode = self._floatFormat
 
                 elif self.XAXES[self._xUnits] == GLDefs.AXISUNITSHZ:
                     if self._ordering:
-
-                        if self.is1D:
-                            axisLimitL = self.axisL * thisSpec.spectrometerFrequencies[0]
-                            axisLimitR = self.axisR * thisSpec.spectrometerFrequencies[0]
-
-                        else:
-                            # get the axis ordering from the spectrumDisplay and map to the strip
-                            indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
-                            axisLimitL = self.axisL * thisSpec.spectrometerFrequencies[indices[0]]
-                            axisLimitR = self.axisR * thisSpec.spectrometerFrequencies[indices[0]]
+                        freq = specSet.spectrometerFrequency[0]
+                        axisLimitL = self.axisL * freq
+                        axisLimitR = self.axisR * freq
 
                     else:
                         # error trap all spectra deleted
@@ -5265,18 +5280,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 else:
                     if self._ordering:
-
-                        if self.is1D:
-                            axisLimitL = thisSpec.spectrumDimensions[0].valueToPoint(self.axisL)
-                            axisLimitR = thisSpec.spectrumDimensions[0].valueToPoint(self.axisR)
-
-                        else:
-                            # get the axis ordering from the spectrumDisplay and map to the strip
-                            indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
-
-                            # map to a point
-                            axisLimitL = thisSpec.spectrumDimensions[indices[0]].valueToPoint(self.axisL)
-                            axisLimitR = thisSpec.spectrumDimensions[indices[0]].valueToPoint(self.axisR)
+                        ppm2point = specSet.ppmToPoint[0]
+                        axisLimitL = ppm2point(self.axisL)
+                        axisLimitR = ppm2point(self.axisR)
 
                     else:
                         # error trap all spectra deleted
@@ -5285,7 +5291,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     self.XMode = self._intFormat
 
                 # generate different axes depending on units - Y Axis, always use first option for 1d
-                if self.is1D:
+                if self.YAXES[self._yUnits] == GLDefs.AXISUNITSINTENSITY:  # self.is1D:
                     axisLimitT = self.axisT
                     axisLimitB = self.axisB
                     self.YMode = self._eFormat  # '%.6g'
@@ -5297,36 +5303,25 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 elif self.YAXES[self._yUnits] == GLDefs.AXISUNITSHZ:
                     if self._ordering:
-
-                        # get the axis ordering from the spectrumDisplay and map to the strip
-                        indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
-                        axisLimitT = self.axisT * thisSpec.spectrometerFrequencies[indices[1]]
-                        axisLimitB = self.axisB * thisSpec.spectrometerFrequencies[indices[1]]
+                        freq = specSet.spectrometerFrequency[1]
+                        axisLimitT = self.axisT * freq
+                        axisLimitB = self.axisB * freq
 
                     else:
-                        # error trap all spectra deleted
                         axisLimitT = self.axisT
                         axisLimitB = self.axisB
                     self.YMode = self._floatFormat  # '%.3f'
 
                 else:
                     if self._ordering:
-
-                        # get the axis ordering from the spectrumDisplay and map to the strip
-                        indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
-
-                        # map to a point
-                        axisLimitT = thisSpec.spectrumDimensions[indices[1]].valueToPoint(self.axisT)
-                        axisLimitB = thisSpec.spectrumDimensions[indices[1]].valueToPoint(self.axisB)
+                        ppm2point = specSet.ppmToPoint[1]
+                        axisLimitT = ppm2point(self.axisT)
+                        axisLimitB = ppm2point(self.axisB)
 
                     else:
-                        # error trap all spectra deleted
                         axisLimitT = self.axisT
                         axisLimitB = self.axisB
                     self.YMode = self._intFormat  # '%i'
-
-                # ul = np.array([min(self.axisL, self.axisR), min(self.axisT, self.axisB)])
-                # br = np.array([max(self.axisL, self.axisR), max(self.axisT, self.axisB)])
 
                 minX = min(axisLimitL, axisLimitR)
                 maxX = max(axisLimitL, axisLimitR)
@@ -5472,7 +5467,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
         return labelling, axesChanged
 
-    def _widthsChangedEnough(self, r1, r2, tol=1e-5):
+    @staticmethod
+    def _widthsChangedEnough(r1, r2, tol=1e-5):
         if len(r1) != len(r2):
             raise ValueError('WidthsChanged must be the same length')
 
@@ -6502,7 +6498,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 if len(spectrumView.spectrum.axisCodes) == 1:
                     # should be sub-classed somewhere!
-                    xOffset, yOffset = self._spectrumSettings[spectrumView].get(GLDefs.SPECTRUM_STACKEDMATRIXOFFSET)
+                    # xOffset, yOffset = self._spectrumSettings[spectrumView].get(GLDefs.SPECTRUM_STACKEDMATRIXOFFSET)
+                    xOffset, yOffset = self._spectrumSettings[spectrumView].stackedMatrixOffset
+                    xDim, yDim = self._spectrumSettings[spectrumView].dimensionIndices
+
                     y0 = self._startCoordinate[1]
                     y1 = self._endCoordinate[1]
                     y0, y1 = min(y0, y1), max(y0, y1)
@@ -6517,7 +6516,10 @@ class CcpnGLWidget(QOpenGLWidget):
                             try:
                                 peak = drawList.stringObject
                                 pView = peak.getPeakView(peakListView)
-                                px, py = float(peak.position[0]), float(peak.height)
+                                if xDim:  # need to decide on a consistent way of doing this flip :|
+                                    px, py = float(peak.height), float(peak.position[0])
+                                else:
+                                    px, py = float(peak.position[0]), float(peak.height)
                                 tx, ty = pView.textOffset
                                 if not tx and not ty:
                                     # TODO: ED - nasty :|

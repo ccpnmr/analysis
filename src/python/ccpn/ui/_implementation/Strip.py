@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 14:29:32 +0100 (Wed, June 28, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-08-24 19:07:47 +0100 (Thu, August 24, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -462,6 +462,7 @@ class Strip(AbstractWrapperObject):
         # move the strip
         self._wrappedData.moveTo(newIndex)
 
+
 def _copyStrip(self: SpectrumDisplay, strip: Strip, newIndex=None) -> Strip:
     """Make copy of strip in self, at position newIndex - or rightmost.
     """
@@ -521,6 +522,10 @@ def _copyStrip(self: SpectrumDisplay, strip: Strip, newIndex=None) -> Strip:
 # SpectrumDisplay.copyStrip = _copyStrip
 # del _copyStrip
 
+
+#=========================================================================================
+# DisplayedSpectrum
+#=========================================================================================
 
 class DisplayedSpectrum(object):
     """GWV; a class to hold SpectrumView and strip objects
@@ -747,17 +752,22 @@ class DisplayedSpectrum(object):
 
         return sliceTuples
 
-    def checkForRegionsOutsideLimits(self, regions) -> tuple:
+    @staticmethod
+    def checkForRegionsOutsideLimits(regions, strip, spectrumView) -> tuple:
         """check if regions are fully outside the aliasing limits of spectrum.
         :return a tuple of booleans in display order
         """
         result = []
-        for region, limits in zip(regions, self.spectrumView.aliasingLimits):
+        minL = strip._CcpnGLWidget._spectrumSettings[spectrumView].minAliasedFrequency
+        maxL = strip._CcpnGLWidget._spectrumSettings[spectrumView].maxAliasedFrequency
+
+        # for region, limits in zip(regions, self.spectrumView.aliasingLimits):
+        for region, minLimit, maxLimit in zip(regions, minL, maxL):
             # to not be dependent on order of low,high values in region or limits:
             minVal = min(region)
             maxVal = max(region)
-            minLimit = min(limits)
-            maxLimit = max(limits)
+            # minLimit = min(limits)
+            # maxLimit = max(limits)
             if maxVal < minLimit or minVal > maxLimit:
                 result.append(True)
             else:

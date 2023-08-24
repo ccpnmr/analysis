@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-01 19:39:57 +0100 (Thu, June 01, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-08-24 19:07:48 +0100 (Thu, August 24, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -284,7 +284,7 @@ class GLmultipletListMethods():
         cols = getAutoColourRgbRatio(col or DEFAULTLINECOLOUR, multiplet.multipletList.spectrum, self.autoColour,
                                      getColours()[CCPNGLWIDGET_MULTIPLETLINK])
 
-        posList = p0
+        posList = p0[:]  # copy
         for peak in multiplet.peaks:
             # get the correct coordinates based on the axisCodes
             pp = peak.pointPositions
@@ -318,7 +318,7 @@ class GLmultipletListMethods():
         cols = getAutoColourRgbRatio(col or DEFAULTLINECOLOUR, multiplet.multipletList.spectrum, self.autoColour,
                                      getColours()[CCPNGLWIDGET_MULTIPLETLINK])
 
-        posList = p0
+        posList = p0[:]  # copy
         for peak in multiplet.peaks:
             # get the correct coordinates based on the axisCodes
             pp = peak.pointPositions
@@ -559,19 +559,23 @@ class GLmultiplet1dLabelling(GL1dLabelling, GLmultipletNdLabelling):
         cols = getAutoColourRgbRatio(col if col else DEFAULTLINECOLOUR, multiplet.multipletList.spectrum, self.autoColour,
                                      getColours()[CCPNGLWIDGET_MULTIPLETLINK])
 
-        posList = p0
+        posList = p0[:]  # copy
         for peak in multiplet.peaks:
             # get the correct coordinates based on the axisCodes
             try:
-                h = peak.height if peak.height is not None else 0  # p0[1]  # error should only occur on next line
-                p1 = (peak.pointPositions[pIndex[0]] - 1, h)
+                _pos = (peak.pointPositions[0] - 1, peak.height if peak.height is not None else 0)
+                p1 = [_pos[dim] for dim in pIndex]
                 posList += p1
             except Exception:
                 posList += (0, 0)  # add the bad-point
 
         try:
             peakAlias = multiplet.peaks[0].aliasing
-            alias = getAliasSetting(peakAlias[pIndex[0]], 0)
+            if pIndex[0]:  # check that the 1d-dimensions are reversed :|
+                alias = getAliasSetting(0, peakAlias[0])
+            else:
+                alias = getAliasSetting(peakAlias[0], 0)
+
         except Exception:
             alias = 0
 
@@ -593,19 +597,22 @@ class GLmultiplet1dLabelling(GL1dLabelling, GLmultipletNdLabelling):
         cols = getAutoColourRgbRatio(col or DEFAULTLINECOLOUR, multiplet.multipletList.spectrum, self.autoColour,
                                      getColours()[CCPNGLWIDGET_MULTIPLETLINK])
 
-        posList = p0
+        posList = p0[:]  # copy
         for peak in multiplet.peaks:
             # get the correct coordinates based on the axisCodes
             try:
-                h = peak.height if peak.height is not None else 0  # p0[1]  # error should only occur on next line
-                p1 = (peak.pointPositions[pIndex] - 1, h)
+                _pos = (peak.pointPositions[0] - 1, peak.height if peak.height is not None else 0)
+                p1 = [_pos[dim] for dim in pIndex]
                 posList += p1
             except Exception:
                 posList += (0, 0)  # add the bad-point
 
         try:
             peakAlias = multiplet.peaks[0].aliasing
-            alias = getAliasSetting(peakAlias[0], 0)
+            if pIndex[0]:  # check that the 1d-dimensions are reversed :|
+                alias = getAliasSetting(0, peakAlias[0])
+            else:
+                alias = getAliasSetting(peakAlias[0], 0)
         except Exception:
             alias = 0
 

@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-01 19:39:57 +0100 (Thu, June 01, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-08-24 19:07:48 +0100 (Thu, August 24, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -134,6 +134,10 @@ class GLintegralListMethods():
         return obj.getIntegralView(integralListView)
 
 
+#=========================================================================================
+# GLintegralNdLabelling
+#=========================================================================================
+
 class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling):  #, GLpeakNdLabelling):
     """Class to handle symbol and symbol labelling for Nd displays
     """
@@ -190,7 +194,7 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
         self.buildSymbols()
 
         # why is this not initialising?
-        self._GLParent.globalGL._shaderProgram1.setMVMatrix(self._GLParent._IMatrix)
+        shader.setMVMatrix(self._GLParent._IMatrix)
 
         for integralListView, specView in self._visibleListViews:
             if not integralListView.isDeleted and integralListView in self._GLSymbols.keys():
@@ -201,14 +205,12 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
                         if self._GLParent._stackingMode:
                             # use the stacking matrix to offset the 1D spectra
                             #   - not sure that they are actually drawn in stacking mode
-                            self._GLParent.globalGL._shaderProgram1.setMVMatrix(self._GLParent._spectrumSettings[
-                                                                                    specView][
-                                                                                    GLDefs.SPECTRUM_STACKEDMATRIX])
+                            shader.setMVMatrix(self._GLParent._spectrumSettings[specView].stackedMatrix)
 
                         # draw the actual integral areas
                         integralArea._integralArea.drawVertexColorVBO()
 
-        self._GLParent.globalGL._shaderProgram1.setMVMatrix(self._GLParent._IMatrix)
+        shader.setMVMatrix(self._GLParent._IMatrix)
 
     def drawSymbolRegions(self, spectrumSettings):
         if self.strip.isDeleted:
@@ -428,6 +430,10 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
         """
         return True, False, 0, 1.0
 
+
+#=========================================================================================
+# GLintegral1dLabelling
+#=========================================================================================
 
 class GLintegral1dLabelling(GLintegralNdLabelling):
     """Class to handle symbol and symbol labelling for 1d displays

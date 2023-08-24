@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-23 14:45:09 +0000 (Thu, February 23, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-08-24 19:07:47 +0100 (Thu, August 24, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -417,6 +417,11 @@ class SpectrumView(AbstractWrapperObject):
         return [self.spectrum.axisCodes[idx] for idx in self.dimensionIndices]
 
     @property
+    def axesReversed(self) -> list:
+        """Spectrum axesReversed in display order"""
+        return [self.spectrum.axesReversed[idx] for idx in self.dimensionIndices]
+
+    @property
     def isotopeCodes(self) -> list:
         """Spectrum isotopeCodes in display order"""
         return [self.spectrum.isotopeCodes[idx] for idx in self.dimensionIndices]
@@ -434,15 +439,51 @@ class SpectrumView(AbstractWrapperObject):
         return [_tmp[idx] for idx in self.dimensionIndices]
 
     @property
+    def aliasingWidths(self) -> list:
+        """Spectrum aliasing widths in display order"""
+        _tmp = self.spectrum.aliasingLimits
+        return [max(_tmp[idx]) - min(_tmp[idx]) for idx in self.dimensionIndices]
+
+    @property
+    def aliasingIndexes(self) -> list:
+        """Spectrum aliasing indexes in display order"""
+        _tmp = self.spectrum.aliasingIndexes
+        return [_tmp[idx] for idx in self.dimensionIndices]
+
+    @property
     def foldingLimits(self) -> list:
         """Spectrum folding limits in display order"""
         _tmp = self.spectrum.foldingLimits
         return [_tmp[idx] for idx in self.dimensionIndices]
 
     @property
+    def foldingWidths(self) -> list:
+        """Spectrum folding widths in display order"""
+        _tmp = self.spectrum.foldingLimits
+        return [max(_tmp[idx]) - min(_tmp[idx]) for idx in self.dimensionIndices]
+
+    @property
+    def foldingModes(self) -> list:
+        """Spectrum folding modes in display order"""
+        _tmp = self.spectrum.foldingModes
+        return [_tmp[idx] for idx in self.dimensionIndices]
+
+    @property
     def ppmPerPoints(self) -> list:
         """Spectrum ppm-per-points values in display order"""
         _tmp = self.spectrum.ppmPerPoints
+        return [_tmp[idx] for idx in self.dimensionIndices]
+
+    @property
+    def ppmToPoints(self) -> list:
+        """Spectrum ppm-to-points methods in display order"""
+        _tmp = self.spectrum.ppmToPoints
+        return [_tmp[idx] for idx in self.dimensionIndices]
+
+    @property
+    def isTimeDomains(self) -> list:
+        """Spectrum isTimeDomains in display order"""
+        _tmp = self.spectrum.isTimeDomains
         return [_tmp[idx] for idx in self.dimensionIndices]
 
     @property

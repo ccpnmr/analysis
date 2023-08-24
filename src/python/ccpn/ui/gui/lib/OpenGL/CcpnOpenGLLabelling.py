@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-01 19:39:57 +0100 (Thu, June 01, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-08-24 19:07:48 +0100 (Thu, August 24, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -77,6 +77,10 @@ _numTimes = 12
 
 DEFAULTLINECOLOUR = '#7f7f7f'
 
+
+#=========================================================================================
+# GLLabelling
+#=========================================================================================
 
 class GLLabelling():
     """Base class to handle symbol and symbol labelling
@@ -399,7 +403,7 @@ class GLLabelling():
         if not _isInPlane and not _isInFlankingPlane:
             return
 
-        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+        pIndex = self._spectrumSettings[spectrumView].dimensionIndices
         try:
             # fix the pointPositions
             objPos = obj.pointPositions
@@ -659,17 +663,17 @@ class GLLabelling():
         arrowMinimum = self.strip.arrowMinimum**2  # a bit quicker
         symbolWidth = self.strip.symbolSize / 2.0
 
-        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
-        vPP = spectrumView.spectrum.ppmPerPoints
+        specSet = self._spectrumSettings[spectrumView]
+        vPP = specSet.ppmPerPoint
 
         try:
             r = self._GLParent.symbolX * np.sign(self._GLParent.pixelX)
-            pr = abs(r / vPP[pIndex[0]])
+            pr = abs(r / vPP[0])
         except Exception:
             pr = r
         try:
             w = self._GLParent.symbolY * np.sign(self._GLParent.pixelY)
-            pw = abs(w / vPP[pIndex[1]])
+            pw = abs(w / vPP[1])
         except Exception:
             pw = w
 
@@ -740,7 +744,7 @@ class GLLabelling():
         if not _isInPlane and not _isInFlankingPlane:
             return
 
-        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+        pIndex = self._spectrumSettings[spectrumView].dimensionIndices
         try:
             # fix the pointPositions
             objPos = obj.pointPositions
@@ -1061,17 +1065,16 @@ class GLLabelling():
         symbolType = self.strip.symbolType
         symbolWidth = self.strip.symbolSize / 2.0
 
-        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
-        vPP = spectrumView.spectrum.ppmPerPoints
+        vPP = self._spectrumSettings[spectrumView].ppmPerPoint
 
         try:
             r = self._GLParent.symbolX * np.sign(self._GLParent.pixelX)
-            pr = abs(r / vPP[pIndex[0]])
+            pr = abs(r / vPP[0])
         except Exception:
             pr = r
         try:
             w = self._GLParent.symbolY * np.sign(self._GLParent.pixelY)
-            pw = abs(w / vPP[pIndex[1]])
+            pw = abs(w / vPP[1])
         except Exception:
             pw = w
 
@@ -1083,8 +1086,7 @@ class GLLabelling():
         symbolType = self.strip.symbolType
         symbolWidth = self.strip.symbolSize / 2.0
 
-        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
-        vPP = spectrumView.spectrum.ppmPerPoints
+        vPP = self._spectrumSettings[spectrumView].ppmPerPoint
 
         # try:
         #     r = tx * abs(self._GLParent.pixelX)  # change from pixels to ppm
@@ -1099,12 +1101,12 @@ class GLLabelling():
 
         try:
             r = tx  #* np.sign(self._GLParent.pixelX)  # change from pixels to ppm
-            pr = r / vPP[pIndex[0]]  # change from ppm to points
+            pr = r / vPP[0]  # change from ppm to points
         except Exception:
             pr = r
         try:
             w = ty  #* np.sign(self._GLParent.pixelY)
-            pw = w / vPP[pIndex[1]]
+            pw = w / vPP[1]
         except Exception:
             pw = w
 
@@ -1123,7 +1125,7 @@ class GLLabelling():
         # pls = peakListView.peakList
         pls = self.objectList(objListView)
 
-        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+        pIndex = self._spectrumSettings[spectrumView].dimensionIndices
         try:
             # fix the pointPositions
             objPos = obj.pointPositions
@@ -1213,7 +1215,7 @@ class GLLabelling():
         # use the first object for referencing
         obj = objectList(pls)[0]
 
-        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+        pIndex = self._spectrumSettings[spectrumView].dimensionIndices
         try:
             # fix the pointPositions
             objPos = obj.pointPositions
@@ -1431,7 +1433,7 @@ class GLLabelling():
         if not _isInPlane and not _isInFlankingPlane:
             return
 
-        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+        pIndex = self._spectrumSettings[spectrumView].dimensionIndices
         try:
             # fix the pointPositions
             objPos = obj.pointPositions
@@ -1723,7 +1725,7 @@ class GLLabelling():
         if not _isInPlane and not _isInFlankingPlane:
             return
 
-        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+        pIndex = self._spectrumSettings[spectrumView].dimensionIndices
         try:
             # fix the pointPositions
             objPos = obj.pointPositions
@@ -2748,6 +2750,10 @@ class GLLabelling():
             pass
 
 
+#=========================================================================================
+# GL1dLabelling
+#=========================================================================================
+
 class GL1dLabelling():
     """Class to handle symbol and symbol labelling for generic 1d displays
     """
@@ -2784,10 +2790,10 @@ class GL1dLabelling():
         meritEnabled = objListView.meritEnabled
         meritThreshold = objListView.meritThreshold
 
-        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+        dims = self._spectrumSettings[spectrumView].dimensionIndices
         try:
-            _h = obj.height if obj.height is not None else 0
-            p0 = (obj.pointPositions[pIndex[0]] - 1, _h)
+            _pos = (obj.pointPositions[0] - 1, obj.height if obj.height is not None else 0)
+            p0 = [_pos[dim] for dim in dims]
             _badPos = False
         except Exception:
             p0 = (0.0, 0.0)
@@ -2846,7 +2852,7 @@ class GL1dLabelling():
             alias = 0
 
         iCount, _selected = self._appendArrowIndices(drawList, indexing.vertexStart, 0, obj, arrowType)
-        self._appendArrowItemVertices(True, True, _selected, cols, drawList, 1.0, iCount, indexing, obj, p0, pIndex,
+        self._appendArrowItemVertices(True, True, _selected, cols, drawList, 1.0, iCount, indexing, obj, p0, dims,
                                       0, r, w, alias, sx, sy, rx, ry, tnx, tny)
 
     def _insertArrowItem(self, strip, obj, listCol, indexing, r, w,
@@ -2863,10 +2869,11 @@ class GL1dLabelling():
         if not obj:
             return
 
+        dims = self._spectrumSettings[spectrumView].dimensionIndices
         try:
             objPos = obj.pointPositions
-            _h = obj.height if obj.height is not None else 0
-            p0 = (objPos[0] - 1, _h)
+            _pos = (objPos[0] - 1, obj.height if obj.height is not None else 0)
+            p0 = [_pos[dim] for dim in dims]
             _badPos = False
         except Exception:
             p0 = (0.0, 0.0)
@@ -2923,7 +2930,7 @@ class GL1dLabelling():
 
         iCount, _selected = self._makeArrowIndices(drawList, indexEnd, vertexStart, 0, obj, arrowType)
         self._insertArrowItemVertices(True, True, _selected, cols, drawList, 1.0, iCount,
-                                      indexing, obj, objNum, p0, 0, 0, r, vertexPtr, w, alias, sx, sy, rx, ry, tnx, tny)
+                                      indexing, obj, objNum, p0, dims, 0, r, vertexPtr, w, alias, sx, sy, rx, ry, tnx, tny)
 
     def _removeArrow(self, spectrumView, objListView, delObj):
         """Remove an arrow from the list
@@ -3193,10 +3200,10 @@ class GL1dLabelling():
         if not obj:
             return
 
+        dims = self._spectrumSettings[spectrumView].dimensionIndices
         try:
-            objPos = obj.pointPositions
-            _h = obj.height if obj.height is not None else 0
-            p0 = (objPos[0] - 1, _h)
+            _pos = (obj.pointPositions[0] - 1, obj.height if obj.height is not None else 0)
+            p0 = [_pos[dim] for dim in dims]
             _badPos = False
         except Exception:
             p0 = (0.0, 0.0)
@@ -3211,7 +3218,10 @@ class GL1dLabelling():
 
         try:
             _alias = obj.aliasing
-            alias = getAliasSetting(_alias[0], 0)
+            if dims[0]:
+                alias = getAliasSetting(0, _alias[0])
+            else:
+                alias = getAliasSetting(_alias[0], 0)
         except Exception:
             alias = 0
 
@@ -3221,7 +3231,7 @@ class GL1dLabelling():
             iCount, _selected = self._makePlusSymbol(drawList, indexEnd, vertexStart, 0, obj)
 
         self._insertSymbolItemVertices(True, True, _selected, cols, drawList, 1.0, iCount,
-                                       indexing, obj, objNum, p0, 0, 0, r, vertexPtr, w, alias)
+                                       indexing, obj, objNum, p0, dims, 0, r, vertexPtr, w, alias)
 
     def _buildSymbols(self, spectrumView, objListView):
         spectrum = spectrumView.spectrum
@@ -3359,10 +3369,10 @@ class GL1dLabelling():
         meritEnabled = objListView.meritEnabled
         meritThreshold = objListView.meritThreshold
 
-        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+        dims = self._spectrumSettings[spectrumView].dimensionIndices
         try:
-            _h = obj.height if obj.height is not None else 0
-            p0 = (obj.pointPositions[pIndex[0]] - 1, _h)
+            _pos = (obj.pointPositions[0] - 1, obj.height if obj.height is not None else 0)
+            p0 = [_pos[dim] for dim in dims]
             _badPos = False
         except Exception:
             p0 = (0.0, 0.0)
@@ -3380,7 +3390,10 @@ class GL1dLabelling():
 
         try:
             _alias = obj.aliasing
-            alias = getAliasSetting(_alias[0], 0)
+            if dims[0]:
+                alias = getAliasSetting(0, _alias[0])
+            else:
+                alias = getAliasSetting(_alias[0], 0)
         except Exception:
             alias = 0
 
@@ -3391,7 +3404,7 @@ class GL1dLabelling():
             else:  # plus
                 iCount, _selected = self._appendPlusSymbol(drawList, indexing.vertexStart, 0, obj)
 
-            self._appendSymbolItemVertices(True, True, _selected, cols, drawList, 1.0, iCount, indexing, obj, p0, pIndex,
+            self._appendSymbolItemVertices(True, True, _selected, cols, drawList, 1.0, iCount, indexing, obj, p0, dims,
                                            0, r, w, alias)
 
     def _removeSymbol(self, spectrumView, objListView, delObj):
@@ -3456,10 +3469,10 @@ class GL1dLabelling():
         else:
             _, _, symbolType, symbolWidth, r, w = self._getSymbolWidths(spectrumView)
 
-        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+        dims = self._spectrumSettings[spectrumView].dimensionIndices
         try:
-            h = obj.height if obj.height is not None else 0
-            p0 = (obj.pointPositions[pIndex[0]] - 1, h)  # need to split into pos, height
+            _pos = (obj.pointPositions[0] - 1, obj.height if obj.height is not None else 0)
+            p0 = [_pos[dim] for dim in dims]
             _badPos = False
         except Exception:
             p0 = (0.0, 0.0)
@@ -3467,7 +3480,10 @@ class GL1dLabelling():
 
         try:
             _alias = obj.aliasing
-            alias = getAliasSetting(_alias[0], 0)
+            if dims[0]:
+                alias = getAliasSetting(0, _alias[0])
+            else:
+                alias = getAliasSetting(_alias[0], 0)
         except Exception:
             alias = 0
 

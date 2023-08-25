@@ -5084,6 +5084,8 @@ class CcpnGLWidget(QOpenGLWidget):
                     if self._stackingMode:
                         # use the stacking matrix to offset the 1D spectra
                         shader.setMVMatrix(self._spectrumSettings[hTrace.spectrumView].stackedMatrix)
+                    else:
+                        shader.setMVMatrix(np.array(self._IMatrix))
                     hTrace.drawVertexColorVBO()
 
             for vTrace in self._staticVTraces:
@@ -5092,6 +5094,8 @@ class CcpnGLWidget(QOpenGLWidget):
                     if self._stackingMode:
                         # use the stacking matrix to offset the 1D spectra
                         shader.setMVMatrix(self._spectrumSettings[vTrace.spectrumView].stackedMatrix)
+                    else:
+                        shader.setMVMatrix(np.array(self._IMatrix))
                     vTrace.drawVertexColorVBO()
 
         # only paint if mouse is in the window, or menu has been raised in this strip

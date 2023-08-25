@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-08-24 19:07:48 +0100 (Thu, August 24, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-25 15:00:00 +0100 (Fri, August 25, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -2099,6 +2099,8 @@ class Gui1dWidget(CcpnGLWidget):
                         if self._stackingMode:
                             # use the stacking matrix to offset the 1D spectra
                             currentShader.setMVMatrix(self._spectrumSettings[spectrumView].stackedMatrix)
+                        else:
+                            currentShader.setMVMatrix(self._IMatrix)
                         # draw contours
                         if spectrumView in self._contourList:
                             self._contourList[spectrumView].drawVertexColorVBO()

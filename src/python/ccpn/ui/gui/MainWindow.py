@@ -452,10 +452,10 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                           'current'                 : self.application.current,
                           'preferences'             : self.application.preferences,
                           'redo'                    : self.application.redo,
-                          'undo'                    : self.application.undo,
-
+                          'undo'                  : self.application.undo,
                           'get'                     : self.application.get,
-                          'getGid'                  : self.application.ui.getByGid,
+                          'getByPid'            :  self.application.get,
+                          'getByGid'            : self.application.ui.getByGid,
                           'ui'                      : self.application.ui,
                           'mainWindow'              : self,
                           'project'                 : self.application.project,

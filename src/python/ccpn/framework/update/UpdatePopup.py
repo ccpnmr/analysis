@@ -4,7 +4,7 @@ Module Documentation Here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-27 18:13:14 +0100 (Thu, October 27, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-08-30 19:22:14 +0100 (Wed, August 30, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,6 +27,9 @@ __date__ = "$Date: 2017-04-07 10:28:40 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtCore, QtWidgets
+
+# don't remove this import
+import ccpn.core
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
@@ -41,11 +44,10 @@ from ccpn.framework.Version import applicationVersion
 REFRESHBUTTONTEXT = 'Refresh Updates Information'
 DOWNLOADBUTTONTEXT = 'Download/Install Updates'
 UPDATELICENCEKEYTEXT = 'Update LicenceKey'
-# CLOSEBUTTONTEXT = 'Close'
 CLOSEEXITBUTTONTEXT = 'Close and Exit'
 
 
-class UpdatePopup(CcpnDialogMainWidget, UpdateAgent):
+class UpdatePopup(CcpnDialogMainWidget):
     def __init__(self, parent=None, mainWindow=None, title='Update CCPN code', **kwds):
         CcpnDialogMainWidget.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
@@ -59,45 +61,51 @@ class UpdatePopup(CcpnDialogMainWidget, UpdateAgent):
             self.project = mainWindow.application.project
             self.preferences = mainWindow.application.preferences
         else:
-            self.application = None
-            self.project = None
-            self.preferences = None
+            self.application = self.project = self.preferences = None
 
-        # version = QtCore.QCoreApplication.applicationVersion()
-        version = applicationVersion  # .withoutRelease()
-        UpdateAgent.__init__(self, version, dryRun=False,
-                             showInfo=self._showInfo, showError=self._showError,
-                             _updateProgressHandler=self._refreshQT)
+        version = applicationVersion
+        self._updatePopupAgent = UpdateAgent(version, dryRun=False,
+                                             showInfo=self._showInfo, showError=self._showError,
+                                             _updateProgressHandler=self._refreshQT)
 
         self.setWindowTitle(title)
+        self._setWidgets(version)
 
+        self.setFixedWidth(self.sizeHint().width())
+        self._hideInfoBox()
+        # self._showInfoBox()
+
+        # initialise the popup
+        self.resetFromServer()
+        self._numUpdatesInstalled = 0
+        self._updateButton.setEnabled(self._updatePopupAgent._check())
+
+        self._downloadButton = self.buttonList.getButton(DOWNLOADBUTTONTEXT)
+        self._downloadButton.setEnabled(bool(self._updatePopupAgent.updateFiles and
+                                             len(self._updatePopupAgent.updateFiles) > 0))
+
+    def _setWidgets(self, version):
+        """Set the widgets.
+        """
         row = 0
-
         #label = Label(self, 'Server location:', grid=(row, 0))
         #label = Label(self, self.server, grid=(row, 1))
         #row += 1
-
         # align all widgets to the top
         self.mainWidget.getLayout().setAlignment(QtCore.Qt.AlignTop)
-
         label = Label(self.mainWidget, 'Installation location:', grid=(row, 0), gridSpan=(1, 2))
-        label = Label(self.mainWidget, text=self.installLocation, grid=(row, 2))
+        label = Label(self.mainWidget, text=self._updatePopupAgent.installLocation, grid=(row, 2))
         row += 1
-
         label = Label(self.mainWidget, 'Version:', grid=(row, 0), gridSpan=(1, 2))
         label = Label(self.mainWidget, text=version, grid=(row, 2))
         row += 1
-
         label = Label(self.mainWidget, 'Number of updates:', grid=(row, 0), gridSpan=(1, 2))
         self.updatesLabel = Label(self.mainWidget, text='TBD', grid=(row, 2))
         row += 1
-
         label = Label(self.mainWidget, 'Installing updates will require a restart of the program.', grid=(row, 0), gridSpan=(1, 3))
         row += 1
-
         self._updateButton = Button(self.mainWidget, text=UPDATELICENCEKEYTEXT, tipText='Update LicenceKey from the server',
                                     callback=self._doUpdate, icon='icons/Filetype-Docs-icon.png', grid=(row, 0))
-
         row += 1
         texts = (REFRESHBUTTONTEXT, DOWNLOADBUTTONTEXT, self.CLOSEBUTTONTEXT)
         callbacks = (self._resetClicked, self._install, self._accept)
@@ -107,16 +115,13 @@ class UpdatePopup(CcpnDialogMainWidget, UpdateAgent):
         icons = ('icons/redo.png', 'icons/dialog-apply.png', 'icons/window-close.png')
         self.buttonList = ButtonList(self.mainWidget, texts=texts, tipTexts=tipTexts, callbacks=callbacks, icons=icons, grid=(row, 0), gridSpan=(1, 3),
                                      setMinimumWidth=False)
-
         # set some padding for the buttons
         _height = getFontHeight()
         _style = f'QPushButton {{padding-left: {_height}px; padding-right: {_height}px; padding-top: 1px; padding-bottom: 1px;}}'
         for button in self.buttonList.buttons:
             button.setStyleSheet(_style)
         self._updateButton.setStyleSheet(_style)
-
         row += 1
-
         if self.preferences:
             checkAtStartup = CheckBoxCompoundWidget(self.mainWidget,
                                                     grid=(row, 0), hAlign='left', gridSpan=(1, 3),
@@ -126,29 +131,17 @@ class UpdatePopup(CcpnDialogMainWidget, UpdateAgent):
                                                     checked=self.preferences.general.checkUpdatesAtStartup,
                                                     callback=self._checkAtStartupCallback)
             row += 1
-
         self.infoBox = TextEditor(self.mainWidget, grid=(row, 0), gridSpan=(1, 3))  # NOTE:ED - do not set valign here
         self.infoBox.setVisible(False)
         self.infoBox.setEnabled(True)
         self.infoBox.setReadOnly(True)
 
-        self.setFixedWidth(self.sizeHint().width())
-        self._hideInfoBox()
-        # self._showInfoBox()
-
-        # initialise the popup
-        self.resetFromServer()
-        self._numUpdatesInstalled = 0
-        self._updateButton.setEnabled(self._check())
-
-        self._downloadButton = self.buttonList.getButton(DOWNLOADBUTTONTEXT)
-        self._downloadButton.setEnabled(bool(self.updateFiles and len(self.updateFiles) > 0))
-
     def _resetClicked(self):
         """Reset button clicked,update the count and reset the download button
         """
         self.resetFromServer()
-        self._downloadButton.setEnabled(bool(self.updateFiles and len(self.updateFiles) > 0))
+        self._downloadButton.setEnabled(bool(self._updatePopupAgent.updateFiles and
+                                             len(self._updatePopupAgent.updateFiles) > 0))
 
     def _install(self):
         """The update button has been clicked. Install updates and flag that files have been changed
@@ -160,11 +153,15 @@ class UpdatePopup(CcpnDialogMainWidget, UpdateAgent):
         # QtCore.QTimer.singleShot(0, self._handleUpdates)
 
     def _handleUpdates(self):
-        if updateFilesInstalled := self.installUpdates():
+
+        # NOTE:ED - call update as subprocess.Popen?
+
+        if updateFilesInstalled := self._updatePopupAgent.installUpdates():
             self._numUpdatesInstalled += len(updateFilesInstalled)
             self.buttonList.getButton(self.CLOSEBUTTONTEXT).setText(CLOSEEXITBUTTONTEXT)
 
-        self._downloadButton.setEnabled(bool(self.updateFiles and len(self.updateFiles) > 0))
+        self._downloadButton.setEnabled(bool(self._updatePopupAgent.updateFiles and
+                                             len(self._updatePopupAgent.updateFiles) > 0))
 
     def _closeProgram(self):
         """Call the mainWindow close function giving user option to save, then close program
@@ -194,8 +191,8 @@ class UpdatePopup(CcpnDialogMainWidget, UpdateAgent):
     def resetFromServer(self):
         """Get current number of updates from the server
         """
-        UpdateAgent.resetFromServer(self)
-        self.updatesLabel.set('%d' % len(self.updateFiles))
+        self._updatePopupAgent.resetFromServer()
+        self.updatesLabel.set('%d' % len(self._updatePopupAgent.updateFiles))
 
     def closeEvent(self, event) -> None:
         self.reject()
@@ -242,9 +239,7 @@ class UpdatePopup(CcpnDialogMainWidget, UpdateAgent):
 
 
 def main():
-    import sys
-    import os
-
+    # QApplication must be persistent until end of main
     qtApp = QtWidgets.QApplication(['Update'])
 
     QtCore.QCoreApplication.setApplicationName('Update')
@@ -252,12 +247,6 @@ def main():
 
     popup = UpdatePopup()
     popup.exec_()
-
-    # os._exit(qtApp.exec_()) - not required with exec_
-
-
-if __name__ == '__main__':
-    main()
 
 
 if __name__ == '__main__':

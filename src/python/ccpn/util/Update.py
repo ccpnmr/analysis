@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-23 15:25:39 +0000 (Thu, February 23, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-08-30 19:22:15 +0100 (Wed, August 30, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -35,7 +35,7 @@ from datetime import datetime
 import json
 
 
-ccpn2Url = 'http://www.ccpn.ac.uk'
+ccpn2Url = 'https://www.ccpn.ac.uk'
 
 from ccpn.util import Path
 
@@ -64,6 +64,16 @@ DELETEHASHCODE = '<DELETE>'
 TERMSANDCONDITIONS = 'termsConditions'
 
 VERSION_UPDATE_FILE = 'src/python/ccpn/framework/Version.py'
+
+SUCCESS_RELEASE = 1
+SUCCESS_MICROUPDATE = 2  # bit alternates between 0|1 when updating micro-version
+SUCCESS_MINORUPDATE = 4  # --ditto-- minor-version
+SUCCESS_MAJORUPDATE = 8
+SUCCESS = 16
+FAIL_UNEXPECTED = 32
+FAIL_NOTUPDATED = 33
+FAIL_WRITEERROR = 34
+MAX_COUNT = 16
 
 
 def lastModifiedTime(filePath):
@@ -126,7 +136,7 @@ def calcHashCode(filePath):
             with open(filePath, 'r', encoding='utf-8') as fp:
                 data = fp.read()
             data = bytes(data, 'utf-8')
-    except Exception as es:
+    except Exception:
         data = ''
 
     h = hashlib.md5()
@@ -200,6 +210,8 @@ def installUpdates(version, dryRun=True):
     updateAgent.installUpdates()
     if updateAgent._check():
         updateAgent._resetMd5()
+
+    return updateAgent.exitCode
 
 
 class UpdateFile:
@@ -317,6 +329,10 @@ class UpdateFile:
     #     self.fileHashCode = calcHashCode(self.fullFilePath)
 
 
+#=========================================================================================
+# UpdateAgent
+#=========================================================================================
+
 class UpdateAgent(object):
 
     def __init__(self, version, showError=None, showInfo=None, askPassword=None,
@@ -325,20 +341,9 @@ class UpdateAgent(object):
                  _updateProgressHandler=None,
                  dryRun=True):
 
-        if not showError:
-            # showError = MessageDialog.showError
-            showError = lambda title, msg: print(msg)
-
-        if not showInfo:
-            # showInfo = MessageDialog.showInfo
-            showInfo = lambda title, msg: print(msg)
-
-        # if not askPassword:
-        #  askPassword = InputDialog.askPassword
-
         self.version = version
-        self.showError = showError
-        self.showInfo = showInfo
+        self.showError = showError or (lambda title, msg: print(msg))
+        self.showInfo = showInfo or (lambda title, msg: print(msg))
         self.askPassword = askPassword
         self.serverUser = serverUser  # None for downloads, not None for uploads
         self.server = server
@@ -357,6 +362,8 @@ class UpdateAgent(object):
 
         self._updateProgressHandler = _updateProgressHandler
         self._dryRun = dryRun
+
+        self.exitCode = 0
 
     def checkNumberUpdates(self):
         self.fetchUpdateDb()
@@ -554,7 +561,7 @@ class UpdateAgent(object):
                                existsErrorCount, existsErrorCount > 1 and 's' or ''))
 
     def haveWriteAccess(self):
-        """See if can write files to local installation."""
+        """See if write-access to local installation."""
 
         testFile = os.path.join(self.installLocation, '__write_test__')
         try:
@@ -562,16 +569,23 @@ class UpdateAgent(object):
                 pass
             os.remove(testFile)
             return True
+
         except:
             return False
 
     def installChosen(self):
         """Download chosen server files to local installation."""
+        from ccpn.framework.Version import applicationVersion
 
         updateFiles = [updateFile for updateFile in self.updateFiles if updateFile.shouldInstall]
         if not updateFiles:
             self.showError('No updates', 'No updates for installation')
+
+            # success and version has NOT been updated
+            self.exitCode = SUCCESS
             return
+
+        self.exitCode = FAIL_UNEXPECTED  # catch anything unexpected
 
         n = 0
         updateFilesInstalled = []
@@ -580,13 +594,15 @@ class UpdateAgent(object):
             # # check that the last file to be updated is the Version.py
             # _allowVersionUpdate = True if (len(updateFiles) == 1 and updateFiles[0].filePath == VERSION_UPDATE_FILE) else False
 
-            # go through the list is updates and apply each
+            self.exitCode = FAIL_NOTUPDATED  # files not updated correctly
+
+            # go through the list is updates and apply each, ignoring Version.py
             for updateFile in updateFiles:
 
                 if self._updateProgressHandler:
                     self._updateProgressHandler()
 
-                # skip the version update file
+                # skip the version update file until the next pass
                 if updateFile.filePath == VERSION_UPDATE_FILE:
                     continue
 
@@ -594,6 +610,8 @@ class UpdateAgent(object):
                 n = self._updateSingleFile(n, updateFile, updateFilesInstalled)
 
             # check how many have been updated correctly
+            #   if n == all updates, okay with no version update
+            #   any lower => version.py still needs updating OR update errors
             ss = n != 1 and 's' or ''
             if n != len(updateFiles):
 
@@ -608,14 +626,25 @@ class UpdateAgent(object):
                     if n == len(updateFiles):
                         self.showInfo('Update%s installed' % ss, '%d update%s installed successfully' % (n, ss))
 
+                        # success and version has been updated
+                        # keep the last bits which would alternate 0|1 as the version-number increases
+                        self.exitCode = applicationVersion._bitHash()
+
                     else:
                         self.showError('Update problem', '%d update%s installed, %d not installed, see console for error messages' % (n, ss, len(updateFiles) - n))
                 else:
                     self.showError('Update problem', '%d update%s installed, %d not installed, see console for error messages' % (n, ss, len(updateFiles) - n))
+
             else:
                 self.showInfo('Update%s installed' % ss, '%d update%s installed successfully' % (n, ss))
+
+                # success and version has NOT been updated
+                self.exitCode = SUCCESS
+
         else:
             self.showError('No write permission', 'You do not have write permission in the CCPN installation directory')
+
+            self.exitCode = FAIL_WRITEERROR  # no write permission
 
         self.resetFromServer()
 
@@ -697,17 +726,23 @@ class UpdateAgent(object):
                 write('No local copy of file\n')
 
 
-def testMain():
+def main():
     from ccpn.framework.Version import applicationVersion
     import sys
     import os
 
     # installUpdates(applicationVersion.withoutRelease(), dryRun=False)
-    installUpdates(applicationVersion, dryRun=False)
+    # exitCode = installUpdates(applicationVersion, dryRun=True)
 
+    # test to assume that the micro version increments by one each time
+    exitCode = applicationVersion._bitHash()
+
+    # code must be [0, 255] - 0 represents success
     if sys.platform[:3].lower() == 'win':
-        os._exit(0)
+        os._exit(exitCode)
+    else:
+        sys.exit(exitCode)
 
 
 if __name__ == '__main__':
-    testMain()
+    main()

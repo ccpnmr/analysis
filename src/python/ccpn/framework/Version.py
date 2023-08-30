@@ -110,6 +110,23 @@ class VersionString(str):
         """
         return '.'.join(self.fields[:3])
 
+    def _bitHash(self):
+        """Return the last bits of major/minor/micro/release.
+        CCPN Internal - used by update to check whether the version is incrementing.
+            Assumes that increments are integer steps
+        """
+        from operator import or_
+        from functools import reduce
+
+        return reduce(or_, ((int(val or 0) & 0x01) << shift
+                            for shift, val in enumerate([self.release,
+                                                         self.microVersion,
+                                                         self.minorVersion,
+                                                         self.majorVersion,
+                                                         ])
+                            )
+                      )
+
     def __len__(self):
         return len(self.fields)
 

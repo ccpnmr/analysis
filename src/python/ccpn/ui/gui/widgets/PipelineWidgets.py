@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-30 15:59:18 +0100 (Fri, June 30, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-31 20:07:03 +0100 (Thu, August 31, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -585,12 +585,15 @@ class GuiPipe(Dock, GuiPipeDrop):
                                                               headerText=headerText, headerEnabled=headerEnabled, headerIcon=headerIcon)
                 # Below a mechanism to autoselect spectrumGroups Pulldown based on the pid. Eg autoselect the Control SG pulldown if in the inputData there is a SG with the name Control in its pid.
                 if selected == self._pulldownSGHeaderText:
-                    texts = [sg.pid for sg in spectrumGroups]
-                    for text in texts:
+                    pids = [sg.pid for sg in spectrumGroups]
+                    for pid in pids:
                         if len(widgetVariable.split('_'))>0:
                             for subText in widgetVariable.split('_'):
-                                if subText.lower() in text.lower():
-                                    selected = text
+                                firstLabelLetter = subText[0]
+                                _id = pid.id
+                                firstPidLetter = _id[0]
+                                if firstLabelLetter.lower() == firstPidLetter.lower():
+                                    selected = pid
                                     continue
                 _getWidgetByAtt(self, widgetVariable).select(selected)
 

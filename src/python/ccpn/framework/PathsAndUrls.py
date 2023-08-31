@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-07 10:36:31 +0000 (Tue, November 07, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-08-31 18:07:20 +0100 (Thu, August 31, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -90,6 +90,9 @@ howTosPath                      = tutorialsPath / 'How-Tos'
 
 documentationPath               = ccpnCodePath / 'doc' / 'build' / 'html' / 'index.html'
 licensePath                     = ccpnCodePath / 'LICENSE.txt'
+
+# Resources Path
+ccpnResourcesChemicalShifts     = ccpnResourcesPath / 'referenceChemicalShifts'
 
 # User settings
 userPreferencesDirectory        = Path.aPath('~/.ccpn')

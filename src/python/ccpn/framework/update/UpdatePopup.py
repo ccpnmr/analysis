@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-08-30 19:22:14 +0100 (Wed, August 30, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-31 19:00:36 +0100 (Thu, August 31, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -27,6 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:40 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtCore, QtWidgets
+import contextlib
 
 # don't remove this import
 import ccpn.core
@@ -49,7 +50,7 @@ CLOSEEXITBUTTONTEXT = 'Close and Exit'
 
 class UpdatePopup(CcpnDialogMainWidget):
     def __init__(self, parent=None, mainWindow=None, title='Update CCPN code', **kwds):
-        CcpnDialogMainWidget.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
+        super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
 
         # keep focus on this window
         self.setModal(True)
@@ -76,13 +77,17 @@ class UpdatePopup(CcpnDialogMainWidget):
         # self._showInfoBox()
 
         # initialise the popup
+        self._updatesInstalled = False
+        self._updateCount = 0
         self.resetFromServer()
-        self._numUpdatesInstalled = 0
-        self._updateButton.setEnabled(self._updatePopupAgent._check())
 
+        self._updateButton.setEnabled(self._updatePopupAgent._check())
         self._downloadButton = self.buttonList.getButton(DOWNLOADBUTTONTEXT)
-        self._downloadButton.setEnabled(bool(self._updatePopupAgent.updateFiles and
-                                             len(self._updatePopupAgent.updateFiles) > 0))
+        self._downloadButton.setEnabled(self._updateCount > 0)
+
+        # initialise the buttons and dialog size
+        self.setDefaultButton(None)
+        self._postInit()
 
     def _setWidgets(self, version):
         """Set the widgets.
@@ -131,17 +136,21 @@ class UpdatePopup(CcpnDialogMainWidget):
                                                     checked=self.preferences.general.checkUpdatesAtStartup,
                                                     callback=self._checkAtStartupCallback)
             row += 1
+
+        # why does this not resize correctly in self.mainWidget?
         self.infoBox = TextEditor(self.mainWidget, grid=(row, 0), gridSpan=(1, 3))  # NOTE:ED - do not set valign here
         self.infoBox.setVisible(False)
         self.infoBox.setEnabled(True)
         self.infoBox.setReadOnly(True)
 
+        # why???
+        self.mainWidget.setMaximumSize(QtCore.QSize(3000, 3000))
+
     def _resetClicked(self):
         """Reset button clicked,update the count and reset the download button
         """
         self.resetFromServer()
-        self._downloadButton.setEnabled(bool(self._updatePopupAgent.updateFiles and
-                                             len(self._updatePopupAgent.updateFiles) > 0))
+        self._downloadButton.setEnabled(self._updateCount > 0)
 
     def _install(self):
         """The update button has been clicked. Install updates and flag that files have been changed
@@ -154,14 +163,40 @@ class UpdatePopup(CcpnDialogMainWidget):
 
     def _handleUpdates(self):
 
-        # NOTE:ED - call update as subprocess.Popen?
+        from ccpn.framework.PathsAndUrls import ccpnBinPath, ccpnBatchPath
+        from ccpn.util.Common import isWindowsOS
+        from subprocess import PIPE, Popen, CalledProcessError
+        from ccpn.util.Update import FAIL_UNEXPECTED
 
-        if updateFilesInstalled := self._updatePopupAgent.installUpdates():
-            self._numUpdatesInstalled += len(updateFilesInstalled)
-            self.buttonList.getButton(self.CLOSEBUTTONTEXT).setText(CLOSEEXITBUTTONTEXT)
+        exitCode = 0
+        if isWindowsOS():
+            from os import startfile
 
-        self._downloadButton.setEnabled(bool(self._updatePopupAgent.updateFiles and
-                                             len(self._updatePopupAgent.updateFiles) > 0))
+            startfile(ccpnBatchPath / 'update')
+
+        else:
+            # start a process and continuously read the stdout to the textbox
+            process = Popen([ccpnBinPath / 'update'], stdout=PIPE, stderr=PIPE, text=True, bufsize=1, universal_newlines=True)
+            for line in process.stdout:
+                self._showInfo(line)
+            exitCode = process.wait()
+            # if exitCode >= FAIL_UNEXPECTED:
+            #     CalledProcessError(exitCode, process.args)
+
+        self._updatesInstalled = True
+        self.buttonList.getButton(self.CLOSEBUTTONTEXT).setText(CLOSEEXITBUTTONTEXT)
+        self._downloadButton.setEnabled(bool(exitCode != 0))
+
+        self.resetFromServer()
+
+        # resize due to change in button text
+        QtCore.QTimer.singleShot(0, self._checkWidth)
+
+    def _checkWidth(self):
+        """Resize to account for the slighty wider buttons.
+        """
+        _width = self.sizeHint().width() + 100  # still not sure why I need to add constant here :|
+        self.setFixedWidth(_width)
 
     def _closeProgram(self):
         """Call the mainWindow close function giving user option to save, then close program
@@ -171,7 +206,7 @@ class UpdatePopup(CcpnDialogMainWidget):
     def _accept(self):
         """Close button has been clicked, close if files have been updated or close dialog
         """
-        if self._numUpdatesInstalled:
+        if self._updatesInstalled:
             self._closeProgram()
         else:
             self.accept()
@@ -183,7 +218,7 @@ class UpdatePopup(CcpnDialogMainWidget):
     def reject(self):
         """Dialog-frame close button has been clicked, close if files have been updated or close dialog
         """
-        if self._numUpdatesInstalled:
+        if self._updatesInstalled:
             self._closeProgram()
         else:
             super(UpdatePopup, self).reject()
@@ -191,20 +226,41 @@ class UpdatePopup(CcpnDialogMainWidget):
     def resetFromServer(self):
         """Get current number of updates from the server
         """
+        from subprocess import PIPE, Popen
+        from ccpn.framework.PathsAndUrls import ccpnBinPath, ccpnBatchPath
+        from ccpn.util.Common import isWindowsOS
+
+        count = 0
+        if isWindowsOS():
+            from os import startfile
+
+            startfile(ccpnBatchPath / 'update', '--count')
+
+        else:
+            command = [ccpnBinPath / 'update', '--count']
+            query = Popen(command, stdout=PIPE, stderr=PIPE)
+            status, error = query.communicate()
+            if query.poll() == 0:
+                with contextlib.suppress(Exception):
+                    count = int(status.decode("utf-8").strip())
+
+        self.updatesLabel.set(f'{count}')
+        self._updateCount = count
+
         self._updatePopupAgent.resetFromServer()
-        self.updatesLabel.set('%d' % len(self._updatePopupAgent.updateFiles))
 
     def closeEvent(self, event) -> None:
         self.reject()
 
     def _showInfoBox(self):
         self.infoBox.show()
+        _width = self.sizeHint().width()
         _height = self.sizeHint().height()
         # self.setMinimumHeight(8 * getFontHeight())
         # self.setMaximumHeight(16 * getFontHeight())
         self.setMinimumHeight(_height)
-        self.setMaximumHeight(_height * 2)
-        self.resize(QtCore.QSize(self.width(), _height * 2))
+        self.setMaximumHeight(int(_height * 2.5))
+        self.resize(QtCore.QSize(_width, int(_height * 2.5)))
         self._refreshQT()
 
     def _hideInfoBox(self):

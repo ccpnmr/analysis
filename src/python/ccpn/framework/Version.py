@@ -123,6 +123,7 @@ class VersionString(str):
                                                          self.microVersion,
                                                          self.minorVersion,
                                                          self.majorVersion,
+                                                         1,  # add higher bit to ensure code >= 16
                                                          ])
                             )
                       )

@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
-SUCCESS_RELEASE=1
-SUCCESS_MICROUPDATE=2 # bit alternates between 0|1 when updating micro-version
-SUCCESS_MINORUPDATE=4 # --ditto-- minor-version
-SUCCESS_MAJORUPDATE=8
-SUCCESS=16
+SUCCESS=0
+SUCCESS_VERSION=1
+SUCCESS_RELEASE=2
+SUCCESS_MICROUPDATE=4  # bit alternates between 0|1 when updating micro-version
+SUCCESS_MINORUPDATE=8  # --ditto-- minor-version
+SUCCESS_MAJORUPDATE=16
 FAIL_UNEXPECTED=32
 FAIL_NOTUPDATED=33
 FAIL_WRITEERROR=34
@@ -33,20 +34,23 @@ UPDATE="${CCPNMR_TOP_DIR}"/src/python/ccpn/util/Update.py
 
 source "${CCPNMR_TOP_DIR}"/bin/paths.sh
 
-count=1
 lasterr=-1
 err=0
 for count in $(seq ${MAX_COUNT}); do
     "${CONDA}"/bin/python -W ignore "${UPDATE}" "$@"
     err=$?
 
-    echo ${count} "-->" ${err}${lasterr}
-    if [[ err -ge SUCCESS ]]; then
+    if [[ err -eq SUCCESS ]]; then
         # updated with code that requires loop to terminate
+        #   could be called with switches that do other actions
+        break
+    elif [[ err -ge FAIL_UNEXPECTED ]]; then
+        # updated with code that requires loop to terminate
+        echo "--> there was an error updating: ${err}"
         break
     elif [[ err -eq lasterr ]]; then
         # update was apparently successful but the version didn't increment by 1 in any field
-        echo "--> there was an issue updating: ${err}"
+        echo "--> there was an issue updating version: ${err}"
         break
     fi
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-08-30 19:22:15 +0100 (Wed, August 30, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-31 19:00:36 +0100 (Thu, August 31, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -33,6 +33,7 @@ import shutil
 import sys
 from datetime import datetime
 import json
+from contextlib import suppress
 
 
 ccpn2Url = 'https://www.ccpn.ac.uk'
@@ -65,11 +66,12 @@ TERMSANDCONDITIONS = 'termsConditions'
 
 VERSION_UPDATE_FILE = 'src/python/ccpn/framework/Version.py'
 
-SUCCESS_RELEASE = 1
-SUCCESS_MICROUPDATE = 2  # bit alternates between 0|1 when updating micro-version
-SUCCESS_MINORUPDATE = 4  # --ditto-- minor-version
-SUCCESS_MAJORUPDATE = 8
-SUCCESS = 16
+SUCCESS = 0
+SUCCESS_VERSION = 1
+SUCCESS_RELEASE = 2
+SUCCESS_MICROUPDATE = 4  # bit alternates between 0|1 when updating micro-version
+SUCCESS_MINORUPDATE = 8  # --ditto-- minor-version
+SUCCESS_MAJORUPDATE = 16
 FAIL_UNEXPECTED = 32
 FAIL_NOTUPDATED = 33
 FAIL_WRITEERROR = 34
@@ -214,6 +216,13 @@ def installUpdates(version, dryRun=True):
     return updateAgent.exitCode
 
 
+def getUpdateCount(version):
+    """Return the number of updates for the specified version.
+    """
+    updateAgent = UpdateAgent(version)
+    return updateAgent.checkNumberUpdates()
+
+
 class UpdateFile:
 
     def __init__(self, installLocation, serverDbRoot, filePath, fileServerTime=None,
@@ -315,12 +324,9 @@ class UpdateFile:
         """Remove file as update action
         """
         fullFilePath = self.fullFilePath
-        try:
+        with suppress(OSError):
             os.remove(fullFilePath)
             return True
-
-        except OSError:
-            pass
 
     # def commitUpdate(self, serverUser, serverPassword):
     #
@@ -333,7 +339,9 @@ class UpdateFile:
 # UpdateAgent
 #=========================================================================================
 
-class UpdateAgent(object):
+class UpdateAgent:
+
+    updateFileClass = UpdateFile
 
     def __init__(self, version, showError=None, showInfo=None, askPassword=None,
                  serverUser=None, server=SERVER, serverDbRoot=SERVER_DB_ROOT, serverDbFile=SERVER_DB_FILE,
@@ -406,7 +414,7 @@ class UpdateAgent(object):
                         # delete file
                         if os.path.exists(os.path.join(self.installLocation, filePath)):
                             # if still exists then need to add to update list
-                            updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime,
+                            updateFile = self.updateFileClass(self.installLocation, self.serverDbRoot, filePath, fileTime,
                                                     fileStoredAs, fileHashCode, serverDownloadScript=serverDownloadScript,
                                                     serverUploadScript=serverUploadScript)
                             updateFiles.append(updateFile)
@@ -415,7 +423,7 @@ class UpdateAgent(object):
                     elif self.serverUser or self.isUpdateDifferent(filePath, fileHashCode):
 
                         # file exists, is modified and needs updating
-                        updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime,
+                        updateFile = self.updateFileClass(self.installLocation, self.serverDbRoot, filePath, fileTime,
                                                 fileStoredAs, fileHashCode, serverDownloadScript=serverDownloadScript,
                                                 serverUploadScript=serverUploadScript)
                         updateFiles.append(updateFile)
@@ -424,7 +432,7 @@ class UpdateAgent(object):
                     elif fileTime in [0, '0', '0.0']:
 
                         # file exists, is modified and needs updating
-                        updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime,
+                        updateFile = self.updateFileClass(self.installLocation, self.serverDbRoot, filePath, fileTime,
                                                 fileStoredAs, fileHashCode, serverDownloadScript=serverDownloadScript,
                                                 serverUploadScript=serverUploadScript)
                         updateFiles.append(updateFile)
@@ -518,7 +526,6 @@ class UpdateAgent(object):
                 fp.write(self._found)
 
     def resetFromServer(self):
-
         try:
             self.fetchUpdateDb()
 
@@ -542,7 +549,7 @@ class UpdateAgent(object):
                     self.showInfo('Add Files', 'File %s already in updates' % filePath)
                     existsErrorCount += 1
                 else:
-                    updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, shouldCommit=True,
+                    updateFile = self.updateFileClass(self.installLocation, self.serverDbRoot, filePath, shouldCommit=True,
                                             isNew=True, serverDownloadScript=serverDownloadScript,
                                             serverUploadScript=serverUploadScript)
                     self.updateFiles.append(updateFile)
@@ -726,16 +733,19 @@ class UpdateAgent(object):
                 write('No local copy of file\n')
 
 
-def main():
+def main(doCount=False):
     from ccpn.framework.Version import applicationVersion
     import sys
     import os
 
-    # installUpdates(applicationVersion.withoutRelease(), dryRun=False)
-    # exitCode = installUpdates(applicationVersion, dryRun=True)
+    if doCount:
+        print(getUpdateCount(applicationVersion))
+        exitCode = 0  # success
+    else:
+        exitCode = installUpdates(applicationVersion, dryRun=False)
 
     # test to assume that the micro version increments by one each time
-    exitCode = applicationVersion._bitHash()
+    # exitCode = applicationVersion._bitHash()
 
     # code must be [0, 255] - 0 represents success
     if sys.platform[:3].lower() == 'win':
@@ -745,4 +755,6 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    import sys
+
+    main(doCount=('--count' in sys.argv))

@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-07 15:16:42 +0100 (Thu, September 07, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-08-31 19:00:14 +0100 (Thu, August 31, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -90,7 +90,7 @@ from ccpn.framework.PathsAndUrls import \
     tipOfTheDayConfig, \
     ccpnCodePath, \
     CCPN_DIRECTORY_SUFFIX
-
+from ccpn.framework.lib.resources.Resources import Resources
 from ccpn.ui.gui.Gui import Gui
 from ccpn.ui.gui.GuiBase import GuiBase
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
@@ -246,6 +246,8 @@ class Framework(NotifierBase, GuiBase):
 
         self._spectrumDataSourceFormats = getDataFormats()
 
+        # Resources
+        self.resources = Resources(self)
         # get a user interface; nb. ui.start() is called by the application
         self.ui = self._getUI()
 

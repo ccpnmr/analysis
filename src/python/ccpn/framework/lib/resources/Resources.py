@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-31 18:07:20 +0100 (Thu, August 31, 2023) $"
+__dateModified__ = "$dateModified: 2023-08-31 19:00:14 +0100 (Thu, August 31, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -27,11 +27,11 @@ __date__ = "$Date: 2023-08-30 15:14:00 +0100 (Wed, August 30, 2023) $"
 #=========================================================================================
 
 from ccpn.framework.lib.resources.ReferenceChemicalShifts import ReferenceChemicalShifts
-from ccpn.framework.lib.resources.IsotopeRecords import IsotopeRecords
+from ccpn.util.isotopes import IsotopeRecords
 
-class Resources(object):
+class Resources():
 
-    def __int__(self, application):
+    def __init__(self, application):
         super().__init__()
         self.application = application
 

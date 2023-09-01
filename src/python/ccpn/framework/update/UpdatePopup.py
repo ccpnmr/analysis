@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-01 10:09:05 +0100 (Fri, September 01, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-01 10:36:56 +0100 (Fri, September 01, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -179,8 +179,7 @@ class UpdatePopup(CcpnDialogMainWidget):
             process = Popen([ccpnBinPath / 'update'], stdout=PIPE, stderr=STDOUT, text=True, bufsize=1, universal_newlines=True)
             for line in process.stdout:
                 self._showInfo(line)
-            process.wait()
-            exitCode = process.returncode
+            exitCode = process.wait()
             # if exitCode >= FAIL_UNEXPECTED:
             #     CalledProcessError(exitCode, process.args)
 

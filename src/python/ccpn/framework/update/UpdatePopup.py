@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-08-31 19:00:36 +0100 (Thu, August 31, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-01 10:09:05 +0100 (Fri, September 01, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -165,7 +165,7 @@ class UpdatePopup(CcpnDialogMainWidget):
 
         from ccpn.framework.PathsAndUrls import ccpnBinPath, ccpnBatchPath
         from ccpn.util.Common import isWindowsOS
-        from subprocess import PIPE, Popen, CalledProcessError
+        from subprocess import PIPE, Popen, STDOUT, CalledProcessError
         from ccpn.util.Update import FAIL_UNEXPECTED
 
         exitCode = 0
@@ -176,10 +176,11 @@ class UpdatePopup(CcpnDialogMainWidget):
 
         else:
             # start a process and continuously read the stdout to the textbox
-            process = Popen([ccpnBinPath / 'update'], stdout=PIPE, stderr=PIPE, text=True, bufsize=1, universal_newlines=True)
+            process = Popen([ccpnBinPath / 'update'], stdout=PIPE, stderr=STDOUT, text=True, bufsize=1, universal_newlines=True)
             for line in process.stdout:
                 self._showInfo(line)
-            exitCode = process.wait()
+            process.wait()
+            exitCode = process.returncode
             # if exitCode >= FAIL_UNEXPECTED:
             #     CalledProcessError(exitCode, process.args)
 

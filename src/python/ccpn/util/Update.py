@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-08-31 19:00:36 +0100 (Thu, August 31, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-01 11:44:04 +0100 (Fri, September 01, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -733,16 +733,26 @@ class UpdateAgent:
                 write('No local copy of file\n')
 
 
-def main(doCount=False):
+def main(doCount=False, doVersion=False, dryRun=False):
+    """Main code.
+    Either:
+        return the number of updates for the current version,
+        return the version string,
+        or install the updates for the current version.
+    """
     from ccpn.framework.Version import applicationVersion
     import sys
     import os
 
-    if doCount:
+    exitCode = 0  # success
+    if doCount and doVersion:
+        print(f'{getUpdateCount(applicationVersion)}, {applicationVersion}')
+    elif doCount:
         print(getUpdateCount(applicationVersion))
-        exitCode = 0  # success
+    elif doVersion:
+        print(str(applicationVersion))
     else:
-        exitCode = installUpdates(applicationVersion, dryRun=False)
+        exitCode = installUpdates(applicationVersion, dryRun=dryRun)
 
     # test to assume that the micro version increments by one each time
     # exitCode = applicationVersion._bitHash()
@@ -757,4 +767,6 @@ def main(doCount=False):
 if __name__ == '__main__':
     import sys
 
-    main(doCount=('--count' in sys.argv))
+    main(doCount=('--count' in sys.argv),
+         doVersion=('--version' in sys.argv),
+         dryRun=('--dry-run' in sys.argv))

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-01 10:36:56 +0100 (Fri, September 01, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-01 11:44:04 +0100 (Fri, September 01, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -79,6 +79,7 @@ class UpdatePopup(CcpnDialogMainWidget):
         # initialise the popup
         self._updatesInstalled = False
         self._updateCount = 0
+        self._updateVersion = None
         self.resetFromServer()
 
         self._updateButton.setEnabled(self._updatePopupAgent._check())
@@ -102,7 +103,7 @@ class UpdatePopup(CcpnDialogMainWidget):
         label = Label(self.mainWidget, text=self._updatePopupAgent.installLocation, grid=(row, 2))
         row += 1
         label = Label(self.mainWidget, 'Version:', grid=(row, 0), gridSpan=(1, 2))
-        label = Label(self.mainWidget, text=version, grid=(row, 2))
+        self.versionLabel = Label(self.mainWidget, text='TBD', grid=(row, 2))
         row += 1
         label = Label(self.mainWidget, 'Number of updates:', grid=(row, 0), gridSpan=(1, 2))
         self.updatesLabel = Label(self.mainWidget, text='TBD', grid=(row, 2))
@@ -223,6 +224,26 @@ class UpdatePopup(CcpnDialogMainWidget):
         else:
             super(UpdatePopup, self).reject()
 
+    def _runProcess(self, command, text=False):
+        """Run a system process and return any stdout/stderr.
+        """
+        if not isinstance(command, list) and all(isinstance(val, str) for val in command):
+            raise TypeError(f'Invalid command structure - {command}')
+
+        from subprocess import PIPE, Popen
+        from ccpn.framework.PathsAndUrls import ccpnBinPath, ccpnBatchPath
+        from ccpn.util.Common import isWindowsOS
+
+        if isWindowsOS():
+            from os import startfile
+
+        else:
+            query = Popen(command, stdout=PIPE, stderr=PIPE, text=text, bufsize=1)
+            status, error = query.communicate()
+            if query.poll() == 0:
+                with contextlib.suppress(Exception):
+                    return status
+
     def resetFromServer(self):
         """Get current number of updates from the server
         """
@@ -231,21 +252,19 @@ class UpdatePopup(CcpnDialogMainWidget):
         from ccpn.util.Common import isWindowsOS
 
         count = 0
+        version = '-'
         if isWindowsOS():
             from os import startfile
 
-            startfile(ccpnBatchPath / 'update', '--count')
+            # startfile(ccpnBatchPath / 'update', '--count')
 
         else:
-            command = [ccpnBinPath / 'update', '--count']
-            query = Popen(command, stdout=PIPE, stderr=PIPE)
-            status, error = query.communicate()
-            if query.poll() == 0:
-                with contextlib.suppress(Exception):
-                    count = int(status.decode("utf-8").strip())
+            if (response := self._runProcess([ccpnBinPath / 'update', '--count', '--version'], text=True)) is not None:
+                count, version = [val.strip() for val in response.split(',')]
 
+        self._updateCount = int(count)
         self.updatesLabel.set(f'{count}')
-        self._updateCount = count
+        self.versionLabel.set(f'{version}')
 
         self._updatePopupAgent.resetFromServer()
 

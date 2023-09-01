@@ -73,6 +73,7 @@ class UpdatePopup(CcpnDialogMainWidget):
         self._setWidgets(version)
 
         self.setFixedWidth(self.sizeHint().width())
+        self._maxHeight = int(self.sizeHint().height() * 3)
         self._hideInfoBox()
         # self._showInfoBox()
 
@@ -89,6 +90,8 @@ class UpdatePopup(CcpnDialogMainWidget):
         # initialise the buttons and dialog size
         self.setDefaultButton(None)
         self._postInit()
+
+        self.setMaximumHeight(self._maxHeight)
 
     def _setWidgets(self, version):
         """Set the widgets.
@@ -278,7 +281,7 @@ class UpdatePopup(CcpnDialogMainWidget):
         # self.setMinimumHeight(8 * getFontHeight())
         # self.setMaximumHeight(16 * getFontHeight())
         self.setMinimumHeight(_height)
-        self.setMaximumHeight(int(_height * 2.5))
+        # self.setMaximumHeight(int(_height * 2.5))
         self.resize(QtCore.QSize(_width, int(_height * 2.5)))
         self._refreshQT()
 

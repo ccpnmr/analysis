@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-08-01 13:38:21 +0100 (Tue, August 01, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-04 17:24:09 +0100 (Mon, September 04, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,7 @@ __date__ = "$Date: 2022-09-08 17:27:34 +0100 (Thu, September 08, 2022) $"
 
 import numpy as np
 import pandas as pd
+import contextlib
 from PyQt5 import QtCore, QtGui
 from ccpn.util.floatUtils import numZeros
 from ccpn.core.lib.CcpnSorting import universalSortKey
@@ -493,22 +494,28 @@ class _TableModel(QtCore.QAbstractTableModel):
                 # need to discard columns that include check-boxes
                 val = self._df.iat[row, col]
 
-                # float/np.float - round to 3 decimal places. This should be settable, ideally even by the user,
-                if isinstance(val, (float, np.floating)):
-                    try:
-                        maxDecimalToShow = 3
-                        if abs(val) > 1e6:  # make it scientific annotation if a huge/tiny number
-                            value = f'{val:.{maxDecimalToShow}e}'
-                        elif numZeros(val) >= maxDecimalToShow:
-                            #e.g.:  if is 0.0001 will show as 1e-4 instead of 0.000
-                            value = f'{val:.{maxDecimalToShow}e}'
-                        else:
-                            # just rounds to the third decimal
-                            value = f'{val:.{maxDecimalToShow}f}'
-                    except Exception:
+                try:
+                    # try and get the function from the column-definitions
+                    fmt = self._view._columnDefs._columns[col].format
+                    return fmt % val
+
+                except Exception:
+                    # fallback - float/np.float - round to 3 decimal places. This should be settable, ideally even by the user,
+                    if isinstance(val, (float, np.floating)):
+                        try:
+                            maxDecimalToShow = 3
+                            if abs(val) > 1e6:  # make it scientific annotation if a huge/tiny number
+                                value = f'{val:.{maxDecimalToShow}e}'
+                            elif numZeros(val) >= maxDecimalToShow:
+                                #e.g.:  if is 0.0001 will show as 1e-4 instead of 0.000
+                                value = f'{val:.{maxDecimalToShow}e}'
+                            else:
+                                # just rounds to the third decimal
+                                value = f'{val:.{maxDecimalToShow}f}'
+                        except Exception:
+                            value = str(val)
+                    else:
                         value = str(val)
-                else:
-                    value = str(val)
 
                 return value
 
@@ -854,11 +861,11 @@ class _TableModel(QtCore.QAbstractTableModel):
 # _TableObjectModel
 #=========================================================================================
 
-def _getDisplayRole(colDef, obj):
+def _getCheckedDisplayRole(colDef, obj):
     return None if isinstance((value := colDef.getFormatValue(obj)), bool) else value
 
 
-def _getCheckRole(colDef, obj):
+def _getCheckedRole(colDef, obj):
     if isinstance((value := colDef.getValue(obj)), bool):
         return CHECKED if value else UNCHECKED
 
@@ -874,8 +881,8 @@ class _TableObjectModel(_TableModel):
 
     defaultFlags = ENABLED | SELECTABLE | CHECKABLE
 
-    getAttribRole = {DISPLAY_ROLE   : _getDisplayRole,
-                     CHECK_ROLE     : _getCheckRole,
+    getAttribRole = {DISPLAY_ROLE   : _getCheckedDisplayRole,
+                     CHECK_ROLE     : _getCheckedRole,
                      ICON_ROLE      : lambda colDef, obj: colDef.getIcon(obj),
                      EDIT_ROLE      : lambda colDef, obj: colDef.getEditValue(obj),
                      TOOLTIP_ROLE   : lambda colDef, obj: colDef.tipText,

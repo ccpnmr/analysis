@@ -4,10 +4,13 @@
 _path="${BASH_SOURCE[0]}"
 
 # iterate through the symbolic links if needed
-for ii in {1..3}; do
+for _ in $(seq 3); do
     if [[ -d ${_path} ]]; then
         # change to absolute path
-        _path="$(cd "${_path}" || exit; pwd -P)"
+        _path="$(
+            cd "${_path}" || exit
+            pwd -P
+        )"
     fi
     _pathlink="$(readlink "${_path}")"
     _pathlink="${_pathlink:-${_path}}"
@@ -15,4 +18,3 @@ for ii in {1..3}; do
 done
 
 "${_pathlink}"/bin/analysisstructure "$@"
-

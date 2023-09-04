@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+ANALYSIS=AnalysisAssign
 FAIL_UNEXPECTED=32
 
 # get the script file if symbolic
@@ -7,17 +8,19 @@ _path="${BASH_SOURCE[0]}"
 
 # check whether --auto-update in the switches
 args=()
-for n in $(seq $#); do
-    arg="${!n}"
-    case "$arg" in
-        '--auto-update')
-            autoUpdate=true
-            ;;
-        *)
-            args+=("${arg}")
-            ;;
-    esac
-done
+if [[ $# -ge 1 ]]; then
+    for n in $(seq $#); do
+        arg="${!n}"
+        case "$arg" in
+            '--auto-update')
+                autoUpdate=true
+                ;;
+            *)
+                args+=("${arg}")
+                ;;
+        esac
+    done
+fi
 
 # iterate through the symbolic links if needed
 for _ in $(seq 3); do
@@ -40,13 +43,12 @@ source "${CCPNMR_TOP_DIR}"/bin/paths.sh
 
 # update if required
 if [[ ${autoUpdate} ]]; then
-    ./update "${args[@]}"
+    "${CCPNMR_TOP_DIR}"/bin/update "${args[@]}"
     err=$?
     if [[ err -ge FAIL_UNEXPECTED ]]; then
         echo "--> there was an issue auto-updating: ${err}"
     fi
 fi
-exit $?
 
-ANALYSIS="${CCPNMR_TOP_DIR}"/src/python/ccpn/AnalysisAssign
-"${CCPNMR_TOP_DIR}${CCPN_PYTHON}" -W ignore "${ANALYSIS}" "${args[@]}"
+ENTRY="${CCPNMR_TOP_DIR}"/src/python/ccpn/${ANALYSIS}
+"${CCPNMR_TOP_DIR}${CCPN_PYTHON}" -W ignore "${ENTRY}" "${args[@]}"

@@ -55,8 +55,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-02 16:18:35 +0100 (Wed, August 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-09-04 15:26:55 +0100 (Mon, September 04, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -784,7 +784,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self._currentView = GLDefs.FULLVIEW
 
         vp = self.viewports.getViewportFromWH(self._currentView, self.w, self.h)
-        vpwidth, vpheight = vp.width, vp.height
+        vpwidth, vpheight = vp.width or 1, vp.height or 1
         currentShader.setViewportMatrix(self._uVMatrix, 0, vpwidth, 0, vpheight,
                                         -1.0, 1.0)
 
@@ -5356,6 +5356,8 @@ class CcpnGLWidget(QOpenGLWidget):
                     nlTarget = 10.**i
                     _pow = np.log10(abs(dist / nlTarget)) + 0.5
                     d = 10.**np.floor(_pow)
+                    if 0 in d:
+                        continue
 
                     ul1 = np.floor(ul / d) * d
                     br1 = np.ceil(br / d) * d
@@ -5422,7 +5424,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
                         offset = GLDefs.AXISDRAWOFFSET if self.AXIS_INSIDE else (1 - GLDefs.AXISDRAWOFFSET)
                         if ax == 0:
-                            # add the x axis line
+                            # add the x-axis line
                             indexList += (index, index + 1)
                             vertexList += (0.0, offset, 1.0, offset)
                             colorList += (r, g, b, 1.0, r, g, b, 1.0)
@@ -5430,14 +5432,14 @@ class CcpnGLWidget(QOpenGLWidget):
                             index += 2
 
                         elif ax == 1:
-                            # add the y axis line
+                            # add the y-axis line
                             indexList += (index, index + 1)
                             vertexList += (1.0 - offset, 0.0, 1.0 - offset, 1.0)
                             colorList += (r, g, b, 1.0, r, g, b, 1.0)
                             gridGLList.numVertices += 2
                             index += 2
 
-                # copy the arrays the the GLstore
+                # copy the arrays the GLstore
                 gridGLList.vertices = np.array(vertexList, dtype=np.float32)
                 gridGLList.indices = np.array(indexList, dtype=np.uint32)
                 gridGLList.colors = np.array(colorList, dtype=np.float32)

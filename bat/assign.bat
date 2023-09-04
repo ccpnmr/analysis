@@ -1,16 +1,8 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set /a SUCCESS=0
-set /a SUCCESS_VERSION=1
-set /a SUCCESS_RELEASE=2
-set /a SUCCESS_MICROUPDATE=4
-set /a SUCCESS_MINORUPDATE=8
-set /a SUCCESS_MAJORUPDATE=16
+set MODULE=src\python\ccpn\AnalysisAssign
 set /a FAIL_UNEXPECTED=32
-set /a FAIL_NOTUPDATED=33
-set /a FAIL_WRITEERROR=34
-set /a MAX_COUNT=16
 
 rem extract command-line parameters to pass to ./update
 set args=
@@ -24,8 +16,6 @@ for %%a in (%*) do (
     )
 )
 
-set MODULE=src\python\ccpn\AnalysisAssign
-
 rem iterate through and resolve the symbolic links if needed
 set CCPNMR_TOP_DIR=%~dpnx0
 set /a _count=0
@@ -33,7 +23,7 @@ set /a _count=0
     call :isLink _SYM "%CCPNMR_TOP_DIR%"
     call :fileName _PATH "%CCPNMR_TOP_DIR%"
     set _FOUND=
-    FOR /F "tokens=2 delims=[]" %%G in ('"dir  /AL "%CCPNMR_TOP_DIR%"\.. 2^>nul | find "%_PATH%""') do set "_FOUND=%%G"
+    for /F "tokens=2 delims=[]" %%G in ('"dir  /AL "%CCPNMR_TOP_DIR%"\.. 2^>nul | find "%_PATH%""') do set _FOUND=%%G
     if defined _SYM if defined _FOUND call :AbsPath CCPNMR_TOP_DIR "%_FOUND%"
     call :AbsPath CCPNMR_TOP_DIR "%CCPNMR_TOP_DIR%"\..
 

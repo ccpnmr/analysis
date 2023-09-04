@@ -36,7 +36,7 @@ source "${CCPNMR_TOP_DIR}"/bin/paths.sh
 
 lasterr=-1
 err=0
-for count in $(seq ${MAX_COUNT}); do
+for _ in $(seq ${MAX_COUNT}); do
     "${CONDA}"/bin/python -W ignore "${UPDATE}" "$@"
     err=$?
 

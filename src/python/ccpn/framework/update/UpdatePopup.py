@@ -27,6 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:40 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtCore, QtWidgets
+from subprocess import PIPE, Popen, STDOUT, CalledProcessError
 import contextlib
 
 # don't remove this import
@@ -38,8 +39,10 @@ from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.Font import getFontHeight
-from ccpn.util.Update import UpdateAgent
+from ccpn.util.Update import UpdateAgent, FAIL_UNEXPECTED
+from ccpn.util.Common import isWindowsOS
 from ccpn.framework.Version import applicationVersion
+from ccpn.framework.PathsAndUrls import ccpnBinPath, ccpnBatchPath
 
 
 REFRESHBUTTONTEXT = 'Refresh Updates Information'
@@ -97,9 +100,9 @@ class UpdatePopup(CcpnDialogMainWidget):
         """Set the widgets.
         """
         row = 0
-        #label = Label(self, 'Server location:', grid=(row, 0))
-        #label = Label(self, self.server, grid=(row, 1))
-        #row += 1
+        # label = Label(self, 'Server location:', grid=(row, 0))
+        # label = Label(self, self.server, grid=(row, 1))
+        # row += 1
         # align all widgets to the top
         self.mainWidget.getLayout().setAlignment(QtCore.Qt.AlignTop)
         label = Label(self.mainWidget, 'Installation location:', grid=(row, 0), gridSpan=(1, 2))
@@ -166,26 +169,15 @@ class UpdatePopup(CcpnDialogMainWidget):
         # QtCore.QTimer.singleShot(0, self._handleUpdates)
 
     def _handleUpdates(self):
-
-        from ccpn.framework.PathsAndUrls import ccpnBinPath, ccpnBatchPath
-        from ccpn.util.Common import isWindowsOS
-        from subprocess import PIPE, Popen, STDOUT, CalledProcessError
-        from ccpn.util.Update import FAIL_UNEXPECTED
-
-        exitCode = 0
-        if isWindowsOS():
-            from os import startfile
-
-            startfile(ccpnBatchPath / 'update')
-
-        else:
-            # start a process and continuously read the stdout to the textbox
-            process = Popen([ccpnBinPath / 'update'], stdout=PIPE, stderr=STDOUT, text=True, bufsize=1, universal_newlines=True)
-            for line in process.stdout:
-                self._showInfo(line)
-            exitCode = process.wait()
-            # if exitCode >= FAIL_UNEXPECTED:
-            #     CalledProcessError(exitCode, process.args)
+        """Call external script to update which may require several iterations.
+        """
+        cmd = [ccpnBatchPath / 'update.bat'] if isWindowsOS() else [ccpnBinPath / 'update']
+        process = Popen(cmd, stdout=PIPE, stderr=STDOUT, text=True, bufsize=1, universal_newlines=True)
+        for line in process.stdout:
+            self._showInfo(line)
+        exitCode = process.wait()
+        # if exitCode >= FAIL_UNEXPECTED:
+        #     CalledProcessError(exitCode, process.args)
 
         self._updatesInstalled = True
         self.buttonList.getButton(self.CLOSEBUTTONTEXT).setText(CLOSEEXITBUTTONTEXT)
@@ -227,43 +219,28 @@ class UpdatePopup(CcpnDialogMainWidget):
         else:
             super(UpdatePopup, self).reject()
 
-    def _runProcess(self, command, text=False):
+    @staticmethod
+    def _runProcess(command, text=False):
         """Run a system process and return any stdout/stderr.
         """
         if not isinstance(command, list) and all(isinstance(val, str) for val in command):
             raise TypeError(f'Invalid command structure - {command}')
 
-        from subprocess import PIPE, Popen
-        from ccpn.framework.PathsAndUrls import ccpnBinPath, ccpnBatchPath
-        from ccpn.util.Common import isWindowsOS
-
-        if isWindowsOS():
-            from os import startfile
-
-        else:
-            query = Popen(command, stdout=PIPE, stderr=PIPE, text=text, bufsize=1)
-            status, error = query.communicate()
-            if query.poll() == 0:
-                with contextlib.suppress(Exception):
-                    return status
+        query = Popen(command, stdout=PIPE, stderr=PIPE, text=text, bufsize=1)
+        status, error = query.communicate()
+        if query.poll() == 0:
+            with contextlib.suppress(Exception):
+                return status
 
     def resetFromServer(self):
         """Get current number of updates from the server
         """
-        from subprocess import PIPE, Popen
-        from ccpn.framework.PathsAndUrls import ccpnBinPath, ccpnBatchPath
-        from ccpn.util.Common import isWindowsOS
-
         count = 0
         version = '-'
-        if isWindowsOS():
-            from os import startfile
-
-            # startfile(ccpnBatchPath / 'update', '--count')
-
-        else:
-            if (response := self._runProcess([ccpnBinPath / 'update', '--count', '--version'], text=True)) is not None:
-                count, version = [val.strip() for val in response.split(',')]
+        cmd = [ccpnBatchPath / 'update.bat', '--count', '--version'] if isWindowsOS() else \
+            [ccpnBinPath / 'update', '--count', '--version']
+        if (response := self._runProcess(cmd, text=True)) is not None:
+            count, version = [val.strip() for val in response.split(',')]
 
         self._updateCount = int(count)
         self.updatesLabel.set(f'{count}')

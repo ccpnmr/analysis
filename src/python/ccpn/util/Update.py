@@ -31,14 +31,14 @@ import hashlib
 import os
 import shutil
 import sys
-from datetime import datetime
 import json
+from datetime import datetime
 from contextlib import suppress
+from ccpn.util import Path
+from ccpn.framework.Version import applicationVersion
 
 
 ccpn2Url = 'https://www.ccpn.ac.uk'
-
-from ccpn.util import Path
 
 
 SERVER = ccpn2Url + '/'
@@ -223,6 +223,10 @@ def getUpdateCount(version):
     return updateAgent.checkNumberUpdates()
 
 
+#=========================================================================================
+# UpdateFile
+#=========================================================================================
+
 class UpdateFile:
 
     def __init__(self, installLocation, serverDbRoot, filePath, fileServerTime=None,
@@ -292,6 +296,16 @@ class UpdateFile:
                     lastHashCode = calcHashCode(fullFilePath) if os.path.isfile(fullFilePath) else '<None>'
                     with open(fullFilePath, 'w', encoding='utf-8') as fp:
                         fp.write(data)
+
+                    if Path.aPath(fullFilePath).suffix == '.py':
+                        _file = Path.aPath(fullFilePath)
+                        _name = _file.basename
+
+                        # is a python file - remove the pycache to make sure that it loads correctly next time
+                        for fp in [Path.aPath(fp) for fp in (_file.filepath / '__pycache__').listdir()]:
+                            if fp.basename == _name and fp.suffix == '.pyc':
+                                print(f'cleaning pycache: {fp.name}')
+                                fp.removeFile()
 
                     # generate the hashcode for the new file here
                     currentHashCode = calcHashCode(fullFilePath)
@@ -738,19 +752,20 @@ def main(doCount=False, doVersion=False, dryRun=False):
     Either:
         return the number of updates for the current version,
         return the version string,
+        or both,
         or install the updates for the current version.
     """
-    from ccpn.framework.Version import applicationVersion
-    import sys
-    import os
 
     exitCode = 0  # success
     if doCount and doVersion:
         print(f'{getUpdateCount(applicationVersion)}, {applicationVersion}')
+
     elif doCount:
         print(getUpdateCount(applicationVersion))
+
     elif doVersion:
         print(str(applicationVersion))
+
     else:
         exitCode = installUpdates(applicationVersion, dryRun=dryRun)
 
@@ -765,8 +780,6 @@ def main(doCount=False, doVersion=False, dryRun=False):
 
 
 if __name__ == '__main__':
-    import sys
-
     main(doCount=('--count' in sys.argv),
          doVersion=('--version' in sys.argv),
          dryRun=('--dry-run' in sys.argv))

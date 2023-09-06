@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-09-04 15:09:04 +0100 (Mon, September 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-06 14:28:31 +0100 (Wed, September 06, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -26,147 +26,24 @@ __date__ = "$Date: 2023-08-30 15:14:00 +0100 (Wed, August 30, 2023) $"
 # Start of code
 #=========================================================================================
 
-from collections import Counter, OrderedDict, defaultdict
-from ccpn.util.traits.CcpNmrJson import CcpNmrJson, CcpnJsonDirectoryABC
-from ccpn.util.traits.CcpNmrTraits import Unicode, Int, Float, Bool, RecursiveList, List, Tuple, CTuple
-from ccpn.framework.PathsAndUrls import ccpnResourcesPath, ccpnResourcesChemicalShifts
-from ccpn.util.decorators import singleton
-from ccpn.util.Path import aPath
-import glob, os
-
-PROTEIN = 'Protein'
-DNA = 'DNA'
-RNA = 'RNA'
-FUNCTIONALGROUP = 'FunctionalGroup'
-SMALLMOLECULE = 'SmallMolecule'
-VERSION = 1.0
-
-### _metaData Level
-TITLE = 'title'
-COMMENT = 'comment'
-
-### residues level
-MOLECULETYPE = 'moleculeType'
-RESIDUES = 'residues'
-RESIDUENAME = 'residueName'
-SHORTNAME = 'shortName'
-CCPCODE = 'ccpcode'
-ATOMS = 'atoms'
-
-### Atoms level
-ATOMNAME = 'atomName'
-ELEMENT = 'element'
-AVERAGESHIFT = "averageShift"
-MINSHIFT = "minShift"
-MAXSHIFT= "maxShift"
-SHIFTRANGES= "shiftRanges"
-STDSHIFT = "stdShift"
-DISTRIBUTION = 'distribution'
-DISTRIBUTIONREFVALUE = 'distributionRefValue'
-DISTRIBUTIONVALUEPERPOINT = 'distributionValuePerPoint'
-
-class AtomChemicalShift(CcpNmrJson):
-    """Class to store ReferenceChemicalShift information for a single Atom
-    """
-    classVersion = VERSION
-    saveAllTraitsToJson = True
-    atomName =  Unicode(allow_none=False, default_value='??').tag(info='The atomName identifier, e.g. H1, etc')
-    element =  Unicode(allow_none=False, default_value='??').tag(info='The element identifier, e.g. H, etc')
-    averageShift =  Float(allow_none=True, default_value=0.0).tag(info='The average Chemical Shift in ppm.')
-    stdShift =  Float(allow_none=True, default_value=0.0).tag(info='The std Shift')
-    minShift =  Float(allow_none=True, default_value=0.0).tag(info='')
-    maxShift =  Float(allow_none=True, default_value=0.0).tag(info='')
-    distributionRefValue =  Float(allow_none=True, default_value=0.0).tag(info='')
-    distributionValuePerPoint =  Float(allow_none=True, default_value=0.0).tag(info='')
-    distribution =  List(default_value=[]).tag(info='')
+from collections import OrderedDict, defaultdict
+from ccpn.util.Logging import getLogger
+from ccpn.util.OrderedSet import OrderedSet
 
 
-    def __repr__(self):
-        # Nothing funcy. keep simple
-        return f'{self.__class__.__name__}("{self.atomName}")'
-
-class ReferenceChemicalShift(CcpNmrJson):
-    """Class to store ReferenceChemicalShift information for a residue
-    """
-    classVersion = VERSION
-    saveAllTraitsToJson = True
-    residueName =  Unicode(allow_none=False, default_value='??').tag(info='The full residueName identifier, e.g. Alanine, etc')
-    shortName =  Unicode(allow_none=False, default_value='??').tag(info='The short Name identifier, e.g. ALA, etc')
-    ccpcode =  Unicode(allow_none=False, default_value='??').tag(info='The ccpcode identifier, e.g. Ala, etc')
-    moleculeType =  Unicode(allow_none=False, default_value='??').tag(info='The moleculeType identifier, e.g. Protein, etc')
-    atoms = RecursiveList()
-
-    def _setAtomTraits(self):
-        atoms = []
-        for atomDict in self.atoms:
-            atomTrait = AtomChemicalShift()
-            atomTrait.update(atomDict)
-            atoms.append(atomTrait)
-        self.update({'atoms': atoms})
-
-    @property
-    def title(self):
-        return self._metadata.get('title')
-
-    @property
-    def comment(self):
-        return self._metadata.get('comment')
-
-    def __repr__(self):
-        # Nothing funcy. keep simple
-        return f'{self.__class__.__name__}("{self.shortName}")'
-
-ReferenceChemicalShift.register()
-
-class _ReferenceChemicalShiftsABC(CcpnJsonDirectoryABC):
-    """
-    Class to handle the ReferenceChemicalShifts from Json Files.
-    --- Tree ---
-        -- Residue:
-            -- residueName: Alanine
-            -- shortName: ALA
-            -- ccpcode: Ala
-            - Atoms:
-                - atomName: H1
-                - element: H
-                - ...
-    """
-    attributeName = 'shortName'  # attribute of object whose value functions as the key to store the object
-    directory = None
-
-    def __init__(self):
-        super().__init__()
-        self._setAtomTraits()
-
-    def _setAtomTraits(self):
-        for k, res in self.items():
-            res._setAtomTraits()
-
-class _ReferenceChemicalShiftsLoader(_ReferenceChemicalShiftsABC):
-    directory = aPath(ccpnResourcesChemicalShifts)
-    recursive = True
-    extension = '.json'
-    searchPattern = str(aPath('**') / '*.json') # recursive search in all subdirectories
-
-@singleton
 class ReferenceChemicalShifts(OrderedDict):
     """
     Class to handle all the ReferenceChemicalShifts .
 
     """
-    _registeredClasses = set()
+    _registeredClasses = OrderedSet()
 
     def __init__(self):
         super().__init__()
-        self._initTraits()
+        self._objsByClass = {}
+        self._registerCcpnReferenceChemicalShiftLoaders()
         self._activeChemicalShifts = []
 
-    def activeChemicalShifts(self):
-        return self._activeChemicalShifts
-
-    def setActiveChemicalShifts(self, activeChemicalShifts):
-        """ Filter the ReferenceChemicalShifts  by conditions and set as active for all the ongoing calculations"""
-        self._activeChemicalShifts = activeChemicalShifts
 
     def getByMoleculeType(self, moleculeType:str):
         """
@@ -211,6 +88,13 @@ class ReferenceChemicalShifts(OrderedDict):
                 values.add(obj)
         return list(values)
 
+    def activeChemicalShifts(self):
+        return self._activeChemicalShifts
+
+    def setActiveChemicalShifts(self, activeChemicalShifts):
+        """ Filter the ReferenceChemicalShifts  by conditions and set as active for all the ongoing calculations"""
+        self._activeChemicalShifts = activeChemicalShifts
+
     def _getAvailableMolTypes(self):
         availableMolTypes = set()
         for obj in self.values():
@@ -220,26 +104,46 @@ class ReferenceChemicalShifts(OrderedDict):
 
     ############# Core Registration Methods ##############
 
-    def _initTraits(self):
-        """Update the trait objects read from file to the class """
-        for cls in self._registeredClasses:
-            obj = cls()
+    def register(self, theClass, loadObjects=True):
+        """"""
+        self._registeredClasses.add(theClass)
+        if loadObjects:
+            obj = theClass()
             self.update(obj)
+            self._objsByClass[theClass] = obj
 
-    @staticmethod
-    def register(cls):
-        """When registered from a Plugin at run-time, you also need to run refreshObjects """
-        ReferenceChemicalShifts._registeredClasses.add(cls)
+    def deregister(self, theClass, unloadObjects=True):
+        """ remove the registered class and unload the RCS. E.g. done when switching projects.
+        """
+        if theClass not in self._registeredClasses:
+            getLogger().warning(f'Cannot deregister {theClass} from {self.__class__.__name__}. Value not in the _registeredClasses.')
+            return
+        self._registeredClasses.pop(theClass)
+        if unloadObjects:
+            obj = self._objsByClass.pop(theClass, {})
+            for key in obj:
+                self.pop(key, None)
+            del obj
 
+    def _registerCcpnReferenceChemicalShiftLoaders(self):
+        """ Register the default ReferenceChemicalShifts available in the installation and internal (~/.ccpn/resources) """
+        if len(self._registeredClasses) == 0:
+            from ccpn.framework.lib.resources.ReferenceChemicalShiftLoaders import _DefaultReferenceChemicalShiftsLoader, _InternalReferenceChemicalShiftsLoader
+            self.register(_DefaultReferenceChemicalShiftsLoader)
+            self.register(_InternalReferenceChemicalShiftsLoader)
 
+    def _initProjectReferenceChemicalShifts(self):
+        """ Add the user-Project-specific Resources ReferenceChemicalShiftsLoader """
+        from ccpn.framework.Application import getProject
+        from ccpn.framework.PathsAndUrls import CCPN_RESOURCES_DIRECTORY
+        from ccpn.framework.lib.resources.ReferenceChemicalShiftLoaders import _ProjectReferenceChemicalShiftsLoader
 
-## Register the default distribution  ReferenceChemicalShifts
-ReferenceChemicalShifts.register(_ReferenceChemicalShiftsLoader)
+        if (project := getProject()) is not None:
+            projectResourcesPath = project.projectPath / CCPN_RESOURCES_DIRECTORY
+            _ProjectReferenceChemicalShiftsLoader.directory = projectResourcesPath
+            self.register(_ProjectReferenceChemicalShiftsLoader)
 
-rcs = ReferenceChemicalShifts()
-
-# results = rcs.filterBySingleCondition('residueName', 'Valine')
-# results = rcs.filterByMultipleCondition(titles=[RNA, DNA], moleculeTypes=[RNA, DNA])
-# print(results)
-# print(len(rcs))
-
+    def _deregisterProjectReferenceChemicalShifts(self):
+        """ Remove the user-Project-specific Resources ReferenceChemicalShiftsLoader  """
+        from ccpn.framework.lib.resources.ReferenceChemicalShiftLoaders import _ProjectReferenceChemicalShiftsLoader
+        self.deregister(_ProjectReferenceChemicalShiftsLoader)

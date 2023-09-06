@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-31 19:00:14 +0100 (Thu, August 31, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-06 14:28:31 +0100 (Wed, September 06, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -248,6 +248,7 @@ class Framework(NotifierBase, GuiBase):
 
         # Resources
         self.resources = Resources(self)
+
         # get a user interface; nb. ui.start() is called by the application
         self.ui = self._getUI()
 
@@ -611,6 +612,8 @@ class Framework(NotifierBase, GuiBase):
 
         # Now that all objects, including the graphics are there, restore current
         self.current._restoreStateFromFile(self.statePath)
+        # Load project specific resources.
+        self.resources._initProjectResources()
 
         if self.hasGui:
             self.ui.initialize(self._mainWindow)
@@ -1157,6 +1160,7 @@ class Framework(NotifierBase, GuiBase):
             self._project = None
             del (_project)
 
+        self.resources._deregisterProjectResources()
         self._cleanTemporaryDirectory()
         self._cleanGarbageCollector()
 

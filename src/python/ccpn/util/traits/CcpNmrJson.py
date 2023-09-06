@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-09-04 15:09:04 +0100 (Mon, September 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-06 14:28:31 +0100 (Wed, September 06, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -713,6 +713,8 @@ class CcpnJsonDirectoryABC(OrderedDict):
     def readFromJson(self):
         "read from directory"
         objs = []
+        if self.directory is None:
+            return objs
         for path in self.directory.glob(self.searchPattern):
             try:
                 obj = CcpNmrJson.newObjectFromJson(path)

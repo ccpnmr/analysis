@@ -1,5 +1,5 @@
 """
-A module to handle resources loaded from disk as JSON files.
+A module to handle Reference ChemicalShifts loaded from disk as JSON files.
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -26,40 +26,55 @@ __date__ = "$Date: 2023-08-30 15:14:00 +0100 (Wed, August 30, 2023) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.framework.lib.resources.ReferenceChemicalShifts import ReferenceChemicalShifts
-from ccpn.util.isotopes import IsotopeRecords
-
-class Resources():
-
-    def __init__(self, application):
-        super().__init__()
-        self.application = application
-        self._referenceChemicalShifts = ReferenceChemicalShifts()
-
-    @property
-    def referenceChemicalShifts(self):
-        return self._referenceChemicalShifts
-
-    @property
-    def referenceMolecules(self):
-        return ''
-
-    @property
-    def isotopeRecords(self):
-        return IsotopeRecords()
-
-    @property
-    def referenceExperimentTypes(self):
-        return ''
-
-    # ------ Private Methods ---------
-
-    def _initProjectResources(self):
-        """ Init the Resources that defined by users only at a Project level.
-        This operation can be done only at run-time"""
-        self.referenceChemicalShifts._initProjectReferenceChemicalShifts()
+from ccpn.util.DataEnum import DataEnum
 
 
-    def _deregisterProjectResources(self):
-        """ Remove/unload the resources when closing/switching projects"""
-        self.referenceChemicalShifts._deregisterProjectReferenceChemicalShifts()
+INSTALLATION =  'installation'
+EXTERNAL =  'external'
+INTERNAL =  'internal'
+PROJECT =  'project'
+
+class ResourcesLoadingLevel(DataEnum):
+    """
+    Define the order and description of a Resource loader
+    """
+    INSTALLATION    = 0, INSTALLATION
+    EXTERNAL           = 1, EXTERNAL
+    INTERNAL            = 2, INTERNAL
+    PROJECT             = 3, PROJECT
+    
+
+###########################################
+######## ---- ReferenceChemicalShifts ---- ########
+###########################################
+
+### _metaData Level
+TITLE = 'title'
+COMMENT = 'comment'
+
+PROTEIN = 'Protein'
+DNA = 'DNA'
+RNA = 'RNA'
+FUNCTIONALGROUP = 'FunctionalGroup'
+SMALLMOLECULE = 'SmallMolecule'
+VERSION = 1.0
+
+### residues level
+MOLECULETYPE = 'moleculeType'
+RESIDUES = 'residues'
+RESIDUENAME = 'residueName'
+SHORTNAME = 'shortName'
+CCPCODE = 'ccpcode'
+ATOMS = 'atoms'
+
+### Atoms level
+ATOMNAME = 'atomName'
+ELEMENT = 'element'
+AVERAGESHIFT = "averageShift"
+MINSHIFT = "minShift"
+MAXSHIFT= "maxShift"
+SHIFTRANGES= "shiftRanges"
+STDSHIFT = "stdShift"
+DISTRIBUTION = 'distribution'
+DISTRIBUTIONREFVALUE = 'distributionRefValue'
+DISTRIBUTIONVALUEPERPOINT = 'distributionValuePerPoint'

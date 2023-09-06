@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-31 18:07:20 +0100 (Thu, August 31, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-06 14:28:31 +0100 (Wed, September 06, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -44,7 +44,7 @@ CCPN_PLOTS_DIRECTORY            = 'data/plots'
 # CCPN code
 ccpnCodePath                    = Path.aPath(Path.getTopDirectory())
 ccpnConfigPath                  = ccpnCodePath / 'config'
-ccpnResourcesPath              = ccpnCodePath / 'resources'
+ccpnResourcesPath              = ccpnCodePath / CCPN_RESOURCES_DIRECTORY
 ccpnRunTerminal                 = ccpnCodePath / 'bin' / 'runTerminal.sh'
 defaultPreferencesPath          = ccpnConfigPath / 'defaultv3settings.json'
 tipOfTheDayConfig               = ccpnConfigPath / 'tipConfig.hjson'
@@ -102,6 +102,7 @@ userCcpnPath                    = Path.aPath('~/.ccpn')
 userCcpnDataPath                = userCcpnPath / 'data'
 userCcpnMacroPath               = userCcpnPath / 'macro'
 userCcpnPipesPath               = userCcpnPath / 'pipes'
+userCcpnResourcesPath               = userCcpnPath / CCPN_RESOURCES_DIRECTORY
 userCcpnPathSubDirectories      = ['data', 'macros', 'pipes']  # These get created by framework
 
 userDefaultProjectPath          = userCcpnDataPath / 'default.ccpn'
@@ -115,19 +116,6 @@ projectStateLayoutFileName      = 'layout_3_1.json'
 # DO NOT REMOVE and keep in sync (for circular import reasons) (for now!)
 CCPN_DIRECTORY_SUFFIX    = '.ccpn'
 CCPN_BACKUP_SUFFIX       = '_backup'  # used by Project, ApiLoader; deprecated
-
-# subdirectories of Projects
-CCPN_API_DIRECTORY          = 'ccpnv3'
-CCPN_ARCHIVES_DIRECTORY     = 'archives'
-CCPN_BACKUPS_DIRECTORY      = 'backups'
-CCPN_SUMMARIES_DIRECTORY    = 'summaries'
-CCPN_LOGS_DIRECTORY         = 'logs'
-CCPN_DATA_DIRECTORY         = 'data'
-CCPN_PLUGINS_DIRECTORY      = 'data/plugins'
-CCPN_SPECTRA_DIRECTORY      = 'data/spectra'
-CCPN_SCRIPTS_DIRECTORY      = 'scripts'
-CCPN_STATE_DIRECTORY        = 'state'
-CCPN_STATESPECTRA_DIRECTORY = 'state/spectra'
 
 CCPN_SUB_DIRECTORIES = [
     CCPN_API_DIRECTORY, CCPN_ARCHIVES_DIRECTORY, CCPN_BACKUPS_DIRECTORY,

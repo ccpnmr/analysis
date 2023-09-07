@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-06 18:41:46 +0100 (Thu, July 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-07 10:49:43 +0100 (Thu, September 07, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -27,7 +27,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import typing
-from typing import List
 from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
@@ -48,9 +47,9 @@ def _getCurrentZoomRatio(viewRange):
 
 
 def navigateToPositionInStrip(strip,
-                              positions: List[float],
-                              axisCodes: List[str] = None,
-                              widths: List[float] = None,
+                              positions: list[typing.Optional[float]],
+                              axisCodes: list[typing.Optional[str]] = None,
+                              widths: list[typing.Optional[float]] = None,
                               markPositions: bool = False):
     """
     Takes a strip, a list of positions and optionally, a parallel list of axisCodes.

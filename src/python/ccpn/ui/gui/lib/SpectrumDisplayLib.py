@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-06 18:41:46 +0100 (Thu, July 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-07 10:49:43 +0100 (Thu, September 07, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -156,6 +156,7 @@ def navigateToPeakInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, peak, widt
     spCodes = spectrumDisplay.axisCodes
     pos = [None] * len(spCodes)
     newWidths = ['full'] * len(spCodes)
+    mappedNewWidths = [None] * len(spCodes)
     index = 'YXT'.index(spectrumDisplay.stripArrangement)
 
     if widths is None and index < 2:
@@ -174,9 +175,9 @@ def navigateToPeakInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, peak, widt
     for ii, ind in enumerate(indices):
         if ind is not None and ind < len(peak.position):
             pos[ii] = peak.position[ind]
-            # mappedNewWidths[ii] = newWidths[ind]
+            mappedNewWidths[ii] = newWidths[ind]
 
-    navigateToPositionInStrip(strip, pos, spCodes, widths=newWidths, markPositions=markPositions)
+    navigateToPositionInStrip(strip, pos, spCodes, widths=mappedNewWidths, markPositions=markPositions)
     strip.header.reset()
     strip.header.setLabelText(position='c', text=peak.pid)
     # strip.header.headerVisible = True

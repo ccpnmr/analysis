@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-01 11:44:04 +0100 (Fri, September 01, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-09-07 19:14:25 +0100 (Thu, September 07, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -174,7 +174,7 @@ def fetchUrl(url, data=None, headers=None, timeout=2.0, decodeResponse=True):
         print('Error fetching Url.')
 
 
-def downloadFile(serverScript, serverDbRoot, fileName):
+def downloadFile(serverScript, serverDbRoot, fileName, quiet=False):
     """Download a file from the server
     """
     # fileName = os.path.join(serverDbRoot, fileName)
@@ -192,9 +192,10 @@ def downloadFile(serverScript, serverDbRoot, fileName):
                 result = data.decode('utf-8')
 
                 if result.startswith(BAD_DOWNLOAD):
-                    ll = len(result)
-                    bd = len(BAD_DOWNLOAD)
-                    print(str(result[min(ll, bd):min(ll, bd + 50)]))
+                    if not quiet:
+                        ll = len(result)
+                        bd = len(BAD_DOWNLOAD)
+                        print(str(result[min(ll, bd):min(ll, bd + 50)]))
                     return
 
             return result
@@ -398,7 +399,7 @@ class UpdateAgent:
         self.updateFileDict = updateFileDict = {}
         serverDownloadScript = '%s%s' % (self.server, self.serverDownloadScript)
         serverUploadScript = '%s%s' % (self.server, self.serverUploadScript)
-        data = downloadFile(serverDownloadScript, self.serverDbRoot, self.serverDbFile)
+        data = downloadFile(serverDownloadScript, self.serverDbRoot, self.serverDbFile, quiet=True)
 
         if not data:
             return
@@ -758,10 +759,18 @@ def main(doCount=False, doVersion=False, dryRun=False):
 
     exitCode = 0  # success
     if doCount and doVersion:
-        print(f'{getUpdateCount(applicationVersion)}, {applicationVersion}')
+        try:
+            count = int(getUpdateCount(applicationVersion))
+            print(f'{count}, {applicationVersion}')
+        except Exception:
+            print(f'-1, {applicationVersion}')
 
     elif doCount:
-        print(getUpdateCount(applicationVersion))
+        try:
+            count = int(getUpdateCount(applicationVersion))
+            print(f'{count}')
+        except Exception:
+            print('-1')
 
     elif doVersion:
         print(str(applicationVersion))

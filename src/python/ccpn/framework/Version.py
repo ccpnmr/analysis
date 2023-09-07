@@ -203,5 +203,5 @@ class VersionString(str):
         return self.__gt__(other) or self.__eq__(other)
 
 
-applicationVersion = VersionString('3.2.0')
+applicationVersion = VersionString('3.2.1')
 revision = '3'

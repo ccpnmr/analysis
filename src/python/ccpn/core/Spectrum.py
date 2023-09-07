@@ -53,8 +53,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-14 14:07:38 +0100 (Mon, August 14, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-09-07 17:25:14 +0100 (Thu, September 07, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -68,7 +68,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from typing import Sequence, Tuple, Optional, Union, List
 from functools import partial
 from itertools import permutations
-import numpy
+import numpy as np
 import pandas as pd
 
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
@@ -128,7 +128,7 @@ from ccpn.core._implementation.Updater import updateObject, UPDATE_POST_PROJECT_
 class Spectrum(AbstractWrapperObject):
     """A Spectrum object contains all the stored properties of an NMR spectrum, as well as the
     path to the NMR (binary) data file. The Spectrum object has methods to get the binary data
-    as SpectrumData (i.e. numpy.ndarray) objects.
+    as SpectrumData (i.e. np.ndarray) objects.
     """
     #-----------------------------------------------------------------------------------------
 
@@ -1526,8 +1526,8 @@ class Spectrum(AbstractWrapperObject):
             raise RuntimeError('Spectrum.get1Dlimits() is only implemented for 1D spectra')
         ppmLimits = self.spectrumLimits[0]
         sliceData = self.getSliceData()
-        minValue = float(numpy.min(sliceData))
-        maxValue = float(numpy.max(sliceData))
+        minValue = float(np.min(sliceData))
+        maxValue = float(np.max(sliceData))
         return (ppmLimits, (minValue, maxValue))
 
     @property
@@ -1635,7 +1635,7 @@ class Spectrum(AbstractWrapperObject):
 
     @intensities.setter
     @ccpNmrV3CoreSetter(allChanged=True)
-    def intensities(self, value: numpy.array):
+    def intensities(self, value: np.array):
         self._intensities = value
 
         # # NOTE:ED - temporary hack for immediately showing the result of intensities change
@@ -1643,12 +1643,12 @@ class Spectrum(AbstractWrapperObject):
         #     spectrumView.refreshData()
 
     @property
-    def positions(self) -> numpy.array:
+    def positions(self) -> np.array:
         """ spectral region in ppm as NumPy array for 1D spectra """
 
         if self.dimensionCount != 1:
             getLogger().warning('Currently this method only works for 1D spectra')
-            return numpy.array([])
+            return np.array([])
 
         if self._positions is None:
             self._positions = self.getPpmArray(dimension=1)
@@ -1889,7 +1889,7 @@ class Spectrum(AbstractWrapperObject):
 
         return self.spectrumDimensions[dimension - 1].pointToValue(value)
 
-    def getPpmArray(self, axisCode=None, dimension=None) -> numpy.array:
+    def getPpmArray(self, axisCode=None, dimension=None) -> np.array:
         """Return a numpy array with ppm values of the grid points along axisCode or dimension
         """
         if dimension is None and axisCode is None:
@@ -1904,7 +1904,7 @@ class Spectrum(AbstractWrapperObject):
             raise RuntimeError('Invalid dimension (%s)' % (dimension,))
 
         spectrumLimits = self.spectrumLimits[dimension - 1]
-        result = numpy.linspace(spectrumLimits[0], spectrumLimits[1], self.pointCounts[dimension - 1])
+        result = np.linspace(spectrumLimits[0], spectrumLimits[1], self.pointCounts[dimension - 1])
 
         return result
 
@@ -1936,12 +1936,12 @@ class Spectrum(AbstractWrapperObject):
     #     pR = min((MAXALIASINGRANGE + 1) * pCount, max(-MAXALIASINGRANGE * pCount, pR))
     #     return ppmL, ppmR, pL, pR
 
-    # def getPpmAliasingLimitsArray(self, axisCode=None, dimension=None) -> numpy.array:
+    # def getPpmAliasingLimitsArray(self, axisCode=None, dimension=None) -> np.array:
     #     """Return a numpy array of ppm values of the grid points along axisCode or dimension
     #     for the points contained by the aliasing limits, end points are inclusive
     #     """
     #     ppmL, ppmR, pL, pR = self._verifyAxisCodeDimension(axisCode, dimension)
-    #     return numpy.linspace(ppmL, ppmR, pR - pL + 1)
+    #     return np.linspace(ppmL, ppmR, pR - pL + 1)
     #
     # def getPpmAliasingLimits(self, axisCode=None, dimension=None):
     #     """Return a tuple of ppm values of the (first, last) grid points along axisCode or dimension
@@ -1950,11 +1950,11 @@ class Spectrum(AbstractWrapperObject):
     #     ppmL, ppmR, _tmp1, _tmp2 = self._verifyAxisCodeDimension(axisCode, dimension)
     #     return (ppmL, ppmR)
 
-    # def getPointAliasingLimitsArray(self, axisCode=None, dimension=None) -> numpy.array:
+    # def getPointAliasingLimitsArray(self, axisCode=None, dimension=None) -> np.array:
     #     """Return a numpy array with point values of the grid points along axisCode or dimension
     #     """
     #     _tmp1, _tmp2, pL, pR = self._verifyAxisCodeDimension(axisCode, dimension)
-    #     return numpy.linspace(pL, pR, pR - pL + 1)
+    #     return np.linspace(pL, pR, pR - pL + 1)
 
     # def getPointAliasingLimits(self, axisCode=None, dimension=None):
     #     """Return a tuple of point values of the (first, last) grid points along axisCode or dimension
@@ -2449,13 +2449,13 @@ class Spectrum(AbstractWrapperObject):
     @logCommand(get='self')
     def getPlaneData(self, position=None, xDim: int = 1, yDim: int = 2) -> PlaneData:
         """Get a plane defined by by xDim and yDim ('1'-based), and a position vector ('1'-based)
-        as a PlaneData object (i.e. a 2D numpy.ndarray). Dimensionality must be >= 2
+        as a PlaneData object (i.e. a 2D np.ndarray). Dimensionality must be >= 2
 
         :param position: A list/tuple of point-positions (1-based)
         :param xDim: Dimension of the first axis (1-based)
         :param yDim: Dimension of the second axis (1-based)
 
-        :return: a PlaneData object (i.e. a 2D numpy.ndarray in order (yDim, xDim))
+        :return: a PlaneData object (i.e. a 2D np.ndarray in order (yDim, xDim))
 
         NB: use getPlane() method for axisCode based access
         """
@@ -2482,22 +2482,22 @@ class Spectrum(AbstractWrapperObject):
         #TODO: settle on the axisReversed issue
 
         # if self.axesReversed[xDim-1]:
-        #     data = numpy.flip(data, axis=0)  # data are [y,x] ordered
+        #     data = np.flip(data, axis=0)  # data are [y,x] ordered
         # if self.axesReversed[yDim-1]:
-        #     data = numpy.flip(data, axis=1)  # data are [y,x] ordered
+        #     data = np.flip(data, axis=1)  # data are [y,x] ordered
 
         return data
 
     @logCommand(get='self')
     def getPlane(self, axisCodes, position=None) -> PlaneData:
         """Get a plane defined by axisCodes and position as a a PlaneData object
-        (i.e. a 2D numpy.ndarray in order (yDim, xDim)). Dimensionality must be >= 2
+        (i.e. a 2D np.ndarray in order (yDim, xDim)). Dimensionality must be >= 2
 
         :param axisCodes: tuple/list of two axisCodes; expand if exactMatch=False
         :param position: A list/tuple of point-positions (1-based)
         :param axisCodes: A list/tuple of axisCodes that define the plane dimensions
 
-        :return: a PlaneData object (i.e. a 2D numpy.ndarray in order (yDim, xDim))
+        :return: a PlaneData object (i.e. a 2D np.ndarray in order (yDim, xDim))
 
         NB: use getPlaneData method for dimension based access
         """
@@ -2571,7 +2571,7 @@ class Spectrum(AbstractWrapperObject):
                        'sum', 'sum above threshold', 'sum below threshold'
         :param threshold: threshold value for relevant method
 
-        :return: projected spectrum data as a PlaneData object (i.e. a 2D numpy.ndarray in order (yDim, xDim))
+        :return: projected spectrum data as a PlaneData object (i.e. a 2D np.ndarray in order (yDim, xDim))
         """
         projectedData = _getProjection(self, axisCodes=axisCodes, method=method, threshold=threshold)
         return projectedData
@@ -2712,7 +2712,7 @@ class Spectrum(AbstractWrapperObject):
     def getRegion(self, **axisDict) -> RegionData:
         """
         Return the region of the spectrum data defined by the axis limits in ppm as a RegionData object,
-        i.e. a numpy.ndarray of the same dimensionality as defined by the Spectrum instance.
+        i.e. a np.ndarray of the same dimensionality as defined by the Spectrum instance.
 
         Axis limits  are passed in as a dict of (axisCode, tupleLimit) key, value pairs
         with the tupleLimit supplied as (startPpm,stopPpm) axis limits in ppm (lower ppm value first).

@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-04 15:26:55 +0100 (Mon, September 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-07 17:25:14 +0100 (Thu, September 07, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -1670,7 +1670,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self._rescaleAllAxes()
         self.emitAllAxesChanged(allStrips=True)
-
 
     def _resetAxisRange(self, xAxis=True, yAxis=True):
         """
@@ -4466,10 +4465,10 @@ class CcpnGLWidget(QOpenGLWidget):
                 elif self.XAXES[self._xUnits] == GLDefs.AXISUNITSHZ:
                     if self._ordering:
 
-                            # get the axis ordering from the spectrumDisplay and map to the strip
-                            indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
-                            cursorX = cursorCoordinate[0] * thisSpec.spectrometerFrequencies[indices[0]]
-                            startX = self._startCoordinate[0] * thisSpec.spectrometerFrequencies[indices[0]]
+                        # get the axis ordering from the spectrumDisplay and map to the strip
+                        indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
+                        cursorX = cursorCoordinate[0] * thisSpec.spectrometerFrequencies[indices[0]]
+                        startX = self._startCoordinate[0] * thisSpec.spectrometerFrequencies[indices[0]]
 
                     else:
                         # error trap all spectra deleted
@@ -4479,10 +4478,10 @@ class CcpnGLWidget(QOpenGLWidget):
                 else:
                     if self._ordering:
 
-                            indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
-                            # map to a point
-                            cursorX = thisSpec.spectrumDimensions[indices[0]].valueToPoint(cursorCoordinate[0])
-                            startX = thisSpec.spectrumDimensions[indices[0]].valueToPoint(self._startCoordinate[0])
+                        indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
+                        # map to a point
+                        cursorX = thisSpec.spectrumDimensions[indices[0]].valueToPoint(cursorCoordinate[0])
+                        startX = thisSpec.spectrumDimensions[indices[0]].valueToPoint(self._startCoordinate[0])
 
                     else:
                         # error trap all spectra deleted

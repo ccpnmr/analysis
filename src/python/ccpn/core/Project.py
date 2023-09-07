@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-30 18:47:45 +0100 (Fri, June 30, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-07 15:16:42 +0100 (Thu, September 07, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -379,7 +379,7 @@ class Project(AbstractWrapperObject):
         from ccpn.core.lib.XmlLoader import XmlLoader
 
         if not isinstance(xmlLoader, XmlLoader):
-            raise ValueError(f'Ex[ected XmlLoader instance, got {xmlLoader}')
+            raise ValueError(f'Expected XmlLoader instance, got {xmlLoader}')
 
         if not xmlLoader.path.exists():
             raise FileNotFoundError(f'Path "{xmlLoader.path}" does not exist')
@@ -813,6 +813,7 @@ class Project(AbstractWrapperObject):
             _newPath.removeDir()
             parent.fetchDir(_newPath)
 
+        # redirect only if _newXmlLoader is successful?
         for sp in self.spectra:
             # check if any spectra are referenced as ALONGSIDE and update to the new path
             if sp._isAlongside and sp.hasValidPath() and aPath(self.path).parent != _newPath.parent:

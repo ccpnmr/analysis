@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-08-02 15:52:57 +0100 (Wed, August 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-07 15:16:42 +0100 (Thu, September 07, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -124,6 +124,10 @@ MAXITEMLOGGING = 4
 
 # For @Ed: sys.excepthook PyQT related code now in Gui.py
 
+
+#=========================================================================================
+# Framework
+#=========================================================================================
 
 class Framework(NotifierBase, GuiBase):
     """
@@ -384,6 +388,7 @@ class Framework(NotifierBase, GuiBase):
     #-----------------------------------------------------------------------------------------
     # "get" methods
     #-----------------------------------------------------------------------------------------
+
     def get(self, identifier):
         """General method to obtain object (either gui or data) from identifier (pid, gid,
         obj-string)
@@ -1052,6 +1057,11 @@ class Framework(NotifierBase, GuiBase):
             getLogger().warning(failMessage)
             raise
 
+        except RuntimeWarning as es:
+            failMessage = f'saveAs: unable to save {es}'
+            getLogger().warning(failMessage)
+            raise
+
         except Exception as es:
             failMessage = f'saveAs: unable to save {es}'
             getLogger().warning(failMessage)
@@ -1201,11 +1211,13 @@ class Framework(NotifierBase, GuiBase):
                                                           )
 
                     if not (result := self.ui._loadProject(dataLoader=dataLoader)):
-                        # update the logger read-only state
-                        self.project._updateReadOnlyState()
-                        self.project._updateLoggerState(flush=not self.project.readOnly)
-                        if self.mainWindow:
-                            self.mainWindow._setReadOnlyIcon()
+                        if self.project:
+                            # may be run from the command-line, so no project yet
+                            # update the logger read-only state
+                            self.project._updateReadOnlyState()
+                            self.project._updateLoggerState(flush=not self.project.readOnly)
+                            if self.mainWindow:
+                                self.mainWindow._setReadOnlyIcon()
 
                         return []
 

@@ -190,12 +190,10 @@ from __future__ import annotations  # pycharm still highlights as errors
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
-               )
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y"
-                )
+                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -886,35 +884,38 @@ class XmlLoader(XmlLoaderABC):
     Class to access and load the api (v2/3) data; 
     Does all the magic
     """
+
     #--------------------------------------------------------------------------------------------
+    # @formatter:off
 
-    path               = CPath(default_value=None, allow_none=True)  # The V3 project path
-    apiUserPath        = CPath(default_value=None, allow_none=True)  # The path as contained in the xml
-    pathHasChanged     = Bool(False)  # indicates if repository data path is different from current path
+    path                 = CPath(default_value=None, allow_none=True)  # The V3 project path
+    apiUserPath          = CPath(default_value=None, allow_none=True)  # The path as contained in the xml
+    pathHasChanged       = Bool(False)  # indicates if repository data path is different from current path
 
-    isV2               = Bool(False)  # flag indicating V2 project, default False only set for loading
-    # readOnly           = Bool(False)  # flag indicating a read-only project, default False, but True for V2 projects
+    isV2                 = Bool(False)  # flag indicating V2 project, default False only set for loading
+    # readOnly             = Bool(False)  # flag indicating a read-only project, default False, but True for V2 projects
 
-    name               = Unicode()    # project name, derived from path;
-    nameHasChanged     = Bool(False)  # indicates if repository name is different from current name
+    name                 = Unicode()    # project name, derived from path;
+    nameHasChanged       = Bool(False)  # indicates if repository name is different from current name
 
     readingBlockingLevel = Int(default_value=0)  # reading blocking
-    writeBlockingLevel = Int(default_value=0)  # write blocking
+    writeBlockingLevel   = Int(default_value=0)  # write blocking
 
-    memopsXmlPath      = CPath(default_value=None, allow_none=True)  # The path to the memops (project) xml-file
-    memopsRoot         = Any(default_value=None, allow_none=True)    # The MemopsRoot of the old-style V2 project object;
-                                                                     # identical to self.apiNmrProject.root
+    memopsXmlPath        = CPath(default_value=None, allow_none=True)  # The path to the memops (project) xml-file
+    memopsRoot           = Any(default_value=None, allow_none=True)    # The MemopsRoot of the old-style V2 project object;
+                                                                       # identical to self.apiNmrProject.root
 
-    apiNmrProject      = Any(default_value=None, allow_none=True)    # The api NMR project
+    apiNmrProject        = Any(default_value=None, allow_none=True)    # The api NMR project
 
     # the children
-    repositories       = List(default_value=[])  # List with Repository instances
+    repositories         = List(default_value=[])  # List with Repository instances
 
-    loadingStack       = List(default_value=[])  # for debugging
+    loadingStack         = List(default_value=[])  # for debugging
 
-    # useFileLogger      = False  # Toggling the logging from Api calls (!?) (to be eliminated)
-    MAX_BACKUPS_ON_SAVE = 10  # Maximum number of backups to keep on save
+    # useFileLogger        = False  # Toggling the logging from Api calls (!?) (to be eliminated)
+    MAX_BACKUPS_ON_SAVE  = 10  # Maximum number of backups to keep on save
 
+    # @formatter:on
     #--------------------------------------------------------------------------------------------
 
     def __init__(self, path: Path, name: str = None, readOnly: bool = False, create: bool = False):
@@ -936,6 +937,10 @@ class XmlLoader(XmlLoaderABC):
             self.setReadOnly(True)
 
         self.path = aPath(path)
+
+        if not self.path.isValidCcpn(suffixes=['', '.xml', '.ccpn']):
+            raise RuntimeWarning(f'Path contains invalid characters.\n{self.path._validCharactersMessage()}')
+
         if not self.path.exists():
             if create:
                 self.path.mkdir(parents=True, exist_ok=False)
@@ -1181,8 +1186,8 @@ class XmlLoader(XmlLoaderABC):
 
         result._setFromMemops(xmlLoader.memopsRoot)
         result.apiUserPath = xmlLoader.apiUserPath
-        result.pathHasChanged = (result.path == result.apiUserPath)
-        result.nameHasChanged = (result.name == result.apiName)
+        result.pathHasChanged = (result.path != result.apiUserPath)
+        result.nameHasChanged = (result.name != result.apiName)
 
         return result
 

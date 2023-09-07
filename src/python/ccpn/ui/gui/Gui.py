@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-31 16:38:53 +0100 (Mon, July 31, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-07 15:16:42 +0100 (Thu, September 07, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -65,6 +65,7 @@ from ccpnmodel.ccpncore.memops.ApiError import ApiError
 #-----------------------------------------------------------------------------------------
 # Subclass the exception hook fpr PyQT
 #-----------------------------------------------------------------------------------------
+
 def _ccpnExceptionhook(ccpnType, value, tback):
     """This because PyQT raises and catches exceptions,
     but doesn't pass them along instead makes the program crashing miserably.
@@ -106,6 +107,10 @@ REMOVEDEBUG = r'\(\S+\.\w+:\d+\)$'
 MAXITEMLOGGING = 4
 
 
+#=========================================================================================
+# _MyAppProxyStyle
+#=========================================================================================
+
 class _MyAppProxyStyle(QtWidgets.QProxyStyle):
     """Class to handle resizing icons in menus
     """
@@ -136,6 +141,10 @@ class _MyAppProxyStyle(QtWidgets.QProxyStyle):
 
         return super().standardIcon(standardIcon, option, widget)
 
+
+#=========================================================================================
+# Gui
+#=========================================================================================
 
 class Gui(Ui):
     """Top class for the GUI interface
@@ -669,12 +678,17 @@ class Gui(Ui):
                     MessageDialog.showWarning('Save project', msg)
                     return False
 
+                except RuntimeWarning as es:
+                    msg = f'Error saving {newPath}:\n{es}'
+                    MessageDialog.showWarning('Save project', msg)
+                    return False
+
         self.mainWindow._updateWindowTitle()
         self.application._getRecentProjectFiles(oldPath=oldPath)  # this will also update the list
         self.mainWindow._fillRecentProjectsMenu()  # Update the menu
 
         successMessage = f'Project successfully saved to "{self.project.path}"'
-        MessageDialog.showInfo("Project SaveAs", successMessage, parent=self.mainWindow)
+        # MessageDialog.showInfo("Project SaveAs", successMessage, parent=self.mainWindow)
         self.mainWindow.statusBar().showMessage(successMessage)
         getLogger().info(successMessage)
 

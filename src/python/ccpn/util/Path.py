@@ -5,6 +5,7 @@ Includes extensions of sys.path functions and CCPN-specific functionality
 """
 from __future__ import annotations
 
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -18,9 +19,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:43 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-09-07 15:16:42 +0100 (Thu, September 07, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -39,6 +40,9 @@ import shutil
 import glob
 import datetime
 import re
+from functools import reduce
+from operator import add
+
 
 dirsep = '/'
 # note, cannot just use os.sep below because can have window file names cropping up on unix machines
@@ -63,6 +67,10 @@ from pathlib import Path as _Path_
 from pathlib import _windows_flavour, _posix_flavour
 
 
+#=========================================================================================
+# Path
+#=========================================================================================
+
 class Path(_Path_):
     """Subclassed for compatibility, convenience and enhancements
     """
@@ -82,12 +90,6 @@ class Path(_Path_):
         """The folder without the filename"""
         return self if self.is_dir() else self.parent
 
-    def addTimeStamp(self) -> Path:
-        """:return a Path instance with path.timeStamp-suffix profile
-        """
-        now = datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')
-        return self.parent / (self.stem + '-' + str(now) + self.suffix)
-
     @property
     def version(self) -> int:
         """Parse self to yield a version integer, presumably generated with the incrementVersion method
@@ -104,7 +106,7 @@ class Path(_Path_):
             return 0
 
         try:
-            value = int(basename[start+1:stop-1])
+            value = int(basename[start + 1:stop - 1])
         except ValueError:
             return 0
 
@@ -112,6 +114,183 @@ class Path(_Path_):
             return 0
 
         return value
+
+    @staticmethod
+    def _isValid(value, allowLowerAlpha=True, allowUpperAlpha=True, allowNumeric=True,
+                 allowUnderscore=True, allowSpace=True, allowDash=True,
+                 allowBrackets=True, allowEmpty=False, allowOther: str | None = None):
+        """Check the parts of a filename.
+        other must be an inclusion test, i.e., other characters that are allowed in value.
+
+            e.g.
+
+            fp = Path('/filepath/fol$d%er/filename.ccpn')
+            print(fp.isValidFilePath())                     # --> False
+            print(fp.isValidFilePath(allowOther=r'%'))      # --> False
+            print(fp.isValidFilePath(allowOther=r'%$'))     # --> True
+
+        Brackets are included to allow possible numbering of folders/filenames.
+
+        :param str value: part of filename to check.
+        :param bool allowLowerAlpha: allow lower-case.
+        :param bool allowUpperAlpha: allow upper-case.
+        :param bool allowNumeric: allow numeric.
+        :param bool allowUnderscore: allow underscores.
+        :param bool allowSpace: allow spaces.
+        :param bool allowDash: allow dash-characters.
+        :param bool allowBrackets: allow square/round brackets.
+        :param bool allowEmpty: allow empty string.
+        :param optional(str) allowOther: list of other characters that are allowed, or None.
+        :return: True is value is valid.
+        """
+        # extra characters are inserted into 'bad' discard string as escape characters - saves passing them in like that
+        codes = reduce(add, (rf'\{ch}' for ch in allowOther)) if allowOther else ""
+        sequences = {'lowerAlpha': (allowLowerAlpha, '[a-z]+'),
+                     'upperAlpha': (allowUpperAlpha, '[A-Z]+'),
+                     'numeric'   : (allowNumeric, '[0-9]+'),
+                     'underscore': (allowUnderscore, '[_]+'),
+                     'space'     : (allowSpace, '[ ]+'),
+                     'dash'      : (allowDash, '[-]+'),
+                     'brackets'  : (allowBrackets, r'[\(\)\[\]]+'),
+                     'bad'       : (False, rf'[^a-zA-z0-9\_\ \-\(\)\[\]{codes is not None and codes or ""}]+'),
+                     }
+
+        if not value and not allowEmpty:
+            return False
+
+        valids = [True] + [False
+                           for vc, (allow, seq) in sequences.items()
+                           if not allow and re.findall(seq, value)]
+
+        return all(valids)
+
+    def isValidFilePath(self, allowLowerAlpha: bool = True, allowUpperAlpha: bool = True, allowNumeric: bool = True,
+                        allowUnderscore: bool = True, allowSpace: bool = True, allowDash: bool = True,
+                        allowBrackets: bool = True, allowEmpty: bool = False,
+                        allowOther: str | None = None) -> bool:
+        """Return True if the filepath conforms to required parameters.
+        allowOther must be an inclusion test, i.e., other characters that are allowed in value.
+
+            e.g.
+
+            fp = Path('/filepath/fol$d%er/filename.ccpn')
+            print(fp.isValidFilePath())                     # --> False
+            print(fp.isValidFilePath(allowOther=r'%'))      # --> False
+            print(fp.isValidFilePath(allowOther=r'%$'))     # --> True
+
+        Brackets are included to allow possible numbering of folders/filenames.
+
+        :param bool allowLowerAlpha: allow lower-case.
+        :param bool allowUpperAlpha: allow upper-case.
+        :param bool allowNumeric: allow numeric.
+        :param bool allowUnderscore: allow underscores.
+        :param bool allowSpace: allow spaces.
+        :param bool allowDash: allow dash-characters.
+        :param bool allowBrackets: allow square/round brackets.
+        :param bool allowEmpty: allow empty string.
+        :param optional(str) allowOther: optional list of other characters that are allowed.
+        :return: True if valid.
+        """
+        if not all(isinstance(val, bool) for val in (allowLowerAlpha, allowUpperAlpha, allowNumeric, allowUnderscore,
+                                                     allowSpace, allowDash, allowBrackets, allowEmpty)):
+            raise TypeError(f'{self.__class__.__name__}.isValidFilePath: parameters must be of type bool.')
+        if not isinstance(allowOther, str | None):
+            raise TypeError(f'{self.__class__.__name__}.isValidFilePath: allowOther must be str or None.')
+
+        fp = all(self._isValid(val, allowLowerAlpha=allowLowerAlpha, allowUpperAlpha=allowUpperAlpha, allowNumeric=allowNumeric,
+                               allowUnderscore=allowUnderscore, allowSpace=allowSpace, allowDash=allowDash,
+                               allowBrackets=allowBrackets, allowEmpty=allowEmpty, allowOther=allowOther)
+                 for val in self.parts[1 if self.anchor else 0:-1])
+
+        return fp
+
+    def isValidBasename(self, allowLowerAlpha: bool = True, allowUpperAlpha: bool = True, allowNumeric: bool = True,
+                        allowUnderscore: bool = True, allowSpace: bool = True, allowDash: bool = True,
+                        allowBrackets: bool = True, allowEmpty: bool = False,
+                        allowOther: str | None = None,
+                        suffixes: list[str, ...] | None = None) -> bool:
+        """Return True if the basename and extension conform to required parameters.
+        allowOther must be an inclusion test, i.e., other characters that are allowed in value.
+
+            e.g.
+
+            fp = Path('/filepath/folder/filename$%.ccpn')
+            print(fp.isValidBasename())                     # --> False
+            print(fp.isValidBasename(allowOther=r'%'))      # --> False
+            print(fp.isValidBasename(allowOther=r'%$'))     # --> True
+
+        Brackets are included to allow possible numbering of folders/filenames.
+        If suffixes is None, the suffix is not checked.
+
+        :param bool allowLowerAlpha: allow lower-case.
+        :param bool allowUpperAlpha: allow upper-case.
+        :param bool allowNumeric: allow numeric.
+        :param bool allowUnderscore: allow underscores.
+        :param bool allowSpace: allow spaces.
+        :param bool allowDash: allow dash-characters.
+        :param bool allowBrackets: allow square/round brackets.
+        :param bool allowEmpty: allow empty string.
+        :param optional(str) allowOther: optional list of other characters that are allowed.
+        :param optional(list(str)) suffixes: optional list of strings of the form '.<suffix>'
+        :return: True if valid.
+        """
+        if not all(isinstance(val, bool) for val in (allowLowerAlpha, allowUpperAlpha, allowNumeric, allowUnderscore,
+                                                     allowSpace, allowDash, allowBrackets, allowEmpty)):
+            raise TypeError(f'{self.__class__.__name__}.isValidFilePath: parameters must be of type bool.')
+        if not isinstance(allowOther, str | None):
+            raise TypeError(f'{self.__class__.__name__}.isValidFilePath: allowOther must be str or None.')
+        if not isinstance(suffixes, list | None) or (suffixes and not all(isinstance(val, str) for val in suffixes)):
+            raise TypeError(f'{self.__class__.__name__}.isValidFilePath: suffixes must be list of str, or None.')
+
+        bn = self._isValid(self.basename, allowLowerAlpha=allowLowerAlpha, allowUpperAlpha=allowUpperAlpha, allowNumeric=allowNumeric,
+                           allowUnderscore=allowUnderscore, allowSpace=allowSpace, allowDash=allowDash,
+                           allowBrackets=allowBrackets, allowEmpty=allowEmpty, allowOther=allowOther)
+
+        ext = True if suffixes is None else self.suffix in suffixes
+
+        return bn and ext
+
+    @staticmethod
+    def _validCharactersMessage() -> str:
+        """Return a quick message informing valid characters based on isValidCcpn.
+        """
+        return '\nTo minimise any issues with Ccpn folder and filenames, please try to abide by the following guidelines ' \
+               'for filenames of the form <filepath>/<basename>.<suffix>:' \
+               '\n' \
+               '\nfilepath is alphanumeric; it may also contain spaces, underscores, dashes, and square/round brackets, but cannot be empty.' \
+               '\nbasename is alphanumeric; it may also contain underscores, dashes, and square/round brackets. ' \
+               'Spaces are not allowed, and it cannot be empty.' \
+               '\n' \
+               '\nFor a ccpn project the suffix is \'.ccpn\'' \
+               '\n' \
+               '\nNOTE that dashes, brackets, and other special characters may be changed to underscores in the loaded project-name, ' \
+               'but the filepath is not altered during loading/saving.'
+
+    def isValidCcpn(self, suffixes: list[str, ...] | None = None) -> bool:
+        """Return True if the filename conforms to valid CCPN guidelines:
+
+        Convenience method to quickly check filenames.
+
+        filepath is alphanumeric; it may also contain spaces, underscores, dashes, and square/round brackets.
+        basename is alphanumeric; it may also contain underscores, dashes, and square/round brackets. Spaces are not allowed.
+        Neither is allowed to be empty.
+
+        If suffix is not supplied, defaults to '.ccpn' (suffix must be '.ccpn' for project folder).
+
+        NOTE that dashes, brackets, and other special characters may be changed to underscores in the loaded project-name,
+        but filepath is not altered during loading/saving.
+
+        :param Optional[list] suffixes: optional list of allowed suffixes (including .)
+        :return: True if valid.
+        """
+        return self.isValidFilePath() and \
+            self.isValidBasename(allowSpace=False, suffixes=suffixes if suffixes is not None else ['.ccpn', ])
+
+    def addTimeStamp(self) -> Path:
+        """Return a Path instance with path.timeStamp-suffix profile
+        """
+        now = datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')
+        return self.parent / (self.stem + '-' + str(now) + self.suffix)
 
     def incrementVersion(self) -> Path:
         """return: a Path instance with directory/basename(version).suffixes profile
@@ -184,6 +363,7 @@ class Path(_Path_):
         :return a Path instance of the location of the copied directory
         """
         import shutil
+
         if not self.exists():
             raise FileNotFoundError(f'"{self}" does not exist')
         if not self.is_dir():
@@ -221,7 +401,7 @@ class Path(_Path_):
             raise RuntimeError(f'"{self}" is not a file')
 
         _dest = aPath(destination)
-        if _dest.is_dir():   # implies it exists as is_dir returns False if it doesn't
+        if _dest.is_dir():  # implies it exists as is_dir returns False if it doesn't
             _dir, _base, _suffix = self.split3()
             # create a new path from the destination directory and basename, suffix of self
             # NB shutil.copy2 used below can do the same, but always overwrites the target
@@ -282,7 +462,7 @@ class Path(_Path_):
             raise ValueError('No suffix defined')
         return self.with_suffix(suffix=suffix)
 
-    def listDirFiles(self, extension:str=None) -> list:
+    def listDirFiles(self, extension: str = None) -> list:
         """Obsolete; extension is without a "."
         use listdir instead
         """
@@ -291,11 +471,11 @@ class Path(_Path_):
         else:
             return list(self.glob(f'*.{extension}'))
 
-    def listdir(self, suffix:str = None, excludeDotFiles:bool = True, relative:bool = False) -> list:
+    def listdir(self, suffix: str = None, excludeDotFiles: bool = True, relative: bool = False) -> list:
         """
         If self is a directory , return a list of its files as Path instance.
         If the suffix is given (e.g.: .pdf, .jpeg...), returns only files of that pattern.
-        Non recursive.
+        Non-recursive.
 
         :param suffix: optional suffix used to filter
         :param excludeDotFiles: flag to exclude (nix) dot-files (e.g. like .cshrc .DSstore); default True
@@ -359,6 +539,10 @@ class Path(_Path_):
     def __add__(self, other):
         return Path(self.asString() + other)
 
+
+#=========================================================================================
+# Functions
+#=========================================================================================
 
 def _rmdirs(path):
     """Recursively delete path and contents; maybe not very fast
@@ -607,6 +791,7 @@ def fetchDir(path, dirName):
         else:
             return newPath
 
+
 # Original in util.Common
 defaultFileNameChar = '_'
 separatorFileNameChar = '+'
@@ -614,6 +799,7 @@ validFileNamePartChars = ('abcdefghijklmnopqrstuvwxyz'
                           'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
                           + defaultFileNameChar)
 validCcpnFileNameChars = validFileNamePartChars + '-.' + separatorFileNameChar
+
 
 def makeValidCcpnFilePath(path):
     """Replace invalid chars in path to assure Python 2.1 (used in ObjectDomain) compatibility
@@ -626,5 +812,70 @@ def makeValidCcpnFilePath(path):
         ll.append(char)
     return ''.join(ll)
 
+
 makeValidCcpnPath = makeValidCcpnFilePath
+
+
 # used in ccpnmodel/ccpncore/lib/chemComp/Io.py"
+
+
+#=========================================================================================
+# main
+#=========================================================================================
+
+def main():
+    # put into test-cases
+
+    fp = Path('/wergwe98/help/name.ccpn')
+    print(fp.parts)
+    print(fp.isValidFilePath(allowUpperAlpha=False, allowUnderscore=False, allowDash=False))
+    # True
+
+    print(fp.isValidFilePath(allowUnderscore=False))
+    print(fp.isValidFilePath(allowNumeric=False))
+    print(fp.isValidFilePath(allowDash=False))
+    print(fp.isValidFilePath(allowLowerAlpha=False))
+    # True, False, True, False
+
+    print('------->')
+    fp = Path('/wergwe98/n2$@34a£-$me/name.ccpn')  # --> $@£
+    print(fp.isValidFilePath(allowOther=r'@'))
+    print(fp.isValidFilePath(allowOther=r'@£$'))
+    # False, True
+
+    print('------->')
+    fp = Path('/wergwe98/he-lp/n2$@3()4a£-$me.ccpn')  # --> $@£
+    print(fp.isValidBasename(suffixes=['', ]))
+    print(fp.isValidBasename(suffixes=['.ccpn']))
+    # False, False
+
+    print(fp.isValidBasename(allowOther='$'))
+    print(fp.isValidBasename(allowOther='£'))
+    print(fp.isValidBasename(allowOther='@'))
+    print(fp.isValidBasename(allowOther='$£'))
+    print(fp.isValidBasename(allowOther='$£@'))
+    print(fp.isValidBasename(allowOther='@$£'))  # different order
+    print(fp.isValidBasename(allowOther='£@\$'))
+    # False, False, False, False, True, True, True
+
+    print('------->')
+    fp = Path('/werg-we98/help/name.ccpn')
+    print(fp.isValidBasename(suffixes=['', ]))
+    print(fp.isValidBasename(suffixes=['.ccpn']))
+    print(fp.isValidCcpn())
+    # False, True, True
+
+    try:
+        print(fp.isValidBasename(suffixes=[34, '.ccpn']))  # type-hints does not recognise lists like this, only tuples
+    except TypeError:
+        ...
+
+    try:
+        print(fp.isValidBasename(suffixes=['', 34]))
+    except TypeError:
+        ...
+    # Error, Error
+
+
+if __name__ == '__main__':
+    main()

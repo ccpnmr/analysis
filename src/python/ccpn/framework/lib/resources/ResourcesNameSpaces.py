@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-09-06 14:28:31 +0100 (Wed, September 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-07 17:23:47 +0100 (Thu, September 07, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -60,6 +60,8 @@ SMALLMOLECULE = 'SmallMolecule'
 VERSION = 1.0
 
 ### residues level
+
+RESIDUEOBJ = 'residueObject'
 MOLECULETYPE = 'moleculeType'
 RESIDUES = 'residues'
 RESIDUENAME = 'residueName'
@@ -68,6 +70,7 @@ CCPCODE = 'ccpcode'
 ATOMS = 'atoms'
 
 ### Atoms level
+ATOMOBJ = 'atomObject'
 ATOMNAME = 'atomName'
 ELEMENT = 'element'
 AVERAGESHIFT = "averageShift"
@@ -78,3 +81,5 @@ STDSHIFT = "stdShift"
 DISTRIBUTION = 'distribution'
 DISTRIBUTIONREFVALUE = 'distributionRefValue'
 DISTRIBUTIONVALUEPERPOINT = 'distributionValuePerPoint'
+PPMARRAY = 'ppmArray'
+INTENSITIESARRAY = 'intensitiesArray'

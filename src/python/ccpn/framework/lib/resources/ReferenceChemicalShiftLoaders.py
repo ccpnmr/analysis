@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-09-06 14:28:31 +0100 (Wed, September 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-07 17:23:47 +0100 (Thu, September 07, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -115,6 +115,8 @@ class ReferenceChemicalShift(CcpNmrJson):
     shortName =  Unicode(allow_none=False, default_value='??').tag(info='The short Name identifier, e.g. ALA, etc')
     ccpcode =  Unicode(allow_none=False, default_value='??').tag(info='The ccpcode identifier, e.g. Ala, etc')
     moleculeType =  Unicode(allow_none=False, default_value='??').tag(info='The moleculeType identifier, e.g. Protein, etc')
+    classification =  Unicode(allow_none=False, default_value='??').tag(info='The moleculeType classification, e.g. Peptide linking, etc')
+    loadingLevel = Int(allow_none=False, default_value='??').tag(info='The loading source level. e.g. 0 for distribution, 1 for internal, 2 for project. Set automatically, not read from json ')
     atoms = RecursiveList()
 
     def _setAtomTraits(self):
@@ -161,11 +163,17 @@ class _ReferenceChemicalShiftsABC(CcpnJsonDirectoryABC):
     def __init__(self):
         super().__init__() # will trigger the loading from super class
         self._setAtomTraits()
+        self._setLoadingLevel()
 
     def _setAtomTraits(self):
         """ Recursively load any AtomTrait in the main objects"""
         for k, res in self.items():
             res._setAtomTraits()
+
+    def _setLoadingLevel(self):
+        """ set the _setLoadingLevel to each element"""
+        for k, res in self.items():
+            res.loadingLevel = self.loadingLevel.value
 
 class _DefaultReferenceChemicalShiftsLoader(_ReferenceChemicalShiftsABC):
     loadingLevel = ResourcesLoadingLevel.INSTALLATION

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-09-06 14:28:31 +0100 (Wed, September 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-07 17:23:47 +0100 (Thu, September 07, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -27,80 +27,135 @@ __date__ = "$Date: 2023-08-30 15:14:00 +0100 (Wed, August 30, 2023) $"
 #=========================================================================================
 
 from collections import OrderedDict, defaultdict
+import pandas as pd
 from ccpn.util.Logging import getLogger
 from ccpn.util.OrderedSet import OrderedSet
-
+from ccpn.framework.lib.resources import ResourcesNameSpaces as rns
 
 class ReferenceChemicalShifts(OrderedDict):
     """
-    Class to handle all the ReferenceChemicalShifts .
+    Class to handle all the ReferenceChemicalShifts.
+    The ReferenceChemicalShifts object is represented by an OrderedDict.
+
+    The OrderedDict is structured as
+        - key -> residue shortName
+        - value -> residue Traitlet object (see /resources/ReferenceChemicalShiftLoaders.py)
+
+    usage:
+    To get this object at runtime:
+                referenceChemicalShifts = application.resources.referenceChemicalShifts
+
+    Objects can be retrieved simply by the built-in dictionary methods.
+        e.g.: by residue shortName:
+            ala = referenceChemicalShifts.get('ALA')
+
+    For more complex data queries: use the built-in methods getBy which returns a dataFrame representation and can be further filtered as a pipeline.
+
+        e.g.:
+        - get all data by the "DNA" moleculeType:
+            data =  referenceChemicalShifts.dataFrame
+            dnaData = referenceChemicalShifts.getBy(dataFrame=data, theProperty='moleculeType', values=['DNA'])
+        - keep filtering by "C" atomName:
+            dnaData = referenceChemicalShifts.getBy(dataFrame=dnaData, theProperty='atomName', values=['P'])
+        - keepFiltering by stdShift:
+            dnaData = referenceChemicalShifts.getByRange(dataFrame=dnaData, theProperty='stdShift',  minValue=2, maxValue=5)
 
     """
     _registeredClasses = OrderedSet()
 
     def __init__(self):
         super().__init__()
-        self._objsByClass = {}
+        self._objsByClass = {} # used to load/unload objects
         self._registerCcpnReferenceChemicalShiftLoaders()
-        self._activeChemicalShifts = []
+        self._dataFrame = self._buildDataFrame()
 
-
-    def getByMoleculeType(self, moleculeType:str):
+    @property
+    def dataFrame(self):
         """
-        Filter all ReferenceChemicalShifts by a given  moleculeType.
-        :param moleculeType: str. case-sensitive
+        :return: Pandas DataFrame.  All information regarding residues and atoms in a flat dataFrame object
         """
-        availableMolTypes = self._getAvailableMolTypes()
-        if moleculeType not in availableMolTypes:
-            msg = f'''Cannot filter ReferenceChemicalShifts by the given moleculeType: "{moleculeType}". Use one of the available: {", ".join(availableMolTypes)}. Case-sensitive'''
-            raise ValueError(msg)
-        return self.filterBySingleCondition('moleculeType', moleculeType)
+        return self._dataFrame
 
-    def groupByTitle(self, filteringObjects=None):
-        groups = defaultdict(list)
-        filteringObjects = filteringObjects or self.values()
-        for obj in filteringObjects:
-            groups[obj.title].append(obj)
-        return groups
-
-    def filterBySingleCondition(self, theProperty, condition, filteringObjects=None):
+    def getBy(self, dataFrame, theProperty, values):
         """
-        Find all ReferenceChemicalShifts that have a property that matches a given condition. E.g.: residueName named 'Valine'.
-        :param theProperty: str. attribute of the ReferenceChemicalShift. Eg. residueName, shortName, ccpcode, moleculeType
-        :param condition: str, float, int
-        :param filteringObjects: list of ReferenceChemicalShift objects. If None, use all available. Default
-        :return:  list of ReferenceChemicalShift objects
+        :param dataFrame: the dataFrame containing all data
+        :param theProperty: the ReferenceChemicalShift property to filter, can be a residue or atom property.
+        :param values: the querying values
+        :return: a filtered dataFrame
+
+        Usage:
+           - get all data by the "DNA" moleculeType:
+            data =  referenceChemicalShifts.dataFrame
+            dnaData = referenceChemicalShifts.getBy(dataFrame=data, theProperty='moleculeType', values=['DNA'])
         """
-        filteringObjects = filteringObjects or self.values()
-        return [obj for obj in filteringObjects if getattr(obj, theProperty, None) == condition ]
+        if theProperty not in self.dataFrame.columns:
+            raise ValueError(f"ReferenceChemicalShifts getBy error. Value: {theProperty} not defined in the data structure")
+        df = self._getDFforValues(dataFrame, values=values, headerName=theProperty)
+        return df
 
-    def filterByMultipleCondition(self, titles, moleculeTypes, filteringObjects=None,):
+    def getByRange(self, dataFrame, theProperty, minValue, maxValue, minIncluded=True, maxIncluded=True):
         """
-        Find all ReferenceChemicalShifts that have a property that matches a given condition. E.g.: moleculeTypes = ['Protein', 'DNA']
-        titles = ['Protein', 'MyCustomTitle']
-        :return:  list of ReferenceChemicalShift objects
+        :param dataFrame: the dataFrame containing all data
+        :param theProperty:  str. the ReferenceChemicalShift property to filter.  Can be a residue or atom property.
+        :param minValue: int or float. The filtering condition
+        :param maxValue:  int or float.  The filtering condition
+        :param minIncluded: bool. whether  to include the minValue in the filtering results
+        :param maxIncluded:  whether  to include the maxValue in the filtering results
+        :return: a filtered dataFrame
+        Usage:
+           - get all data with an averageShift between 3-5 ppm:
+            data =  referenceChemicalShifts.dataFrame
+            result = referenceChemicalShifts.getByRange(dataFrame=dnaData, theProperty='averageShift',  minValue=3, maxValue=5)
         """
-        filteringObjects = filteringObjects or self.values()
+        if theProperty not in self.dataFrame.columns:
+            raise ValueError(f"ReferenceChemicalShifts getBy error. Value: {theProperty} not defined in the data structure")
+        df =  self._getDFByRange(dataFrame, theProperty, minValue, maxValue, minIncluded=minIncluded, maxIncluded=maxIncluded)
+        return df
 
-        values = set()
-        for obj in filteringObjects:
-            if obj.title in titles and obj.moleculeType in moleculeTypes:
-                values.add(obj)
-        return list(values)
-
-    def activeChemicalShifts(self):
-        return self._activeChemicalShifts
-
-    def setActiveChemicalShifts(self, activeChemicalShifts):
-        """ Filter the ReferenceChemicalShifts  by conditions and set as active for all the ongoing calculations"""
-        self._activeChemicalShifts = activeChemicalShifts
+    ## -------- Private Methods -------- ##
 
     def _getAvailableMolTypes(self):
-        availableMolTypes = set()
-        for obj in self.values():
-            availableMolTypes.add(obj.moleculeType)
-        return list(availableMolTypes)
+        return self.dataFrame.moleculeType.unique()
 
+    @staticmethod
+    def _getDFforValues(df, values, headerName):
+        df = df.copy()
+        return df[df[headerName].isin(values)]
+
+    @staticmethod
+    def _getDFByRange(df, theProperty, minValue, maxValue, minIncluded=True, maxIncluded=True):
+        df = df.copy()
+        try:
+            cond1 = '>=' if minIncluded else '>'
+            cond2 = '<=' if maxIncluded else '<>>'
+            df = df[df.eval(f"{theProperty} {cond1} {minValue} & {theProperty} {cond2} {maxValue}")]
+        except Exception as err:
+            getLogger().warning(f"Cannot filter by range. {err}")
+            df = pd.DataFrame()
+        return df
+
+    def _buildDataFrame(self):
+        """
+        Create a flat dataframe for all the traits definition.
+        :return:
+        """
+        _data = []
+        for residueTrait in self.values():
+            residueTraitDict = dict(residueTrait.items())
+            residueTraitDict[rns.TITLE] = residueTrait.title
+            residueTraitDict[rns.COMMENT] = residueTrait.comment
+            residueTraitDict[rns.RESIDUEOBJ] = residueTrait
+            atomTraits = residueTraitDict.pop(rns.ATOMS, [])
+            for atomTrait in atomTraits:
+                atomTraitDict = dict(atomTrait.items())
+                atomTraitDict.pop(rns.DISTRIBUTION, [])
+                atomTraitDict[rns.PPMARRAY] = atomTrait.ppmArray
+                atomTraitDict[rns.INTENSITIESARRAY] = atomTrait.intensitiesArray
+                atomTraitDict[rns.ATOMOBJ] = atomTrait
+                _row = residueTraitDict | atomTraitDict
+                _data.append(_row)
+        df = pd.DataFrame(_data)
+        return df
 
     ############# Core Registration Methods ##############
 
@@ -111,6 +166,7 @@ class ReferenceChemicalShifts(OrderedDict):
             obj = theClass()
             self.update(obj)
             self._objsByClass[theClass] = obj
+            self._dataFrame = self._buildDataFrame()
 
     def deregister(self, theClass, unloadObjects=True):
         """ remove the registered class and unload the RCS. E.g. done when switching projects.
@@ -124,6 +180,7 @@ class ReferenceChemicalShifts(OrderedDict):
             for key in obj:
                 self.pop(key, None)
             del obj
+            self._dataFrame = self._buildDataFrame()
 
     def _registerCcpnReferenceChemicalShiftLoaders(self):
         """ Register the default ReferenceChemicalShifts available in the installation and internal (~/.ccpn/resources) """

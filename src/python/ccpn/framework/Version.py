@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 19:17:55 +0100 (Wed, June 28, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-09-07 18:04:53 +0100 (Thu, September 07, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -166,7 +166,7 @@ class VersionString(str):
         return False
 
     def __gt__(self, other):
-        """Check if self is greater then other;
+        """Check if self is greater than other;
          raise Value Error if other is an invalid object.
          Presence of development field implies an earlier version (i.e. __gt__ is False) compared to
          the absence of the field

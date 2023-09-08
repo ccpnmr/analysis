@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-07 15:16:42 +0100 (Thu, September 07, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-08 12:15:32 +0100 (Fri, September 08, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -152,7 +152,7 @@ class Path(_Path_):
                      'space'     : (allowSpace, '[ ]+'),
                      'dash'      : (allowDash, '[-]+'),
                      'brackets'  : (allowBrackets, r'[\(\)\[\]]+'),
-                     'bad'       : (False, rf'[^a-zA-z0-9\_\ \-\(\)\[\]{codes is not None and codes or ""}]+'),
+                     'bad'       : (False, rf'[^a-zA-z0-9\_\ \-\(\)\[\]\~{codes is not None and codes or ""}]+'),
                      }
 
         if not value and not allowEmpty:
@@ -254,17 +254,13 @@ class Path(_Path_):
     def _validCharactersMessage() -> str:
         """Return a quick message informing valid characters based on isValidCcpn.
         """
-        return '\nTo minimise any issues with Ccpn folder and filenames, please try to abide by the following guidelines ' \
-               'for filenames of the form <filepath>/<basename>.<suffix>:' \
+        return '\nPlease only use alphanumeric characters (no accents or other diacritics), ' \
+               'underscores (_), dashes (-), and square/round brackets ()[] in your ' \
+               'file path and project name.' \
+               '\nSpaces are allowed in the file path but not in the project name.' \
                '\n' \
-               '\nfilepath is alphanumeric; it may also contain spaces, underscores, dashes, and square/round brackets, but cannot be empty.' \
-               '\nbasename is alphanumeric; it may also contain underscores, dashes, and square/round brackets. ' \
-               'Spaces are not allowed, and it cannot be empty.' \
-               '\n' \
-               '\nFor a ccpn project the suffix is \'.ccpn\'' \
-               '\n' \
-               '\nNOTE that dashes, brackets, and other special characters may be changed to underscores in the loaded project-name, ' \
-               'but the filepath is not altered during loading/saving.'
+               '\nNOTE: dashes (-), square/round brackets ()[], and other non-alphanumeric characters in your project ' \
+               'name may automatically be changed to underscores (_) when loading/saving.'
 
     def isValidCcpn(self, suffixes: list[str, ...] | None = None) -> bool:
         """Return True if the filename conforms to valid CCPN guidelines:

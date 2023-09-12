@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-08-24 19:07:48 +0100 (Thu, August 24, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-12 14:30:57 +0100 (Tue, September 12, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -233,13 +233,17 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
             vertices = drawStr.numVertices
 
             if vertices:
+                # axisIndex is set when creating the labels, based on _flipped
                 if drawStr.axisIndex == 0:
                     _font = drawStr.font
 
+                    # top-left of region, bound to top of screen
                     offsets = [drawStr.axisPosition + (3.0 * self._GLParent.pixelX),
                                self._GLParent.axisT - (2 * _font.charHeight * self._GLParent.pixelY),
                                0.0]
+
                 else:
+                    # bottom-left of region, bound to left of screen - should be top-left of region?
                     offsets = [self._GLParent.axisL + (3.0 * self._GLParent.pixelX),
                                drawStr.axisPosition + (3.0 * self._GLParent.pixelY),
                                0.0]
@@ -343,8 +347,8 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
     def _appendLabel(self, spectrumView, objListView, stringList, obj):
         """Append a new label to the end of the list
         """
-        spectrum = spectrumView.spectrum
-        spectrumFrequency = spectrum.spectrometerFrequencies
+        # spectrum = spectrumView.spectrum
+        # spectrumFrequency = spectrum.spectrometerFrequencies
 
         # pls = peakListView.peakList
         pls = self.objectList(objListView)
@@ -357,6 +361,7 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
         p0 = [0.0] * 2  # len(self.axisOrder)
         lims = obj.limits[0] if obj.limits else (0.0, 0.0)
 
+        dims = self._spectrumSettings[spectrumView].dimensionIndices
         for ps, psCode in enumerate(self._GLParent.axisOrder[0:2]):
             for pp, ppCode in enumerate(obj.axisCodes):
 
@@ -402,8 +407,13 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
         text = self.getLabelling(obj, self._GLParent)
 
         smallFont = self._GLParent.getSmallFont()
-        textX = pos or 0.0 + (3.0 * self._GLParent.pixelX)
-        textY = self._GLParent.axisT - (2 * smallFont.charHeight * self._GLParent.pixelY)
+        if dims[0]:
+            # 1D is flipped
+            textX = self._GLParent.axisL + 3.0 * self._GLParent.pixelX
+            textY = pos or 0.0
+        else:
+            textX = pos or 0.0 + (3.0 * self._GLParent.pixelX)
+            textY = self._GLParent.axisT - (2 * smallFont.charHeight * self._GLParent.pixelY)
 
         newString = GLString(text=text,
                              font=smallFont,
@@ -416,7 +426,7 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
                              GLContext=self._GLParent,
                              obj=obj)
         # this is in the attribs
-        newString.axisIndex = 0
+        newString.axisIndex = dims[0]  # still hacking for the minute
         newString.axisPosition = pos or 0.0
 
         stringList.append(newString)

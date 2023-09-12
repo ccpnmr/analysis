@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-08-24 19:07:48 +0100 (Thu, August 24, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-12 14:30:57 +0100 (Tue, September 12, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -3455,8 +3455,8 @@ class GL1dLabelling():
     def _appendLabel(self, spectrumView, objListView, stringList, obj):
         """Append a new label to the end of the list
         """
-        spectrum = spectrumView.spectrum
-        spectrumFrequency = spectrum.spectrometerFrequencies
+        # spectrum = spectrumView.spectrum
+        # spectrumFrequency = spectrum.spectrometerFrequencies
 
         # pls = peakListView.peakList
         pls = self.objectList(objListView)

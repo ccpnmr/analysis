@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-12 14:30:58 +0100 (Tue, September 12, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-13 16:34:03 +0100 (Wed, September 13, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -57,6 +57,7 @@ REGION_COLOURS = {
 
 class GLRegion(QtWidgets.QWidget):
     valuesChanged = pyqtSignal(list)
+
     # editingFinished = pyqtSignal(list)
 
     def __init__(self, parent, glList, values=(0, 0), axisCode=None, orientation='h',
@@ -297,6 +298,7 @@ class GLRegion(QtWidgets.QWidget):
 
 class GLInfiniteLine(GLRegion):
     valuesChanged = pyqtSignal(float)
+
     # editingFinished = pyqtSignal(float)
 
     def __init__(self, parent, glList, values=(0, 0), axisCode=None, orientation='h',
@@ -378,8 +380,16 @@ class GLExternalRegion(GLVertexArray):
         self._regions = []
 
     def addIntegral(self, integral, integralListView, colour='blue', brush=None):
+        """Add an integral region to the spectrumDisplay.
+        """
         lims = integral.limits[0] if integral.limits else (0.0, 0.0)
-        return self._addRegion(values=lims, orientation='v', movable=True,
+
+        if self._parent.spectrumDisplay.is1D and self._parent.spectrumDisplay._flipped:
+            ornt = 'h'
+        else:
+            ornt = 'v'
+
+        return self._addRegion(values=lims, orientation=ornt, movable=True,
                                obj=integral, objectView=integralListView, colour=colour, brush=brush)
 
     def _removeRegion(self, region):
@@ -823,7 +833,7 @@ class GLIntegralRegion(GLExternalRegion):
 
             lims = reg._object.limits[0] if reg._object.limits else (0.0, 0.0)
             # assume 'ppm' axis units
-            if axisIndex == self._parent.spectrumDisplay._flipped:
+            if axisIndex == 0:  # self._parent.spectrumDisplay._flipped:
                 # vertical region
                 pos0 = x0 = lims[0]  # reg.values[0]
                 pos1 = x1 = lims[1]  # reg.values[1]

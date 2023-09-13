@@ -463,9 +463,9 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                           # 'newProject' : self.application.newProject, this is a crash!
                           'info'                    : getLogger().info,
                           'warning'                 : getLogger().warning,
-                          'showWarning': showWarning,
-                          'showInfo': showInfo,
-                          'showError': showError,
+                          'showWarning'             : showWarning,
+                          'showInfo'                : showInfo,
+                          'showError'               : showError,
 
                           #### context managers
                           'undoBlock'               : undoBlockWithoutSideBar,
@@ -1575,7 +1575,9 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                     if strip.spectrumDisplay.is1D:
                         cursorPosition = self.application.current.cursorPosition
                         if cursorPosition is not None and len(cursorPosition) > 1:
-                            limits = [cursorPosition[0], cursorPosition[0] + 0.01]
+
+                            pos = cursorPosition[strip.spectrumDisplay._flipped]
+                            limits = [pos, pos + 0.01]
 
                             validViews = [sv for sv in strip.spectrumViews if sv.isDisplayed]
                             currentIntegrals = list(self.current.integrals)
@@ -2105,10 +2107,10 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                 try:
                     peak = peaks[0]
                     peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4,
-                                            minDropFactor=minDropFactor, searchBoxMode=searchBoxMode, searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
-                    if peak.spectrum.dimensionCount ==1 and peak.figureOfMerit <1:
+                                        minDropFactor=minDropFactor, searchBoxMode=searchBoxMode, searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
+                    if peak.spectrum.dimensionCount == 1 and peak.figureOfMerit < 1:
                         showWarning(f'Cannot snap peak', f'Figure of merit below the snapping threshold of 1.')
-                    if peak.spectrum.dimensionCount ==1 and peak.spectrum.negativeNoiseLevel < peak.height < peak.spectrum.noiseLevel:
+                    if peak.spectrum.dimensionCount == 1 and peak.spectrum.negativeNoiseLevel < peak.height < peak.spectrum.noiseLevel:
                         showWarning(f'Cannot snap peak', f'Adjust the noise level thresholds or move the peak closer to a signal.')
                 except Exception as es:
                     showWarning('Snap to Extremum', str(es))
@@ -2120,13 +2122,14 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                         _is1Ds = [p.spectrum.dimensionCount == 1 for p in peaks]
                         if all(_is1Ds):
                             from ccpn.core.lib.PeakPickers.PeakSnapping1D import snap1DPeaksByGroup
+
                             snap1DPeaksByGroup(peaks)
-                            nonSnappingPeaks = [pk for pk in peaks if pk.figureOfMerit <1]
-                            nonSnappingPeaksBelowNoiseT = [pk for pk in peaks if pk.spectrum.negativeNoiseLevel < pk.height < pk.spectrum.noiseLevel ]
-                            msg = 'one of the selected peak' if len(nonSnappingPeaks)==1 else 'some of the selected peaks'
-                            if len(nonSnappingPeaks)>0:
+                            nonSnappingPeaks = [pk for pk in peaks if pk.figureOfMerit < 1]
+                            nonSnappingPeaksBelowNoiseT = [pk for pk in peaks if pk.spectrum.negativeNoiseLevel < pk.height < pk.spectrum.noiseLevel]
+                            msg = 'one of the selected peak' if len(nonSnappingPeaks) == 1 else 'some of the selected peaks'
+                            if len(nonSnappingPeaks) > 0:
                                 showWarning(f'Cannot snap {msg}', f'Figure of merit below the snapping threshold of 1 for {nonSnappingPeaks}')
-                            if len(nonSnappingPeaksBelowNoiseT)>0:
+                            if len(nonSnappingPeaksBelowNoiseT) > 0:
                                 showWarning(f'Cannot find new maxima', f'Some maxima could be in the noise. Adjust the noise level thresholds to include more results. Affected peaks: {nonSnappingPeaksBelowNoiseT}')
                         else:
                             peaks.sort(key=lambda x: x.position[0] if x.position and None not in x.position else 0, reverse=False)  # reorder peaks by position

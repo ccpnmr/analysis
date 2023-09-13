@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-07 17:25:14 +0100 (Thu, September 07, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-13 16:34:03 +0100 (Wed, September 13, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -2189,6 +2189,12 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def mousePressIn1DArea(self, regions):
         cursorCoordinate = self.getCurrentCursorCoordinate()
+
+        if self.spectrumDisplay.is1D and self.spectrumDisplay._flipped:
+            cx, cy, ornt = cursorCoordinate[1], cursorCoordinate[0], 'h'
+        else:
+            cx, cy, ornt = cursorCoordinate[0], cursorCoordinate[1], 'v'
+
         for region in regions:
             if region._objectView and not region._objectView.isDisplayed:
                 continue
@@ -2199,7 +2205,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     mid = np.median(thisRegion[1])
                     delta = (np.max(thisRegion[1]) - np.min(thisRegion[1])) / 2.0
                     inX = self._widthsChangedEnough((mid, 0.0),
-                                                    (cursorCoordinate[0], 0.0),
+                                                    (cx, 0.0),
                                                     tol=delta)
 
                     mx = np.max([thisRegion[0], np.max(thisRegion[2])])
@@ -2207,15 +2213,18 @@ class CcpnGLWidget(QOpenGLWidget):
                     mid = (mx + mn) / 2.0
                     delta = (mx - mn) / 2.0
                     inY = self._widthsChangedEnough((0.0, mid),
-                                                    (0.0, cursorCoordinate[1]),
+                                                    (0.0, cy),
                                                     tol=delta)
                     if not inX and not inY:
-                        self._dragRegions.add((region, 'v', 3))
+                        # add horizontal/vertical drag area to check-list
+                        self._dragRegions.add((region, ornt, 3))
 
         return self._dragRegions
 
     def mousePressInRegion(self, regions):
         cursorCoordinate = self.getCurrentCursorCoordinate()
+        cx, cy, ornt = cursorCoordinate[0], cursorCoordinate[1], 'v'
+
         for region in regions:
             if region._objectView and not region._objectView.isDisplayed:
                 continue
@@ -2223,13 +2232,13 @@ class CcpnGLWidget(QOpenGLWidget):
             if region.visible and region.movable:
                 if region.orientation == 'h':
                     if not self._widthsChangedEnough((0.0, region.values[0]),
-                                                     (0.0, cursorCoordinate[1]),
+                                                     (0.0, cy),
                                                      tol=abs(3 * self.pixelY)):
                         self._dragRegions.add((region, 'h', 0))  # line 0 of h-region
                         # break
 
                     elif not self._widthsChangedEnough((0.0, region.values[1]),
-                                                       (0.0, cursorCoordinate[1]),
+                                                       (0.0, cy),
                                                        tol=abs(3 * self.pixelY)):
                         self._dragRegions.add((region, 'h', 1))  # line 1 of h-region
                         # break
@@ -2237,20 +2246,20 @@ class CcpnGLWidget(QOpenGLWidget):
                         mid = (region.values[0] + region.values[1]) / 2.0
                         delta = abs(region.values[0] - region.values[1]) / 2.0
                         if not self._widthsChangedEnough((0.0, mid),
-                                                         (0.0, cursorCoordinate[1]),
+                                                         (0.0, cy),
                                                          tol=delta):
                             self._dragRegions.add((region, 'h', 3))  # both lines of h-region
                             # break
 
                 elif region.orientation == 'v':
                     if not self._widthsChangedEnough((region.values[0], 0.0),
-                                                     (cursorCoordinate[0], 0.0),
+                                                     (cx, 0.0),
                                                      tol=abs(3 * self.pixelX)):
                         self._dragRegions.add((region, 'v', 0))  # line 0 of v-region
                         # break
 
                     elif not self._widthsChangedEnough((region.values[1], 0.0),
-                                                       (cursorCoordinate[0], 0.0),
+                                                       (cx, 0.0),
                                                        tol=abs(3 * self.pixelX)):
                         self._dragRegions.add((region, 'v', 1))  # line 1 of v-region
                         # break
@@ -2258,7 +2267,7 @@ class CcpnGLWidget(QOpenGLWidget):
                         mid = (region.values[0] + region.values[1]) / 2.0
                         delta = abs(region.values[0] - region.values[1]) / 2.0
                         if not self._widthsChangedEnough((mid, 0.0),
-                                                         (cursorCoordinate[0], 0.0),
+                                                         (cx, 0.0),
                                                          tol=delta):
                             self._dragRegions.add((region, 'v', 3))  # both lines of v-region
                             # break
@@ -2409,12 +2418,13 @@ class CcpnGLWidget(QOpenGLWidget):
             # check for dragging of infinite lines, region boundaries, integrals
             self.mousePressInfiniteLine(self._infiniteLines)
 
-            while len(self._dragRegions) > 1:
-                self._dragRegions.pop()
+            # while len(self._dragRegions) > 1:  # why?
+            #     self._dragRegions.pop()
+            self._dragRegions.clear()
 
-            if not self._dragRegions:
-                if not self.mousePressInRegion(self._externalRegions._regions):
-                    self.mousePressInIntegralLists()
+            # if not self._dragRegions:
+            if not self.mousePressInRegion(self._externalRegions._regions):
+                self.mousePressInIntegralLists()
 
         if int(ev.buttons() & (Qt.LeftButton | Qt.RightButton)):
             # find the bounds for the region that has currently been clicked

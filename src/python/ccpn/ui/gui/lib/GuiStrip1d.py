@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-08-24 19:07:48 +0100 (Thu, August 24, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-13 16:34:03 +0100 (Wed, September 13, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -482,7 +482,7 @@ class GuiStrip1d(GuiStrip):
             initialOffset = self._getInitialOffset()
 
             # offset is now a tuple
-            self.offsetWidget.setValue((0.0, initialOffset))
+            self.offsetWidget.setInitialIntensity(initialOffset)
             self.offsetWidget.setVisible(True)
         else:
             self.offsetWidget.setVisible(not self.offsetWidget.isVisible())

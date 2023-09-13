@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-13 11:23:01 +0100 (Wed, September 13, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-13 11:23:39 +0100 (Wed, September 13, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -43,8 +43,6 @@ class VersionString(str):
 
     If the optional release is included it must be alphanumeric, and of the form [label][releaseNumber]
     If only the label is supplied, the releaseNumber defaults to 0.
-
-    The isValid function checks for validity.
 
     The majorVersion, minorVersion, microVersion and release fields are available as properties.
 

@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-08 12:15:32 +0100 (Fri, September 08, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-14 13:45:32 +0100 (Thu, September 14, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -409,11 +409,11 @@ class Path(_Path_):
         shutil.copy2(self, _dest)
         return _dest
 
-    def copyfile(self, destination):
+    def copyfile(self, destination, overwrite):
         """Copy file represented by self to destination.
-        depricated; use copyFile instead
+        deprecated; use copyFile instead
         """
-        self.copyFile(destination)
+        self.copyFile(destination, overwrite)
 
     def remove(self):
         """Remove file/directory represented by self if it exists.

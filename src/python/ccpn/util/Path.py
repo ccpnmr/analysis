@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-08-01 16:05:28 +0100 (Tue, August 01, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-14 18:29:10 +0100 (Thu, September 14, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -39,25 +39,7 @@ import shutil
 import glob
 import datetime
 import re
-
-dirsep = '/'
-# note, cannot just use os.sep below because can have window file names cropping up on unix machines
-winsep = '\\'
-
-# This does not belong here and should go to PathsAndUrls;
-# However, the 'Api.py' and Implementation relies on this, so it should stay
-# DO NOT USE!
-CCPN_API_DIRECTORY = 'ccpnv3'
-CCPN_DIRECTORY_SUFFIX = '.ccpn'
-CCPN_BACKUP_SUFFIX = '_backup'
-CCPN_ARCHIVES_DIRECTORY = 'archives'
-CCPN_SUMMARIES_DIRECTORY = 'summaries'
-CCPN_LOGS_DIRECTORY = 'logs'
-CCPN_PYTHON = 'miniconda/bin/python'
-
-# Can't do because of circular imports:
-# from ccpn.framework.PathsAndUrls import CCPN_API_DIRECTORY, CCPN_DIRECTORY_SUFFIX, \
-#       CCPN_BACKUP_SUFFIX, CCPN_ARCHIVES_DIRECTORY, CCPN_LOGS_DIRECTORY,  CCPN_SUMMARIES_DIRECTORY
+from contextlib import contextmanager
 
 from pathlib import Path as _Path_
 from pathlib import _windows_flavour, _posix_flavour
@@ -151,6 +133,72 @@ class Path(_Path_):
             else:
                 raise FileNotFoundError('Error opening file "%s"' % self)
         return fp
+
+    _tempSuffix = '~temp'
+
+    @contextmanager
+    def saveWriteToFile(self, mode:str = 'w', overwrite:bool = False, keepOnError:bool  = True):
+        """Initiate a save write to file:
+        Write to temporary file first; catch any errors on writing. Generate result as atomic
+        operation by moving temporary file as self.
+
+        Use in a with statement; ie.:
+
+        with myFile.saveWriteToFile as fp:
+            sys.write(fp, 'text')
+
+        :param mode: usual string defining write (w) or append (a) access, text or binary (b)
+        :param overwrite: flag to indicate overwriting of existing file
+        :param keepOnError: flag to keep the intermediate file on error
+
+        :raise RunTimeError upon catching any error during open, write, close, ..
+        """
+
+        _tempFile = aPath(self + self._tempSuffix).uniqueVersion()
+
+        success = False
+        errorString = ''
+        fp = None
+
+        try:
+            # Some checks first
+            if self.exists() and self.is_dir():
+                raise RuntimeError(f'{self} exists and is a directory')
+
+            if self.exists() and not overwrite:
+                raise FileExistsError(f'{self} exists and overwrite is False')
+
+            if not self.parent.exists():
+                raise FileNotFoundError('{self.parent} does not exists: unable to write to {self.basename}')
+
+            # check for append; if so copy self as tempFile first
+            if self.exists() and 'a' in mode:
+                self.copyFile(destination=_tempFile, overwrite=True)
+
+            fp = _tempFile.open(mode=mode)
+            yield fp
+            success = True
+
+        except Exception as es:
+            success = False
+            errorString = str(es)
+
+        finally:
+            if fp:
+                fp.close()
+
+            if success:
+                if self.exists():
+                    self.remove()
+                # use the os.rename call to cut out any intermediary
+                os.rename(_tempFile.asString(), aPath(self).asString())
+
+            else:
+                # An error occurred
+                if _tempFile.exists() and not keepOnError:
+                    _tempFile.remove()
+
+                raise RuntimeError(f'While writing to {self} an error occured: {errorString}')
 
     def globList(self, pattern='*') -> list:
         """Return a list rather than a generator
@@ -387,9 +435,41 @@ def _rmdirs(path):
     path.rmdir()
 
 
-def aPath(path):
-    """Return a ~-expanded, left/right spaces-stripped, normalised Path instance"""
+def aPath(path) -> Path:
+    """:return a ~-expanded, left/right spaces-stripped, normalised Path instance
+    """
     return Path(str(path).strip()).expanduser().normalise()
+
+
+def home() -> Path:
+    """
+    :return absolute path to user home directory as a Path instance
+    """
+    return aPath('~')
+
+
+#=========================================================================================
+# do not use: reminents from V2 code base
+#=========================================================================================
+
+dirsep = '/'
+# note, cannot just use os.sep below because can have window file names cropping up on unix machines
+winsep = '\\'
+
+# This does not belong here and should go to PathsAndUrls;
+# However, the 'Api.py' and Implementation relies on this, so it should stay
+# Can't do because of circular imports:
+# from ccpn.framework.PathsAndUrls import CCPN_API_DIRECTORY, CCPN_DIRECTORY_SUFFIX, \
+#       CCPN_BACKUP_SUFFIX, CCPN_ARCHIVES_DIRECTORY, CCPN_LOGS_DIRECTORY,  CCPN_SUMMARIES_DIRECTORY
+
+# DO NOT USE!
+CCPN_API_DIRECTORY = 'ccpnv3'
+CCPN_DIRECTORY_SUFFIX = '.ccpn'
+CCPN_BACKUP_SUFFIX = '_backup'
+CCPN_ARCHIVES_DIRECTORY = 'archives'
+CCPN_SUMMARIES_DIRECTORY = 'summaries'
+CCPN_LOGS_DIRECTORY = 'logs'
+CCPN_PYTHON = 'miniconda/bin/python'
 
 
 def normalisePath(path, makeAbsolute=None):

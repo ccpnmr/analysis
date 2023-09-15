@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-09-07 17:23:47 +0100 (Thu, September 07, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-15 14:18:06 +0100 (Fri, September 15, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -42,44 +42,52 @@ class ResourcesLoadingLevel(DataEnum):
     EXTERNAL           = 1, EXTERNAL
     INTERNAL            = 2, INTERNAL
     PROJECT             = 3, PROJECT
-    
+
 
 ###########################################
 ######## ---- ReferenceChemicalShifts ---- ########
 ###########################################
 
 ### _metaData Level
-TITLE = 'title'
-COMMENT = 'comment'
+VERSION = 1.0
 
+### General terms and prefixes
 PROTEIN = 'Protein'
 DNA = 'DNA'
 RNA = 'RNA'
 FUNCTIONALGROUP = 'FunctionalGroup'
 SMALLMOLECULE = 'SmallMolecule'
-VERSION = 1.0
+CHEMICALSHIFT = 'chemicalShift'
+COMPOUND = 'compound'
+ATOM = 'atom'
 
-### residues level
+### Reference ChemicalShift level
+CHEMICALSHIFTNAME = f'{CHEMICALSHIFT}Name'
+CHEMICALSHIFTENTRYDATE = f'{CHEMICALSHIFT}EntryDate'
+CHEMICALSHIFTCOMMENT = f'{CHEMICALSHIFT}Comment'
+CHEMICALSHIFTYPE = f'{CHEMICALSHIFT}Type'
 
-RESIDUEOBJ = 'residueObject'
-MOLECULETYPE = 'moleculeType'
-RESIDUES = 'residues'
-RESIDUENAME = 'residueName'
-SHORTNAME = 'shortName'
-CCPCODE = 'ccpcode'
+### Residue level
+COMPOUNDOBJ = f'{COMPOUND}Object'
+COMPOUNDTYPE = f'{COMPOUND}Type'
+COMPOUNDS = f'{COMPOUND}s'
+COMPOUNDNAME = f'{COMPOUND}Name'
+SHORTNAME = f'{COMPOUND}ShortName'
+CCPCODE = f'{COMPOUND}Ccpcode'
+PRECURSOR = f'{COMPOUND}PrecursorName'
+COMPOUNDCLASSIFICATION = f'{COMPOUND}TypeClassification'
 ATOMS = 'atoms'
 
-### Atoms level
+### Atom level
 ATOMOBJ = 'atomObject'
-ATOMNAME = 'atomName'
-ELEMENT = 'element'
-AVERAGESHIFT = "averageShift"
-MINSHIFT = "minShift"
-MAXSHIFT= "maxShift"
-SHIFTRANGES= "shiftRanges"
-STDSHIFT = "stdShift"
-DISTRIBUTION = 'distribution'
-DISTRIBUTIONREFVALUE = 'distributionRefValue'
-DISTRIBUTIONVALUEPERPOINT = 'distributionValuePerPoint'
-PPMARRAY = 'ppmArray'
-INTENSITIESARRAY = 'intensitiesArray'
+ATOMNAME = f'{ATOM}Name'
+ELEMENT = f'{ATOM}ElementName'
+AVERAGESHIFT = f'{ATOM}AverageShift'
+STDSHIFT = f'{ATOM}StdShift'
+MINSHIFT = f'{ATOM}MinShift'
+MAXSHIFT= f'{ATOM}MaxShift'
+DISTRIBUTION = f'{ATOM}StatisticalDistribution'
+DISTRIBUTIONREFVALUE = f'{ATOM}DistributionRefValue'
+DISTRIBUTIONVALUEPERPOINT =  f'{ATOM}DistributionValuePerPoint'
+PPMARRAY =  f'{ATOM}DistributionPpmArray'
+INTENSITIESARRAY = f'{ATOM}DistributionIntensitiesArray'

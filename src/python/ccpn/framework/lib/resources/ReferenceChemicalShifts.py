@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-09-07 17:23:47 +0100 (Thu, September 07, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-15 14:18:06 +0100 (Fri, September 15, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -32,24 +32,15 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.framework.lib.resources import ResourcesNameSpaces as rns
 
-class ReferenceChemicalShifts(OrderedDict):
+class ReferenceChemicalShifts(object):
     """
     Class to handle all the ReferenceChemicalShifts.
-    The ReferenceChemicalShifts object is represented by an OrderedDict.
-
-    The OrderedDict is structured as
-        - key -> residue shortName
-        - value -> residue Traitlet object (see /resources/ReferenceChemicalShiftLoaders.py)
-
     usage:
     To get this object at runtime:
-                referenceChemicalShifts = application.resources.referenceChemicalShifts
+            referenceChemicalShifts = application.resources.referenceChemicalShifts
 
-    Objects can be retrieved simply by the built-in dictionary methods.
-        e.g.: by residue shortName:
-            ala = referenceChemicalShifts.get('ALA')
-
-    For more complex data queries: use the built-in methods getBy which returns a dataFrame representation and can be further filtered as a pipeline.
+    For complex data queries: use the built-in methods getBy which returns a dataFrame representation and can be further filtered as a pipeline.
+    See the classes in resources/ReferenceChemicalShiftLoaders for the various properties.
 
         e.g.:
         - get all data by the "DNA" moleculeType:
@@ -68,6 +59,11 @@ class ReferenceChemicalShifts(OrderedDict):
         self._objsByClass = {} # used to load/unload objects
         self._registerCcpnReferenceChemicalShiftLoaders()
         self._dataFrame = self._buildDataFrame()
+
+        ##  active ChemicalShifts names used to fetch directly the residues information
+        self._proteinChemicalShiftName = rns.PROTEIN
+        self._DNAChemicalShiftName = rns.DNA
+        self._RNAChemicalShiftName = rns.RNA
 
     @property
     def dataFrame(self):
@@ -112,6 +108,34 @@ class ReferenceChemicalShifts(OrderedDict):
         df =  self._getDFByRange(dataFrame, theProperty, minValue, maxValue, minIncluded=minIncluded, maxIncluded=maxIncluded)
         return df
 
+    @property
+    def protein(self):
+        proteinData = self.getBy(dataFrame=self.dataFrame, theProperty=rns.COMPOUNDTYPE, values=[rns.PROTEIN])
+        proteinData = self.getBy(dataFrame=proteinData, theProperty=rns.CHEMICALSHIFTNAME, values=[self._proteinChemicalShiftName])
+        shortnames = proteinData[rns.SHORTNAME].values
+        objs = proteinData[rns.COMPOUNDOBJ].values
+        results = dict(zip(shortnames, objs))
+        return results
+
+    def _activateChemicalShiftName(self, moleculteType, name):
+        """
+        Set the ChemicalShift Name to be used as the active List.
+        This is used when multiple ReferenceChemicalShifts for the same moleculeType are available.
+        Example if a user includes new resources in a personal project/internal or via a plugin.
+        :param name: str. The name for the available ReferenceChemicalShift
+        :return: None
+        """
+        # need to do error checkings
+        if moleculteType == rns.PROTEIN:
+            self._proteinChemicalShiftName = name
+            self._updateREFDB_fromApplication()
+        elif moleculteType == rns.DNA:
+            self._DNAChemicalShiftName = name
+        elif moleculteType == rns.RNA:
+            self._RNAChemicalShiftName = name
+        else:
+            getLogger().warning(f'Molecule type not yet available. Cannot set {name} to {moleculteType} ')
+
     ## -------- Private Methods -------- ##
 
     def _getAvailableMolTypes(self):
@@ -136,26 +160,57 @@ class ReferenceChemicalShifts(OrderedDict):
 
     def _buildDataFrame(self):
         """
-        Create a flat dataframe for all the traits definition.
-        :return:
+        Create a flat dataframe for all the traits definition. 1 Row per Atom.
+        Each Colum is exactly the same as the Trait Object property for Residue and Atom
+        :return: pandas DataFrame
         """
-        _data = []
-        for residueTrait in self.values():
-            residueTraitDict = dict(residueTrait.items())
-            residueTraitDict[rns.TITLE] = residueTrait.title
-            residueTraitDict[rns.COMMENT] = residueTrait.comment
-            residueTraitDict[rns.RESIDUEOBJ] = residueTrait
-            atomTraits = residueTraitDict.pop(rns.ATOMS, [])
-            for atomTrait in atomTraits:
-                atomTraitDict = dict(atomTrait.items())
-                atomTraitDict.pop(rns.DISTRIBUTION, [])
-                atomTraitDict[rns.PPMARRAY] = atomTrait.ppmArray
-                atomTraitDict[rns.INTENSITIESARRAY] = atomTrait.intensitiesArray
-                atomTraitDict[rns.ATOMOBJ] = atomTrait
-                _row = residueTraitDict | atomTraitDict
-                _data.append(_row)
-        df = pd.DataFrame(_data)
+        data = defaultdict(list) # construct the data in a default dict instead of a normal dict for accommodating  duplicated key values etc
+        for loaderClass, loader in self._objsByClass.items():
+            for shortName, residueTrait in loader.items():
+                residueDict = residueTrait.asDict()
+                atoms = residueDict.pop(rns.ATOMS)
+                for atomTrait in atoms:
+                    for rk, rv in residueDict.items():
+                        data[rk].append(rv)
+                    # build atoms
+                    atomDict = atomTrait.asDict()
+                    for k, v in atomDict.items():
+                        data[k].append(v)
+                    data[rns.PPMARRAY].append(atomTrait.ppmArray)
+                    data[rns.INTENSITIESARRAY].append(atomTrait.intensitiesArray)
+                    data[rns.COMPOUNDOBJ].append(residueTrait)
+        df = pd.DataFrame(data)
         return df
+
+
+    # Internal
+
+    def _updateREFDB_fromApplication(self):
+        """
+        This routine is meant to be a temporary solution until we finally remove the hardcoded REFDB_SD_MEAN in
+        cpnmodel.ccpncore.lib.assignment.ChemicalShift.
+        Update the REFDB  from the registered resources/ReferenceChemicalShifts loaded from Json files
+        """
+        from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import REFDB_SD_MEAN
+        referenceChemicalShifts = self.protein
+        for key, atomsDict in REFDB_SD_MEAN.items():
+            moleculeType, shortName = key
+            ## New Application referencing
+            residue = referenceChemicalShifts.get(shortName.upper())
+            if residue is None:
+                continue
+            for atom in residue.atoms:
+                atomName = atom.atomName
+                averageShift = atom.averageShift
+                stdShift = atom.stdShift
+                # Update the Old REFDB from the new References
+                values = atomsDict.get(atomName)
+                if values is None:
+                    continue
+                mean, sd, probabilityOfMissing, directlyBoundAtom = values
+                newValues = (averageShift, stdShift, probabilityOfMissing, directlyBoundAtom)
+                atomsDict[atomName] = newValues
+        return
 
     ############# Core Registration Methods ##############
 
@@ -164,7 +219,6 @@ class ReferenceChemicalShifts(OrderedDict):
         self._registeredClasses.add(theClass)
         if loadObjects:
             obj = theClass()
-            self.update(obj)
             self._objsByClass[theClass] = obj
             self._dataFrame = self._buildDataFrame()
 
@@ -177,9 +231,6 @@ class ReferenceChemicalShifts(OrderedDict):
         self._registeredClasses.pop(theClass)
         if unloadObjects:
             obj = self._objsByClass.pop(theClass, {})
-            for key in obj:
-                self.pop(key, None)
-            del obj
             self._dataFrame = self._buildDataFrame()
 
     def _registerCcpnReferenceChemicalShiftLoaders(self):

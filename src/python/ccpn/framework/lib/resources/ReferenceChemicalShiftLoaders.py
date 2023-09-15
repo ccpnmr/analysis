@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-09-07 17:23:47 +0100 (Thu, September 07, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-15 14:18:06 +0100 (Fri, September 15, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -40,15 +40,16 @@ class AtomChemicalShift(CcpNmrJson):
     """
     classVersion = rns.VERSION
     saveAllTraitsToJson = True
-    atomName =  Unicode(allow_none=False, default_value='??').tag(info='The atomName identifier, e.g. H1, etc')
-    element =  Unicode(allow_none=False, default_value='??').tag(info='The element identifier, e.g. H, etc')
-    averageShift =  Float(allow_none=True, default_value=0.0).tag(info='The average Chemical Shift in ppm.')
-    stdShift =  Float(allow_none=True, default_value=0.0).tag(info='The std Shift')
-    minShift =  Float(allow_none=True, default_value=0.0).tag(info='')
-    maxShift =  Float(allow_none=True, default_value=0.0).tag(info='')
-    distributionRefValue =  Float(allow_none=True, default_value=0.0).tag(info='')
-    distributionValuePerPoint =  Float(allow_none=True, default_value=0.0).tag(info='')
-    distribution = List(default_value=[]).tag(info='The probability distribution values at the various ppm observations.')
+
+    atomName = Unicode(allow_none=False, default_value='??').tag(info='The atomName identifier, e.g.: H1, etc')
+    atomElementName = Unicode(allow_none=False, default_value='??').tag(info='The element identifier, e.g.: H, etc')
+    atomAverageShift = Float(allow_none=True, default_value=0.0).tag(info='The average Chemical Shift in ppm.')
+    atomStdShift = Float(allow_none=True, default_value=0.0).tag(info='The std Shift')
+    atomMinShift = Float(allow_none=True, default_value=0.0).tag(info='')
+    atomMaxShift = Float(allow_none=True, default_value=0.0).tag(info='')
+    atomDistributionRefValue = Float(allow_none=True, default_value=0.0).tag(info='')
+    atomDistributionValuePerPoint = Float(allow_none=True, default_value=0.0).tag(info='')
+    atomStatisticalDistribution = List(default_value=[]).tag(info='The probability distribution values at the various ppm observations.')
     _isIntensitiesReconstructed = False # False if the distribution definition is not given and the plottable intensitiesArray is reconstructed by the other definitions
     _defaultArrayLength = 100
 
@@ -64,14 +65,14 @@ class AtomChemicalShift(CcpNmrJson):
         """
         :return: A 1D Probability density Distribution array for plotting the ReferenceChemicalShifts statistical observations.
         The distribution array is given by:
-        1) json file definition "distribution"
+        1) json file definition "atomStatisticalDistribution"
         2) reconstructed as a Gaussian curve by the "minShift","maxShift", "averageShift" and "stdShift" definition of the json file.  AKA: Probability density function evaluated at the ppmArray
         3) flat line of zeros if not any of  "averageShift" and "stdShift" definition in the json file
         4) empty, if  the minimal information are not given ("minShift","maxShift" values)
         Options 2-4 will set the _isIntensitiesReconstructed to True
         """
-        if len(self.distribution) > 0:
-            return self.distribution
+        if len(self.atomStatisticalDistribution) > 0:
+            return self.atomStatisticalDistribution
         else:
             _isIntensitiesReconstructed = True
             return self._getIntensitiesArray()
@@ -80,8 +81,8 @@ class AtomChemicalShift(CcpNmrJson):
 
     def _getIntensitiesArray(self):
         ppmArray = self._getPpmArray()
-        averageShift = self.averageShift
-        stdShift = self.stdShift
+        averageShift = self.atomAverageShift
+        stdShift = self.atomStdShift
         length = len(ppmArray)
         if len(ppmArray) == 0: # empty, cannot do anything.  the minimal information are not given (min, max values)
             return ppmArray
@@ -92,9 +93,9 @@ class AtomChemicalShift(CcpNmrJson):
         return distribution
 
     def _getPpmArray(self):
-        minShift = self.minShift
-        maxShift = self.maxShift
-        distribution = self.distribution
+        minShift = self.atomMinShift
+        maxShift = self.atomMaxShift
+        distribution = self.atomStatisticalDistribution
         if minShift is None:
             return np.array([])
         if maxShift is None:
@@ -107,16 +108,20 @@ class AtomChemicalShift(CcpNmrJson):
         return f'{self.__class__.__name__}("{self.atomName}")'
 
 class ReferenceChemicalShift(CcpNmrJson):
-    """Class to store ReferenceChemicalShift information for a residue
+    """Class to store ReferenceChemicalShift information for a compound
     """
     classVersion = rns.VERSION
     saveAllTraitsToJson = True
-    residueName =  Unicode(allow_none=False, default_value='??').tag(info='The full residueName identifier, e.g. Alanine, etc')
-    shortName =  Unicode(allow_none=False, default_value='??').tag(info='The short Name identifier, e.g. ALA, etc')
-    ccpcode =  Unicode(allow_none=False, default_value='??').tag(info='The ccpcode identifier, e.g. Ala, etc')
-    moleculeType =  Unicode(allow_none=False, default_value='??').tag(info='The moleculeType identifier, e.g. Protein, etc')
-    classification =  Unicode(allow_none=False, default_value='??').tag(info='The moleculeType classification, e.g. Peptide linking, etc')
-    loadingLevel = Int(allow_none=False, default_value='??').tag(info='The loading source level. e.g. 0 for distribution, 1 for internal, 2 for project. Set automatically, not read from json ')
+    chemicalShiftName = Unicode(allow_none=False, default_value='??').tag(info='')
+    chemicalShiftComment = Unicode(allow_none=False, default_value='??').tag(info='')
+    chemicalShiftEntryDate = Unicode(allow_none=True, default_value='??').tag(info='')
+    compoundName = Unicode(allow_none=False, default_value='??').tag(info='The full compoundName identifier, e.g.: Alanine, etc')
+    compoundShortName = Unicode(allow_none=False, default_value='??').tag(info='The short Name identifier, e.g.: ALA, etc')
+    compoundCcpCode = Unicode(allow_none=False, default_value='??').tag(info='The ccpcode (ChemComp) identifier, e.g.: Ala, etc')
+    compoundType = Unicode(allow_none=False, default_value='??').tag(info='The moleculeType identifier, e.g.: Protein, etc')
+    compoundTypeClassification = Unicode(allow_none=True, default_value='??').tag(info='The moleculeType classification, e.g.: Peptide linking, etc')
+    compoundPrecursorName = Unicode(allow_none=True, default_value='??').tag(info='Usually used for Non-Standards. The full precursor or parent compound name, e.g.: Alanine, for a the ALPHA-AMINOBUTYRIC ACID ')
+    loadingLevel = Int(allow_none=False, default_value='??').tag(info='The loading source level. e.g.: 0 for distribution, 1 for internal, 2 for project. Set automatically, not read from json ')
     atoms = RecursiveList()
 
     def _setAtomTraits(self):
@@ -136,21 +141,19 @@ class ReferenceChemicalShift(CcpNmrJson):
         return self._metadata.get('comment')
 
     def __repr__(self):
-        return f'{self.__class__.__name__}("{self.shortName}")'
+        return f'{self.__class__.__name__}("{self.chemicalShiftName}:{self.compoundType}-{self.compoundCcpCode}")'
 
 ReferenceChemicalShift.register()
 
 class _ReferenceChemicalShiftsABC(CcpnJsonDirectoryABC):
     """
     Class to handle the loading of ReferenceChemicalShifts from Json Files.
-    --- Tree ---
-        -- Residue (trait):
-            -- residueName: Alanine
-            -- shortName: ALA
-            -- ccpcode: Ala
+        -- compound (trait):
+            -- chemicalShiftName: CCPN V3 Default Protein
+            -- compoundName: Alanine
+            -- ...
             - Atoms (traits):
                 - atomName: H1
-                - element: H
                 - ...
     """
     attributeName = rns.SHORTNAME  # attribute of object whose value functions as the key to store the object
@@ -190,4 +193,20 @@ class _ProjectReferenceChemicalShiftsLoader(_ReferenceChemicalShiftsABC):
 class _ExternalReferenceChemicalShiftsLoader(_ReferenceChemicalShiftsABC):
     """ Subclass this in a plugin to add custom ReferenceChemicalShiftsLoaders """
     loadingLevel = ResourcesLoadingLevel.EXTERNAL
-    directory = None # added in subclassed plugin
+    directory = None #  ==> Mandatory <== added in subclassed plugin  #
+
+
+## An example of custom External usage:
+'''class MyChemicalShiftsLoader(_ExternalReferenceChemicalShiftsLoader):
+    """ Custom ReferenceChemicalShiftsLoaders which load Protein ReferenceChemicalShifts """
+    directory = aPath('path/to/myChemicalShifts/') # ==> Mandatory in subclass
+
+class MyPlugin():
+    def __init__(self, *args, **kwargs):
+        ## Register the new referenceChemicalShifts
+        self.application = getApplication()
+        referenceChemicalShifts = self.application.resources.referenceChemicalShifts
+        referenceChemicalShifts.register(MyChemicalShiftsLoader)
+        referenceChemicalShifts._activateChemicalShiftName('Protein', 'MyProteinChemicalShifts')
+        
+'''

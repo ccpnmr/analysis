@@ -1,0 +1,33 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "IMD",
+  "compoundName": "IMIDAZOLE",
+  "compoundCcpcode": "IMD",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "HD1",
+      "atomElementName": "",
+      "atomAverageShift": 10.596,
+      "atomStdShift": null,
+      "atomMinShift": 10.596,
+      "atomMaxShift": 10.596,
+      "atomDistributionRefValue": 10.596,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

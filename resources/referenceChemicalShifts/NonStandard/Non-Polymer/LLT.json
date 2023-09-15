@@ -1,0 +1,143 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "LLT",
+  "compoundName": "L-deoxythymidine",
+  "compoundCcpcode": "LLT",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H1'",
+      "atomElementName": "",
+      "atomAverageShift": 6.051,
+      "atomStdShift": null,
+      "atomMinShift": 6.051,
+      "atomMaxShift": 6.051,
+      "atomDistributionRefValue": 6.051,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2'",
+      "atomElementName": "",
+      "atomAverageShift": 2.072,
+      "atomStdShift": null,
+      "atomMinShift": 2.072,
+      "atomMaxShift": 2.072,
+      "atomDistributionRefValue": 2.072,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2''",
+      "atomElementName": "",
+      "atomAverageShift": 2.242,
+      "atomStdShift": null,
+      "atomMinShift": 2.242,
+      "atomMaxShift": 2.242,
+      "atomDistributionRefValue": 2.242,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H3'",
+      "atomElementName": "",
+      "atomAverageShift": 4.456,
+      "atomStdShift": null,
+      "atomMinShift": 4.456,
+      "atomMaxShift": 4.456,
+      "atomDistributionRefValue": 4.456,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H4'",
+      "atomElementName": "",
+      "atomAverageShift": 4.052,
+      "atomStdShift": null,
+      "atomMinShift": 4.052,
+      "atomMaxShift": 4.052,
+      "atomDistributionRefValue": 4.052,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H5",
+      "atomElementName": "",
+      "atomAverageShift": 5.131,
+      "atomStdShift": null,
+      "atomMinShift": 5.131,
+      "atomMaxShift": 5.131,
+      "atomDistributionRefValue": 5.131,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H5'",
+      "atomElementName": "",
+      "atomAverageShift": 4.046,
+      "atomStdShift": null,
+      "atomMinShift": 4.046,
+      "atomMaxShift": 4.046,
+      "atomDistributionRefValue": 4.046,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H5''",
+      "atomElementName": "",
+      "atomAverageShift": 4.174,
+      "atomStdShift": null,
+      "atomMinShift": 4.174,
+      "atomMaxShift": 4.174,
+      "atomDistributionRefValue": 4.174,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H6",
+      "atomElementName": "",
+      "atomAverageShift": 7.455,
+      "atomStdShift": null,
+      "atomMinShift": 7.455,
+      "atomMaxShift": 7.455,
+      "atomDistributionRefValue": 7.455,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H7",
+      "atomElementName": "",
+      "atomAverageShift": 1.603,
+      "atomStdShift": null,
+      "atomMinShift": 1.603,
+      "atomMaxShift": 1.603,
+      "atomDistributionRefValue": 1.603,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "P",
+      "atomElementName": "",
+      "atomAverageShift": -3.889,
+      "atomStdShift": null,
+      "atomMinShift": -3.889,
+      "atomMaxShift": -3.889,
+      "atomDistributionRefValue": -3.889,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

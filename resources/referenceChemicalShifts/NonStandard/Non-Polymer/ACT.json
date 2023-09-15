@@ -1,0 +1,66 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "ACT",
+  "compoundName": "ACETATE ION",
+  "compoundCcpcode": "ACT",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "CH3",
+      "atomElementName": "",
+      "atomAverageShift": 25.566,
+      "atomStdShift": 0,
+      "atomMinShift": 25.566,
+      "atomMaxShift": 25.566,
+      "atomDistributionRefValue": 25.566,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H1",
+      "atomElementName": "",
+      "atomAverageShift": 1.885,
+      "atomStdShift": 0.005,
+      "atomMinShift": 1.881,
+      "atomMaxShift": 1.888,
+      "atomDistributionRefValue": 1.881,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2",
+      "atomElementName": "",
+      "atomAverageShift": 1.885,
+      "atomStdShift": 0.005,
+      "atomMinShift": 1.881,
+      "atomMaxShift": 1.888,
+      "atomDistributionRefValue": 1.881,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H3",
+      "atomElementName": "",
+      "atomAverageShift": 1.885,
+      "atomStdShift": 0.005,
+      "atomMinShift": 1.881,
+      "atomMaxShift": 1.888,
+      "atomDistributionRefValue": 1.881,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "GPR",
+  "compoundName": "(9R,10R)-9-(S-GLUTATHIONYL)-10-HYDROXY-9,10-DIHYDROPHENANTHRENE",
+  "compoundCcpcode": "GPR",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "Glycine",
+  "atoms": [
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 4.557,
+      "atomStdShift": 0.016,
+      "atomMinShift": 4.546,
+      "atomMaxShift": 4.568,
+      "atomDistributionRefValue": 4.546,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB2",
+      "atomElementName": "",
+      "atomAverageShift": 2.697,
+      "atomStdShift": null,
+      "atomMinShift": 2.697,
+      "atomMaxShift": 2.697,
+      "atomDistributionRefValue": 2.697,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB3",
+      "atomElementName": "",
+      "atomAverageShift": 2.079,
+      "atomStdShift": null,
+      "atomMinShift": 2.079,
+      "atomMaxShift": 2.079,
+      "atomDistributionRefValue": 2.079,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HD2",
+      "atomElementName": "",
+      "atomAverageShift": 3.926,
+      "atomStdShift": 0.062,
+      "atomMinShift": 3.882,
+      "atomMaxShift": 3.969,
+      "atomDistributionRefValue": 3.882,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HD3",
+      "atomElementName": "",
+      "atomAverageShift": 3.551,
+      "atomStdShift": 0.074,
+      "atomMinShift": 3.499,
+      "atomMaxShift": 3.603,
+      "atomDistributionRefValue": 3.499,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HG11",
+      "atomElementName": "",
+      "atomAverageShift": 2.035,
+      "atomStdShift": null,
+      "atomMinShift": 2.035,
+      "atomMaxShift": 2.035,
+      "atomDistributionRefValue": 2.035,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HG12",
+      "atomElementName": "",
+      "atomAverageShift": 2.035,
+      "atomStdShift": null,
+      "atomMinShift": 2.035,
+      "atomMaxShift": 2.035,
+      "atomDistributionRefValue": 2.035,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "QB",
+      "atomElementName": "",
+      "atomAverageShift": 2.495,
+      "atomStdShift": null,
+      "atomMinShift": 2.495,
+      "atomMaxShift": 2.495,
+      "atomDistributionRefValue": 2.495,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

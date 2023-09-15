@@ -1,0 +1,66 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "HTS",
+  "compoundName": "2-MERCAPTOPHENOL",
+  "compoundCcpcode": "HTS",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H3",
+      "atomElementName": "",
+      "atomAverageShift": 7.514,
+      "atomStdShift": null,
+      "atomMinShift": 7.514,
+      "atomMaxShift": 7.514,
+      "atomDistributionRefValue": 7.514,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H4",
+      "atomElementName": "",
+      "atomAverageShift": 6.817,
+      "atomStdShift": null,
+      "atomMinShift": 6.817,
+      "atomMaxShift": 6.817,
+      "atomDistributionRefValue": 6.817,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H5",
+      "atomElementName": "",
+      "atomAverageShift": 7.162,
+      "atomStdShift": null,
+      "atomMinShift": 7.162,
+      "atomMaxShift": 7.162,
+      "atomDistributionRefValue": 7.162,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H6",
+      "atomElementName": "",
+      "atomAverageShift": 6.937,
+      "atomStdShift": null,
+      "atomMinShift": 6.937,
+      "atomMaxShift": 6.937,
+      "atomDistributionRefValue": 6.937,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "ETA",
+  "compoundName": "ETHANOLAMINE",
+  "compoundCcpcode": "ETA",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "L-peptide COOH carboxy terminus",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "HA1",
+      "atomElementName": "",
+      "atomAverageShift": 3.38,
+      "atomStdShift": 0,
+      "atomMinShift": 3.38,
+      "atomMaxShift": 3.38,
+      "atomDistributionRefValue": 3.38,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA2",
+      "atomElementName": "",
+      "atomAverageShift": 3.38,
+      "atomStdShift": 0,
+      "atomMinShift": 3.38,
+      "atomMaxShift": 3.38,
+      "atomDistributionRefValue": 3.38,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB1",
+      "atomElementName": "",
+      "atomAverageShift": 3.46,
+      "atomStdShift": 0.113,
+      "atomMinShift": 3.38,
+      "atomMaxShift": 3.54,
+      "atomDistributionRefValue": 3.38,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB2",
+      "atomElementName": "",
+      "atomAverageShift": 3.46,
+      "atomStdShift": 0.113,
+      "atomMinShift": 3.38,
+      "atomMaxShift": 3.54,
+      "atomDistributionRefValue": 3.38,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HN1",
+      "atomElementName": "",
+      "atomAverageShift": 7.705,
+      "atomStdShift": 0.064,
+      "atomMinShift": 7.66,
+      "atomMaxShift": 7.75,
+      "atomDistributionRefValue": 7.66,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HN2",
+      "atomElementName": "",
+      "atomAverageShift": 7.705,
+      "atomStdShift": 0.064,
+      "atomMinShift": 7.66,
+      "atomMaxShift": 7.75,
+      "atomDistributionRefValue": 7.66,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HO",
+      "atomElementName": "",
+      "atomAverageShift": 3.805,
+      "atomStdShift": 0.021,
+      "atomMinShift": 3.79,
+      "atomMaxShift": 3.82,
+      "atomDistributionRefValue": 3.79,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "N",
+      "atomElementName": "",
+      "atomAverageShift": 111.9,
+      "atomStdShift": 0.283,
+      "atomMinShift": 111.7,
+      "atomMaxShift": 112.1,
+      "atomDistributionRefValue": 111.7,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

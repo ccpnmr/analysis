@@ -1,0 +1,44 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "GMP",
+  "compoundName": "GUANOSINE",
+  "compoundCcpcode": "GMP",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H1'",
+      "atomElementName": "",
+      "atomAverageShift": 5.511,
+      "atomStdShift": null,
+      "atomMinShift": 5.511,
+      "atomMaxShift": 5.511,
+      "atomDistributionRefValue": 5.511,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H8",
+      "atomElementName": "",
+      "atomAverageShift": 8.141,
+      "atomStdShift": null,
+      "atomMinShift": 8.141,
+      "atomMaxShift": 8.141,
+      "atomDistributionRefValue": 8.141,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

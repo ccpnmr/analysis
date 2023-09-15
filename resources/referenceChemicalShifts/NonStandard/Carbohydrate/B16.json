@@ -1,0 +1,44 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "B16",
+  "compoundName": "1,6-di-O-phosphono-beta-D-glucopyranose",
+  "compoundCcpcode": "B16",
+  "compoundType": "Carbohydrate",
+  "compoundTypeClassification": "D-saccharide",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "P",
+      "atomElementName": "",
+      "atomAverageShift": 1.655,
+      "atomStdShift": 0.502,
+      "atomMinShift": 1.3,
+      "atomMaxShift": 2.01,
+      "atomDistributionRefValue": 1.3,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "P'",
+      "atomElementName": "",
+      "atomAverageShift": 5.125,
+      "atomStdShift": 0.064,
+      "atomMinShift": 5.08,
+      "atomMaxShift": 5.17,
+      "atomDistributionRefValue": 5.08,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

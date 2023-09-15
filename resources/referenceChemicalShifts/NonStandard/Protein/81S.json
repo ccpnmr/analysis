@@ -1,0 +1,88 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "81S",
+  "compoundName": "(4S)-4,5-disulfanyl-L-norvaline",
+  "compoundCcpcode": "81S",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "L-peptide linking",
+  "compoundPrecursorName": "Valine",
+  "atoms": [
+    {
+      "atomName": "H4",
+      "atomElementName": "",
+      "atomAverageShift": 4.116,
+      "atomStdShift": null,
+      "atomMinShift": 4.116,
+      "atomMaxShift": 4.116,
+      "atomDistributionRefValue": 4.116,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H5",
+      "atomElementName": "",
+      "atomAverageShift": 2.131,
+      "atomStdShift": null,
+      "atomMinShift": 2.131,
+      "atomMaxShift": 2.131,
+      "atomDistributionRefValue": 2.131,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H6",
+      "atomElementName": "",
+      "atomAverageShift": 1.947,
+      "atomStdShift": null,
+      "atomMinShift": 1.947,
+      "atomMaxShift": 1.947,
+      "atomDistributionRefValue": 1.947,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H7",
+      "atomElementName": "",
+      "atomAverageShift": 2.861,
+      "atomStdShift": null,
+      "atomMinShift": 2.861,
+      "atomMaxShift": 2.861,
+      "atomDistributionRefValue": 2.861,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H8",
+      "atomElementName": "",
+      "atomAverageShift": 2.98,
+      "atomStdShift": null,
+      "atomMinShift": 2.98,
+      "atomMaxShift": 2.98,
+      "atomDistributionRefValue": 2.98,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H9",
+      "atomElementName": "",
+      "atomAverageShift": 2.399,
+      "atomStdShift": null,
+      "atomMinShift": 2.399,
+      "atomMaxShift": 2.399,
+      "atomDistributionRefValue": 2.399,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

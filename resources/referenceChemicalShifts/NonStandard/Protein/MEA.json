@@ -1,0 +1,88 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "MEA",
+  "compoundName": "N-METHYLPHENYLALANINE",
+  "compoundCcpcode": "MEA",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "L-peptide linking",
+  "compoundPrecursorName": "Alanine",
+  "atoms": [
+    {
+      "atomName": "H",
+      "atomElementName": "",
+      "atomAverageShift": 2.958,
+      "atomStdShift": 0.478,
+      "atomMinShift": 2.25,
+      "atomMaxShift": 3.25,
+      "atomDistributionRefValue": 2.25,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 4.818,
+      "atomStdShift": 0.328,
+      "atomMinShift": 4.55,
+      "atomMaxShift": 5.22,
+      "atomDistributionRefValue": 4.55,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB2",
+      "atomElementName": "",
+      "atomAverageShift": 3.095,
+      "atomStdShift": 0.078,
+      "atomMinShift": 3.04,
+      "atomMaxShift": 3.15,
+      "atomDistributionRefValue": 3.04,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB3",
+      "atomElementName": "",
+      "atomAverageShift": 3.29,
+      "atomStdShift": 0.099,
+      "atomMinShift": 3.22,
+      "atomMaxShift": 3.36,
+      "atomDistributionRefValue": 3.22,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HD1",
+      "atomElementName": "",
+      "atomAverageShift": 7.235,
+      "atomStdShift": 0.021,
+      "atomMinShift": 7.22,
+      "atomMaxShift": 7.25,
+      "atomDistributionRefValue": 7.22,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HE1",
+      "atomElementName": "",
+      "atomAverageShift": 7.335,
+      "atomStdShift": 0.035,
+      "atomMinShift": 7.31,
+      "atomMaxShift": 7.36,
+      "atomDistributionRefValue": 7.31,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

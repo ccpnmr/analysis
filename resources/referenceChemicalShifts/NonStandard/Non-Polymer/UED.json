@@ -1,0 +1,44 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "UED",
+  "compoundName": "N~2~-[(benzyloxy)carbonyl]-N-{(2S)-1-hydroxy-3-[(3S)-2-oxopyrrolidin-3-yl]propan-2-yl}-L-leucinamide",
+  "compoundCcpcode": "UED",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "C21",
+      "atomElementName": "",
+      "atomAverageShift": 85.667,
+      "atomStdShift": 8.377,
+      "atomMinShift": 76,
+      "atomMaxShift": 90.8,
+      "atomDistributionRefValue": 76,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H29",
+      "atomElementName": "",
+      "atomAverageShift": 5.127,
+      "atomStdShift": 0.455,
+      "atomMinShift": 4.82,
+      "atomMaxShift": 5.65,
+      "atomDistributionRefValue": 4.82,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

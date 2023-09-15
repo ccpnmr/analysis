@@ -1,0 +1,110 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "SEP",
+  "compoundName": "PHOSPHOSERINE",
+  "compoundCcpcode": "SEP",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "L-peptide linking",
+  "compoundPrecursorName": "Serine",
+  "atoms": [
+    {
+      "atomName": "C",
+      "atomElementName": "",
+      "atomAverageShift": 173.763,
+      "atomStdShift": 1.199,
+      "atomMinShift": 169.376,
+      "atomMaxShift": 176.943,
+      "atomDistributionRefValue": 169.376,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CA",
+      "atomElementName": "",
+      "atomAverageShift": 57.512,
+      "atomStdShift": 1.576,
+      "atomMinShift": 55.108,
+      "atomMaxShift": 63.701,
+      "atomDistributionRefValue": 55.108,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CB",
+      "atomElementName": "",
+      "atomAverageShift": 65.63,
+      "atomStdShift": 1.27,
+      "atomMinShift": 62.443,
+      "atomMaxShift": 72.065,
+      "atomDistributionRefValue": 62.443,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H",
+      "atomElementName": "",
+      "atomAverageShift": 8.735,
+      "atomStdShift": 0.361,
+      "atomMinShift": 7.178,
+      "atomMaxShift": 10.049,
+      "atomDistributionRefValue": 7.178,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 4.502,
+      "atomStdShift": 0.157,
+      "atomMinShift": 4.067,
+      "atomMaxShift": 4.833,
+      "atomDistributionRefValue": 4.067,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB2",
+      "atomElementName": "",
+      "atomAverageShift": 4.057,
+      "atomStdShift": 0.185,
+      "atomMinShift": 3.641,
+      "atomMaxShift": 4.84,
+      "atomDistributionRefValue": 3.641,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB3",
+      "atomElementName": "",
+      "atomAverageShift": 4.008,
+      "atomStdShift": 0.139,
+      "atomMinShift": 3.601,
+      "atomMaxShift": 4.217,
+      "atomDistributionRefValue": 3.601,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "N",
+      "atomElementName": "",
+      "atomAverageShift": 118.339,
+      "atomStdShift": 1.853,
+      "atomMinShift": 113,
+      "atomMaxShift": 123.345,
+      "atomDistributionRefValue": 113,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

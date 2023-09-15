@@ -1,0 +1,132 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "SSU",
+  "compoundName": "URIDINE-5'-PHOSPHOROTHIOATE",
+  "compoundCcpcode": "SSU",
+  "compoundType": "RNA",
+  "compoundTypeClassification": "RNA linking",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "C1'",
+      "atomElementName": "",
+      "atomAverageShift": 91.81,
+      "atomStdShift": null,
+      "atomMinShift": 91.81,
+      "atomMaxShift": 91.81,
+      "atomDistributionRefValue": 91.81,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "C5",
+      "atomElementName": "",
+      "atomAverageShift": 102.9,
+      "atomStdShift": null,
+      "atomMinShift": 102.9,
+      "atomMaxShift": 102.9,
+      "atomDistributionRefValue": 102.9,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "C6",
+      "atomElementName": "",
+      "atomAverageShift": 140.8,
+      "atomStdShift": null,
+      "atomMinShift": 140.8,
+      "atomMaxShift": 140.8,
+      "atomDistributionRefValue": 140.8,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H1'",
+      "atomElementName": "",
+      "atomAverageShift": 5.639,
+      "atomStdShift": null,
+      "atomMinShift": 5.639,
+      "atomMaxShift": 5.639,
+      "atomDistributionRefValue": 5.639,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2'",
+      "atomElementName": "",
+      "atomAverageShift": 4.302,
+      "atomStdShift": null,
+      "atomMinShift": 4.302,
+      "atomMaxShift": 4.302,
+      "atomDistributionRefValue": 4.302,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H3'",
+      "atomElementName": "",
+      "atomAverageShift": 4.39,
+      "atomStdShift": null,
+      "atomMinShift": 4.39,
+      "atomMaxShift": 4.39,
+      "atomDistributionRefValue": 4.39,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H4'",
+      "atomElementName": "",
+      "atomAverageShift": 4.35,
+      "atomStdShift": null,
+      "atomMinShift": 4.35,
+      "atomMaxShift": 4.35,
+      "atomDistributionRefValue": 4.35,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H5",
+      "atomElementName": "",
+      "atomAverageShift": 5.639,
+      "atomStdShift": null,
+      "atomMinShift": 5.639,
+      "atomMaxShift": 5.639,
+      "atomDistributionRefValue": 5.639,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H6",
+      "atomElementName": "",
+      "atomAverageShift": 7.781,
+      "atomStdShift": null,
+      "atomMinShift": 7.781,
+      "atomMaxShift": 7.781,
+      "atomDistributionRefValue": 7.781,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "P",
+      "atomElementName": "",
+      "atomAverageShift": 59.15,
+      "atomStdShift": null,
+      "atomMinShift": 59.15,
+      "atomMaxShift": 59.15,
+      "atomDistributionRefValue": 59.15,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "SEC",
+  "compoundName": "SELENOCYSTEINE",
+  "compoundCcpcode": "SEC",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "L-peptide linking",
+  "compoundPrecursorName": "Alanine",
+  "atoms": [
+    {
+      "atomName": "H",
+      "atomElementName": "",
+      "atomAverageShift": 8.391,
+      "atomStdShift": 0.583,
+      "atomMinShift": 7.05,
+      "atomMaxShift": 9.135,
+      "atomDistributionRefValue": 7.05,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 4.664,
+      "atomStdShift": 0.268,
+      "atomMinShift": 4.17,
+      "atomMaxShift": 5.19,
+      "atomDistributionRefValue": 4.17,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB2",
+      "atomElementName": "",
+      "atomAverageShift": 3.68,
+      "atomStdShift": 0.322,
+      "atomMinShift": 3.23,
+      "atomMaxShift": 4.08,
+      "atomDistributionRefValue": 3.23,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB3",
+      "atomElementName": "",
+      "atomAverageShift": 3.363,
+      "atomStdShift": 0.157,
+      "atomMinShift": 3.13,
+      "atomMaxShift": 3.59,
+      "atomDistributionRefValue": 3.13,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

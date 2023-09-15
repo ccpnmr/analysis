@@ -1,0 +1,66 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "SET",
+  "compoundName": "AMINOSERINE",
+  "compoundCcpcode": "SET",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "L-peptide linking",
+  "compoundPrecursorName": "Serine",
+  "atoms": [
+    {
+      "atomName": "H",
+      "atomElementName": "",
+      "atomAverageShift": 8.518,
+      "atomStdShift": 0.062,
+      "atomMinShift": 8.45,
+      "atomMaxShift": 8.6,
+      "atomDistributionRefValue": 8.45,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 4.371,
+      "atomStdShift": 0.074,
+      "atomMinShift": 4.26,
+      "atomMaxShift": 4.415,
+      "atomDistributionRefValue": 4.26,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB2",
+      "atomElementName": "",
+      "atomAverageShift": 3.864,
+      "atomStdShift": 0.039,
+      "atomMinShift": 3.83,
+      "atomMaxShift": 3.92,
+      "atomDistributionRefValue": 3.83,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB3",
+      "atomElementName": "",
+      "atomAverageShift": 3.888,
+      "atomStdShift": 0.062,
+      "atomMinShift": 3.83,
+      "atomMaxShift": 3.97,
+      "atomDistributionRefValue": 3.83,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

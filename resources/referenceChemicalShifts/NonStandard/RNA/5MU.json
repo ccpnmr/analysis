@@ -1,0 +1,77 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "5MU",
+  "compoundName": "5-METHYLURIDINE 5'-MONOPHOSPHATE",
+  "compoundCcpcode": "5MU",
+  "compoundType": "RNA",
+  "compoundTypeClassification": "RNA linking",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "C7",
+      "atomElementName": "",
+      "atomAverageShift": 13.4,
+      "atomStdShift": null,
+      "atomMinShift": 13.4,
+      "atomMaxShift": 13.4,
+      "atomDistributionRefValue": 13.4,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H3",
+      "atomElementName": "",
+      "atomAverageShift": 13.66,
+      "atomStdShift": null,
+      "atomMinShift": 13.66,
+      "atomMaxShift": 13.66,
+      "atomDistributionRefValue": 13.66,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H3'",
+      "atomElementName": "",
+      "atomAverageShift": 13.689,
+      "atomStdShift": null,
+      "atomMinShift": 13.689,
+      "atomMaxShift": 13.689,
+      "atomDistributionRefValue": 13.689,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H7",
+      "atomElementName": "",
+      "atomAverageShift": 1.02,
+      "atomStdShift": null,
+      "atomMinShift": 1.02,
+      "atomMaxShift": 1.02,
+      "atomDistributionRefValue": 1.02,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "N3",
+      "atomElementName": "",
+      "atomAverageShift": 159.814,
+      "atomStdShift": 0.727,
+      "atomMinShift": 159.3,
+      "atomMaxShift": 160.328,
+      "atomDistributionRefValue": 159.3,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

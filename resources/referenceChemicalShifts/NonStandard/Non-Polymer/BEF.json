@@ -1,0 +1,55 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "BEF",
+  "compoundName": "BERYLLIUM TRIFLUORIDE ION",
+  "compoundCcpcode": "BEF",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "F1",
+      "atomElementName": "",
+      "atomAverageShift": -150.205,
+      "atomStdShift": 0.007,
+      "atomMinShift": -150.21,
+      "atomMaxShift": -150.2,
+      "atomDistributionRefValue": -150.21,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "F2",
+      "atomElementName": "",
+      "atomAverageShift": -151.08,
+      "atomStdShift": 0.679,
+      "atomMinShift": -151.56,
+      "atomMaxShift": -150.6,
+      "atomDistributionRefValue": -151.56,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "F3",
+      "atomElementName": "",
+      "atomAverageShift": -178.7,
+      "atomStdShift": null,
+      "atomMinShift": -178.7,
+      "atomMaxShift": -178.7,
+      "atomDistributionRefValue": -178.7,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

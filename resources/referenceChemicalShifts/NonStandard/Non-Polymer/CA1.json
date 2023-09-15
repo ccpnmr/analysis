@@ -1,0 +1,88 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "CA1",
+  "compoundName": "ETHYL PROPIONATE",
+  "compoundCcpcode": "CA1",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H1",
+      "atomElementName": "",
+      "atomAverageShift": 1.32,
+      "atomStdShift": null,
+      "atomMinShift": 1.32,
+      "atomMaxShift": 1.32,
+      "atomDistributionRefValue": 1.32,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2",
+      "atomElementName": "",
+      "atomAverageShift": 3.95,
+      "atomStdShift": null,
+      "atomMinShift": 3.95,
+      "atomMaxShift": 3.95,
+      "atomDistributionRefValue": 3.95,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H3",
+      "atomElementName": "",
+      "atomAverageShift": 4.22,
+      "atomStdShift": null,
+      "atomMinShift": 4.22,
+      "atomMaxShift": 4.22,
+      "atomDistributionRefValue": 4.22,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H4",
+      "atomElementName": "",
+      "atomAverageShift": 3.62,
+      "atomStdShift": null,
+      "atomMinShift": 3.62,
+      "atomMaxShift": 3.62,
+      "atomDistributionRefValue": 3.62,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H5",
+      "atomElementName": "",
+      "atomAverageShift": 4.92,
+      "atomStdShift": null,
+      "atomMinShift": 4.92,
+      "atomMaxShift": 4.92,
+      "atomDistributionRefValue": 4.92,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H6",
+      "atomElementName": "",
+      "atomAverageShift": 1.22,
+      "atomStdShift": null,
+      "atomMinShift": 1.22,
+      "atomMaxShift": 1.22,
+      "atomDistributionRefValue": 1.22,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

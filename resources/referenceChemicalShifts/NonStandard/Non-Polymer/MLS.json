@@ -1,0 +1,88 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "MLS",
+  "compoundName": "2-fluoro-3-methyl-N'-[(naphthalen-2-yl)sulfonyl]benzohydrazide",
+  "compoundCcpcode": "MLS",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 4.59,
+      "atomStdShift": null,
+      "atomMinShift": 4.59,
+      "atomMaxShift": 4.59,
+      "atomDistributionRefValue": 4.59,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB2",
+      "atomElementName": "",
+      "atomAverageShift": 4.19,
+      "atomStdShift": null,
+      "atomMinShift": 4.19,
+      "atomMaxShift": 4.19,
+      "atomDistributionRefValue": 4.19,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB3",
+      "atomElementName": "",
+      "atomAverageShift": 4.05,
+      "atomStdShift": null,
+      "atomMinShift": 4.05,
+      "atomMaxShift": 4.05,
+      "atomDistributionRefValue": 4.05,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HN1",
+      "atomElementName": "",
+      "atomAverageShift": 2.54,
+      "atomStdShift": null,
+      "atomMinShift": 2.54,
+      "atomMaxShift": 2.54,
+      "atomDistributionRefValue": 2.54,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HN2",
+      "atomElementName": "",
+      "atomAverageShift": 2.54,
+      "atomStdShift": null,
+      "atomMinShift": 2.54,
+      "atomMaxShift": 2.54,
+      "atomDistributionRefValue": 2.54,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HN3",
+      "atomElementName": "",
+      "atomAverageShift": 2.54,
+      "atomStdShift": null,
+      "atomMinShift": 2.54,
+      "atomMaxShift": 2.54,
+      "atomDistributionRefValue": 2.54,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

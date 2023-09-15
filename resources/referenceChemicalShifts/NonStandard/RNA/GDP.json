@@ -1,0 +1,44 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "GDP",
+  "compoundName": "GUANOSINE-5'-DIPHOSPHATE",
+  "compoundCcpcode": "GDP",
+  "compoundType": "RNA",
+  "compoundTypeClassification": "RNA linking",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "HN1",
+      "atomElementName": "",
+      "atomAverageShift": 12.881,
+      "atomStdShift": 0.111,
+      "atomMinShift": 12.802,
+      "atomMaxShift": 12.959,
+      "atomDistributionRefValue": 12.802,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "N1",
+      "atomElementName": "",
+      "atomAverageShift": 128.615,
+      "atomStdShift": 25.556,
+      "atomMinShift": 110.544,
+      "atomMaxShift": 146.685,
+      "atomDistributionRefValue": 110.544,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

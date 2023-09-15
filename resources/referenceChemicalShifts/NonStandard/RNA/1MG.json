@@ -1,0 +1,88 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "1MG",
+  "compoundName": "1N-METHYLGUANOSINE-5'-MONOPHOSPHATE",
+  "compoundCcpcode": "1MG",
+  "compoundType": "RNA",
+  "compoundTypeClassification": "RNA linking",
+  "compoundPrecursorName": "Guanosine-5'-Monophosphate",
+  "atoms": [
+    {
+      "atomName": "H1'",
+      "atomElementName": "",
+      "atomAverageShift": 5.897,
+      "atomStdShift": null,
+      "atomMinShift": 5.897,
+      "atomMaxShift": 5.897,
+      "atomDistributionRefValue": 5.897,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2'",
+      "atomElementName": "",
+      "atomAverageShift": 4.948,
+      "atomStdShift": null,
+      "atomMinShift": 4.948,
+      "atomMaxShift": 4.948,
+      "atomDistributionRefValue": 4.948,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H3'",
+      "atomElementName": "",
+      "atomAverageShift": 4.913,
+      "atomStdShift": null,
+      "atomMinShift": 4.913,
+      "atomMaxShift": 4.913,
+      "atomDistributionRefValue": 4.913,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H4'",
+      "atomElementName": "",
+      "atomAverageShift": 4.587,
+      "atomStdShift": null,
+      "atomMinShift": 4.587,
+      "atomMaxShift": 4.587,
+      "atomDistributionRefValue": 4.587,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H8",
+      "atomElementName": "",
+      "atomAverageShift": 7.995,
+      "atomStdShift": null,
+      "atomMinShift": 7.995,
+      "atomMaxShift": 7.995,
+      "atomDistributionRefValue": 7.995,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HM11",
+      "atomElementName": "",
+      "atomAverageShift": 3.354,
+      "atomStdShift": null,
+      "atomMinShift": 3.354,
+      "atomMaxShift": 3.354,
+      "atomDistributionRefValue": 3.354,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

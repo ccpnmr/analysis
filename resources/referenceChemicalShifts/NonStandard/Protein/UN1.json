@@ -1,0 +1,44 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "UN1",
+  "compoundName": "2-AMINOHEXANEDIOIC ACID",
+  "compoundCcpcode": "UN1",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "L-peptide linking",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H4",
+      "atomElementName": "",
+      "atomAverageShift": 3.985,
+      "atomStdShift": 0.163,
+      "atomMinShift": 3.87,
+      "atomMaxShift": 4.1,
+      "atomDistributionRefValue": 3.87,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H4N1",
+      "atomElementName": "",
+      "atomAverageShift": 7.612,
+      "atomStdShift": null,
+      "atomMinShift": 7.612,
+      "atomMaxShift": 7.612,
+      "atomDistributionRefValue": 7.612,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

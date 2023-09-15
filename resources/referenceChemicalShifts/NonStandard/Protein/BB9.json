@@ -1,0 +1,77 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "BB9",
+  "compoundName": "(2Z)-2-amino-3-sulfanylprop-2-enoic acid",
+  "compoundCcpcode": "BB9",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "peptide linking",
+  "compoundPrecursorName": "CYSTEINE",
+  "atoms": [
+    {
+      "atomName": "C",
+      "atomElementName": "",
+      "atomAverageShift": 141.006,
+      "atomStdShift": 42.628,
+      "atomMinShift": 64.9,
+      "atomMaxShift": 165,
+      "atomDistributionRefValue": 64.9,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CA",
+      "atomElementName": "",
+      "atomAverageShift": 153.588,
+      "atomStdShift": 4.055,
+      "atomMinShift": 149,
+      "atomMaxShift": 160.3,
+      "atomDistributionRefValue": 149,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CB",
+      "atomElementName": "",
+      "atomAverageShift": 126.547,
+      "atomStdShift": 3.483,
+      "atomMinShift": 120.4,
+      "atomMaxShift": 130.4,
+      "atomDistributionRefValue": 120.4,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB",
+      "atomElementName": "",
+      "atomAverageShift": 8.059,
+      "atomStdShift": 0.414,
+      "atomMinShift": 6.907,
+      "atomMaxShift": 8.743,
+      "atomDistributionRefValue": 6.907,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HC",
+      "atomElementName": "",
+      "atomAverageShift": 5.14,
+      "atomStdShift": 0.361,
+      "atomMinShift": 4.6,
+      "atomMaxShift": 5.35,
+      "atomDistributionRefValue": 4.6,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

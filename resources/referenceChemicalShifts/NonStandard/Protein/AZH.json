@@ -1,0 +1,99 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "AZH",
+  "compoundName": "AZIDOHOMOALANINE",
+  "compoundCcpcode": "AZH",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "L-peptide linking",
+  "compoundPrecursorName": "Alanine",
+  "atoms": [
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 3.095,
+      "atomStdShift": null,
+      "atomMinShift": 3.095,
+      "atomMaxShift": 3.095,
+      "atomDistributionRefValue": 3.095,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB1C",
+      "atomElementName": "",
+      "atomAverageShift": 1.663,
+      "atomStdShift": null,
+      "atomMinShift": 1.663,
+      "atomMaxShift": 1.663,
+      "atomDistributionRefValue": 1.663,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB2C",
+      "atomElementName": "",
+      "atomAverageShift": 1.663,
+      "atomStdShift": null,
+      "atomMinShift": 1.663,
+      "atomMaxShift": 1.663,
+      "atomDistributionRefValue": 1.663,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HG1C",
+      "atomElementName": "",
+      "atomAverageShift": 1.807,
+      "atomStdShift": null,
+      "atomMinShift": 1.807,
+      "atomMaxShift": 1.807,
+      "atomDistributionRefValue": 1.807,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HG2C",
+      "atomElementName": "",
+      "atomAverageShift": 1.807,
+      "atomStdShift": null,
+      "atomMinShift": 1.807,
+      "atomMaxShift": 1.807,
+      "atomDistributionRefValue": 1.807,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HN1",
+      "atomElementName": "",
+      "atomAverageShift": 8.161,
+      "atomStdShift": null,
+      "atomMinShift": 8.161,
+      "atomMaxShift": 8.161,
+      "atomDistributionRefValue": 8.161,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "N",
+      "atomElementName": "",
+      "atomAverageShift": 125.443,
+      "atomStdShift": null,
+      "atomMinShift": 125.443,
+      "atomMaxShift": 125.443,
+      "atomDistributionRefValue": 125.443,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

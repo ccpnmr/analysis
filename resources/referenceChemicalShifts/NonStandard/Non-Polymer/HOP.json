@@ -1,0 +1,77 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "HOP",
+  "compoundName": "(1S,2S,5S)2-(4-GLUTARIDYLBENZYL)-5-PHENYL-1-CYCLOHEXANOL",
+  "compoundCcpcode": "HOP",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "C",
+      "atomElementName": "",
+      "atomAverageShift": 179.193,
+      "atomStdShift": null,
+      "atomMinShift": 179.193,
+      "atomMaxShift": 179.193,
+      "atomDistributionRefValue": 179.193,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CA",
+      "atomElementName": "",
+      "atomAverageShift": 69.006,
+      "atomStdShift": null,
+      "atomMinShift": 69.006,
+      "atomMaxShift": 69.006,
+      "atomDistributionRefValue": 69.006,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CB",
+      "atomElementName": "",
+      "atomAverageShift": 21.217,
+      "atomStdShift": null,
+      "atomMinShift": 21.217,
+      "atomMaxShift": 21.217,
+      "atomDistributionRefValue": 21.217,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 4.257,
+      "atomStdShift": null,
+      "atomMinShift": 4.257,
+      "atomMaxShift": 4.257,
+      "atomDistributionRefValue": 4.257,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB1",
+      "atomElementName": "",
+      "atomAverageShift": 1.327,
+      "atomStdShift": null,
+      "atomMinShift": 1.327,
+      "atomMaxShift": 1.327,
+      "atomDistributionRefValue": 1.327,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "MSE",
+  "compoundName": "SELENOMETHIONINE",
+  "compoundCcpcode": "MSE",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "L-peptide linking",
+  "compoundPrecursorName": "Methionine",
+  "atoms": [
+    {
+      "atomName": "C",
+      "atomElementName": "",
+      "atomAverageShift": 176.873,
+      "atomStdShift": 0.426,
+      "atomMinShift": 176.571,
+      "atomMaxShift": 177.174,
+      "atomDistributionRefValue": 176.571,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CA",
+      "atomElementName": "",
+      "atomAverageShift": 60,
+      "atomStdShift": 1.488,
+      "atomMinShift": 58.948,
+      "atomMaxShift": 61.052,
+      "atomDistributionRefValue": 58.948,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CB",
+      "atomElementName": "",
+      "atomAverageShift": 33.968,
+      "atomStdShift": 0.562,
+      "atomMinShift": 33.57,
+      "atomMaxShift": 34.365,
+      "atomDistributionRefValue": 33.57,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H",
+      "atomElementName": "",
+      "atomAverageShift": 8.645,
+      "atomStdShift": 0.533,
+      "atomMinShift": 8.268,
+      "atomMaxShift": 9.022,
+      "atomDistributionRefValue": 8.268,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "N",
+      "atomElementName": "",
+      "atomAverageShift": 120.291,
+      "atomStdShift": 3.64,
+      "atomMinShift": 117.717,
+      "atomMaxShift": 122.865,
+      "atomDistributionRefValue": 117.717,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

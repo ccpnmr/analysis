@@ -1,0 +1,88 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "UAR",
+  "compoundName": "URACIL ARABINOSE-5'-PHOSPHATE",
+  "compoundCcpcode": "UAR",
+  "compoundType": "RNA",
+  "compoundTypeClassification": "RNA linking",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H1'",
+      "atomElementName": "",
+      "atomAverageShift": 5.782,
+      "atomStdShift": 0.098,
+      "atomMinShift": 5.712,
+      "atomMaxShift": 5.851,
+      "atomDistributionRefValue": 5.712,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2'",
+      "atomElementName": "",
+      "atomAverageShift": 4.423,
+      "atomStdShift": 0.02,
+      "atomMinShift": 4.409,
+      "atomMaxShift": 4.437,
+      "atomDistributionRefValue": 4.409,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H3",
+      "atomElementName": "",
+      "atomAverageShift": 13.934,
+      "atomStdShift": 0.134,
+      "atomMinShift": 13.839,
+      "atomMaxShift": 14.029,
+      "atomDistributionRefValue": 13.839,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H4'",
+      "atomElementName": "",
+      "atomAverageShift": 4.082,
+      "atomStdShift": 0.086,
+      "atomMinShift": 4.021,
+      "atomMaxShift": 4.143,
+      "atomDistributionRefValue": 4.021,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H5",
+      "atomElementName": "",
+      "atomAverageShift": 5.271,
+      "atomStdShift": 0.209,
+      "atomMinShift": 5.123,
+      "atomMaxShift": 5.419,
+      "atomDistributionRefValue": 5.123,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H6",
+      "atomElementName": "",
+      "atomAverageShift": 7.246,
+      "atomStdShift": 0.106,
+      "atomMinShift": 7.171,
+      "atomMaxShift": 7.321,
+      "atomDistributionRefValue": 7.171,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

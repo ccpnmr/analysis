@@ -1,0 +1,110 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "ENN",
+  "compoundName": "~{N}-butyl-2,4-bis(chloranyl)-5-sulfamoyl-benzamide",
+  "compoundCcpcode": "ENN",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "C",
+      "atomElementName": "",
+      "atomAverageShift": 175.6,
+      "atomStdShift": null,
+      "atomMinShift": 175.6,
+      "atomMaxShift": 175.6,
+      "atomDistributionRefValue": 175.6,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CA",
+      "atomElementName": "",
+      "atomAverageShift": 54.9,
+      "atomStdShift": null,
+      "atomMinShift": 54.9,
+      "atomMaxShift": 54.9,
+      "atomDistributionRefValue": 54.9,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CB",
+      "atomElementName": "",
+      "atomAverageShift": 40.5,
+      "atomStdShift": null,
+      "atomMinShift": 40.5,
+      "atomMaxShift": 40.5,
+      "atomDistributionRefValue": 40.5,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CD",
+      "atomElementName": "",
+      "atomAverageShift": 51.7,
+      "atomStdShift": null,
+      "atomMinShift": 51.7,
+      "atomMaxShift": 51.7,
+      "atomDistributionRefValue": 51.7,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CG",
+      "atomElementName": "",
+      "atomAverageShift": 55,
+      "atomStdShift": null,
+      "atomMinShift": 55,
+      "atomMaxShift": 55,
+      "atomDistributionRefValue": 55,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CZ",
+      "atomElementName": "",
+      "atomAverageShift": 163,
+      "atomStdShift": null,
+      "atomMinShift": 163,
+      "atomMaxShift": 163,
+      "atomDistributionRefValue": 163,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H",
+      "atomElementName": "",
+      "atomAverageShift": 9.6,
+      "atomStdShift": null,
+      "atomMinShift": 9.6,
+      "atomMaxShift": 9.6,
+      "atomDistributionRefValue": 9.6,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "N",
+      "atomElementName": "",
+      "atomAverageShift": 110.9,
+      "atomStdShift": null,
+      "atomMinShift": 110.9,
+      "atomMaxShift": 110.9,
+      "atomDistributionRefValue": 110.9,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

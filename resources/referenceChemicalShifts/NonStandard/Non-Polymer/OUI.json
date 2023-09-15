@@ -1,0 +1,220 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "OUI",
+  "compoundName": "[(2~{S},3~{S})-2-azanyl-3-methyl-pentyl]carbamic acid",
+  "compoundCcpcode": "OUI",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "1HD1",
+      "atomElementName": "",
+      "atomAverageShift": 0.85,
+      "atomStdShift": null,
+      "atomMinShift": 0.85,
+      "atomMaxShift": 0.85,
+      "atomDistributionRefValue": 0.85,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "1HG2",
+      "atomElementName": "",
+      "atomAverageShift": 1.07,
+      "atomStdShift": null,
+      "atomMinShift": 1.07,
+      "atomMaxShift": 1.07,
+      "atomDistributionRefValue": 1.07,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "2HG1",
+      "atomElementName": "",
+      "atomAverageShift": 1.46,
+      "atomStdShift": null,
+      "atomMinShift": 1.46,
+      "atomMaxShift": 1.46,
+      "atomDistributionRefValue": 1.46,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "3HG1",
+      "atomElementName": "",
+      "atomAverageShift": 1.42,
+      "atomStdShift": null,
+      "atomMinShift": 1.42,
+      "atomMaxShift": 1.42,
+      "atomDistributionRefValue": 1.42,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CA",
+      "atomElementName": "",
+      "atomAverageShift": 55.02,
+      "atomStdShift": null,
+      "atomMinShift": 55.02,
+      "atomMaxShift": 55.02,
+      "atomDistributionRefValue": 55.02,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CB",
+      "atomElementName": "",
+      "atomAverageShift": 40.33,
+      "atomStdShift": null,
+      "atomMinShift": 40.33,
+      "atomMaxShift": 40.33,
+      "atomDistributionRefValue": 40.33,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CD1",
+      "atomElementName": "",
+      "atomAverageShift": 16.72,
+      "atomStdShift": null,
+      "atomMinShift": 16.72,
+      "atomMaxShift": 16.72,
+      "atomDistributionRefValue": 16.72,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CG1",
+      "atomElementName": "",
+      "atomAverageShift": 26.67,
+      "atomStdShift": null,
+      "atomMinShift": 26.67,
+      "atomMaxShift": 26.67,
+      "atomDistributionRefValue": 26.67,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CG2",
+      "atomElementName": "",
+      "atomAverageShift": 17.85,
+      "atomStdShift": null,
+      "atomMinShift": 17.85,
+      "atomMaxShift": 17.85,
+      "atomDistributionRefValue": 17.85,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CM",
+      "atomElementName": "",
+      "atomAverageShift": 48.2,
+      "atomStdShift": null,
+      "atomMinShift": 48.2,
+      "atomMaxShift": 48.2,
+      "atomDistributionRefValue": 48.2,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H",
+      "atomElementName": "",
+      "atomAverageShift": 5.91,
+      "atomStdShift": null,
+      "atomMinShift": 5.91,
+      "atomMaxShift": 5.91,
+      "atomDistributionRefValue": 5.91,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 3.4,
+      "atomStdShift": null,
+      "atomMinShift": 3.4,
+      "atomMaxShift": 3.4,
+      "atomDistributionRefValue": 3.4,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB",
+      "atomElementName": "",
+      "atomAverageShift": 2.22,
+      "atomStdShift": null,
+      "atomMinShift": 2.22,
+      "atomMaxShift": 2.22,
+      "atomDistributionRefValue": 2.22,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HM2",
+      "atomElementName": "",
+      "atomAverageShift": 3.45,
+      "atomStdShift": null,
+      "atomMinShift": 3.45,
+      "atomMaxShift": 3.45,
+      "atomDistributionRefValue": 3.45,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HM3",
+      "atomElementName": "",
+      "atomAverageShift": 3.45,
+      "atomStdShift": null,
+      "atomMinShift": 3.45,
+      "atomMaxShift": 3.45,
+      "atomDistributionRefValue": 3.45,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HN2",
+      "atomElementName": "",
+      "atomAverageShift": 5.46,
+      "atomStdShift": null,
+      "atomMinShift": 5.46,
+      "atomMaxShift": 5.46,
+      "atomDistributionRefValue": 5.46,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "N",
+      "atomElementName": "",
+      "atomAverageShift": 93.16,
+      "atomStdShift": null,
+      "atomMinShift": 93.16,
+      "atomMaxShift": 93.16,
+      "atomDistributionRefValue": 93.16,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "N2",
+      "atomElementName": "",
+      "atomAverageShift": 75.99,
+      "atomStdShift": null,
+      "atomMinShift": 75.99,
+      "atomMaxShift": 75.99,
+      "atomDistributionRefValue": 75.99,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

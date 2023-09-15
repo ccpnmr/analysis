@@ -1,0 +1,77 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "SIN",
+  "compoundName": "SUCCINIC ACID",
+  "compoundCcpcode": "SIN",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H",
+      "atomElementName": "",
+      "atomAverageShift": 9.7,
+      "atomStdShift": null,
+      "atomMinShift": 9.7,
+      "atomMaxShift": 9.7,
+      "atomDistributionRefValue": 9.7,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H21",
+      "atomElementName": "",
+      "atomAverageShift": 2.59,
+      "atomStdShift": 0,
+      "atomMinShift": 2.59,
+      "atomMaxShift": 2.59,
+      "atomDistributionRefValue": 2.59,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H31",
+      "atomElementName": "",
+      "atomAverageShift": 7.59,
+      "atomStdShift": null,
+      "atomMinShift": 7.59,
+      "atomMaxShift": 7.59,
+      "atomDistributionRefValue": 7.59,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H32",
+      "atomElementName": "",
+      "atomAverageShift": 6.82,
+      "atomStdShift": null,
+      "atomMinShift": 6.82,
+      "atomMaxShift": 6.82,
+      "atomDistributionRefValue": 6.82,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 2.67,
+      "atomStdShift": 0.014,
+      "atomMinShift": 2.66,
+      "atomMaxShift": 2.68,
+      "atomDistributionRefValue": 2.66,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "MG",
+  "compoundName": "MAGNESIUM ION",
+  "compoundCcpcode": "MG",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H1",
+      "atomElementName": "",
+      "atomAverageShift": 11.971,
+      "atomStdShift": 0.728,
+      "atomMinShift": 11.456,
+      "atomMaxShift": 12.485,
+      "atomDistributionRefValue": 11.456,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H1'",
+      "atomElementName": "",
+      "atomAverageShift": 6.02,
+      "atomStdShift": 0.018,
+      "atomMinShift": 6.007,
+      "atomMaxShift": 6.033,
+      "atomDistributionRefValue": 6.007,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H8",
+      "atomElementName": "",
+      "atomAverageShift": 7.5,
+      "atomStdShift": 0.195,
+      "atomMinShift": 7.362,
+      "atomMaxShift": 7.638,
+      "atomDistributionRefValue": 7.362,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HM'1",
+      "atomElementName": "",
+      "atomAverageShift": 3.82,
+      "atomStdShift": 0.017,
+      "atomMinShift": 3.808,
+      "atomMaxShift": 3.832,
+      "atomDistributionRefValue": 3.808,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HM'2",
+      "atomElementName": "",
+      "atomAverageShift": 3.82,
+      "atomStdShift": 0.017,
+      "atomMinShift": 3.808,
+      "atomMaxShift": 3.832,
+      "atomDistributionRefValue": 3.808,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HM'3",
+      "atomElementName": "",
+      "atomAverageShift": 3.82,
+      "atomStdShift": 0.017,
+      "atomMinShift": 3.808,
+      "atomMaxShift": 3.832,
+      "atomDistributionRefValue": 3.808,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "CMF",
+  "compoundName": "3-CYCLOHEXYL-1-(2-MORPHOLIN-4-YL-2-OXOETHYL)-2-PHENYL-1H-INDOLE-6-CARBOXYLIC ACID",
+  "compoundCcpcode": "CMF",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "HD",
+      "atomElementName": "",
+      "atomAverageShift": 7.206,
+      "atomStdShift": null,
+      "atomMinShift": 7.206,
+      "atomMaxShift": 7.206,
+      "atomDistributionRefValue": 7.206,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HE",
+      "atomElementName": "",
+      "atomAverageShift": 7.165,
+      "atomStdShift": null,
+      "atomMinShift": 7.165,
+      "atomMaxShift": 7.165,
+      "atomDistributionRefValue": 7.165,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

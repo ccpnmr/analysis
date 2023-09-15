@@ -1,0 +1,77 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "FMT",
+  "compoundName": "FORMIC ACID",
+  "compoundCcpcode": "FMT",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "C",
+      "atomElementName": "",
+      "atomAverageShift": 174,
+      "atomStdShift": null,
+      "atomMinShift": 174,
+      "atomMaxShift": 174,
+      "atomDistributionRefValue": 174,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CA",
+      "atomElementName": "",
+      "atomAverageShift": 52.7,
+      "atomStdShift": null,
+      "atomMinShift": 52.7,
+      "atomMaxShift": 52.7,
+      "atomDistributionRefValue": 52.7,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CB",
+      "atomElementName": "",
+      "atomAverageShift": 35.8,
+      "atomStdShift": null,
+      "atomMinShift": 35.8,
+      "atomMaxShift": 35.8,
+      "atomDistributionRefValue": 35.8,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CN",
+      "atomElementName": "",
+      "atomAverageShift": 163.9,
+      "atomStdShift": null,
+      "atomMinShift": 163.9,
+      "atomMaxShift": 163.9,
+      "atomDistributionRefValue": 163.9,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "N",
+      "atomElementName": "",
+      "atomAverageShift": 131.6,
+      "atomStdShift": null,
+      "atomMinShift": 131.6,
+      "atomMaxShift": 131.6,
+      "atomDistributionRefValue": 131.6,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

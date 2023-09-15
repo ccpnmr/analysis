@@ -1,0 +1,66 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "CY3",
+  "compoundName": "2-AMINO-3-MERCAPTO-PROPIONAMIDE",
+  "compoundCcpcode": "CY3",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "L-peptide linking",
+  "compoundPrecursorName": "Cysteine",
+  "atoms": [
+    {
+      "atomName": "H",
+      "atomElementName": "",
+      "atomAverageShift": 8.483,
+      "atomStdShift": 0.181,
+      "atomMinShift": 8.35,
+      "atomMaxShift": 8.69,
+      "atomDistributionRefValue": 8.35,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 4.543,
+      "atomStdShift": 0.091,
+      "atomMinShift": 4.46,
+      "atomMaxShift": 4.64,
+      "atomDistributionRefValue": 4.46,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB2",
+      "atomElementName": "",
+      "atomAverageShift": 3.01,
+      "atomStdShift": 0.147,
+      "atomMinShift": 2.92,
+      "atomMaxShift": 3.18,
+      "atomDistributionRefValue": 2.92,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB3",
+      "atomElementName": "",
+      "atomAverageShift": 2.817,
+      "atomStdShift": 0.188,
+      "atomMinShift": 2.6,
+      "atomMaxShift": 2.93,
+      "atomDistributionRefValue": 2.6,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

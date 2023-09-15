@@ -1,0 +1,88 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "63T",
+  "compoundName": "[(2R,3S)-3-hydroxy-5-oxotetrahydrofuran-2-yl]methyl dihydrogen phosphate (non-preferred name)",
+  "compoundCcpcode": "63T",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H2'",
+      "atomElementName": "",
+      "atomAverageShift": 2.82,
+      "atomStdShift": null,
+      "atomMinShift": 2.82,
+      "atomMaxShift": 2.82,
+      "atomDistributionRefValue": 2.82,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2''",
+      "atomElementName": "",
+      "atomAverageShift": 2.61,
+      "atomStdShift": null,
+      "atomMinShift": 2.61,
+      "atomMaxShift": 2.61,
+      "atomDistributionRefValue": 2.61,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2'1",
+      "atomElementName": "",
+      "atomAverageShift": 2.61,
+      "atomStdShift": null,
+      "atomMinShift": 2.61,
+      "atomMaxShift": 2.61,
+      "atomDistributionRefValue": 2.61,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2'2",
+      "atomElementName": "",
+      "atomAverageShift": 2.8,
+      "atomStdShift": null,
+      "atomMinShift": 2.8,
+      "atomMaxShift": 2.8,
+      "atomDistributionRefValue": 2.8,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H3'",
+      "atomElementName": "",
+      "atomAverageShift": 4.795,
+      "atomStdShift": 0.021,
+      "atomMinShift": 4.78,
+      "atomMaxShift": 4.81,
+      "atomDistributionRefValue": 4.78,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H4'",
+      "atomElementName": "",
+      "atomAverageShift": 4.12,
+      "atomStdShift": 0.339,
+      "atomMinShift": 3.88,
+      "atomMaxShift": 4.36,
+      "atomDistributionRefValue": 3.88,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

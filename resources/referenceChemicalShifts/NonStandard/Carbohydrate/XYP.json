@@ -1,0 +1,88 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "XYP",
+  "compoundName": "beta-D-xylopyranose",
+  "compoundCcpcode": "XYP",
+  "compoundType": "Carbohydrate",
+  "compoundTypeClassification": "D-saccharide, beta linking",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H1B",
+      "atomElementName": "",
+      "atomAverageShift": 4.711,
+      "atomStdShift": null,
+      "atomMinShift": 4.711,
+      "atomMaxShift": 4.711,
+      "atomDistributionRefValue": 4.711,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2B",
+      "atomElementName": "",
+      "atomAverageShift": 3.211,
+      "atomStdShift": null,
+      "atomMinShift": 3.211,
+      "atomMaxShift": 3.211,
+      "atomDistributionRefValue": 3.211,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H3B",
+      "atomElementName": "",
+      "atomAverageShift": 3.151,
+      "atomStdShift": null,
+      "atomMinShift": 3.151,
+      "atomMaxShift": 3.151,
+      "atomDistributionRefValue": 3.151,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H4B",
+      "atomElementName": "",
+      "atomAverageShift": 3.304,
+      "atomStdShift": null,
+      "atomMinShift": 3.304,
+      "atomMaxShift": 3.304,
+      "atomDistributionRefValue": 3.304,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H5B1",
+      "atomElementName": "",
+      "atomAverageShift": 2.918,
+      "atomStdShift": null,
+      "atomMinShift": 2.918,
+      "atomMaxShift": 2.918,
+      "atomDistributionRefValue": 2.918,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H5B2",
+      "atomElementName": "",
+      "atomAverageShift": 2.28,
+      "atomStdShift": null,
+      "atomMinShift": 2.28,
+      "atomMaxShift": 2.28,
+      "atomDistributionRefValue": 2.28,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "CD",
+  "compoundName": "CADMIUM ION",
+  "compoundCcpcode": "CD",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "CD",
+      "atomElementName": "",
+      "atomAverageShift": 644.84,
+      "atomStdShift": 26.661,
+      "atomMinShift": 605,
+      "atomMaxShift": 691,
+      "atomDistributionRefValue": 605,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "Cd",
+      "atomElementName": "",
+      "atomAverageShift": 244.302,
+      "atomStdShift": 300.831,
+      "atomMinShift": 33.517,
+      "atomMaxShift": 648.6,
+      "atomDistributionRefValue": 33.517,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

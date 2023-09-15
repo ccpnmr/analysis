@@ -1,0 +1,143 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "A2M",
+  "compoundName": "2'-O-methyladenosine 5'-(dihydrogen phosphate)",
+  "compoundCcpcode": "A2M",
+  "compoundType": "RNA",
+  "compoundTypeClassification": "RNA linking",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H1'",
+      "atomElementName": "",
+      "atomAverageShift": 6.129,
+      "atomStdShift": 0.186,
+      "atomMinShift": 5.75,
+      "atomMaxShift": 6.3,
+      "atomDistributionRefValue": 5.75,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2",
+      "atomElementName": "",
+      "atomAverageShift": 8.247,
+      "atomStdShift": 0.203,
+      "atomMinShift": 7.8,
+      "atomMaxShift": 8.41,
+      "atomDistributionRefValue": 7.8,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2'",
+      "atomElementName": "",
+      "atomAverageShift": 4.181,
+      "atomStdShift": 0.212,
+      "atomMinShift": 3.72,
+      "atomMaxShift": 4.35,
+      "atomDistributionRefValue": 3.72,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H3'",
+      "atomElementName": "",
+      "atomAverageShift": 4.201,
+      "atomStdShift": 0.203,
+      "atomMinShift": 4.02,
+      "atomMaxShift": 4.58,
+      "atomDistributionRefValue": 4.02,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H4'",
+      "atomElementName": "",
+      "atomAverageShift": 4.464,
+      "atomStdShift": 0.101,
+      "atomMinShift": 4.27,
+      "atomMaxShift": 4.61,
+      "atomDistributionRefValue": 4.27,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H61",
+      "atomElementName": "",
+      "atomAverageShift": 9.199,
+      "atomStdShift": 0.212,
+      "atomMinShift": 8.85,
+      "atomMaxShift": 9.49,
+      "atomDistributionRefValue": 8.85,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H62",
+      "atomElementName": "",
+      "atomAverageShift": 8.001,
+      "atomStdShift": 0.344,
+      "atomMinShift": 7.43,
+      "atomMaxShift": 8.43,
+      "atomDistributionRefValue": 7.43,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H8",
+      "atomElementName": "",
+      "atomAverageShift": 7.614,
+      "atomStdShift": 0.375,
+      "atomMinShift": 7.3,
+      "atomMaxShift": 8.39,
+      "atomDistributionRefValue": 7.3,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HM'1",
+      "atomElementName": "",
+      "atomAverageShift": 3.806,
+      "atomStdShift": 0.087,
+      "atomMinShift": 3.63,
+      "atomMaxShift": 3.9,
+      "atomDistributionRefValue": 3.63,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HM'2",
+      "atomElementName": "",
+      "atomAverageShift": 3.806,
+      "atomStdShift": 0.087,
+      "atomMinShift": 3.63,
+      "atomMaxShift": 3.9,
+      "atomDistributionRefValue": 3.63,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HM'3",
+      "atomElementName": "",
+      "atomAverageShift": 3.806,
+      "atomStdShift": 0.087,
+      "atomMinShift": 3.63,
+      "atomMaxShift": 3.9,
+      "atomDistributionRefValue": 3.63,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

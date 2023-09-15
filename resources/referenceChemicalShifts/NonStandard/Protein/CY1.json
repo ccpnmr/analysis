@@ -1,0 +1,66 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "CY1",
+  "compoundName": "ACETAMIDOMETHYLCYSTEINE",
+  "compoundCcpcode": "CY1",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "L-peptide linking",
+  "compoundPrecursorName": "Cysteine",
+  "atoms": [
+    {
+      "atomName": "H",
+      "atomElementName": "",
+      "atomAverageShift": 8.423,
+      "atomStdShift": null,
+      "atomMinShift": 8.423,
+      "atomMaxShift": 8.423,
+      "atomDistributionRefValue": 8.423,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 4.498,
+      "atomStdShift": null,
+      "atomMinShift": 4.498,
+      "atomMaxShift": 4.498,
+      "atomDistributionRefValue": 4.498,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB2",
+      "atomElementName": "",
+      "atomAverageShift": 3.054,
+      "atomStdShift": null,
+      "atomMinShift": 3.054,
+      "atomMaxShift": 3.054,
+      "atomDistributionRefValue": 3.054,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB3",
+      "atomElementName": "",
+      "atomAverageShift": 2.88,
+      "atomStdShift": null,
+      "atomMinShift": 2.88,
+      "atomMaxShift": 2.88,
+      "atomDistributionRefValue": 2.88,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

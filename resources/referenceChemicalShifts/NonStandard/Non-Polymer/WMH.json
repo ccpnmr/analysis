@@ -1,0 +1,66 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "WMH",
+  "compoundName": "1-methyl-1H-1,2,3-triazole",
+  "compoundCcpcode": "WMH",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "C",
+      "atomElementName": "",
+      "atomAverageShift": 44.288,
+      "atomStdShift": 0.474,
+      "atomMinShift": 43.937,
+      "atomMaxShift": 44.985,
+      "atomDistributionRefValue": 43.937,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H1",
+      "atomElementName": "",
+      "atomAverageShift": 4.288,
+      "atomStdShift": 0.074,
+      "atomMinShift": 4.178,
+      "atomMaxShift": 4.336,
+      "atomDistributionRefValue": 4.178,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2",
+      "atomElementName": "",
+      "atomAverageShift": 4.506,
+      "atomStdShift": 0.062,
+      "atomMinShift": 4.434,
+      "atomMaxShift": 4.576,
+      "atomDistributionRefValue": 4.434,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H5",
+      "atomElementName": "",
+      "atomAverageShift": 7.428,
+      "atomStdShift": 0.036,
+      "atomMinShift": 7.4,
+      "atomMaxShift": 7.48,
+      "atomDistributionRefValue": 7.4,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

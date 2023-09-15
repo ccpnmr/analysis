@@ -1,0 +1,88 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "2SU",
+  "compoundName": "alpha-(fluoromethyl)-D-tryptophan",
+  "compoundCcpcode": "2SU",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "Tryptophan",
+  "atoms": [
+    {
+      "atomName": "H1'",
+      "atomElementName": "",
+      "atomAverageShift": 6.152,
+      "atomStdShift": 0.007,
+      "atomMinShift": 6.147,
+      "atomMaxShift": 6.157,
+      "atomDistributionRefValue": 6.147,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2'",
+      "atomElementName": "",
+      "atomAverageShift": 4.485,
+      "atomStdShift": 0.007,
+      "atomMinShift": 4.48,
+      "atomMaxShift": 4.49,
+      "atomDistributionRefValue": 4.48,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H3",
+      "atomElementName": "",
+      "atomAverageShift": 14.253,
+      "atomStdShift": 0.007,
+      "atomMinShift": 14.248,
+      "atomMaxShift": 14.258,
+      "atomDistributionRefValue": 14.248,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H3'",
+      "atomElementName": "",
+      "atomAverageShift": 4.853,
+      "atomStdShift": 0.007,
+      "atomMinShift": 4.848,
+      "atomMaxShift": 4.858,
+      "atomDistributionRefValue": 4.848,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H5",
+      "atomElementName": "",
+      "atomAverageShift": 5.979,
+      "atomStdShift": 0.007,
+      "atomMinShift": 5.974,
+      "atomMaxShift": 5.984,
+      "atomDistributionRefValue": 5.974,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H6",
+      "atomElementName": "",
+      "atomAverageShift": 8.244,
+      "atomStdShift": 0.007,
+      "atomMinShift": 8.239,
+      "atomMaxShift": 8.249,
+      "atomDistributionRefValue": 8.239,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

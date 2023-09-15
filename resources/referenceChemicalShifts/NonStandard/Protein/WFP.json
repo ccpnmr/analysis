@@ -1,0 +1,88 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "WFP",
+  "compoundName": "3,5-difluoro-L-phenylalanine",
+  "compoundCcpcode": "WFP",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "L-peptide linking",
+  "compoundPrecursorName": "Alanine",
+  "atoms": [
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 4.644,
+      "atomStdShift": 0.222,
+      "atomMinShift": 4.328,
+      "atomMaxShift": 4.966,
+      "atomDistributionRefValue": 4.328,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB2",
+      "atomElementName": "",
+      "atomAverageShift": 2.656,
+      "atomStdShift": 0.101,
+      "atomMinShift": 2.474,
+      "atomMaxShift": 2.722,
+      "atomDistributionRefValue": 2.474,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB3",
+      "atomElementName": "",
+      "atomAverageShift": 2.556,
+      "atomStdShift": 0.08,
+      "atomMinShift": 2.425,
+      "atomMaxShift": 2.64,
+      "atomDistributionRefValue": 2.425,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HD1",
+      "atomElementName": "",
+      "atomAverageShift": 6.41,
+      "atomStdShift": 0.084,
+      "atomMinShift": 6.348,
+      "atomMaxShift": 6.59,
+      "atomDistributionRefValue": 6.348,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HN",
+      "atomElementName": "",
+      "atomAverageShift": 8.263,
+      "atomStdShift": 0.108,
+      "atomMinShift": 8.089,
+      "atomMaxShift": 8.401,
+      "atomDistributionRefValue": 8.089,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HZ",
+      "atomElementName": "",
+      "atomAverageShift": 6.497,
+      "atomStdShift": 0.035,
+      "atomMinShift": 6.45,
+      "atomMaxShift": 6.542,
+      "atomDistributionRefValue": 6.45,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

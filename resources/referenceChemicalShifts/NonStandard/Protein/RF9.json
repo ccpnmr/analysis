@@ -1,0 +1,88 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "RF9",
+  "compoundName": "N~6~-[(1R)-1-carboxyethyl]-L-lysine",
+  "compoundCcpcode": "RF9",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "L-peptide linking",
+  "compoundPrecursorName": "Lysine",
+  "atoms": [
+    {
+      "atomName": "C",
+      "atomElementName": "",
+      "atomAverageShift": 176.66,
+      "atomStdShift": 0.244,
+      "atomMinShift": 176.335,
+      "atomMaxShift": 177.196,
+      "atomDistributionRefValue": 176.335,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CA",
+      "atomElementName": "",
+      "atomAverageShift": 56.525,
+      "atomStdShift": 0.185,
+      "atomMinShift": 56.258,
+      "atomMaxShift": 56.997,
+      "atomDistributionRefValue": 56.258,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CB",
+      "atomElementName": "",
+      "atomAverageShift": 33.003,
+      "atomStdShift": 0.118,
+      "atomMinShift": 32.818,
+      "atomMaxShift": 33.151,
+      "atomDistributionRefValue": 32.818,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H",
+      "atomElementName": "",
+      "atomAverageShift": 8.416,
+      "atomStdShift": 0.098,
+      "atomMinShift": 8.207,
+      "atomMaxShift": 8.535,
+      "atomDistributionRefValue": 8.207,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 4.295,
+      "atomStdShift": 0.06,
+      "atomMinShift": 4.178,
+      "atomMaxShift": 4.398,
+      "atomDistributionRefValue": 4.178,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "N",
+      "atomElementName": "",
+      "atomAverageShift": 123.158,
+      "atomStdShift": 1.481,
+      "atomMinShift": 120.784,
+      "atomMaxShift": 126.452,
+      "atomDistributionRefValue": 120.784,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

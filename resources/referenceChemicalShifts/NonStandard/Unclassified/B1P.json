@@ -1,0 +1,66 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "B1P",
+  "compoundName": "",
+  "compoundCcpcode": "B1P",
+  "compoundType": "Unclassified",
+  "compoundTypeClassification": "",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H5",
+      "atomElementName": "",
+      "atomAverageShift": 4.434,
+      "atomStdShift": 0.008,
+      "atomMinShift": 4.428,
+      "atomMaxShift": 4.439,
+      "atomDistributionRefValue": 4.428,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H6",
+      "atomElementName": "",
+      "atomAverageShift": 2.251,
+      "atomStdShift": 0.312,
+      "atomMinShift": 2.03,
+      "atomMaxShift": 2.471,
+      "atomDistributionRefValue": 2.03,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H7",
+      "atomElementName": "",
+      "atomAverageShift": 2.08,
+      "atomStdShift": 0.045,
+      "atomMinShift": 2.048,
+      "atomMaxShift": 2.112,
+      "atomDistributionRefValue": 2.048,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H8",
+      "atomElementName": "",
+      "atomAverageShift": 5.609,
+      "atomStdShift": 0.193,
+      "atomMinShift": 5.472,
+      "atomMaxShift": 5.745,
+      "atomDistributionRefValue": 5.472,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

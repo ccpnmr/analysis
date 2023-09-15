@@ -1,0 +1,77 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "2KT",
+  "compoundName": "2-KETOBUTYRIC ACID",
+  "compoundCcpcode": "2KT",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "C3",
+      "atomElementName": "",
+      "atomAverageShift": 30.145,
+      "atomStdShift": 0.094,
+      "atomMinShift": 30.078,
+      "atomMaxShift": 30.211,
+      "atomDistributionRefValue": 30.078,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "C4",
+      "atomElementName": "",
+      "atomAverageShift": 5.774,
+      "atomStdShift": 0.111,
+      "atomMinShift": 5.695,
+      "atomMaxShift": 5.852,
+      "atomDistributionRefValue": 5.695,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H32",
+      "atomElementName": "",
+      "atomAverageShift": 1.957,
+      "atomStdShift": 1.217,
+      "atomMinShift": 1.096,
+      "atomMaxShift": 2.817,
+      "atomDistributionRefValue": 1.096,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H33",
+      "atomElementName": "",
+      "atomAverageShift": 1.957,
+      "atomStdShift": 1.217,
+      "atomMinShift": 1.096,
+      "atomMaxShift": 2.817,
+      "atomDistributionRefValue": 1.096,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "Q4",
+      "atomElementName": "",
+      "atomAverageShift": 1.036,
+      "atomStdShift": 0.079,
+      "atomMinShift": 0.98,
+      "atomMaxShift": 1.092,
+      "atomDistributionRefValue": 0.98,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

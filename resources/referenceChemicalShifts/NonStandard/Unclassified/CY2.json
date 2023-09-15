@@ -1,0 +1,110 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "CY2",
+  "compoundName": "",
+  "compoundCcpcode": "CY2",
+  "compoundType": "Unclassified",
+  "compoundTypeClassification": "",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "C",
+      "atomElementName": "",
+      "atomAverageShift": 176.42,
+      "atomStdShift": 0.754,
+      "atomMinShift": 175.82,
+      "atomMaxShift": 177.266,
+      "atomDistributionRefValue": 175.82,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CA",
+      "atomElementName": "",
+      "atomAverageShift": 59.983,
+      "atomStdShift": 3.197,
+      "atomMinShift": 57.545,
+      "atomMaxShift": 63.602,
+      "atomDistributionRefValue": 57.545,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CB",
+      "atomElementName": "",
+      "atomAverageShift": 30.636,
+      "atomStdShift": 0.615,
+      "atomMinShift": 30.014,
+      "atomMaxShift": 31.243,
+      "atomDistributionRefValue": 30.014,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H",
+      "atomElementName": "",
+      "atomAverageShift": 7.72,
+      "atomStdShift": 0.762,
+      "atomMinShift": 6.935,
+      "atomMaxShift": 8.456,
+      "atomDistributionRefValue": 6.935,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 4.542,
+      "atomStdShift": 0.446,
+      "atomMinShift": 4.055,
+      "atomMaxShift": 4.932,
+      "atomDistributionRefValue": 4.055,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB2",
+      "atomElementName": "",
+      "atomAverageShift": 3.29,
+      "atomStdShift": 0.173,
+      "atomMinShift": 3.105,
+      "atomMaxShift": 3.448,
+      "atomDistributionRefValue": 3.105,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB3",
+      "atomElementName": "",
+      "atomAverageShift": 2.749,
+      "atomStdShift": 0.431,
+      "atomMinShift": 2.257,
+      "atomMaxShift": 3.055,
+      "atomDistributionRefValue": 2.257,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "N",
+      "atomElementName": "",
+      "atomAverageShift": 122.259,
+      "atomStdShift": 8.912,
+      "atomMinShift": 116.646,
+      "atomMaxShift": 132.535,
+      "atomDistributionRefValue": 116.646,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

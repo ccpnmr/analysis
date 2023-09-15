@@ -1,0 +1,77 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "FOL",
+  "compoundName": "FOLIC ACID",
+  "compoundCcpcode": "FOL",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "Glutamic Acid",
+  "atoms": [
+    {
+      "atomName": "H1'",
+      "atomElementName": "",
+      "atomAverageShift": 6.279,
+      "atomStdShift": 0.091,
+      "atomMinShift": 6.149,
+      "atomMaxShift": 6.395,
+      "atomDistributionRefValue": 6.149,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2",
+      "atomElementName": "",
+      "atomAverageShift": 7.174,
+      "atomStdShift": 0.417,
+      "atomMinShift": 6.393,
+      "atomMaxShift": 7.722,
+      "atomDistributionRefValue": 6.393,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2'",
+      "atomElementName": "",
+      "atomAverageShift": 5.157,
+      "atomStdShift": 0.068,
+      "atomMinShift": 5.026,
+      "atomMaxShift": 5.255,
+      "atomDistributionRefValue": 5.026,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H3'",
+      "atomElementName": "",
+      "atomAverageShift": 4.789,
+      "atomStdShift": 0.044,
+      "atomMinShift": 4.742,
+      "atomMaxShift": 4.852,
+      "atomDistributionRefValue": 4.742,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H8",
+      "atomElementName": "",
+      "atomAverageShift": 7.911,
+      "atomStdShift": 0.231,
+      "atomMinShift": 7.617,
+      "atomMaxShift": 8.196,
+      "atomDistributionRefValue": 7.617,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

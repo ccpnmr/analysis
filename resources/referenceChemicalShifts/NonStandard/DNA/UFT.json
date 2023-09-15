@@ -1,0 +1,88 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "UFT",
+  "compoundName": "2'-deoxy-2'-fluorouridine 5'-(dihydrogen phosphate)",
+  "compoundCcpcode": "UFT",
+  "compoundType": "DNA",
+  "compoundTypeClassification": "DNA linking",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H1'",
+      "atomElementName": "",
+      "atomAverageShift": 5.984,
+      "atomStdShift": null,
+      "atomMinShift": 5.984,
+      "atomMaxShift": 5.984,
+      "atomDistributionRefValue": 5.984,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2'",
+      "atomElementName": "",
+      "atomAverageShift": 5.237,
+      "atomStdShift": null,
+      "atomMinShift": 5.237,
+      "atomMaxShift": 5.237,
+      "atomDistributionRefValue": 5.237,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H4'",
+      "atomElementName": "",
+      "atomAverageShift": 4.487,
+      "atomStdShift": null,
+      "atomMinShift": 4.487,
+      "atomMaxShift": 4.487,
+      "atomDistributionRefValue": 4.487,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H5",
+      "atomElementName": "",
+      "atomAverageShift": 5.389,
+      "atomStdShift": null,
+      "atomMinShift": 5.389,
+      "atomMaxShift": 5.389,
+      "atomDistributionRefValue": 5.389,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H6",
+      "atomElementName": "",
+      "atomAverageShift": 7.523,
+      "atomStdShift": null,
+      "atomMinShift": 7.523,
+      "atomMaxShift": 7.523,
+      "atomDistributionRefValue": 7.523,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HN3",
+      "atomElementName": "",
+      "atomAverageShift": 13.818,
+      "atomStdShift": null,
+      "atomMinShift": 13.818,
+      "atomMaxShift": 13.818,
+      "atomDistributionRefValue": 13.818,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

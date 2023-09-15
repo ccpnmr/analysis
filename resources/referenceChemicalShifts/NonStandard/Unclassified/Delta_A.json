@@ -1,0 +1,55 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "Delta_A",
+  "compoundName": "",
+  "compoundCcpcode": "Delta_A",
+  "compoundType": "Unclassified",
+  "compoundTypeClassification": "",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H",
+      "atomElementName": "",
+      "atomAverageShift": 9.975,
+      "atomStdShift": 0.191,
+      "atomMinShift": 9.84,
+      "atomMaxShift": 10.11,
+      "atomDistributionRefValue": 9.84,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HBC",
+      "atomElementName": "",
+      "atomAverageShift": 5.73,
+      "atomStdShift": null,
+      "atomMinShift": 5.73,
+      "atomMaxShift": 5.73,
+      "atomDistributionRefValue": 5.73,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HBT",
+      "atomElementName": "",
+      "atomAverageShift": 5.73,
+      "atomStdShift": null,
+      "atomMinShift": 5.73,
+      "atomMaxShift": 5.73,
+      "atomDistributionRefValue": 5.73,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

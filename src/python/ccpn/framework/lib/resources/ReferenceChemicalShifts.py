@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-09-15 14:18:06 +0100 (Fri, September 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-15 14:42:22 +0100 (Fri, September 15, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -201,8 +201,8 @@ class ReferenceChemicalShifts(object):
                 continue
             for atom in residue.atoms:
                 atomName = atom.atomName
-                averageShift = atom.averageShift
-                stdShift = atom.stdShift
+                averageShift = atom.atomAverageShift
+                stdShift = atom.atomStdShift
                 # Update the Old REFDB from the new References
                 values = atomsDict.get(atomName)
                 if values is None:

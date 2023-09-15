@@ -5,10 +5,10 @@
     "classVersion": 1,
     "user": "CCPN",
     "lastPath": "",
-    "timestamp": "Fri Sep 15 13:24:39 2023",
+    "timestamp": "Fri Sep 15 15:08:11 2023",
     "applicationVersion": 3.2
   },
-  "chemicalShiftName": "Default CCPN DNA",
+  "chemicalShiftName": "DNA",
   "chemicalShiftComment": "The CCPN Analysis V2 ReferenceChemical shifts retrieved from BMRB",
   "chemicalShiftEntryDate": "2006-08-16-14:25:08",
   "compoundShortName": "DT",

@@ -5,7 +5,7 @@
     "classVersion": 1,
     "user": "CCPN",
     "lastPath": "",
-    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
     "applicationVersion": 3.2
   },
   "chemicalShiftName": "Non-Standard Residues / Small Molecules",
@@ -13,7 +13,7 @@
   "chemicalShiftEntryDate": "2023-09-14-14:25:08",
   "compoundShortName": "M5U",
   "compoundName": "dimethyl 2,2'-((12Z,122Z,4S,6Z,8E,10E,15S,17Z,19E,21E)-2,13-dioxo-3,14-dioxa-1(4,2),12(2,4)-dioxazolacyclodocosaphane-6,8,10,17,19,21-hexaene-4,15-diyl)(2S,2'S,3S,3'S,4E,4'E)-bis(3-hydroxyhex-4-enoate)",
-  "compoundCcpcode": "M5U",
+  "compoundCcpCode": "M5U",
   "compoundType": "Non-Polymer",
   "compoundTypeClassification": "non-polymer",
   "compoundPrecursorName": "",

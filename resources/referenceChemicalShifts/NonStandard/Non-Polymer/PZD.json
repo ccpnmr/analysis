@@ -5,7 +5,7 @@
     "classVersion": 1,
     "user": "CCPN",
     "lastPath": "",
-    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
     "applicationVersion": 3.2
   },
   "chemicalShiftName": "Non-Standard Residues / Small Molecules",
@@ -13,7 +13,7 @@
   "chemicalShiftEntryDate": "2023-09-14-14:25:08",
   "compoundShortName": "PZD",
   "compoundName": "(11aS)-7,8-dimethoxy-2-naphthalen-2-yl-1,10,11,11a-tetrahydro-5H-pyrrolo[2,1-c][1,4]benzodiazepin-5-one",
-  "compoundCcpcode": "PZD",
+  "compoundCcpCode": "PZD",
   "compoundType": "Non-Polymer",
   "compoundTypeClassification": "non-polymer",
   "compoundPrecursorName": "",

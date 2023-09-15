@@ -5,7 +5,7 @@
     "classVersion": 1,
     "user": "CCPN",
     "lastPath": "",
-    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
     "applicationVersion": 3.2
   },
   "chemicalShiftName": "Non-Standard Residues / Small Molecules",
@@ -13,7 +13,7 @@
   "chemicalShiftEntryDate": "2023-09-14-14:25:08",
   "compoundShortName": "C90",
   "compoundName": "N-{(1S,2R)-2-hydroxy-1-[(hydroxyamino)carbonyl]propyl}-4-{[4-(morpholin-4-ylmethyl)phenyl]ethynyl}benzamide",
-  "compoundCcpcode": "C90",
+  "compoundCcpCode": "C90",
   "compoundType": "Non-Polymer",
   "compoundTypeClassification": "non-polymer",
   "compoundPrecursorName": "",

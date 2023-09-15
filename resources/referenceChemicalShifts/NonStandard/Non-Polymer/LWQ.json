@@ -5,7 +5,7 @@
     "classVersion": 1,
     "user": "CCPN",
     "lastPath": "",
-    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
     "applicationVersion": 3.2
   },
   "chemicalShiftName": "Non-Standard Residues / Small Molecules",
@@ -13,7 +13,7 @@
   "chemicalShiftEntryDate": "2023-09-14-14:25:08",
   "compoundShortName": "LWQ",
   "compoundName": "~{N}2,~{N}6-bis(1-methylquinolin-1-ium-3-yl)pyridine-2,6-dicarboxamide",
-  "compoundCcpcode": "LWQ",
+  "compoundCcpCode": "LWQ",
   "compoundType": "Non-Polymer",
   "compoundTypeClassification": "non-polymer",
   "compoundPrecursorName": "",

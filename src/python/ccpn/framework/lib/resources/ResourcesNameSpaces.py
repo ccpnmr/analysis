@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-09-15 14:18:06 +0100 (Fri, September 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-15 15:26:32 +0100 (Fri, September 15, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -73,7 +73,7 @@ COMPOUNDTYPE = f'{COMPOUND}Type'
 COMPOUNDS = f'{COMPOUND}s'
 COMPOUNDNAME = f'{COMPOUND}Name'
 SHORTNAME = f'{COMPOUND}ShortName'
-CCPCODE = f'{COMPOUND}Ccpcode'
+CCPCODE = f'{COMPOUND}CcpCode'
 PRECURSOR = f'{COMPOUND}PrecursorName'
 COMPOUNDCLASSIFICATION = f'{COMPOUND}TypeClassification'
 ATOMS = 'atoms'

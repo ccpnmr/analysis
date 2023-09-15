@@ -5,7 +5,7 @@
     "classVersion": 1,
     "user": "CCPN",
     "lastPath": "",
-    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
     "applicationVersion": 3.2
   },
   "chemicalShiftName": "Non-Standard Residues / Small Molecules",
@@ -13,7 +13,7 @@
   "chemicalShiftEntryDate": "2023-09-14-14:25:08",
   "compoundShortName": "L2H",
   "compoundName": "(12S,27S)-12,27-bis(4-aminobutyl)-4,30-dimethyl-3,7,14,18,22,29-hexaoxa-11,26,31,32,33,34,35,36-octaazaheptacyclo[26.2.\n1.1~2,5~.1~6,9~.1~13,16~.1~17,20~.1~21,24~]hexatriaconta-1(30),2(36),4,6(35),8,13(34),15,17(33),19,21(32),23,28(31)-dode\ncaene-10,25-dione",
-  "compoundCcpcode": "L2H",
+  "compoundCcpCode": "L2H",
   "compoundType": "Non-Polymer",
   "compoundTypeClassification": "non-polymer",
   "compoundPrecursorName": "",

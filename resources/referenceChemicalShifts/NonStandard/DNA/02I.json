@@ -5,7 +5,7 @@
     "classVersion": 1,
     "user": "CCPN",
     "lastPath": "",
-    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
     "applicationVersion": 3.2
   },
   "chemicalShiftName": "Non-Standard Residues / Small Molecules",
@@ -13,7 +13,7 @@
   "chemicalShiftEntryDate": "2023-09-14-14:25:08",
   "compoundShortName": "02I",
   "compoundName": "(6S,7S,8S,10R)-4-amino-8-hydroxy-7,8,9,10-tetrahydro-6H-7,10-epoxyazepino[1,2-e]purin-6-yl dihydrogen phosphate",
-  "compoundCcpcode": "02I",
+  "compoundCcpCode": "02I",
   "compoundType": "DNA",
   "compoundTypeClassification": "DNA linking",
   "compoundPrecursorName": "",

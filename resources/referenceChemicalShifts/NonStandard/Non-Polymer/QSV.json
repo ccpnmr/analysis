@@ -5,7 +5,7 @@
     "classVersion": 1,
     "user": "CCPN",
     "lastPath": "",
-    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
     "applicationVersion": 3.2
   },
   "chemicalShiftName": "Non-Standard Residues / Small Molecules",
@@ -13,7 +13,7 @@
   "chemicalShiftEntryDate": "2023-09-14-14:25:08",
   "compoundShortName": "QSV",
   "compoundName": "(2E,2'E)-2,2'-{dibenzo[b,d]thiene-2,8-diyldi[(1E)eth-1-yl-1-ylidene]}bis(N-methylhydrazine-1-carboximidamide)",
-  "compoundCcpcode": "QSV",
+  "compoundCcpCode": "QSV",
   "compoundType": "Non-Polymer",
   "compoundTypeClassification": "non-polymer",
   "compoundPrecursorName": "",

@@ -5,7 +5,7 @@
     "classVersion": 1,
     "user": "CCPN",
     "lastPath": "",
-    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
     "applicationVersion": 3.2
   },
   "chemicalShiftName": "Non-Standard Residues / Small Molecules",
@@ -13,7 +13,7 @@
   "chemicalShiftEntryDate": "2023-09-14-14:25:08",
   "compoundShortName": "K4Z",
   "compoundName": "3-[3-[[4-[[4-[[4-[[4-[[(2~{R})-2-azaniumyl-4-[[1-methyl-4-[[1-methyl-4-[[1-methyl-4-[(1-methylimidazol-2-yl)carbonylamino]pyrrol-2-yl]carbonylamino]pyrrol-2-yl]carbonylamino]pyrrol-2-yl]carbonylamino]butanoyl]amino]-1-methyl-imidazol-2-yl]carbonylamino]-1-methyl-pyrrol-2-yl]carbonylamino]-1-methyl-pyrrol-2-yl]carbonylamino]-1-methyl-pyrrol-2-yl]carbonylamino]propanoylamino]propyl-dimethyl-azanium",
-  "compoundCcpcode": "K4Z",
+  "compoundCcpCode": "K4Z",
   "compoundType": "Non-Polymer",
   "compoundTypeClassification": "non-polymer",
   "compoundPrecursorName": "",

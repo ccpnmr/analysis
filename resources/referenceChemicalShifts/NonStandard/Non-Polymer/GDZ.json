@@ -5,7 +5,7 @@
     "classVersion": 1,
     "user": "CCPN",
     "lastPath": "",
-    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
     "applicationVersion": 3.2
   },
   "chemicalShiftName": "Non-Standard Residues / Small Molecules",
@@ -13,7 +13,7 @@
   "chemicalShiftEntryDate": "2023-09-14-14:25:08",
   "compoundShortName": "GDZ",
   "compoundName": "2-(8-fluoranyl-2-methyl-imidazo[1,2-a]pyridin-6-yl)-7-(4-methylpiperazin-1-yl)pyrido[1,2-a]pyrimidin-4-one",
-  "compoundCcpcode": "GDZ",
+  "compoundCcpCode": "GDZ",
   "compoundType": "Non-Polymer",
   "compoundTypeClassification": "non-polymer",
   "compoundPrecursorName": "",

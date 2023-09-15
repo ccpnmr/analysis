@@ -5,7 +5,7 @@
     "classVersion": 1,
     "user": "CCPN",
     "lastPath": "",
-    "timestamp": "Fri Sep 15 13:01:35 2023",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
     "applicationVersion": 3.2
   },
   "chemicalShiftName": "Non-Standard Residues / Small Molecules",
@@ -13,7 +13,7 @@
   "chemicalShiftEntryDate": "2023-09-14-14:25:08",
   "compoundShortName": "7BU",
   "compoundName": "[5,10,15,20-tetrakis(trifluoromethyl)porphyrinato(2-)-kappa~4~N~21~,N~22~,N~23~,N~24~]zinc",
-  "compoundCcpcode": "7BU",
+  "compoundCcpCode": "7BU",
   "compoundType": "Non-Polymer",
   "compoundTypeClassification": "non-polymer",
   "compoundPrecursorName": "",

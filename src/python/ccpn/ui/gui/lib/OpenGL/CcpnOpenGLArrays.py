@@ -4,7 +4,7 @@ GL routines used to draw vertex buffer objects (VBOs)
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:05 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-09-15 13:05:34 +0100 (Fri, September 15, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,7 +28,7 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 
 import numpy as np
 from ccpn.ui.gui.lib.OpenGL import GL
-
+from ccpn.ui.gui.lib.OpenGL import VBO
 
 GLRENDERMODE_IGNORE = 0
 GLRENDERMODE_DRAW = 1
@@ -44,6 +44,7 @@ COLOR_PTR = 1
 INDEX_PTR = 2
 ATTRIB_PTR = 3
 TEXT_PTR = 4
+_USAGE=GL.GL_DYNAMIC_DRAW
 
 
 class GLVertexArray():
@@ -98,15 +99,19 @@ class GLVertexArray():
         self.dimension = int(dimension)
         self._GLContext = GLContext
 
-        # VAO doesn't work on MacOS
-        self.VAO = None
-        self.VBOs = None
+        # VAO doesn't work on MacOS on default profile, need to use setFormat
+        # self.VAO = None
+        self._vertexVBO = None
+        self._colorVBO = None
+        self._attribVBO = None
+        self._textureVBO = None
+        self._indexVBO = None
 
-    def __del__(self):
-        """Delete vertex buffer objects on deletion
-        """
-        if self.VBOs is not None:
-            GL.glDeleteBuffers(len(self.VBOs), self.VBOs)
+    # def __del__(self):
+    #     """Delete vertex buffer objects on deletion
+    #     """
+    #     if self.VBOs is not None:
+    #         GL.glDeleteBuffers(len(self.VBOs), self.VBOs)
 
     def clearArrays(self):
         """Clear and reset all arrays
@@ -160,7 +165,6 @@ class GLVertexArray():
 
         GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, self.vertices)
         GL.glColorPointer(4, GL.GL_FLOAT, 0, self.colors)
-
         GL.glDrawElements(self.drawMode, len(self.indices), GL.GL_UNSIGNED_INT, self.indices)
 
         GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
@@ -183,34 +187,25 @@ class GLVertexArray():
         """
         # getLogger().info('>>> defineIndexVBO')
 
-        # print("OpenGL: " + str(GL.glGetString(GL.GL_VERSION)))
-        # print('glGenVertexArrays Available %s' % bool(GL.glGenVertexArrays))
-        # if not hasattr(self, 'VAOs'):
-        #     self.VAOs = GL.glGenVertexArrays(1)
-        # GL.glBindVertexArray(self.VAOs)                # define VAOs - doesn't work MacOS
-
-        # create the VBOs if they don't exist - reusing will just rewrite the buffers
-        if self.VBOs is None:
-            self.VBOs = GL.glGenBuffers(5)
+        _float = np.array([], dtype=np.float32)
+        _int = np.array([], dtype=np.uint32)
+        self._vertexVBO = VBO.VBO(_float, usage=_USAGE)
+        self._colorVBO = VBO.VBO(_float, usage=_USAGE)
+        self._indexVBO = VBO.VBO(_int, usage=_USAGE, target=GL.GL_ELEMENT_ARRAY_BUFFER)
 
         self._defineIndexVBO()
 
     def _defineIndexVBO(self):
         """Push Indices/Colours/Vertices to graphics card
         """
-        sizeVertices = self.vertices.size * self.vertices.itemsize
-        sizeColors = self.colors.size * self.colors.itemsize
-        sizeIndices = self.indices.size * self.indices.itemsize
+        # getLogger().info('>>> _defineIndexVBO')
 
-        # bind to the buffers
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[VERTEX_PTR])
-        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeVertices, self.vertices, GL.GL_DYNAMIC_DRAW)
-
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[COLOR_PTR])
-        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeColors, self.colors, GL.GL_DYNAMIC_DRAW)
-
-        GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, self.VBOs[INDEX_PTR])
-        GL.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, sizeIndices, self.indices, GL.GL_DYNAMIC_DRAW)
+        self._vertexVBO.set_array(self.vertices)
+        self._colorVBO.bind()
+        self._colorVBO.set_array(self.colors)
+        self._indexVBO.bind()
+        self._indexVBO.set_array(self.indices)
+        self._vertexVBO.bind()
 
         GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
@@ -222,7 +217,7 @@ class GLVertexArray():
         # getLogger().info('>>> updateIndexVBO')
 
         # check the VBOs, if they don't exist raise error
-        if self.VBOs is None:
+        if self._vertexVBO is None:
             # raise RuntimeError('OpenGL Error: cannot update indexVBO: %s' % self)
             return
 
@@ -235,15 +230,12 @@ class GLVertexArray():
         # getLogger().info('>>> updateIndexVBOIndices')
 
         # check the VBOs, if they don't exist raise error
-        if self.VBOs is None:
+        if self._indexVBO is None:
             # raise RuntimeError('OpenGL Error: cannot update indexArray: %s' % self)
             return
 
-        sizeIndices = self.indices.size * self.indices.itemsize
-
-        # bind to the buffers
-        GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, self.VBOs[INDEX_PTR])
-        GL.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, sizeIndices, self.indices, GL.GL_DYNAMIC_DRAW)
+        self._indexVBO.set_array(self.indices)
+        self._indexVBO.bind()
 
         GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
 
@@ -255,7 +247,7 @@ class GLVertexArray():
 
         if not self.indices.size:
             return
-        if self.VBOs is None:
+        if not self._indexVBO:
             # raise RuntimeError('OpenGL Error: cannot draw IndexVBO: %s' % self)
             return
 
@@ -267,14 +259,12 @@ class GLVertexArray():
         GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
         GL.glEnableClientState(GL.GL_COLOR_ARRAY)
 
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[VERTEX_PTR])
-        GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, None)
-
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[COLOR_PTR])
-        GL.glColorPointer(4, GL.GL_FLOAT, 0, None)
-
-        GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, self.VBOs[INDEX_PTR])
-        GL.glDrawElements(self.drawMode, len(self.indices), GL.GL_UNSIGNED_INT, None)
+        self._vertexVBO.bind()
+        GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, self._vertexVBO)
+        self._colorVBO.bind()
+        GL.glColorPointer(4, GL.GL_FLOAT, 0, self._colorVBO)
+        self._indexVBO.bind()
+        GL.glDrawElements(self.drawMode, len(self.indices), GL.GL_UNSIGNED_INT, self._indexVBO)
 
         GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
@@ -308,7 +298,7 @@ class GLVertexArray():
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # indexed VBOs (vertex buffer objects)
-    # Index array - Indices/Vertices/Colour/attribs
+    # Index array - Indices/Vertices/Colour/Attribs.
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def defineAliasedIndexVBO(self):
@@ -325,38 +315,28 @@ class GLVertexArray():
         """
         # getLogger().info('>>> defineIndexVBO')
 
-        # print("OpenGL: " + str(GL.glGetString(GL.GL_VERSION)))
-        # print('glGenVertexArrays Available %s' % bool(GL.glGenVertexArrays))
-        # if not hasattr(self, 'VAOs'):
-        #     self.VAOs = GL.glGenVertexArrays(1)
-        # GL.glBindVertexArray(self.VAOs)                # define VAOs - doesn't work MacOS
-
-        # create the VBOs if they don't exist - reusing will just rewrite the buffers
-        if self.VBOs is None:
-            self.VBOs = GL.glGenBuffers(5)
+        _float = np.array([], dtype=np.float32)
+        _int = np.array([], dtype=np.uint32)
+        self._vertexVBO = VBO.VBO(_float, usage=_USAGE)
+        self._colorVBO = VBO.VBO(_float, usage=_USAGE)
+        self._attribVBO = VBO.VBO(_float, usage=_USAGE)
+        self._indexVBO = VBO.VBO(_int, usage=_USAGE, target=GL.GL_ELEMENT_ARRAY_BUFFER)
 
         self._defineAliasedIndexVBO()
 
     def _defineAliasedIndexVBO(self):
         """Push Indices/Colours/Vertices/attribs to graphics card
         """
-        sizeVertices = self.vertices.size * self.vertices.itemsize
-        sizeColors = self.colors.size * self.colors.itemsize
-        sizeIndices = self.indices.size * self.indices.itemsize
-        sizeAttribs = self.attribs.size * self.attribs.itemsize
+        # getLogger().info('>>> _defineAliasedIndexVBO')
 
-        # bind to the buffers
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[VERTEX_PTR])
-        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeVertices, self.vertices, GL.GL_DYNAMIC_DRAW)
-
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[COLOR_PTR])
-        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeColors, self.colors, GL.GL_DYNAMIC_DRAW)
-
-        GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, self.VBOs[INDEX_PTR])
-        GL.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, sizeIndices, self.indices, GL.GL_DYNAMIC_DRAW)
-
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[ATTRIB_PTR])
-        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeAttribs, self.attribs, GL.GL_DYNAMIC_DRAW)
+        self._vertexVBO.set_array(self.vertices)
+        self._vertexVBO.bind()
+        self._colorVBO.set_array(self.colors)
+        self._colorVBO.bind()
+        self._attribVBO.set_array(self.attribs)
+        self._attribVBO.bind()
+        self._indexVBO.set_array(self.indices)
+        self._indexVBO.bind()
 
         GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
@@ -368,7 +348,7 @@ class GLVertexArray():
         # getLogger().info('>>> updateIndexVBO')
 
         # check the VBOs, if they don't exist raise error
-        if self.VBOs is None:
+        if self._vertexVBO is None:
             # raise RuntimeError('OpenGL Error: cannot update indexVBO: %s' % self)
             return
 
@@ -381,15 +361,12 @@ class GLVertexArray():
         # getLogger().info('>>> updateIndexVBOIndices')
 
         # check the VBOs, if they don't exist raise error
-        if self.VBOs is None:
+        if self._indexVBO is None:
             # raise RuntimeError('OpenGL Error: cannot update indexArray: %s' % self)
             return
 
-        sizeIndices = self.indices.size * self.indices.itemsize
-
-        # bind to the buffers
-        GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, self.VBOs[INDEX_PTR])
-        GL.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, sizeIndices, self.indices, GL.GL_DYNAMIC_DRAW)
+        self._indexVBO.set_array(self.indices)
+        self._indexVBO.bind()
 
         GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
 
@@ -401,7 +378,7 @@ class GLVertexArray():
 
         if not self.indices.size:
             return
-        if self.VBOs is None:
+        if self._indexVBO is None:
             # raise RuntimeError('OpenGL Error: cannot draw IndexVBO: %s' % self)
             return
 
@@ -414,17 +391,14 @@ class GLVertexArray():
         GL.glEnableClientState(GL.GL_COLOR_ARRAY)
         GL.glEnableVertexAttribArray(1)
 
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[VERTEX_PTR])
-        GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, None)
-
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[COLOR_PTR])
-        GL.glColorPointer(4, GL.GL_FLOAT, 0, None)
-
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[ATTRIB_PTR])
-        GL.glVertexAttribPointer(1, 1, GL.GL_FLOAT, GL.GL_FALSE, 0, None)
-
-        GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, self.VBOs[INDEX_PTR])
-        GL.glDrawElements(self.drawMode, len(self.indices), GL.GL_UNSIGNED_INT, None)
+        self._vertexVBO.bind()
+        GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, self._vertexVBO)
+        self._colorVBO.bind()
+        GL.glColorPointer(4, GL.GL_FLOAT, 0, self._colorVBO)
+        self._attribVBO.bind()
+        GL.glVertexAttribPointer(1, 1, GL.GL_FLOAT, GL.GL_FALSE, 0, self._attribVBO)
+        self._indexVBO.bind()
+        GL.glDrawElements(self.drawMode, len(self.indices), GL.GL_UNSIGNED_INT, self._indexVBO)
 
         GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
@@ -496,15 +470,10 @@ class GLVertexArray():
         """
         # getLogger().info('>>> defineVertexColorVBO')
 
-        # print("OpenGL: " + str(GL.glGetString(GL.GL_VERSION)))
-        # print('glGenVertexArrays Available %s' % bool(GL.glGenVertexArrays))
-        # if not hasattr(self, 'VAOs'):
-        #     self.VAOs = GL.glGenVertexArrays(1)
-        # GL.glBindVertexArray(self.VAOs)                # define VAOs - doesn't work MacOS
-
-        # create the VBOs if they don't exist - reusing will just rewrite the buffers
-        if self.VBOs is None:
-            self.VBOs = GL.glGenBuffers(2)
+        _float = np.array([], dtype=np.float32)
+        _int = np.array([], dtype=np.uint32)
+        self._vertexVBO = VBO.VBO(_float, usage=_USAGE)
+        self._colorVBO = VBO.VBO(_float, usage=_USAGE)
 
         self._defineVertexColorVBO()
 
@@ -513,15 +482,10 @@ class GLVertexArray():
         """
         # getLogger().info('>>> _defineVertexColorVBO')
 
-        sizeVertices = self.vertices.size * self.vertices.itemsize
-        sizeColors = self.colors.size * self.colors.itemsize
-
-        # bind to the buffers
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[VERTEX_PTR])
-        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeVertices, self.vertices, GL.GL_DYNAMIC_DRAW)
-
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[COLOR_PTR])
-        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeColors, self.colors, GL.GL_DYNAMIC_DRAW)
+        self._vertexVBO.set_array(self.vertices)
+        self._colorVBO.bind()
+        self._colorVBO.set_array(self.colors)
+        self._vertexVBO.bind()
 
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
 
@@ -532,7 +496,7 @@ class GLVertexArray():
         # getLogger().info('>>> updateVertexColorVBO')
 
         # check the VBOs, if they don't exist raise error
-        if self.VBOs is None:
+        if self._vertexVBO is None:
             # raise RuntimeError('OpenGL Error: cannot update vertexColorArray: %s' % self)
             return
 
@@ -544,7 +508,7 @@ class GLVertexArray():
         """
         # getLogger().info('>>> drawVertexColorVBO')
 
-        if self.VBOs is None:
+        if self._vertexVBO is None:
             # raise RuntimeError('OpenGL Error: cannot draw VertexColorVBO: %s' % self)
             return
 
@@ -556,12 +520,10 @@ class GLVertexArray():
         GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
         GL.glEnableClientState(GL.GL_COLOR_ARRAY)
 
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[VERTEX_PTR])
-        GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, None)
-
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[COLOR_PTR])
-        GL.glColorPointer(4, GL.GL_FLOAT, 0, None)
-
+        self._vertexVBO.bind()
+        GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, self._vertexVBO)
+        self._colorVBO.bind()
+        GL.glColorPointer(4, GL.GL_FLOAT, 0, self._colorVBO)
         GL.glDrawArrays(self.drawMode, 0, self.numVertices)
 
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
@@ -618,7 +580,6 @@ class GLVertexArray():
         # this is for passing extra attributes in
         GL.glEnableVertexAttribArray(1)
         GL.glVertexAttribPointer(1, 3, GL.GL_FLOAT, GL.GL_FALSE, 0, self.attribs)
-
         GL.glDrawElements(self.drawMode, len(self.indices), GL.GL_UNSIGNED_INT, self.indices)
 
         GL.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY)
@@ -641,10 +602,16 @@ class GLVertexArray():
             texcoords       (u, v) * vertices
             attribs         (a, b) * vertices
         """
+        # getLogger().info('>>> defineTextArrayVBO')
 
         # create the VBOs if they don't exist - reusing will just rewrite the buffers
-        if self.VBOs is None:
-            self.VBOs = GL.glGenBuffers(5)
+        _float = np.array([], dtype=np.float32)
+        _int = np.array([], dtype=np.uint32)
+        self._vertexVBO = VBO.VBO(_float, usage=_USAGE)
+        self._colorVBO = VBO.VBO(_float, usage=_USAGE)
+        self._attribVBO = VBO.VBO(_float, usage=_USAGE)
+        self._textureVBO = VBO.VBO(_float, usage=_USAGE)
+        self._indexVBO = VBO.VBO(_int, usage=_USAGE, target=GL.GL_ELEMENT_ARRAY_BUFFER)
 
         self._defineTextArrayVBO()
 
@@ -653,27 +620,16 @@ class GLVertexArray():
         """
         # getLogger().info('>>> _defineTextArrayVBO')
 
-        sizeVertices = self.vertices.size * self.vertices.itemsize
-        sizeColors = self.colors.size * self.colors.itemsize
-        sizeText = self.texcoords.size * self.texcoords.itemsize
-        sizeAttribs = self.attribs.size * self.attribs.itemsize
-        sizeIndices = self.indices.size * self.indices.itemsize
-
-        # bind to the buffers
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[VERTEX_PTR])
-        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeVertices, self.vertices, GL.GL_DYNAMIC_DRAW)
-
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[COLOR_PTR])
-        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeColors, self.colors, GL.GL_DYNAMIC_DRAW)
-
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[TEXT_PTR])
-        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeText, self.texcoords, GL.GL_DYNAMIC_DRAW)
-
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[ATTRIB_PTR])
-        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeAttribs, self.attribs, GL.GL_DYNAMIC_DRAW)
-
-        GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, self.VBOs[INDEX_PTR])
-        GL.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, sizeIndices, self.indices, GL.GL_DYNAMIC_DRAW)
+        self._vertexVBO.set_array(self.vertices)
+        self._colorVBO.bind()
+        self._colorVBO.set_array(self.colors)
+        self._textureVBO.bind()
+        self._textureVBO.set_array(self.texcoords)
+        self._attribVBO.bind()
+        self._attribVBO.set_array(self.attribs)
+        self._indexVBO.bind()
+        self._indexVBO.set_array(self.indices)
+        self._vertexVBO.bind()
 
         GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
@@ -685,7 +641,7 @@ class GLVertexArray():
         # getLogger().info('>>> updateTextArrayVBO')
 
         # check the VBOs, if they don't exist raise error
-        if self.VBOs is None:
+        if self._vertexVBO is None:
             # raise RuntimeError('OpenGL Error: cannot update textArrayVBO: %s' % self)
             return
 
@@ -698,14 +654,12 @@ class GLVertexArray():
         # getLogger().info('>>> updateTextArrayVBOAttribs')
 
         # check the VBOs, if they don't exist raise error
-        if self.VBOs is None:
+        if self._attribVBO is None:
             # raise RuntimeError('OpenGL Error: cannot update textArrayVBOAttribs: %s' % self)
             return
 
-        sizeAttribs = self.attribs.size * self.attribs.itemsize
-
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[ATTRIB_PTR])
-        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeAttribs, self.attribs, GL.GL_DYNAMIC_DRAW)
+        self._attribVBO.set_array(self.attribs)
+        self._attribVBO.bind()
 
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
 
@@ -716,14 +670,12 @@ class GLVertexArray():
         # getLogger().info('>>> updateTextArrayVBOColour')
 
         # check the VBOs, if they don't exist raise error
-        if self.VBOs is None:
+        if self._colorVBO is None:
             # raise RuntimeError('OpenGL Error: cannot update textArrayVBOColour: %s' % self)
             return
 
-        sizeColors = self.colors.size * self.colors.itemsize
-
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[COLOR_PTR])
-        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeColors, self.colors, GL.GL_DYNAMIC_DRAW)
+        self._colorVBO.set_array(self.colors)
+        self._colorVBO.bind()
 
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
 
@@ -748,7 +700,7 @@ class GLVertexArray():
         # getLogger().info('>>> drawTextArrayVBO')
 
         # check the VBOs, if they don't exist raise error
-        if self.VBOs is None:
+        if self._indexVBO is None:
             # raise RuntimeError('OpenGL Error: cannot drawTextArrayVBO: %s' % self)
             return
 
@@ -762,20 +714,16 @@ class GLVertexArray():
             GL.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY)
             GL.glEnableVertexAttribArray(_attribArrayIndex)
 
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[VERTEX_PTR])
-        GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, None)
-
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[COLOR_PTR])
-        GL.glColorPointer(4, GL.GL_FLOAT, 0, None)
-
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[TEXT_PTR])
-        GL.glTexCoordPointer(2, GL.GL_FLOAT, 0, None)
-
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[ATTRIB_PTR])
-        GL.glVertexAttribPointer(_attribArrayIndex, 3, GL.GL_FLOAT, GL.GL_FALSE, 0, None)
-
-        GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, self.VBOs[INDEX_PTR])
-        GL.glDrawElements(self.drawMode, len(self.indices), GL.GL_UNSIGNED_INT, None)
+        self._vertexVBO.bind()
+        GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, self._vertexVBO)
+        self._colorVBO.bind()
+        GL.glColorPointer(4, GL.GL_FLOAT, 0, self._colorVBO)
+        self._textureVBO.bind()
+        GL.glTexCoordPointer(2, GL.GL_FLOAT, 0, self._textureVBO)
+        self._attribVBO.bind()
+        GL.glVertexAttribPointer(_attribArrayIndex, 3, GL.GL_FLOAT, GL.GL_FALSE, 0, self._attribVBO)
+        self._indexVBO.bind()
+        GL.glDrawElements(self.drawMode, len(self.indices), GL.GL_UNSIGNED_INT, self._indexVBO)
 
         GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)

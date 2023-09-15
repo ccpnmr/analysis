@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-15 14:57:47 +0100 (Fri, September 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-15 19:14:27 +0100 (Fri, September 15, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -29,6 +29,8 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 import numpy as np
 from ccpn.ui.gui.lib.OpenGL import GL
 from ccpn.ui.gui.lib.OpenGL import VBO
+from ccpn.util.Logging import getLogger
+
 
 GLRENDERMODE_IGNORE = 0
 GLRENDERMODE_DRAW = 1
@@ -46,6 +48,12 @@ ATTRIB_PTR = 3
 TEXT_PTR = 4
 _USAGE=GL.GL_DYNAMIC_DRAW
 
+_DEBUG = False
+
+
+#=========================================================================================
+# GLVertexArray
+#=========================================================================================
 
 class GLVertexArray():
     def __init__(self, numLists=1,
@@ -99,8 +107,6 @@ class GLVertexArray():
         self.dimension = int(dimension)
         self._GLContext = GLContext
 
-        # VAO doesn't work on MacOS on default profile, need to use setFormat
-        # self.VAO = None
         self._vertexVBO = None
         self._colorVBO = None
         self._attribVBO = None
@@ -153,7 +159,8 @@ class GLVertexArray():
         """Draw the vertex buffers in indexed array mode. Arrays are copied from main memory each time.
         Indexed with vertices and colour.
         """
-        # getLogger().info('>>> drawIndexArray')
+        if _DEBUG:
+            getLogger().debug(f'-->  {self.__class__.__name__}.drawIndexArray')
 
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)
@@ -185,20 +192,23 @@ class GLVertexArray():
             _
             attribs:        array of float for defining aliasPosition
         """
-        # getLogger().info('>>> defineIndexVBO')
+        if _DEBUG:
+            getLogger().debug(f'-->  {self.__class__.__name__}.defineIndexVBO')
 
-        _float = np.array([], dtype=np.float32)
-        _int = np.array([], dtype=np.uint32)
-        self._vertexVBO = VBO.VBO(_float, usage=_USAGE)
-        self._colorVBO = VBO.VBO(_float, usage=_USAGE)
-        self._indexVBO = VBO.VBO(_int, usage=_USAGE, target=GL.GL_ELEMENT_ARRAY_BUFFER)
-
+        # create the VBOs if they don't exist - reusing will just rewrite the buffers
+        if self._vertexVBO is None:
+            _float = np.array([], dtype=np.float32)
+            _int = np.array([], dtype=np.uint32)
+            self._vertexVBO = VBO(_float, usage=_USAGE)
+            self._colorVBO = VBO(_float, usage=_USAGE)
+            self._indexVBO = VBO(_int, usage=_USAGE, target=GL.GL_ELEMENT_ARRAY_BUFFER)
         self._defineIndexVBO()
 
     def _defineIndexVBO(self):
         """Push Indices/Colours/Vertices to graphics card
         """
-        # getLogger().info('>>> _defineIndexVBO')
+        if _DEBUG:
+            getLogger().debug(f'-->  {self.__class__.__name__}._defineIndexVBO')
 
         self._vertexVBO.set_array(self.vertices)
         self._vertexVBO.bind()
@@ -214,11 +224,11 @@ class GLVertexArray():
         """Update the buffers on the graphics card.
         Indexed mode with vertices and colour.
         """
-        # getLogger().info('>>> updateIndexVBO')
+        if _DEBUG:
+            getLogger().debug(f'-->  {self.__class__.__name__}.updateIndexVBO')
 
-        # check the VBOs, if they don't exist raise error
         if self._vertexVBO is None:
-            # raise RuntimeError('OpenGL Error: cannot update indexVBO: %s' % self)
+            getLogger().debug(f'{self.__class__.__name__}.updateIndexVBO: OpenGL Error - {self}')
             return
 
         self._defineIndexVBO()
@@ -227,11 +237,11 @@ class GLVertexArray():
         """Update the buffers on the graphics card.
         Only the index array.
         """
-        # getLogger().info('>>> updateIndexVBOIndices')
+        if _DEBUG:
+            getLogger().debug(f'-->  {self.__class__.__name__}.updateIndexVBOIndices')
 
-        # check the VBOs, if they don't exist raise error
         if self._indexVBO is None:
-            # raise RuntimeError('OpenGL Error: cannot update indexArray: %s' % self)
+            getLogger().debug(f'{self.__class__.__name__}.updateIndexVBOIndices: OpenGL Error - {self}')
             return
 
         self._indexVBO.set_array(self.indices)
@@ -243,12 +253,13 @@ class GLVertexArray():
         """Draw the vertex buffers in indexed array mode. Arrays are drawn from buffers already bound to graphics card memory.
         Indexed mode with vertices and colour.
         """
-        # getLogger().info('>>> drawIndexVBO')
+        if _DEBUG:
+            getLogger().debug(f'-->  {self.__class__.__name__}.drawIndexVBO')
 
         if not self.indices.size:
             return
-        if not self._indexVBO:
-            # raise RuntimeError('OpenGL Error: cannot draw IndexVBO: %s' % self)
+        if self._indexVBO is None:
+            getLogger().debug(f'{self.__class__.__name__}.drawIndexVBO: OpenGL Error - {self}')
             return
 
         if self.blendMode:
@@ -279,7 +290,8 @@ class GLVertexArray():
         """Draw the vertex buffers in indexed array mode. Arrays are copied from main memory each time.
         Indexed mode using only vertices, no colour.
         """
-        # getLogger().info('>>>drawIndexArrayNoColor')
+        if _DEBUG:
+            getLogger().debug(f'-->  {self.__class__.__name__}.drawIndexArrayNoColor')
 
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)
@@ -298,7 +310,7 @@ class GLVertexArray():
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # indexed VBOs (vertex buffer objects)
-    # Index array - Indices/Vertices/Colour/Attribs.
+    # Index array - Indices/Vertices/Colour/Attribs
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def defineAliasedIndexVBO(self):
@@ -313,21 +325,28 @@ class GLVertexArray():
             _
             attribs:        array of float for defining aliasPosition
         """
-        # getLogger().info('>>> defineIndexVBO')
+        if _DEBUG:
+            getLogger().debug(f'-->  {self.__class__.__name__}.defineAliasedIndexVBO')
 
-        _float = np.array([], dtype=np.float32)
-        _int = np.array([], dtype=np.uint32)
-        self._vertexVBO = VBO.VBO(_float, usage=_USAGE)
-        self._colorVBO = VBO.VBO(_float, usage=_USAGE)
-        self._attribVBO = VBO.VBO(_float, usage=_USAGE)
-        self._indexVBO = VBO.VBO(_int, usage=_USAGE, target=GL.GL_ELEMENT_ARRAY_BUFFER)
-
+        # create the VBOs if they don't exist - reusing will just rewrite the buffers
+        if self._vertexVBO is None:
+            _float = np.array([], dtype=np.float32)
+            _int = np.array([], dtype=np.uint32)
+            self._vertexVBO = VBO(_float, usage=_USAGE)
+            self._colorVBO = VBO(_float, usage=_USAGE)
+            self._attribVBO = VBO(_float, usage=_USAGE)
+            self._indexVBO = VBO(_int, usage=_USAGE, target=GL.GL_ELEMENT_ARRAY_BUFFER)
         self._defineAliasedIndexVBO()
 
     def _defineAliasedIndexVBO(self):
         """Push Indices/Colours/Vertices/attribs to graphics card
         """
-        # getLogger().info('>>> _defineAliasedIndexVBO')
+        if _DEBUG:
+            getLogger().debug(f'-->  {self.__class__.__name__}._defineAliasedIndexVBO')
+
+        if self._vertexVBO is None:
+            getLogger().debug(f'{self.__class__.__name__}._defineAliasedIndexVBO: OpenGL Error - {self}')
+            return
 
         self._vertexVBO.set_array(self.vertices)
         self._vertexVBO.bind()
@@ -345,11 +364,11 @@ class GLVertexArray():
         """Update the buffers on the graphics card.
         Indexed mode with vertices and colour.
         """
-        # getLogger().info('>>> updateIndexVBO')
+        if _DEBUG:
+            getLogger().debug(f'-->  {self.__class__.__name__}.updateAliasedIndexVBO')
 
-        # check the VBOs, if they don't exist raise error
         if self._vertexVBO is None:
-            # raise RuntimeError('OpenGL Error: cannot update indexVBO: %s' % self)
+            getLogger().debug(f'{self.__class__.__name__}.updateAliasedIndexVBO: OpenGL Error - {self}')
             return
 
         self._defineAliasedIndexVBO()
@@ -358,11 +377,11 @@ class GLVertexArray():
         """Update the buffers on the graphics card.
         Only the index array.
         """
-        # getLogger().info('>>> updateIndexVBOIndices')
+        if _DEBUG:
+            getLogger().debug(f'-->  {self.__class__.__name__}.updateAliasedIndexVBOIndices')
 
-        # check the VBOs, if they don't exist raise error
         if self._indexVBO is None:
-            # raise RuntimeError('OpenGL Error: cannot update indexArray: %s' % self)
+            getLogger().debug(f'{self.__class__.__name__}.updateAliasedIndexVBOIndices: OpenGL Error - {self}')
             return
 
         self._indexVBO.set_array(self.indices)
@@ -374,12 +393,13 @@ class GLVertexArray():
         """Draw the vertex buffers in indexed array mode. Arrays are drawn from buffers already bound to graphics card memory.
         Indexed mode with vertices and colour.
         """
-        # getLogger().info('>>> drawIndexVBO')
+        if _DEBUG:
+            getLogger().debug(f'-->  {self.__class__.__name__}.drawAliasedIndexVBO')
 
         if not self.indices.size:
             return
         if self._indexVBO is None:
-            # raise RuntimeError('OpenGL Error: cannot draw IndexVBO: %s' % self)
+            getLogger().debug(f'{self.__class__.__name__}.drawAliasedIndexVBO: OpenGL Error - {self}')
             return
 
         if self.blendMode:
@@ -414,7 +434,8 @@ class GLVertexArray():
         """Draw the vertex buffers in indexed array mode. Arrays are copied from main memory each time.
         Indexed mode using only vertices, no colour.
         """
-        # getLogger().info('>>>drawIndexArrayNoColor')
+        if _DEBUG:
+            getLogger().debug(f'-->  {self.__class__.__name__}.drawAliasedIndexArrayNoColor')
 
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)
@@ -439,7 +460,8 @@ class GLVertexArray():
         """Draw the vertex buffers in direct array mode. Arrays are copied from main memory each time.
         Only vertices and colour required.
         """
-        # getLogger().info('>>> drawVertexColor')
+        if _DEBUG:
+            getLogger().debug(f'-->  {self.__class__.__name__}.drawVertexColor')
 
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)
@@ -468,19 +490,21 @@ class GLVertexArray():
             vertices:       (x, y) * vertices
             colors:         (R, G, B, a) * vertices
         """
-        # getLogger().info('>>> defineVertexColorVBO')
+        if _DEBUG:
+            getLogger().debug(f'-->  {self.__class__.__name__}.defineVertexColorVBO')
 
-        _float = np.array([], dtype=np.float32)
-        _int = np.array([], dtype=np.uint32)
-        self._vertexVBO = VBO.VBO(_float, usage=_USAGE)
-        self._colorVBO = VBO.VBO(_float, usage=_USAGE)
-
+        # create the VBOs if they don't exist - reusing will just rewrite the buffers
+        if self._vertexVBO is None:
+            _float = np.array([], dtype=np.float32)
+            self._vertexVBO = VBO(_float, usage=_USAGE)
+            self._colorVBO = VBO(_float, usage=_USAGE)
         self._defineVertexColorVBO()
 
     def _defineVertexColorVBO(self):
         """Push Colours/Vertices to graphics card
         """
-        # getLogger().info('>>> _defineVertexColorVBO')
+        if _DEBUG:
+            getLogger().debug(f'-->  {self.__class__.__name__}._defineVertexColorVBO')
 
         self._vertexVBO.set_array(self.vertices)
         self._vertexVBO.bind()
@@ -493,11 +517,11 @@ class GLVertexArray():
         """Update the buffers on the graphics card.
         Direct mode with vertices and colour.
         """
-        # getLogger().info('>>> updateVertexColorVBO')
+        if _DEBUG:
+            getLogger().debug(f'-->  {self.__class__.__name__}.updateVertexColorVBO')
 
-        # check the VBOs, if they don't exist raise error
         if self._vertexVBO is None:
-            # raise RuntimeError('OpenGL Error: cannot update vertexColorArray: %s' % self)
+            getLogger().debug(f'{self.__class__.__name__}.updateVertexColorVBO: OpenGL Error - {self}')
             return
 
         self._defineVertexColorVBO()
@@ -506,10 +530,11 @@ class GLVertexArray():
         """Draw the vertex buffers in direct array mode. Arrays are drawn from buffers already bound to graphics card memory.
         Only vertices and colour required.
         """
-        # getLogger().info('>>> drawVertexColorVBO')
+        if _DEBUG:
+            getLogger().debug(f'-->  {self.__class__.__name__}.drawVertexColorVBO')
 
         if self._vertexVBO is None:
-            # raise RuntimeError('OpenGL Error: cannot draw VertexColorVBO: %s' % self)
+            getLogger().debug(f'{self.__class__.__name__}.drawVertexColorVBO: OpenGL Error - {self}')
             return
 
         if self.blendMode:
@@ -538,7 +563,8 @@ class GLVertexArray():
         """Draw the vertex buffers in direct array mode. Arrays are copied from main memory each time.
         Only vertices are required.
         """
-        # getLogger().info('>>> drawVertexNoColor')
+        if _DEBUG:
+            getLogger().debug(f'-->  {self.__class__.__name__}.drawVertexNoColor')
 
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)
@@ -564,7 +590,8 @@ class GLVertexArray():
         """Draw the texture buffers in indexed array mode. Arrays are copied from main memory each time.
         Facilitates drawing of fonts.
         """
-        # getLogger().info('>>> drawTextArray')
+        if _DEBUG:
+            getLogger().debug(f'-->  {self.__class__.__name__}.drawTextArray')
 
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)
@@ -602,23 +629,25 @@ class GLVertexArray():
             texcoords       (u, v) * vertices
             attribs         (a, b) * vertices
         """
-        # getLogger().info('>>> defineTextArrayVBO')
+        if _DEBUG:
+            getLogger().debug(f'-->  {self.__class__.__name__}.defineTextArrayVBO')
 
         # create the VBOs if they don't exist - reusing will just rewrite the buffers
-        _float = np.array([], dtype=np.float32)
-        _int = np.array([], dtype=np.uint32)
-        self._vertexVBO = VBO.VBO(_float, usage=_USAGE)
-        self._colorVBO = VBO.VBO(_float, usage=_USAGE)
-        self._attribVBO = VBO.VBO(_float, usage=_USAGE)
-        self._textureVBO = VBO.VBO(_float, usage=_USAGE)
-        self._indexVBO = VBO.VBO(_int, usage=_USAGE, target=GL.GL_ELEMENT_ARRAY_BUFFER)
-
+        if self._vertexVBO is None:
+            _float = np.array([], dtype=np.float32)
+            _int = np.array([], dtype=np.uint32)
+            self._vertexVBO = VBO(_float, usage=_USAGE)
+            self._colorVBO = VBO(_float, usage=_USAGE)
+            self._attribVBO = VBO(_float, usage=_USAGE)
+            self._textureVBO = VBO(_float, usage=_USAGE)
+            self._indexVBO = VBO(_int, usage=_USAGE, target=GL.GL_ELEMENT_ARRAY_BUFFER)
         self._defineTextArrayVBO()
 
     def _defineTextArrayVBO(self):
         """Push vertices/colours/texture co-ordinates/attribs/indices to graphics card
         """
-        # getLogger().info('>>> _defineTextArrayVBO')
+        if _DEBUG:
+            getLogger().debug(f'-->  {self.__class__.__name__}._defineTextArrayVBO')
 
         self._vertexVBO.set_array(self.vertices)
         self._vertexVBO.bind()
@@ -638,11 +667,11 @@ class GLVertexArray():
         """Update the buffers on the graphics card.
         Indexed mode with vertices, colour, texture and attributes.
         """
-        # getLogger().info('>>> updateTextArrayVBO')
+        if _DEBUG:
+            getLogger().debug(f'-->  {self.__class__.__name__}.updateTextArrayVBO')
 
-        # check the VBOs, if they don't exist raise error
         if self._vertexVBO is None:
-            # raise RuntimeError('OpenGL Error: cannot update textArrayVBO: %s' % self)
+            getLogger().debug(f'{self.__class__.__name__}.updateTextArrayVBO: OpenGL Error - {self}')
             return
 
         self._defineTextArrayVBO()
@@ -651,11 +680,11 @@ class GLVertexArray():
         """Update the buffers on the graphics card.
         Only update the attributes used for moving text.
         """
-        # getLogger().info('>>> updateTextArrayVBOAttribs')
+        if _DEBUG:
+            getLogger().debug(f'-->  {self.__class__.__name__}.pushTextArrayVBOAttribs')
 
-        # check the VBOs, if they don't exist raise error
         if self._attribVBO is None:
-            # raise RuntimeError('OpenGL Error: cannot update textArrayVBOAttribs: %s' % self)
+            getLogger().debug(f'{self.__class__.__name__}.pushTextArrayVBOAttribs: OpenGL Error - {self}')
             return
 
         self._attribVBO.set_array(self.attribs)
@@ -667,11 +696,11 @@ class GLVertexArray():
         """Update the buffers on the graphics card.
         Only update the colour, used for highlighting text.
         """
-        # getLogger().info('>>> updateTextArrayVBOColour')
+        if _DEBUG:
+            getLogger().debug(f'-->  {self.__class__.__name__}.updateTextArrayVBOColour')
 
-        # check the VBOs, if they don't exist raise error
         if self._colorVBO is None:
-            # raise RuntimeError('OpenGL Error: cannot update textArrayVBOColour: %s' % self)
+            getLogger().debug(f'{self.__class__.__name__}.updateTextArrayVBOColour: OpenGL Error - {self}')
             return
 
         self._colorVBO.set_array(self.colors)
@@ -697,11 +726,11 @@ class GLVertexArray():
         """Draw the texture buffers in indexed array mode. Arrays are drawn from buffers already bound to graphics card memory.
         Indexed mode with vertices, colour, texture and attributes.
         """
-        # getLogger().info('>>> drawTextArrayVBO')
+        if _DEBUG:
+            getLogger().debug(f'-->  {self.__class__.__name__}.drawTextArrayVBO')
 
-        # check the VBOs, if they don't exist raise error
-        if self._indexVBO is None:
-            # raise RuntimeError('OpenGL Error: cannot drawTextArrayVBO: %s' % self)
+        if self._vertexVBO is None:
+            getLogger().debug(f'{self.__class__.__name__}.drawTextArrayVBO: OpenGL Error - {self}')
             return
 
         if self.blendMode:
@@ -738,18 +767,26 @@ class GLVertexArray():
             GL.glDisable(GL.GL_BLEND)
 
 
+#=========================================================================================
+# GLSymbolArray
+#=========================================================================================
+
 class GLSymbolArray(GLVertexArray):
     """
     Array class to handle symbols.
     """
 
     def __init__(self, GLContext=None, spectrumView=None, objListView=None):
-        super(GLSymbolArray, self).__init__(renderMode=GLRENDERMODE_REBUILD,
-                                            blendMode=False, drawMode=GL.GL_LINES,
-                                            dimension=2, GLContext=GLContext)
+        super().__init__(renderMode=GLRENDERMODE_REBUILD,
+                         blendMode=False, drawMode=GL.GL_LINES,
+                         dimension=2, GLContext=GLContext)
         self.spectrumView = spectrumView
         self.objListView = objListView
 
+
+#=========================================================================================
+# GLLabelArray
+#=========================================================================================
 
 class GLLabelArray(GLVertexArray):
     """
@@ -757,9 +794,9 @@ class GLLabelArray(GLVertexArray):
     """
 
     def __init__(self, GLContext=None, spectrumView=None, objListView=None):
-        super(GLLabelArray, self).__init__(renderMode=GLRENDERMODE_REBUILD,
-                                           blendMode=False, drawMode=GL.GL_LINES,
-                                           dimension=2, GLContext=GLContext)
+        super().__init__(renderMode=GLRENDERMODE_REBUILD,
+                         blendMode=False, drawMode=GL.GL_LINES,
+                         dimension=2, GLContext=GLContext)
         self.spectrumView = spectrumView
         self.objListView = objListView
         self.stringList = []

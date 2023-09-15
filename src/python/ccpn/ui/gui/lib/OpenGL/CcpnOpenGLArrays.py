@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-15 13:05:34 +0100 (Fri, September 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-15 14:57:47 +0100 (Fri, September 15, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -201,11 +201,11 @@ class GLVertexArray():
         # getLogger().info('>>> _defineIndexVBO')
 
         self._vertexVBO.set_array(self.vertices)
-        self._colorVBO.bind()
-        self._colorVBO.set_array(self.colors)
-        self._indexVBO.bind()
-        self._indexVBO.set_array(self.indices)
         self._vertexVBO.bind()
+        self._colorVBO.set_array(self.colors)
+        self._colorVBO.bind()
+        self._indexVBO.set_array(self.indices)
+        self._indexVBO.bind()
 
         GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
@@ -483,9 +483,9 @@ class GLVertexArray():
         # getLogger().info('>>> _defineVertexColorVBO')
 
         self._vertexVBO.set_array(self.vertices)
-        self._colorVBO.bind()
-        self._colorVBO.set_array(self.colors)
         self._vertexVBO.bind()
+        self._colorVBO.set_array(self.colors)
+        self._colorVBO.bind()
 
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
 
@@ -621,15 +621,15 @@ class GLVertexArray():
         # getLogger().info('>>> _defineTextArrayVBO')
 
         self._vertexVBO.set_array(self.vertices)
-        self._colorVBO.bind()
-        self._colorVBO.set_array(self.colors)
-        self._textureVBO.bind()
-        self._textureVBO.set_array(self.texcoords)
-        self._attribVBO.bind()
-        self._attribVBO.set_array(self.attribs)
-        self._indexVBO.bind()
-        self._indexVBO.set_array(self.indices)
         self._vertexVBO.bind()
+        self._colorVBO.set_array(self.colors)
+        self._colorVBO.bind()
+        self._textureVBO.set_array(self.texcoords)
+        self._textureVBO.bind()
+        self._attribVBO.set_array(self.attribs)
+        self._attribVBO.bind()
+        self._indexVBO.set_array(self.indices)
+        self._indexVBO.bind()
 
         GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)

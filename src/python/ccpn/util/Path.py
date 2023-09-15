@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-09-14 18:29:10 +0100 (Thu, September 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-15 11:32:45 +0100 (Fri, September 15, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -400,6 +400,24 @@ class Path(_Path_):
             _size = self.stat().st_size
 
         return _size
+
+    def isReadable(self) -> bool:
+        """
+        :return: True if self exists and is readable
+        """
+        return self.exists() and os.access(self.asString(), os.R_OK)
+
+    def isWriteable(self) -> bool:
+        """
+        :return: True if self exists and is writable
+        """
+        return self.exists() and os.access(self.asString(), os.W_OK)
+
+    def isExecutable(self) -> bool:
+        """
+        :return: True if self exists and is executable
+        """
+        return self.exists() and os.access(self.asString(), os.X_OK)
 
     def __len__(self):
         return len(self.asString())

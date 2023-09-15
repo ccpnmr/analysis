@@ -505,15 +505,19 @@ class TopObject(XmlLoaderABC):
                 if not self.package.path.exists():
                     self.package.path.mkdir(parents=True, exist_ok=False)
 
-                with self.path.open('w') as fp:
-                    saveToStream(fp, self.apiTopObject)
+                if not self.path.parent.isWriteable():
+                    raise PermissionError(f'No write permission for {self.path.parent}')
 
-                if updateIsModified:
-                    # make sure that isModified is not updated if the file is not saved
-                    forceSetattr(self.apiTopObject, 'isModified', False)
+            except (PermissionError, FileNotFoundError) as es:
+                self.logger.info(f'Saving: {es}')
+                return
 
-            except (PermissionError, FileNotFoundError):
-                self.logger.info('Saving: folder may be read-only')
+            with self.path.saveWriteToFile(mode='w', overwrite=True) as fp:
+                saveToStream(fp, self.apiTopObject)
+
+            if updateIsModified:
+                # make sure that isModified is not updated if the file is not saved
+                forceSetattr(self.apiTopObject, 'isModified', False)
 
             self.isLoaded = True  # xml-file reflects contents
 

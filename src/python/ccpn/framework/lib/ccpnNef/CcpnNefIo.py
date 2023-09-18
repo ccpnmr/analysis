@@ -7160,6 +7160,7 @@ class CcpnNefReader(CcpnNefContent):
             if loop:
                 importer = self.importers[loopName]
                 importer(self, result, loop, saveFrame)
+        return result
 
     #
     importers['ccpn_substance'] = load_ccpn_substance

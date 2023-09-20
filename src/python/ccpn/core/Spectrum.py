@@ -54,7 +54,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-08-02 14:32:01 +0100 (Wed, August 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-20 17:53:24 +0100 (Wed, September 20, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -3314,12 +3314,19 @@ class Spectrum(AbstractWrapperObject):
         """Update any setting before saving to API XML
         #CCPNINTERNAL: called in Project.save()
         """
-        # The is needed as nef-initiated loading may have scuppered the
-        # references to the internal data
-        self._spectrumTraits._storeToSpectrum()
-        # if self._wrappedData.isModified:
-        # NOTE:ED - metadata may not have been saved if project was read-only
-        self._saveSpectrumMetaData()
+        try:
+            # The is needed as nef-initiated loading may have scuppered the
+            # references to the internal data
+            self._spectrumTraits._storeToSpectrum()
+        except Exception as es:
+            raise RuntimeError(f'Storing Spectrum parameters failed with: {es}')
+
+        try:
+            # if self._wrappedData.isModified:
+            # NOTE:ED - metadata may not have been saved if project was read-only
+            self._saveSpectrumMetaData()
+        except Exception as es:
+            raise RuntimeError(f'Saving Spectrum meta data to disk failed with: {es}')
 
     # @classmethod
     # def _restoreObject(cls, project, apiObj):

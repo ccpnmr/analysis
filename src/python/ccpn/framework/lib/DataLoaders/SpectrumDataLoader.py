@@ -19,8 +19,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:40 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-09-21 08:59:26 +0100 (Thu, September 21, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -197,3 +197,9 @@ class JcampSpectrumLoader(SpectrumDataLoaderABC):
     from ccpn.core.lib.SpectrumDataSources.JcampSpectrumDataSource import JcampSpectrumDataSource
     spectumDataSourceClass = JcampSpectrumDataSource
 JcampSpectrumLoader._initClass()   # also registers
+
+
+class JeolSpectrumLoader(SpectrumDataLoaderABC):
+    from ccpn.core.lib.SpectrumDataSources.JeolSpectrumDataSource import JeolSpectrumDataSource
+    spectumDataSourceClass = JeolSpectrumDataSource
+JeolSpectrumLoader._initClass()   # also registers

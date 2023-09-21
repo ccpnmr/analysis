@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-08-01 16:52:31 +0100 (Tue, August 01, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-21 08:59:26 +0100 (Thu, September 21, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -106,6 +106,11 @@ DATA_TYPE_COMPLEX_nRnI = '(nR)(nI)' # n real followed by n imag points; pointCou
 DATA_TYPE_COMPLEX_nRI  = 'n(RI)'  # n (real, imag) pairs; pointCount = 2*n
 DATA_TYPE_COMPLEX_PN   = 'n(PN)'   # n (P, N) pairs; pointCount = 2*n
 DATA_TYPES = (DATA_TYPE_REAL, DATA_TYPE_COMPLEX_nRnI, DATA_TYPE_COMPLEX_nRI, DATA_TYPE_COMPLEX_PN)
+
+def isComplexDataType(dataType):
+    """:return True if dataType is not real
+    """
+    return dataType != DATA_TYPE_REAL
 
 MagnetisationTransferTypes = ('onebond', 'Jcoupling', 'Jmultibond', 'relayed', 'through-space', 'relayed-alternate')
 MagnetisationTransferParameters = ('dimension1 dimension2 transferType isIndirect'.split())

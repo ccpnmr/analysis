@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-28 17:24:46 +0100 (Fri, July 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-21 08:59:26 +0100 (Thu, September 21, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -212,7 +212,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
             # map the quad types
             _quadTypes = self.header.getParameterValue('quadType')
             self.dataTypes = [dataTypeMap.get(v, DATA_TYPE_REAL) for v in _quadTypes]
-            self.isComplex = [v != DATA_TYPE_REAL for v in self.dataTypes]
+            self.isComplex = [specLib.isComplexDataType(v) for v in self.dataTypes]
 
             _pointCounts = self.header.getParameterValue('pointCounts')
             # correction for complex types required here

@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-07-28 17:24:46 +0100 (Fri, July 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-21 08:59:26 +0100 (Thu, September 21, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -156,6 +156,7 @@ def getDataFormats() -> OrderedDict:
     from ccpn.core.lib.SpectrumDataSources.NmrViewSpectrumDataSource import NmrViewSpectrumDataSource
     from ccpn.core.lib.SpectrumDataSources.JcampSpectrumDataSource import JcampSpectrumDataSource
     from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
+    from ccpn.core.lib.SpectrumDataSources.JeolSpectrumDataSource import JeolSpectrumDataSource
     return SpectrumDataSourceABC._spectrumDataFormats
 
 
@@ -301,6 +302,11 @@ class SpectrumDataSourceABC(CcpNmrJson):
     # spectrumAttribute: name of corresponding attribute in Spectrum class
     # hasSetterInSpectrumClass: bool: corresponding attribute in Spectrum class can be set
     date = CString(allow_none=True, default_value=None).tag(isDimensional=False,
+                                                            doCopy=True,
+                                                            spectrumAttribute=None,
+                                                            hasSetterInSpectrumClass=False
+                                                            )
+    user = CString(allow_none=True, default_value=None).tag(isDimensional=False,
                                                             doCopy=True,
                                                             spectrumAttribute=None,
                                                             hasSetterInSpectrumClass=False
@@ -1113,14 +1119,19 @@ class SpectrumDataSourceABC(CcpNmrJson):
         nBlocks = [1 + (self.pointCounts[dim] - 1) // self.blockSizes[dim] for dim in range(self.dimensionCount)]
         return nBlocks
 
-    def _pointsToBlocksPerDimension(self, zPoints):
-        """returns list of (block-index, block-offset) tuples (zero-based) corresponding to zPoints (zero-based)"""
+    def _pointsToBlocksPerDimension(self, points) -> list[tuple]:
+        """
+        :param points: an n-dimensional points vector (zero-based)
+        :returns list of (block-index, block-offset) tuples (zero-based) corresponding to points (zero-based)
+        """
         return [(p // self.blockSizes[i],
                  p % self.blockSizes[i]
-                 ) for i, p in enumerate(zPoints)]
+                 ) for i, p in enumerate(points)]
 
     def _pointsToAbsoluteBlockIndex(self, points):
-        """Returns absolute block index corresponding to points (zero-based)
+        """
+        :param points: an n-dimensional points vector (zero-based)
+        :returns absolute block index corresponding to points (zero-based)
 
             absIndex =   Ia * Nz * Ny * Nx  +  Iz * Ny * Nx  +  Iy * Nx  +  Ix
                      = ((Ia * Nz + Iz) * Ny + Iy) * Nx + Ix
@@ -1129,14 +1140,14 @@ class SpectrumDataSourceABC(CcpNmrJson):
             Nx,y,z,a is number of blocks along x, y, z, a
 
         """
-        blockIndex = [idx for idx, _t in self._pointsToBlocksPerDimension(points)]
+        blockIndices = [idx for idx, _t in self._pointsToBlocksPerDimension(points)]
         numBlocks = self._numBlocksPerDimension
         # start at the highest dimension
         dim = self.dimensionCount - 1
-        absIndex = blockIndex[dim]
+        absIndex = blockIndices[dim]
         dim -= 1
         while dim >= 0:
-            absIndex = absIndex * numBlocks[dim] + blockIndex[dim]
+            absIndex = absIndex * numBlocks[dim] + blockIndices[dim]
             dim -= 1
         return absIndex
 
@@ -1152,15 +1163,24 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """return the numpy dtype string based on settings"""
         return '%s%s%s' % (self.isBigEndian and '>' or '<', self.isFloatData and 'f' or 'i', self.wordSize)
 
-    @cached(_BLOCK_CACHE, debug=False, doSignatureExpansion=False)
-    def _readBlockFromFile(self, absoluteBlockIndex):
-        """Read block at absoluteBlockIndex; separate routine for caching reasons
-        Return NumPy array
+    def _getBlockOffset(self, absoluteBlockIndex):
+        """Calculate the block offset
+        :param absoluteBlockIndex: absolute index of the block to calculate the offset
+        :return offset in Bytes
         """
         offset = (self.headerSize +
                   self._totalBlockSize * absoluteBlockIndex
                   ) * self.wordSize  # offset in bytes
-        self.fp.seek(offset, 0)
+        return offset
+
+    @cached(_BLOCK_CACHE, debug=False, doSignatureExpansion=False)
+    def _readBlockFromFile(self, absoluteBlockIndex):
+        """Read block at absoluteBlockIndex;
+        separate routine for caching reasons
+        :param absoluteBlockIndex: absolute index of the block to read
+        :return NumPy array
+        """
+        self.fp.seek(self._getBlockOffset(absoluteBlockIndex), 0)
         # dtype = '%s%s%s' % (self.isBigEndian and '>' or '<', self.isFloatData and 'f' or 'i', self.wordSize)
         blockdata = numpy.fromfile(file=self.fp, dtype=self.dtype, count=self._totalBlockSize)
         return self._convertBlockData(blockdata)
@@ -1501,10 +1521,10 @@ class SpectrumDataSourceABC(CcpNmrJson):
         if self.hasOpenFile():
             self.closeFile()
 
-
         try:
             self._checkFilePath(newFile, mode)
-            self.fp = self.openMethod(str(self.path), mode, **kwds)
+            _p = self.path.asString()
+            self.fp = self.openMethod(_p, mode, **kwds)
             self.mode = mode
 
         except Exception as es:

@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-09-21 08:59:26 +0100 (Thu, September 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-25 19:40:54 +0100 (Mon, September 25, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -32,6 +32,7 @@ __date__ = "$Date: 2023-09-18 10:28:48 +0000 (Mon, September 18, 2023) $"
 import numpy as np
 import io
 import math
+from typing import Sequence
 
 from ccpn.util.Path import Path, aPath, home
 from ccpn.util.Common import flatten
@@ -44,6 +45,8 @@ import ccpn.core.lib.SpectrumLib as specLib
 
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
 from ccpn.core.lib.SpectrumDataSources.lib.BinaryHeader import BinaryHeader
+from ccpn.core._implementation.SpectrumData import SliceData, PlaneData, RegionData
+
 
 WORD_SIZE = 4
 MAX_BYTES = 1360
@@ -80,12 +83,14 @@ DATA_AXIS_TYPE_NOTUSED = 0
 DATA_AXIS_TYPE_REAL = 1
 DATA_AXIS_TYPE_TPPI = 2
 DATA_AXIS_TYPE_COMPLEX = 3
+DATA_AXIS_TYPE_REAL_COMPLEX = 4
 
 dataTypeMap = {
     DATA_AXIS_TYPE_NOTUSED : specLib.DATA_TYPE_REAL,
     DATA_AXIS_TYPE_REAL : specLib.DATA_TYPE_REAL,
     DATA_AXIS_TYPE_TPPI : specLib.DATA_TYPE_REAL,
-    DATA_AXIS_TYPE_COMPLEX : specLib.DATA_TYPE_COMPLEX_nRnI
+    DATA_AXIS_TYPE_COMPLEX : specLib.DATA_TYPE_COMPLEX_nRnI,
+    DATA_AXIS_TYPE_REAL_COMPLEX : specLib.DATA_TYPE_REAL,  # A sillt definition: complex for dim=0, real otherwise
 }
 
 UNITS_HZ = 13
@@ -154,6 +159,8 @@ class JeolSpectrumDataSource(SpectrumDataSourceABC):
     defaultOpenReadMode = 'rb'
 
     _dataIs32Bit = CBool(default_value=False).tag(info='data is stored as 32 bit')
+    _dataScaleIsDefined = CBool(default_value=True).tag(info='dataScale has been defined (on basis of noise original data)')
+
     _dataOffsetBytes = CInt(default_value=None, allow_none=True).tag(info='offset in Bytes for start of data')
     _dataTotalBytes = CInt(default_value=None, allow_none=True).tag(info='Total number of data Bytes')
 
@@ -180,6 +187,14 @@ class JeolSpectrumDataSource(SpectrumDataSourceABC):
                               hasSetterInSpectrumClass=False
                              )
 
+    _dataZeroPoints =  CList(trait=CFloat(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+                              info='zero points along each dimension',
+                              isDimensional=True,
+                              doCopy=False,
+                              spectrumAttribute=None,
+                              hasSetterInSpectrumClass=False
+                             )
+
     def readParameters(self):
         """Read the parameters from the Jeol file header
         Returns self
@@ -194,10 +209,11 @@ class JeolSpectrumDataSource(SpectrumDataSourceABC):
 
             header = self.header = JeolHeader(self.headerSize, self.wordSize).read(self.fp)
 
+            # CHeck some crucial values in the header (according to documentation)
             if (jeolStr := header.bytesToString(0, 8)) != 'JEOL.NMR' or \
                (majorVersion := header.bytes[9:10].view(dtype='>B'))[0] != 1 or \
                (minorVersion := header.bytes[10:12].view(dtype='>H')[0]) != 2:
-                raise RuntimeError('Felix file %s appears to be corrupted' % self.path)
+                raise RuntimeError('Jeol file %s appears to be corrupted' % self.path)
 
             #ndim
             self.dimensionCount =  header.bytes[12:13].view('>B')[0]
@@ -209,13 +225,18 @@ class JeolSpectrumDataSource(SpectrumDataSourceABC):
             self.user = header.bytesToString(552, 680, strip=True)
             #
             #comment
-            self.comment = header.bytesToString(680, 808, strip=True)
+            self.comment = 'Comment: ' + header.bytesToString(680, 808, strip=True) + \
+                           '; Title: ' + header.bytesToString(48, 48+124, strip=True)
 
             #-------------------------------------------------------------------------------------------------
             # Data related
             #-------------------------------------------------------------------------------------------------
             # data little endian
             self.isBigEndian = not bool(header.bytes[9].view(dtype='>B'))
+
+            # Reading parameters implies resetting the data scaling and doing this again
+            self.dataScale = 1.0
+            self._dataScaleIsDefined = False
 
             # Byte 14: upper 2 bits; 32 bit or 64 bit
             self._dataIs32Bit = bool(header.bytes[14].view(dtype='>B') & 0b11000000)
@@ -245,6 +266,9 @@ class JeolSpectrumDataSource(SpectrumDataSourceABC):
             _data_axis_types = header.bytes[24:32].view(dtype='>B')
             # print('data_axis_types:  ', data_axis_types)
             self.dataTypes = [dataTypeMap.get(t, specLib.DATA_TYPE_REAL) for t in _data_axis_types]
+            # correct for silly _REAL_COMPLEX type definition
+            if _data_axis_types[0] == DATA_AXIS_TYPE_REAL_COMPLEX:
+                self.dataTypes[0] = specLib.DATA_TYPE_COMPLEX_nRnI
             self.isComplex = [specLib.isComplexDataType(dt) for dt in self.dataTypes]
 
             _points = header.bytes[176:208].view(dtype='>i')
@@ -279,6 +303,9 @@ class JeolSpectrumDataSource(SpectrumDataSourceABC):
             # print('data_stop:    ', data_stop)
             self._dataRanges = [t if data_ranged[i]==0 else None for i,t in enumerate(zip(data_start, data_stop))]
 
+            # GWV: This is related to the reference values
+            _dataZeroPoints = [float(val)+0.5 for val in header.bytes[1128:1192].view(dtype='>d')]
+
             # GWV: reconstruct (best guess) spectralwiths
             for i, dRange, dValidPoints, np in zip(range(self.dimensionCount), self._dataRanges, self._dataValidPoints, self.realPointCounts):
                 if dRange is None or dValidPoints is None:
@@ -293,9 +320,13 @@ class JeolSpectrumDataSource(SpectrumDataSourceABC):
 
                 elif dimension_units[i] == UNITS_HZ:
                     sw = _drange
+                    self.referencePoints[i] = _dataZeroPoints[i] * self.realPointCounts[i]
+                    self.referenceValues[i] = 0.0
 
                 elif dimension_units[i] == UNITS_PPM:
                     sw = _drange * self.spectrometerFrequencies[i]
+                    self.referencePoints[i] = 1
+                    self.referenceValues[i] = dRange[0]
 
                 else:
                     getLogger().warning(f'Unable to derive spectral width for dimension {i+1}; (unite={dimension_units[i]}')
@@ -306,9 +337,6 @@ class JeolSpectrumDataSource(SpectrumDataSourceABC):
                 sw *= float(np) / float(_nvp)
                 self.spectralWidthsHz[i] = sw
 
-            # GWV: This might be the reference values, but not sure
-            zero_point = [float(val) for val in header.bytes[1128:1192].view(dtype='>d')]
-            # print('zero_point:       ', zero_point)
 
             #-------------------------------------------------------------------------------------------------
 
@@ -430,6 +458,56 @@ class JeolSpectrumDataSource(SpectrumDataSourceABC):
         offset = self._dataOffsetBytes + \
                  absoluteBlockIndex * self._totalBlockSize * wordSize  # offset in bytes
         return offset
+
+    def _setDataScale(self, data, noiseLevel):
+        """Helper function to set the dataScale parameter based on data and noiseLevel
+        :return data scaled by new self.dataScale
+        """
+        self.dataScale = 1.0
+        while 0.0 < noiseLevel < 1.0:
+            self.dataScale *= 10.0
+            noiseLevel *= 10.0
+        self._dataScaleIsDefined = True
+        self.noiseLevel = noiseLevel
+        data *= self.dataScale
+        return data
+
+    def getSliceData(self, position: Sequence = None, sliceDim: int = 1) -> SliceData:
+        """Get slice defined by sliceDim and position
+
+        Subclassed to check for scaling based on the noise level on first usage,
+        as values appear to be very small in the original data.
+
+        :param position: position vector (1-based)
+        :param sliceDim: dimension to take the slice (1-based)
+        :return: SliceData instance
+        """
+
+        data = super().getSliceData(position=position, sliceDim=sliceDim)
+        if not self._dataScaleIsDefined:
+            noiseLevel, _tmp = specLib.estimateNoiseLevel1D(data)
+            data = self._setDataScale(data, noiseLevel)
+        return data
+
+    def getPlaneData(self, position: Sequence = None, xDim: int = 1, yDim: int = 2) -> PlaneData:
+        """Get plane defined by xDim, yDim and position
+        Check for hdf5buffer first, then blocked format
+
+        Subclassed to check for scaling based on the noise level on first usage,
+        as values appear to be very small in the original data.
+
+        :param position: position vector (1-based)
+        :param xDim: first dimension of the plane (1-based)
+        :param yDim: second dimension of the plane (1-based)
+        :return PlaneData instance (i.e. numpy.ndarray).
+        """
+
+        data = super().getPlaneData(position=position, xDim=xDim, yDim=yDim)
+        if not self._dataScaleIsDefined:
+            noiseLevel, _tmp = specLib.estimateNoiseLevelnD(data, stdFactor=0.5)
+            data = self._setDataScale(data, noiseLevel)
+        return data
+
 
 # Register the format
 JeolSpectrumDataSource._registerFormat()

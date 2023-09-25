@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-09-21 08:59:26 +0100 (Thu, September 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-25 19:40:55 +0100 (Mon, September 25, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -1588,6 +1588,28 @@ class _1DRawDataDict(dict):
         getLogger().info('Building 1D raw data dictionary. Completed')
 
 
+def estimateNoiseLevelnD(data, stdFactor=0.5) -> Tuple[float, float]:
+    """
+
+    :param data: the data of the spectrum to examine
+    :param stdFactor: number of times the std of the data
+    :return: (noiseMax, noiseMin) of estimated noise threshold
+    """
+    data = data.flatten()
+    absData = np.array([v for v in map(abs, data)])
+    absData = absData[np.isfinite(absData)]
+    median = float(np.median(absData))
+    _temp = data[np.isfinite(data)].astype(np.float64)
+    std = np.std(_temp)
+    if std != std:
+        # std may still be nan because contains HUGE numbers
+        std = 0.0
+    std = float(std)
+    eMax = median + stdFactor * std
+    eMin = median - stdFactor * std
+    return (eMax, eMin)
+
+
 def estimateNoiseLevel1D(y, f=10, stdFactor=0.5) -> Tuple[float, float]:
     """
 
@@ -1599,8 +1621,8 @@ def estimateNoiseLevel1D(y, f=10, stdFactor=0.5) -> Tuple[float, float]:
     from ccpn.util.Common import percentage
     eMax, eMin = 0, 0
     if stdFactor == 0:
-        stdFactor = 1
         getLogger().warning('stdFactor of value zero is not allowed.')
+        stdFactor = 1.0
     if y is None:
         return eMax, eMin
     percent = percentage(f, int(len(y)))

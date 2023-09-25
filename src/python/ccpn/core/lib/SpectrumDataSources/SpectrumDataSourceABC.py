@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-09-21 08:59:26 +0100 (Thu, September 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-25 19:40:55 +0100 (Mon, September 25, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -1720,11 +1720,13 @@ class SpectrumDataSourceABC(CcpNmrJson):
         return position
 
     def getPlaneData(self, position: Sequence = None, xDim: int = 1, yDim: int = 2) -> PlaneData:
-        """Get plane defined by xDim, yDim and position (all 1-based)
+        """Get plane defined by xDim, yDim and position
         Check for hdf5buffer first, then blocked format
-        Optionally to be subclassed
 
-        :return PlaneData (i.e. numpy.ndarray) object.
+        :param position: position vector (1-based)
+        :param xDim: first dimension of the plane (1-based)
+        :param yDim: second dimension of the plane (1-based)
+        :return PlaneData instance (i.e. numpy.ndarray).
         """
 
         if self.isBuffered:
@@ -1773,9 +1775,10 @@ class SpectrumDataSourceABC(CcpNmrJson):
     def getSliceData(self, position: Sequence = None, sliceDim: int = 1) -> SliceData:
         """Get slice defined by sliceDim and position (all 1-based)
         Check for hdf5buffer first, then blocked format
-        Optionally to be subclassed
 
-        :return SliceData object (i.e. a numpy.ndarray) object
+        :param position: position vector (1-based)
+        :param sliceDim: dimension to take the slice (1-based)
+        :return: SliceData instance
         """
         if self.isBuffered:
             self._checkBuffer()
@@ -2036,43 +2039,41 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         return regionData
 
-    def estimateNoise(self):
+    def estimateNoise(self) -> float:
         """Estimate and return a noise level
-        Use mean of abs of dataPlane or dataSlice
+        1D:
+        nD: Use mean of abs of dataPlane
         """
 
         if self.dimensionCount == 1:
-            from ccpn.core.lib.SpectrumLib import estimateNoiseLevel1D
             data = self.getSliceData()
-            noiseLevel, neg = estimateNoiseLevel1D(data, f=3, stdFactor = 1.5)
-            self.noiseLevel = noiseLevel
-            return noiseLevel
+            self.noiseLevel, _tmp = specLib.estimateNoiseLevel1D(data)
+            return self.noiseLevel
 
         elif self.dimensionCount == 2:
             # 2D: presumably t has data (and potentially water!)
             data =self.getPlaneData()
-            data.flatten()
-            stdFactor = 0.5
+            self.noiseLevel, _tmp = specLib.estimateNoiseLevelnD(data, stdFactor = 0.5)
 
         else:
             # 3D and up: use a yz-plane, about 10 points in; this plane is likely mostly empty
             position = [min(10, self.pointCounts[0])] + [1] * (self.dimensionCount-1)
             data = self.getPlaneData(xDim=specLib.Y_DIM, yDim=specLib.Z_DIM, position=position)
-            data = data.flatten()
-            stdFactor = 2.0
+            self.noiseLevel, _tmp = specLib.estimateNoiseLevelnD(data, stdFactor = 2.0)
+            # stdFactor = 2.0
+        #
+        # absData = numpy.array([v for v in map(abs, data)])
+        # absData = absData[numpy.isfinite(absData)]
+        # median = numpy.median(absData)
+        # _temp = data[numpy.isfinite(data)].astype(numpy.float64)
+        # std = numpy.std(_temp)
+        # if std != std:
+        #     # std may still be nan because contains HUGE numbers
+        #     std = 0
+        # noiseLevel = median + stdFactor * std
+        # self.noiseLevel = noiseLevel
 
-        absData = numpy.array([v for v in map(abs, data)])
-        absData = absData[numpy.isfinite(absData)]
-        median = numpy.median(absData)
-        _temp = data[numpy.isfinite(data)].astype(numpy.float64)
-        std = numpy.std(_temp)
-        if std != std:
-            # std may still be nan because contains HUGE numbers
-            std = 0
-        noiseLevel = median + stdFactor * std
-        self.noiseLevel = noiseLevel
-
-        return noiseLevel
+        return self.noiseLevel
 
     #=========================================================================================
     # Iterators

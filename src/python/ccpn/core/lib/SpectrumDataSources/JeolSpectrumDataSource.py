@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-09-25 19:40:54 +0100 (Mon, September 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-25 19:54:36 +0100 (Mon, September 25, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -320,12 +320,12 @@ class JeolSpectrumDataSource(SpectrumDataSourceABC):
 
                 elif dimension_units[i] == UNITS_HZ:
                     sw = _drange
-                    self.referencePoints[i] = _dataZeroPoints[i] * self.realPointCounts[i]
+                    self.referencePoints[i] = int(_dataZeroPoints[i] * _nvp)
                     self.referenceValues[i] = 0.0
 
                 elif dimension_units[i] == UNITS_PPM:
                     sw = _drange * self.spectrometerFrequencies[i]
-                    self.referencePoints[i] = 1
+                    self.referencePoints[i] = dValidPoints[0] + 1  # one-based
                     self.referenceValues[i] = dRange[0]
 
                 else:

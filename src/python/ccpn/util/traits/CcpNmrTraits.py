@@ -8,7 +8,7 @@ CcpNmr version of the Trailets; all subclassed for added functionalities:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
@@ -21,8 +21,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-16 16:19:26 +0000 (Wed, March 16, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-09-26 18:36:14 +0100 (Tue, September 26, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -40,8 +40,8 @@ from traitlets import \
     Long, Complex, CComplex, Bytes, CBytes, \
     ObjectName, DottedObjectName, \
     Type, This, ForwardDeclaredInstance, ForwardDeclaredType, \
-    Enum, CaselessStrEnum, TCPAddress, CRegExp, \
-    TraitType, default, validate, observe, Undefined, HasTraits, TraitError
+    CaselessStrEnum, TCPAddress, CRegExp, \
+    TraitType, default, validate, observe, Undefined, HasTraits, TraitError, All
 
 from traitlets import Any as _Any
 from traitlets import Instance as _Instance
@@ -53,6 +53,7 @@ from traitlets import Unicode as _Unicode
 from traitlets import CUnicode as _CUnicode
 from traitlets import Bool as _Bool
 from traitlets import CBool as _CBool
+from traitlets import Enum as _Enum
 
 from traitlets import List as _List
 from traitlets import Set as _Set
@@ -98,11 +99,22 @@ class Int(_Int, _Ordered):
         _Int.__init__(self, *args, **kwargs)
         _Ordered.__init__(self)
 
+    def info(self):
+        """:return info string
+        """
+        _limits = ''
+        if self.max or self.min:
+            _min = 'minInt' if self.min is None else str(self.min)
+            _max = 'maxInt' if self.max is None else str(self.max)
+            _limits = f' between ({_min},{_max})'
+        return f'an int{_limits}'
 
-class CInt(_CInt, _Ordered):
-    def __init__(self, *args, **kwargs):
-        _CInt.__init__(self, *args, **kwargs)
-        _Ordered.__init__(self)
+
+class CInt(Int):
+    """A casting version of the int trait.
+    """
+    def validate(self, obj, value):
+        return _CInt.validate(self, obj, value)
 
 
 class Float(_Float, _Ordered):
@@ -111,10 +123,11 @@ class Float(_Float, _Ordered):
         _Ordered.__init__(self)
 
 
-class CFloat(_CFloat, _Ordered):
-    def __init__(self, *args, **kwargs):
-        _CFloat.__init__(self, *args, **kwargs)
-        _Ordered.__init__(self)
+class CFloat(Float):
+    """A casting version of the float trait.
+    """
+    def validate(self, obj, value):
+        return _CFloat.validate(self, obj, value)
 
 
 class Unicode(_Unicode, _Ordered):
@@ -123,10 +136,11 @@ class Unicode(_Unicode, _Ordered):
         _Ordered.__init__(self)
 
 
-class CUnicode(_CUnicode, _Ordered):
-    def __init__(self, *args, **kwargs):
-        _CUnicode.__init__(self, *args, **kwargs)
-        _Ordered.__init__(self)
+class CUnicode(Unicode):
+    """A casting version of the Unicode trait; i.e. any value is converted to str
+    """
+    def validate(self, obj, value):
+        return _CUnicode.validate(self, obj, value)
 
 
 class Bool(_Bool, _Ordered):
@@ -135,14 +149,25 @@ class Bool(_Bool, _Ordered):
         _Ordered.__init__(self)
 
 
-class CBool(_CBool, _Ordered):
-    def __init__(self, *args, **kwargs):
-        _CBool.__init__(self, *args, **kwargs)
+class CBool(Bool):
+    """A casting version of the Bool trait.
+    """
+    def validate(self, obj, value):
+        return _CBool.validate(self, obj, value)
+
+
+class Enum(_Enum, _Ordered):
+    """Enum trait; ordered version
+    """
+    def __init__(self, values, default_value=Undefined, **kwargs):
+        _Enum.__init__(self, values=tuple(values), default_value=default_value, **kwargs)
         _Ordered.__init__(self)
 
 
 class List(_List, _Ordered):
-    """Fixing default_value problem"""
+    """List-trait, ordered version
+    Fixing default_value problem
+    """
 
     def __init__(self, trait=None, default_value=[], minlen=0, maxlen=sys.maxsize, **kwargs):
         _List.__init__(self, trait=trait, default_value=default_value, minlen=minlen, maxlen=maxlen, **kwargs)
@@ -151,19 +176,22 @@ class List(_List, _Ordered):
             self.default_value = default_value
 
 
-class CList(List, _Ordered):
+class CList(List):
     """Casting list, any iterable"""
 
-    def validate(self, obj, values):
+    def validate(self, obj, value):
         # local import, because isotopeRecords in Common cause circular imports £%%$$GRr
         from ccpn.util.Common import isIterable
 
-        if isinstance(values, list):
+        if isinstance(value, list):
             pass
-        elif isIterable(values):
-            values = [val for val in values]
-        values = self.validate_elements(obj, values)
-        return values
+        elif isIterable(value):
+            value = [val for val in value]
+        else:
+            raise ValueError(f'{obj.__class__.__name__}.{self.name}: cannot set to {value}; expected list or iterable')
+
+        value = self.validate_elements(obj, value)
+        return value
 
 
 class RecursiveList(List):

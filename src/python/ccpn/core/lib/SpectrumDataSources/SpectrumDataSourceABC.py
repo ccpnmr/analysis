@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-09-25 19:40:55 +0100 (Mon, September 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-26 18:37:07 +0100 (Tue, September 26, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -128,7 +128,7 @@ from ccpn.util.decorators import singleton
 
 from ccpn.util.isotopes import findNucleiFromSpectrometerFrequencies, Nucleus
 from ccpn.util.traits.CcpNmrTraits import CFloat, CInt, CBool, Bool, List, \
-    CString, CList, CPath, Any
+    CString, CList, CPath, Any, Enum, observe, All
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson
 
 from ccpn.framework.constants import CCPNMR_PREFIX, NO_SUFFIX, ANY_SUFFIX
@@ -389,8 +389,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
             spectrumAttribute='dimensionTypes',
             hasSetterInSpectrumClass=True
             )
-    dataTypes = CList(trait=CString(), default_value=[specLib.DATA_TYPE_REAL] * MAXDIM, maxlen=MAXDIM).tag(
-            info='Data type identifier (nR, (nR)(nI), n(RI), n(PN)) along each dimension',
+    dataTypes = CList(trait=Enum(specLib.DATA_TYPES), default_value=[specLib.DATA_TYPE_REAL] * MAXDIM, maxlen=MAXDIM, eventful=True).tag(
+            info=f'Data type identifier, i.e. {specLib.DATA_TYPES}, along each dimension',
             isDimensional=True,
             doCopy=True,
             spectrumAttribute=None,
@@ -402,6 +402,18 @@ class SpectrumDataSourceABC(CcpNmrJson):
             spectrumAttribute='isComplex',
             hasSetterInSpectrumClass=True
             )
+    # GWV: this appears not to be working
+    # @observe('dataTypes', type=All)
+    # def _dataTypesChanged(self, changes):
+    #     """Adjust isComplex if dataTypes is changed
+    #     """
+    #     for change in changes:
+    #         idx = change['index']
+    #         newValue = change['new']
+    #         if not (0 <= idx < self.dimensionCount):
+    #             raise IndexError(f'dataTypes: Invalid index ({idx}; cannot change isComplex')
+    #         self.isComplex[idx] = specLib.isComplexDataType(newValue)
+
     _tmp = [False] * MAXDIM; _tmp[0] = True
     isAcquisition = CList(trait=CBool(), default_value=_tmp, maxlen=MAXDIM).tag(
             isDimensional=True,
@@ -1280,11 +1292,6 @@ class SpectrumDataSourceABC(CcpNmrJson):
         xDim -= 1
         yDim -= 1
         points = [p - 1 for p in position]
-
-        # # create the array with zeros
-        # pointCounts = (self.pointCounts[yDim], self.pointCounts[xDim])  # y,x ordering
-        # # data = numpy.zeros(pointCounts, dtype=self.dataType)
-        # data = PlaneData(dataSource=self, dimensions=dimensions, position=position)
 
         # we are reading nD blocks; need to slice across these with depth of 1 in non-plane dims and a
         # size of blockSizes[xDim], blockSizes[yDim] along the xDim,yDim (set dynamically during the looping)
@@ -2398,6 +2405,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
             return f'<{self.__class__.__name__}: {self._fileInfoString3}, ({fpStatus},{pathName!r})>'
 #end class
+
 
 def _fillSlice(sliceData, start, stop, aliasing, resultSlice=None):
     """Helper function for _getRegionData.

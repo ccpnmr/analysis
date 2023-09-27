@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-09-26 18:36:14 +0100 (Tue, September 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-27 11:16:56 +0100 (Wed, September 27, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -67,6 +67,7 @@ from ccpn.util.Path import aPath, Path
 from ccpn.util.Logging import getLogger
 
 from ccpn.framework.Application import getApplication
+
 
 class _Ordered(object):
     """A class that maintains and sets trait-order
@@ -160,8 +161,23 @@ class Enum(_Enum, _Ordered):
     """Enum trait; ordered version
     """
     def __init__(self, values, default_value=Undefined, **kwargs):
+        # local import, because isotopeRecords in Common cause circular imports £%%$$GRr
+        from ccpn.util.Common import isIterable
+        if not isIterable(values):
+            raise ValueError(f'Enum.__init__: Invalid parameter values {values}')
+        values = list(values)
+        if len(values) == 0:
+            raise ValueError(f'Enum.__init__: parameter values has zero length')
+
+        if default_value == Undefined:
+            default_value = values[0]
         _Enum.__init__(self, values=tuple(values), default_value=default_value, **kwargs)
         _Ordered.__init__(self)
+
+    def info(self):
+        """:return info string
+        """
+        return f'an Enum; one of {list(self.values)}'
 
 
 class List(_List, _Ordered):

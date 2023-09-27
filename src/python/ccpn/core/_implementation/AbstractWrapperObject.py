@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-08-02 18:07:28 +0100 (Wed, August 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-27 18:39:01 +0100 (Wed, September 27, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -223,7 +223,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         className = self.className
         if parent is None:
             # This is the project
-            _id = self._wrappedData.name
+            _id = self.name
             sortKey = ('',)
         elif parent is project:
             _id = str(self._key)

@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-08-02 17:19:18 +0100 (Wed, August 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-27 18:39:01 +0100 (Wed, September 27, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -385,14 +385,20 @@ class Project(AbstractWrapperObject):
         if xmlLoader.apiNmrProject is None or not isinstance(xmlLoader.apiNmrProject, ApiNmrProject):
             raise RuntimeError('No valid ApiNmrProject defined')
 
+        # reference to XmlLoader instance;
+        self._xmlLoader = xmlLoader
+
         # Setup object handling dictionaries
         self._data2Obj = {}
         self._pid2Obj = {}
+
+        self._name = xmlLoader.name  # AbstractWrapperObject init needs name to be set
 
         #==> AbstractWrapper defines:
         # linkage attributes
         #   self._project = self
         #   self._wrappedData = wrappedData
+        #   self._id
         # Tuple to hold children that explicitly need finalising after atomic operations
         #   self._finaliseChildren = []
         #   self._childActions = []
@@ -404,13 +410,6 @@ class Project(AbstractWrapperObject):
         # self._appBase = None (delt with below)
         # Reference to application; defined by Framework
         self._application = None
-
-        self._name = xmlLoader.name
-        self._id = self._name
-        self._resetIds()
-
-        # reference to XmlLoader instance;
-        self._xmlLoader = xmlLoader
 
         # Set up notification machinery
         # Active notifiers - saved for later cleanup. CORE APPLICATION ONLY
@@ -838,6 +837,7 @@ class Project(AbstractWrapperObject):
         self._xmlLoader = _newXmlLoader
         self._path = _newXmlLoader.path.asString()
         self._name = _newXmlLoader.name
+        self._resetIds()
 
         # Optionally copy and check subdirectories
         if copySubDirectories:

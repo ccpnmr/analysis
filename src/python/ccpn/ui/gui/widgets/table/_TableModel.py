@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-04 17:24:09 +0100 (Mon, September 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-27 18:01:01 +0100 (Wed, September 27, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -28,7 +28,7 @@ __date__ = "$Date: 2022-09-08 17:27:34 +0100 (Thu, September 08, 2022) $"
 
 import numpy as np
 import pandas as pd
-import contextlib
+from pandas.api.types import is_float_dtype
 from PyQt5 import QtCore, QtGui
 from ccpn.util.floatUtils import numZeros
 from ccpn.core.lib.CcpnSorting import universalSortKey
@@ -160,7 +160,8 @@ class _TableModel(QtCore.QAbstractTableModel):
     _MAXCHARS = 100
     _chrWidth = 12
     _chrHeight = 12
-    _chrPadding = 8
+    _chrPixelPadding = 8
+    _chrPadding = 3
 
     showEditIcon = False
     defaultFlags = ENABLED | SELECTABLE  # add CHECKABLE to enable check-boxes
@@ -204,9 +205,9 @@ class _TableModel(QtCore.QAbstractTableModel):
             bbox = fontMetric.boundingRect
 
             # get an estimate for an average character width/height - must be floats for estimate-column-widths
-            test = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,./;\<>?:|!@£$%^&*()'
-            self._chrWidth = 1 + bbox(test).width() / len(test)
-            self._chrHeight = bbox('A').height() + self._chrPadding
+            test = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789,./;\<>?:|!@£$%^&*()'
+            self._chrWidth = bbox(test).width() / len(test)
+            self._chrHeight = bbox('A').height() + self._chrPixelPadding
 
         # set default colours
         self._defaultForegroundColour = QtGui.QColor(getColours()[GUITABLE_ITEM_FOREGROUND])
@@ -650,7 +651,6 @@ class _TableModel(QtCore.QAbstractTableModel):
             # process the heights/widths of the headers
             if orientation == QtCore.Qt.Horizontal:
                 try:
-
                     # get the cell height from the number of lines in the header data
                     txt = str(self.headerData(col, orientation, role=DISPLAY_ROLE))
                     height = len(txt.split('\n')) * int(self._chrHeight)
@@ -662,7 +662,8 @@ class _TableModel(QtCore.QAbstractTableModel):
                         if width is not None:
                             return QtCore.QSize(width, height)
 
-                    width = self._estimateColumnWidth(col)
+                    width = self._estimateColumnWidth(col) + \
+                            (self._editableIcon.width() if (self._isColumnEditable(col) and self.showEditIcon) else 0)
 
                     # return the size
                     return QtCore.QSize(width, height)
@@ -699,32 +700,46 @@ class _TableModel(QtCore.QAbstractTableModel):
             else:
                 txts = list(self._df.columns)[col].split('\n')
 
-            maxLen = max(len(txt) for txt in txts) + 1
+            maxLen = max(len(txt) for txt in txts)
             maxLen = max(maxLen, self._MINCHARS)
 
         except Exception:
             maxLen = self._MINCHARS
 
-        # iterate over a few rows to get an estimate
-        for row in range(min(self.rowCount(), self._CHECKROWS)):
-            data = self._df.iat[row, col]
-
-            # float/np.float - round to 3 decimal places
-            if isinstance(data, (float, np.floating)):
-                newLen = len(f'{data:.3f}') + 1
+        try:
+            dType = self._df.dtypes[col]
+            # get the maximum number of characters in the required column
+            if is_float_dtype(dType):
+                max_length = self._df.iloc[:, col].apply(lambda x: len(f'{x:.6g}')).max()
             else:
-                data = str(data)
-                if '\n' in data:
-                    # get the longest row from the cell
-                    dataRows = data.split('\n')
-                    newLen = max(len(_chrs) for _chrs in dataRows) + 1
+                # should implement line-splitting here
+                max_length = self._df.iloc[:, col].apply(str).apply(len).max()
+            maxLen = max(maxLen, max_length) + self._chrPadding
+
+            return int(min(self._MAXCHARS, maxLen) * self._chrWidth)
+
+        except Exception as es:
+            print(es)
+            # iterate over a few rows to get an estimate
+            for row in range(min(self.rowCount(), self._CHECKROWS)):
+                data = self._df.iat[row, col]
+
+                # float/np.float - round to 3 decimal places
+                if isinstance(data, (float, np.floating)):
+                    newLen = len(f'{data:.6g}')
                 else:
-                    newLen = len(data) + 1
+                    data = str(data)
+                    if '\n' in data:
+                        # get the longest row from the cell
+                        dataRows = data.split('\n')
+                        newLen = max(len(_chrs) for _chrs in dataRows)
+                    else:
+                        newLen = len(data)
 
-            # update the current maximum
-            maxLen = max(newLen, maxLen)
+                # update the current maximum
+                maxLen = max(newLen, maxLen) + self._chrPadding
 
-        return int(min(self._MAXCHARS, maxLen) * self._chrWidth) + 2
+        return int(min(self._MAXCHARS, maxLen) * self._chrWidth)
 
     def setForeground(self, row, column, colour):
         """Set the foreground colour for dataFrame cell at position (row, column).

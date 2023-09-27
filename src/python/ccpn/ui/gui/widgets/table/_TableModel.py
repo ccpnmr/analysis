@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-27 18:01:01 +0100 (Wed, September 27, 2023) $"
+__dateModified__ = "$dateModified: 2023-09-27 18:03:18 +0100 (Wed, September 27, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -719,7 +719,6 @@ class _TableModel(QtCore.QAbstractTableModel):
             return int(min(self._MAXCHARS, maxLen) * self._chrWidth)
 
         except Exception as es:
-            print(es)
             # iterate over a few rows to get an estimate
             for row in range(min(self.rowCount(), self._CHECKROWS)):
                 data = self._df.iat[row, col]

@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-01 11:44:04 +0100 (Fri, September 01, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-10-05 17:01:42 +0100 (Thu, October 05, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,8 +29,9 @@ __date__ = "$Date: 2017-04-07 10:28:40 +0000 (Fri, April 07, 2017) $"
 from PyQt5 import QtCore, QtWidgets
 from subprocess import PIPE, Popen, STDOUT, CalledProcessError
 import contextlib
+import html
 
-# don't remove this import
+# don't remove this import!
 import ccpn.core
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
@@ -41,7 +42,7 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.Font import getFontHeight
 from ccpn.util.Update import UpdateAgent, FAIL_UNEXPECTED
 from ccpn.util.Common import isWindowsOS
-from ccpn.framework.Version import applicationVersion
+from ccpn.framework.Version import applicationVersion, VersionString
 from ccpn.framework.PathsAndUrls import ccpnBinPath, ccpnBatchPath
 
 
@@ -49,6 +50,10 @@ REFRESHBUTTONTEXT = 'Refresh Updates Information'
 DOWNLOADBUTTONTEXT = 'Download/Install Updates'
 UPDATELICENCEKEYTEXT = 'Update LicenceKey'
 CLOSEEXITBUTTONTEXT = 'Close and Exit'
+
+_rTexts = [(' ', '&nbsp;'),
+           ('\t', '&nbsp;&nbsp;&nbsp;&nbsp;'),
+           ]
 
 
 class UpdatePopup(CcpnDialogMainWidget):
@@ -78,12 +83,12 @@ class UpdatePopup(CcpnDialogMainWidget):
         self.setFixedWidth(self.sizeHint().width())
         self._maxHeight = int(self.sizeHint().height() * 3)
         self._hideInfoBox()
-        # self._showInfoBox()
 
         # initialise the popup
         self._updatesInstalled = False
         self._updateCount = 0
         self._updateVersion = None
+        self._lastMsgWasError = None
         self.resetFromServer()
 
         self._updateButton.setEnabled(self._updatePopupAgent._check())
@@ -145,6 +150,14 @@ class UpdatePopup(CcpnDialogMainWidget):
             row += 1
 
         # why does this not resize correctly in self.mainWidget?
+        self.changeLogBox = TextEditor(self.mainWidget, grid=(row, 0), gridSpan=(1, 3),
+                                       enableWebLinks=True)  # NOTE:ED - do not set valign here
+        self.changeLogBox.setVisible(True)
+        self.changeLogBox.setEnabled(True)
+        self.changeLogBox.setReadOnly(True)
+        row += 1
+
+        # why does this not resize correctly in self.mainWidget?
         self.infoBox = TextEditor(self.mainWidget, grid=(row, 0), gridSpan=(1, 3))  # NOTE:ED - do not set valign here
         self.infoBox.setVisible(False)
         self.infoBox.setEnabled(True)
@@ -171,13 +184,29 @@ class UpdatePopup(CcpnDialogMainWidget):
     def _handleUpdates(self):
         """Call external script to update which may require several iterations.
         """
+        import selectors
+
         cmd = [ccpnBatchPath / 'update.bat'] if isWindowsOS() else [ccpnBinPath / 'update']
-        process = Popen(cmd, stdout=PIPE, stderr=STDOUT, text=True, bufsize=1, universal_newlines=True)
-        for line in process.stdout:
-            self._showInfo(line)
+        process = Popen(cmd, stdout=PIPE, stderr=PIPE, text=True, bufsize=1, universal_newlines=True)
+        sel = selectors.DefaultSelector()
+        sel.register(process.stdout, selectors.EVENT_READ)
+        sel.register(process.stderr, selectors.EVENT_READ)
+
+        check = 0
+        while check != 2:
+            check = 0
+            for key, _ in sel.select():
+                if not (data := key.fileobj.readline()):
+                    check += 1
+                if key.fileobj is process.stdout:
+                    self._showInfo(data)
+                else:
+                    self._showError(data)
+
         exitCode = process.wait()
-        # if exitCode >= FAIL_UNEXPECTED:
-        #     CalledProcessError(exitCode, process.args)
+        if exitCode >= FAIL_UNEXPECTED:
+            CalledProcessError(exitCode, process.args)
+        sel.close()
 
         self._updatesInstalled = True
         self.buttonList.getButton(self.CLOSEBUTTONTEXT).setText(CLOSEEXITBUTTONTEXT)
@@ -248,6 +277,36 @@ class UpdatePopup(CcpnDialogMainWidget):
 
         self._updatePopupAgent.resetFromServer()
 
+        self._updateChangeLog()
+
+    def _updateChangeLog(self):
+        """Read the current change-log and print the required mesages.
+        """
+        from datetime import datetime
+
+        timeformat = '%Y-%m-%d %H:%M'
+
+        changeLog = self._updatePopupAgent.fetchChangeLog()
+
+        if changeLog and (records := changeLog.get("records", {})):
+            clb = ''
+            for version, rec in reversed(sorted(records.items(), key=lambda rr: rr[1].get('timestamp', 0))):
+                # make a simple header for each update section
+                if VersionString(version) < applicationVersion:
+                    # skip updates that are too old
+                    continue
+
+                # check that timestamp is defined correctly
+                heading = [version]
+                if (ts := rec.get("timestamp", 0)):
+                    tt = datetime.utcfromtimestamp(float(ts)).strftime(timeformat)
+                    heading.append(tt)
+
+                clb += f'<h3>Changes in version {": ".join(heading)} (utc)</h3>'
+                # print the explicit html-string - need to watch quotes, need leading backslash
+                clb += rec.get('info', '')
+            self.changeLogBox.setHtml(clb)
+
     def closeEvent(self, event) -> None:
         self.reject()
 
@@ -270,17 +329,29 @@ class UpdatePopup(CcpnDialogMainWidget):
         self._refreshQT()
 
     def _showInfo(self, *args):
-        self._showInfoBox()
-        for arg in args:
-            if arg:
-                txt = f'<span style="color:#101010;" >{arg}</span>'
-                self.infoBox.append(txt)
+        """Add text to the html-box in default colour or green if the last message was an error.
+        """
+        # need to check the default theme colour
+        col = '#20d040' if self._lastMsgWasError else 'solid'  # green
+        self._lastMsgWasError = False
+        self._addMessage(args, col)
 
     def _showError(self, *args):
+        """Add text to the html-box in red.
+        """
+        col = '#ff1008'  # red
+        self._lastMsgWasError = True
+        self._addMessage(args, col)
+
+    def _addMessage(self, args, col):
         self._showInfoBox()
         for arg in args:
             if arg:
-                txt = f'<span style="color:#ff1008;" >{arg}</span>'
+                # make the text html-safe
+                arg = html.escape(arg)
+                for rr in _rTexts:
+                    arg = arg.replace(*rr)
+                txt = f'<span style="color:{col};" >{arg}</span>'
                 self.infoBox.append(txt)
 
     def _refreshQT(self):

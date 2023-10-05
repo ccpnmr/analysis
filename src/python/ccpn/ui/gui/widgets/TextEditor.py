@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-30 14:03:32 +0100 (Fri, June 30, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-10-05 17:01:42 +0100 (Thu, October 05, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,6 +26,9 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import sys
+from PyQt5.Qt import QDesktopServices, QUrl, QApplication, Qt
+from PyQt5.QtWidgets import QTextEdit
 
 from PyQt5 import QtGui, QtWidgets, QtCore, QtPrintSupport
 from ccpn.ui.gui.widgets.FileDialog import MacrosFileDialog
@@ -36,7 +39,8 @@ from ccpn.ui.gui.widgets.Label import Label, ActiveLabel
 from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 from ccpn.util.Path import aPath
-from ccpn.ui.gui.widgets.MessageDialog import  showMessage, showMulti
+from ccpn.ui.gui.widgets.MessageDialog import showMessage
+
 
 ATTRIBUTE_CHECK_LIST = ('_mouseStart', '_minimumWidth', '_widthStart', '_minimumHeight', '_heightStart')
 ATTRIBUTE_HEIGHT_LIST = ('_minimumHeight')
@@ -54,7 +58,7 @@ class TextEditor(QtWidgets.QTextEdit, Base):
                  listener=None, stripEndWhitespace=True, editable=True,
                  backgroundText='<default>',
                  acceptRichText=False, addGrip=False, addWordWrap=False, wordWrap=False,
-                 fitToContents=False, maximumRows=None,
+                 fitToContents=False, maximumRows=None, enableWebLinks=False,
                  **kwds):
         super().__init__(parent)
         Base._init(self, setLayout=True, **kwds)
@@ -109,7 +113,40 @@ class TextEditor(QtWidgets.QTextEdit, Base):
                             width: 20px; height: 20px;
             }""" % (_gripIcon._filePath))
 
+        self._enableWebLinks = enableWebLinks
+
         self._setFocusColour()
+
+    def mousePressEvent(self, e):
+        """Get the web-link under the mouse.
+        """
+        if self._enableWebLinks:
+            self._anchor = self.anchorAt(e.pos())
+
+        super().mousePressEvent(e)
+
+    def mouseMoveEvent(self, e):
+        """Change the cursor if there is a link under the mouse.
+        """
+        if self._enableWebLinks:
+            if _anchor := self.anchorAt(e.pos()):
+                QApplication.setOverrideCursor(Qt.PointingHandCursor)
+                self.setToolTip(_anchor)
+            else:
+                QApplication.setOverrideCursor(Qt.ArrowCursor)
+                self.setToolTip(None)
+
+        super().mouseMoveEvent(e)
+
+    def mouseReleaseEvent(self, e):
+        """Open a new web-page to the link under the mouse.
+        """
+        if self._enableWebLinks and self._anchor:
+            QDesktopServices.openUrl(QUrl(self._anchor))
+            QApplication.setOverrideCursor(Qt.ArrowCursor)
+            self._anchor = None
+
+        super().mouseReleaseEvent(e)
 
     def _toggleWordWrap(self):
         wordWrap = (self.lineWrapMode() != QtWidgets.QTextEdit.WidgetWidth)
@@ -275,10 +312,11 @@ class TextEditor(QtWidgets.QTextEdit, Base):
         """
         return self.set(value)
 
+
 class TextBrowser(QtWidgets.QTextBrowser, Base):
     receivedFocus = QtCore.pyqtSignal()
 
-    def __init__(self, parent=None, htmlFilePath=None,  **kwds):
+    def __init__(self, parent=None, htmlFilePath=None, **kwds):
         super().__init__(parent)
         Base._init(self, setLayout=True, **kwds)
         self.htmlFilePath = htmlFilePath
@@ -286,7 +324,7 @@ class TextBrowser(QtWidgets.QTextBrowser, Base):
             self.setHtmlFilePath(self.htmlFilePath)
 
     def setHtmlFilePath(self, htmlFilePath):
-        path  = aPath(htmlFilePath)
+        path = aPath(htmlFilePath)
         if not path.exists():
             showMessage('Path not found', f'Could not load {path}')
             return
@@ -512,6 +550,7 @@ if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
     from ccpn.ui.gui.widgets.Widget import Widget
+
 
     app = TestApplication()
 

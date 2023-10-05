@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-07 19:14:25 +0100 (Thu, September 07, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-05 17:01:42 +0100 (Thu, October 05, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -32,6 +32,7 @@ import os
 import shutil
 import sys
 import json
+import shutil
 from datetime import datetime
 from contextlib import suppress
 from ccpn.util import Path
@@ -39,7 +40,6 @@ from ccpn.framework.Version import applicationVersion
 
 
 ccpn2Url = 'https://www.ccpn.ac.uk'
-
 
 SERVER = ccpn2Url + '/'
 SERVER_DB_ROOT = 'ccpNmrUpdate'
@@ -65,6 +65,7 @@ DELETEHASHCODE = '<DELETE>'
 TERMSANDCONDITIONS = 'termsConditions'
 
 VERSION_UPDATE_FILE = 'src/python/ccpn/framework/Version.py'
+ZIPFILE = 'zip'
 
 SUCCESS = 0
 SUCCESS_VERSION = 1
@@ -178,7 +179,7 @@ def downloadFile(serverScript, serverDbRoot, fileName, quiet=False):
     """Download a file from the server
     """
     # fileName = os.path.join(serverDbRoot, fileName)
-    fileName = '/'.join([serverDbRoot, fileName])
+    fileName = '/'.join(list(filter(lambda val: bool(val), [serverDbRoot, fileName])))
 
     try:
         values = {'fileName': fileName}
@@ -224,9 +225,9 @@ def getUpdateCount(version):
     return updateAgent.checkNumberUpdates()
 
 
-#=========================================================================================
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # UpdateFile
-#=========================================================================================
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class UpdateFile:
 
@@ -355,7 +356,6 @@ class UpdateFile:
 #=========================================================================================
 
 class UpdateAgent:
-
     updateFileClass = UpdateFile
 
     def __init__(self, version, showError=None, showInfo=None, askPassword=None,
@@ -430,8 +430,8 @@ class UpdateAgent:
                         if os.path.exists(os.path.join(self.installLocation, filePath)):
                             # if still exists then need to add to update list
                             updateFile = self.updateFileClass(self.installLocation, self.serverDbRoot, filePath, fileTime,
-                                                    fileStoredAs, fileHashCode, serverDownloadScript=serverDownloadScript,
-                                                    serverUploadScript=serverUploadScript)
+                                                              fileStoredAs, fileHashCode, serverDownloadScript=serverDownloadScript,
+                                                              serverUploadScript=serverUploadScript)
                             updateFiles.append(updateFile)
                             updateFileDict[filePath] = updateFile
 
@@ -439,8 +439,8 @@ class UpdateAgent:
 
                         # file exists, is modified and needs updating
                         updateFile = self.updateFileClass(self.installLocation, self.serverDbRoot, filePath, fileTime,
-                                                fileStoredAs, fileHashCode, serverDownloadScript=serverDownloadScript,
-                                                serverUploadScript=serverUploadScript)
+                                                          fileStoredAs, fileHashCode, serverDownloadScript=serverDownloadScript,
+                                                          serverUploadScript=serverUploadScript)
                         updateFiles.append(updateFile)
                         updateFileDict[filePath] = updateFile
 
@@ -448,8 +448,8 @@ class UpdateAgent:
 
                         # file exists, is modified and needs updating
                         updateFile = self.updateFileClass(self.installLocation, self.serverDbRoot, filePath, fileTime,
-                                                fileStoredAs, fileHashCode, serverDownloadScript=serverDownloadScript,
-                                                serverUploadScript=serverUploadScript)
+                                                          fileStoredAs, fileHashCode, serverDownloadScript=serverDownloadScript,
+                                                          serverUploadScript=serverUploadScript)
                         updateFiles.append(updateFile)
                         updateFileDict[filePath] = updateFile
 
@@ -547,6 +547,26 @@ class UpdateAgent:
         except Exception as e:
             self.showError('Update error', 'Could not fetch updates: %s' % e)
 
+    def fetchChangeLog(self):
+        serverDownloadScript = '%s%s' % (self.server, self.serverDownloadScript)
+        data = downloadFile(serverDownloadScript, '', 'changeLog.json', quiet=True)
+
+        if not data:
+            return
+
+        if data.startswith(BAD_DOWNLOAD):
+            self.showError('fetching change-log', f'Error: Could not download change-log from server - {data}')
+            return
+
+        if data.startswith(ERROR_DOWNLOAD):
+            self.showError('fetching change-log', data)
+            return
+
+        try:
+            return json.loads(data)
+        except Exception as es:
+            self.showError('fetching change-log', f'Error: Could not download change-log from server - {es}')
+
     def addFiles(self, filePaths):
 
         serverDownloadScript = '%s%s' % (self.server, self.serverDownloadScript)
@@ -565,8 +585,8 @@ class UpdateAgent:
                     existsErrorCount += 1
                 else:
                     updateFile = self.updateFileClass(self.installLocation, self.serverDbRoot, filePath, shouldCommit=True,
-                                            isNew=True, serverDownloadScript=serverDownloadScript,
-                                            serverUploadScript=serverUploadScript)
+                                                      isNew=True, serverDownloadScript=serverDownloadScript,
+                                                      serverUploadScript=serverUploadScript)
                     self.updateFiles.append(updateFile)
                     self.updateFileDict[filePath] = updateFile
             else:
@@ -596,7 +616,8 @@ class UpdateAgent:
             return False
 
     def installChosen(self):
-        """Download chosen server files to local installation."""
+        """Download chosen server files to local installation.
+        """
         from ccpn.framework.Version import applicationVersion
 
         updateFiles = [updateFile for updateFile in self.updateFiles if updateFile.shouldInstall]
@@ -713,7 +734,20 @@ class UpdateAgent:
         for updateFile in self.updateFiles:
             updateFile.shouldInstall = True
 
-        return self.installChosen()
+        done = self.installChosen()
+
+        for file in done:
+            fp = Path.aPath(file.fileName)
+            if file.shouldInstall and \
+                    fp.suffix == '.' + ZIPFILE and file.fileDir == 'resources':
+                # unzip as required
+                try:
+                    # unpack relative to the root of the installation - leading '/' and '..' are checked by shutil
+                    # shutil.unpack_archive(file.fullFilePath, extract_dir=file.installLocation, format=ZIPFILE)
+                    print('UNPACKING')
+                except Exception as es:
+                    self.showError('Install Error', f'Could not unzip file {fp.fullFilePath}: {es}')
+                    fp.rename('_' + fp.name)
 
     def diffUpdates(self, updateFiles=None, write=sys.stdout.write):
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-13 11:23:39 +0100 (Wed, September 13, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-05 17:01:42 +0100 (Thu, October 05, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -252,10 +252,10 @@ class VersionString(str):
         # At this point, majorVersion, minorVersion and revision are all equal
         # Check development field
         if len(fields_S) == 4 and len(fields_O) == 3:
-            return True
+            return self._getSortField(fields_S[3]) < self._getSortField('')
 
         elif len(fields_S) == 3 and len(fields_O) == 4:
-            return False
+            return self._getSortField('') < self._getSortField(fields_O[3])
 
         elif len(fields_S) == 4 and len(fields_O) == 4:
             return self._getSortField(fields_S[3]) < self._getSortField(fields_O[3])
@@ -283,10 +283,10 @@ class VersionString(str):
         # At this point, majorVersion, minorVersion and revision are all equal
         # Check development field
         if len(fields_S) == 4 and len(fields_O) == 3:
-            return False
+            return self._getSortField(fields_S[3]) > self._getSortField('')
 
         elif len(fields_S) == 3 and len(fields_O) == 4:
-            return True
+            return self._getSortField('') > self._getSortField(fields_O[3])
 
         elif len(fields_S) == 4 and len(fields_O) == 4:
             return self._getSortField(fields_S[3]) > self._getSortField(fields_O[3])
@@ -352,11 +352,31 @@ def main():
                      False, False]
 
     # check sorting conditions
-    print(VersionString('3.2.1.alpha19') > VersionString('3.2.1.alpha2'))
-    print(VersionString('3.2.1.alpha2') < VersionString('3.2.1.alpha19'))
-    print(VersionString('3.2.1.2') < VersionString('3.2.1.alpha19'))
-    print(VersionString('3.2.1.alpha2') > VersionString('3.2.1.19'))
-    print(VersionString('3.2.1.45') > VersionString('3.2.1.23'))
+    valid = [VersionString('3.2.1.alpha19') > VersionString('3.2.1.alpha2'),
+             VersionString('3.2.1.alpha2') < VersionString('3.2.1.alpha19'),
+             VersionString('3.2.1.2') < VersionString('3.2.1.alpha19'),
+             VersionString('3.2.1.alpha2') > VersionString('3.2.1.19'),
+             VersionString('3.2.1.45') > VersionString('3.2.1.23'),
+             VersionString('1.0.0.0') < VersionString('2.0.0.0'),
+             VersionString('1.1.0.0') < VersionString('1.2.0.0'),
+             VersionString('1.0.1.0') < VersionString('1.0.2.0'),
+             VersionString('1.0.0.1') < VersionString('1.0.0.2'),
+             VersionString('2.0.0.0') > VersionString('1.0.0.0'),
+             VersionString('1.2.0.0') > VersionString('1.1.0.0'),
+             VersionString('1.0.2.0') > VersionString('1.0.1.0'),
+             VersionString('1.0.0.2') > VersionString('1.0.0.1'),
+             # missing digit is assumed to be '' or 0
+             VersionString('1.1.1.1') > VersionString('1.1.1'),
+             VersionString('1.1.1') > VersionString('1.1.1.1'),
+             VersionString('1.1.1.1') < VersionString('1.1.1'),
+             VersionString('1.1.1') < VersionString('1.1.1.1'),
+             ]
+    print('\n'.join([str(bb) for bb in valid]))
+
+    assert valid == [True, True, True, True, True,
+                     True, True, True, True,
+                     True, True, True, True,
+                     True, False, False, True]
 
     # check only one argument allowed
     try:
@@ -367,6 +387,19 @@ def main():
         VersionString('4.3.2.1', '1.1.1.1')
     except Exception as es:
         print('   --> {:<20} : {}'.format('', es))
+
+    from datetime import datetime, timezone
+
+    timeformat = '%Y-%m-%d %H:%M:%S %z'
+    timeoutput = '0000-00-00 00:00:00 +0000'
+    now = datetime.now(timezone.utc)
+
+    then = datetime.strptime(__dateModified__[len('$dateModified: '): len('$dateModified: ') + len(timeoutput)], timeformat)
+
+    print(timeformat)
+    print(now.strftime(timeformat), int(now.timestamp()))
+    print(then.strftime(timeformat), then.timestamp())
+    print(int((now - then).total_seconds()))
 
 
 if __name__ == '__main__':

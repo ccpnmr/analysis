@@ -13,62 +13,52 @@
 
    
 <h2>Assignment Statistics Tables</h2>
-<p>The aim of the assignment statistic tables is to allow the calculation of the degree of assignment of a protein chain.
-   From this information it can :</p>
+   <p>The assignment statistics tables can be calculated using a CCPN macro. Go to <span class="action">Macro / Run CCPN Macros / assignmentStatisticsTables</span>. Select the <span class="action">Chain</span> and <span class="action">Chemical Shift List</span> for which you want to calculate your statistics. Tick the types of table you want to produce (see below for a description of each of these) and if you wish, change the names you give the tables. The macro will then produce your tables which you will find in the <span class="action">DataTables</span> section of the sidebar. A timestamp is added to the table name. Simply <span class="action">drag</span> the tables into the <span class="action">Drop Area</span> to open and inspect them.</p>
+   <p>The tables provide various statistics about the degree of assignment of a protein Chain in your project. You can use this information to:</p>
    <ul>
       <li>Help identify residues with missing assignments</li>
-      <li>Calculate Assignment percentages for atom types</li>
-      <li>Identify some potential assignment issues</li>
+      <li>Calculate assignment percentages by atom type</li>
+      <li>Identify some potential assignment problems</li>
+   </ul>
+   <p><span class="action">Please note:</span> Certain atom groups are excluded from this analysis on the grounds that they are not normally assigned. The <a href="https://www.springer.com/journal/12104">Biomolecular NMR Assignments</a> journal would not typically expect you to report these as assigned, i.e. your protein can count as 100% assigned, even when these groups are not assigned. These groups are:  carbon atoms with no attached protons (e.g. Phe/Tyr/Trp/His/Asp/Asn C&gamma; or Glu/Gln C&delta;), OH/SH protons (e.g. Ser/Thr side chain OH or Cys SH protons), Lys side-chain N&zeta; groups, Arg side-chain N&epsilon;, C&zeta; and N&eta; groups, N-terminal amide groups. </p>
+
+
+<h3>Assigned Chemical Shifts Table</h3>
+   <p>This table gives an overview of every assigned chemical shift in a chemical shift list for every possible atom or atom group
+      in the selected chain. Consequently, this is a very large table with a very large number of columns.</p>
+   <h4>Possible values:</h4>
+   <ul>
+      <li>the chemical shift value recorded for the atom/atom group</li>
+      <li>empty cells indicate that no data is expected in this location (i.e. that atom/atom group doesn't exist for that residue type)</li>
+      <li>‘ <span class="action">-</span> ‘ data is expected but not available for this for atom/atom group</li>
+   </ul>
+   <p>Remember that you can exclude columns from the table by <span class="action">right-clicking</span> on a <span class="action">Column header</span> and selecting <span class="action">Column Settings...</span>. You can also use the shortcut <span class="action">FT</span> (or <span class="action">right-click</span> in the table and select <span class="action">Filter...</span>) to bring up the table filtering tool to look for particular rows you might be interested in (e.g. you could exclude PRO or search for rows with a <span class="action">-</span> etc.). This table can be very useful for producing a table of chemical shifts to put into a paper or share with a colleague.</p>
+
+   <h3>Assignment Completeness Table</h3>
+   <p>This table provides an overview of which atom groups are assigned. Whereas the <span class="action">Assigned Chemical Shifts</span> table lists all atoms separately, here they are  grouped into HA, HB, CG etc. regardless of how many atoms may be part of that group.</p>
+   <h4>Possible values:</h4>
+   <ul>
+      <li>number of observed chemical shifts for this atom/atom group; both integers and fractions can be observed (e.g. if only one HB out of two is assigned)</li>
+      <li>empty cells indicate that no data is expected in this location</li>
    </ul>
 
+   <h3>Summary Assignment Table</h3>
+   <p>This table provides a list of atom types (again grouped as HA, HB, CG etc.) and their percentage assignment coverage.</p>
+   <h4>Possible values:</h4>
+   <ul>
+      <li>Number assigned/unassigned</li>
+      <li>Percentage assigned</li>
+      <li>If no atoms of a type are observed then the percentage column for that value will be empty</li>
+   </ul>
 
-<h3>Generated tables</h3>
-
-<h3>AssignedChemicalShifts</h3>
-   <p>Gives an overview of every chemical shift assigned from a chemical shift list for every possible atom/atom group
-      in selected chain, consequently this gives you very large table with a very large number of columns.</p>
-
-   <p><b>Possible values:</b></p>
-<ul>
-   <li>Chemical shift value recorded for atom/atom group</li>
-   <li>empty cells indicate that no data is expected in this location.</li>
-   <li>‘ - ‘ data is expected but not available for this for atom/atom group</li>
-</ul>
-
-   <h3>AssignmentCompleteness</h3>
-   <p>Provides an overview of which atom/atom groups are assigned.</p>
-
-   <p><b>Possible values:</b></p>
-<ul>
-   <li>Number of observed chemical shifts for this atom/atom group. Both integers and fractions can be observed</li>
-   <li>empty cells indicate that no data is expected in this location.</li>
-</ul>
-
-
-   <h3>SummaryAssignment</h3>
-   <p>Provides a list of atom types and their percentage assignment coverage.
-</p>
-
-   <p><b>Possible values:</b></p>
-<ul>
-   <li>Number assigned/unassigned</li>
-   <li>Percentage assigned</li>
-   <li>If no atoms of a type are observed then the percentage column for that value will be empty</li>
-</ul>
-
-
-   <h3>PossibleProblems</h3>
-   <p>This table only lists residues, for which recorded chemical shifts number fall outside excepted number.
-      For instance, if Ile gamma proton has been recorded for HG1x but not for HG1y, this is listed in the HG
-      column as 0.5.<br/>
-<b>NOTE:</b> currently we do not catch errors such as inconsistent assignment, for instance if Ile HG1y and HG12 are
-      both assigned then this will return 1.0</p>
-
-   <p><b>Possible values:</b></p>
-<ul>
-   <li>Number of observed chemical shifts for this atom/atom group. Both integers and fractions can be observed</li>
-   <li>empty cells indicate that no data is expected in this location.</li>
-</ul>
+   <h3>Possible Problems Table</h3>
+   <p>This table only lists residues, for which the number of recorded chemical shifts falls outside the expected number. For instance, if an Ile &gamma; proton has been recorded for HG1x but not for HG1y, this is listed in the HG column as 0.5.
+      <br/><span class="action">NOTE:</span> currently we do not catch errors such as inconsistent assignments, for instance if Ile HG1y and HG12 are both assigned then this will return 1.0</p>
+   <h4>Possible values:</h4>
+   <ul>
+      <li>number of observed chemical shifts for this atom/atom group; both integers and fractions can be observed</li>
+      <li>empty cells indicate that no data is expected in this location.</li>
+   </ul>
 
 
 

@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-05 17:01:42 +0100 (Thu, October 05, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2023-10-05 17:44:49 +0100 (Thu, October 05, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -734,20 +734,26 @@ class UpdateAgent:
         for updateFile in self.updateFiles:
             updateFile.shouldInstall = True
 
-        done = self.installChosen()
+        if done := self.installChosen():
+            for file in done:
+                fp = Path.aPath(file.fullFilePath)
+                if file.shouldInstall and \
+                        fp.suffix == '.' + ZIPFILE and file.fileDir == 'resources':
+                    # unzip as required
+                    if self._dryRun:
+                        self.showInfo('Unzipping', f'dry-run {file.fullFilePath} --> {file.installLocation}')
+                    else:
+                        try:
+                            # unpack relative to the root of the installation - leading '/' and '..' are checked by shutil
+                            self.showInfo('Unzipping', f'Unzipping {file.fullFilePath} --> {file.installLocation}')
+                            shutil.unpack_archive(file.fullFilePath, extract_dir=file.installLocation, format=ZIPFILE)
+                        except Exception as es:
+                            self.showError('Install Error', f'Could not unzip file {file.fullFilePath}: {es}')
+                            # need to discard the file?
+                            with suppress(OSError):
+                                fp.replace(fp.parent / '_' + fp.name)
 
-        for file in done:
-            fp = Path.aPath(file.fileName)
-            if file.shouldInstall and \
-                    fp.suffix == '.' + ZIPFILE and file.fileDir == 'resources':
-                # unzip as required
-                try:
-                    # unpack relative to the root of the installation - leading '/' and '..' are checked by shutil
-                    # shutil.unpack_archive(file.fullFilePath, extract_dir=file.installLocation, format=ZIPFILE)
-                    print('UNPACKING')
-                except Exception as es:
-                    self.showError('Install Error', f'Could not unzip file {fp.fullFilePath}: {es}')
-                    fp.rename('_' + fp.name)
+        return done
 
     def diffUpdates(self, updateFiles=None, write=sys.stdout.write):
 

@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-03 16:55:22 +0100 (Tue, October 03, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-06 11:26:36 +0100 (Fri, October 06, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -73,10 +73,10 @@ class JournalReferenceABC(TraitBase):
     @property
     def genericMinimal(self):
         """ Generic minimal formatting
-        First author et al.  DOI.
+        First author et al. YYYY. Short journal.  DOI.
          """
         authors = self.getAuthors(count=1, inititialOnly=True, nameSep='', add_etal=True)
-        return f"{authors}. {self.journalNameShort}. {self.year}. {self.doi}"
+        return f"{authors}. {self.year}. {self.journalNameShort}. {self.doi}"
 
     @property
     def vancouver(self):

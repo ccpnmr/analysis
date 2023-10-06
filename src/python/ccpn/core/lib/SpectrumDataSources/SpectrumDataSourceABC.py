@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-06 19:21:39 +0100 (Fri, October 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-06 19:29:08 +0100 (Fri, October 06, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -441,13 +441,12 @@ class SpectrumDataSourceABC(CcpNmrJson):
                                             hasSetterInSpectrumClass=False,
                                             info='per dimension: labels, as e.g. present in Felix or NmrPipe',
                                             )
-    #ToDo default_value is not in SpecLib.MagnetisationTransferTypes
-    measurementTypes = TList(itemTrait=CString(allow_none=True), default_value=['Shift'] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='measurementTypes',
-            hasSetterInSpectrumClass=True,
-            )
+    measurementTypes = TList(itemTrait=CEnum(specLib.MEASUREMENT_TYPES, allow_none=True), default_value=[specLib.MEASUREMENT_TYPE_SHIFT] * MAXDIM, maxlen=MAXDIM).tag(
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='measurementTypes',
+                                            hasSetterInSpectrumClass=True,
+                                            )
     foldingModes = TList(itemTrait=CEnum(specLib.FOLDING_MODES, allow_none=True), default_value=[specLib.FOLDING_MODE_CIRCULAR] * MAXDIM, maxlen=MAXDIM).tag(
                                             isDimensional=True,
                                             doCopy=True,
@@ -490,35 +489,34 @@ class SpectrumDataSourceABC(CcpNmrJson):
                                             spectrumAttribute='phases1',
                                             hasSetterInSpectrumClass=True,
                                             )
-    #ToDo change into enumerated type
-    windowFunctions = TList(itemTrait=CString(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='windowFunctions',
-            hasSetterInSpectrumClass=True,
-            info='per dimension: Window function name (or None) - e.g. "EM", "GM", "SINE", "QSINE"'
-            )
-    lorentzianBroadenings = TList(itemTrait=CFloat(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='lorentzianBroadenings',
-            hasSetterInSpectrumClass=True,
-            info='per dimension: Lorenzian broadening in Hz'
-            )
-    gaussianBroadenings = TList(itemTrait=CFloat(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='gaussianBroadenings',
-            hasSetterInSpectrumClass=True,
-            info='per dimension: Gaussian broadening in Hz'
-            )
+    windowFunctions = TList(itemTrait=CEnum(specLib.WINDOW_FUNCTIONS, allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='windowFunctions',
+                                            hasSetterInSpectrumClass=True,
+                                            info='per dimension: Window function name (or None) - e.g. "EM", "GM", "SINE", "QSINE"'
+                                            )
+    lorentzianBroadenings = TList(itemTrait=CFloat(allow_none=True, min=0.0), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='lorentzianBroadenings',
+                                            hasSetterInSpectrumClass=True,
+                                            info='per dimension: Lorenzian broadening in Hz'
+                                            )
+    gaussianBroadenings = TList(itemTrait=CFloat(allow_none=True, min=0.0), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='gaussianBroadenings',
+                                            hasSetterInSpectrumClass=True,
+                                            info='per dimension: Gaussian broadening in Hz'
+                                            )
     assignmentTolerances = TList(itemTrait=CFloat(allow_none=True, min=0.0), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='assignmentTolerances',
-            hasSetterInSpectrumClass=True,
-            info='per dimension: Assignment tolerance in ppm'
-            )
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='assignmentTolerances',
+                                            hasSetterInSpectrumClass=True,
+                                            info='per dimension: Assignment tolerance in ppm'
+                                            )
 
     #=========================================================================================
     # new implementation, using newFromPath method and validity testing later on

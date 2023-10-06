@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-08-07 12:24:22 +0100 (Mon, August 07, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-10-06 22:35:42 +0100 (Fri, October 06, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -393,10 +393,10 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
 
                 if not isinstance(s, str):
                     raise TypeError('sequence element is not a valid string: %s' % str(s))
-                elif len(s) != 3:
-                    raise TypeError(
-                            'sequence elements must be 3 characters each, e.g., "ala ala ala"\nor sequence must be a single string, try removing spaces and return characters: %s' % str(
-                                    s))
+                # elif len(s) != 3: # this is wrong constraint. 3LetterCode is not necessarily a length of three
+                #     raise TypeError(
+                #             'sequence elements must be 3 characters each, e.g., "ala ala ala"\nor sequence must be a single string, try removing spaces and return characters: %s' % str(
+                #                     s))
                 elif not s.isalpha():
                     raise TypeError('sequence element contains bad characters: %s' % str(s))
 
@@ -564,17 +564,19 @@ def _checkChemCompExists(project, ccpCode):
 
 def _fetchChemCompFromFile(project, filePath):
     """
-    Load a ChemComp from an xml file if not already present in the project, otherwise return the one available.
+    Load a ChemComp from a xml file if not already present in the project, otherwise return the one available.
     :param project: v3 project object.
     :param filePath: xml file path  for the chemcomp. Xml filename must contain the same strings as defined  in the
     guid inside the file.
     :return: The API chemComp object
     """
     from ccpnmodel.ccpncore.xml.memops.Implementation import loadFromStream
-    from ccpn.util.Path import aPath
-
+    from ccpn.util.Path import aPath, joinPath
+    from ccpn.framework.PathsAndUrls import CCPN_API_DIRECTORY
+    from ccpnmodel.ccpncore.lib.chemComp.ChemCompOverview import chemCompStdDict
+    filePathObj = aPath(filePath)
     memopsRoot = project._wrappedData.root
-    basename = aPath(filePath).basename
+    basename = filePathObj.basename
     ll = basename.split('+')  # assuming the file is an old xml type with + separators or created from Chembuild.
     if len(ll) > 1:
         ccpCode = ll[1]
@@ -588,7 +590,18 @@ def _fetchChemCompFromFile(project, filePath):
     else:
         with open(filePath) as stream:
             chemComp = loadFromStream(stream, topObject=memopsRoot, topObjId=topObjId, )
-
+            #update the 3letterCode because is needed on  V3 for some reasons...
+            if not chemComp.code3Letter:
+                chemComp.__dict__['code3Letter'] = chemComp.ccpCode.upper()
+    # need to copy the xml file to the project to be reopened
+    # Not sure why is not done automatically or about a better way of doing it
+    chemCompProjectSubPath = aPath(CCPN_API_DIRECTORY) / 'ccp' / 'molecule' / 'ChemComp'
+    chemCompProjectPath = joinPath(project.projectPath, chemCompProjectSubPath)
+    filePathObj.copyFile(chemCompProjectPath, overwrite=True)
+    ## update the massive dict on chemcomp ccpCode which is used by v3 to create chains
+    commonNames = chemComp.commonNames
+    commonName = commonNames[0] if len(commonNames) > 0 else ''
+    chemCompStdDict[chemComp.molType][chemComp.ccpCode] = [chemComp.code1Letter, chemComp.code3Letter, commonName, '' ]  #code1Letter, code3Letter, 'syn', 'formula'
     return chemComp
 
 

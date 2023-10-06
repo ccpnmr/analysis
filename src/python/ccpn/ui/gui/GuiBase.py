@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-07-07 11:55:59 +0100 (Fri, July 07, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-06 22:35:43 +0100 (Fri, October 06, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -282,6 +282,8 @@ class GuiBase(object):
                    ))
 
         ms.append(('Molecules', [
+            ("Load ChemComp from Xml...", self._loadDataCallback),
+            (),
             ("Chain from FASTA...", self._loadDataCallback),
             (),
             ("New Chain...", self.showCreateChainPopup),

@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-07 10:36:31 +0000 (Tue, November 07, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-10-06 22:35:43 +0100 (Fri, October 06, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -1780,6 +1780,16 @@ class Project(AbstractWrapperObject):
                 reader = ExcelReader(project=self, excelPath=str(path))
                 result = reader.load()
         return result
+
+    def _loadChemCompFile(self, path: (str, Path)) -> list:
+        """
+        Load a Xml file containing a ChemComp.
+        """
+        from ccpn.core.Chain import _fetchChemCompFromFile
+        with logCommandManager('application.', 'loadData', path):
+            with undoBlockWithoutSideBar():
+                chemcomp = _fetchChemCompFromFile(project=self, filePath=str(path))
+        return chemcomp
 
     #===========================================================================================
     # End data loaders

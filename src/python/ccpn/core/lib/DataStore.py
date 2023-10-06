@@ -23,9 +23,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-23 15:26:33 +0100 (Tue, May 23, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-10-06 18:00:36 +0100 (Fri, October 06, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -485,7 +485,6 @@ DataStore.register()
 
 
 from ccpn.util.traits.CcpNmrTraits import Instance
-from ccpn.util.traits.TraitJsonHandlerBase import CcpNmrJsonClassHandlerABC
 
 class DataStoreTrait(Instance):
     """Specific trait for a Datastore instance encoding the path and dataFormat of the (binary) spectrum data.
@@ -495,6 +494,3 @@ class DataStoreTrait(Instance):
     def __init__(self, **kwds):
         Instance.__init__(self, klass=self.klass, allow_none=True, **kwds)
 
-    class jsonHandler(CcpNmrJsonClassHandlerABC):
-        # klass = klass
-        pass

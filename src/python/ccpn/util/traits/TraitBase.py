@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-09-27 11:16:56 +0100 (Wed, September 27, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-06 18:00:36 +0100 (Fri, October 06, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -39,11 +39,18 @@ class TraitBase(HasTraits):
                          # of the keys
 
     def getTraitValue(self, trait):
-        """convenience (to complement setTraitValue): return value of trait
+        """convenience (to complement setTraitValue)
+        :parameter trait: the name of the trait
+        :return value of trait
         """
         if not self.hasTrait(trait):
             raise ValueError('Trait "%s" does not exist for object %s' % (trait, self))
-        return self._trait_values[trait]
+        try:
+            value = self._trait_values[trait]
+        except KeyError:
+            # No values set; use getattr as this will trigger the machinery
+            value = getattr(self, trait)
+        return value
 
     def setTraitValue(self, trait, value, force=False):
         """Convenience: set value of trait, optionally overwriting immutable ones
@@ -134,18 +141,22 @@ class TraitBase(HasTraits):
     # the ones below are derived from keys() method
     def values(self, **metadata):
         """get values, optionally filtering for metadata"""
-        return [getattr(self, key) for key in self.keys(**metadata)]
+        return [self.getTraitValue(key) for key in self.keys(**metadata)]
 
-    def update(self, other, **metadata):
-        """update self with values from other (dict-like), optionally filtering for metadata"""
+    def update(self, other, force=False, **metadata):
+        """update self with values from other (dict-like), optionally filtering for metadata
+        :parameter other: dict with (key,value) pairs to update
+        :parameter force: force update of inmutable traits
+        :parameter metadata: optional param=values pairs to filter for metadata (i.e. tag values)
+        """
         for key in self.keys(**metadata):
             if key in other:
-                setattr(self, key, other[key])
+                self.setTraitValue(key, other[key], force=force)
 
     def items(self, **metadata):
         """iterable over key, value pairs, optionally filtering for metadata"""
         for key in self.keys(**metadata):
-            value = getattr(self, key)
+            value = self.getTraitValue(key)
             yield (key, value)
 
     def __iter__(self, **metadata):

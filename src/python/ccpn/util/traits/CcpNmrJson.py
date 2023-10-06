@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-21 11:46:44 +0000 (Mon, March 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-10-06 18:00:36 +0100 (Fri, October 06, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -59,10 +59,11 @@ class Constants(object):
     JSONVERSION = 'jsonVersion'
     CLASSNAME = 'className'
     CLASSVERSION = 'classVersion'
+    CLASSINFO = 'classInfo'
     USER = 'user'
     LASTPATH = 'lastPath'
     TIMESTAMP = 'timestamp'
-    METADATA_KEYS = (JSONVERSION, CLASSNAME, CLASSVERSION, USER, LASTPATH, TIMESTAMP)
+    METADATA_KEYS = (JSONVERSION, CLASSNAME, CLASSVERSION, CLASSINFO, USER, LASTPATH, TIMESTAMP)
 
 # end class
 
@@ -72,6 +73,15 @@ def jsonHandler(trait):
     """
     def theDecorator(cls):
         trait.tag(jsonHandler=cls)
+        return cls
+    return theDecorator
+
+
+def register(overwrite=False):
+    """A decorator to register the class
+    """
+    def theDecorator(cls):
+        cls.register(overwrite=overwrite)
         return cls
     return theDecorator
 
@@ -216,18 +226,15 @@ def update(updateHandler, push=False):
 #--------------------------------------------------------------------------------------------
 # Some info regarding the call hiarchy on restoring
 #
-# restoreObject(path)
-#   fromJson(string) -> data
-#   dataDict = dict(data)
+# restore(path)
+#   fromJson(string) -> dataList
+#   dataDict = dict(dataList)
 #   dataDict = _update(dataDict)
 #   _decode(dataDict)
-#       _getJsonHandler() -> handler
-#       handler.handle(obj, dataDict)
-#           for key,value in dataDict.items():
-#               if recursion and _isEncodedObject(value):
-#                   obj.key = _newObjectFromDict(value)
-#               else:
-#                   obj.key = value
+#       for key,value in dataDict.items():
+#           _getJsonHandler(key) -> handler(obj, trait)
+#           newValue = handler.decode(value)  # Also handles optional recursion
+#           setTraitValue(key, newValue)
 #   return obj
 #
 #--------------------------------------------------------------------------------------------
@@ -237,17 +244,21 @@ def update(updateHandler, push=False):
 @fileHandler('.json', 'toJson', 'fromJson')
 class CcpNmrJson(TraitBase):
     """
-    Abstract base class to handle objects to and from json
+    Abstract base class to handle an object with traits and to- and fromJson methods for storing
+    and retrieving
 
     --------------------------------------------------------------------------------------------
      Define attributes (traits) as traitlets instances (Import from util/traits/CcpNmrTraits).
 
-     Traits to be saved to json are tagged saveToJson=True.
-         Example:  myint = Int().tag(saveToJson=True)
 
      All traits can be saved by default setting the class attribute saveAllTraitsToJson to True
+     (default is False):
         Example:   saveAllTraitsToJson = True
-         
+
+     Traits to be explicitly saved or not save to json are tagged saveToJson=True/False. This
+     overrides the effect of the saveAllTraitsToJson class attribute for the trait:
+         Example:  myint = Int().tag(saveToJson=True)
+
          
      Trait handlers are defined by hiarachy:
      
@@ -269,41 +280,54 @@ class CcpNmrJson(TraitBase):
      3) A TraitBase class can have a jsonHandler, which it would use for all traits. NB assure that the handler
      can deal with all trait types defined in the class
      
-     4) No explicit handler defined, json decoders are assumed be able to handle it.
+     4) The default handler defined for all traits does nothing, json decoders are assumed be able to handle it.
      
 
-     A jsonHandler class must derive from TraitJsonHandlerBase and can subclass
-     two  methods:
+     A jsonHandler class must derive from TraitJsonHandlerBase / DictTraitJsonHandleABC / ListTraitJsonHandlerABC
+     and can subclass the following methods:
 
-         encode(obj, trait) which returns a json serialisable object
-         decode(obj, trait, value) which uses value to generate and set the new (or modified) obj 
+         encode(self, value) which returns a json serialisable python object
+         decode(self, value) which uses value (a python object) to generate the new (or modified) obj
+
+     For handlers of container objects (list, dict, tuple, set, ...) inheriting from DictTraitJsonHandleABC /
+     ListTraitJsonHandlerABC:
+         encodeItem(self, value) which returns a json serialisable python object for an item of a container
+                                 object
+         decodeItem(self, value) which uses value (a python object) to generate the new item of a container
+                                 object
+
+         An jsonHandler instance has two attributes:
+            self.obj : The object which trait is being decoded/encoded
+            self.trait : The Trait instance; use Trait.name and other usefull attributes
 
      Example:
 
          class myHandler(TraitJsonHandlerBase):
-               def encode(self, obj, trait):
+               def encode(self, value):
                    "returns a json serialisable object"
-                   value = getattr(obj, trait)
-                   -- some action on value --
+                   -- some action on value; optionally use self.obj, self.trait --
                    return value
 
-               def decode(self, obj, trait, value):
+               def decode(self, value):
                    "uses value to generate and set the new (or modified) obj"
-                   newValue =  --- some action using value ---
-                   setattr(obj, trait, newValue)
+                   newValue =  --- some action using value; optionally use self.obj, self.trait ---
+                   return newValue
 
      Any CcpNmrJson-derived class maintains metadata. Use the setJsonMetadata(), getJsonMetadata()
-    and hasJsonMetadata() methods to access
+     and hasJsonMetadata() methods to access
 
-     NB: Need to register the class for proper restoring from the json data
+     NB: Need to register the class for proper restoring from the json data; best use the register
+     decorator
      Example:
+        from ccpn.util.traits.CcpNmrJson import CcpNmrJson, register
 
+         @register()
          class MyClass(CcpNmrJson):
 
             .. actions
 
          #end class
-         MyClass.register()
+
     --------------------------------------------------------------------------------------------
     """
 
@@ -313,7 +337,7 @@ class CcpNmrJson(TraitBase):
 
     saveAllTraitsToJson = False  # This flag effectively sets saveToJson to True/False for all traits
     classVersion = None  # The version identifier for the specific class (usefull when upgrading is required)
-    objectInfo = None  # Any information about the class
+    classInfo = None  # Any information about the class
 
     #--------------------------------------------------------------------------------------------
     # end to be subclassed
@@ -330,16 +354,19 @@ class CcpNmrJson(TraitBase):
         return className in CcpNmrJson._registeredClasses
 
     @classmethod
-    def register(cls):
-        """Register the class"""
+    def register(cls, overwrite=False):
+        """Register the class
+        :parameter overwrite: allow for a second call to register to overwrite;
+                              usefull for e.g. testing macro's
+        """
         className = cls.__name__
-        if cls.isRegistered(className):
+        if cls.isRegistered(className) and not overwrite:
             raise RuntimeError('className "%s" is already registered' % className)
         CcpNmrJson._registeredClasses[className] = cls
 
     @staticmethod
     def _getClassFromDict(theDict):
-        """Return the class from theDict
+        """Return the class as defined in the metadata that should be in theDict
         """
         metadata = theDict.get(Constants.METADATA)
         if metadata is None:
@@ -347,10 +374,10 @@ class CcpNmrJson(TraitBase):
 
         className = metadata.get(Constants.CLASSNAME)
         if className is None:
-            raise ValueError('metadata does not contain the classname of a CcpNmrJson (sub-)type')
+            raise ValueError('Metadata does not contain the classname of a CcpNmrJson (sub-)type')
 
         if not className in CcpNmrJson._registeredClasses:
-            raise RuntimeError(f'Unregistered class "{className}"; Cannot decode the data')
+            raise RuntimeError(f'Unregistered class "{className}"; Cannot decode the data in theDict')
         cls = CcpNmrJson._registeredClasses[className]
         return cls
 
@@ -389,9 +416,6 @@ class CcpNmrJson(TraitBase):
 
         :return the object restored from the Json data
         """
-        if path is None and jsonString is None:
-            raise RuntimeError('newObjectFromJson: undefined path and jsonString')
-
         if path is not None:
             path = aPath(path)
             if not path.exists():
@@ -402,6 +426,9 @@ class CcpNmrJson(TraitBase):
 
         elif jsonString is not None:
             theDict = dict(json.loads(jsonString))
+
+        else:
+            raise RuntimeError('newObjectFromJson: undefined path and jsonString')
 
         return CcpNmrJson._newObjectFromDict(theDict, **kwds)
 
@@ -417,6 +444,7 @@ class CcpNmrJson(TraitBase):
         defaults[Constants.JSONVERSION] = self._jsonVersion
         defaults[Constants.CLASSNAME] = self.__class__.__name__
         defaults[Constants.CLASSVERSION] = self.classVersion
+        defaults[Constants.CLASSINFO] = self.classInfo
         defaults[Constants.USER] = getpass.getuser()
         defaults[Constants.LASTPATH] = 'undefined'
         defaults[Constants.TIMESTAMP] = str(now())
@@ -427,14 +455,14 @@ class CcpNmrJson(TraitBase):
     class _metadataJsonHandler(TraitJsonHandlerBase):
         """Handle json metadata
         """
-        # def encode(self, obj, trait):  # Handled by base class
-        #     return getattr(obj, trait)
+        # def encode(value):  # Handled by base class
 
-        def decode(self, obj, trait, value):
-            # retain current metadata; just update the ones from value
-            currentMetaData = getattr(obj, Constants.METADATA)
+        def decode(self, value):
+            # retain essential current metadata; just update the others from value (reflecting the
+            # data in the json file
+            currentMetaData = getattr(self.obj, Constants.METADATA)
             currentMetaData.update(value)
-            setattr(obj, trait, currentMetaData)
+            return  currentMetaData
     # end class
 
     # @property
@@ -495,90 +523,116 @@ class CcpNmrJson(TraitBase):
             # any protected keys.
             self.setJsonMetadata(key=key, value=value)
 
-    def duplicate(self, **metadata):
-        """Convenience method to return a duplicate of self, using toJson and fromJson methods
-        and a ad-hoc json conversion for those traits that were not included.
-        Method will fail if attributes cannot be serialised
+    def duplicate(self, recursion=True, **metadata):
+        """Convenience method to return a duplicate of self, using
+        json serialisation with trait jsonHandlers to assure 'deepcopy' behavior
+        Method will fail if attributes cannot be serialised; e.g. an Any trait set to a non-serialisable
+        object.
+
+        :parameter recursion: flag to recurse into any CcpNmr (sub)-class making a duplicate of that object.
+                              If False: retain the reference to the original copy.
+        :parameter metadata: optional keyword=value pairs to update in the metadata
+        :returns a duplicate of self
         """
         duplicate = self.__class__(**metadata)
-        duplicate.fromJson(self.toJson(indent=None))
-        # now find the traits that were skipped, taking all traits minus the ones we have done
-        skippedTraits = set(self.keys()) - set(self.keys(saveToJson=True))
-        for trait in skippedTraits:
-            # duplicate using json serialisation (explicit conversion assures 'deepcopy' behavior)
-            handler = self._getJsonHandler(trait)
-            if handler is not None:
-                value = handler().encode(self, trait)
-                value = json.loads(json.dumps(value))
-                handler().decode(duplicate, trait, value)
+
+        for traitName, value in self.items():
+            if isinstance(value, CcpNmrJson):
+                if recursion:
+                    # recursion into any CcpNmrJson (sub)-classes
+                    newValue = value.duplicate(recursion=True)
+                else:
+                    newValue = value
+
             else:
-                value = json.loads(json.dumps(getattr(self, trait)))
-                setattr(duplicate, trait, value)
+                # Use json handler to make a "deep-copy"
+                handler = self._getJsonHandler(traitName)
+                _encoded = handler.encode(value)
+                _json = json.dumps(_encoded)
+                # effectively make a copy by loading the json string
+                _encoded = json.loads(_json)
+                newValue = handler.decode(_encoded)
+
+            duplicate.setTraitValue(traitName, newValue, force=True)
+
         return duplicate
 
     #--------------------------------------------------------------------------------------------
 
     # @debug3Enter()
     # @debug3Leave()
-    def _getJsonHandler(self, trait):
-        """Check metadata trait for specific jsonHandler, 
-        or subsequently check for one of the traitlet class.
-        or subsequently check for one of self
-        Return handler or None
+    def _getJsonHandler(self, traitName):
+        """Get a json handler for traitName
+        Check:
+        - metadata trait for specific jsonHandler,
+        - or subsequently check for one of the traitlet class.
+        - or subsequently check for one of self
+
+        :return handler instance
+        :raises RuntimeError if no handler can be found
         """
+        traitObj = self.getTraitObject(traitName)
+        handler = None
+
         # check for trait specific handler
-        handler = self.trait_metadata(trait, Constants.JSONHANDLER)
-        if handler is not None:
-            return handler
+        if (handler := self.trait_metadata(traitName, Constants.JSONHANDLER))is not None:
+            pass
 
         # check for traitlet class specific handler
-        traitObj = self.getTraitObject(trait)
-        if hasattr(traitObj, Constants.JSONHANDLER):
-            return getattr(traitObj, Constants.JSONHANDLER)
+        elif hasattr(traitObj, Constants.JSONHANDLER):
+            handler = getattr(traitObj, Constants.JSONHANDLER)
 
         # check for TraitBase class specific handler
-        if hasattr(self, Constants.JSONHANDLER):
-            return getattr(self, Constants.JSONHANDLER)
+        elif hasattr(self, Constants.JSONHANDLER):
+            handler = getattr(self, Constants.JSONHANDLER)
 
-        return None
+        if handler is None:
+            raise RuntimeError(f'Unable to json handler for trait {traitName} of object {self}')
+
+        return handler(obj=self, trait=traitObj)
 
     def toJson(self, **kwds):
         """Return self as list of (trait, value) tuples represented in a json string
         """
         indent = kwds.setdefault('indent', 2)
         dataList = self._encode()
-        return json.dumps(dataList, indent=indent)
+        try:
+            _json = json.dumps(dataList, indent=indent)
+        except TypeError as es:
+            raise RuntimeError(f'While encoding {self} as json: {es}')
+        return _json
 
     def _encode(self):
-        """Return self as list of (trait, value) tuples
+        """Return self as list of (traitName, value) tuples
         """
 
         # get all traits that need saving to json
         # Subtle but important implementation change relative to the previous one-liner
         # Allow trait-specific saveToJson metadata (i.e. 'tag'), to override object's saveAllToJson
         traitsToEncode = [Constants.METADATA]
-        for trait in self.keys():
-            # check if saveToJson was defined for this trait
-            _saveTraitToJson = self.trait_metadata(traitname=trait, key='saveToJson', default=None)
+        for traitName in self.keys():
+            # check if saveToJson was defined for this trait; use None as default as the tag can be True/False
+            _saveTraitToJson = self.trait_metadata(traitname=traitName, key='saveToJson', default=None)
             # if saveToJson was not defined for this trait, check saveAllToJson flag
             if _saveTraitToJson is None:
-                # We didn't obtain a result
-                if self.saveAllTraitsToJson:
-                    _saveTraitToJson = True
-                else:
-                    _saveTraitToJson = False
-
+                # We didn't obtain a result; check the global saveAllTraitsToJson flag
+                _saveTraitToJson = True if self.saveAllTraitsToJson else False
             if _saveTraitToJson:
-                traitsToEncode.append(trait)
+                traitsToEncode.append(traitName)
 
-        # create a list of (trait, value) tuples
+        # create a list of (traitName, value) tuples
         dataList = []
-        for trait in traitsToEncode:
-            handler = self._getJsonHandler(trait)
-            if handler is not None:
-                dataList.append((trait, handler().encode(self, trait)))
+        for traitName in traitsToEncode:
+            handler = self._getJsonHandler(traitName)
+            value = self.getTraitValue(traitName)
+            # Do not try to encode None's
+            if value is None:
+                newValue = None
             else:
-                dataList.append((trait, getattr(self, trait)))
+                newValue = handler.encode(value)
+
+            dataList.append((traitName, newValue))
+
         return dataList
 
     def fromJson(self, string):
@@ -615,15 +669,20 @@ class CcpNmrJson(TraitBase):
     def _decode(self, dataDict):
         """Populate/update self with data from dataDict
         """
-        for trait in [Constants.METADATA] + self.keys():
-            if trait in dataDict:
+        # Only update currently defined traits from the dataDict
+        for traitName in [Constants.METADATA] + self.keys():
+            if traitName in dataDict:
                 # update the trait with value from dataDict after optional decoding
-                value = dataDict[trait]
-                handler = self._getJsonHandler(trait)
-                if handler is not None:
-                    handler().decode(self, trait, value)
+                handler = self._getJsonHandler(traitName)
+                value = dataDict[traitName]
+                if value is None:
+                    # Do not decode None's
+                    newValue = None
                 else:
-                    setattr(self, trait, value)
+                    newValue = handler.decode(value)
+
+                self.setTraitValue(traitName, newValue, force=True)
+
         return self
 
     #--------------------------------------------------------------------------------------------
@@ -635,6 +694,7 @@ class CcpNmrJson(TraitBase):
             # We have updates
             for handler in getattr(self, Constants.UPDATEHANDLERS):
                 dataDict = handler(self, dataDict)
+
         # check if all is ok
         currentVersion = dataDict[Constants.METADATA][Constants.JSONVERSION]
         if currentVersion < self._jsonVersion:
@@ -655,12 +715,12 @@ class CcpNmrJson(TraitBase):
             raise RuntimeError('Unable to save; No fileHandlers defined for %s' % self)
         _fileHandlers = getattr(self, Constants.FILEHANDLERS)
 
-        if (handler := _fileHandlers.get(extension)) is None:
+        if (fileHandler := _fileHandlers.get(extension)) is None:
             raise RuntimeError('Unable to save; no fileHandler defined for extension "%s"' % extension)
 
         self._metadata[Constants.LASTPATH] = str(path)
         self._metadata[Constants.TIMESTAMP] = str(now())
-        handler.save(self, path, **kwds)
+        fileHandler.save(self, path, **kwds)
 
     def restore(self, path, **kwds):
         """Restore from file using appropriate handlers depending on extension; return self
@@ -676,10 +736,10 @@ class CcpNmrJson(TraitBase):
             raise RuntimeError('Unable to restore: no fileHandlers defined for %s' % self)
         _fileHandlers = getattr(self, Constants.FILEHANDLERS)
 
-        if (handler := _fileHandlers.get(extension)) is None:
+        if (fileHandler := _fileHandlers.get(extension)) is None:
             raise RuntimeError('Unable to restore; no fileHandler defined for extension "%s"' % extension)
 
-        handler.restore(self, path, **kwds)
+        fileHandler.restore(self, path, **kwds)
         self._metadata[Constants.LASTPATH] = str(path)
         return self
 

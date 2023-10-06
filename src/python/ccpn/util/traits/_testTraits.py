@@ -5,9 +5,10 @@
 """
 
 from ccpn.util.traits.CcpNmrTraits import Dict, Odict, Int, List, CPath, Adict, Set
-from ccpn.util.traits.CcpNmrJson import CcpNmrJson
+from ccpn.util.traits.CcpNmrJson import CcpNmrJson, register
 from ccpn.util.traits.CcpNmrTraits import RecursiveDict, RecursiveList, RecursiveOdict, RecursiveSet
 
+@register()
 class TestObj(CcpNmrJson):
 
     saveAllTraitsToJson = True
@@ -25,9 +26,8 @@ class TestObj(CcpNmrJson):
     thePath = CPath(default_value='bla.dat')
     theSet = RecursiveSet()
 
-TestObj.register()
 
-
+@register()
 class TestObj2(CcpNmrJson):
     saveAllTraitsToJson = True
     value = Int(default_value = 1)
@@ -54,8 +54,6 @@ class TestObj2(CcpNmrJson):
 
     def __repr__(self):
         return str(self)
-
-TestObj2.register()
 
 
 def test():

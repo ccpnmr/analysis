@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-09-25 19:54:36 +0100 (Mon, September 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-06 18:02:25 +0100 (Fri, October 06, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,7 @@ from typing import Sequence
 
 from ccpn.util.Path import Path, aPath, home
 from ccpn.util.Common import flatten
-from ccpn.util.traits.CcpNmrTraits import CFloat, CInt, CBool, Bool, List, \
+from ccpn.util.traits.CcpNmrTraits import CFloat, CInt, CBool, Bool, List, TList, \
     CString, CList, CPath, Any, CTuple
 
 from ccpn.util.Logging import getLogger
@@ -164,14 +164,14 @@ class JeolSpectrumDataSource(SpectrumDataSourceABC):
     _dataOffsetBytes = CInt(default_value=None, allow_none=True).tag(info='offset in Bytes for start of data')
     _dataTotalBytes = CInt(default_value=None, allow_none=True).tag(info='Total number of data Bytes')
 
-    _dataValidPoints =  CList(trait=CTuple(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+    _dataValidPoints =  TList(itemTrait=CTuple(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
                               info='Tuples of valid points along each dimension',
                               isDimensional=True,
                               doCopy=False,
                               spectrumAttribute=None,
                               hasSetterInSpectrumClass=False
                              )
-    _dimensionUnits =  CList(trait=CString(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+    _dimensionUnits =  TList(itemTrait=CString(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
                               info='Units along each dimension',
                               isDimensional=True,
                               doCopy=False,
@@ -179,7 +179,7 @@ class JeolSpectrumDataSource(SpectrumDataSourceABC):
                               hasSetterInSpectrumClass=False
                              )
 
-    _dataRanges =  CList(trait=CTuple(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+    _dataRanges =  TList(itemTrait=CTuple(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
                               info='Tuples of data range along each dimension',
                               isDimensional=True,
                               doCopy=False,
@@ -187,7 +187,7 @@ class JeolSpectrumDataSource(SpectrumDataSourceABC):
                               hasSetterInSpectrumClass=False
                              )
 
-    _dataZeroPoints =  CList(trait=CFloat(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+    _dataZeroPoints =  TList(itemTrait=CFloat(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
                               info='zero points along each dimension',
                               isDimensional=True,
                               doCopy=False,

@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-04 17:21:59 +0100 (Thu, May 04, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-10-06 11:22:43 +0100 (Fri, October 06, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -374,6 +374,11 @@ def calculateRollingAverage(data, windowSize=10):
     """
     window = np.ones(int(windowSize))/float(windowSize)
     return np.convolve(data, window,  mode='same')
+
+
+def aad(data, axis=None):
+    """The mean absolute deviation. Do not confuse with the median absolute difference. """
+    return np.mean(np.absolute(data - np.mean(data, axis)), axis)
 
 ############################################################
 ############### Spectral density mapping functions ################

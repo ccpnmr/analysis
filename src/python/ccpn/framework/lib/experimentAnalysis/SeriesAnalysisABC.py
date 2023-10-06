@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-05 09:40:47 +0100 (Mon, June 05, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-10-06 11:22:42 +0100 (Fri, October 06, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -403,22 +403,34 @@ class SeriesAnalysisABC(ABC):
         if columnName not in data:
             return
         factor = factor if factor and factor >0 else 1
-        thresholdValue = None
+        value = None
         if data is not None:
             if len(data[columnName])>0:
                 values = data[columnName].values
                 values = values[~np.isnan(values)]  # skip nans
+                mean = np.mean(values)
+                if calculationMode == sv.MEAN:
+                    value = mean
+
+                if calculationMode == sv.MEDIAN:
+                    value = np.median(values)
+
+                if calculationMode == sv.TRIMMED_MEAN:
+                    value = stats.trim_mean(values, proportiontocut=factor)
+
                 if calculationMode == sv.MAD:
-                    thresholdValue = stats.median_absolute_deviation(values) # in scipy MAD is Median absolute deviation
+                    value = mean + (stats.median_abs_deviation(values) * factor)
+
                 if calculationMode == sv.AAD:
-                    thresholdValue = data[columnName].mad() # in pandas MAD is Mean absolute deviation !
-                else:
-                    func = lf.CommonStatFuncs.get(calculationMode, None)
-                    if func:
-                        thresholdValue = func(values)
-        if thresholdValue:
-            thresholdValue *= factor
-        return thresholdValue
+                    value = mean + (lf.aad(values) * factor)
+
+                if calculationMode == sv.STD:
+                    value = mean + (np.std(values) * factor)
+
+                if calculationMode == sv.VARIANCE:
+                    value = mean + (np.var(values) * factor)
+
+        return value
 
     @staticmethod
     def _setRestoringMetadata(dataTable, seriesFrame, spectrumGroup):

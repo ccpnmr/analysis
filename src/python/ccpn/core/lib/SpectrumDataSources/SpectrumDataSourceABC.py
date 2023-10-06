@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-06 18:00:36 +0100 (Fri, October 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-06 19:21:39 +0100 (Fri, October 06, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -301,107 +301,108 @@ class SpectrumDataSourceABC(CcpNmrJson):
     # doCopy: bool: copy parameter to/from spectra and between dataSource instances
     # spectrumAttribute: name of corresponding attribute in Spectrum class
     # hasSetterInSpectrumClass: bool: corresponding attribute in Spectrum class can be set
-    date = CString(allow_none=True, default_value=None).tag(isDimensional=False,
-                                                            doCopy=True,
-                                                            spectrumAttribute=None,
-                                                            hasSetterInSpectrumClass=False
-                                                            )
-    user = CString(allow_none=True, default_value=None).tag(isDimensional=False,
-                                                            doCopy=True,
-                                                            spectrumAttribute=None,
-                                                            hasSetterInSpectrumClass=False
-                                                            )
-    comment = CString(allow_none=True, default_value=None).tag(isDimensional=False,
-                                                               doCopy=True,
-                                                               spectrumAttribute='comment',
-                                                               hasSetterInSpectrumClass=True
-                                                               )
-    pulseProgram = CString(allow_none=True, default_value=None).tag(isDimensional=False,
-                                                                    doCopy=True,
-                                                                    spectrumAttribute=None,
-                                                                    hasSetterInSpectrumClass=False
-                                                                    )
-    temperature = CFloat(allow_none=True, default_value=None).tag(isDimensional=False,
-                                                                  doCopy=True,
-                                                                  spectrumAttribute='temperature',
-                                                                  hasSetterInSpectrumClass=True
-                                                                  )
-    noiseLevel = CFloat(allow_none=True, default_value=None).tag(isDimensional=False,
-                                                                  doCopy=True,
-                                                                  spectrumAttribute='noiseLevel',
-                                                                  hasSetterInSpectrumClass=True
-                                                                  )
+    date = CString(default_value=None).tag(isDimensional=False,
+                                           doCopy=True,
+                                           spectrumAttribute=None,
+                                           hasSetterInSpectrumClass=False
+                                           )
+    user = CString(default_value=None).tag(isDimensional=False,
+                                           doCopy=True,
+                                           spectrumAttribute=None,
+                                           hasSetterInSpectrumClass=False
+                                           )
+    comment = CString(default_value=None).tag(isDimensional=False,
+                                           doCopy=True,
+                                           spectrumAttribute='comment',
+                                           hasSetterInSpectrumClass=True
+                                           )
+    pulseProgram = CString(default_value=None).tag(isDimensional=False,
+                                           doCopy=True,
+                                           spectrumAttribute=None,
+                                           hasSetterInSpectrumClass=False
+                                           )
+    temperature = CFloat(default_value=None, min=0.0).tag(isDimensional=False,
+                                           doCopy=True,
+                                           spectrumAttribute='temperature',
+                                           hasSetterInSpectrumClass=True
+                                           )
+    noiseLevel = CFloat(default_value=None, min=0.0).tag(isDimensional=False,
+                                            doCopy=True,
+                                            spectrumAttribute='noiseLevel',
+                                            hasSetterInSpectrumClass=True
+                                            )
     isBigEndian = Bool(default_value=_bigEndian).tag(isDimensional=False,
-                                                     doCopy=True,
-                                                     spectrumAttribute=None,
-                                                     hasSetterInSpectrumClass=False
-                                                     )
+                                            doCopy=True,
+                                            spectrumAttribute=None,
+                                            hasSetterInSpectrumClass=False
+                                            )
     # internal data scale (e.g. as used by Bruker)
     dataScale = CFloat(default_value=1.0).tag(isDimensional=False,
-                                              doCopy=True,
-                                              spectrumAttribute=None,
-                                              hasSetterInSpectrumClass=False
-                                              )
+                                            doCopy=True,
+                                            spectrumAttribute=None,
+                                            hasSetterInSpectrumClass=False
+                                            )
     sampledValues = List(default_value=[None for dim in range(0, MAXDIM)]).tag(
-                                               isDimensional=True,
-                                               doCopy=True,
-                                               spectrumAttribute=None,
-                                               hasSetterInSpectrumClass=False
-                                               )
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute=None,
+                                            hasSetterInSpectrumClass=False
+                                            )
     sampledSigmas = List(default_value=[None for dim in range(0, MAXDIM)]).tag(
-                                               isDimensional=True,
-                                               doCopy=True,
-                                               spectrumAttribute=None,
-                                               hasSetterInSpectrumClass=False
-                                               )
-    dimensionCount = CInt(default_value=0).tag(isDimensional=False,
-                                               doCopy=True,
-                                               spectrumAttribute='dimensionCount',
-                                               hasSetterInSpectrumClass=False
-                                               )
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute=None,
+                                            hasSetterInSpectrumClass=False
+                                            )
+    dimensionCount = CInt(default_value=0, min=0, max=MAXDIM).tag(
+                                            isDimensional=False,
+                                            doCopy=True,
+                                            spectrumAttribute='dimensionCount',
+                                            hasSetterInSpectrumClass=False
+                                            )
 
     # dimension order mappings e.g. used by NmrPipe, Xeasy
-    dimensionOrder = TList(itemTrait=CInt(), default_value=[dim for dim in range(0, MAXDIM)], maxlen=MAXDIM).tag(
-            info='A (optional) mapping index into the dimensional data',
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute=None,
-            hasSetterInSpectrumClass=False
-            )
-    pointCounts = TList(itemTrait=CInt(allow_none=False), default_value=[0] * MAXDIM, maxlen=MAXDIM).tag(
-            info='Total number of data points along each dimension',
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='pointCounts',
-            hasSetterInSpectrumClass=True
-            )
-    blockSizes = TList(itemTrait=CInt(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
-            info='Sub-matrix number of points along each dimension',
-            isDimensional=True,
-            doCopy=False,
-            spectrumAttribute=None,
-            hasSetterInSpectrumClass=False
-            )
-    dimensionTypes = TList(itemTrait=CString(allow_none=True), default_value=[specLib.DIMENSION_FREQUENCY] * MAXDIM, maxlen=MAXDIM).tag(
-            info='Dimension type (Frequency or Time) identifier along each dimension',
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='dimensionTypes',
-            hasSetterInSpectrumClass=True
-            )
+    dimensionOrder = TList(itemTrait=CInt(min=0, max=MAXDIM), default_value=[dim for dim in range(0, MAXDIM)], maxlen=MAXDIM).tag(
+                                            info='A (optional) mapping index into the dimensional data',
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute=None,
+                                            hasSetterInSpectrumClass=False
+                                            )
+    pointCounts = TList(itemTrait=CInt(allow_none=False, min=0), default_value=[0] * MAXDIM, maxlen=MAXDIM).tag(
+                                            info='Total number of data points along each dimension',
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='pointCounts',
+                                            hasSetterInSpectrumClass=True
+                                            )
+    blockSizes = TList(itemTrait=CInt(allow_none=True, min=0), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+                                            info='Sub-matrix number of points along each dimension',
+                                            isDimensional=True,
+                                            doCopy=False,
+                                            spectrumAttribute=None,
+                                            hasSetterInSpectrumClass=False
+                                            )
+    dimensionTypes = TList(itemTrait=CEnum(specLib.DIMENSIONTYPES, allow_none=True), default_value=[specLib.DIMENSION_FREQUENCY] * MAXDIM, maxlen=MAXDIM).tag(
+                                            info='Dimension type (Frequency or Time) identifier along each dimension',
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='dimensionTypes',
+                                            hasSetterInSpectrumClass=True
+                                            )
     dataTypes = TList(itemTrait=CEnum(specLib.DATA_TYPES), default_value=[specLib.DATA_TYPE_REAL] * MAXDIM, maxlen=MAXDIM, eventful=True).tag(
-            info=f'Data type identifier, i.e. {specLib.DATA_TYPES}, along each dimension',
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute=None,
-            hasSetterInSpectrumClass=False
-            )
+                                            info=f'Data type identifier, i.e. {specLib.DATA_TYPES}, along each dimension',
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute=None,
+                                            hasSetterInSpectrumClass=False
+                                            )
     isComplex = TList(itemTrait=CBool(), default_value=[False] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='isComplex',
-            hasSetterInSpectrumClass=True
-            )
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='isComplex',
+                                            hasSetterInSpectrumClass=True
+                                            )
     # GWV: this appears not to be working
     # @observe('dataTypes', type=All)
     # def _dataTypesChanged(self, changes):
@@ -416,78 +417,80 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     _tmp = [False] * MAXDIM; _tmp[0] = True
     isAcquisition = TList(itemTrait=CBool(), default_value=_tmp, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='isAcquisition',
-            hasSetterInSpectrumClass=True
-            )
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='isAcquisition',
+                                            hasSetterInSpectrumClass=True
+                                            )
     isotopeCodes = TList(itemTrait=CString(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='isotopeCodes',
-            hasSetterInSpectrumClass=True
-            )
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='isotopeCodes',
+                                            hasSetterInSpectrumClass=True
+                                            )
     axisCodes = TList(itemTrait=CString(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='axisCodes',
-            hasSetterInSpectrumClass=True
-            )
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='axisCodes',
+                                            hasSetterInSpectrumClass=True
+                                            )
     axisLabels = TList(itemTrait=CString(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute=None,
-            hasSetterInSpectrumClass=False,
-            info='per dimension: labels, as e.g. present in Felix or NmrPipe',
-            )
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute=None,
+                                            hasSetterInSpectrumClass=False,
+                                            info='per dimension: labels, as e.g. present in Felix or NmrPipe',
+                                            )
+    #ToDo default_value is not in SpecLib.MagnetisationTransferTypes
     measurementTypes = TList(itemTrait=CString(allow_none=True), default_value=['Shift'] * MAXDIM, maxlen=MAXDIM).tag(
             isDimensional=True,
             doCopy=True,
             spectrumAttribute='measurementTypes',
             hasSetterInSpectrumClass=True,
             )
-    foldingModes = TList(itemTrait=CString(allow_none=True), default_value=[specLib.FOLDING_MODE_CIRCULAR] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='foldingModes',
-            hasSetterInSpectrumClass=True,
-            )
-    spectrometerFrequencies = TList(itemTrait=CFloat(allow_none=False), default_value=[1.0] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='spectrometerFrequencies',
-            hasSetterInSpectrumClass=True,
-            )
-    spectralWidthsHz = TList(itemTrait=CFloat(allow_none=False), default_value=[1.0] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='spectralWidthsHz',
-            hasSetterInSpectrumClass=True,
-            )
+    foldingModes = TList(itemTrait=CEnum(specLib.FOLDING_MODES, allow_none=True), default_value=[specLib.FOLDING_MODE_CIRCULAR] * MAXDIM, maxlen=MAXDIM).tag(
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='foldingModes',
+                                            hasSetterInSpectrumClass=True,
+                                            )
+    spectrometerFrequencies = TList(itemTrait=CFloat(allow_none=False, min=0.0), default_value=[1.0] * MAXDIM, maxlen=MAXDIM).tag(
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='spectrometerFrequencies',
+                                            hasSetterInSpectrumClass=True,
+                                            )
+    spectralWidthsHz = TList(itemTrait=CFloat(allow_none=False, min=0.0), default_value=[1.0] * MAXDIM, maxlen=MAXDIM).tag(
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='spectralWidthsHz',
+                                            hasSetterInSpectrumClass=True,
+                                            )
     referencePoints = TList(itemTrait=CFloat(allow_none=False), default_value=[1.0] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='referencePoints',
-            hasSetterInSpectrumClass=True,
-            )
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='referencePoints',
+                                            hasSetterInSpectrumClass=True,
+                                            )
     referenceValues = TList(itemTrait=CFloat(allow_none=False), default_value=[1.0] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='referenceValues',
-            hasSetterInSpectrumClass=True,
-            )
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='referenceValues',
+                                            hasSetterInSpectrumClass=True,
+                                            )
     phases0 = TList(itemTrait=CFloat(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='phases0',
-            hasSetterInSpectrumClass=True,
-            )
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='phases0',
+                                            hasSetterInSpectrumClass=True,
+                                            )
     phases1 = TList(itemTrait=CFloat(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='phases1',
-            hasSetterInSpectrumClass=True,
-            )
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='phases1',
+                                            hasSetterInSpectrumClass=True,
+                                            )
+    #ToDo change into enumerated type
     windowFunctions = TList(itemTrait=CString(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
             isDimensional=True,
             doCopy=True,
@@ -509,7 +512,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             hasSetterInSpectrumClass=True,
             info='per dimension: Gaussian broadening in Hz'
             )
-    assignmentTolerances = TList(itemTrait=CFloat(allow_none=True, minValue=0.0), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+    assignmentTolerances = TList(itemTrait=CFloat(allow_none=True, min=0.0), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
             isDimensional=True,
             doCopy=True,
             spectrumAttribute='assignmentTolerances',
@@ -528,20 +531,20 @@ class SpectrumDataSourceABC(CcpNmrJson):
     # Attributes for more complicated dataFormats that have separate binaries and parameter
     # files; e.g. Azara, Bruker, Xeasy, NmrPipe
     #=========================================================================================
-    _parameterFile = CPath(default_value=None, allow_none=True).tag(info =
+    _parameterFile = CPath(default_value=None).tag(info =
                                         'an attribute to store the (parsed) path to a parameter file'
                                                                     )
-    _binaryFile = CPath(default_value=None, allow_none=True).tag(info =
+    _binaryFile = CPath(default_value=None).tag(info =
                                         'an attribute to store the path to a binary file; used during parsing'
                                                                  )
-    _path = CPath(default_value=None, allow_none=True).tag(info =
+    _path = CPath(default_value=None).tag(info =
                                         'an attribute to store the initial path used to define binary/parameter files; used during parsing'
                                                            )
     _isDirectory = Bool(default_value=False).tag(
                                         info='Initiating path was a directory',
                                         )
     #=========================================================================================
-    # hdf5Buffer related attributes
+    # hdf5Buffer related attributes; not saved to json
     #=========================================================================================
     _isBuffered = Bool(default_value=False).tag(info =
                                                 'Flag to indicate the spectrumDataSource object to have buffered read/writes',
@@ -556,7 +559,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
                                                 saveToJson = False
                                                 )
 
-    _bufferPath = CPath(default_value=None, allow_none=True).tag(info =
+    _bufferPath = CPath(default_value=None).tag(info =
                                                 'an attribute to store the path of the buffer file',
                                                 saveToJson = False
                                                 )

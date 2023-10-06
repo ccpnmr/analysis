@@ -95,7 +95,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-06 18:00:36 +0100 (Fri, October 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-06 19:21:39 +0100 (Fri, October 06, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -229,6 +229,17 @@ class Int(_Int, _CcpNmrTrait):
         _Int.__init__(self, *args, **kwargs)
         _CcpNmrTrait.__init__(self)
 
+    def validate(self, obj, value):
+        if value is None and self.allow_none:
+            return None
+        if isinstance(value, (int,)):
+            if (self.max is not None and value > self.max) or \
+               (self.min is not None and value < self.min):
+                raise ValueError(f'validate(): value {value} out of bounds; expected {self.info}')
+            return value
+        else:
+            raise TypeError(f'validate(): expected type int, got {_classType(value)}')
+
     def info(self):
         """:return info string
         """
@@ -243,8 +254,14 @@ class CInt(Int):
     def validate(self, obj, value):
         if value is None and self.allow_none:
             return value
-        else:
-            return _CInt.validate(self, obj, value)
+
+        if not isinstance(value, int):
+            try:
+                value = int(value)
+            except:
+                raise TypeError(f'validate(): unable to cast {value} to int')
+
+        return Int.validate(self, obj, value)
 
 
 class Float(_Float, _CcpNmrTrait):
@@ -463,14 +480,18 @@ class _TypedList(list):
         :param value: value for the item to be validated used self._itemTrait (if
                       self._itemTrait is not None and not Any)
         :return: validated (and optionally converted) value
-        :raises: ValueError
+        :raises: ValueError, TypeError
         """
         if self._itemTrait is None or isinstance(self._itemTrait, Any):
             return value
+
         try:
             value = self._itemTrait.validate(self._obj, value)
-        except TraitError:
+        except (TraitError, ValueError):
             raise ValueError(f'{self._fullName}[{item}]: invalid value {repr(value)}, expected {self._itemTrait.info()}')
+        except TypeError:
+            raise ValueError(f'{self._fullName}[{item}]: invalid type, expected {self._itemTrait.info()} got {_classType(value)}')
+
         return value
 
     def __setitem__(self, item, value):

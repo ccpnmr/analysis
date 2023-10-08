@@ -4,7 +4,7 @@ CcpNmr version of the Traitlets; all subclassed for added functionalities:
 - fixing of default_value issues (see also https://github.com/ipython/traitlets/issues/165)
 - if default_value == None, automatically set allow_none=True
 - json handlers
-- recursion option
+- recursion for all container objects (list, dict, tuple, set, ...)
 - Typed-dict (TDict) and typed-list (TList) traits
 - added functionalities
 
@@ -15,7 +15,7 @@ CcpNmr version of the Traitlets; all subclassed for added functionalities:
 
 from ccpn.util.traits.CcpNmrTraits import List, Any, Int,  \
     V3Object, CList, TList, CEnum, Dict, Float, CFloat, Instance, \
-    TDict, ObjectWithTraits
+    TDict, OWTraits
 
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson, Constants, register
 
@@ -52,7 +52,7 @@ class MyObj(CcpNmrJson):
     mi = Int(default_value=None)
     mydict = TDict(CFloat(), default_value={'aap':1.0})
     myfloat = CFloat(default_value=None, min=0.0)
-    obj2 = ObjectWithTraits(klass=MyObj2, default_value=MyObj2())
+    obj2 = OWTraits(klass=MyObj2, default_value=MyObj2())
 
     def __str__(self):
         return f'<MyObj {hex(id(self))}>'
@@ -95,7 +95,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-06 19:21:39 +0100 (Fri, October 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-08 10:59:55 +0100 (Sun, October 08, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -136,7 +136,7 @@ from traitlets import Dict as _Dict
 from traitlets import Tuple as _Tuple
 
 from ccpn.util.traits.TraitJsonHandlerBase import TraitJsonHandlerBase, DictTraitJsonHandlerABC, \
-    ListTraitJsonHandlerABC
+    ListTraitJsonHandlerABC, CcpNmrJsonClassHandlerABC
 
 from ccpn.util.AttributeDict import AttributeDict
 from ccpn.util.DataEnum import DataEnum
@@ -154,7 +154,7 @@ class _CcpNmrTrait(object):
     """
     _globalTraitOrder = 0
 
-    def __init__(self, recursion=False, itemTrait=None, valueTrait=None, keyTrait=None):
+    def __init__(self, itemTrait=None, valueTrait=None, keyTrait=None):
         self._traitOrder = _CcpNmrTrait._globalTraitOrder
         _CcpNmrTrait._globalTraitOrder += 1
 
@@ -163,7 +163,6 @@ class _CcpNmrTrait(object):
             self.allow_none = True
 
         # initialisation; attributes used TList, TDict, etc subclasses
-        self.recursion = recursion
         self.itemTrait = itemTrait
         self.valueTrait = valueTrait
         self.keyTrait = keyTrait
@@ -178,6 +177,12 @@ class _CcpNmrTrait(object):
         - the trait metadata
         - the trait class definition
 
+        :parameter obj: the parent object in which the trait defines
+                        an attribute,
+                        or
+                        the container obj (list, dict, set, ...) if
+                        the trait defines an item/value
+
         :return a json handler instance
         :raises RuntimeError if handler is not defined
         """
@@ -187,9 +192,10 @@ class _CcpNmrTrait(object):
         handler = None
         # check for trait specific handler in metadata
         if (handler := self.get_metadata(Constants.JSONHANDLER))is not None:
+            # we found a handler in the metadata
             pass
 
-        # check for trait class specific handler
+        # next, check for trait-class specific handler
         elif hasattr(self, Constants.JSONHANDLER):
             handler = getattr(self, Constants.JSONHANDLER)
 
@@ -200,7 +206,8 @@ class _CcpNmrTrait(object):
         return handler(obj=obj, trait=self)
 
     class jsonHandler(TraitJsonHandlerBase):
-        "A default json handler that does nothing"
+        """A default json handler that does nothing
+        """
         pass
 
 
@@ -209,24 +216,22 @@ class _CcpNmrTrait(object):
 #=========================================================================================
 
 class Any(_Any, _CcpNmrTrait):
-    def __init__(self, *args, **kwargs):
-        if not 'default_value' in kwargs:
-            raise ValueError('%s Traitlet without explicit default_value' % self.__class__.__name__)
-        _Any.__init__(self, *args, **kwargs)
+    def __init__(self, default_value=None, **kwargs):
+        _Any.__init__(self, default_value=default_value, **kwargs)
         _CcpNmrTrait.__init__(self)
 
 
 class Instance(_Instance, _CcpNmrTrait):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         if not 'default_value' in kwargs:
             raise ValueError('%s Traitlet without explicit default_value' % self.__class__.__name__)
-        _Instance.__init__(self, *args, **kwargs)
+        _Instance.__init__(self, **kwargs)
         _CcpNmrTrait.__init__(self)
 
 
 class Int(_Int, _CcpNmrTrait):
-    def __init__(self, *args, **kwargs):
-        _Int.__init__(self, *args, **kwargs)
+    def __init__(self, **kwargs):
+        _Int.__init__(self, **kwargs)
         _CcpNmrTrait.__init__(self)
 
     def validate(self, obj, value):
@@ -265,8 +270,8 @@ class CInt(Int):
 
 
 class Float(_Float, _CcpNmrTrait):
-    def __init__(self, *args, **kwargs):
-        _Float.__init__(self, *args, **kwargs)
+    def __init__(self, **kwargs):
+        _Float.__init__(self, **kwargs)
         _CcpNmrTrait.__init__(self)
 
     def info(self):
@@ -399,15 +404,15 @@ class CEnum(Enum):
             _inverseMap = dict((val, key) for key, val in self.trait._mapping.items())
 
             if value is None:
-                pass
-            elif value in _inverseMap.keys():
-                value = _inverseMap[value]
+                return None
+
+            if value in _inverseMap.keys():
+                return _inverseMap[value]
+
             else:
                 raise RuntimeError(f'Invalid value {value}; should be {self.trait.info()}')
 
-            return value
-
-       # def decode(self, value):  £ from base class
+       # def decode(self, value):  # from base class
 
 
 class List(_List, _CcpNmrTrait):
@@ -415,18 +420,17 @@ class List(_List, _CcpNmrTrait):
     Fixing default_value problem
     """
 
-    def __init__(self, default_value=[], minlen=0, maxlen=sys.maxsize, recursion=False, **kwargs):
+    def __init__(self, default_value=[], minlen=0, maxlen=sys.maxsize, **kwargs):
         """
         Initialise the object
         :param default_value: the default value of the list
         :param minlen: minimum length of the list
         :param maxlen: maximum length of the list
-        :param recursion: recurse (i.e. encode/decode) any CcpNmrJson object
         :param kwargs: optional keyword arguments
         """
 
         _List.__init__(self, default_value=default_value, minlen=minlen, maxlen=maxlen, **kwargs)
-        _CcpNmrTrait.__init__(self, recursion=recursion)
+        _CcpNmrTrait.__init__(self)
 
         if default_value is not None:
             self.default_value = default_value
@@ -442,6 +446,37 @@ class List(_List, _CcpNmrTrait):
         """:return the maximum length of the list
         """
         return self._maxlen
+
+    class jsonHandler(ListTraitJsonHandlerABC):
+        klass = list
+
+
+class CList(List):
+    """An List trait with casting from any iterable
+    """
+
+    def validate(self, obj, theList):
+        """
+        Validate theList
+        :param obj: object containing trait
+        :param theList: new value (list or iterable) for the trait to be validated
+        :return: validated (and optionally converted) theList
+        :raises: ValueError
+        """
+        # local import, because isotopeRecords in Common cause circular imports £%%$$GRr
+        from ccpn.util.Common import isIterable
+
+        if theList is None and self.allow_none:
+            return None
+
+        if isinstance(theList, list):
+            return theList
+
+        elif isIterable(theList):
+            return [val for val in theList]
+
+        else:
+            raise ValueError(f'{obj.__class__.__name__}.{self.name}: expected list or iterable, got {theList}')
 
 
 class _TypedList(list):
@@ -564,51 +599,10 @@ class _TypedList(list):
         return f'{self.__class__.__name__}({super().__repr__()})'
 
 
-class CList(List):
-    """An List trait with casting from any iterable and optional recursion
-    """
-    def __init__(self, default_value=[], minlen=0, maxlen=sys.maxsize, recursion=False, **kwargs):
-        """
-        Initialise the object
-        :param default_value: the default value of the list
-        :param minlen: minimum length of the list
-        :param maxlen: maximum length of the list
-        :param recursion: recurse (i.e. encode/decode) any CcpNmrJson object
-        :param kwargs: optional keyword arguments
-        """
-        super().__init__(default_value=default_value, minlen=minlen, maxlen=maxlen, recursion=recursion, **kwargs)
-
-    def validate(self, obj, theList):
-        """
-        Validate theList
-        :param obj: object containing trait
-        :param theList: new value (list or iterable) for the trait to be validated
-        :return: validated (and optionally converted) theList
-        :raises: ValueError
-        """
-        # local import, because isotopeRecords in Common cause circular imports £%%$$GRr
-        from ccpn.util.Common import isIterable
-
-        if theList is None and self.allow_none:
-            return None
-
-        if isinstance(theList, list):
-            return theList
-
-        elif isIterable(theList):
-            return [val for val in theList]
-
-        else:
-            raise ValueError(f'{obj.__class__.__name__}.{self.name}: expected list or iterable, got {theList}')
-
-    class jsonHandler(ListTraitJsonHandlerABC):
-        klass = list
-
-
-class TList(CList):
+class TList(List):
     """An Typed-List trait with:
     - casting from any iterable
-    - Item validation; i.e. by the itemTrait defined in the init. Recursion is always active
+    - Item validation; i.e. by the itemTrait defined in the init.
     """
     def __init__(self, itemTrait, default_value=[], minlen=0, maxlen=sys.maxsize, **kwargs):
         """
@@ -657,21 +651,18 @@ class TList(CList):
 
     class jsonHandler(ListTraitJsonHandlerABC):
         klass = _TypedList
-        recursion = True  # Assure that we handle the items
 
 
 class RecursiveList(List):
     """A list trait that implements recursion of any of the values that are a CcpNmrJson (sub)type
-    DEPRICATED: use recurson parameter of List or CList
+    DEPRICATED: use List or CList
     """
-    # trait-specific json handler
-    class jsonHandler(ListTraitJsonHandlerABC):
-        klass = list
-        recursion = True
+    pass
 
 
 class Set(_Set, _CcpNmrTrait):
-    """Fixing default_value problem"""
+    """Fixing default_value problem
+    """
 
     def __init__(self, trait=None, default_value=None, minlen=0, maxlen=sys.maxsize, **kwargs):
         _Set.__init__(self, trait=trait, default_value=default_value, minlen=minlen, maxlen=maxlen, **kwargs)
@@ -679,20 +670,20 @@ class Set(_Set, _CcpNmrTrait):
         if default_value is not None:
             self.default_value = default_value
 
+    class jsonHandler(ListTraitJsonHandlerABC):
+        klass = set
+
 
 class RecursiveSet(Set):
     """A Set trait that implements recursion of any of the values that are a CcpNmrJson (sub)type
+    DEPRICATED: use Set
     """
-    # trait-specific json handler
-    class jsonHandler(ListTraitJsonHandlerABC):
-        klass = set
-        recursion = True
+    pass
 
 
 class Tuple(_Tuple, _CcpNmrTrait):
     """Fixing default_value problem
     """
-
     def __init__(self, *traits, **kwargs):
         default_value = kwargs.setdefault('default_value', None)
         _Tuple.__init__(self, *traits, **kwargs)
@@ -700,11 +691,13 @@ class Tuple(_Tuple, _CcpNmrTrait):
         if default_value is not None:
             self.default_value = default_value
 
+    class jsonHandler(ListTraitJsonHandlerABC):
+        klass = tuple
+
 
 class CTuple(Tuple):
     """Casting tuple, any iterable
     """
-
     def validate(self, obj, values):
         # local import, because isotopeRecords in Common cause circular imports £%%$$GRr
         from ccpn.util.Common import isIterable
@@ -722,11 +715,9 @@ class CTuple(Tuple):
 
 class RecursiveTuple(Tuple):
     """A tuple trait that implements recursion of any of the values that are a CcpNmrJson (sub)type
+    DEPRICATED: use Tuple or CTuple
     """
-    # trait-specific json handler
-    class jsonHandler(ListTraitJsonHandlerABC):
-        klass = tuple
-        recursion = True
+    pass
 
 
 class Dict(_Dict, _CcpNmrTrait):
@@ -734,27 +725,25 @@ class Dict(_Dict, _CcpNmrTrait):
     Use TDict for a dict with typpe checking
     """
 
-    def __init__(self, default_value={}, recursion=False, **kwargs):
+    def __init__(self, default_value={}, **kwargs):
         """
         :param default_value: the default for the trait
-        :param recursion: flag to recursively handle any values while saving to json
         :param kwargs: additional optional parameters of the Dict trailet, like allow_none, read_only ...
         """
         _Dict.__init__(self, default_value=default_value, **kwargs)
-        _CcpNmrTrait.__init__(self, recursion=recursion)
+        _CcpNmrTrait.__init__(self)
         if default_value is not None:
             self.default_value = default_value
+
+    class jsonHandler(DictTraitJsonHandlerABC):
+        klass = dict
 
 
 class RecursiveDict(Dict):
     """A dict trait that implements recursion of any of the values that are a CcpNmrJson (sub)type
-    Recursion is active by default, unless tagged with .tag(recursion=False)
-    DEPRICATED: use Dict(..., recursion=True ..)
+    DEPRICATED: use Dict, CDict, TDict
     """
-    # trait-specific json handler
-    class jsonHandler(DictTraitJsonHandlerABC):
-        klass = dict
-        recursion = True
+    pass
 
 
 class Adict(TraitType, _CcpNmrTrait):
@@ -765,16 +754,15 @@ class Adict(TraitType, _CcpNmrTrait):
     default_value = AttributeDict()
     info_text = "'an AttributeDict'"
 
-    def __init__(self, default_value={}, recursion=False, **kwargs):
+    def __init__(self, default_value={}, **kwargs):
         """
         :param default_value: the default for the trait
-        :param recursion: flag to recursively handle any values while saving to json
         :param kwargs: additional optional parameters of the Dict trailet, like allow_none, read_only ...
         """
         if default_value is not None:
             self.default_value = default_value
         TraitType.__init__(self, default_value=default_value, **kwargs)
-        _CcpNmrTrait.__init__(self, recursion=recursion)
+        _CcpNmrTrait.__init__(self)
 
     def validate(self, obj, value):
         """Assure a AttributeDict instance
@@ -798,12 +786,10 @@ class RecursiveAdict(Adict):
     """A trait that defines a json serialisable AttributeDict;
     dicts or (key,value) iterables are automatically cast into AttributeDict
     Recursion is active
-    DEPRICATED: use Adict( .., recursion=True, ) instead
+    DEPRICATED: use Adict instead
     """
     # trait-specific json handler
-    class jsonHandler(DictTraitJsonHandlerABC):
-        klass = AttributeDict
-        recursion = True
+    pass
 # end class
 
 
@@ -815,14 +801,13 @@ class Odict(TraitType, _CcpNmrTrait):
     default_value = OrderedDict()
     info_text = "'an OrderedDict'"
 
-    def __init__(self, default_value={}, recursion=False, **kwargs):
+    def __init__(self, default_value={}, **kwargs):
         """
         :param default_value: the default for the trait
-        :param recursion: flag to recusively handle any values while saving to json
         :param kwargs: additional optional parameters of the Dict trailet, like allow_none, read_only ...
         """
         TraitType.__init__(self, default_value=default_value, **kwargs)
-        _CcpNmrTrait.__init__(self, recursion=recursion)
+        _CcpNmrTrait.__init__(self)
         if default_value is not None:
             self.default_value = default_value
 
@@ -848,12 +833,9 @@ class RecursiveOdict(Odict):
     """A trait that defines a json serialisable OrderedDict;
     dicts are automatically cast into OrderedDict
     Recursion is active
-    DEPRICATED: use Odict(  , recursion=True, ..)
+    DEPRICATED: use Odict
     """
-    # trait-specific json handler
-    class jsonHandler(DictTraitJsonHandlerABC):
-        klass = OrderedDict
-        recursion = True
+    pass
 # end class
 
 
@@ -946,7 +928,6 @@ class TDict(Dict):
     a trait-instance definition provided upon initialisation. Currently, all values
     need to be of the type defined by a single trait instance. This may be expanded
     in the future with a key-based definition.
-    Recursion is always True.
     """
     def __init__(self, valueTrait, default_value={}, **kwargs):
         """
@@ -967,7 +948,6 @@ class TDict(Dict):
         super().__init__(default_value=default_value, **kwargs)
 
         self.valueTrait = valueTrait  # This is also store by traitlets, but do not like using private attributes
-        self.recursion = True
 
     def validate(self, obj, theDict) -> _TypedDict | None:
         """
@@ -992,7 +972,6 @@ class TDict(Dict):
 
     class jsonHandler(DictTraitJsonHandlerABC):
         klass = _TypedDict
-        recursion = True
 
 
 class Immutable(Any, _CcpNmrTrait):
@@ -1195,53 +1174,18 @@ class V3ObjectList(TList):
     info_text = "A V3-ObjectList"
 
     def __init__(self, default_value = [], **kwargs):
-        TList.__init__(self, V3Object(), default_value=default_value, **kwargs)
+        TList.__init__(self, itemTrait=V3Object(allow_none=True), default_value=default_value, **kwargs)
 
-    #     if default_value is not None:
-    #         self.default_value = default_value
-    #
-    #     def validate_elements(self, obj, value):
-    #         """Assure a str instance
-    #         """
-    #         from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-    #         from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
-    #
-    #         for val in value:
-    #             if isinstance(val, (AbstractWrapperObject, V3CoreObjectABC)):
-    #                 pass
-    #             else:
-    #                 self.error(obj, value)
-    #
-    #         return value
-    #
-    # # trait-specific json handler
-    # class jsonHandler(TraitJsonHandlerBase):
-    #     """json compatible;
-    #     """
-    #     def encode(self, value):
-    #         "returns a json serialisable object"
-    #         # make a list of pids
-    #         pids = [val.pid for val in value]
-    #         return pids
-    #
-    #     def decode(self, value):
-    #         "uses value to generate and set the new (or modified) obj"
-    #         _app = getApplication()
-    #         # get obj's for the list of pids
-    #         result = [_app.get(val) for val in value]
-    #         if None in result:
-    #             getLogger().warning('Unable to decode some pid\'s to objects; %r' % value)
-    #         return result
 # end class
 
 
-class ObjectWithTraits(TraitType, _CcpNmrTrait):
-    """A trait for CcpNmrJson object instance
+class OWTraits(TraitType, _CcpNmrTrait):
+    """A trait for CcpNmrJson object with traits instance
     """
 
     klass = None  # can subclass to overwrite this
 
-    def __init__(self, klass=None, default_value=None):
+    def __init__(self, klass=None, default_value=None, **kwds):
         """Initialise the CcpNmrJson trait.
 
         :parameter klass: Optional parameters to define a CcpNmrJson subclass, either as
@@ -1255,7 +1199,7 @@ class ObjectWithTraits(TraitType, _CcpNmrTrait):
         # set the klass for this trait; default to class attribute klass or CcpNmrJson, or the value
         # given as the klass parameter to the call.
         if klass is None:
-            self.klass = ObjectWithTraits.klass if ObjectWithTraits.klass is not None else CcpNmrJson
+            self.klass = OWTraits.klass if OWTraits.klass is not None else CcpNmrJson
 
         else:
             if klass in CcpNmrJson._registeredClasses.values():
@@ -1273,7 +1217,7 @@ class ObjectWithTraits(TraitType, _CcpNmrTrait):
             if not isinstance(default_value, self.klass):
                 raise TypeError(f'parameter default_value: expected {_classType(self.klass)} instance, got {_classType(default_value)}')
 
-        TraitType.__init__(self, default_value=default_value)
+        TraitType.__init__(self, default_value=default_value, **kwds)
         _CcpNmrTrait.__init__(self)
 
     def default(self, obj=None):
@@ -1294,22 +1238,20 @@ class ObjectWithTraits(TraitType, _CcpNmrTrait):
 
         return value
 
-    class jsonHandler(TraitJsonHandlerBase):
+    class jsonHandler(CcpNmrJsonClassHandlerABC):
 
         def encode(self, value):
             _klass = self.trait.klass
             if not isinstance(value, _klass):
                 raise TypeError(f'encode value: expected  {_classType(_klass)} instance; got {_classType(value)}')
-            return value._encode()
+            return super().encode(value)
 
         def decode(self, value):
             # decode value; a dict defining a self.trait.klass instance
             _klass = self.trait.klass
             if not _klass._isEncodedObject(value):
                 raise RuntimeError(f'decode value: error decoding and initialising {_classType(_klass)} instance')
-            theDict = dict(value)
-            value = _klass._newObjectFromDict(theDict)
-            return value
+            return super().decode(value)
 
 
 

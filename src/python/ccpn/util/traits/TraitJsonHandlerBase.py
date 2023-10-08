@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-06 18:00:36 +0100 (Fri, October 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-08 10:59:55 +0100 (Sun, October 08, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -85,59 +85,70 @@ class ContainerJsonHandlerABC(TraitJsonHandlerBase):
     # to be subclassed
     #--------------------------------------------------------------------------------------------
     klass = None        # The class to be handled
-    recursion = False   # Flag to recurse if CcpNmrJson objects are encountered in the list
-                        # True overrides trait instance setting
     #--------------------------------------------------------------------------------------------
     # end to be subclassed
 
-    def _doRecurse(self) -> bool:
-        """Recursion logic flag; class definition == True overrides trait instance definition
+    def getJsonItemHandler(self, parent, item):
+        """:return A jsonHandler instance for the child-item or None which
+        indicates not handling is needed (or can be defined)
+        Could be subclassed;
         """
-        if self.recursion:
-            _recursion = True
+        # local import to avoid cycles
+        from ccpn.util.traits.CcpNmrTraits import OWTraits, Any
+        from ccpn.util.traits.CcpNmrJson import CcpNmrJson
+
+        _trait = self.trait.itemTrait or self.trait.valueTrait
+        if _trait is not None:
+            pass
+
+        elif isinstance(item, CcpNmrJson):
+            # for encode
+            _trait = OWTraits(allow_none=True)
+
+        elif CcpNmrJson._isEncodedObject(item):
+            # for decode
+            _trait = OWTraits(allow_none=True)
+
         else:
-            _recursion = self.trait.recursion
-        return _recursion
+            pass
 
-    def getJsonItemHandler(self):
-        """:return A jsonHandler instance for the item or None
-        to be subclassed; without it all container items will be unaltered
-        """
-        return None
+        if _trait is None:
+            return None
+        else:
+            return _trait.getJsonHandler(obj=parent)
 
-    def encodeItem(self, item):
-        """encode item of the container, checking for CcpNmrJson instances and jsonHandlers
+    def encodeItem(self, parent, item):
+        """encode item of the container value;
+        getHandler will be checking for CcpNmrJson instances and defined handlers
+        :parameter parent: the container object; e.g. a list or dict, ...
+        :parameter item: the item to be encoded from the container
         :return Encoded item
         Can be subclassed
         """
-        # local imports to avoid circular dependencies
-        from ccpn.util.traits.CcpNmrJson import CcpNmrJson
+        if item is None:
+            return None
 
-        if isinstance(item, CcpNmrJson):
-            newValue = item._encode()
-
-        elif (jsonHandler := self.getJsonItemHandler()) is not None:
-            newValue = jsonHandler.encode(item)
+        if (itemHandler := self.getJsonItemHandler(parent, item)) is not None:
+            newValue = itemHandler.encode(item)
 
         else:
             newValue = item
 
         return newValue
 
-    def decodeItem(self, item):
-        """decode item of the container, checking for possible CcpNmrJson encoded data and jsonHandlers
+    def decodeItem(self, parent, item):
+        """decode item of the container parent
+        getHandler will be checking for CcpNmrJson instances and defined handlers
+        :parameter parent: the container object; e.g. a list or dict, ...
+        :parameter item: the item to be encoded from the container
         :return Decoded item
         Can be subclassed
         """
-        # local imports to avoid circular dependencies
-        from ccpn.util.traits.CcpNmrJson import CcpNmrJson
+        if item is None:
+            return None
 
-        if CcpNmrJson._isEncodedObject(item):
-            theDict = dict(item)
-            newValue = CcpNmrJson._newObjectFromDict(theDict)
-
-        elif (jsonHandler := self.getJsonItemHandler()) is not None:
-            newValue = jsonHandler.decode(item)
+        if (itemHandler := self.getJsonItemHandler(parent, item)) is not None:
+            newValue = itemHandler.decode(item)
 
         else:
             newValue = item
@@ -146,85 +157,67 @@ class ContainerJsonHandlerABC(TraitJsonHandlerBase):
 
 
 class DictTraitJsonHandlerABC(ContainerJsonHandlerABC):
-    """Abstract base class to handle (optionally) recursion of dict-like traits
-    Each value of the (key,value) pairs must of CcpNmrJson (sub-)type
+    """Abstract base class to handle recursion of dict-like traits
     """
 
-    def _getJsonItemHandler(self):
-        """:return A jsonHandler instance for the item or None
-        """
-        if self.trait.valueTrait is not None:
-            return self.trait.valueTrait.getJsonHandler(obj=self.obj)
-        else:
-            return None
-
-    def encode(self, theDict):
-        """Encode theDict, optionally recursing depending on class / trait settings
+    def encode(self, theDict) -> dict:
+        """Encode theDict, recursing values depending on class / trait settings
 
         :param theDict: a dict instance of self.klass to be encoded
-        :return: A encoded list of (key, value) pairs
+        :return: A dict with (key, encoded-value) pairs
         """
+        from ccpn.util.Common import classType
 
         if not isinstance(theDict, self.klass):
-            raise RuntimeError(f'Expected instance of {type(self.klass)}, got {type(theDict)}')
+            raise RuntimeError(f'Expected instance of {classType(self.klass)}, got {classType(theDict)}')
 
-        if self._doRecurse():
-            theList = [(key, self.encodeItem(val)) for key,val in theDict.items()]
-        else:
-            theList = [(key, val) for key,val in theDict.items()]
+        theList = [(key, self.encodeItem(theDict, val)) for key,val in theDict.items()]
+        return dict(theList)
 
-        return theList
+    def decode(self, theData) -> dict:
+        """Decode theData, i.e. a dict or a list of (key,value) pairs;
+        always recurse to decode values
 
-    def decode(self, theList):
-        """Decode the list of (key,value) pairs; always recurse to decode values
-
-        :param theList: list with (key,value) pairs to decode
-        :return: the decoded list as a dict
+        :param theData: dict or list with (key,value) pairs to decode
+        :return: the decoded data as a dict
         """
+        # previously, Dict items were not encoded as list of (key, value) tuples,
+        # only RecursiveDicts and the like. Now there is no distinction, so we
+        # need to check theData
+        if isinstance(theData, list):
+            theData = dict(theData)
         # needs recursing for each (key, value) pair
-        result = [(key, self.decodeItem(value)) for key, value in theList]
-        theDict = dict(result)
-        return theDict
+        result = [(key, self.decodeItem(theData, value)) for key, value in theData.items()]
+        return dict(result)
 # end class
 
 
 class ListTraitJsonHandlerABC(ContainerJsonHandlerABC):
     """Abstract base class to handle recursion of list-like traits
-    Each value of the (list must of CcpNmrJson (sub-)type
     """
-
-    def getJsonItemHandler(self):
-        """:return A jsonHandler instance for the item or None
-        """
-        if self.trait.itemTrait is not None:
-            return self.trait.itemTrait.getJsonHandler(obj=self.obj)
-        else:
-            return None
-
-    def encode(self, theList):
-        """Encode thelist, optionally recursing depending on class / trait settings
+    def encode(self, theList) -> list:
+        """Encode theList, recursing depending on class / trait settings
 
         :param theList: a list instance of self.klass to be encoded
         :return: The encoded list
         """
+        from ccpn.util.Common import classType
+
         if not isinstance(theList, self.klass):
-            raise RuntimeError(f'Expected instance of {type(self.klass)}, got {type(theList)}')
+            raise RuntimeError(f'Expected instance of {classType(self.klass)}, got {classType(theList)}')
 
-        if self._doRecurse():
-            result = [self.encodeItem(item) for item in theList]
-        else:
-            result = [item for item in theList]
-
+        result = [self.encodeItem(theList, item) for item in theList]
         return result
 
     def decode(self, theList):
-        """Decode theList of encoded items; always recurse to decode items
+        """Decode theList of encoded items;
+        always recurse to decode items
 
         :param theList: list with items to decode
         :return: the decoded list
         """
         # needs decoding for each item in theList
-        result = [self.decodeItem(item) for item in theList]
+        result = [self.decodeItem(theList, item) for item in theList]
         return result
 # end class
 

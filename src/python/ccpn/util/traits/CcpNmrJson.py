@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-06 18:00:36 +0100 (Fri, October 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-08 10:59:55 +0100 (Sun, October 08, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -274,11 +274,12 @@ class CcpNmrJson(TraitBase):
                    class myHandler(object):   #myHandler defined inside the class
                         ....
 
-     2) A custom traitlet class can have a traitlet-specific jsonHandler class defined inside its class
+     2) A (custom) traitlet class can have a traitlet-specific jsonHandler class defined inside its class
      definition (see Adict for example).
-     
-     3) A TraitBase class can have a jsonHandler, which it would use for all traits. NB assure that the handler
-     can deal with all trait types defined in the class
+
+     # GWV 5/10/23: disabled as not usefull and gives too much headache
+     # 3) A TraitBase class can have a jsonHandler, which it would use for all traits. NB assure that the handler
+     # can deal with all trait types defined in the class
      
      4) The default handler defined for all traits does nothing, json decoders are assumed be able to handle it.
      
@@ -546,7 +547,7 @@ class CcpNmrJson(TraitBase):
 
             else:
                 # Use json handler to make a "deep-copy"
-                handler = self._getJsonHandler(traitName)
+                handler = self._getTraitJsonHandler(traitName)
                 _encoded = handler.encode(value)
                 _json = json.dumps(_encoded)
                 # effectively make a copy by loading the json string
@@ -561,35 +562,35 @@ class CcpNmrJson(TraitBase):
 
     # @debug3Enter()
     # @debug3Leave()
-    def _getJsonHandler(self, traitName):
-        """Get a json handler for traitName
-        Check:
+    def _getTraitJsonHandler(self, traitName):
+        """just a helper function to get a json handler instance from trait traitName
+        Checks (via trait.getJsonHandler call):
         - metadata trait for specific jsonHandler,
-        - or subsequently check for one of the traitlet class.
-        - or subsequently check for one of self
+        - or subsequently check for one of the trait class.
 
         :return handler instance
         :raises RuntimeError if no handler can be found
         """
         traitObj = self.getTraitObject(traitName)
-        handler = None
+        return traitObj.getJsonHandler(self)
+        # handler = None
+        #
+        # # check for trait specific handler
+        # if (handler := self.trait_metadata(traitName, Constants.JSONHANDLER))is not None:
+        #     pass
+        #
+        # # check for traitlet class specific handler
+        # elif hasattr(traitObj, Constants.JSONHANDLER):
+        #     handler = getattr(traitObj, Constants.JSONHANDLER)
+        #
+        # # check for TraitBase class specific handler
+        # elif hasattr(self, Constants.JSONHANDLER):
+        #     handler = getattr(self, Constants.JSONHANDLER)
+        #
+        # if handler is None:
+        #     raise RuntimeError(f'Unable to json handler for trait {traitName} of object {self}')
 
-        # check for trait specific handler
-        if (handler := self.trait_metadata(traitName, Constants.JSONHANDLER))is not None:
-            pass
-
-        # check for traitlet class specific handler
-        elif hasattr(traitObj, Constants.JSONHANDLER):
-            handler = getattr(traitObj, Constants.JSONHANDLER)
-
-        # check for TraitBase class specific handler
-        elif hasattr(self, Constants.JSONHANDLER):
-            handler = getattr(self, Constants.JSONHANDLER)
-
-        if handler is None:
-            raise RuntimeError(f'Unable to json handler for trait {traitName} of object {self}')
-
-        return handler(obj=self, trait=traitObj)
+        # return handler(obj=self, trait=traitObj)
 
     def toJson(self, **kwds):
         """Return self as list of (trait, value) tuples represented in a json string
@@ -599,7 +600,7 @@ class CcpNmrJson(TraitBase):
         try:
             _json = json.dumps(dataList, indent=indent)
         except TypeError as es:
-            raise RuntimeError(f'While encoding {self} as json: {es}')
+            raise RuntimeError(f'While encoding {self} as JSON: {es}')
         return _json
 
     def _encode(self):
@@ -621,19 +622,17 @@ class CcpNmrJson(TraitBase):
                 traitsToEncode.append(traitName)
 
         # create a list of (traitName, value) tuples
-        dataList = []
+        _encodedData = []
         for traitName in traitsToEncode:
-            handler = self._getJsonHandler(traitName)
             value = self.getTraitValue(traitName)
             # Do not try to encode None's
-            if value is None:
-                newValue = None
-            else:
-                newValue = handler.encode(value)
+            if value is not None:
+                handler = self._getTraitJsonHandler(traitName)
+                value = handler.encode(value)
 
-            dataList.append((traitName, newValue))
+            _encodedData.append((traitName, value))
 
-        return dataList
+        return _encodedData
 
     def fromJson(self, string):
         """Populate/update self with data from json string; a list of (trait, value) tuples 
@@ -652,13 +651,17 @@ class CcpNmrJson(TraitBase):
             return self
 
         # check for updates
-        dataDict = self._update(dataDict)
+        try:
+            dataDict = self._update(dataDict)
+        except RuntimeError:
+            getLogger().warning(f'{self.__class__.__name__}.fromJson: error updating data from JSON, retaining default values')
+            return self
 
         # at this point, we expect dataDict to be compatible with the data structure of the object
         if Constants.METADATA in dataDict:
             if dataDict[Constants.METADATA][Constants.CLASSNAME] != self.__class__.__name__:
                 raise RuntimeError(
-                        'trying to restore from json file incompatible with class "%s"' % self.__class__.__name__)
+                        'trying to restore from JSON file incompatible with class "%s"' % self.__class__.__name__)
 
             self._decode(dataDict)
         else:
@@ -673,27 +676,26 @@ class CcpNmrJson(TraitBase):
         for traitName in [Constants.METADATA] + self.keys():
             if traitName in dataDict:
                 # update the trait with value from dataDict after optional decoding
-                handler = self._getJsonHandler(traitName)
                 value = dataDict[traitName]
-                if value is None:
-                    # Do not decode None's
-                    newValue = None
-                else:
-                    newValue = handler.decode(value)
-
-                self.setTraitValue(traitName, newValue, force=True)
+                # Do not decode None's
+                if value is not None:
+                    handler = self._getTraitJsonHandler(traitName)
+                    value = handler.decode(value)
+                self.setTraitValue(traitName, value, force=True)
 
         return self
 
     #--------------------------------------------------------------------------------------------
 
     def _update(self, dataDict) -> dict:
-        """Process any updates using  the handlers; returns dataDict dict
+        """Update dataDict using  the handlers
+        :returns updated dataDict
+        :raises RuntimeError
         """
         if hasattr(self, Constants.UPDATEHANDLERS):
             # We have updates
-            for handler in getattr(self, Constants.UPDATEHANDLERS):
-                dataDict = handler(self, dataDict)
+            for updateHandler in getattr(self, Constants.UPDATEHANDLERS):
+                dataDict = updateHandler(self, dataDict)
 
         # check if all is ok
         currentVersion = dataDict[Constants.METADATA][Constants.JSONVERSION]

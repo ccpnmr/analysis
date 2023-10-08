@@ -95,7 +95,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-08 10:59:55 +0100 (Sun, October 08, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-08 13:07:13 +0100 (Sun, October 08, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -1095,21 +1095,19 @@ class V3Object(TraitType, _CcpNmrTrait):
         :param default_value: value set by default (None)
         :param kwargs: optional
         """
-        from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-        from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
-        from ccpn.core.Project import Project
+        from ccpn.core._implementation.CoreModel import _isV3coreClass, _isV3coreClassInstance, _getV3coreClass
 
         if klass is None:
             self._klass = None
 
         else:
 
-            if isinstance(klass, str) and \
-               (_klass := Project._coreClassDict.get(klass)) is not None:
-                self._klass = _klass
-
-            elif klass in Project._coreClassDict.values():
+            if _isV3coreClass(klass):
                 self._klass = klass
+
+            elif isinstance(klass, str) and \
+               (_klass := _getV3coreClass(klass)) is not None:
+                self._klass = _klass
 
             else:
                 raise ValueError(f'parameter klass: expected a valid V3 class; got {klass}')
@@ -1122,24 +1120,18 @@ class V3Object(TraitType, _CcpNmrTrait):
 
     def validate(self, obj, value):
         """Assure a Core-class instance
+        :raises TypeError, ValueError
         """
-        from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-        from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
+        from ccpn.core._implementation.CoreModel import _isV3coreClass, _isV3coreClassInstance, _getV3coreClass
 
-        if value is None and self.allow_none:
-            pass
+        if value is None and not self.allow_none:
+            raise ValueError(f'Expected an instance of a V3 class; got None')
 
-        elif self._klass is not None:
-            if isinstance(value, self._klass):
-                pass
-            else:
-                raise ValueError(f'Expected instance of {_classType(self._klass)}; got {_classType(value)}')
+        elif self._klass is not None and not isinstance(value, self._klass):
+            raise TypeError(f'Expected an instance of {_classType(self._klass)}; got {value} {_classType(value)}')
 
-        elif isinstance(value, (AbstractWrapperObject, V3CoreObjectABC)):
-            pass
-
-        else:
-            raise ValueError(f'Expected an instance of valid V3 class; got {_classType(value)}')
+        elif not _isV3coreClassInstance(value):
+            raise TypeError(f'Expected an instance of a V3 class; got {value} {_classType(value)}')
 
         return value
 

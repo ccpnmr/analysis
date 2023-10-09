@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-09 08:37:49 +0100 (Mon, October 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-09 08:51:49 +0100 (Mon, October 09, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -366,9 +366,9 @@ class CcpNmrJson(TraitBase):
         defaults[Constants.CLASSVERSION] = self.classVersion
         defaults[Constants.CLASSINFO] = self.classInfo
         defaults[Constants.OBJECT_ID] = str(hex(id(self)))
-        defaults[Constants.USER] = getpass.getuser()
-        defaults[Constants.LASTPATH] = 'undefined'
-        defaults[Constants.TIMESTAMP] = str(now())
+        # defaults[Constants.USER] = getpass.getuser()
+        # defaults[Constants.LASTPATH] = 'undefined'
+        # defaults[Constants.TIMESTAMP] = str(now())
         return defaults
 
     # _metadata-specific json handler; note the invocation with the attribute, not a string!
@@ -627,8 +627,6 @@ class CcpNmrJson(TraitBase):
     def _encode(self):
         """Return self as dict
         """
-        _metaData = dict([self._encodeTrait(Constants.METADATA)])
-
         # get all traits that need saving to json
         # Subtle but important implementation change relative to the previous one-liner
         # Allow trait-specific saveToJson metadata (i.e. 'tag'), to override object's saveAllToJson
@@ -648,7 +646,7 @@ class CcpNmrJson(TraitBase):
 
         # create the the encodedData dict
         _encodedData = {}
-        _encodedData[Constants.METADATA] = _metaData
+        _encodedData[Constants.METADATA] = self._metadata
         _encodedData[Constants.DATA] = _data
 
         return _encodedData
@@ -734,17 +732,6 @@ class CcpNmrJson(TraitBase):
             if _jsonVersion != 3.0:
                 raise RuntimeError(f'Undefined JSON version in {Constants.METADATA}; got {_jsonVersion}')
 
-            # # Copy the object data info from their 3.0 location in metadata to object data
-            # # (which did not exist, so needs creating)
-            # _objectData = {}
-            # for key in (Constants.CLASSNAME, Constants.CLASSVERSION, Constants.CLASSINFO):
-            #     val = _metaData.get(key, None)
-            #     _objectData[key] = val
-            #     # Older files do not have CLASSINFO key
-            #     if key in _metaData:
-            #         del _metaData[key]
-            # _objectData[Constants.OBJECT_ID] = None
-
             # Move the object trait data to _data
             _data = {}
             for key in list(theData.keys()):
@@ -798,6 +785,7 @@ class CcpNmrJson(TraitBase):
         if (fileHandler := _fileHandlers.get(extension)) is None:
             raise RuntimeError('Unable to save; no fileHandler defined for extension "%s"' % extension)
 
+        self._metadata[Constants.USER] = getpass.getuser()
         self._metadata[Constants.LASTPATH] = str(path)
         self._metadata[Constants.TIMESTAMP] = str(now())
         fileHandler.save(self, path, **kwds)

@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:38 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-10-09 08:37:02 +0100 (Mon, October 09, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -114,7 +114,12 @@ class SpectrumTraits(CcpNmrJson):
         try:
             peakPicker = spectrum._getPeakPicker()
         except (ValueError, RuntimeError) as es:
-            getLogger().warning('Error restoring valid peak picker for %s (%s)' % (spectrum, es))
+            # GWV: Log this in the debugger, as it might get lost and cause confusion
+            getLogger().debug(f'restoring peakPicker raised error: {es}')
+            getLogger().warning(f'Error restoring valid peak picker for {spectrum}')
+            peakPicker = None
+        except Exception as es:
+            raise RuntimeError(f'While restoring Spectrum traits; {es}')
         finally:
             self.peakPicker = peakPicker
 #end class

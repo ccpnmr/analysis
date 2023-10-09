@@ -54,7 +54,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-09-20 17:53:24 +0100 (Wed, September 20, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-09 08:37:02 +0100 (Mon, October 09, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -3289,7 +3289,9 @@ class Spectrum(AbstractWrapperObject):
         """
         from ccpn.core.lib.SpectrumLib import fetchPeakPicker
 
-        if (peakPicker := fetchPeakPicker(self)) is not None:
+        # GWV; having problems here; two-step for debugging
+        peakPicker = fetchPeakPicker(self)
+        if peakPicker is not None:
             self.peakPicker = peakPicker
         return peakPicker
 

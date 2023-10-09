@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 12:06:24 +0100 (Fri, June 09, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-10-09 19:41:07 +0100 (Mon, October 09, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1009,9 +1009,6 @@ def _createPolymerSubstance(self: Project, sequence: typing.Sequence[str], name:
         name = Substance._uniqueName(project=self, name=name)
     self._validateStringValue(attribName='name', value=name, allowNone=True)
     self._validateStringValue(attribName='labelling', value=labelling, allowNone=True)
-
-    if not sequence:
-        raise ValueError("createPolymerSubstance requires non-empty sequence")
 
     apiNmrProject = self._wrappedData
     if apiNmrProject.sampleStore.refSampleComponentStore.findFirstComponent(name=name, labeling=apiLabeling) is not None:

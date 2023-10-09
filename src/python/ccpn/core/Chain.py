@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-06 22:35:42 +0100 (Fri, October 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-09 19:41:07 +0100 (Mon, October 09, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -41,6 +41,7 @@ from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Chain as ApiChain
 from ccpnmodel.ccpncore.api.ccp.molecule import Molecule
 from ccpnmodel.ccpncore.api.ccp.lims import Sample
 
+NotFound = 'NotFound' # used to create missing residues
 
 class Chain(AbstractWrapperObject):
     """A molecular Chain, containing one or more Residues."""
@@ -328,9 +329,54 @@ def _getChain(self: Project, sequence: Union[str, Sequence[str]], compoundName: 
     pass
 
 
+def _convertSequence1LetterToCcpCode(project, sequence, molType):
+    """ Covert the One LetterCode sequence to the CcpCode. If an item is not found, then is replaced with a placeholder.
+     Ideally should be a gap but NOT raise Errors!"""
+    molTypes = ['protein', 'DNA', 'RNA']
+    if molType not in molTypes :
+        raise RuntimeError(f' Sequence of 1 Letter code is not available for molType: {molType}. Use one of {molTypes}')
+    chemCompData = project._chemCompsData.copy()
+    chemCompData = chemCompData[chemCompData['molType'] == molType]
+    ccpCodesSequence = []
+    for i, code in enumerate(sequence, start=1):
+        found = chemCompData[chemCompData.code1Letter == code.upper()]
+        ccpCode = None
+        for ix, row in found.iterrows():
+            chemComp = row.obj
+            if chemComp.className == 'StdChemComp': # not really a better way so far
+                ccpCode = chemComp.ccpCode
+                break
+        if not ccpCode:
+            #  it should be only one really
+            ccpCode = NotFound
+            getLogger().warning(f'One-Letter Code "{code}" at position {i} was not found for molType: {molType}."')
+        ccpCodesSequence.append(ccpCode)
+
+    return ccpCodesSequence
+
+def _validateSequenceCcpCode(project, sequence, molType):
+    if not isinstance(sequence, (tuple, list)):
+        raise RuntimeError(f'Sequence must be an iterable (tuple or list) of ccpCodes')
+
+    chemCompData = project._chemCompsData.copy()
+    chemCompData = chemCompData[chemCompData['molType'] == molType]
+
+    availableCodes = [i for i in chemCompData.ccpCode.unique() if i]
+    curatedSequence = []
+    for i, ccpCode in enumerate(sequence, start=1):
+        found = ccpCode in availableCodes
+        if not found:
+            getLogger().warning(f'CcpCode "{ccpCode}" at position {i} was not found for molType: {molType}.')
+            curatedSequence.append(f'{NotFound}')
+        else:
+            curatedSequence.append(ccpCode)
+    return curatedSequence
+
 # @newObject(Chain)
 @undoBlock()
-def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundName: str = None,
+def _createChain(self: Project, sequence: Union[str, Sequence[str]]=None, compoundName: str = None,
+                 sequence1Letter: str=None,
+                 sequenceCcpCode: Union[Sequence[str]] = None,
                  startNumber: int = 1, molType: str = None, isCyclic: bool = False,
                  shortName: str = None, role: str = None, comment: str = None,
                  expandFromAtomSets: bool = True,
@@ -343,9 +389,10 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
 
     See the Chain class for details.
 
-    :param Sequence sequence: string of one-letter codes or sequence of residue types
-                                E.g. 'HMRQPPLVT' or ('HMRQPPLVT',) 
-                                or ('ala', 'ala', 'ala')
+    :param Sequence: Deprecated
+    :param sequence1Letter: string of one-letter codes E.g. 'HMRQPPLVT'
+    :param Sequence sequence: sequence of  CcpCodes (also known as ChemComp Codes) are case-sensitive. E.G.:  ('Ala', 'Ala', 'Ala', 'Aba')
+
     :param str compoundName: name of new Substance (e.g. 'Lysozyme') Defaults to 'Molecule_n
     :param str molType: molType ('protein','DNA', 'RNA'). Needed only if sequence is a string.
     :param int startNumber: number of first residue in sequence
@@ -357,56 +404,15 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
                 See ccpn.core.lib.MoleculeLib.expandChainAtoms for details.
     :return: a new Chain instance.
     """
+    if sequence:
+        raise DeprecationWarning('Argument "sequence" is deprecated and will be removed in future releases. Use sequence1Letter or sequenceCcpCode')
+    if sequence1Letter:
+        sequence = _convertSequence1LetterToCcpCode(self.project, sequence1Letter, molType)
+    if sequenceCcpCode:
+        sequence = _validateSequenceCcpCode(self.project, sequenceCcpCode, molType)
 
-    # check sequence is valid first
-    # either string, or list/tuple of strings
-    # list must all be 3 chars long if more than 1 element in list
-    if not sequence:
-        raise ValueError('sequence must be defined')
-
-    if isinstance(sequence, str):
-
-        # alpha string
-        if not sequence.isalpha():
-            raise ValueError('sequence contains bad characters: %s' % str(sequence))
-
-        sequence = sequence.upper()
-
-    elif isinstance(sequence, Iterable):
-
-        # iterable
-        if len(sequence) == 1:
-
-            # single element in a list
-            sequence = sequence[0]
-            if not isinstance(sequence, str):
-                raise TypeError('sequence is not a valid string: %s' % str(sequence))
-            elif not sequence.isalpha():
-                raise TypeError('sequence contains bad characters: %s' % str(sequence))
-
-            sequence = sequence.upper()
-
-        elif len(sequence) > 1:
-            # iterate through all elements
-            newSeq = []
-            for s in sequence:
-
-                if not isinstance(s, str):
-                    raise TypeError('sequence element is not a valid string: %s' % str(s))
-                # elif len(s) != 3: # this is wrong constraint. 3LetterCode is not necessarily a length of three
-                #     raise TypeError(
-                #             'sequence elements must be 3 characters each, e.g., "ala ala ala"\nor sequence must be a single string, try removing spaces and return characters: %s' % str(
-                #                     s))
-                elif not s.isalpha():
-                    raise TypeError('sequence element contains bad characters: %s' % str(s))
-
-                newSeq.append(s.upper())
-            sequence = tuple(newSeq)
-
-        else:
-            raise TypeError('sequence is not a valid string: %s' % str(sequence))
-    else:
-        raise TypeError('sequence is not a valid string: %s' % str(sequence))
+    if sequence1Letter and sequenceCcpCode:
+        raise RuntimeError('Create chain error. Please use "sequence1Letter" or  "sequenceCcpCode", not both.')
 
     apiMolSystem = self._wrappedData.molSystem
     shortName = (
@@ -437,7 +443,8 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
 
     apiMolecule = substance._apiSubstance.molecule
 
-    try:
+    # try:
+    if True:
         result = _newApiChain(self, apiMolecule, shortName, role, comment)
         if result and expandFromAtomSets:
             from ccpn.core.lib.MoleculeLib import expandChainAtoms
@@ -451,15 +458,18 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
                              pseudoNamingSystem='AQUA')
 
 
-    except Exception as es:
-        if substance:
+    # except Exception as es:
+    #     if substance:
             # clean up and remove the created substance
-            substance.delete()
-        raise RuntimeError('Unable to generate new Chain item') from es
+            # substance.delete()
+        # raise RuntimeError('Unable to generate new Chain item') from es
 
     for residue in result.residues:
         # Necessary as CCPN V2 default protonation states do not match tne NEF / V3 standard
         residue.resetVariantToDefault()
+        if not residue.residueType:
+            with undoBlock():
+                self.project.deleteObjects(*residue.atoms)
 
     return result
 

@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-06 22:35:43 +0100 (Fri, October 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-09 19:41:07 +0100 (Mon, October 09, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -39,6 +39,7 @@ from collections import OrderedDict
 # from time import time
 from datetime import datetime
 from collections.abc import Iterable
+import pandas as pd
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core._implementation.Updater import UPDATE_POST_PROJECT_INITIALISATION
@@ -266,6 +267,21 @@ class Project(AbstractWrapperObject):
         for shiftList in self.chemicalShiftLists:
             _shifts.extend(shiftList.chemicalShifts)
         return _shifts
+
+    @property
+    def _chemCompsData(self):
+        """
+        _internal. ChemComps/molecules to be handled in Resources
+        Return a Pandas DataFrame with the loaded ChemComps definitions.
+        Columns:  'molType', 'ccpCode', 'code3Letter', 'code1Letter', 'obj'.
+        """
+        df = pd.DataFrame()
+        attrs = [ 'molType', 'ccpCode', 'code3Letter', 'code1Letter']
+        for i, chemComp in enumerate(self._wrappedData.root.chemComps):
+            for attr in attrs:
+                df.loc[i, attr] = getattr(chemComp, attr, None)
+            df.loc[i,'obj'] = chemComp
+        return df
 
     @property
     def collections(self) -> list:
@@ -1084,10 +1100,10 @@ class Project(AbstractWrapperObject):
     #-----------------------------------------------------------------------------------------
 
     # Should be removed:
-    @property
-    def _residueName2chemCompId(self) -> dict:
-        """dict of {residueName:(molType,ccpCode)}"""
-        return MoleculeQuery.fetchStdResNameMap(self._wrappedData.root)
+    # @property
+    # def _residueName2chemCompId(self) -> dict:
+    #     """dict of {residueName:(molType,ccpCode)}"""
+    #     return MoleculeQuery.fetchStdResNameMap(self._wrappedData.root)
 
     @property
     def _experimentTypeMap(self) -> OrderedDict:
@@ -2208,7 +2224,10 @@ class Project(AbstractWrapperObject):
         return _newSpectrumGroup(self, name=name, spectra=spectra, **kwds)
 
     @logCommand('project.')
-    def createChain(self, sequence: Union[str, Sequence[str]], compoundName: str = None,
+    def createChain(self, sequence: Union[str, Sequence[str]]=None,
+                    sequence1Letter: str = None,
+                    sequenceCcpCode: Union[Sequence[str]] = None,
+                    compoundName: str = None,
                     startNumber: int = 1, molType: str = None, isCyclic: bool = False,
                     shortName: str = None, role: str = None, comment: str = None,
                     expandFromAtomSets: bool = True,
@@ -2222,7 +2241,11 @@ class Project(AbstractWrapperObject):
 
         Optional keyword arguments can be passed in; see Chain._createChain for details.
 
-        :param Sequence sequence: string of one-letter codes or sequence of residue types
+        :param Sequence: Deprecated
+        :param sequence1Letter: string of one-letter codes E.g. 'HMRQPPLVT'
+        :param Sequence sequence: sequence of  CcpCodes (also known as ChemComp Codes) are case-sensitive. E.G.:  ('Ala', 'Ala', 'Ala', 'Aba')
+        Note: CcpCode and not Residue3LetterCode because the ccpCode allows more flexibility and less unambiguity.
+
         :param str compoundName: name of new Substance (e.g. 'Lysozyme') Defaults to 'Molecule_n
         :param str molType: molType ('protein','DNA', 'RNA'). Needed only if sequence is a string.
         :param int startNumber: number of first residue in sequence
@@ -2236,7 +2259,10 @@ class Project(AbstractWrapperObject):
         """
         from ccpn.core.Chain import _createChain
 
-        return _createChain(self, sequence=sequence, compoundName=compoundName,
+        return _createChain(self, sequence=sequence,
+                            sequence1Letter=sequence1Letter,
+                            sequenceCcpCode=sequenceCcpCode,
+                            compoundName=compoundName,
                             startNumber=startNumber, molType=molType, isCyclic=isCyclic,
                             shortName=shortName, role=role, comment=comment,
                             expandFromAtomSets=expandFromAtomSets, addPseudoAtoms=addPseudoAtoms,

@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-22 14:03:29 +0100 (Tue, August 22, 2023) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-10-09 12:09:36 +0100 (Mon, October 09, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -1331,10 +1331,14 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         # to stop overloading of the log
 
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import _getPotentialDataLoaders
+        from ccpn.ui.gui.widgets.SideBar import SideBar
 
         urls = [str(url) for url in data.get(DropBase.URLS, []) if len(url) > 0]
         if urls is None:
             return []
+
+        _obj = data.get('theObject')
+        _droppedOnSideBar = (_obj is not None and isinstance(_obj, SideBar))
 
         getLogger().info('Handling urls ...')
 
@@ -1347,7 +1351,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             # try finding a data loader, catch any errors for recognised but
             # incomplete/invalid url's (i.e. incomplete spectral data)
             try:
-                dataLoader, createsNewProject, ignore = self.ui._getDataLoader(url)
+                dataLoader, createsNewProject, ignore = self.ui._getDataLoader(url, droppedOnSideBar=_droppedOnSideBar)
                 dataLoaders.append((url, dataLoader, createsNewProject, ignore))
 
             except (RuntimeError, ValueError) as es:

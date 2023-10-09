@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-07 15:16:42 +0100 (Thu, September 07, 2023) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-10-09 12:09:35 +0100 (Mon, October 09, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -34,7 +34,7 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from ccpn.core.Project import Project
 
 from ccpn.framework.Application import getApplication
-from ccpn.framework.PathsAndUrls import CCPN_EXTENSION
+from ccpn.framework.PathsAndUrls import CCPN_DIRECTORY_SUFFIX, CCPN_SAVEAS_SUB_DIRECTORIES
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import _checkPathForDataLoader
 
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking, catchExceptions, \
@@ -317,7 +317,7 @@ class Gui(Ui):
 
         return (dataLoader, createNewProject, ignore)
 
-    def _getDataLoader(self, path, formatFilter=None):
+    def _getDataLoader(self, path, formatFilter=None, droppedOnSideBar=False):
         """Get dataLoader for path (or None if not present), optionally only testing for
         dataFormats defined in filter.
         Allows for reporting or checking through popups.
@@ -325,6 +325,7 @@ class Gui(Ui):
 
         :param path: the path to get a dataLoader for
         :param formatFilter: a list/tuple of optional dataFormat strings; filter optional dataLoaders for this
+        :param: droppedOnSideBar: flag to indicate path dropped on the sidebar
         :returns a tuple (dataLoader, createNewProject, ignore)
 
         :raises RuntimeError in case of failure to define a proper dataLoader
@@ -336,6 +337,7 @@ class Gui(Ui):
         from ccpn.framework.lib.DataLoaders.SparkyDataLoader import SparkyDataLoader
         from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
         from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
+        from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import NmrPipeSpectrumLoader
 
         _path = aPath(path)
         if not _path.exists():
@@ -440,16 +442,39 @@ class Gui(Ui):
                                                 f'"{dataLoader.path}"\n'
                                                 f'already exists in the project\n'
                                                 '\n'
-                                                'do you want to load?'
+                                                'Do you want to load?'
                                                 )
-            if not ok:
-                ignore = True
+
+        elif dataLoader.dataFormat == NmrPipeSpectrumLoader.dataFormat:
+            # NmrPipe file; check if it is large 3D/4D
+            _ds = dataLoader.dataSource
+            dims = _ds.dimensionCount
+            expectedSize = _ds.expectedFileSizeInBytes / (1024*1024)
+            if dims > 2 and expectedSize >= _ds.WARNING_FILE_SIZE and not _ds.bufferIsFilled:
+
+                if droppedOnSideBar:
+                    _txt1 = f'Loading Spectrum "{dataLoader.path}"'
+                    _txt2 = f'The {dims}D NmrPipe file ({expectedSize:.1f} MB) will be automatically buffered when first displayed\n' \
+                            f'Consider converting to Hdf5 format (Menu: Spectrum --> Convert to Hdf5)\n'
+                    ok = MessageDialog.showOkCancel(_txt1, _txt2)
+                    if not ok:
+                        ignore = True
+
+                else:
+                    _txt1 = f'Displaying Spectrum "{dataLoader.path}"'
+                    _txt2 = f'The {dims}D NmrPipe file ({expectedSize:.1f} MB) will be automatically buffered\n' \
+                            f'Consider loading first and converting to Hdf5 format (Menu: Spectrum --> Convert to Hdf5)\n' \
+                            '\n' \
+                            'Do you want to display now? (the buffering may take a -little- while)'
+                    ok = MessageDialog.showYesNoWarning(_txt1, _txt2)
+                    if not ok:
+                        ignore = True
 
         elif dataLoader.dataFormat == StarDataLoader.dataFormat and dataLoader:
             (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)
             if dataLoader and not ignore:
                 title = 'New project from NmrStar' if createNewProject else \
-                    'Import from NmrStar'
+                        'Import from NmrStar'
                 dataLoader.getDataBlock()  # this will read and parse the file
                 popup = StarImporterPopup(dataLoader=dataLoader,
                                           parent=self.mainWindow,
@@ -638,37 +663,67 @@ class Gui(Ui):
         :return True if successful
         """
         from ccpn.core.lib.ProjectLib import checkProjectName
-
-        oldPath = self.project.path
-        if newPath is None:
-            if (newPath := _getSaveDirectory(self.mainWindow)) is None:
-                return False
-
-        newPath = aPath(newPath).assureSuffix(CCPN_EXTENSION)
         title = 'Project SaveAs'
+        oldPath = Path(self.project.path)
 
-        if (not overwrite and
-                newPath.exists() and
-                (newPath.is_file() or (newPath.is_dir() and len(newPath.listdir(excludeDotFiles=False)) > 0))
-        ):
-            # should not really need to check the second and third condition above, only
-            # the Qt dialog stupidly insists a directory exists before you can select it
-            # so if it exists but is empty then don't bother asking the question
+        if newPath is None:
+            # try to create a new path from the old one
+            if self.project.isTemporary:
+                _newPath = (aPath('~') / 'myNewProject').assureSuffix(CCPN_DIRECTORY_SUFFIX)
+            else:
+                _newName = f'{oldPath.basename}_new'
+                _newPath = oldPath.with_name(_newName).assureSuffix(CCPN_DIRECTORY_SUFFIX)
+            # query for this path
+            dialog = FileDialog.ProjectSaveFileDialog(parent=self.mainWindow,
+                                                      directory=_newPath.parent.asString(),
+                                                      selectFile=_newPath.name,
+                                                      acceptMode='save')
+            dialog._show()
+            if (newPath := dialog.selectedFile()) is None:
+                return False
+        newPath = aPath(newPath).assureSuffix(CCPN_DIRECTORY_SUFFIX)
+
+        if  newPath.exists() and \
+           (newPath.is_file() or (newPath.is_dir() and len(newPath.listdir(excludeDotFiles=False)) > 0)) and \
+           not overwrite :
             msg = f'Path "{newPath}" already exists; overwrite?'
             if not MessageDialog.showYesNo(title, msg):
                 return False
 
-        # check the project name derived from path
+        # check the project name derived from path; not all is allowed
         newName = newPath.basename
-        if (_name := checkProjectName(newName, correctName=True)) != newName:
-            newPath = (newPath.parent / _name).assureSuffix(CCPN_EXTENSION)
-            MessageDialog.showInfo(title, f'Project name changed from "{newName}" to "{_name}"\nSee console/log for details',
+        if (_nameFromPath := checkProjectName(newName, correctName=True)) != newName:
+            MessageDialog.showInfo(title, f'Project name will be changed from "{newName}" to "{_nameFromPath}"\n'
+                                          f'See console/log for details',
                                    parent=self.mainWindow)
+            newPath = (newPath.parent / _nameFromPath).assureSuffix(CCPN_DIRECTORY_SUFFIX)
+            newName = _nameFromPath
+
+        # Checking copy subdirectories
+        _sizeDict = self.project._getSubdirectorySizes(CCPN_SAVEAS_SUB_DIRECTORIES, sizeInMB=True)
+        _totalSize = sum(_sizeDict.values())
+        _tmp = '%.1f' % _totalSize
+        msg = f'Also copy sub-directories (data, archives, scripts, ...) ({_tmp} MB)?\n'
+
+        # Check for any inside spectra
+        _insideSpectra = [sp for sp in self.project.spectra if sp._isInside]
+        _size = '%.1f' % (sum([sp.dataSource.expectedFileSizeInBytes for sp in _insideSpectra]) / (1024*1024))
+        if len(_insideSpectra) == 1:
+            msg += f'\nNote that the data of {_insideSpectra[0].pid} ({_size} MB) is in "{oldPath.name}/data/spectra"\n'
+        elif len(_insideSpectra) > 1:
+            msg += f'\nNote that the data of {len(_insideSpectra)} spectra ({_size} MB) are in "{oldPath.name}/data/spectra"\n'
+
+        if self.project.isTemporary:
+            copySubDirs = True
+        else:
+            if (copySubDirs :=  MessageDialog.showYesNoCancel(title, msg)) is None:
+                # pressed "cancel"
+                return False
 
         with catchExceptions(errorStringTemplate='Error saving project: %s'):
             with MessageDialog.progressManager(self.mainWindow, f'Saving project as {newPath} ... '):
                 try:
-                    if not self.application._saveProjectAs(newPath=newPath, overwrite=True):
+                    if not self.application._saveProjectAs(newPath=newPath, overwrite=True, copySubDirectories=copySubDirs):
                         txt = f"Saving project to {newPath} aborted"
                         MessageDialog.showError("Project SaveAs", txt, parent=self.mainWindow)
                         return False
@@ -684,8 +739,9 @@ class Gui(Ui):
                     return False
 
         self.mainWindow._updateWindowTitle()
-        self.application._getRecentProjectFiles(oldPath=oldPath)  # this will also update the list
+        self.application._getRecentProjectFiles(oldPath=oldPath.asString())  # this will also update the list
         self.mainWindow._fillRecentProjectsMenu()  # Update the menu
+        self.mainWindow.sideBar.setProjectName(self.project)
 
         successMessage = f'Project successfully saved to "{self.project.path}"'
         # MessageDialog.showInfo("Project SaveAs", successMessage, parent=self.mainWindow)
@@ -845,28 +901,3 @@ class Gui(Ui):
             result = self.application._loadData(spectrumLoaders)
 
         return result
-
-
-#-----------------------------------------------------------------------------------------
-# Helper code
-#-----------------------------------------------------------------------------------------
-
-def _getSaveDirectory(mainWindow):
-    """Opens save Project as dialog box and gets directory specified in
-    the file dialog.
-    :return path instance or None
-    """
-
-    dialog = FileDialog.ProjectSaveFileDialog(parent=mainWindow, acceptMode='save')
-    dialog._show()
-    newPath = dialog.selectedFile()
-
-    # if not iterable then ignore - dialog may return string or tuple(<path>, <fileOptions>)
-    if isinstance(newPath, tuple) and len(newPath) > 0:
-        newPath = newPath[0]
-
-    # ignore if empty
-    if not newPath:
-        return None
-
-    return newPath

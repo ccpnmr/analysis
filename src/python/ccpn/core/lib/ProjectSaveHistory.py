@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 18:46:14 +0100 (Tue, March 28, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-10-09 12:09:35 +0100 (Mon, October 09, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -96,13 +96,13 @@ class ProjectSaveHistory(CcpNmrJson):
     class RecordListHandler(TraitJsonHandlerBase):
         """Record-list handling by Json"""
 
-        def decode(self, obj, trait, value):
+        def decode(self, value):
             """uses value to generate and set the new (or modified) obj"""
             newValue = []
             for item in value:
-                record = obj._newRecord(*item)
+                record = self.obj._newRecord(*item)
                 newValue.append(record)
-            setattr(obj, trait, newValue)
+            return newValue
 
 
     # the list of entries

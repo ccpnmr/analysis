@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-07 15:16:42 +0100 (Thu, September 07, 2023) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-10-09 12:09:35 +0100 (Mon, October 09, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -238,12 +238,10 @@ class Framework(NotifierBase, GuiBase):
 
         # register dataLoaders for the first and only time
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders
-
         self._dataLoaders = getDataLoaders()
 
         # register SpectrumDataSource formats for the first and only time
         from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
-
         self._spectrumDataSourceFormats = getDataFormats()
 
         # get a user interface; nb. ui.start() is called by the application
@@ -436,12 +434,10 @@ class Framework(NotifierBase, GuiBase):
         """
         if self.args.interface == 'Gui':
             from ccpn.ui.gui.Gui import Gui
-
             ui = Gui(application=self)
 
         else:
             from ccpn.ui.Ui import NoUi
-
             ui = NoUi(application=self)
 
         return ui
@@ -1039,15 +1035,20 @@ class Framework(NotifierBase, GuiBase):
 
         return result
 
-    def _saveProjectAs(self, newPath=None, overwrite=False) -> bool:
+    def _saveProjectAs(self, newPath=None, overwrite=False, copySubDirectories: bool = True) -> bool:
         """Save project to newPath (optionally overwrite)
+
+        :param newPath: new path for storing project files
+        :param overwrite: flag to overwrite if path exists
+        :param copySubDirectories: flag to set the copying of the project's subdirectories
         :return True if successful
         """
-        if self.preferences.general.keepSpectraInsideProject:
-            self.project.copySpectraToProject()
+        # GWV 27/7/2023: disabled
+        # if self.preferences.general.keepSpectraInsideProject:
+        #     self.project.copySpectraToProject()
 
         try:
-            self.project.saveAs(newPath=newPath, overwrite=overwrite)
+            self.project.saveAs(newPath=newPath, overwrite=overwrite, copySubDirectories=copySubDirectories)
             Layout.saveLayoutToJson(self.ui.mainWindow)
             self.current._dumpStateToFile(self.statePath)
             self._getUndo().markSave()
@@ -1063,7 +1064,7 @@ class Framework(NotifierBase, GuiBase):
             raise
 
         except Exception as es:
-            failMessage = f'saveAs: unable to save {es}'
+            failMessage = f'saveAs: {es}'
             getLogger().warning(failMessage)
             return False
 
@@ -1092,8 +1093,9 @@ class Framework(NotifierBase, GuiBase):
                 getLogger().warning('Project is read-only')
                 return True
 
-            if self.preferences.general.keepSpectraInsideProject:
-                self.project.copySpectraToProject()
+            # GWV 27/7/2023: disabled
+            # if self.preferences.general.keepSpectraInsideProject:
+            #     self.project.copySpectraToProject()
 
             try:
                 self.project.save()
@@ -1104,7 +1106,7 @@ class Framework(NotifierBase, GuiBase):
             except (PermissionError, FileNotFoundError):
                 failMessage = 'Folder may be read-only'
                 getLogger().info(failMessage)
-                raise
+                raise RuntimeError(failMessage)
 
             except Exception as es:
                 failMessage = f'save: unable to save {es}'
@@ -1120,8 +1122,6 @@ class Framework(NotifierBase, GuiBase):
         :param overwrite: flag to indicate overwriting of existing path
         :return True if successful
         """
-        # self._saveOverride = False
-
         with self._setSaveOverride(True):
             # override read-only for a save to a new folder
             #   project can still be read-only for next load
@@ -1382,7 +1382,7 @@ class Framework(NotifierBase, GuiBase):
         :return Project instance (either newly created or the existing)
         CCPNINTERNAL: called from NefDataLoader.load()
         """
-        from ccpn.core.Project import DEFAULT_CHEMICALSHIFTLIST
+        from ccpn.core.ChemicalShiftList import ChemicalShiftList, DEFAULT_CHEMICALSHIFTLIST
         from ccpn.core.lib.ProjectLib import checkProjectName
 
         TOBEDELETED = '_toBeDeleted'
@@ -1395,7 +1395,8 @@ class Framework(NotifierBase, GuiBase):
 
         # TODO: find a different solution for this
         with rebuildSidebar(application=self):
-            if _newProject and (ch := project.getChemicalShiftList(DEFAULT_CHEMICALSHIFTLIST)):
+            if _newProject and \
+                (ch := project._getChild(ChemicalShiftList, DEFAULT_CHEMICALSHIFTLIST)):
                 # rename the existing chemical-shift-list, hopefully an unused name
                 ch.rename(TOBEDELETED)
 

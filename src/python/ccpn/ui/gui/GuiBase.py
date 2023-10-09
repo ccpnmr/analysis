@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-07-07 11:55:59 +0100 (Fri, July 07, 2023) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-10-09 12:09:36 +0100 (Mon, October 09, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -66,7 +66,7 @@ class GuiBase(object):
     """
 
     def __init__(self):
-        # GWV these attributes should move to the GUI class (in 3.2x ??)
+        # GWV these attributes should move to the GUI class (in 3.x.0 ??)
         # For now, initialised by calls in Gui.__init_ as we need programme
         # arguments and preferences to have been initialised
         self._styleSheet = None
@@ -259,6 +259,7 @@ class GuiBase(object):
             # ("Spectrum Groups...", self.showSpectrumGroupsPopup, [('shortcut', 'ss')]), # multiple edit temporarly disabled
             ("Set Experiment Types...", self.showExperimentTypePopup, [('shortcut', 'et')]),
             ("Validate Paths...", self.showValidateSpectraPopup, [('shortcut', 'vp')]),
+            ("Copy into Project...", self._copyToProjectCallback, []),
             (),
             ("Pick Peaks", (("Pick 1D Peaks...", self.showPeakPick1DPopup, [('shortcut', 'p1')]),
                             ("Pick ND Peaks...", self.showPeakPickNDPopup, [('shortcut', 'pp')])
@@ -276,6 +277,7 @@ class GuiBase(object):
             (),
             ("Pseudo Spectrum to SpectrumGroup...", self.showPseudoSpectrumPopup),
             ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj')]),
+            ("Convert...", self.showConvertSpectrumPopup, []),
             (),
             ("Print to File...", self.showPrintSpectrumDisplayPopup, [('shortcut', '⌃p')]),
             ]
@@ -524,6 +526,35 @@ class GuiBase(object):
         """Load all the spectra callback
         """
         self.ui.loadSpectra()
+
+    def showConvertSpectrumPopup(self):
+        """Show the convertToHdf5 popup
+        """
+        from ccpn.ui.gui.popups.ConvertToHdf5Popup import ConvertToHdf5Popup
+        popup = ConvertToHdf5Popup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+        popup.exec_()
+
+    def _copyToProjectCallback(self):
+        """Callback for Spectrum -> Copy into Project
+        """
+        title = 'Copy Spectra into Project'
+        if len(self.project.spectra) == 0:
+            MessageDialog.showWarning(title, 'No spectra in project', parent=self.mainWindow)
+            return
+
+        _spectra = [sp for sp in self.project.spectra if sp.hasValidPath() and not sp._isInside and not sp.isEmptySpectrum()]
+        if len(_spectra) == 0:
+            MessageDialog.showWarning(title, 'There are no spectra to be copied', parent=self.mainWindow)
+            return
+
+        _size = '%.1f' % (sum([sp.dataSource.expectedFileSizeInBytes for sp in _spectra]) / (1024*1024))
+        if len(_spectra) == 1:
+            _msg = f'1 spectrum ({_size} MB) to be copied'
+        else:
+            _msg = f'{len(_spectra)} spectra ({_size} MB) to be copied'
+        ok = MessageDialog.showOkCancel(title, _msg, parent=self.mainWindow)
+        if ok:
+            self.project.copySpectraToProject()
 
     #-----------------------------------------------------------------------------------------
     # Help -->

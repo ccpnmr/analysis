@@ -19,8 +19,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:40 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-10-09 12:09:35 +0100 (Mon, October 09, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -71,7 +71,7 @@ class DirectoryDataLoader(DataLoaderABC):
         if not self.path.is_dir():
             raise RuntimeError(f'{self.path} is not a directory' )
 
-        _filesToExamine = list(self.path.glob('*'))
+        _filesToExamine = self.path.listdir(excludeDotFiles=True)
         _filesToExamine.sort()
         _nFilesToExamine = len(_filesToExamine)
 
@@ -86,7 +86,8 @@ class DirectoryDataLoader(DataLoaderABC):
             # check if we can find a data loader for f, using the filter which excludes
             # a directory data loader
             elif f.is_file() and \
-                (dataLoader := checkPathForDataLoader(f, formatFilter=formatFilter)) is not None:
+                (dataLoader := checkPathForDataLoader(f, formatFilter=formatFilter)) and \
+                 dataLoader.isValid:
                 self.dataLoaders.append(dataLoader)
                 self.count += 1
                 # remove all files already handled by the dataLoader; this prevent types that
@@ -105,12 +106,13 @@ class DirectoryDataLoader(DataLoaderABC):
                 # Find dataLoader for f if it was anything but a general directory
                 if self.dataFormat in _filters:
                     _filters.remove(self.dataFormat)
-                if (dataLoader := checkPathForDataLoader(f, formatFilter=_filters)) is not None:
+                if (dataLoader := checkPathForDataLoader(f, formatFilter=_filters)) and \
+                    dataLoader.isValid:
                     self.dataLoaders.append(dataLoader)
                     self.count += 1
                 # Haven't found a dataLoader yet; add f using DirectoryLoader if recursive is True
                 if dataLoader is None and recursive:
-                    if (dataLoader := DirectoryDataLoader(path=f, recursive=recursive, formatFilter=formatFilter)) and \
+                    if (dataLoader := DirectoryDataLoader(path=f, recursive=recursive, formatFilter=_filters)) and \
                         dataLoader.isValid:
                         # Loadable files were found
                         self.dataLoaders.append(dataLoader)

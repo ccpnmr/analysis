@@ -4,30 +4,32 @@
 --------------------------------------------------------------------------------------------
 """
 
-from ccpn.util.traits.CcpNmrTraits import Dict, Odict, Int, List, CPath, Adict, Set
-from ccpn.util.traits.CcpNmrJson import CcpNmrJson
-from ccpn.util.traits.CcpNmrTraits import RecursiveDict, RecursiveList, RecursiveOdict, RecursiveSet
+from ccpn.util.traits.CcpNmrTraits import Dict, Odict, Int, List, CPath, Adict, Set, OWTraits
+from ccpn.util.traits.CcpNmrJson import CcpNmrJson, register
 
+
+@register(overwrite=True)
 class TestObj(CcpNmrJson):
 
     saveAllTraitsToJson = True
     classVersion = 0.1
 
-    odict = RecursiveOdict()
+    odict = Odict()
     adict = Adict()
 
-    theDict = RecursiveDict()
+    theDict = Dict()
     theDict2 = Dict(default_value=dict(app=1,noot=2, mies=3))
 
-    theList = RecursiveList()
+    theList = List()
     theList2 = List(default_value=[1,2,3])
 
     thePath = CPath(default_value='bla.dat')
-    theSet = RecursiveSet()
+    theSet = Set()
 
-TestObj.register()
+    owtraits = OWTraits(default_value=None)
 
 
+@register(overwrite=True)
 class TestObj2(CcpNmrJson):
     saveAllTraitsToJson = True
     value = Int(default_value = 1)
@@ -54,8 +56,6 @@ class TestObj2(CcpNmrJson):
 
     def __repr__(self):
         return str(self)
-
-TestObj2.register()
 
 
 def test():
@@ -85,11 +85,14 @@ def test():
 
     obj1.theSet = obj1.theList
 
+    obj1.owtraits = TestObj2(100)
+
+
     js = obj1.toJson(ident=None)
-    print(js)
+    # print(js)
     obj2 = TestObj().fromJson(js)
-    obj2.setMetadata(key='id', value='copy from obj1')
-    print(obj2)
+    obj2.setJsonMetadata(key='id', value='copy from obj1')
+    # print(obj2)
 
     return (obj1, obj2)
 
@@ -97,4 +100,7 @@ def test():
 
 if __name__ == '__main__':
 
-    test()
+    obj1, obj2 = test()
+
+    obj1.print()
+    obj2.print()

@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-22 10:51:24 +0100 (Tue, August 22, 2023) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-10-09 12:09:35 +0100 (Mon, October 09, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -106,6 +106,11 @@ DATA_TYPE_COMPLEX_nRnI = '(nR)(nI)' # n real followed by n imag points; pointCou
 DATA_TYPE_COMPLEX_nRI  = 'n(RI)'  # n (real, imag) pairs; pointCount = 2*n
 DATA_TYPE_COMPLEX_PN   = 'n(PN)'   # n (P, N) pairs; pointCount = 2*n
 DATA_TYPES = (DATA_TYPE_REAL, DATA_TYPE_COMPLEX_nRnI, DATA_TYPE_COMPLEX_nRI, DATA_TYPE_COMPLEX_PN)
+
+def isComplexDataType(dataType):
+    """:return True if dataType is not real
+    """
+    return dataType != DATA_TYPE_REAL
 
 MagnetisationTransferTypes = ('onebond', 'Jcoupling', 'Jmultibond', 'relayed', 'through-space', 'relayed-alternate')
 MagnetisationTransferParameters = ('dimension1 dimension2 transferType isIndirect'.split())
@@ -822,7 +827,6 @@ def arPLS_Implementation(y, lambdaValue=5.e4, maxValue=1e6, minValue=-1e6, iterm
 #     """
 #
 #     from scipy.interpolate import interp1d
-#     #FIXME: invalid import
 #     import statsmodels.api as sm
 #
 #     # introduce some floats in our x-values
@@ -1590,6 +1594,28 @@ class _1DRawDataDict(dict):
         getLogger().info('Building 1D raw data dictionary. Completed')
 
 
+def estimateNoiseLevelnD(data, stdFactor=0.5) -> Tuple[float, float]:
+    """
+
+    :param data: the data of the spectrum to examine
+    :param stdFactor: number of times the std of the data
+    :return: (noiseMax, noiseMin) of estimated noise threshold
+    """
+    data = data.flatten()
+    absData = np.array([v for v in map(abs, data)])
+    absData = absData[np.isfinite(absData)]
+    median = float(np.median(absData))
+    _temp = data[np.isfinite(data)].astype(np.float64)
+    std = np.std(_temp)
+    if std != std:
+        # std may still be nan because contains HUGE numbers
+        std = 0.0
+    std = float(std)
+    eMax = median + stdFactor * std
+    eMin = median - stdFactor * std
+    return (eMax, eMin)
+
+
 def estimateNoiseLevel1D(y, f=10, stdFactor=0.5) -> Tuple[float, float]:
     """
 
@@ -1601,8 +1627,8 @@ def estimateNoiseLevel1D(y, f=10, stdFactor=0.5) -> Tuple[float, float]:
     from ccpn.util.Common import percentage
     eMax, eMin = 0, 0
     if stdFactor == 0:
-        stdFactor = 1
         getLogger().warning('stdFactor of value zero is not allowed.')
+        stdFactor = 1.0
     if y is None:
         return eMax, eMin
     percent = percentage(f, int(len(y)))

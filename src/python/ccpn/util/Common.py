@@ -19,9 +19,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-28 13:51:58 +0100 (Tue, March 28, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-10-09 12:09:37 +0100 (Mon, October 09, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -39,6 +39,7 @@ import sys
 import string
 import platform
 import collections
+import inspect
 from collections.abc import Iterable
 from itertools import islice
 from string import whitespace
@@ -443,6 +444,15 @@ def stringifier(*fields, **options):
 
     return formatter
 
+def classType(obj) -> str:
+    """Helper function to yield a more managable class description for an object (either class or instance)
+    (in lieu of type())
+    :parameter obj: object (class or instance) to get the type (name) from
+    """
+    if inspect.isclass(obj):
+        return f'<class {repr(obj.__name__)}>'
+    else:
+        return f'<class {repr(obj.__class__.__name__)}>'
 
 def contains_whitespace(s):
     return True in [c in s for c in string.whitespace]

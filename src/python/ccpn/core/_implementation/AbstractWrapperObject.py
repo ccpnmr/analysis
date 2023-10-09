@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 12:06:24 +0100 (Fri, June 09, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-10-09 12:09:34 +0100 (Mon, October 09, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -223,7 +223,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         className = self.className
         if parent is None:
             # This is the project
-            _id = self._wrappedData.name
+            _id = self.name
             sortKey = ('',)
         elif parent is project:
             _id = str(self._key)
@@ -713,6 +713,15 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
     #     for child in node._childClasses:
     #         self._printClassTree(child, tabs=tabs + 1)
 
+    def _getChild(self, klazz, name):
+        """Get the child of type klazz with name
+        :param klazz: class identifier: either className, shortClassName of a CoreClass
+        :param name: the name of the child object
+        :return the child or None
+        """
+        _pid = Pid.new(klazz, name)
+        return self.project.getByPid(_pid)
+
     def _getAllDecendants(self) -> list:
         """Get all objects descending from self; i.e. children, grandchildren, etc
         """
@@ -723,7 +732,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
     def _getChildrenByClass(self, klass) -> list:
         """GWV: Convenience: get the children of type klass of self.
-        klass is string (e.g. 'Peak') or V3 core class
+        klass is string (e.g. 'Peak') or V3 core class instance
         returns empty list if klass is not a child of self
         """
         klass = klass if isinstance(klass, str) else getattr(klass, 'className')

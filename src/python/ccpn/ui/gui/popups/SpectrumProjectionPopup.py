@@ -15,12 +15,12 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:42 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-10-09 12:09:36 +0100 (Mon, October 09, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: CCPN $"
+__author__ = "$Author: gvuister $"
 __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 #=========================================================================================
 # Start of code
@@ -29,40 +29,43 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 from ccpn.core.lib.SpectrumLib import PROJECTION_METHODS
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.FileDialog import ExportFileDialog
+from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
-from ccpn.ui.gui.widgets.MessageDialog import progressManager
-from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
+from ccpn.ui.gui.widgets.MessageDialog import progressManager, showWarning
+from ccpn.ui.gui.popups._CcpnDialogWithOutputPathPopupABC import CcpnDialogWithOutputPathPopupABC
 from ccpn.ui.gui.popups.ExportDialog import ExportDialogABC
-from ccpn.util.Path import aPath
+from ccpn.util.Path import aPath, Path
 
 
-class SpectrumProjectionPopup(CcpnDialogMainWidget):  # ExportDialogABC):
+class SpectrumProjectionPopup(CcpnDialogWithOutputPathPopupABC):  # ExportDialogABC):
     FIXEDHEIGHT = True
+    FIXEDWIDTH = False
 
     def __init__(self, parent=None, mainWindow=None, title='Spectrum Projection', **kwds):
 
         # for CcpnDialogMainWidget:
-        super().__init__(parent=parent, setLayout=True, windowTitle=title,
-                         **kwds)
+        super().__init__(parent=parent, mainWindow=mainWindow, title=title, **kwds)
 
-        if mainWindow:
-            self.mainWindow = mainWindow
-            self.project = self.mainWindow.project
-            self.application = self.mainWindow.application
-        else:
-            self.mainWindow = self.project = self.application = None
-
-        self.validSpectra = None
         if self.project:
             # Only select 3D's for now
             self.validSpectra = [s for s in self.project.spectra if s.dimensionCount == 3]
 
-            if len(self.validSpectra) == 0:
-                from ccpn.ui.gui.widgets.MessageDialog import showWarning
+        if not self.validSpectra:  # not None or len==0
+            showWarning('No valid spectra', 'No 3D spectra in current dataset')
+            self.errorFlag = True
+            return
 
-                showWarning('No valid spectra', 'No 3D spectra in current dataset')
-                self.reject()
+        # select a spectrum from current or validSpectra
+        if self.application.current.strip is not None and \
+                not self.application.current.strip.isDeleted and \
+                len(self.application.current.strip.spectra) > 0 and \
+                self.application.current.strip.spectra[0].dimensionCount == 3:
+            self.spectrum = self.application.current.strip.spectra[0]
+        else:
+            self.spectrum = self.validSpectra[0]
 
         # for CcpnDialogMainWidget:
         self.initialise(self.mainWidget)
@@ -72,116 +75,131 @@ class SpectrumProjectionPopup(CcpnDialogMainWidget):  # ExportDialogABC):
         # initialise the buttons and dialog size
         self._postInit()
 
-    def actionButtons(self):
-        self.setOkButton(callback=self.makeProjection, text='Make Projection', tipText='Export the projection to file and close dialog')
-        self.setCloseButton(callback=self._rejectDialog, text='Close', tipText='Close')
-        self.setDefaultButton(ExportDialogABC.CLOSEBUTTON)
+    @property
+    def projectionAxisCode(self):
+        return self.projectionAxisPulldown.get()
 
-    def _rejectDialog(self):
-        # NOTE:ED - not required for exportDialogABC
-        self.reject()
+    @property
+    def otherAxisCodes(self) -> list:
+        """Return axisCodes of projected spectra (as defined by self.projectionAxisCode)
+        """
+        ac = list(self.spectrum.axisCodes)
+        ac.remove(self.projectionAxisCode)
+        return ac
 
     def initialise(self, userFrame):
         """Create the widgets for the userFrame
         """
         # spectrum selection
-        spectrumLabel = Label(userFrame, 'Spectrum', grid=(0, 0), hAlign='r')
-        self.spectrumPulldown = PulldownList(userFrame, grid=(0, 1), callback=self._setSpectrum, gridSpan=(1, 2))
+        rowIndex = 0
+        rowIndex += self.initialiseSpectrumWidgets(userFrame, rowIndex=rowIndex)
+        # Hide in inPath info as it is not really needed
+        self.inPathLabel.setVisible(False)
+        self.inPathWidget.setVisible(False)
+
+        userFrame.addSpacer(10, 20, grid=(rowIndex, 1), expandX=True, expandY=True)
+        rowIndex += 1
 
         # projection axis
-        axisLabel = Label(userFrame, 'Projection axis', grid=(2, 0), hAlign='r')
-        self.projectionAxisPulldown = PulldownList(userFrame, grid=(2, 1), gridSpan=(1, 2))
+        Label(userFrame, 'Projection', grid=(rowIndex, 0), bold=True, **self._alignLabel)
+        rowIndex += 1
+
+        Label(userFrame, 'Axis', grid=(rowIndex, 0), **self._alignLabel)
+        self.projectionAxisPulldown = PulldownList(userFrame, grid=(rowIndex, 1),
+                                                   callback=self._setAxisCallback)
+        rowIndex += 1
 
         # method
-        methodLabel = Label(userFrame, 'Projection method', grid=(4, 0), hAlign='r')
-        self.methodPulldown = PulldownList(userFrame, grid=(4, 1), gridSpan=(1, 2), callback=self._setMethod)
+        Label(userFrame, 'Method', grid=(rowIndex, 0), **self._alignLabel)
+        self.methodPulldown = PulldownList(userFrame, grid=(rowIndex, 1),
+                                           callback=self._setMethodCallback)
         self.methodPulldown.setData(PROJECTION_METHODS)
+        rowIndex += 1
 
         # threshold
-        thresholdLabel = Label(userFrame, 'Threshold', grid=(5, 0), hAlign='r')
-        self.thresholdData = ScientificDoubleSpinBox(userFrame, grid=(5, 1), gridSpan=(1, 2), vAlign='t', min=0.1, max=1e12)
+        Label(userFrame, 'Threshold', grid=(rowIndex, 0), **self._alignLabel)
+        self.thresholdData = ScientificDoubleSpinBox(userFrame, grid=(rowIndex, 1), min=0.1, max=1e12)
+        rowIndex += 1
+
+        userFrame.addSpacer(10, 20, grid=(rowIndex, 1), expandX=True, expandY=True)
+        rowIndex += 1
+
+        rowIndex += self.initialiseOutputPathWidgets(userFrame, rowIndex=rowIndex)
 
         # Contour colours checkbox
-        contourLabel = Label(userFrame, 'Preserve contour colours', grid=(6, 0), hAlign='r')
-        self.contourCheckBox = CheckBox(userFrame, checked=True, grid=(6, 1))
+        Label(userFrame, 'Contours', grid=(rowIndex, 0), **self._alignLabel)
+        self.contourCheckBox = CheckBox(userFrame, text='keep colours', checked=True, grid=(rowIndex, 1))
+        rowIndex += 1
 
-        userFrame.addSpacer(5, 5, grid=(7, 1), expandX=True, expandY=True)
+        userFrame.addSpacer(5, 5, grid=(rowIndex, 1), expandX=True, expandY=True)
 
-        if self.project:
-            if self.validSpectra:
-                self.spectrumPulldown.setData([s.pid for s in self.validSpectra])
-
-            # select a spectrum from current or validSpectra
-            if self.application.current.strip is not None and \
-                    not self.application.current.strip.isDeleted and \
-                    len(self.application.current.strip.spectra) > 0 and \
-                    self.application.current.strip.spectra[0].dimensionCount == 3:
-                self.spectrum = self.application.current.strip.spectra[0]
-            else:
-                self.spectrum = self.validSpectra[0]
-
-        else:
-            self.spectrum = None
+    def actionButtons(self):
+        self.setOkButton(callback=self.makeProjection, text='Make Projection', tipText='Export the projection to file and close dialog')
+        self.setCloseButton(callback=self.reject, text='Close', tipText='Close')
+        self.setDefaultButton(ExportDialogABC.CLOSEBUTTON)
 
     def populate(self, userFrame):
         """populate the widgets
         """
-        with self.blockWidgetSignals(userFrame):
-            if self.spectrum:
-                # update all widgets to correct settings
-                self.spectrumPulldown.set(self.spectrum.pid)
-                self._setSpectrum(self.spectrum.pid)
-                self._setMethod(self.methodPulldown.currentText())
+        if self.spectrum:
+            self._setMethodCallback(self.methodPulldown.currentText())
+        super(SpectrumProjectionPopup, self).populate(userFrame)
 
-    def _setSpectrum(self, spectrumPid):
-        """Callback for selecting spectrum"""
-        spectrum = self.project.getByPid(spectrumPid)
-        self.projectionAxisPulldown.setData(spectrum.axisCodes)
-        self.thresholdData.set(spectrum.positiveContourBase)
+    def getInfoString(self) -> str:
+        """Return a string for the info widget field
+        Should be subclassed
+        """
+        return self.spectrum.dataSource._fileInfoString2
 
-    def _setMethod(self, method):
+    def getName(self) -> str:
+        """Return a string for the name of the file
+        Can be subclassed
+        """
+        return f'{self.spectrum.name}_{self.projectionAxisCode}_projection'
+
+    def _setSpectrumCallback(self, spectrumPid):
+        """Callback for selecting spectrum
+        """
+        self.spectrum = self.project.getByPid(spectrumPid)
+        self.projectionAxisPulldown.setData(self.spectrum.axisCodes)
+        self.projectionAxisPulldown.set(self.spectrum.axisCodes[0])
+        self.thresholdData.set(self.spectrum.positiveContourBase)
+        super()._setSpectrumCallback(spectrumPid)
+
+    def _setAxisCallback(self, axis):
+        """Callback when setting projection axis"""
+        self._setDataStore()
+        self.outPathWidget.setText(self.dataStore.path.asString())
+
+    def _setMethodCallback(self, method):
         """Callback when setting method"""
         if method.endswith('threshold'):
             self.thresholdData.setEnabled(True)
         else:
             self.thresholdData.setEnabled(False)
 
-    @property
-    def projectionAxisCode(self):
-        return self.projectionAxisPulldown.currentText()
-
-    @property
-    def axisCodes(self):
-        """Return axisCodes of projected spectra (as defined by self.projectionAxisCode)"""
-        spectrum = self.project.getByPid(self.spectrumPulldown.currentText())
-        ac = list(spectrum.axisCodes)
-        ac.remove(self.projectionAxisCode)
-        return ac
-
     def makeProjection(self):
-        """Make projection from the specified spectrum.
-
-        Spectrum is saved alongside the original spectrum, if this folder is not available then
-        the spectrum is saved in the project/data/spectra folder.
+        """Make projection from the selected spectrum.
         """
-        # get options
-        if (spectrum := self.project.getByPid(self.spectrumPulldown.currentText())):
-            axisCodes = self.axisCodes
-            method = self.methodPulldown.currentText()
-            threshold = self.thresholdData.get()
+        if self.spectrum is None:
+            raise RuntimeError(f'Spectrum is undefined')
 
-            # default path is spectrum
-            defaultPath = spectrum.dataSource.parentPath
+        axisCodes = self.otherAxisCodes
+        method = self.methodPulldown.get()
+        threshold = self.thresholdData.get()
 
-            with progressManager(self, 'Making %s projection from %s' % ('-'.join(axisCodes), spectrum.name)):
-                projectedSpectrum = spectrum.extractProjectionToFile(axisCodes, method=method, threshold=threshold)
-                if not self.contourCheckBox.get():
-                    # settings are copied by default from the originating spectrum
-                    projectedSpectrum._setDefaultContourColours()
+        with progressManager(self, 'Making %s projection from %s' % ('-'.join(axisCodes), self.spectrum.name)):
+            projectedSpectrum = self.spectrum.extractProjectionToFile(axisCodes,
+                                                                      method=method,
+                                                                      threshold=threshold,
+                                                                      dataFormat=self.dataStore.dataFormat,
+                                                                      path=self.dataStore.path
+                                                                      )
+            if not self.contourCheckBox.get():
+                # settings were copied by default from the originating spectrum
+                projectedSpectrum._setDefaultContourColours()
 
-        else:
-            raise RuntimeError(f'Error getting spectrum from pulldown')
-
+        self.accept()
 
 
 def main():

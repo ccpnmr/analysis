@@ -19,8 +19,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:39 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-10-09 12:09:35 +0100 (Mon, October 09, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -71,6 +71,8 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
     - Bruker processed data file, e.g. 1r, 2rr, etc
     """
     dataFormat = 'Bruker'
+    # Conveniances; subclassed in the respective classes
+    isBrukerSpectrum = True
 
     isBlocked = True
     wordSize = 4
@@ -365,6 +367,7 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         else:
             _path = Path(path)
             self._path = _path
+            self._isDirectory = _path.is_dir()
 
             if _path.is_file() and _path.stem in self._processedDataFiles:
                 # Bruker binary processed data file
@@ -434,8 +437,8 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         :return: True if ok, False otherwise
         """
 
-        self.isValid = False
-        self.errorString = 'Checking validity'
+        self.isValid = True
+        self.errorString = ''
 
         # if self._path is None or not self._path.exists():
         #     errorMsg = f'Path "{self._path}" does not exist'
@@ -480,8 +483,6 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         if not self._checkValidExtra():
             return False
 
-        self.isValid = True
-        self.errorString = ''
         return super(BrukerSpectrumDataSource, self).checkValid()
 
     def readParameters(self):
@@ -517,6 +518,9 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 self.dataScale = 1.0
 
             self.temperature = self.acqus[0]['TE']
+            if self.temperature == 0.0:
+                self.temperature = None
+                getLogger().warning(f'Acqus defined temperature was 0.0; changed to undefined (None) instead')
 
             # Dimensional parameters
             for dimIndx in range(self.dimensionCount):

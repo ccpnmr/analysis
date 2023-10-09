@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:04 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-10-09 19:07:18 +0100 (Mon, October 09, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,7 +26,7 @@ __date__ = "$Date: 2022-09-02 13:02:37 +0100 (Fri, September 02, 2022) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtWidgets
 from functools import partial
 from typing import Optional
 from ccpn.util.Logging import getLogger
@@ -55,7 +55,7 @@ def dynamicSizeAdjust(widget, sizeFunction: callable = None, completedFunction: 
 
         To start the size operation, call as follows:
 
-        >>> QtCore.QTimer.singleShot(0, partial(dynamicSizeAdjust, widget, sizeFunction, completedFunction, adjustWidth=True, adjustHeight=False))
+        >>> QtCore.QTimer().singleShot(0, partial(dynamicSizeAdjust, widget, sizeFunction, completedFunction, adjustWidth=True, adjustHeight=False))
 
     :param callable sizeFunction: function to return the target-size, match-size
     :param callable completedFunction: function called when the resize has stopped
@@ -114,21 +114,29 @@ def dynamicSizeAdjust(widget, sizeFunction: callable = None, completedFunction: 
                 thisStepH = thisStepH // 2
 
             if (adjustWidth and thisStepW > 1) or (adjustHeight and thisStepH > 1):
-                # if still need to adjust the width/height then perform another iteration
+                # if this still needs to adjust the width/height then perform another iteration
                 _steps = QtCore.QSize(thisStepW, thisStepH)
 
                 # adjust the size
                 adjustW = (int(thisStepW) if size.width() < target.width() else -int(thisStepW)) if adjustWidth else 0
                 adjustH = (int(thisStepH) if size.height() < target.height() else -int(thisStepH)) if adjustHeight else 0
+
+                # setting setFixed<dimension> is not enough, sizePolicy must also be set for widget
+                if (sPolicy := (widget.sizePolicy().horizontalPolicy(), widget.sizePolicy().verticalPolicy())) == (QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed):
+                    widget.setFixedSize(widget.width() + adjustW, widget.height() + adjustH)
+                elif sPolicy[0] == QtWidgets.QSizePolicy.Fixed:
+                    widget.setFixedWidth(widget.width() + adjustW)
+                elif sPolicy[1] == QtWidgets.QSizePolicy.Fixed:
+                    widget.setFixedHeight(widget.height() + adjustH)
                 widget.resize(widget.width() + adjustW, widget.height() + adjustH)
 
                 # create another single-shot - waits until gui is up-to-date before firing
-                QtCore.QTimer.singleShot(0, partial(dynamicSizeAdjust, widget=widget,
-                                                    sizeFunction=sizeFunction, completedFunction=completedFunction,
-                                                    step=step, adjustWidth=adjustWidth, adjustHeight=adjustHeight,
-                                                    _steps=_steps, _lastSteps=_lastSteps, _lastsizes=_lastsizes,
-                                                    _maxIterations=_maxIterations,
-                                                    ))
+                QtCore.QTimer().singleShot(0, partial(dynamicSizeAdjust, widget=widget,
+                                                      sizeFunction=sizeFunction, completedFunction=completedFunction,
+                                                      step=step, adjustWidth=adjustWidth, adjustHeight=adjustHeight,
+                                                      _steps=_steps, _lastSteps=_lastSteps, _lastsizes=_lastsizes,
+                                                      _maxIterations=_maxIterations,
+                                                      ))
                 return
 
         if completedFunction:

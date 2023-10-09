@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-05 17:01:42 +0100 (Thu, October 05, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2023-10-09 19:07:18 +0100 (Mon, October 09, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,6 +30,7 @@ from PyQt5 import QtCore, QtWidgets
 from subprocess import PIPE, Popen, STDOUT, CalledProcessError
 import contextlib
 import html
+from functools import partial
 
 # don't remove this import!
 import ccpn.core
@@ -40,6 +41,7 @@ from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.Font import getFontHeight
+from ccpn.ui.gui.lib.DynamicSizeAdjust import dynamicSizeAdjust
 from ccpn.util.Update import UpdateAgent, FAIL_UNEXPECTED
 from ccpn.util.Common import isWindowsOS
 from ccpn.framework.Version import applicationVersion, VersionString
@@ -57,6 +59,9 @@ _rTexts = [(' ', '&nbsp;'),
 
 
 class UpdatePopup(CcpnDialogMainWidget):
+    FIXEDWIDTH = True
+    FIXEDHEIGHT = False
+
     def __init__(self, parent=None, mainWindow=None, title='Update CCPN code', **kwds):
         super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
 
@@ -76,20 +81,15 @@ class UpdatePopup(CcpnDialogMainWidget):
         self._updatePopupAgent = UpdateAgent(version, dryRun=False,
                                              showInfo=self._showInfo, showError=self._showError,
                                              _updateProgressHandler=self._refreshQT)
-
         self.setWindowTitle(title)
-        self._setWidgets(version)
-
-        self.setFixedWidth(self.sizeHint().width())
-        self._maxHeight = int(self.sizeHint().height() * 3)
-        self._hideInfoBox()
+        self._setWidgets()
 
         # initialise the popup
         self._updatesInstalled = False
         self._updateCount = 0
         self._updateVersion = None
         self._lastMsgWasError = None
-        self.resetFromServer()
+        self._showBoxes = False
 
         self._updateButton.setEnabled(self._updatePopupAgent._check())
         self._downloadButton = self.buttonList.getButton(DOWNLOADBUTTONTEXT)
@@ -99,9 +99,23 @@ class UpdatePopup(CcpnDialogMainWidget):
         self.setDefaultButton(None)
         self._postInit()
 
-        self.setMaximumHeight(self._maxHeight)
+        self._defaultHeight = self.minimumSizeHint().height()
+        self.resetFromServer()
+        self._downloadButton.setEnabled(self._updateCount > 0)
 
-    def _setWidgets(self, version):
+        # set the popup constraints
+        QtCore.QTimer().singleShot(0, self._finalise)
+
+    def _finalise(self):
+        """Set the minimu/maximum height of the popup based on which text-boxes are visible.
+        """
+        if self._showBoxes:
+            self.setMaximumHeight(self._defaultHeight * 6)
+            self.setMinimumHeight(self.minimumSizeHint().height())
+        else:
+            self.setFixedHeight(self.minimumSizeHint().height())
+
+    def _setWidgets(self):
         """Set the widgets.
         """
         row = 0
@@ -110,16 +124,16 @@ class UpdatePopup(CcpnDialogMainWidget):
         # row += 1
         # align all widgets to the top
         self.mainWidget.getLayout().setAlignment(QtCore.Qt.AlignTop)
-        label = Label(self.mainWidget, 'Installation location:', grid=(row, 0), gridSpan=(1, 2))
-        label = Label(self.mainWidget, text=self._updatePopupAgent.installLocation, grid=(row, 2))
+        Label(self.mainWidget, 'Installation location:', grid=(row, 0), gridSpan=(1, 2))
+        Label(self.mainWidget, text=self._updatePopupAgent.installLocation, grid=(row, 2))
         row += 1
-        label = Label(self.mainWidget, 'Version:', grid=(row, 0), gridSpan=(1, 2))
+        Label(self.mainWidget, 'Version:', grid=(row, 0), gridSpan=(1, 2))
         self.versionLabel = Label(self.mainWidget, text='TBD', grid=(row, 2))
         row += 1
-        label = Label(self.mainWidget, 'Number of updates:', grid=(row, 0), gridSpan=(1, 2))
+        Label(self.mainWidget, 'Number of updates:', grid=(row, 0), gridSpan=(1, 2))
         self.updatesLabel = Label(self.mainWidget, text='TBD', grid=(row, 2))
         row += 1
-        label = Label(self.mainWidget, 'Installing updates will require a restart of the program.', grid=(row, 0), gridSpan=(1, 3))
+        Label(self.mainWidget, 'Installing updates will require a restart of the program.', grid=(row, 0), gridSpan=(1, 3))
         row += 1
         self._updateButton = Button(self.mainWidget, text=UPDATELICENCEKEYTEXT, tipText='Update LicenceKey from the server',
                                     callback=self._doUpdate, icon='icons/Filetype-Docs-icon.png', grid=(row, 0))
@@ -140,25 +154,25 @@ class UpdatePopup(CcpnDialogMainWidget):
         self._updateButton.setStyleSheet(_style)
         row += 1
         if self.preferences:
-            checkAtStartup = CheckBoxCompoundWidget(self.mainWidget,
-                                                    grid=(row, 0), hAlign='left', gridSpan=(1, 3),
-                                                    # fixedWidths=(None, 30),
-                                                    orientation='right',
-                                                    labelText='Check for updates at startup',
-                                                    checked=self.preferences.general.checkUpdatesAtStartup,
-                                                    callback=self._checkAtStartupCallback)
+            CheckBoxCompoundWidget(self.mainWidget,
+                                   grid=(row, 0), hAlign='left', gridSpan=(1, 3),
+                                   # fixedWidths=(None, 30),
+                                   orientation='right',
+                                   labelText='Check for updates at startup',
+                                   checked=self.preferences.general.checkUpdatesAtStartup,
+                                   callback=self._checkAtStartupCallback)
             row += 1
 
         # why does this not resize correctly in self.mainWidget?
         self.changeLogBox = TextEditor(self.mainWidget, grid=(row, 0), gridSpan=(1, 3),
-                                       enableWebLinks=True)  # NOTE:ED - do not set valign here
-        self.changeLogBox.setVisible(True)
+                                       enableWebLinks=True)  # don't set valign here
+        self.changeLogBox.setVisible(False)
         self.changeLogBox.setEnabled(True)
         self.changeLogBox.setReadOnly(True)
         row += 1
 
         # why does this not resize correctly in self.mainWidget?
-        self.infoBox = TextEditor(self.mainWidget, grid=(row, 0), gridSpan=(1, 3))  # NOTE:ED - do not set valign here
+        self.infoBox = TextEditor(self.mainWidget, grid=(row, 0), gridSpan=(1, 3))  # don't set valign here
         self.infoBox.setVisible(False)
         self.infoBox.setEnabled(True)
         self.infoBox.setReadOnly(True)
@@ -178,9 +192,6 @@ class UpdatePopup(CcpnDialogMainWidget):
         self._showInfoBox()
         self._handleUpdates()
 
-        # # not very nice but refreshes the popup first
-        # QtCore.QTimer.singleShot(0, self._handleUpdates)
-
     def _handleUpdates(self):
         """Call external script to update which may require several iterations.
         """
@@ -198,10 +209,11 @@ class UpdatePopup(CcpnDialogMainWidget):
             for key, _ in sel.select():
                 if not (data := key.fileobj.readline()):
                     check += 1
-                if key.fileobj is process.stdout:
+                elif key.fileobj is process.stdout:
                     self._showInfo(data)
                 else:
                     self._showError(data)
+            self._refreshQT()
 
         exitCode = process.wait()
         if exitCode >= FAIL_UNEXPECTED:
@@ -215,13 +227,13 @@ class UpdatePopup(CcpnDialogMainWidget):
         self.resetFromServer()
 
         # resize due to change in button text
-        QtCore.QTimer.singleShot(0, self._checkWidth)
+        # QtCore.QTimer.singleShot(0, self._checkWidth)
 
-    def _checkWidth(self):
-        """Resize to account for the slighty wider buttons.
-        """
-        _width = self.sizeHint().width() + 100  # still not sure why I need to add constant here :|
-        self.setFixedWidth(_width)
+    # def _checkWidth(self):
+    #     """Resize to account for the slighty wider buttons.
+    #     """
+    #     _width = self.mainWidget.sizeHint().width() + 150  # still not sure why I need to add constant here :|
+    #     self.setFixedWidth(_width)
 
     def _closeProgram(self):
         """Call the mainWindow close function giving user option to save, then close program
@@ -276,8 +288,9 @@ class UpdatePopup(CcpnDialogMainWidget):
         self.versionLabel.set(f'{version}')
 
         self._updatePopupAgent.resetFromServer()
-
         self._updateChangeLog()
+
+        self._resizeWidget()
 
     def _updateChangeLog(self):
         """Read the current change-log and print the required mesages.
@@ -305,34 +318,29 @@ class UpdatePopup(CcpnDialogMainWidget):
                 clb += f'<h3>Changes in version {": ".join(heading)} (utc)</h3>'
                 # print the explicit html-string - need to watch quotes, need leading backslash
                 clb += rec.get('info', '')
-            self.changeLogBox.setHtml(clb)
+
+            if clb:
+                self.changeLogBox.setHtml(clb)
+                self._showChangeLogBox()
 
     def closeEvent(self, event) -> None:
         self.reject()
 
     def _showInfoBox(self):
+        self._showBoxes = True
         self.infoBox.show()
-        _width = self.sizeHint().width()
-        _height = self.sizeHint().height()
-        # self.setMinimumHeight(8 * getFontHeight())
-        # self.setMaximumHeight(16 * getFontHeight())
-        self.setMinimumHeight(_height)
-        # self.setMaximumHeight(int(_height * 2.5))
-        self.resize(QtCore.QSize(_width, int(_height * 2.5)))
-        self._refreshQT()
+        self._resizeWidget()
 
-    def _hideInfoBox(self):
-        self.infoBox.hide()
-        _height = self.sizeHint().height()
-        # self.setFixedHeight(8 * getFontHeight())
-        self.setFixedHeight(_height)
-        self._refreshQT()
+    def _showChangeLogBox(self):
+        self._showBoxes = True
+        self.changeLogBox.show()
+        self._resizeWidget()
 
     def _showInfo(self, *args):
         """Add text to the html-box in default colour or green if the last message was an error.
         """
         # need to check the default theme colour
-        col = '#20d040' if self._lastMsgWasError else 'solid'  # green
+        col = '#20d040' if self._lastMsgWasError else 'solid'  # green or default
         self._lastMsgWasError = False
         self._addMessage(args, col)
 
@@ -354,15 +362,49 @@ class UpdatePopup(CcpnDialogMainWidget):
                 txt = f'<span style="color:{col};" >{arg}</span>'
                 self.infoBox.append(txt)
 
-    def _refreshQT(self):
+    def _resizeWidget(self):
+        """change the width to the selected tab
+        """
+        QtCore.QTimer().singleShot(0, self._finalise)
+        # create a single-shot - waits until gui is up-to-date before firing first iteration of size-adjust
+        QtCore.QTimer().singleShot(0, partial(dynamicSizeAdjust, self, sizeFunction=self._targetSize,
+                                              adjustWidth=True, adjustHeight=True, step=32))
+
+    def _targetSize(self) -> tuple | None:
+        """Get the size of the widget to match the popup to.
+
+        Returns the size of mainWidget, or None if there is an error.
+        Size is modified by visibility of text-boxes.
+        None will terminate the iteration.
+
+        :return: size of target widget, or None.
+        """
+        try:
+            hh = 0 + (200 if self.changeLogBox.isVisible() else 0) + (200 if self.infoBox.isVisible() else 0)
+            # get the size of mainWidget
+            targetSize = self.minimumSizeHint() + QtCore.QSize(0, hh)
+            # match against the popup
+            sourceSize = self.size()
+
+            return targetSize, sourceSize
+
+        except Exception:
+            return None
+
+    @staticmethod
+    def _refreshQT():
         # force a refresh of the popup - makes the updating look a little cleaner
-        self.repaint()
+        # self.updateGeometry()
         QtWidgets.QApplication.processEvents()
 
     def _checkAtStartupCallback(self, value):
         if self.preferences:
             self.preferences.general.checkUpdatesAtStartup = value
 
+
+#=========================================================================================
+# main
+#=========================================================================================
 
 def main():
     # QApplication must be persistent until end of main

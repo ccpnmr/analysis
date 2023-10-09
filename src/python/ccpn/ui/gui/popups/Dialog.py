@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-13 12:22:21 +0100 (Thu, July 13, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-09 19:07:18 +0100 (Mon, October 09, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -221,18 +221,21 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         # set the fixed sized policies as required
         if self.FIXEDWIDTH:
             self.setFixedWidth(max(_size.width(), _minimumSize.width()))
+            # this is very strange, setting fixed<dimension> does not necessarily set the policy :|
+            self.setSizePolicy(QtWidgets.QSizePolicy.Fixed, self.sizePolicy().verticalPolicy())
         elif minimumSize:
             # set minimumSize from settings
             self.setMinimumWidth(_minimumSize.width())
 
         if self.FIXEDHEIGHT:
             self.setFixedHeight(max(_size.height(), _minimumSize.height()))
+            self.setSizePolicy(self.sizePolicy().horizontalPolicy(), QtWidgets.QSizePolicy.Fixed)
         elif minimumSize:
             # set minimumSize from settings
             self.setMinimumHeight(_minimumSize.height())
 
-        self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Fixed if self.FIXEDWIDTH else QtWidgets.QSizePolicy.Preferred,
-                                      QtWidgets.QSizePolicy.Fixed if self.FIXEDHEIGHT else QtWidgets.QSizePolicy.Preferred, )
+        self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Fixed if self.FIXEDWIDTH else QtWidgets.QSizePolicy.MinimumExpanding,
+                                      QtWidgets.QSizePolicy.Fixed if self.FIXEDHEIGHT else QtWidgets.QSizePolicy.MinimumExpanding, )
         self.resize(_size)
 
     # # pyqt5.15 does not allow setting with a float
@@ -374,10 +377,10 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         return self.dialogButtons.button(buttonName)
 
     def fixedSize(self):
-        self.sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        self.sizePolicy.setHorizontalStretch(0)
-        self.sizePolicy.setVerticalStretch(0)
-        self.setSizePolicy(self.sizePolicy)
+        self._sPolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        self._sPolicy.setHorizontalStretch(0)
+        self._sPolicy.setVerticalStretch(0)
+        self.setSizePolicy(self._sPolicy)
         self.setFixedSize(self.maximumWidth(), self.maximumHeight())
         self.setSizeGripEnabled(False)
 
@@ -600,6 +603,10 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         pass
 
 
+#=========================================================================================
+# CcpnDialog
+#=========================================================================================
+
 class CcpnDialog(QtWidgets.QDialog, Base):
     """
     Class to handle popup dialogs
@@ -624,10 +631,10 @@ class CcpnDialog(QtWidgets.QDialog, Base):
         self.setWindowIcon(QtGui.QIcon())
 
     def fixedSize(self):
-        self.sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        self.sizePolicy.setHorizontalStretch(0)
-        self.sizePolicy.setVerticalStretch(0)
-        self.setSizePolicy(self.sizePolicy)
+        self._sPolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        self._sPolicy.setHorizontalStretch(0)
+        self._sPolicy.setVerticalStretch(0)
+        self.setSizePolicy(self._sPolicy)
         self.setFixedSize(self.maximumWidth(), self.maximumHeight())
         self.setSizeGripEnabled(False)
 

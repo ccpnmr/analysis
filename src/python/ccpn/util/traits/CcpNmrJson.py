@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-08 10:59:55 +0100 (Sun, October 08, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-09 08:37:49 +0100 (Mon, October 09, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -35,11 +35,12 @@ from ccpn.util.Path import aPath, Path
 from ccpn.util.AttributeDict import AttributeDict
 from ccpn.util.traits.TraitBase import TraitBase
 from ccpn.util.traits.TraitJsonHandlerBase import TraitJsonHandlerBase
-from ccpn.util.traits.CcpNmrTraits import default, Dict
+from ccpn.util.traits.CcpNmrTraits import default, Dict, CString
 from ccpn.util.Logging import getLogger
 from ccpn.util.Time import now
 from ccpn.util.decorators import debug2Enter, debug3Enter, debug3Leave  # Not used now to avoid circular import
 
+from ccpn.framework.Version import VersionString
 
 class Constants(object):
     # jsonHandlers
@@ -52,19 +53,24 @@ class Constants(object):
     # update handler routines
     UPDATEHANDLERS = '_updateHandlers'
 
-    # metadata
+    # the json keys:  _objectData, _metadata, _data
     METADATA = '_metadata'
+    DATA = '_data'
+    JSON_KEYS = [METADATA, DATA]
+
+    # object data
 
     # used in metadata dict
     JSONVERSION = 'jsonVersion'
     CLASSNAME = 'className'
     CLASSVERSION = 'classVersion'
     CLASSINFO = 'classInfo'
+    OBJECT_ID = 'id'
     USER = 'user'
     LASTPATH = 'lastPath'
     TIMESTAMP = 'timestamp'
-    METADATA_KEYS = (JSONVERSION, CLASSNAME, CLASSVERSION, CLASSINFO, USER, LASTPATH, TIMESTAMP)
-
+    # 'reserved' metadata keys
+    METADATA_KEYS = (JSONVERSION, CLASSNAME, CLASSVERSION, CLASSINFO, OBJECT_ID, USER, LASTPATH, TIMESTAMP)
 # end class
 
 
@@ -227,8 +233,8 @@ def update(updateHandler, push=False):
 # Some info regarding the call hiarchy on restoring
 #
 # restore(path)
-#   fromJson(string) -> dataList
-#   dataDict = dict(dataList)
+#   from json(string) -> data
+#   dataDict = _update_3_1(data)
 #   dataDict = _update(dataDict)
 #   _decode(dataDict)
 #       for key,value in dataDict.items():
@@ -344,11 +350,47 @@ class CcpNmrJson(TraitBase):
     # end to be subclassed
     #--------------------------------------------------------------------------------------------
 
-    _jsonVersion = 3.0       # A version id, stored in metadata, to track any changes to this code
+    # jsonVersion: 'A version id to track any changes to the JSON implementation'
+    _jsonVersion = VersionString('3.1.0')
+
+    #--------------------------------------------------------------------------------------------
+    # _metadata: should be in-sinc with Constants.METADATA
+    _metadata = Dict().tag(saveToJson=True, info='The metadata of the class')
+
+    @default(Constants.METADATA)
+    def _metadata_default(self) -> dict:
+        """The defaults for the metadata dict"""
+        defaults = {}
+        defaults[Constants.JSONVERSION] = str(self._jsonVersion)
+        defaults[Constants.CLASSNAME] = self.__class__.__name__
+        defaults[Constants.CLASSVERSION] = self.classVersion
+        defaults[Constants.CLASSINFO] = self.classInfo
+        defaults[Constants.OBJECT_ID] = str(hex(id(self)))
+        defaults[Constants.USER] = getpass.getuser()
+        defaults[Constants.LASTPATH] = 'undefined'
+        defaults[Constants.TIMESTAMP] = str(now())
+        return defaults
+
+    # _metadata-specific json handler; note the invocation with the attribute, not a string!
+    @jsonHandler(_metadata)
+    class _metadataJsonHandler(TraitJsonHandlerBase):
+        """Handle json metadata
+        """
+        # def encode(value):  # Handled by base class
+        def decode(self, value):
+            # retain essential current metadata; just update the others from value (reflecting the
+            # data in the json file
+            currentMetaData = getattr(self.obj, Constants.METADATA)
+            currentMetaData.update(value)
+            return currentMetaData
+    # end class
+
+    #--------------------------------------------------------------------------------------------
 
     _registeredClasses = {}  # A dict that contains the (className, class) mappings for restoring
                              # CcpNmrJson (sub-)classes from json files
 
+    #--------------------------------------------------------------------------------------------
     @staticmethod
     def isRegistered(className):
         """Return True if className is registered"""
@@ -365,42 +407,63 @@ class CcpNmrJson(TraitBase):
             raise RuntimeError('className "%s" is already registered' % className)
         CcpNmrJson._registeredClasses[className] = cls
 
+    #--------------------------------------------------------------------------------------------
+
     @staticmethod
     def _getClassFromDict(theDict):
-        """Return the class as defined in the metadata that should be in theDict
+        """Return the class as defined in the objectdata that should be in theDict
         """
-        metadata = theDict.get(Constants.METADATA)
-        if metadata is None:
-            raise ValueError('theDict is not a valid representation of a CcpNmrJson (sub-)type')
-
-        className = metadata.get(Constants.CLASSNAME)
+        className = theDict.get(Constants.METADATA).get(Constants.CLASSNAME)
         if className is None:
-            raise ValueError('Metadata does not contain the classname of a CcpNmrJson (sub-)type')
-
+            raise ValueError(f'{Constants.METADATA} does not contain the classname of a CcpNmrJson (sub-)type')
         if not className in CcpNmrJson._registeredClasses:
             raise RuntimeError(f'Unregistered class "{className}"; Cannot decode the data in theDict')
         cls = CcpNmrJson._registeredClasses[className]
         return cls
 
-    @staticmethod
-    def _isEncodedObject(theList):
-        """Return True if theList defines an encoded CcpNmr object. To establish this, we look at the structure
-        which must be a list of (key,value) items, encoded as a list, with the first (key,value) pair encoding the
-        metadata dict.
+    @classmethod
+    def _isEncodedObject(cls, theData):
+        """Return True if theList defines an encoded CcpNmr object.
+        To establish this, we look at the structure of either 3.0 or 3.1.0 data
+
         CCPNINTERNAL: used in TraitJsonHandlerBase
         """
-        if isinstance(theList, list) and len(theList) > 0 and \
-           isinstance(theList[0], (list,tuple)) and len(theList[0]) == 2 and theList[0][0] == Constants.METADATA and \
-           isinstance(theList[0][1], dict) and Constants.JSONVERSION in theList[0][1]:
-            return True
+        # We should have a list or dict, if not it was something else
+        # This can happen, as the method is called by jsonHandlers, to check if we have an encoded object
+        if not isinstance(theData, (list, dict)):
+            return False
+
+        if isinstance(theData, list):
+            # this could be 3.0 encoded list; check that there is at least one (key, value) tuple
+            # Convert to dict for more checks later on; catch any errors doing that
+            if len(theData) >=0 and \
+               len(theData[0]) == 2:
+                try:
+                    theData = dict(theData)
+                except:
+                    return False
+
+            else:
+                return False
+
+        # check for metadata
+        if (_metaData := theData.get(Constants.METADATA, None)) is None:
+            return False
+
+        # check for json version and className
+        if _metaData.get(Constants.JSONVERSION, None) is not None:
+            if _metaData.get(Constants.CLASSNAME, None) is not None:
+                return True
+
         return False
 
     @staticmethod
-    def _newObjectFromDict(theDict, **kwds):
-        """Return new object as defined by theDict; kwds are passed to the class instantiation
+    def _newObjectFromDict(theData, **kwds):
+        """Return new object as defined by theData; kwds are passed to the class instantiation
         requires presence of metadata and registered classname
         CCPNMRINTERNAL: used in recursive handler classes (see below)
         """
+        theDict = CcpNmrJson._updateToJson3_1(theData)
         cls = CcpNmrJson._getClassFromDict(theDict)
         obj = cls(**kwds)
         theDict = obj._update(theDict)
@@ -423,53 +486,18 @@ class CcpNmrJson(TraitBase):
                 raise FileNotFoundError('file "%s" does not exist' % path)
 
             with path.open('r') as fp:
-                theDict =  dict(json.load(fp))
+                theData =  json.load(fp)
 
         elif jsonString is not None:
-            theDict = dict(json.loads(jsonString))
+            theData = json.loads(jsonString)
 
         else:
             raise RuntimeError('newObjectFromJson: undefined path and jsonString')
 
-        return CcpNmrJson._newObjectFromDict(theDict, **kwds)
+        obj = CcpNmrJson._newObjectFromDict(theData, **kwds)
+        return obj
 
     #--------------------------------------------------------------------------------------------
-    # _metadata(should be in-sinc with Constants.METADATA)
-    #--------------------------------------------------------------------------------------------
-    _metadata = Dict().tag(saveToJson=True, info='The metadata that define the class, and the versioning of the data')
-
-    @default(Constants.METADATA)
-    def _metadata_default(self) -> dict:
-        """The defaults for the json metadata dict"""
-        defaults = {}
-        defaults[Constants.JSONVERSION] = self._jsonVersion
-        defaults[Constants.CLASSNAME] = self.__class__.__name__
-        defaults[Constants.CLASSVERSION] = self.classVersion
-        defaults[Constants.CLASSINFO] = self.classInfo
-        defaults[Constants.USER] = getpass.getuser()
-        defaults[Constants.LASTPATH] = 'undefined'
-        defaults[Constants.TIMESTAMP] = str(now())
-        return defaults
-
-    # _metadata-specific json handler; note the invocation with the attribute, not a string!
-    @jsonHandler(_metadata)
-    class _metadataJsonHandler(TraitJsonHandlerBase):
-        """Handle json metadata
-        """
-        # def encode(value):  # Handled by base class
-
-        def decode(self, value):
-            # retain essential current metadata; just update the others from value (reflecting the
-            # data in the json file
-            currentMetaData = getattr(self.obj, Constants.METADATA)
-            currentMetaData.update(value)
-            return  currentMetaData
-    # end class
-
-    # @property
-    # def metadata(self):
-    #     "Return metadata dict"
-    #     return getattr(self, Constants.METADATA)
 
     def setJsonMetadata(self, key, value, force=False):
         """Update Json metadata with kwds (key,value) pairs;
@@ -508,11 +536,7 @@ class CcpNmrJson(TraitBase):
         store information regarding the class, version, user, path, etc of the json representation of the
         object.
         """
-        keys = super().keys(**metadata)
-        # check if we have to remove the _metadata key
-        if Constants.METADATA in keys:
-            idx = keys.index(Constants.METADATA)
-            keys.pop(idx)
+        keys = [key for key in super().keys(**metadata) if key not in Constants.JSON_KEYS]
         return keys
 
     #--------------------------------------------------------------------------------------------
@@ -573,44 +597,42 @@ class CcpNmrJson(TraitBase):
         """
         traitObj = self.getTraitObject(traitName)
         return traitObj.getJsonHandler(self)
-        # handler = None
-        #
-        # # check for trait specific handler
-        # if (handler := self.trait_metadata(traitName, Constants.JSONHANDLER))is not None:
-        #     pass
-        #
-        # # check for traitlet class specific handler
-        # elif hasattr(traitObj, Constants.JSONHANDLER):
-        #     handler = getattr(traitObj, Constants.JSONHANDLER)
-        #
-        # # check for TraitBase class specific handler
-        # elif hasattr(self, Constants.JSONHANDLER):
-        #     handler = getattr(self, Constants.JSONHANDLER)
-        #
-        # if handler is None:
-        #     raise RuntimeError(f'Unable to json handler for trait {traitName} of object {self}')
-
-        # return handler(obj=self, trait=traitObj)
 
     def toJson(self, **kwds):
-        """Return self as list of (trait, value) tuples represented in a json string
+        """Encode self represented in a json string
+        :return The encoded json string
+        :raises RuntimeError
         """
         indent = kwds.setdefault('indent', 2)
-        dataList = self._encode()
         try:
+            dataList = self._encode()
             _json = json.dumps(dataList, indent=indent)
-        except TypeError as es:
+        except Exception as es:
+            # GWV: Log this, as the error might be caught elsewhere
+            getLogger().debug(f'While encoding {self} as JSON an exception was raised: {es}')
             raise RuntimeError(f'While encoding {self} as JSON: {es}')
         return _json
 
-    def _encode(self):
-        """Return self as list of (traitName, value) tuples
+    def _encodeTrait(self, traitName):
+        """Encode trait traitName
+        :return (traitName, encoded-value) tuple
         """
+        value = self.getTraitValue(traitName)
+        # Do not try to encode None's
+        if value is not None:
+            handler = self._getTraitJsonHandler(traitName)
+            value = handler.encode(value)
+        return (traitName, value)
+
+    def _encode(self):
+        """Return self as dict
+        """
+        _metaData = dict([self._encodeTrait(Constants.METADATA)])
 
         # get all traits that need saving to json
         # Subtle but important implementation change relative to the previous one-liner
         # Allow trait-specific saveToJson metadata (i.e. 'tag'), to override object's saveAllToJson
-        traitsToEncode = [Constants.METADATA]
+        traitsToEncode = []
         for traitName in self.keys():
             # check if saveToJson was defined for this trait; use None as default as the tag can be True/False
             _saveTraitToJson = self.trait_metadata(traitname=traitName, key='saveToJson', default=None)
@@ -621,16 +643,13 @@ class CcpNmrJson(TraitBase):
             if _saveTraitToJson:
                 traitsToEncode.append(traitName)
 
-        # create a list of (traitName, value) tuples
-        _encodedData = []
-        for traitName in traitsToEncode:
-            value = self.getTraitValue(traitName)
-            # Do not try to encode None's
-            if value is not None:
-                handler = self._getTraitJsonHandler(traitName)
-                value = handler.encode(value)
+        # create a dict of (traitName, value) tuples for the trait data
+        _data = dict(self._encodeTrait(traitName) for traitName in traitsToEncode)
 
-            _encodedData.append((traitName, value))
+        # create the the encodedData dict
+        _encodedData = {}
+        _encodedData[Constants.METADATA] = _metaData
+        _encodedData[Constants.DATA] = _data
 
         return _encodedData
 
@@ -641,67 +660,126 @@ class CcpNmrJson(TraitBase):
         if len(string) == 0:
             getLogger().warning('%s.fromJson: empty string, retaining default values' % self.__class__.__name__)
             return self
-        # json file was saved as list of (trait, value) tuples
         try:
             data = json.loads(string)
-            # Subtle but important implementation change relative to the previous AttributeDict (~2 commits ago)
-            dataDict = dict(data)
         except json.JSONDecodeError:
             getLogger().warning('%s.fromJson: error decoding, retaining default values' % self.__class__.__name__)
             return self
 
         # check for updates
         try:
+            dataDict = self._updateToJson3_1(data)
             dataDict = self._update(dataDict)
-        except RuntimeError:
+        except Exception as es:
+            getLogger().debug(f'updating from JSON raised errror: {es}')
             getLogger().warning(f'{self.__class__.__name__}.fromJson: error updating data from JSON, retaining default values')
             return self
 
         # at this point, we expect dataDict to be compatible with the data structure of the object
-        if Constants.METADATA in dataDict:
-            if dataDict[Constants.METADATA][Constants.CLASSNAME] != self.__class__.__name__:
-                raise RuntimeError(
-                        'trying to restore from JSON file incompatible with class "%s"' % self.__class__.__name__)
-
-            self._decode(dataDict)
-        else:
-            getLogger().warning('%s.fromJson: error decoding: no metadata, retaining default values' % self.__class__.__name__)
+        if (_className := dataDict.get(Constants.METADATA).get(Constants.CLASSNAME)) != self.__class__.__name__:
+            raise RuntimeError(
+                f'trying to restore from JSON encoded class {_className} incompatible with class {self.__class__.__name__}'
+            )
+        self._decode(dataDict)
 
         return self
+
+    def _decodeTrait(self, traitName, theDict):
+        """Helper function to decode a single trait
+        """
+        # update the trait with value from theDict after optional decoding
+        value = theDict.get(traitName)
+        # Do not decode None's
+        if value is not None:
+            handler = self._getTraitJsonHandler(traitName)
+            value = handler.decode(value)
+        self.setTraitValue(traitName, value, force=True)
 
     def _decode(self, dataDict):
         """Populate/update self with data from dataDict
         """
-        # Only update currently defined traits from the dataDict
-        for traitName in [Constants.METADATA] + self.keys():
-            if traitName in dataDict:
-                # update the trait with value from dataDict after optional decoding
-                value = dataDict[traitName]
-                # Do not decode None's
-                if value is not None:
-                    handler = self._getTraitJsonHandler(traitName)
-                    value = handler.decode(value)
-                self.setTraitValue(traitName, value, force=True)
+        self._decodeTrait(Constants.METADATA, dataDict)
+
+        # update from the _data
+        if (_data := dataDict.get(Constants.DATA, None)) is None:
+            raise RuntimeError(f'_decode(): Unable to get {Constants.DATA} from dataDict')
+
+        # Only update currently defined traits
+        for traitName in self.keys():
+            if traitName in _data:
+                self._decodeTrait(traitName, _data)
 
         return self
 
     #--------------------------------------------------------------------------------------------
+    @classmethod
+    def _updateToJson3_1(cls, theData) -> dict:
+        """
+        Update the data to json 3.1 defs
+        :return: theData as an updated dict
+        """
+        # Subtle but important implementation change relative to the previous AttributeDict (~2 commits ago)
+        # 3.0 json file was saved as list of (trait, value) tuples
+        if isinstance(theData, list):
+            theData = dict(theData)
+
+        if (_metaData := theData.get(Constants.METADATA, None)) is None:
+            raise RuntimeError(f'No {Constants.METADATA}: The data do not represent a valid JSON encoded object')
+
+        if (_jsonVersion := _metaData.get(Constants.JSONVERSION, None)) is None:
+            raise RuntimeError(f'No {Constants.JSONVERSION}: The data do not represent a valid JSON encoded object')
+
+        if isinstance(_jsonVersion, float):
+            # Should be json 3.0
+            if _jsonVersion != 3.0:
+                raise RuntimeError(f'Undefined JSON version in {Constants.METADATA}; got {_jsonVersion}')
+
+            # # Copy the object data info from their 3.0 location in metadata to object data
+            # # (which did not exist, so needs creating)
+            # _objectData = {}
+            # for key in (Constants.CLASSNAME, Constants.CLASSVERSION, Constants.CLASSINFO):
+            #     val = _metaData.get(key, None)
+            #     _objectData[key] = val
+            #     # Older files do not have CLASSINFO key
+            #     if key in _metaData:
+            #         del _metaData[key]
+            # _objectData[Constants.OBJECT_ID] = None
+
+            # Move the object trait data to _data
+            _data = {}
+            for key in list(theData.keys()):
+                if key != Constants.METADATA:
+                    _data[key] = theData[key]
+                    del theData[key]
+
+            # we are now at 3.1.0
+            _metaData[Constants.JSONVERSION] = '3.1.0'
+            _newData = {}
+            _newData[Constants.METADATA] = _metaData
+            _newData[Constants.DATA] = _data
+
+            return _newData
+
+        else:
+            # No change: return unaltered
+            return theData
 
     def _update(self, dataDict) -> dict:
         """Update dataDict using  the handlers
         :returns updated dataDict
         :raises RuntimeError
         """
+
         if hasattr(self, Constants.UPDATEHANDLERS):
             # We have updates
             for updateHandler in getattr(self, Constants.UPDATEHANDLERS):
                 dataDict = updateHandler(self, dataDict)
 
-        # check if all is ok
-        currentVersion = dataDict[Constants.METADATA][Constants.JSONVERSION]
-        if currentVersion < self._jsonVersion:
-            raise RuntimeError('invalid version "%s" of json data; cannot restore %s' %
-                               (currentVersion, self))
+        # # check if all is ok
+        # currentVersion = dataDict[Constants.METADATA][Constants.JSONVERSION]
+        # if currentVersion < self._jsonVersion:
+        #     raise RuntimeError('invalid version "%s" of json data; cannot restore %s' %
+        #                        (currentVersion, self))
         return dataDict
 
     def save(self, path, **kwds):

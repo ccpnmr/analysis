@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-08 10:59:55 +0100 (Sun, October 08, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-09 08:37:49 +0100 (Mon, October 09, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -105,7 +105,7 @@ class ContainerJsonHandlerABC(TraitJsonHandlerBase):
             # for encode
             _trait = OWTraits(allow_none=True)
 
-        elif CcpNmrJson._isEncodedObject(item):
+        elif isinstance(item, (list, dict)) and CcpNmrJson._isEncodedObject(item):
             # for decode
             _trait = OWTraits(allow_none=True)
 

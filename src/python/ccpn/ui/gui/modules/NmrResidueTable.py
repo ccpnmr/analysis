@@ -11,7 +11,7 @@ Geerten 1-7/12/2016; 11/04/2017
 # Licence, Reference and Credits
 #=========================================================================================
 
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -22,8 +22,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:05 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-10-10 17:35:45 +0100 (Tue, October 10, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -273,7 +273,12 @@ class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
         """
         # classItem is usually a type such as PeakList, MultipletList
         # with an attribute such as peaks/peaks
-        return [cellItem._oldNmrResidue] if cellItem.isDeleted else [cellItem.nmrResidue], Notifier.CHANGE
+        try:
+            return [cellItem._oldNmrResidue] if cellItem.isDeleted else [cellItem.nmrResidue], Notifier.CHANGE
+        except Exception:
+            # this USUALLY happens when an offsetNmrResidue is deleted, not spotted any other cases yet
+            #   shouldn't be an issue as the nmrResidue should already have been removed from the table
+            return [], Notifier.CHANGE
 
     #=========================================================================================
     # Table context menu

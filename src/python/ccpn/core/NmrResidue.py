@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 12:06:24 +0100 (Fri, June 09, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-10-10 17:35:45 +0100 (Tue, October 10, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1214,12 +1214,13 @@ class NmrResidue(AbstractWrapperObject):
         """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""
         return parent._wrappedData.sortedResonanceGroups() if parent._wrappedData else ()
 
-    def _reverseChainForDelete(self, apiNmrChain):
+    @staticmethod
+    def _reverseChainForDelete(apiNmrChain):
         """Reverse the chain.
         """
         apiNmrChain.__dict__['mainResonanceGroups'].reverse()
 
-    def _finaliseAction(self, action: str):
+    def _finaliseAction(self, action: str, **actionKwds):
         """Subclassed to handle associated offsetNMrResidues
         """
         if action == 'delete':
@@ -1238,6 +1239,9 @@ class NmrResidue(AbstractWrapperObject):
                 offNmrRes._finaliseAction('rename')
 
         if action in ['delete', 'create']:
+            # notify any offset-nmrResidues
+            for offNmrRes in self.offsetNmrResidues:
+                offNmrRes._finaliseAction(action)
             # notify that the peak labels need to be updated
             _peaks = set(pk for nmrAtom in self.nmrAtoms for pk in nmrAtom.assignedPeaks)
             for pk in _peaks:
@@ -1259,17 +1263,10 @@ class NmrResidue(AbstractWrapperObject):
 
             # remove all the mmrAtoms from their associated chemicalShifts
             # - clearing before the delete handles the notifiers nicely
-            _shs = [sh for nmrAt in self.nmrAtoms for sh in nmrAt.chemicalShifts]
+            _shs = {sh for nmrRes in (self,) + self.offsetNmrResidues for nmrAt in nmrRes.nmrAtoms for sh in nmrAt.chemicalShifts}
             for sh in _shs:
                 sh.nmrAtom = None
             super().delete()
-
-            # else:
-            #     raise ValueError('Cannot delete nmrResidues from the head of a connected chain.')
-            # # disconnect and then delete
-            # nextNmrResidue = self.project._data2Obj[stretch[1]]
-            # removeNmrChain = nextNmrResidue.disconnectPrevious()
-            # super().delete()
 
     def delete(self):
         """Delete routine to check whether the item can be deleted otherwise raise api error.

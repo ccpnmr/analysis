@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 12:06:24 +0100 (Fri, June 09, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-10-10 17:35:45 +0100 (Tue, October 10, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -374,6 +374,18 @@ class NmrChain(AbstractWrapperObject):
 
         if not super()._finaliseAction(action, **actionKwds):
             return
+
+    def delete(self):
+        """Delete self and update the chemicalShift values
+        """
+        with undoBlock():
+            # remove all the mmrAtoms from their associated chemicalShifts
+            # - clearing before the delete handles the notifiers nicely
+            _shs = {sh for nmrRes in self.nmrResidues for nmrAt in nmrRes.nmrAtoms for sh in nmrAt.chemicalShifts}
+            for sh in _shs:
+                sh.nmrAtom = None
+            # delete the nmrChain - notifiers handled by decorator
+            self._delete()
 
     #=========================================================================================
     # CCPN functions

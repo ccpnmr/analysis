@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-09 19:41:07 +0100 (Mon, October 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-10 20:03:17 +0100 (Tue, October 10, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -159,7 +159,9 @@ class Chain(AbstractWrapperObject):
         """
         # extracted as function below.
         # - fires a single notifier for the chain creation
-        return _cloneChain(self, shortName=shortName)
+        raise DeprecationWarning('Clone has been deprecated in 3.2.1. Please use new chain')
+
+        # return _cloneChain(self, shortName=shortName)
 
     def _lock(self):
         """Finalise chain so that it can no longer be modified, and add missing data."""
@@ -217,6 +219,14 @@ class Chain(AbstractWrapperObject):
                 if c := residue.shortName:
                     sequence += c
         return sequence
+
+    @property
+    def sequenceCcpCode(self):
+        """
+        :return: A list of  CcpCodes used to build the sequence
+        """
+        ccpCodes = [residue.ccpCode for residue in self.residues]
+        return ccpCodes
 
     @property
     def _sequenceCodesAsIntegers(self):
@@ -665,7 +675,10 @@ def _newChainFromChemComp(project, chemComp,
 def _cloneChain(self: Chain, shortName: str = None):
     """Make copy of chain.
     """
+
     # _newApiObject no longer fires a ny notifiers. Single notifier is now handled by the decorator
+    raise DeprecationWarning('Clone chain has been deprecated in 3.2.1. Please use new chain')
+    # FIXME This is broken for Non-Standard Residues. (probably never tested as it never implemented in V3)
     apiChain = self._wrappedData
     apiMolSystem = apiChain.molSystem
     dataObj = self._project._data2Obj

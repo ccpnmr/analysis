@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-09 19:41:08 +0100 (Mon, October 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-10 20:03:17 +0100 (Tue, October 10, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -50,7 +50,7 @@ DefaultAddPseudoAtoms = False
 DefaultAddNonstereoAtoms = True
 DefaultSetBoundsForAtomGroups = False
 CODE1LETTER = 'One Letter Code'
-CODEFULLLETTER = 'Ccp Code (ChemComp)'
+CCPCODESELECTION = 'Ccp Code (ChemComp)'
 
 
 def divideChunks(l, n):
@@ -150,7 +150,7 @@ class CreateChainPopup(AttributeEditorPopupABC):
         tipText = ""
         # self.sequenceEditor = TextEditor(self.mainWidget, grid=(row, 1), gridSpan=(1, 3), tipText=tipText)
         self.sequenceEditorCodeOptions = RadioButtons(self.mainWidget,
-                                                      texts=[CODE1LETTER, CODEFULLLETTER],
+                                                      texts=[CODE1LETTER, CCPCODESELECTION],
                                                       selectedInd=0,
                                                       callback=self._toggleSequenceEditor,
                                                       grid=(row, 1), gridSpan=(1, 3), tipText=tipText)
@@ -242,7 +242,11 @@ class CreateChainPopup(AttributeEditorPopupABC):
                 self.moleculeEdit.setText(self.obj.compoundName)
                 self.commentName.setText(self.obj.comment)
                 self.molTypePulldown.setCurrentText(self.obj.molType)
-                # self.sequence1CodeEditor.setText(self.obj.sequence1Letter)
+                if self.obj.sequence1Letter:
+                    self.sequence1CodeEditor.setText(self.obj.sequence1Letter)
+                if self.obj.sequenceCcpCode:
+                    codes = ','.join(self.obj.sequenceCcpCode)
+                    self.sequenceCcpCodeEditor.setText(codes)
                 self.lineEdit1a.set(self.obj.startNumber)
                 self.lineEdit2a.setText(self.obj.shortName)
                 self.expandAtomsFromAtomSetW.set(self.obj.expandFromAtomSets)
@@ -258,6 +262,7 @@ class CreateChainPopup(AttributeEditorPopupABC):
         self.sequence1CodeEditor.setText(formatted)
         # Format the ccpCode
         valueCcpCode = self.sequenceCcpCodeEditor.toPlainText()
+        valueCcpCode = valueCcpCode.replace(' ', '')
         codes = valueCcpCode.split(',')
         codes = [f'{code}' for code in codes]
         chunks = list(divideChunks(codes, self._formattingLenght))
@@ -275,7 +280,7 @@ class CreateChainPopup(AttributeEditorPopupABC):
         mode = self.sequenceEditorCodeOptions.getSelectedText()
         if mode == CODE1LETTER:
             self.obj.sequenceCcpCode = None
-        if mode == CODEFULLLETTER:
+        if mode == CCPCODESELECTION:
             self.obj.sequence1Letter = None
         self.project.createChain(**self.obj)
 

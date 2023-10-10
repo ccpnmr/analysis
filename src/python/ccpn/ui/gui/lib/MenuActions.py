@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-11 12:23:34 +0100 (Thu, May 11, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-10-10 20:03:17 +0100 (Tue, October 10, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -51,7 +51,7 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.popups.ChainPopup import ChainPopup
 from ccpn.ui.gui.popups.ChemicalShiftListPopup import ChemicalShiftListEditor
 from ccpn.ui.gui.popups.ComplexEditorPopup import ComplexEditorPopup
-from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
+from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup, CCPCODESELECTION
 from ccpn.ui.gui.popups.CreateNmrChainPopup import CreateNmrChainPopup
 from ccpn.ui.gui.popups.StructureDataPopup import StructureDataPopup
 from ccpn.ui.gui.popups.IntegralListPropertiesPopup import IntegralListPropertiesPopup
@@ -890,6 +890,25 @@ class _openItemChainTable(OpenItemABC):
     openItemMethod = 'showResidueTable'
     objectArgumentName = 'chain'
 
+
+    def _cloneObject(self, objs):
+        """Open a new popup prefilled from the current object"""
+        objs  = [obj for obj in objs if isinstance(obj, Chain)]
+        if len(objs)>1:
+            showWarning('Clone Chain', 'Cloning is available for one chain at a time')
+            return
+        if len(objs) == 1:
+            obj = objs[0]
+            popup = CreateChainPopup(mainWindow=self.mainWindow)
+            popup.setWindowTitle(f'New Chain from {obj.pid}')
+            # popup.obj.compoundName = obj.compoundName #this could be set but needs to ensure a unique name
+            popup.obj.comment = obj.comment
+            popup.obj.sequenceCcpCode = obj.sequenceCcpCode
+            popup.obj.isCyclic = obj.isCyclic
+            popup.obj.molType = obj.chainType
+            popup._populate()
+            popup.sequenceEditorCodeOptions.set(CCPCODESELECTION)
+            popup.exec()
 
 class _openItemResidueTable(OpenItemABC):
     objectArgumentName = 'residue'

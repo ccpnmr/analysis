@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-28 19:23:04 +0100 (Wed, June 28, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-10-10 17:49:14 +0100 (Tue, October 10, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -277,7 +277,7 @@ class SpectrumGroup(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
     def series(self, items):
-        """Setter for series
+        """Setter for series.
         series must be a tuple of items or Nones, the contents of the items are not checked
         Items can be anything but must all be the same type or None
         """
@@ -560,6 +560,12 @@ class SpectrumGroup(AbstractWrapperObject):
             # rename the items in _seriesValues as they are referenced by pid
             for spectrum in self.spectra:
                 spectrum._renameSeriesItems(self, oldPid)
+
+    def delete(self):
+        """Delete should notify spectrumGroup of delete.
+        """
+        with undoBlockWithoutSideBar():
+            super().delete()
 
     @classmethod
     def _restoreObject(cls, project, apiObj):

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-09 12:09:35 +0100 (Mon, October 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-10 16:27:30 +0100 (Tue, October 10, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -1053,17 +1053,20 @@ class Framework(NotifierBase, GuiBase):
             self.current._dumpStateToFile(self.statePath)
             self._getUndo().markSave()
 
-        except (PermissionError, FileNotFoundError):
+        except (PermissionError, FileNotFoundError) as es:
+            getLogger().debug(f'_saveProjectAs() caught: {es}')
             failMessage = f'Folder {newPath} may be read-only'
             getLogger().warning(failMessage)
-            raise
+            raise es
 
         except RuntimeWarning as es:
+            getLogger().debug(f'_saveProjectAs() caught: {es}')
             failMessage = f'saveAs: unable to save {es}'
             getLogger().warning(failMessage)
-            raise
+            raise es
 
         except Exception as es:
+            getLogger().debug(f'_saveProjectAs() caught: {es}')
             failMessage = f'saveAs: {es}'
             getLogger().warning(failMessage)
             return False

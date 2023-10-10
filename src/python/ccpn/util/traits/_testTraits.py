@@ -12,7 +12,7 @@ from ccpn.util.traits.CcpNmrJson import CcpNmrJson, register
 class TestObj(CcpNmrJson):
 
     saveAllTraitsToJson = True
-    classVersion = 0.1
+    classVersion = '0.1.1'
 
     odict = Odict()
     adict = Adict()

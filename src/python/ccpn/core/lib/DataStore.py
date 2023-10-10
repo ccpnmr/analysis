@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-09 12:09:34 +0100 (Mon, October 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-10 16:27:30 +0100 (Tue, October 10, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -204,7 +204,7 @@ class DataStore(CcpNmrJson):
     # Once linked to a Spectrum, it stores the path and other relevant info as json-encoded string
     # in the spectrum instance internal parameter storage
 
-    classVersion = 1.0
+    classVersion = '1.0.0'
 
     _path = CPath(allow_none=True, default_value=None).tag(saveToJson=True)
     dataFormat = CString(allow_none=True, default_value=None).tag(saveToJson=True)
@@ -484,13 +484,14 @@ class DataStore(CcpNmrJson):
 DataStore.register()
 
 
-from ccpn.util.traits.CcpNmrTraits import Instance
-
-class DataStoreTrait(Instance):
-    """Specific trait for a Datastore instance encoding the path and dataFormat of the (binary) spectrum data.
-    None indicates no spectrum data file path has been defined
-    """
-    klass = DataStore
-    def __init__(self, **kwds):
-        Instance.__init__(self, klass=self.klass, allow_none=True, **kwds)
+# GWV: moved to ccpn.core.lib.CoreTraits
+# from ccpn.util.traits.CcpNmrTraits import OWTraits
+#
+# class DataStoreTrait(OWTraits):
+#     """Specific trait for a Datastore instance encoding the path and dataFormat of the (binary) spectrum data.
+#     None indicates no spectrum data file path has been defined
+#     """
+#     klass = DataStore
+#     # def __init__(self, **kwds):
+#     #     OWTraits.__init__(self, klass=self.klass, allow_none=True, **kwds)
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-09 12:09:37 +0100 (Mon, October 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-10 16:27:30 +0100 (Tue, October 10, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -81,7 +81,7 @@ class CcpNmrDataFrame(CcpNmrJson):
     """Class for json serialisable and easy Pandas DataFrame
     """
 
-    classVersion = 3.0
+    classVersion = '3.0.0'
 
     # --------------------------------------------------------------------------------------------
 

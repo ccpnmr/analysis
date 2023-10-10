@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-09 12:09:35 +0100 (Mon, October 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-10 16:27:30 +0100 (Tue, October 10, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -724,7 +724,7 @@ class Gui(Ui):
             with MessageDialog.progressManager(self.mainWindow, f'Saving project as {newPath} ... '):
                 try:
                     if not self.application._saveProjectAs(newPath=newPath, overwrite=True, copySubDirectories=copySubDirs):
-                        txt = f"Saving project to {newPath} aborted"
+                        txt = f"Saving project to {newPath} aborted; check log for details"
                         MessageDialog.showError("Project SaveAs", txt, parent=self.mainWindow)
                         return False
 

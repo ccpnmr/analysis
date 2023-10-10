@@ -4,7 +4,7 @@ PeakPicker abstract base class
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
@@ -16,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:43 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-10-10 16:27:30 +0100 (Tue, October 10, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -106,7 +106,9 @@ class PeakPickerABC(CcpNmrJson):
     """ABC for implementation of a peak picker
     """
 
-    classVersion = 1.0  # For json saving
+    keysInOrder = True  # maintain the definition order
+    classVersion = '1.0.0'  # For json saving
+    saveAllTraitsToJson = True
 
     #=========================================================================================
     # to be subclassed
@@ -140,11 +142,6 @@ class PeakPickerABC(CcpNmrJson):
     #=========================================================================================
     # parameter definitions and mappings onto the Spectrum class
     #=========================================================================================
-
-    keysInOrder = True  # maintain the definition order
-
-    saveAllTraitsToJson = True
-    classVersion = 1.0  # for json saving
 
     # list of core peakPicker attributes that need to be restored when the spectrum is loaded
     dimensionCount = CInt(default_value=0)
@@ -419,19 +416,20 @@ class PeakPickerABC(CcpNmrJson):
 
 #end class
 
-from ccpn.util.traits.CcpNmrTraits import Instance
-from ccpn.util.traits.TraitJsonHandlerBase import CcpNmrJsonClassHandlerABC
+# GWV: moved to ccpn.core.lib.CoreTraits
+# from ccpn.util.traits.CcpNmrTraits import Instance, OWTraits
+# from ccpn.util.traits.TraitJsonHandlerBase import CcpNmrJsonClassHandlerABC
+#
+#
+# class PeakPickerTrait(OWTraits):
+#     """Specific trait for a PeakPicker instance.
+#     """
+#     klass = PeakPickerABC
 
-
-class PeakPickerTrait(Instance):
-    """Specific trait for a PeakPicker instance.
-    """
-    klass = PeakPickerABC
-
-    def __init__(self, **kwds):
-        Instance.__init__(self, klass=self.klass, allow_none=True, **kwds)
-
-
-    class jsonHandler(CcpNmrJsonClassHandlerABC):
-        # klass = PeakPickerABC
-        pass
+    # def __init__(self, **kwds):
+    #     Instance.__init__(self, klass=self.klass, allow_none=True, **kwds)
+    #
+    #
+    # class jsonHandler(CcpNmrJsonClassHandlerABC):
+    #     # klass = PeakPickerABC
+    #     pass

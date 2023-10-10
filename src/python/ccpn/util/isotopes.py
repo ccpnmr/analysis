@@ -20,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-28 19:23:06 +0100 (Wed, June 28, 2023) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-10-10 16:27:30 +0100 (Tue, October 10, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -51,7 +51,7 @@ fieldsInMHz = (300.0, 360.0, 400.0, 500.0, 600.0, 700.0, 750.0, 800.0, 850.0, 90
                1000.0, 1100.0, 1200.0)
 #=========================================================================================
 
-VERSION = 1.0
+VERSION = '1.0.0'
 
 class IsotopeRecord(CcpNmrJson):
     """Class to store isotope information

@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-09 12:09:35 +0100 (Mon, October 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-10 16:27:30 +0100 (Tue, October 10, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -227,7 +227,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     ABC for NMR spectral data sources reading/writing
     """
 
-    classVersion = 1.0  # For json saving
+    classVersion = '1.0.0'  # For json saving
     saveAllTraitsToJson = True
     keysInOrder = True  # maintain the definition order
 
@@ -2491,18 +2491,18 @@ def _fillSlice(sliceData, start, stop, aliasing, resultSlice=None):
     return resultSlice
 
 
-
-from ccpn.util.traits.CcpNmrTraits import Instance
-from ccpn.util.traits.TraitJsonHandlerBase import CcpNmrJsonClassHandlerABC
-
-class DataSourceTrait(Instance):
-    """Specific trait for a Datasource instance encoding access to the (binary) spectrum data.
-    None indicates no spectrumDataSource has been defined
-    """
-    klass = SpectrumDataSourceABC
-    def __init__(self, **kwds):
-        Instance.__init__(self, klass=self.klass, allow_none=True, **kwds)
-
+# GWV: moved to ccpn.core.lib.CoreTrait
+# from ccpn.util.traits.CcpNmrTraits import OWTraits
+# from ccpn.util.traits.TraitJsonHandlerBase import CcpNmrJsonClassHandlerABC
+#
+# class DataSourceTrait(OWTraits):
+#     """Specific trait for a Datasource instance encoding access to the (binary) spectrum data.
+#     None indicates no spectrumDataSource has been defined
+#     """
+#     klass = SpectrumDataSourceABC
+#     # def __init__(self, **kwds):
+#     #     Instance.__init__(self, klass=self.klass, allow_none=True, **kwds)
+#
 
 def testMain():
     testSlice = numpy.arange(4, dtype=numpy.int32) + 1

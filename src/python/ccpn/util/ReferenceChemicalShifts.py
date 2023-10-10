@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-23 11:36:54 +0000 (Mon, January 23, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-10-10 16:27:30 +0100 (Tue, October 10, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -67,7 +67,7 @@ DISTRIBUTION = 'distribution'
 DISTRIBUTIONREFVALUE = 'distributionRefValue'
 DISTRIBUTIONVALUEPERPOINT = 'distributionValuePerPoint'
 
-VERSION = 1.0
+VERSION = '1.0.0'
 
 class AtomReferenceShift(CcpNmrJson):
     """Class to store the Atom ReferenceChemicalShift information
@@ -96,14 +96,14 @@ class AtomReferenceShift(CcpNmrJson):
         return self.averageShift < other.averageShift
 
     def __str__(self):
-        return '<AtomReference %s>' % self.atomName
+        return '<AtomReferenceShift %s>' % self.atomName
 
     def __repr__(self):
         distribution = self.distribution
         distributionRepr = [] if not distribution else [distribution[0], '...']
         dd = dict(self.items())
         dd.update({'distribution':distributionRepr})
-        return 'AtomReference(%s)' % ', '.join(['%s=%r'%(k,v) for k,v in dd.items()])
+        return 'AtomReferenceShift(%s)' % ', '.join(['%s=%r'%(k,v) for k,v in dd.items()])
 
 class ResidueReferenceShift(CcpNmrJson):
     """Class to store the Residue ReferenceChemicalShift information

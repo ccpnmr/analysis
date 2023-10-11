@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-07 15:16:42 +0100 (Thu, September 07, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-11 18:55:44 +0100 (Wed, October 11, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -28,13 +28,11 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import contextlib
 import functools
 import os
-import sys
 import typing
 import operator
-from typing import Sequence, Union, Optional, List
+from typing import Sequence, Union, Optional, List, Any
 from collections import OrderedDict
 # from time import time
 from datetime import datetime
@@ -79,9 +77,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.NmrExpPrototype import RefExperiment
 # from ccpnmodel.ccpncore.lib import Constants
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 # from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
-from ccpnmodel.ccpncore.lib import ApiPath
 from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
-from ccpnmodel.ccpncore.api.memops import Implementation
 
 
 # TODO These should be merged with the same constants in CcpnNefIo
@@ -158,7 +154,7 @@ class Project(AbstractWrapperObject):
     _READONLY = 'readOnly'
 
     #-----------------------------------------------------------------------------------------
-    # Attributes of the data structure (incomplete)
+    # Property Attributes of the data structure
     #-----------------------------------------------------------------------------------------
 
     @property
@@ -168,98 +164,8 @@ class Project(AbstractWrapperObject):
         return None
 
     @property
-    def spectra(self) -> list:
-        """STUB: hot-fixed later"""
-        return []
-
-    @property
-    def peakLists(self) -> list:
-        """STUB: hot-fixed later"""
-        return []
-
-    @property
-    def peaks(self) -> list:
-        """STUB: hot-fixed later"""
-        return []
-
-    @property
-    def multipletLists(self) -> list:
-        """STUB: hot-fixed later"""
-        return []
-
-    @property
-    def integralLists(self) -> list:
-        """STUB: hot-fixed later"""
-        return []
-
-    @property
-    def spectrumViews(self) -> list:
-        """STUB: hot-fixed later"""
-        return []
-
-    @property
-    def chemicalShiftLists(self) -> list:
-        """STUB: hot-fixed later"""
-        return []
-
-    @property
-    def chains(self) -> list:
-        """STUB: hot-fixed later"""
-        return []
-
-    @property
-    def restraintTables(self) -> list:
-        """STUB: hot-fixed later"""
-        return []
-
-    @property
-    def violationTables(self) -> list:
-        """STUB: hot-fixed later"""
-        return []
-
-    @property
-    def samples(self) -> list:
-        """STUB: hot-fixed later"""
-        return []
-
-    @property
-    def substances(self) -> list:
-        """STUB: hot-fixed later"""
-        return []
-
-    @property
-    def nmrChains(self) -> list:
-        """STUB: hot-fixed later"""
-        return []
-
-    @property
-    def structureData(self) -> list:
-        """STUB: hot-fixed later"""
-        return []
-
-    @property
-    def complexes(self) -> list:
-        """STUB: hot-fixed later"""
-        return []
-
-    @property
-    def spectrumGroups(self) -> list:
-        """STUB: hot-fixed later"""
-        return []
-
-    @property
-    def notes(self) -> list:
-        """STUB: hot-fixed later"""
-        return []
-
-    # @property
-    # def _peakClusters(self) -> list:
-    #     """STUB: hot-fixed later"""
-    #     return []
-
-    @property
     def chemicalShifts(self) -> list:
-        """:return the list of chemicalShifts in the project
+        """:return: list of chemicalShifts in the project
         """
         _shifts = []
         for shiftList in self.chemicalShiftLists:
@@ -268,7 +174,7 @@ class Project(AbstractWrapperObject):
 
     @property
     def collections(self) -> list:
-        """:return the list of collections in the project
+        """:return: list of collections in the project
         """
         return self._collectionList.collections
 
@@ -280,19 +186,643 @@ class Project(AbstractWrapperObject):
     def _collectionData(self, value):
         self._wrappedData.collectionData = value
 
-    @property
-    def bonds(self) -> list:
-        """STUB: hot-fixed later"""
-        return []
-
     def getBonds(self, bondType: typing.Optional[str] = None):
         """Get the bonds of a specific bondType.
         """
         return tuple(bnd for bnd in self.bonds if bnd.bondType == bondType)
 
+    # @property
+    # def _oldChemicalShifts(self) -> list['_oldChemicalShift']:
+    #     """STUB: hot-fixed later
+    #     :return: a list of _oldChemicalShifts in the Project
+    #     """
+    #     return []
+    #
+    # @property
+    # def _peakClusters(self) -> list['_peakCluster']:
+    #     """STUB: hot-fixed later
+    #     :return: a list of _peakClusters in the Project
+    #     """
+    #     return []
+
+    @property
+    def atoms(self) -> list['Atom']:
+        """STUB: hot-fixed later
+        :return: a list of atoms in the Project
+        """
+        return []
+
+    @property
+    def axes(self) -> list['Axis']:
+        """STUB: hot-fixed later
+        :return: a list of axes in the Project
+        """
+        return []
+
+    @property
+    def bonds(self) -> list['Bond']:
+        """STUB: hot-fixed later
+        :return: a list of bonds in the Project
+        """
+        return []
+
+    @property
+    def calculationSteps(self) -> list['CalculationStep']:
+        """STUB: hot-fixed later
+        :return: a list of calculationSteps in the Project
+        """
+        return []
+
+    @property
+    def chains(self) -> list['Chain']:
+        """STUB: hot-fixed later
+        :return: a list of chains in the Project
+        """
+        return []
+
+    @property
+    def chemicalShiftLists(self) -> list['ChemicalShiftList']:
+        """STUB: hot-fixed later
+        :return: a list of chemicalShiftLists in the Project
+        """
+        return []
+
+    @property
+    def complexes(self) -> list['Complex']:
+        """STUB: hot-fixed later
+        :return: a list of complexes in the Project
+        """
+        return []
+
+    @property
+    def data(self) -> list['Data']:
+        """STUB: hot-fixed later
+        :return: a list of data in the Project
+        """
+        return []
+
+    @property
+    def dataTables(self) -> list['DataTable']:
+        """STUB: hot-fixed later
+        :return: a list of dataTables in the Project
+        """
+        return []
+
+    @property
+    def integralListViews(self) -> list['IntegralListView']:
+        """STUB: hot-fixed later
+        :return: a list of integralListViews in the Project
+        """
+        return []
+
+    @property
+    def integralLists(self) -> list['IntegralList']:
+        """STUB: hot-fixed later
+        :return: a list of integralLists in the Project
+        """
+        return []
+
+    @property
+    def integralViews(self) -> list['IntegralView']:
+        """STUB: hot-fixed later
+        :return: a list of integralViews in the Project
+        """
+        return []
+
+    @property
+    def integrals(self) -> list['Integral']:
+        """STUB: hot-fixed later
+        :return: a list of integrals in the Project
+        """
+        return []
+
+    @property
+    def marks(self) -> list['Mark']:
+        """STUB: hot-fixed later
+        :return: a list of marks in the Project
+        """
+        return []
+
+    @property
+    def models(self) -> list['Model']:
+        """STUB: hot-fixed later
+        :return: a list of models in the Project
+        """
+        return []
+
+    @property
+    def multipletListViews(self) -> list['MultipletListView']:
+        """STUB: hot-fixed later
+        :return: a list of multipletListViews in the Project
+        """
+        return []
+
+    @property
+    def multipletLists(self) -> list['MultipletList']:
+        """STUB: hot-fixed later
+        :return: a list of multipletLists in the Project
+        """
+        return []
+
+    @property
+    def multipletViews(self) -> list['MultipletView']:
+        """STUB: hot-fixed later
+        :return: a list of multipletViews in the Project
+        """
+        return []
+
+    @property
+    def multiplets(self) -> list['Multiplet']:
+        """STUB: hot-fixed later
+        :return: a list of multiplets in the Project
+        """
+        return []
+
+    @property
+    def nmrAtoms(self) -> list['NmrAtom']:
+        """STUB: hot-fixed later
+        :return: a list of nmrAtoms in the Project
+        """
+        return []
+
+    @property
+    def nmrChains(self) -> list['NmrChain']:
+        """STUB: hot-fixed later
+        :return: a list of nmrChains in the Project
+        """
+        return []
+
+    @property
+    def nmrResidues(self) -> list['NmrResidue']:
+        """STUB: hot-fixed later
+        :return: a list of nmrResidues in the Project
+        """
+        return []
+
+    @property
+    def notes(self) -> list['Note']:
+        """STUB: hot-fixed later
+        :return: a list of notes in the Project
+        """
+        return []
+
+    @property
+    def peakListViews(self) -> list['PeakListView']:
+        """STUB: hot-fixed later
+        :return: a list of peakListViews in the Project
+        """
+        return []
+
+    @property
+    def peakLists(self) -> list['PeakList']:
+        """STUB: hot-fixed later
+        :return: a list of peakLists in the Project
+        """
+        return []
+
+    @property
+    def peakViews(self) -> list['PeakView']:
+        """STUB: hot-fixed later
+        :return: a list of peakViews in the Project
+        """
+        return []
+
+    @property
+    def peaks(self) -> list['Peak']:
+        """STUB: hot-fixed later
+        :return: a list of peaks in the Project
+        """
+        return []
+
+    @property
+    def pseudoDimensions(self) -> list['PseudoDimension']:
+        """STUB: hot-fixed later
+        :return: a list of pseudoDimensions in the Project
+        """
+        return []
+
+    @property
+    def residues(self) -> list['Residue']:
+        """STUB: hot-fixed later
+        :return: a list of residues in the Project
+        """
+        return []
+
+    @property
+    def restraintContributions(self) -> list['RestraintContribution']:
+        """STUB: hot-fixed later
+        :return: a list of restraintContributions in the Project
+        """
+        return []
+
+    @property
+    def restraintTables(self) -> list['RestraintTable']:
+        """STUB: hot-fixed later
+        :return: a list of restraintTables in the Project
+        """
+        return []
+
+    @property
+    def restraints(self) -> list['Restraint']:
+        """STUB: hot-fixed later
+        :return: a list of restraints in the Project
+        """
+        return []
+
+    @property
+    def sampleComponents(self) -> list['SampleComponent']:
+        """STUB: hot-fixed later
+        :return: a list of sampleComponents in the Project
+        """
+        return []
+
+    @property
+    def samples(self) -> list['Sample']:
+        """STUB: hot-fixed later
+        :return: a list of samples in the Project
+        """
+        return []
+
+    @property
+    def spectra(self) -> list['Spectrum']:
+        """STUB: hot-fixed later
+        :return: a list of spectra in the Project
+        """
+        return []
+
+    @property
+    def spectrumDisplays(self) -> list['SpectrumDisplay']:
+        """STUB: hot-fixed later
+        :return: a list of spectrumDisplays in the Project
+        """
+        return []
+
+    @property
+    def spectrumGroups(self) -> list['SpectrumGroup']:
+        """STUB: hot-fixed later
+        :return: a list of spectrumGroups in the Project
+        """
+        return []
+
+    @property
+    def spectrumHits(self) -> list['SpectrumHit']:
+        """STUB: hot-fixed later
+        :return: a list of spectrumHits in the Project
+        """
+        return []
+
+    @property
+    def spectrumReferences(self) -> list['SpectrumReference']:
+        """STUB: hot-fixed later
+        :return: a list of spectrumReferences in the Project
+        """
+        return []
+
+    @property
+    def spectrumViews(self) -> list['SpectrumView']:
+        """STUB: hot-fixed later
+        :return: a list of spectrumViews in the Project
+        """
+        return []
+
+    @property
+    def strips(self) -> list['Strip']:
+        """STUB: hot-fixed later
+        :return: a list of strips in the Project
+        """
+        return []
+
+    @property
+    def structureData(self) -> list['StructureData']:
+        """STUB: hot-fixed later
+        :return: a list of structureData in the Project
+        """
+        return []
+
+    @property
+    def structureEnsembles(self) -> list['StructureEnsemble']:
+        """STUB: hot-fixed later
+        :return: a list of structureEnsembles in the Project
+        """
+        return []
+
+    @property
+    def substances(self) -> list['Substance']:
+        """STUB: hot-fixed later
+        :return: a list of substances in the Project
+        """
+        return []
+
+    @property
+    def violationTables(self) -> list['ViolationTable']:
+        """STUB: hot-fixed later
+        :return: a list of violationTables in the Project
+        """
+        return []
+
+    @property
+    def windows(self) -> list['Window']:
+        """STUB: hot-fixed later
+        :return: a list of windows in the Project
+        """
+        return []
+
+    #-----------------------------------------------------------------------------------------
+    # Attribute getters of the data structure
+    #-----------------------------------------------------------------------------------------
+
+    def getAtom(self) -> 'Atom | None':
+        """STUB: hot-fixed later
+        :return: an instance of Atom, or None
+        """
+        return []
+
+    def getAxis(self) -> 'Axis | None':
+        """STUB: hot-fixed later
+        :return: an instance of Axis, or None
+        """
+        return []
+
+    def getBond(self) -> 'Bond | None':
+        """STUB: hot-fixed later
+        :return: an instance of Bond, or None
+        """
+        return []
+
+    def getCalculationStep(self) -> 'CalculationStep | None':
+        """STUB: hot-fixed later
+        :return: an instance of CalculationStep, or None
+        """
+        return []
+
+    def getChain(self) -> 'Chain | None':
+        """STUB: hot-fixed later
+        :return: an instance of Chain, or None
+        """
+        return []
+
+    def getChemicalShiftList(self) -> 'ChemicalShiftList | None':
+        """STUB: hot-fixed later
+        :return: an instance of ChemicalShiftList, or None
+        """
+        return []
+
+    def getComplex(self) -> 'Complex | None':
+        """STUB: hot-fixed later
+        :return: an instance of Complex, or None
+        """
+        return []
+
+    def getData(self) -> 'Data | None':
+        """STUB: hot-fixed later
+        :return: an instance of Data, or None
+        """
+        return []
+
+    def getDataTable(self) -> 'DataTable | None':
+        """STUB: hot-fixed later
+        :return: an instance of DataTable, or None
+        """
+        return []
+
+    def getIntegral(self) -> 'Integral | None':
+        """STUB: hot-fixed later
+        :return: an instance of Integral, or None
+        """
+        return []
+
+    def getIntegralList(self) -> 'IntegralList | None':
+        """STUB: hot-fixed later
+        :return: an instance of IntegralList, or None
+        """
+        return []
+
+    def getIntegralListView(self) -> 'IntegralListView | None':
+        """STUB: hot-fixed later
+        :return: an instance of IntegralListView, or None
+        """
+        return []
+
+    def getIntegralView(self) -> 'IntegralView | None':
+        """STUB: hot-fixed later
+        :return: an instance of IntegralView, or None
+        """
+        return []
+
+    def getMark(self) -> 'Mark | None':
+        """STUB: hot-fixed later
+        :return: an instance of Mark, or None
+        """
+        return []
+
+    def getModel(self) -> 'Model | None':
+        """STUB: hot-fixed later
+        :return: an instance of Model, or None
+        """
+        return []
+
+    def getMultiplet(self) -> 'Multiplet | None':
+        """STUB: hot-fixed later
+        :return: an instance of Multiplet, or None
+        """
+        return []
+
+    def getMultipletList(self) -> 'MultipletList | None':
+        """STUB: hot-fixed later
+        :return: an instance of MultipletList, or None
+        """
+        return []
+
+    def getMultipletListView(self) -> 'MultipletListView | None':
+        """STUB: hot-fixed later
+        :return: an instance of MultipletListView, or None
+        """
+        return []
+
+    def getMultipletView(self) -> 'MultipletView | None':
+        """STUB: hot-fixed later
+        :return: an instance of MultipletView, or None
+        """
+        return []
+
+    def getNmrAtom(self) -> 'NmrAtom | None':
+        """STUB: hot-fixed later
+        :return: an instance of NmrAtom, or None
+        """
+        return []
+
+    def getNmrChain(self) -> 'NmrChain | None':
+        """STUB: hot-fixed later
+        :return: an instance of NmrChain, or None
+        """
+        return []
+
+    def getNmrResidue(self) -> 'NmrResidue | None':
+        """STUB: hot-fixed later
+        :return: an instance of NmrResidue, or None
+        """
+        return []
+
+    def getNote(self) -> 'Note | None':
+        """STUB: hot-fixed later
+        :return: an instance of Note, or None
+        """
+        return []
+
+    def getPeak(self) -> 'Peak | None':
+        """STUB: hot-fixed later
+        :return: an instance of Peak, or None
+        """
+        return []
+
+    def getPeakList(self) -> 'PeakList | None':
+        """STUB: hot-fixed later
+        :return: an instance of PeakList, or None
+        """
+        return []
+
+    def getPeakListView(self) -> 'PeakListView | None':
+        """STUB: hot-fixed later
+        :return: an instance of PeakListView, or None
+        """
+        return []
+
+    def getPeakView(self) -> 'PeakView | None':
+        """STUB: hot-fixed later
+        :return: an instance of PeakView, or None
+        """
+        return []
+
+    def getPseudoDimension(self) -> 'PseudoDimension | None':
+        """STUB: hot-fixed later
+        :return: an instance of PseudoDimension, or None
+        """
+        return []
+
+    def getResidue(self) -> 'Residue | None':
+        """STUB: hot-fixed later
+        :return: an instance of Residue, or None
+        """
+        return []
+
+    def getRestraint(self) -> 'Restraint | None':
+        """STUB: hot-fixed later
+        :return: an instance of Restraint, or None
+        """
+        return []
+
+    def getRestraintContribution(self) -> 'RestraintContribution | None':
+        """STUB: hot-fixed later
+        :return: an instance of RestraintContribution, or None
+        """
+        return []
+
+    def getRestraintTable(self) -> 'RestraintTable | None':
+        """STUB: hot-fixed later
+        :return: an instance of RestraintTable, or None
+        """
+        return []
+
+    def getSample(self) -> 'Sample | None':
+        """STUB: hot-fixed later
+        :return: an instance of Sample, or None
+        """
+        return []
+
+    def getSampleComponent(self) -> 'SampleComponent | None':
+        """STUB: hot-fixed later
+        :return: an instance of SampleComponent, or None
+        """
+        return []
+
+    def getSpectrum(self) -> 'Spectrum | None':
+        """STUB: hot-fixed later
+        :return: an instance of Spectrum, or None
+        """
+        return []
+
+    def getSpectrumDisplay(self) -> 'SpectrumDisplay | None':
+        """STUB: hot-fixed later
+        :return: an instance of SpectrumDisplay, or None
+        """
+        return []
+
+    def getSpectrumGroup(self) -> 'SpectrumGroup | None':
+        """STUB: hot-fixed later
+        :return: an instance of SpectrumGroup, or None
+        """
+        return []
+
+    def getSpectrumHit(self) -> 'SpectrumHit | None':
+        """STUB: hot-fixed later
+        :return: an instance of SpectrumHit, or None
+        """
+        return []
+
+    def getSpectrumReference(self) -> 'SpectrumReference | None':
+        """STUB: hot-fixed later
+        :return: an instance of SpectrumReference, or None
+        """
+        return []
+
+    def getSpectrumView(self) -> 'SpectrumView | None':
+        """STUB: hot-fixed later
+        :return: an instance of SpectrumView, or None
+        """
+        return []
+
+    def getStrip(self) -> 'Strip | None':
+        """STUB: hot-fixed later
+        :return: an instance of Strip, or None
+        """
+        return []
+
+    def getStructureData(self) -> 'StructureData | None':
+        """STUB: hot-fixed later
+        :return: an instance of StructureData, or None
+        """
+        return []
+
+    def getStructureEnsemble(self) -> 'StructureEnsemble | None':
+        """STUB: hot-fixed later
+        :return: an instance of StructureEnsemble, or None
+        """
+        return []
+
+    def getSubstance(self) -> 'Substance | None':
+        """STUB: hot-fixed later
+        :return: an instance of Substance, or None
+        """
+        return []
+
+    def getViolationTable(self) -> 'ViolationTable | None':
+        """STUB: hot-fixed later
+        :return: an instance of ViolationTable, or None
+        """
+        return []
+
+    def getWindow(self) -> 'Window | None':
+        """STUB: hot-fixed later
+        :return: an instance of Window, or None
+        """
+        return []
+
+    # def get_OldChemicalShift(self) -> '_OldChemicalShift | None':
+    #     """STUB: hot-fixed later
+    #     :return: an instance of _OldChemicalShift, or None
+    #     """
+    #     return []
+    #
+    # def get_PeakCluster(self) -> '_PeakCluster | None':
+    #     """STUB: hot-fixed later
+    #     :return: an instance of _PeakCluster, or None
+    #     """
+    #     return []
+
     #-----------------------------------------------------------------------------------------
     # (Sub-)directories of the project
     #-----------------------------------------------------------------------------------------
+
     @property
     def projectPath(self) -> Path:
         """
@@ -2104,7 +2634,7 @@ class Project(AbstractWrapperObject):
     def newSample(self, name: str = None, pH: float = None, ionicStrength: float = None,
                   amount: float = None, amountUnit: str = None, isVirtual: bool = False, isHazardous: bool = None,
                   creationDate: datetime = None, batchIdentifier: str = None, plateIdentifier: str = None,
-                  rowNumber: int = None, columnNumber: int = None, comment: str = None, **kwds):
+                  rowNumber: int = None, columnNumber: int = None, comment: str = None, **kwds) -> 'Sample':
         """Create new Sample.
 
         See the Sample class for details.
@@ -2135,7 +2665,7 @@ class Project(AbstractWrapperObject):
                           rowNumber=rowNumber, columnNumber=columnNumber, comment=comment, **kwds)
 
     @logCommand('project.')
-    def fetchSample(self, name: str):
+    def fetchSample(self, name: str) -> 'Sample':
         """Get or create Sample with given name.
         See the Sample class for details.
         :param self: project

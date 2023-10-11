@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Small Molecules</title>
+    <link rel="stylesheet" href="CcpnVideoTutorials.css">
+</head>
+<body>
+<div class="header"><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a
+        href="index.html" class="button">Video<br> Tutorials<br> & Manual</a><a href="https://forums.ccpn.ac.uk"><img
+        src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 15px"></a></div>
+<br>
+<div class="headerBar">Small Molecules</div>
+<div class="tutorial">
+
+
+    <h2>Small Molecules</h2>
+    <p>Peak labels in CcpNmr Analysis are what we call NmrAtoms. They have  been conceived to suit the labelling of proteins and polynucleotides which consist of a chain of molecules (residues, either amino acids or nucleotides, each of which have a SequenceNumber and a ResidueType). These in turn contain atoms. If you wish to work with small molecules instead, this is possible, too, you simply need to adapt the NmrChain/NmrResidue/NmrAtoms nomenclature. One possibility we suggest is as follows, taking ethanol as an example:</p>
+    <h4>NmrChain</h4>
+    <p><span class="action">NC:A</span>
+        <br>You can use a letter, here, the same as you might for a peptide, protein or polynucleotide.</p>
+    <h4>NmrResidue</h4>
+    <p><span class="action">NR:A.1.ethanol</span>
+        <br>Use only a single NmrResidue for all the atoms in your molecule. Give the NmrResidue the SquenceNumber 1 and set the ResidueType as the molecule's name.</p>
+    <h4>NmrAtom</h4>
+    <p><span class="action">NA:A.1.ethanol.H2%</span>
+        <br>The atom name is simply the name you choose to give each atom according to whatever naming convention you have chosen. In this case H2% would refer to the methyl protons of ethanol.</p>
+    <p>It is entirely up to you, when and how you create your NmrAtoms. You can either create them all in advance (using the tools in the sidebar) and then use them, e.g. by dragging them onto peaks to assign the peaks. Or you can create them directly in the Peak Assigner module as you go along, each time you identify which atoms a peak should be assigned to.</p>
+    <p>Remember that the fields can take any numbers or letters, so you don't have to follow the scheme above. You could divide a propanol "Chain" into three residues, one for each carbon position. Your atom names can simply be <span class="action">MethylGroup</span>. The only restriction is that you cannot use spaces and we also advice against using characters with accents and other diacritics.</p>
+    <p>Another way to label you peaks is using the <span class="action">Annotation</span>. In the PeakList table you will see that every peak can have a <span class="action">Comment</span> and an <span class="action">Annotation</span>. Both of these can contain spaces and the <span class="action">Annotation</span> can also be shown as a peak label. Simply open the <span class="action">Settings</span> panel of your SpectrumDisplay and set the <span class="action">Label</span> in the <span class="action">Peaks</span> section to <span class="action">Annotation</span>. You can also make this change global so that it will apply to all SpectrumDisplays: Go to the <span class="action">Peaks</span> tab in your <span class="action">Preferences</span> (go to <span class="action">File / Preferences</span> or use the shortcut <span class="action">Ctrl/Cmd+,</span>) and set the <span class="action">Label</span> to <span class="action">Annotation</span>.</p>
+</div>
+</body>
+</html>

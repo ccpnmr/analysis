@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-09 12:09:34 +0100 (Mon, October 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-11 08:37:28 +0100 (Wed, October 11, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -134,6 +134,8 @@ class Project(AbstractWrapperObject):
     #TODO: do we still have this limitation?
     _MAX_PROJECT_NAME_LENGTH = 32
     _READONLY = 'readOnly'
+
+    _LOWEST_COMPATIBLE_VERSION = '3.1.0'
 
     #-----------------------------------------------------------------------------------------
     # Attributes of the data structure (incomplete)
@@ -521,11 +523,12 @@ class Project(AbstractWrapperObject):
         if (dataloader := CcpNmrV3ProjectDataLoader.checkForValidFormat(path)) is None:
             raise ValueError('Path "%s" does not define a valid ccpn project' % path)
 
-        if (projectHistory := getProjectSaveHistory(dataloader.path)):
-            # check whether the history exists
-            return projectHistory.lastSavedVersion <= '3.0.4'
-
-        return True
+        return dataloader.projectNeedsUpgrade
+        # if (projectHistory := getProjectSaveHistory(dataloader.path)):
+        #     # check whether the saved version
+        #     return projectHistory.lastSavedVersion < Project._LOWEST_COMPATIBLE_VERSION
+        #
+        # return True
 
     @property
     def _data(self):

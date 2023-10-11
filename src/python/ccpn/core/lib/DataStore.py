@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-10 16:27:30 +0100 (Tue, October 10, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-11 08:37:28 +0100 (Wed, October 11, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -205,6 +205,7 @@ class DataStore(CcpNmrJson):
     # in the spectrum instance internal parameter storage
 
     classVersion = '1.0.0'
+    _encodeAsJson_3_0 = True  # needs to be readible by all versions
 
     _path = CPath(allow_none=True, default_value=None).tag(saveToJson=True)
     dataFormat = CString(allow_none=True, default_value=None).tag(saveToJson=True)
@@ -394,7 +395,7 @@ class DataStore(CcpNmrJson):
         if self.spectrum is None:
             raise RuntimeError('%s._saveInternal: spectrum not defined' % self.__class__.__name__)
 
-        jsonData = self.toJson()
+        jsonData = self.toJson(indent=None)  # Use compact style
         self.spectrum._setInternalParameter(self.spectrum._DATASTORE_KEY, jsonData)
 
     def _restoreInternal(self):

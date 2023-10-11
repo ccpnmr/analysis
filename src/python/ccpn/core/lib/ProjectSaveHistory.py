@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-10 16:27:30 +0100 (Tue, October 10, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-11 08:37:28 +0100 (Wed, October 11, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,8 @@ from ccpn.framework.Version import VersionString, applicationVersion
 from ccpn.util.Time import now
 from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
-from ccpn.util.traits.CcpNmrJson import CcpNmrJson, TraitJsonHandlerBase
+from ccpn.util.traits.CcpNmrJson import CcpNmrJson, Constants
+from ccpn.util.traits.TraitJsonHandlerBase import TraitJsonHandlerBase
 from ccpn.util.traits.CcpNmrTraits import List, Path
 
 
@@ -85,6 +86,7 @@ class ProjectSaveHistory(CcpNmrJson):
     """
 
     classVersion = '1.0.0'  # Json classVersion
+    _encodeAsJson_3_0 = True  # History need to be readible by all versions
 
     SaveRecord = namedtuple('SaveRecord', 'version datetime user platform comment')
 

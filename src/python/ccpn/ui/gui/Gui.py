@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-10 16:27:30 +0100 (Tue, October 10, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-11 08:37:29 +0100 (Wed, October 11, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -394,7 +394,7 @@ class Gui(Ui):
                 getLogger().info(f'==> Cancelled loading ccpn project "{path}"')
                 ignore = True
 
-        elif dataLoader.dataFormat == CcpNmrV3ProjectDataLoader.dataFormat and Project._needsUpgrading(path):
+        elif dataLoader.dataFormat == CcpNmrV3ProjectDataLoader.dataFormat and dataLoader.projectNeedsUpgrade:
             createNewProject = True
             dataLoader.createNewProject = True
 
@@ -403,13 +403,14 @@ class Gui(Ui):
             MAKE_ARCHIVE = 'Make a backup archive (.tgz) of the project'
 
             dataLoader.makeArchive = False
-            ok = MessageDialog.showMulti('Load Project',
-                                         f'You are opening an older project (version 3.0.x) - {path.name}\n'
-                                         '\n'
-                                         'When you save, it will be upgraded and will not be readable by version 3.0.4\n',
-                                         texts=[DONT_OPEN, CONTINUE],
-                                         checkbox=MAKE_ARCHIVE, checked=False,
-                                         )
+            ok = MessageDialog.showMulti(
+                    'Load Project',
+                     f'You are opening an older project (version {dataLoader.lastSavedVersion}) - {path.name}\n'
+                     '\n'
+                     f'When you save, it will be upgraded and will no longer be readable by program versions < {Project._LOWEST_COMPATIBLE_VERSION}\n',
+                     texts=[DONT_OPEN, CONTINUE],
+                     checkbox=MAKE_ARCHIVE, checked=False,
+            )
 
             if all(ss not in ok for ss in [DONT_OPEN, MAKE_ARCHIVE, CONTINUE]):
                 # there was an error from the dialog

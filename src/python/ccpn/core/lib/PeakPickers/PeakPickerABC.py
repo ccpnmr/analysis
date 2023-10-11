@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-10 16:27:30 +0100 (Tue, October 10, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-11 08:37:28 +0100 (Wed, October 11, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -109,6 +109,7 @@ class PeakPickerABC(CcpNmrJson):
     keysInOrder = True  # maintain the definition order
     classVersion = '1.0.0'  # For json saving
     saveAllTraitsToJson = True
+    _encodeAsJson_3_0 = True  # needs to be readible by all versions
 
     #=========================================================================================
     # to be subclassed

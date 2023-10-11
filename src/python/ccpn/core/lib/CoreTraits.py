@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-10 16:27:30 +0100 (Tue, October 10, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-11 08:37:28 +0100 (Wed, October 11, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -25,8 +25,7 @@ __date__ = "$Date: 2023-10-10 10:10:10 +0000 (Tue, October 10, 2023) $"
 # Start of code
 #=========================================================================================
 
-
-from ccpn.util.traits.CcpNmrTraits import Instance, OWTraits, List, Int, Float, TraitError
+from ccpn.util.traits.CcpNmrTraits import Instance, OWTraits, List, Int, Float, Unicode, TraitError
 
 
 from ccpn.core.lib.PeakPickers import PeakPickerABC
@@ -50,6 +49,13 @@ class DataSourceTrait(OWTraits):
     None indicates no spectrumDataSource has been defined
     """
     klass = SpectrumDataSourceABC
+
+from ccpn.framework.Version import VersionString
+class VersionTrait(Unicode):
+    """A trait to encode a version
+    """
+    def validate(self, obj, value):
+        return VersionString(value)
 
 
 #===========================================================================================================

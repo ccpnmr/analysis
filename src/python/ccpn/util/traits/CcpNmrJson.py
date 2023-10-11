@@ -116,7 +116,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-10 16:27:30 +0100 (Tue, October 10, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-11 08:37:29 +0100 (Wed, October 11, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -364,6 +364,9 @@ class CcpNmrJson(TraitBase):
     saveAllTraitsToJson = False  # This flag effectively sets saveToJson to True/False for all traits
     classVersion = '1.0.0'  # The version identifier for the specific class (usefull when upgrading is required)
     classInfo = None  # Any information about the class
+
+    _encodeAsJson_3_0 = False  # Encode object in json 3.0 format; for backward compatibility
+                               # (e.g. DataStore, ProjectHistory). This way, older program versions can restore
 
     #--------------------------------------------------------------------------------------------
     # end to be subclassed
@@ -677,6 +680,9 @@ class CcpNmrJson(TraitBase):
                                     defined ones; used by duplicate()
         :return self as 3.1.0 encoded dict
         """
+        if self._encodeAsJson_3_0:
+            return self._encode_3_0()
+
         _id = self._id
         self.setJsonMetadata(Constants.OBJECT_ID, _id, force=True)
 
@@ -706,6 +712,20 @@ class CcpNmrJson(TraitBase):
         _encodedData[Constants.DATA] = _data
 
         return _encodedData
+
+    def _encode_3_0(self):
+        """
+        :return self as 3.0 encoded dict to maintain compatiblity with earlier versions;
+        i.e. allowing those versions to read it and determine save-version
+        """
+        _id = self._id
+        self.setJsonMetadata(Constants.OBJECT_ID, _id, force=True)
+        CcpNmrJson._objectDict[_id] = self
+        traitsToEncode = [Constants.METADATA] + [traitName for traitName in self.keys() if self._saveTraitToJson(traitName)]
+        self.setJsonMetadata(Constants.JSONVERSION, 3.0, force=True)
+        # Encode 3.0 style; i.e. a list of (traitName, encoded-value) tuples
+        _encoded = [self._encodeTrait(traitName) for traitName in traitsToEncode]
+        return _encoded
 
     def fromJson(self, string):
         """Populate/update self with data from json string; a list of (trait, value) tuples 
@@ -811,10 +831,6 @@ class CcpNmrJson(TraitBase):
 
             _metaData = theData[0][1]
 
-            # theData = dict(theData)
-        # if (_metaData := theData.get(Constants.METADATA, None)) is None:
-        #     raise RuntimeError(f'No {Constants.METADATA}: The data do not represent a valid JSON encoded object')
-
             if (_jsonVersion := _metaData.get(Constants.JSONVERSION, None)) is None:
                 raise RuntimeError(f'No {Constants.JSONVERSION}: The data do not represent a valid JSON encoded 3.0 object')
 
@@ -823,10 +839,18 @@ class CcpNmrJson(TraitBase):
                     raise RuntimeError(f'Updating from JSON 3.0: Undefined JSON version {_jsonVersion}')
             del(_metaData[Constants.JSONVERSION])
 
-            if (_classVersion := _metaData.get(Constants.CLASSVERSION, None)) is None:
+            _classVersion = _metaData.get(Constants.CLASSVERSION, None)
+            if isinstance(_classVersion, str):
+                # A string, we should be good
+                pass
+            elif _classVersion is None:
                 _metaData[Constants.CLASSVERSION] = cls.classVersion
-            else:
+            elif isinstance(_classVersion, (float,int)):
+                # Converting to string
                 _metaData[Constants.CLASSVERSION] = '%.1f' % _classVersion + '.0'
+            else:
+                getLogger().debug(f'_updateToJson_3_1: Undefined _classversion {_classVersion}; setting to {cls.classVersion}')
+                _metaData[Constants.CLASSVERSION] = cls.classVersion
 
             # Encode the object trait data as a dict _data
             _data = dict(item for item in theData[1:])

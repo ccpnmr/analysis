@@ -17,9 +17,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 18:46:14 +0100 (Tue, March 28, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-10-11 08:37:29 +0100 (Wed, October 11, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,6 +32,8 @@ __date__ = "$Date: 2021-06-30 10:28:41 +0000 (Fri, June 30, 2021) $"
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
 from ccpn.framework.PathsAndUrls import CCPN_DIRECTORY_SUFFIX, CCPN_API_DIRECTORY, CCPN_STATE_DIRECTORY
 from ccpn.framework.Framework import Framework
+from ccpn.core.lib.CoreTraits import VersionTrait
+from ccpn.util.traits.CcpNmrTraits import Bool
 
 
 class CcpNmrV3ProjectDataLoader(DataLoaderABC):
@@ -45,12 +47,18 @@ class CcpNmrV3ProjectDataLoader(DataLoaderABC):
     canCreateNewProject = False
     loadFunction = (Framework._loadV3Project, 'application')
 
+    lastSavedVersion = VersionTrait(default_value=None).tag(info='The last saved version string as derived from the history')
+    projectNeedsUpgrade = Bool(default_value=False)
+
     def checkValid(self) -> bool:
         """Check if self.path is valid.
         Calls _checkPath and _checkSuffix
         sets self.isValid and self.errorString
         :returns True if ok or False otherwise
         """
+        from ccpn.core.Project import Project
+        from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory
+
         if not super().checkValid():
             return False
 
@@ -64,6 +72,10 @@ class CcpNmrV3ProjectDataLoader(DataLoaderABC):
                 self.isValid = False
                 self.errorString = f'Required sub-directory "{subDir}" not found'
                 return False
+
+        if (_history := getProjectSaveHistory(self.path)):
+            self.lastSavedVersion = _history.lastSavedVersion
+            self.projectNeedsUpgrade = self.lastSavedVersion < Project._LOWEST_COMPATIBLE_VERSION
 
         self.isValid = True
         self.errorString = ''

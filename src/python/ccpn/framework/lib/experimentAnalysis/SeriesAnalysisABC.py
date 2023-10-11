@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-06 11:22:42 +0100 (Fri, October 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-11 15:29:56 +0100 (Wed, October 11, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -402,7 +402,6 @@ class SeriesAnalysisABC(ABC):
         """
         if columnName not in data:
             return
-        factor = factor if factor and factor >0 else 1
         value = None
         if data is not None:
             if len(data[columnName])>0:
@@ -416,7 +415,13 @@ class SeriesAnalysisABC(ABC):
                     value = np.median(values)
 
                 if calculationMode == sv.TRIMMED_MEAN:
-                    value = stats.trim_mean(values, proportiontocut=factor)
+                    if factor:
+                        value = stats.trim_mean(values, proportiontocut=factor)
+                    else:
+                        getLogger().warning('Undetermined factor. Using 10% as default')
+                        value = stats.trim_mean(values, proportiontocut=0.10)
+
+                factor = factor if factor is not None else 1
 
                 if calculationMode == sv.MAD:
                     value = mean + (stats.median_abs_deviation(values) * factor)

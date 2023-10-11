@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-27 18:03:18 +0100 (Wed, September 27, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-11 13:56:26 +0100 (Wed, October 11, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -160,7 +160,7 @@ class _TableModel(QtCore.QAbstractTableModel):
     _MAXCHARS = 100
     _chrWidth = 12
     _chrHeight = 12
-    _chrPixelPadding = 8
+    _chrPixelPadding = 6
     _chrPadding = 3
 
     showEditIcon = False

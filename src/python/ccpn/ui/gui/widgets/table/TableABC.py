@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 19:17:57 +0100 (Wed, June 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-11 13:56:26 +0100 (Wed, October 11, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -227,7 +227,7 @@ class TableABC(QtWidgets.QTableView):
         """Set the font-style
         """
         setWidgetFont(self, name=TABLEFONT)
-        height = getFontHeight(name=TABLEFONT)
+        height = getFontHeight(name=TABLEFONT) - 2
         self._setHeaderWidgets(height, showHorizontalHeader, showVerticalHeader, df)
         self.setMinimumSize(2 * height, 2 * height + self.horizontalScrollBar().height())
 
@@ -391,6 +391,7 @@ class TableABC(QtWidgets.QTableView):
         _header.setHighlightSections(self.font().bold())
         _header.setVisible(showHorizontalHeader)
         setWidgetFont(_header, name=TABLEFONT)
+        _header.setDefaultAlignment(QtCore.Qt.AlignVCenter)
 
         # set the verticalHeader information
         _header = self.verticalHeader()

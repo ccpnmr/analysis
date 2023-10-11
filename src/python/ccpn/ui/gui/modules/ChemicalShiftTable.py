@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-08 15:06:47 +0000 (Wed, March 08, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-10-11 13:56:26 +0100 (Wed, October 11, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -225,16 +225,16 @@ class _NewChemicalShiftTable(_ProjectTableABC):
     OBJECTCOLUMN = CS_OBJECT  # column holding active objects (uniqueId/ChemicalShift for this table?)
     INDEXCOLUMN = CS_UNIQUEID  # column holding the index
 
-    defaultHidden = [CS_UNIQUEID, CS_ISDELETED, CS_FIGUREOFMERIT, CS_ALLPEAKS, CS_CHAINCODE,
+    defaultHidden = [CS_UNIQUEID, CS_ISDELETED, CS_PID, CS_FIGUREOFMERIT, CS_ALLPEAKS, CS_CHAINCODE,
                      CS_SEQUENCECODE, CS_STATE, CS_ORPHAN]
     _internalColumns = [CS_ISDELETED, CS_OBJECT]  # columns that are always hidden
 
     # define self._columns here
-    columnHeaders = {CS_UNIQUEID           : 'Unique ID',
+    columnHeaders = {CS_UNIQUEID           : 'ID',
                      CS_ISDELETED          : 'isDeleted',  # should never be visible
                      CS_PID                : 'ChemicalShift',
-                     CS_VALUE              : 'ChemicalShift Value (ppm)',
-                     CS_VALUEERROR         : 'Value Error',
+                     CS_VALUE              : 'Value\n(ppm)',
+                     CS_VALUEERROR         : 'Value Error\n(ppm)',
                      CS_FIGUREOFMERIT      : 'Figure of Merit',
                      CS_NMRATOM            : 'NmrAtom',
                      CS_CHAINCODE          : 'ChainCode',
@@ -243,9 +243,9 @@ class _NewChemicalShiftTable(_ProjectTableABC):
                      CS_ATOMNAME           : 'AtomName',
                      CS_STATE              : 'State',
                      CS_ORPHAN             : 'Orphaned',
-                     CS_ALLPEAKS           : 'Assigned Peaks',
+                     CS_ALLPEAKS           : 'Assigned\nPeaks',
                      CS_SHIFTLISTPEAKSCOUNT: 'Peak Count',
-                     CS_ALLPEAKSCOUNT      : 'Total Peak Count',
+                     CS_ALLPEAKSCOUNT      : 'Total\nPeak Count',
                      CS_COMMENT            : 'Comment',
                      CS_OBJECT             : '_object'
                      }
@@ -261,8 +261,8 @@ class _NewChemicalShiftTable(_ProjectTableABC):
                 'SequenceCode of attached nmrAtom, or None',
                 'ResidueType of attached nmrAtom, or None',
                 'AtomName of attached nmrAtom, or None',
-                'Active state of chemicalShift',
-                'Orphaned state of chemicalShift',
+                'Active state of chemicalShift:\nstatic - not linked to any spectra,\ndynamic - linked to at least one spectrum through a peak-assignment',
+                'Orphaned state of chemicalShift.\nA Dynamic chemical-shift is orphaned if its nmrAtom is not\nused for any peak assignments in the linked spectra',
                 'List of assigned peaks associated with this chemicalShift',
                 'Number of assigned peaks attached to a chemicalShift\nbelonging to spectra associated with parent chemicalShiftList',
                 'Total number of assigned peaks attached to a chemicalShift\nbelonging to any spectra',
@@ -426,7 +426,7 @@ class _NewChemicalShiftTable(_ProjectTableABC):
     def _setComment(obj, value):
         """CCPN-INTERNAL: Insert a comment into object
         """
-        obj.comment = value if value else None
+        obj.comment = value or None
 
     def buildTableDataFrame(self):
         """Return a Pandas dataFrame from an internal list of objects.
@@ -551,7 +551,7 @@ class _NewChemicalShiftTable(_ProjectTableABC):
                     # return
                     # current table is empty
                     objSet = set()
-                tableSet = set(self._df['Unique ID'])  # must be table column name, not reference name
+                tableSet = set(self._df['ID'])  # must be table column name, not reference name
 
                 if trigger == Notifier.DELETE:
                     # uniqueIds in the visible table
@@ -735,8 +735,7 @@ class _NewChemicalShiftTable(_ProjectTableABC):
     def _editNmrAtom(self):
         """Show the edit nmrAtom popup for the clicked nmrAtom
         """
-        data = self.getRightMouseItem()
-        if data is not None and not data.empty:
+        if (data := self.getRightMouseItem()) is not None and not data.empty:
             cShift = data.get(DATAFRAME_OBJECT)
             currentNmrAtom = cShift.nmrAtom if cShift else None
 
@@ -747,7 +746,11 @@ class _NewChemicalShiftTable(_ProjectTableABC):
                 popup.exec_()
 
     def _addNavigationStripsToContextMenu(self):
-        cShift = self._getValidChemicalShift4Callback(self.getSelectedObjects())
+        if (data := self.getRightMouseItem()) is None or data.empty:
+            return
+
+        cShift = data.get(DATAFRAME_OBJECT)
+
         self._navigateMenu.clear()
         if cShift and cShift.nmrAtom:
             name = cShift.nmrAtom.name

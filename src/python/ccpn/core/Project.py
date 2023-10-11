@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-07 15:16:42 +0100 (Thu, September 07, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-11 18:42:23 +0100 (Wed, October 11, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -28,13 +28,11 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import contextlib
 import functools
 import os
-import sys
 import typing
 import operator
-from typing import Sequence, Union, Optional, List
+from typing import Sequence, Union, Optional, List, Any
 from collections import OrderedDict
 # from time import time
 from datetime import datetime
@@ -79,9 +77,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.NmrExpPrototype import RefExperiment
 # from ccpnmodel.ccpncore.lib import Constants
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 # from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
-from ccpnmodel.ccpncore.lib import ApiPath
 from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
-from ccpnmodel.ccpncore.api.memops import Implementation
 
 
 # TODO These should be merged with the same constants in CcpnNefIo
@@ -293,6 +289,7 @@ class Project(AbstractWrapperObject):
     #-----------------------------------------------------------------------------------------
     # (Sub-)directories of the project
     #-----------------------------------------------------------------------------------------
+
     @property
     def projectPath(self) -> Path:
         """
@@ -2088,17 +2085,18 @@ class Project(AbstractWrapperObject):
         return _newPeakCluster(self, peaks=peaks, **kwds)
 
     @logCommand('project.')
-    def newCollection(self, items: Sequence[typing.Any] = None, **kwds) -> Optional['Collection']:
+    def newCollection(self, name: str = None, *, items: Sequence[Any] = None, **kwds: object) -> 'Collection':
         """Create new Collection.
 
         See the Collection class for details.
 
         Optional keyword arguments can be passed in; see Collection._newCollection for details.
 
+        :param name: optional name of type str.
         :param items: optional list of core objects as objects or pids.
         :return: a new Collection instance.
         """
-        return self._collectionList.newCollection(items=items, **kwds)
+        return self._collectionList.newCollection(name=name, items=items, **kwds)
 
     @logCommand('project.')
     def newSample(self, name: str = None, pH: float = None, ionicStrength: float = None,

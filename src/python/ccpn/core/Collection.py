@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 12:06:23 +0100 (Fri, June 09, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-10-11 18:42:22 +0100 (Wed, October 11, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -524,13 +524,14 @@ class Collection(V3CoreObjectABC):
 # Connections to parents:
 #=========================================================================================
 
-def _newCollection(project: Project, collectionList, _uniqueId: Optional[int] = None):
+def _newCollection(project: Project, collectionList: 'CollectionList', _uniqueId: int = None) -> Collection:
     """Create a new collection attached to the collectionList.
 
-    :param project: core project
-    :param collectionList: parent collectionList
-    :param _uniqueId: _unique int identifier
+    :param project: core project.
+    :param collectionList: parent collectionList.
+    :param _uniqueId: optional _unique int identifier.
     :return: a new Collection instance.
+    :raises RuntimeError: if Collection cannot be created.
     """
     result = Collection(project, collectionList, _uniqueId=_uniqueId)
     if result is None:

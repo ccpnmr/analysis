@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-04-21 16:41:02 +0100 (Fri, April 21, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-10-11 18:42:23 +0100 (Wed, October 11, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -37,11 +37,12 @@ from ccpn.core.Peak import Peak
 def _getClusteredPeaksBySpectralAssignemnt(spectra, peakListIndices=None) -> defaultdict:
     """A dict containing assignment:[peaks...]. Used to create collections from assignments"""
     assignmentsDict = defaultdict(list)
-    peakListIndices = peakListIndices or [-1]*len(spectra)
+    peakListIndices = peakListIndices or [-1] * len(spectra)
     for spectrum, peakListIndex in zip(spectra, peakListIndices):
         for pk in spectrum.peakLists[peakListIndex].peaks:
             assignmentsDict[pk.assignments].append(pk)
     return assignmentsDict
+
 
 def _getCollectionNameForAssignments(nmrAtoms):
     """ Get a formatted name to use as a collection name from the nmrAtoms.
@@ -55,6 +56,7 @@ def _getCollectionNameForAssignments(nmrAtoms):
     if prefix and suffix:
         return f'{prefix}.{suffix}'
 
+
 def _getCollectionNameFromPeakPosition(peak):
     """ Get a formatted name to use as a collection name from the PeakPosition.
     Format:
@@ -65,6 +67,7 @@ def _getCollectionNameFromPeakPosition(peak):
     if prefix and suffix:
         return f'{prefix}:{suffix}'
 
+
 def _getCollectionNameForPeak(peak):
     """ Get a formatted name to use as a collection name from the PeakAssignment or PeakPosition.
     """
@@ -73,22 +76,25 @@ def _getCollectionNameForPeak(peak):
         collectionName = _getCollectionNameFromPeakPosition(peak)
     return collectionName
 
+
 def _makeCollectionsOfPeaks(project, clusters, topCollectionName):
     collections = []
     for clusterName, clusterPeaks in clusters.items():
-        newCollection = project.newCollection(clusterPeaks, name=clusterName)
+        newCollection = project.newCollection(name=clusterName, items=clusterPeaks)
         collections.append(newCollection)
     collectionName = topCollectionName
-    topCollection = project.newCollection(collections, name=collectionName)
+    topCollection = project.newCollection(name=collectionName, items=collections)
     return topCollection
+
 
 def renameCollectionFromAssignments(collection):
     """ Rename the collection. Useful for example to rename a collection which was created before assigning peaks. TODO"""
     pass
 
+
 def renameCollectionFromPeaks(collection):
     peaks = collection.items
-    if len(peaks)>0:
+    if len(peaks) > 0:
         peak = peaks[0]
         if isinstance(peak, Peak):
             name = _getCollectionNameFromPeakPosition(peak)
@@ -104,9 +110,6 @@ def createCollectionsFromSpectrumGroup(spectrumGroup, peakListIndices=None):
             for assignments, peaks in clusteredPeaksByAssignemnt.items():
                 name = _getCollectionNameForAssignments(flattenLists(assignments))
                 if not name:
-                    name = _getCollectionNameFromPeakPosition(peaks[0]) # alternatively get a name from ppm position
-                collections.append(project.newCollection(peaks, name=name))
+                    name = _getCollectionNameFromPeakPosition(peaks[0])  # alternatively get a name from ppm position
+                collections.append(project.newCollection(name=name, items=peaks))
     return collections
-
-
-

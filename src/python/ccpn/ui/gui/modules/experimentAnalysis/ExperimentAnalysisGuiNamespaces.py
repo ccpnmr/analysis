@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-06 11:22:43 +0100 (Fri, October 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-11 16:33:55 +0100 (Wed, October 11, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -320,9 +320,9 @@ WidgetVarName_ThreshValueCalcOptions = 'ThreshValueCalcOptions'
 Label_ThreshValueCalcOptions = 'Threshold Value Calculation'
 TipText_ThreshValueCalcOptions = 'Select the calculation method for the threshold line. (Note. Std, variance, AAD, MAD are added to the mean), '
 
-WidgetVarName_ThreshValueFactor = 'ThreshValueCalcFactor'
-Label_ThreshValueFactor = 'Threshold Factor'
-TipText_ThreshValueFactor = 'Increase (multiply) the threshold value by a factor.'
+WidgetVarName_SDThreshValueFactor = 'ThreshValueCalcFactor'
+Label_SDThreshValueFactor = 'SD Factor'
+TipText_SDThreshValueFactor = 'Increase (multiply) the Standard Deviation by a factor'
 
 WidgetVarName_WindowRollingAverage = 'WindowRolling'
 Label_WindowRollingAverage = 'Rolling Average Window'

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-11 15:29:56 +0100 (Wed, October 11, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-11 16:33:55 +0100 (Wed, October 11, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -387,7 +387,7 @@ class SeriesAnalysisABC(ABC):
         collections = createCollectionsFromSpectrumGroup(spectrumGroup, peakListIndices)
         return collections
 
-    def getThresholdValueForData(self, data, columnName, calculationMode=sv.MAD, factor=1.):
+    def getThresholdValueForData(self, data, columnName, calculationMode=sv.MAD, sdFactor=1.):
         """ Get the Threshold value for the ColumnName values.
         :param data: pd.dataFrame
         :param columnName: str. a column name presents in the data(frame)
@@ -414,26 +414,19 @@ class SeriesAnalysisABC(ABC):
                 if calculationMode == sv.MEDIAN:
                     value = np.median(values)
 
-                if calculationMode == sv.TRIMMED_MEAN:
-                    if factor:
-                        value = stats.trim_mean(values, proportiontocut=factor)
-                    else:
-                        getLogger().warning('Undetermined factor. Using 10% as default')
-                        value = stats.trim_mean(values, proportiontocut=0.10)
-
-                factor = factor if factor is not None else 1
+                sdFactor = sdFactor if sdFactor is not None else 1
 
                 if calculationMode == sv.MAD:
-                    value = mean + (stats.median_abs_deviation(values) * factor)
+                    value = mean + stats.median_abs_deviation(values)
 
                 if calculationMode == sv.AAD:
-                    value = mean + (lf.aad(values) * factor)
+                    value = mean + lf.aad(values)
 
                 if calculationMode == sv.STD:
-                    value = mean + (np.std(values) * factor)
+                    value = mean + (np.std(values) * sdFactor)
 
                 if calculationMode == sv.VARIANCE:
-                    value = mean + (np.var(values) * factor)
+                    value = mean + np.var(values)
 
         return value
 

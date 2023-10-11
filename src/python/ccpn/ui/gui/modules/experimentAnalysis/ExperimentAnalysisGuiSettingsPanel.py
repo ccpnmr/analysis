@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-06 11:22:43 +0100 (Fri, October 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-11 16:33:55 +0100 (Wed, October 11, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -953,17 +953,18 @@ class AppearancePanel(GuiSettingPanel):
               'kwds': {'labelText': guiNameSpaces.Label_ThreshValueCalcOptions,
                        'tipText': guiNameSpaces.TipText_ThreshValueCalcOptions,
                        'texts': ["<Select>"] + guiNameSpaces.DirectThresholdCalcOption + [' ' ] + guiNameSpaces.PlusThresholdCalcOption,
+                       'default':guiNameSpaces.DirectThresholdCalcOption[0],
                        'fixedWidths': SettingsWidgetFixedWidths}}),
 
-            (guiNameSpaces.WidgetVarName_ThreshValueFactor,
-             {'label': guiNameSpaces.Label_ThreshValueFactor,
-              'tipText': guiNameSpaces.TipText_ThreshValueFactor,
+            (guiNameSpaces.WidgetVarName_SDThreshValueFactor,
+             {'label': guiNameSpaces.Label_SDThreshValueFactor,
+              'tipText': guiNameSpaces.TipText_SDThreshValueFactor,
               'callBack': self._setThresholdValueForData,
               'enabled': True,
               'type': compoundWidget.DoubleSpinBoxCompoundWidget,
               '_init': None,
-              'kwds': {'labelText': guiNameSpaces.Label_ThreshValueFactor,
-                       'tipText': guiNameSpaces.TipText_ThreshValueFactor,
+              'kwds': {'labelText': guiNameSpaces.Label_SDThreshValueFactor,
+                       'tipText': guiNameSpaces.TipText_SDThreshValueFactor,
                        'value': 1,
                        'step': 0.01,
                        'decimals': 4,
@@ -980,7 +981,9 @@ class AppearancePanel(GuiSettingPanel):
                        'tipText': guiNameSpaces.TipText_ThreshValue,
                        'value': 0.1,
                        'step': 0.01,
-                       'decimals': 4,
+                       'min':-1e40,
+                       'max': 1e40,
+                       'decimals': 25,
                        'fixedWidths': SettingsWidgetFixedWidths}}),
 
             (guiNameSpaces.WidgetVarName_WindowRollingAverage,
@@ -1144,40 +1147,32 @@ class AppearancePanel(GuiSettingPanel):
 
     def _setThresholdValueForData(self, *args):
         mode = None
-        factor = 1
+        sdFactor = 1
         calculcationModeW = self.getWidget(guiNameSpaces.WidgetVarName_ThreshValueCalcOptions)
         if calculcationModeW:
             mode = calculcationModeW.getText()
-        factorW = self.getWidget(guiNameSpaces.WidgetVarName_ThreshValueFactor)
+        factorW = self.getWidget(guiNameSpaces.WidgetVarName_SDThreshValueFactor)
 
         if factorW:
-            factor = factorW.getValue()
+            sdFactor = factorW.getValue()
         yColumnNameW = self.getWidget(guiNameSpaces.WidgetVarName_MainPlotYcolumnName)
         if yColumnNameW:
             yColumnName = yColumnNameW.getText()
         else:
             return
-
-        if mode == sv.TRIMMED_MEAN and factor < 1:
-            msg = 'Factor value not allowed. Usage: select 10 for a 10% trimmed mean.'
-            showWarning('Option not available.', msg)
-            return
-        elif mode == sv.TRIMMED_MEAN and factor > 50:
-            msg = 'Factor value too large. Usage: select 10 for a 10% trimmed mean.'
-            showWarning('Option not available.', msg)
-            return
-
         if mode:
             try:
-                value = self._getThresholdValueFromBackend(columnName=yColumnName, calculationMode=mode, factor=factor)
+                value = self._getThresholdValueFromBackend(columnName=yColumnName, calculationMode=mode, sdFactor=sdFactor)
             except Exception as err:
-                showWarning('Cannot calculate a threshold line', f'The selected options could not yield any result. Error: {err}')
+                getLogger().warning('Cannot calculate a threshold line', f'The selected options could not yield any result. Error: {err}')
                 return
 
             if isinstance(value, (float,int)):
                 thresholdValueW = self.getWidget(guiNameSpaces.WidgetVarName_ThreshValue)
                 if thresholdValueW and value:
-                    thresholdValueW.setValue(round(value, 3))
+                    totalDigitInFloatingPart = 3
+                    value = f"{value:.{totalDigitInFloatingPart}E}"
+                    thresholdValueW.setValue(float(value))
     
     def _thresholdValueChangedCallback(self, *args, **kwargs):
         """ Called from doubleSpinBox"""
@@ -1188,13 +1183,13 @@ class AppearancePanel(GuiSettingPanel):
             panel.thresholdValue = value
             panel.updatePanel(keepZoom=True)
 
-    def _getThresholdValueFromBackend(self, columnName, calculationMode, factor):
+    def _getThresholdValueFromBackend(self, columnName, calculationMode, sdFactor):
 
         """ Get the threshold value based on selected Y axis. called from _setThresholdValueForData"""
         mo = self.guiModule
         data = mo.getVisibleDataFrame(includeHiddenColumns=True)
         value = mo.backendHandler.getThresholdValueForData(data=data, columnName=columnName,
-                                                           calculationMode=calculationMode, factor=factor)
+                                                           calculationMode=calculationMode, sdFactor=sdFactor)
         return value
 
 

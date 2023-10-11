@@ -89,9 +89,9 @@ class RelaxationFittingPanel(GuiFittingPanel):
 
 class RelaxationAppearancePanel(AppearancePanel):
 
-    def _getThresholdValueFromBackend(self, columnName, calculationMode, factor):
+    def _getThresholdValueFromBackend(self, columnName, calculationMode, sdFactor):
         """ Get the threshold value based on selected Y axis. called from _setThresholdValueForData"""
-        return super()._getThresholdValueFromBackend(columnName, calculationMode, factor)
+        return super()._getThresholdValueFromBackend(columnName, calculationMode, sdFactor)
 
 
 #####################################################################

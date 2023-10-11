@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-28 19:23:05 +0100 (Wed, June 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-11 16:33:55 +0100 (Wed, October 11, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -122,6 +122,8 @@ class MainPlotPanel(GuiPanel):
             self.mainPlotWidget.clear()
             return
         vr = self.mainPlotWidget._viewRect
+        self._appearancePanel._setThresholdValueForData()
+
         if self.viewMode == guiNameSpaces.PlotViewMode_Backbone:
             chainWidget = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_Chain)
             if chainWidget is not None:

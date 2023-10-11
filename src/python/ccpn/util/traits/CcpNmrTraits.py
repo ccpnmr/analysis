@@ -95,7 +95,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-09 12:09:37 +0100 (Mon, October 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-11 09:11:06 +0100 (Wed, October 11, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -1080,96 +1080,96 @@ class CString(TraitType, _CcpNmrTrait):
 
         return value
 
+# GWV: moved to CoreTraits
+# class V3Object(TraitType, _CcpNmrTrait):
+#     """A trait that defines a V3-object, json serialisable through its Pid
+#     """
+#     default_value = None
+#     info_text = "A V3-Object"
+#
+#     def __init__(self, klass=None, default_value=None, **kwargs):
+#         """
+#         Initialise the trait
+#         :param klass: only allow objects of type klass (V3object or className str);
+#                       ignored when None
+#         :param default_value: value set by default (None)
+#         :param kwargs: optional
+#         """
+#         from ccpn.core._implementation.CoreModel import _isV3coreClass, _isV3coreClassInstance, _getV3coreClass
+#
+#         if klass is None:
+#             self._klass = None
+#
+#         else:
+#
+#             if _isV3coreClass(klass):
+#                 self._klass = klass
+#
+#             elif isinstance(klass, str) and \
+#                (_klass := _getV3coreClass(klass)) is not None:
+#                 self._klass = _klass
+#
+#             else:
+#                 raise ValueError(f'parameter klass: expected a valid V3 class; got {klass}')
+#
+#         TraitType.__init__(self, default_value=default_value, **kwargs)
+#         _CcpNmrTrait.__init__(self)
+#
+#         if default_value is not None:
+#             self.default_value = default_value
+#
+#     def validate(self, obj, value):
+#         """Assure a Core-class instance
+#         :raises TypeError, ValueError
+#         """
+#         from ccpn.core._implementation.CoreModel import _isV3coreClass, _isV3coreClassInstance, _getV3coreClass
+#
+#         if value is None and not self.allow_none:
+#             raise ValueError(f'Expected an instance of a V3 class; got None')
+#
+#         elif self._klass is not None and not isinstance(value, self._klass):
+#             raise TypeError(f'Expected an instance of {_classType(self._klass)}; got {value} {_classType(value)}')
+#
+#         elif not _isV3coreClassInstance(value):
+#             raise TypeError(f'Expected an instance of a V3 class; got {value} {_classType(value)}')
+#
+#         return value
+#
+#     # trait-specific json handler
+#     class jsonHandler(TraitJsonHandlerBase):
+#         """json compatible;
+#         """
+#         def encode(self, value):
+#             "returns a json serialisable object"
+#             if value is None:
+#                 return None
+#             else:
+#                 return str(value.pid)
+#
+#         def decode(self, value):
+#             "uses value to generate and set the new (or modified) obj"
+#             if value is None:
+#                 return None
+#             else:
+#                 _app = getApplication()
+#                 if (result := _app.get(value)) is None:
+#                     getLogger().warning('Error decoding %r; set to None' % value)
+#                 return result
+# # end class
 
-class V3Object(TraitType, _CcpNmrTrait):
-    """A trait that defines a V3-object, json serialisable through its Pid
-    """
-    default_value = None
-    info_text = "A V3-Object"
-
-    def __init__(self, klass=None, default_value=None, **kwargs):
-        """
-        Initialise the trait
-        :param klass: only allow objects of type klass (V3object or className str);
-                      ignored when None
-        :param default_value: value set by default (None)
-        :param kwargs: optional
-        """
-        from ccpn.core._implementation.CoreModel import _isV3coreClass, _isV3coreClassInstance, _getV3coreClass
-
-        if klass is None:
-            self._klass = None
-
-        else:
-
-            if _isV3coreClass(klass):
-                self._klass = klass
-
-            elif isinstance(klass, str) and \
-               (_klass := _getV3coreClass(klass)) is not None:
-                self._klass = _klass
-
-            else:
-                raise ValueError(f'parameter klass: expected a valid V3 class; got {klass}')
-
-        TraitType.__init__(self, default_value=default_value, **kwargs)
-        _CcpNmrTrait.__init__(self)
-
-        if default_value is not None:
-            self.default_value = default_value
-
-    def validate(self, obj, value):
-        """Assure a Core-class instance
-        :raises TypeError, ValueError
-        """
-        from ccpn.core._implementation.CoreModel import _isV3coreClass, _isV3coreClassInstance, _getV3coreClass
-
-        if value is None and not self.allow_none:
-            raise ValueError(f'Expected an instance of a V3 class; got None')
-
-        elif self._klass is not None and not isinstance(value, self._klass):
-            raise TypeError(f'Expected an instance of {_classType(self._klass)}; got {value} {_classType(value)}')
-
-        elif not _isV3coreClassInstance(value):
-            raise TypeError(f'Expected an instance of a V3 class; got {value} {_classType(value)}')
-
-        return value
-
-    # trait-specific json handler
-    class jsonHandler(TraitJsonHandlerBase):
-        """json compatible;
-        """
-        def encode(self, value):
-            "returns a json serialisable object"
-            if value is None:
-                return None
-            else:
-                return str(value.pid)
-
-        def decode(self, value):
-            "uses value to generate and set the new (or modified) obj"
-            if value is None:
-                return None
-            else:
-                _app = getApplication()
-                if (result := _app.get(value)) is None:
-                    getLogger().warning('Error decoding %r; set to None' % value)
-                return result
-# end class
-
-
-class V3ObjectList(TList):
-    """A trait that defines a list of V3-objects, json serialisable through their Pid's
-    DEPRICATED: use TList(V3Object(), ....) instead
-    """
-    default_value = []
-    info_text = "A V3-ObjectList"
-
-    def __init__(self, default_value = [], **kwargs):
-        TList.__init__(self, itemTrait=V3Object(allow_none=True), default_value=default_value, **kwargs)
-
-# end class
-
+#
+# class V3ObjectList(TList):
+#     """A trait that defines a list of V3-objects, json serialisable through their Pid's
+#     DEPRICATED: use TList(V3Object(), ....) instead
+#     """
+#     default_value = []
+#     info_text = "A V3-ObjectList"
+#
+#     def __init__(self, default_value = [], **kwargs):
+#         TList.__init__(self, itemTrait=V3Object(allow_none=True), default_value=default_value, **kwargs)
+#
+# # end class
+#
 
 class OWTraits(TraitType, _CcpNmrTrait):
     """A trait for CcpNmrJson object with traits instance

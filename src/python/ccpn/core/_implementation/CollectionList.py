@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:42 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-10-12 14:30:33 +0100 (Thu, October 12, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -361,7 +361,7 @@ class CollectionList():
     #===========================================================================================
 
     @logCommand(get='self')
-    def newCollection(self, name: str = None, items: Sequence[Any] = None, comment: str = None):
+    def newCollection(self, name: str = None, *, items: Sequence[Any] = None, comment: str = None) -> 'Collection':
         """Create new Collection.
 
         Name is a non-empty string.
@@ -380,9 +380,9 @@ class CollectionList():
             project.newCollection()
             project.newCollection(name='smallCollection', items=(Note0, Peak1, Collection2), comment='A small collection')
 
-        :param name: unique name for the Collection
+        :param name: optional unique name for the Collection.
         :param items: optional single object or list of core objects, as objects or pid strings.
-        :param comment: optional user comment
+        :param comment: optional user comment.
         :return: a new Collection instance.
         """
 
@@ -394,9 +394,9 @@ class CollectionList():
         return self._newCollectionObject(data, name, items, comment)
 
     @newV3Object()
-    def _newCollectionObject(self, data=None, name: str = None, items: Union[str, Pid, None] = None, comment: str = None):
-        """Create a new pure V3 Collection object
-        Method is wrapped with create/delete notifier
+    def _newCollectionObject(self, data: pd.DataFrame = None, name: str = None, items: str | Pid = None, comment: str = None) -> 'Collection':
+        """Create a new pure V3 Collection object.
+        Method is wrapped with create/delete notifier.
         """
         from ccpn.core.Collection import Collection, _getByTuple, _newCollection as _newCollection
 

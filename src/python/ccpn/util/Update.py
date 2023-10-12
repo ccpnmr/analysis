@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-05 17:44:49 +0100 (Thu, October 05, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-10-12 15:28:36 +0100 (Thu, October 12, 2023) $"
+__version__ = "$Revision: 3.2.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -306,7 +306,7 @@ class UpdateFile:
                         # is a python file - remove the pycache to make sure that it loads correctly next time
                         for fp in [Path.aPath(fp) for fp in (_file.filepath / '__pycache__').listdir()]:
                             if fp.basename == _name and fp.suffix == '.pyc':
-                                print(f'cleaning pycache: {fp.name}')
+                                # print(f'cleaning pycache: {fp.name}')
                                 fp.removeFile()
 
                     # generate the hashcode for the new file here

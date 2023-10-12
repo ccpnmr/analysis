@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 12:05:58 +0100 (Fri, June 09, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-08-30 19:22:14 +0100 (Wed, August 30, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -133,7 +133,7 @@ class Ui(NotifierBase):
         numUpdates = updateAgent.checkNumberUpdates()
         getLogger().debug(f'_checkUpdates: {numUpdates} updates available')
         if numUpdates > 0:
-            self._execUpdates()
+            return self._execUpdates()
 
     @property
     def _isRegistered(self):
@@ -352,10 +352,10 @@ class NoUi(Ui):
         from ccpn.framework.Version import applicationVersion
 
         # applicationVersion = __version__.split()[1]  # ejb - read from the header
-        installUpdates(applicationVersion)  # .withoutRelease(), dryRun=False)
+        exitCode = installUpdates(applicationVersion)  # .withoutRelease(), dryRun=False)
 
         sys.stderr.write('Please restart the program to apply the updates\n')
-        sys.exit(1)
+        sys.exit(exitCode)
 
     @staticmethod
     def getProgressHandler():

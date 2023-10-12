@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 19:17:55 +0100 (Wed, June 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-05 17:44:49 +0100 (Thu, October 05, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -27,6 +27,9 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 
+_DEBUG = False
+
+
 class VersionString(str):
     """Version-string routines, adapted from path idea in: Python Cookbook,
     A. Martelli and D. Ascher (eds), O'Reilly 2002, pgs 140-142
@@ -36,36 +39,55 @@ class VersionString(str):
 
         majorVersion.minorVersion.microVersion[.release]
 
-     Examples: 3.0.4; 3.1.0.alpha
+      Examples: 3.0.4; 3.1.0.alpha
 
-    The isValid function checks for validity
+    If the optional release is included it must be alphanumeric, and of the form [label][releaseNumber]
+    If only the label is supplied, the releaseNumber defaults to 0.
 
     The majorVersion, minorVersion, microVersion and release fields are available as properties.
 
     A VersionString instance supports comparisons with either another VersionString instance or a suitable
     formatted string; e.g.
 
-     VersionString('3.1.0.alpha') > VersionString('3.0.4')    yields True
-     VersionString('3.1.0.alpha') < '3.0.2'    yields False
+      VersionString('3.1.0.alpha') > VersionString('3.0.4')    yields True
+      VersionString('3.1.0.alpha') < '3.0.2'                   yields False
 
     """
 
-    def __init__(self, string: str, **kwds):
+    def __new__(cls, value=None, *args, **kwargs):
         """First argument ('string' must be a valid pid string with at least one, non-initial PREFIXSEP
         Additional arguments are converted to string with disallowed characters changed to altCharacter
         """
-        super().__init__(**kwds)  # GWV does not understand this
-        self._fields = tuple(self.split('.'))
+        if not isinstance(value, str):
+            raise TypeError('Invalid versionString "{}"; must be a string'.format(value))
+        if args or kwargs:
+            raise TypeError('Invalid versionString; too many arguments')
 
-        if len(self._fields) < 3:
-            raise ValueError('Invalid VersionString "%s"; expected at least 3 fields' % self)
+        _fields = tuple(value.split('.'))
+        if len(_fields) < 3:
+            raise ValueError('Invalid VersionString "{}"; expected at least 3 fields'.format(value))
+        if len(_fields) > 4:
+            raise ValueError('Invalid VersionString "{}"; too many fields'.format(value))
 
-        for name, val in zip('majorVersion minorVersion microVersion'.split(), self._fields[:3]):
+        for name, val in zip('majorVersion minorVersion microVersion'.split(), _fields[:3]):
             try:
                 int(val)
-            except:
-                raise ValueError('Invalid VersionString "%s"; expected number for field "%s" ("%s")' %
-                                 (self, name, val))
+            except Exception:
+                raise ValueError('Invalid VersionString "{}"; expected integer for field "{}" ("{}")'.format(value, name, val)) from None
+
+        if len(_fields) == 4:
+            try:
+                cls._validateField(_fields[3])
+            except Exception:
+                raise ValueError('Invalid VersionString "{}"; expected release ("{}") to be alphanumeric of the form [label][int]'.format(value, _fields[3])) from None
+
+        if _DEBUG:
+            print('--> {} "{}" created'.format(cls.__name__, value))
+
+        _new = super().__new__(cls, value)
+        _new._fields = _fields
+
+        return _new
 
     @property
     def majorVersion(self) -> str:
@@ -106,15 +128,90 @@ class VersionString(str):
         return str(self)
 
     def withoutRelease(self) -> str:
-        """Convenience: return self as str with the release field
+        """Convenience: return self as str without the release field
         """
         return '.'.join(self.fields[:3])
+
+    @staticmethod
+    def _validateField(field):
+        """Validate that the field is of the form [label][int],
+        with label and int both optional. Missing int will default to 0.
+        """
+        if not field:
+            return 0
+
+        # get the positions of the label/int parts
+        ll = rr = 0
+        for ch in field:
+            if not ch.isalpha(): break
+            ll += 1
+        for ch in reversed(field):
+            if not ch.isnumeric(): break
+            rr += 1
+
+        if ll + rr < len(field):
+            raise
+
+        if not rr:
+            return 0
+
+        # return the int component
+        return int(field[ll:])
+
+    @staticmethod
+    def _versionBit(value) -> int:
+        """Return the last bit of the integer conversion of the version-field.
+        """
+        return int(VersionString._validateField(value) or 0) & 0x01
+
+    def _bitHash(self) -> int:
+        """Return the last bits of major/minor/micro/release.
+        CCPN Internal - used by update to check whether the version is incrementing.
+
+          Example: version '3.20.15.12' => 0b11010
+        """
+        from operator import or_
+        from functools import reduce
+
+        bits = reduce(or_, (self._versionBit(val) << shift
+                            for shift, val in enumerate([self.release,
+                                                         self.microVersion,
+                                                         self.minorVersion,
+                                                         self.majorVersion,
+                                                         '1',  # add high bit to ensure code >= 16
+                                                         ])
+                            )
+                      )
+        if _DEBUG:
+            print(bin(bits))
+
+        return bits
 
     def __len__(self):
         return len(self.fields)
 
     def __getitem__(self, item):
         return self.fields[item]
+
+    @staticmethod
+    def _getSortField(field) -> tuple:
+        """Return the release field as a tuple(<label>, <int>) if exist, for sorting.
+        """
+        if not field:
+            return ('', 0)
+
+        ll = rr = 0
+        for ch in field:
+            if not ch.isalpha(): break
+            ll += 1
+        for ch in reversed(field):
+            if not ch.isnumeric(): break
+            rr += 1
+
+        if not rr:
+            return (field, 0)
+
+        return (field[:ll], int(field[ll:]))
 
     def __eq__(self, other):
         """Check if self equals other
@@ -135,7 +232,7 @@ class VersionString(str):
         return True
 
     def __lt__(self, other):
-        """Check if self is lower then other;
+        """Check if self is lower than other;
          raise Value Error if other is an invalid object.
          Presence of development field implies an earlier version (i.e. __lt__ is True) compared to
          the absence of the field
@@ -155,18 +252,18 @@ class VersionString(str):
         # At this point, majorVersion, minorVersion and revision are all equal
         # Check development field
         if len(fields_S) == 4 and len(fields_O) == 3:
-            return True
+            return self._getSortField(fields_S[3]) < self._getSortField('')
 
         elif len(fields_S) == 3 and len(fields_O) == 4:
-            return False
+            return self._getSortField('') < self._getSortField(fields_O[3])
 
         elif len(fields_S) == 4 and len(fields_O) == 4:
-            return fields_S[3] < fields_O[3]
+            return self._getSortField(fields_S[3]) < self._getSortField(fields_O[3])
 
         return False
 
     def __gt__(self, other):
-        """Check if self is greater then other;
+        """Check if self is greater than other;
          raise Value Error if other is an invalid object.
          Presence of development field implies an earlier version (i.e. __gt__ is False) compared to
          the absence of the field
@@ -186,13 +283,13 @@ class VersionString(str):
         # At this point, majorVersion, minorVersion and revision are all equal
         # Check development field
         if len(fields_S) == 4 and len(fields_O) == 3:
-            return False
+            return self._getSortField(fields_S[3]) > self._getSortField('')
 
         elif len(fields_S) == 3 and len(fields_O) == 4:
-            return True
+            return self._getSortField('') > self._getSortField(fields_O[3])
 
         elif len(fields_S) == 4 and len(fields_O) == 4:
-            return fields_S[3] > fields_O[3]
+            return self._getSortField(fields_S[3]) > self._getSortField(fields_O[3])
 
         return False
 
@@ -203,5 +300,107 @@ class VersionString(str):
         return self.__gt__(other) or self.__eq__(other)
 
 
+#=========================================================================================
+# Top level application version
+# - also imported by git pre-commit
+#=========================================================================================
+
 applicationVersion = VersionString('3.2.0')
 revision = '3'
+
+
+#=========================================================================================
+# main - quick validation
+#=========================================================================================
+
+def main():
+    """Quick validation for versionString.
+    """
+    # check versionString creation
+    valid = []
+    for ver in ['3.21.13',
+                '3.2.1.',
+                '3.20.15.12',
+                '3.2.1.alpha',
+                '3.2.1.alpha123',
+
+                '3.2.1.123alpha',
+                '3.2.1.alp2ha',
+                '3.2.1.3er2',
+                '3.2.1.%',
+                '3.2.1. ',
+                '3.2.1.alpha 34',
+
+                'alpha.2.1.',
+                '3.alpha.1.',
+                '3.2.alpha1.',
+                'alpha.2.1.23',
+
+                '1.23',
+                '3.2.1.23.2',
+                ]:
+        try:
+            VersionString(ver)._bitHash()
+            valid.append(True)
+        except Exception as es:
+            print('   --> {:<20} : {}'.format(ver, es))
+            valid.append(False)
+
+    assert valid == [True, True, True, True, True,
+                     False, False, False, False, False, False,
+                     False, False, False, False,
+                     False, False]
+
+    # check sorting conditions
+    valid = [VersionString('3.2.1.alpha19') > VersionString('3.2.1.alpha2'),
+             VersionString('3.2.1.alpha2') < VersionString('3.2.1.alpha19'),
+             VersionString('3.2.1.2') < VersionString('3.2.1.alpha19'),
+             VersionString('3.2.1.alpha2') > VersionString('3.2.1.19'),
+             VersionString('3.2.1.45') > VersionString('3.2.1.23'),
+             VersionString('1.0.0.0') < VersionString('2.0.0.0'),
+             VersionString('1.1.0.0') < VersionString('1.2.0.0'),
+             VersionString('1.0.1.0') < VersionString('1.0.2.0'),
+             VersionString('1.0.0.1') < VersionString('1.0.0.2'),
+             VersionString('2.0.0.0') > VersionString('1.0.0.0'),
+             VersionString('1.2.0.0') > VersionString('1.1.0.0'),
+             VersionString('1.0.2.0') > VersionString('1.0.1.0'),
+             VersionString('1.0.0.2') > VersionString('1.0.0.1'),
+             # missing digit is assumed to be '' or 0
+             VersionString('1.1.1.1') > VersionString('1.1.1'),
+             VersionString('1.1.1') > VersionString('1.1.1.1'),
+             VersionString('1.1.1.1') < VersionString('1.1.1'),
+             VersionString('1.1.1') < VersionString('1.1.1.1'),
+             ]
+    print('\n'.join([str(bb) for bb in valid]))
+
+    assert valid == [True, True, True, True, True,
+                     True, True, True, True,
+                     True, True, True, True,
+                     True, False, False, True]
+
+    # check only one argument allowed
+    try:
+        VersionString()
+    except Exception as es:
+        print('   --> {:<20} : {}'.format('', es))
+    try:
+        VersionString('4.3.2.1', '1.1.1.1')
+    except Exception as es:
+        print('   --> {:<20} : {}'.format('', es))
+
+    from datetime import datetime, timezone
+
+    timeformat = '%Y-%m-%d %H:%M:%S %z'
+    timeoutput = '0000-00-00 00:00:00 +0000'
+    now = datetime.now(timezone.utc)
+
+    then = datetime.strptime(__dateModified__[len('$dateModified: '): len('$dateModified: ') + len(timeoutput)], timeformat)
+
+    print(timeformat)
+    print(now.strftime(timeformat), int(now.timestamp()))
+    print(then.strftime(timeformat), then.timestamp())
+    print(int((now - then).total_seconds()))
+
+
+if __name__ == '__main__':
+    main()

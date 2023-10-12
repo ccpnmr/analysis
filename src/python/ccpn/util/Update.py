@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-23 15:25:39 +0000 (Thu, February 23, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-10-05 17:44:49 +0100 (Thu, October 05, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,14 +31,15 @@ import hashlib
 import os
 import shutil
 import sys
-from datetime import datetime
 import json
-
-
-ccpn2Url = 'http://www.ccpn.ac.uk'
-
+import shutil
+from datetime import datetime
+from contextlib import suppress
 from ccpn.util import Path
+from ccpn.framework.Version import applicationVersion
 
+
+ccpn2Url = 'https://www.ccpn.ac.uk'
 
 SERVER = ccpn2Url + '/'
 SERVER_DB_ROOT = 'ccpNmrUpdate'
@@ -64,6 +65,18 @@ DELETEHASHCODE = '<DELETE>'
 TERMSANDCONDITIONS = 'termsConditions'
 
 VERSION_UPDATE_FILE = 'src/python/ccpn/framework/Version.py'
+ZIPFILE = 'zip'
+
+SUCCESS = 0
+SUCCESS_VERSION = 1
+SUCCESS_RELEASE = 2
+SUCCESS_MICROUPDATE = 4  # bit alternates between 0|1 when updating micro-version
+SUCCESS_MINORUPDATE = 8  # --ditto-- minor-version
+SUCCESS_MAJORUPDATE = 16
+FAIL_UNEXPECTED = 32
+FAIL_NOTUPDATED = 33
+FAIL_WRITEERROR = 34
+MAX_COUNT = 16
 
 
 def lastModifiedTime(filePath):
@@ -126,7 +139,7 @@ def calcHashCode(filePath):
             with open(filePath, 'r', encoding='utf-8') as fp:
                 data = fp.read()
             data = bytes(data, 'utf-8')
-    except Exception as es:
+    except Exception:
         data = ''
 
     h = hashlib.md5()
@@ -162,11 +175,11 @@ def fetchUrl(url, data=None, headers=None, timeout=2.0, decodeResponse=True):
         print('Error fetching Url.')
 
 
-def downloadFile(serverScript, serverDbRoot, fileName):
+def downloadFile(serverScript, serverDbRoot, fileName, quiet=False):
     """Download a file from the server
     """
     # fileName = os.path.join(serverDbRoot, fileName)
-    fileName = '/'.join([serverDbRoot, fileName])
+    fileName = '/'.join(list(filter(lambda val: bool(val), [serverDbRoot, fileName])))
 
     try:
         values = {'fileName': fileName}
@@ -180,9 +193,10 @@ def downloadFile(serverScript, serverDbRoot, fileName):
                 result = data.decode('utf-8')
 
                 if result.startswith(BAD_DOWNLOAD):
-                    ll = len(result)
-                    bd = len(BAD_DOWNLOAD)
-                    print(str(result[min(ll, bd):min(ll, bd + 50)]))
+                    if not quiet:
+                        ll = len(result)
+                        bd = len(BAD_DOWNLOAD)
+                        print(str(result[min(ll, bd):min(ll, bd + 50)]))
                     return
 
             return result
@@ -201,6 +215,19 @@ def installUpdates(version, dryRun=True):
     if updateAgent._check():
         updateAgent._resetMd5()
 
+    return updateAgent.exitCode
+
+
+def getUpdateCount(version):
+    """Return the number of updates for the specified version.
+    """
+    updateAgent = UpdateAgent(version)
+    return updateAgent.checkNumberUpdates()
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# UpdateFile
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class UpdateFile:
 
@@ -272,6 +299,16 @@ class UpdateFile:
                     with open(fullFilePath, 'w', encoding='utf-8') as fp:
                         fp.write(data)
 
+                    if Path.aPath(fullFilePath).suffix == '.py':
+                        _file = Path.aPath(fullFilePath)
+                        _name = _file.basename
+
+                        # is a python file - remove the pycache to make sure that it loads correctly next time
+                        for fp in [Path.aPath(fp) for fp in (_file.filepath / '__pycache__').listdir()]:
+                            if fp.basename == _name and fp.suffix == '.pyc':
+                                print(f'cleaning pycache: {fp.name}')
+                                fp.removeFile()
+
                     # generate the hashcode for the new file here
                     currentHashCode = calcHashCode(fullFilePath)
                     serverHashCode = self.fileHashCode
@@ -303,12 +340,9 @@ class UpdateFile:
         """Remove file as update action
         """
         fullFilePath = self.fullFilePath
-        try:
+        with suppress(OSError):
             os.remove(fullFilePath)
             return True
-
-        except OSError:
-            pass
 
     # def commitUpdate(self, serverUser, serverPassword):
     #
@@ -317,7 +351,12 @@ class UpdateFile:
     #     self.fileHashCode = calcHashCode(self.fullFilePath)
 
 
-class UpdateAgent(object):
+#=========================================================================================
+# UpdateAgent
+#=========================================================================================
+
+class UpdateAgent:
+    updateFileClass = UpdateFile
 
     def __init__(self, version, showError=None, showInfo=None, askPassword=None,
                  serverUser=None, server=SERVER, serverDbRoot=SERVER_DB_ROOT, serverDbFile=SERVER_DB_FILE,
@@ -325,20 +364,9 @@ class UpdateAgent(object):
                  _updateProgressHandler=None,
                  dryRun=True):
 
-        if not showError:
-            # showError = MessageDialog.showError
-            showError = lambda title, msg: print(msg)
-
-        if not showInfo:
-            # showInfo = MessageDialog.showInfo
-            showInfo = lambda title, msg: print(msg)
-
-        # if not askPassword:
-        #  askPassword = InputDialog.askPassword
-
         self.version = version
-        self.showError = showError
-        self.showInfo = showInfo
+        self.showError = showError or (lambda title, msg: print(msg))
+        self.showInfo = showInfo or (lambda title, msg: print(msg))
         self.askPassword = askPassword
         self.serverUser = serverUser  # None for downloads, not None for uploads
         self.server = server
@@ -358,6 +386,8 @@ class UpdateAgent(object):
         self._updateProgressHandler = _updateProgressHandler
         self._dryRun = dryRun
 
+        self.exitCode = 0
+
     def checkNumberUpdates(self):
         self.fetchUpdateDb()
         return len(self.updateFiles)
@@ -369,7 +399,7 @@ class UpdateAgent(object):
         self.updateFileDict = updateFileDict = {}
         serverDownloadScript = '%s%s' % (self.server, self.serverDownloadScript)
         serverUploadScript = '%s%s' % (self.server, self.serverUploadScript)
-        data = downloadFile(serverDownloadScript, self.serverDbRoot, self.serverDbFile)
+        data = downloadFile(serverDownloadScript, self.serverDbRoot, self.serverDbFile, quiet=True)
 
         if not data:
             return
@@ -399,27 +429,27 @@ class UpdateAgent(object):
                         # delete file
                         if os.path.exists(os.path.join(self.installLocation, filePath)):
                             # if still exists then need to add to update list
-                            updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime,
-                                                    fileStoredAs, fileHashCode, serverDownloadScript=serverDownloadScript,
-                                                    serverUploadScript=serverUploadScript)
+                            updateFile = self.updateFileClass(self.installLocation, self.serverDbRoot, filePath, fileTime,
+                                                              fileStoredAs, fileHashCode, serverDownloadScript=serverDownloadScript,
+                                                              serverUploadScript=serverUploadScript)
                             updateFiles.append(updateFile)
                             updateFileDict[filePath] = updateFile
 
                     elif self.serverUser or self.isUpdateDifferent(filePath, fileHashCode):
 
                         # file exists, is modified and needs updating
-                        updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime,
-                                                fileStoredAs, fileHashCode, serverDownloadScript=serverDownloadScript,
-                                                serverUploadScript=serverUploadScript)
+                        updateFile = self.updateFileClass(self.installLocation, self.serverDbRoot, filePath, fileTime,
+                                                          fileStoredAs, fileHashCode, serverDownloadScript=serverDownloadScript,
+                                                          serverUploadScript=serverUploadScript)
                         updateFiles.append(updateFile)
                         updateFileDict[filePath] = updateFile
 
                     elif fileTime in [0, '0', '0.0']:
 
                         # file exists, is modified and needs updating
-                        updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime,
-                                                fileStoredAs, fileHashCode, serverDownloadScript=serverDownloadScript,
-                                                serverUploadScript=serverUploadScript)
+                        updateFile = self.updateFileClass(self.installLocation, self.serverDbRoot, filePath, fileTime,
+                                                          fileStoredAs, fileHashCode, serverDownloadScript=serverDownloadScript,
+                                                          serverUploadScript=serverUploadScript)
                         updateFiles.append(updateFile)
                         updateFileDict[filePath] = updateFile
 
@@ -511,12 +541,31 @@ class UpdateAgent(object):
                 fp.write(self._found)
 
     def resetFromServer(self):
-
         try:
             self.fetchUpdateDb()
 
         except Exception as e:
             self.showError('Update error', 'Could not fetch updates: %s' % e)
+
+    def fetchChangeLog(self):
+        serverDownloadScript = '%s%s' % (self.server, self.serverDownloadScript)
+        data = downloadFile(serverDownloadScript, '', 'changeLog.json', quiet=True)
+
+        if not data:
+            return
+
+        if data.startswith(BAD_DOWNLOAD):
+            self.showError('fetching change-log', f'Error: Could not download change-log from server - {data}')
+            return
+
+        if data.startswith(ERROR_DOWNLOAD):
+            self.showError('fetching change-log', data)
+            return
+
+        try:
+            return json.loads(data)
+        except Exception as es:
+            self.showError('fetching change-log', f'Error: Could not download change-log from server - {es}')
 
     def addFiles(self, filePaths):
 
@@ -535,9 +584,9 @@ class UpdateAgent(object):
                     self.showInfo('Add Files', 'File %s already in updates' % filePath)
                     existsErrorCount += 1
                 else:
-                    updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, shouldCommit=True,
-                                            isNew=True, serverDownloadScript=serverDownloadScript,
-                                            serverUploadScript=serverUploadScript)
+                    updateFile = self.updateFileClass(self.installLocation, self.serverDbRoot, filePath, shouldCommit=True,
+                                                      isNew=True, serverDownloadScript=serverDownloadScript,
+                                                      serverUploadScript=serverUploadScript)
                     self.updateFiles.append(updateFile)
                     self.updateFileDict[filePath] = updateFile
             else:
@@ -554,7 +603,7 @@ class UpdateAgent(object):
                                existsErrorCount, existsErrorCount > 1 and 's' or ''))
 
     def haveWriteAccess(self):
-        """See if can write files to local installation."""
+        """See if write-access to local installation."""
 
         testFile = os.path.join(self.installLocation, '__write_test__')
         try:
@@ -562,16 +611,24 @@ class UpdateAgent(object):
                 pass
             os.remove(testFile)
             return True
+
         except:
             return False
 
     def installChosen(self):
-        """Download chosen server files to local installation."""
+        """Download chosen server files to local installation.
+        """
+        from ccpn.framework.Version import applicationVersion
 
         updateFiles = [updateFile for updateFile in self.updateFiles if updateFile.shouldInstall]
         if not updateFiles:
             self.showError('No updates', 'No updates for installation')
+
+            # success and version has NOT been updated
+            self.exitCode = SUCCESS
             return
+
+        self.exitCode = FAIL_UNEXPECTED  # catch anything unexpected
 
         n = 0
         updateFilesInstalled = []
@@ -580,13 +637,15 @@ class UpdateAgent(object):
             # # check that the last file to be updated is the Version.py
             # _allowVersionUpdate = True if (len(updateFiles) == 1 and updateFiles[0].filePath == VERSION_UPDATE_FILE) else False
 
-            # go through the list is updates and apply each
+            self.exitCode = FAIL_NOTUPDATED  # files not updated correctly
+
+            # go through the list is updates and apply each, ignoring Version.py
             for updateFile in updateFiles:
 
                 if self._updateProgressHandler:
                     self._updateProgressHandler()
 
-                # skip the version update file
+                # skip the version update file until the next pass
                 if updateFile.filePath == VERSION_UPDATE_FILE:
                     continue
 
@@ -594,6 +653,8 @@ class UpdateAgent(object):
                 n = self._updateSingleFile(n, updateFile, updateFilesInstalled)
 
             # check how many have been updated correctly
+            #   if n == all updates, okay with no version update
+            #   any lower => version.py still needs updating OR update errors
             ss = n != 1 and 's' or ''
             if n != len(updateFiles):
 
@@ -608,14 +669,25 @@ class UpdateAgent(object):
                     if n == len(updateFiles):
                         self.showInfo('Update%s installed' % ss, '%d update%s installed successfully' % (n, ss))
 
+                        # success and version has been updated
+                        # keep the last bits which would alternate 0|1 as the version-number increases
+                        self.exitCode = applicationVersion._bitHash()
+
                     else:
                         self.showError('Update problem', '%d update%s installed, %d not installed, see console for error messages' % (n, ss, len(updateFiles) - n))
                 else:
                     self.showError('Update problem', '%d update%s installed, %d not installed, see console for error messages' % (n, ss, len(updateFiles) - n))
+
             else:
                 self.showInfo('Update%s installed' % ss, '%d update%s installed successfully' % (n, ss))
+
+                # success and version has NOT been updated
+                self.exitCode = SUCCESS
+
         else:
             self.showError('No write permission', 'You do not have write permission in the CCPN installation directory')
+
+            self.exitCode = FAIL_WRITEERROR  # no write permission
 
         self.resetFromServer()
 
@@ -662,7 +734,26 @@ class UpdateAgent(object):
         for updateFile in self.updateFiles:
             updateFile.shouldInstall = True
 
-        return self.installChosen()
+        if done := self.installChosen():
+            for file in done:
+                fp = Path.aPath(file.fullFilePath)
+                if file.shouldInstall and \
+                        fp.suffix == '.' + ZIPFILE and file.fileDir == 'resources':
+                    # unzip as required
+                    if self._dryRun:
+                        self.showInfo('Unzipping', f'dry-run {file.fullFilePath} --> {file.installLocation}')
+                    else:
+                        try:
+                            # unpack relative to the root of the installation - leading '/' and '..' are checked by shutil
+                            self.showInfo('Unzipping', f'Unzipping {file.fullFilePath} --> {file.installLocation}')
+                            shutil.unpack_archive(file.fullFilePath, extract_dir=file.installLocation, format=ZIPFILE)
+                        except Exception as es:
+                            self.showError('Install Error', f'Could not unzip file {file.fullFilePath}: {es}')
+                            # need to discard the file?
+                            with suppress(OSError):
+                                fp.replace(fp.parent / '_' + fp.name)
+
+        return done
 
     def diffUpdates(self, updateFiles=None, write=sys.stdout.write):
 
@@ -697,17 +788,47 @@ class UpdateAgent(object):
                 write('No local copy of file\n')
 
 
-def testMain():
-    from ccpn.framework.Version import applicationVersion
-    import sys
-    import os
+def main(doCount=False, doVersion=False, dryRun=False):
+    """Main code.
+    Either:
+        return the number of updates for the current version,
+        return the version string,
+        or both,
+        or install the updates for the current version.
+    """
 
-    # installUpdates(applicationVersion.withoutRelease(), dryRun=False)
-    installUpdates(applicationVersion, dryRun=False)
+    exitCode = 0  # success
+    if doCount and doVersion:
+        try:
+            count = int(getUpdateCount(applicationVersion))
+            print(f'{count}, {applicationVersion}')
+        except Exception:
+            print(f'-1, {applicationVersion}')
 
+    elif doCount:
+        try:
+            count = int(getUpdateCount(applicationVersion))
+            print(f'{count}')
+        except Exception:
+            print('-1')
+
+    elif doVersion:
+        print(str(applicationVersion))
+
+    else:
+        exitCode = installUpdates(applicationVersion, dryRun=dryRun)
+
+    # test to assume that the micro version increments by one each time
+    # exitCode = applicationVersion._bitHash()
+
+    # code must be [0, 255] - 0 represents success
     if sys.platform[:3].lower() == 'win':
-        os._exit(0)
+        os._exit(exitCode)
+    else:
+        sys.exit(exitCode)
 
 
 if __name__ == '__main__':
-    testMain()
+    main(doCount=('--count' in sys.argv),
+         doVersion=('--version' in sys.argv),
+         dryRun=('--dry-run' in sys.argv))

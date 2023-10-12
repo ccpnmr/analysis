@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-07-07 11:55:59 +0100 (Fri, July 07, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-08-31 19:00:36 +0100 (Thu, August 31, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -615,7 +615,7 @@ class GuiBase(object):
             updatePopup.exec_()
 
             # if updates have been installed then popup the quit dialog with no cancel button
-            if updatePopup._numUpdatesInstalled > 0:
+            if updatePopup._updatesInstalled:
                 self.ui.mainWindow._closeWindowFromUpdate(disableCancel=True)
 
         else:

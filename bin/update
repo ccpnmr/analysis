@@ -1,13 +1,27 @@
 #!/usr/bin/env bash
 
+SUCCESS=0
+SUCCESS_VERSION=1
+SUCCESS_RELEASE=2
+SUCCESS_MICROUPDATE=4  # bit alternates between 0|1 when updating micro-version
+SUCCESS_MINORUPDATE=8  # --ditto-- minor-version
+SUCCESS_MAJORUPDATE=16
+FAIL_UNEXPECTED=32
+FAIL_NOTUPDATED=33
+FAIL_WRITEERROR=34
+MAX_COUNT=16
+
 # get the script file if symbolic
 _path="${BASH_SOURCE[0]}"
 
 # iterate through the symbolic links if needed
-for ii in {1..3}; do
+for _ in $(seq 3); do
     if [[ -d ${_path} ]]; then
         # change to absolute path
-        _path="$(cd "${_path}" || exit; pwd -P)"
+        _path="$(
+            cd "${_path}" || exit
+            pwd -P
+        )"
     fi
     _pathlink="$(readlink "${_path}")"
     _pathlink="${_pathlink:-${_path}}"
@@ -19,4 +33,30 @@ export CCPNMR_TOP_DIR
 UPDATE="${CCPNMR_TOP_DIR}"/src/python/ccpn/util/Update.py
 
 source "${CCPNMR_TOP_DIR}"/bin/paths.sh
-"${CONDA}"/bin/python -W ignore "${UPDATE}" $*
+
+lasterr=-1
+err=0
+for _ in $(seq ${MAX_COUNT}); do
+    "${CONDA}"/bin/python -W ignore "${UPDATE}" "$@"
+    err=$?
+
+    if [[ err -eq SUCCESS ]]; then
+        # updated with code that requires loop to terminate
+        #   could be called with switches that do other actions
+        break
+    elif [[ err -ge FAIL_UNEXPECTED ]]; then
+        # updated with code that requires loop to terminate
+        echo "--> there was an error updating: ${err}"
+        break
+    elif [[ err -eq lasterr ]]; then
+        # update was apparently successful but the version didn't increment by 1 in any field
+        echo "--> there was an issue updating version: ${err}"
+        break
+    fi
+
+    # version changed so may need to update again
+    lasterr=$((err))
+done
+
+# return the exit code from the update
+exit ${err}

@@ -283,7 +283,7 @@ class Gui(Ui):
     def _execUpdates(self):
         """Use the Update popup to execute any updates
         """
-        self.application._showUpdatePopup()
+        return self.application._showUpdatePopup()
 
     #-----------------------------------------------------------------------------------------
     # Helper methods

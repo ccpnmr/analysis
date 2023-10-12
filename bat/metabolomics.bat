@@ -1,29 +1,51 @@
 @echo off
-setlocal
+setlocal enabledelayedexpansion
 
 set MODULE=src\python\ccpn\AnalysisMetabolomics
+set /a FAIL_UNEXPECTED=32
 
+rem extract command-line parameters to pass to ./update
+set args=
+set /a n=0
+for %%a in (%*) do (
+    if "%%a"=="--auto-update" (
+        set autoUpdate=true
+    ) else (
+        set /a n+=1
+        set args=!args! %%a
+    )
+)
+
+rem iterate through and resolve the symbolic links if needed
 set CCPNMR_TOP_DIR=%~dpnx0
-set /a "_count=0"
+set /a _count=0
 :_countLoop
     call :isLink _SYM "%CCPNMR_TOP_DIR%"
     call :fileName _PATH "%CCPNMR_TOP_DIR%"
-    set "_FOUND="
-    FOR /F "tokens=2 delims=[]" %%G in ('"dir  /AL "%CCPNMR_TOP_DIR%"\.. 2^>nul | find "%_PATH%""') do set "_FOUND=%%G"
+    set _FOUND=
+    for /F "tokens=2 delims=[]" %%G in ('"dir  /AL "%CCPNMR_TOP_DIR%"\.. 2^>nul | find "%_PATH%""') do set _FOUND=%%G
     if defined _SYM if defined _FOUND call :AbsPath CCPNMR_TOP_DIR "%_FOUND%"
     call :AbsPath CCPNMR_TOP_DIR "%CCPNMR_TOP_DIR%"\..
 
-    set /a "_count=_count+1"
+    set /a _count=_count+1
     if %_count% lss 2 goto _countLoop
 
+rem get the required paths
 call "%CCPNMR_TOP_DIR%\bat\paths"
 
+rem update if required
+if "%autoUpdate%"=="true" (
+    call "%CCPNMR_TOP_DIR%\bat\update" %args%
+    if !errorlevel! geq %FAIL_UNEXPECTED% (
+        echo there was an issue auto-updating: !errorlevel!
+    )
+)
+
 set ENTRY_MODULE=%CCPNMR_TOP_DIR%\%MODULE%
-"%CONDA%\python.exe" -i -O -W ignore "%ENTRY_MODULE%" %*
+"%CONDA%\python.exe" -i -O -W ignore "%ENTRY_MODULE%" %argval%
 endlocal
 
-PAUSE
-exit /b
+exit /b !errorlevel!
 
 :AbsPath
     REM return absolute name of input path

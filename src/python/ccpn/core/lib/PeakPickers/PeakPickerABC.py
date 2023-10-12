@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-11 08:37:28 +0100 (Wed, October 11, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-12 08:07:00 +0100 (Thu, October 12, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -170,8 +170,8 @@ class PeakPickerABC(CcpNmrJson):
 
         if spectrum is None:
             raise ValueError('%s: spectrum is None' % self.__class__.__name__)
-        if not isinstance(spectrum, Spectrum):
-            raise ValueError('%s: spectrum is not of Spectrum class' % self.__class__.__name__)
+        # if not isinstance(spectrum, Spectrum):
+        #     raise ValueError('%s: spectrum is not of Spectrum class' % self.__class__.__name__)
 
         if spectrum.dimensionCount > 1 and self.onlyFor1D:
             raise ValueError('%s only works for 1D spectra' % self.__class__.__name__)

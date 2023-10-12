@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-10 16:27:30 +0100 (Tue, October 10, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-12 08:07:00 +0100 (Thu, October 12, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -2447,15 +2447,16 @@ def fetchPeakPicker(spectrum):
     from ccpn.core.lib.PeakPickers.PeakPicker1D import PeakPicker1D
     from ccpn.core.lib.PeakPickers.PeakPickerNd import PeakPickerNd
     from ccpn.core.lib.PeakPickers.PeakPickerABC import getPeakPickerTypes, PEAKPICKERPARAMETERS
+    from ccpn.framework.Preferences import getPreferences
 
     if spectrum is None:
         raise ValueError('fetchPeakPicker: spectrum is None')
     if not isinstance(spectrum, Spectrum):
         raise ValueError('fetchPeakPicker: spectrum is not of Spectrum class')
 
-    project = spectrum.project
-    application = project.application
-    preferences = application.preferences
+    # project = spectrum.project
+    # application = project.application
+    preferences = getPreferences()
 
     peakPickers = getPeakPickerTypes()
     default1DPickerType = preferences.general.peakPicker1d

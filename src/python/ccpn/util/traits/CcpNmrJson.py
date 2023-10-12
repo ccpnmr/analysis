@@ -116,7 +116,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-11 08:37:29 +0100 (Wed, October 11, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-12 08:07:00 +0100 (Thu, October 12, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -386,8 +386,8 @@ class CcpNmrJson(TraitBase):
         defaults[Constants.CLASSNAME] = self.__class__.__name__
         defaults[Constants.CLASSVERSION] = self.classVersion
         defaults[Constants.CLASSINFO] = self.classInfo
-        defaults[Constants.OBJECT_ID] = self._id
-        # Added by the topobject that saved the file
+        defaults[Constants.OBJECT_ID] = self._getCcpNmrJsonId()
+        # Added by the root-object that saved the file
         # defaults[Constants.USER] = getpass.getuser()
         # defaults[Constants.LASTPATH] = 'undefined'
         # defaults[Constants.TIMESTAMP] = str(now())
@@ -434,8 +434,7 @@ class CcpNmrJson(TraitBase):
     # Dict to track encoded/decoded objects
     _objectDict = {}
 
-    @property
-    def _id(self) -> str:
+    def _getCcpNmrJsonId(self) -> str:
         """:return a Hex representation of id as string
         """
         return str(hex(id(self)))
@@ -683,7 +682,7 @@ class CcpNmrJson(TraitBase):
         if self._encodeAsJson_3_0:
             return self._encode_3_0()
 
-        _id = self._id
+        _id = self._getCcpNmrJsonId()
         self.setJsonMetadata(Constants.OBJECT_ID, _id, force=True)
 
         _data = {}
@@ -718,7 +717,10 @@ class CcpNmrJson(TraitBase):
         :return self as 3.0 encoded dict to maintain compatiblity with earlier versions;
         i.e. allowing those versions to read it and determine save-version
         """
-        _id = self._id
+        _id = self._getCcpNmrJsonId()
+        if _id in CcpNmrJson._objectDict:
+            raise RuntimeError(f'encode_3_0(): object can only be encoded once in JSON 3.0')
+
         self.setJsonMetadata(Constants.OBJECT_ID, _id, force=True)
         CcpNmrJson._objectDict[_id] = self
         traitsToEncode = [Constants.METADATA] + [traitName for traitName in self.keys() if self._saveTraitToJson(traitName)]
@@ -901,9 +903,9 @@ class CcpNmrJson(TraitBase):
         if (fileHandler := _fileHandlers.get(extension)) is None:
             raise RuntimeError('Unable to save; no fileHandler defined for extension "%s"' % extension)
 
-        self._metadata[Constants.USER] = getpass.getuser()
-        self._metadata[Constants.LASTPATH] = str(path)
-        self._metadata[Constants.TIMESTAMP] = str(now())
+        self.setJsonMetadata(Constants.USER, getpass.getuser(), force=True)
+        self.setJsonMetadata(Constants.LASTPATH, str(path), force=True)
+        self.setJsonMetadata(Constants.TIMESTAMP, str(now()), force=True)
         fileHandler.save(self, path, **kwds)
 
     def restore(self, path, **kwds):
@@ -924,7 +926,7 @@ class CcpNmrJson(TraitBase):
             raise RuntimeError('Unable to restore; no fileHandler defined for extension "%s"' % extension)
 
         fileHandler.restore(self, path, **kwds)
-        self._metadata[Constants.LASTPATH] = str(path)
+        self.setJsonMetadata(Constants.LASTPATH, str(path), force=True)
         return self
 
 # end class

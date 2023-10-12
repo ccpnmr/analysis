@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-11 16:33:55 +0100 (Wed, October 11, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-12 16:56:18 +0100 (Thu, October 12, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -489,6 +489,31 @@ class SeriesAnalysisABC(ABC):
 
     def plotResults(self, *args, **kwargs):
         pass
+
+    def _getFittedCurvesData(self, fittedCurvePoinCount=1000):
+        """ Get the fitted curves coordinates as dataframe.
+        Curves are recreated from the current fitting model and output resultDataTable.
+        """
+        outputData = self.resultDataTable
+        model = self.currentFittingModel
+        df = outputData.data
+        pids = df[sv.COLLECTIONPID].unique()
+        xs = df[model.xSeriesStepHeader].values
+        initialPoint = min(xs)
+        finalPoint = max(xs)
+        xf = np.linspace(initialPoint, finalPoint, fittedCurvePoinCount)
+        resultDf = pd.DataFrame()
+        resultDf.index = xf
+        for ix, pid in enumerate(pids):
+            filteredDf = df[df[sv.COLLECTIONPID] == pid]
+            resCode = filteredDf[sv.NMRRESIDUECODE].values[-1]
+            func = model.getFittingFunc(model)
+            funcArgs = model.modelArgumentNames
+            argsFit = filteredDf.iloc[0][funcArgs]
+            fittingArgs = argsFit.astype(float).to_dict()
+            yf = func(xf, **fittingArgs)
+            resultDf[pid] = yf
+        return resultDf
 
     def __init__(self):
         self.project = getProject()

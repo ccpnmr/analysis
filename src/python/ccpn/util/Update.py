@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-12 15:28:36 +0100 (Thu, October 12, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-12 16:29:14 +0100 (Thu, October 12, 2023) $"
 __version__ = "$Revision: 3.2.0.1 $"
 #=========================================================================================
 # Created
@@ -738,7 +738,7 @@ class UpdateAgent:
             for file in done:
                 fp = Path.aPath(file.fullFilePath)
                 if file.shouldInstall and \
-                        fp.suffix == '.' + ZIPFILE and file.fileDir == 'resources':
+                        fp.suffix == '.' + ZIPFILE and file.fileDir == '.updates':
                     # unzip as required
                     if self._dryRun:
                         self.showInfo('Unzipping', f'dry-run {file.fullFilePath} --> {file.installLocation}')

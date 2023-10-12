@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 12:06:24 +0100 (Fri, June 09, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-10-11 18:55:44 +0100 (Wed, October 11, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1152,7 +1152,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
             if cls not in Project._allLinkedWrapperClasses:
                 Project._allLinkedWrapperClasses.append(cls)
 
-                classFullName = repr(cls)[7:-2]
+                classFullName = repr(cls)[7:-1]
 
                 # add getCls in all ancestors
                 funcName = 'get' + cls.className
@@ -1164,7 +1164,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
                     func.__doc__ = "Get contained %s object by relative ID" % classFullName
                     setattr(ancestor, funcName, func)
-                    _allGetters.append(f'{ancestor.__name__}.{funcName}')
+                    _allGetters.setdefault(ancestor.__name__, []).append((1, funcName))
 
                 # Add descendant links
                 linkName = cls._pluralLinkName
@@ -1215,7 +1215,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
                     #     continue
 
                     setattr(ancestor, linkName, prop)
-                    _allGetters.append(f'{ancestor.__name__}.{linkName}')
+                    _allGetters.setdefault(ancestor.__name__, []).append((0, linkName))
 
                 # Add standard Notifiers:
                 if cls._registerClassNotifiers:

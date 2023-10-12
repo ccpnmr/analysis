@@ -418,6 +418,8 @@ from ccpn.core.Atom import Atom
 Atom._registerCoreClass()
 
 from ccpn.core.Bond import Bond
+
+
 Bond._registerCoreClass()
 
 from ccpn.core.Complex import Complex
@@ -567,6 +569,8 @@ from ccpn.ui.gui.lib.PeakListView import PeakListView
 PeakListView._registerCoreClass()
 
 from ccpn.ui._implementation.PeakView import PeakView
+
+
 # from ccpn.ui.gui.lib.PeakView import PeakView
 
 
@@ -597,10 +601,37 @@ from ccpn.core._implementation._PeakCluster import _PeakCluster
 
 _PeakCluster._registerCoreClass()
 
-_allGetters = []
+_allGetters = {}
 Project._linkWrapperClasses(_allGetters=_allGetters)
 
-# print('\n    '.join(sorted(_allGetters)))
+# for grp, stubs in sorted(_allGetters.items(), key=lambda val: val[0]):
+#     print(f'~~~~~~~~~~~~~~~~~~~~~~~~~\n{grp}')
+#     for num, stub in sorted(stubs):
+#         if stub.startswith('get'):
+#             print(f'''def {stub}(self) -> '{stub[3:]} | None':
+#     """STUB: hot-fixed later
+#     :return: an instance of {stub[3:]}, or None
+#     """
+#     return []
+# '''
+#                   )
+#         else:
+#             if stub == 'spectra':
+#                 lbl = 'Spectrum'
+#             elif stub == 'axes':
+#                 lbl = 'Axis'
+#             elif stub == 'complexes':
+#                 lbl = 'Complex'
+#             else:
+#                 lbl = stub[0].upper() + (stub[1:-1] if stub.endswith('s') else stub[1:])
+#             print(f'''@property
+# def {stub}(self) -> list['{lbl}']:
+#     """STUB: hot-fixed later
+#     :return: a list of {stub} in the {grp}
+#     """
+#     return []
+# '''
+#                   )
 
 #=========================================================================================
 # current list of getters for core objects - inserted by _linkWrapperClasses

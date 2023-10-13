@@ -95,7 +95,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-11 09:11:06 +0100 (Wed, October 11, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-13 10:24:11 +0100 (Fri, October 13, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -143,7 +143,6 @@ from ccpn.util.DataEnum import DataEnum
 from ccpn.util.Path import aPath, Path
 from ccpn.util.Logging import getLogger
 
-from ccpn.framework.Application import getApplication
 
 # _VALIDATOR = 'Validator'
 
@@ -190,7 +189,7 @@ class _CcpNmrTrait(object):
         from ccpn.util.traits.CcpNmrJson import Constants
 
         handler = None
-        # check for trait specific handler in metadata
+        # check for trait specific handler in metadata of trait
         if (handler := self.get_metadata(Constants.JSONHANDLER))is not None:
             # we found a handler in the metadata
             pass
@@ -200,7 +199,7 @@ class _CcpNmrTrait(object):
             handler = getattr(self, Constants.JSONHANDLER)
 
         if handler is None:
-            # This can only happen if some code delibrately removed the below definition!
+            # This can only happen if some code deliberately removed the below definition!
             raise RuntimeError(f'No json handler for trait {self.name}')
 
         return handler(obj=obj, trait=self)

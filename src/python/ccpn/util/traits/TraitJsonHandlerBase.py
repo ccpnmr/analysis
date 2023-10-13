@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-10 16:27:31 +0100 (Tue, October 10, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-13 10:24:12 +0100 (Fri, October 13, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -99,23 +99,20 @@ class ContainerJsonHandlerABC(TraitJsonHandlerBase):
 
         _trait = self.trait.itemTrait or self.trait.valueTrait
         if _trait is not None:
-            pass
+            return _trait.getJsonHandler(obj=parent)
 
         elif isinstance(item, CcpNmrJson):
             # for encode
             _trait = OWTraits(allow_none=True)
+            return _trait.getJsonHandler(obj=parent)
 
         elif isinstance(item, (list, dict)) and CcpNmrJson._isEncodedObject(item):
             # for decode
             _trait = OWTraits(allow_none=True)
-
-        else:
-            pass
-
-        if _trait is None:
-            return None
-        else:
             return _trait.getJsonHandler(obj=parent)
+
+        else:
+            return None
 
     def encodeItem(self, parent, item):
         """encode item of the container value;

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-09 12:09:37 +0100 (Mon, October 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-13 19:21:30 +0100 (Fri, October 13, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -49,6 +49,8 @@ class TraitBase(HasTraits):
             value = self._trait_values[trait]
         except KeyError:
             # No values set; use getattr as this will trigger the machinery
+            # if trait=='temperature':
+            #     pass
             value = getattr(self, trait)
         return value
 
@@ -190,11 +192,13 @@ class TraitBase(HasTraits):
         """Print all traits"""
         print('-------', self, '-------')
         for trait, value in self.items():
-            info = self.getMetadata(trait, key='info', default='')
-            if len(info) > 0 and printInfo:
-                print('%-20s : %-40s (%s)' % (trait, value, info))
-            else:
-                print('%-20s : %s' % (trait, value))
+            doPrint = self.getMetadata(trait, key='doPrint', default=True)
+            if doPrint:
+                info = self.getMetadata(trait, key='info', default='')
+                if len(info) > 0 and printInfo:
+                    print('%-20s : %-40s (%s)' % (trait, value, info))
+                else:
+                    print('%-20s : %s' % (trait, value))
 
     # --------------------------------------------------------------------------------------------
 

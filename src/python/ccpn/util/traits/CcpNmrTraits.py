@@ -95,7 +95,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-13 10:24:11 +0100 (Fri, October 13, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-13 19:21:30 +0100 (Fri, October 13, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -269,8 +269,8 @@ class CInt(Int):
 
 
 class Float(_Float, _CcpNmrTrait):
-    def __init__(self, **kwargs):
-        _Float.__init__(self, **kwargs)
+    def __init__(self, default_value=Undefined, allow_none=False, **kwargs):
+        _Float.__init__(self, default_value=default_value, allow_none=allow_none, **kwargs)
         _CcpNmrTrait.__init__(self)
 
     def info(self):

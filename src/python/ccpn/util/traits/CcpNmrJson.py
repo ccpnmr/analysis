@@ -119,7 +119,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-13 10:24:11 +0100 (Fri, October 13, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-13 12:59:08 +0100 (Fri, October 13, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -459,10 +459,14 @@ class CcpNmrJson(TraitBase):
     def _getClassFromDict(theDict):
         """Return the class as defined in the objectdata that should be in theDict
         """
-        if (classdata := theDict.get(Constants.OBJECTDATA)) is None:
+        if (_objectdata := theDict.get(Constants.OBJECTDATA)) is None:
             raise ValueError(f'theDict does not contain any {Constants.OBJECTDATA}')
 
-        if (className := classdata.get(Constants.CLASSNAME)) is None:
+        if not isinstance(_objectdata, dict):
+            # This should really never happen, but while developing it occured
+            raise RuntimeError(f'An error occured getting _objectdata; got {_objectdata}')
+
+        if (className := _objectdata.get(Constants.CLASSNAME)) is None:
             raise ValueError(f'{Constants.OBJECTDATA} does not contain the classname of a CcpNmrJson (sub-)type')
 
         if (cls := CcpNmrJson._registeredClasses.get(className, None)) is None:
@@ -502,17 +506,31 @@ class CcpNmrJson(TraitBase):
 
     @staticmethod
     def _newObjectFromDict(theData, **kwds):
-        """Return new object as defined by theData; kwds are passed to the class instantiation
-        requires presence of metadata and registered classname
+        """Return new object as defined by theData;
+        kwds are passed to the class instantiation
+        requires presence of _objectdata and registered classname
         CCPNMRINTERNAL: used in recursive handler classes (see below)
         """
         theDict = CcpNmrJson._updateToJson3_1(theData)
-        cls = CcpNmrJson._getClassFromDict(theDict)
-        obj = cls(**kwds)
-        theDict = obj._update(theDict)
-        # decoding might return an existing obj;
-        obj = obj._decode(theDict)
-        return obj
+        if (_objectdata := theDict.get(Constants.OBJECTDATA, None)) is None:
+            # This should never happen
+            raise RuntimeError(f'_newObjectFromDict(): unable to obtain _objectdata')
+
+        if isinstance(_objectdata, str):
+            # This is an object that already was encountered before;
+            # should be in the objectDict
+            if _objectdata not in CcpNmrJson._objectDict:
+                raise RuntimeError(f'_newObjectFromDict(): unable to obtain object {_objectdata}')
+            return CcpNmrJson._objectDict[_objectdata]
+
+        else:
+            # we need create this object and decode theDict
+            cls = CcpNmrJson._getClassFromDict(theDict)
+            obj = cls(**kwds)
+            theDict = obj._update(theDict)
+            # decoding might return an existing obj;
+            obj = obj._decode(theDict)
+            return obj
 
     @staticmethod
     def newObjectFromJson(path=None, jsonString=None, **kwds):
@@ -754,7 +772,7 @@ class CcpNmrJson(TraitBase):
             raise RuntimeError(f'encode_3_0(): object can only be encoded once in JSON 3.0')
         CcpNmrJson._objectDict[_id] = self
 
-        # store classdata in the _metadata dict
+        # store _objectdata in the _metadata dict
         _objectdata = self._getObjectDataDict()
         for key, value in _objectdata.items():
             self.setJsonMetadata(key, value, force=True)
@@ -807,7 +825,7 @@ class CcpNmrJson(TraitBase):
             # reset the _objectDict as we are done trying
             CcpNmrJson._objectDict = {}
             getLogger().debug(f'fromJson: while decoding {self} as JSON an exception was raised: {es}')
-            raise RuntimeError(f'While decoding {self} as JSON: {es}')
+            raise RuntimeError(f'While decoding {self} from JSON an error occured: {es}')
 
         return self
 
@@ -827,6 +845,9 @@ class CcpNmrJson(TraitBase):
         :return Updated self or referenced object
         """
         _className = self.__class__.__name__
+
+        if not isinstance(dataDict, dict):
+            raise RuntimeError(f'decode(): invalid dataDict; got {dataDict}')
 
         # check the class data
         if (_objectdata := dataDict.get(Constants.OBJECTDATA), None) is None:

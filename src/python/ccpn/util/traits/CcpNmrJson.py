@@ -119,7 +119,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-13 12:59:08 +0100 (Fri, October 13, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-13 16:52:46 +0100 (Fri, October 13, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -267,7 +267,7 @@ def fileHandler(extension, toString, fromString):
 
 def update(updateHandler, push=False):
     """Decorator to register updateHandler function
-    It also defines the _update method and _updateHandlers list for the class. 
+    It defines the _updateHandlers list for the class.
 
     :param updateHandler: a function to update the dataDict with profile:
     
@@ -371,6 +371,8 @@ class CcpNmrJson(TraitBase):
 
     _encodeAsJson_3_0 = False  # Encode object in json 3.0 format; for backward compatibility
                                # (e.g. DataStore, ProjectHistory). This way, older program versions can restore
+
+    initDefaults = {}  # Any arguments given to class instantiation
 
     #--------------------------------------------------------------------------------------------
     # end to be subclassed
@@ -524,10 +526,14 @@ class CcpNmrJson(TraitBase):
             return CcpNmrJson._objectDict[_objectdata]
 
         else:
-            # we need create this object and decode theDict
+            # we need create this object and update theDict
             cls = CcpNmrJson._getClassFromDict(theDict)
-            obj = cls(**kwds)
-            theDict = obj._update(theDict)
+            theDict = cls._update(cls, theDict)
+
+            _kwds = cls.initDefaults.copy()
+            _kwds.update(kwds)
+            obj = cls(**_kwds)
+
             # decoding might return an existing obj;
             obj = obj._decode(theDict)
             return obj
@@ -556,7 +562,13 @@ class CcpNmrJson(TraitBase):
         else:
             raise RuntimeError('newObjectFromJson: undefined path and jsonString')
 
+        # re-initialise the class objectDict
+        CcpNmrJson._objectDict = {}
+        CcpNmrJson._isRestoring = True
         obj = CcpNmrJson._newObjectFromDict(theData, **kwds)
+        # re-initialise the class objectDict
+        CcpNmrJson._objectDict = {}
+        CcpNmrJson._isRestoring = False
         return obj
 
     #--------------------------------------------------------------------------------------------
@@ -613,6 +625,17 @@ class CcpNmrJson(TraitBase):
             # This affords the necesary safeguarding against accidentially overwriting
             # any protected keys; also checks for JSON serilisation
             self.setJsonMetadata(key=key, value=value)
+
+    #--------------------------------------------------------------------------------------------
+
+    # (globel) class flag to indicate that the object is being restored; maintained by _decode()
+    _isRestoring = False
+
+    @property
+    def isRestoring(self) -> bool:
+        """flag to indicate if restoring, i.e. decoding, is in progress
+        """
+        return self._isRestoring
 
     def duplicate(self, **metadata):
         """Convenience method to return a duplicate of self, using
@@ -816,14 +839,19 @@ class CcpNmrJson(TraitBase):
         try:
             # re-initialise the class objectDict
             CcpNmrJson._objectDict = {}
+            CcpNmrJson._isRestoring = True
             # Decodes the data
             self._decode(dataDict)
             # reset the _objectDict as we are done
             CcpNmrJson._objectDict = {}
+            CcpNmrJson._isRestoring = False
+
         except Exception as es:
             # GWV: Log this, as the error might be caught elsewhere
             # reset the _objectDict as we are done trying
             CcpNmrJson._objectDict = {}
+            CcpNmrJson._isRestoring = False
+
             getLogger().debug(f'fromJson: while decoding {self} as JSON an exception was raised: {es}')
             raise RuntimeError(f'While decoding {self} from JSON an error occured: {es}')
 
@@ -870,19 +898,24 @@ class CcpNmrJson(TraitBase):
         # need to do this here, as handling of traits might recurse and then need to skip self.
         CcpNmrJson._objectDict[_storedId] = self
 
-        # decode the metadata
-        if not Constants.METADATA in dataDict:
-            raise RuntimeError(f'{_className}._decode(): unable to get {Constants.METADATA} from dataDict')
-        self._decodeTrait(Constants.METADATA, dataDict)
+        try:
+            # decode the metadata
+            if not Constants.METADATA in dataDict:
+                raise RuntimeError(f'{_className}._decode(): unable to get {Constants.METADATA} from dataDict')
+            self._decodeTrait(Constants.METADATA, dataDict)
 
-        # Handle the data
-        if (_data := dataDict.get(Constants.DATA), None) is None:
-            raise RuntimeError(f'{_className}._decode(): unable to get {Constants.DATA} from dataDict')
+            # Handle the data
+            if (_data := dataDict.get(Constants.DATA), None) is None:
+                raise RuntimeError(f'{_className}._decode(): unable to get {Constants.DATA} from dataDict')
 
-        # Update currently defined traits
-        for traitName in self.keys():
-            if traitName in _data:
-                self._decodeTrait(traitName, _data)
+            # Update currently defined traits
+            for traitName in self.keys():
+                if traitName in _data:
+                    self._decodeTrait(traitName, _data)
+
+        except Exception as es:
+            getLogger().debug(f'decode(): an error occurred: {es}')
+            raise es
 
         return self
 
@@ -945,26 +978,31 @@ class CcpNmrJson(TraitBase):
 
             return _newData
 
-        else:
-            # No change: return unaltered
+        elif isinstance(theData, dict) and \
+                theData.get(Constants.CCPNMRJSON) is not None:
+            # 3.1.0 No change: return unaltered
             return theData
 
-    def _update(self, dataDict) -> dict:
+        else:
+            raise RuntimeError(f'updating JSON 3.0 to 3.1.0: unrecognised data {theData}')
+
+    def _update(cls, dataDict) -> dict:
         """Update dataDict using  the handlers
         :returns updated dataDict
         :raises RuntimeError
         """
+        # this should not be necessary, but just a check
+        dataDict = cls._updateToJson3_1(dataDict)
 
-        if hasattr(self, Constants.UPDATEHANDLERS):
+        if hasattr(cls, Constants.UPDATEHANDLERS):
             # We have updates
-            for updateHandler in getattr(self, Constants.UPDATEHANDLERS):
-                dataDict = updateHandler(self, dataDict)
+            for updateHandler in getattr(cls, Constants.UPDATEHANDLERS):
+                dataDict = updateHandler(cls, dataDict)
 
         # # check if all is ok
         currentVersion = VersionString(dataDict[Constants.CCPNMRJSON])
-        if currentVersion < self._jsonVersion:
-            raise RuntimeError('invalid version "%s" of JSON data; cannot restore %s' %
-                               (currentVersion, self))
+        if currentVersion < cls._jsonVersion:
+            raise RuntimeError(f'invalid version {cls} of JSON data; should be >= {cls._jsonVersion}')
         return dataDict
 
     def save(self, path, **kwds):

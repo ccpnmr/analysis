@@ -97,7 +97,7 @@ CcpNmrJson(TraitBase):
 
 
     _ccpNmrJson: the CcpNmrJson identifier
-    _objectdata: dict with CLASSNAME, CLASSVERSION, CLASSINFO, OBJECT_ID keys
+    _objectdata: dict with CLASSNAME, CLASSVERSION, CLASSINFO, OBJECT_UID keys
     _metadata: dict with USER, LASTPATH, TIMESTAMP (+ optional others)
     _data: a dict of (taitName, encoded-value) pairs
 
@@ -119,7 +119,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-14 11:04:06 +0100 (Sat, October 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-14 12:22:11 +0100 (Sat, October 14, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -160,24 +160,24 @@ class Constants(object):
 
     # the json keys:  _objectData, _metadata, _data
     CCPNMRJSON = '_ccpNmrJson'
+    OBJECT_UID = '_uid'
     OBJECTDATA = '_objectdata'
     METADATA = '_metadata'
     DATA = '_data'
-    JSON_KEYS = [CCPNMRJSON, OBJECTDATA, METADATA, DATA]
+    JSON_KEYS = [CCPNMRJSON, OBJECT_UID, OBJECTDATA, METADATA, DATA]
 
     # used in _objectdata dict
     CLASSNAME = 'className'
     CLASSVERSION = 'classVersion'
     CLASSINFO = 'classInfo'
-    OBJECT_ID = '_id'
 
     # used in _metadata dict
     JSONVERSION = 'jsonVersion'  # 3.0 def
     USER = 'user'
     LASTPATH = 'lastPath'
     TIMESTAMP = 'timestamp'
-    # 'reserved' metadata keys
-    METADATA_KEYS = (JSONVERSION, USER, LASTPATH, TIMESTAMP, OBJECT_ID)
+    # 'reserved' metadata keys; some for backward 3.0 compatibility
+    METADATA_KEYS = (JSONVERSION, USER, LASTPATH, TIMESTAMP, OBJECT_UID)
 # end class
 
 
@@ -392,7 +392,7 @@ class CcpNmrJson(TraitBase):
     #     defaults[Constants.CLASSNAME] = self.__class__.__name__
     #     defaults[Constants.CLASSVERSION] = self.classVersion
     #     defaults[Constants.CLASSINFO] = self.classInfo
-    #     defaults[Constants.OBJECT_ID] = self._getCcpNmrJsonId()
+    #     defaults[Constants.OBJECT_UID] = self._getCcpNmrJsonId()
     #     # Added by the root-object that saved the file
     #     # defaults[Constants.USER] = getpass.getuser()
     #     # defaults[Constants.LASTPATH] = 'undefined'
@@ -453,8 +453,8 @@ class CcpNmrJson(TraitBase):
         result = {}
         result[Constants.CLASSNAME] = self.__class__.__name__
         result[Constants.CLASSVERSION] = self.classVersion
-        result[Constants.CLASSINFO] = self.classInfo
-        result[Constants.OBJECT_ID] = self._getUid()
+        if self.classInfo is not None:
+            result[Constants.CLASSINFO] = self.classInfo
         return result
 
     #--------------------------------------------------------------------------------------------
@@ -746,18 +746,15 @@ class CcpNmrJson(TraitBase):
         if self._encodeAsJson_3_0:
             return self._encode_3_0()
 
-        # self.setJsonMetadata(Constants.OBJECT_ID, _id, force=True)
-
-        _id = self._getUid()
-        _data = {}
-        if _id in CcpNmrJson._objectDict:
+        _uid = self._getUid()
+        if _uid in CcpNmrJson._objectDict:
             # The data for this object have already been encoded; No need to do it again
             # create the the encodedData dict;
-            # set OBJECTDATA to the _id and metdadat and data to None, to indicate a reference
-            # to the already encoded object
+            # set OBJECT_UID to the _uid and objectdata, metdadata and data to None.
             _encodedData = {}
             _encodedData[Constants.CCPNMRJSON] = self._jsonVersion
-            _encodedData[Constants.OBJECTDATA] = _id
+            _encodedData[Constants.OBJECT_UID] = _uid
+            _encodedData[Constants.OBJECTDATA] = None
             _encodedData[Constants.METADATA] = None
             _encodedData[Constants.DATA] = None
             return _encodedData
@@ -765,7 +762,7 @@ class CcpNmrJson(TraitBase):
         else:
             # Store the object-id for reference usage; need to do this here at the top,
             # as handling of traits might recurse and encounter self again.
-            CcpNmrJson._objectDict[_id] = self
+            CcpNmrJson._objectDict[_uid] = self
 
             _tmp, _metadata = self._encodeTrait(Constants.METADATA)
 
@@ -781,6 +778,7 @@ class CcpNmrJson(TraitBase):
             # create the the encodedData dict
             _encodedData = {}
             _encodedData[Constants.CCPNMRJSON] = self._jsonVersion
+            _encodedData[Constants.OBJECT_UID] = _uid
             _encodedData[Constants.OBJECTDATA] = self._getObjectDataDict()
             _encodedData[Constants.METADATA] = _metadata
             _encodedData[Constants.DATA] = _data
@@ -792,16 +790,17 @@ class CcpNmrJson(TraitBase):
         :return self as 3.0 encoded dict to maintain compatiblity with earlier versions;
         i.e. allowing those versions to read it and determine save-version
         """
-        _id = self._getUid()
-        if _id in CcpNmrJson._objectDict:
+        _uid = self._getUid()
+        if _uid in CcpNmrJson._objectDict:
             raise RuntimeError(f'encode_3_0(): object can only be encoded once in JSON 3.0')
-        CcpNmrJson._objectDict[_id] = self
+        CcpNmrJson._objectDict[_uid] = self
 
         # store _objectdata in the _metadata dict
         _objectdata = self._getObjectDataDict()
         for key, value in _objectdata.items():
             self.setJsonMetadata(key, value, force=True)
         self.setJsonMetadata(Constants.JSONVERSION, 3.0, force=True)
+        self.setJsonMetadata(Constants.OBJECT_UID, _uid, force=True)
 
         # Encode 3.0 style; i.e. a list of (traitName, encoded-value) tuples
         traitsToEncode = [Constants.METADATA] + [traitName for traitName in self.keys() if self._saveTraitToJson(traitName)]
@@ -879,38 +878,41 @@ class CcpNmrJson(TraitBase):
         if not isinstance(dataDict, dict):
             raise RuntimeError(f'decode(): invalid dataDict; got {dataDict}')
 
-        # check the class data
+        if not Constants.OBJECT_UID in dataDict:
+            raise RuntimeError(f'{_className}._decode(): unable to get {Constants.OBJECT_UID} from dataDict')
+        _uid = dataDict[Constants.OBJECT_UID]
+
+        # check the _uid; can be None because of 3.0 encoding!
+        if _uid is not None and _uid in CcpNmrJson._objectDict:
+            # we have encountered an obj that already was decoded;
+            # get it and return
+            return CcpNmrJson._objectDict[_uid]
+
+        # fix _uid if it was None ( 3.0 encoding)
+        if _uid is None:
+            _uid = self._getUid()
+
+        # check the object data
         if (_objectdata := dataDict.get(Constants.OBJECTDATA), None) is None:
             raise RuntimeError(f'{_className}._decode(): unable to get {Constants.OBJECTDATA} from dataDict')
 
-        if isinstance(_objectdata, str):
-            # we have encountered an obj that already was decoded; _objectdata is the storedId
-            # Check: _storedId should be in the_objectDict
-            if not _objectdata in CcpNmrJson._objectDict:
-                raise RuntimeError(f'{_className}._decode(): object {_objectdata} referenced but no data retrievable')
-            return CcpNmrJson._objectDict[_objectdata]
+        # check the metadata
+        if (_metadata := dataDict.get(Constants.METADATA), None) is None:
+            raise RuntimeError(f'{_className}._decode(): unable to get {Constants.METADATA} from dataDict')
 
-        elif isinstance(_objectdata, dict):
-            _storedId = _objectdata.get(Constants.OBJECT_ID)
-
-        else:
-            raise TypeError(f'{_className}._decode(): invalid {Constants.OBJECTDATA}; got {_objectdata}')
+        # check the data
+        if (_data := dataDict.get(Constants.DATA), None) is None:
+            raise RuntimeError(f'{_className}._decode(): unable to get {Constants.DATA} from dataDict')
 
         # We need to decode; Store the object-id for future reference usage;
         # need to do this here, as handling of traits might recurse and then need to skip self.
-        CcpNmrJson._objectDict[_storedId] = self
+        CcpNmrJson._objectDict[_uid] = self
 
         try:
             # decode the metadata
-            if not Constants.METADATA in dataDict:
-                raise RuntimeError(f'{_className}._decode(): unable to get {Constants.METADATA} from dataDict')
             self._decodeTrait(Constants.METADATA, dataDict)
 
-            # Handle the data
-            if (_data := dataDict.get(Constants.DATA), None) is None:
-                raise RuntimeError(f'{_className}._decode(): unable to get {Constants.DATA} from dataDict')
-
-            # Update currently defined traits
+            # Handle the data; Update currently defined traits
             for traitName in self.keys():
                 if traitName in _data:
                     self._decodeTrait(traitName, _data)
@@ -940,6 +942,14 @@ class CcpNmrJson(TraitBase):
 
             if (_jsonVersion := _metaData.get(Constants.JSONVERSION, None)) is None:
                 raise RuntimeError(f'No {Constants.JSONVERSION}: The data do not represent a valid JSON encoded 3.0 object')
+
+            # Not all 3.0 have a _uid; i.e. the do now if generated later for backward
+            # compatibility, but not if originating from previous code
+            if Constants.OBJECT_UID in _metaData:
+                _uid = _metaData[Constants.OBJECT_UID]
+                del _metaData[Constants.OBJECT_UID]
+            else:
+                _uid = None
 
             # Should be json 3.0 float
             if not isinstance(_jsonVersion, float) or _jsonVersion != 3.0:
@@ -974,6 +984,7 @@ class CcpNmrJson(TraitBase):
             # we are now at 3.1.0
             _newData = {}
             _newData[Constants.CCPNMRJSON] = '3.1.0'
+            _newData[Constants.OBJECT_UID] = _uid
             _newData[Constants.OBJECTDATA] = _objectdata
             _newData[Constants.METADATA] = _metaData
             _newData[Constants.DATA] = _data

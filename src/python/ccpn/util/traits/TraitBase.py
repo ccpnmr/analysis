@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-13 19:21:30 +0100 (Fri, October 13, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-14 17:28:57 +0100 (Sat, October 14, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,7 @@ class TraitBase(HasTraits):
     """
 
     keysInOrder = True   # If True, return key in order defined by _traitOrder attribute
-                         # of the keys
+                         # of the keys; can bet put at end by traitAtEnd tag
 
     def getTraitValue(self, trait):
         """convenience (to complement setTraitValue)
@@ -132,9 +132,16 @@ class TraitBase(HasTraits):
         """get keys (object only), optionally filtering for metadata
         """
         if self.keysInOrder:
-            items = [(val._traitOrder, key) for key,val in self.class_traits(**metadata).items()]
-            items.sort()
-            keys = [key for val,key in items]
+            frontKeys = [(trait._traitOrder, key) for key,trait in self.class_traits(**metadata).items()
+                          if not 'traitAtEnd' in trait.metadata
+                        ]
+            frontKeys.sort()
+            endKeys = [(trait._traitOrder, key) for key,trait in self.class_traits(**metadata).items()
+                        if 'traitAtEnd' in trait.metadata
+                      ]
+            endKeys.sort()
+            keys = [key for val,key in frontKeys] + [key for val,key in endKeys]
+
         else:
             keys = [key for key in self.class_traits(**metadata).keys()]
             keys.sort()

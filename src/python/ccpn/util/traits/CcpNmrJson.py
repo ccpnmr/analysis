@@ -119,7 +119,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-14 12:22:11 +0100 (Sat, October 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-14 17:28:57 +0100 (Sat, October 14, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -160,7 +160,7 @@ class Constants(object):
 
     # the json keys:  _objectData, _metadata, _data
     CCPNMRJSON = '_ccpNmrJson'
-    OBJECT_UID = '_uid'
+    OBJECT_UID = '_json_uid'
     OBJECTDATA = '_objectdata'
     METADATA = '_metadata'
     DATA = '_data'

@@ -119,7 +119,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-13 16:52:46 +0100 (Fri, October 13, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-14 11:04:06 +0100 (Sat, October 14, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -440,8 +440,10 @@ class CcpNmrJson(TraitBase):
     # Dict to track encoded/decoded objects
     _objectDict = {}
 
-    def _getCcpNmrJsonId(self) -> str:
-        """:return a Hex representation of id as string
+    def _getUid(self) -> str:
+        """Generate a UID for the object;
+        currently a Hex representation of id as string
+        :return uid-string
         """
         return str(hex(id(self)))
 
@@ -452,7 +454,7 @@ class CcpNmrJson(TraitBase):
         result[Constants.CLASSNAME] = self.__class__.__name__
         result[Constants.CLASSVERSION] = self.classVersion
         result[Constants.CLASSINFO] = self.classInfo
-        result[Constants.OBJECT_ID] = self._getCcpNmrJsonId()
+        result[Constants.OBJECT_ID] = self._getUid()
         return result
 
     #--------------------------------------------------------------------------------------------
@@ -746,7 +748,7 @@ class CcpNmrJson(TraitBase):
 
         # self.setJsonMetadata(Constants.OBJECT_ID, _id, force=True)
 
-        _id = self._getCcpNmrJsonId()
+        _id = self._getUid()
         _data = {}
         if _id in CcpNmrJson._objectDict:
             # The data for this object have already been encoded; No need to do it again
@@ -790,7 +792,7 @@ class CcpNmrJson(TraitBase):
         :return self as 3.0 encoded dict to maintain compatiblity with earlier versions;
         i.e. allowing those versions to read it and determine save-version
         """
-        _id = self._getCcpNmrJsonId()
+        _id = self._getUid()
         if _id in CcpNmrJson._objectDict:
             raise RuntimeError(f'encode_3_0(): object can only be encoded once in JSON 3.0')
         CcpNmrJson._objectDict[_id] = self

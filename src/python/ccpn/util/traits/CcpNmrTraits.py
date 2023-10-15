@@ -95,7 +95,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-13 19:21:30 +0100 (Fri, October 13, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-15 12:27:57 +0100 (Sun, October 15, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -273,6 +273,12 @@ class Float(_Float, _CcpNmrTrait):
         _Float.__init__(self, default_value=default_value, allow_none=allow_none, **kwargs)
         _CcpNmrTrait.__init__(self)
 
+    def validate(self, obj, value):
+        if value is None and self.allow_none:
+            return value
+        else:
+            return _Float.validate(self, obj, value)
+
     def info(self):
         """:return info string
         """
@@ -292,6 +298,12 @@ class CFloat(Float):
         else:
             return _CFloat.validate(self, obj, value)
 
+    def info(self):
+        """:return info string
+        """
+        _min = '-inf' if self.min is None else str(self.min)
+        _max = '+inf' if self.max is None else str(self.max)
+        return f'an float between ({_min},{_max})'
 
 class Unicode(_Unicode, _CcpNmrTrait):
     def __init__(self, *args, **kwargs):

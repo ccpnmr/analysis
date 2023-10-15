@@ -119,7 +119,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-14 17:28:57 +0100 (Sat, October 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-15 12:27:57 +0100 (Sun, October 15, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -360,6 +360,9 @@ class CcpNmrJson(TraitBase):
     Abstract base class to handle an object with traits and to- and fromJson methods for storing
     and retrieving (see module doc)
     """
+    # From HasTraits; keeping keys in order
+    keysInOrder = True   # If True, return key in order defined by _traitOrder attribute
+                         # of the keys; can be put at end by traitAtEnd tag
 
     #--------------------------------------------------------------------------------------------
     # to be subclassed
@@ -384,20 +387,6 @@ class CcpNmrJson(TraitBase):
     #--------------------------------------------------------------------------------------------
     # # _metadata: should be in-sinc with Constants.METADATA
     _metadata = Dict(default_value={}, allow_none=True).tag(saveToJson=True, info='The metadata of the class')
-
-    # @default(Constants.METADATA)
-    # def _metadata_default(self) -> dict:
-    #     """The defaults for the metadata dict"""
-    #     defaults = {}
-    #     defaults[Constants.CLASSNAME] = self.__class__.__name__
-    #     defaults[Constants.CLASSVERSION] = self.classVersion
-    #     defaults[Constants.CLASSINFO] = self.classInfo
-    #     defaults[Constants.OBJECT_UID] = self._getCcpNmrJsonId()
-    #     # Added by the root-object that saved the file
-    #     # defaults[Constants.USER] = getpass.getuser()
-    #     # defaults[Constants.LASTPATH] = 'undefined'
-    #     # defaults[Constants.TIMESTAMP] = str(now())
-    #     return defaults
 
     # # _metadata-specific json handler; note the invocation with the attribute, not a string!
     # @jsonHandler(_metadata)

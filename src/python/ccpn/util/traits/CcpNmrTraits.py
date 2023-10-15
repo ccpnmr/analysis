@@ -95,7 +95,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-15 12:27:57 +0100 (Sun, October 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-15 21:38:02 +0100 (Sun, October 15, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -733,7 +733,7 @@ class RecursiveTuple(Tuple):
 
 class Dict(_Dict, _CcpNmrTrait):
     """Fixing default_value problem
-    Use TDict for a dict with typpe checking
+    Use TDict for a dict with type checking
     """
 
     def __init__(self, default_value={}, **kwargs):
@@ -741,6 +741,8 @@ class Dict(_Dict, _CcpNmrTrait):
         :param default_value: the default for the trait
         :param kwargs: additional optional parameters of the Dict trailet, like allow_none, read_only ...
         """
+        if default_value is None:
+            kwargs['allow_none'] = True
         _Dict.__init__(self, default_value=default_value, **kwargs)
         _CcpNmrTrait.__init__(self)
         if default_value is not None:

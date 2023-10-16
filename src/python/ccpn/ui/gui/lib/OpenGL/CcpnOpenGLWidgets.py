@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-16 12:35:20 +0100 (Mon, October 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-16 13:13:51 +0100 (Mon, October 16, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -53,7 +53,7 @@ REGION_COLOURS = {
 
 class GLRegion(QtWidgets.QWidget):
     valuesChanged = pyqtSignal(list)
-    editingFinished = pyqtSignal(list)
+    editingFinished = pyqtSignal(dict)
 
     def __init__(self, parent, glList, values=(0, 0), axisCode=None, orientation='h',
                  brush=None, colour='blue',

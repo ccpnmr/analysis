@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-16 12:35:19 +0100 (Mon, October 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-16 13:13:51 +0100 (Mon, October 16, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -428,7 +428,8 @@ class GuiStrip1d(GuiStrip):
             _GLlinearRegions.editingFinished.connect(partial(self._setContourBaseValues, spectrum))
             self._pickingExclusionAreas[spectrum] = _GLlinearRegions
 
-    def _setContourBaseValues(self,  spectrum, values, *args):
+    def _setContourBaseValues(self,  spectrum, _dict, *args):
+        values = _dict.get('values', [])
         if len(values) == 0:
             return
         pos, neg = np.max(values), np.min(values)

@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-16 12:35:19 +0100 (Mon, October 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-16 13:13:51 +0100 (Mon, October 16, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -6786,7 +6786,8 @@ class CcpnGLWidget(QOpenGLWidget):
                             addUndoItem(undo=partial(setattr, obj, VALUES, preValues),
                                         redo=partial(setattr, obj, VALUES, postValues), )
                         if hasattr(obj, 'editingFinished'): #fire callback when drag is finished
-                            obj.editingFinished.emit(getattr(obj, VALUES, []))
+                            _d = {VALUES:getattr(obj, VALUES), 'obj':obj}
+                            obj.editingFinished.emit(_d)
 
             self._dragValues = {}
 

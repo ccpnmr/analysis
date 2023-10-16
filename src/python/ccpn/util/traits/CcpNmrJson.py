@@ -119,7 +119,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-15 12:27:57 +0100 (Sun, October 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-16 16:42:30 +0100 (Mon, October 16, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -429,7 +429,7 @@ class CcpNmrJson(TraitBase):
     # Dict to track encoded/decoded objects
     _objectDict = {}
 
-    def _getUid(self) -> str:
+    def _getJsonUid(self) -> str:
         """Generate a UID for the object;
         currently a Hex representation of id as string
         :return uid-string
@@ -735,7 +735,7 @@ class CcpNmrJson(TraitBase):
         if self._encodeAsJson_3_0:
             return self._encode_3_0()
 
-        _uid = self._getUid()
+        _uid = self._getJsonUid()
         if _uid in CcpNmrJson._objectDict:
             # The data for this object have already been encoded; No need to do it again
             # create the the encodedData dict;
@@ -779,7 +779,7 @@ class CcpNmrJson(TraitBase):
         :return self as 3.0 encoded dict to maintain compatiblity with earlier versions;
         i.e. allowing those versions to read it and determine save-version
         """
-        _uid = self._getUid()
+        _uid = self._getJsonUid()
         if _uid in CcpNmrJson._objectDict:
             raise RuntimeError(f'encode_3_0(): object can only be encoded once in JSON 3.0')
         CcpNmrJson._objectDict[_uid] = self
@@ -879,7 +879,7 @@ class CcpNmrJson(TraitBase):
 
         # fix _uid if it was None ( 3.0 encoding)
         if _uid is None:
-            _uid = self._getUid()
+            _uid = self._getJsonUid()
 
         # check the object data
         if (_objectdata := dataDict.get(Constants.OBJECTDATA), None) is None:

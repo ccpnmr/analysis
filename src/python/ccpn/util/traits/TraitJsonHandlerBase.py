@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-13 10:24:12 +0100 (Fri, October 13, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-16 16:42:30 +0100 (Mon, October 16, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -74,6 +74,18 @@ class TraitJsonHandlerBase():
         """
         # This is stub that does nothing
         return value
+
+    def getTraitValue(self):
+        """Conveniance function to get the trait value from self.object
+        """
+        return self.obj.getTraitValue(self.trait.name)
+
+    def setTraitValue(self, value, force=False):
+        """Conveniance function to set the trait value in self.object
+        :parameter value: the value to set to trait
+        :parameter force: overwrite read_only flag
+        """
+        self.obj.setTraitValue(self.trait.name, value=value, force=force)
 
 
 class ContainerJsonHandlerABC(TraitJsonHandlerBase):

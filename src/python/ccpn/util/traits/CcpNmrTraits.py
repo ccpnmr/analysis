@@ -95,7 +95,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-15 21:38:02 +0100 (Sun, October 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-16 16:42:30 +0100 (Mon, October 16, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -751,6 +751,17 @@ class Dict(_Dict, _CcpNmrTrait):
     class jsonHandler(DictTraitJsonHandlerABC):
         klass = dict
 
+class UDict(Dict):
+    """A dict that updates the current value, rather than overwrites
+    """
+    class jsonHandler(DictTraitJsonHandlerABC):
+        klass = dict
+
+        def decode(self, theData):
+            _decoded = super().decode(theData)
+            _theDict = self.obj.getTraitValue(self.trait.name)
+            _theDict.update(_decoded)
+            return _theDict
 
 class RecursiveDict(Dict):
     """A dict trait that implements recursion of any of the values that are a CcpNmrJson (sub)type

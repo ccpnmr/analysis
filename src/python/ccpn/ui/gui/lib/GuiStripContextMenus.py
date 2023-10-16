@@ -18,9 +18,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-12 15:31:27 +0100 (Fri, May 12, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-10-16 12:35:19 +0100 (Mon, October 16, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -293,10 +293,18 @@ def _estimateNoise(strip):
 
 
 def _showNoise(strip):
-    return _SCMitem(name='Show Noise thresholds',
+    return _SCMitem(name='Show Noise Thresholds',
                     typeItem=ItemTypes.get(ITEM), toolTip='Show the spectral noise thresholds as dotted lines', shortcut='SL',
                     checkable=True, checked=strip._noiseThresholdLinesActive,
                     callback=strip.toggleNoiseThresholdLines)
+
+def _showPeakPickingThresholds(strip):
+    tt = 'Show the Peak Picking Exclusion Area which enables to select and adjust the thresholds values.'
+    return _SCMitem(name='Show Peak Picking Exclusion Area',
+                    typeItem=ItemTypes.get(ITEM), toolTip=tt, shortcut='EA',
+                    checkable=True, checked=strip._pickingExclusionAreaActive,
+                    callback=strip.togglePickingExclusionArea)
+
 
 
 def _makeStripPlot(strip):
@@ -896,6 +904,7 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
 
         _estimateNoise(guiStrip1d),
         _showNoise(guiStrip1d),
+        _showPeakPickingThresholds(guiStrip1d),
         _makeStripPlot(guiStrip1d),
         _separator(),
 

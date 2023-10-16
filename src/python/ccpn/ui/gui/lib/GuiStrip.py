@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-08-07 16:56:15 +0100 (Mon, August 07, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-10-16 12:35:19 +0100 (Mon, October 16, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -386,6 +386,8 @@ class GuiStrip(Frame):
         self._vTraceActive = False
         self._newConsoleDirection = None
         self._noiseThresholdLinesActive = False
+        self._pickingExclusionAreaActive = False # used for 1D peak picking
+        self._pickingInclusionAreaActive = False  # used for nD peak picking. NIY
 
         # create an overlay for drag-drop/highlight operations
         self._overlayArea = _StripOverlay(self)
@@ -746,6 +748,9 @@ class GuiStrip(Frame):
         popup.exec_()
 
     def toggleNoiseThresholdLines(self):
+        pass
+
+    def togglePickingExclusionArea(self):
         pass
 
     def makeStripPlot(self, includePeakLists=True, includeNmrChains=True, includeSpectrumTable=False):

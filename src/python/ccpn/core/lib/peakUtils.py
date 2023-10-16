@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-08-17 13:03:39 +0100 (Thu, August 17, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-10-16 14:45:44 +0100 (Mon, October 16, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -714,16 +714,6 @@ def recalculatePeaksHeightAtPosition(peaks):
                         peak.height = height
 
 
-def updatePeaksFigureOfMerits(peaks, newMerit=0):
-    """Set the figure of merit to the given value if the peak height is below the Noise threshold """
-    with undoBlockWithoutSideBar():
-        with notificationEchoBlocking():
-            if len(peaks) > 0:
-                for peak in peaks:  # peaks can be from diff peakLists
-                    if peak is not None:
-                        noiseLevel = peak.spectrum.noiseLevel or peak.spectrum.estimateNoise()
-                        if peak.height < noiseLevel:
-                            peak.figureOfMerit = newMerit
 
 
 def getSpectralPeakHeights(spectra, peakListIndexes: list = None) -> pd.DataFrame:

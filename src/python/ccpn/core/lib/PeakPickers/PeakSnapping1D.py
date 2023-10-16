@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-22 12:43:49 +0100 (Tue, August 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-16 14:45:44 +0100 (Mon, October 16, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -43,7 +43,7 @@ from collections import defaultdict
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.ContextManagers import  undoBlockWithoutSideBar, notificationEchoBlocking
 from ccpn.core.lib.PeakPickers.PeakPicker1D import _find1DMaxima
-from ccpn.core.lib.SpectrumLib import estimateNoiseLevel1D, _1DRawDataDict
+from ccpn.core.lib.SpectrumLib import  _1DRawDataDict
 from scipy import spatial
 
 
@@ -394,23 +394,17 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1,  doNeg=False,
     a, b = peak._temporaryPosition[0] - maximumLimit, peak._temporaryPosition[0] + maximumLimit
 
     # find closest maxima
-    noiseLevel = spectrum.noiseLevel
-    negativeNoiseLevel = spectrum.negativeNoiseLevel
-    if not noiseLevel:  # estimate as you can from the spectrum
-        spectrum.noiseLevel, spectrum.negativeNoiseLevel = noiseLevel, negativeNoiseLevel = estimateNoiseLevel1D(y)
-    if not negativeNoiseLevel:
-        noiseLevel, negativeNoiseLevel = estimateNoiseLevel1D(y)
-        spectrum.negativeNoiseLevel = negativeNoiseLevel
+    pcb, ncb = spectrum.positiveContourBase, spectrum.negativeContourBase
 
     x_filtered, y_filtered = _1DregionsFromLimits(x, y, [a, b])
-    maxValues, minValues = _find1DMaxima(y_filtered, x_filtered, positiveThreshold=noiseLevel, negativeThreshold=negativeNoiseLevel, findNegative=doNeg)
+    maxValues, minValues = _find1DMaxima(y_filtered, x_filtered, positiveThreshold=pcb, negativeThreshold=ncb, findNegative=doNeg)
     allValues = np.array(maxValues + minValues)
     # allValues = _filterKnownPeakPositionsFromNewMaxima(allValues, peak, rounding=4)
 
     if len(allValues) > 1:
         ## do a line smoothing to remove noise and shoulder peaks.
         y_smoothed = lineSmoothing(y_filtered, windowSize=windowSize)
-        maxValues, minValues = _find1DMaxima(y_smoothed, x_filtered, positiveThreshold=noiseLevel, negativeThreshold=negativeNoiseLevel, findNegative=doNeg)
+        maxValues, minValues = _find1DMaxima(y_smoothed, x_filtered, positiveThreshold=pcb, negativeThreshold=ncb, findNegative=doNeg)
         allValuesSmooth = np.array(maxValues + minValues)
         if allValuesSmooth.ndim == 2:
             positions = allValues[:, 0]

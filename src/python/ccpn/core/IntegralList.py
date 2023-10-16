@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-01 19:39:55 +0100 (Thu, June 01, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-10-16 14:45:44 +0100 (Mon, October 16, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,49 +32,9 @@ from scipy import signal
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import IntegralList as ApiIntegralList
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core._implementation.PMIListABC import PMIListABC
-from ccpn.core.lib.SpectrumLib import _oldEstimateNoiseLevel1D, estimateNoiseLevel1D, _filterROI1Darray
 from ccpn.core.lib.ContextManagers import newObject
 from ccpn.util.decorators import logCommand
 from ccpn.util.Logging import getLogger
-
-
-# moved on peakUtil ####################################################################
-def _createIntersectingLine(x, y):
-    """create a straight line with x values like the original spectrum and y value from the estimated noise level"""
-    return [_oldEstimateNoiseLevel1D(x, y)] * len(x)
-
-
-def _getIntersectionPoints(x, y, line):
-    """
-    :param line: x points of line to intersect y points
-    :return: list of intersecting points
-    """
-    z = y - line
-    dx = x[1:] - x[:-1]
-    cross = np.sign(z[:-1] * z[1:])
-
-    x_intersect = x[:-1] - dx / (z[1:] - z[:-1]) * z[:-1]
-    negatives = np.where(cross < 0)
-    points = x_intersect[negatives]
-    return points
-
-
-def _pairIntersectionPoints(intersectionPoints):
-    """ Yield successive pair chunks from list of intersectionPoints """
-    for i in range(0, len(intersectionPoints), 2):
-        pair = intersectionPoints[i:i + 2]
-        if len(pair) == 2:
-            yield pair
-
-
-def _getPeaksLimits(x, y, intersectingLine=None):
-    """Get the limits of each peak of the spectrum given an intersecting line. If
-     intersectingLine is None, it is calculated by the STD of the spectrum"""
-    if intersectingLine is None:
-        intersectingLine = _createIntersectingLine(x, y)
-    limits = _getIntersectionPoints(x, y, intersectingLine)
-    limitsPairs = list(_pairIntersectionPoints(limits))
-    return limitsPairs
 
 
 ########################################################################################################################################
@@ -141,102 +101,6 @@ class IntegralList(PMIListABC):
         except Exception as es:
             raise RuntimeError('Error _finalising integralListViews: %s' % str(es))
 
-    #=========================================================================================
-    # CCPN functions
-    #=========================================================================================
-
-    def findLimits(self, f=20, stdFactor=0.001):
-        spectrum = self.spectrum
-        x, y = np.array(spectrum.positions), np.array(spectrum.intensities)
-
-        const = int(len(y) * 0.0039)
-        y2 = signal.correlate(y, np.ones(const), mode='same') / const
-        yy = y - y2
-        # if noiseThreshold is None:
-        maxNL, minNL = estimateNoiseLevel1D(yy, f=f, stdFactor=stdFactor)
-        intersectingLine = [maxNL] * len(x)
-        limitsPairs = _getPeaksLimits(x, yy, intersectingLine)
-        return limitsPairs, maxNL, minNL
-
-    def automaticIntegral1D(self, minimalLineWidth=0.01, deltaFactor=1.5, findPeak=False, noiseThreshold=None) -> List['Integral']:
-        """
-        minimalLineWidth:  an attempt to exclude noise. Below this threshold the area is discarded.
-        noiseThreshold: value used to calculate the intersectingLine to get the peak limits
-        """
-        # TODO: add excludeRegions option. Calculate Negative peak integral.
-        # self._project.suspendNotification
-        from ccpn.core.lib.PeakPickers.PeakPicker1D import _find1DMaxima
-        from ccpn.core.PeakList import estimateNoiseLevel1D
-
-        try:
-            spectrum = self.spectrum
-            if findPeak:
-                peakList = spectrum.newPeakList()
-            x, y = np.array(spectrum.positions), np.array(spectrum.intensities)
-
-            const = int(len(y) * 0.0039)
-            y2 = signal.correlate(y, np.ones(const), mode='same') / const
-            yy = y-y2
-            if noiseThreshold is None:
-                # maxNL, minNL = estimateNoiseLevel1D(yy, f=20, stdFactor=0.001)
-                noiseThreshold, minNL = estimateNoiseLevel1D(yy, f=20, stdFactor=0.001)
-
-            intersectingLine = [noiseThreshold] * len(x)
-            # else:
-            #     intersectingLine = [noiseThreshold] * len(x)
-            limitsPairs = _getPeaksLimits(x, y, intersectingLine)
-            spectrum.noiseLevel = noiseThreshold
-
-            integrals = []
-
-            for i in limitsPairs:
-                minI, maxI = min(i), max(i)
-                # aminI = minI - percentage(0.05, minI) #add a bit on each sides
-                # amaxI = maxI + percentage(0.05, minI)
-                # print(i, aminI,amaxI)
-                lineWidth = abs(maxI - minI)
-                if lineWidth:
-                    newIntegral = self.newIntegral(value=None, limits=[[minI, maxI], ])
-                    newIntegral.baseline = noiseThreshold
-                    filteredX = np.where((x <= i[0]) & (x >= i[1]))
-                    y_filtered = spectrum.intensities[filteredX]
-                    x_filtered =  filteredX[0].flatten()
-                    # filteredY = filteredY[1].compressed()
-                    if findPeak:  # pick peaks and link to integral
-                        maxValues, minValues = _find1DMaxima(y_filtered, x_filtered, positiveThreshold=noiseThreshold, findNegative=False)
-                        if len(maxValues) > 1:  #calculate centre of mass or     #   add to multiplet ??
-
-                            positions = []
-                            heights = []
-                            numerator = []
-                            for position, height in maxValues:
-                                positions.append(x[position])
-                                heights.append(height)
-                            for p, h in zip(positions, heights):
-                                numerator.append(p * h)
-                                centerOfMass = sum(numerator) / sum(heights)
-                                newPeak = peakList.newPeak(ppmPositions=[centerOfMass, ], height=max(heights))
-                                newIntegral.peak = newPeak
-                                newPeak.volume = newIntegral.value
-                                newPeak.lineWidths = (lineWidth,)
-
-                        else:
-                            for position, height in maxValues:
-                                newPeak = peakList.newPeak(ppmPositions=[float(x[position]), ], height=height)
-                                newIntegral.peak = newPeak
-                                newPeak.volume = newIntegral.value
-                                newPeak.lineWidths = (lineWidth,)
-
-                    if intersectingLine:
-                        newIntegral.baseline = intersectingLine[0]
-
-                    integrals.append(newIntegral)
-
-        finally:
-            # self._project.resumeNotification()
-            pass
-
-        return integrals
 
     #===========================================================================================
     # new<Object> and other methods

@@ -247,7 +247,7 @@ def isUbuntuVersion(value: str = ''):
     return False
 
 
-def isRHEL(value: int = 8):
+def isRHEL(value: str = '8.'):
     import csv
     import pathlib
 
@@ -259,12 +259,15 @@ def isRHEL(value: int = 8):
         reader = csv.reader(fp, delimiter="=")
         os_release = dict(reader)
 
-    if 'rhel' in os_release.get('ID_LIKE', '') and \
-            (version_id := int(os_release.get('VERSION_ID', '0'))) and \
-            version_id == value:
-        return True
-
-    return False
+    try:
+        if 'rhel' in os_release.get('ID_LIKE', '') and \
+                (version_id := os_release.get('VERSION_ID', '')) and \
+                version_id.startswith(value):
+            return True
+    except Exception:
+        ...
+    finally:
+        return False
 
 
 def parseSequenceCode(value):

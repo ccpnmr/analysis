@@ -1493,7 +1493,7 @@ class _GLVertexArray:
 # Windows again - doesn't appear to correctly accelerate all GL objects
 #=========================================================================================
 
-if isRHEL(8):  # check for RHEL8
+if isRHEL():  # check for RHEL8
     GLVertexArray = _VBOGLVertexArray
 else:
     GLVertexArray = _GLVertexArray

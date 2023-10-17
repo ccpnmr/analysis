@@ -101,6 +101,27 @@ CcpNmrJson(TraitBase):
     _metadata: dict with USER, LASTPATH, TIMESTAMP (+ optional others)
     _data: a dict of (taitName, encoded-value) pairs
 
+    --------------------------------------------------------------------------------------------
+
+    Class initialisation / restore methods and hiarchies
+
+    - obj:
+        obj.fromJson(string)
+            string -> JSON -> theDict
+            return ._decode(theDict)
+
+    - Static
+        _newInstanceFromDict(theDict)
+            theDict -> class
+            obj = class()
+            return obj._decode(theDict)
+
+        newObjectFromJson(string, path)
+            (string or path) -> JSON -> theDict
+            theDict -> class
+            obj = class()
+            return obj._decode(theDict)
+
 """
 
 #=========================================================================================
@@ -119,7 +140,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-16 16:42:30 +0100 (Mon, October 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-17 12:33:42 +0100 (Tue, October 17, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -140,7 +161,7 @@ from ccpn.util.Path import aPath, Path
 from ccpn.util.AttributeDict import AttributeDict
 from ccpn.util.traits.TraitBase import TraitBase
 from ccpn.util.traits.TraitJsonHandlerBase import TraitJsonHandlerBase
-from ccpn.util.traits.CcpNmrTraits import default, Dict, CString
+from ccpn.util.traits.CcpNmrTraits import default, Dict, CString, Bool, Unicode
 from ccpn.util.Logging import getLogger
 from ccpn.util.Time import now
 from ccpn.util.decorators import debug2Enter, debug3Enter, debug3Leave  # Not used now to avoid circular import
@@ -369,13 +390,13 @@ class CcpNmrJson(TraitBase):
     #--------------------------------------------------------------------------------------------
 
     saveAllTraitsToJson = False  # This flag effectively sets saveToJson to True/False for all traits
-    classVersion = '1.0.0'  # The version identifier for the specific class (usefull when upgrading is required)
+    classVersion = '1.0.0'  # The version identifier for the specific class (useful when upgrading is required)
     classInfo = None  # Any information about the class
 
     _encodeAsJson_3_0 = False  # Encode object in json 3.0 format; for backward compatibility
                                # (e.g. DataStore, ProjectHistory). This way, older program versions can restore
 
-    initDefaults = {}  # Any arguments given to class instantiation
+    initDefaults = {}  # Any arguments given to class instantiation when restoring
 
     #--------------------------------------------------------------------------------------------
     # end to be subclassed
@@ -387,20 +408,6 @@ class CcpNmrJson(TraitBase):
     #--------------------------------------------------------------------------------------------
     # # _metadata: should be in-sinc with Constants.METADATA
     _metadata = Dict(default_value={}, allow_none=True).tag(saveToJson=True, info='The metadata of the class')
-
-    # # _metadata-specific json handler; note the invocation with the attribute, not a string!
-    # @jsonHandler(_metadata)
-    # class _metadataJsonHandler(TraitJsonHandlerBase):
-    #     """Handle json metadata
-    #     """
-    #     # def encode(value):  # Handled by base class
-    #     def decode(self, value):
-    #         # retain essential current metadata; just update the others from value (reflecting the
-    #         # data in the json file
-    #         currentMetaData = getattr(self.obj, Constants.METADATA)
-    #         currentMetaData.update(value)
-    #         return currentMetaData
-    # end class
 
     #--------------------------------------------------------------------------------------------
 
@@ -425,19 +432,43 @@ class CcpNmrJson(TraitBase):
         CcpNmrJson._registeredClasses[className] = cls
 
     #--------------------------------------------------------------------------------------------
-
-    # Dict to track encoded/decoded objects
+    # Code used for saving / restoring
+    #--------------------------------------------------------------------------------------------
+    # Class Dict to track encoded/decoded objects
     _objectDict = {}
+
+    # Class (global) flag to indicate that the object is being restored;
+    # maintained by _decode()
+    _isRestoring = False
+
+    # object specific flag to set to restoring
+    _objIsRestoring = Bool(default_value=False).tag(saveToJson=False, doPrint=False, reservedTrait=True)
+
+    @property
+    def isRestoring(self) -> bool:
+        """flag to indicate if restoring, i.e. decoding, is in progress
+        """
+        return CcpNmrJson._isRestoring or self._objIsRestoring
+
+    @classmethod
+    def _setRestoring(cls, flag):
+        """Class method to set the restoring on/off
+        If flag == True: initialise _objectDict to {}; _isRestoring = True
+        If flag == False: reset _objectDict to {}; _isRestoring = False
+        """
+        CcpNmrJson._objectDict = {}
+        CcpNmrJson._isRestoring = flag
 
     def _getJsonUid(self) -> str:
         """Generate a UID for the object;
         currently a Hex representation of id as string
         :return uid-string
+        #CCPNINTERNAL: subclassed in Tree-derived classes
         """
         return str(hex(id(self)))
 
     def _getObjectDataDict(self):
-        """":return a dict with the object data
+        """":return a dict with the object data, saved as JSON key OBJECTDATA
         """
         result = {}
         result[Constants.CLASSNAME] = self.__class__.__name__
@@ -487,7 +518,7 @@ class CcpNmrJson(TraitBase):
                 return False
 
         elif isinstance(theData, dict):
-            # This could be a 3.1.0 encoded object; needs to be a dict of len 3 and have CCPNMRJSON key
+            # This could be a 3.1.0 encoded object; needs to be a dict with all JSON_KEYS and have CCPNMRJSON key
             if len(theData) == len(Constants.JSON_KEYS) and Constants.CCPNMRJSON in theData:
                 return True
             else:
@@ -501,33 +532,31 @@ class CcpNmrJson(TraitBase):
     def _newObjectFromDict(theData, **kwds):
         """Return new object as defined by theData;
         kwds are passed to the class instantiation
-        requires presence of _objectdata and registered classname
         CCPNMRINTERNAL: used in recursive handler classes (see below)
         """
         theDict = CcpNmrJson._updateToJson3_1(theData)
-        if (_objectdata := theDict.get(Constants.OBJECTDATA, None)) is None:
-            # This should never happen
-            raise RuntimeError(f'_newObjectFromDict(): unable to obtain _objectdata')
 
-        if isinstance(_objectdata, str):
-            # This is an object that already was encountered before;
-            # should be in the objectDict
-            if _objectdata not in CcpNmrJson._objectDict:
-                raise RuntimeError(f'_newObjectFromDict(): unable to obtain object {_objectdata}')
-            return CcpNmrJson._objectDict[_objectdata]
+        if not Constants.OBJECT_UID in theDict:
+            raise RuntimeError(f'_newObjectFromDict(): unable to get {Constants.OBJECT_UID} from theData')
+        _uid = theDict[Constants.OBJECT_UID]
 
-        else:
-            # we need create this object and update theDict
-            cls = CcpNmrJson._getClassFromDict(theDict)
-            theDict = cls._update(cls, theDict)
+        # check the _uid; can be None because of 3.0 encoding!
+        if _uid is not None and _uid in CcpNmrJson._objectDict:
+            # we have encountered an obj that already was decoded;
+            # get it and return
+            return CcpNmrJson._objectDict[_uid]
 
-            _kwds = cls.initDefaults.copy()
-            _kwds.update(kwds)
-            obj = cls(**_kwds)
+        # we need create this object and update theDict
+        cls = CcpNmrJson._getClassFromDict(theDict)
+        theDict = cls._update(cls, theDict)
 
-            # decoding might return an existing obj;
-            obj = obj._decode(theDict)
-            return obj
+        _kwds = cls.initDefaults.copy()
+        _kwds.update(kwds)
+        obj = cls(**_kwds)
+
+        # decoding might return an existing obj;
+        obj = obj._decode(theDict)
+        return obj
 
     @staticmethod
     def newObjectFromJson(path=None, jsonString=None, **kwds):
@@ -553,13 +582,10 @@ class CcpNmrJson(TraitBase):
         else:
             raise RuntimeError('newObjectFromJson: undefined path and jsonString')
 
-        # re-initialise the class objectDict
-        CcpNmrJson._objectDict = {}
-        CcpNmrJson._isRestoring = True
+        CcpNmrJson._setRestoring(True)
         obj = CcpNmrJson._newObjectFromDict(theData, **kwds)
-        # re-initialise the class objectDict
-        CcpNmrJson._objectDict = {}
-        CcpNmrJson._isRestoring = False
+        CcpNmrJson._setRestoring(False)
+
         return obj
 
     #--------------------------------------------------------------------------------------------
@@ -598,11 +624,13 @@ class CcpNmrJson(TraitBase):
 
     #--------------------------------------------------------------------------------------------
 
-    def keys(self, **metadata):
+    def keys(self, **metadata) -> list:
         """Return the keys; excluding the json.METADATA trait;
-        optionally filter for trait metadata; NB these are different from the json METADATA.
-        The latter store nay information regarding the user, path, etc of the json representation
-        of the object.
+        Optionally filter for trait metadata;
+        NB these are different from the json METADATA. The latter store the information regarding the user, path, etc of the json representation
+           of the object.
+        Key order is determined by keysInOrder attribute and optional traitAtEnd tag settings.
+        :return The keys as a list
         """
         keys = [key for key in super().keys(**metadata) if key != Constants.METADATA]
         return keys
@@ -614,19 +642,10 @@ class CcpNmrJson(TraitBase):
         setattr(self, Constants.METADATA, {})
         for key, value in metadata.items():
             # This affords the necesary safeguarding against accidentially overwriting
-            # any protected keys; also checks for JSON serilisation
+            # any protected keys; also checks for JSON serialisation
             self.setJsonMetadata(key=key, value=value)
 
     #--------------------------------------------------------------------------------------------
-
-    # (globel) class flag to indicate that the object is being restored; maintained by _decode()
-    _isRestoring = False
-
-    @property
-    def isRestoring(self) -> bool:
-        """flag to indicate if restoring, i.e. decoding, is in progress
-        """
-        return self._isRestoring
 
     def duplicate(self, **metadata):
         """Convenience method to return a duplicate of self, using
@@ -639,17 +658,17 @@ class CcpNmrJson(TraitBase):
         :parameter metadata: optional keyword=value pairs to update in the json metadata
         :returns a duplicate of self
         """
-        CcpNmrJson._objectDict = {}
+        CcpNmrJson._setRestoring(True)
         _encoded = self._encode(encodeAllTraits=True)
-        CcpNmrJson._objectDict = {}
+        CcpNmrJson._setRestoring(False)
 
         _json = json.dumps(_encoded)
         # effectively make a copy by loading the json string
         _encodedDuplicate = json.loads(_json)
 
-        CcpNmrJson._objectDict = {}
+        CcpNmrJson._setRestoring(True)
         duplicate = self._newObjectFromDict(_encodedDuplicate, **metadata)
-        CcpNmrJson._objectDict = {}
+        CcpNmrJson._setRestoring(False)
 
         return duplicate
 
@@ -677,14 +696,13 @@ class CcpNmrJson(TraitBase):
         indent = kwds.setdefault('indent', 2)
         try:
             # Encode the data
-            # re-initialise the objectDict
-            CcpNmrJson._objectDict = {}
+            CcpNmrJson._setRestoring(True)
             dataList = self._encode()
-            # reset the _objectDict as we are done
-            CcpNmrJson._objectDict = {}
+            CcpNmrJson._setRestoring(False)
+
         except Exception as es:
             # reset the _objectDict as we are done trying
-            CcpNmrJson._objectDict = {}
+            CcpNmrJson._setRestoring(False)
             # GWV: Log this, as the error might be caught elsewhere
             getLogger().debug(f'toJson(): while encoding {self} for JSON an exception was raised: {es}')
             raise RuntimeError(f'While encoding {self} for JSON: {es}')
@@ -827,21 +845,15 @@ class CcpNmrJson(TraitBase):
             )
 
         try:
-            # re-initialise the class objectDict
-            CcpNmrJson._objectDict = {}
-            CcpNmrJson._isRestoring = True
             # Decodes the data
+            CcpNmrJson._setRestoring(True)
             self._decode(dataDict)
-            # reset the _objectDict as we are done
-            CcpNmrJson._objectDict = {}
-            CcpNmrJson._isRestoring = False
+            CcpNmrJson._setRestoring(False)
 
         except Exception as es:
             # GWV: Log this, as the error might be caught elsewhere
             # reset the _objectDict as we are done trying
-            CcpNmrJson._objectDict = {}
-            CcpNmrJson._isRestoring = False
-
+            CcpNmrJson._setRestoring(False)
             getLogger().debug(f'fromJson: while decoding {self} as JSON an exception was raised: {es}')
             raise RuntimeError(f'While decoding {self} from JSON an error occured: {es}')
 

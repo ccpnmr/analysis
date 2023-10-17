@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-14 17:28:57 +0100 (Sat, October 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-17 12:33:42 +0100 (Tue, October 17, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -128,8 +128,10 @@ class TraitBase(HasTraits):
         "convenience for trait_metadata"
         return self.trait_metadata(trait, key, default)
 
-    def keys(self, **metadata):
-        """get keys (object only), optionally filtering for metadata
+    def keys(self, **metadata) -> list:
+        """Get keys (object only), optionally filtering for metadata.
+        Key order is determined by keysInOrder attribute and optional traitAtEnd tag settings.
+        :return The keys as a list
         """
         if self.keysInOrder:
             frontKeys = [(trait._traitOrder, key) for key,trait in self.class_traits(**metadata).items()

@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-22 14:03:29 +0100 (Tue, August 22, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-10-17 16:09:59 +0100 (Tue, October 17, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -248,7 +248,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         self._lastKeyTimer.start()
         self._lastKey = 0
         self._lastKeyTime = 0
-        self._lastKeyMessage = ''
+        self._lastKeyList = []
 
         # label for the statusBar, with grey text
         self._lastKeyStatus = Label(textColour='grey')
@@ -994,34 +994,35 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
 
         self._addKeyToStatusBar(key)
 
+        return super().keyReleaseEvent(event)
+
     def _addKeyToStatusBar(self, key):
+
         # remember the last key that was pressed for reset keySequence timer below
         self._lastKeyTime = time.perf_counter()
         self._lastKey = key
         try:
-            if chr(key).isascii():
-                if chr(key) not in [' ', self._lastKeyMessage[-1:]]:
-                    self._lastKeyMessage += chr(key)
-                elif chr(key) == ' ':
-                    self._lastKeyMessage += 'Space'
-            if len(self._lastKeyMessage) > max(2, 5 * min(self._lastKeyMessage.count('Space'), 2)):
-                # limit the message to 2 characters, or 2 occurrences of 'Space'
-                if self._lastKeyMessage.startswith('Space'):
-                    self._lastKeyMessage = self._lastKeyMessage[5:]
+            if key == QtCore.Qt.Key_Tab:
+                self._lastKeyList.append('Tab')
+            elif chr(key).isascii():
+                if chr(key) == ' ':
+                    self._lastKeyList.append('Space')
                 else:
-                    self._lastKeyMessage = self._lastKeyMessage[1:]
+                    self._lastKeyList.append(chr(key))
+            if len(self._lastKeyList) > 2:
+                self._lastKeyList.pop(0)
+        except Exception:
+            self._lastKeyList = []
 
-        except:
-            self._lastKeyMessage = ''
-
-        self._lastKeyStatus.setText(self._lastKeyMessage)
+        self._lastKeyStatus.setText(''.join(self._lastKeyList))
 
     def _setStatusBarKeys(self, keys: str):
         """Set the statusBar and update the timer
         """
         if isinstance(keys, str):
-            if self._lastKeyMessage.endswith(keys) or (keys == '  ' and self._lastKeyMessage.endswith('SpaceSpace')):
-                self._lastKeyMessage = ''
+            msg = ''.join(self._lastKeyList)
+            if msg.endswith(keys) or (keys == '  ' and msg.endswith('SpaceSpace')):
+                self._lastKeyList = []
         self._lastKey = 0
         self._lastKeyTime = time.perf_counter()
         self._lastKeyStatus.setText(keys)
@@ -1032,14 +1033,12 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         deltaT = time.perf_counter() - self._lastKeyTime
         if deltaT > KEY_DELAY and self._lastKey not in [QtCore.Qt.Key_Escape, 0]:
             self._lastKey = 0
-
             # simulate an escape-key to clear keySequences - MUST be KeyPress
             event = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Escape, QtCore.Qt.NoModifier)
             QtCore.QCoreApplication.sendEvent(self, event)
-
             # clear the statusBar
-            self._lastKeyMessage = ''
-            self._lastKeyStatus.setText(self._lastKeyMessage)
+            self._lastKeyList = []
+            self._lastKeyStatus.setText('')
 
     def _fillCcpnPluginsMenu(self):
 

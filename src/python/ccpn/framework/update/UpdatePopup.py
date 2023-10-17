@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-09 19:07:18 +0100 (Mon, October 09, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-10-17 16:43:06 +0100 (Tue, October 17, 2023) $"
+__version__ = "$Revision: 3.2.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================

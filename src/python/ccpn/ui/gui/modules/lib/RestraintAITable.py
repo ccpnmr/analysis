@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-04 17:19:50 +0100 (Tue, July 04, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-10-17 16:43:06 +0100 (Tue, October 17, 2023) $"
+__version__ = "$Revision: 3.2.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -154,8 +154,10 @@ class _MultiSort(_MITableModel):
 
 def _checkRestraintFloat(offset, value, row, col):
     """Display the contents of the cell if the restraint-pid is valid - float
+    Assumes multi-index
     """
-    if row[col - offset]:
+    # if row[col - offset] not in [None, '', '-']:
+    if row[(row.index[col][0], HeaderRestraint)] not in [None, '', '-']:
         try:
             return f'{value:.3f}' if (1e-6 < value < 1e6) or value == 0.0 else f'{value:.3e}'
         except Exception:
@@ -166,8 +168,10 @@ def _checkRestraintFloat(offset, value, row, col):
 
 def _checkRestraintInt(offset, value, row, col):
     """Display the contents of the cell if the restraint-pid is valid - int
+    Assumes multi-index
     """
-    if row[col - offset]:
+    # if row[col - offset]:
+    if row[(row.index[col][0], HeaderRestraint)] not in [None, '', '-']:
         return int(value)
 
     return '-'
@@ -581,6 +585,7 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
             # make matching length tables for each of the restraintTables for each peak so the rows match up in the table
             #   must be a pandas way of doing this
             dfs = {}
+            dfsAll = {}
             for lCount, cSet in enumerate(cSetLists):
                 cSetName = cSet.comparisonSetName
                 resLists = cSet.getTreeTables(depth=1, selected=True)
@@ -592,7 +597,12 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                 head = 0
                 for pk, cc, maxcc in zip(pks, counts[lCount], maxCount):
                     # ensure that the atoms are sorted so that they are matched correctly
-                    _res = [(res.pid, ' - '.join(sorted(_atom.split(' - '), key=universalSortKey)) if _atom else None)
+                    _res = [(res.pid,
+                             ' - '.join(sorted(_atom.split(' - '), key=universalSortKey)) if _atom else None,
+                             res.targetValue,
+                             res.lowerLimit,
+                             res.upperLimit,
+                             )
                             for res in (pkRestraints.get(pk.pid) or ()) if res.restraintTable in resLists
                             for _atom in contribs[res]]
                     if _res:
@@ -604,13 +614,20 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                     head += maxcc
 
                 COLS = [(cSetName, f'{HeaderRestraint}'),
-                        (cSetName, 'Atoms')]
+                        (cSetName, 'Atoms'),
+                        (cSetName, f'{HeaderTarget}'),
+                        (cSetName, f'{HeaderLowerLimit}'),
+                        (cSetName, f'{HeaderUpperLimit}'),
+                        ]
 
                 # put the serial and atoms into another table to be concatenated to the right, lCount = index in resLists
-                dfs[cSetName] = pd.concat([allPkSerials,
-                                           # pd.DataFrame(ll, columns=[f'{HeaderRestraint}_{lCount + 1}',
-                                           #                           f'Atoms_{lCount + 1}'])], axis=1)
-                                           pd.DataFrame(ll, columns=COLS)], axis=1)
+                dd = pd.concat([allPkSerials,
+                                # pd.DataFrame(ll, columns=[f'{HeaderRestraint}_{lCount + 1}',
+                                #                           f'Atoms_{lCount + 1}'])], axis=1)
+                                pd.DataFrame(ll, columns=COLS)], axis=1)
+                dfsAll[cSetName] = dd.dropna(how='all', axis=1)
+                # just keeping the pid/Atoms
+                dfs[cSetName] = dd.drop(columns=COLS[2:])
 
             # # get the dataSets that contain data with a matching 'result' name - should be violations
             # violationResults = {resList: viols.data.copy() if viols is not None else None
@@ -647,12 +664,12 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                     # if not cSet.getTreeTables(depth=1, selected=True):
                     #     continue
 
-                    if violationResults.get(cSetName):
+                    HEADERSCOL = (cSetName, f'{HeaderRestraint}')
+                    ATOMSCOL = (cSetName, 'Atoms')
+                    HEADERMEANCOL = (cSetName, f'{HeaderMean}')
+                    HEADERVIOLATION = (cSetName, HeaderViolation)
 
-                        HEADERSCOL = (cSetName, f'{HeaderRestraint}')
-                        ATOMSCOL = (cSetName, 'Atoms')
-                        HEADERMEANCOL = (cSetName, f'{HeaderMean}')
-                        HEADERVIOLATION = (cSetName, HeaderViolation)
+                    if violationResults.get(cSetName):
 
                         extraDefaultHiddenColumns.append(HEADERVIOLATION)
 
@@ -724,9 +741,13 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                         #         # columns should have been renamed and post-fixed with _<num>. above
                         #         _cols.append(((name, _colID), lambda row: _getValueByHeader(row, f'{_colID}_{ii + 1}'), f'{_colID}_Tip{ii + 1}', None, None))
 
-                    elif cSetName in dfs:
+                    elif cSetName in dfsAll:
                         # lose the PeakSerial column for each
-                        _new = dfs[cSetName].drop(columns=[PEAKSERIALCOL]).fillna(0.0)
+                        _new = dfsAll[cSetName].drop(columns=[PEAKSERIALCOL])  # .fillna(0.0)
+                        # fill the blank spaces with the correct types
+                        _new = _new.fillna({HEADERSCOL: '-', ATOMSCOL: '-', HEADERVIOLATION: False})
+                        _new = _new.fillna(0.0)
+
                         _out.append(_new)
 
                         # # create new column headings
@@ -755,8 +776,15 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                     if not cSet.getTreeTables(depth=1, selected=True):
                         continue
 
+                    HEADERSCOL = (cSetName, f'{HeaderRestraint}')
+                    ATOMSCOL = (cSetName, 'Atoms')
+                    HEADERVIOLATION = (cSetName, HeaderViolation)
+
                     # lose the PeakSerial column for each
-                    _new = dfs[cSetName].drop(columns=[PEAKSERIALCOL]).fillna(0.0)
+                    _new = dfsAll[cSetName].drop(columns=[PEAKSERIALCOL])  # .fillna(0.0)
+                    # # fill the blank spaces with the correct types
+                    # _new = _new.fillna({HEADERSCOL: '-', ATOMSCOL: '-', HEADERVIOLATION: False})
+                    _new = _new.fillna(0.0)
                     _out.append(_new)
 
                     # # create new column headings

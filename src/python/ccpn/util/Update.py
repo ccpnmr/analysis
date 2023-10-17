@@ -32,7 +32,6 @@ import os
 import shutil
 import sys
 import json
-import shutil
 from datetime import datetime
 from contextlib import suppress
 from ccpn.util import Path

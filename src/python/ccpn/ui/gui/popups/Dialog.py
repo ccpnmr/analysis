@@ -222,20 +222,20 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         if self.FIXEDWIDTH:
             self.setFixedWidth(max(_size.width(), _minimumSize.width()))
             # this is very strange, setting fixed<dimension> does not necessarily set the policy :|
-            self.setSizePolicy(QtWidgets.QSizePolicy.Fixed, self.sizePolicy().verticalPolicy())
+            # self.setSizePolicy(QtWidgets.QSizePolicy.Fixed, self.sizePolicy().verticalPolicy())
         elif minimumSize:
             # set minimumSize from settings
             self.setMinimumWidth(_minimumSize.width())
 
         if self.FIXEDHEIGHT:
             self.setFixedHeight(max(_size.height(), _minimumSize.height()))
-            self.setSizePolicy(self.sizePolicy().horizontalPolicy(), QtWidgets.QSizePolicy.Fixed)
+            # self.setSizePolicy(self.sizePolicy().horizontalPolicy(), QtWidgets.QSizePolicy.Fixed)
         elif minimumSize:
             # set minimumSize from settings
             self.setMinimumHeight(_minimumSize.height())
 
-        self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Fixed if self.FIXEDWIDTH else QtWidgets.QSizePolicy.MinimumExpanding,
-                                      QtWidgets.QSizePolicy.Fixed if self.FIXEDHEIGHT else QtWidgets.QSizePolicy.MinimumExpanding, )
+        # self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Fixed if self.FIXEDWIDTH else QtWidgets.QSizePolicy.MinimumExpanding,
+        #                               QtWidgets.QSizePolicy.Fixed if self.FIXEDHEIGHT else QtWidgets.QSizePolicy.MinimumExpanding, )
         self.resize(_size)
 
     # # pyqt5.15 does not allow setting with a float

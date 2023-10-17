@@ -42,7 +42,7 @@ if "%autoUpdate%"=="true" (
 )
 
 set ENTRY_MODULE=%CCPNMR_TOP_DIR%\%MODULE%
-"%CONDA%\python.exe" -i -O -W ignore "%ENTRY_MODULE%" %argval%
+"%CONDA%\python.exe" -i -O -W ignore "%ENTRY_MODULE%" %args%
 endlocal
 
 exit /b !errorlevel!

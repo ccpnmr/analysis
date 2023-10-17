@@ -260,7 +260,7 @@ def isRHEL(value: str = '8.'):
         os_release = dict(reader)
 
     try:
-        if 'rhel' in os_release.get('ID_LIKE', '') and \
+        if (os_release.get('ID', '') == 'rhel' or 'rhel' in os_release.get('ID_LIKE', '')) and \
                 (version_id := os_release.get('VERSION_ID', '')) and \
                 version_id.startswith(value):
             return True

@@ -45,12 +45,12 @@ for /l %%c in (1,1,!MAX_COUNT!) do (
     if !errorlevel! geq !FAIL_UNEXPECTED! (
         rem updated with code that requires loop to terminate
         echo there was an error updating: !errorlevel!
-        goto Done
+        goto _done
     )
-    if !err! equ !lasterr! (
+    if !errorlevel! equ !lasterr! (
         rem update was apparently successful but the version didn't increment by 1 in any field
         echo there was an issue updating version: !errorlevel!
-        goto Done
+        goto _done
     )
 
     rem version changed so may need to update again

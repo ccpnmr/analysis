@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:40 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtCore, QtWidgets
-from subprocess import PIPE, Popen, STDOUT, CalledProcessError
+from subprocess import PIPE, Popen, CalledProcessError
 import contextlib
 import html
 from functools import partial
@@ -58,6 +58,27 @@ _rTexts = [(' ', '&nbsp;'),
            ]
 
 
+class _Worker(QtCore.QThread):
+    """Worker to read from OS process and write to text-box.
+    """
+    logout = QtCore.pyqtSignal(str, object)
+
+    def __init__(self, process, outLog):
+        super().__init__(None)
+        self._procstd = process
+        self._outLog = outLog
+
+    def run(self):
+        # thread to read output from process
+        for line in self._procstd:
+            # emit signal to send message to the textBox, must be on main thread
+            self.logout.emit(line, self._outLog)
+
+
+#=========================================================================================
+# UpdatePopup
+#=========================================================================================
+
 class UpdatePopup(CcpnDialogMainWidget):
     FIXEDWIDTH = True
     FIXEDHEIGHT = False
@@ -67,6 +88,7 @@ class UpdatePopup(CcpnDialogMainWidget):
 
         # keep focus on this window
         self.setModal(True)
+        self._initialised = False
 
         # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow
@@ -80,7 +102,7 @@ class UpdatePopup(CcpnDialogMainWidget):
         version = applicationVersion
         self._updatePopupAgent = UpdateAgent(version, dryRun=False,
                                              showInfo=self._showInfo, showError=self._showError,
-                                             _updateProgressHandler=self._refreshQT)
+                                             )
         self.setWindowTitle(title)
         self._setWidgets()
 
@@ -91,8 +113,14 @@ class UpdatePopup(CcpnDialogMainWidget):
         self._lastMsgWasError = None
         self._showBoxes = False
 
+        self._threads = []
+        self._process = None
+        self._threadCount = 0
+
+        self._resetButton = self.buttonList.buttons[0]
+        self._downloadButton = self.buttonList.buttons[1]
+        self._closeButton = self.buttonList.buttons[2]
         self._updateButton.setEnabled(self._updatePopupAgent._check())
-        self._downloadButton = self.buttonList.getButton(DOWNLOADBUTTONTEXT)
         self._downloadButton.setEnabled(self._updateCount > 0)
 
         # initialise the buttons and dialog size
@@ -107,13 +135,15 @@ class UpdatePopup(CcpnDialogMainWidget):
         QtCore.QTimer().singleShot(0, self._finalise)
 
     def _finalise(self):
-        """Set the minimu/maximum height of the popup based on which text-boxes are visible.
+        """Set the minimum/maximum height of the popup based on which text-boxes are visible.
         """
         if self._showBoxes:
-            self.setMaximumHeight(self._defaultHeight * 6)
+            self.setMaximumHeight(self._defaultHeight * 5)
             self.setMinimumHeight(self.minimumSizeHint().height())
         else:
             self.setFixedHeight(self.minimumSizeHint().height())
+
+        self._initialised = True
 
     def _setWidgets(self):
         """Set the widgets.
@@ -193,51 +223,71 @@ class UpdatePopup(CcpnDialogMainWidget):
         self._handleUpdates()
 
     def _handleUpdates(self):
-        """Call external script to update which may require several iterations.
+        """Call external script to perform update, may require several iterations.
         """
-        import selectors
+        # temporarily disable buttons until end of process
+        for btn in self.buttonList.buttons:
+            btn.setEnabled(False)
 
         cmd = [ccpnBatchPath / 'update.bat'] if isWindowsOS() else [ccpnBinPath / 'update']
-        process = Popen(cmd, stdout=PIPE, stderr=PIPE, text=True, bufsize=1, universal_newlines=True)
-        sel = selectors.DefaultSelector()
-        sel.register(process.stdout, selectors.EVENT_READ)
-        sel.register(process.stderr, selectors.EVENT_READ)
+        self._process = Popen(cmd, stdout=PIPE, stderr=PIPE,
+                              text=True, bufsize=1, universal_newlines=True)
 
-        check = 0
-        while check != 2:
-            check = 0
-            for key, _ in sel.select():
-                if not (data := key.fileobj.readline()):
-                    check += 1
-                elif key.fileobj is process.stdout:
-                    self._showInfo(data)
-                else:
-                    self._showError(data)
-            self._refreshQT()
+        # create threads to handle stdout/err from the OS process
+        self._threads = []
+        for proc, log in ((self._process.stdout, self._showInfo),
+                          (self._process.stderr, self._showError)):
+            thr = _Worker(proc, log)
+            self._threads.append(thr)
+            thr.logout.connect(self._threadOut)
+            thr.finished.connect(self._threadFinish)
 
-        exitCode = process.wait()
-        if exitCode >= FAIL_UNEXPECTED:
-            CalledProcessError(exitCode, process.args)
-        sel.close()
+        self._threadCount = len(self._threads)
+        for thr in self._threads:
+            thr.start()
+        # now wait for the threads to finish...
+
+    @staticmethod
+    def _threadOut(line, log):
+        """Write line to the textBox.
+        This must be on the main thread to safely print to the textbox.
+        """
+        log(line)
+
+    def _threadFinish(self):
+        """Handle processing the finished threads.
+        """
+        self._threadCount -= 1
+        if self._threadCount > 0:
+            return
+
+        # Finish handling the update process.
+        try:
+            exitCode = self._process.wait()
+            if exitCode >= FAIL_UNEXPECTED:
+                CalledProcessError(exitCode, self._process.args)
+        except Exception:
+            exitCode = -1
 
         self._updatesInstalled = True
-        self.buttonList.getButton(self.CLOSEBUTTONTEXT).setText(CLOSEEXITBUTTONTEXT)
+
+        # release the fixed-width so the popup can resize
+        self.setFixedSize(QtWidgets.QWIDGETSIZE_MAX, QtWidgets.QWIDGETSIZE_MAX)
+        self._closeButton.setText(CLOSEEXITBUTTONTEXT)
+        self._updateButton.setEnabled(self._updatePopupAgent._check())
+        self._resetButton.setEnabled(True)
         self._downloadButton.setEnabled(bool(exitCode != 0))
+        self._closeButton.setEnabled(True)
 
         self.resetFromServer()
-
-        # resize due to change in button text
-        # QtCore.QTimer.singleShot(0, self._checkWidth)
-
-    # def _checkWidth(self):
-    #     """Resize to account for the slighty wider buttons.
-    #     """
-    #     _width = self.mainWidget.sizeHint().width() + 150  # still not sure why I need to add constant here :|
-    #     self.setFixedWidth(_width)
 
     def _closeProgram(self):
         """Call the mainWindow close function giving user option to save, then close program
         """
+        if self._threadCount:
+            for thr in self._threads:
+                thr.terminate()
+
         self.accept()
 
     def _accept(self):
@@ -261,13 +311,14 @@ class UpdatePopup(CcpnDialogMainWidget):
             super(UpdatePopup, self).reject()
 
     @staticmethod
-    def _runProcess(command, text=False):
+    def _runProcess(command, text=False, shell=False):
         """Run a system process and return any stdout/stderr.
         """
         if not isinstance(command, list) and all(isinstance(val, str) for val in command):
             raise TypeError(f'Invalid command structure - {command}')
 
-        query = Popen(command, stdout=PIPE, stderr=PIPE, text=text, bufsize=1)
+        query = Popen(command, stdout=PIPE, stderr=PIPE, text=text,
+                      bufsize=1, universal_newlines=True)
         status, error = query.communicate()
         if query.poll() == 0:
             with contextlib.suppress(Exception):
@@ -280,8 +331,11 @@ class UpdatePopup(CcpnDialogMainWidget):
         version = '-'
         cmd = [ccpnBatchPath / 'update.bat', '--count', '--version'] if isWindowsOS() else \
             [ccpnBinPath / 'update', '--count', '--version']
-        if (response := self._runProcess(cmd, text=True)) is not None:
-            count, version = [val.strip() for val in response.split(',')]
+        if (response := self._runProcess(cmd, text=True, shell=False)) is not None:
+            with contextlib.suppress(Exception):
+                _countVer = [val.strip() for val in response.split(',')]
+                count = int(_countVer[0])
+                version = VersionString(_countVer[1])
 
         self._updateCount = int(count)
         self.updatesLabel.set(f'{count}')
@@ -328,13 +382,15 @@ class UpdatePopup(CcpnDialogMainWidget):
 
     def _showInfoBox(self):
         self._showBoxes = True
-        self.infoBox.show()
-        self._resizeWidget()
+        if not self.infoBox.isVisible():
+            self.infoBox.show()
+            self._resizeWidget()
 
     def _showChangeLogBox(self):
         self._showBoxes = True
-        self.changeLogBox.show()
-        self._resizeWidget()
+        if not self.changeLogBox.isVisible():
+            self.changeLogBox.show()
+            self._resizeWidget()
 
     def _showInfo(self, *args):
         """Add text to the html-box in default colour or green if the last message was an error.
@@ -366,9 +422,10 @@ class UpdatePopup(CcpnDialogMainWidget):
         """change the width to the selected tab
         """
         QtCore.QTimer().singleShot(0, self._finalise)
-        # create a single-shot - waits until gui is up-to-date before firing first iteration of size-adjust
-        QtCore.QTimer().singleShot(0, partial(dynamicSizeAdjust, self, sizeFunction=self._targetSize,
-                                              adjustWidth=True, adjustHeight=True, step=32))
+        if self._initialised:
+            # create a single-shot - waits until gui is up-to-date before firing first iteration of size-adjust
+            QtCore.QTimer().singleShot(0, partial(dynamicSizeAdjust, self, sizeFunction=self._targetSize,
+                                                  adjustWidth=True, adjustHeight=True))
 
     def _targetSize(self) -> tuple | None:
         """Get the size of the widget to match the popup to.
@@ -411,7 +468,7 @@ def main():
     qtApp = QtWidgets.QApplication(['Update'])
 
     QtCore.QCoreApplication.setApplicationName('Update')
-    QtCore.QCoreApplication.setApplicationVersion('3.0.1')
+    QtCore.QCoreApplication.setApplicationVersion('3.2.0')
 
     popup = UpdatePopup()
     popup.exec_()

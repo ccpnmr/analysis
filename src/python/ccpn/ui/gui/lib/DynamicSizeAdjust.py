@@ -32,8 +32,31 @@ from typing import Optional
 from ccpn.util.Logging import getLogger
 
 
-_INITIAL_STEP = 1024
+_INITIAL_STEP = 256
 _MAX_ITERATIONS = 50
+
+
+def _fixedSize(widget, lastSizes, completedFunction):
+    """Fix the width/height as required.
+    """
+    lastSizes.insert(0, (widget.size().width(), widget.size().height()))
+    lastSizes = lastSizes[:3]  # keep the last 3
+
+    if len(set(lastSizes)) > 1:
+        # size is not stable yet
+        QtCore.QTimer().singleShot(0, partial(_fixedSize, widget, lastSizes, completedFunction))
+    else:
+        wFixed = getattr(widget, 'FIXEDWIDTH', False)
+        hFixed = getattr(widget, 'FIXEDHEIGHT', False)
+        # size is stable
+        if wFixed:
+            widget.setFixedWidth(widget.width())
+        if hFixed:
+            widget.setFixedHeight(widget.height())
+
+        if completedFunction:
+            # resizing has finished, call the completedFunction if needed
+            completedFunction()
 
 
 def dynamicSizeAdjust(widget, sizeFunction: callable = None, completedFunction: callable = None,
@@ -86,7 +109,7 @@ def dynamicSizeAdjust(widget, sizeFunction: callable = None, completedFunction: 
             getLogger().debug('dynamicSizeAdjust failed - maximum iterations reached')
             if completedFunction:
                 # call the completedFunction if needed
-                completedFunction()
+                QtCore.QTimer().singleShot(0, completedFunction)
             return
 
         # set the step-sizes for the first iteration
@@ -101,7 +124,7 @@ def dynamicSizeAdjust(widget, sizeFunction: callable = None, completedFunction: 
                 # stop if widget isn't resizing correctly
                 if completedFunction:
                     # call the completedFunction if needed
-                    completedFunction()
+                    QtCore.QTimer().singleShot(0, completedFunction)
                 return
 
             _lastSteps, _lastsizes = _steps, size
@@ -113,7 +136,7 @@ def dynamicSizeAdjust(widget, sizeFunction: callable = None, completedFunction: 
                 # iteratively change step-size until less than distance to target-height
                 thisStepH = thisStepH // 2
 
-            if (adjustWidth and thisStepW > 1) or (adjustHeight and thisStepH > 1):
+            if (adjustWidth and thisStepW >= 1) or (adjustHeight and thisStepH >= 1):
                 # if this still needs to adjust the width/height then perform another iteration
                 _steps = QtCore.QSize(thisStepW, thisStepH)
 
@@ -121,13 +144,19 @@ def dynamicSizeAdjust(widget, sizeFunction: callable = None, completedFunction: 
                 adjustW = (int(thisStepW) if size.width() < target.width() else -int(thisStepW)) if adjustWidth else 0
                 adjustH = (int(thisStepH) if size.height() < target.height() else -int(thisStepH)) if adjustHeight else 0
 
-                # setting setFixed<dimension> is not enough, sizePolicy must also be set for widget
-                if (sPolicy := (widget.sizePolicy().horizontalPolicy(), widget.sizePolicy().verticalPolicy())) == (QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed):
-                    widget.setFixedSize(widget.width() + adjustW, widget.height() + adjustH)
-                elif sPolicy[0] == QtWidgets.QSizePolicy.Fixed:
-                    widget.setFixedWidth(widget.width() + adjustW)
-                elif sPolicy[1] == QtWidgets.QSizePolicy.Fixed:
-                    widget.setFixedHeight(widget.height() + adjustH)
+                widget.setFixedSize(QtWidgets.QWIDGETSIZE_MAX, QtWidgets.QWIDGETSIZE_MAX)
+                # # wFixed = widget.minimumWidth() == widget.maximumWidth()
+                # # hFixed = widget.minimumHeight() == widget.maximumHeight()
+                # wFixed = getattr(widget, 'FIXEDWIDTH', False)
+                # hFixed = getattr(widget, 'FIXEDHEIGHT', False)
+                # # setting setFixed<dimension> is not enough, sizePolicy must also be set for widget
+                # if wFixed and hFixed:
+                #     widget.setFixedSize(widget.width() + adjustW, widget.height() + adjustH)
+                # elif wFixed:
+                #     print(f'--> {widget.width()}   {adjustW}')
+                #     widget.setFixedWidth(widget.width() + adjustW)
+                # elif hFixed:
+                #     widget.setFixedHeight(widget.height() + adjustH)
                 widget.resize(widget.width() + adjustW, widget.height() + adjustH)
 
                 # create another single-shot - waits until gui is up-to-date before firing
@@ -139,9 +168,7 @@ def dynamicSizeAdjust(widget, sizeFunction: callable = None, completedFunction: 
                                                       ))
                 return
 
-        if completedFunction:
-            # resizing has finished, call the completedFunction if needed
-            completedFunction()
+            QtCore.QTimer().singleShot(0, partial(_fixedSize, widget, [(0, 0)], completedFunction))
 
     except Exception as es:
         getLogger().debug2(f'dynamicSizeAdjust failed {es}')

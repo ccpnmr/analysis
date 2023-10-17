@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-17 19:30:23 +0100 (Tue, October 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-17 20:22:56 +0100 (Tue, October 17, 2023) $"
 __version__ = "$Revision: 3.2.0.1 $"
 #=========================================================================================
 # Created
@@ -254,13 +254,14 @@ def isRHEL(value: str = '8.'):
     if not isLinux():
         return False
 
-    path = pathlib.Path("/etc/os-release")
-    with open(path) as fp:
-        reader = csv.reader(fp, delimiter="=")
-        os_release = dict(reader)
-
     try:
-        if (os_release.get('ID', '') == 'rhel' or 'rhel' in os_release.get('ID_LIKE', '')) and \
+        path = pathlib.Path("/etc/os-release")
+        with open(path) as fp:
+            reader = csv.reader(fp, delimiter="=")
+            os_release = dict(reader)
+
+        if (os_release.get('ID', '') == 'rhel' or
+            'rhel' in os_release.get('ID_LIKE', '')) and \
                 (version_id := os_release.get('VERSION_ID', '')) and \
                 version_id.startswith(value):
             return True

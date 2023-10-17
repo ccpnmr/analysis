@@ -3,6 +3,8 @@
 export CONDA="${CCPNMR_TOP_DIR}"/miniconda
 export CCPN_PYTHON="/bin/lib/CcpNmrAnalysis"
 export PYTHONPATH="${CCPNMR_TOP_DIR}"/src/python:"${CCPNMR_TOP_DIR}"/src/c
+export PYTHONHOME="${CCPNMR_TOP_DIR}"/miniconda
+export PYTHONUNBUFFERED=1
 export FONTCONFIG_FILE="${CONDA}"/etc/fonts/fonts.conf
 export FONTCONFIG_PATH="${CONDA}"/etc/fonts
 export QT_PLUGIN_PATH=${QT_PLUGIN_PATH}:"${CONDA}"/plugins

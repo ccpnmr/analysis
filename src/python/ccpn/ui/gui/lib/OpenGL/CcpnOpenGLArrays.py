@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-17 18:51:22 +0100 (Tue, October 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-17 19:30:23 +0100 (Tue, October 17, 2023) $"
 __version__ = "$Revision: 3.2.0.1 $"
 #=========================================================================================
 # Created
@@ -31,7 +31,7 @@ import numpy as np
 from ccpn.ui.gui.lib.OpenGL import GL
 from ccpn.ui.gui.lib.OpenGL import VBO
 from ccpn.util.Logging import getLogger
-from ccpn.util.Common import isWindowsOS
+from ccpn.util.Common import isRHEL
 
 
 GLRENDERMODE_IGNORE = 0
@@ -1493,10 +1493,10 @@ class _GLVertexArray:
 # Windows again - doesn't appear to correctly accelerate all GL objects
 #=========================================================================================
 
-if True:  # check for RHEL8
-    GLVertexArray = _GLVertexArray
-else:
+if isRHEL(8):  # check for RHEL8
     GLVertexArray = _VBOGLVertexArray
+else:
+    GLVertexArray = _GLVertexArray
 
 
 #=========================================================================================

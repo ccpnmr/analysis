@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-17 20:22:56 +0100 (Tue, October 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-17 20:43:48 +0100 (Tue, October 17, 2023) $"
 __version__ = "$Revision: 3.2.0.1 $"
 #=========================================================================================
 # Created
@@ -266,9 +266,9 @@ def isRHEL(value: str = '8.'):
                 version_id.startswith(value):
             return True
     except Exception:
-        ...
-    finally:
         return False
+
+    return False
 
 
 def parseSequenceCode(value):

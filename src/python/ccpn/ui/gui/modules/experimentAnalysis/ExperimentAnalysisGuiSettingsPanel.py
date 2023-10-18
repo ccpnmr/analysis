@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-11 16:33:55 +0100 (Wed, October 11, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-18 16:07:32 +0100 (Wed, October 18, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -952,7 +952,7 @@ class AppearancePanel(GuiSettingPanel):
               'enabled': True,
               'kwds': {'labelText': guiNameSpaces.Label_ThreshValueCalcOptions,
                        'tipText': guiNameSpaces.TipText_ThreshValueCalcOptions,
-                       'texts': ["<Select>"] + guiNameSpaces.DirectThresholdCalcOption + [' ' ] + guiNameSpaces.PlusThresholdCalcOption,
+                       'texts': [guiNameSpaces.SELECT] + guiNameSpaces.DirectThresholdCalcOption + [' ' ] + guiNameSpaces.PlusThresholdCalcOption,
                        'default':guiNameSpaces.DirectThresholdCalcOption[0],
                        'fixedWidths': SettingsWidgetFixedWidths}}),
 

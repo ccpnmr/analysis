@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-11 16:33:55 +0100 (Wed, October 11, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-18 16:07:32 +0100 (Wed, October 18, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -251,6 +251,8 @@ TipText_ErrorMethod = 'Select the Fitting Error calculation Method'
 ############################################################
 ##########  TAB: Appearance
 ############################################################
+
+SELECT = '<Select>'
 
 WidgetVarName_GenAppearanceSeparator = 'GeneralAppearanceSeparator'
 Label_GeneralAppearance = 'Appearance'

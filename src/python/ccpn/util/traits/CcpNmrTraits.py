@@ -95,7 +95,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-16 16:42:30 +0100 (Mon, October 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-18 10:17:32 +0100 (Wed, October 18, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -165,6 +165,11 @@ class _CcpNmrTrait(object):
         self.itemTrait = itemTrait
         self.valueTrait = valueTrait
         self.keyTrait = keyTrait
+
+    def _fullName(self, obj) -> str:
+        """:return a obj-class-name.trait-name string; eg.for error reporting
+        """
+        return _fullName(obj, self)
 
     def __str__(self):
         return f'<Trait {self.__class__.__name__} {repr(self.name)}>'
@@ -239,10 +244,10 @@ class Int(_Int, _CcpNmrTrait):
         if isinstance(value, (int,)):
             if (self.max is not None and value > self.max) or \
                (self.min is not None and value < self.min):
-                raise ValueError(f'validate(): value {value} out of bounds; expected {self.info}')
+                raise ValueError(f'{self._fullName(obj)}: value {value} out of bounds; expected {self.info}')
             return value
         else:
-            raise TypeError(f'validate(): expected type int, got {_classType(value)}')
+            raise TypeError(f'{self._fullName(obj)}: expected type int, got {_classType(value)}')
 
     def info(self):
         """:return info string
@@ -263,7 +268,7 @@ class CInt(Int):
             try:
                 value = int(value)
             except:
-                raise TypeError(f'validate(): unable to cast {value} to int')
+                raise TypeError(f'{self._fullName(obj)}: unable to cast {value} to int')
 
         return Int.validate(self, obj, value)
 
@@ -382,7 +387,7 @@ class CEnum(Enum):
         elif isinstance(mapping, DataEnum):
             self._mapping = dict(zip(mapping.values(), mapping.names()))
         else:
-            raise ValueError(f'Invalid mapping {mapping}')
+            raise ValueError(f'CEnum.__init__(): invalid mapping {mapping}')
 
         Enum.__init__(self, list(self._mapping.values()), *args, **kwargs)
 
@@ -487,7 +492,7 @@ class CList(List):
             return [val for val in theList]
 
         else:
-            raise ValueError(f'{obj.__class__.__name__}.{self.name}: expected list or iterable, got {theList}')
+            raise ValueError(f'{self._fullName(obj)}: expected list or iterable, got {theList}')
 
 
 class _TypedList(list):
@@ -631,7 +636,7 @@ class TList(List):
             getLogger().warning(f'TList trait: depricated {repr("trait")} keyword, use {repr("itemTrait")} instead')
 
         if itemTrait is None or not isinstance(itemTrait, TraitType):
-            raise ValueError(f'parameter itemTrait: invalid, got {itemTrait}')
+            raise ValueError(f'TList parameter itemTrait: invalid, got {itemTrait}')
 
         super().__init__(default_value=default_value, minlen=minlen, maxlen=maxlen, **kwargs)
         self.itemTrait = itemTrait

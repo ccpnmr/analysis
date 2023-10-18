@@ -19,9 +19,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-28 13:51:58 +0100 (Tue, March 28, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-10-17 20:43:48 +0100 (Tue, October 17, 2023) $"
+__version__ = "$Revision: 3.2.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -181,6 +181,7 @@ def recursiveImport(dirname, modname=None, ignoreModules=None, force=False):
         if os.path.isdir(newdirname) and name.find('.') == -1:
             recursiveImport(newdirname, prefix + name, ignoreModules)
 
+
 @singleton
 class Process(object):
     """A simple (singleton)class to hold information about the process:
@@ -190,6 +191,7 @@ class Process(object):
     executable:Path : python executable as a Path instance
     initialWorkingDirectory:Path  : cwd() when first started as a Path instance
     """
+
     def __init__(self):
         import psutil
         from ccpn.util.Path import aPath
@@ -205,11 +207,13 @@ class Process(object):
     def __str__(self):
         return f'<Process: pid={self.pid}, username={self.username}>'
 
+
 def getProcess() -> Process:
     """Get the process info; e.g. getProcess().username
     :return The Process instance
     """
     return Process()
+
 
 def isWindowsOS():
     return sys.platform[:3].lower() == 'win'
@@ -239,6 +243,30 @@ def isUbuntuVersion(value: str = ''):
             for line in osStatus.decode("utf-8").split('\n'):
                 if OPERATING_SYSTEM in line and value in line:
                     return True
+
+    return False
+
+
+def isRHEL(value: str = '8.'):
+    import csv
+    import pathlib
+
+    if not isLinux():
+        return False
+
+    try:
+        path = pathlib.Path("/etc/os-release")
+        with open(path) as fp:
+            reader = csv.reader(fp, delimiter="=")
+            os_release = dict(reader)
+
+        if (os_release.get('ID', '') == 'rhel' or
+            'rhel' in os_release.get('ID_LIKE', '')) and \
+                (version_id := os_release.get('VERSION_ID', '')) and \
+                version_id.startswith(value):
+            return True
+    except Exception:
+        return False
 
     return False
 
@@ -388,7 +416,8 @@ def reorder(values, axisCodes, refAxisCodes):
     if this is longer than the values.
 
     NB if there are multiple matches possible, one is chosen by heuristics"""
-    from ccpn.core.lib.AxisCodeLib import _axisCodeMapIndices # this causes circular imports. KEEP LOCAL
+    from ccpn.core.lib.AxisCodeLib import _axisCodeMapIndices  # this causes circular imports. KEEP LOCAL
+
     if len(values) != len(axisCodes):
         raise ValueError("Length mismatch between %s and %s" % (values, axisCodes))
     remapping = _axisCodeMapIndices(axisCodes, refAxisCodes)
@@ -521,6 +550,7 @@ def _traverse(obj, tree_types=(list, tuple)):
 def percentage(percent, whole):
     return (percent * whole) / 100.0
 
+
 def _add(x, y):
     if y > 0:
         return _add(x, y - 1) + 1
@@ -529,6 +559,7 @@ def _add(x, y):
     else:
         return x
 
+
 def _sub(x, y):
     if y > 0:
         return _sub(x, y - 1) - 1
@@ -536,6 +567,7 @@ def _sub(x, y):
         return _sub(x, y + 1) + 1
     else:
         return x
+
 
 def _fillListToLenght(aList, desiredLength, fillingValue=None):
     """

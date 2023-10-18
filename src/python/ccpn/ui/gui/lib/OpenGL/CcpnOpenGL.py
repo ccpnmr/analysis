@@ -56,8 +56,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-07 17:25:14 +0100 (Thu, September 07, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-10-17 18:51:22 +0100 (Tue, October 17, 2023) $"
+__version__ = "$Revision: 3.2.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -3092,6 +3092,8 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.strip.isDeleted:
             return
 
+        # tt = time.perf_counter()
+
         # NOTE:ED - testing, remove later
         # self._paintMode = PaintModes.PAINT_ALL
 
@@ -3160,6 +3162,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # only need to paint the mouse cursor
             self._paintGLMouseOnly()
+
+        # print(f'{round((time.perf_counter() - tt) * 1000.0, 2)},')
 
     # @contextmanager
     def _disableGLAliasing(self):

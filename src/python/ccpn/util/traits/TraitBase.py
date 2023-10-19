@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-17 12:33:42 +0100 (Tue, October 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-19 13:33:29 +0100 (Thu, October 19, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -128,7 +128,7 @@ class TraitBase(HasTraits):
         "convenience for trait_metadata"
         return self.trait_metadata(trait, key, default)
 
-    def keys(self, **metadata) -> list:
+    def _keys(self, **metadata) -> list:
         """Get keys (object only), optionally filtering for metadata.
         Key order is determined by keysInOrder attribute and optional traitAtEnd tag settings.
         :return The keys as a list
@@ -148,6 +148,37 @@ class TraitBase(HasTraits):
             keys = [key for key in self.class_traits(**metadata).keys()]
             keys.sort()
         return keys
+
+    def keys(self, **kwds) -> list:
+        """Allow for skipping or showing of reserved traits
+        i.e. tagged with reservedTrait=False or True, respectively
+        """
+        # Downstream self._keys() call omits reservedTrait keyword,
+        # as it is not set by default.
+
+        if 'reservedTrait' not in kwds:
+            # regular behavior:
+            return self._keys(**kwds)
+
+        reservedTrait = kwds['reservedTrait']
+
+        if reservedTrait == True:
+            # looking for those tagged with reservedTrait = True
+            return self._keys(**kwds)
+
+        elif reservedTrait == False:
+            # reservedTrait == False; i.e. not the reserved ones
+            _reservedTraits = self._keys(reservedTrait=True)  # yields those that are tagged
+            # delete reservedTrait from kwds, as the tag most likely is not set
+            # for (many) traits
+            del kwds['reservedTrait']
+            # get traits filtering for not in _reservedTraits
+            return [key for key in self._keys(**kwds)
+                    if key not in _reservedTraits]
+
+        else:
+            raise ValueError(f'keys(): Invalid parameter reservedTrait, expected None | True | False, got {reservedTrait}')
+
 
     # the ones below are derived from keys() method
     def values(self, **metadata):

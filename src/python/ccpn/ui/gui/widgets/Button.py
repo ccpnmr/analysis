@@ -73,8 +73,8 @@ class Button(QtWidgets.QPushButton, Base):
 
     def keyReleaseEvent(self, event: QtGui.QKeyEvent):
         if event.key() in [QtCore.Qt.Key_Space]:
-            # simulate an escape-key to clear keySequences
-            escape = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Escape, QtCore.Qt.NoModifier)
+            # simulate an exit-key to clear keySequences
+            escape = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Exit, QtCore.Qt.NoModifier)
             QtCore.QCoreApplication.sendEvent(self, escape)
             # perform button action
             self.click()

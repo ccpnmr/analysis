@@ -1033,8 +1033,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         deltaT = time.perf_counter() - self._lastKeyTime
         if deltaT > KEY_DELAY and self._lastKey not in [QtCore.Qt.Key_Escape, 0]:
             self._lastKey = 0
-            # simulate an escape-key to clear keySequences - MUST be KeyPress
-            event = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Escape, QtCore.Qt.NoModifier)
+            # simulate an exit-key to clear keySequences - MUST be KeyPress
+            event = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Exit, QtCore.Qt.NoModifier)
             QtCore.QCoreApplication.sendEvent(self, event)
             # clear the statusBar
             self._lastKeyList = []

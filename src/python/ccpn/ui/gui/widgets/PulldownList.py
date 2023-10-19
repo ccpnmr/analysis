@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import time
+from functools import partial
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ccpn.ui.gui.widgets.Base import Base
@@ -46,20 +47,20 @@ class _ListView(QtWidgets.QListView):
     _lastKeyTime = 0
 
     def keyPressEvent(self, event: QtGui.QKeyEvent):
-        if event.key() in [QtCore.Qt.Key_Escape]:
+        if event.key() in [QtCore.Qt.Key_Exit, QtCore.Qt.Key_Escape]:
             if (time.perf_counter() - self._lastKeyTime) * 1e3 < QtWidgets.QApplication.instance().doubleClickInterval():
                 return
 
-        return super().keyPressEvent(event)
+        super().keyPressEvent(event)
 
     def keyReleaseEvent(self, event: QtGui.QKeyEvent):
         if event.key() in [QtCore.Qt.Key_Space, QtCore.Qt.Key_Tab]:
-            # simulate an escape-key to clear keySequences
-            escape = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Escape, QtCore.Qt.NoModifier)
+            # simulate an exit-key to clear keySequences
+            escape = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Exit, QtCore.Qt.NoModifier)
             QtCore.QCoreApplication.sendEvent(self, escape)
             self._lastKeyTime = time.perf_counter()
 
-        return super().keyReleaseEvent(event)
+        super().keyReleaseEvent(event)
 
 
 class PulldownList(QtWidgets.QComboBox, Base):
@@ -167,13 +168,13 @@ class PulldownList(QtWidgets.QComboBox, Base):
 
     def keyReleaseEvent(self, event: QtGui.QKeyEvent):
         if event.key() in [QtCore.Qt.Key_Space]:
-            # simulate an escape-key to clear keySequences - requires timer on hidePopup
-            escape = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Escape, QtCore.Qt.NoModifier)
-            QtCore.QCoreApplication.sendEvent(self, escape)
             # open the popup if space pressed
             self.showPopup()
-
-        return super().keyReleaseEvent(event)
+            # simulate an exit-key to clear keySequences - requires timer on hidePopup
+            escape = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Exit, QtCore.Qt.NoModifier)
+            # QtCore.QTimer().singleShot(0, partial(QtCore.QCoreApplication.sendEvent, self, escape))
+            QtCore.QCoreApplication.sendEvent(self, escape)
+        super().keyReleaseEvent(event)
 
     def focusOutEvent(self, ev) -> None:
         super(PulldownList, self).focusOutEvent(ev)

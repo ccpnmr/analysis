@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-17 16:43:06 +0100 (Tue, October 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-19 12:24:29 +0100 (Thu, October 19, 2023) $"
 __version__ = "$Revision: 3.2.0.1 $"
 #=========================================================================================
 # Created
@@ -463,9 +463,9 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                           # 'newProject' : self.application.newProject, this is a crash!
                           'info'                    : getLogger().info,
                           'warning'                 : getLogger().warning,
-                          'showWarning': showWarning,
-                          'showInfo': showInfo,
-                          'showError': showError,
+                          'showWarning'             : showWarning,
+                          'showInfo'                : showInfo,
+                          'showError'               : showError,
 
                           #### context managers
                           'undoBlock'               : undoBlockWithoutSideBar,
@@ -984,7 +984,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             getLogger().warning('Error expanding module: sideBar')
 
     def keyReleaseEvent(self, event: QtGui.QKeyEvent) -> None:
-        # this MUST be a keyRelease event (isAutoRepeat can be used)
+        # this MUST be a keyRelease event (isAutoRepeat MUST be false for keysequence-actions)
         key = event.key()
         if key == QtCore.Qt.Key_Escape:
             # Reset Mouse Mode
@@ -1002,7 +1002,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         self._lastKeyTime = time.perf_counter()
         self._lastKey = key
         try:
-            if key == QtCore.Qt.Key_Tab:
+            if key in [QtCore.Qt.Key_Tab, QtCore.Qt.Key_Backtab]:
                 self._lastKeyList.append('Tab')
             elif chr(key).isascii():
                 if chr(key) == ' ':
@@ -2103,10 +2103,10 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                 try:
                     peak = peaks[0]
                     peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4,
-                                            minDropFactor=minDropFactor, searchBoxMode=searchBoxMode, searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
-                    if peak.spectrum.dimensionCount ==1 and peak.figureOfMerit <1:
+                                        minDropFactor=minDropFactor, searchBoxMode=searchBoxMode, searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
+                    if peak.spectrum.dimensionCount == 1 and peak.figureOfMerit < 1:
                         showWarning(f'Cannot snap peak', f'Figure of merit below the snapping threshold of 1.')
-                    if peak.spectrum.dimensionCount ==1 and peak.spectrum.negativeNoiseLevel < peak.height < peak.spectrum.noiseLevel:
+                    if peak.spectrum.dimensionCount == 1 and peak.spectrum.negativeNoiseLevel < peak.height < peak.spectrum.noiseLevel:
                         showWarning(f'Cannot snap peak', f'Adjust the noise level thresholds or move the peak closer to a signal.')
                 except Exception as es:
                     showWarning('Snap to Extremum', str(es))
@@ -2118,13 +2118,14 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                         _is1Ds = [p.spectrum.dimensionCount == 1 for p in peaks]
                         if all(_is1Ds):
                             from ccpn.core.lib.PeakPickers.PeakSnapping1D import snap1DPeaksByGroup
+
                             snap1DPeaksByGroup(peaks)
-                            nonSnappingPeaks = [pk for pk in peaks if pk.figureOfMerit <1]
-                            nonSnappingPeaksBelowNoiseT = [pk for pk in peaks if pk.spectrum.negativeNoiseLevel < pk.height < pk.spectrum.noiseLevel ]
-                            msg = 'one of the selected peak' if len(nonSnappingPeaks)==1 else 'some of the selected peaks'
-                            if len(nonSnappingPeaks)>0:
+                            nonSnappingPeaks = [pk for pk in peaks if pk.figureOfMerit < 1]
+                            nonSnappingPeaksBelowNoiseT = [pk for pk in peaks if pk.spectrum.negativeNoiseLevel < pk.height < pk.spectrum.noiseLevel]
+                            msg = 'one of the selected peak' if len(nonSnappingPeaks) == 1 else 'some of the selected peaks'
+                            if len(nonSnappingPeaks) > 0:
                                 showWarning(f'Cannot snap {msg}', f'Figure of merit below the snapping threshold of 1 for {nonSnappingPeaks}')
-                            if len(nonSnappingPeaksBelowNoiseT)>0:
+                            if len(nonSnappingPeaksBelowNoiseT) > 0:
                                 showWarning(f'Cannot find new maxima', f'Some maxima could be in the noise. Adjust the noise level thresholds to include more results. Affected peaks: {nonSnappingPeaksBelowNoiseT}')
                         else:
                             peaks.sort(key=lambda x: x.position[0] if x.position and None not in x.position else 0, reverse=False)  # reorder peaks by position

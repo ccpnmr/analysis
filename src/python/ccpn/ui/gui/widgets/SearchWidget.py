@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-02 15:45:00 +0000 (Thu, March 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-10-19 12:24:29 +0100 (Thu, October 19, 2023) $"
+__version__ = "$Revision: 3.2.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,7 +31,7 @@ import operator as op
 import numpy as np
 import itertools
 from functools import partial
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
 
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Label import Label
@@ -372,8 +372,43 @@ class _TableFilterABC(ScrollArea):
 
         self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Minimum)
 
+        # set the local tab-order for the search widgets
+        self._tabOrder = (self.conditionWidget, self.condition1, self.condition2,
+                          self.columnOptions, *self.searchButtons.buttons,)
+        for widg in self._tabOrder:
+            # add filter to capture the tab/backtab event
+            widg.installEventFilter(self)
+
         # initialise search list
         self._listRows = None
+
+    def eventFilter(self, source, event):
+        """Handle foward/backward tabbing in a small group of widgets.
+        """
+        tp = event.type()
+        if tp in [QtCore.QEvent.KeyPress, QtCore.QEvent.KeyRelease]:
+            key = event.key()
+            if (tp, key) in [(QtCore.QEvent.KeyRelease, QtCore.Qt.Key_Tab),
+                             (QtCore.QEvent.KeyPress, QtCore.Qt.Key_Backtab), ]:
+                ind = (self._tabOrder.index(source) + (1 if key == QtCore.Qt.Key_Tab else -1)) % len(self._tabOrder)
+                count = 0
+                while not (self._tabOrder[ind].isEnabled() and self._tabOrder[ind].isVisible()):
+                    ind = (ind + (1 if key == QtCore.Qt.Key_Tab else -1)) % len(self._tabOrder)
+
+                    count += 1
+                    if count > len(self._tabOrder):
+                        # have cycled through all the tabs at least once
+                        break  # while not
+                else:
+                    self._tabOrder[ind].setFocus()
+
+            if key in [QtCore.Qt.Key_Tab, QtCore.Qt.Key_Backtab]:
+                # simulate an escape-key to clear keySequences
+                escape = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Escape, QtCore.Qt.NoModifier)
+                QtCore.QCoreApplication.sendEvent(self, escape)
+                return True
+
+        return False
 
     def searchRows(self, df, rows):
         """Return the subset of the df based on rows

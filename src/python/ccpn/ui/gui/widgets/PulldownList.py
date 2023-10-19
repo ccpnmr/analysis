@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-07-31 15:08:13 +0100 (Mon, July 31, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-10-19 12:24:29 +0100 (Thu, October 19, 2023) $"
+__version__ = "$Revision: 3.2.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,25 +27,47 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import time
 from PyQt5 import QtCore, QtGui, QtWidgets
-
-from ccpn.util.Logging import getLogger
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
+from ccpn.util.Logging import getLogger
 
 
 NULL = object()
 
 
-#TODO: clean various methods, removing 'deprecated' ones
+class _ListView(QtWidgets.QListView):
+    """Class to implement listView that disables the SpaceSpace behaviour opening the python-console.
+    """
+    _lastKeyTime = 0
+
+    def keyPressEvent(self, event: QtGui.QKeyEvent):
+        if event.key() in [QtCore.Qt.Key_Escape]:
+            if (time.perf_counter() - self._lastKeyTime) * 1e3 < QtWidgets.QApplication.instance().doubleClickInterval():
+                return
+
+        return super().keyPressEvent(event)
+
+    def keyReleaseEvent(self, event: QtGui.QKeyEvent):
+        if event.key() in [QtCore.Qt.Key_Space, QtCore.Qt.Key_Tab]:
+            # simulate an escape-key to clear keySequences
+            escape = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Escape, QtCore.Qt.NoModifier)
+            QtCore.QCoreApplication.sendEvent(self, escape)
+            self._lastKeyTime = time.perf_counter()
+
+        return super().keyReleaseEvent(event)
+
 
 class PulldownList(QtWidgets.QComboBox, Base):
     popupAboutToBeShown = QtCore.pyqtSignal()
     pulldownTextEdited = QtCore.pyqtSignal()
     pulldownTextReady = QtCore.pyqtSignal(str)
+
+    _list = None
 
     def __init__(self, parent, texts=None, objects=None,
                  icons=None, callback=None,
@@ -54,7 +76,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
                  headerEnabled=False, headerIcon=None,
                  editable=False, maxVisibleItems=16,
                  iconSize=None, toolTips=None,
-                 disableWheelEvent = True,
+                 disableWheelEvent=True,
                  **kwds):
         """
 
@@ -91,7 +113,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
         self.disableWheelEvent = disableWheelEvent
 
         # replace with a simple listView - fixes stylesheet hassle; default QComboBox listview can't be changed
-        self._list = QtWidgets.QListView()
+        self._list = _ListView()
         self.setView(self._list)
         setWidgetFont(self._list, )
         # add a scrollBar for long lists
@@ -109,7 +131,8 @@ class PulldownList(QtWidgets.QComboBox, Base):
         if self.clickToShowCallback:
             self.popupAboutToBeShown.connect(self.clickToShowCallback)
 
-        self.setStyleSheet('PulldownList { padding: 3px 3px 3px 3px; combobox-popup: 0; }')
+        self.setStyleSheet('PulldownList { padding: 3px 3px 3px 3px; combobox-popup: 0; }'
+                           'PulldownList:focus { border: 1px solid %(BORDER_FOCUS)s; }' % getColours())
         # this (or similar) can now be added to the stylesheet if needed
         # 'QListView::item { padding: 12px; }')
 
@@ -142,6 +165,16 @@ class PulldownList(QtWidgets.QComboBox, Base):
             # set the font for the placeHolderText (not set by Base)
             setWidgetFont(self.lineEdit(), )
 
+    def keyReleaseEvent(self, event: QtGui.QKeyEvent):
+        if event.key() in [QtCore.Qt.Key_Space]:
+            # simulate an escape-key to clear keySequences - requires timer on hidePopup
+            escape = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Escape, QtCore.Qt.NoModifier)
+            QtCore.QCoreApplication.sendEvent(self, escape)
+            # open the popup if space pressed
+            self.showPopup()
+
+        return super().keyReleaseEvent(event)
+
     def focusOutEvent(self, ev) -> None:
         super(PulldownList, self).focusOutEvent(ev)
         if self.isEditable():
@@ -151,16 +184,24 @@ class PulldownList(QtWidgets.QComboBox, Base):
         self.pulldownTextReady.emit(self._editedText)
 
     def showPopup(self):
-        self.popupAboutToBeShown.emit()
+        self._list._lastKeyTime = time.perf_counter()
         self._list.setMinimumSize(self.sizeHint())
+        self.popupAboutToBeShown.emit()
         super(PulldownList, self).showPopup()
+
+    def hidePopup(self):
+        if self._list and (time.perf_counter() - self._list._lastKeyTime) * 1e3 < QtWidgets.QApplication.instance().doubleClickInterval():
+            # prevent the popup from hiding too quickly
+            return
+
+        super().hidePopup()
 
     def currentIndex(self) -> int:
         ind = super().currentIndex()
 
         # remove number of preceding separators
         filt = list(filter(None, (self.model().index(rr, 0).data(QtCore.Qt.AccessibleDescriptionRole)
-                                for rr in range(ind))))
+                                  for rr in range(ind))))
 
         return ind - len(filt)
 
@@ -171,8 +212,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
             if index >= 0:
                 return self.objects[index]
 
-    def currentData(self):
-
+    def currentData(self, role=None):
         return (self.currentText(), self.currentObject())
 
     def select(self, item):
@@ -191,7 +231,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
             self.setCurrentIndex(indx)
 
     def eventFilter(self, source, event):
-        if (event.type() == QtCore.QEvent.Wheel and  self.disableWheelEvent):
+        if (event.type() == QtCore.QEvent.Wheel and self.disableWheelEvent):
             return True
         return super(PulldownList, self).eventFilter(source, event)
 

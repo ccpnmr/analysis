@@ -140,7 +140,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-18 10:17:32 +0100 (Wed, October 18, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-20 17:25:47 +0100 (Fri, October 20, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -870,7 +870,8 @@ class CcpNmrJson(TraitBase):
                 f'trying to restore from JSON encoded class {_className} incompatible with class {self.__class__.__name__}'
             )
 
-        self._decode(dataDict)
+        with self._doProcessJson():
+            self._decode(dataDict)
         return self
 
     def _decodeTrait(self, traitName, theDict):

@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-09 12:09:34 +0100 (Mon, October 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-20 17:25:47 +0100 (Fri, October 20, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -210,10 +210,8 @@ class Pid(str):
     -> False    # all pid elements are strings
     """
 
-    # # name mapping dictionary
-    # nameMap = dict(
-    #         MO='Molecule'
-    # )
+    _checkPidType = True  # flag to set Pid type-checking using coreClass dict;
+                          # (set to False during v3mimic development)
 
     def __init__(self, string: str, **kwds):
         """First argument ('string' must be a valid pid string with at least one, non-initial PREFIXSEP
@@ -269,7 +267,8 @@ class Pid(str):
         Create a new Pid instance;
         Have to use this as intermediate as str baseclass of Pid only accepts one argument
 
-        :param *args: the pid-type and ids; args[0] can be a CoreClass object (e.g. Spectrum, Peak, etc)
+        :param *args: the pid-type and ids; args[0] can be a CoreClass object (e.g. Spectrum,
+                      Peak, etc) or a string.
         :return Pid object from arguments
         """
         from ccpn.core._implementation.CoreModel import CoreModel
@@ -297,7 +296,7 @@ class Pid(str):
             _pidType = klazz.shortClassName
 
         # check if type exists
-        if _pidType not in CoreModel._coreClassShortNameDict:
+        if cls._checkPidType and _pidType not in CoreModel._coreClassShortNameDict:
             raise ValueError('Pid.new: invalid Pid type (%s)' % _pidType)
 
         # check ids arguments

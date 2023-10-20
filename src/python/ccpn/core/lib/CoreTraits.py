@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-11 09:11:05 +0100 (Wed, October 11, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-20 17:25:47 +0100 (Fri, October 20, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -56,6 +56,7 @@ class DataSourceTrait(OWTraits):
     """
     klass = SpectrumDataSourceABC
 
+
 from ccpn.framework.Version import VersionString
 class VersionTrait(Unicode):
     """A trait to encode a version
@@ -63,6 +64,21 @@ class VersionTrait(Unicode):
     def validate(self, obj, value):
         return VersionString(value)
 
+
+from ccpn.core.lib.Pid import Pid
+class PidTrait(Unicode):
+    """A trait to encode/decode a pid
+    """
+    def validate(self, obj, value):
+        if value is None and self.allow_none:
+            return None
+        if isinstance(value, str):
+            return Pid(value)
+        elif hasattr(value, 'pid'):
+            value = getattr(value, 'pid')
+            return Pid(value)
+        else:
+            raise ValueError(f'{self._fullName(obj)}: expected pid or object with pid, got {value}')
 
 class V3Object(TraitType, _CcpNmrTrait):
     """A trait that defines a V3-object, json serialisable through its Pid

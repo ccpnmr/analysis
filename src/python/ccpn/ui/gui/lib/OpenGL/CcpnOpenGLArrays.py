@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-17 19:30:23 +0100 (Tue, October 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-23 12:20:23 +0100 (Mon, October 23, 2023) $"
 __version__ = "$Revision: 3.2.0.1 $"
 #=========================================================================================
 # Created
@@ -118,8 +118,7 @@ class _VBOGLVertexArray:
     # def __del__(self):
     #     """Delete vertex buffer objects on deletion
     #     """
-    #     if self.VBOs is not None:
-    #         GL.glDeleteBuffers(len(self.VBOs), self.VBOs)
+    #     # not required for VBO-objects
 
     def clearArrays(self):
         """Clear and reset all arrays
@@ -834,12 +833,14 @@ class _GLVertexArray:
     def __del__(self):
         """Delete vertex buffer objects on deletion
         """
+        if not (self._GLContext and self._GLContext.isValid()):
+            return
         for vbo in (self._vertexVBO,
                     self._colorVBO,
                     self._attribVBO,
                     self._textureVBO,
                     self._indexVBO,):
-            with contextlib.suppress(Exception):
+            if vbo is not None:
                 GL.glDeleteBuffers(1, vbo)
 
     def clearArrays(self):

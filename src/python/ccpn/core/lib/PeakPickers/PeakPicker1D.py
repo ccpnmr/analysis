@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-23 12:57:13 +0100 (Wed, August 23, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-23 11:00:54 +0100 (Mon, October 23, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -94,21 +94,13 @@ class PeakPicker1D(PeakPickerABC):
         application = spectrum.project.application
         self._doNegativePeaks = application.preferences.general.negativePeakPick1D
 
-    def _setThresholds(self):
-        # first make sure the noiseLevel is set for the spectrum. Don't change this.
-        if not self.spectrum.noiseLevel:
-            self.spectrum.noiseLevel = self.spectrum.estimateNoise()
-        if not self.spectrum.negativeNoiseLevel:
-            self.spectrum.negativeNoiseLevel = -self.spectrum.noiseLevel
+    def _setThresholdsFromSpectrum(self):
+        """ Get the initial noise thresholds from the spectrum contour base"""
         if not self.positiveThreshold:
-            self.positiveThreshold = self.spectrum.noiseLevel
+            self.positiveThreshold = self.spectrum.positiveContourBase
+
         if not self.negativeThreshold:
-            self.negativeThreshold = self.spectrum.negativeNoiseLevel
-        # don't pick below the noise level.
-        if self.positiveThreshold <= self.spectrum.noiseLevel:
-            self.positiveThreshold = self.spectrum.noiseLevel
-        if abs(self.negativeThreshold) <= abs(self.spectrum.negativeNoiseLevel):
-            self.negativeThreshold = self.spectrum.negativeNoiseLevel
+            self.negativeThreshold = self.spectrum.negativeContourBase
 
     def _isHeightWithinIntesityLimits(self, height):
         """ check if value is within the intensity limits. This is a different check from the noise Thresholds.
@@ -136,7 +128,7 @@ class PeakPicker1D(PeakPickerABC):
         peaks = []
         start = int(self.spectrum.referencePoints[0])
         x = np.arange(start, start + len(data))
-        self._setThresholds()
+        self._setThresholdsFromSpectrum()
         maxValues, minValues = _find1DMaxima(y=data, x=x,
                                              positiveThreshold=self.positiveThreshold,
                                              negativeThreshold=self.negativeThreshold,

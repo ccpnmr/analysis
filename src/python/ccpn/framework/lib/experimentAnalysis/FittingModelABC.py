@@ -42,7 +42,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-07-31 15:08:47 +0100 (Mon, July 31, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-23 09:19:35 +0100 (Mon, October 23, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -410,7 +410,6 @@ class MinimiserModel(Model):
 
             if fit_kws is None:
                 fit_kws = {}
-            print(f'Fitting with: {self.method}')
             result = MinimiserResult(self, params, method=self.method, iter_cb=iter_cb,
                                  scale_covar=scale_covar, fcn_kws=kwargs,
                                  nan_policy=self.nan_policy, calc_covar=calc_covar,

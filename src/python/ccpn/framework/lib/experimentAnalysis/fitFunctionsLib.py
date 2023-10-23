@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-06 11:22:43 +0100 (Fri, October 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-23 09:19:35 +0100 (Mon, October 23, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -224,6 +224,16 @@ def onePhaseDecay_func(x, rate=1, amplitude=1):
     """
     rate = ls.not_zero(rate)
     result = amplitude * np.exp(-rate * x)
+    return result
+
+def onePhaseDecayPlateau_func(x, rate=1, amplitude=1, plateau=0):
+    """ Function used to describe the  decay rate in an exponential decay model with the extra argument plateau.
+    rate is the rate constant, expressed in reciprocal of the X axis time units.
+     If X is in seconds, then rate is expressed in inverse seconds, (Spower-1)
+     Y=(Y0 - Plateau)*exp(-K*X) + Plateau
+    """
+    rate = ls.not_zero(rate)
+    result = (amplitude - plateau) * np.exp(-rate * x) + plateau
     return result
 
 def exponential_func(x, amplitude, decay):

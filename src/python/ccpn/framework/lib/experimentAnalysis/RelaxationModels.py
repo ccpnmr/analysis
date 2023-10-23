@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-07-31 15:08:47 +0100 (Mon, July 31, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-23 09:19:35 +0100 (Mon, October 23, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -105,6 +105,44 @@ class OnePhaseDecayMinimiser(MinimiserModel):
         return update_param_vals(params, self.prefix, **kwargs)
 
 ################
+
+class OnePhaseDecayPlateauMinimiser(MinimiserModel):
+    """
+    """
+    MODELNAME = 'OnePhaseDecayPlateauMinimiser'
+    FITTING_FUNC = lf.onePhaseDecayPlateau_func
+    AMPLITUDEstr = sv.AMPLITUDE
+    RATEstr = sv.RATE
+    PLATEAUstr = sv.PLATEAU
+    # _defaultParams must be set. They are required. Also Strings must be exactly as they are defined in the FITTING_FUNC arguments!
+    # There is a clever signature inspection that set the args as class attributes. This was too hard/dangerous to change!
+    defaultParams = {
+                        AMPLITUDEstr:1,
+                        RATEstr:1.5,
+                        PLATEAUstr:0
+                      }
+
+    def __init__(self, independent_vars=['x'], prefix='', nan_policy=sv.RAISE_MODE, **kwargs):
+        kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})
+        super().__init__(OnePhaseDecayPlateauMinimiser.FITTING_FUNC, **kwargs)
+        self.name = self.MODELNAME
+        self.params = self.make_params(**self.defaultParams)
+
+
+    def guess(self, data, x, **kwargs):
+        """Estimate initial model parameter values from data."""
+
+        try:
+            sval, oval = np.polyfit(x, np.log(abs(data)+1.e-15), 1)
+        except TypeError:
+            sval, oval = 1., np.log(abs(max(data)+1.e-9))
+
+        params = self.make_params(
+                amplitude=dict(value=np.exp(oval), min=max(data) / 2, max=max(data) * 2),
+                rate=dict(value=abs(sval)),
+                plateau=dict(value=min(data), min=min(data) / 2, max=min(data) * 2)
+                )
+        return update_param_vals(params, self.prefix, **kwargs)
 
 
 class ExpDecayMinimiser(MinimiserModel):
@@ -215,6 +253,28 @@ class OnePhaseDecayModel(_RelaxationBaseFittingModel):
 
         return self.Minimiser.RATEstr
 
+class OnePhaseDecayPlateauModel(_RelaxationBaseFittingModel):
+    """
+    FittingModel model class containing fitting equation and fitting information
+    """
+    ModelName   = sv.OnePhaseDecayWithPlateau
+    Info        = '''A model to describe the rate of a decay.  '''
+    Description = '''Model:\nY=(amplitude - plateau) *exp(-rate*X) + plateau     
+                 X:the various times values
+                 amplitude: the Y value when X (time) is zero. Same units as Y
+                 rate: the rate constant, expressed in reciprocal of the X axis time units,  e.g.: Second-1
+                 plateau: the Y value at infinite times. Same units as Y.
+                  '''
+    References  = '''
+                  '''
+    Minimiser = OnePhaseDecayPlateauMinimiser
+    FullDescription = f'{Info}\n{Description}'
+
+    @property
+    def _preferredYPlotArgName(self):
+        """  Private only used in UI mode."""
+
+        return self.Minimiser.RATEstr
 
 
 class ExponentialDecayModel(_RelaxationBaseFittingModel):
@@ -742,6 +802,7 @@ class SDMCalculation(CalculationModel):
 #####################################################
 FittingModels            = [
                     OnePhaseDecayModel,
+                    OnePhaseDecayPlateauModel,
                     ExponentialDecayModel,
                     InversionRecoveryFittingModel,
                     ]

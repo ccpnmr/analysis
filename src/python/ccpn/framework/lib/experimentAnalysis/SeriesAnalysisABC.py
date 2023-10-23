@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-12 16:56:18 +0100 (Thu, October 12, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-23 09:19:35 +0100 (Mon, October 23, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -240,26 +240,63 @@ class SeriesAnalysisABC(ABC):
         self._setMinimisedPropertyFromModels()
         return outputDataTable
 
-        # if self.currentCalculationModel._disableFittingModels:
-        #     data = calculationFrame
-        # else:
-        #     # merge the frames on CollectionPid/id, Assignment, model-results/statistics and calculation
-        #     # keep only minimal info and not duplicates to the fitting frame (except the collectionPid)
-        #     if self.currentCalculationModel.ModelName == sv.BLANKMODELNAME:
-        #         inputFrame = self.inputDataTables[-1].data
-        #     else:
-        #         inputFrame = calculationFrame
-        #     fittingFrame = self.currentFittingModel.fitSeries(inputFrame)
-        #     if sv.CALCULATION_MODEL in calculationFrame.columns:
-        #         cdf = calculationFrame[[ sv.COLLECTIONPID, sv.CALCULATION_MODEL] + self.currentCalculationModel.modelArgumentNames]
-        #     else:
-        #         cdf = calculationFrame[[sv.COLLECTIONPID] + self.currentCalculationModel.modelArgumentNames]
-        #     data = pd.merge(fittingFrame, cdf, on=[sv.COLLECTIONPID], how='left')
-        fittingFrame.joinNmrResidueCodeType()
-        outputDataTable = self._fetchOutputDataTable(name=self._outputDataTableName)
-        outputDataTable.data = data
-        self.resultDataTable = outputDataTable
-        return outputDataTable
+    def refitCollection(self, collectionPid, resetInitialParams=False, customMinimiserParamsDict=None):
+        """
+        Given a CollectionPid, refit the series using the options defined in the module.
+        :param collectionPid: str: Ccpn collection pid for a collection which is contained in the inputDataTables and outputData.
+        :param resetInitialParams: bool. True   to re-guess the initial params. False to start the refit using the parameters from the last best fit.
+        :param customMinimiserParamsDict. A dict of dict containing the new parameters to be considered for the fitting. Use with caution, see the Minimiser "make_params" for proper usage.
+                    e.g.: usage for a OnePhaseDecayPlateauModel:
+                            minimiserParamsDict = {'amplitude': 10, 'rate': 3, 'plateau': 0}
+                            or to setup ranges:
+                            minimiserParamsDict = {'amplitude': dict(value=2.4),
+                                                                 'rate': dict(value=1.5),
+                                                                  'plateau': dict(value=0.5, min=0, max=None)}
+
+        :return: a pandas dataFrame with the latest fitted data.
+        """
+        resultDataTable = self.resultDataTable
+        resultData = resultDataTable.data
+
+        if len(self.inputDataTables) == 1:
+            inputDataTable = self.inputDataTables[0]
+        else:
+            getLogger().warn('Refit collection is only available with one InputDataTable.')
+            return
+        inputData = inputDataTable.data
+        fittingModel = self.currentFittingModel
+        dfForCollection = inputData[inputData[sv.COLLECTIONPID] == collectionPid].copy()
+        dfForCollection.sort_values([fittingModel.xSeriesStepHeader], inplace=True)
+        seriesSteps = Xs = dfForCollection[fittingModel.xSeriesStepHeader].values
+        seriesValues = Ys = dfForCollection[fittingModel.ySeriesStepHeader].values
+        minimiser = fittingModel.Minimiser()
+
+        ## Get the initial fitting Params from the ResultData
+        resultDataForCollection = resultData[resultData[sv.COLLECTIONPID] == collectionPid].copy()
+        if resetInitialParams:
+            params = minimiser.guess(Ys, Xs)
+        else:
+            if customMinimiserParamsDict is None:
+                modelNames = fittingModel.modelArgumentNames
+                modelValues = resultDataForCollection[modelNames].values[0]
+                existingModelParamsDict = dict(zip(modelNames, modelValues))
+                params = minimiser.make_params(**existingModelParamsDict)
+            else:
+                try:
+                    params = minimiser.make_params(**customMinimiserParamsDict)
+                except Exception as err:
+                    getLogger().warn(f'Could not make parameters for the current fitting. Ensure the format is correct. {customMinimiserParamsDict}. {err}. Fallback enabled.')
+                    params = minimiser.guess(Ys, Xs)
+
+        minimiser.setMethod(fittingModel._minimiserMethod)
+        result = minimiser.fit(Ys, params, x=Xs)
+
+        ## write to the output data (overriding the previously results)
+        for ix, row in resultDataForCollection.iterrows():
+            for resultName, resulValue in result.getAllResultsAsDict().items():
+                resultData.loc[ix, resultName] = resulValue
+            resultData.loc[ix, sv.MODEL_NAME] = fittingModel.ModelName
+            resultData.loc[ix, sv.MINIMISER_METHOD] = minimiser.method
 
     def _setMinimisedPropertyFromModels(self):
         """ Set the _minimisedProperty from the current models.

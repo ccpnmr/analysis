@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-16 12:35:19 +0100 (Mon, October 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-24 13:54:29 +0100 (Tue, October 24, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -3158,7 +3158,6 @@ class GuiStrip(Frame):
                     _xArray = np.array(regions[0]) - xOffset
                     _sliceTuples = _displayedSpectrum.getSliceTuples([_xArray])
                     spectrum.peakPicker._intensityLimits = _intensityLimits  #needed to make sure it peaks only inside the selected box.
-                    positiveThreshold, negativeThreshold = None, None  # get automatically
 
                 for thisPeakListView in validPeakListViews:
                     peakList = thisPeakListView.peakList

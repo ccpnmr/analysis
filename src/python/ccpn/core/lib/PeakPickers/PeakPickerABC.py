@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-09 19:41:07 +0100 (Mon, October 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-24 13:54:29 +0100 (Tue, October 24, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -377,8 +377,11 @@ class PeakPickerABC(CcpNmrJson):
                 if (self.positiveThreshold and pk.height > self.positiveThreshold) or \
                         (self.negativeThreshold and pk.height < self.negativeThreshold):
                     cPeak = peakList.newPeak(pointPositions=pointPositions, height=pk.height, volume=pk.volume, pointLineWidths=pk.lineWidths)
-                    if self.autoFit:
-                        peakParabolicInterpolation(cPeak, update=True)
+                    if self.autoFit and self.spectrum.dimensionCount > 1:
+                        try:
+                            peakParabolicInterpolation(cPeak, update=True) # why we need this? Some peakPicker can have their own and this will override their results.
+                        except Exception as err:
+                            getLogger().warning(f'Cannot auto using a Parabolic Interpolation for {cPeak}. Error: {err}')
                     corePeaks.append(cPeak)
 
         if progress.error:

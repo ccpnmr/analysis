@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-16 14:45:44 +0100 (Mon, October 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-24 13:54:29 +0100 (Tue, October 24, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -617,7 +617,7 @@ def peakParabolicInterpolation(peak: 'Peak', update=False):
         raise ValueError('Expected a Peak, Pid or valid pid-string for the "peak" argument')
 
     spectrum = peak.peakList.spectrum
-    spectrum.checkValidPath()
+    # spectrum.checkValidPath() # not in 3.2.x
 
     # get the position as the nearest grid point
     position = [int(p + 0.5) for p in peak.pointPositions]

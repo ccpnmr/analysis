@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-20 17:25:47 +0100 (Fri, October 20, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-24 08:51:48 +0100 (Tue, October 24, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -86,6 +86,8 @@ class V3Object(TraitType, _CcpNmrTrait):
     default_value = None
     info_text = "A V3-Object"
 
+    _overrideClassCheck = False  # flag for v3mimic testing
+
     def __init__(self, klass=None, default_value=None, **kwargs):
         """
         Initialise the trait
@@ -125,6 +127,9 @@ class V3Object(TraitType, _CcpNmrTrait):
 
         if value is None and not self.allow_none:
             raise ValueError(f'Expected an instance of a V3 class; got None')
+
+        elif self._overrideClassCheck:
+            pass
 
         elif self._klass is not None and not isinstance(value, self._klass):
             raise TypeError(f'Expected an instance of {classType(self._klass)}; got {value} {classType(value)}')

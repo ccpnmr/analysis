@@ -140,7 +140,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-20 17:25:47 +0100 (Fri, October 20, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-24 16:44:55 +0100 (Tue, October 24, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -156,6 +156,11 @@ from contextlib import contextmanager
 import json
 from collections import OrderedDict
 import getpass
+
+class CcpNmrJsonError(RuntimeError):
+    """A class to bail out of Json recursion
+    """
+    pass
 
 from ccpn.util.decorators import singleton
 from ccpn.util.Path import aPath, Path
@@ -442,6 +447,8 @@ class CcpNmrJson(TraitBase):
     # maintained by _setRestoring
     _isRestoring = 0
 
+    _errorStack = []
+
     @property
     def isRestoring(self) -> bool:
         """flag to indicate if restoring, i.e. decoding, is in progress
@@ -457,13 +464,15 @@ class CcpNmrJson(TraitBase):
         if flag:
             if CcpNmrJson._isRestoring == 0:
                 CcpNmrJson._objectDict = {}
+                CcpNmrJson._errorStack = []
+
             CcpNmrJson._isRestoring += 1
         else:
             CcpNmrJson._isRestoring -= 1
             if CcpNmrJson._isRestoring < 0:
                 raise RuntimeError(f'_setRestoring(): global restoring flag < 0; this should not happen!')
             if CcpNmrJson._isRestoring == 0:
-                CcpNmrJson._objectDict = {}
+                CcpNmrJson._errorStack = []
 
     @contextmanager
     def _doProcessJson(self, encoding=False):
@@ -477,21 +486,28 @@ class CcpNmrJson(TraitBase):
         :yields _objectDict
         """
         CcpNmrJson._setRestoring(True)
-        _error = False
+        _error = None
         try:
             yield CcpNmrJson._objectDict
 
         except Exception as es:
+            _isRestoring = CcpNmrJson._isRestoring
+            # print(f'Exception level: {_isRestoring}')
             _action = 'encoding' if encoding else 'decoding'
-            _error = True
-            getLogger().debug(f'_doProcessJson() {_action}: caught exception: {es}')
-            CcpNmrJson._setRestoring(False)
-            raise RuntimeError(f'While {_action} {self} from JSON an error occured: {es}')
-
-        finally:
-            if not _error:
-                # only call if we have not already done so
+            _error = f'While {_action} {self} from JSON: {es}'
+            CcpNmrJson._errorStack.append(_error)
+            if _isRestoring == 1:
+                # We are at the starting restore level
+                _error = CcpNmrJson._errorStack[0]
+                getLogger().debug(f'_doProcessJson() {_action}: caught exception: {_error}')
                 CcpNmrJson._setRestoring(False)
+                raise RuntimeError(_error)
+            else:
+                CcpNmrJson._setRestoring(False)
+                raise es
+
+        CcpNmrJson._setRestoring(False)
+
 
     def _getJsonUid(self) -> str:
         """Generate a UID for the object;
@@ -878,12 +894,18 @@ class CcpNmrJson(TraitBase):
         """Helper function to decode a single trait
         """
         # update the trait with value from theDict after optional decoding
-        value = theDict.get(traitName)
-        # Do not decode None's
-        if value is not None:
-            handler = self._getTraitJsonHandler(traitName)
-            value = handler.decode(value)
-        self.setTraitValue(traitName, value, force=True)
+        try:
+            value = theDict.get(traitName)
+            # Do not decode None's
+            if value is not None:
+                handler = self._getTraitJsonHandler(traitName)
+                value = handler.decode(value)
+            self.setTraitValue(traitName, value, force=True)
+
+        except Exception as es:
+            _error = f'While decoding {self} trait "{traitName}": {es}'
+            CcpNmrJson._errorStack.append(_error)
+            raise es
 
     def _decode(self, dataDict):
         """Populate/update self with data from dataDict

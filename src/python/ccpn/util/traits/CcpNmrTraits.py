@@ -95,7 +95,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-18 10:17:32 +0100 (Wed, October 18, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-25 15:03:08 +0100 (Wed, October 25, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -116,7 +116,7 @@ from traitlets import \
     ObjectName, DottedObjectName, \
     Type, This, ForwardDeclaredInstance, ForwardDeclaredType, \
     CaselessStrEnum, TCPAddress, CRegExp, \
-    TraitType, default, validate, observe, Undefined, HasTraits, TraitError, All
+    TraitType, default, validate, observe, Undefined, TraitError, All, Bunch
 
 from traitlets import Any as _Any
 from traitlets import Instance as _Instance
@@ -545,26 +545,51 @@ class _TypedList(list):
 
         return value
 
+    def _newChangeBunch(self, subType) -> Bunch:
+        """:return a new Bunch instance for change notification
+        """
+        change = Bunch()
+        change.type = 'change'
+        change.subType = subType
+        change.name = self._trait.name
+        change.owner = self._obj
+        change.old = list(self)
+        return change
+
+    def _handleSliceItem(self, item, count):
+        """Handle the slice item and translate into (start, stop, step) tuple
+        """
+        # examine slice parameters
+        _start = item.start if item.start is not None else 0
+        if _start < 0:
+            # handle negative starts
+            _start = _start % len(self)
+        _step = item.step if item.step is not None else 1
+        if item.stop is not None:
+            _stop = item.stop
+        elif count is not None:
+            _stop = _start + count*_step
+        else:
+            _stop = len(self)
+        return _start, _stop, _step
+
     def __setitem__(self, item, value):
         # local import because of cycles £$£$%^^&&
         from ccpn.util.Common import isIterable
+
+        change = self._newChangeBunch(subType='__setitem__')
 
         if isinstance(item, int):
             if item >= len(self):
                 raise IndexError(f'{self._fullName}[{item}] = {repr(value)}; list index should be < {len(self)}')
             newValue = self._validateItem(item, value)
+            change.items = [(item, newValue)]
 
         elif isinstance(item, slice):
             if not isIterable(value):
                 raise ValueError(f'Expected iterable; got {value}')
 
-            # examine slice parameters
-            _start = item.start if item.start is not None else 0
-            if _start < 0:
-                # handle negative starts
-                _start = _start % len(self)
-            _step = item.step if item.step is not None else 1
-            _stop = item.stop if item.stop is not None else _start + len(value)*_step
+            _start, _stop, _step = self._handleSliceItem(item, len(value))
 
             if _stop > self._trait.maxlen:
                 raise IndexError(f'{self._fullName}[{_start}:{_stop}] = {repr(value)}; list maximum length is {self._trait.maxlen}')
@@ -572,11 +597,42 @@ class _TypedList(list):
                 raise IndexError(f'{self._fullName}[{item.start}:{item.stop}] = {repr(value)}; too few items to assign')
 
             newValue = [self._validateItem(i, val) for i,val in zip(range(_start, _stop, _step), value)]
+            # get all items that changed
+            change.items = [(i,val) for i,val in zip(range(_start, _stop, _step), newValue)]
 
         else:
             raise IndexError(f'{self._fullName}[]: expected int or slice; got {item}')
 
         super().__setitem__(item, newValue)
+
+        change.new = self
+        self._obj.notify_change(change)
+
+    def __delitem__(self, item):
+
+        change = self._newChangeBunch(subType='__delitem__')
+
+        if isinstance(item, int):
+            if item >= len(self):
+                raise IndexError(f'{self._fullName}[{item}]; list index should be < {len(self)}')
+            change.items = [(item, self[item])]
+
+        elif isinstance(item, slice):
+            _start, _stop, _step = self._handleSliceItem(item, None)
+
+            if _stop < self._trait.minlen:
+                raise IndexError(f'{self._fullName}[{_start}:{_stop}]; list minimum length is {self._trait.minlen}')
+
+            # get all items that got deleted
+            change.items = [(i, self[i]) for i in range(_start, _stop, _step)]
+
+        else:
+            raise IndexError(f'{self._fullName}[]: expected int or slice; got {item}')
+
+        super().__delitem__(item)
+
+        change.new = self
+        self._obj.notify_change(change)
 
     def extend(self, values):
         """Extend self with values
@@ -586,7 +642,14 @@ class _TypedList(list):
             raise ValueError(f'{self._fullName}.extend(): {len(values)} additional items would exceed maximum length ({self._trait.maxlen})')
 
         values = [self._validateItem(_len+i, val) for i, val in enumerate(values)]
+
+        change = self._newChangeBunch(subType='extend')
+        change.items = [(_len+i, val) for i, val in enumerate(values)]
+
         super().extend(values)
+
+        change.new = self
+        self._obj.notify_change(change)
 
     def append(self, value):
         """Append self with value
@@ -596,7 +659,14 @@ class _TypedList(list):
             raise ValueError(f'{self._fullName}.append(): an additional item would exceed maximum length ({self._trait._maxlen})')
 
         value = self._validateItem(_len+1, value)
+
+        change = self._newChangeBunch(subType='append')
+        change.items = [(_len, value)]
+
         super().append(value)
+
+        change.new = self
+        self._obj.notify_change(change)
 
     def copy(self):
         return _TypedList(obj=self._obj, trait=self._trait, values=self[:])

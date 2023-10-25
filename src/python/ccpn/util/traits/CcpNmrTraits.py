@@ -95,7 +95,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-25 15:03:08 +0100 (Wed, October 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-25 17:43:54 +0100 (Wed, October 25, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -498,6 +498,9 @@ class CList(List):
 class _TypedList(list):
     """A list with only specific type of items as defined by itemTrait;
     to be used by CcpNmr TList trait only
+    Changing a list value, i.e. mylist[item] = value, extend() and append(), or del trigger traitlets
+    change notifiers (if set on the TLict trait). The change-dict has an additional "itemsChanged"
+    key with (item/key, value) pairs of those elements that have changed.
     """
 
     def __init__(self, obj, trait, values=[]):
@@ -583,7 +586,7 @@ class _TypedList(list):
             if item >= len(self):
                 raise IndexError(f'{self._fullName}[{item}] = {repr(value)}; list index should be < {len(self)}')
             newValue = self._validateItem(item, value)
-            change.items = [(item, newValue)]
+            change.itemsChanged = [(item, newValue)]
 
         elif isinstance(item, slice):
             if not isIterable(value):
@@ -598,7 +601,7 @@ class _TypedList(list):
 
             newValue = [self._validateItem(i, val) for i,val in zip(range(_start, _stop, _step), value)]
             # get all items that changed
-            change.items = [(i,val) for i,val in zip(range(_start, _stop, _step), newValue)]
+            change.itemsChanged = [(i,val) for i,val in zip(range(_start, _stop, _step), newValue)]
 
         else:
             raise IndexError(f'{self._fullName}[]: expected int or slice; got {item}')
@@ -615,7 +618,7 @@ class _TypedList(list):
         if isinstance(item, int):
             if item >= len(self):
                 raise IndexError(f'{self._fullName}[{item}]; list index should be < {len(self)}')
-            change.items = [(item, self[item])]
+            change.itemsChanged = [(item, self[item])]
 
         elif isinstance(item, slice):
             _start, _stop, _step = self._handleSliceItem(item, None)
@@ -624,7 +627,7 @@ class _TypedList(list):
                 raise IndexError(f'{self._fullName}[{_start}:{_stop}]; list minimum length is {self._trait.minlen}')
 
             # get all items that got deleted
-            change.items = [(i, self[i]) for i in range(_start, _stop, _step)]
+            change.itemsChanged = [(i, self[i]) for i in range(_start, _stop, _step)]
 
         else:
             raise IndexError(f'{self._fullName}[]: expected int or slice; got {item}')
@@ -644,7 +647,7 @@ class _TypedList(list):
         values = [self._validateItem(_len+i, val) for i, val in enumerate(values)]
 
         change = self._newChangeBunch(subType='extend')
-        change.items = [(_len+i, val) for i, val in enumerate(values)]
+        change.itemsChanged = [(_len+i, val) for i, val in enumerate(values)]
 
         super().extend(values)
 
@@ -661,7 +664,7 @@ class _TypedList(list):
         value = self._validateItem(_len+1, value)
 
         change = self._newChangeBunch(subType='append')
-        change.items = [(_len, value)]
+        change.itemsChanged = [(_len, value)]
 
         super().append(value)
 
@@ -941,6 +944,9 @@ class RecursiveOdict(Odict):
 class _TypedDict(dict):
     """A dict with only specific type of values as defined by valueTrait;
     to be used by CcpNmr CDict trait only
+    Changing a dict value, i.e. d[key] = value, update, or del d[key] trigger traitlets
+    change notifiers (if set on the TDict trait). The change-dict has an additional "itemsChanged"
+    key with (item/key, value) pairs of those elements that have changed.
     """
 
     def __init__(self, obj, trait, values={}):
@@ -982,9 +988,36 @@ class _TypedDict(dict):
 
         return value
 
+    def _newChangeBunch(self, subType) -> Bunch:
+        """:return a new Bunch instance for change notification
+        """
+        change = Bunch()
+        change.type = 'change'
+        change.subType = subType
+        change.name = self._trait.name
+        change.owner = self._obj
+        change.old = dict(self.items())
+        return change
+
     def __setitem__(self, key, value):
         value = self._validateValue(key, value)
+
+        change = self._newChangeBunch(subType='__setitem__')
         super().__setitem__(key, value)
+        change.itemsChanged = [(key, value)]
+        change.new = self
+        self._obj.notify_change(change)
+
+    def __delitem__(self, key):
+        if key not in self:
+            raise KeyError(f'Key {key} not in {self._fullName}')
+        value = self[key]
+
+        change = self._newChangeBunch(subType='__setitem__')
+        super().__delitem__(key)
+        change.itemsChanged = [(key, value)]
+        change.new = self
+        self._obj.notify_change(change)
 
     def update(self,  E=None, **F): # known special case of dict.update
         """
@@ -995,18 +1028,30 @@ class _TypedDict(dict):
 
         Validates each value before updating
         """
+        change = self._newChangeBunch(subType='update')
+        change.itemsChanged = []
+
+        # GWV: logic implemented form doc description above
         if E is not None and hasattr(E, 'keys'):
             for key in getattr(E, 'keys')():
                 value = E[key]
-                self.__setitem__(key, value)  # will validate value
+                value = self._validateValue(key, value)
+                super().__setitem__(key, value)
+                change.itemsChanged.append((key, value))
 
         elif E is not None and not hasattr(E, 'keys'):
             for key, value in E.items():
-                self.__setitem__(key, value)  # will validate value
+                value = self._validateValue(key, value)
+                super().__setitem__(key, value)
+                change.itemsChanged.append((key, value))
 
-        for key in F:
-            value = F[key]
-            self.__setitem__(key, value)  # will validate value
+        for key, value in F.items():
+            value = self._validateValue(key, value)
+            super().__setitem__(key, value)
+            change.itemsChanged.append((key, value))
+
+        change.new = self
+        self._obj.notify_change(change)
 
     @property
     def _fullName(self):
@@ -1027,6 +1072,8 @@ class TDict(Dict):
     a trait-instance definition provided upon initialisation. Currently, all values
     need to be of the type defined by a single trait instance. This may be expanded
     in the future with a key-based definition.
+    Changing a dict value, i.e. d[key] = value and update() trigger traitlets change notifiers
+    (if set on the TDict trait)
     """
     def __init__(self, valueTrait, default_value={}, **kwargs):
         """

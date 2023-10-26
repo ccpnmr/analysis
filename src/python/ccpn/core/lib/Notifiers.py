@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-26 12:12:04 +0100 (Thu, October 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-26 17:00:57 +0100 (Thu, October 26, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -355,7 +355,7 @@ class Notifier(NotifierABC):
                     self._previousValue = getattr(theObject, targetName)
 
                 notifier = (trigger, targetName)
-                func = self.project.registerNotifier(className=theObject.className,
+                func = self.project.registerNotifierregisterNotifier(className=theObject.className,
                                                      target=Notifier.CHANGE,
                                                      func=partial(self, notifier=notifier),
                                                      onceOnly=onceOnly)
@@ -544,7 +544,8 @@ class NotifierBase(object):
         return objNotifiers
 
     def _addNotifier(self, notifier):
-        """Isolating adding Notifier for easier subclassing
+        """Add notfier to notfiersDict;
+        Isolating for easier subclassing of setNotifier()
         """
         objNotifiers = self._getObjectNotifiersDict()
         _id = notifier.id

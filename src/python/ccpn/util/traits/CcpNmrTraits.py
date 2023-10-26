@@ -95,7 +95,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-25 17:43:54 +0100 (Wed, October 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-26 17:00:57 +0100 (Thu, October 26, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -143,6 +143,7 @@ from ccpn.util.DataEnum import DataEnum
 from ccpn.util.Path import aPath, Path
 from ccpn.util.Logging import getLogger
 
+ITEMS_CHANGED = 'itemsChanged'
 
 # _VALIDATOR = 'Validator'
 
@@ -517,6 +518,7 @@ class _TypedList(list):
         self._trait = trait
         self._itemTrait = trait.itemTrait
         self._obj = obj
+        self._blanking = 0  # blank any item-change notification
 
         super().__init__()
 
@@ -525,7 +527,9 @@ class _TypedList(list):
         if len(values) > self._trait.maxlen:
             raise ValueError(f'{self._fullName}.__init__(): too many initial items ({len(values)}); should be maximum of {self._trait.maxlen}')
 
+        self._blanking += 1
         self.extend(values)
+        self._blanking -= 1
 
     def _validateItem(self, item, value):
         """
@@ -586,7 +590,7 @@ class _TypedList(list):
             if item >= len(self):
                 raise IndexError(f'{self._fullName}[{item}] = {repr(value)}; list index should be < {len(self)}')
             newValue = self._validateItem(item, value)
-            change.itemsChanged = [(item, newValue)]
+            change[ITEMS_CHANGED] = [(item, newValue)]
 
         elif isinstance(item, slice):
             if not isIterable(value):
@@ -601,15 +605,16 @@ class _TypedList(list):
 
             newValue = [self._validateItem(i, val) for i,val in zip(range(_start, _stop, _step), value)]
             # get all items that changed
-            change.itemsChanged = [(i,val) for i,val in zip(range(_start, _stop, _step), newValue)]
+            change[ITEMS_CHANGED] = [(i,val) for i,val in zip(range(_start, _stop, _step), newValue)]
 
         else:
             raise IndexError(f'{self._fullName}[]: expected int or slice; got {item}')
 
         super().__setitem__(item, newValue)
 
-        change.new = self
-        self._obj.notify_change(change)
+        if not self._blanking:
+            change.new = self
+            self._obj.notify_change(change)
 
     def __delitem__(self, item):
 
@@ -618,7 +623,7 @@ class _TypedList(list):
         if isinstance(item, int):
             if item >= len(self):
                 raise IndexError(f'{self._fullName}[{item}]; list index should be < {len(self)}')
-            change.itemsChanged = [(item, self[item])]
+            change[ITEMS_CHANGED] = [(item, self[item])]
 
         elif isinstance(item, slice):
             _start, _stop, _step = self._handleSliceItem(item, None)
@@ -627,15 +632,16 @@ class _TypedList(list):
                 raise IndexError(f'{self._fullName}[{_start}:{_stop}]; list minimum length is {self._trait.minlen}')
 
             # get all items that got deleted
-            change.itemsChanged = [(i, self[i]) for i in range(_start, _stop, _step)]
+            change[ITEMS_CHANGED] = [(i, self[i]) for i in range(_start, _stop, _step)]
 
         else:
             raise IndexError(f'{self._fullName}[]: expected int or slice; got {item}')
 
         super().__delitem__(item)
 
-        change.new = self
-        self._obj.notify_change(change)
+        if not self._blanking:
+            change.new = self
+            self._obj.notify_change(change)
 
     def extend(self, values):
         """Extend self with values
@@ -647,12 +653,13 @@ class _TypedList(list):
         values = [self._validateItem(_len+i, val) for i, val in enumerate(values)]
 
         change = self._newChangeBunch(subType='extend')
-        change.itemsChanged = [(_len+i, val) for i, val in enumerate(values)]
+        change[ITEMS_CHANGED] = [(_len+i, val) for i, val in enumerate(values)]
 
         super().extend(values)
 
-        change.new = self
-        self._obj.notify_change(change)
+        if not self._blanking:
+            change.new = self
+            self._obj.notify_change(change)
 
     def append(self, value):
         """Append self with value
@@ -664,12 +671,13 @@ class _TypedList(list):
         value = self._validateItem(_len+1, value)
 
         change = self._newChangeBunch(subType='append')
-        change.itemsChanged = [(_len, value)]
+        change[ITEMS_CHANGED] = [(_len, value)]
 
         super().append(value)
 
-        change.new = self
-        self._obj.notify_change(change)
+        if not self._blanking:
+            change.new = self
+            self._obj.notify_change(change)
 
     def copy(self):
         return _TypedList(obj=self._obj, trait=self._trait, values=self[:])
@@ -1004,7 +1012,7 @@ class _TypedDict(dict):
 
         change = self._newChangeBunch(subType='__setitem__')
         super().__setitem__(key, value)
-        change.itemsChanged = [(key, value)]
+        change[ITEMS_CHANGED] = [(key, value)]
         change.new = self
         self._obj.notify_change(change)
 
@@ -1015,7 +1023,7 @@ class _TypedDict(dict):
 
         change = self._newChangeBunch(subType='__setitem__')
         super().__delitem__(key)
-        change.itemsChanged = [(key, value)]
+        change[ITEMS_CHANGED] = [(key, value)]
         change.new = self
         self._obj.notify_change(change)
 
@@ -1029,7 +1037,7 @@ class _TypedDict(dict):
         Validates each value before updating
         """
         change = self._newChangeBunch(subType='update')
-        change.itemsChanged = []
+        change[ITEMS_CHANGED] = []
 
         # GWV: logic implemented form doc description above
         if E is not None and hasattr(E, 'keys'):
@@ -1037,18 +1045,18 @@ class _TypedDict(dict):
                 value = E[key]
                 value = self._validateValue(key, value)
                 super().__setitem__(key, value)
-                change.itemsChanged.append((key, value))
+                change[ITEMS_CHANGED].append((key, value))
 
         elif E is not None and not hasattr(E, 'keys'):
             for key, value in E.items():
                 value = self._validateValue(key, value)
                 super().__setitem__(key, value)
-                change.itemsChanged.append((key, value))
+                change[ITEMS_CHANGED].append((key, value))
 
         for key, value in F.items():
             value = self._validateValue(key, value)
             super().__setitem__(key, value)
-            change.itemsChanged.append((key, value))
+            change[ITEMS_CHANGED].append((key, value))
 
         change.new = self
         self._obj.notify_change(change)

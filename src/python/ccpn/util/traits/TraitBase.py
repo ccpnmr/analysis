@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-19 13:33:29 +0100 (Thu, October 19, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-26 17:00:57 +0100 (Thu, October 26, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -81,6 +81,18 @@ class TraitBase(HasTraits):
         if defaultValue == Undefined:
             raise RuntimeError('Trait "%s" of object %s does not have a default value defined' % (trait, self))
         self.setTraitValue(trait, defaultValue, force=True)
+
+    def setDefaultValues(self, overRide=False, **metadata):
+        """convenience: set all traits (optionally filtered for metadata) that do not yet have
+        a value (optionally overRide) to default value (if defined)
+        :parameter overRide: set default vlue to all traits, including those that already have a value
+                             i.e. a 'reset'.
+        :parameter metadata: optionally filter traits for the metadata
+        """
+        for traitName, trait in self.items(**metadata):
+            if (not self.trait_has_value(traitName) or overRide):
+                if (defaultValue :=  trait.default_value) != Undefined:
+                    self.setTraitValue(traitName, defaultValue, force=True)
 
     def hasTrait(self, trait):
         """Convenience, Return True if self has trait

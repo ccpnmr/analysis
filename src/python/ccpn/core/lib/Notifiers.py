@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-26 17:00:57 +0100 (Thu, October 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-26 17:46:08 +0100 (Thu, October 26, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -572,14 +572,6 @@ class NotifierBase(object):
                             callback=callback,
                             setterObject=self,
                             **kwargs)
-
-        # objNotifiers = self._getObjectNotifiersDict()
-        # _id = notifier.id
-        # # this should never happen; hence just a check
-        # if _id in objNotifiers:
-        #     raise RuntimeError('%s: a notifier with id "%s" already exists (%s)' % (self, _id, objNotifiers[_id]))
-        # # add the notifier
-        # objNotifiers[_id] = notifier
         self._addNotifier(notifier)
         return notifier
 
@@ -675,7 +667,8 @@ class NotifierBase(object):
         return foundNotifiers
 
     def deleteAllNotifiers(self):
-        """Unregister all the notifiers"""
+        """Unregister all the notifiers
+        """
         if not self.hasNotifier(None):
             # there are no notifiers
             return

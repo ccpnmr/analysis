@@ -95,7 +95,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-26 17:00:57 +0100 (Thu, October 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-27 19:53:07 +0100 (Fri, October 27, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -311,10 +311,16 @@ class CFloat(Float):
         _max = '+inf' if self.max is None else str(self.max)
         return f'an float between ({_min},{_max})'
 
+
 class Unicode(_Unicode, _CcpNmrTrait):
     def __init__(self, *args, **kwargs):
         _Unicode.__init__(self, *args, **kwargs)
         _CcpNmrTrait.__init__(self)
+    def validate(self, obj, value):
+        if value is None and self.allow_none:
+            return value
+        else:
+            return _Unicode.validate(self, obj, value)
 
 
 class CUnicode(Unicode):
@@ -332,6 +338,11 @@ class Bool(_Bool, _CcpNmrTrait):
         _Bool.__init__(self, *args, **kwargs)
         _CcpNmrTrait.__init__(self)
 
+    def validate(self, obj, value):
+        if value is None and self.allow_none:
+            return value
+        else:
+            return _Bool.validate(self, obj, value)
 
 class CBool(Bool):
     """A casting version of the Bool trait.
@@ -359,6 +370,12 @@ class Enum(_Enum, _CcpNmrTrait):
             default_value = values[0]
         _Enum.__init__(self, values=tuple(values), default_value=default_value, **kwargs)
         _CcpNmrTrait.__init__(self)
+
+    def validate(self, obj, value):
+        if value is None and self.allow_none:
+            return value
+        else:
+            return _Enum.validate(self, obj, value)
 
     def info(self):
         """:return info string

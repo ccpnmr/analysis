@@ -140,7 +140,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-24 16:44:55 +0100 (Tue, October 24, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-27 19:53:07 +0100 (Fri, October 27, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -954,9 +954,11 @@ class CcpNmrJson(TraitBase):
             self._decodeTrait(Constants.METADATA, dataDict)
 
             # Handle the data; Update currently defined traits
-            for traitName in self.keys():
-                if traitName in _data:
-                    self._decodeTrait(traitName, _data)
+            # Handle without any notifications; values should be correct
+            with self.traitNotificationBlanking():
+                for traitName in self.keys():
+                    if traitName in _data:
+                        self._decodeTrait(traitName, _data)
 
         return self
 

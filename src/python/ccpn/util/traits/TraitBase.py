@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-26 17:00:57 +0100 (Thu, October 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-27 19:53:07 +0100 (Fri, October 27, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -28,7 +28,10 @@ __date__ = "$Date: 2018-05-14 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import sys
 import os
+from contextlib import contextmanager
 from traitlets import HasTraits, Undefined
+
+from ccpn.util.Logging import getLogger
 
 
 class TraitBase(HasTraits):
@@ -233,6 +236,32 @@ class TraitBase(HasTraits):
     def asDict(self, **metadata):
         """return trait, value pairs as dict, optionally filtering for metadata"""
         return dict(self.items(**metadata))
+
+    # blanking context manager
+    _notifierBlanking = 0
+
+    @contextmanager
+    def traitNotificationBlanking(self):
+        """Blank all trait notification; i.e. they are not saved and executed late.
+        If that is needed, use hold_trait_notifications()
+        """
+
+        # following hold_trait_notifications approach
+        def blank(changes):
+            pass
+
+        try:
+            self._notifierBlanking += 1
+            self.notify_change = blank
+            yield
+
+        except Exception as es:
+            getLogger().debug(f'traiNotificationBlanking: caught error {es}')
+            raise es
+
+        finally:
+            self._notifierBlanking -= 1
+            del self.notify_change
 
     def __str__(self):
         return '<%s>' % (self.__class__.__name__,)

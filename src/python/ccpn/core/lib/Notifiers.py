@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-26 17:46:08 +0100 (Thu, October 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-27 10:44:03 +0100 (Fri, October 27, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -106,6 +106,7 @@ class NotifierABC(object):
             if trigger not in self._triggerKeywords:
                 raise ValueError('Invalid trigger "%s" for <%s>' % (trigger, self.__class__.__name__))
         self._triggers = tuple(triggers)
+        self._trigger = triggers[0]  # Just a convenience for some implementation that only ever have one trigger
 
         self._targetName = targetName
         self._callback = callback
@@ -438,17 +439,6 @@ class Notifier(NotifierABC):
                              )
 
         notifierFired = False
-        # callbackDict = {self.NOTIFIER     : self,
-        #                 self.THEOBJECT    : self._theObject,
-        #                 self.TRIGGER      : trigger,
-        #                 self.TARGETNAME   : targetName,
-        #                 self.PREVIOUSVALUE: None,
-        #                 self.VALUE        : None,
-        #                 self.OBJECT       : obj,
-        #                 self.OLDPID       : None,
-        #                 self.GETPID       : None,
-        #                 self.SPECIFIERS   : actionKwds,
-        #                 }
         callbackDict = self.newCallbackDict(trigger=trigger, obj=obj, specifiers=actionKwds)
 
         # CURRENT special case

@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-11 08:37:28 +0100 (Wed, October 11, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-29 12:35:27 +0000 (Sun, October 29, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -44,7 +44,7 @@ from ccpn.util.traits.CcpNmrTraits import Unicode, Any, CPath, Bool, Dict, CStri
 
 from ccpn.util.decorators import singleton
 
-from ccpn.framework.Application import getApplication
+from ccpn.framework.Application import getApplication, getProject
 from ccpn.util.Logging import getLogger
 
 
@@ -61,12 +61,7 @@ class RedirectionABC(CcpNmrJson):
     identifier = None # to be subclassed
     expand = False # expand to handle None, zero-length and '.'
 
-    _application = Any(default_value=None, allow_none=True)
     _path = CPath(default_value=None, allow_none=True)
-
-    def __init__(self):
-        super().__init__()
-        self._application = getApplication()
 
     @property
     def path(self):
@@ -97,15 +92,21 @@ class DataRedirection(RedirectionABC):
     expand = True
 
     @property
-    def path(self):
+    def path(self) -> Path:
+        """:return dataPath from application preferences
+        """
+        if (_app := getApplication()) is None:
+            raise RuntimeError(f'DataRedirection.path: unable to get application')
         if self._path is None:
-            self._path = aPath(self._application.preferences.general.dataPath)
+            self._path = aPath(_app.preferences.general.dataPath)
         return super().path
 
     @path.setter
     def path(self, path):
+        if (_app := getApplication()) is None:
+            raise RuntimeError(f'DataRedirection.path: unable to get application')
         self._path = aPath(path)
-        self._application.preferences.general.dataPath = str(self._path)
+        _app.preferences.general.dataPath = str(self._path)
 
 
 @singleton
@@ -116,8 +117,12 @@ class InsideRedirection(RedirectionABC):
     expand = False
 
     @property
-    def path(self):
-        self._path = aPath(self._application.project.path)
+    def path(self) -> Path:
+        """:return project path, or None if project is not defined
+        """
+        if (_project := getProject()) is None:
+            return None
+        self._path = aPath(_project.path)
         return super().path
 
 
@@ -129,8 +134,12 @@ class AlongsideRedirection(RedirectionABC):
     expand = False
 
     @property
-    def path(self):
-        self._path = aPath(self._application.project.path).parent
+    def path(self) -> Path:
+        """:return directory where project resides, or None if project is not defined
+        """
+        if (_project := getProject()) is None:
+            return None
+        self._path = aPath(_project.path).parent
         return super().path
 
 
@@ -162,10 +171,11 @@ class PathRedirections(list):
     def insidePath(self):
         return self[2].path
 
-    def getPaths(self):
-        """Return a list of (identifier, path) tuples"""
+    def getPaths(self) -> dict:
+        """:return a dict of (identifier, path) pairs
+        """
         # paths = [(r.identifier, r.path) for r in self]
-        paths = [(r.identifier, getattr(r, 'path', None)) for r in self]
+        paths = dict((r.identifier, getattr(r, 'path', None)) for r in self)
         return paths
 
     def getApiMappings(self):
@@ -236,7 +246,7 @@ class DataStore(CcpNmrJson):
         self.autoRedirect = autoRedirect
         self.autoVersioning = autoVersioning
 
-        self._getPathRedirections()
+        # self._getPathRedirections()
 
     @property
     def path(self) -> Path:
@@ -299,8 +309,10 @@ class DataStore(CcpNmrJson):
 
     def expandPath(self, path=None) -> Path:
         """return path decoded for $DATA, $ALONGSIDE, $INSIDE redirections
+        :parameter path: path to expand (set to self._path if None)
         :return Path instance
         """
+        # first convert to a path instance
         if path is not None:
             _path = Path(path)
         elif path is None and self._path is not None:
@@ -308,8 +320,10 @@ class DataStore(CcpNmrJson):
         else:
             raise RuntimeError('Undefined path: cannot expand')
 
-        for d, p in self._getPathRedirections():
+        for d, p in self._getPathRedirections().items():
             if _path.startswith(d):
+                if p is None:
+                    raise RuntimeError(f'Undefined redirection "{d}" for {_path}; this can happen if getProject() yielded None')
                 _path = p / Path._from_parts(_path.parts[1:])  # Using undocumented private method!
                 break
         return _path
@@ -326,7 +340,7 @@ class DataStore(CcpNmrJson):
             raise RuntimeError('Undefined path: cannot redirect')
 
         # check in reverse order, prioritising $INSIDE, then $ALONGSIDE, then $DATA
-        for d, p in self._getPathRedirections()[::-1]:
+        for d, p in self._getPathRedirections().items()[::-1]:
             p = str(p)
             if _path.startswith(p):
                 _path = Path(d) / _path.relative_to(p)
@@ -338,7 +352,7 @@ class DataStore(CcpNmrJson):
         """Return the identifier of the current redirection
         """
         # check in reverse order, prioritising $INSIDE, then $ALONGSIDE, then $DATA
-        return next((d for d, p in self._getPathRedirections() if self._path and self._path.startswith(d)), None)
+        return next((d for d, p in self._getPathRedirections().items() if self._path and self._path.startswith(d)), None)
 
     def aPath(self) -> Path:
         """:return aPath instance of self, decoded for $DATA, $ALONGSIDE, $INSIDE redirections
@@ -448,25 +462,36 @@ class DataStore(CcpNmrJson):
 
         return self
 
-    def _getPathRedirections(self):
+    def _getPathRedirections(self) -> dict:
         """Get the redirection paths;
-        :return list of items of the pathRedirection dict
+        :return the pathRedirection dict
         """
         redirections = PathRedirections().getPaths()
-        # Convert and store the redirections for future reference
-        self.pathRedirections = dict( [(r, str(p)) for r, p in redirections] )
+        for redirection, path in redirections.items():
+            # check path
+            if path is None:
+                getLogger().debug(f'Path of redirection {redirection} is None; using fallback')
+                path = self.pathRedirections.get(redirection, None)
+                if path is not None:
+                    path = Path(path)
+                redirections[redirection] = path
+            else:
+                # store the redirection for future reference
+                self.pathRedirections[redirection] = str(path)
         return redirections
 
     def _message(self):
         """return message to be displayed on logger
         """
-        text = 'path "%s" is invalid ' % self.path
+        text = 'path "%s" is invalid' % self.path
         for d, p in self._getPathRedirections():
             if self.path.startswith(d):
-                if p.exists():
-                    text += ' (check %s)' % d
+                if p is None:
+                    text += f'; no path for {d} defined'
+                elif not p.exists():
+                    text += f'; {d} (= {p}) does not exist)'
                 else:
-                    text += ' (%s "%s" does not exist)' % (d, p)
+                    text += f'; check {d} (= {p})'
                 break
         return text
 

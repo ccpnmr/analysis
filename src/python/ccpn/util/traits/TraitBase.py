@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-27 19:53:07 +0100 (Fri, October 27, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-29 12:36:48 +0000 (Sun, October 29, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -237,8 +237,8 @@ class TraitBase(HasTraits):
         """return trait, value pairs as dict, optionally filtering for metadata"""
         return dict(self.items(**metadata))
 
-    # blanking context manager
-    _notifierBlanking = 0
+    # blanking context manager; keep track of the level if ever required
+    _traitNotifierBlanking = 0
 
     @contextmanager
     def traitNotificationBlanking(self):
@@ -251,16 +251,16 @@ class TraitBase(HasTraits):
             pass
 
         try:
-            self._notifierBlanking += 1
+            TraitBase._traitNotifierBlanking += 1
             self.notify_change = blank
             yield
 
         except Exception as es:
-            getLogger().debug(f'traiNotificationBlanking: caught error {es}')
+            getLogger().debug(f'{self.__class__.__name__}.traitNotificationBlanking() level={TraitBase._notifierBlanking}: caught error {es}')
             raise es
 
         finally:
-            self._notifierBlanking -= 1
+            TraitBase._traitNotifierBlanking -= 1
             del self.notify_change
 
     def __str__(self):

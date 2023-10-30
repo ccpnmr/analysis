@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-12 14:27:55 +0100 (Thu, October 12, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-30 16:30:59 +0000 (Mon, October 30, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -303,8 +303,10 @@ class VersionString(str):
 #=========================================================================================
 # Top level application version
 # - also imported by git pre-commit
+# - previous is included as a reference (not currently used)
 #=========================================================================================
 
+_previousApplicationVersion = VersionString('3.2.0.1')
 applicationVersion = VersionString('3.2.1')
 revision = '3'
 

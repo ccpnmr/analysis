@@ -20,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-14 13:45:32 +0100 (Thu, September 14, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-10-30 16:30:59 +0000 (Mon, October 30, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -117,7 +117,7 @@ class Path(_Path_):
 
     @staticmethod
     def _isValid(value, allowLowerAlpha=True, allowUpperAlpha=True, allowNumeric=True,
-                 allowUnderscore=True, allowSpace=True, allowDash=True,
+                 allowUnderscore=True, allowSpace=True, allowDash=True, allowFullstop=True,
                  allowBrackets=True, allowEmpty=False, allowOther: str | None = None):
         """Check the parts of a filename.
         other must be an inclusion test, i.e., other characters that are allowed in value.
@@ -138,6 +138,7 @@ class Path(_Path_):
         :param bool allowUnderscore: allow underscores.
         :param bool allowSpace: allow spaces.
         :param bool allowDash: allow dash-characters.
+        :param bool allowFullstop: allow full-stop.
         :param bool allowBrackets: allow square/round brackets.
         :param bool allowEmpty: allow empty string.
         :param optional(str) allowOther: list of other characters that are allowed, or None.
@@ -151,8 +152,9 @@ class Path(_Path_):
                      'underscore': (allowUnderscore, '[_]+'),
                      'space'     : (allowSpace, '[ ]+'),
                      'dash'      : (allowDash, '[-]+'),
+                     'fullstop'  : (allowFullstop, '[\.]+'),
                      'brackets'  : (allowBrackets, r'[\(\)\[\]]+'),
-                     'bad'       : (False, rf'[^a-zA-z0-9\_\ \-\(\)\[\]\~{codes is not None and codes or ""}]+'),
+                     'bad'       : (False, rf'[^a-zA-z0-9\_\ \-\.\(\)\[\]\~{codes is not None and codes or ""}]+'),
                      }
 
         if not value and not allowEmpty:
@@ -165,7 +167,7 @@ class Path(_Path_):
         return all(valids)
 
     def isValidFilePath(self, allowLowerAlpha: bool = True, allowUpperAlpha: bool = True, allowNumeric: bool = True,
-                        allowUnderscore: bool = True, allowSpace: bool = True, allowDash: bool = True,
+                        allowUnderscore: bool = True, allowSpace: bool = True, allowDash: bool = True, allowFullstop: bool = True,
                         allowBrackets: bool = True, allowEmpty: bool = False,
                         allowOther: str | None = None) -> bool:
         """Return True if the filepath conforms to required parameters.
@@ -186,26 +188,27 @@ class Path(_Path_):
         :param bool allowUnderscore: allow underscores.
         :param bool allowSpace: allow spaces.
         :param bool allowDash: allow dash-characters.
+        :param bool allowFullstop: allow full-stop.
         :param bool allowBrackets: allow square/round brackets.
         :param bool allowEmpty: allow empty string.
         :param optional(str) allowOther: optional list of other characters that are allowed.
         :return: True if valid.
         """
         if not all(isinstance(val, bool) for val in (allowLowerAlpha, allowUpperAlpha, allowNumeric, allowUnderscore,
-                                                     allowSpace, allowDash, allowBrackets, allowEmpty)):
+                                                     allowSpace, allowDash, allowFullstop, allowBrackets, allowEmpty)):
             raise TypeError(f'{self.__class__.__name__}.isValidFilePath: parameters must be of type bool.')
         if not isinstance(allowOther, str | None):
             raise TypeError(f'{self.__class__.__name__}.isValidFilePath: allowOther must be str or None.')
 
         fp = all(self._isValid(val, allowLowerAlpha=allowLowerAlpha, allowUpperAlpha=allowUpperAlpha, allowNumeric=allowNumeric,
-                               allowUnderscore=allowUnderscore, allowSpace=allowSpace, allowDash=allowDash,
+                               allowUnderscore=allowUnderscore, allowSpace=allowSpace, allowDash=allowDash, allowFullstop=allowFullstop,
                                allowBrackets=allowBrackets, allowEmpty=allowEmpty, allowOther=allowOther)
                  for val in self.parts[1 if self.anchor else 0:-1])
 
         return fp
 
     def isValidBasename(self, allowLowerAlpha: bool = True, allowUpperAlpha: bool = True, allowNumeric: bool = True,
-                        allowUnderscore: bool = True, allowSpace: bool = True, allowDash: bool = True,
+                        allowUnderscore: bool = True, allowSpace: bool = True, allowDash: bool = True, allowFullstop: bool = True,
                         allowBrackets: bool = True, allowEmpty: bool = False,
                         allowOther: str | None = None,
                         suffixes: list[str, ...] | None = None) -> bool:
@@ -228,6 +231,7 @@ class Path(_Path_):
         :param bool allowUnderscore: allow underscores.
         :param bool allowSpace: allow spaces.
         :param bool allowDash: allow dash-characters.
+        :param bool allowFullstop: allow full-stop.
         :param bool allowBrackets: allow square/round brackets.
         :param bool allowEmpty: allow empty string.
         :param optional(str) allowOther: optional list of other characters that are allowed.
@@ -235,7 +239,7 @@ class Path(_Path_):
         :return: True if valid.
         """
         if not all(isinstance(val, bool) for val in (allowLowerAlpha, allowUpperAlpha, allowNumeric, allowUnderscore,
-                                                     allowSpace, allowDash, allowBrackets, allowEmpty)):
+                                                     allowSpace, allowDash, allowFullstop, allowBrackets, allowEmpty)):
             raise TypeError(f'{self.__class__.__name__}.isValidFilePath: parameters must be of type bool.')
         if not isinstance(allowOther, str | None):
             raise TypeError(f'{self.__class__.__name__}.isValidFilePath: allowOther must be str or None.')
@@ -243,7 +247,7 @@ class Path(_Path_):
             raise TypeError(f'{self.__class__.__name__}.isValidFilePath: suffixes must be list of str, or None.')
 
         bn = self._isValid(self.basename, allowLowerAlpha=allowLowerAlpha, allowUpperAlpha=allowUpperAlpha, allowNumeric=allowNumeric,
-                           allowUnderscore=allowUnderscore, allowSpace=allowSpace, allowDash=allowDash,
+                           allowUnderscore=allowUnderscore, allowSpace=allowSpace, allowDash=allowDash, allowFullstop=allowFullstop,
                            allowBrackets=allowBrackets, allowEmpty=allowEmpty, allowOther=allowOther)
 
         ext = True if suffixes is None else self.suffix in suffixes
@@ -822,7 +826,7 @@ makeValidCcpnPath = makeValidCcpnFilePath
 def main():
     # put into test-cases
 
-    fp = Path('/wergwe98/help/name.ccpn')
+    fp = Path('/wergw.e98/help/name.ccpn')
     print(fp.parts)
     print(fp.isValidFilePath(allowUpperAlpha=False, allowUnderscore=False, allowDash=False))
     # True
@@ -830,8 +834,9 @@ def main():
     print(fp.isValidFilePath(allowUnderscore=False))
     print(fp.isValidFilePath(allowNumeric=False))
     print(fp.isValidFilePath(allowDash=False))
+    print(fp.isValidFilePath(allowFullstop=False))
     print(fp.isValidFilePath(allowLowerAlpha=False))
-    # True, False, True, False
+    # True, False, True, False, False
 
     print('------->')
     fp = Path('/wergwe98/n2$@34a£-$me/name.ccpn')  # --> $@£

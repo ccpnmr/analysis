@@ -20,33 +20,51 @@ __Title__ = "remove Unused Nmr Atoms"
 __Category__ = "Assignment,"
 __tags__ = ("NmrAtoms", )
 __Description__ = """ This macro will remove all unused NmrAtoms from your project, i.e."""
-"""all NmrAtoms which are not used in any peak assignments."""
+"""all NmrAtoms which are not used in any peak assignments and don't have a chemical"""
+"""shift value associated with it."""
 
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
-for nc in project.nmrChains:
-    for nr in list(nc.nmrResidues):
-        for na in list(nr.nmrAtoms):
-            if not na.assignedPeaks:
-                na.delete()
-# If you want to remove unused NmrResidues at the same time include this code
-# as well (remove the # at the start of the line):
-#        if not nr.nmrAtoms:
-#            nr.delete()
+from ccpn.core.lib.ContextManagers import undoBlock
+
+with undoBlock():
+    for nc in project.nmrChains:
+        for nr in list(nc.nmrResidues):
+            for na in list(nr.nmrAtoms):
+                if not na.assignedPeaks:
+                    doNotDelete = False
+                    for cs in na.chemicalShifts:
+                        if cs.static:
+                            doNotDelete = True
+                    if doNotDelete is False:
+                        na.delete()
+    # If you want to remove unused NmrResidues at the same time include this code
+    # as well (remove the # at the start of the line):
+    #        if not nr.nmrAtoms:
+    #            nr.delete()
 
 
 
 # If you wanted a macro to remove the NmrAtoms in a specific NmrChain,
 # use this code instead, making sure to enter the correct NmrChain PID in the
-# first line.
+# second line.
 #
-# nc = get('NC:@-')
-# for nr in nc.nmrResidues:
-#     for na in list(nr.nmrAtoms):
-#         if not na.assignedPeaks:
-#             na.delete()
-
+# with undoBlock():
+#     nc = get('NC:@-')
+#     for nr in list(nc.nmrResidues):
+#         for na in list(nr.nmrAtoms):
+#             if not na.assignedPeaks:
+#                 doNotDelete = False
+#                 for cs in na.chemicalShifts:
+#                     if cs.static:
+#                         doNotDelete = True
+#                 if doNotDelete is False:
+#                     na.delete()
+    # If you want to remove unused NmrResidues at the same time include this code
+    # as well (remove the # at the start of the line):
+    #    if not nr.nmrAtoms:
+    #        nr.delete()
 
 

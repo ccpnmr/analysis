@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-07 15:16:42 +0100 (Thu, September 07, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-31 11:34:51 +0000 (Tue, October 31, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -76,10 +76,11 @@ def _ccpnExceptionhook(ccpnType, value, tback):
         sys.stderr.write('_ccpnExceptionhook: value = %s\n' % value)
         sys.stderr.write('_ccpnExceptionhook: tback = %s\n' % tback)
 
-    if application and application.hasGui:
-        title = f'{str(ccpnType)[8:-2]}:'
-        text = str(value)
-        MessageDialog.showError(title=title, message=text)
+    # this is crashing on Windows 10 Enterprise :|
+    # if application and application.hasGui:
+    #     title = f'{str(ccpnType)[8:-2]}:'
+    #     text = str(value)
+    #     MessageDialog.showError(title=title, message=text)
 
     if application.project and not application.project.readOnly:
         application.project._updateLoggerState(readOnly=False, flush=True)

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-29 12:36:48 +0000 (Sun, October 29, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-31 14:45:14 +0100 (Tue, October 31, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -40,6 +40,11 @@ class TraitBase(HasTraits):
 
     keysInOrder = True   # If True, return key in order defined by _traitOrder attribute
                          # of the keys; can bet put at end by traitAtEnd tag
+
+    def __init__(self, *args, **kwds):
+        super().__init__(*args, **kwds)
+        # trait notifers
+        self._traitNotifierBlanking = 0
 
     def getTraitValue(self, trait):
         """convenience (to complement setTraitValue)
@@ -237,12 +242,9 @@ class TraitBase(HasTraits):
         """return trait, value pairs as dict, optionally filtering for metadata"""
         return dict(self.items(**metadata))
 
-    # blanking context manager; keep track of the level if ever required
-    _traitNotifierBlanking = 0
-
     @contextmanager
     def traitNotificationBlanking(self):
-        """Blank all trait notification; i.e. they are not saved and executed late.
+        """Blank all trait notification (per object!); i.e. they are not saved and executed late.
         If that is needed, use hold_trait_notifications()
         """
 
@@ -251,17 +253,18 @@ class TraitBase(HasTraits):
             pass
 
         try:
-            TraitBase._traitNotifierBlanking += 1
+            self._traitNotifierBlanking += 1
             self.notify_change = blank
             yield
 
         except Exception as es:
-            getLogger().debug(f'{self.__class__.__name__}.traitNotificationBlanking() level={TraitBase._notifierBlanking}: caught error {es}')
+            getLogger().debug(f'{self.__class__.__name__}.traitNotificationBlanking() level={self._traitNotifierBlanking}: caught error {es}')
             raise es
 
         finally:
-            TraitBase._traitNotifierBlanking -= 1
-            del self.notify_change
+            self._traitNotifierBlanking -= 1
+            if self._traitNotifierBlanking == 0:
+                del self.notify_change
 
     def __str__(self):
         return '<%s>' % (self.__class__.__name__,)

@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-08-07 16:56:15 +0100 (Mon, August 07, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-11-02 15:52:59 +0000 (Thu, November 02, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1494,10 +1494,15 @@ class GuiStrip(Frame):
         self.viewStripMenu = self._phasingMenu
 
         if self.spectrumDisplay.is1D:
-
-            self._hTraceActive = True
-            self._vTraceActive = False
-            self._newConsoleDirection = 0
+            dim = self.spectrumDisplay._flipped
+            if dim:
+                self._hTraceActive = False
+                self._vTraceActive = True
+                self._newConsoleDirection = 1
+            else:
+                self._hTraceActive = True
+                self._vTraceActive = False
+                self._newConsoleDirection = 0
         else:
             # TODO:ED remember trace direction
             self._hTraceActive = self.spectrumDisplay.hTraceAction  # self.hTraceAction.isChecked()
@@ -3132,7 +3137,7 @@ class GuiStrip(Frame):
                     getLogger().warning('Strip.pickPeaks: not peakPicker selected for %s' % spectrum)
                     continue
 
-                _checkOutside = _displayedSpectrum.checkForRegionsOutsideLimits(regions)
+                _checkOutside = _displayedSpectrum.checkForRegionsOutsideLimits(regions, self, spectrumView)
                 _skip = any(_checkOutside)
                 if _skip and not self._CcpnGLWidget._stackingMode:
                     getLogger().warning('Strip.pickPeaks: skipping %s; outside region %r' % (spectrum, regions))
@@ -3148,9 +3153,11 @@ class GuiStrip(Frame):
                 positiveThreshold = spectrum.positiveContourBase if spectrum.includePositiveContours else None
                 negativeThreshold = spectrum.negativeContourBase if spectrum.includeNegativeContours else None
                 if spectrum.dimensionCount == 1:
-                    xOffset, yOffset = self._CcpnGLWidget._spectrumSettings[spectrumView].get(SPECTRUM_STACKEDMATRIXOFFSET)
-                    _intensityLimits = np.array(regions[1]) - yOffset
-                    _xArray = np.array(regions[0]) - xOffset
+                    xOffset, yOffset = self._CcpnGLWidget._spectrumSettings[spectrumView].stackedMatrixOffset
+                    xDim, yDim = self._CcpnGLWidget._spectrumSettings[spectrumView].dimensionIndices
+                    _intensityLimits = np.array(regions[yDim]) - yOffset
+                    _xArray = np.array(regions[xDim]) - xOffset
+
                     _sliceTuples = _displayedSpectrum.getSliceTuples([_xArray])
                     spectrum.peakPicker._intensityLimits = _intensityLimits  #needed to make sure it peaks only inside the selected box.
                     positiveThreshold, negativeThreshold = None, None  # get automatically
@@ -3294,19 +3301,21 @@ class GuiStrip(Frame):
         axes = self.orderedAxes
 
         if spectrum.dimensionCount == 1:
+            dim = self.spectrumDisplay._flipped
+            _x, _y = dim, 1 - dim
             # 1D spectrum
             ppmLimits, valueLimits = spectrum.get1Dlimits()
 
-            axes[0].region = ppmLimits
-            axes[0]._positionByUnit = axes[0].position
-            axes[0]._widthByUnit = axes[0].width
+            axes[_x].region = ppmLimits
+            axes[_x]._positionByUnit = axes[_x].position
+            axes[_x]._widthByUnit = axes[_x].width
 
             if valueLimits == (0.0, 0.0):
                 # make the axes show something for the first show if there is nothing in the spectrumData
                 valueLimits = (-1.0, 1.0)
 
-            axes[1].region = valueLimits
-            axes[1].unit = AXISUNIT_NUMBER
+            axes[_y].region = valueLimits
+            axes[_y].unit = AXISUNIT_NUMBER
 
         else:
             # nD

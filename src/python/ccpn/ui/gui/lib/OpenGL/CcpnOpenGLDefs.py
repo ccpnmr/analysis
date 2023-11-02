@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-01 19:39:57 +0100 (Thu, June 01, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-11-02 15:53:00 +0000 (Thu, November 02, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -33,8 +33,7 @@ from ccpn.util.DataEnum import DataEnum
 SPECTRUM_STACKEDMATRIX = 'stackedMatrix'
 SPECTRUM_STACKEDMATRIXOFFSET = 'stackedMatrixOffset'
 SPECTRUM_MATRIX = 'spectrumMatrix'
-SPECTRUM_XLIMITS = 'xLimits'
-SPECTRUM_YLIMITS = 'yLimits'
+SPECTRUM_LIMITS = 'limits'
 SPECTRUM_AF = 'AF'
 SPECTRUM_SCALE = 'scale'
 SPECTRUM_POINTINDEX = 'pointIndex'
@@ -43,8 +42,9 @@ SPECTRUM_SPINNINGRATE = 'spinningRate'
 SPECTRUM_ALIASINGINDEX = 'aliasingIndex'
 SPECTRUM_FOLDINGMODE = 'foldingMode'
 SPECTRUM_REGIONBOUNDS = 'regionBounds'
-SPECTRUM_XFOLDLIMITS = 'xFoldLimits'
-SPECTRUM_YFOLDLIMITS = 'yFoldLimits'
+SPECTRUM_FOLDLIMITS = 'foldLimits'
+SPECTRUM_SPECFREQ = 'specFreq'
+SPECTRUM_PPMTOPOINT = 'ppmToPoint'
 
 MAINVIEW = 'mainView'
 MAINVIEWFULLWIDTH = 'mainViewFullWidth'
@@ -175,7 +175,6 @@ GLSCALINGBYUNITS = 'Scaling By Units'
 GLSCALINGAXIS = 'Scaling Axis'
 GLPRINTFONT = 'Print Font'
 GLUSEPRINTFONT = 'Use Print Font'
-# NOTE:ED - add tick marks?
 
 AXISDRAWOFFSET = 0.001
 

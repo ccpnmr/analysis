@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 14:29:32 +0100 (Wed, June 28, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-11-02 15:52:58 +0000 (Thu, November 02, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -275,7 +275,7 @@ class SpectrumDisplay(AbstractWrapperObject):
     def is1D(self) -> bool:
         """True if this is a 1D display."""
         tt = self.axisCodes
-        return bool(tt and tt[1] == self.INTENSITY)
+        return bool(tt and (tt[1] == self.INTENSITY or tt[0] == self.INTENSITY))
 
     @property
     def dimensionTypes(self):
@@ -627,7 +627,7 @@ class SpectrumDisplay(AbstractWrapperObject):
 def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
                         stripDirection: str = 'Y', name: str = None,
                         zPlaneNavigationMode: str = None,
-                        isGrouped: bool = False):
+                        isGrouped: bool = False, flip1D=False):
     """Create new SpectrumDisplay.
 
     :param window:
@@ -652,6 +652,9 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
         raise ValueError('_newSpectrumDisplay: undefined spectrum')
     is1D = (spectrum.dimensionCount == 1)
 
+    if not is1D and flip1D:
+        raise ValueError('_newSpectrumDisplay: flid1D does not alpply to nD spectra')
+
     # set api-parameters for display generation
     displayPars = dict(
             stripDirection=stripDirection,
@@ -659,7 +662,12 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
             )
 
     if is1D:
-        axisCodes = spectrum.axisCodes + [SpectrumDisplay.INTENSITY]
+        # build axes for 1D display
+        if flip1D:
+            axisCodes = [SpectrumDisplay.INTENSITY] + spectrum.axisCodes
+        else:
+            axisCodes = spectrum.axisCodes + [SpectrumDisplay.INTENSITY]
+
     if len(axisCodes) < 2:
         raise ValueError("New SpectrumDisplay must have at least two axisCodes")
     displayPars['axisCodes'] = displayPars['axisOrder'] = axisCodes
@@ -681,6 +689,7 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
     display.stripArrangement = stripDirection
     if zPlaneNavigationMode:
         display.zPlaneNavigationMode = zPlaneNavigationMode
+
     # GWV: no idea what these are for; just adapted from original code
     # it gets crazy on 1D-displays
     # display._useFirstDefault = (False if is1D else True)
@@ -693,17 +702,31 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
 
     # Create axes
     if is1D:
-        # SpectrumDisplay X
-        if spectrum.dimensionTypes[0] == specLib.DIMENSION_FREQUENCY:
-            apiSpectrumDisplay.newFrequencyAxis(code=axisCodes[0], stripSerial=1, unit=AXISUNIT_PPM)
-        elif spectrum.dimensionTypes[0] == specLib.DIMENSION_TIME:
-            apiSpectrumDisplay.newFidAxis('time', stripSerial=1, unit=AXISUNIT_POINT)
+        if flip1D:
+            # SpectrumDisplay X; i.e. Intensity
+            apiSpectrumDisplay.newIntensityAxis(code=SpectrumDisplay.INTENSITY, stripSerial=1, unit=AXISUNIT_NUMBER)
 
-        # SpectrumDisplay Y; i.e. Intensity
-        apiSpectrumDisplay.newIntensityAxis(code=SpectrumDisplay.INTENSITY, stripSerial=1, unit=AXISUNIT_NUMBER)
+            # SpectrumDisplay Y
+            if spectrum.dimensionTypes[0] == specLib.DIMENSION_FREQUENCY:
+                apiSpectrumDisplay.newFrequencyAxis(code=axisCodes[1], stripSerial=1, unit=AXISUNIT_PPM)
+            elif spectrum.dimensionTypes[0] == specLib.DIMENSION_TIME:
+                apiSpectrumDisplay.newFidAxis('time', stripSerial=1, unit=AXISUNIT_POINT)
 
-        # we need these to do the checks
-        # display._isotopeCodes = tuple(spectrum.isotopeCodes)
+            # we need these to do the checks
+            # display._isotopeCodes = tuple(spectrum.isotopeCodes)
+
+        else:
+            # SpectrumDisplay X
+            if spectrum.dimensionTypes[0] == specLib.DIMENSION_FREQUENCY:
+                apiSpectrumDisplay.newFrequencyAxis(code=axisCodes[0], stripSerial=1, unit=AXISUNIT_PPM)
+            elif spectrum.dimensionTypes[0] == specLib.DIMENSION_TIME:
+                apiSpectrumDisplay.newFidAxis('time', stripSerial=1, unit=AXISUNIT_POINT)
+
+            # SpectrumDisplay Y; i.e. Intensity
+            apiSpectrumDisplay.newIntensityAxis(code=SpectrumDisplay.INTENSITY, stripSerial=1, unit=AXISUNIT_NUMBER)
+
+            # we need these to do the checks
+            # display._isotopeCodes = tuple(spectrum.isotopeCodes)
 
     else:
         # nD

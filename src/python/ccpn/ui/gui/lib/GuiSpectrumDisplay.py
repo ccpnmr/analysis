@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-31 16:38:54 +0100 (Mon, July 31, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-11-02 15:52:59 +0000 (Thu, November 02, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -99,7 +99,7 @@ INCLUDE_AXIS_WIDGET = True
 
 
 # GST All this complication is added because the scroll frame appears to have a lower margin added by some part of Qt
-#     that we can't control in PyQt. Specifically even if you overide setContentsMargins on ScrollArea it is never
+#     that we can't control in PyQt. Specifically even if you override setContentsMargins on ScrollArea it is never
 #     called but at the same time ScrollArea gets a lower contents margin of 1 pixel that we didn't ask for... ;-(
 def styleSheetPredicate(target):
     children = [child for child in target.children() if isinstance(child, QtWidgets.QWidget)]
@@ -134,6 +134,10 @@ class ScrollAreaWithPredicateStylesheet(ScrollArea):
         self.modifyStyleSheet(self.checkPredicate())
         return super().resizeEvent(e)
 
+
+#=========================================================================================
+# GuiSpectrumDisplay
+#=========================================================================================
 
 class GuiSpectrumDisplay(CcpnModule):
     """
@@ -423,6 +427,7 @@ class GuiSpectrumDisplay(CcpnModule):
         if len(self.axisCodes) < 3:
             self._stripToolBarWidget.setVisible(False)
         includeDirection = not self.is1D
+
         self.phasingFrame = PhasingFrame(parent=self.qtParent,
                                          showBorder=False,
                                          includeDirection=includeDirection,
@@ -440,9 +445,11 @@ class GuiSpectrumDisplay(CcpnModule):
         self._spectrumDisplaySettings = SpectrumDisplaySettings(parent=self.settingsWidget,
                                                                 mainWindow=self.mainWindow, spectrumDisplay=self,
                                                                 grid=(0, 0),
-                                                                xTexts=AXISUNITS, xAxisUnits=xAxisUnits,
-                                                                yTexts=_yTexts, yAxisUnits=_yAx,
-                                                                showYAxis=_showY,
+                                                                xTexts=AXISUNITS, xAxisUnits=_general.xAxisUnits,
+                                                                yTexts=AXISUNITS, yAxisUnits=_general.yAxisUnits,
+                                                                # yTexts=_yTexts, yAxisUnits=_yAx,
+                                                                showXAxis=True if _showY else not bool(self._flipped),
+                                                                showYAxis=True if _showY else bool(self._flipped),
                                                                 _baseAspectRatioAxisCode=_general._baseAspectRatioAxisCode,
                                                                 _aspectRatios=_general.aspectRatios,
                                                                 symbolType=_general.symbolType,
@@ -708,6 +715,12 @@ class GuiSpectrumDisplay(CcpnModule):
                                                          SpectrumDisplay.className,
                                                          self._spectrumDisplayChanged,
                                                          onceOnly=True)
+
+    @property
+    def _flipped(self):
+        """Return 0|1 depending on whether the 1d spectrum-display is flipped with intensity on the x-axis.
+        """
+        return 1 - self.axisCodes.index('intensity')
 
     def setRightOverlayArea(self, value):
         """Set the overlay state for the right axis.

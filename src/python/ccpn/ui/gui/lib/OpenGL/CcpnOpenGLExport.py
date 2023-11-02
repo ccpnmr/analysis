@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-01 19:39:57 +0100 (Thu, June 01, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-11-02 15:53:00 +0000 (Thu, November 02, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -34,7 +34,7 @@ import numpy as np
 import math
 # import glob
 import contextlib
-# from itertools import zip_longest
+from itertools import product
 from dataclasses import dataclass
 from collections import OrderedDict
 from collections.abc import Iterable
@@ -61,8 +61,9 @@ from reportlab.pdfbase.ttfonts import TTFont
 from ccpn.ui.gui.widgets.Font import getSystemFonts
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import viewportDimensions
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import SPECTRUM_STACKEDMATRIX, SPECTRUM_MATRIX, \
-    GLLINE_STYLES_ARRAY, SPECTRUM_XLIMITS, SPECTRUM_AF, SPECTRUM_ALIASINGINDEX, SPECTRUM_FOLDINGMODE, \
-    SPECTRUM_YLIMITS, SPECTRUM_SCALE, SPECTRUM_STACKEDMATRIXOFFSET
+    GLLINE_STYLES_ARRAY, SPECTRUM_LIMITS, \
+    SPECTRUM_AF, SPECTRUM_ALIASINGINDEX, SPECTRUM_FOLDINGMODE, \
+    SPECTRUM_SCALE, SPECTRUM_STACKEDMATRIXOFFSET
 
 from ccpn.ui.gui.lib.OpenGL import GL
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLGRIDLINES, GLAXISLABELS, GLAXISMARKS, \
@@ -1052,62 +1053,59 @@ class GLExporter():
 
                     if spectrumView.spectrum.dimensionCount > 1:
                         # draw nD spectra
+                        fxMax, fyMax = specSettings.maxSpectrumFrequency
+                        dxAF, dyAF = specSettings.spectralWidth
+                        xScale, yScale = specSettings.scale
+                        alias = specSettings.aliasingIndex
+                        folding = specSettings.foldingMode
 
-                        # self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
-                        #                                            1, GL.GL_FALSE,
-                        #                                            self._spectrumSettings[spectrumView][SPECTRUM_MATRIX])
+                        # for ii in range(alias[0][0], alias[0][1] + 1, 1):
+                        #     for jj in range(alias[1][0], alias[1][1] + 1, 1):
+                        for ii, jj in product(range(alias[0][0], alias[0][1] + 1),
+                                              range(alias[1][0], alias[1][1] + 1)):
 
-                        _, fxMax = specSettings[SPECTRUM_XLIMITS]
-                        _, fyMax = specSettings[SPECTRUM_YLIMITS]
-                        dxAF, dyAF = specSettings[SPECTRUM_AF]
-                        xScale, yScale = specSettings[SPECTRUM_SCALE]
-                        alias = specSettings[SPECTRUM_ALIASINGINDEX]
-                        folding = specSettings[SPECTRUM_FOLDINGMODE]
+                            foldX = foldY = 1.0
+                            foldXOffset = foldYOffset = 0
+                            if folding[0] == 'mirror':
+                                foldX = pow(-1, ii)
+                                foldXOffset = -dxAF if foldX < 0 else 0
 
-                        for ii in range(alias[0][0], alias[0][1] + 1, 1):
-                            for jj in range(alias[1][0], alias[1][1] + 1, 1):
+                            if folding[1] == 'mirror':
+                                foldY = pow(-1, jj)
+                                foldYOffset = -dyAF if foldY < 0 else 0
 
-                                foldX = foldY = 1.0
-                                foldXOffset = foldYOffset = 0
-                                if folding[0] == 'mirror':
-                                    foldX = pow(-1, ii)
-                                    foldXOffset = -dxAF if foldX < 0 else 0
+                            # build the spectrum transformation matrix
+                            specMatrix = np.array([xScale * foldX, 0.0, 0.0, 0.0,
+                                                   0.0, yScale * foldY, 0.0, 0.0,
+                                                   0.0, 0.0, 1.0, 0.0,
+                                                   fxMax + (ii * dxAF) + foldXOffset, fyMax + (jj * dyAF) + foldYOffset, 0.0, 1.0],
+                                                  dtype=np.float32)
+                            _data.matrix = np.transpose(specMatrix.reshape((4, 4)))
+                            _data.matrixSymbols = np.transpose(specMatrix.reshape((4, 4)))
+                            _data.alias = getAliasSetting(ii, jj)
+                            # get the transformation matrix from the spectrumView
+                            # mat = np.transpose(self._parent._spectrumSettings[spectrumView][SPECTRUM_MATRIX].reshape((4, 4)))
 
-                                if folding[1] == 'mirror':
-                                    foldY = pow(-1, jj)
-                                    foldYOffset = -dyAF if foldY < 0 else 0
+                            # # clip all colours first - not sure if needed now, but was causing overflow error in the past
+                            # _colors = np.clip(thisSpec.colors, 0.0, 0.9999)
 
-                                # build the spectrum transformation matrix
-                                specMatrix = np.array([xScale * foldX, 0.0, 0.0, 0.0,
-                                                       0.0, yScale * foldY, 0.0, 0.0,
-                                                       0.0, 0.0, 1.0, 0.0,
-                                                       fxMax + (ii * dxAF) + foldXOffset, fyMax + (jj * dyAF) + foldYOffset, 0.0, 1.0],
-                                                      dtype=np.float32)
-                                _data.matrix = np.transpose(specMatrix.reshape((4, 4)))
-                                _data.matrixSymbols = np.transpose(specMatrix.reshape((4, 4)))
-                                _data.alias = getAliasSetting(ii, jj)
-                                # get the transformation matrix from the spectrumView
-                                # mat = np.transpose(self._parent._spectrumSettings[spectrumView][SPECTRUM_MATRIX].reshape((4, 4)))
+                            yield _data  # pass object
 
-                                # # clip all colours first - not sure if needed now, but was causing overflow error in the past
-                                # _colors = np.clip(thisSpec.colors, 0.0, 0.9999)
-
-                                yield _data  # pass object
-
-                                _data.index += 1
+                            _data.index += 1
 
                     else:
                         # draw 1D spectra
+                        fxMax, fyMax = specSettings.maxSpectrumFrequency
+                        dxAF, dyAF = specSettings.spectralWidth
+                        xScale, yScale = specSettings.scale
+                        alias = specSettings.aliasingIndex
+                        folding = specSettings.foldingMode
+                        stackX, stackY = specSettings.stackedMatrixOffset
+                        dimX, _ = specSettings.dimensionIndices
 
-                        # assume that the vertexArray is a GL_LINE_STRIP
-                        _, fxMax = specSettings[SPECTRUM_XLIMITS]
-                        dxAF, _ = specSettings[SPECTRUM_AF]
-                        xScale, _ = specSettings[SPECTRUM_SCALE]
-                        alias = specSettings[SPECTRUM_ALIASINGINDEX]
-                        folding = specSettings[SPECTRUM_FOLDINGMODE]
-                        stackX, stackY = specSettings[SPECTRUM_STACKEDMATRIXOFFSET]
-
-                        for ii in range(alias[0][0], alias[0][1] + 1, 1):
+                        # for ii in range(alias[0][0], alias[0][1] + 1, 1):
+                        for ii, jj in product(range(alias[0][0], alias[0][1] + 1),
+                                              range(alias[1][0], alias[1][1] + 1)):
 
                             foldX = 1.0
                             foldXOffsetSym = foldXOffset = 0
@@ -1116,24 +1114,46 @@ class GLExporter():
                                 foldXOffset = (2 * fxMax - dxAF) if foldX < 0 else 0
                                 foldXOffsetSym = -dxAF if foldX < 0 else 0
 
+                            foldY = 1.0
+                            foldYOffsetSym = foldYOffset = 0
+                            if folding[1] == 'mirror':
+                                foldY = pow(-1, jj)
+                                foldYOffset = (2 * fyMax - dyAF) if foldY < 0 else 0
+                                foldYOffsetSym = -dyAF if foldY < 0 else 0
+
                             if self._parent._stackingMode:
-                                _matrix = np.array(specSettings[SPECTRUM_STACKEDMATRIX])
+                                _matrix = np.array(specSettings.matrix)
                             else:
                                 _matrix = np.array(self._parent._IMatrix)
 
-                            # build the spectrum transformation matrices
-                            _matrixSym = np.array([xScale * foldX, 0.0, 0.0, 0.0,
-                                                   0.0, 1.0, 0.0, 0.0,
-                                                   0.0, 0.0, 1.0, 0.0,
-                                                   fxMax + (ii * dxAF) + foldXOffsetSym + stackX, stackY, 0.0, 1.0],
-                                                  dtype=np.float32)
+                            if dimX:  # quick way to check if 1D is flipped
+                                # build the 1D spectrum transformation matrices
+                                _matrixSym = np.array([1.0, 0.0, 0.0, 0.0,
+                                                       0.0, yScale * foldY, 0.0, 0.0,
+                                                       0.0, 0.0, 1.0, 0.0,
+                                                       stackX, fyMax + (jj * dyAF) + foldYOffsetSym + stackY, 0.0, 1.0],
+                                                      dtype=np.float32)
+                                _data.alias = getAliasSetting(0, jj)
 
-                            # take the stacking matrix and insert the correct x-scaling to map the pointPositions to the screen
-                            _matrix[0] = foldX
-                            _matrix[12] += (ii * dxAF) + foldXOffset  # add to the stacked offset
+                                # take the stacking matrix and insert the correct x-scaling to map the pointPositions to the screen
+                                _matrix[5] = foldY
+                                _matrix[13] += (jj * dyAF) + foldYOffset  # add to the stacked offset
+
+                            else:
+                                # build the nD spectrum transformation matrices
+                                _matrixSym = np.array([xScale * foldX, 0.0, 0.0, 0.0,
+                                                       0.0, 1.0, 0.0, 0.0,
+                                                       0.0, 0.0, 1.0, 0.0,
+                                                       fxMax + (ii * dxAF) + foldXOffsetSym + stackX, stackY, 0.0, 1.0],
+                                                      dtype=np.float32)
+                                _data.alias = getAliasSetting(ii, 0)
+
+                                # take the stacking matrix and insert the correct x-scaling to map the pointPositions to the screen
+                                _matrix[0] = foldX
+                                _matrix[12] += (ii * dxAF) + foldXOffset  # add to the stacked offset
+
                             _data.matrix = np.transpose(_matrix.reshape((4, 4)))
                             _data.matrixSymbols = np.transpose(_matrixSym.reshape((4, 4)))
-                            _data.alias = getAliasSetting(ii, 0)
 
                             yield _data  # pass object back to the calling method
 
@@ -1388,7 +1408,7 @@ class GLExporter():
 
                 elif spectrumView in self._parent._contourList.keys():
                     # assume that the vertexArray is a GL_LINE_STRIP
-                    mat = np.transpose(self._parent._spectrumSettings[spectrumView][SPECTRUM_STACKEDMATRIX].reshape((4, 4))) if self._parent._stackingMode else None
+                    mat = np.transpose(self._parent._spectrumSettings[spectrumView].matrix.reshape((4, 4))) if self._parent._stackingMode else None
 
                 # draw the integralAreas if they exist
                 for integralArea in self._parent._GLIntegrals._GLSymbols[integralListView]._regions:
@@ -1679,7 +1699,7 @@ class GLExporter():
             # drawVertexColor
 
             if self._parent._stackingMode:
-                mat = np.transpose(self._parent._spectrumSettings[spectrumView][SPECTRUM_STACKEDMATRIX].reshape((4, 4)))
+                mat = np.transpose(self._parent._spectrumSettings[spectrumView].matrix.reshape((4, 4)))
             else:
                 mat = None
 
@@ -2381,7 +2401,7 @@ class GLExporter():
                 continue
             specSettings = self._parent._spectrumSettings[spectrumView]
             # get the transformation matrix from the spectrumView
-            mat = np.transpose(self._parent._spectrumSettings[spectrumView][SPECTRUM_MATRIX].reshape((4, 4)))
+            mat = np.transpose(self._parent._spectrumSettings[spectrumView].matrix.reshape((4, 4)))
 
             attribList = getattr(spectrumView, f'{listView}Views')
             validListViews = [pp for pp in attribList

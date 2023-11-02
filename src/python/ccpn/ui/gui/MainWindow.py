@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-19 12:24:29 +0100 (Thu, October 19, 2023) $"
-__version__ = "$Revision: 3.2.0.1 $"
+__dateModified__ = "$dateModified: 2023-11-02 15:52:59 +0000 (Thu, November 02, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1575,7 +1575,9 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                     if strip.spectrumDisplay.is1D:
                         cursorPosition = self.application.current.cursorPosition
                         if cursorPosition is not None and len(cursorPosition) > 1:
-                            limits = [cursorPosition[0], cursorPosition[0] + 0.01]
+
+                            pos = cursorPosition[strip.spectrumDisplay._flipped]
+                            limits = [pos, pos + 0.01]
 
                             validViews = [sv for sv in strip.spectrumViews if sv.isDisplayed]
                             currentIntegrals = list(self.current.integrals)
@@ -1734,7 +1736,9 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                         multipletList = spectrum.multipletLists[-1]
                     peaks = [peak for peakList in spectrum.peakLists for peak in peakList.peaks if
                              peak in self.application.current.peaks]
-                    multiplet = multipletList.newMultiplet(peaks=peaks)
+                    if peaks:
+                        # only create a multiplet that contains peaks
+                        multiplet = multipletList.newMultiplet(peaks=peaks)
                     self.application.current.multiplet = multiplet
 
     def newCollectionOfCurrentPeaks(self):

@@ -54,8 +54,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-07 17:25:14 +0100 (Thu, September 07, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-11-02 15:52:58 +0000 (Thu, November 02, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -762,7 +762,7 @@ class Spectrum(AbstractWrapperObject):
 
         return self._dataStore.redirectionIdentifier == AlongsideRedirection.identifier
 
-    def _makeNewRelativePath(self , newPath) -> Path:
+    def _makeNewRelativePath(self, newPath) -> Path:
         """Insert a possible redirection in the path, as maintained in the dataStore object
         by creating a new one with the relative path.
         NB. The dataSource object already used the absolute path, so no need to re-initialise
@@ -1028,6 +1028,11 @@ class Spectrum(AbstractWrapperObject):
     def ppmPerPoints(self) -> List[float]:
         """Convenience; ppm-per-point for each dimension"""
         return self._getDimensionalAttributes('ppmPerPoint')
+
+    @property
+    def ppmToPoints(self) -> List[float]:
+        """Convenience; ppm-to-point for each dimension"""
+        return self._getDimensionalAttributes('ppmToPoint')
 
     @property
     def _valuePerPoints(self) -> List[Optional[float]]:
@@ -1314,7 +1319,7 @@ class Spectrum(AbstractWrapperObject):
     @checkSpectrumPropertyValue(iterable=True, allowNone=False, types=(float, int))
     def referencePoints(self, value):
         self._setDimensionalAttributes('referencePoint', value)
-        if self.dimensionCount == 1 and not self.isEmptySpectrum(): # make sure the spectrum will shift correctly on the next redraw.
+        if self.dimensionCount == 1 and not self.isEmptySpectrum():  # make sure the spectrum will shift correctly on the next redraw.
             self.positions = self.getPpmArray(dimension=1)
 
     @property
@@ -1330,7 +1335,7 @@ class Spectrum(AbstractWrapperObject):
     def referenceValues(self, value):
         self._setDimensionalAttributes('referenceValue', value)
 
-        if self.dimensionCount == 1 and not self.isEmptySpectrum(): # make sure the spectrum will shift correctly on the next redraw.
+        if self.dimensionCount == 1 and not self.isEmptySpectrum():  # make sure the spectrum will shift correctly on the next redraw.
             self.positions = self.getPpmArray(dimension=1)
 
     @property
@@ -2818,7 +2823,7 @@ class Spectrum(AbstractWrapperObject):
         :param path:
         :return: None
         """
-        self._extractToFile(axisCodes=self.axisCodes, position=[1]*self.dimensionCount, path=path, dataFormat='Hdf5', tag='toHdf5')
+        self._extractToFile(axisCodes=self.axisCodes, position=[1] * self.dimensionCount, path=path, dataFormat='Hdf5', tag='toHdf5')
 
     def _extractToFile(self, axisCodes, position, path, dataFormat, tag):
         """Local helper routine to prevent code duplication across extractSliceToFile, extractPlaneToFile,

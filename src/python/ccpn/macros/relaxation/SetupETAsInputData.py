@@ -1,23 +1,27 @@
 """
-This macro is used to set up the ETAs experiments in a CPMG relaxation analysis . See Relaxation Tutorial for where to find the example input spectra.
+This macro is used to analyse IPAP experiments measuring both the transverse (xy) and longitudinal (z)
+15N chemical shift anisotropy–dipolar cross-correlation rate constants (ETA).
+See the Dynamics Tutorial for where to find the example input spectra.
 
-This analysis requires 4 different spectrum groups:
-    -  Inphase ETAz
+This analysis requires 4 different SpectrumGroups:
+    - inphase ETAz
     - antiPhase ETAz
-    - Inphase ETAxy
+    - inphase ETAxy
     - antiPhase ETAxy
 
-Inphase-antiphase series must have the exact amount of spectra and the same time values.
-This macro requires a source peaklist with assignments.  Source spectrum and series must have the same axisCodes/dimensions.
+Each of the two inphase-antiphase series must contain the same number of spectra measured at the same time points.
+The spectra need to be referenced so that the peaks are in the same positions as in the reference spectrum.
+This macro requires a source peakList with assignments from a reference Spectrum. The reference spectrum and the
+series spectra must have the same axisCodes/dimensions.
 Before running the macro, ensure the user settings are correct for your project.
-Results: New peaks for each spectrum, collections, input/output datatables.
+Results: New Peaks for each Spectrum, Collections, input/output dataTables.
 
 The executed  steps are as following:
     -  Create a RelaxationAnalysis instance
-    -  Copy-fit-Create 4 collections ( one for each series) from the source Peaklist
-    - Create 4 input data
-    - Run the calculation/fitting models
-    All these steps can be reproduced on the Gui.
+    -  Copy-fit-Create 4 collections (one for each series) from the source Peaklist
+    -  Create 4 input dataTables
+    -  Run the calculation/fitting models
+    All these steps can be reproduced on the GUI.
 
  """
 reference = """ Reference: DOI: https://doi.org/10.1002/mrc.1253. 
@@ -37,9 +41,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-03 16:10:16 +0100 (Sat, June 03, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: VickyAH $"
+__dateModified__ = "$dateModified: 2023-11-02 10:15:27 +0000 (Thu, November 02, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -110,17 +114,18 @@ if not all( spectrumGroups + [sourcePL]):
 ## create a RelaxationAnalysis instance
 backend = RelaxationAnalysisBC()
 totalCopies = len(spectrumGroups)
-title = 'Setting up the inputData for the ETAs analysis'
+title = 'Setting up the inputData for the ETA analysis'
 text= f"""
-This macro is used to set up the ETAs experiments in a CPMG relaxation analysis.
+This macro is used to analyse IPAP experiments measuring both the transverse (xy) and longitudinal (z)
+15N chemical shift anisotropy–dipolar cross-correlation rate constants (ETA).
 The executed  steps are as following:
     -  Create a RelaxationAnalysis instance 
     -  Copy and fit peaks from the source PeakList {SourcePeakListPid}
-    -  Create 4 collectionLists of peaks grouped by assignments (one collectionLists for each series) 
-    -  Create 4 input data. (ETAxy/z inphase/antiphase)
+    -  Create 4 sets of Collections of peaks grouped by assignments (one set of Collections for each series/SpectrumGroup) 
+    -  Create 4 input dataTables (ETAxy/z inphase/antiphase)
     -  Run the calculation/fitting models
-    - Create 2 Result datatables. {(ETAxyResultDataName, ETAzResultDataName)}
-Note: All these steps can also be reproduced on the Relaxation analysis Gui Module.
+    -  Create 2 Result dataTables. {(ETAxyResultDataName, ETAzResultDataName)}
+Note: All these steps can also be reproduced on the Relaxation analysis GUI Module.
 
 For more details see: {reference}
 

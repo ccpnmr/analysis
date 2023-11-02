@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-30 16:29:25 +0000 (Mon, October 30, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-02 17:02:05 +0000 (Thu, November 02, 2023) $"
 __version__ = "$Revision: 3.2.0.1 $"
 #=========================================================================================
 # Created
@@ -109,10 +109,7 @@ class VersionString(str):
         """return release field of self, or None if it does not exist
         """
         fields = self.fields
-        if len(fields) >= 4:
-            return self.fields[3]
-        else:
-            return None
+        return self.fields[3] if len(fields) >= 4 else None
 
     @property
     def fields(self) -> tuple:
@@ -152,11 +149,7 @@ class VersionString(str):
         if ll + rr < len(field):
             raise
 
-        if not rr:
-            return 0
-
-        # return the int component
-        return int(field[ll:])
+        return int(field[ll:]) if rr else 0
 
     @staticmethod
     def _versionBit(value) -> int:
@@ -208,10 +201,7 @@ class VersionString(str):
             if not ch.isnumeric(): break
             rr += 1
 
-        if not rr:
-            return (field, 0)
-
-        return (field[:ll], int(field[ll:]))
+        return (field[:ll], int(field[ll:])) if rr else (field, 0)
 
     def __eq__(self, other):
         """Check if self equals other
@@ -225,11 +215,7 @@ class VersionString(str):
         if len(self) != len(other):
             return False
 
-        for fs, fo in zip(self.fields, other.fields):
-            if fs != fo:
-                return False
-
-        return True
+        return all(fs == fo for fs, fo in zip(self.fields, other.fields))
 
     def __lt__(self, other):
         """Check if self is lower than other;
@@ -243,12 +229,9 @@ class VersionString(str):
         fields_S = self.fields
         fields_O = other.fields
 
-        for fs, fo in zip(fields_S[:3], fields_O[0:3]):
-            if int(fs) < int(fo):
-                return True
-            elif int(fs) > int(fo):
-                return False
-
+        for fs, fo in zip(fields_S[:3], fields_O[:3]):
+            if int(fs) != int(fo):
+                return int(fs) < int(fo)
         # At this point, majorVersion, minorVersion and revision are all equal
         # Check development field
         if len(fields_S) == 4 and len(fields_O) == 3:
@@ -274,12 +257,9 @@ class VersionString(str):
         fields_S = self.fields
         fields_O = other.fields
 
-        for fs, fo in zip(fields_S[:3], fields_O[0:3]):
-            if int(fs) < int(fo):
-                return False
-            elif int(fs) > int(fo):
-                return True
-
+        for fs, fo in zip(fields_S[:3], fields_O[:3]):
+            if int(fs) != int(fo):
+                return int(fs) > int(fo)
         # At this point, majorVersion, minorVersion and revision are all equal
         # Check development field
         if len(fields_S) == 4 and len(fields_O) == 3:

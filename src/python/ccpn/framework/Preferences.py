@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 15:20:40 +0100 (Tue, March 28, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-11-02 14:35:22 +0000 (Thu, November 02, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -55,8 +55,8 @@ USER_PIPES_PATH = 'general.userPipesPath'
 USER_LAYOUTS_PATH = 'general.userLayoutsPath'
 
 PRINT_OPTIONS = 'printSettings.printOptions'
-
 USE_PROJECT_PATH = 'general.useProjectPath'
+APPEARANCE = 'appearance'
 
 
 def getPreferences():
@@ -191,12 +191,17 @@ class Preferences(AttrDict):
     def __str__(self):
         return f'<Preferences: {repr(self._lastPath)}>'
 
-    def _overrideDefaults(self, prefs):
+    @staticmethod
+    def _overrideDefaults(prefs):
         """Override any settings that are currently causing problems
         """
         # NOTE:ED - there is a bug in pyqt5.12.3 that causes a crash when using QWebEngineView
         prefs.general.useNativeWebbrowser = True
-        prefs.appearance.useOnlineDocumentation = False
+        if (pr := prefs.get(APPEARANCE)) is None:
+            # appearance is not in very early settings
+            return
+
+        pr.useOnlineDocumentation = False
 
         # if the fonts have not been defined, copy from the OS-specific settings
         if isMacOS():
@@ -212,5 +217,5 @@ class Preferences(AttrDict):
             frmFont = f'{fontPrefix}{prefFont}'
 
             # set from the default for the OS-specific
-            if not prefs.appearance.get(prefFont):
-                prefs.appearance[prefFont] = prefs.appearance[frmFont]
+            if not pr.get(prefFont):
+                pr[prefFont] = pr[frmFont]

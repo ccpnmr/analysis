@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-19 12:24:29 +0100 (Thu, October 19, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-02 12:59:55 +0000 (Thu, November 02, 2023) $"
 __version__ = "$Revision: 3.2.0.1 $"
 #=========================================================================================
 # Created
@@ -28,7 +28,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import time
-from functools import partial
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ccpn.ui.gui.widgets.Base import Base
@@ -47,9 +46,9 @@ class _ListView(QtWidgets.QListView):
     _lastKeyTime = 0
 
     def keyPressEvent(self, event: QtGui.QKeyEvent):
-        if event.key() in [QtCore.Qt.Key_Exit, QtCore.Qt.Key_Escape]:
-            if (time.perf_counter() - self._lastKeyTime) * 1e3 < QtWidgets.QApplication.instance().doubleClickInterval():
-                return
+        if event.key() in [QtCore.Qt.Key_Exit, QtCore.Qt.Key_Escape] and \
+                (time.perf_counter() - self._lastKeyTime) * 1e3 < QtWidgets.QApplication.instance().doubleClickInterval():
+            return
 
         super().keyPressEvent(event)
 
@@ -145,6 +144,15 @@ class PulldownList(QtWidgets.QComboBox, Base):
         if editable:
             self.currentIndexChanged.connect(self._textReady)
             self.lineEdit().editingFinished.connect(self._textReady)
+        # doesn't work :|
+        #     if alignment is not None:
+        #         self.lineEdit().setAlignment(alignment)
+        # elif alignment is not None:
+        #     self.setEditable(True)
+        #     self.lineEdit().setAlignment(alignment)
+        #     self.lineEdit().setReadOnly(True)
+        #     # self.lineEdit().setStyleSheet('padding: 0px;')
+
         if toolTips:
             self.setToolTips(toolTips)
 

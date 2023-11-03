@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Backups</title>
+    <link rel="stylesheet" href="CcpnVideoTutorials.css">
+</head>
+<body>
+<div class="header"><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a
+        href="index.html" class="button">Video<br> Tutorials<br> & Manual</a><a href="https://forums.ccpn.ac.uk"><img
+        src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 15px"></a></div>
+<br>
+<div class="headerBar">Backups</div>
+<div class="tutorial">
+
+
+<div class="videoContainer">
+  <div class="videoWrapper">
+    <iframe src="https://www.youtube.com/embed/w2TFCQlV9_Y" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  </div>
+</div>
+
+
+
+    <h2>Backups</h2>
+    <p>As part of some Version 3.1.1 updates we changed the way in which the program makes backups. This has made the whole system much more robust and easier to use. Below is an explanation of the different types of backups the program makes of your project and how to restore them.</p>
+
+    <h3>Project Structure</h3>
+    <p>Before talking about project backups, it is helpful to be clear about the structure and content of CcpNmr Analysis projects. CcpNmr Analysis projects are always saved within a directory which is the name of the Project followed by <span class="action">.ccpn</span>, e.g. <span class="action">ProjectName.ccpn</span>. This folder contains a number of subfolders:</p>
+    <ul>
+        <li>archives</li>
+        <li>backups</li>
+        <li>ccpnv3</li>
+        <li>data</li>
+        <li>logs</li>
+        <li>scripts</li>
+        <li>state</li>
+        <li>summaries</li>
+    </ul>
+    <p>The main content of your project is contained within the <span class="action">ccpnv3</span> folder. This folder contains many subfolders with .xml files within them and this is where the information about your spectra, peaks, assignments etc. is kept. If something has gone wrong with your project, it will almost certainly be something within this folder.
+    <br>The <span class="action">archives</span> folder is where archives of your project are stored. This is essentially a compressed copy of your .ccpn folder.
+    <br>The <span class="action">backups</span> folder is where we store all the project backups and these are essentially copied versions of the <span class="action">ccpnv3</span> folder.
+        <br>The <span class="action">data</span> folder is empty by default apart from two (empty) folders called <span class="action">plugins</span> and <span class="action">spectra</span>.The <span class="action">plugins</span> folder is (obviously) for use by plugins. The <span class="action">spectra</span> folder is a place where you can save your spectra within the project if you so wish (but this will obviously make your .ccpn project folder very large). The other use the program currently makes of the <span class="action">data</span> folder is to store structure calculation related data if you set up an XPLOR structure calculation.
+    <br>The <span class="action">logs</span> folder simply contains copies of the terminal output from every time you have had the program open and done something. It can be helpful if you want to trace what has been done while the project has been open.
+    <br>The <span class="action">state</span> folder contains information about the layout of your project when you last used it. The way we store and use this information may well change over time.
+    <br>The <span class="action">scripts</span> and <span class="action">summaries</span> folders aren't typically used much.</p>
+    <p>Here we are mainly going to concerned with the <span class="action">archives</span>, <span class="action">backup</span> and <span class="action">ccpnv3</span> folders.</p>
+
+    <h3>Previously Saved State</h3>
+    <p>Every time you open or save your project, a copy of the <span class="action">ccpnv3</span> folder is made and placed into the <span class="action">backups</span> folder. A timestamp is added, so the folder name in the <span class="action">backups</span> folder will become something like <span class="action">ccpnv3-2023-07-19-134604.ccpnV3backup</span>. By default, only 10 versions of the project will be kept and after that the oldest one will be removed every time a new one is added. If you want to change this number, go to <span class="action">File / Preferences</span> and change the <span class="action">Number of backups on user-save</span>.</p>
+
+    <h3>Autobackups</h3>
+    <p>By default your projects will be automatically backed up every 10 minutes. This means that every 10 minutes, a copy of your <span class="action">ccpnv3</span> folder is made and placed into the <span class="action">backups</span> folder. Again, a timestamp is added, so the folder name in the <span class="action">backups</span> folder will become something like <span class="action">ccpnv3-2023-10-20-100151.ccpnV3autobackup</span> and up to 10 versions are saved. If you want to change the frequency of autobackups or the number of autobackups retained, then go to <span class="action">File / Preferences</span> and change the <span class="action">Backup frequency (mins)</span> or <span class="action">Number of auto-backups</span>. Here you can also choose the switch the Autobackup system off if you wish. Note that these options are user-specific and not project-specific.</p>
+
+    <h3>Restoring a backup</h3>
+    <p>If you wish to restore a backup, then simply rename your <span class="action">ccpnv3</span> folder, e.g. to <span class="action">ccpnv3-orig</span> or move it to your Desktop and place (a copy of) one of the folders in the <span class="action">backups</span> folder in its place, i.e. directly into the <span class="action">.ccpn</span> folder and change its name to <span class="action">ccpnv3</span>. Now open your project and the backed up version of the project should open. We do have plans to make this more user-friendly, but are currently prioritising the implementation of other features.</p>
+
+    <h3>Project Archives</h3>
+    <p>Archives are slightly different to backups: they are essentially copies of the whole <span class="action">.ccpn</span> folder rather than just the <span class="action">ccpnv3</span> folder. Creating an archive can be useful if you wish to share your project with someone, or if you wish to make sure you have a copy of your project before trying out something new, risky or experimental. Be aware that this doesn't currently archive your data folder (other than the plugins subdirectory). To open an archived project, place the archive into a directory of your choise, uncompress it and then open the <span class="action">.ccpn</span> folder as normal.</p>
+
+</div>
+</body>
+</html>

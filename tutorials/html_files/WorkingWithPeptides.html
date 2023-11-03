@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Working with Peptides</title>
+    <link rel="stylesheet" href="CcpnVideoTutorials.css">
+</head>
+<body>
+<div class="header"><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a
+        href="index.html" class="button">Video<br> Tutorials<br> & Manual</a><a href="https://forums.ccpn.ac.uk"><img
+        src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 15px"></a></div>
+<br>
+<div class="headerBar">Working with Peptides</div>
+<div class="tutorial">
+
+    <h2>Working with Peptides</h2>
+    <p>CcpNmr Analysis contains several features which should make life easier for people working peptides.</p>
+
+    <h3>Multiplets</h3>
+    <p>Peptide spectra often contain undecoupled peaks which are split into multiplets. Find out about our <a href="Multiplets.html">Multiplets feature</a> to see how you can group your peaks into multiplets. This way, the Chemical Shift reported in your Chemical Shift List will always be at the centre of the multiplet and you won't have to place an artificial placeholder peak between the two actual multiplet components as a surrogate.</p>
+    <p>We have also introduced a 2D multiplet peak picker. If you go to <span class="action">File / Preferences</span> and then go to the <span class="action">Peaks</span> tab, you can set your <span class="action">Default nD peak picker</span> to <span class="action">PeakPicker2DMultiplets</span>. This will act exactly the same as our normal <span class="action">PeakPickerNd</span> peak picker, but for 2D spectra it will automatically group close peaks into multiplets.</p>
+
+    <h3>Working with non-canonical Amino Acids</h3>
+    <p>This is a common occurrence for people working with peptides. In principle, if you are simply assigning your protein, you can just go ahead and create the NmrResidues and NmrAtoms that you need as you want. The <span class="action">ResidueType</span> box can be set to anything, so you can give your residue a different name. Similarly, the <span class="action">AtomName</span> can be set to anything, so as long as you know what each atom in your non-canonical amino acid is called, you can name these as you wish.</p>
+    <p>You may decide that you would like to have not only an NmrChain, but also a Chain of your peptide in your project. This would, for example, allow you to create all possible NmrAtoms from the Chain very easily. And if you are going to be doing structure calculations you will need a Chain, too. In order to add a non-canonical amino acid to your Chain, you need to have a ChemComp .xml file for this amino acid. This is a file which contains all the information about the atoms: their names, how they are bonded to one another, possible differences in protonation state, magnetically equivalent groups, prochiral atoms, where/how the amino acid is linked to neighbouring amino acids in a chain etc. Find out about how to access existing ChemComp files for non-canonical amino acids create your own on our <a href="CreatingNoncanonicalAAChemComps.html">Creating Non-canonical Amino Acid ChemComps page</a>.</p>
+    <p>Once you have your ChemComp file you will then need to add it to your project and create your Chain using so-called ccpCodes rather than the standard 1-letter amino acid code. The code for this is to be done using our normal graphical user interface is still being tested. For the time being you can find out about <a href="https://youtu.be/vmG2zWyZpcg">a manual workaround in a short video</a>.</p>
+
+    <h3>Other</h3>
+    <p>We have several other macros and tips and tricks which will be coming soon. Come back to find out more.</p>
+
+
+</div>
+</body>
+</html>

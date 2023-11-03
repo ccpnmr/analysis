@@ -25,16 +25,19 @@ __Description__ = """ This macro will delete all the orphaned chemical shifts in
 # Start of code
 #=========================================================================================
 
-for csl in project.chemicalShiftLists:
-    for cs in list(csl.chemicalShifts):
-        if cs.orphan:
-            csl.deleteChemicalShift(uniqueId=cs.uniqueId)
+from ccpn.core.lib.ContextManagers import undoBlock
 
-# If you wanted a macro to remove the orphans in a specific ChemicalShiftList,
-# use this code instead, making sure to enter the correct ChemicalShiftList PID in the
-# first line. 
-# 
-# csl = get('CL:default')
-# for cs in list(csl.chemicalShifts):
-#     if cs.orphan:
-#         csl.deleteChemicalShift(uniqueId=cs.uniqueId)
+with undoBlock():
+    for csl in project.chemicalShiftLists:
+        for cs in list(csl.chemicalShifts):
+            if cs.orphan:
+                csl.deleteChemicalShift(uniqueId=cs.uniqueId)
+
+    # If you wanted a macro to remove the orphans in a specific ChemicalShiftList,
+    # use this code instead, making sure to enter the correct ChemicalShiftList PID in the
+    # first line.
+    #
+    # csl = get('CL:default')
+    # for cs in list(csl.chemicalShifts):
+    #     if cs.orphan:
+    #         csl.deleteChemicalShift(uniqueId=cs.uniqueId)

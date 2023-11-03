@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-03 12:53:55 +0000 (Fri, November 03, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-03 13:06:45 +0000 (Fri, November 03, 2023) $"
 __version__ = "$Revision: 3.2.0.1 $"
 #=========================================================================================
 # Created
@@ -177,8 +177,8 @@ class UpdatePopup(CcpnDialogMainWidget):
         self.buttonList = ButtonList(self.mainWidget, texts=texts, tipTexts=tipTexts, callbacks=callbacks, icons=icons, grid=(row, 0), gridSpan=(1, 3),
                                      setMinimumWidth=False)
         # set some padding for the buttons
-        _height = getFontHeight()
-        _style = f'QPushButton {{padding-left: {_height}px; padding-right: {_height}px; padding-top: 1px; padding-bottom: 1px;}}'
+        self.fontHeight = getFontHeight()
+        _style = f'QPushButton {{padding-left: {self.fontHeight}px; padding-right: {self.fontHeight}px; padding-top: 1px; padding-bottom: 1px;}}'
         for button in self.buttonList.buttons:
             button.setStyleSheet(_style)
         self._updateButton.setStyleSheet(_style)
@@ -385,12 +385,14 @@ class UpdatePopup(CcpnDialogMainWidget):
     def _showInfoBox(self):
         self._showBoxes = True
         if not self.infoBox.isVisible():
+            self.resize(self.width(), self.height() + (self.fontHeight * 12))
             self.infoBox.show()
             self._resizeWidget()
 
     def _showChangeLogBox(self):
         self._showBoxes = True
         if not self.changeLogBox.isVisible():
+            self.resize(self.width(), self.height() + (self.fontHeight * 12))
             self.changeLogBox.show()
             self._resizeWidget()
 

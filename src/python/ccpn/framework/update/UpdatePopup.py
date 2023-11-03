@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-17 16:43:06 +0100 (Tue, October 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-03 12:53:55 +0000 (Fri, November 03, 2023) $"
 __version__ = "$Revision: 3.2.0.1 $"
 #=========================================================================================
 # Created
@@ -337,7 +337,7 @@ class UpdatePopup(CcpnDialogMainWidget):
                 count = int(_countVer[0])
                 version = VersionString(_countVer[1])
 
-        self._updateCount = int(count)
+        self._updateCount = count
         self.updatesLabel.set(f'{count}')
         self.versionLabel.set(f'{version}')
 
@@ -357,7 +357,9 @@ class UpdatePopup(CcpnDialogMainWidget):
 
         if changeLog and (records := changeLog.get("records", {})):
             clb = ''
-            for version, rec in reversed(sorted(records.items(), key=lambda rr: rr[1].get('timestamp', 0))):
+            timeformat = '%Y-%m-%d %H:%M'
+
+            for version, rec in reversed(sorted(records.items(), key=lambda dd: VersionString(dd[0]))):
                 # make a simple header for each update section
                 if VersionString(version) < applicationVersion:
                     # skip updates that are too old
@@ -469,6 +471,10 @@ def main():
 
     QtCore.QCoreApplication.setApplicationName('Update')
     QtCore.QCoreApplication.setApplicationVersion('3.2.0')
+
+    # patch for icon sizes in menus, etc.
+    styles = QtWidgets.QStyleFactory()
+    qtApp.setStyle(styles.create('fusion'))
 
     popup = UpdatePopup()
     popup.exec_()

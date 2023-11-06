@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-19 12:24:29 +0100 (Thu, October 19, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-06 14:52:30 +0000 (Mon, November 06, 2023) $"
 __version__ = "$Revision: 3.2.0.1 $"
 #=========================================================================================
 # Created
@@ -53,11 +53,14 @@ class Button(QtWidgets.QPushButton, Base):
         if icon:  # filename or pixmap
             self.setIcon(Icon(icon))
             # this causes the button to reset its stylesheet
-            fontHeight = (getFontHeight() or 16)  # + 7
+            fontHeight = (getFontHeight() or 12) + 4
             self.setIconSize(QtCore.QSize(fontHeight, fontHeight))
-
-        self.setStyleSheet('Button { padding: 3px 2px 3px 2px; }'
-                           'Button:focus { padding: 0px 0px 0px 0px; border: 1px solid %(BORDER_FOCUS)s; }' % getColours())
+            # slightly narrower padding for nicer fit of the icon
+            self.setStyleSheet('Button { padding: 1px 1px 1px 1px; }'
+                               'Button:focus { padding: 0px 0px 0px 0px; border: 1px solid %(BORDER_FOCUS)s; }' % getColours())
+        else:
+            self.setStyleSheet('Button { padding: 3px 2px 3px 2px; }'
+                               'Button:focus { padding: 0px 0px 0px 0px; border: 1px solid %(BORDER_FOCUS)s; }' % getColours())
 
         self.toggle = toggle
         if toggle is not None:

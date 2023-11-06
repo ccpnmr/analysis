@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-08-17 14:06:48 +0100 (Thu, August 17, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-11-06 14:52:30 +0000 (Mon, November 06, 2023) $"
+__version__ = "$Revision: 3.2.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1019,7 +1019,8 @@ class CcpnModuleLabel(DockLabel):
 
     sigDragEntered = QtCore.pyqtSignal(object, object)
 
-    def getMaxIconSize(self, icon):
+    @staticmethod
+    def getMaxIconSize(icon):
         iconSizes = [max((size.height(), size.width())) for size in icon.availableSizes()]
         return max(iconSizes)
 
@@ -1031,7 +1032,8 @@ class CcpnModuleLabel(DockLabel):
         self.buttonCornerRadius = 3
         self.labelRadius = 3
 
-        _fontSize = getWidgetFontHeight(size='MEDIUM') or 16
+        self.labelSize = (getWidgetFontHeight(size='MEDIUM') or 12) + 2
+        self._fontSize = self.labelSize - 4
         super().__init__(name, closable=showCloseButton, )  # fontSize=_fontSize)
         # super().__init__(name, module, showCloseButton=showCloseButton, )  # fontSize=_fontSize)
 
@@ -1040,12 +1042,11 @@ class CcpnModuleLabel(DockLabel):
         self.fixedWidth = True
 
         setWidgetFont(self, size='MEDIUM')
-        self.labelSize = _fontSize  # (getWidgetFontHeight(size='LARGE') or 16)
 
         self.setAlignment(QtCore.Qt.AlignVCenter | QtCore.Qt.AlignHCenter)
-        self.closeButton.setStyleSheet(
-                f'border: 0px solid {BORDERNOFOCUS_COLOUR};border-radius: 1px;background-color: transparent;'
-                )
+        # self.closeButton.setStyleSheet(
+        #         f'border: 0px solid {BORDERNOFOCUS_COLOUR};border-radius: 1px;background-color: transparent;'
+        #         )
 
         from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 
@@ -1059,7 +1060,7 @@ class CcpnModuleLabel(DockLabel):
 
         if showCloseButton:
             # button is already there because of the DockLabel init
-            self.closeButton.setIconSize(QtCore.QSize(self.labelSize, self.labelSize))
+            self.closeButton.setIconSize(QtCore.QSize(self._fontSize, self._fontSize))
 
             if closeCallback is None:
                 raise RuntimeError('Requested closeButton without callback')
@@ -1072,6 +1073,7 @@ class CcpnModuleLabel(DockLabel):
                                           icons=['icons/gearbox', 'icons/system-help'],
                                           callbacks=[settingsCallback, helpButtonCallback]
                                           )
+        self.settingsButtons.getLayout().setSpacing(0)  # remove any gaps
         self.settingsButton = self.settingsButtons.buttons[0]
         self.helpButton = self.settingsButtons.buttons[1]
         self.setupLabelButton(self.settingsButton, position=CcpnModuleLabel.TOP_LEFT)
@@ -1106,9 +1108,9 @@ class CcpnModuleLabel(DockLabel):
             icon = Icon(f'icons/{iconName}')
             button.setIcon(icon)
         # retinaIconSize = self.getMaxIconSize(icon) // 2
-        retinaIconSize = self.labelSize - 4
+        # retinaIconSize = self.labelSize - 4
 
-        button.setIconSize(QtCore.QSize(retinaIconSize, retinaIconSize))
+        button.setIconSize(QtCore.QSize(self._fontSize, self._fontSize))
 
         if position == CcpnModuleLabel.TOP_RIGHT:
             styleInfo = (self.buttonBorderWidth, 0, self.buttonCornerRadius)
@@ -1121,16 +1123,16 @@ class CcpnModuleLabel(DockLabel):
 
         # GST colours are hard coded... help please I need  a central source for
         # these presumably a color palette or scheme
-        button.setStyleSheet(""" border: %ipx solid #a9a9a9 ;
-                                 border-top-left-radius: %ipx;
-                                 border-top-right-radius: %ipx;
-                                 border-bottom-left-radius: 0px;
-                                 border-bottom-right-radius: 0px;
-                                 background-color: #ececec ;  """ % styleInfo)
-        buttonSize = retinaIconSize + (self.buttonBorderWidth * 2) + (self.buttonIconMargin * 2)
-        button.setMinimumSize(QtCore.QSize(buttonSize, buttonSize))
-        button.setMaximumSize(QtCore.QSize(buttonSize, buttonSize))
-        button.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        # button.setStyleSheet(""" border: %ipx solid #a9a9a9 ;
+        #                          border-top-left-radius: %ipx;
+        #                          border-top-right-radius: %ipx;
+        #                          border-bottom-left-radius: 0px;
+        #                          border-bottom-right-radius: 0px;
+        #                          background-color: #ececec ;  """ % styleInfo)
+        buttonSize = self.labelSize + 4
+        # button.setMinimumSize(QtCore.QSize(buttonSize, buttonSize))
+        button.setMaximumSize(QtCore.QSize(buttonSize, buttonSize))  # just let the button expand a little to fit the label
+        button.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
     def setModuleHighlight(self, hightlighted=False):
         self.setDim(hightlighted)

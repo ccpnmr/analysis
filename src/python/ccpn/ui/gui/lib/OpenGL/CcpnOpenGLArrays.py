@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-23 12:20:23 +0100 (Mon, October 23, 2023) $"
-__version__ = "$Revision: 3.2.0.1 $"
+__dateModified__ = "$dateModified: 2023-11-06 18:25:10 +0000 (Mon, November 06, 2023) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -417,7 +417,7 @@ class _VBOGLVertexArray:
         self._colorVBO.bind()
         GL.glColorPointer(4, GL.GL_FLOAT, 0, self._colorVBO)
         self._attribVBO.bind()
-        GL.glVertexAttribPointer(1, 1, GL.GL_FLOAT, GL.GL_FALSE, 0, self._attribVBO)
+        GL.glVertexAttribPointer(1, 4, GL.GL_FLOAT, GL.GL_FALSE, 0, self._attribVBO)
         self._indexVBO.bind()
         GL.glDrawElements(self.drawMode, self.indices.size, GL.GL_UNSIGNED_INT, self._indexVBO)
 
@@ -1140,7 +1140,7 @@ class _GLVertexArray:
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self._colorVBO[0])
         GL.glColorPointer(4, GL.GL_FLOAT, 0, None)
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self._attribVBO[0])
-        GL.glVertexAttribPointer(1, 1, GL.GL_FLOAT, GL.GL_FALSE, 0, None)
+        GL.glVertexAttribPointer(1, 4, GL.GL_FLOAT, GL.GL_FALSE, 0, None)
         GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, self._indexVBO[0])
         GL.glDrawElements(self.drawMode, self.indices.size, GL.GL_UNSIGNED_INT, None)
 
@@ -1512,7 +1512,7 @@ class GLSymbolArray(GLVertexArray):
     def __init__(self, GLContext=None, spectrumView=None, objListView=None):
         super().__init__(renderMode=GLRENDERMODE_REBUILD,
                          blendMode=False, drawMode=GL.GL_LINES,
-                         dimension=2, GLContext=GLContext)
+                         dimension=4, GLContext=GLContext)
         self.spectrumView = spectrumView
         self.objListView = objListView
 
@@ -1529,7 +1529,7 @@ class GLLabelArray(GLVertexArray):
     def __init__(self, GLContext=None, spectrumView=None, objListView=None):
         super().__init__(renderMode=GLRENDERMODE_REBUILD,
                          blendMode=False, drawMode=GL.GL_LINES,
-                         dimension=2, GLContext=GLContext)
+                         dimension=4, GLContext=GLContext)
         self.spectrumView = spectrumView
         self.objListView = objListView
         self.stringList = []

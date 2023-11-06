@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 19:39:20 +0100 (Fri, June 09, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-11-06 18:25:10 +0000 (Mon, November 06, 2023) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -227,7 +227,7 @@ class AliasedPixelShader(PixelShader):
 
         uniform   mat4  pMatrix;
         uniform   mat4  mvMatrix;
-        attribute float alias;
+        attribute vec4  alias;
         uniform   float aliasPosition;
         varying   float _aliased;
         varying   vec4  _FC;
@@ -237,7 +237,7 @@ class AliasedPixelShader(PixelShader):
             // calculate the position, set shading value
             gl_Position = pMatrix * mvMatrix * vec4(gl_Vertex.xy, 0.0, 1.0);
             _FC = gl_Color;
-            _aliased = (aliasPosition - alias);
+            _aliased = (aliasPosition - alias.x);
         }
         """
 

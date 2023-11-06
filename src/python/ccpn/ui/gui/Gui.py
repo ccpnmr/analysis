@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-31 11:34:51 +0000 (Tue, October 31, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-11-03 12:00:10 +0000 (Fri, November 03, 2023) $"
+__version__ = "$Revision: 3.2.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -116,24 +116,24 @@ class _MyAppProxyStyle(QtWidgets.QProxyStyle):
     """Class to handle resizing icons in menus
     """
 
-    def pixelMetric(self, metric, option=None, widget=None) -> int:
-        if metric == QtWidgets.QStyle.PM_SmallIconSize:
-            # change the size of the icons in menus - overrides checkBoxes in menus
-            return (getFontHeight(size='SMALL') or 15) + 3
-
-        elif metric in (QtWidgets.QStyle.PM_IndicatorHeight,
-                        QtWidgets.QStyle.PM_IndicatorWidth,
-                        QtWidgets.QStyle.PM_ExclusiveIndicatorWidth,
-                        QtWidgets.QStyle.PM_ExclusiveIndicatorHeight,
-                        ):
-            # change the size of checkBoxes and radioButtons
-            return (getFontHeight(size='SMALL') or 15) - 2
-
-        elif metric == QtWidgets.QStyle.PM_MessageBoxIconSize:
-            # change the icon size in messageDialog
-            return getFontHeight(size='MAXIMUM') or 18
-
-        return super().pixelMetric(metric, option, widget)
+    # def pixelMetric(self, metric, option=None, widget=None) -> int:
+    #     if metric == QtWidgets.QStyle.PM_SmallIconSize:
+    #         # change the size of the icons in menus - overrides checkBoxes in menus
+    #         return (getFontHeight(size='SMALL') or 15) + 3
+    #
+    #     elif metric in (QtWidgets.QStyle.PM_IndicatorHeight,
+    #                     QtWidgets.QStyle.PM_IndicatorWidth,
+    #                     QtWidgets.QStyle.PM_ExclusiveIndicatorWidth,
+    #                     QtWidgets.QStyle.PM_ExclusiveIndicatorHeight,
+    #                     ):
+    #         # change the size of checkBoxes and radioButtons
+    #         return (getFontHeight(size='SMALL') or 15) - 2
+    #
+    #     elif metric == QtWidgets.QStyle.PM_MessageBoxIconSize:
+    #         # change the icon size in messageDialog
+    #         return getFontHeight(size='MAXIMUM') or 18
+    #
+    #     return super().pixelMetric(metric, option, widget)
 
     def standardIcon(self, standardIcon, option=None, widget=None) -> QtGui.QIcon:
         # change the close-button of the line-edit to a cleaner icon, set by setClearButtonEnabled

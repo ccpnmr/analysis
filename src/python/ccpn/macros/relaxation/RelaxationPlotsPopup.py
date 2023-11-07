@@ -19,9 +19,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-22 10:50:03 +0000 (Wed, February 22, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-11-07 14:20:12 +0000 (Tue, November 07, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -40,6 +40,9 @@ from ccpn.ui.gui.widgets.PulldownListsForObjects import DataTablePulldown
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.util.Path import aPath, fetchDir, joinPath
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+import matplotlib.pyplot as plt
+
+plt.close('all') #make sure all plots are closed first
 
 TIPTEXT = ''' 
 A  popup to launch several macros that generate various relaxation plots.
@@ -47,6 +50,9 @@ These macros require a DataTable containing the results of a Reduced Spectral de
 See the Dynamics tutorial to learn how to create such a  dataTable. '''
 
 thisDirPath = aPath(__file__).filepath
+project._checkProjectSubDirectories()
+plotsPath = project.plotsPath
+
 SEQUENCE = 'KLILNGKTLKGETTTEAVDAATAEKVFKQYANDNGVDGEWTYDAATKTFTVTE'
 SS_SEQUENCE = 'BBBBBCCCCBBBBBBCCCCHHHHHHHHHHHHHHCCCCCBBBBCCCCCBBBBBC'
 Rates = 'Rates'
@@ -57,10 +63,10 @@ T1T2ContouredScatter = 'T1 vs T2 Contoured Scatter'
 MINIMUMWIDTHS = (150, 300)
 
 MACROS_DICT = {
-                            Rates: '1_RelaxationRates_plots.py',
-                            AnisotropyDetermination: '2_AnisotropyDetermination_plots.py',
-                            ReducedSpectralDensityMapping: '3_ReduceSpectralDensityMapping_plots.py',
-                            T1T2ContouredScatter: '4_T1T2_contourScatter_plot.py',
+                            Rates: '_1_RelaxationRates_plots.py',
+                            AnisotropyDetermination: '_2_AnisotropyDetermination_plots.py',
+                            ReducedSpectralDensityMapping: '_3_ReduceSpectralDensityMapping_plots.py',
+                            T1T2ContouredScatter: '_4_T1T2_contourScatter_plot.py',
                             }
 
 NeededColumns_DICT = {
@@ -121,7 +127,7 @@ class RelaxationPlotsPopup(CcpnDialogMainWidget):
                                          callback=None)
         row += 1
         self.filePathW = cw.EntryPathCompoundWidget(self.mainWidget, labelText='Output Dir Path',
-                                                     entryText=str(thisDirPath),
+                                                     entryText=str(plotsPath),
                                                     lineEditMinimumWidth=300,
                                                     minimumWidths=MINIMUMWIDTHS,
                                                     compoundKwds = {'fileMode': 'directory'},
@@ -134,6 +140,9 @@ class RelaxationPlotsPopup(CcpnDialogMainWidget):
                                                tipText='One letter code sequence without spaces. Leave empty if not available',
                                                entryText=SEQUENCE,
                                                minimumWidths=MINIMUMWIDTHS,
+                                               compoundKwds={
+                                                   'backgroundText':f'One-Letter code. E.G.: {SEQUENCE}',
+                                                   },
                                                gridSpan=(1, 1),
                                                grid=(row, 0))
         row += 1
@@ -141,6 +150,9 @@ class RelaxationPlotsPopup(CcpnDialogMainWidget):
                                                tipText='One letter code secondary structure sequence without spaces.  DSSP nomenclature. Leave empty if not available',
                                                entryText=SS_SEQUENCE,
                                                minimumWidths=MINIMUMWIDTHS,
+                                               compoundKwds={
+                                                   'backgroundText': f'DSSP One-Letter code. E.G.: {SS_SEQUENCE}',
+                                                   },
                                                gridSpan=(1, 1),
                                                grid=(row, 0))
         row += 1
@@ -154,9 +166,17 @@ class RelaxationPlotsPopup(CcpnDialogMainWidget):
                                                minimumWidths=MINIMUMWIDTHS,
                                                gridSpan=(1, 1),
                                                grid=(row, 0))
+        row += 1
+        self._interactivePlotW = cw.CheckBoxCompoundWidget(self.mainWidget, labelText='Interactive Plots',
+                                                     tipText='Open an interactive plot, zoomable and resizable.',
+                                                     text='Open Plots',
+                                                     checked=True,
+                                                     minimumWidths=MINIMUMWIDTHS,
+                                                     gridSpan=(1, 1),
+                                                     grid=(row, 0))
 
         self.optionsCB.getLayout().setAlignment(QtCore.Qt.AlignLeft)
-
+        self._interactivePlotW.getLayout().setAlignment(QtCore.Qt.AlignLeft)
         self.mainWidget.getLayout().setAlignment(QtCore.Qt.AlignTop)
 
 
@@ -179,7 +199,7 @@ class RelaxationPlotsPopup(CcpnDialogMainWidget):
         sequence = self.seWidget.getText()
         ss = self.ssWidget.getText()
         selectedOptions = self.optionsCB.get()
-
+        isInteractive = self._interactivePlotW.get()
         for selectedOption in selectedOptions:
             macroPathName = MACROS_DICT.get(selectedOption, None)
             if macroPathName is not None:
@@ -196,11 +216,13 @@ class RelaxationPlotsPopup(CcpnDialogMainWidget):
                 macroName = macroPath.basename
                 filePath = aPath(joinPath(outputPath, macroName))
                 filePath = filePath.assureSuffix('.pdf')
+                itCommand = '--interactivePlot' if isInteractive else '--no-interactivePlot'
                 commands = [
                                     f'-d {dataTableName}',
                                     f'-o {filePath}',
                                     f'-se {sequence}',
-                                    f'-ss {ss}'
+                                    f'-ss {ss}',
+                                    f'{itCommand}',
                             ]
                 if self.application is not None:
                     self.application.runMacro(macroPath, commands)

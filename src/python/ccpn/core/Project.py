@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-12 14:30:33 +0100 (Thu, October 12, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-07 14:20:12 +0000 (Tue, November 07, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -66,7 +66,8 @@ from ccpn.framework.PathsAndUrls import \
     CCPN_SUB_DIRECTORIES, \
     CCPN_LOGS_DIRECTORY, \
     CCPN_BACKUPS_DIRECTORY, \
-    CCPN_DIRECTORY_SUFFIX
+    CCPN_DIRECTORY_SUFFIX, \
+    CCPN_PLOTS_DIRECTORY
 
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
 from ccpnmodel.ccpncore.memops import Notifiers
@@ -878,6 +879,14 @@ class Project(AbstractWrapperObject):
                  as a Path instance
         """
         return self.projectPath / CCPN_SCRIPTS_DIRECTORY
+
+    @property
+    def plotsPath(self) -> Path:
+        """
+        :return: the absolute path to the plots subdirectory of the current project
+                 as a Path instance
+        """
+        return self.projectPath / CCPN_PLOTS_DIRECTORY
 
     @property
     def archivesPath(self) -> Path:

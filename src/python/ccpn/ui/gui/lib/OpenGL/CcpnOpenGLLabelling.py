@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-06 18:25:10 +0000 (Mon, November 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-07 12:12:46 +0000 (Tue, November 07, 2023) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -502,8 +502,7 @@ class GLLabelling():
         # add extra indices
         _indexCount, extraIndices = self.appendExtraIndices(drawList, indexing.vertexStart + self.LENARR, obj)
         # add extra vertices for the multiplet
-        extraVertices = self.appendExtraVertices(drawList, pIndex, obj,
-                                                 pxy, (*cols, fade), fade, alias)
+        extraVertices = self.appendExtraVertices(drawList, pIndex, obj, pxy, (*cols, fade), fade)
         # keep a pointer to the obj
         drawList.pids = np.append(drawList.pids, (obj, drawList.numVertices, (self.LENARR + extraVertices),
                                                   _isInPlane, _isInFlankingPlane, _selected,
@@ -1691,9 +1690,7 @@ class GLLabelling():
         # add extra indices
         extraIndices, extraIndexCount = self.insertExtraIndices(drawList, indexing.end + iCount, indexing.start + self.LENSQ, obj)
         # add extra vertices for the multiplet
-        extraVertices = self.insertExtraVertices(drawList, vertexPtr + self.LENSQ4, pIndex, obj,
-                                                 pxy, (*cols, fade), fade, alias)
-
+        extraVertices = self.insertExtraVertices(drawList, vertexPtr + self.LENSQ4, pIndex, obj, pxy, (*cols, fade), fade)
         # keep a pointer to the obj
         drawList.pids[objNum:objNum + GLDefs.LENPID] = (obj, drawList.numVertices, (self.LENSQ + extraVertices),
                                                         _isInPlane, _isInFlankingPlane, _selected,

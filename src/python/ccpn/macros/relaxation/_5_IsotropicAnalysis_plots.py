@@ -1,5 +1,7 @@
 """
-A macro for creating plots of  R1 R2 NOE rates as a function of the sequence code
+A macro for creating plots of R1, R2 and NOE  isotropic analysis results for GB1.
+Note. This macro is for demonstration purpose only.
+It uses the original LZ model from Model-Free which is wrong for the current example of GB1.
 
 This macro requires a  dataset  created after performing  the Reduced Spectral density Mapping calculation model
 on the Relaxation Analysis Module (alpha)
@@ -12,7 +14,6 @@ Which is a dataset that contains a table with the following (mandatory) columns:
 Macro created for Analysis Version 3.1.1
 
 """
-
 
 #=========================================================================================
 # Licence, Reference and Credits
@@ -27,9 +28,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-08 16:58:57 +0000 (Wed, March 08, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-11-07 10:36:31 +0000 (Tue, November 07, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -40,20 +41,27 @@ __date__ = "$Date: 2023-02-03 10:04:03 +0000 (Fri, February 03, 2023) $"
 #=========================================================================================
 
 
+
+
 ############################################################
 #####################    User Settings      #######################
 ############################################################
 
 dataTableName = 'RSDM_results'
+
 ##  demo sequence for the GB1 protein . Replace with an empty str if not available, e.g.: sequence  = ''
 sequence  = 'KLILNGKTLKGETTTEAVDAATAEKVFKQYANDNGVDGEWTYDAATKTFTVTE'
 ##  secondary structure  for the above sequence  using the DSSP nomenclature.  Replace with an empty str if not available. e.g.: ss_sequence  = ''
 ss_sequence   =  'BBBBBCCCCBBBBBBCCCCHHHHHHHHHHHHHHCCCCCBBBBCCCCCBBBBBC'
 
-## Some Graphics Settings
+spectrometerFrequency=600.13
 
-titlePdf  = 'Relaxation Rates Results'
-showInteractivePlot = False # True if you want the plot to popup as a new windows, to allow the zooming and panning of the figure.
+## Some Graphics Settings
+titlePdf  = 'Isotropic Analysis Results'
+windowTitle = f'CcpNmr {application.applicationName} - {titlePdf}'
+
+figureTitleFontSize = 8
+interactivePlot = False # True if you want the plot to popup as a new windows, to allow the zooming and panning of the figure.
 barColour='black'
 barErrorColour='red'
 barErrorLW = 1
@@ -66,115 +74,125 @@ labelMajorSize=4
 labelMinorSize=3
 titleColor = 'blue'
 hspace= 1
-figureTitleFontSize = 10
+scatterColor = 'navy'
+scatterColorError = 'darkred'
+scatterExcludedByNOEColor = 'orange'
+scatterSize = 3
+scatterErrorLinewidth=0.1
+scatterErrorCapSize=0.8
+TrimmedLineColour = 'black'
+scatterFontSize = 5
 
 # exporting to pdf: Default save to same location and name.pdf as this macro
 #  alternatively, provide a full valid path
 outputPath = None
 
-
 ############################################################
 ##################   End User Settings     ########################
 ############################################################
-import argparse
+
 import numpy as np
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+import ccpn.framework.lib.experimentAnalysis.spectralDensityLib as sdl
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+from matplotlib.ticker import MultipleLocator
 from ccpn.ui.gui.widgets.DrawSS import plotSS
 import ccpn.macros.relaxation._macrosLib as macrosLib
-import matplotlib
-from ccpn.util.Path import aPath
 
 
-def _plotRates(pdf):
-    """ Plot the  SS -  R1  - R2 - NOE """
-    fig, axes  = macrosLib._makeFigureLayoutWithOneColumn(4, height_ratios=[2, 2, 2, 1])
-    axR1, axR2, axNOE, axss = axes
+def _plotIsotropicAnalysisPage1(pdf):
+    #  S2, Te, Tm, Rex
+    fig = plt.figure(dpi=300)
+    fig.suptitle(titlePdf, fontsize=10)
+    fig.canvas.manager.set_window_title(windowTitle)
 
-    # plot the data
-    axR1.bar(x, R1, yerr=R1_ERR, color=barColour, ecolor=barErrorColour, error_kw=dict(lw=barErrorLW, capsize=barErrorCapsize, capthick=barErrorCapthick))
-    axR2.bar(x, R2, yerr=R2_ERR, color=barColour, ecolor=barErrorColour, error_kw=dict(lw=barErrorLW, capsize=barErrorCapsize, capthick=barErrorCapthick))
-    axNOE.bar(x, NOE, yerr=NOE_ERR, color=barColour, ecolor=barErrorColour, error_kw=dict(lw=barErrorLW, capsize=barErrorCapsize, capthick=barErrorCapthick))
+    axSe = plt.subplot(411)
+    axTe = plt.subplot(412)
+    axRex = plt.subplot(413)
+    axss = fig.add_subplot(414)
     if macrosLib._isSequenceValid(sequence, ss_sequence):
-        plotSS(axss, xSequence, sequence, ss_sequence=ss_sequence, showSequenceNumber=False, startSequenceCode=startSequenceCode, fontsize=labelMinorSize, )
+        plotSS(axss, xSequence, sequence, ss_sequence=ss_sequence, startSequenceCode=startSequenceCode, fontsize=5,
+               showSequenceNumber=False, )
 
+    axSe.bar(x, S2, yerr=None, color=barColour, ecolor=barErrorColour, error_kw=dict(lw=barErrorLW, capsize=barErrorCapsize, capthick=barErrorCapthick))
+    axTe.bar(x, TE, yerr=None, color=barColour, ecolor=barErrorColour, error_kw=dict(lw=barErrorLW, capsize=barErrorCapsize, capthick=barErrorCapthick))
+    axRex.bar(x, REX, yerr=None, color=barColour, ecolor=barErrorColour, error_kw=dict(lw=barErrorLW, capsize=barErrorCapsize, capthick=barErrorCapthick))
 
+    axSe.set_ylim(ymin=0, ymax=1)
+    axTe.set_ylim(ymin=0)
+    axRex.set_ylim(ymin=0)
 
-    # set the various labels
-    axR1.set_title('R1', fontsize=fontTitleSize, color=titleColor)
-    axR2.set_title('R2',  fontsize=fontTitleSize, color=titleColor)
-    axNOE.set_title('HetNOE', fontsize=fontTitleSize, color=titleColor)
-    axR1.set_ylabel('R$_{1}$ (sec$^{-1}$)', fontsize=fontYSize)
-    axR2.set_ylabel('R$_{2}$ (sec$^{-1}$)', fontsize=fontYSize)
-    axNOE.set_ylabel('het-NOE ratio', fontsize=fontYSize)
-    axNOE.set_xlabel('Residue Number', fontsize=fontXSize, )
+    axSe.set_title('$S^2$',  fontsize=fontTitleSize, color=titleColor)
+    axTe.set_title('Te',  fontsize=fontTitleSize, color='blue')
+    axRex.set_title('Rex',  fontsize=fontTitleSize, color=titleColor)
 
-    # set the various axis settings
-    macrosLib._setJoinedX(axss, [axR1, axR2, axNOE])
-    for ax in [axss, axR1, axR2, axNOE]:
-        macrosLib._setRightTopSpinesOff(ax)
-        macrosLib._setXTicks(ax, labelMajorSize, labelMinorSize)
-        macrosLib._setYLabelOffset(ax, -0.05, 0.5)
-        if ax != axss:
-            macrosLib. _setCommonYLim(ax,  ax.get_ylim())
-    if np.all(NOE.astype(float)>0): 
-        axNOE.set_ylim([0, 1])
-    else:
-        axNOE.set_ylim([-1, 1])
+    axSe.set_ylabel(f'$S^2$', fontsize=fontYSize)
+    axTe.set_ylabel(f'Te  (ps)', fontsize=fontYSize)
+    axRex.set_ylabel(f'Rex', fontsize=fontYSize)
 
-    if not macrosLib._isSequenceValid(sequence, ss_sequence):
-        axss.remove()
+    ml = MultipleLocator(1)
+    for ax in [axss, axSe, axTe, axRex]:
+        ax.spines[['right', 'top']].set_visible(False)
+        ax.minorticks_on()
+        ax.xaxis.set_minor_locator(ml)
+        ax.tick_params(axis='both', which='major', labelsize=labelMajorSize)
+        ax.tick_params(axis='both', which='minor', labelsize=labelMinorSize)
+        ax.yaxis.get_offset_text().set_x(-0.02)
+        ax.yaxis.get_offset_text().set_size(5)
+        ax.yaxis.set_label_coords(-0.05, 0.5)  # align the labels to vcenter and middle
 
-    fig.suptitle(titlePdf, fontsize=figureTitleFontSize)
+    axss.get_shared_x_axes().join(axss, axSe, axTe, axRex)
+    axRex.set_xlabel('Residue Number', fontsize=fontXSize, )
     plt.tight_layout()
     plt.subplots_adjust(hspace=hspace)
-    plt.subplots_adjust(top=0.85,) # space title and plots
+    bestGct = otherAnalysis.TM.values[0]
+    if not macrosLib._isSequenceValid(sequence, ss_sequence):
+        axss.remove()
+    plt.figtext(0.5, 0.01, f'Global Molecular Tumbling CorrelationTime Tm: {round(bestGct, 3)} ns',
+                ha="center", fontsize=6,)
+
     pdf.savefig()
     return fig
 
 ###################      start inline macro       #####################
-
-# update locals if run as a python script with arguments
-#e.g.: %run -i  1_RelaxationRates_plots.py -d RSDM -o myDirPath
 args = macrosLib.getArgs().parse_args()
 globals().update(args.__dict__)
 
-
-## get the data
+## data preparation
+## get the various values  and perform the needed calculations
 dataTable = macrosLib._getDataTableForMacro(dataTableName)
 data =  dataTable.data
-
 x = data[sv.NMRRESIDUECODE]
 x = x.astype(int)
 x = x.values
-
 startSequenceCode = x[0]
 endSequenceCode = startSequenceCode + len(ss_sequence)
 xSequence = np.arange(startSequenceCode, endSequenceCode)
-
 R1 = data[sv.R1].values
 R2 = data[sv.R2].values
 NOE = data[sv.HETNOE_VALUE].values
-
 R1_ERR = data[sv.R1_ERR]
 R2_ERR  = data[sv.R2_ERR]
 NOE_ERR = data[sv.HETNOE_VALUE_ERR]
 
+otherAnalysis, meanAnalysis = sdl._fitIsotropicModelFromT1T2NOE(data, spectrometerFrequency=spectrometerFrequency)
+S2 = otherAnalysis[sv.S2].values
+TE = otherAnalysis[sv.TE].values
+REX = otherAnalysis[sv.REX].values
+
 ##  init the plot and save to pdf
 filePath = macrosLib._getExportingPath(__file__, outputPath)
+
 with PdfPages(filePath) as pdf:
-    fig1 = _plotRates(pdf)
+    fig1 = _plotIsotropicAnalysisPage1(pdf)
     info(f'Report saved in {filePath}')
 
-if showInteractivePlot:
+if interactivePlot:
     plt.show()
 else:
     plt.close(fig1)
 
-
-# if interactive plot
-# the figure has to be closed manually after  finished with the popup plot  or will stay hanging around in memory!  Cannot close here or you don't see the interactive plot!
-
+###################      end macro        #########################
 
 

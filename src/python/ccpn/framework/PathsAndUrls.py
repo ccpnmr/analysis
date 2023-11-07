@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-28 19:23:04 +0100 (Wed, June 28, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-11-07 10:36:31 +0000 (Tue, November 07, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -37,6 +37,9 @@ ccpnVideos                      = 'https://www.ccpn.ac.uk/manual/v3/'
 oldCcpnIssuesUrl                = 'https://sourceforge.net/p/ccpn/bugs/'
 ccpnIssuesUrl                   = 'https://bitbucket.org/ccpnmr/issue-tracker/issues?status=new&status=open'
 ccpnDocumentationUrl            = 'https://www.ccpn.ac.uk/api-documentation/v3/html'
+
+# subdirectories of Projects
+CCPN_PLOTS_DIRECTORY            = 'data/plots'
 
 # CCPN code
 ccpnCodePath                    = Path.aPath(Path.getTopDirectory())
@@ -127,7 +130,8 @@ CCPN_SUB_DIRECTORIES = [
     CCPN_API_DIRECTORY, CCPN_ARCHIVES_DIRECTORY, CCPN_BACKUPS_DIRECTORY,
     CCPN_SUMMARIES_DIRECTORY, CCPN_LOGS_DIRECTORY, CCPN_DATA_DIRECTORY,
     CCPN_PLUGINS_DIRECTORY, CCPN_SPECTRA_DIRECTORY, CCPN_SCRIPTS_DIRECTORY,
-    CCPN_STATE_DIRECTORY, CCPN_STATESPECTRA_DIRECTORY
+    CCPN_STATE_DIRECTORY, CCPN_STATESPECTRA_DIRECTORY,
+    CCPN_PLOTS_DIRECTORY
 ]
 
 ccpnVersionHistory       = 'versionHistory.json'

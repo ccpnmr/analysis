@@ -24,9 +24,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-08 16:58:57 +0000 (Wed, March 08, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-11-07 14:23:30 +0000 (Tue, November 07, 2023) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -78,7 +78,8 @@ ictScalingFactor = 1e-12
 ## Some Graphics Settings
 
 titlePdf  = 'Relaxation Rates with Isotropic-Model Contouring Lines '
-showInteractivePlot = True # True if you want the plot to popup as a new windows, to allow the zooming and panning of the figure.
+windowTitle = f'CcpNmr {application.applicationName} - {titlePdf}'
+interactivePlot = True # True if you want the plot to popup as a new windows, to allow the zooming and panning of the figure.
 
 fontTitleSize = 6
 fontXSize = 4
@@ -109,14 +110,18 @@ import ccpn.framework.lib.experimentAnalysis.spectralDensityLib as sdl
 import ccpn.macros.relaxation._macrosLib as macrosLib
 from ccpn.util.Common import percentage
 
+
+
+
 def _plotClusters(pdf):
     fig = plt.figure(dpi=300)
+    fig.canvas.manager.set_window_title(windowTitle)
     fig.suptitle(titlePdf, fontsize=fontTitleSize)
 
     ax = plt.subplot(111)
     ## R1 vs R2
-    T1 = 1/R1*1e3
-    T2 = 1 / R2*1e3
+    T1 = (1/R1)*1e3
+    T2 = (1 / R2)*1e3
 
     xPerc = percentage(20, np.mean(T1))
     yPerc = percentage(50, np.mean(T2))
@@ -175,9 +180,16 @@ def _plotClusters(pdf):
     try:
         lXseValues = np.array(lXseValues)
         lYseValues = np.array(lYseValues)
-        xMaxLim = np.min(lXseValues[lXseValues>np.max(T1)])
+        # xMaxLim = np.min(lXseValues[lXseValues>np.max(T1)])
         xMinLim = np.min(lXseValues) if np.min(lXseValues) < np.min(T1) else np.min(T1)
-        yMaxLim = np.max(lYseValues[lYseValues>np.max(T2)])
+        # yMaxLim = np.max(lYseValues[lYseValues>np.max(T2)])
+        mdT1 = np.median(T1)
+        mdT2 = np.median(T2)
+        xMaxLim = mdT1 + mdT1/2
+        xMinLim = mdT1 - mdT1/2
+        yMinLim = mdT2 - mdT2/2
+        yMaxLim = mdT2 + mdT2/2
+
     except Exception as err:
         print(f'GUI error. Cannot determine the best fit for setting the plot zoom limits. {err}')
 
@@ -242,7 +254,8 @@ with PdfPages(filePath) as pdf:
     fig1 = _plotClusters(pdf)
     info(f'Report saved in {filePath}')
 
-if showInteractivePlot:
+if interactivePlot:
+
     plt.show()
 else:
     plt.close(fig1)

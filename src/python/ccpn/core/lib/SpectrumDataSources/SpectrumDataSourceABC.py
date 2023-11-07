@@ -92,9 +92,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:39 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-11-07 14:23:29 +0000 (Tue, November 07, 2023) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1992,8 +1992,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
             from ccpn.core.lib.SpectrumLib import estimateNoiseLevel1D
             data = self.getSliceData()
             noiseLevel, neg = estimateNoiseLevel1D(data, f=3, stdFactor = 1.5)
-            self.noiseLevel = noiseLevel
-            return noiseLevel
+            self.noiseLevel = abs(noiseLevel) + 1e-4
+            return self.noiseLevel
 
         elif self.dimensionCount == 2:
             # 2D: presumably t has data (and potentially water!)

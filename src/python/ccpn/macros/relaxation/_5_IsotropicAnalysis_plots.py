@@ -28,9 +28,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-08 16:58:57 +0000 (Wed, March 08, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-11-07 14:23:30 +0000 (Tue, November 07, 2023) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -57,9 +57,11 @@ ss_sequence   =  'BBBBBCCCCBBBBBBCCCCHHHHHHHHHHHHHHCCCCCBBBBCCCCCBBBBBC'
 spectrometerFrequency=600.13
 
 ## Some Graphics Settings
-titlePdf  = 'Anisotropy and Chemical Exchange Determination'
+titlePdf  = 'Isotropic Analysis Results'
+windowTitle = f'CcpNmr {application.applicationName} - {titlePdf}'
+
 figureTitleFontSize = 8
-showInteractivePlot = False # True if you want the plot to popup as a new windows, to allow the zooming and panning of the figure.
+interactivePlot = False # True if you want the plot to popup as a new windows, to allow the zooming and panning of the figure.
 barColour='black'
 barErrorColour='red'
 barErrorLW = 1
@@ -102,7 +104,9 @@ import ccpn.macros.relaxation._macrosLib as macrosLib
 def _plotIsotropicAnalysisPage1(pdf):
     #  S2, Te, Tm, Rex
     fig = plt.figure(dpi=300)
-    fig.suptitle('Isotropic Analysis Results', fontsize=10)
+    fig.suptitle(titlePdf, fontsize=10)
+    fig.canvas.manager.set_window_title(windowTitle)
+
     axSe = plt.subplot(411)
     axTe = plt.subplot(412)
     axRex = plt.subplot(413)
@@ -184,7 +188,7 @@ with PdfPages(filePath) as pdf:
     fig1 = _plotIsotropicAnalysisPage1(pdf)
     info(f'Report saved in {filePath}')
 
-if showInteractivePlot:
+if interactivePlot:
     plt.show()
 else:
     plt.close(fig1)

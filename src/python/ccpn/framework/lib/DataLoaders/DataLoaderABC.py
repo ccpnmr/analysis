@@ -78,6 +78,7 @@ def getDataLoaders() -> dict:
     from ccpn.framework.lib.DataLoaders.HtmlDataLoader import HtmlDataLoader
     from ccpn.framework.lib.DataLoaders.SparkyDataLoader import SparkyDataLoader
     from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
+    from ccpn.framework.lib.DataLoaders.MmcifDataLoader import MmcifDataLoader
 
     return DataLoaderABC._dataLoaders
 

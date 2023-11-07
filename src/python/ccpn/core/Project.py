@@ -2295,6 +2295,26 @@ class Project(AbstractWrapperObject):
 
         return [se]
 
+    def _loadMmcifFile(self, path: (str, Path)) -> list:
+        """Load data from mmcif file path into new StructureEnsemble object(s)
+        CCPNINTERNAL: called from pdb dataLoader
+        """
+
+        from ccpn.util.StructureData import EnsembleData, averageStructure
+
+        with logCommandManager('application.', 'loadData', path):
+            path = aPath(path)
+            name = path.basename
+
+            ensemble = EnsembleData.from_mmcif(str(path))
+            se = self.newStructureEnsemble(name=name, data=ensemble)
+
+            # create a new ensemble-average in a dataTable
+            dTable = self.newDataTable(name=f'{name}-average', data=averageStructure(ensemble))
+            dTable.setMetadata('structureEnsemble', se.pid)
+
+        return [se]
+
     def _loadTextFile(self, path: (str, Path)) -> list:
         """Load text from file path into new Note object
         CCPNINTERNAL: called from text dataLoader

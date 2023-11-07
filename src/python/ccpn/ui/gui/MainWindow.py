@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-19 12:24:29 +0100 (Thu, October 19, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-07 14:18:57 +0000 (Tue, November 07, 2023) $"
 __version__ = "$Revision: 3.2.0.1 $"
 #=========================================================================================
 # Created
@@ -851,12 +851,20 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         for (dirpath, dirnames, filenames) in walk(os.path.expanduser(macroPath)):
             startpath = startpath or dirpath
 
-            macroFiles = [os.path.join(dirpath, filename) for filename in filenames if '__' not in filename and filename.endswith('.py')]
+            macroFiles = []
+            for filename in filenames:
+                if filename.startswith('_'):
+                    continue
+                elif filename.startswith('__'):
+                    continue
+                if filename.endswith('.py'):
+                    _macroName = os.path.join(dirpath, filename)
+                    macroFiles.append(_macroName)
 
             thispath = dirpath[len(startpath):]
             if any(thispath.startswith(nn) for nn in ['/old', '/ideas']):
                 continue
-
+            # remove underscores
             if macroFiles:
                 if thispath:
                     dirname = modulesMenu.addAction(f'---  {thispath}  ---')

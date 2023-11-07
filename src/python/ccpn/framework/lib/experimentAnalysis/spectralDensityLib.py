@@ -16,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-05 13:50:51 +0100 (Mon, June 05, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-11-07 14:18:56 +0000 (Tue, November 07, 2023) $"
+__version__ = "$Revision: 3.2.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -45,14 +45,14 @@ from scipy import stats
 def calculateSigmaNOE(noe, r1, gx, gh):
     """Calculate the sigma NOE value.
     Eq. 16 Backbone dynamics of Barstar: A 15N NMR relaxation study.
-    Udgaonkar et al 2000. Proteins: 41:460-474"""
+    Udgaonkar et al. 2000. Proteins: 41:460-474"""
 
     return (noe - 1.0) * r1 * (gx / gh)
 
 def calculateJ0(noe, r1, r2, d, c, gx, gh):
     """Calculate J(0).
      Eq. 13 Backbone dynamics of Barstar: A 15N NMR relaxation study.
-    Udgaonkar et al 2000. Proteins: 41:460-474
+    Udgaonkar et al. 2000. Proteins: 41:460-474
     """
     sigmaNOE = calculateSigmaNOE(noe, r1, gx, gh)
     j0 = 3/(2*(3*d + c)) * (-(1/2)*r1 + r2 - (3/5)*sigmaNOE)
@@ -352,6 +352,53 @@ def _calculateNOEp(A, gammaHN, t1, jHpN, jHmN):
     :return:
     """
     return 1.0 + (A * gammaHN * t1 * ((6 * jHpN) - jHmN))
+
+def _Jw(t, w):
+    """
+    eq 10 from Krizova  et al, Journal of Biomolecular NMR 28: 369–384, 2004.  Temperature-dependent spectral density analysis ...
+    :param t: total correlation time
+    :param w: wH or wX
+    :return: jw at a particular w
+    """
+    jo  = 0.4 * t
+    jw = jo / ( 1 + 6.25 * (w * jo)**2)
+    return jw
+
+
+def calculateJW_at_Tc(spectrometerFrequency=600.130,
+  minRct=0,  maxRct=30.0, stepRct=0.1, rctScalingFactor =  1e-9,  ):
+    """
+    Calculate JW at a range of rotational correlation times.
+
+    :param spectrometerFrequency:  default 600.130
+    :param lenNh: NH bond Length. default 1.0150 Armstrong
+    :param ict: the internalCorrelationTime Te
+    :param csaN: value of the axially symmetric chemical shift tensor for 15N. Default -160 ppm
+    :param minS2: minimum S2 contours value
+    :param maxS2: max S2 contours value
+    :param stepS2: single step on the curve
+    :param minRct: minimum rotational correlation Time  (rct) contours value
+    :param maxRct: max rct contours value
+    :param stepRct: single step on the curve
+    :return: tuple  rctLines, s2Lines
+    """
+
+    omegaH = calculateOmegaH(spectrometerFrequency, scalingFactor=1e6)  # Rad/s
+    omegaN = calculateOmegaN(spectrometerFrequency, scalingFactor=1e6)
+    rct = maxRct
+    jwNs = []
+    jwHs = []
+    rcts = []
+    while rct >= minRct:
+        rctB = rct * rctScalingFactor  # Seconds
+        jN = _Jw(rctB,  omegaN)
+        jH = _Jw(rctB,  omegaH)
+        jwNs.append(jN)
+        jwHs.append(jH)
+        rct -= stepRct
+        rcts.append(rct)
+    return np.array(rcts), np.array(jwHs),  np.array(jwNs)
+
 
 ##### calculate the Ssquared, Te and Exchange from T1 T2 NOE using the original model-free
 

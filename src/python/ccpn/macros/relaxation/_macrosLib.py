@@ -17,9 +17,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-22 10:50:03 +0000 (Wed, February 22, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-11-07 14:18:57 +0000 (Tue, November 07, 2023) $"
+__version__ = "$Revision: 3.2.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -132,11 +132,13 @@ def getArgs():
     defaultDataTableName = 'RSDM_results'
     sequence = 'KLILNGKTLKGETTTEAVDAATAEKVFKQYANDNGVDGEWTYDAATKTFTVTE'
     ss_sequence = 'BBBBBCCCCBBBBBBCCCCHHHHHHHHHHHHHHCCCCCBBBBCCCCCBBBBBC'
+    interactivePlot = True
     parser = argparse.ArgumentParser( description='Create Relaxation Analysis Plots')
     parser.add_argument('-o',  '--outputPath', help='Output file path ', default=defaultOutputPath)
     parser.add_argument('-d',  '--dataTableName', help='The DataTable name containing the Reduced Spectral Density Mapping results', default=defaultDataTableName)
     parser.add_argument('-se',  '--sequence', help='The protein sequence', default=sequence)
     parser.add_argument('-ss',  '--ss_sequence', help='The protein secondary structure  for the above sequence  using the DSSP nomenclature', default=ss_sequence)
+    parser.add_argument('-ip',  '--interactivePlot', help='Open a matplotLib plot', default=True, action=argparse.BooleanOptionalAction)
     return parser
 
 

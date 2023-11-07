@@ -56,8 +56,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-02 15:52:59 +0000 (Thu, November 02, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2023-11-07 17:12:00 +0000 (Tue, November 07, 2023) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -2908,14 +2908,14 @@ class CcpnGLWidget(QOpenGLWidget):
             smallFont = self.getSmallFont()
             offsets = [GLDefs.TITLEXOFFSET * smallFont.charWidth * self.deltaX,
                        1.0 - (GLDefs.TITLEYOFFSET * smallFont.charHeight * self.deltaY),
-                       0.0]
+                       0.0, 0.0]
 
             self.stripIDString.attribs[:] = offsets * self.stripIDString.numVertices
             self.stripIDString.updateTextArrayVBOAttribs()
 
         if self._lockedStringTrue:
             dy = STRINGOFFSET * self.deltaY
-            offsets = [0.0, dy, 0.0]
+            offsets = [0.0, dy, 0.0, 0.0]
             self._lockedStringTrue.attribs[:] = offsets * self._lockedStringTrue.numVertices
             self._lockedStringTrue.updateTextArrayVBOAttribs()
 
@@ -2924,7 +2924,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self._lockedStringFalse.updateTextArrayVBOAttribs()
             dx = self._lockedStringTrue.width * self.deltaX
 
-            offsets = [dx, dy, 0.0]
+            offsets = [dx, dy, 0.0, 0.0]
             if self._fixedStringFalse:
                 self._fixedStringFalse.attribs[:] = offsets * self._fixedStringFalse.numVertices
                 self._fixedStringFalse.updateTextArrayVBOAttribs()

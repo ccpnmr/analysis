@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:10 +0100 (Wed, October 12, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-11-07 17:12:00 +0000 (Tue, November 07, 2023) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -273,7 +273,7 @@ class GLString(GLVertexArray):
         """
         super().__init__(renderMode=GLRENDERMODE_DRAW, blendMode=blendMode,
                          GLContext=GLContext, drawMode=GL.GL_TRIANGLES,
-                         dimension=2, clearArrays=clearArrays)
+                         dimension=4, clearArrays=clearArrays)
         if text is None:
             text = ''
         self.text = text
@@ -310,9 +310,8 @@ class GLString(GLVertexArray):
 
         # allocate space for all the letters, bad are discarded, spaces/tabs are not stored
         self.indices = np.empty(lenText * 6, dtype=np.uint32)
-        self.vertices = np.empty(lenText * 8, dtype=np.float32)
         self.texcoords = np.empty(lenText * 8, dtype=np.float32)
-
+        self.vertices = np.zeros(lenText * 16, dtype=np.float32)
         # self.attribs = np.zeros((len(text) * 4, 2), dtype=np.float32)
         # self.offsets = np.zeros((len(text) * 4, 2), dtype=np.float32)
 
@@ -349,10 +348,15 @@ class GLString(GLVertexArray):
                 i4 = i * 4
                 i6 = i * 6
                 i8 = i * 8
+                i16 = i * 16
 
                 if self._angle == 0.0:
                     # horizontal text
-                    self.vertices[i8:i8 + 8] = (x0, y0, x0, y1, x1, y1, x1, y0)  # pixel coordinates in string
+                    self.vertices[i16:i16 + 16] = (x0, y0, self._alias, 0.0,
+                                                   x0, y1, self._alias, 0.0,
+                                                   x1, y1, self._alias, 0.0,
+                                                   x1, y0, self._alias, 0.0,
+                                                   )  # pixel coordinates in string
                 else:
                     # apply rotation to the text
                     xbl, ybl = x0 * cs + y0 * sn, -x0 * sn + y0 * cs
@@ -360,7 +364,11 @@ class GLString(GLVertexArray):
                     xtr, ytr = x1 * cs + y1 * sn, -x1 * sn + y1 * cs
                     xbr, ybr = x1 * cs + y0 * sn, -x1 * sn + y0 * cs
 
-                    self.vertices[i8:i8 + 8] = (xbl, ybl, xtl, ytl, xtr, ytr, xbr, ybr)  # pixel coordinates in string
+                    self.vertices[i16:i16 + 16] = (xbl, ybl, self._alias, 0.0,
+                                                   xtl, ytl, self._alias, 0.0,
+                                                   xtr, ytr, self._alias, 0.0,
+                                                   xbr, ybr, self._alias, 0.0,
+                                                   )  # pixel coordinates in string
 
                 self.indices[i6:i6 + 6] = (i4, i4 + 1, i4 + 2, i4, i4 + 2, i4 + 3)
                 self.texcoords[i8:i8 + 8] = (u0, v0, u0, v1, u1, v1, u1, v0)
@@ -381,10 +389,8 @@ class GLString(GLVertexArray):
                 # for vt in self.vertices:
                 #   vt[1] = vt[1] + font.height
 
-                # occasional strange - RuntimeWarning: invalid value encountered in add
-                # self.vertices[:, 1] += font.height
                 # move all characters up by font height, centred bottom-left
-                self.vertices[1:i * 8:2] += font.height
+                self.vertices[1::4] += font.height
                 self.height += font.height
 
             elif (c == 9):  # tab
@@ -396,15 +402,16 @@ class GLString(GLVertexArray):
             prev = charCode
 
         if not (0.9999 < self._scale < 1.0001):
-            # apply font scaling for hi-res displays
-            self.vertices /= self._scale
+            # apply font scaling for hi-res displays - shader will do this soon
+            self.vertices[::4] /= self._scale
+            self.vertices[1::4] /= self._scale
             self.height /= self._scale
             self.width /= self._scale
 
         # set the offsets for the characters to the desired coordinates
-        self.numVertices = len(self.vertices) // 2
-        self.attribs = np.array((x + ox, y + oy, self._alias) * self.numVertices, dtype=np.float32)
-        self.offsets = np.array((x, y) * self.numVertices, dtype=np.float32)
+        self.numVertices = len(self.vertices) // 4
+        self.attribs = np.array((x + ox, y + oy, 0.0, 0.0) * self.numVertices, dtype=np.float32)
+        self.offsets = np.array((x, y, 0.0, 0.0) * self.numVertices, dtype=np.float32)
         self.stringOffset = None  # (ox, oy)
 
         # set the colour for the whole string
@@ -440,5 +447,5 @@ class GLString(GLVertexArray):
         self.colors = np.array(self.colour * self.numVertices, dtype=np.float32)
 
     def setStringOffset(self, attrib):
-        for pp in range(0, self.numVertices):
-            self.attribs[3 * pp:3 * pp + 2] = self.offsets[2 * pp:2 * pp + 2] + attrib
+        for pp in range(0, self.attribs.shape[0], 4):
+            self.attribs[pp:pp + 2] = self.offsets[pp:pp + 2] + attrib

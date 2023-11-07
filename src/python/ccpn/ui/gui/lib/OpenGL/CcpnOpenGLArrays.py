@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-06 18:25:10 +0000 (Mon, November 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-07 17:12:00 +0000 (Tue, November 07, 2023) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -607,7 +607,7 @@ class _VBOGLVertexArray:
 
         # this is for passing extra attributes in
         GL.glEnableVertexAttribArray(1)
-        GL.glVertexAttribPointer(1, 3, GL.GL_FLOAT, GL.GL_FALSE, 0, self.attribs)
+        GL.glVertexAttribPointer(1, 4, GL.GL_FLOAT, GL.GL_FALSE, 0, self.attribs)
         GL.glDrawElements(self.drawMode, self.indices.size, GL.GL_UNSIGNED_INT, self.indices)
 
         GL.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY)
@@ -751,7 +751,7 @@ class _VBOGLVertexArray:
         self._textureVBO.bind()
         GL.glTexCoordPointer(2, GL.GL_FLOAT, 0, self._textureVBO)
         self._attribVBO.bind()
-        GL.glVertexAttribPointer(_attribArrayIndex, 3, GL.GL_FLOAT, GL.GL_FALSE, 0, self._attribVBO)
+        GL.glVertexAttribPointer(_attribArrayIndex, 4, GL.GL_FLOAT, GL.GL_FALSE, 0, self._attribVBO)
         self._indexVBO.bind()
         GL.glDrawElements(self.drawMode, self.indices.size, GL.GL_UNSIGNED_INT, self._indexVBO)
 
@@ -1330,7 +1330,7 @@ class _GLVertexArray:
 
         # this is for passing extra attributes in
         GL.glEnableVertexAttribArray(1)
-        GL.glVertexAttribPointer(1, 3, GL.GL_FLOAT, GL.GL_FALSE, 0, self.attribs)
+        GL.glVertexAttribPointer(1, 4, GL.GL_FLOAT, GL.GL_FALSE, 0, self.attribs)
         GL.glDrawElements(self.drawMode, self.indices.size, GL.GL_UNSIGNED_INT, self.indices)
 
         GL.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY)
@@ -1473,7 +1473,7 @@ class _GLVertexArray:
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self._textureVBO[0])
         GL.glTexCoordPointer(2, GL.GL_FLOAT, 0, None)
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self._attribVBO[0])
-        GL.glVertexAttribPointer(_attribArrayIndex, 3, GL.GL_FLOAT, GL.GL_FALSE, 0, None)
+        GL.glVertexAttribPointer(_attribArrayIndex, 4, GL.GL_FLOAT, GL.GL_FALSE, 0, None)
         GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, self._indexVBO[0])
         GL.glDrawElements(self.drawMode, self.indices.size, GL.GL_UNSIGNED_INT, None)
 

@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-02 15:53:00 +0000 (Thu, November 02, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2023-11-07 17:12:00 +0000 (Tue, November 07, 2023) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -240,13 +240,13 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
                     # top-left of region, bound to top of screen
                     offsets = [drawStr.axisPosition + (3.0 * self._GLParent.pixelX),
                                self._GLParent.axisT - (2 * _font.charHeight * self._GLParent.pixelY),
-                               0.0]
+                               0.0, 0.0]
 
                 else:
                     # bottom-left of region, bound to left of screen - should be top-left of region?
                     offsets = [self._GLParent.axisL + (3.0 * self._GLParent.pixelX),
                                drawStr.axisPosition + (3.0 * self._GLParent.pixelY),
-                               0.0]
+                               0.0, 0.0]
 
                 drawStr.attribs[:] = offsets * vertices
 

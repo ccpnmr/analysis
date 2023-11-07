@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-06 18:25:10 +0000 (Mon, November 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-07 17:12:00 +0000 (Tue, November 07, 2023) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -237,7 +237,7 @@ class AliasedPixelShader(PixelShader):
             // calculate the position, set shading value
             gl_Position = pMatrix * mvMatrix * vec4(gl_Vertex.xy, 0.0, 1.0);
             _FC = gl_Color;
-            _aliased = (aliasPosition - alias.x);
+            _aliased = (aliasPosition - gl_Vertex.z);
         }
         """
 
@@ -372,11 +372,11 @@ class TextShader(ShaderProgramABC):
         uniform   vec2  stackOffset;
         varying   vec4  _FC;
         varying   vec2  _texCoord;
-        attribute vec3  _offset;
+        attribute vec4  _offset;
         
         void main()
         {
-            gl_Position = pTexMatrix * ((gl_Vertex * axisScale) + vec4(_offset.xy + stackOffset, 0.0, 0.0));
+            gl_Position = pTexMatrix * vec4(gl_Vertex.xy * axisScale.xy + _offset.xy + stackOffset, 0.0, 1.0);
 
             _texCoord = gl_MultiTexCoord0.st;
             _FC = gl_Color;
@@ -393,8 +393,8 @@ class TextShader(ShaderProgramABC):
         uniform float     alpha;
         varying vec4      _FC;
         varying vec2      _texCoord;
-        vec4              _texFilter;
-        float             _opacity;
+                vec4      _texFilter;
+                float     _opacity;
 
         void main()
         {
@@ -523,16 +523,15 @@ class AliasedTextShader(TextShader):
         varying   float _aliased;
         varying   vec4  _FC;
         varying   vec2  _texCoord;
-        attribute vec3  _offset;
+        attribute vec4  _offset;
 
         void main()
         {
-            gl_Position = pTexMatrix * mvMatrix * ((gl_Vertex * axisScale) + vec4(_offset.xy + stackOffset, 0.0, 0.0));
-            //gl_Position = pTexMatrix * mvMatrix * (gl_Vertex + vec4(_offset.xy + stackOffset, 0.0, 0.0));
+            gl_Position = pTexMatrix * mvMatrix * vec4(gl_Vertex.xy * axisScale.xy + _offset.xy + stackOffset, 0.0, 1.0);
 
             _texCoord = gl_MultiTexCoord0.st;
             _FC = gl_Color;
-            _aliased = (aliasPosition - _offset.z);
+            _aliased = (aliasPosition - gl_Vertex.z);
         }
         """
 
@@ -548,8 +547,8 @@ class AliasedTextShader(TextShader):
         uniform int       aliasEnabled;
         varying vec4      _FC;
         varying vec2      _texCoord;
-        vec4              _texFilter;
-        float             _opacity;
+                vec4      _texFilter;
+                float     _opacity;
         varying float     _aliased;
         
         void main()

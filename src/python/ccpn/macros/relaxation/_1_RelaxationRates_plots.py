@@ -27,9 +27,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-08 16:58:57 +0000 (Wed, March 08, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-11-07 14:23:29 +0000 (Tue, November 07, 2023) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -53,12 +53,14 @@ ss_sequence   =  'BBBBBCCCCBBBBBBCCCCHHHHHHHHHHHHHHCCCCCBBBBCCCCCBBBBBC'
 ## Some Graphics Settings
 
 titlePdf  = 'Relaxation Rates Results'
-showInteractivePlot = False # True if you want the plot to popup as a new windows, to allow the zooming and panning of the figure.
+windowTitle = f'CcpNmr {application.applicationName} - {titlePdf}'
+
+interactivePlot = True # True if you want the plot to popup as a new windows, to allow the zooming and panning of the figure.
 barColour='black'
 barErrorColour='red'
-barErrorLW = 1
-barErrorCapsize=2
-barErrorCapthick=0.5
+barErrorLW = 0.1
+barErrorCapsize=0
+barErrorCapthick=0.05
 fontTitleSize = 6
 fontXSize = 4
 fontYSize =  4
@@ -83,7 +85,6 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from ccpn.ui.gui.widgets.DrawSS import plotSS
 import ccpn.macros.relaxation._macrosLib as macrosLib
-import matplotlib
 from ccpn.util.Path import aPath
 
 
@@ -93,17 +94,15 @@ def _plotRates(pdf):
     axR1, axR2, axNOE, axss = axes
 
     # plot the data
-    axR1.bar(x, R1, yerr=R1_ERR, color=barColour, ecolor=barErrorColour, error_kw=dict(lw=barErrorLW, capsize=barErrorCapsize, capthick=barErrorCapthick))
-    axR2.bar(x, R2, yerr=R2_ERR, color=barColour, ecolor=barErrorColour, error_kw=dict(lw=barErrorLW, capsize=barErrorCapsize, capthick=barErrorCapthick))
-    axNOE.bar(x, NOE, yerr=NOE_ERR, color=barColour, ecolor=barErrorColour, error_kw=dict(lw=barErrorLW, capsize=barErrorCapsize, capthick=barErrorCapthick))
+    axR1.bar(x, R1, yerr=[np.zeros(len(R1_ERR)),R1_ERR], color=barColour, ecolor=barErrorColour, error_kw=dict(lw=barErrorLW, capsize=barErrorCapsize, capthick=barErrorCapthick,))
+    axR2.bar(x, R2, yerr=[np.zeros(len(R2_ERR)),R2_ERR], color=barColour, ecolor=barErrorColour, error_kw=dict(lw=barErrorLW, capsize=barErrorCapsize, capthick=barErrorCapthick, ls='None'))
+    axNOE.bar(x, NOE, yerr=[np.zeros(len(NOE_ERR)),NOE_ERR], color=barColour, ecolor=barErrorColour, error_kw=dict(lw=barErrorLW, capsize=barErrorCapsize, capthick=barErrorCapthick, ls='None'))
     if macrosLib._isSequenceValid(sequence, ss_sequence):
         plotSS(axss, xSequence, sequence, ss_sequence=ss_sequence, showSequenceNumber=False, startSequenceCode=startSequenceCode, fontsize=labelMinorSize, )
 
-
-
     # set the various labels
-    axR1.set_title('R1', fontsize=fontTitleSize, color=titleColor)
-    axR2.set_title('R2',  fontsize=fontTitleSize, color=titleColor)
+    axR1.set_title('R$_{1}$', fontsize=fontTitleSize, color=titleColor)
+    axR2.set_title('R$_{2}$',  fontsize=fontTitleSize, color=titleColor)
     axNOE.set_title('HetNOE', fontsize=fontTitleSize, color=titleColor)
     axR1.set_ylabel('R$_{1}$ (sec$^{-1}$)', fontsize=fontYSize)
     axR2.set_ylabel('R$_{2}$ (sec$^{-1}$)', fontsize=fontYSize)
@@ -118,7 +117,7 @@ def _plotRates(pdf):
         macrosLib._setYLabelOffset(ax, -0.05, 0.5)
         if ax != axss:
             macrosLib. _setCommonYLim(ax,  ax.get_ylim())
-    if np.all(NOE.astype(float)>0): 
+    if np.all(NOE.astype(float)>0):
         axNOE.set_ylim([0, 1])
     else:
         axNOE.set_ylim([-1, 1])
@@ -127,6 +126,8 @@ def _plotRates(pdf):
         axss.remove()
 
     fig.suptitle(titlePdf, fontsize=figureTitleFontSize)
+    fig.canvas.manager.set_window_title(windowTitle)
+
     plt.tight_layout()
     plt.subplots_adjust(hspace=hspace)
     plt.subplots_adjust(top=0.85,) # space title and plots
@@ -167,7 +168,7 @@ with PdfPages(filePath) as pdf:
     fig1 = _plotRates(pdf)
     info(f'Report saved in {filePath}')
 
-if showInteractivePlot:
+if interactivePlot:
     plt.show()
 else:
     plt.close(fig1)

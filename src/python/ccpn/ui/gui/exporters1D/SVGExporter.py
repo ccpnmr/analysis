@@ -210,7 +210,7 @@ def _generateItemSvg(item, nodes=None, root=None):
     buf = QtCore.QBuffer(arr)
     svg = QtSvg.QSvgGenerator()
     svg.setOutputDevice(buf)
-    dpi = QtGui.QDesktopWidget().physicalDpiX()
+    dpi = QtWidgets.QDesktopWidget().physicalDpiX()
     svg.setResolution(dpi)
 
     p = QtGui.QPainter()
@@ -219,7 +219,7 @@ def _generateItemSvg(item, nodes=None, root=None):
       item.setExportMode(True, {'painter': p})
     try:
       p.setTransform(tr)
-      item.paint(p, QtGui.QStyleOptionGraphicsItem(), None)
+      item.paint(p, QtWidgets.QStyleOptionGraphicsItem(), None)
     finally:
       p.end()
       ## Can't do this here--we need to wait until all children have painted as well.

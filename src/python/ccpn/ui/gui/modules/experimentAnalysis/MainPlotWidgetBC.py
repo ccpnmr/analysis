@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-28 19:23:05 +0100 (Wed, June 28, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-11-08 11:39:35 +0000 (Wed, November 08, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -33,6 +33,8 @@ from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_HIGHLIGHT
 from ccpn.ui.gui.guiSettings import getColours
 from ccpn.util.Colour import hexToRgb, rgbaRatioToHex
+from ccpn.ui.gui.widgets.Menu import Menu
+from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
 from ccpn.ui.gui.widgets.Font import getFont
 from ccpn.util.DataEnum import DataEnum
 from typing import Optional, List, Tuple, Any, Sequence, Union
@@ -804,7 +806,27 @@ class ViewBox(pg.ViewBox):
     def __init__(self, parentWidget, *args, **kwds):
         pg.ViewBox.__init__(self, *args, **kwds)
         self.setMenuEnabled(enableMenu=False)  # override pg default context menu
+        self.exportDialog = None
 
+    def mouseClickEvent(self, event, *args):
+        if event.button() == QtCore.Qt.RightButton:
+            event.accept()
+            self._raiseContextMenu(event)
+
+    def _getContextMenu(self):
+        self.contextMenu = Menu('', None, isFloatWidget=True)
+        self.contextMenu.addAction('Export', self.showExportDialog)
+        return self.contextMenu
+
+    def _raiseContextMenu(self, event):
+        contextMenu = self._getContextMenu()
+        contextMenu.exec_(QtGui.QCursor.pos())
+
+    def showExportDialog(self):
+        if self.exportDialog is None:
+            scene =  self.scene()
+            self.exportDialog = CustomExportDialog(scene, titleName='Exporting')
+        self.exportDialog.show(self)
 
 class PlotWidget(pg.PlotWidget):
 

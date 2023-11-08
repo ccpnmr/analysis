@@ -63,13 +63,13 @@ class Exporter(object):
         return
         
     def fileSaveFinished(self, filename):
-        filename = pg.python2_3.asUnicode(filename)
+        filename = str(filename)
         global LastExportDirectory
         LastExportDirectory = os.path.split(filename)[0]
         
         ## If file name does not match selected extension, append it now
         ext = os.path.splitext(filename)[1].lower().lstrip('.')
-        selectedExt = re.search(r'\*\.(\w+)\b', pg.python2_3.asUnicode(self.fileDialog.selectedNameFilter()))
+        selectedExt = re.search(r'\*\.(\w+)\b', str(self.fileDialog.selectedNameFilter()))
         if selectedExt is not None:
             selectedExt = selectedExt.groups()[0].lower()
             if ext != selectedExt:

@@ -105,7 +105,11 @@ class CustomExportDialog(QtWidgets.QDialog):
         if not self.shown:
             self.shown = False
             vcenter = self.scene.getViewWidget().geometry().center()
-            self.setGeometry(vcenter.x() - self.width() / 2, vcenter.y() - self.height() / 2, self.width(), self.height())
+            a = int(vcenter.x() - self.width() / 2)
+            b = int(vcenter.y() - self.height() / 2)
+            w = int(self.width())
+            h= int(self.height())
+            self.setGeometry(a,b,w,h)
 
     def updateItemList(self, select=None):
         self.ui.itemTree.clear()

@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-06 14:52:30 +0000 (Mon, November 06, 2023) $"
-__version__ = "$Revision: 3.2.0.1 $"
+__dateModified__ = "$dateModified: 2023-11-10 18:27:12 +0000 (Fri, November 10, 2023) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1071,7 +1071,8 @@ class CcpnModuleLabel(DockLabel):
         # Settings
         self.settingsButtons = ButtonList(self, texts=['', ''],
                                           icons=['icons/gearbox', 'icons/system-help'],
-                                          callbacks=[settingsCallback, helpButtonCallback]
+                                          callbacks=[settingsCallback, helpButtonCallback],
+                                          enableFocusBorder=False,
                                           )
         self.settingsButtons.getLayout().setSpacing(0)  # remove any gaps
         self.settingsButton = self.settingsButtons.buttons[0]

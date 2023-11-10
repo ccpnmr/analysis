@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 19:17:56 +0100 (Wed, June 28, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-11-10 18:27:12 +0000 (Fri, November 10, 2023) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -207,7 +207,7 @@ class ButtonList(Widget, ButtonListMixin):
     A building block Widget used throughout. (Not just as ok/close in popups).
     """
     def __init__(self, parent=None, texts=None, callbacks=None, icons=None, setMinimumWidth=True,
-                 tipTexts=None, direction='h', commands=None, images=None, setLastButtonFocus=True, **kwds):
+                 tipTexts=None, direction='h', commands=None, images=None, setLastButtonFocus=True, enableFocusBorder=True, **kwds):
 
         super().__init__(parent, setLayout=True, **kwds)  # ejb - added setLayout
 
@@ -231,6 +231,7 @@ class ButtonList(Widget, ButtonListMixin):
 
         direction = direction.lower()
         self.direction = direction
+        self._enableFocusBorder = enableFocusBorder
 
         if tipTexts is None:
             tipTexts = []
@@ -275,7 +276,8 @@ class ButtonList(Widget, ButtonListMixin):
                 grid = (i + j, 0)
 
             button = Button(self, text, callbacks[i], icons[i],
-                            tipText=tipTexts[i], grid=grid)
+                            tipText=tipTexts[i], grid=grid,
+                            enableFocusBorder=self._enableFocusBorder)
 
             width = button.fontMetrics().boundingRect(text).width() + 7
             if setMinimumWidth:

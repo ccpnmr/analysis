@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-06 14:52:30 +0000 (Mon, November 06, 2023) $"
-__version__ = "$Revision: 3.2.0.1 $"
+__dateModified__ = "$dateModified: 2023-11-10 18:27:12 +0000 (Fri, November 10, 2023) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -41,7 +41,7 @@ UNCHECKED = QtCore.Qt.Unchecked
 
 class Button(QtWidgets.QPushButton, Base):
 
-    def __init__(self, parent=None, text='', callback=None, icon=None, toggle=None, enabled=True, **kwds):
+    def __init__(self, parent=None, text='', callback=None, icon=None, toggle=None, enabled=True, enableFocusBorder=True, **kwds):
 
         #text = translator.translate(text): not needed as it calls setText which does the work
 
@@ -49,6 +49,7 @@ class Button(QtWidgets.QPushButton, Base):
         Base._init(self, **kwds)
 
         self.setText(text)
+        self._enableFocusBorder = enableFocusBorder
 
         if icon:  # filename or pixmap
             self.setIcon(Icon(icon))
@@ -56,11 +57,17 @@ class Button(QtWidgets.QPushButton, Base):
             fontHeight = (getFontHeight() or 12) + 4
             self.setIconSize(QtCore.QSize(fontHeight, fontHeight))
             # slightly narrower padding for nicer fit of the icon
-            self.setStyleSheet('Button { padding: 1px 1px 1px 1px; }'
-                               'Button:focus { padding: 0px 0px 0px 0px; border: 1px solid %(BORDER_FOCUS)s; }' % getColours())
+            if enableFocusBorder:
+                self.setStyleSheet('Button { padding: 0px 1px 0px 1px; }'
+                                   'Button:focus { padding: 0px 0px 0px 0px; border: 1px solid %(BORDER_FOCUS)s; }' % getColours())
+            else:
+                self.setStyleSheet('Button { padding: 0px 1px 0px 1px; }')
         else:
-            self.setStyleSheet('Button { padding: 3px 2px 3px 2px; }'
-                               'Button:focus { padding: 0px 0px 0px 0px; border: 1px solid %(BORDER_FOCUS)s; }' % getColours())
+            if enableFocusBorder:
+                self.setStyleSheet('Button { padding: 2px 3px 2px 3px; }'
+                                   'Button:focus { padding: 0px 0px 0px 0px; border: 1px solid %(BORDER_FOCUS)s; }' % getColours())
+            else:
+                self.setStyleSheet('Button { padding: 2px 3px 2px 3px; }')
 
         self.toggle = toggle
         if toggle is not None:

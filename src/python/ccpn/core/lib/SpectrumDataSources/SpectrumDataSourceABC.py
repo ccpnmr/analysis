@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-07 14:20:12 +0000 (Tue, November 07, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-10 18:24:16 +0000 (Fri, November 10, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -154,6 +154,7 @@ def getDataFormats() -> OrderedDict:
     from ccpn.core.lib.SpectrumDataSources.NmrViewSpectrumDataSource import NmrViewSpectrumDataSource
     from ccpn.core.lib.SpectrumDataSources.JcampSpectrumDataSource import JcampSpectrumDataSource
     from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
+
     return SpectrumDataSourceABC._spectrumDataFormats
 
 
@@ -178,7 +179,7 @@ class SpectrumDataSourceSuffixDict(dict):
         # Fill the dict
         for dataFormat, klass in getDataFormats().items():
             if dataFormat != EmptySpectrumDataSource.dataFormat:
-                suffixes =  [NO_SUFFIX, ANY_SUFFIX] if len(klass.suffixes) == 0 else klass.suffixes
+                suffixes = [NO_SUFFIX, ANY_SUFFIX] if len(klass.suffixes) == 0 else klass.suffixes
                 for suffix in suffixes:
                     suffix = NO_SUFFIX if suffix is None else suffix
                     self[suffix].append(klass)
@@ -248,8 +249,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
     hasWritingAbility = False  # flag that defines if dataFormat implements writing methods
 
     suffixes = []  # potential suffixes of data file; first is taken as default;
-                   # NO_SUFFIX defines that no suffix is allowed
-                   # ANY_SUFFIX defines that any suffix is allowed
+    # NO_SUFFIX defines that no suffix is allowed
+    # ANY_SUFFIX defines that any suffix is allowed
     allowDirectory = False  # Can/Can't open a directory
     openMethod = None  # method to open the file as openMethod(path, mode)
     defaultOpenReadMode = 'r+'
@@ -260,7 +261,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     #=========================================================================================
     # data formats
     #=========================================================================================
-    _dtype = numpy.float32   # numpy data format of the resulting slice, plane, region data
+    _dtype = numpy.float32  # numpy data format of the resulting slice, plane, region data
 
     # A dict of registered spectrum data formats: filled by _registerFormat classmethod, called
     # once after each definition of a new derived class (e.g. Hdf5SpectrumDataSource)
@@ -313,10 +314,10 @@ class SpectrumDataSourceABC(CcpNmrJson):
                                                                   hasSetterInSpectrumClass=True
                                                                   )
     noiseLevel = CFloat(allow_none=True, default_value=None).tag(isDimensional=False,
-                                                                  doCopy=True,
-                                                                  spectrumAttribute='noiseLevel',
-                                                                  hasSetterInSpectrumClass=True
-                                                                  )
+                                                                 doCopy=True,
+                                                                 spectrumAttribute='noiseLevel',
+                                                                 hasSetterInSpectrumClass=True
+                                                                 )
     isBigEndian = Bool(default_value=_bigEndian).tag(isDimensional=False,
                                                      doCopy=True,
                                                      spectrumAttribute=None,
@@ -329,17 +330,17 @@ class SpectrumDataSourceABC(CcpNmrJson):
                                               hasSetterInSpectrumClass=False
                                               )
     sampledValues = List(default_value=[None for dim in range(0, MAXDIM)]).tag(
-                                               isDimensional=True,
-                                               doCopy=True,
-                                               spectrumAttribute=None,
-                                               hasSetterInSpectrumClass=False
-                                               )
+            isDimensional=True,
+            doCopy=True,
+            spectrumAttribute=None,
+            hasSetterInSpectrumClass=False
+            )
     sampledSigmas = List(default_value=[None for dim in range(0, MAXDIM)]).tag(
-                                               isDimensional=True,
-                                               doCopy=True,
-                                               spectrumAttribute=None,
-                                               hasSetterInSpectrumClass=False
-                                               )
+            isDimensional=True,
+            doCopy=True,
+            spectrumAttribute=None,
+            hasSetterInSpectrumClass=False
+            )
     dimensionCount = CInt(default_value=0).tag(isDimensional=False,
                                                doCopy=True,
                                                spectrumAttribute='dimensionCount',
@@ -388,7 +389,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
             spectrumAttribute='isComplex',
             hasSetterInSpectrumClass=True
             )
-    _tmp = [False] * MAXDIM; _tmp[0] = True
+    _tmp = [False] * MAXDIM;
+    _tmp[0] = True
     isAcquisition = CList(trait=CBool(), default_value=_tmp, maxlen=MAXDIM).tag(
             isDimensional=True,
             doCopy=True,
@@ -502,14 +504,14 @@ class SpectrumDataSourceABC(CcpNmrJson):
     # Attributes for more complicated dataFormats that have separate binaries and parameter
     # files; e.g. Azara, Bruker, Xeasy
     #=========================================================================================
-    _parameterFile = CPath(default_value=None, allow_none=True).tag(info =
-                                        'an attribute to store the (parsed) path to a parameter file'
+    _parameterFile = CPath(default_value=None, allow_none=True).tag(info=
+                                                                    'an attribute to store the (parsed) path to a parameter file'
                                                                     )
-    _binaryFile = CPath(default_value=None, allow_none=True).tag(info =
-                                        'an attribute to store the path to a binary file; used during parsing'
+    _binaryFile = CPath(default_value=None, allow_none=True).tag(info=
+                                                                 'an attribute to store the path to a binary file; used during parsing'
                                                                  )
-    _path = CPath(default_value=None, allow_none=True).tag(info =
-                                        'an attribute to store the initial path used to define binary/parameter files; used during parsing'
+    _path = CPath(default_value=None, allow_none=True).tag(info=
+                                                           'an attribute to store the initial path used to define binary/parameter files; used during parsing'
                                                            )
 
     #=========================================================================================
@@ -517,14 +519,14 @@ class SpectrumDataSourceABC(CcpNmrJson):
     #=========================================================================================
 
     isotopeDefaultDataDict = defaultdict(
-        lambda: {'spectralRange' : (12.0, -1.0),   'pointCount' : 128},
-        [
-        ('1H' , {'spectralRange' : (12.0, -1.0),   'pointCount' : 512}),
-        ('15N', {'spectralRange' : (130.0, 100.0), 'pointCount' : 128}),
-        ('13C', {'spectralRange' : (130.0, 5.0),   'pointCount' : 256}),
-        ('19F', {'spectralRange' : (250.0, 40.0),  'pointCount' : 512}),
-        ]
-    )
+            lambda: {'spectralRange': (15.0, -2.0), 'pointCount': 512},
+            [
+                ('1H', {'spectralRange': (15.0, -2.0), 'pointCount': 512}),
+                ('15N', {'spectralRange': (150.0, 90.0), 'pointCount': 256}),
+                ('13C', {'spectralRange': (150.0, -10.0), 'pointCount': 256}),
+                ('19F', {'spectralRange': (250.0, 40.0), 'pointCount': 512}),
+                ]
+            )
 
     #=========================================================================================
     # Convenience properties and methods
@@ -544,13 +546,13 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         _newProject = 'Never'
 
-        result = f'{cls.dataFormat} spectrum binary data format.\n'+\
-            cls.__doc__ +\
-            f'\n' +\
-            f'    Valid suffixes:      {cls.suffixes}\n' +\
-            f'    Allows directory:    {cls.allowDirectory}\n' +\
-            f'    Creates new project: {_newProject}\n' + \
-            f'    Has writing ability: {cls.hasWritingAbility}'
+        result = f'{cls.dataFormat} spectrum binary data format.\n' + \
+                 cls.__doc__ + \
+                 f'\n' + \
+                 f'    Valid suffixes:      {cls.suffixes}\n' + \
+                 f'    Allows directory:    {cls.allowDirectory}\n' + \
+                 f'    Creates new project: {_newProject}\n' + \
+                 f'    Has writing ability: {cls.hasWritingAbility}'
 
         return result
 
@@ -998,7 +1000,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         if isotopeCode is not None:
 
-            idx = dimension-1
+            idx = dimension - 1
             nuc = Nucleus(isotopeCode)
             defaultValues = self.isotopeDefaultDataDict[isotopeCode]
 
@@ -1007,7 +1009,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
                 self.spectrometerFrequencies[idx] = nuc.frequencyAtField(field)
 
                 high, low = defaultValues['spectralRange']
-                self.spectralWidthsHz[idx] = (high-low)*self.spectrometerFrequencies[idx]
+                self.spectralWidthsHz[idx] = (high - low) * self.spectrometerFrequencies[idx]
 
                 self.referencePoints[idx] = 1.0
                 self.referenceValues[idx] = high
@@ -1021,7 +1023,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """Set spectral parameters at field
         """
         for idx, isotopeCode in enumerate(self.isotopeCodes):
-            self._setDefaultIsotopeValues(isotopeCode, dimension=idx+1, field=field)
+            self._setDefaultIsotopeValues(isotopeCode, dimension=idx + 1, field=field)
 
     #=========================================================================================
     # access to cache
@@ -1192,7 +1194,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         # create the array with zeros
         # data = numpy.zeros(self.pointCounts[sliceIdx], dtype=self.dataType)
-        data = SliceData(dataSource=self, dimensions=(sliceDim,), position = position)
+        data = SliceData(dataSource=self, dimensions=(sliceDim,), position=position)
 
         # we are reading nD blocks; need to slice across these with depth of 1 in non-slice dims and a
         # size of blockSizes[sliceIdx] along the sliceDim (set dynamically during the looping)
@@ -1224,7 +1226,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             raise RuntimeError('%s is not a blocked format' % self)
 
         # create the array with zeros
-        data = PlaneData(dataSource=self, dimensions=(xDim,yDim), position=position)
+        data = PlaneData(dataSource=self, dimensions=(xDim, yDim), position=position)
 
         # convert to zero-based
         xDim -= 1
@@ -1385,7 +1387,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             return self._returnFalse(txt)
 
         self.isValid = True
-        self.errorString =''
+        self.errorString = ''
         return True
 
     def checkParameters(self, spectrum) -> bool:
@@ -1423,7 +1425,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         depricated: initate an instance and use the isValid attribute
         """
-        instance = cls(path = path)
+        instance = cls(path=path)
         if not instance.isValid:
             return None
         else:
@@ -1467,7 +1469,6 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         if self.hasOpenFile():
             self.closeFile()
-
 
         try:
             self._checkFilePath(newFile, mode)
@@ -1600,6 +1601,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         :return A list of files copied
         """
         import shutil
+
         _destination = aPath(destinationDirectory)
         if not _destination.is_dir():
             raise ValueError(f'"{_destination}" is not a valid directory')
@@ -1610,7 +1612,6 @@ class SpectrumDataSourceABC(CcpNmrJson):
             result.append(_newPath)
 
         return result
-
 
     #=========================================================================================
     # Data access methods
@@ -1661,8 +1662,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         # set position of xDim, yDim to 1; to assure compatibilty with SpectrumData
         # classes
-        position[xDim-1] = 1
-        position[yDim-1] = 1
+        position[xDim - 1] = 1
+        position[yDim - 1] = 1
 
         return position
 
@@ -1713,7 +1714,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         # set position of sliceDim to 1; to assure compatibility with SpectrumData
         # classes
-        position[sliceDim-1] = 1
+        position[sliceDim - 1] = 1
 
         return position
 
@@ -1873,7 +1874,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
             if not isIterable(sTuple) or len(sTuple) != 2:
                 raise ValueError('invalid sliceTuple for dimension %s; got %s' %
-                                     (idx+1, sTuple))
+                                 (idx + 1, sTuple))
 
             # assure a to be a tuple
             sliceTuples[idx] = tuple(sTuple)
@@ -1899,10 +1900,10 @@ class SpectrumDataSourceABC(CcpNmrJson):
         implementation based upon getSliceData method
         GWV 13/01/2022: new implementation
         """
-        sliceDim = 1 # only works for 1, as there is otherwise a np shape mismatch
-        sliceIdx = sliceDim-1
+        sliceDim = 1  # only works for 1, as there is otherwise a np shape mismatch
+        sliceIdx = sliceDim - 1
 
-        newPoints = [s[1]-s[0]+1 for s in sliceTuples]
+        newPoints = [s[1] - s[0] + 1 for s in sliceTuples]
         slicePoints = newPoints[sliceIdx]
 
         # first collect all the folded/unfolded/indexed points
@@ -1910,9 +1911,9 @@ class SpectrumDataSourceABC(CcpNmrJson):
         for foldedPosition, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=[sliceDim]):
 
             foldedPosition = tuple(foldedPosition)
-            unFoldedPosition = tuple([a*np+p
+            unFoldedPosition = tuple([a * np + p
                                       for p, a, np in zip(foldedPosition, aliased, self.pointCounts)])
-            indxPosition = tuple([(p-sliceTuples[idx][0])
+            indxPosition = tuple([(p - sliceTuples[idx][0])
                                   for idx, p in zip(self.dimensionIndices, unFoldedPosition)])
             # get aliasing factor determined by dimensions other than sliceDim
             factor = 1.0
@@ -1931,7 +1932,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         # data = numpy.zeros(newPoints[::-1], dtype='float32')  # the final result
         data = RegionData(shape=newPoints[::-1],
                           dataSource=self, dimensions=self.dimensions,
-                          position = [st[0] for st in sliceTuples]
+                          position=[st[0] for st in sliceTuples]
                           )
 
         newSliceData = numpy.zeros(newPoints[sliceIdx], dtype='float32')  # the unaliased slice
@@ -1949,10 +1950,10 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
             # put the unaliased slice at all required positions in the data
             for unFoldedPosition, indxPosition, factor in _vals:
-                slices = [slice(idx, idx+1, 1) for idx in indxPosition]
+                slices = [slice(idx, idx + 1, 1) for idx in indxPosition]
                 slices[sliceIdx] = slice(0, slicePoints, 1)
                 slices = tuple(slices[::-1])  # x,y,z order is reversed
-                data[slices] = factor*newSliceData[:]
+                data[slices] = factor * newSliceData[:]
 
         return data
 
@@ -1990,20 +1991,21 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         if self.dimensionCount == 1:
             from ccpn.core.lib.SpectrumLib import estimateNoiseLevel1D
+
             data = self.getSliceData()
-            noiseLevel, neg = estimateNoiseLevel1D(data, f=3, stdFactor = 1.5)
+            noiseLevel, neg = estimateNoiseLevel1D(data, f=3, stdFactor=1.5)
             self.noiseLevel = abs(noiseLevel) + 1e-4
             return self.noiseLevel
 
         elif self.dimensionCount == 2:
             # 2D: presumably t has data (and potentially water!)
-            data =self.getPlaneData()
+            data = self.getPlaneData()
             data.flatten()
             stdFactor = 0.5
 
         else:
             # 3D and up: use a yz-plane, about 10 points in; this plane is likely mostly empty
-            position = [min(10, self.pointCounts[0])] + [1] * (self.dimensionCount-1)
+            position = [min(10, self.pointCounts[0])] + [1] * (self.dimensionCount - 1)
             data = self.getPlaneData(xDim=specLib.Y_DIM, yDim=specLib.Z_DIM, position=position)
             data = data.flatten()
             stdFactor = 2.0
@@ -2120,7 +2122,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """ReturnTrue if file is buffered"""
         return self._isBuffered
 
-    def setBuffering(self, isBuffered:bool, bufferIsTemporary:bool=True, bufferPath=None):
+    def setBuffering(self, isBuffered: bool, bufferIsTemporary: bool = True, bufferPath=None):
         """Define the SpectrumDataSource buffering status
         :param isBuffered (True, False): set the buffering status
         :param bufferIsTemporary (True, False): define buffer as temporary (i.e. disgarded on close)
@@ -2273,11 +2275,13 @@ class SpectrumDataSourceABC(CcpNmrJson):
                     pathName = self.path.name
 
             return '<%s: %dD (%s), (%s,%r)>' % (self.__class__.__name__,
-                                                    self.dimensionCount,
-                                                    'x'.join([str(p) for p in self.pointCounts]),
-                                                    fpStatus,
-                                                    pathName
-                                                    )
+                                                self.dimensionCount,
+                                                'x'.join([str(p) for p in self.pointCounts]),
+                                                fpStatus,
+                                                pathName
+                                                )
+
+
 #end class
 
 
@@ -2292,10 +2296,10 @@ def _fillSlice(sliceData, start, stop, aliasing, resultSlice=None):
     sliceFactor = pow(aliasing, 0)
 
     nPoints = sliceData.shape[0]
-    start = start-1
+    start = start - 1
 
     if resultSlice is None:
-        resultSlice = numpy.zeros((stop-start,), dtype=sliceData.dtype)
+        resultSlice = numpy.zeros((stop - start,), dtype=sliceData.dtype)
 
     # Simple cases:
     if start >= 0 and stop <= nPoints:
@@ -2307,32 +2311,32 @@ def _fillSlice(sliceData, start, stop, aliasing, resultSlice=None):
     elif -nPoints <= start < 0 and stop <= 0:
         # exclusively in the left extension
         sliceFactor = pow(aliasing, 1)
-        resultSlice[:] = sliceData[start+nPoints:stop+nPoints]*sliceFactor  # need to account for zero
+        resultSlice[:] = sliceData[start + nPoints:stop + nPoints] * sliceFactor  # need to account for zero
         return resultSlice
 
-    elif nPoints <= start < nPoints*2 and stop <= nPoints*2:
+    elif nPoints <= start < nPoints * 2 and stop <= nPoints * 2:
         # exclusively in the right extension
         sliceFactor = pow(aliasing, 1)
-        resultSlice[:] = sliceData[start-nPoints:stop-nPoints]*sliceFactor
+        resultSlice[:] = sliceData[start - nPoints:stop - nPoints] * sliceFactor
         return resultSlice
 
     elif -nPoints <= start < 0 and stop <= nPoints:
         # at most one extension on left
         sliceFactor = pow(aliasing, 1)
-        numpy.concatenate((sliceData[start:]*sliceFactor, sliceData[0:stop]), out=resultSlice)
-        return  resultSlice
+        numpy.concatenate((sliceData[start:] * sliceFactor, sliceData[0:stop]), out=resultSlice)
+        return resultSlice
 
-    elif start >= 0 and stop <= nPoints*2:
+    elif start >= 0 and stop <= nPoints * 2:
         # at most one extension on the right
         sliceFactor = pow(aliasing, 1)
-        numpy.concatenate((sliceData[start:], sliceData[0:stop-nPoints]*sliceFactor), out=resultSlice)
-        return  resultSlice
+        numpy.concatenate((sliceData[start:], sliceData[0:stop - nPoints] * sliceFactor), out=resultSlice)
+        return resultSlice
 
-    elif -nPoints < start < 0 and nPoints <= stop <= nPoints*2:
+    elif -nPoints < start < 0 and nPoints <= stop <= nPoints * 2:
         # at most one extension on the left and right;
         # might occur regularly for peak picking of a plane with one-point extension
         sliceFactor = pow(aliasing, 1)
-        numpy.concatenate((sliceData[start:]*sliceFactor, sliceData, sliceData[0:stop-nPoints]*sliceFactor), out=resultSlice)
+        numpy.concatenate((sliceData[start:] * sliceFactor, sliceData, sliceData[0:stop - nPoints] * sliceFactor), out=resultSlice)
         return resultSlice
 
     foldedStop = stop // nPoints
@@ -2357,24 +2361,26 @@ def _fillSlice(sliceData, start, stop, aliasing, resultSlice=None):
         # print('>', start, stop, '>>', idx_1, idx_2)
 
         # copy the data
-        resultSlice[result_idx:result_idx+increment] = sliceData[idx_1:idx_2] * sliceFactor
+        resultSlice[result_idx:result_idx + increment] = sliceData[idx_1:idx_2] * sliceFactor
         idx += increment
         result_idx += increment
 
     return resultSlice
 
 
-
 from ccpn.util.traits.CcpNmrTraits import Instance
 from ccpn.util.traits.TraitJsonHandlerBase import CcpNmrJsonClassHandlerABC
+
 
 class DataSourceTrait(Instance):
     """Specific trait for a Datasource instance encoding access to the (binary) spectrum data.
     None indicates no spectrumDataSource has been defined
     """
     klass = SpectrumDataSourceABC
+
     def __init__(self, **kwds):
         Instance.__init__(self, klass=self.klass, allow_none=True, **kwds)
+
 
     class jsonHandler(CcpNmrJsonClassHandlerABC):
         # klass = SpectrumDataSourceABC
@@ -2386,10 +2392,10 @@ def testMain():
     aliasing = -1
 
     for ln in (0, 2, 4, 7, 13):
-        print(f'\nARRAY   {testSlice*aliasing}{testSlice}{testSlice*aliasing} {testSlice} {testSlice*aliasing}{testSlice}')
+        print(f'\nARRAY   {testSlice * aliasing}{testSlice}{testSlice * aliasing} {testSlice} {testSlice * aliasing}{testSlice}')
         print(f'LEN -> {ln}')
-        for start in range(-7, 11-ln, 1):
-            _fillSlice(testSlice, start, start+ln, aliasing=aliasing)
+        for start in range(-7, 11 - ln, 1):
+            _fillSlice(testSlice, start, start + ln, aliasing=aliasing)
 
 
 if __name__ == '__main__':

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-11 15:29:56 +0100 (Wed, October 11, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-13 13:33:12 +0000 (Mon, November 13, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -39,7 +39,19 @@ ccpnIssuesUrl                   = 'https://bitbucket.org/ccpnmr/issue-tracker/is
 ccpnDocumentationUrl            = 'https://www.ccpn.ac.uk/api-documentation/v3/html'
 
 # subdirectories of Projects
-CCPN_PLOTS_DIRECTORY            = 'data/plots'
+CCPN_API_DIRECTORY          = 'ccpnv3'
+CCPN_ARCHIVES_DIRECTORY     = 'archives'
+CCPN_BACKUPS_DIRECTORY      = 'backups'
+CCPN_SUMMARIES_DIRECTORY    = 'summaries'
+CCPN_LOGS_DIRECTORY         = 'logs'
+CCPN_DATA_DIRECTORY         = 'data'
+CCPN_PLUGINS_DIRECTORY      = 'data/plugins'
+CCPN_SPECTRA_DIRECTORY      = 'data/spectra'
+CCPN_PLOTS_DIRECTORY      =    'data/plots'
+CCPN_SCRIPTS_DIRECTORY      = 'scripts'
+CCPN_STATE_DIRECTORY        = 'state'
+CCPN_STATESPECTRA_DIRECTORY = 'state/spectra'
+CCPN_RESOURCES_DIRECTORY   = 'resources'
 
 # CCPN code
 ccpnCodePath                    = Path.aPath(Path.getTopDirectory())
@@ -121,7 +133,7 @@ CCPN_SUB_DIRECTORIES = [
     CCPN_API_DIRECTORY, CCPN_ARCHIVES_DIRECTORY, CCPN_BACKUPS_DIRECTORY,
     CCPN_SUMMARIES_DIRECTORY, CCPN_LOGS_DIRECTORY, CCPN_DATA_DIRECTORY,
     CCPN_PLUGINS_DIRECTORY, CCPN_SPECTRA_DIRECTORY, CCPN_SCRIPTS_DIRECTORY,
-    CCPN_STATE_DIRECTORY, CCPN_STATESPECTRA_DIRECTORY,
+    CCPN_STATE_DIRECTORY, CCPN_STATESPECTRA_DIRECTORY, CCPN_RESOURCES_DIRECTORY,
     CCPN_PLOTS_DIRECTORY
 ]
 

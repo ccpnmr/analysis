@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-16 14:45:44 +0100 (Mon, October 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-14 17:24:16 +0000 (Tue, November 14, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,7 @@ from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.pipeline.PipeBase import SpectraPipe, PIPE_GENERIC
@@ -41,31 +42,17 @@ from ccpn.core.lib.SpectrumLib import _filterROI1Darray
 ########################################################################################################################
 
 PipeName = 'Noise Threshold'
-NoiseThreshold = 'Noise_Threshold'
+ManualNoiseThreshold = 'Noise_Threshold'
 UseRegion = 'Calibration_region'
 EstimateNoiseThreshold = 'Estimate_Noise_Threshold'
-IncreaseBySTD = 'Add_STD'
-
-DefaultEstimateNoiseThreshold = True
+PickingMultiplier = 'PickingMultiplier'
+Auto = 'Auto'
+Manual = 'Manual'
+Modes = [Auto, Manual]
+Mode = 'Mode'
+DefaultMode = Auto
 DefaultNoiseThreshold = [0, 0]
-DefaultCalibration_region = [14,12]
-DefaultIncreaseBySTD = 0.50
-
-########################################################################################################################
-##########################################      ALGORITHM       ########################################################
-########################################################################################################################
-
-def _getNoiseThreshold(spectrum, roi, stdFactor):
-    from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
-
-    if spectrum is not None:
-        x, y = spectrum.positions, spectrum.intensities
-        xRoi, yRoi = _filterROI1Darray(x, y, roi)
-        noiseLevel = SpectrumDataSourceABC._getNoiseLevelForData(yRoi, stdFactor)
-        maxNL, minNL = noiseLevel, -noiseLevel
-        return maxNL, minNL
-
-
+DefaultMultiplier = 1.41
 
 
 ########################################################################################################################
@@ -82,51 +69,43 @@ class NoiseThresholdGuiPipe(GuiPipe):
         GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
         self._parent = parent
         i=0
-        self.estimateNoiseThresholdLabel = Label(self.pipeFrame, EstimateNoiseThreshold, grid=(i, 0))
-        setattr(self, EstimateNoiseThreshold,
-                CheckBox(self.pipeFrame, checked=DefaultEstimateNoiseThreshold, callback=self._manageButtons, grid=(i, 1)))
-        i += 1
-        # auto noise widgets
-        self.noiseThresholdLabel = Label(self.pipeFrame, text=UseRegion, grid=(i, 0))
-        setattr(self, UseRegion,
-                GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application, colour='red',
-                                        orientation='v', decimals=4, step=0.001,
-                                        values=DefaultCalibration_region, grid=(i, 1)))
 
-        i += 1
-        self.addError = Label(self.pipeFrame, IncreaseBySTD, grid=(i, 0))
-        setattr(self, IncreaseBySTD,
-                ScientificDoubleSpinBox(self.pipeFrame, value=DefaultIncreaseBySTD, min=0.0, max=None,
-                              step=0.5, prefix=None, suffix=None, showButtons=True, decimals=3, grid=(i, 1)))
+        self.modeCalculationLabel = Label(self.pipeFrame, Mode, grid=(i, 0))
+        setattr(self, Mode, RadioButtons(self.pipeFrame,
+                                                    texts=Modes, selectedInd=0,
+                                                    callback=self._changeMode,
+                                                    direction='v', grid=(i, 1)))
 
         # manual noise widgets
         i += 1
-        self.noiseThresholdLabel = Label(self.pipeFrame, text=NoiseThreshold, grid=(i, 0))
-        setattr(self, NoiseThreshold, GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application, colour='green',
-                                                              orientation='h', decimals=4,
-                                                               step=0.001, grid=(i, 1)))
-        self._manageButtons()
+        self.noiseThresholdLabel = Label(self.pipeFrame, text=ManualNoiseThreshold, grid=(i, 0))
+        setattr(self, ManualNoiseThreshold, GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application, colour='green',
+                                                                    orientation='h', decimals=4,
+                                                                    step=0.001, grid=(i, 1)))
 
-    def _manageButtons(self):
-        checkBox = _getWidgetByAtt(self, EstimateNoiseThreshold)
-        noiseThreshold = _getWidgetByAtt(self, NoiseThreshold)
-        calibrRegion = _getWidgetByAtt(self, UseRegion)
-        addStd = _getWidgetByAtt(self, IncreaseBySTD)
+        i += 1
+        self.peakPickingMultiplierLabel = Label(self.pipeFrame, text='Peak Picking Threshold Multiplier', grid=(i, 0))
+        setattr(self, PickingMultiplier, DoubleSpinbox(self.pipeFrame, application=self.application,
+                                                       value = DefaultMultiplier,
+                                                       decimals=2,
+                                                        step=0.1, grid=(i, 1)))
+        self._changeMode()
 
-        if checkBox.isChecked():
-            noiseThreshold.setDisabled(True)
-            calibrRegion.setDisabled(False)
-            addStd.setDisabled(False)
-
+    def _changeMode(self, *args):
+        modeWidget = _getWidgetByAtt(self, Mode)
+        mode = modeWidget.get()
+        if mode == Auto:
+            self._disableManualNoiseThresholdWidget(True)
         else:
-            noiseThreshold.setDisabled(False)
-            calibrRegion.setDisabled(True)
-            addStd.setDisabled(True)
+            self._disableManualNoiseThresholdWidget(False)
+
+    def _disableManualNoiseThresholdWidget(self, value:bool):
+        manualNoiseThresholdW = _getWidgetByAtt(self, ManualNoiseThreshold)
+        manualNoiseThresholdW.setDisabled(value)
 
     def _closePipe(self):
         'remove the lines from plotwidget if any'
-        _getWidgetByAtt(self, NoiseThreshold)._turnOffPositionPicking()
-        _getWidgetByAtt(self, UseRegion)._turnOffPositionPicking()
+        _getWidgetByAtt(self, ManualNoiseThreshold)._turnOffPositionPicking()
         self.closePipe()
 
 
@@ -142,10 +121,9 @@ class NoiseThresholdPipe(SpectraPipe):
 
 
     _kwargs = {
-        EstimateNoiseThreshold: DefaultEstimateNoiseThreshold,
-        NoiseThreshold        : DefaultNoiseThreshold,
-        UseRegion             : DefaultCalibration_region,
-        IncreaseBySTD         : DefaultIncreaseBySTD,
+        ManualNoiseThreshold: DefaultNoiseThreshold,
+        Mode                : DefaultMode,
+        PickingMultiplier :DefaultMultiplier
         }
 
     def runPipe(self, spectra):
@@ -158,16 +136,24 @@ class NoiseThresholdPipe(SpectraPipe):
 
         for spectrum in spectra:
             if spectrum is not None:
-                if self._kwargs[EstimateNoiseThreshold]:
-                    roi = self._kwargs[UseRegion]
-                    stdFactor = self._kwargs[IncreaseBySTD]
-                    maxNL, minNL = _getNoiseThreshold(spectrum, roi, stdFactor)
-                    spectrum.noiseLevel = maxNL
-                    spectrum.negativeNoiseLevel = minNL
-                    self._kwargs.update({NoiseThreshold: [spectrum.noiseLevel, minNL]})
+                if self._kwargs[Mode] == Auto:
+                    spectrum.noiseLevel = spectrum.estimateNoise()
+                    spectrum.negativeNoiseLevel =  -spectrum.noiseLevel
                 else:
-                    spectrum.noiseLevel = max(self._kwargs[NoiseThreshold])
+                    noiseLevel =  max(self._kwargs[ManualNoiseThreshold])
+                    negativeNoiseLevel = min(self._kwargs[ManualNoiseThreshold])
+                    if negativeNoiseLevel > 0 or negativeNoiseLevel == noiseLevel:
+                        negativeNoiseLevel = -noiseLevel
+                    spectrum.noiseLevel = noiseLevel
+                    spectrum.negativeNoiseLevel = negativeNoiseLevel
+                # set the countourBase values which are used as peakPicking limits
+                pickingMultiplier = self._kwargs.get(PickingMultiplier, 1)
+                noiseLevel = spectrum.noiseLevel or 0
+                negativeNoiseLevel = spectrum.negativeNoiseLevel or 0
+                spectrum.positiveContourBase = noiseLevel * pickingMultiplier
+                spectrum.negativeContourBase = negativeNoiseLevel * pickingMultiplier
 
+                self._kwargs.update({ManualNoiseThreshold: [spectrum.noiseLevel, spectrum.negativeNoiseLevel]})
             self.pipeline._kwargs.update(self._kwargs)
 
         return spectra

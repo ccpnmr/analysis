@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-16 14:45:44 +0100 (Mon, October 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-14 17:22:07 +0000 (Tue, November 14, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -1306,7 +1306,7 @@ def _getNoiseEstimate(spectrum, nsamples=1000, nsubsets=10, fraction=0.1):
     # create a list of random points in the spectrum, get only points that are not nan/inf
     # getPointValue is the slow bit
     allPts = [[min(n - 1, int(n * random.random()) + 1) for n in npts] for i in range(nsamples)]
-    _list = np.array([spectrum.getPointValue(pt) for pt in allPts], dtype=np.float32)
+    _list = np.array([spectrum._getPointValue(pt) for pt in allPts], dtype=np.float32)
     data = _list[np.isfinite(_list)]
     fails = nsamples - len(data)
 
@@ -1460,8 +1460,10 @@ def _getContourEstimate(spectrum, nsamples=1000, nsubsets=10, fraction=0.1):
     return value
 
 
-def estimateSNR(noiseLevels, signalPoints, factor=2.5):
+def _old_estimateSNR(noiseLevels, signalPoints, factor=2.5):
     """
+    This calculation methods, internally known as the Varian Method,
+     is deprecated from Version 3.2.1 onwards.
     SNratio = factor*(height/|NoiseMax-NoiseMin|)
     :param noiseLevels: (max, min) floats
     :param signalPoints: iterable of floats estimated to be signal or peak heights

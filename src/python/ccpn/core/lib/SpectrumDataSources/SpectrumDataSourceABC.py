@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-11-13 13:33:12 +0000 (Mon, November 13, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-14 17:22:07 +0000 (Tue, November 14, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -1991,7 +1991,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         if self.dimensionCount == 1:
             data = self.getSliceData()
-            stdFactor = 3.5
+            stdFactor = 0.5
 
         elif self.dimensionCount == 2:
             # 2D: presumably t has data (and potentially water!)
@@ -2007,17 +2007,26 @@ class SpectrumDataSourceABC(CcpNmrJson):
             stdFactor = 2.0
 
         self.noiseLevel = self._getNoiseLevelForData(data, stdFactor)
+        std = self._getSigmaForData(data)
+        self.spectrum._noiseSD = float(std) # add this property which is needed by the peak.signalToNoiseRatio
         return self.noiseLevel
+
+    @staticmethod
+    def _getSigmaForData(data):
+        """
+        """
+        std = numpy.std(data)
+        return std
 
     @staticmethod
     def _getNoiseLevelForData(data, stdFactor):
         """ _internal. Decoupling function from Ccpn object.
         Calculate the Noise level for an array"""
-        absData = numpy.array([v for v in map(abs, data)]) # why not use  absData = numpy.absolute(data) ?
+        absData = numpy.absolute(data)
         absData = absData[numpy.isfinite(absData)]
         median = numpy.median(absData)
         _temp = data[numpy.isfinite(data)].astype(numpy.float64)
-        std = numpy.std(_temp)
+        std = SpectrumDataSourceABC._getSigmaForData(data)
         if std != std:
             # std may still be nan because contains HUGE numbers
             std = 0

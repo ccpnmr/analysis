@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-24 13:54:29 +0100 (Tue, October 24, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-14 17:22:07 +0000 (Tue, November 14, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -819,41 +819,21 @@ def _getSpectralPeakPropertyAsDataFrame(spectra, peakProperty=HEIGHT, NR_ID=NR_I
     return df[sortedCols]
 
 
-def _getPeakSNRatio(peak, factor=2.5):
+def _getPeakSNRatio(peak):
     """
-    Estimate the Signal to Noise ratio based on the spectrum Positive and Negative noise values.
-    If Noise thresholds are not defined in the spectrum, then they are estimated as well.
-    If only the positive noise threshold is defined, the negative noise threshold will be the inverse of the positive.
-        SNratio = |factor*(height/|NoiseMax-NoiseMin|)|
-                height is the peak height
-                NoiseMax is the spectrum positive noise threshold
-                NoiseMin is the spectrum negative noise threshold
-    :param factor: float, multiplication factor.
+    Estimate the Signal to Noise ratio
     :return: float, SignalToNoise Ratio value for the peak
     """
-    spectrum = peak._parent.spectrum
-    from ccpn.core.lib.SpectrumLib import estimateSNR
-
-    noiseLevel, negativeNoiseLevel = spectrum.noiseLevel, spectrum.negativeNoiseLevel
-    # if not negativeNoiseLevel and noiseLevel:
-    if negativeNoiseLevel is None and noiseLevel is not None:
-        negativeNoiseLevel = - noiseLevel if noiseLevel > 0 else noiseLevel * 2
-        spectrum.negativeNoiseLevel = negativeNoiseLevel
-        getLogger().warning('Spectrum Negative noise not defined for %s. Estimated default' % spectrum.pid)
-
-    # if not noiseLevel:  # estimate it
-    if noiseLevel is None:  # estimate it
-        noiseLevel = spectrum.estimateNoise()
-        negativeNoiseLevel = -noiseLevel
-        spectrum.noiseLevel, spectrum.negativeNoiseLevel = noiseLevel, negativeNoiseLevel
-        getLogger().warning('Spectrum noise level(s) not defined for %s. Estimated default' % spectrum.pid)
 
     if peak.height is None:
-        updateHeight(peak)
-        _getPeakSNRatio(peak)
+        return None
 
-    snr = estimateSNR(noiseLevels=[noiseLevel, negativeNoiseLevel], signalPoints=[peak.height], factor=factor)
-    return snr[0]  ## estimateSNR return a list with a length always > 0
+    spectrum = peak.spectrum
+    noiseSD = spectrum._noiseSD
+    if noiseSD is None or noiseSD <= 0:
+        return None
+    result = peak.height/noiseSD
+    return result
 
 
 def _getPeakId(peak):

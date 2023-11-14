@@ -53,8 +53,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-07 17:25:14 +0100 (Thu, September 07, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-11-14 17:22:07 +0000 (Tue, November 14, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -162,7 +162,7 @@ class Spectrum(AbstractWrapperObject):
     _AdditionalAttribute = 'AdditionalAttribute'
     _ReferenceSubstancesPids = '_ReferenceSubstancesPids'
     _REFERENCESUBSTANCES = 'referenceSubstances'
-
+    _NOISESD = '_noiseSD'
     _INCLUDEPOSITIVECONTOURS = 'includePositiveContours'
     _INCLUDENEGATIVECONTOURS = 'includeNegativeContours'
     _PREFERREDAXISORDERING = '_preferredAxisOrdering'
@@ -2247,6 +2247,25 @@ class Spectrum(AbstractWrapperObject):
             noise = None
         return noise
 
+    @property
+    def _noiseSD(self):
+        """_CCPN internal. Noise Standard deviation. Called many times to set the peak.signalToNoiseRatio
+        """
+        result = self._getInternalParameter(self._NOISESD)
+        if result is None:
+            from ccpn.core.lib.SpectrumLib import getNoiseEstimate
+            noiseObj = getNoiseEstimate(self)
+            result = noiseObj.std
+            self._setInternalParameter(self._NOISESD, result) #set to internal so we have for the next time
+        return result
+
+    @_noiseSD.setter
+    def _noiseSD(self, value):
+        """Noise Standard deviation
+        """
+        # return save to internal
+        self._setInternalParameter(self._NOISESD, value)
+
     #-----------------------------------------------------------------------------------------
     # data access functions
     #-----------------------------------------------------------------------------------------
@@ -2319,6 +2338,14 @@ class Spectrum(AbstractWrapperObject):
     @logCommand(get='self')
     def getPointValue(self, pointPositions) -> float:
         """Return the value interpolated at the position given in points (1-based, float values).
+        """
+        return self._getPointValue(pointPositions)
+
+    def _getPointValue(self, pointPositions) -> float:
+        """
+        Keep this routine without a logCommand for recursive calls.
+        :param pointPositions:
+        :return:
         """
         if len(pointPositions) != self.dimensionCount:
             raise ValueError('Length of %s does not match number of dimensions.' % str(pointPositions))

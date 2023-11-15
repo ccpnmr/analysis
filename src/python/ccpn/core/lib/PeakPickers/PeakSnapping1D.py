@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-11-15 11:58:48 +0000 (Wed, November 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-15 16:50:23 +0000 (Wed, November 15, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -184,8 +184,8 @@ def _snap1DPeaksByGroup(peaks, rawDataDict=None, ppmLimit=0.05, groupPpmLimit=0.
             getLogger().warning(f'Raw data for {spectrum.pid}  not found')
             continue
         xValues, yValues = rawDataDict.get(spectrum)
-        noiseLevel = spectrum.noiseLevel
-        negativeNoiseLevel = spectrum.negativeNoiseLevel
+        positiveContourBase = spectrum.positiveContourBase
+        negativeContourBase = spectrum.negativeContourBase
         snappingPeaks = np.array(peaks)
         snappingPositions = np.array([pk._temporaryPosition[0] for pk in snappingPeaks])
 
@@ -212,8 +212,8 @@ def _snap1DPeaksByGroup(peaks, rawDataDict=None, ppmLimit=0.05, groupPpmLimit=0.
                 # otherPeaks = [round(p._temporaryPosition[0],rounding) for p in peakGroup[0].peakList.peaks if p not in peakGroup if p.position[0] if _isWithinLimits(p.position[0], searchingLimits)]
 
                 xROItarget, yROItarget = _1DregionsFromLimits(xValues, yValues, limits=searchingLimits)
-                maxValues, minValues = _find1DMaxima(yROItarget, xROItarget, positiveThreshold=noiseLevel,
-                                                     negativeThreshold=negativeNoiseLevel, findNegative=doNeg)
+                maxValues, minValues = _find1DMaxima(yROItarget, xROItarget, positiveThreshold=positiveContourBase,
+                                                     negativeThreshold=negativeContourBase, findNegative=doNeg)
                 foundCoords = maxValues + minValues
                 # foundCoords = _filterKnownPeakPositionsFromNewMaxima(foundCoords, knownPositions=otherPeaks, rounding=rounding)
 
@@ -464,20 +464,6 @@ def _filterKnownPeakPositionsFromNewMaxima(newMaxima, peak,   rounding=4):
             newMaxima.remove(maximum)
     return np.array(newMaxima)
 
-def _filterLowSNFromNewMaxima(newMaxima, noiseLevel, negativeNoise,  snThreshold=0.5):
-    """Remove los s/n maxima from the newly found maxima to avoid snapping to noise"""
-    for maximum in newMaxima:
-        pos, intens = maximum
-        ratio = None
-        if intens > 0:
-            ratio = intens/noiseLevel
-        if intens < 0:
-            ratio = intens/negativeNoise
-        if ratio is None:
-            continue
-        if ratio  <= snThreshold:
-            newMaxima.remove(maximum)
-    return newMaxima
 
 
 def _filterShouldersFromNewMaxima(newMaxima, x,y, proximityTollerance=1e5 ):

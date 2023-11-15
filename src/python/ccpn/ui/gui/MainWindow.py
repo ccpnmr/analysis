@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-11-15 11:58:48 +0000 (Wed, November 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-15 16:50:23 +0000 (Wed, November 15, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -2128,18 +2128,11 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                             from ccpn.core.lib.PeakPickers.PeakSnapping1D import snap1DPeaksByGroup
                             snap1DPeaksByGroup(peaks)
                             nonSnappingPeaks = [pk for pk in peaks if pk.figureOfMerit <1]
-                            nonSnappingPeaksBelowNoiseT = []
-                            for pk in peaks:
-                                negativeNoiseLevel = pk.spectrum.negativeNoiseLevel or 0
-                                noiseLevel = pk.spectrum.noiseLevel or 0
-                                height = pk.height or 0
-                                if negativeNoiseLevel < height < noiseLevel:
-                                    nonSnappingPeaksBelowNoiseT.append(pk)
+
                             msg = 'one of the selected peak' if len(nonSnappingPeaks)==1 else 'some of the selected peaks'
                             if len(nonSnappingPeaks)>0:
                                 showWarning(f'Cannot snap {msg}', f'Figure of merit below the snapping threshold of 1 for {nonSnappingPeaks}')
-                            if len(nonSnappingPeaksBelowNoiseT)>0:
-                                showWarning(f'Cannot find new maxima', f'Some maxima could be in the noise. Adjust the noise level thresholds to include more results. Affected peaks: {nonSnappingPeaksBelowNoiseT}')
+
                         else:
                             peaks.sort(key=lambda x: x.position[0] if x.position and None not in x.position else 0, reverse=False)  # reorder peaks by position
                             for peak in peaks:

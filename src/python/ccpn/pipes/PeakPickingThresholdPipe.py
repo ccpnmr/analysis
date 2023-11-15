@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-11-14 17:24:16 +0000 (Tue, November 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-15 15:28:21 +0000 (Wed, November 15, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -41,17 +41,15 @@ from ccpn.core.lib.SpectrumLib import _filterROI1Darray
 ###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
 ########################################################################################################################
 
-PipeName = 'Noise Threshold'
+PipeName = 'Peak Picking Thresholds'
 ManualNoiseThreshold = 'Noise_Threshold'
 UseRegion = 'Calibration_region'
-EstimateNoiseThreshold = 'Estimate_Noise_Threshold'
-PickingMultiplier = 'PickingMultiplier'
 Auto = 'Auto'
 Manual = 'Manual'
 Modes = [Auto, Manual]
 Mode = 'Mode'
 DefaultMode = Auto
-DefaultNoiseThreshold = [0, 0]
+DefaultThreshold = [1e2, -1e2]
 DefaultMultiplier = 1.41
 
 
@@ -60,12 +58,12 @@ DefaultMultiplier = 1.41
 ########################################################################################################################
 
 
-class NoiseThresholdGuiPipe(GuiPipe):
+class PeakPickingThresholdGuiPipe(GuiPipe):
     preferredPipe = True
     pipeName = PipeName
 
     def __init__(self, name=pipeName, parent=None, project=None, **kwds):
-        super(NoiseThresholdGuiPipe, self)
+        super(PeakPickingThresholdGuiPipe, self)
         GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
         self._parent = parent
         i=0
@@ -83,12 +81,6 @@ class NoiseThresholdGuiPipe(GuiPipe):
                                                                     orientation='h', decimals=4,
                                                                     step=0.001, grid=(i, 1)))
 
-        i += 1
-        self.peakPickingMultiplierLabel = Label(self.pipeFrame, text='Peak Picking Threshold Multiplier', grid=(i, 0))
-        setattr(self, PickingMultiplier, DoubleSpinbox(self.pipeFrame, application=self.application,
-                                                       value = DefaultMultiplier,
-                                                       decimals=2,
-                                                        step=0.1, grid=(i, 1)))
         self._changeMode()
 
     def _changeMode(self, *args):
@@ -114,44 +106,36 @@ class NoiseThresholdGuiPipe(GuiPipe):
 ########################################################################################################################
 
 
-class NoiseThresholdPipe(SpectraPipe):
-    guiPipe = NoiseThresholdGuiPipe
+class PeakPickingThresholdPipe(SpectraPipe):
+    guiPipe = PeakPickingThresholdGuiPipe
     pipeName = PipeName
     pipeCategory = PIPE_GENERIC
 
 
     _kwargs = {
-        ManualNoiseThreshold: DefaultNoiseThreshold,
+        ManualNoiseThreshold: DefaultThreshold,
         Mode                : DefaultMode,
-        PickingMultiplier :DefaultMultiplier
         }
 
     def runPipe(self, spectra):
         '''
-        For Now this pipe is a special case because it doesn't return a new inputData for the next pipe, but set
-        _kwargs in the pipeline and will be available for the next pipes they might need more then once.
-        If this is run twice, the pipeline will use only the last set.
-        Spectra is not really needed for this pipe. But is essential for the base class pipe.
+        Calculate the positiveContourBase/negativeContourBase which are used by the peakPickers as  the  peakPicking limits
         '''
 
         for spectrum in spectra:
             if spectrum is not None:
                 if self._kwargs[Mode] == Auto:
-                    spectrum.noiseLevel = spectrum.estimateNoise()
-                    spectrum.negativeNoiseLevel =  -spectrum.noiseLevel
+                    positiveContourBase = spectrum.dataSource._estimateInitialContourBase()
+                    negativeContourBase = -positiveContourBase
                 else:
-                    noiseLevel =  max(self._kwargs[ManualNoiseThreshold])
-                    negativeNoiseLevel = min(self._kwargs[ManualNoiseThreshold])
-                    if negativeNoiseLevel > 0 or negativeNoiseLevel == noiseLevel:
-                        negativeNoiseLevel = -noiseLevel
-                    spectrum.noiseLevel = noiseLevel
-                    spectrum.negativeNoiseLevel = negativeNoiseLevel
+                    positiveContourBase =  max(self._kwargs[ManualNoiseThreshold])
+                    negativeContourBase = min(self._kwargs[ManualNoiseThreshold])
+                    if negativeContourBase > 0 or negativeContourBase == positiveContourBase:
+                        negativeContourBase = -positiveContourBase
+
                 # set the countourBase values which are used as peakPicking limits
-                pickingMultiplier = self._kwargs.get(PickingMultiplier, 1)
-                noiseLevel = spectrum.noiseLevel or 0
-                negativeNoiseLevel = spectrum.negativeNoiseLevel or 0
-                spectrum.positiveContourBase = noiseLevel * pickingMultiplier
-                spectrum.negativeContourBase = negativeNoiseLevel * pickingMultiplier
+                spectrum.positiveContourBase = positiveContourBase
+                spectrum.negativeContourBase = negativeContourBase
 
                 self._kwargs.update({ManualNoiseThreshold: [spectrum.noiseLevel, spectrum.negativeNoiseLevel]})
             self.pipeline._kwargs.update(self._kwargs)
@@ -159,4 +143,4 @@ class NoiseThresholdPipe(SpectraPipe):
         return spectra
 
 
-NoiseThresholdPipe.register()  # Registers the pipe in the pipeline
+PeakPickingThresholdPipe.register()  # Registers the pipe in the pipeline

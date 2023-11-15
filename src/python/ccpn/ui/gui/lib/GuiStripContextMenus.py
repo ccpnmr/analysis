@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-16 12:35:19 +0100 (Mon, October 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-15 11:58:49 +0000 (Wed, November 15, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -286,10 +286,10 @@ def _clearMarksItem(strip):
                     callback=strip.clearMarks)
 
 
-def _estimateNoise(strip):
+def _showEstimateNoisePopup(strip):
     return _SCMitem(name='Estimate Noise...',
                     typeItem=ItemTypes.get(ITEM), toolTip='Estimate spectral noise in the visible region', shortcut='EN',
-                    callback=strip.estimateNoise)
+                    callback=strip._showEstimateNoisePopup)
 
 
 def _showNoise(strip):
@@ -902,7 +902,7 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
         _copyAxesMenuItem(guiStrip1d),
         _separator(),
 
-        _estimateNoise(guiStrip1d),
+        _showEstimateNoisePopup(guiStrip1d),
         _showNoise(guiStrip1d),
         _showPeakPickingThresholds(guiStrip1d),
         _makeStripPlot(guiStrip1d),
@@ -1085,7 +1085,7 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
         _flipAxesMenuItem(guiStripNd),
         _separator(),
 
-        _estimateNoise(guiStripNd),
+        _showEstimateNoisePopup(guiStripNd),
         _makeStripPlot(guiStripNd),
         _separator(),
 

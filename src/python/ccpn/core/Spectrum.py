@@ -54,7 +54,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-11-14 17:22:07 +0000 (Tue, November 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-15 11:58:48 +0000 (Wed, November 15, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -2175,7 +2175,8 @@ class Spectrum(AbstractWrapperObject):
         """Set default contour values
         """
         if base is None:
-            base = self.noiseLevel * multiplier if self.noiseLevel else 1e6
+            base = self.dataSource._estimateInitialContourBase(multiplier)
+
         base = max(base, 1.0)  # Contour bases have to be > 0.0
 
         self.positiveContourBase = base
@@ -2242,7 +2243,9 @@ class Spectrum(AbstractWrapperObject):
         """Estimate and return the noise level, or None if it cannot be
         """
         if self.dataSource is not None:
-            noise = self.dataSource.estimateNoise()
+            from ccpn.core.lib.SpectrumLib import getNoiseEstimate
+            noiseObj = getNoiseEstimate(self)
+            noise = noiseObj.noiseLevel
         else:
             noise = None
         return noise
@@ -3250,10 +3253,7 @@ class Spectrum(AbstractWrapperObject):
         # Quietly set some values
         getLogger().debug2(f'Updating {self} parameters')
         with inactivity():
-            # getting the noiseLevel by calling estimateNoise() if not defined
-            if self.noiseLevel is None:
-                self.noiseLevel = self.estimateNoise()
-
+            # noiseLevel is not required at startup
             # Check  contourLevels, contourColours
             if self.positiveContourCount == 0 or self.negativeContourCount == 0:
                 self._setDefaultContourValues()
@@ -3998,7 +3998,6 @@ def _newSpectrum(project: Project, path: (str, Path), name: str = None) -> (Spec
         logger.error(f'{dataSource.errorString}')
         return None
 
-    dataSource.estimateNoise()
     spectrum = _newSpectrumFromDataSource(project, dataStore, dataSource, name)
 
     return spectrum

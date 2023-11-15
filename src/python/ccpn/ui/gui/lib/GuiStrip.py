@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-24 13:54:29 +0100 (Tue, October 24, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-15 11:58:49 +0000 (Wed, November 15, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -738,7 +738,7 @@ class GuiStrip(Frame):
         """
         self.spectrumDisplay.mainWindow.clearMarks()
 
-    def estimateNoise(self):
+    def _showEstimateNoisePopup(self):
         """Estimate noise in the current region
         """
         from ccpn.ui.gui.popups.EstimateNoisePopup import EstimateNoisePopup

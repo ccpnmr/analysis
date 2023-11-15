@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-11-14 17:22:07 +0000 (Tue, November 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-15 11:58:48 +0000 (Wed, November 15, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -1984,8 +1984,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         return regionData
 
-    def estimateNoise(self):
-        """Estimate and return a noise level
+    def _estimateInitialContourBase(self, multiplier=1.41):
+        """Estimate  the ContourBase based on a quick approximation of the noise level.
         Use mean of abs of dataPlane or dataSlice
         """
 
@@ -2006,32 +2006,20 @@ class SpectrumDataSourceABC(CcpNmrJson):
             data = data.flatten()
             stdFactor = 2.0
 
-        self.noiseLevel = self._getNoiseLevelForData(data, stdFactor)
-        std = self._getSigmaForData(data)
-        self.spectrum._noiseSD = float(std) # add this property which is needed by the peak.signalToNoiseRatio
-        return self.noiseLevel
-
-    @staticmethod
-    def _getSigmaForData(data):
-        """
-        """
-        std = numpy.std(data)
-        return std
-
-    @staticmethod
-    def _getNoiseLevelForData(data, stdFactor):
-        """ _internal. Decoupling function from Ccpn object.
-        Calculate the Noise level for an array"""
         absData = numpy.absolute(data)
         absData = absData[numpy.isfinite(absData)]
         median = numpy.median(absData)
         _temp = data[numpy.isfinite(data)].astype(numpy.float64)
-        std = SpectrumDataSourceABC._getSigmaForData(data)
+        std = numpy.std(data)
         if std != std:
             # std may still be nan because contains HUGE numbers
             std = 0
         noiseLevel = median + stdFactor * std
-        return noiseLevel
+        positiveContourBase = float(noiseLevel) * multiplier
+
+        return positiveContourBase
+
+
 
     #=========================================================================================
     # Iterators

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-16 13:13:51 +0100 (Mon, October 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-15 11:58:49 +0000 (Wed, November 15, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -416,7 +416,7 @@ class GuiStrip1d(GuiStrip):
 
         visibleSpectra = [sv.spectrum for sv in self.spectrumViews if sv.isDisplayed]
         for spectrum in visibleSpectra:
-            posValue = spectrum.positiveContourBase or spectrum.estimateNoise()
+            posValue = spectrum.positiveContourBase
             if posValue is None:
                 posValue = 0
             negValue = spectrum.negativeContourBase or -posValue

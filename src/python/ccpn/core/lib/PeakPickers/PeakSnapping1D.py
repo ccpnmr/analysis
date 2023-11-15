@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-16 14:45:44 +0100 (Mon, October 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-15 11:58:48 +0000 (Wed, November 15, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -79,7 +79,8 @@ def snap1DPeaksByGroup(peaks, ppmLimit=0.05, unsnappedLimit=1, increaseLimitStep
     _snap1DPeaksByGroup(peaks, ppmLimit=ppmLimit,  figOfMeritLimit=figOfMeritLimit, doNeg=doNeg, rawDataDict=rawDataDict)
     _snap1DPeaksByGroup.count = 1
     unsnappedPeaks = [p for p in peaks if p._temporaryHeightError and p._temporaryHeightError > 0 and p.figureOfMerit >= figOfMeritLimit]
-    if len(unsnappedPeaks) > 0:
+    if False:
+    # if len(unsnappedPeaks) > 0:
         ## Keep increasing the limits to a max until we find new maxima .
         for newLimit in np.arange(ppmLimit, unsnappedLimit + increaseLimitStep, increaseLimitStep):
             _snap1DPeaksByGroup(unsnappedPeaks, ppmLimit=newLimit, figOfMeritLimit=figOfMeritLimit,

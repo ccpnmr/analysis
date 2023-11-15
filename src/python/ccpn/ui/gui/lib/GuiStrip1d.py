@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-11-15 11:58:49 +0000 (Wed, November 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-15 15:01:48 +0000 (Wed, November 15, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -355,15 +355,20 @@ class GuiStrip1d(GuiStrip):
     def _initNoiseThresholdLines(self):
         from ccpn.util.Colour import hexToRgbRatio
         from functools import partial
-
         if not self._noiseThresholdLinesActive:
             return
+
         visibleSpectra = [sv.spectrum for sv in self.spectrumViews if sv.isDisplayed]
         for spectrum in visibleSpectra:
             posValue = spectrum.noiseLevel or spectrum.estimateNoise()
             if posValue is None:
                 posValue = 0
             negValue = spectrum.negativeNoiseLevel or -posValue
+            if spectrum.noiseLevel is None:
+                spectrum.noiseLevel = posValue
+            if spectrum.negativeNoiseLevel is None:
+                spectrum.negativeNoiseLevel = negValue
+
             brush = hexToRgbRatio(spectrum.sliceColour) + (0.3,)  # sliceCol plus an offset
             positiveLine = self._CcpnGLWidget.addInfiniteLine(values=posValue, colour=brush, movable=True, lineStyle='dashed',
                                                               lineWidth=2.0, obj=spectrum, orientation='h', )
@@ -383,6 +388,18 @@ class GuiStrip1d(GuiStrip):
                     spectrum.noiseLevel = value
             else:
                 spectrum.negativeNoiseLevel = value
+
+        # Define the noiseSD, the standard deviation of the region between the lines boundary
+        intensities = np.array(spectrum.intensities)
+        posValue = spectrum.noiseLevel
+        negValue = spectrum.negativeNoiseLevel
+        try:
+            mask = (intensities >= negValue) & (intensities <= posValue)
+            noiseRegion =  intensities[mask]
+            _noiseSD = np.std(noiseRegion)
+            spectrum._noiseSD = _noiseSD
+        except Exception as exc:
+            getLogger().warning(f'Could not set the NoiseStandardDeviation. {exc}')
 
     # -------- Picking Exclusion Area -------- #
 

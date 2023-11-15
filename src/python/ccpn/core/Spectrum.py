@@ -54,7 +54,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-11-15 11:58:48 +0000 (Wed, November 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-15 15:01:48 +0000 (Wed, November 15, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -2252,7 +2252,7 @@ class Spectrum(AbstractWrapperObject):
 
     @property
     def _noiseSD(self):
-        """_CCPN internal. Noise Standard deviation. Called many times to set the peak.signalToNoiseRatio
+        """_CCPN internal. Noise Standard deviation. This property must be cached as it is used by the peak.signalToNoiseRatio
         """
         result = self._getInternalParameter(self._NOISESD)
         if result is None:

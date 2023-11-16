@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-16 12:50:21 +0000 (Thu, November 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-16 12:51:36 +0000 (Thu, November 16, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -151,19 +151,3 @@ class CompoundBaseWidget(Frame, SignalBlocking):
         if target == self.pulldownList and event.type() == QtCore.QEvent.MouseButtonPress:
             self._preSelectCallBack()
         return False
-
-    # def setEnabled(self, state):
-    #     super().setEnabled(state)
-    #
-    #     with contextlib.suppress(Exception):
-    #         # modify the contained widgets - required if they have been bound to a different parent
-    #         for widg in self._widgets:
-    #             widg.setEnabled(state)
-    #
-    # def setVisible(self, state):
-    #     super().setVisible(state)
-    #
-    #     with contextlib.suppress(Exception):
-    #         # modify the contained widgets - required if they have been bound to a different parent
-    #         for widg in self._widgets:
-    #             widg.setVisible(state)

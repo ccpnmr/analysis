@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-13 16:46:31 +0000 (Mon, November 13, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-11-16 15:47:16 +0000 (Thu, November 16, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -106,24 +106,22 @@ class SampleComponentPopup(ComplexAttributeEditorPopupABC):
 
     klass = SampleComponent  # The class whose properties are edited/displayed
     HWIDTH = 150
-    attributes = VList([VList([('Select Source', RadioButtonsCompoundWidget, None, None, None, None, {'texts'      : BUTTONSTATES,
-                                                                                                      'selectedInd': 1,
-                                                                                                      'direction'  : 'h',
-                                                                                                      'hAlign'     : 'l'}),
-                               ('Current Substances', PulldownListCompoundWidget, None, None, _getCurrentSubstances, None, {'editable': False}),
-                               ],
-                              queueStates=False,
-                              hWidth=None,
-                              group=1,
-                              ),
-                        ('Name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
-                        ('Labelling', PulldownListCompoundWidget, getattr, _setLabelling, _getLabelling, None, {'editable': True,
-                                                                                                                'backgroundText': '> Enter user label <'}),
-                        ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
-                        ('Role', PulldownListCompoundWidget, getattr, _setSampleComponentAttrib, _getRoleTypes, None, {'editable': False}),
-                        ('Concentration Unit', PulldownListCompoundWidget, getattr, _setSampleComponentAttrib, _getConcentrationUnits, None, {'editable': False}),
-                        ('Concentration', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'minimum': 0}),
-                        ],
+    attributes = VList(VList(('Select Source', RadioButtonsCompoundWidget, None, None, None, None, {'texts'      : BUTTONSTATES,
+                                                                                                    'selectedInd': 1,
+                                                                                                    'direction'  : 'h',
+                                                                                                    'hAlign'     : 'l'}),
+                             ('Current Substances', PulldownListCompoundWidget, None, None, _getCurrentSubstances, None, {'editable': False}),
+                             queueStates=False,
+                             hWidth=None,
+                             group=1,
+                             ),
+                       ('Name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
+                       ('Labelling', PulldownListCompoundWidget, getattr, _setLabelling, _getLabelling, None, {'editable'      : True,
+                                                                                                               'backgroundText': '> Enter user label <'}),
+                       ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
+                       ('Role', PulldownListCompoundWidget, getattr, _setSampleComponentAttrib, _getRoleTypes, None, {'editable': False}),
+                       ('Concentration Unit', PulldownListCompoundWidget, getattr, _setSampleComponentAttrib, _getConcentrationUnits, None, {'editable': False}),
+                       ('Concentration', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'minimum': 0}),
                        hWidth=None,
                        group=1,
                        )

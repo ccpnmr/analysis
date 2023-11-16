@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-07-07 12:19:19 +0100 (Fri, July 07, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-11-16 15:47:17 +0000 (Thu, November 16, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -48,9 +48,9 @@ class CompoundView(QGraphicsView, Base):
         super(CompoundView, self).__init__(parent)
         Base._init(self, **kwds)
 
-        self.scene = QGraphicsScene(self)
-        self.scene.setSceneRect(0, 0, 300, 300)
-        self.setScene(self.scene)
+        _scene = QGraphicsScene(self)
+        _scene.setSceneRect(0, 0, 300, 300)
+        self.setScene(_scene)
         self.setCacheMode(QGraphicsView.CacheBackground)
         # QtWidgets.QGraphicsView.__init__(self, parent)
 
@@ -99,8 +99,8 @@ class CompoundView(QGraphicsView, Base):
         self.setInteractive(True)
         self.resetView()
 
-        self.selectionBox = SelectionBox(self.scene, self)
-        self.scene.addItem(self.selectionBox)
+        self.selectionBox = SelectionBox(self.scene(), self)
+        self.scene().addItem(self.selectionBox)
 
         self.editAtom = None
         self.editWidget = QtWidgets.QLineEdit()
@@ -114,7 +114,7 @@ class CompoundView(QGraphicsView, Base):
         #self.editWidget.setGraphicsEffect(effect)
         self.editWidget.returnPressed.connect(self.setAtomName)
         self.editWidget.hide()
-        self.editProxy = self.scene.addWidget(self.editWidget)
+        self.editProxy = self.scene().addWidget(self.editWidget)
         self.editProxy.setZValue(2)
 
         # self.setBackgroundBrush(self.backgroundColor)
@@ -138,7 +138,7 @@ class CompoundView(QGraphicsView, Base):
         self._setFocusColour()
 
     def setSmiles(self, smiles):
-        'set the smiles'
+        """set the smiles"""
         compound = importSmiles(smiles)
         variant = list(compound.variants)[0]
         self.setVariant(variant)
@@ -165,9 +165,17 @@ class CompoundView(QGraphicsView, Base):
                      "}" % (noFocusColour, focusColour)
         self.setStyleSheet(styleSheet)
 
-    def resizeEvent(self, event):
+    def minimumSizeHint(self):
+        return QtCore.QSize(200, 200)
 
-        return QtWidgets.QGraphicsView.resizeEvent(self, event)
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+
+        self.resetCachedContent()
+        self.fitInView(self.scene().itemsBoundingRect(), Qt.KeepAspectRatio)
+        self.zoomLevel = 1.0
+
+        # return QtWidgets.QGraphicsView.resizeEvent(self, event)
 
     # def paintEvent(self, event: QtGui.QPaintEvent):
     #   return QtWidgets.QGraphicsView.paintEvent(self, event)
@@ -380,7 +388,7 @@ class CompoundView(QGraphicsView, Base):
     def setVariant(self, variant):
 
         if variant is not self.variant:
-            scene = self.scene
+            scene = self.scene()
 
             self.atomViews = {}
             self.selectedViews = set()
@@ -410,7 +418,7 @@ class CompoundView(QGraphicsView, Base):
     def updateAll(self):
 
         var = self.variant
-        scene = self.scene
+        scene = self.scene()
 
         if var:
             getView = self.atomViews.get
@@ -463,7 +471,7 @@ class CompoundView(QGraphicsView, Base):
         if not self.variant:
             return
 
-        scene = self.scene
+        scene = self.scene()
 
         # Draw groups
 
@@ -552,7 +560,7 @@ class CompoundView(QGraphicsView, Base):
                     printer.setOutputFileName(filePath)
                     pdfPainter = QtGui.QPainter(printer)
                     self.bondColor = Qt.black
-                    scene = self.scene
+                    scene = self.scene()
                     items = scene.items()
                     cache = [None] * len(items)
                     for i, item in enumerate(items):
@@ -568,7 +576,7 @@ class CompoundView(QGraphicsView, Base):
 
         if self.compound:
             printer = QtSvg.QSvgGenerator()
-            scene = self.scene
+            scene = self.scene()
 
             w = scene.width()
             h = scene.height()
@@ -1227,7 +1235,7 @@ class AtomLabel(QtWidgets.QGraphicsItem):
         super(AtomLabel, self).__init__()
 
         # QtWidgets.QGraphicsItem.__init__(self)
-        self.scene = scene
+        self._scene = scene
 
         #effect = QtWidgets.QGraphicsDropShadowEffect(compoundView)
         #effect.setBlurRadius(SHADOW_RADIUS)
@@ -1349,7 +1357,7 @@ class AtomLabel(QtWidgets.QGraphicsItem):
 class SelectionBox(QtWidgets.QGraphicsItem):
 
     def __init__(self, scene, compoundView):
-        super(SelectionBox, self).__init__()
+        super().__init__()
         # QtWidgets.QGraphicsItem.__init__(self)
         # self._scene = scene
         # print(self.scene(), scene, 'TEST')
@@ -1400,7 +1408,7 @@ class AtomGroupItem(QtWidgets.QGraphicsItem):
     def __init__(self, scene, compoundView, atomGroup):
         super(AtomGroupItem, self).__init__()
         # QtWidgets.QGraphicsItem.__init__(self)
-        self.scene = scene
+        self._scene = scene
 
         compoundView.groupItems[atomGroup] = self
 
@@ -1606,7 +1614,7 @@ class AtomItem(QtWidgets.QGraphicsItem):
         super(AtomItem, self).__init__()
 
         # QtWidgets.QGraphicsItem.__init__(self)
-        self.scene = scene
+        self._scene = scene
 
         compoundView.atomViews[atom] = self
 
@@ -1647,7 +1655,7 @@ class AtomItem(QtWidgets.QGraphicsItem):
         self.freeDrag = False
 
         self.atomLabel = AtomLabel(scene, self, compoundView, atom)
-        compoundView.scene.addItem(self.atomLabel)
+        compoundView.scene().addItem(self.atomLabel)
 
         self.syncToAtom()
 
@@ -1962,7 +1970,7 @@ class AtomItem(QtWidgets.QGraphicsItem):
         atom = self.atom
         self.deselect()
 
-        scene = compoundView.scene
+        # scene = compoundView.scene()
 
         for bondItem in list(self.bondItems):
             bondItem.delete()
@@ -2578,7 +2586,7 @@ class BondItem(QtWidgets.QGraphicsItem):
         super(BondItem, self).__init__()
 
         # QtWidgets.QGraphicsItem.__init__(self)
-        self.scene = scene
+        self._scene = scene
 
         compoundView.bondItems[bond] = self
 
@@ -4475,7 +4483,7 @@ class VarAtom:
 
         return None
 
-    # This function returns a list of neighbours ranked according to Cahn-Ingold-Prelog rules (not taking more than the fourth level of neighbours into account.
+    # This function returns a list of neighbours ranked according to Cahn-Ingold-Prelog rules (not taking more than the fourth level of neighbours into account).
     # The neighbour with highest priority is first in the returned list.
     def getPriorities(self):
 
@@ -4595,7 +4603,7 @@ class VarAtom:
         for localPriorityList in priorityList:
             score = 0
             for i, (a, p) in enumerate(localPriorityList):
-                score += p * (10 ** ((maxLen - i) * 2))
+                score += p * (10**((maxLen - i) * 2))
 
             localPriorityList.append([None, score])
 
@@ -4606,11 +4614,11 @@ class VarAtom:
         priorityList = []
         maxLen = None
 
-        for list in self.getSecondNeighbourPriorities():
+        for lst in self.getSecondNeighbourPriorities():
 
             localPriorityList = []
-            for a, p in list:
-                if a == None:
+            for a, p in lst:
+                if a is None:
                     continue
 
                 for atom, prio in a.getFirstNeighbourPriorities():
@@ -4623,7 +4631,7 @@ class VarAtom:
                             localPriorityList.append([None, prio])
 
             l = len(localPriorityList)
-            if maxLen == None or l > maxLen:
+            if maxLen is None or l > maxLen:
                 maxLen = l
 
             priorityList.append(localPriorityList)
@@ -4633,7 +4641,7 @@ class VarAtom:
         for localPriorityList in priorityList:
             score = 0
             for i, (a, p) in enumerate(localPriorityList):
-                score += p * (10 ** ((maxLen - i) * 2))
+                score += p * (10**((maxLen - i) * 2))
 
             localPriorityList.append([None, score])
 
@@ -4645,18 +4653,18 @@ class VarAtom:
         maxLen = None
         nextNeighbours = set()
 
-        for list in self.getThirdNeighbourPriorities():
+        for lst in self.getThirdNeighbourPriorities():
 
             localPriorityList = []
-            for a, p in list:
-                if a == None:
+            for a, p in lst:
+                if a is None:
                     continue
 
                 for atom, prio in a.getFirstNeighbourPriorities():
                     localPriorityList.append([atom, prio])
 
             l = len(localPriorityList)
-            if maxLen == None or l > maxLen:
+            if maxLen is None or l > maxLen:
                 maxLen = l
 
             priorityList.append(localPriorityList)
@@ -4666,7 +4674,7 @@ class VarAtom:
         for localPriorityList in priorityList:
             score = 0
             for i, (a, p) in enumerate(localPriorityList):
-                score += p * (10 ** ((maxLen - i) * 2))
+                score += p * (10**((maxLen - i) * 2))
 
             localPriorityList.append([None, score])
 
@@ -6883,7 +6891,7 @@ class Compound:
         return hydrogens
 
 
-def importChemComp(chemComp, variantInd:int=0):
+def importChemComp(chemComp, variantInd: int = 0):
     # Main Compound
 
     ccpCode = chemComp.ccpCode

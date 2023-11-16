@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:29 +0100 (Wed, October 26, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-11-16 15:47:16 +0000 (Thu, November 16, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -71,42 +71,34 @@ class SamplePropertiesPopup(ComplexAttributeEditorPopupABC):
     klass = Sample  # The class whose properties are edited/displayed
     HWIDTH = 50
     SHORTWIDTH = 140
-    attributes = VList([('Name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
-                        ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
-                        # ('amountUnit', RadioButtonsCompoundWidget, _get, _set, None, None, {'texts'      : AMOUNT_UNITS,
-                        #                                                                     'selectedInd': 1,
-                        #                                                                     'direction'  : 'h'}),
-                        HList([VList([('Amount', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'minimum': 0}), ],
-                                     hWidth=None,
-                                     group=1,
-                                     ),
-                               VList([('Amount Units', PulldownListCompoundWidget,
-                                       getattr, _setUnits, partial(_getUnits, unitType='amountUnits', unitList=('',) + AMOUNT_UNITS), None,
-                                       {'editable': False}), ],
-                                     hWidth=None,
-                                     group=2,
-                                     ), ],
-                              hWidth=None,
-                              ),
-                        HList([VList([('Ionic Strength', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'minimum': 0}), ],
-                                     hWidth=None,
-                                     group=1,
-                                     ),
-                               VList([('Ionic Strength Units', PulldownListCompoundWidget,
-                                       getattr, _setUnits, partial(_getUnits, unitType='ionicStrengthUnits', unitList=('',) + IONICSTRENGTH_UNITS), None,
-                                       {'editable': False}), ],
-                                     hWidth=None,
-                                     group=2,
-                                     ), ],
-                              hWidth=None,
-                              ),
-                        ('pH', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'minimum': 0, 'max': 14, 'decimals': 2}),
-                        ('Batch Identifier', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
-                        ('Plate Identifier', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
-                        ('Row Number', SpinBoxCompoundWidget, getattr, setattr, None, None, {'minimum': 0, 'step': 1}),
-                        ('Column Number', SpinBoxCompoundWidget, getattr, setattr, None, None, {'minimum': 0, 'step': 1}),
-                        ],
+
+    # NOTE:ED - could use a namedTuple here for each item
+
+    attributes = VList(('Name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
+                       ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
+                       HList(VList(('Amount', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'minimum': 0}),
+                                   ('Ionic Strength', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'minimum': 0}),
+                                   hWidth=None,
+                                   group=1,
+                                   ),
+                             VList(('Amount Units', PulldownListCompoundWidget,
+                                    getattr, _setUnits, partial(_getUnits, unitType='amountUnits', unitList=('',) + AMOUNT_UNITS), None,
+                                    {'editable': False}),
+                                   ('Ionic Strength Units', PulldownListCompoundWidget,
+                                    getattr, _setUnits, partial(_getUnits, unitType='ionicStrengthUnits', unitList=('',) + IONICSTRENGTH_UNITS), None,
+                                    {'editable': False}),
+                                   hWidth=None,
+                                   group=2,
+                                   ),
+                             hWidth=None,
+                             ),
+                       ('pH', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'minimum': 0, 'max': 14, 'decimals': 2}),
+                       ('Batch Identifier', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
+                       ('Plate Identifier', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
+                       ('Row Number', SpinBoxCompoundWidget, getattr, setattr, None, None, {'minimum': 0, 'step': 1}),
+                       ('Column Number', SpinBoxCompoundWidget, getattr, setattr, None, None, {'minimum': 0, 'step': 1}),
                        hWidth=None,
+                       group=3,
                        )
 
     FIXEDWIDTH = True

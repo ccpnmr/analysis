@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-02 12:59:55 +0000 (Thu, November 02, 2023) $"
-__version__ = "$Revision: 3.2.0.1 $"
+__dateModified__ = "$dateModified: 2023-11-16 15:47:18 +0000 (Thu, November 16, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -131,8 +131,11 @@ class PulldownList(QtWidgets.QComboBox, Base):
         if self.clickToShowCallback:
             self.popupAboutToBeShown.connect(self.clickToShowCallback)
 
-        self.setStyleSheet('PulldownList { padding: 3px 3px 3px 3px; combobox-popup: 0; }'
-                           'PulldownList:focus { border: 1px solid %(BORDER_FOCUS)s; }' % getColours())
+        # weird behaviour here - the padding needs to be large on the right and background colour needs to be specified
+        self.setStyleSheet('PulldownList { padding: 2px 8px 2px 3px; combobox-popup: 0; background-color: white; color: black; }'
+                           # 'PulldownList:focus { border: 1px solid %(BORDER_FOCUS)s; }'  # overwrites other properties :|
+                           'PulldownList:!enabled { background-color: whitesmoke; color: darkgrey; }'
+                           '' % getColours())
         # this (or similar) can now be added to the stylesheet if needed
         # 'QListView::item { padding: 12px; }')
 
@@ -144,6 +147,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
         if editable:
             self.currentIndexChanged.connect(self._textReady)
             self.lineEdit().editingFinished.connect(self._textReady)
+
         # doesn't work :|
         #     if alignment is not None:
         #         self.lineEdit().setAlignment(alignment)

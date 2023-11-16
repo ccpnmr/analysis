@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-20 18:40:09 +0100 (Thu, April 20, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-11-16 15:47:16 +0000 (Thu, November 16, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 
 import numpy as np
 from PyQt5 import QtCore
+from collections import namedtuple
 from functools import partial
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, _verifyPopupApply
 from ccpn.core.lib.ContextManagers import queueStateChange
@@ -41,6 +42,8 @@ ATTRGETTER = 0
 ATTRSETTER = 1
 ATTRSIGNAL = 2
 ATTRPRESET = 3
+
+Item = namedtuple('Item', 'name widget getFunction, setFunction, presetFunction, callback parameters')
 
 
 def getAttributeTipText(klass, attr):
@@ -76,6 +79,10 @@ def getAttributeTipText(klass, attr):
         return None
 
 
+#=========================================================================================
+# AttributeEditorPopupABC
+#=========================================================================================
+
 class AttributeEditorPopupABC(CcpnDialogMainWidget):
     """
     Abstract base class to implement a popup for editing properties
@@ -87,9 +94,6 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
     # get/set-Function have getattr, setattr profile
     # if setFunction is None: display attribute value without option to change value
     # kwds: optional kwds passed to LineEdit constructor
-
-    # the width of the first column for compound widgets
-    # hWidth = 100
 
     EDITMODE = True
     WINDOWPREFIX = 'Edit '
@@ -135,6 +139,8 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
 
         # populate the widgets
         self._populate()
+        # constraint and align widget sizes
+        self._defineMinimumSizeWidgets()
 
         # set the links to the buttons
         self._postInit()
@@ -156,7 +162,8 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
             _, maxDim = getTextDimensionsFromFont(textList=optionTexts)
             self.hWidth = maxDim.width()
 
-        for row, (_label, attrType, getFunction, setFunction, presetFunction, callback, kwds) in enumerate(self.attributes):
+        for row, attribItem in enumerate(self.attributes):
+            _label, attrType, getFunction, setFunction, presetFunction, callback, kwds = attribItem
 
             # remove whitespaces to give the attribute name in the class
             attr = stringToCamelCase(_label)
@@ -166,8 +173,6 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
             newWidget = attrType(self.mainWidget, mainWindow=self.mainWindow, labelText=_label, editable=editable,
                                  grid=(row, 0),
                                  tipText=tipText, compoundKwds=kwds)  #, **kwds)
-            widths = [self.hWidth] + [None] * (len(newWidget._widgets) - 1)
-            newWidget.setFixedWidths(widths)
 
             # connect the signal
             if attrType and attrType.__name__ in CommonWidgetsEdits:
@@ -192,9 +197,45 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
                 if callback:
                     newWidget.setCallback(callback=partial(callback, self))
 
-            self.edits[attr] = newWidget
+            self.edits[attr] = (newWidget, self.attributes, attribItem)
 
             setattr(self, attr, newWidget)
+
+    def _defineMinimumSizeWidgets(self):
+        groups = {}
+        # iterate to find the minimum heights/widths for the compound widgets
+        for attr, (compWidg, _aSet, _aItem) in self.edits.items():
+            if layout := compWidg.layout():
+                grp = _aSet and getattr(_aSet, '_group', 0)
+                rSize, cSize = groups.setdefault(grp, [np.zeros(layout.rowCount(), dtype=int),
+                                                       np.zeros(layout.columnCount(), dtype=int)])
+
+                for cc in range(layout.count()):
+                    if (itm := layout.itemAt(cc)) and (widg := itm.widget()):
+
+                        size = widg.sizeHint()
+                        row, col, cols, rows = layout.getItemPosition(cc)
+
+                        if row > rSize.shape[0] - 1:
+                            # extend the array if it isn't long enough
+                            np.resize(rSize, row + 1)
+                            rSize[row] = 0
+                        rSize[row] = max(rSize[row], size.height())
+                        if col > cSize.shape[0] - 1:
+                            np.resize(cSize, col + 1)
+                            cSize[col] = 0
+                        cSize[col] = max(cSize[col], size.width())
+
+        # 2nd pass: iterate and set the minimum width constraints - check for heights
+        for attr, (compWidg, _aSet, _aItem) in self.edits.items():
+            if layout := compWidg.layout():
+                grp = _aSet and getattr(_aSet, '_group', 0)
+                rSize, cSize = groups.setdefault(grp, [np.zeros(layout.rowCount(), dtype=int),
+                                                       np.zeros(layout.columnCount(), dtype=int)])
+
+                for col, width in enumerate(cSize):
+                    if width:
+                        layout.setColumnMinimumWidth(col, width)
 
     def _populate(self):
         """Populate the widgets in the popup
@@ -219,7 +260,8 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
                     if getFunction:  # and self.EDITMODE:
                         # set the current value
                         value = getFunction(self.obj, attr, None)
-                        attrSetter(self.edits[attr], value)
+                        compWidget, _attSet, _attItem = self.edits[attr]
+                        attrSetter(compWidget, value)
 
     def _populateInitialValues(self):
         """Populate the initial values for an empty object
@@ -252,7 +294,8 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
 
         if attrType and attrType.__name__ in CommonWidgetsEdits:
             attrGetter = CommonWidgetsEdits[attrType.__name__][ATTRGETTER]
-            value = attrGetter(self.edits[attr])
+            compWidget, _attSet, _attItem = self.edits[attr]
+            value = attrGetter(compWidget)
 
             if getFunction:  # and self.EDITMODE:
                 oldValue = self._getValue(attr, getFunction, None)
@@ -303,10 +346,10 @@ class AttributeListType(DataEnum):
     EMPTYFRAME = 5, 'frame'
 
 
-class AttributeABC():
+class AttributeABC:
     ATTRIBUTELISTTYPE = AttributeListType.VERTICAL
 
-    def __init__(self, attributeList, queueStates=True, newContainer=True, hWidth=100, group=None, **kwds):
+    def __init__(self, *attributeList, queueStates=True, newContainer=True, hWidth=100, fieldWidth=None, group=None, **kwds):
         self._attributes = attributeList
         self._row = 0
         self._col = 0
@@ -315,22 +358,23 @@ class AttributeABC():
         self._container = None
         self._kwds = kwds
         self._hWidth = hWidth
+        self._fieldWidth = fieldWidth
         self._group = group
 
-    def createContainer(self, parent, attribParent, grid=None, gridSpan=(1, 1)):
+    def createContainer(self, parent, attribSet, grid=None, gridSpan=(1, 1), _indent=0):
         # create the new container here, including gridSpan?
-        if attribParent:
-            grid = attribParent.nextGridPosition()
-            attribParent.nextPosition()
+        if attribSet:
+            grid = attribSet.nextGridPosition()
+            attribSet.nextPosition()
         else:
             grid = (0, 0)
 
-        self._container = Frame(parent, setLayout=True, grid=grid, **self._kwds)
-        self._container.getLayout().setAlignment(QtCore.Qt.AlignTop)
+        self._content = self._container = Frame(parent, setLayout=True, grid=grid, **self._kwds)
+        self._container.getLayout().setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
         self.nextPosition()
         return self._container
 
-    def addAttribItem(self, parentRoot, attribItem):
+    def addAttribItem(self, parentRoot, attribItem, _indent=0):
         # add a new widget to the current container
         if not self._container:
             raise RuntimeError('Container not instantiated')
@@ -348,7 +392,7 @@ class AttributeABC():
         newWidget = attrType(self._container, mainWindow=parentRoot.mainWindow,
                              labelText=_label, editable=editable,
                              grid=(self._row, self._col),
-                             fixedWidths=(self._hWidth, None),
+                             # fixedWidths=(self._hWidth, self._fieldWidth, None, None, None),  # not very nice, but simple :|
                              tipText=tipText, compoundKwds=kwds)  #, **kwds)
 
         # connect the signal
@@ -374,7 +418,7 @@ class AttributeABC():
             if callback:
                 newWidget.setCallback(callback=partial(callback, self))
 
-        parentRoot.edits[attr] = newWidget
+        parentRoot.edits[attr] = (newWidget, self, attribItem)
         if self._queueStates:
             parentRoot._VALIDATTRS.add(attr)
 
@@ -408,20 +452,24 @@ class HList(AttributeABC):
 class MoreLess(AttributeABC):
     ATTRIBUTELISTTYPE = AttributeListType.MORELESS
 
-    def createContainer(self, parent, attribParent, grid=None, gridSpan=(1, 1)):
-        # create the new container here, including gridSpan?
-        if attribParent:
-            grid = attribParent.nextGridPosition()
-            attribParent.nextPosition()
+    def createContainer(self, parent, attribSet, grid=None, gridSpan=(1, 1), _indent=0):
+        # create the new container here, including gridSpan
+        if attribSet:
+            grid = attribSet.nextGridPosition()
+            attribSet.nextPosition()
         else:
             grid = (0, 0)
 
-        _frame = MoreLessFrame(parent, showMore=False, grid=grid, **self._kwds)
+        self._content = _frame = MoreLessFrame(parent, showMore=False, grid=grid, **self._kwds)
         self._container = _frame.contentsFrame
-        self._container.getLayout().setAlignment(QtCore.Qt.AlignTop)
+        self._container.getLayout().setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
         self.nextPosition()
         return self._container
 
+
+#=========================================================================================
+# ComplexAttributeEditorPopupABC
+#=========================================================================================
 
 class ComplexAttributeEditorPopupABC(AttributeEditorPopupABC):
     """
@@ -432,19 +480,23 @@ class ComplexAttributeEditorPopupABC(AttributeEditorPopupABC):
     # each attribute is of type (attributeName, getFunction, setFunction, kwds) tuples;
     # or a container type VList/HList/MoreLess
 
-    def _setAttributeSet(self, parentWidget, attribParent, attribContainer):
+    def _setAttributeSet(self, attribSetParent, attribSet, _indent=0):
 
         # start by making new container
-        attribContainer.createContainer(parentWidget, attribParent)
+        attribSet.createContainer(attribSetParent._container if attribSetParent else self.mainWidget,
+                                  attribSetParent,
+                                  _indent=_indent)
 
-        for attribItem in attribContainer._attributes:
+        for attribItem in attribSet._attributes:
             if isinstance(attribItem, AttributeABC):
                 # recurse into the list
-                self._setAttributeSet(attribContainer._container, attribContainer, attribItem)
+                self._setAttributeSet(attribSet,
+                                      attribItem,
+                                      _indent=_indent + 4)
 
             elif isinstance(attribItem, tuple):
                 # add widget
-                attribContainer.addAttribItem(self, attribItem)
+                attribSet.addAttribItem(self, attribItem)
 
             else:
                 raise RuntimeError('Container not type defined')
@@ -459,12 +511,8 @@ class ComplexAttributeEditorPopupABC(AttributeEditorPopupABC):
         self.edits = {}  # An (attributeName, widgetType) dict
         self._VALIDATTRS = OrderedSet()
 
-        attribGroups = {}
-        self._defineMinimumWidthSet(self.attributes, attribGroups)
-        self._linkAttributeGroups(attribGroups)
-
         # create the list of widgets and set the callbacks for each
-        self._setAttributeSet(self.mainWidget, None, self.attributes)
+        self._setAttributeSet(None, self.attributes)
 
     @staticmethod
     def _linkAttributeGroups(attribGroups):
@@ -476,21 +524,21 @@ class ComplexAttributeEditorPopupABC(AttributeEditorPopupABC):
                     for klass in groups:
                         klass._hWidth = maxHWidth
 
-    def _defineMinimumWidthSet(self, attribContainer, attribGroups):
+    def _defineMinimumWidthSet(self, attribSet, attribGroups):
 
-        if attribContainer._group is not None:
-            if attribContainer._group not in attribGroups:
-                attribGroups[attribContainer._group] = (attribContainer,)
+        if attribSet._group is not None:
+            if attribSet._group not in attribGroups:
+                attribGroups[attribSet._group] = (attribSet,)
             else:
-                attribGroups[attribContainer._group] += (attribContainer,)
+                attribGroups[attribSet._group] += (attribSet,)
 
-        if not attribContainer._hWidth:
+        if not attribSet._hWidth:
             # calculate a new _hWidth if undefined
-            optionTexts = [attribItem[0] for attribItem in attribContainer._attributes if isinstance(attribItem, tuple)]
+            optionTexts = [attribItem[0] for attribItem in attribSet._attributes if isinstance(attribItem, tuple)]
             _, maxDim = getTextDimensionsFromFont(textList=optionTexts)
-            attribContainer._hWidth = maxDim.width()
+            attribSet._hWidth = maxDim.width()
 
-        for attribItem in attribContainer._attributes:
+        for attribItem in attribSet._attributes:
             if isinstance(attribItem, AttributeABC):
                 # recurse into the list
                 self._defineMinimumWidthSet(attribItem, attribGroups)
@@ -523,7 +571,9 @@ class ComplexAttributeEditorPopupABC(AttributeEditorPopupABC):
                     if getFunction:  # and self.EDITMODE:
                         # set the current value
                         value = getFunction(self.obj, attr, None)
-                        attrSetter(self.edits[attr], value)
+                        compWidget, _attSet, _attItem = self.edits[attr]
+                        attrSetter(compWidget, value)
+                        # attrSetter(self.edits[attr], value)
 
             else:
                 raise RuntimeError('Container type not defined')

@@ -1,19 +1,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:25:09 +0100 (Mon, September 13, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2023-11-17 17:08:04 +0000 (Fri, November 17, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -35,28 +35,39 @@ class Test_makeNmrAtom(WrapperTesting):
         c = self.project.newNmrChain()
         r = c.newNmrResidue()
         a = r.newNmrAtom(isotopeCode='15N')
-        # Undo and redo all operations
-        self.undo.undo()
-        self.undo.redo()
         self.assertEqual(a.isotopeCode, '15N')
+
+        # Test undo redo using PID
+        self.undo_redo_tester(a)
 
     def test_createNmrAtom_withName(self):
         c = self.project.newNmrChain()
         r = c.newNmrResidue()
         a = r.newNmrAtom(name='CA')
-        # Undo and redo all operations
-        self.undo.undo()
-        self.undo.redo()
         self.assertEqual(a.name, 'CA')
+
+        # Undo and redo all operations
+        self.undo_redo_tester(a)
 
     def test_fetchNmrAtom(self):
         c = self.project.newNmrChain()
         r = c.newNmrResidue()
-        a = r.fetchNmrAtom(name='CB')
-        # Undo and redo all operations
+        # test fetching
+        created_a = r.newNmrAtom(name='CB')
+        self.assertEqual(created_a.name, 'CB')
+        fetched_a = r.fetchNmrAtom(name='CB')
+        self.assertEqual(fetched_a, created_a)
+
+        # test undo redo
+        self.undo_redo_tester(fetched_a)
+
+    def undo_redo_tester(self, undo_obj):
+        undo_obj_ref = undo_obj.__repr__()
         self.undo.undo()
+        self.assertNotEqual(undo_obj_ref, undo_obj.__repr__())
         self.undo.redo()
-        self.assertEqual(a.name, 'CB')
+        self.assertEqual(undo_obj_ref, undo_obj.__repr__())
+
 
 
 class Test_chemicalShift(WrapperTesting):

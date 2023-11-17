@@ -1993,8 +1993,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
             from ccpn.core.lib.SpectrumLib import estimateNoiseLevel1D
 
             data = self.getSliceData()
-            noiseLevel, neg = estimateNoiseLevel1D(data, f=3, stdFactor=1.5)
-            self.noiseLevel = abs(noiseLevel) + 1e-4
+            noiseLevel, neg = estimateNoiseLevel1D(data, f=3, stdFactor = 1.5)
+            self.noiseLevel = abs(noiseLevel) or 1e-4
             return self.noiseLevel
 
         elif self.dimensionCount == 2:

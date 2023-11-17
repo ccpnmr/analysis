@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-11-15 15:28:21 +0000 (Wed, November 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-17 11:14:30 +0000 (Fri, November 17, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -42,8 +42,7 @@ from ccpn.core.lib.SpectrumLib import _filterROI1Darray
 ########################################################################################################################
 
 PipeName = 'Peak Picking Thresholds'
-ManualNoiseThreshold = 'Noise_Threshold'
-UseRegion = 'Calibration_region'
+ManualThresholdLimits = 'ManualThresholdLimits'
 Auto = 'Auto'
 Manual = 'Manual'
 Modes = [Auto, Manual]
@@ -76,10 +75,10 @@ class PeakPickingThresholdGuiPipe(GuiPipe):
 
         # manual noise widgets
         i += 1
-        self.noiseThresholdLabel = Label(self.pipeFrame, text=ManualNoiseThreshold, grid=(i, 0))
-        setattr(self, ManualNoiseThreshold, GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application, colour='green',
-                                                                    orientation='h', decimals=4,
-                                                                    step=0.001, grid=(i, 1)))
+        self.noiseThresholdLabel = Label(self.pipeFrame, text=ManualThresholdLimits, grid=(i, 0))
+        setattr(self, ManualThresholdLimits, GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application, colour='green',
+                                                                     orientation='h', decimals=4,
+                                                                     step=0.001, grid=(i, 1)))
 
         self._changeMode()
 
@@ -92,12 +91,12 @@ class PeakPickingThresholdGuiPipe(GuiPipe):
             self._disableManualNoiseThresholdWidget(False)
 
     def _disableManualNoiseThresholdWidget(self, value:bool):
-        manualNoiseThresholdW = _getWidgetByAtt(self, ManualNoiseThreshold)
+        manualNoiseThresholdW = _getWidgetByAtt(self, ManualThresholdLimits)
         manualNoiseThresholdW.setDisabled(value)
 
     def _closePipe(self):
         'remove the lines from plotwidget if any'
-        _getWidgetByAtt(self, ManualNoiseThreshold)._turnOffPositionPicking()
+        _getWidgetByAtt(self, ManualThresholdLimits)._turnOffPositionPicking()
         self.closePipe()
 
 
@@ -113,8 +112,8 @@ class PeakPickingThresholdPipe(SpectraPipe):
 
 
     _kwargs = {
-        ManualNoiseThreshold: DefaultThreshold,
-        Mode                : DefaultMode,
+        ManualThresholdLimits: DefaultThreshold,
+        Mode                 : DefaultMode,
         }
 
     def runPipe(self, spectra):
@@ -128,8 +127,8 @@ class PeakPickingThresholdPipe(SpectraPipe):
                     positiveContourBase = spectrum.dataSource._estimateInitialContourBase()
                     negativeContourBase = -positiveContourBase
                 else:
-                    positiveContourBase =  max(self._kwargs[ManualNoiseThreshold])
-                    negativeContourBase = min(self._kwargs[ManualNoiseThreshold])
+                    positiveContourBase =  max(self._kwargs[ManualThresholdLimits])
+                    negativeContourBase = min(self._kwargs[ManualThresholdLimits])
                     if negativeContourBase > 0 or negativeContourBase == positiveContourBase:
                         negativeContourBase = -positiveContourBase
 
@@ -137,7 +136,6 @@ class PeakPickingThresholdPipe(SpectraPipe):
                 spectrum.positiveContourBase = positiveContourBase
                 spectrum.negativeContourBase = negativeContourBase
 
-                self._kwargs.update({ManualNoiseThreshold: [spectrum.noiseLevel, spectrum.negativeNoiseLevel]})
             self.pipeline._kwargs.update(self._kwargs)
 
         return spectra

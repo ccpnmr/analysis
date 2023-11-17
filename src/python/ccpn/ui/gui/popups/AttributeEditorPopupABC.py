@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-16 15:47:16 +0000 (Thu, November 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-17 17:43:49 +0000 (Fri, November 17, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -36,6 +36,7 @@ from ccpn.util.Common import makeIterableList, stringToCamelCase
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.ui.gui.widgets.Font import getTextDimensionsFromFont
+from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 
 
 ATTRGETTER = 0
@@ -43,7 +44,7 @@ ATTRSETTER = 1
 ATTRSIGNAL = 2
 ATTRPRESET = 3
 
-Item = namedtuple('Item', 'name widget getFunction, setFunction, presetFunction, callback parameters')
+Item = namedtuple('Item', 'name widget getFunction setFunction presetFunction callback parameters')
 
 
 def getAttributeTipText(klass, attr):
@@ -207,6 +208,9 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
         for attr, (compWidg, _aSet, _aItem) in self.edits.items():
             if layout := compWidg.layout():
                 grp = _aSet and getattr(_aSet, '_group', 0)
+                if not grp:
+                    continue
+
                 rSize, cSize = groups.setdefault(grp, [np.zeros(layout.rowCount(), dtype=int),
                                                        np.zeros(layout.columnCount(), dtype=int)])
 
@@ -230,6 +234,8 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
         for attr, (compWidg, _aSet, _aItem) in self.edits.items():
             if layout := compWidg.layout():
                 grp = _aSet and getattr(_aSet, '_group', 0)
+                if not grp:
+                    continue
                 rSize, cSize = groups.setdefault(grp, [np.zeros(layout.rowCount(), dtype=int),
                                                        np.zeros(layout.columnCount(), dtype=int)])
 
@@ -325,16 +331,20 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
         pass
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Attribute classes
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 NEWHIDDENGROUP = '_NEWHIDDENGROUP'
 CLOSEHIDDENGROUP = '_CLOSEHIDDENGROUP'
 from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
 from ccpn.util.DataEnum import DataEnum
-from collections import namedtuple
+# from collections import namedtuple
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.util.AttrDict import AttrDict
 
 
-AttributeItem = namedtuple('AttributeItem', ('attr', 'attrType', 'getFunction', 'setFunction', 'presetFunction', 'callback', 'kwds',))
+# AttributeItem = namedtuple('AttributeItem', ('attr', 'attrType', 'getFunction', 'setFunction', 'presetFunction', 'callback', 'kwds',))
 
 
 class AttributeListType(DataEnum):
@@ -467,9 +477,43 @@ class MoreLess(AttributeABC):
         return self._container
 
 
-#=========================================================================================
+from ccpn.ui.gui.widgets.HLine import LabeledHLine
+from ccpn.ui.gui.widgets.VLine import LabeledVLine
+
+
+class Separator(AttributeABC):
+
+    def __init__(self, name=None, *args, **kwds):
+        super().__init__()
+        self._name = name or ''
+
+    def createContainer(self, parent, attribSet, grid=None, *args, **kwds):
+        if attribSet:
+            grid = attribSet.nextGridPosition()
+            attribSet.nextPosition()
+        else:
+            grid = (0, 0)
+
+        if attribSet.ATTRIBUTELISTTYPE == AttributeListType.HORIZONTAL:
+            self._frame = LabeledVLine(parent, text=self._name,
+                                       grid=grid, gridSpan=(1, 1), lineWidth=1, height=None, colour=getColours()[DIVIDER])
+        else:
+            self._frame = LabeledHLine(parent, text=self._name,
+                                       grid=grid, gridSpan=(1, 1), lineWidth=1, height=None, colour=getColours()[DIVIDER])
+        self._frame._fixToSizeHint()
+
+        self._content = self._container = None
+        self.nextPosition()
+
+        return self._container
+
+    def setVisible(self, value):
+        self._frame.setVisible(value)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ComplexAttributeEditorPopupABC
-#=========================================================================================
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class ComplexAttributeEditorPopupABC(AttributeEditorPopupABC):
     """
@@ -494,7 +538,7 @@ class ComplexAttributeEditorPopupABC(AttributeEditorPopupABC):
                                       attribItem,
                                       _indent=_indent + 4)
 
-            elif isinstance(attribItem, tuple):
+            elif isinstance(attribItem, Item):
                 # add widget
                 attribSet.addAttribItem(self, attribItem)
 
@@ -524,24 +568,24 @@ class ComplexAttributeEditorPopupABC(AttributeEditorPopupABC):
                     for klass in groups:
                         klass._hWidth = maxHWidth
 
-    def _defineMinimumWidthSet(self, attribSet, attribGroups):
-
-        if attribSet._group is not None:
-            if attribSet._group not in attribGroups:
-                attribGroups[attribSet._group] = (attribSet,)
-            else:
-                attribGroups[attribSet._group] += (attribSet,)
-
-        if not attribSet._hWidth:
-            # calculate a new _hWidth if undefined
-            optionTexts = [attribItem[0] for attribItem in attribSet._attributes if isinstance(attribItem, tuple)]
-            _, maxDim = getTextDimensionsFromFont(textList=optionTexts)
-            attribSet._hWidth = maxDim.width()
-
-        for attribItem in attribSet._attributes:
-            if isinstance(attribItem, AttributeABC):
-                # recurse into the list
-                self._defineMinimumWidthSet(attribItem, attribGroups)
+    # def _defineMinimumWidthSet(self, attribSet, attribGroups):
+    #
+    #     if attribSet._group is not None:
+    #         if attribSet._group not in attribGroups:
+    #             attribGroups[attribSet._group] = (attribSet,)
+    #         else:
+    #             attribGroups[attribSet._group] += (attribSet,)
+    #
+    #     if not attribSet._hWidth:
+    #         # calculate a new _hWidth if undefined
+    #         optionTexts = [attribItem[0] for attribItem in attribSet._attributes if isinstance(attribItem, tuple)]
+    #         _, maxDim = getTextDimensionsFromFont(textList=optionTexts)
+    #         attribSet._hWidth = maxDim.width()
+    #
+    #     for attribItem in attribSet._attributes:
+    #         if isinstance(attribItem, AttributeABC):
+    #             # recurse into the list
+    #             self._defineMinimumWidthSet(attribItem, attribGroups)
 
     def _populateIterator(self, attribList):
         from ccpn.ui.gui.modules.CcpnModule import CommonWidgetsEdits
@@ -552,7 +596,7 @@ class ComplexAttributeEditorPopupABC(AttributeEditorPopupABC):
                 # must be another subgroup of attributes - AttributeABC
                 self._populateIterator(attribItem)
 
-            elif isinstance(attribItem, tuple):
+            elif isinstance(attribItem, Item):
                 # these are now in the containerList
                 attr, attrType, getFunction, _, _presetFunction, _, _ = attribItem
 
@@ -612,7 +656,7 @@ class _complexAttribContainer(AttrDict):
                 # must be another subgroup of attributes - AttributeABC
                 self._setAttributes(attribItem)
 
-            elif isinstance(attribItem, tuple):
+            elif isinstance(attribItem, Item):
                 _label = stringToCamelCase(attribItem[0])
                 self[_label] = None
 

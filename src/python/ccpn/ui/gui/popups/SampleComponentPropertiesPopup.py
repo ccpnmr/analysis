@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-16 15:47:16 +0000 (Thu, November 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-17 17:43:49 +0000 (Fri, November 17, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -27,7 +27,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from ccpn.util.Constants import concentrationUnits
-from ccpn.ui.gui.popups.AttributeEditorPopupABC import ComplexAttributeEditorPopupABC, VList, _complexAttribContainer
+from ccpn.ui.gui.popups.AttributeEditorPopupABC import ComplexAttributeEditorPopupABC, \
+    VList, _complexAttribContainer, Item, Separator
 from ccpn.core.SampleComponent import SampleComponent
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, ScientificSpinBoxCompoundWidget, \
     RadioButtonsCompoundWidget, PulldownListCompoundWidget
@@ -106,22 +107,23 @@ class SampleComponentPopup(ComplexAttributeEditorPopupABC):
 
     klass = SampleComponent  # The class whose properties are edited/displayed
     HWIDTH = 150
-    attributes = VList(VList(('Select Source', RadioButtonsCompoundWidget, None, None, None, None, {'texts'      : BUTTONSTATES,
-                                                                                                    'selectedInd': 1,
-                                                                                                    'direction'  : 'h',
-                                                                                                    'hAlign'     : 'l'}),
-                             ('Current Substances', PulldownListCompoundWidget, None, None, _getCurrentSubstances, None, {'editable': False}),
+    attributes = VList(VList(Item('Select Source', RadioButtonsCompoundWidget, None, None, None, None, {'texts'      : BUTTONSTATES,
+                                                                                                        'selectedInd': 1,
+                                                                                                        'direction'  : 'h',
+                                                                                                        'hAlign'     : 'l'}),
+                             Item('Current Substances', PulldownListCompoundWidget, None, None, _getCurrentSubstances, None, {'editable': False}),
                              queueStates=False,
                              hWidth=None,
                              group=1,
                              ),
-                       ('Name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
-                       ('Labelling', PulldownListCompoundWidget, getattr, _setLabelling, _getLabelling, None, {'editable'      : True,
-                                                                                                               'backgroundText': '> Enter user label <'}),
-                       ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
-                       ('Role', PulldownListCompoundWidget, getattr, _setSampleComponentAttrib, _getRoleTypes, None, {'editable': False}),
-                       ('Concentration Unit', PulldownListCompoundWidget, getattr, _setSampleComponentAttrib, _getConcentrationUnits, None, {'editable': False}),
-                       ('Concentration', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'minimum': 0}),
+                       (_separator := Separator()),  # a bit of a cheat :)
+                       Item('Name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
+                       Item('Labelling', PulldownListCompoundWidget, getattr, _setLabelling, _getLabelling, None, {'editable'      : True,
+                                                                                                                   'backgroundText': '> Enter user label <'}),
+                       Item('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
+                       Item('Role', PulldownListCompoundWidget, getattr, _setSampleComponentAttrib, _getRoleTypes, None, {'editable': False}),
+                       Item('Concentration Unit', PulldownListCompoundWidget, getattr, _setSampleComponentAttrib, _getConcentrationUnits, None, {'editable': False}),
+                       Item('Concentration', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'minimum': 0}),
                        hWidth=None,
                        group=1,
                        )
@@ -159,6 +161,7 @@ class SampleComponentPopup(ComplexAttributeEditorPopupABC):
             self.currentSubstances.setVisible(False)
             self.name.setEnabled(False)
             self.labelling.setEnabled(False)
+            self._separator.setVisible(False)
         else:
             self.selectSource.radioButtons.buttonGroup.buttonClicked.connect(self._changeSource)
             self.currentSubstances.pulldownList.activated.connect(self._fillInfoFromSubstance)

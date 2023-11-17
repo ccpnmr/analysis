@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-16 15:47:16 +0000 (Thu, November 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-17 17:43:49 +0000 (Fri, November 17, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -27,7 +27,8 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 #=========================================================================================
 
 from functools import partial
-from ccpn.ui.gui.popups.AttributeEditorPopupABC import ComplexAttributeEditorPopupABC, VList, HList
+from ccpn.ui.gui.popups.AttributeEditorPopupABC import ComplexAttributeEditorPopupABC, \
+    VList, HList, Item, Separator
 from ccpn.core.Sample import Sample, DEFAULTAMOUNTUNITS, DEFAULTIONICSTRENGTHUNITS
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, ScientificSpinBoxCompoundWidget, \
     SpinBoxCompoundWidget, PulldownListCompoundWidget
@@ -72,31 +73,31 @@ class SamplePropertiesPopup(ComplexAttributeEditorPopupABC):
     HWIDTH = 50
     SHORTWIDTH = 140
 
-    # NOTE:ED - could use a namedTuple here for each item
-
-    attributes = VList(('Name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
-                       ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
-                       HList(VList(('Amount', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'minimum': 0}),
-                                   ('Ionic Strength', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'minimum': 0}),
+    attributes = VList(Item('Name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
+                       Item('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
+                       Separator(),
+                       HList(VList(Item('Amount', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'minimum': 0}),
+                                   Item('Ionic Strength', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'minimum': 0}),
                                    hWidth=None,
                                    group=1,
                                    ),
-                             VList(('Amount Units', PulldownListCompoundWidget,
-                                    getattr, _setUnits, partial(_getUnits, unitType='amountUnits', unitList=('',) + AMOUNT_UNITS), None,
-                                    {'editable': False}),
-                                   ('Ionic Strength Units', PulldownListCompoundWidget,
-                                    getattr, _setUnits, partial(_getUnits, unitType='ionicStrengthUnits', unitList=('',) + IONICSTRENGTH_UNITS), None,
-                                    {'editable': False}),
+                             VList(Item('Amount Units', PulldownListCompoundWidget,
+                                        getattr, _setUnits, partial(_getUnits, unitType='amountUnits', unitList=('',) + AMOUNT_UNITS), None,
+                                        {'editable': False}),
+                                   Item('Ionic Strength Units', PulldownListCompoundWidget,
+                                        getattr, _setUnits, partial(_getUnits, unitType='ionicStrengthUnits', unitList=('',) + IONICSTRENGTH_UNITS), None,
+                                        {'editable': False}),
                                    hWidth=None,
                                    group=2,
                                    ),
                              hWidth=None,
                              ),
-                       ('pH', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'minimum': 0, 'max': 14, 'decimals': 2}),
-                       ('Batch Identifier', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
-                       ('Plate Identifier', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
-                       ('Row Number', SpinBoxCompoundWidget, getattr, setattr, None, None, {'minimum': 0, 'step': 1}),
-                       ('Column Number', SpinBoxCompoundWidget, getattr, setattr, None, None, {'minimum': 0, 'step': 1}),
+                       Separator(),
+                       Item('pH', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'minimum': 0, 'max': 14, 'decimals': 2}),
+                       Item('Batch Identifier', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
+                       Item('Plate Identifier', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
+                       Item('Row Number', SpinBoxCompoundWidget, getattr, setattr, None, None, {'minimum': 0, 'step': 1}),
+                       Item('Column Number', SpinBoxCompoundWidget, getattr, setattr, None, None, {'minimum': 0, 'step': 1}),
                        hWidth=None,
                        group=3,
                        )

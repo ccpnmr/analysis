@@ -1,19 +1,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-28 17:35:34 +0000 (Mon, February 28, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-11-17 17:43:50 +0000 (Fri, November 17, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -23,11 +23,9 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import sys
-from PyQt5 import QtGui, QtCore, QtWidgets
-from ccpn.ui.gui.widgets.Base import Base
+from PyQt5 import QtGui, QtCore
 from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.Label import VerticalLabel
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.util.Colour import hexToRgb
 
@@ -58,7 +56,7 @@ class VLine(Widget):
         self._parent = parent
         self.style = style
         self.colour = colour
-        self.height = width
+        self.width = width
         self.divisor = divisor  #int(height / divisor)
         self.lineWidth = lineWidth
 
@@ -73,10 +71,10 @@ class VLine(Widget):
     def drawLine(self, qp, style=None, colour=None):
 
         geomRect = self.geometry()
-        geomWidth = int(geomRect.width() / self.divisor + 0.5)
-        lineWidth = geomWidth + self.contentsMargins().right()
-        top = geomRect.top()
-        bottom = geomRect.bottom()
+        geomWidth = geomRect.width() // self.divisor
+        lineWidth = geomWidth + self.contentsMargins().left()
+        top = 0
+        bottom = geomRect.height()
 
         if style in self.styles:
             style = self.styles[style]
@@ -89,27 +87,82 @@ class VLine(Widget):
             qp.drawLine(lineWidth, top, lineWidth, bottom)
 
 
-# class LabeledVLine(Frame):
-#     """A class to make a Frame with a Vline - Label - Vline
-#     """
-#
-#     def __init__(self, parent=None, height=30, text=None, bold=False,
-#                  style=VLine.SOLID_LINE, colour=QtCore.Qt.black, lineWidth=2, **kwds):
-#         super(LabeledVLine, self).__init__(parent=parent, setLayout=True, showBorder=False, **kwds)
-#         self.setFixedWidth(height)
-#
-#         # first line
-#         self._line1 = Frame(parent=self, grid=(0, 0), setLayout=True, showBorder=False, hPolicy='expanding')
-#         VLine(self._line1, grid=(0, 0), style=style, colour=colour, lineWidth=lineWidth, height=height, divisor=2)
-#         # the label with text
-#         self._label = Label(parent=self, grid=(0, 1), text=text, bold=bold, hAlign='centre')
-#         # the second line
-#         self._line2 = Frame(parent=self, grid=(0, 2), setLayout=True, showBorder=False, hPolicy='expanding')
-#         VLine(self._line2, grid=(0, 0), style=style, colour=colour, lineWidth=lineWidth, height=height, divisor=2)
-#
-#     def setText(self, text):
-#         """Set the text of the widget"""
-#         self._label.setText(text)
+class LabeledVLine(Frame):
+    """A class to make a Frame with a VLine - Label - VLine
+    """
+
+    def __init__(self, parent=None, width=30, text=None, bold=False, sides='both',
+                 style=VLine.SOLID_LINE, colour=QtCore.Qt.black, lineWidth=2,
+                 **kwds):
+        """
+        Draw a horizontal line and a label
+        :param parent:
+        :param width:
+        :param text:
+        :param bold:
+        :param sides: either of 'both', 'top', 'bottom'
+        :param style:
+        :param colour:
+        :param lineWidth:
+        :param kwds:
+        """
+        if sides not in ['top', 'bottom', 'both']:
+            raise RuntimeError('sides not defined correctly')
+        self._sides = sides
+
+        super().__init__(parent=parent, setLayout=True, showBorder=False, **kwds)
+        width = width if width is not None else 30
+        self.setFixedWidth(width)
+
+        # the label with text
+        self._line1 = VLine(parent=self, grid=(2, 0), style=style, colour=colour, lineWidth=lineWidth, width=width, divisor=2, vPolicy='expanding')
+        self._label = VerticalLabel(parent=self, grid=(1, 0), text=text, bold=bold, orientation='vertical', vPolicy='fixed')
+        self._line2 = VLine(parent=self, grid=(0, 0), style=style, colour=colour, lineWidth=lineWidth, width=width, divisor=2, vPolicy='expanding')
+
+        self._updateLines()
+
+    @property
+    def sides(self):
+        return self._sides
+
+    @sides.setter
+    def sides(self, value):
+        if value not in ['top', 'bottom', 'both']:
+            raise RuntimeError('sides not defined correctly')
+        self._sides = value
+
+        self._updateLines()
+
+    def _updateLines(self):
+        if self._sides == 'bottom':
+            self._line1.show()
+            self._line2.hide()
+        elif self._sides == 'top':
+            self._line1.hide()
+            self._line2.show()
+        else:
+            self._line1.show()
+            self._line2.show()
+        if not (txt := bool(self._label.get())):
+            if self._sides == 'bottom':
+                self._line2.hide()
+            else:
+                self._line1.hide()
+
+        self._label.setVisible(txt)
+
+    def setText(self, text):
+        """Set the text of the widget"""
+        self._label.setText(text)
+        self._updateLines()
+
+    def _fixToSizeHint(self):
+        size = self.sizeHint()
+        val = size.width()
+
+        self._line1.setFixedWidth(val // 2)
+        self._line2.setFixedWidth(val // 2)
+        self.setFixedWidth(val)
 
 
 def main():

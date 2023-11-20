@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-16 15:47:17 +0000 (Thu, November 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-20 12:49:41 +0000 (Mon, November 20, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -824,10 +824,18 @@ class CheckBoxCompoundWidget(CompoundBaseWidget):
     """
     layoutDict = dict(
             # grid positions for label and checkBox for the different orientations
-            left=[(0, 0), (0, 1)],
-            right=[(0, 1), (0, 0)],
-            top=[(0, 0), (1, 0)],
-            bottom=[(1, 0), (0, 0)],
+            left=[(0, 0), (0, 1), (0, 2)],
+            right=[(0, 1), (0, 0), (0, 2)],
+            top=[(0, 0), (1, 0), (2, 0)],
+            bottom=[(1, 0), (0, 0), (2, 0)],
+            )
+    _layoutStretchDict = dict(
+            # list of (stretchType, row, col, stretchValue) for the different orientations
+            # makes the pulldownList stretch to stop flickering
+            left=[('col', None, 0, 0), ('col', None, 1, 1), ('col', None, 2, 100)],
+            right=[('col', None, 0, 0), ('col', None, 1, 1), ('col', None, 2, 100)],
+            top=[('row', 0, None, 0), ('row', 1, None, 1), ('row', 2, None, 100)],
+            bottom=[('row', 0, None, 0), ('row', 1, None, 1), ('row', 2, None, 100)],
             )
 
     def __init__(self, parent=None, mainWindow=None,
@@ -852,6 +860,8 @@ class CheckBoxCompoundWidget(CompoundBaseWidget):
 
         CompoundBaseWidget.__init__(self, parent=parent, layoutDict=self.layoutDict, orientation=orientation,
                                     showBorder=showBorder, **kwds)
+        compoundKwds = compoundKwds or {}
+        spacer = compoundKwds.get('addSpacer', False)
 
         self.label = Label(parent=self, text=labelText, vAlign='center')
         self._addWidget(self.label)
@@ -877,6 +887,22 @@ class CheckBoxCompoundWidget(CompoundBaseWidget):
 
         if fixedWidths is not None:
             self.setFixedWidths(fixedWidths)
+
+        if spacer:
+            _spacer = Spacer(self, 5, 5,
+                             QtWidgets.QSizePolicy.Expanding if orientation in ['left', 'right'] else QtWidgets.QSizePolicy.Fixed,
+                             QtWidgets.QSizePolicy.Expanding if orientation in ['top', 'bottom'] else QtWidgets.QSizePolicy.Fixed,
+                             grid=(0, 0))
+
+        _layout = self.getLayout()
+        # set the stretches for the rows/columns
+        _stretchs = self._layoutStretchDict.get(orientation)
+        sp = len(_stretchs) if spacer else -1
+        for _stretch, row, col, value in _stretchs[:sp]:
+            if _stretch == 'col':
+                _layout.setColumnStretch(col, value)
+            else:
+                _layout.setRowStretch(row, value)
 
     def isChecked(self):
         """Convenience: Return whether checkBox is checked"""

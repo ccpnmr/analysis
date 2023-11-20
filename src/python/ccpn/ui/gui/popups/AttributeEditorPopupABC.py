@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-17 17:43:49 +0000 (Fri, November 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-20 12:49:41 +0000 (Mon, November 20, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -30,13 +30,30 @@ import numpy as np
 from PyQt5 import QtCore
 from collections import namedtuple
 from functools import partial
-from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, _verifyPopupApply
 from ccpn.core.lib.ContextManagers import queueStateChange
 from ccpn.util.Common import makeIterableList, stringToCamelCase
-from ccpn.ui.gui.lib.ChangeStateHandler import changeState
 from ccpn.util.OrderedSet import OrderedSet
-from ccpn.ui.gui.widgets.Font import getTextDimensionsFromFont
+from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, _verifyPopupApply
+from ccpn.ui.gui.lib.ChangeStateHandler import changeState
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
+from ccpn.ui.gui.widgets.LineEdit import LineEdit
+from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.RadioButton import RadioButton
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
+from ccpn.ui.gui.widgets.Slider import Slider
+from ccpn.ui.gui.widgets.Spinbox import Spinbox
+from ccpn.ui.gui.widgets.TextEditor import TextEditor
+from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
+from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
+from ccpn.ui.gui.widgets.PythonEditor import QCodeEditor
+from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
+from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget, CheckBoxCompoundWidget, \
+    DoubleSpinBoxCompoundWidget, SelectorWidget, InputPulldown, \
+    ColourSelectionWidget, LineEditPopup, ListCompoundWidget, EntryCompoundWidget, TextEditorCompoundWidget, \
+    RadioButtonsCompoundWidget, ScientificSpinBoxCompoundWidget, SpinBoxCompoundWidget, EntryPathCompoundWidget
 
 
 ATTRGETTER = 0
@@ -44,8 +61,57 @@ ATTRSETTER = 1
 ATTRSIGNAL = 2
 ATTRPRESET = 3
 
+_commonWidgetsEdits = {
+    CheckBox.__name__                       : (CheckBox.get, CheckBox.setChecked, None),
+    ColourDialog.__name__                   : (ColourDialog.getColor, ColourDialog.setColour, None),
+    DoubleSpinbox.__name__                  : (DoubleSpinbox.value, DoubleSpinbox.setValue, None),
+    ScientificDoubleSpinBox.__name__        : (ScientificDoubleSpinBox.value, ScientificDoubleSpinBox.setValue, None),
+
+    LineEdit.__name__                       : (LineEdit.get, LineEdit.setText, None),
+    LineEditButtonDialog.__name__           : (LineEditButtonDialog.get, LineEditButtonDialog.setText, None),
+    PulldownList.__name__                   : (PulldownList.currentText, PulldownList.set, None),
+    RadioButtons.__name__                   : (RadioButtons.get, RadioButtons.set, None),
+    RadioButton.__name__                    : (RadioButton.isChecked, RadioButton.setChecked, None),
+
+    Slider.__name__                         : (Slider.get, Slider.setValue, None),
+    Spinbox.__name__                        : (Spinbox.value, Spinbox.set, None),
+    TextEditor.__name__                     : (TextEditor.get, TextEditor.setText, None),
+    GLTargetButtonSpinBoxes.__name__        : (GLTargetButtonSpinBoxes.get, GLTargetButtonSpinBoxes.setValues, None),
+
+    PulldownListCompoundWidget.__name__     : (PulldownListCompoundWidget.getText, PulldownListCompoundWidget.select,
+                                               ('pulldownList.activated', 'pulldownList.pulldownTextEdited')),
+
+    ListCompoundWidget.__name__             : (ListCompoundWidget.getTexts, ListCompoundWidget.setTexts, None),
+    CheckBoxCompoundWidget.__name__         : (CheckBoxCompoundWidget.get, CheckBoxCompoundWidget.set, None),
+    DoubleSpinBoxCompoundWidget.__name__    : (DoubleSpinBoxCompoundWidget.getValue, DoubleSpinBoxCompoundWidget.setValue,
+                                               ('doubleSpinBox.valueChanged')),
+    ScientificSpinBoxCompoundWidget.__name__: (ScientificSpinBoxCompoundWidget.getValue, ScientificSpinBoxCompoundWidget.setValue,
+                                               ('scientificSpinBox.valueChanged')),
+    SpinBoxCompoundWidget.__name__          : (SpinBoxCompoundWidget.getValue, SpinBoxCompoundWidget.setValue,
+                                               ('spinBox.valueChanged')),
+
+    SelectorWidget.__name__                 : (SelectorWidget.getText, SelectorWidget.select, None),
+    InputPulldown.__name__                  : (InputPulldown.currentText, InputPulldown.set, None),
+    ColourSelectionWidget.__name__          : (ColourSelectionWidget.currentText, ColourSelectionWidget.setColour, None),
+    LineEditPopup.__name__                  : (LineEditPopup.get, LineEditPopup.set, None),
+    QCodeEditor.__name__                    : (QCodeEditor.get, QCodeEditor.set, None),
+
+    EntryCompoundWidget.__name__            : (EntryCompoundWidget.getText, EntryCompoundWidget.setText, 'entry.textEdited'),
+    TextEditorCompoundWidget.__name__       : (TextEditorCompoundWidget.getText, TextEditorCompoundWidget.setText, 'textEditor.textChanged'),
+    NmrChainPulldown.__name__               : (NmrChainPulldown.getText, NmrChainPulldown.select, 'pulldownList.activated'),
+    RadioButtonsCompoundWidget.__name__     : (RadioButtonsCompoundWidget.getIndex, RadioButtonsCompoundWidget.setIndex,
+                                               'radioButtons.buttonGroup.buttonClicked'),
+    EntryPathCompoundWidget.__name__        : (EntryPathCompoundWidget.getText, EntryPathCompoundWidget.setText, 'entry.lineEdit.textChanged'),
+    # ADD TABLES
+    # ADD Others
+    }
+
 Item = namedtuple('Item', 'name widget getFunction setFunction presetFunction callback parameters')
 
+
+#=========================================================================================
+# General methods
+#=========================================================================================
 
 def getAttributeTipText(klass, attr):
     """Generate a tipText from the attribute of the given class.
@@ -153,15 +219,13 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
     def _setAttributeWidgets(self):
         """Create the attributes in the main widget area
         """
-        from ccpn.ui.gui.modules.CcpnModule import CommonWidgetsEdits
-
         self.edits = {}  # An (attributeName, widgetType) dict
 
-        if self.hWidth is None:
-            # set the hWidth for the popup
-            optionTexts = [attr for attr, _, _, _, _, _, _ in self.attributes]
-            _, maxDim = getTextDimensionsFromFont(textList=optionTexts)
-            self.hWidth = maxDim.width()
+        # if self.hWidth is None:
+        #     # set the hWidth for the popup
+        #     optionTexts = [attr for attr, _, _, _, _, _, _ in self.attributes]
+        #     _, maxDim = getTextDimensionsFromFont(textList=optionTexts)
+        #     self.hWidth = maxDim.width()
 
         for row, attribItem in enumerate(self.attributes):
             _label, attrType, getFunction, setFunction, presetFunction, callback, kwds = attribItem
@@ -176,8 +240,8 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
                                  tipText=tipText, compoundKwds=kwds)  #, **kwds)
 
             # connect the signal
-            if attrType and attrType.__name__ in CommonWidgetsEdits:
-                attrSignalTypes = CommonWidgetsEdits[attrType.__name__][ATTRSIGNAL]
+            if attrType and attrType.__name__ in _commonWidgetsEdits:
+                attrSignalTypes = _commonWidgetsEdits[attrType.__name__][ATTRSIGNAL]
 
                 for attrST in makeIterableList(attrSignalTypes):
                     this = newWidget
@@ -208,7 +272,8 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
         for attr, (compWidg, _aSet, _aItem) in self.edits.items():
             if layout := compWidg.layout():
                 grp = _aSet and getattr(_aSet, '_group', 0)
-                if not grp:
+                if grp is None:
+                    # is _group is not defined will default to 0 and will align, specify None to skip alignment
                     continue
 
                 rSize, cSize = groups.setdefault(grp, [np.zeros(layout.rowCount(), dtype=int),
@@ -234,7 +299,8 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
         for attr, (compWidg, _aSet, _aItem) in self.edits.items():
             if layout := compWidg.layout():
                 grp = _aSet and getattr(_aSet, '_group', 0)
-                if not grp:
+                if grp is None:
+                    # is _group is not defined will default to 0 and will align, specify None to skip alignment
                     continue
                 rSize, cSize = groups.setdefault(grp, [np.zeros(layout.rowCount(), dtype=int),
                                                        np.zeros(layout.columnCount(), dtype=int)])
@@ -246,8 +312,6 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
     def _populate(self):
         """Populate the widgets in the popup
         """
-        from ccpn.ui.gui.modules.CcpnModule import CommonWidgetsEdits
-
         self._changes.clear()
         with self._changes.blockChanges():
             for _label, attrType, getFunction, _, _presetFunction, _, _ in self.attributes:
@@ -255,8 +319,8 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
                 attr = stringToCamelCase(_label)
 
                 # populate the widget
-                if attr in self.edits and attrType and attrType.__name__ in CommonWidgetsEdits:
-                    thisEdit = CommonWidgetsEdits[attrType.__name__]
+                if attr in self.edits and attrType and attrType.__name__ in _commonWidgetsEdits:
+                    thisEdit = _commonWidgetsEdits[attrType.__name__]
                     attrSetter = thisEdit[ATTRSETTER]
 
                     if _presetFunction:
@@ -296,10 +360,9 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
         """Queue the function for setting the attribute in the calling object (dim needs to stay for the decorator)
         """
         # _value needs to be None because this is also called by widget.callBack which does not add the extra parameter
-        from ccpn.ui.gui.modules.CcpnModule import CommonWidgetsEdits
 
-        if attrType and attrType.__name__ in CommonWidgetsEdits:
-            attrGetter = CommonWidgetsEdits[attrType.__name__][ATTRGETTER]
+        if attrType and attrType.__name__ in _commonWidgetsEdits:
+            attrGetter = _commonWidgetsEdits[attrType.__name__][ATTRGETTER]
             compWidget, _attSet, _attItem = self.edits[attr]
             value = attrGetter(compWidget)
 
@@ -389,8 +452,6 @@ class AttributeABC:
         if not self._container:
             raise RuntimeError('Container not instantiated')
 
-        from ccpn.ui.gui.modules.CcpnModule import CommonWidgetsEdits
-
         # add widget here
         _label, attrType, getFunction, setFunction, presetFunction, callback, kwds = attribItem
 
@@ -406,8 +467,8 @@ class AttributeABC:
                              tipText=tipText, compoundKwds=kwds)  #, **kwds)
 
         # connect the signal
-        if attrType and attrType.__name__ in CommonWidgetsEdits:
-            attrSignalTypes = CommonWidgetsEdits[attrType.__name__][ATTRSIGNAL]
+        if attrType and attrType.__name__ in _commonWidgetsEdits:
+            attrSignalTypes = _commonWidgetsEdits[attrType.__name__][ATTRSIGNAL]
 
             for attrST in makeIterableList(attrSignalTypes):
                 this = newWidget
@@ -588,8 +649,6 @@ class ComplexAttributeEditorPopupABC(AttributeEditorPopupABC):
     #             self._defineMinimumWidthSet(attribItem, attribGroups)
 
     def _populateIterator(self, attribList):
-        from ccpn.ui.gui.modules.CcpnModule import CommonWidgetsEdits
-
         for attribItem in attribList._attributes:
 
             if isinstance(attribItem, AttributeABC):
@@ -604,8 +663,8 @@ class ComplexAttributeEditorPopupABC(AttributeEditorPopupABC):
                 attr = stringToCamelCase(attr)
 
                 # populate the widget
-                if attr in self.edits and attrType and attrType.__name__ in CommonWidgetsEdits:
-                    thisEdit = CommonWidgetsEdits[attrType.__name__]
+                if attr in self.edits and attrType and attrType.__name__ in _commonWidgetsEdits:
+                    thisEdit = _commonWidgetsEdits[attrType.__name__]
                     attrSetter = thisEdit[ATTRSETTER]
 
                     if _presetFunction:

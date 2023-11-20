@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-13 11:55:48 +0100 (Tue, June 13, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-11-20 16:55:26 +0000 (Mon, November 20, 2023) $"
+__version__ = "$Revision: 3.2.0.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1966,13 +1966,16 @@ class Gui1dWidget(CcpnGLWidget):
         for ii, ind in enumerate(indices[:2]):
             lastStartCoordinate[ii] = peak.height if ind is None else peak.position[ind]
 
-    def _movePeak(self, peak, deltaPosition):
+    @staticmethod
+    def _movePeak(peak, deltaPosition):
         """Move the peak to new position
         """
         peak.height += deltaPosition[1]
         position = peak.position[0]
         position += deltaPosition[0]
         peak.position = [position]
+        peak.volume = None
+        peak.lineWidths = None
 
     def _tracesNeedUpdating(self, spectrumView=None):
         """Check if traces need updating on _lastTracePoint, use spectrumView to see

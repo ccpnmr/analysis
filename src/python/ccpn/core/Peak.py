@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-04 15:40:55 +0100 (Fri, August 04, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-11-20 16:55:26 +0000 (Mon, November 20, 2023) $"
+__version__ = "$Revision: 3.2.0.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -400,8 +400,13 @@ class Peak(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
     def boxWidths(self, value: Sequence):
-        for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
-            peakDim.boxWidth = value[ii]
+        if value is None:
+            # set all dimensions to None
+            for peakDim in self._wrappedData.sortedPeakDims():
+                peakDim.boxWidth = None
+        else:
+            for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+                peakDim.boxWidth = value[ii]
 
     @property
     def lineWidths(self) -> Tuple[Optional[float], ...]:
@@ -412,9 +417,14 @@ class Peak(AbstractWrapperObject):
     @lineWidths.setter
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
-    def lineWidths(self, value: Sequence):
-        for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
-            peakDim.lineWidth = value[ii]
+    def lineWidths(self, value: Optional[Sequence]):
+        if value is None:
+            # set all dimensions to None
+            for peakDim in self._wrappedData.sortedPeakDims():
+                peakDim.lineWidth = None
+        else:
+            for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+                peakDim.lineWidth = value[ii]
 
     # @property
     # def ppmLineWidths(self) -> Tuple[Optional[float], ...]:

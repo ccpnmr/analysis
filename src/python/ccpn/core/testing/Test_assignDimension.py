@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2023-11-17 17:08:04 +0000 (Fri, November 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-20 12:07:56 +0000 (Mon, November 20, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -27,6 +27,14 @@ from ccpn.core.lib.AxisCodeLib import axisCodeMatch
 from ccpn.core.testing.WrapperTesting import WrapperTesting
 
 
+def undo_redo_tester(self, undo_obj):
+    """tests undo redo functionality by comparing change in object representations/PIDs"""
+    undo_obj_id = undo_obj.__repr__()
+    self.undo.undo()
+    self.assertNotEqual(undo_obj_id, undo_obj.__repr__())
+    self.undo.redo()
+    self.assertEqual(undo_obj_id, undo_obj.__repr__())
+
 class Test_makeNmrAtom(WrapperTesting):
     # Path of project to load (None for new project)
     projectPath = None
@@ -38,7 +46,7 @@ class Test_makeNmrAtom(WrapperTesting):
         self.assertEqual(a.isotopeCode, '15N')
 
         # Test undo redo using PID
-        self.undo_redo_tester(a)
+        undo_redo_tester(self, a)
 
     def test_createNmrAtom_withName(self):
         c = self.project.newNmrChain()
@@ -47,7 +55,7 @@ class Test_makeNmrAtom(WrapperTesting):
         self.assertEqual(a.name, 'CA')
 
         # Undo and redo all operations
-        self.undo_redo_tester(a)
+        undo_redo_tester(self, a)
 
     def test_fetchNmrAtom(self):
         c = self.project.newNmrChain()
@@ -58,15 +66,9 @@ class Test_makeNmrAtom(WrapperTesting):
         fetched_a = r.fetchNmrAtom(name='CB')
         self.assertEqual(fetched_a, created_a)
 
-        # test undo redo
-        self.undo_redo_tester(fetched_a)
+        # Undo and redo all operations
+        undo_redo_tester(self, fetched_a)
 
-    def undo_redo_tester(self, undo_obj):
-        undo_obj_ref = undo_obj.__repr__()
-        self.undo.undo()
-        self.assertNotEqual(undo_obj_ref, undo_obj.__repr__())
-        self.undo.redo()
-        self.assertEqual(undo_obj_ref, undo_obj.__repr__())
 
 
 
@@ -87,18 +89,51 @@ class Test_chemicalShift(WrapperTesting):
             self.shiftList = self.project.chemicalShiftLists[0]
             self.peakList = self.spectrum.newPeakList() if spectra else None
 
-    def test_assignDimension(self):
+    def testPeaks(self):
         # peaks = self.peakList.pickPeaksNd([[7.0, 7.2], [111.75, 112.2]])
         _picker = self.spectrum.peakPicker
-        peaks = self.spectrum.pickPeaks(peakList=self.peakList,
-                                        positiveThreshold=12000.0, negativeThreshold=12000.0,
-                                        H=(7.0, 7.2), N=(111.75, 112.2))
+        return self.spectrum.pickPeaks(peakList=self.peakList,
+                                             positiveThreshold=12000.0, negativeThreshold=12000.0,
+                                             H=(7.0, 7.2), N=(111.75, 112.2))
 
+    def test_assignDimensionNmrAtom(self):
+        peaks = self.testPeaks()
+
+        self.assertIsNone(self.shiftList.getChemicalShift(self.atom))
         peaks[0].assignDimension(axisCode=axisCodeMatch('N', self.spectrum.axisCodes),
                                  value=self.atom)
+        sl = self.shiftList.getChemicalShift(self.atom)
+        self.assertIsNotNone(sl)
+
         # Undo and redo all operations
-        self.assertIsNotNone(self.shiftList.getChemicalShift(self.atom))
-        self.undo.undo()
+        undo_redo_tester(self, sl)
+
+    def test_assignDimensionPID(self):
+        peaks = self.testPeaks()
+
+        atom_pid = self.atom.pid
         self.assertIsNone(self.shiftList.getChemicalShift(self.atom))
-        self.undo.redo()
-        self.assertIsNotNone(self.shiftList.getChemicalShift(self.atom))
+        peaks[0].assignDimension(axisCode=axisCodeMatch('N', self.spectrum.axisCodes),
+                                 value=atom_pid)
+        sl = self.shiftList.getChemicalShift(self.atom)
+        self.assertIsNotNone(sl)
+
+        # Undo and redo all operations
+        undo_redo_tester(self, sl)
+
+    def test_assignDimensionNone(self):
+        peaks = self.testPeaks()
+
+        self.assertIsNone(self.shiftList.getChemicalShift(self.atom))
+        peaks[0].assignDimension(axisCode=axisCodeMatch('N', self.spectrum.axisCodes),
+                                 value=None)
+        sl = self.shiftList.getChemicalShift(self.atom)
+        self.assertIsNone(sl)
+
+    def test_assignDimensionAxisCodeError(self):
+        peaks = self.testPeaks()
+        with self.assertRaises(ValueError) as cm:
+            peaks[0].assignDimension(axisCode='invalid axis code',
+                                     value=self.atom)
+        err = cm.exception
+        self.assertEqual(str(err), 'axisCode invalid axis code not recognised')

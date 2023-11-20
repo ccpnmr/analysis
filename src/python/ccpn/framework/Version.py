@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-02 17:02:05 +0000 (Thu, November 02, 2023) $"
-__version__ = "$Revision: 3.2.0.1 $"
+__dateModified__ = "$dateModified: 2023-11-20 16:00:42 +0000 (Mon, November 20, 2023) $"
+__version__ = "$Revision: 3.2.0.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -286,8 +286,8 @@ class VersionString(str):
 # - previous is included as a reference (not currently used)
 #=========================================================================================
 
-_previousApplicationVersion = VersionString('3.2.0')
-applicationVersion = VersionString('3.2.0.1')
+_previousApplicationVersion = VersionString('3.2.0.1')
+applicationVersion = VersionString('3.2.0.2')
 revision = '3'
 
 

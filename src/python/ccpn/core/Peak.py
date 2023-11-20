@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-21 13:24:43 +0000 (Tue, November 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-29 09:21:56 +0000 (Wed, November 29, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -516,7 +516,7 @@ class Peak(AbstractWrapperObject):
            )
 
         Assignments as a list of individual combinations is given in 'assignedNmrAtoms'.
-        Note that by setting dimensionAssignments you tel the program that all combinations are
+        Note that by setting dimensionAssignments you tell the program that all combinations are
         possible - in the example that all four protons could be bound to either of the carbons
 
         To (re)set the assignment for a single dimension, use the Peak.assignDimension method."""

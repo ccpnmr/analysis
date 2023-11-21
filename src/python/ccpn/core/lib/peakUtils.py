@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-08-17 13:03:39 +0100 (Thu, August 17, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-11-21 13:24:43 +0000 (Tue, November 21, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -686,7 +686,7 @@ def estimateVolumes(peaks: Sequence[Union[str, 'Peak']], volumeIntegralLimit=2.0
 
 
 def movePeak(peak, ppmPositions, updateHeight=True):
-    """Move a peak based on it's delta shift and optionally update to the height at the new position
+    """Move a peak based on its delta shift and optionally update to the height at the new position
     """
     with undoBlockWithoutSideBar():
         peak.position = ppmPositions
@@ -694,6 +694,10 @@ def movePeak(peak, ppmPositions, updateHeight=True):
         if updateHeight:
             # get the interpolated height at this position
             peak.height = peak.peakList.spectrum.getHeight(ppmPositions)
+
+        # lineWidth and volume are invalid
+        peak.volume = None
+        peak.lineWidths = None
 
 
 def updateHeight(peak):

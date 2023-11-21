@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-12 13:12:58 +0100 (Mon, June 12, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-11-21 13:33:21 +0000 (Tue, November 21, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -7160,6 +7160,7 @@ class CcpnNefReader(CcpnNefContent):
             if loop:
                 importer = self.importers[loopName]
                 importer(self, result, loop, saveFrame)
+        return result
 
     #
     importers['ccpn_substance'] = load_ccpn_substance

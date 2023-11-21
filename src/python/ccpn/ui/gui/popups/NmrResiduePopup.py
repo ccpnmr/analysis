@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:46 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-11-21 13:33:21 +0000 (Tue, November 21, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -24,11 +24,12 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import re
+from collections import OrderedDict
 from ccpn.core.NmrResidue import NmrResidue, _getNmrResidue
 from ccpn.core.lib.AssignmentLib import CCP_CODES_SORTED, getNmrResiduePrediction
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC, _attribContainer
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, PulldownListCompoundWidget, CheckBoxCompoundWidget
-from ccpn.ui.gui.widgets.MessageDialog import showWarning, showYesNoWarning
+from ccpn.ui.gui.widgets.MessageDialog import showYesNoWarning, showMulti, showWarning
 from ccpn.util.OrderedSet import OrderedSet
 
 
@@ -195,21 +196,52 @@ class NmrResidueEditPopup(AttributeEditorPopupABC):
                     _msg = 'Cannot move NmrResidue to an existing NmrResidue without merging.\n\nDo you want to merge?'
                     _ok = showYesNoWarning(str(self.windowTitle()), _msg)
 
-                if _ok:
-                    destNmrResidue.mergeNmrResidues(self.obj)
-                    destNmrResidue.comment = self.comment.getText()
+                if not _ok:
+                    # keep the popup open
+                    return True
+
+                destNmrResidue.mergeNmrResidues(self.obj)
+                destNmrResidue.comment = self.comment.getText()
 
             else:
+                resType = re.sub(REMOVEPERCENT, '', self.residueType.getText())
                 if not create or (self.obj == destNmrResidue):
-                    # assign to a new nmrResidue, includes changing just the residueType
-                    self.obj.moveToNmrChain(_chainPid,
-                                            self.sequenceCode.getText(),
-                                            re.sub(REMOVEPERCENT, '', self.residueType.getText())
-                                            )
+                    if res := self.obj.residue:
+                        # check for assignment
+                        _msg = 'You are changing the residueType of an assigned nmrResidue.\n' \
+                               'This change will currently not be applied to the attached residue,\n' \
+                               'and it will become unassigned.\n\n' \
+                               'Do you want to continue?'
+
+                        # another button can be added as required
+                        options = OrderedDict((v, i) for i, v in enumerate(['Cancel', 'Ok']))
+                        buttons = list(options)
+                        _ok = showMulti(f'Edit NmrResidue {self.obj.id}', _msg, texts=buttons)
+
+                        if _ok == 'Temp':
+                            raise RuntimeWarning('Cannot change the residueType of an NmrResidue in an assigned NmrChain')
+
+                        elif _ok == 'Ok':
+                            self.obj.deassign()
+                            # assign to the same nmrResidue, includes changing just the residueType
+                            self.obj.moveToNmrChain(_chainPid,
+                                                    self.sequenceCode.getText(),
+                                                    resType
+                                                    )
+                        else:
+                            # cancel does nothing - keep the popup open
+                            return True
+
+                    else:
+                        # assign to the same nmrResidue, includes changing just the residueType
+                        self.obj.moveToNmrChain(_chainPid,
+                                                self.sequenceCode.getText(),
+                                                resType
+                                                )
                 else:
                     # fetch a new residue, sequenceCode has changed
                     self.obj = _nmrChain.fetchNmrResidue(self.sequenceCode.getText(),
-                                                         re.sub(REMOVEPERCENT, '', self.residueType.getText())
+                                                         resType
                                                          )
                 self.obj.comment = self.comment.getText()
 

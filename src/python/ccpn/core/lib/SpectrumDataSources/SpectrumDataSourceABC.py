@@ -93,8 +93,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-10 18:27:12 +0000 (Fri, November 10, 2023) $"
-__version__ = "$Revision: 3.2.2 $"
+__dateModified__ = "$dateModified: 2023-11-21 13:33:21 +0000 (Tue, November 21, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1993,8 +1993,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
             from ccpn.core.lib.SpectrumLib import estimateNoiseLevel1D
 
             data = self.getSliceData()
-            noiseLevel, neg = estimateNoiseLevel1D(data, f=3, stdFactor=1.5)
-            self.noiseLevel = abs(noiseLevel) + 1e-4
+            noiseLevel, neg = estimateNoiseLevel1D(data, f=3, stdFactor = 1.5)
+            self.noiseLevel = abs(noiseLevel) or 1e-4
             return self.noiseLevel
 
         elif self.dimensionCount == 2:

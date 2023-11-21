@@ -3,6 +3,7 @@ set CONDA=%CCPNMR_TOP_DIR%\miniconda
 set PYTHONPATH=%CCPNMR_TOP_DIR%\src\python;%CCPNMR_TOP_DIR%\src\c
 set PYTHONHOME=%CCPNMR_TOP_DIR%\miniconda
 set PYTHONUNBUFFERED=1
+set PYTHONUTF8=1
 set QT_PLUGIN_PATH=%CONDA%\Library\plugins
 set PATH=%CONDA%\lib\site-packages\numpy\.libs;^
 %CONDA%;^

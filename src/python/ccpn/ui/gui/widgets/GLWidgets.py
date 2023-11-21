@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-07 12:12:46 +0000 (Tue, November 07, 2023) $"
-__version__ = "$Revision: 3.2.2 $"
+__dateModified__ = "$dateModified: 2023-11-21 13:33:22 +0000 (Tue, November 21, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1810,7 +1810,8 @@ class Gui1dWidget(CcpnGLWidget):
         for ii, ind in enumerate(indices[:2]):
             lastStartCoordinate[ii] = peak.height if ind is None else peak.position[ind]
 
-    def _movePeak(self, peak, deltaPosition):
+    @staticmethod
+    def _movePeak(peak, deltaPosition):
         """Move the peak to new position
         """
         if self.spectrumDisplay._flipped:
@@ -1823,6 +1824,8 @@ class Gui1dWidget(CcpnGLWidget):
             position = peak.position[0]
             position += deltaPosition[0]
             peak.position = [position]
+        peak.volume = None
+        peak.lineWidths = None
 
     @staticmethod
     def _tracesNeedUpdating(spectrumView=None):

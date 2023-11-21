@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-07 15:16:42 +0100 (Thu, September 07, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-11-21 13:33:21 +0000 (Tue, November 21, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -494,6 +494,9 @@ class Framework(NotifierBase, GuiBase):
     def _updateAutoBackup(self, disable=False, kill=False):
         # CCPNINTERNAL: also called from preferences popup
         # raise NotImplementedError('AutoBackup is not available in the current release')
+        if not self.hasGui:
+            # not required if not in an interactive mode
+            return
 
         if self._autoBackupThread is None:
             self._autoBackupThread = AutoBackupHandler(eventFunction=self._backupProject,
@@ -516,6 +519,11 @@ class Framework(NotifierBase, GuiBase):
     def pauseAutoBackups(self, delay=False):
         """Temporarily pause backups for loading/saving
         """
+        if not self.hasGui:
+            # not required if not in an interactive mode
+            yield
+            return
+
         try:
             if delay:
                 # keep remaining interval for restart

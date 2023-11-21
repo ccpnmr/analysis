@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-09 19:07:18 +0100 (Mon, October 09, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-11-21 13:33:21 +0000 (Tue, November 21, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -512,6 +512,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
             if not allChanges:
                 return True
 
+        valid = True
         # handle clicking of the Apply/OK button
         with handleDialogApply(self) as error:
 
@@ -522,7 +523,8 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
             # apply all functions to the object
             changes = self._changes
             if changes or not self.EDITMODE:
-                self._applyAllChanges(changes)
+                # check whether the popup needs to be closed
+                error.cleanUndo = bool(self._applyAllChanges(changes))
 
             # add item here to redraw items
             with undoStackBlocking() as addUndoItem:
@@ -531,15 +533,15 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
             # redraw the items
             self._refreshGLItems()
 
-        # everything has happened - disable the apply button
-        if self.dialogButtons.button(self.APPLYBUTTON):
-            self.dialogButtons.button(self.APPLYBUTTON).setEnabled(False)
-
         # check for any errors
-        if error.errorValue:
+        if error.errorValue or error.cleanUndo:
             # repopulate popup on an error
             # self._populate()
             return False
+
+        # everything has happened - disable the apply button
+        if self.dialogButtons.button(self.APPLYBUTTON):
+            self.dialogButtons.button(self.APPLYBUTTON).setEnabled(False)
 
         # remove all changes
         self._changes.clear()
@@ -652,7 +654,8 @@ def dialogErrorReport(self, undo, es):
     """
     from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
-    showWarning(str(self.windowTitle()), str(es))
+    if es:
+        showWarning(str(self.windowTitle()), str(es))
 
     # should only undo if something new has been added to the undo deque
     # may cause a problem as some things may be set with the same values
@@ -695,7 +698,7 @@ def handleDialogApply(self):
     @dataclass
     class errorContent():
         errorValue = None
-
+        cleanUndo = False
 
     try:
         # add an undoBlockWithoutSideBar
@@ -714,6 +717,11 @@ def handleDialogApply(self):
         # re-raise the error if in debug mode
         if self.application._isInDebugMode:
             raise es
+
+    else:
+        if error.cleanUndo:
+            # clean-up with warning popup
+            dialogErrorReport(self, undo, None)
 
 
 def _verifyPopupApply(self, attributeName, value, last, *postArgs, **postKwds):

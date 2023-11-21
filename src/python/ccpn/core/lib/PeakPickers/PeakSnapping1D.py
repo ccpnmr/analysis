@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-11-15 16:50:23 +0000 (Wed, November 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-21 13:37:54 +0000 (Tue, November 21, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -44,7 +44,8 @@ from ccpn.util.Logging import getLogger
 from ccpn.core.lib.ContextManagers import  undoBlockWithoutSideBar, notificationEchoBlocking
 from ccpn.core.lib.PeakPickers.PeakPicker1D import _find1DMaxima
 from ccpn.core.lib.SpectrumLib import  _1DRawDataDict
-from scipy import spatial
+from scipy import spatial, signal
+
 
 
 # from ccpn.util.decorators import profile
@@ -365,6 +366,50 @@ def lineSmoothing(y, windowSize=15, mode="hanning", ):
     ys = ys[:len(y)] ## make sure to have the same length as the input
     return ys
 
+def _onePhaseDecayPlateau_func(x, rate=1.0, amplitude=1.0, plateau=0.0):
+    """
+    Duplicated function from series Analysis. Import from fitting models
+    """
+    result = (amplitude - plateau) * np.exp(-rate * x) + plateau
+    return result
+
+def _getMaximaForRegion(y, x, minimalHeightThreshold, neededMaxima, initialWindowSize=500, totWindowSizeSteps=1000):
+    unfilteredMaxima, unfilteredMinima = _find1DMaxima(y, x, minimalHeightThreshold)
+    unfilteredMaximaPos = np.array([x[0] for x in unfilteredMaxima])
+    unfilteredMaximaHeight = np.array([x[1] for x in unfilteredMaxima])
+
+    windowSizesX = np.linspace(0, 1, totWindowSizeSteps)
+    windowSizes = _onePhaseDecayPlateau_func(windowSizesX, rate=10, amplitude=initialWindowSize, plateau=1)
+
+    coords = []
+    for windowSize in windowSizes:  # keep reducing the window until we find smoothed peaks
+        print(f'STARTING with windowSize: {windowSize}')
+
+        y_smoothed = lineSmoothing(y, windowSize=int(windowSize))
+        indexes, _ = signal.find_peaks(y_smoothed, )
+        for index in indexes:
+            try:
+                pos = x[index]
+                idx = (np.abs(unfilteredMaximaPos - pos)).argmin()
+                nearestPos = unfilteredMaximaPos[idx]
+                nearestHeight = unfilteredMaximaHeight[idx]
+                coord = (nearestPos, nearestHeight)
+                if coord not in coords:
+                    coords.append(coord)
+            except Exception as error:
+                getLogger().warn(f'Something wrong snapping peak. {windowSize}')
+
+        if len(coords) >= neededMaxima:
+            print('DONE. Reached needed count')
+            break
+        print('-' * 50)
+
+    if len(coords) >= neededMaxima:
+        coords = sorted(coords, key=lambda x: x[1], reverse=True)  #sort by height
+        coords = coords[:neededMaxima]
+    return coords
+
+
 def _get1DClosestExtremum(peak, maximumLimit=0.1,  doNeg=False,
                           figOfMeritLimit=1, windowSize=15, rawDataDict=None ):
     """
@@ -392,54 +437,39 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1,  doNeg=False,
     if peak.figureOfMerit < figOfMeritLimit:
         return position, height, heightError
 
+    rounding = 4
     a, b = peak._temporaryPosition[0] - maximumLimit, peak._temporaryPosition[0] + maximumLimit
+    knownPositions = np.array([p._temporaryPosition[0] for p in peak.peakList.peaks if p is not peak])
+    limits = np.array([a, b])
+    queryPos = peak.position[0]
+    knownPositions = np.concatenate([knownPositions, limits])
+    left = knownPositions[knownPositions > queryPos]
+    right = knownPositions[knownPositions < queryPos]
+    closestLeft = left[np.argmin(left - queryPos)]
+    closestRight = right[np.argmin(abs(right) - queryPos)]
 
-    # find closest maxima
-    pcb, ncb = spectrum.positiveContourBase, spectrum.negativeContourBase
-
-    x_filtered, y_filtered = _1DregionsFromLimits(x, y, [a, b])
-    maxValues, minValues = _find1DMaxima(y_filtered, x_filtered, positiveThreshold=pcb, negativeThreshold=ncb, findNegative=doNeg)
-    allValues = np.array(maxValues + minValues)
-    # allValues = _filterKnownPeakPositionsFromNewMaxima(allValues, peak, rounding=4)
-
-    if len(allValues) > 1:
-        ## do a line smoothing to remove noise and shoulder peaks.
-        y_smoothed = lineSmoothing(y_filtered, windowSize=windowSize)
-        maxValues, minValues = _find1DMaxima(y_smoothed, x_filtered, positiveThreshold=pcb, negativeThreshold=ncb, findNegative=doNeg)
-        allValuesSmooth = np.array(maxValues + minValues)
-        if allValuesSmooth.ndim == 2:
-            positions = allValues[:, 0]
-            heights = allValues[:, 1]
-            positionsSmooth = allValuesSmooth[:, 0]
-            heightsSmooth = allValuesSmooth[:, 1]
-            nearestPositionSmooth = find_nearest(positionsSmooth, peak._temporaryPosition[0])
-            #find the real position and not the smoothed pos
-            nearestPosition = find_nearest(positions, nearestPositionSmooth)
-            nearestHeight = heights[positions == nearestPosition]
-
-            position = [float(nearestPosition), ]
-            height = nearestHeight
-            height = _getClosestHeight(x, y, position, height)
-            heightError = 0
+    minimalHeightThreshold = np.median(y) + 0.5 * np.std(y)
+    x_filtered, y_filtered = _1DregionsFromLimits(x, y, [closestLeft, closestRight])
+    regionSize = len(y_filtered)
+    initialWindowSize = regionSize/2 if regionSize > 100 else 100  # don't make the initial Window too huge.
+    coords = _getMaximaForRegion(y_filtered, x_filtered,  minimalHeightThreshold=minimalHeightThreshold, neededMaxima=1, initialWindowSize=initialWindowSize, totWindowSizeSteps=1000)
+    print(f'SNAPPING in region : {closestLeft}, {closestRight}')
+    heightAtQuery = _getClosestHeight(x, y, queryPos, peak.height)
+    if len(coords) > 0:
+        coord = coords[0]
+        existing = np.array([round(p._temporaryPosition[0], rounding) for p in peak.peakList.peaks])
+        heights = np.array([coord[1], float(heightAtQuery)])
+        if round(coord[0], rounding) in existing:
+            print('cannot snap here. Already one peak here', coord[0], 'THERE:', existing)
+            return [queryPos], heightAtQuery, 1
+        elif (heights < minimalHeightThreshold).all(): #both the knew found value and the original are in the noise. so just keep at position
+            print('Found in noise .No Point snapping. ')
+            return [queryPos], heightAtQuery, 1
         else:
-            height = _getClosestHeight(x, y, peak._temporaryPosition, peak._temporaryHeight)
-            heightError = 1
-
-    elif len(allValues) == 1: # we found just a sigle maxima
-        allValues = np.array(allValues)
-        positions = allValues[:, 0]
-        heights = allValues[:, 1]
-        nearestPosition = find_nearest(positions, peak._temporaryPosition[0])
-        nearestHeight = heights[positions == nearestPosition]
-        position = [float(nearestPosition), ]
-        height = nearestHeight
-        heightError = 0
+            return [coord[0]], coord[1], None
     else:
-        height = _getClosestHeight(x,y, peak._temporaryPosition, peak._temporaryHeight)
-        heightError = 1
+        return [queryPos], heightAtQuery, 1
 
-    height = _correctNegativeHeight(height, doNeg)  # Very important. don't return a negative height if doNeg is False.
-    return position, float(height), heightError
 
 
 def _getClosestHeight(x,y, pos, currentHeight):

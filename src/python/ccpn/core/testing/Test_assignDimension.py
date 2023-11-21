@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2023-11-20 12:07:56 +0000 (Mon, November 20, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-21 15:20:27 +0000 (Tue, November 21, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -27,13 +27,16 @@ from ccpn.core.lib.AxisCodeLib import axisCodeMatch
 from ccpn.core.testing.WrapperTesting import WrapperTesting
 
 
-def undo_redo_tester(self, undo_obj):
+def undo_redo_tester(obj, undo_obj):
     """tests undo redo functionality by comparing change in object representations/PIDs"""
-    undo_obj_id = undo_obj.__repr__()
-    self.undo.undo()
-    self.assertNotEqual(undo_obj_id, undo_obj.__repr__())
-    self.undo.redo()
-    self.assertEqual(undo_obj_id, undo_obj.__repr__())
+    undo_obj_id = repr(undo_obj)
+    obj.undo.undo()
+    # check repr change ('deleted' included on end)
+    obj.assertNotEqual(undo_obj_id, repr(undo_obj))
+    obj.undo.redo()
+    # repr should revert to original (no 'deleted' on end)
+    obj.assertEqual(undo_obj_id, repr(undo_obj))
+
 
 class Test_makeNmrAtom(WrapperTesting):
     # Path of project to load (None for new project)
@@ -68,8 +71,6 @@ class Test_makeNmrAtom(WrapperTesting):
 
         # Undo and redo all operations
         undo_redo_tester(self, fetched_a)
-
-
 
 
 class Test_chemicalShift(WrapperTesting):

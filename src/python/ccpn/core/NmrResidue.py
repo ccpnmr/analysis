@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-10 17:35:45 +0100 (Tue, October 10, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-11-21 13:24:43 +0000 (Tue, November 21, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -221,19 +221,25 @@ class NmrResidue(AbstractWrapperObject):
 
     @property
     def residueType(self) -> str:
-        """Residue type string (e.g. 'ALA'). Part of id. Use self.assignTo or
-        self.rename to reset the residueType"""
+        """Residue type string (e.g. 'ALA'). Part of id.
+        """
         return self._wrappedData.residueType or ''
 
-    # GWV 20230109: disabled setter
-    # @residueType.setter
-    # def residueType(self, value: typing.Optional[str]):
-    #     if not isinstance(value, (str, type(None))):
-    #         raise TypeError(f'residueType {repr(value)} must be a string or None')
-    #     if isinstance(value, str) and not value:
-    #         raise TypeError(f'residueType {repr(value)} must be a non-empty string')
-    #     if self.residueType != value:
-    #         self._wrappedData.resetResidueType(value)
+    @residueType.setter
+    def residueType(self, value: typing.Optional[str]):
+        if not isinstance(value, (str, type(None))):
+            raise TypeError(f'residueType {repr(value)} must be a string or None')
+        if isinstance(value, str) and not value:
+            raise TypeError(f'residueType {repr(value)} must be a non-empty string')
+
+        if self.residue:
+            raise RuntimeError('Cannot change the residueType of an assigned NmrResidue.')
+
+        if self.residueType != value:
+            try:
+                self.rename(sequenceCode=self.sequenceCode, residueType=value)
+            except Exception as es:
+                raise RuntimeError(f'Error changing the residueType to {value}') from es
 
     @property
     def relativeOffset(self) -> typing.Optional[int]:

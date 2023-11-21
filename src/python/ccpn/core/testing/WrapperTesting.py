@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 18:59:24 +0100 (Tue, March 28, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-11-20 14:41:41 +0000 (Mon, November 20, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -85,6 +85,20 @@ def checkGetSetAttr(cls, obj, attrib, value, *funcOut):
         cls.assertEqual(getattr(obj, attrib), value)
     else:
         cls.assertEqual(getattr(obj, attrib), funcOut[0])
+
+
+def getProperties(obj) -> dict:
+    props = {}
+    for k in dir(obj):
+        if not k.startswith('_') and isinstance(getattr(type(obj), k), property):
+            try:
+                val = str(getattr(obj, k))
+                props[k] = val
+            except Exception:
+                # if the property is deleted then some/most properties will be unavailable
+                props[k] = ''
+
+    return props
 
 
 #=========================================================================================

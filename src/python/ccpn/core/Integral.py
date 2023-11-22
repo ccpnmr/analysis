@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 12:06:24 +0100 (Fri, June 09, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2023-11-22 10:18:58 +0000 (Wed, November 22, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -118,6 +118,7 @@ class Integral(AbstractWrapperObject):
 
     @value.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def value(self, value: Union[float, int, None]):
         if not isinstance(value, (float, int, type(None))):
             raise TypeError('value must be a float, integer or None')
@@ -150,6 +151,7 @@ class Integral(AbstractWrapperObject):
 
     @valueError.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def valueError(self, value: Union[float, int, None]):
         if not isinstance(value, (float, int, type(None))):
             raise TypeError('valueError must be a float, integer or None')
@@ -179,6 +181,7 @@ class Integral(AbstractWrapperObject):
 
     @bias.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def bias(self, value: Union[float, int]):
         if not isinstance(value, (float, int)):
             raise TypeError('bias must be a float or integer')
@@ -201,6 +204,7 @@ class Integral(AbstractWrapperObject):
 
     @figureOfMerit.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def figureOfMerit(self, value: float):
         self._wrappedData.figOfMerit = value
 
@@ -216,6 +220,7 @@ class Integral(AbstractWrapperObject):
 
     @offset.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def offset(self, value: Union[float, int]):
         if not isinstance(value, (float, int)):
             raise TypeError('offset must be a float or integer')
@@ -247,6 +252,7 @@ class Integral(AbstractWrapperObject):
 
     @baseline.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def baseline(self, value: Union[float, int]):
         if not isinstance(value, (float, int)):
             raise TypeError('baseline must be a float or integer')
@@ -269,6 +275,7 @@ class Integral(AbstractWrapperObject):
 
     @constraintWeight.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def constraintWeight(self, value: float):
         self._wrappedData.constraintWeight = value
 
@@ -323,6 +330,7 @@ class Integral(AbstractWrapperObject):
 
     @annotation.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def annotation(self, value: str):
         self._wrappedData.annotation = value
 

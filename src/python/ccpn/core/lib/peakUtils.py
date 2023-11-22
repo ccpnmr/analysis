@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-11-14 17:22:07 +0000 (Tue, November 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-22 18:46:46 +0000 (Wed, November 22, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,6 @@ from typing import Sequence, Union
 from scipy.optimize import curve_fit
 from collections import OrderedDict
 
-from ccpn.core.lib.PeakPickers.PeakSnapping1D import snap1DPeaksByGroup
 from ccpn.util.Logging import getLogger
 from ccpn.core.PeakList import GAUSSIANMETHOD, PARABOLICMETHOD
 from ccpn.core.lib.ContextManagers import newObject, undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
@@ -569,8 +568,8 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 4, halfBoxFitWidth: i
 
     if numDim == 1:
         # do the fit for 1D here
-        doNeg = getApp.preferences.general.negativePeakPick1D
-        snap1DPeaksByGroup([peak], ppmLimit=0.2, doNeg=doNeg)
+        from ccpn.core.lib.PeakPickers.PeakSnapping1D import snap1DPeaks
+        snap1DPeaks([peak])
 
     else:
         from ccpn.core.lib.SpectrumLib import fetchPeakPicker

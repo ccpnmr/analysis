@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-11-21 13:37:54 +0000 (Tue, November 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-22 18:46:46 +0000 (Wed, November 22, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -2123,8 +2123,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                     try:
                         _is1Ds = [p.spectrum.dimensionCount == 1 for p in peaks]
                         if all(_is1Ds):
-                            from ccpn.core.lib.PeakPickers.PeakSnapping1D import snap1DPeaksByGroup
-                            snap1DPeaksByGroup(peaks)
+                            from ccpn.core.lib.PeakPickers.PeakSnapping1D import snap1DPeaks
+                            snap1DPeaks(peaks)
                             nonSnappingPeaks = [pk for pk in peaks if pk.figureOfMerit <1]
                             msg = 'one of the selected peak' if len(nonSnappingPeaks)==1 else 'some of the selected peaks'
                             if len(nonSnappingPeaks)>0:

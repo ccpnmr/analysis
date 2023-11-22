@@ -27,8 +27,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 19:17:57 +0100 (Wed, June 28, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-11-22 13:04:53 +0000 (Wed, November 22, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1469,31 +1469,31 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
                            QtCore.QPoint(event.globalPos().x(), event.globalPos().y() + 10),
                            objs)
 
-    def _deleteItemObject(self, objs):
-        """Removes the specified item from the sidebar and deletes it from the project.
-        NB, the clean-up of the side bar is done through notifiers
-        """
-        from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
-        from ccpn.util.Logging import getLogger
-
-        try:
-            getLogger().info('Deleting: %s' % ', '.join(map(str, objs)))
-            with undoBlockWithoutSideBar():
-                with notificationEchoBlocking():
-                    self.project.deleteObjects(*objs)
-                # for obj in objs:
-                #     if obj:
-                #         # just delete the object
-                #         obj.delete()
-
-        except Exception as es:
-            showWarning('Delete', str(es))
-
-        #  Force repaint if GL windows
-        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-
-        GLSignals = GLNotifier(parent=self)
-        GLSignals.emitEvent(triggers=[GLNotifier.GLALLPEAKS, GLNotifier.GLALLINTEGRALS, GLNotifier.GLALLMULTIPLETS])
+    # def _deleteItemObject(self, objs):
+    #     """Removes the specified item from the sidebar and deletes it from the project.
+    #     NB, the clean-up of the side bar is done through notifiers
+    #     """
+    #     from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
+    #     from ccpn.util.Logging import getLogger
+    #
+    #     try:
+    #         getLogger().info('Deleting: %s' % ', '.join(map(str, objs)))
+    #         with undoBlockWithoutSideBar():
+    #             with notificationEchoBlocking():
+    #                 self.project.deleteObjects(*objs)
+    #             # for obj in objs:
+    #             #     if obj:
+    #             #         # just delete the object
+    #             #         obj.delete()
+    #
+    #     except Exception as es:
+    #         showWarning('Delete', str(es))
+    #
+    #     #  Force repaint if GL windows
+    #     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+    #
+    #     GLSignals = GLNotifier(parent=self)
+    #     GLSignals.emitEvent(triggers=[GLNotifier.GLALLPEAKS, GLNotifier.GLALLINTEGRALS, GLNotifier.GLALLMULTIPLETS])
 
     def _blockSideBarEvents(self):
         """Block all updates/signals/notifiers on the sidebar

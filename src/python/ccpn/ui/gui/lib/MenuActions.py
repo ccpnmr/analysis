@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-22 12:08:08 +0000 (Wed, November 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-22 13:04:53 +0000 (Wed, November 22, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -398,6 +398,7 @@ class OpenItemABC():
     # These should be subclassed
     openItemMethod = None  # a method to open the item in ccpnModuleArea
     objectArgumentName = 'obj'  # argument name set to obj passed to openItemClass instantiation
+    objectClassName = None
     openItemDirectMethod = None  # parent argument name set to obj passed to openItemClass instantiation when useParent==True
     useApplication = True
     hasOpenMethod = True
@@ -424,6 +425,7 @@ class OpenItemABC():
         if self.useApplication is False and self.openItemDirectMethod is None:
             raise RuntimeError(f'useApplication==False requires definition of openItemDirectMethod ({self})')
 
+        self.objectClassName = self.objectArgumentName[0].upper() + self.objectArgumentName[1:]
         self.useNone = useNone
         self.kwds = kwds
         # these get set upon callback
@@ -488,7 +490,7 @@ class OpenItemABC():
             contextMenu.addAction('Split Planes to SpectrumGroup', partial(self._splitPlanesToSpectrumGroup, objs))
         contextMenu.addAction('Copy Pid to Clipboard', partial(self._copyPidsToClipboard, objs))
         self._addCollectionMenu(contextMenu, objs)
-        contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
+        contextMenu.addAction('Delete', partial(self._deleteItemObject, thisObj, objs))
         canBeCloned = all(hasattr(obj, 'clone') for obj in objs)
         if canBeCloned:
             contextMenu.addAction('Clone', partial(self._cloneObject, objs))
@@ -512,7 +514,7 @@ class OpenItemABC():
             obj.clone()
 
     @staticmethod
-    def _deleteItemObject(objs):
+    def _deleteItemObject(thisObj, objs):
         """Delete items from the project.
         """
 
@@ -777,7 +779,7 @@ class _openItemChemicalShiftListTable(OpenItemABC):
         contextMenu.addAction('Copy Pid to Clipboard', partial(self._copyPidsToClipboard, objs))
         self._addCollectionMenu(contextMenu, objs)
         contextMenu.addAction('Duplicate', partial(self._duplicateAction, objs))
-        contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
+        contextMenu.addAction('Delete', partial(self._deleteItemObject, thisObj, objs))
 
         contextMenu.addSeparator()
         contextMenu.addAction('Edit Properties', partial(parentWidget._raiseObjectProperties, self.node.widget))
@@ -803,6 +805,31 @@ class _openItemChemicalShiftListTable(OpenItemABC):
             popup.show()
             popup.raise_()
 
+    @staticmethod
+    def _collectSpectra(objs):
+        # check the spectra of chemical-shift-lists
+        specs = {sp for obj in objs if isinstance(obj, ChemicalShiftList)
+                 for sp in obj.spectra
+                 }
+
+        return specs
+
+    def _deleteItemObject(self, thisObj, objs):
+        if self._collectSpectra(objs):
+            count = Counter(map(type, objs))
+            plural = 's' if count[type(thisObj)] > 1 else ''
+            msg = f'It is not possible to delete {self.objectClassName}s with associated Spectra,\n' \
+                  f'please move the Spectra to alternative {self.objectClassName}s before deleting.'
+            if len(count) > 1:
+                msg += '\n\nPlease note that you have selected other objects that will also be deleted.\n'
+                title = 'Delete...'
+            else:
+                title = f'Delete {self.objectClassName}{plural}'
+            showWarning(title, msg)
+
+        else:
+            super()._deleteItemObject(thisObj, objs)
+
 
 class _openItemPeakListTable(OpenItemABC):
     openItemMethod = 'showPeakTable'
@@ -820,7 +847,6 @@ class _openItemMultipletListTable(OpenItemABC):
 
 
 class _openItemNmrClass(OpenItemABC):
-    _nmrObjectType = '<not set>'
 
     @staticmethod
     def _collectShifts(objs):
@@ -842,32 +868,33 @@ class _openItemNmrClass(OpenItemABC):
 
         return shs
 
-    def _deleteItemObject(self, objs):
+    def _deleteItemObject(self, thisObj, objs):
         if self._collectShifts(objs):
-            msg = f'The selected {self._nmrObjectType} contain assignments.\n' \
-                  f'Deleting {self._nmrObjectType} will delete their chemicalShifts and deassign any associated peaks.\n' \
+            count = Counter(map(type, objs))
+            plural = 's' if count[type(thisObj)] > 1 else ''
+            notPlural = '' if count[type(thisObj)] > 1 else 's'
+            msg = f'The selected {self.objectClassName}{plural} contain{notPlural} assignments.\n' \
+                  f'Deleting {self.objectClassName}s will delete their chemicalShifts and deassign any associated peaks.\n' \
                   'Do you want to continue?'
-            if len(Counter(map(type, objs))) > 1:
+            if len(count) > 1:
                 msg += '\n\nPlease note that you have selected other objects that will also be deleted.\n'
                 title = 'Delete...'
             else:
-                title = f'Delete {self._nmrObjectType}'
+                title = f'Delete {self.objectClassName}{plural}'
             ok = showYesNoWarning(title, msg)
 
             if ok:
-                super()._deleteItemObject(objs)
+                super()._deleteItemObject(thisObj, objs)
 
 
 class _openItemNmrChainTable(_openItemNmrClass):
     openItemMethod = 'showNmrResidueTable'
     objectArgumentName = 'nmrChain'
-    _nmrObjectType = 'NmrChains'
 
 
 class _openItemNmrResidueItem(_openItemNmrClass):
     objectArgumentName = 'nmrResidue'
     hasOpenMethod = False
-    _nmrObjectType = 'NmrResidues'
 
     def _openContextMenu(self, parentWidget, position, thisObj, objs, deferExec=False):
         """Open a context menu.
@@ -909,7 +936,6 @@ class _openItemNmrResidueItem(_openItemNmrClass):
 class _openItemNmrAtomItem(_openItemNmrClass):
     objectArgumentName = 'nmrAtom'
     hasOpenMethod = False
-    _nmrObjectType = 'NmrAtoms'
 
 
 class _openItemAtomItem(OpenItemABC):
@@ -1116,7 +1142,7 @@ class _openItemSpectrumInGroupDisplay(_openItemSpectrumDisplay):
             self._addCollectionMenu(contextMenu, objs)
             contextMenu.addSeparator()
 
-        contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
+        contextMenu.addAction('Delete', partial(self._deleteItemObject, thisObj, objs))
         canBeCloned = all(hasattr(obj, 'clone') for obj in objs)
         if canBeCloned:
             contextMenu.addAction('Clone', partial(self._cloneObject, objs))

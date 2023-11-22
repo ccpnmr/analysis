@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-21 13:24:43 +0000 (Tue, November 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-22 12:08:08 +0000 (Wed, November 22, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -1273,6 +1273,9 @@ class NmrResidue(AbstractWrapperObject):
             for sh in _shs:
                 sh.nmrAtom = None
             super().delete()
+            # clean-up/delete the chemical-shifts
+            for sh in _shs:
+                sh.delete()
 
     def delete(self):
         """Delete routine to check whether the item can be deleted otherwise raise api error.

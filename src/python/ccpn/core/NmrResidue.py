@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-22 12:06:23 +0000 (Wed, November 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-22 18:21:41 +0000 (Wed, November 22, 2023) $"
 __version__ = "$Revision: 3.2.0.2 $"
 #=========================================================================================
 # Created
@@ -1233,9 +1233,16 @@ class NmrResidue(AbstractWrapperObject):
             # store the old parent information - may be required for some modules
             self._oldNmrChain = self.nmrChain
             self._oldNmrAtoms = tuple(self.nmrAtoms)
+            for nmrAt in self.nmrAtoms:
+                nmrAt._oldNmrResidue = self
+                nmrAt._oldAssignedPeaks = tuple(nmrAt.assignedPeaks)
         elif action == 'create':
             self._oldNmrChain = None
             self._oldNmrAtoms = ()
+            # this might be empty
+            for nmrAt in self.nmrAtoms:
+                nmrAt._oldNmrResidue = None
+                nmrAt._oldAssignedPeaks = ()
 
         if not super()._finaliseAction(action):
             return

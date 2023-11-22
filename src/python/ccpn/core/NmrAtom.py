@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 12:06:24 +0100 (Fri, June 09, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-11-22 12:08:08 +0000 (Wed, November 22, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -527,6 +527,9 @@ class NmrAtom(AbstractWrapperObject):
                 sh.nmrAtom = None
             # delete the nmrAtom - notifiers handled by decorator
             self._delete()
+            # clean-up/delete the chemical-shifts
+            for sh in _shifts:
+                sh.delete()
 
     #=========================================================================================
     # CCPN functions

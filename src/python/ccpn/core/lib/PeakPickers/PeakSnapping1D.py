@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-11-22 18:46:46 +0000 (Wed, November 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-23 11:28:24 +0000 (Thu, November 23, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -104,7 +104,7 @@ def _find1DCoordsForPeaks(peaks,
 
         ## use the largest signal linewdth as an initial windowSize needed later-on for lineSmoothing. Or a default value (100 pnts)
         if len(maximaHWHH) > 0:
-            initialWindowSize = np.max(maximaHWHH) * 2
+            initialWindowSize = np.max(maximaHWHH) + np.std(maximaHWHH)
         else:
             initialWindowSize = 100
 
@@ -283,13 +283,17 @@ def _getMaximaForRegion(y, x, minimalHeightThreshold, neededMaxima, initialWindo
     unfilteredMaximaHeight = np.array([x[1] for x in unfilteredMaxima])
 
     windowSizesX = np.linspace(0, 1, totWindowSizeSteps)
-    windowSizes = _onePhaseDecayPlateau_func(windowSizesX, rate=10, amplitude=initialWindowSize, plateau=1)
+    windowSizes = _onePhaseDecayPlateau_func(windowSizesX, rate=10, amplitude=initialWindowSize, plateau=2)
 
     coords = []
     for windowSize in windowSizes:  # keep reducing the window until we find smoothed peaks
         print(f'STARTING with windowSize: {windowSize}')
 
-        y_smoothed = lineSmoothing(y, windowSize=int(windowSize))
+        try:
+            y_smoothed = lineSmoothing(y, windowSize=int(windowSize))
+        except Exception as ex:
+            getLogger().warning(f'Cannot smooth with windows size of {windowSize}, {ex}')
+            break # is probably a too small window
         indexes, _ = signal.find_peaks(y_smoothed, )
         for index in indexes:
             try:

@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-05 15:28:41 +0000 (Thu, January 05, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2023-11-23 14:46:22 +0000 (Thu, November 23, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,7 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.core.testing.WrapperTesting import WrapperTesting
+from ccpn.core.testing.WrapperTesting import WrapperTesting, getProperties
 from ccpnmodel.ccpncore.memops.ApiError import ApiError
 
 
@@ -61,9 +61,12 @@ class NmrChainTest(WrapperTesting):
         self.assertRaises(ValueError, nc2.rename, '@6')
 
         nc3 = self.project.newNmrChain()
+        undo_id = nc3.pid
         self.undo.undo()
+        self.assertNotEqual(undo_id, nc3.pid)
         self.undo.redo()
         self.assertEqual(nc3.shortName, '@7')
+        self.assertEqual(undo_id, nc3.pid)
         self.assertRaises(ApiError, nc3.rename, '#7')
 
         # cannot create chain beginning with @- for safety/clarity
@@ -72,8 +75,12 @@ class NmrChainTest(WrapperTesting):
     def test_NmrChain_Chain(self):
         chain = self.project.createChain(sequence='AACKC', shortName='x', molType='protein')
         nmrChain = self.project.newNmrChain(shortName='x')
+
+        undo_id = nmrChain.pid
         self.undo.undo()
+        self.assertNotEqual(undo_id, nmrChain.pid)
         self.undo.redo()
+        self.assertEqual(undo_id, nmrChain.pid)
         self.assertIs(nmrChain.chain, chain)
         self.assertIs(chain.nmrChain, nmrChain)
 
@@ -90,6 +97,9 @@ class NmrChainTest(WrapperTesting):
         ncx = self.project.newNmrChain(isConnected=True)
         self.assertEqual(ncx.pid, 'NC:#3')
         ncx.deassign()
+
         self.undo.undo()
         self.undo.redo()
+
         self.assertEqual(ncx.pid, 'NC:#3')
+

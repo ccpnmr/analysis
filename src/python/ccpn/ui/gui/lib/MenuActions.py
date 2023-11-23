@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-22 13:04:53 +0000 (Wed, November 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-28 12:46:24 +0000 (Tue, November 28, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -883,8 +883,10 @@ class _openItemNmrClass(OpenItemABC):
                 title = f'Delete {self.objectClassName}{plural}'
             ok = showYesNoWarning(title, msg)
 
-            if ok:
-                super()._deleteItemObject(thisObj, objs)
+            if not ok:
+                return
+
+        super()._deleteItemObject(thisObj, objs)
 
 
 class _openItemNmrChainTable(_openItemNmrClass):

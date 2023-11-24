@@ -33,14 +33,14 @@ from ccpn.core.testing.WrapperTesting import WrapperTesting, getProperties
 
 
 def id_undo_redo(obj, undo_obj):
-    """tests undo redo functionality by comparing change in object representations/PIDs"""
-    undo_obj_id = repr(undo_obj)
+    """tests undo redo functionality by testing for 'Deleted' string in object representations/PIDs"""
+    obj.assertNotIn('Deleted', repr(undo_obj))
     obj.undo.undo()
     # check repr change ('deleted' included on end)
-    obj.assertNotEqual(undo_obj_id, repr(undo_obj))
+    obj.assertIn('Deleted', repr(undo_obj))
     obj.undo.redo()
     # repr should revert to original (no 'deleted' on end)
-    obj.assertEqual(undo_obj_id, repr(undo_obj))
+    obj.assertNotIn('Deleted', repr(undo_obj))
 
 
 def granular_dict_undo_redo(obj, instance, p_dict):

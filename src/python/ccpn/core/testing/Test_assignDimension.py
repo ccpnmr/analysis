@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2023-11-21 15:20:27 +0000 (Tue, November 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-24 17:02:55 +0000 (Fri, November 24, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -28,14 +28,14 @@ from ccpn.core.testing.WrapperTesting import WrapperTesting
 
 
 def undo_redo_tester(obj, undo_obj):
-    """tests undo redo functionality by comparing change in object representations/PIDs"""
-    undo_obj_id = repr(undo_obj)
+    """tests undo redo functionality by testing for 'Deleted' string in object representations/PIDs"""
+    obj.assertNotIn('Deleted', repr(undo_obj))
     obj.undo.undo()
     # check repr change ('deleted' included on end)
-    obj.assertNotEqual(undo_obj_id, repr(undo_obj))
+    obj.assertIn('Deleted', repr(undo_obj))
     obj.undo.redo()
     # repr should revert to original (no 'deleted' on end)
-    obj.assertEqual(undo_obj_id, repr(undo_obj))
+    obj.assertNotIn('Deleted', repr(undo_obj))
 
 
 class Test_makeNmrAtom(WrapperTesting):

@@ -260,5 +260,16 @@
         ]
     },
     "recentFiles"      : [
-    ]
+    ],
+    "popups": {
+        "_openItemNmrChainTable": {
+            "dontShowPopup": false
+        },
+        "_openItemNmrResidueItem": {
+            "dontShowPopup": false
+        },
+        "_openItemNmrAtomItem": {
+            "dontShowPopup": false
+        }
+    }
 }

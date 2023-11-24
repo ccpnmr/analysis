@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-28 12:46:24 +0000 (Tue, November 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-28 12:50:21 +0000 (Tue, November 28, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -881,7 +881,7 @@ class _openItemNmrClass(OpenItemABC):
                 title = 'Delete...'
             else:
                 title = f'Delete {self.objectClassName}{plural}'
-            ok = showYesNoWarning(title, msg)
+            ok = showYesNoWarning(title, msg, dontShowEnabled=True, defaultResponse=True, popupId=self.__class__.__name__)
 
             if not ok:
                 return

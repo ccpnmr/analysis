@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-21 13:24:44 +0000 (Tue, November 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-28 12:50:21 +0000 (Tue, November 28, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -27,14 +27,19 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import textwrap
+import math
+import sys
+from contextlib import suppress
+from functools import partial
 from dataclasses import dataclass
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5.QtCore import Qt, QEvent, pyqtSlot
 from ccpn.ui.gui.widgets.Font import setWidgetFont
+from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from PyQt5.QtCore import QEvent
+from ccpn.ui.gui.guiSettings import getColours
+from ccpn.util.Logging import getLogger
 
-
-# from ccpn.ui.gui.guiSettings import messageFont, messageFontBold
 
 def _isDarwin():
     return 'darwin' in QtCore.QSysInfo().kernelType().lower()
@@ -63,6 +68,10 @@ if _isDarwin():
 LINELENGTH = 100
 WRAPBORDER = 5
 WRAPSCALE = 1.01
+
+_DONTSHOWMESSAGE = "Don't show this again"
+_DONTSHOWPOPUP = 'dontShowPopup'
+_POPUPS = 'popups'
 
 
 def _wrapString(text, lineLength=LINELENGTH):
@@ -117,13 +126,21 @@ def _wrapString(text, lineLength=LINELENGTH):
     # return newWrapped2, '\n'.join(newWrapped2)
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# MessageDialog
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 class MessageDialog(QtWidgets.QMessageBox):
     """
     Base class for all dialogues
     Using the 'multiline' to emulate the windowTitle, as on Mac the windows do not get their title
     """
+    DONTSHOWENABLED = False
+    _defaultResponse = None
+    _popupId = None
 
-    def __init__(self, title, basicText, message, icon=Information, iconPath=None, parent=None, scrollableMessage=False):
+    def __init__(self, title, basicText, message, icon=Information, iconPath=None, parent=None, scrollableMessage=False,
+                 dontShowEnabled=False, defaultResponse=None, popupId=None):
         super().__init__(parent)
 
         # set modality to take control
@@ -192,11 +209,61 @@ class MessageDialog(QtWidgets.QMessageBox):
             scaledImage = image.scaled(48, 48, QtCore.Qt.KeepAspectRatio)
             self.setIconPixmap(scaledImage)
 
-        # self.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
+        if dontShowEnabled:
+            self.DONTSHOWENABLED = dontShowEnabled
+            self._defaultResponse = defaultResponse
+            self._popupId = popupId
+        self._setDontShow()
+
+    def _setDontShow(self):
+        # put a Don't Show checkbox at the bottom of the dialog if needed
+        if not self.DONTSHOWENABLED:
+            return
+
+        try:
+            from ccpn.framework.Application import getApplication
+
+            # retrieve from preferences
+            app = getApplication()
+            popup = app.preferences.popups[self._popupId]
+            state = bool(popup[_DONTSHOWPOPUP])
+        except Exception:
+            # any error should hide the checkbox
+            self._dontShowCheckBox = None
+            return
+
+        layout = self.layout()
+
+        # add a checkbox below the buttons - looks a little cleaner
+        # - just use simple widgets for the minute to stop cyclic imports
+        self._frame = _frame = Frame(self)
+        innerLayout = QtWidgets.QHBoxLayout()
+        _frame.setLayout(innerLayout)
+
+        # set the background/fontSize for the tooltips, fraction slower but don't need to import the colour-names
+        _frame.setStyleSheet('QToolTip {{ background-color: {TOOLTIP_BACKGROUND}; '
+                             'color: {TOOLTIP_FOREGROUND}; '
+                             'font-size: {_size}pt ; }}'.format(_size=_frame.font().pointSize(), **getColours()))
+
+        _msg = 'This popup can be enabled again from preferences->appearance'
+        self._dontShowCheckBox = CheckBox(_frame, text=_DONTSHOWMESSAGE)
+        self._dontShowCheckBox.setToolTip(_msg)
+        self._dontShowCheckBox.setContentsMargins(0, 0, 0, 0)
+        self._dontShowCheckBox.setChecked(state)
+        innerLayout.addWidget(self._dontShowCheckBox, 0, QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+
+        self.accepted.connect(self._accept)
+        self.rejected.connect(self._reject)
+
+        _frame.setFixedSize(_frame.minimumSizeHint())
+        hs = _frame.height() - layout.verticalSpacing() - self.contentsMargins().bottom() // 2
+
+        _spacer = QtWidgets.QSpacerItem(0, max(1, hs), QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        layout.addItem(_spacer, layout.rowCount(), 0, 1, layout.columnCount())
 
     def event(self, event):
         """
-        handler to make dialogs proely modal but at the sametime accept the correct keys for default actions
+        handler to make dialogs modal but at the sametime accept the correct keys for default actions
         """
 
         # accepted events apple-delete, apple-c apple-v, esc, return, spacebar, command period, apple-z apple-y,
@@ -265,10 +332,12 @@ class MessageDialog(QtWidgets.QMessageBox):
                       - self.frameGeometry().center()
                       + self.frameGeometry().topLeft())
 
-    def runFunc(self, func):
-        from functools import partial
+        if self.DONTSHOWENABLED:
+            self._frame.move(self.contentsMargins().left() // 2,
+                             self.geometry().height() - self._frame.height() - self.contentsMargins().bottom() // 2)
 
-        QtCore.QTimer.singleShot(0, partial(self._runFunc, func))
+    def runFunc(self, func):
+        QtCore.QTimer().singleShot(0, partial(self._runFunc, func))
         self.exec_()
         return self._funcResult
 
@@ -278,6 +347,58 @@ class MessageDialog(QtWidgets.QMessageBox):
         self._funcResult = func()
         self.close()
 
+    def dontShowPopup(self):
+        """Check the exec state from the stored don't-show preferences
+        """
+        if self.DONTSHOWENABLED:
+            try:
+                from ccpn.framework.Application import getApplication
+
+                # store in preferences
+                app = getApplication()
+                popup = app.preferences.popups[self._popupId]
+                state = popup[_DONTSHOWPOPUP]
+            except Exception:
+                state = False
+
+            # what is the default response for this dialog?
+            # needs to be defined/set in the subclass of __init__
+            return state
+
+        return False
+
+    def _accept(self):
+        # store the current state of the checkbox in preferences
+        if self.DONTSHOWENABLED:
+            with suppress(Exception):
+                from ccpn.framework.Application import getApplication
+
+                # store in preferences
+                if app := getApplication():
+                    popups = app.preferences.setdefault(_POPUPS, {})
+                    popup = popups.setdefault(self._popupId, {})
+                    # should really get from a property rather than a widget
+                    #  - if widget does not show then the initial state may not be set
+                    popup[_DONTSHOWPOPUP] = self._dontShowCheckBox.isChecked()
+
+    def _reject(self):
+        # store False in preferences - popup still opens
+        if self.DONTSHOWENABLED:
+            with suppress(Exception):
+                from ccpn.framework.Application import getApplication
+
+                # store in preferences
+                if app := getApplication():
+                    popups = app.preferences.setdefault(_POPUPS, {})
+                    popup = popups.setdefault(self._popupId, {})
+                    # should really get from a property rather than a widget
+                    #  - if widget does not show then the initial state may not be set
+                    popup[_DONTSHOWPOPUP] = False
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# MessageDialog subclasses
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def showInfo(title, message, parent=None, iconPath=None):
     """Display an info message
@@ -385,13 +506,18 @@ def showOkCancelWarning(title, message, parent=None, iconPath=None):
     return dialog.exec_() == Ok
 
 
-def showYesNoWarning(title, message, parent=None, iconPath=None):
-    dialog = MessageDialog('Warning', title, message, Warning, iconPath, parent)
+def showYesNoWarning(title, message, parent=None, iconPath=None,
+                     dontShowEnabled=False, defaultResponse=None, popupId=None):
+    dialog = MessageDialog('Warning', title, message, Warning, iconPath, parent,
+                           dontShowEnabled=dontShowEnabled, defaultResponse=defaultResponse, popupId=popupId)
+
+    if dialog.dontShowPopup():
+        getLogger().info(f'Popup {popupId!r} skipped with response={defaultResponse}')
+        return defaultResponse
 
     dialog.setStandardButtons(Yes | No)
     dialog.setDefaultButton(No)
 
-    dialog.raise_()
     return dialog.exec_() == Yes
 
 
@@ -480,11 +606,15 @@ def showMessage(title, message, parent=None, iconPath=None):
     return
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# progressPopup dialog
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 # testing simple progress/busy popup
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui, QtWidgets
-from PyQt5.QtCore import pyqtSlot
+# from PyQt5 import QtCore
+# from PyQt5 import QtGui, QtWidgets
+# from PyQt5.QtCore import pyqtSlot
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.Label import Label
 from contextlib import contextmanager
@@ -645,32 +775,27 @@ def _stoppableProgressBar(data, title='Calculating...', buttonText='Cancel'):
         yield (v)
 
 
-import math, sys
-from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtGui import *
-
-
 class busyOverlay(QtWidgets.QWidget):
     def __init__(self, parent=None):
 
         QtWidgets.QWidget.__init__(self, parent)
-        palette = QPalette(self.palette())
+        palette = QtGui.QPalette(self.palette())
         palette.setColor(palette.Background, Qt.transparent)
         self.setPalette(palette)
 
     def paintEvent(self, event):
 
-        painter = QPainter()
+        painter = QtGui.QPainter()
         painter.begin(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-        painter.fillRect(event.rect(), QBrush(QColor(255, 255, 255, 127)))
-        painter.setPen(QPen(Qt.NoPen))
+        painter.setRenderHint(QtGui.QPainter.Antialiasing)
+        painter.fillRect(event.rect(), QtGui.QBrush(QtGui.QColor(255, 255, 255, 127)))
+        painter.setPen(QtGui.QPen(Qt.NoPen))
 
         for i in range(6):
             if (self.counter / 5) % 6 == i:
-                painter.setBrush(QBrush(QColor(127 + (self.counter % 5) * 32, 127, 127)))
+                painter.setBrush(QtGui.QBrush(QtGui.QColor(127 + (self.counter % 5) * 32, 127, 127)))
             else:
-                painter.setBrush(QBrush(QColor(127, 127, 127)))
+                painter.setBrush(QtGui.QBrush(QtGui.QColor(127, 127, 127)))
             painter.drawEllipse(
                     self.width() / 2 + 30 * math.cos(2 * math.pi * i / 6.0) - 10,
                     self.height() / 2 + 30 * math.sin(2 * math.pi * i / 6.0) - 10,
@@ -715,7 +840,6 @@ class busyOverlay(QtWidgets.QWidget):
 #       event.accept()
 
 if __name__ == '__main__':
-    import sys
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.widgets.BasePopup import BasePopup
     from ccpn.ui.gui.widgets.Button import Button

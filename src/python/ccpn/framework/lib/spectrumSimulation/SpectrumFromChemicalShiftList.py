@@ -57,7 +57,7 @@ class SimulatedSpectrumByExperimentTypeABC(TraitBase):
     #=========================================================================================
     experimentType = None
     peakAtomNameMappers = [[],]
-    isotopeCodes =  []
+    isotopeCodes = []
     axisCodes = []
     spectralWidths = []
     referenceValues = []
@@ -189,7 +189,7 @@ class SimulatedSpectrumByExperimentTypeABC(TraitBase):
 
     def _setSpectrumProperties(self, **kwargs):
         """
-        Set a valid spectrum properti from a dict key:value. key: the property to be set, value: its value.
+        Set a valid spectrum property from a dict key:value. key: the property to be set, value: its value.
         See the Spectrum core class for more info.
         Usage: .setSpectrumProperties(**{'referenceValues': [12.0, 200.0, 130.0]})
         :param kwargs:
@@ -214,7 +214,7 @@ class SimulatedSpectrumByExperimentTypeABC(TraitBase):
         pass
 
     def _isValidPeakMapper(self):
-        """check if is a valid PeakMapper. e.g.: the structure is same lenght as the dimension count"""
+        """check if is a valid PeakMapper. e.g.: the structure is same length as the dimension count"""
         pass
 
     def _getAllRequiredAtomNames(self):
@@ -285,6 +285,12 @@ class NAtomNamesMapper(AtomNamesMapper):
     axisCode            = 'Nh'
     offsetNmrAtomNames  = {0: 'N'}
 
+class ssNAtomNamesMapper(AtomNamesMapper):
+
+    isotopeCode         = '15N'
+    axisCode            = 'N'
+    offsetNmrAtomNames  = {0: 'N'}
+
 class COAtomNamesMapper(AtomNamesMapper):
 
     isotopeCode         = '13C'
@@ -301,6 +307,12 @@ class CAAtomNamesMapper(AtomNamesMapper):
 
     isotopeCode         = '13C'
     axisCode            = 'C'
+    offsetNmrAtomNames  = {0: 'CA'}
+
+class ssCAAtomNamesMapper(AtomNamesMapper):
+
+    isotopeCode         = '13C'
+    axisCode            = 'CA'
     offsetNmrAtomNames  = {0: 'CA'}
 
 class CAM1AtomNamesMapper(AtomNamesMapper):
@@ -505,6 +517,65 @@ class SimulatedSpectrum_HNCACB(SimulatedSpectrumByExperimentTypeABC):
                             ]
                          ]
 
+class SimulatedSpectrum_CANCO(SimulatedSpectrumByExperimentTypeABC):
+
+    experimentType      = 'CANCO'
+    isotopeCodes        = ['13C', '15N', '13C']
+    axisCodes           = ['C', 'N', 'CA']
+    spectralWidths      = [30, 40, 35]
+    referenceValues     = [190, 140, 75]
+    peakAtomNameMappers = [
+                            [
+                            COM1AtomNamesMapper(),
+                            ssNAtomNamesMapper(),
+                            ssCAAtomNamesMapper()
+                            ]
+                        ]
+
+class SimulatedSpectrum_NCACX(SimulatedSpectrumByExperimentTypeABC):
+
+    experimentType      = 'NCACX (relayed)'
+    isotopeCodes        = ['13C', '13C', '15N']
+    axisCodes           = ['C', 'CA', 'N']
+    spectralWidths      = [30, 35, 40]
+    referenceValues     = [190, 75, 140]
+    peakAtomNameMappers = None
+
+    @staticmethod
+    def _createAtomNameMappers():
+        from ccpn.core.lib.AssignmentLib import NEF_ATOM_NAMES_CBONDED
+
+        peakMappers = [[],]
+        for catom in NEF_ATOM_NAMES_CBONDED.keys():
+            atomNameMappers = [AtomNamesMapper(isotopeCode='13C', axisCode='C', offsetNmrAtomNames={0:catom}),
+                                AtomNamesMapper(isotopeCode='13C', axisCode='CA', offsetNmrAtomNames={0: 'CA'}),
+                                AtomNamesMapper(isotopeCode='15N', axisCode='N', offsetNmrAtomNames={0: 'N'})]
+            peakMappers.append(atomNameMappers)
+
+        return(peakMappers)
+
+class SimulatedSpectrum_NCOCX(SimulatedSpectrumByExperimentTypeABC):
+
+    experimentType      = 'NCOCX (relayed)'
+    isotopeCodes        = ['13C', '13C', '15N']
+    axisCodes           = ['C', 'CO', 'N']
+    spectralWidths      = [30, 35, 40]
+    referenceValues     = [190, 75, 140]
+    peakAtomNameMappers = None
+
+    @staticmethod
+    def _createAtomNameMappers():
+        from ccpn.core.lib.AssignmentLib import NEF_ATOM_NAMES_CBONDED
+
+        peakMappers = [[],]
+        for catom in NEF_ATOM_NAMES_CBONDED.keys():
+            atomNameMappers = [AtomNamesMapper(isotopeCode='13C', axisCode='C', offsetNmrAtomNames={0:catom}),
+                                AtomNamesMapper(isotopeCode='13C', axisCode='CO', offsetNmrAtomNames={0: 'C'}),
+                                AtomNamesMapper(isotopeCode='15N', axisCode='N', offsetNmrAtomNames={+1: 'N'})]
+            peakMappers.append(atomNameMappers)
+
+        return(peakMappers)
+
 
 
 #--------------------------------------------------------------------------------------------
@@ -519,4 +590,7 @@ CSL2SPECTRUM_DICT = OrderedDict([
                             (SimulatedSpectrum_HNCA.experimentType, SimulatedSpectrum_HNCA),
                             (SimulatedSpectrum_HNCOCA.experimentType, SimulatedSpectrum_HNCOCA),
                             (SimulatedSpectrum_HNCACB.experimentType, SimulatedSpectrum_HNCACB),
+                            (SimulatedSpectrum_CANCO.experimentType, SimulatedSpectrum_CANCO),
+                            (SimulatedSpectrum_NCACX.experimentType, SimulatedSpectrum_NCACX),
+                            (SimulatedSpectrum_NCOCX.experimentType, SimulatedSpectrum_NCOCX),
                             ])

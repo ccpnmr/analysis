@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-11-23 11:28:24 +0000 (Thu, November 23, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-28 16:09:08 +0000 (Tue, November 28, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -40,6 +40,8 @@ from ccpn.core.lib.ContextManagers import  undoBlockWithoutSideBar, notification
 from ccpn.core.lib.PeakPickers.PeakPicker1D import _find1DMaxima
 from ccpn.core.lib.SpectrumLib import  _1DRawDataDict
 from scipy import spatial, signal
+from scipy.spatial.distance import cdist
+from scipy.optimize import linear_sum_assignment
 
 def snap1DPeaks(peaks, **kwargs):
     results = _find1DCoordsForPeaks(peaks, **kwargs)
@@ -61,18 +63,20 @@ def _find1DCoordsForPeaks(peaks,
                       autoClusterPeaks = True,
                       additionalClusterPeakPpmLimit=0.1,
                       figOfMeritLimit=1,
+                      limits=None,
                       doNeg=False):
     """
     :param peaks:
     :param rawDataDict:
     :param ppmLimit:
-    :param additionalClusterPeakPpmLimit:  When detecting a cluster, add an additional +- limits to the edges of a cluster region
+    :param additionalClusterPeakPpmLimit:  When auto-detecting a cluster, add a +/- ppm rangeLimits to the edges of a cluster region
     :param figOfMeritLimit:
     :param doNeg:
     :return: dict.
                         Keys: peak.
                         values: list of [ppmPosition, height, heightError]
     """
+    limits = limits or {}
     results = {peak:[peak.position, peak.height, peak.heightError] for peak in peaks}
     rounding = 4
     ## peaks can be from different spectra, so let's group first
@@ -109,11 +113,12 @@ def _find1DCoordsForPeaks(peaks,
             initialWindowSize = 100
 
         for pl, subPeakGroup in peaksByPeakList.items():
+            print(f'Starting Snapping PL: {pl} ...')
             snappingPeaks = np.array(subPeakGroup)
             snappingPositions = np.array([pk.position[0] for pk in snappingPeaks])
 
             if autoClusterPeaks:
-                ## Cluster peaks in groups by the ppmLimit. Consider a group of peaks if they fall within the ppmLimits,
+                ## Cluster peaks in groups by the ppmLimit. Consider a group of peaks if they fall within the ppm_rangeLimits,
                 i = np.argsort(snappingPositions)
                 snappingPositions = snappingPositions[i]
                 snappingPeaks = snappingPeaks[i]
@@ -137,21 +142,25 @@ def _find1DCoordsForPeaks(peaks,
 
                 ## if there is only one peak in the group then snap to closest coord:
                 if len(peakGroup) == 1:
-                    ## make the limits around the snapping peak. Reduce the limits if an existing peak(s) fall within the user-set ppmLimit. This avoid "stealing" maxima.
+                    ## make the _rangeLimits around the snapping peak. Reduce the _rangeLimits if an existing peak(s) fall within the user-set ppmLimit. This avoid "stealing" maxima.
                     queryPos = float(_peak.position[0])
-                    limits = np.array([queryPos - ppmLimit, queryPos + ppmLimit])
-                    limitsFromKnownPositions = np.concatenate([knownPositions, limits])
-                    left = limitsFromKnownPositions[limitsFromKnownPositions > queryPos]
-                    right = limitsFromKnownPositions[limitsFromKnownPositions < queryPos]
-                    closestLeft = left[np.argmin(left - queryPos)]
-                    closestRight = right[np.argmin(abs(right) - queryPos)]
+                    limitForPeak = limits.get(_peak, [])
+                    print('limitForPeak', limitForPeak)
+                    if len(limitForPeak) == 2:
+                        _rangeLimits = np.array(limitForPeak)
+                    else:
+                        otherPeaksPointPosition = np.array([p.pointPositions[0] for p in _peak.peakList.peaks])
+                        _rangeLimits = _getSnappingPeakLimits(_peak, otherPeaksPointPosition, defaultLimit = ppmLimit, maxLimit = 0.5)
+                    _rangeLimitsFromKnownPositions = np.concatenate([knownPositions, _rangeLimits])
+
 
                     ## get the region of interest from the whole array
-                    x_filtered, y_filtered = _1DregionsFromLimits(xValues, yValues, [closestLeft, closestRight])
+                    x_filtered, y_filtered = _1DregionsFromLimits(xValues, yValues, _rangeLimits)
                     coords = _getMaximaForRegion(y_filtered, x_filtered, minimalHeightThreshold=minimalHeightThreshold,
                                                  neededMaxima=1, initialWindowSize=initialWindowSize, totWindowSizeSteps=1000)
+
                     heightAtQuery = _getClosestHeight(xValues, yValues, queryPos, _peak.height)
-                    if len(coords) > 0:
+                    if len(coords) == 1:
                         coord = coords[0]
                         ## round knownPositions.
                         existing = np.array([round(p.position[0], rounding) for p in _peak.peakList.peaks])
@@ -180,6 +189,23 @@ def _find1DCoordsForPeaks(peaks,
                             height = coord[1]
                             error = None
                             print('Found a good new solution. ',)
+                    elif len(coords)>1:
+                        print('We Found more then 1', coords)
+                        A = np.array(coords)
+                        Aheights = A.T[1]
+
+                        pt = np.array([queryPos, np.median(Aheights)])
+                        Q = pt.reshape(1, 2)
+                        distanceMatrix = cdist(A, Q, metric='seuclidean', )
+                        AIndexes, QIndexes = linear_sum_assignment(distanceMatrix)
+                        Amatches = A[AIndexes]
+                        if len(Amatches)>0:
+                            print(Amatches, f'FOUND THIESeee. QUert: {Q}')
+                            closestMatch = Amatches[0]
+                            position = [float(closestMatch[0])]
+                            height = closestMatch[1]
+                            error = None
+                            print(f'FROM MANY Found a good new solution. {position}', )
                     else:
                         position = [queryPos]
                         height = heightAtQuery
@@ -189,20 +215,20 @@ def _find1DCoordsForPeaks(peaks,
                 ## we have multiple peaks to snap at once.
                 else:
                     groupPositions = np.array([pk.position[0] for pk in peakGroup])
-                    ## define the search limits around snapping peaks:
-                    ## 1) use the first and last peak position in the group as left-right limits
+                    ## define the search _rangeLimits around snapping peaks:
+                    ## 1) use the first and last peak position in the group as left-right _rangeLimits
                     minGroupPos = np.min(groupPositions)
                     maxGroupPos = np.max(groupPositions)
                     leftLimit = minGroupPos - additionalClusterPeakPpmLimit
                     rightLimit =  maxGroupPos + additionalClusterPeakPpmLimit
-                    clusterLimits = np.array([leftLimit, rightLimit])
-                    limitsFromKnownPositions = np.concatenate([knownPositions, clusterLimits])
-                    left = limitsFromKnownPositions[limitsFromKnownPositions > minGroupPos]
-                    right = limitsFromKnownPositions[limitsFromKnownPositions < maxGroupPos]
+                    cluster_rangeLimits = np.array([leftLimit, rightLimit])
+                    _rangeLimitsFromKnownPositions = np.concatenate([knownPositions, cluster_rangeLimits])
+                    left = _rangeLimitsFromKnownPositions[_rangeLimitsFromKnownPositions > minGroupPos]
+                    right = _rangeLimitsFromKnownPositions[_rangeLimitsFromKnownPositions < maxGroupPos]
                     closestLeft = left[np.argmin(left - minGroupPos)]
                     closestRight = right[np.argmin(abs(right) - maxGroupPos)]
 
-                    # need to check if within these limits there are other peaks. and restrict the search. otherwise will "steal" the maximum from other closer peaks
+                    # need to check if within these _rangeLimits there are other peaks. and restrict the search. otherwise will "steal" the maximum from other closer peaks
                     rounding = 4
                     neededMaxima = len(peakGroup)
                     x_filtered, y_filtered = _1DregionsFromLimits(xValues, yValues, limits=[closestLeft, closestRight])
@@ -243,6 +269,45 @@ def _find1DCoordsForPeaks(peaks,
                             _find1DCoordsForPeaks([peak], ppmLimit=ppmLimit, rawDataDict=rawDataDict)
 
     return results
+
+
+
+def _getSnappingPeakLimits(peak, otherPeaksPointPosition, defaultLimit = 0.250, maxLimit = 1.0):
+    pointPositions = otherPeaksPointPosition
+    ppmPerPoint = peak.spectrum.ppmPerPoints[0]
+    defaultLimitPoints = defaultLimit/ppmPerPoint
+    maxLimitPoints = maxLimit/ppmPerPoint
+    queryPointPos = float(peak.pointPositions[0])
+
+    right = pointPositions[pointPositions > queryPointPos] # upfield - more negative ppm Values
+    left = pointPositions[pointPositions < queryPointPos]  # downfield - more positive ppm Values
+
+    if len(left) > 0:  # could be the last peak or the only one
+        closestLeft = left[np.argmin(abs(left - queryPointPos))]
+        deltaLeft = closestLeft - queryPointPos
+        leftLimit = closestLeft - (deltaLeft/2) #use half delta to the nearest peak
+    else: # there aren't picked peaks to the left
+        deltaLeft = defaultLimitPoints
+        leftLimit = queryPointPos - deltaLeft
+    if abs(deltaLeft) > maxLimitPoints:
+        leftLimit = queryPointPos - maxLimitPoints
+
+    if len(right) > 0:
+        closestRight = right[np.argmin(abs(right) - queryPointPos)]
+        deltaRight = closestRight - queryPointPos
+        rightLimit = closestRight - (deltaRight / 2)
+
+    else:
+        deltaRight = defaultLimitPoints
+        rightLimit = queryPointPos + deltaRight
+
+    if abs(deltaRight) > maxLimitPoints:
+        rightLimit = queryPointPos + maxLimitPoints
+
+    leftPpm = peak.spectrum.point2ppm(leftLimit, peak.spectrum.axisCodes[0])
+    rightPpm = peak.spectrum.point2ppm(rightLimit, peak.spectrum.axisCodes[0])
+
+    return leftPpm, rightPpm
 
 def _1DregionsFromLimits(x, y, limits):
     """
@@ -301,9 +366,10 @@ def _getMaximaForRegion(y, x, minimalHeightThreshold, neededMaxima, initialWindo
                 idx = (np.abs(unfilteredMaximaPos - pos)).argmin()
                 nearestPos = unfilteredMaximaPos[idx]
                 nearestHeight = unfilteredMaximaHeight[idx]
-                coord = (nearestPos, nearestHeight)
+                coord = [float(nearestPos), float(nearestHeight)]
                 if coord not in coords:
-                    coords.append(coord)
+                    if coord[1]/minimalHeightThreshold >= 2: # otherwise is a very low S/N
+                        coords.append(coord)
             except Exception as error:
                 getLogger().warn(f'Something wrong snapping peak. {windowSize}')
 
@@ -311,10 +377,12 @@ def _getMaximaForRegion(y, x, minimalHeightThreshold, neededMaxima, initialWindo
             print('DONE. Reached needed count')
             break
 
-    if len(coords) >= neededMaxima:
-        # take the highest of the solutions
-        coords = sorted(coords, key=lambda x: x[1], reverse=True)  # sort by height
-        coords = coords[:neededMaxima]
+
+    # if len(coords) >= neededMaxima:
+    #
+    #     # take the highest of the solutions
+    #     coords = sorted(coords, key=lambda x: x[1], reverse=True)  # sort by height
+    #     coords = coords[:neededMaxima]
     return coords
 
 def _getClosestHeight(x,y, pos, currentHeight):
@@ -322,10 +390,10 @@ def _getClosestHeight(x,y, pos, currentHeight):
         ax = x.reshape(len(x), 1)
         closestX = ax[spatial.KDTree(ax).query(pos)[1]]
         closestY = y[x==closestX]
-        return closestY
+        return float(closestY)
     except Exception as err:
         getLogger().warning('Could not find the closest', err)
-    return currentHeight
+    return float(currentHeight)
 
 def _correctNegativeHeight(height, doNeg=False):
     """return height either Positive or Negative value if doNEg=True. If height is negative and doNeg=False:

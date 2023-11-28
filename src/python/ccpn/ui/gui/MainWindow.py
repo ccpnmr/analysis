@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-11-22 18:46:46 +0000 (Wed, November 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-28 16:09:08 +0000 (Tue, November 28, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -2120,7 +2120,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             elif n > 1:
                 with progressManager(self, 'Snapping peaks to extrema'):
 
-                    try:
+                    # try:
                         _is1Ds = [p.spectrum.dimensionCount == 1 for p in peaks]
                         if all(_is1Ds):
                             from ccpn.core.lib.PeakPickers.PeakSnapping1D import snap1DPeaks
@@ -2136,8 +2136,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                                 peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4,
                                                     minDropFactor=minDropFactor, searchBoxMode=searchBoxMode, searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
 
-                    except Exception as es:
-                        showWarning('Snap to Extremum', str(es))
+                    # except Exception as es:
+                    #     showWarning('Snap to Extremum', str(es))
 
             else:
                 getLogger().warning('No selected peak/s. Select a peak first.')

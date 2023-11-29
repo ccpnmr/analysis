@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-10 17:28:03 +0100 (Tue, October 10, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-11-29 12:08:48 +0000 (Wed, November 29, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -682,7 +682,7 @@ class MacroEditor(CcpnModule):
                     widget._setSavedState(value)
 
             except Exception as e:
-                getLogger().debug('Impossible to restore %s value for %s. %s' % (variableName, self.name(), e))
+                getLogger().debug('Exception raised: Impossible to restore %s value for %s: %s' % (variableName, self.name(), e))
 
     def _closeModule(self):
         """Re-implementation of closeModule"""

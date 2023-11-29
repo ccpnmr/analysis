@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-07 14:20:12 +0000 (Tue, November 07, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-29 12:08:47 +0000 (Wed, November 29, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -134,6 +134,12 @@ CCPN_SUB_DIRECTORIES = [
     CCPN_PLUGINS_DIRECTORY, CCPN_SPECTRA_DIRECTORY, CCPN_SCRIPTS_DIRECTORY,
     CCPN_STATE_DIRECTORY, CCPN_STATESPECTRA_DIRECTORY,
     CCPN_PLOTS_DIRECTORY
+]
+
+# The CcpNmr Project's top subdirectories (optionally) saved by saveAs
+CCPN_SAVEAS_SUB_DIRECTORIES = [CCPN_ARCHIVES_DIRECTORY, CCPN_BACKUPS_DIRECTORY,
+    CCPN_SUMMARIES_DIRECTORY, CCPN_LOGS_DIRECTORY, CCPN_DATA_DIRECTORY,
+    CCPN_SCRIPTS_DIRECTORY
 ]
 
 ccpnVersionHistory = 'versionHistory.json'

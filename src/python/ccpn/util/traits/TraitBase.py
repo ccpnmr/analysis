@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-01 18:02:13 +0000 (Tue, March 01, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-11-29 12:08:49 +0000 (Wed, November 29, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,7 +28,10 @@ __date__ = "$Date: 2018-05-14 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import sys
 import os
+from contextlib import contextmanager
 from traitlets import HasTraits, Undefined
+
+from ccpn.util.Logging import getLogger
 
 
 class TraitBase(HasTraits):
@@ -36,14 +39,28 @@ class TraitBase(HasTraits):
     """
 
     keysInOrder = True   # If True, return key in order defined by _traitOrder attribute
-                         # of the keys
+                         # of the keys; can bet put at end by traitAtEnd tag
+
+    def __init__(self, *args, **kwds):
+        super().__init__(*args, **kwds)
+        # trait notifers
+        self._traitNotifierBlanking = 0
 
     def getTraitValue(self, trait):
-        """convenience (to complement setTraitValue): return value of trait
+        """convenience (to complement setTraitValue)
+        :parameter trait: the name of the trait
+        :return value of trait
         """
         if not self.hasTrait(trait):
             raise ValueError('Trait "%s" does not exist for object %s' % (trait, self))
-        return self._trait_values[trait]
+        try:
+            value = self._trait_values[trait]
+        except KeyError:
+            # No values set; use getattr as this will trigger the machinery
+            # if trait=='temperature':
+            #     pass
+            value = getattr(self, trait)
+        return value
 
     def setTraitValue(self, trait, value, force=False):
         """Convenience: set value of trait, optionally overwriting immutable ones
@@ -73,13 +90,25 @@ class TraitBase(HasTraits):
             raise RuntimeError('Trait "%s" of object %s does not have a default value defined' % (trait, self))
         self.setTraitValue(trait, defaultValue, force=True)
 
+    def setDefaultValues(self, overRide=False, **metadata):
+        """convenience: set all traits (optionally filtered for metadata) that do not yet have
+        a value (optionally overRide) to default value (if defined)
+        :parameter overRide: set default vlue to all traits, including those that already have a value
+                             i.e. a 'reset'.
+        :parameter metadata: optionally filter traits for the metadata
+        """
+        for traitName, trait in self.items(**metadata):
+            if (not self.trait_has_value(traitName) or overRide):
+                if (defaultValue :=  trait.default_value) != Undefined:
+                    self.setTraitValue(traitName, defaultValue, force=True)
+
     def hasTrait(self, trait):
         """Convenience, Return True if self has trait
         """
         return self.has_trait(trait)
 
     def getTrait(self, trait):
-        """Return the trait object corresponding to trait, or None if does not exists
+        """Return the trait class object corresponding to trait, or None if does not exists
         """
         return self.class_traits().get(trait)
 
@@ -119,33 +148,77 @@ class TraitBase(HasTraits):
         "convenience for trait_metadata"
         return self.trait_metadata(trait, key, default)
 
-    def keys(self, **metadata):
-        """get keys (object only), optionally filtering for metadata
+    def _keys(self, **metadata) -> list:
+        """Get keys (object only), optionally filtering for metadata.
+        Key order is determined by keysInOrder attribute and optional traitAtEnd tag settings.
+        :return The keys as a list
         """
         if self.keysInOrder:
-            items = [(val._traitOrder, key) for key,val in self.class_traits(**metadata).items()]
-            items.sort()
-            keys = [key for val,key in items]
+            frontKeys = [(trait._traitOrder, key) for key,trait in self.class_traits(**metadata).items()
+                          if not 'traitAtEnd' in trait.metadata
+                        ]
+            frontKeys.sort()
+            endKeys = [(trait._traitOrder, key) for key,trait in self.class_traits(**metadata).items()
+                        if 'traitAtEnd' in trait.metadata
+                      ]
+            endKeys.sort()
+            keys = [key for val,key in frontKeys] + [key for val,key in endKeys]
+
         else:
             keys = [key for key in self.class_traits(**metadata).keys()]
             keys.sort()
         return keys
 
+    def keys(self, **kwds) -> list:
+        """Allow for skipping or showing of reserved traits
+        i.e. tagged with reservedTrait=False or True, respectively
+        """
+        # Downstream self._keys() call omits reservedTrait keyword,
+        # as it is not set by default.
+
+        if 'reservedTrait' not in kwds:
+            # regular behavior:
+            return self._keys(**kwds)
+
+        reservedTrait = kwds['reservedTrait']
+
+        if reservedTrait == True:
+            # looking for those tagged with reservedTrait = True
+            return self._keys(**kwds)
+
+        elif reservedTrait == False:
+            # reservedTrait == False; i.e. not the reserved ones
+            _reservedTraits = self._keys(reservedTrait=True)  # yields those that are tagged
+            # delete reservedTrait from kwds, as the tag most likely is not set
+            # for (many) traits
+            del kwds['reservedTrait']
+            # get traits filtering for not in _reservedTraits
+            return [key for key in self._keys(**kwds)
+                    if key not in _reservedTraits]
+
+        else:
+            raise ValueError(f'keys(): Invalid parameter reservedTrait, expected None | True | False, got {reservedTrait}')
+
+
     # the ones below are derived from keys() method
     def values(self, **metadata):
         """get values, optionally filtering for metadata"""
-        return [getattr(self, key) for key in self.keys(**metadata)]
+        return [self.getTraitValue(key) for key in self.keys(**metadata)]
 
-    def update(self, other, **metadata):
-        """update self with values from other (dict-like), optionally filtering for metadata"""
+    def update(self, other, force=False, **metadata):
+        """update self with values from other (dict-like), optionally filtering for metadata
+        :parameter other: dict with (key,value) pairs to update
+        :parameter force: force update of inmutable traits
+        :parameter metadata: optional param=values pairs to filter for metadata (i.e. tag values)
+        """
         for key in self.keys(**metadata):
             if key in other:
-                setattr(self, key, other[key])
+                self.setTraitValue(key, other[key], force=force)
 
     def items(self, **metadata):
         """iterable over key, value pairs, optionally filtering for metadata"""
         for key in self.keys(**metadata):
-            value = getattr(self, key)
+            value = self.getTraitValue(key)
             yield (key, value)
 
     def __iter__(self, **metadata):
@@ -169,6 +242,30 @@ class TraitBase(HasTraits):
         """return trait, value pairs as dict, optionally filtering for metadata"""
         return dict(self.items(**metadata))
 
+    @contextmanager
+    def traitNotificationBlanking(self):
+        """Blank all trait notification (per object!); i.e. they are not saved and executed late.
+        If that is needed, use hold_trait_notifications()
+        """
+
+        # following hold_trait_notifications approach
+        def blank(changes):
+            pass
+
+        try:
+            self._traitNotifierBlanking += 1
+            self.notify_change = blank
+            yield
+
+        except Exception as es:
+            getLogger().debug(f'{self.__class__.__name__}.traitNotificationBlanking() level={self._traitNotifierBlanking}: caught error {es}')
+            raise es
+
+        finally:
+            self._traitNotifierBlanking -= 1
+            if self._traitNotifierBlanking == 0:
+                del self.notify_change
+
     def __str__(self):
         return '<%s>' % (self.__class__.__name__,)
 
@@ -179,11 +276,13 @@ class TraitBase(HasTraits):
         """Print all traits"""
         print('-------', self, '-------')
         for trait, value in self.items():
-            info = self.getMetadata(trait, key='info', default='')
-            if len(info) > 0 and printInfo:
-                print('%-20s : %-40s (%s)' % (trait, value, info))
-            else:
-                print('%-20s : %s' % (trait, value))
+            doPrint = self.getMetadata(trait, key='doPrint', default=True)
+            if doPrint:
+                info = self.getMetadata(trait, key='info', default='')
+                if len(info) > 0 and printInfo:
+                    print('%-20s : %-40s (%s)' % (trait, value, info))
+                else:
+                    print('%-20s : %s' % (trait, value))
 
     # --------------------------------------------------------------------------------------------
 

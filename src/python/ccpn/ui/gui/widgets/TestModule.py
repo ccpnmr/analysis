@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-28 16:36:55 +0100 (Fri, July 28, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-11-29 12:08:49 +0000 (Wed, November 29, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -34,7 +34,7 @@ class MyModule(CcpnModule):
     """
     includeSettingsWidget = True
     maxSettingsState = 2
-    settingsPosition = 'top'
+    settingsPosition = 'left'
 
     className = 'MyModule'
 
@@ -45,8 +45,11 @@ class MyModule(CcpnModule):
         self.aLabel = Label(parent=self.mainWidget, text='Testing my module', grid=(0, 0))
 
         # settingsWidget
-        self.testingLabel = Label(parent=self.settingsWidget, text='Testing my settings space', grid=(0, 0), hAlign='c')
-
+        row = 0
+        self.testingLabel = Label(parent=self.settingsWidget, text='Testing my settings space', grid=(row, 0), hAlign='c')
+        row += 1
+        cb = EditableCheckBox(self.settingsWidget, text='HELLO', checked=False, grid=(row, 0))
+        cb.setChecked(True)
 
 '''
 To test a ccpn Module graphic :
@@ -71,9 +74,8 @@ def main():
     module = MyModule(mainWindow=None, name='My Module')
     module.cb = cb = CheckBox(module.settingsWidget, text='HELLO', checked=False, grid=(0, 0), objectName='CHECKCHECK')
 
-    state = module.widgetsState
-    cb.setChecked(True)
-    module.restoreWidgetsState(**state)
+    # state = module.widgetsState
+    # module.restoreWidgetsState(**state)
 
     moduleArea.addModule(module)
 

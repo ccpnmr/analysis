@@ -16,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-23 12:57:13 +0100 (Wed, August 23, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-11-29 12:08:46 +0000 (Wed, November 29, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,7 +31,7 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerABC, SimplePeak
 from numba import jit
 import numpy as np
-# from ccpn.framework.Application import getApplication
+from ccpn.framework.Application import getApplication
 
 # @jit(nopython=True, nogil=True)
 def _find1DMaxima(y, x, positiveThreshold, negativeThreshold=None, findNegative=False):
@@ -91,7 +91,7 @@ class PeakPicker1D(PeakPickerABC):
     def __init__(self, spectrum):
         super().__init__(spectrum=spectrum)
         self.noise = None
-        application = spectrum.project.application
+        application = getApplication()
         self._doNegativePeaks = application.preferences.general.negativePeakPick1D
 
     def _setThresholds(self):

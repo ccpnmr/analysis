@@ -30,8 +30,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-31 16:38:53 +0100 (Mon, July 31, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-11-29 12:08:46 +0000 (Wed, November 29, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -72,6 +72,18 @@ class NotifierABC(object):
     # needs subclassing
     _triggerKeywords = ()
 
+    # callback dict keywords
+    NOTIFIER = 'notifier'
+    THEOBJECT = 'theObject'
+    TRIGGER = 'trigger'
+    OBJECT = 'object'
+    GETPID = 'pid'
+    OLDPID = 'oldPid'
+    VALUE = 'value'
+    PREVIOUSVALUE = 'previousValue'
+    TARGETNAME = 'targetName'
+    SPECIFIERS = 'specifiers'
+
     def __init__(self, theObject, triggers, targetName, callback, setterObject=None, debug=False, **kwargs):
 
         # Sanity checks
@@ -94,6 +106,7 @@ class NotifierABC(object):
             if trigger not in self._triggerKeywords:
                 raise ValueError('Invalid trigger "%s" for <%s>' % (trigger, self.__class__.__name__))
         self._triggers = tuple(triggers)
+        self._trigger = triggers[0]  # Just a convenience for some implementation that only ever have one trigger
 
         self._targetName = targetName
         self._callback = callback
@@ -144,10 +157,26 @@ class NotifierABC(object):
         """:return True if notifier is still registered; i.e. active"""
         return self._isRegistered
 
+    def newCallbackDict(self, trigger, previousValue=None, value=None, obj=None,
+                        oldpid=None, getpid=None, specifiers=None):
+        callbackDict = {
+                self.NOTIFIER     : self,
+                self.THEOBJECT    : self._theObject,
+                self.TRIGGER      : trigger,
+                self.TARGETNAME   : self._targetName,
+                self.PREVIOUSVALUE: previousValue,
+                self.VALUE        : value,
+                self.OBJECT       : obj,
+                self.OLDPID       : oldpid,
+                self.GETPID       : getpid,
+                self.SPECIFIERS   : specifiers,
+                }
+        return callbackDict
+
     def __str__(self) -> str:
         if self.isRegistered():
             trigs = f'{[(t, self._targetName) for t in self._triggers]}'
-            return '<%s (%d): theObject:%s triggers:%s>' % \
+            return '<%s (%d): theObject:%s --> %s>' % \
                    (self.__class__.__name__,
                     self.id,
                     self._theObject,
@@ -158,7 +187,8 @@ class NotifierABC(object):
                 self.id
                 )
 
-    __repr__ = __str__
+    def __repr__(self) -> str:
+        return f'<{self.__class__.__name__} ({self.id})>'
 
 
 class Notifier(NotifierABC):
@@ -220,18 +250,6 @@ class Notifier(NotifierABC):
     _triggerKeywords = (CREATE, DELETE, RENAME, CHANGE, OBSERVE, CURRENT)
 
     ANY = '<Any>'
-
-    # callback dict keywords
-    NOTIFIER = 'notifier'
-    THEOBJECT = 'theObject'
-    TRIGGER = 'trigger'
-    OBJECT = 'object'
-    GETPID = 'pid'
-    OLDPID = 'oldPid'
-    VALUE = 'value'
-    PREVIOUSVALUE = 'previousValue'
-    TARGETNAME = 'targetName'
-    SPECIFIERS = 'specifiers'
 
     def __init__(self,
                  theObject: Any,
@@ -338,7 +356,7 @@ class Notifier(NotifierABC):
                     self._previousValue = getattr(theObject, targetName)
 
                 notifier = (trigger, targetName)
-                func = self.project.registerNotifier(className=theObject.className,
+                func = self.project.registerNotifierregisterNotifier(className=theObject.className,
                                                      target=Notifier.CHANGE,
                                                      func=partial(self, notifier=notifier),
                                                      onceOnly=onceOnly)
@@ -421,17 +439,7 @@ class Notifier(NotifierABC):
                              )
 
         notifierFired = False
-        callbackDict = {self.NOTIFIER     : self,
-                        self.TRIGGER      : trigger,
-                        self.THEOBJECT    : self._theObject,
-                        self.OBJECT       : obj,
-                        self.TARGETNAME   : targetName,
-                        self.PREVIOUSVALUE: None,
-                        self.VALUE        : None,
-                        self.OLDPID       : None,
-                        self.GETPID       : None,
-                        self.SPECIFIERS   : actionKwds,
-                        }
+        callbackDict = self.newCallbackDict(trigger=trigger, obj=obj, specifiers=actionKwds)
 
         # CURRENT special case
         if trigger == Notifier.CURRENT:
@@ -525,6 +533,18 @@ class NotifierBase(object):
 
         return objNotifiers
 
+    def _addNotifier(self, notifier):
+        """Add notfier to notfiersDict;
+        Isolating for easier subclassing of setNotifier()
+        """
+        objNotifiers = self._getObjectNotifiersDict()
+        _id = notifier.id
+        # this should never happen; hence just a check
+        if _id in objNotifiers:
+            raise RuntimeError('%s: a notifier with id "%s" already exists (%s)' % (self, _id, objNotifiers[_id]))
+        # add the notifier
+        objNotifiers[_id] = notifier
+
     def setNotifier(self, theObject: 'AbstractWrapperObject', triggers: list, targetName: str, callback: Callable[..., Optional[str]], **kwargs) -> Notifier:
         """
         Set Notifier for Ccpn V3 object theObject
@@ -536,19 +556,13 @@ class NotifierBase(object):
         :param **kwargs: optional keyword,value arguments to call back
         :return: a Notifier instance
         """
-        objNotifiers = self._getObjectNotifiersDict()
         notifier = Notifier(theObject=theObject,
                             triggers=triggers,
                             targetName=targetName,
                             callback=callback,
                             setterObject=self,
                             **kwargs)
-        _id = notifier.id
-        # this should never happen; hence just a check
-        if _id in objNotifiers:
-            raise RuntimeError('%s: a notifier with id "%s" already exists (%s)' % (self, _id, objNotifiers[_id]))
-        # add the notifier
-        objNotifiers[_id] = notifier
+        self._addNotifier(notifier)
         return notifier
 
     def setGuiNotifier(self, theObject: 'AbstractWrapperObject', triggers: list, targetName: str, callback: Callable[..., Optional[str]], **kwargs) -> Notifier:
@@ -643,7 +657,8 @@ class NotifierBase(object):
         return foundNotifiers
 
     def deleteAllNotifiers(self):
-        """Unregister all the notifiers"""
+        """Unregister all the notifiers
+        """
         if not self.hasNotifier(None):
             # there are no notifiers
             return

@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:38 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-11-29 12:08:46 +0000 (Wed, November 29, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,11 +28,11 @@ __date__ = "$Date: 2022-01-18 10:28:48 +0000 (Tue, January 18, 2022) $"
 
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson, jsonHandler
 from ccpn.util.traits.CcpNmrTraits import Int, Float, Instance, Any, default, Bool
+from ccpn.core.lib.CoreTraits import PeakPickerTrait, DataStoreTrait, DataSourceTrait
 
-from ccpn.core.lib.DataStore import DataStore, DataStoreTrait
-from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import DataSourceTrait
-from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerTrait
-from ccpn.core.lib.SpectrumLib import SpectrumDimensionTrait
+from ccpn.core.lib.DataStore import DataStore
+# from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import DataSourceTrait
+# from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerTrait
 
 from ccpn.util.Logging import getLogger
 
@@ -41,7 +41,7 @@ class SpectrumTraits(CcpNmrJson):
     """Spectrum related traits
     """
     saveAllTraitsToJson = True
-    classVersion = 1.0  # for json saving
+    classVersion = '1.0.0'  # for json saving
 
     # References to DataStore / DataSource instances for filePath manipulation and (binary) data reading;
     dataStore = DataStoreTrait(default_value=None).tag(
@@ -114,7 +114,12 @@ class SpectrumTraits(CcpNmrJson):
         try:
             peakPicker = spectrum._getPeakPicker()
         except (ValueError, RuntimeError) as es:
-            getLogger().warning('Error restoring valid peak picker for %s (%s)' % (spectrum, es))
+            # GWV: Log this in the debugger, as it might get lost and cause confusion
+            getLogger().debug(f'restoring peakPicker raised error: {es}')
+            getLogger().warning(f'Error restoring valid peak picker for {spectrum}')
+            peakPicker = None
+        except Exception as es:
+            raise RuntimeError(f'While restoring Spectrum traits; {es}')
         finally:
             self.peakPicker = peakPicker
 #end class

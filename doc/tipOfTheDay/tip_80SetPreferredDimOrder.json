@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>If you don't like the default arrangement of axes when opening a Spectrum, you can change this by setting your <span style=%(purple)s>Preferred Dimension Order</span> in the <span style=%(purple)s>Dimensions</span> tab of the <span style=%(purple)s>Spectrum Properties</span> dialog box (open this by double-clicking on the Spectrum in the sidebar).</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 1,
+  "contents": [
+    "./graphics/SetPreferredDimOrder.png"
+  ]
+}

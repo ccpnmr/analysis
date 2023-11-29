@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can move through the Spectra in the active SpectrumDisplay one by one with the shortcut <span style=%(purple)s>Tab,Tab</span>. <span style=%(purple)s>Tab,A</span> will switch all Spectra on, <span style=%(purple)s>Tab,Z</span> will switch all Spectra off.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 1,
+  "contents": [
+    "./graphics/TabTabAZ.png"
+  ]
+}

@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-11 12:23:34 +0100 (Thu, May 11, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-11-29 10:17:30 +0000 (Wed, November 29, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,6 +27,7 @@ __date__ = "$Date: 2020-06-15 10:06:31 +0000 (Mon, June 15, 2020) $"
 #=========================================================================================
 
 from functools import partial
+from collections import Counter
 from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.PeakList import PeakList
@@ -37,6 +38,7 @@ from ccpn.core.Sample import Sample
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.NmrResidue import NmrResidue, MoveToEnd
+from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.Chain import Chain
 from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.RestraintTable import RestraintTable
@@ -45,7 +47,7 @@ from ccpn.core.ViolationTable import ViolationTable
 from ccpn.core.Collection import Collection
 from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 from ccpn.ui.gui.widgets.Menu import Menu
-from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning
+from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning, showYesNoWarning
 from ccpn.ui.gui.widgets.Font import setWidgetFont
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.popups.ChainPopup import ChainPopup
@@ -396,6 +398,7 @@ class OpenItemABC():
     # These should be subclassed
     openItemMethod = None  # a method to open the item in ccpnModuleArea
     objectArgumentName = 'obj'  # argument name set to obj passed to openItemClass instantiation
+    objectClassName = None
     openItemDirectMethod = None  # parent argument name set to obj passed to openItemClass instantiation when useParent==True
     useApplication = True
     hasOpenMethod = True
@@ -422,6 +425,7 @@ class OpenItemABC():
         if self.useApplication is False and self.openItemDirectMethod is None:
             raise RuntimeError(f'useApplication==False requires definition of openItemDirectMethod ({self})')
 
+        self.objectClassName = self.objectArgumentName[0].upper() + self.objectArgumentName[1:]
         self.useNone = useNone
         self.kwds = kwds
         # these get set upon callback
@@ -435,12 +439,12 @@ class OpenItemABC():
         """
         self.node = node
         self.dataPid = dataPid
-        obj = self.getObj()
-        self.kwds[self.objectArgumentName] = obj
+        thisObj = self.getObj()
+        self.kwds[self.objectArgumentName] = thisObj
         self.mainWindow = mainWindow
 
         self._initialise(dataPid, objs)
-        self._openContextMenu(node.sidebar, position, objs)
+        self._openContextMenu(node.sidebar, position, thisObj, objs)
 
     def _execOpenItem(self, mainWindow, obj):
         """Acts as an entry point for opening items in ccpnModuleArea
@@ -470,7 +474,7 @@ class OpenItemABC():
 
             self.openAction = partial(func, **self.kwds)
 
-    def _openContextMenu(self, parentWidget, position, objs, deferExec=False):
+    def _openContextMenu(self, parentWidget, position, thisObj, objs, deferExec=False):
         """Open a context menu.
         """
         contextMenu = Menu('', parentWidget, isFloatWidget=True)
@@ -486,7 +490,7 @@ class OpenItemABC():
             contextMenu.addAction('Split Planes to SpectrumGroup', partial(self._splitPlanesToSpectrumGroup, objs))
         contextMenu.addAction('Copy Pid to Clipboard', partial(self._copyPidsToClipboard, objs))
         self._addCollectionMenu(contextMenu, objs)
-        contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
+        contextMenu.addAction('Delete', partial(self._deleteItemObject, thisObj, objs))
         canBeCloned = all(hasattr(obj, 'clone') for obj in objs)
         if canBeCloned:
             contextMenu.addAction('Clone', partial(self._cloneObject, objs))
@@ -510,7 +514,7 @@ class OpenItemABC():
             obj.clone()
 
     @staticmethod
-    def _deleteItemObject(objs):
+    def _deleteItemObject(thisObj, objs):
         """Delete items from the project.
         """
 
@@ -601,7 +605,8 @@ class OpenItemABC():
                 return
             splitPseudo3DSpectrumIntoPlanes(obj)
 
-    def _createNewCollection(self, pulldown, popup, selectionWidget, items=None):
+    @staticmethod
+    def _createNewCollection(pulldown, popup, items=None):
         """Create a new collection, or add to existing collection
         and close the editPopup"""
         from ccpn.framework.Application import getProject
@@ -623,7 +628,8 @@ class OpenItemABC():
             # create a new collection
             _project.newCollection(name=collection, items=items)
 
-    def _newPulldown(self, parent, allowEmpty=True, name=Collection.__name__, **kwds):
+    @staticmethod
+    def _newPulldown(parent, allowEmpty=True, name=Collection.__name__, **kwds):
         """Create a new pulldown-list to insert ino the new-collections widget
         """
         from ccpn.ui.gui.lib.Validators import LineEditValidator
@@ -761,7 +767,7 @@ class _openItemChemicalShiftListTable(OpenItemABC):
     openItemMethod = 'showChemicalShiftTable'
     objectArgumentName = 'chemicalShiftList'
 
-    def _openContextMenu(self, parentWidget, position, objs, deferExec=False):
+    def _openContextMenu(self, parentWidget, position, thisObj, objs, deferExec=False):
         """Open a context menu.
         """
         contextMenu = Menu('', parentWidget, isFloatWidget=True)
@@ -773,7 +779,7 @@ class _openItemChemicalShiftListTable(OpenItemABC):
         contextMenu.addAction('Copy Pid to Clipboard', partial(self._copyPidsToClipboard, objs))
         self._addCollectionMenu(contextMenu, objs)
         contextMenu.addAction('Duplicate', partial(self._duplicateAction, objs))
-        contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
+        contextMenu.addAction('Delete', partial(self._deleteItemObject, thisObj, objs))
 
         contextMenu.addSeparator()
         contextMenu.addAction('Edit Properties', partial(parentWidget._raiseObjectProperties, self.node.widget))
@@ -799,6 +805,31 @@ class _openItemChemicalShiftListTable(OpenItemABC):
             popup.show()
             popup.raise_()
 
+    @staticmethod
+    def _collectSpectra(objs):
+        # check the spectra of chemical-shift-lists
+        specs = {sp for obj in objs if isinstance(obj, ChemicalShiftList)
+                 for sp in obj.spectra
+                 }
+
+        return specs
+
+    def _deleteItemObject(self, thisObj, objs):
+        if self._collectSpectra(objs):
+            count = Counter(map(type, objs))
+            plural = 's' if count[type(thisObj)] > 1 else ''
+            msg = f'It is not possible to delete {self.objectClassName}s with associated Spectra,\n' \
+                  f'please move the Spectra to alternative {self.objectClassName}s before deleting.'
+            if len(count) > 1:
+                msg += '\n\nPlease note that you have selected other objects that will also be deleted.\n'
+                title = 'Delete...'
+            else:
+                title = f'Delete {self.objectClassName}{plural}'
+            showWarning(title, msg)
+
+        else:
+            super()._deleteItemObject(thisObj, objs)
+
 
 class _openItemPeakListTable(OpenItemABC):
     openItemMethod = 'showPeakTable'
@@ -815,23 +846,66 @@ class _openItemMultipletListTable(OpenItemABC):
     objectArgumentName = 'multipletList'
 
 
-class _openItemNmrChainTable(OpenItemABC):
+class _openItemNmrClass(OpenItemABC):
+
+    @staticmethod
+    def _collectShifts(objs):
+        # check all the mmrAtoms of the selected nmrChain/nmrResidues/nmrAtoms
+        shs = {sh for obj in objs if isinstance(obj, NmrAtom)
+               for sh in obj.chemicalShifts
+               }
+        shs |= {sh for obj in objs if isinstance(obj, NmrResidue)
+                for nmrRes in (obj,) + obj.offsetNmrResidues
+                for nmrAt in nmrRes.nmrAtoms
+                for sh in nmrAt.chemicalShifts
+                }
+        shs |= {sh for obj in objs if isinstance(obj, NmrChain)
+                for res in obj.nmrResidues
+                for nmrRes in (res,) + res.offsetNmrResidues
+                for nmrAt in nmrRes.nmrAtoms
+                for sh in nmrAt.chemicalShifts
+                }
+
+        return shs
+
+    def _deleteItemObject(self, thisObj, objs):
+        if self._collectShifts(objs):
+            count = Counter(map(type, objs))
+            plural = 's' if count[type(thisObj)] > 1 else ''
+            notPlural = '' if count[type(thisObj)] > 1 else 's'
+            msg = f'The selected {self.objectClassName}{plural} contain{notPlural} assignments.\n' \
+                  f'Deleting {self.objectClassName}s will delete their chemicalShifts and deassign any associated peaks.\n' \
+                  'Do you want to continue?'
+            if len(count) > 1:
+                msg += '\n\nPlease note that you have selected other objects that will also be deleted.\n'
+                title = 'Delete...'
+            else:
+                title = f'Delete {self.objectClassName}{plural}'
+            ok = showYesNoWarning(title, msg, dontShowEnabled=True, defaultResponse=True, popupId=self.__class__.__name__)
+
+            if not ok:
+                return
+
+        super()._deleteItemObject(thisObj, objs)
+
+
+class _openItemNmrChainTable(_openItemNmrClass):
     openItemMethod = 'showNmrResidueTable'
     objectArgumentName = 'nmrChain'
 
 
-class _openItemNmrResidueItem(OpenItemABC):
+class _openItemNmrResidueItem(_openItemNmrClass):
     objectArgumentName = 'nmrResidue'
     hasOpenMethod = False
 
-    def _openContextMenu(self, parentWidget, position, objs, deferExec=False):
+    def _openContextMenu(self, parentWidget, position, thisObj, objs, deferExec=False):
         """Open a context menu.
         """
         moveToHeadIcon = Icon('icons/move-to-head')
         moveToTailIcon = Icon('icons/move-to-tail')
 
-        nmrResidue = objs[0]
-        contextMenu = super()._openContextMenu(parentWidget, position, objs, deferExec=True)
+        nmrResidue = thisObj
+        contextMenu = super()._openContextMenu(parentWidget, position, thisObj, objs, deferExec=True)
 
         # add new actions to move the nmrResidue to the head/tail
         actionToHead = contextMenu.addAction(moveToHeadIcon, 'Move NmrResidue to Front', partial(nmrResidue.mainNmrResidue.moveToEnd, MoveToEnd.HEAD))
@@ -861,7 +935,7 @@ class _openItemNmrResidueItem(OpenItemABC):
         contextMenu.exec_()
 
 
-class _openItemNmrAtomItem(OpenItemABC):
+class _openItemNmrAtomItem(_openItemNmrClass):
     objectArgumentName = 'nmrAtom'
     hasOpenMethod = False
 
@@ -870,7 +944,7 @@ class _openItemAtomItem(OpenItemABC):
     objectArgumentName = 'Atom'
     hasOpenMethod = False
 
-    def _openContextMenu(self, parentWidget, position, objs, deferExec=False):
+    def _openContextMenu(self, parentWidget, position, thisObj, objs, deferExec=False):
         """Open a context menu.
         """
         contextMenu = Menu('', parentWidget, isFloatWidget=True)
@@ -895,7 +969,7 @@ class _openItemResidueTable(OpenItemABC):
     objectArgumentName = 'residue'
     hasOpenMethod = False
 
-    def _openContextMenu(self, parentWidget, position, objs, deferExec=False):
+    def _openContextMenu(self, parentWidget, position, thisObj, objs, deferExec=False):
         """Open a context menu.
         """
         contextMenu = Menu('', parentWidget, isFloatWidget=True)
@@ -1054,7 +1128,7 @@ class _openItemSpectrumInGroupDisplay(_openItemSpectrumDisplay):
     """Modified class for spectra that are in sideBar under a spectrumGroup
     """
 
-    def _openContextMenu(self, parentWidget, position, objs, deferExec=False):
+    def _openContextMenu(self, parentWidget, position, thisObj, objs, deferExec=False):
         """Open a context menu.
         """
         contextMenu = Menu('', parentWidget, isFloatWidget=True)
@@ -1070,7 +1144,7 @@ class _openItemSpectrumInGroupDisplay(_openItemSpectrumDisplay):
             self._addCollectionMenu(contextMenu, objs)
             contextMenu.addSeparator()
 
-        contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
+        contextMenu.addAction('Delete', partial(self._deleteItemObject, thisObj, objs))
         canBeCloned = all(hasattr(obj, 'clone') for obj in objs)
         if canBeCloned:
             contextMenu.addAction('Clone', partial(self._cloneObject, objs))
@@ -1121,10 +1195,10 @@ class _openItemCollectionModule(OpenItemABC):
     openItemMethod = 'showCollectionModule'
     objectArgumentName = 'collection'
 
-    def _openContextMenu(self, parentWidget, position, objs, deferExec=False):
+    def _openContextMenu(self, parentWidget, position, thisObj, objs, deferExec=False):
         """Open a context menu for the Collection item in the sideBar.
         """
-        contextMenu = super()._openContextMenu(parentWidget, position, objs, deferExec=True)
+        contextMenu = super()._openContextMenu(parentWidget, position, thisObj, objs, deferExec=True)
 
         # disable the contextMenuText action
         if (actions := [act for act in contextMenu.actions() if act.text() == self.contextMenuText]):
@@ -1176,7 +1250,7 @@ def _openItemObject(mainWindow, objs, **kwds):
     if len(objs) > 0:
         with undoBlockWithoutSideBar():
 
-            # if 5 or more then don't log, otherwise log may be overloaded
+            # if 5 or more, then don't log, otherwise log may be overloaded
             if len(objs) > MAXITEMLOGGING:
                 getLogger().info('Opening items...')
                 with notificationEchoBlocking():
@@ -1206,7 +1280,7 @@ def _openItemObjects(mainWindow, objs, **kwds):
                         except RuntimeError:
                             # process objects to open
                             func = OpenObjAction[obj.__class__](useNone=True, **kwds)
-                            returnObj = func._execOpenItem(mainWindow, obj)
+                            func._execOpenItem(mainWindow, obj)
 
                     elif isinstance(obj, SpectrumGroup) and spectrumDisplay:
                         try:
@@ -1215,7 +1289,8 @@ def _openItemObjects(mainWindow, objs, **kwds):
                         except RuntimeError:
                             # process objects to open
                             func = OpenObjAction[obj.__class__](useNone=True, **kwds)
-                            returnObj = func._execOpenItem(mainWindow, obj)
+                            func._execOpenItem(mainWindow, obj)
+
                     else:
                         # process objects to open
                         func = OpenObjAction[obj.__class__](useNone=True, **kwds)

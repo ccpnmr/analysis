@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-04 15:42:39 +0100 (Fri, August 04, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-11-29 10:17:31 +0000 (Wed, November 29, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -308,7 +308,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
                     strip.multipletSymbolsEnabled = _prefsGen.multipletSymbolsEnabled
                     strip.multipletLabelsEnabled = _prefsGen.multipletLabelsEnabled
                     strip.multipletArrowsEnabled = _prefsGen.multipletArrowsEnabled
-                    
+
                     strip.arrowType = _prefsGen.arrowType
                     strip.arrowSize = _prefsGen.arrowSize
                     strip.arrowMinimum = _prefsGen.arrowMinimum
@@ -685,6 +685,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
         #                                                      callback=self._queueSetCloseSpectrumDisplayOnLastStrip,
         #                                                      toolTip="Close spectrumDisplay if the last strip has been removed")
 
+        row += 1
+        self.showAllDialogs = _makeButton(parent, text="Re-enable hidden dialogs", row=row, buttonText='Enable',
+                                          toolTip="Show all dialogs that have previously been hidden with \"Don't show this again\" checkbox",
+                                          callback=self._queueShowAllDialogs)
+
         #====== Tip of the Day ======
         row += 1
         _makeLine(parent, grid=(row, 0), text="Tip of the Day")
@@ -695,7 +700,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         self.showAllTips = _makeButton(parent, text="Tip history", row=row, buttonText='Clear',
-                                       toolTip="show all tips on next restart",
+                                       toolTip="Show all tips on next restart",
                                        callback=self._queueShowAllTips)
 
         # GWV: option removed as test is done after Drop
@@ -761,6 +766,19 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         parent.addSpacer(15, 2, expandX=True, expandY=True, grid=(row, 2), gridSpan=(1, 1))
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueShowAllDialogs(self):
+        self._setShowAllDialogs()
+
+        # return a 'null' function so that the revert/ok buttons appear correctly
+        return lambda: True
+
+    def _setShowAllDialogs(self):
+        pp = self.preferences.popups
+        for dlg, kwds in pp.items():
+            kwds['dontShowPopup'] = False
+        self.showAllDialogs.setEnabled(False)
 
     @queueStateChange(_verifyPopupApply)
     def _queueShowAllTips(self):
@@ -856,6 +874,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.glAxisFontSizeData.addItems([str(val) for val in _OLDGLFONT_SIZES])
         self.glAxisFontSizeData.setCurrentIndex(self.glAxisFontSizeData.findText(str(prefApp.spectrumDisplayAxisFontSize)))
 
+        self.showAllDialogs.setEnabled(True)
         self.showTipsAtStartUp.setChecked(prefGen.showTipOfTheDay)
         self.showAllTips.setEnabled(len(prefGen.seenTipsOfTheDay) > 0)
 
@@ -1087,7 +1106,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.multipletSymbolsEnabledData.setChecked(self.preferences.general.multipletSymbolsEnabled)
         self.multipletLabelsEnabledData.setChecked(self.preferences.general.multipletLabelsEnabled)
         self.multipletArrowsEnabledData.setChecked(self.preferences.general.multipletArrowsEnabled)
-    
+
     def _populateExternalProgramsTab(self):
         """Populate the widgets in the externalProgramsTab
         """
@@ -1591,12 +1610,12 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         self.multipletAnnotationLabel = Label(parent, text="Label", hAlign='r', grid=(row, 0))
         self.multipletAnnotationData = RadioButtons(parent, texts=_texts,
-                                            objectNames=_names,
-                                            callback=self._queueSetMultipletAnnotation,
-                                            direction='h',
-                                            grid=(row, 1), gridSpan=(1, 3), hAlign='l',
-                                            tipTexts=None,
-                                            )
+                                                    objectNames=_names,
+                                                    callback=self._queueSetMultipletAnnotation,
+                                                    direction='h',
+                                                    grid=(row, 1), gridSpan=(1, 3), hAlign='l',
+                                                    tipTexts=None,
+                                                    )
         self.multipletAnnotationData.radioButtons[2].setVisible(False)
         self.multipletAnnotationData.radioButtons[5].setVisible(False)
 
@@ -1606,12 +1625,12 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         self.multipletLabel = Label(parent, text="Symbol", hAlign='r', grid=(row, 0))
         self.multipletSymbol = RadioButtons(parent, texts=_texts,
-                                   objectNames=_names,
-                                   callback=self._queueSetMultipletSymbol,
-                                   direction='h',
-                                   grid=(row, 1), gridSpan=(1, 3), hAlign='l',
-                                   tipTexts=None,
-                                   )
+                                            objectNames=_names,
+                                            callback=self._queueSetMultipletSymbol,
+                                            direction='h',
+                                            grid=(row, 1), gridSpan=(1, 3), hAlign='l',
+                                            tipTexts=None,
+                                            )
 
         # only one symbol - will add more later
         self.multipletLabel.setVisible(False)
@@ -1624,23 +1643,23 @@ class PreferencesPopup(CcpnDialogMainWidget):
         row += 1
         self.arrowsLabel = _makeLabel(parent, text="Arrow", grid=(row, 0))
         self.arrow = RadioButtons(parent, texts=['Line', 'Wedge', 'Arrow'],
-                                   callback=self._queueSetArrow,
-                                   direction='h',
-                                   grid=(row, 1), hAlign='l', gridSpan=(1, 2),
-                                   tipTexts=None,
-                                   )
+                                  callback=self._queueSetArrow,
+                                  direction='h',
+                                  grid=(row, 1), hAlign='l', gridSpan=(1, 2),
+                                  tipTexts=None,
+                                  )
 
         row += 1
         self.arrowSizeLabel = _makeLabel(parent, text="Size (pixels)", grid=(row, 0))
         self.arrowSizeData = Spinbox(parent, step=1,
-                                           min=1, max=20, grid=(row, 1), hAlign='l')
+                                     min=1, max=20, grid=(row, 1), hAlign='l')
         self.arrowSizeData.setMinimumWidth(LineEditsMinimumWidth)
         self.arrowSizeData.valueChanged.connect(self._queueSetArrowSize)
 
         row += 1
         self.arrowMinimumLabel = _makeLabel(parent, text="Minimum length (pixels)", grid=(row, 0))
         self.arrowMinimumData = Spinbox(parent, step=1,
-                                           min=1, max=100, grid=(row, 1), hAlign='l')
+                                        min=1, max=100, grid=(row, 1), hAlign='l')
         self.arrowMinimumData.setMinimumWidth(LineEditsMinimumWidth)
         self.arrowMinimumData.valueChanged.connect(self._queueSetArrowMinimum)
 

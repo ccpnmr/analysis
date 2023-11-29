@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-07 14:23:29 +0000 (Tue, November 07, 2023) $"
-__version__ = "$Revision: 3.2.2 $"
+__dateModified__ = "$dateModified: 2023-11-29 10:17:30 +0000 (Wed, November 29, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1309,7 +1309,7 @@ class Project(AbstractWrapperObject):
                                     # only log anything weird
                                     getLogger().debug2(f'issue purging {apiHint}  -->  {es}')
 
-        getLogger().debug('done purge')
+        getLogger().debug('Done purge')
 
     def close(self):
         """Clean up the wrapper project previous to deleting or replacing

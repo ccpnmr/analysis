@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-11 13:56:26 +0100 (Wed, October 11, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-11-29 10:17:30 +0000 (Wed, November 29, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -381,10 +381,10 @@ class _NewChemicalShiftTable(_ProjectTableABC):
     # Create table and row methods
     #=========================================================================================
 
-    def _newRowFromUniqueId(self, df, obj, uniqueId):
+    def _newRowFromUniqueId(self, cslDf, obj, uniqueId):
         """Create a new row to insert into the dataFrame or replace row
         """
-        _row = df.loc[uniqueId]
+        _row = cslDf.loc[uniqueId]
         # make the new row
         newRow = _row[:CS_ISDELETED].copy()
         _midRow = _row[CS_VALUE:CS_ATOMNAME]  # CS_STATIC
@@ -541,17 +541,20 @@ class _NewChemicalShiftTable(_ProjectTableABC):
 
             trigger = data[Notifier.TRIGGER]
             try:
-                df = self._table._data
-                if df is not None and not df.empty:
-                    df = df[df[CS_ISDELETED] == False]  # not deleted - should be the only visible ones
-                    objSet = set(df[CS_UNIQUEID])
+                cslDf = self._table._data
+                if cslDf is not None and not cslDf.empty:
+                    cslDf = cslDf[cslDf[CS_ISDELETED] == False]  # not deleted - should be the only visible ones
+                    objSet = set(cslDf[CS_UNIQUEID])
                 else:
-                    # # populate here or in CREATE?
-                    # self.populateTable()
-                    # return
                     # current table is empty
                     objSet = set()
-                tableSet = set(self._df['ID'])  # must be table column name, not reference name
+                if (visDf := self._df) is None or visDf.empty:
+                    # the visible table may not have columns defined, if empty
+                    tableSet = set()
+                    _newVisDf = True
+                else:
+                    tableSet = set(visDf['ID'])  # must be table column name, not reference name
+                    _newVisDf = False
 
                 if trigger == Notifier.DELETE:
                     # uniqueIds in the visible table
@@ -562,32 +565,30 @@ class _NewChemicalShiftTable(_ProjectTableABC):
                 elif trigger == Notifier.CREATE:
                     # uniqueIds in the visible table
                     if uniqueId in (objSet - tableSet):
-                        if df is None or df.empty:
-                            # create a new table from the list
-                            #   not essential for chemicalShiftTable, in for completeness
-                            self.populateTable()
-                        else:
-                            # insert into the table
-                            newRow = self._newRowFromUniqueId(df, obj, uniqueId)
-                            self.model()._insertRow(uniqueId, newRow)
+                        if _newVisDf:
+                            # create a new empty table, required to insert the first row
+                            self.populateTable(setOnHeaderOnly=True)
+                        # insert into the table
+                        newRow = self._newRowFromUniqueId(cslDf, obj, uniqueId)
+                        self.model()._insertRow(uniqueId, newRow)
 
                 elif trigger == Notifier.CHANGE:
                     # uniqueIds in the visible table
                     if uniqueId in (objSet & tableSet):
                         # visible table dataframe update - object MUST be in the table
-                        newRow = self._newRowFromUniqueId(df, obj, uniqueId)
+                        newRow = self._newRowFromUniqueId(cslDf, obj, uniqueId)
                         self.model()._updateRow(uniqueId, newRow)
 
                 elif trigger == Notifier.RENAME:
                     # included for completeness, but shouldn't be required for chemical-shifts
                     if uniqueId in (objSet & tableSet):
                         # visible table dataframe update
-                        newRow = self._newRowFromUniqueId(df, obj, uniqueId)
+                        newRow = self._newRowFromUniqueId(cslDf, obj, uniqueId)
                         self.model()._updateRow(uniqueId, newRow)
 
                     elif uniqueId in (objSet - tableSet):
                         # insert renamed object INTO the table
-                        newRow = self._newRowFromUniqueId(df, obj, uniqueId)
+                        newRow = self._newRowFromUniqueId(cslDf, obj, uniqueId)
                         self.model()._insertRow(uniqueId, newRow)
 
                     elif uniqueId in (tableSet - objSet):

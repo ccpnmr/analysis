@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-21 13:33:21 +0000 (Tue, November 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-29 10:17:31 +0000 (Wed, November 29, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -27,13 +27,14 @@ __date__ = "$Date: 2017-07-04 15:21:16 +0000 (Tue, July 04, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtWidgets, QtCore, QtGui
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from dataclasses import dataclass
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.DialogButtonBox import DialogButtonBox
+from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.guiSettings import getColours
 from ccpn.ui.gui.lib.ChangeStateHandler import ChangeDict
 
@@ -56,6 +57,9 @@ ORIENTATIONLIST = (HORIZONTAL, VERTICAL)
 DEFAULTSPACING = 3
 # DEFAULTMARGINS = (24, 8, 24, 18)
 GETCHANGESTATE = '_getChangeState'
+_DONTSHOWMESSAGE = "Don't show this again"
+_DONTSHOWPOPUP = 'dontShowPopup'
+_POPUPS = 'popups'
 
 
 class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
@@ -86,6 +90,8 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
     FIXEDWIDTH = True
     FIXEDHEIGHT = True
     ENABLEICONS = False
+    DONTSHOWENABLED = False
+    _defaultResponse = None
 
     EDITMODE = True
     DEFAULTMARGINS = (14, 14, 14, 14)
@@ -138,6 +144,8 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
             self._scrollArea.setWidgetResizable(True)
             self._scrollArea.setWidget(self.mainWidget)
             self._scrollArea.setStyleSheet("""ScrollArea { border: 0px; background: transparent; }""")
+
+        self._setDontShow()
 
         # self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         # self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
@@ -366,6 +374,35 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
                                              **self._buttonOptions)
         self.dialogButtons.setContentsMargins(0, 18, 0, 0)
 
+    def _setDontShow(self):
+        # put a Don't Show checkbox at the bottom of the dialog if needed
+        if not self.DONTSHOWENABLED:
+            return
+
+        grid = (2, 0)
+        gridSpan = (1, 1) if self._orientation.startswith('h') else (1, 1)
+        try:
+            from ccpn.framework.Application import getApplication
+
+            # retrieve from preferences
+            app = getApplication()
+            popup = app.preferences.popups[self.__class__.__name__]
+            state = bool(popup[_DONTSHOWPOPUP])
+        except Exception:
+            # any error should hide the checkbox
+            return
+
+        self._dontShowCheckBox = CheckBoxCompoundWidget(self,
+                                                        grid=grid, gridSpan=gridSpan, hAlign='left',
+                                                        orientation='right', stretch=(0, 0),
+                                                        labelText=_DONTSHOWMESSAGE,
+                                                        tipText='This popup can be enabled again from preferences->appearance',
+                                                        checked=state,
+                                                        )
+
+        spc = self._dontShowCheckBox.sizeHint().height()
+        self._dontShowCheckBox.setContentsMargins(0, spc // 4, 0, 0)
+
     def setDefaultButton(self, button=CLOSEBUTTON):
         """Set the default dialog button
         """
@@ -451,6 +488,26 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
     def exec_(self) -> int:
         """Execute the dialog
         """
+        if self.DONTSHOWENABLED:
+            try:
+                from ccpn.framework.Application import getApplication
+
+                # store in preferences
+                app = getApplication()
+                popup = app.preferences.popups[self.__class__.__name__]
+                state = popup[_DONTSHOWPOPUP]
+            except Exception:
+                state = False
+
+            if state:
+                # what is the default response for this dialog?
+                # needs to be defined/set in the subclass of __init__
+                if not self._defaultResponse:
+                    raise RuntimeError('Popup defaultResponse is not defined')
+
+                self._defaultResponse()
+                return 0
+
         # call the super-class if there are no errors during initialising
         # return an error-state here other than None?
         result = None if self.errorFlag else super().exec_()
@@ -560,6 +617,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
 
         getLogger().debug2(f'Clean up dialog {self} on accept')
         self._cleanupDialog()
+        self._storeDontShow()
 
         return result
 
@@ -574,6 +632,19 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         self._cleanupDialog()
 
         return result
+
+    def _storeDontShow(self):
+        if self.DONTSHOWENABLED:
+            with suppress(Exception):
+                from ccpn.framework.Application import getApplication
+
+                # store in preferences
+                if app := getApplication():
+                    popups = app.preferences.setdefault(_POPUPS, {})
+                    popup = popups.setdefault(self.__class__.__name__, {})
+                    # should really get from a property rather than a widget
+                    #  - if widget does not show then the initial state may not be set
+                    popup[_DONTSHOWPOPUP] = self._dontShowCheckBox.isChecked()
 
     def _cleanupDialog(self):
         """Clean-up any extra widgets/data before closing
@@ -699,6 +770,7 @@ def handleDialogApply(self):
     class errorContent():
         errorValue = None
         cleanUndo = False
+
 
     try:
         # add an undoBlockWithoutSideBar

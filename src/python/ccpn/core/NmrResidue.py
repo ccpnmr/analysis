@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-21 13:33:21 +0000 (Tue, November 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-29 10:17:30 +0000 (Wed, November 29, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -1233,9 +1233,16 @@ class NmrResidue(AbstractWrapperObject):
             # store the old parent information - may be required for some modules
             self._oldNmrChain = self.nmrChain
             self._oldNmrAtoms = tuple(self.nmrAtoms)
+            for nmrAt in self.nmrAtoms:
+                nmrAt._oldNmrResidue = self
+                nmrAt._oldAssignedPeaks = tuple(nmrAt.assignedPeaks)
         elif action == 'create':
             self._oldNmrChain = None
             self._oldNmrAtoms = ()
+            # this might be empty
+            for nmrAt in self.nmrAtoms:
+                nmrAt._oldNmrResidue = None
+                nmrAt._oldAssignedPeaks = ()
 
         if not super()._finaliseAction(action):
             return
@@ -1273,6 +1280,9 @@ class NmrResidue(AbstractWrapperObject):
             for sh in _shs:
                 sh.nmrAtom = None
             super().delete()
+            # clean-up/delete the chemical-shifts
+            for sh in _shs:
+                sh.delete()
 
     def delete(self):
         """Delete routine to check whether the item can be deleted otherwise raise api error.

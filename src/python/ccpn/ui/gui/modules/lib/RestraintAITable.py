@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-17 16:43:06 +0100 (Tue, October 17, 2023) $"
-__version__ = "$Revision: 3.2.0.1 $"
+__dateModified__ = "$dateModified: 2023-11-29 10:17:30 +0000 (Wed, November 29, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -694,7 +694,6 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                                 _vMerge = pd.concat(_vResults, axis=0).drop_duplicates([HEADERSCOL, ATOMSCOL])
                                 _vMerge.insert(3, HEADERVIOLATION, True)
                                 _new = pd.merge(_left, _vMerge, how='left').drop(columns=[PEAKSERIALCOL])
-
                                 # fill the blank spaces with the correct types
                                 _new = _new.fillna({HEADERSCOL: '-', ATOMSCOL: '-', HEADERVIOLATION: False})
                                 _new = _new.fillna(0.0)
@@ -743,7 +742,7 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
 
                     elif cSetName in dfsAll:
                         # lose the PeakSerial column for each
-                        _new = dfsAll[cSetName].drop(columns=[PEAKSERIALCOL])  # .fillna(0.0)
+                        _new = dfsAll[cSetName].drop(columns=[PEAKSERIALCOL])
                         # fill the blank spaces with the correct types
                         _new = _new.fillna({HEADERSCOL: '-', ATOMSCOL: '-', HEADERVIOLATION: False})
                         _new = _new.fillna(0.0)
@@ -778,12 +777,12 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
 
                     HEADERSCOL = (cSetName, f'{HeaderRestraint}')
                     ATOMSCOL = (cSetName, 'Atoms')
-                    HEADERVIOLATION = (cSetName, HeaderViolation)
+                    HEADERVIOLATION = (cSetName, f'{HeaderViolation}')
 
                     # lose the PeakSerial column for each
-                    _new = dfsAll[cSetName].drop(columns=[PEAKSERIALCOL])  # .fillna(0.0)
-                    # # fill the blank spaces with the correct types
-                    # _new = _new.fillna({HEADERSCOL: '-', ATOMSCOL: '-', HEADERVIOLATION: False})
+                    _new = dfsAll[cSetName].drop(columns=[PEAKSERIALCOL])
+                    # fill the blank spaces with the correct types
+                    _new = _new.fillna({HEADERSCOL: '-', ATOMSCOL: '-', HEADERVIOLATION: False})
                     _new = _new.fillna(0.0)
                     _out.append(_new)
 

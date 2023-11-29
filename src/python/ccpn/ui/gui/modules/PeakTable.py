@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-04-03 12:51:40 +0100 (Mon, April 03, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-11-29 10:17:30 +0000 (Wed, November 29, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -409,8 +409,18 @@ class _NewPeakTableWidget(_CoreTableWidgetABC):
         # return makeIterableList(getattr(cellItem, attribute, [])), Notifier.CHANGE
 
         return makeIterableList(cellItem._oldAssignedPeaks) if cellItem.isDeleted \
-                   else makeIterableList(cellItem.assignedPeaks), \
-               Notifier.CHANGE
+            else makeIterableList(cellItem.assignedPeaks), \
+            Notifier.CHANGE
+
+    def _updateTableCallback(self, data):
+        """Respond to table notifier.
+        """
+        obj = data[Notifier.OBJECT]
+        if obj != self._table:
+            # discard the wrong object
+            return
+
+        self._update()
 
     #=========================================================================================
     # Table context menu

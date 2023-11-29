@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-07 14:20:13 +0000 (Tue, November 07, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-28 12:49:05 +0000 (Tue, November 28, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -1143,7 +1143,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         CCPNINTERNAL: also called from Framework
         """
         for module in self.moduleArea.ccpnModules:
-            getLogger().debug('closing module: %s' % module)
+            getLogger().debug('Closing module: %s' % module)
             try:
                 module.setVisible(False)  # GWV not sure why, but this was the effect of prior code
                 module.close()
@@ -1156,7 +1156,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         CCPNINTERNAL: also called from Framework
         """
         for module in self.moduleArea.tempAreas:
-            getLogger().debug('closing module: %s' % module)
+            getLogger().debug('Closing module: %s' % module)
             try:
                 module.setVisible(False)  # GWV not sure why, but this was the effect of prior code
                 module.close()

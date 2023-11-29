@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 15:25:11 +0100 (Tue, March 28, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-11-28 12:49:06 +0000 (Tue, November 28, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -434,8 +434,7 @@ class _MIProjectTableABC(MITableABC, Base):
     def populateEmptyTable(self):
         """Populate with an empty dataFrame containing the correct column headers.
         """
-        # self._dataFrameObject = None
-        _df = pd.DataFrame({val: [] for val in self.columnHeaders.keys()})
+        _df = pd.DataFrame({val: [] for val in self.columnHeaders.values()})
 
         if self.OBJECTCOLUMN in _df.columns:
             # use the object as the index, object always exists even if isDeleted
@@ -528,7 +527,7 @@ class _MIProjectTableABC(MITableABC, Base):
     def _clearTableNotifiers(self):
         """Clean up the notifiers
         """
-        getLogger().debug(f'clearing table notifiers {self}')
+        getLogger().debug(f'Clearing table notifiers {self}')
 
         if self._tableNotifier is not None:
             self._tableNotifier.unRegister()

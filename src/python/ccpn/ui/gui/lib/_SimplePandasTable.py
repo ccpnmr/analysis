@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 19:17:55 +0100 (Wed, June 28, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-11-28 12:49:05 +0000 (Tue, November 28, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1996,7 +1996,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
     def _clearTableNotifiers(self):
         """Clean up the notifiers
         """
-        getLogger().debug(f'clearing table notifiers {self}')
+        getLogger().debug(f'Clearing table notifiers {self}')
 
         if self._tableNotifier is not None:
             self._tableNotifier.unRegister()

@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-08-08 14:59:25 +0100 (Tue, August 08, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-11-22 18:27:04 +0000 (Wed, November 22, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -631,6 +631,12 @@ class ChemicalShiftList(AbstractWrapperObject):
             firstCSL = self.project.chemicalShiftLists[0]
             for spec in _deleteSpectra:
                 spec.chemicalShiftList = firstCSL
+
+    def _getDirectChildren(self):
+        """Get list of all objects that have self as a parent
+        Special case here, as children are V3-core objects
+        """
+        return self._shifts  # ignore deleted
 
     #=========================================================================================
     # CCPN functions

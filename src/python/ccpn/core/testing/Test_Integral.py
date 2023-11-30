@@ -93,7 +93,7 @@ class IntegralListTest(WrapperTesting):
         granular_dict_undo_redo(self, integral, self.params)
         self.assertEqual(i_vals, i_vals | self.param_str)
 
-    @unittest.skip('fails with bias ')
+    @unittest.skip('fails with bias 0.0')
     def test_2dIntegralKwargsAddParam(self):
         integral = self.integralList.newIntegral(**self.params)
         i_vals = getProperties(integral)

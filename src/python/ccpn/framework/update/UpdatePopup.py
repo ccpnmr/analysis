@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-03 13:06:45 +0000 (Fri, November 03, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-30 10:35:39 +0000 (Thu, November 30, 2023) $"
 __version__ = "$Revision: 3.2.0.1 $"
 #=========================================================================================
 # Created
@@ -133,6 +133,7 @@ class UpdatePopup(CcpnDialogMainWidget):
 
         # set the popup constraints
         QtCore.QTimer().singleShot(0, self._finalise)
+        self._lock = QtCore.QMutex()
 
     def _finalise(self):
         """Set the minimum/maximum height of the popup based on which text-boxes are visible.
@@ -399,17 +400,19 @@ class UpdatePopup(CcpnDialogMainWidget):
     def _showInfo(self, *args):
         """Add text to the html-box in default colour or green if the last message was an error.
         """
-        # need to check the default theme colour
-        col = '#20d040' if self._lastMsgWasError else 'solid'  # green or default
-        self._lastMsgWasError = False
-        self._addMessage(args, col)
+        with QtCore.QMutexLocker(self._lock):
+            # need to check the default theme colour
+            col = '#20d040' if self._lastMsgWasError else 'solid'  # green or default
+            self._lastMsgWasError = False
+            self._addMessage(args, col)
 
     def _showError(self, *args):
         """Add text to the html-box in red.
         """
-        col = '#ff1008'  # red
-        self._lastMsgWasError = True
-        self._addMessage(args, col)
+        with QtCore.QMutexLocker(self._lock):
+            col = '#ff1008'  # red
+            self._lastMsgWasError = True
+            self._addMessage(args, col)
 
     def _addMessage(self, args, col):
         self._showInfoBox()

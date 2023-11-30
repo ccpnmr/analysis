@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2023-11-24 17:02:55 +0000 (Fri, November 24, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-30 16:59:49 +0000 (Thu, November 30, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -89,19 +89,15 @@ class Test_chemicalShift(WrapperTesting):
             # NBNB The first shiftList, called 'default' is created automatically
             self.shiftList = self.project.chemicalShiftLists[0]
             self.peakList = self.spectrum.newPeakList() if spectra else None
-
-    def testPeaks(self):
         # peaks = self.peakList.pickPeaksNd([[7.0, 7.2], [111.75, 112.2]])
         _picker = self.spectrum.peakPicker
-        return self.spectrum.pickPeaks(peakList=self.peakList,
+        self.peaks = self.spectrum.pickPeaks(peakList=self.peakList,
                                              positiveThreshold=12000.0, negativeThreshold=12000.0,
                                              H=(7.0, 7.2), N=(111.75, 112.2))
 
     def test_assignDimensionNmrAtom(self):
-        peaks = self.testPeaks()
-
         self.assertIsNone(self.shiftList.getChemicalShift(self.atom))
-        peaks[0].assignDimension(axisCode=axisCodeMatch('N', self.spectrum.axisCodes),
+        self.peaks[0].assignDimension(axisCode=axisCodeMatch('N', self.spectrum.axisCodes),
                                  value=self.atom)
         sl = self.shiftList.getChemicalShift(self.atom)
         self.assertIsNotNone(sl)
@@ -110,11 +106,9 @@ class Test_chemicalShift(WrapperTesting):
         undo_redo_tester(self, sl)
 
     def test_assignDimensionPID(self):
-        peaks = self.testPeaks()
-
         atom_pid = self.atom.pid
         self.assertIsNone(self.shiftList.getChemicalShift(self.atom))
-        peaks[0].assignDimension(axisCode=axisCodeMatch('N', self.spectrum.axisCodes),
+        self.peaks[0].assignDimension(axisCode=axisCodeMatch('N', self.spectrum.axisCodes),
                                  value=atom_pid)
         sl = self.shiftList.getChemicalShift(self.atom)
         self.assertIsNotNone(sl)
@@ -123,18 +117,15 @@ class Test_chemicalShift(WrapperTesting):
         undo_redo_tester(self, sl)
 
     def test_assignDimensionNone(self):
-        peaks = self.testPeaks()
-
         self.assertIsNone(self.shiftList.getChemicalShift(self.atom))
-        peaks[0].assignDimension(axisCode=axisCodeMatch('N', self.spectrum.axisCodes),
+        self.peaks[0].assignDimension(axisCode=axisCodeMatch('N', self.spectrum.axisCodes),
                                  value=None)
         sl = self.shiftList.getChemicalShift(self.atom)
         self.assertIsNone(sl)
 
     def test_assignDimensionAxisCodeError(self):
-        peaks = self.testPeaks()
         with self.assertRaises(ValueError) as cm:
-            peaks[0].assignDimension(axisCode='invalid axis code',
+            self.peaks[0].assignDimension(axisCode='invalid axis code',
                                      value=self.atom)
         err = cm.exception
         self.assertEqual(str(err), 'axisCode invalid axis code not recognised')

@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-11-28 16:09:08 +0000 (Tue, November 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-30 09:52:08 +0000 (Thu, November 30, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -56,6 +56,59 @@ def snap1DPeaks(peaks, **kwargs):
                 pk.heightError = error
 
 ## ~~~~~~~~~~~~~ Lib Snapping Functions ~~~~~~~~~~~~~~~~ ##
+
+def _snap(peak, x,y, maxima, minimalHeightThreshold,  defaultLimitPpm=0.150, maxLimitPpm=0.3):
+    positions, heights = maxima
+    otherPeaksPointPosition = np.array([peak.pointPositions[0] for peak in peak.peakList.peaks])
+    deltas = np.linspace(0.01, 0.5, 10)[::-1]
+    found = False
+
+    df = pd.DataFrame()
+    for i, deltaFactor in enumerate(deltas):
+        ## progressivly increase the searching Limits until the next peak or the max allowed
+        limit = _getSnappingPeakLimits(peak, otherPeaksPointPosition=otherPeaksPointPosition, deltaFactor=deltaFactor, defaultLimitPpm=defaultLimitPpm, maxLimitPpm=maxLimitPpm)
+        leftPpm, rightPpm = limit
+        deltaLimit = abs(abs(leftPpm) - abs(rightPpm))
+        std_y = float(np.std(y))
+        maxHeightThreshold = float(np.max(y) - std_y)
+        pickingThresholds = np.linspace(minimalHeightThreshold, maxHeightThreshold, 100)
+        for h, pickingThreshold in enumerate(pickingThresholds):
+            xPos4Region, yPos4Region =  _1DregionsFromLimits(positions, heights, limit)
+            regionMaximaIndexes = np.argsort([yPos4Region > pickingThreshold]).flatten()
+            for index in regionMaximaIndexes:
+                pos = xPos4Region[index]
+                height = yPos4Region[index]
+                if height/minimalHeightThreshold >2:
+                    found = True
+                    df.loc[f'{i}-{h}', 'limit'] = deltaLimit
+                    df.loc[f'{i}-{h}', 'pickingThreshold'] = pickingThreshold
+                    df.loc[f'{i}-{h}', 'ppm'] = pos
+                    df.loc[f'{i}-{h}', 'height'] = height
+                    if found:
+                        break
+            if found:
+                break
+        if found:
+            break
+
+    if len(df)>0:
+        df = df.sort_values(['limit', 'pickingThreshold'], ascending=[True, False])
+        pos = df['ppm'].values[0]
+        height = df['height'].values[0]
+        if height/minimalHeightThreshold > 2:
+            position = float(pos)
+            height = float(height)
+            heightError = 0
+        else:
+            position = peak.position[0]
+            height = float(_getClosestHeight(x, y, position, peak.height))
+            heightError = 1
+    else:
+        position = peak.position[0]
+        height = float(_getClosestHeight(x, y, position, peak.height))
+        heightError = 1
+
+    return [position], height, heightError
 
 def _find1DCoordsForPeaks(peaks,
                       rawDataDict=None,
@@ -102,7 +155,7 @@ def _find1DCoordsForPeaks(peaks,
                 peaksByPeakList[_p.peakList].append(_p)
 
         ## Do a quick search of minimal height for a signal, the expected maxima, and calculate linewidths (pnts)
-        minimalHeightThreshold = float(np.median(yValues) + 0.5 * np.std(yValues))
+        minimalHeightThreshold = float(np.median(yValues) + 1 * np.std(yValues))
         maximaIndices, _ = signal.find_peaks(yValues, height=minimalHeightThreshold)
         maximaHWHH = signal.peak_widths(yValues, maximaIndices, rel_height=0.5)[0]  # array of points
 
@@ -199,13 +252,13 @@ def _find1DCoordsForPeaks(peaks,
                         distanceMatrix = cdist(A, Q, metric='seuclidean', )
                         AIndexes, QIndexes = linear_sum_assignment(distanceMatrix)
                         Amatches = A[AIndexes]
-                        if len(Amatches)>0:
-                            print(Amatches, f'FOUND THIESeee. QUert: {Q}')
-                            closestMatch = Amatches[0]
-                            position = [float(closestMatch[0])]
-                            height = closestMatch[1]
-                            error = None
-                            print(f'FROM MANY Found a good new solution. {position}', )
+
+                        print(Amatches, f'FOUND THIESeee. QUert: {Q}')
+                        closestMatch = Amatches[0]
+                        position = [float(closestMatch[0])]
+                        height = closestMatch[1]
+                        error = None
+                        print(f'FROM MANY Found a good new solution. {position}', )
                     else:
                         position = [queryPos]
                         height = heightAtQuery
@@ -272,37 +325,40 @@ def _find1DCoordsForPeaks(peaks,
 
 
 
-def _getSnappingPeakLimits(peak, otherPeaksPointPosition, defaultLimit = 0.250, maxLimit = 1.0):
+def _getSnappingPeakLimits(peak, otherPeaksPointPosition, deltaFactor = 0.5, defaultLimitPpm = 0.250, maxLimitPpm = 1.0):
+    """
+    :param peak:
+    :param otherPeaksPointPosition:
+    :param deltaFactor:
+    :param defaultLimit:
+    :param maxLimit:
+    :return:
+    """
     pointPositions = otherPeaksPointPosition
     ppmPerPoint = peak.spectrum.ppmPerPoints[0]
-    defaultLimitPoints = defaultLimit/ppmPerPoint
-    maxLimitPoints = maxLimit/ppmPerPoint
+    defaultLimitPoints = defaultLimitPpm/ppmPerPoint
+    maxLimitPoints = maxLimitPpm/ppmPerPoint
     queryPointPos = float(peak.pointPositions[0])
 
     right = pointPositions[pointPositions > queryPointPos] # upfield - more negative ppm Values
     left = pointPositions[pointPositions < queryPointPos]  # downfield - more positive ppm Values
+    if len(left) == 0: # could be the last peak or the only one
+        left = np.array([queryPointPos - defaultLimitPoints])
+    if len(right) == 0:
+        right = np.array([queryPointPos + defaultLimitPoints])
 
-    if len(left) > 0:  # could be the last peak or the only one
-        closestLeft = left[np.argmin(abs(left - queryPointPos))]
-        deltaLeft = closestLeft - queryPointPos
-        leftLimit = closestLeft - (deltaLeft/2) #use half delta to the nearest peak
-    else: # there aren't picked peaks to the left
-        deltaLeft = defaultLimitPoints
-        leftLimit = queryPointPos - deltaLeft
+    closestLeft = left[np.argmin(abs(left - queryPointPos))]
+    deltaLeft = closestLeft - queryPointPos
+    leftLimit = closestLeft - (deltaLeft*deltaFactor) #use half delta to the nearest peak
+
+    closestRight = right[np.argmin(abs(right) - queryPointPos)]
+    deltaRight = closestRight - queryPointPos
+    rightLimit = closestRight - (deltaRight * deltaFactor)
+
     if abs(deltaLeft) > maxLimitPoints:
-        leftLimit = queryPointPos - maxLimitPoints
-
-    if len(right) > 0:
-        closestRight = right[np.argmin(abs(right) - queryPointPos)]
-        deltaRight = closestRight - queryPointPos
-        rightLimit = closestRight - (deltaRight / 2)
-
-    else:
-        deltaRight = defaultLimitPoints
-        rightLimit = queryPointPos + deltaRight
-
+        leftLimit = queryPointPos - (maxLimitPoints* deltaFactor)
     if abs(deltaRight) > maxLimitPoints:
-        rightLimit = queryPointPos + maxLimitPoints
+        rightLimit = queryPointPos + (maxLimitPoints * deltaFactor)
 
     leftPpm = peak.spectrum.point2ppm(leftLimit, peak.spectrum.axisCodes[0])
     rightPpm = peak.spectrum.point2ppm(rightLimit, peak.spectrum.axisCodes[0])
@@ -343,9 +399,9 @@ def _getMaximaForRegion(y, x, minimalHeightThreshold, neededMaxima, initialWindo
     :param totWindowSizeSteps:
     :return:
     """
-    unfilteredMaxima, unfilteredMinima = _find1DMaxima(y, x, minimalHeightThreshold)
-    unfilteredMaximaPos = np.array([x[0] for x in unfilteredMaxima])
-    unfilteredMaximaHeight = np.array([x[1] for x in unfilteredMaxima])
+    allMaxima, _ = signal.find_peaks(y, height=minimalHeightThreshold, distance=10)
+    unfilteredMaximaPos = np.array([x[i] for i in allMaxima])
+    unfilteredMaximaHeight = np.array([y[i] for i in allMaxima])
 
     windowSizesX = np.linspace(0, 1, totWindowSizeSteps)
     windowSizes = _onePhaseDecayPlateau_func(windowSizesX, rate=10, amplitude=initialWindowSize, plateau=2)
@@ -359,7 +415,7 @@ def _getMaximaForRegion(y, x, minimalHeightThreshold, neededMaxima, initialWindo
         except Exception as ex:
             getLogger().warning(f'Cannot smooth with windows size of {windowSize}, {ex}')
             break # is probably a too small window
-        indexes, _ = signal.find_peaks(y_smoothed, )
+        indexes, _ = signal.find_peaks(y_smoothed, height=minimalHeightThreshold )
         for index in indexes:
             try:
                 pos = x[index]
@@ -374,15 +430,9 @@ def _getMaximaForRegion(y, x, minimalHeightThreshold, neededMaxima, initialWindo
                 getLogger().warn(f'Something wrong snapping peak. {windowSize}')
 
         if len(coords) >= neededMaxima:
-            print('DONE. Reached needed count')
+            print(f'DONE. Reached needed count, {coords}')
             break
 
-
-    # if len(coords) >= neededMaxima:
-    #
-    #     # take the highest of the solutions
-    #     coords = sorted(coords, key=lambda x: x[1], reverse=True)  # sort by height
-    #     coords = coords[:neededMaxima]
     return coords
 
 def _getClosestHeight(x,y, pos, currentHeight):

@@ -49,9 +49,6 @@ class GUIMacroTutorial1(CcpnDialogMainWidget):
         self.setCloseButton(callback=self.reject, tipText='Close')
         self.setDefaultButton(CcpnDialogMainWidget.CLOSEBUTTON)
 
-        # initialise the buttons and dialog size
-        self._postInit()
-
     def _getPathFromDialog(self):
         """Select a new path from using a dialog
         """

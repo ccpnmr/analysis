@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-07 14:20:12 +0000 (Tue, November 07, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-01 19:07:03 +0000 (Fri, December 01, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -107,11 +107,6 @@ class RelaxationPlotsPopup(CcpnDialogMainWidget):
         self.setOkButton(callback=self._okCallback, tipText =self.tipText, text='Generate', enabled=True)
         self.setCloseButton(callback=self.reject, tipText='Close')
         self.setDefaultButton(CcpnDialogMainWidget.CLOSEBUTTON)
-
-        # initialise the buttons and dialog size
-        self._postInit()
-        self._okButton = self.dialogButtons.button(self.OKBUTTON)
-        # self.dialogButtons.hide()
 
     def _createWidgets(self):
 

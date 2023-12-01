@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-01 19:39:58 +0100 (Thu, June 01, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-12-01 19:07:04 +0000 (Fri, December 01, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -81,9 +81,6 @@ class MultipletListPropertiesPopup(PMIListPropertiesPopupABC):
                                                grid=(self._rowForNewItems, 1), hAlign='l',
                                                tipTexts=None,
                                                )
-
-        # initialise the buttons and dialog size
-        self._postInit()
 
     def _getSettings(self):
         """Fill the settings dict from the listView object

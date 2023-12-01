@@ -29,9 +29,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-05 13:51:12 +0100 (Mon, June 05, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-12-01 19:07:03 +0000 (Fri, December 01, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -126,8 +126,10 @@ class DataTableSelection(CcpnDialogMainWidget):
         self.setOkButton(callback=self._okClicked, tipText='Run Calculation')
         self.setCloseButton(callback=self.reject, tipText='Close popup')
         self.setDefaultButton(CcpnDialogMainWidget.CLOSEBUTTON)
-        # # initialise the buttons and dialog size
-        self._postInit()
+
+    def _postInit(self):
+        # initialise the buttons and dialog size
+        super()._postInit()
 
         self.widgetETAxy = cw.DataTablePulldown(self.mainWidget,
                                                 mainWindow=self.mainWindow,

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-30 16:30:59 +0000 (Mon, October 30, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-01 19:07:05 +0000 (Fri, December 01, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -106,7 +106,9 @@ class _SetProxy(CcpnDialogMainWidget):
         self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
 
         # initialise the buttons and dialog size
-        self._postInit()
+    def _postInit(self):
+        super()._postInit()
+
         self._okButton = self.getButton(self.OKBUTTON)
         self._revertButton = self.getButton(self.RESETBUTTON)
 

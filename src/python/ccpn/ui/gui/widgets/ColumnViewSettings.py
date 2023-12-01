@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-25 16:12:23 +0100 (Tue, July 25, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-12-01 19:07:05 +0000 (Fri, December 01, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -53,9 +53,6 @@ class ColumnViewSettingsPopup(CcpnDialogMainWidget):
 
         self.setCloseButton(callback=self._close, tipText='Close')
         self.setDefaultButton(self.CLOSEBUTTON)
-
-        # initialise the buttons and dialog size
-        self._postInit()
 
     def getHiddenColumns(self):
         return self.widgetColumnViewSettings.hiddenColumns

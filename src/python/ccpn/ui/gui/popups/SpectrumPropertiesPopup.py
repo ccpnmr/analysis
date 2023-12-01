@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 19:17:56 +0100 (Wed, June 28, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-12-01 19:07:05 +0000 (Fri, December 01, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -384,9 +384,6 @@ class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
 
             self.tabWidget.setCurrentIndex(2)
 
-        # don't forget to call postInit to finish initialise
-        self._postInit()
-
     def _fillPullDowns(self):
         if self.spectrum.dimensionCount == 1:
             self._generalTab._fillPullDowns()
@@ -459,9 +456,6 @@ class SpectrumDisplayPropertiesPopupNd(SpectrumPropertiesPopupABC):
             contoursTab.setContentsMargins(*TABMARGINS)
 
         self.tabWidget.setTabClickCallback(self._tabClicked)
-
-        # don't forget to call postInit to finish initialise
-        self._postInit()
 
     def _fillPullDowns(self):
         for aTab in self.tabs:
@@ -536,9 +530,6 @@ class SpectrumDisplayPropertiesPopup1d(SpectrumPropertiesPopupABC):
             colourTab.setContentsMargins(*TABMARGINS)
 
         self.tabWidget.setTabClickCallback(self._tabClicked)
-
-        # don't forget to call postInit to finish initialise
-        self._postInit()
 
     def _fillPullDowns(self):
         for aTab in self.tabs:
@@ -645,10 +636,11 @@ class GeneralTab(Widget):
         row += 1
 
         from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
+
         _dataFormats = list(getDataFormats().keys())
         Label(self, text="DataFormat ", grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'Format of the binary data defined by path'))
         self.dataFormatWidget = PulldownList(parent=self, vAlign='t', grid=(row, 1), editable=False, texts=_dataFormats,
-                                           )
+                                             )
         self.dataFormatWidget.select(self.spectrum.dataFormat)
         self.dataFormatWidget.disable()
         row += 1

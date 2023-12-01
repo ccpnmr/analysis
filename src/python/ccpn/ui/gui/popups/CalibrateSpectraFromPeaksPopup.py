@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-25 12:25:43 +0000 (Wed, January 25, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-12-01 19:07:04 +0000 (Fri, December 01, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -84,7 +84,10 @@ class CalibrateSpectraFromPeaksPopupNd(CcpnDialogMainWidget):
 
         # set the buttons and the size
         self.adjustSize()
-        self._postInit()
+
+    def _postInit(self):
+        # initialise the buttons and dialog size
+        super()._postInit()
 
         # allow for the scrollbars
         newSize = self._spectrumFrame.minimumSizeHint()

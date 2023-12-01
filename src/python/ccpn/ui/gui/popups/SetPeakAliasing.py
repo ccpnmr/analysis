@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:42 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-12-01 19:07:05 +0000 (Fri, December 01, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -88,15 +88,8 @@ class SetPeakAliasingPopup(CcpnDialogMainWidget):
         # populate the widgets
         self._populate()
 
-        # set the links to the buttons
-        self._postInit()
-        self._okButton = self.dialogButtons.button(self.OKBUTTON)
-        self._closeButton = self.dialogButtons.button(self.CLOSEBUTTON)
-
-        self.GLSignals = GLNotifier(parent=self)
-
     def _setWidgets(self):
-        """Setup the widgets for the dialog
+        """Set up the widgets for the dialog
         """
         row = 0
         Label(self.mainWidget, text='Set aliasing for currently selected peaks', grid=(row, 0), gridSpan=(1, 2))

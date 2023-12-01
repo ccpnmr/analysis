@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-28 19:23:05 +0100 (Wed, June 28, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-12-01 19:07:05 +0000 (Fri, December 01, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -232,7 +232,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
 
         seriesType = self.seriesTab.seriesType.getSelectedText()
         neededType = SeriesTypes._dataTypesMapping().get(seriesType)
-        vv = [neededType(v) if v else None for v in df[_ValuesHeader].values  ]
+        vv = [neededType(v) if v else None for v in df[_ValuesHeader].values]
         self.obj.series = vv
 
     _groupEditorInitMethod = _groupInit
@@ -285,9 +285,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
             if tabFunc:
                 tabFunc()
 
-        self._populate()  # is not needed to populate again all.
         self.setDefaultButton(None)
-
         self.connectSignals()
         self.setSizeGripEnabled(False)
 

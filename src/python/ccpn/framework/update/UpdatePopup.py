@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-30 10:35:39 +0000 (Thu, November 30, 2023) $"
-__version__ = "$Revision: 3.2.0.1 $"
+__dateModified__ = "$dateModified: 2023-12-01 19:07:03 +0000 (Fri, December 01, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -125,7 +125,9 @@ class UpdatePopup(CcpnDialogMainWidget):
 
         # initialise the buttons and dialog size
         self.setDefaultButton(None)
-        self._postInit()
+
+    def _postInit(self):
+        super()._postInit()
 
         self._defaultHeight = self.minimumSizeHint().height()
         self.resetFromServer()

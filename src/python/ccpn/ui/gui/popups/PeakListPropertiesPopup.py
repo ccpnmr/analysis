@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-18 18:49:18 +0100 (Thu, May 18, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-12-01 19:07:05 +0000 (Fri, December 01, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -57,9 +57,6 @@ class PeakListPropertiesPopup(PMIListPropertiesPopupABC):
             title=f'{self.klass.className} Properties',
             **kwds,
         )
-
-        # initialise the buttons and dialog size
-        self._postInit()
 
     def _refreshGLItems(self):
         # emit a signal to rebuild all peaks and multiplets

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-17 17:43:49 +0000 (Fri, November 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-01 19:07:05 +0000 (Fri, December 01, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -167,8 +167,7 @@ class SubstancePropertiesPopup(ComplexAttributeEditorPopupABC):
 
     def __init__(self, parent=None, mainWindow=None,
                  substance=None, sampleComponent=None, newSubstance=False, **kwds):
-        """
-        Initialise the widget
+        """Initialise the widget
         """
         self.EDITMODE = not newSubstance
         self.WINDOWPREFIX = 'New ' if newSubstance else 'Edit '
@@ -182,7 +181,7 @@ class SubstancePropertiesPopup(ComplexAttributeEditorPopupABC):
         self.substance = substance
 
         # initialise the widgets in the popup
-        super().__init__(parent=parent, mainWindow=mainWindow, obj=obj, size=(500, 100), **kwds)
+        super().__init__(parent=parent, mainWindow=mainWindow, obj=obj, **kwds)
 
         # attach callbacks to the new/fromSubstances radioButton
         if self.EDITMODE:
@@ -200,20 +199,20 @@ class SubstancePropertiesPopup(ComplexAttributeEditorPopupABC):
         self.smiles.entry.textEdited.connect(self._smilesChanged)
         self._initialiseCompoundView()
 
-        self._firstSize = self.sizeHint()
-        self._size = self.sizeHint()
-        self.mainWidget.getLayout().setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
-
-        self._setDialogSize()
-
         self._moreLessFrames = []
         for item in self.findChildren(MoreLessFrame):
             item.setCallback(self._moreLessCallback)
             # assume all are initially closed
             self._moreLessFrames.append(item)
 
+        # restrict the scroll-area to the minimum size of the initial widgets - helps to match the other popups
+        self._scrollArea.setMinimumSize(self.mainWidget.sizeHint())
+
+    def _postInit(self):
+        super()._postInit()
         self._baseSize = self.sizeHint()
         for item in self._moreLessFrames:
+            # these should be the closed size-hints
             self._baseSize -= item.sizeHint()
 
     def _setEnabledState(self, fromSubstances):
@@ -292,8 +291,6 @@ class SubstancePropertiesPopup(ComplexAttributeEditorPopupABC):
                 view.setSmiles(self.obj.smiles)
         else:
             view.setSmiles('')
-
-        # NOTE:ED - initial size has been moved to resizeEvent in compoundWidget
 
     def _smilesChanged(self, value):
         view = self.compoundView.compoundView

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-16 15:47:17 +0000 (Thu, November 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-01 15:03:22 +0000 (Fri, December 01, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -49,7 +49,7 @@ class CompoundView(QGraphicsView, Base):
         Base._init(self, **kwds)
 
         _scene = QGraphicsScene(self)
-        _scene.setSceneRect(0, 0, 300, 300)
+        # _scene.setSceneRect(0, 0, 300, 300)
         self.setScene(_scene)
         self.setCacheMode(QGraphicsView.CacheBackground)
         # QtWidgets.QGraphicsView.__init__(self, parent)
@@ -168,12 +168,12 @@ class CompoundView(QGraphicsView, Base):
     def minimumSizeHint(self):
         return QtCore.QSize(200, 200)
 
-    def resizeEvent(self, event):
-        super().resizeEvent(event)
-
-        self.resetCachedContent()
-        self.fitInView(self.scene().itemsBoundingRect(), Qt.KeepAspectRatio)
-        self.zoomLevel = 1.0
+    # def resizeEvent(self, event):
+    #     super().resizeEvent(event)
+    #
+    #     self.resetCachedContent()
+    #     self.fitInView(self.scene().itemsBoundingRect(), Qt.KeepAspectRatio)
+    #     self.zoomLevel = 1.0
 
         # return QtWidgets.QGraphicsView.resizeEvent(self, event)
 

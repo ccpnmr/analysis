@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-20 12:49:41 +0000 (Mon, November 20, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-01 15:03:22 +0000 (Fri, December 01, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -26,6 +26,8 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 from PyQt5 import QtGui, QtWidgets, QtCore
 import contextlib
 from functools import partial
+
+import ccpn.core
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
@@ -2062,9 +2064,11 @@ def main():
     entry = EntryCompoundWidget(parent=popup, labelText="Entry widget", default='test', callback=callback1,
                                 grid=(row, 0))
 
-    popup.show()
-    popup.raise_()
-    app.start()
+    row += 1
+    cView = CompoundViewCompoundWidget(parent=popup, grid=(row, 0), gridSpan=(1, 2),
+                                       smiles='CNC(=O)c1nccc2cccn12')
+
+    popup.exec_()
 
 
 if __name__ == '__main__':

@@ -18,9 +18,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-30 14:03:32 +0100 (Fri, June 30, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-12-04 14:20:08 +0000 (Mon, December 04, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -68,6 +68,7 @@ POLICY_DICT = {
     'preferred'       : QtWidgets.QSizePolicy.Preferred,
     'expanding'       : QtWidgets.QSizePolicy.Expanding,
     'minimumExpanding': QtWidgets.QSizePolicy.MinimumExpanding,
+    'minimumexpanding': QtWidgets.QSizePolicy.MinimumExpanding,
     'ignored'         : QtWidgets.QSizePolicy.Ignored,
     }
 

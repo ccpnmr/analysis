@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-01 14:25:36 +0000 (Fri, December 01, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-04 18:25:00 +0000 (Mon, December 04, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -274,13 +274,12 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
             # fade the background and paint over the top of selected cell
             # - ensures that different coloured backgrounds are still visible
             # - does, however, modify the foreground colour :|
-            back = index.data(QtCore.Qt.BackgroundRole)
-            fore = index.data(QtCore.Qt.ForegroundRole)
-            back = self._mergeColors(back, option.palette.color(QtGui.QPalette.Highlight), 0.2, 0.8)
-            fore = self._mergeColors(fore, option.palette.color(QtGui.QPalette.HighlightedText), 0.5, 0.5)
-            # this might be better for changing the foreground/background colour - instead of model.data(COLOR_ROLE)
-            option.palette.setColor(QtGui.QPalette.Highlight, back)
-            option.palette.setColor(QtGui.QPalette.HighlightedText, fore)
+            if back := index.data(QtCore.Qt.BackgroundRole):
+                back = self._mergeColors(back, option.palette.color(QtGui.QPalette.Highlight), 0.18, 0.82)
+                option.palette.setColor(QtGui.QPalette.Highlight, back)
+            if fore := index.data(QtCore.Qt.ForegroundRole):
+                fore = self._mergeColors(fore, option.palette.color(QtGui.QPalette.HighlightedText), 0.5, 0.5)
+                option.palette.setColor(QtGui.QPalette.HighlightedText, fore)
 
         super().paint(painter, option, index)
 

@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-06 15:50:33 +0000 (Fri, January 06, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-12-04 14:22:46 +0000 (Mon, December 04, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -74,7 +74,6 @@ class AboutPopup(CcpnDialog):
 
         self.setMaximumWidth(self.size().width())
         self.setMaximumSize(self.maximumWidth(), self.maximumHeight())
-        # CcpnDialog.fixedSize(self)
 
     @staticmethod
     def _copyToClipboard():

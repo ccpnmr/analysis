@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-01 19:05:54 +0000 (Fri, December 01, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-04 14:22:46 +0000 (Mon, December 04, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -34,7 +34,6 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.DialogButtonBox import DialogButtonBox
-from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.guiSettings import getColours
 from ccpn.ui.gui.lib.ChangeStateHandler import ChangeDict
 from ccpn.util.Logging import getLogger
@@ -398,12 +397,14 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base, metaclass=_DialogHook):
         self.dialogButtons.setContentsMargins(0, 18, 0, 0)
 
     def _setDontShow(self):
+        from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget  # circular import :|
+
         # put a Don't Show checkbox at the bottom of the dialog if needed
         if not self.DONTSHOWENABLED:
             return
 
         grid = (2, 0)
-        gridSpan = (1, 1) if self._orientation.startswith('h') else (1, 1)
+        gridSpan = (1, 1) if self._orientation.startswith('h') else (1, 1)  # reserved
         try:
             from ccpn.framework.Application import getApplication
 
@@ -436,7 +437,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base, metaclass=_DialogHook):
         """
         return self.dialogButtons.button(buttonName)
 
-    def fixedSize(self):
+    def _fixedSize(self):
         self._sPolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         self._sPolicy.setHorizontalStretch(0)
         self._sPolicy.setVerticalStretch(0)
@@ -726,7 +727,7 @@ class CcpnDialog(QtWidgets.QDialog, Base):
         self.setWindowFilePath('')
         self.setWindowIcon(QtGui.QIcon())
 
-    def fixedSize(self):
+    def _fixedSize(self):
         self._sPolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         self._sPolicy.setHorizontalStretch(0)
         self._sPolicy.setVerticalStretch(0)

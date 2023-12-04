@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-17 17:43:50 +0000 (Fri, November 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-04 14:22:46 +0000 (Mon, December 04, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -23,11 +23,14 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtCore
+from PyQt5 import QtGui, QtCore, QtWidgets
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Label import VerticalLabel
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.util.Colour import hexToRgb
+
+
+MINWIDTH = 12
 
 
 class VLine(Widget):
@@ -36,14 +39,14 @@ class VLine(Widget):
     DASH_DOT_LINE = 'DashDotLine'
     DASH_DOT_DOT_LINE = 'DashDotDotLine'
 
-    styles = {
+    _styles = {
         SOLID_LINE       : QtCore.Qt.SolidLine,
         DASH_LINE        : QtCore.Qt.DashLine,
         DASH_DOT_LINE    : QtCore.Qt.DashDotLine,
         DASH_DOT_DOT_LINE: QtCore.Qt.DashDotDotLine,
         }
 
-    def __init__(self, parent=None, style=SOLID_LINE, colour=QtCore.Qt.black, width=10, lineWidth=2, divisor=3, **kwds):
+    def __init__(self, parent=None, style=SOLID_LINE, colour=QtCore.Qt.black, width=None, lineWidth=2, **kwds):
         """
         :param style: Options:
                               'SolidLine';
@@ -54,44 +57,38 @@ class VLine(Widget):
 
         super().__init__(parent, **kwds)
         self._parent = parent
-        self.style = style
-        self.colour = colour
-        self.width = width
-        self.divisor = divisor  #int(height / divisor)
-        self.lineWidth = lineWidth
-
-        self.setFixedWidth(width)
+        self._style = style
+        self._colour = colour
+        self._lineWidth = lineWidth
+        self.setMinimumWidth(max(MINWIDTH, width or MINWIDTH))
 
     def paintEvent(self, e):
         qp = QtGui.QPainter()
         qp.begin(self)
-        self.drawLine(qp, self.style)
+        self.drawLine(qp, self._style)
         qp.end()
 
-    def drawLine(self, qp, style=None, colour=None):
+    def drawLine(self, qp, style=None):
 
-        geomRect = self.geometry()
-        geomWidth = geomRect.width() // self.divisor
-        lineWidth = geomWidth + self.contentsMargins().left()
-        top = 0
-        bottom = geomRect.height()
+        geomRect = self.rect()
+        linePos = (geomRect.left() + geomRect.right() + 2) // 2
 
-        if style in self.styles:
-            style = self.styles[style]
+        if style in self._styles:
+            style = self._styles[style]
             try:
-                pen = QtGui.QPen(self.colour, self.lineWidth, style)
+                pen = QtGui.QPen(self._colour, self._lineWidth, style)
             except:
-                pen = QtGui.QPen(QtGui.QColor(*hexToRgb(self.colour)), self.lineWidth, style)
+                pen = QtGui.QPen(QtGui.QColor(*hexToRgb(self._colour)), self._lineWidth, style)
 
             qp.setPen(pen)
-            qp.drawLine(lineWidth, top, lineWidth, bottom)
+            qp.drawLine(linePos, geomRect.top(), linePos, geomRect.bottom())
 
 
 class LabeledVLine(Frame):
     """A class to make a Frame with a VLine - Label - VLine
     """
 
-    def __init__(self, parent=None, width=30, text=None, bold=False, sides='both',
+    def __init__(self, parent=None, width=None, text=None, bold=False, sides='both',
                  style=VLine.SOLID_LINE, colour=QtCore.Qt.black, lineWidth=2,
                  **kwds):
         """
@@ -110,14 +107,16 @@ class LabeledVLine(Frame):
             raise RuntimeError('sides not defined correctly')
         self._sides = sides
 
-        super().__init__(parent=parent, setLayout=True, showBorder=False, **kwds)
-        width = width if width is not None else 30
-        self.setFixedWidth(width)
+        super().__init__(parent=parent, setLayout=True, showBorder=True, **kwds)
 
         # the label with text
-        self._line1 = VLine(parent=self, grid=(2, 0), style=style, colour=colour, lineWidth=lineWidth, width=width, divisor=2, vPolicy='expanding')
+        self._line1 = VLine(parent=self, grid=(2, 0), style=style, colour=colour, lineWidth=lineWidth, width=width,
+                            vPolicy='expanding', hPolicy='minimumexpanding')
         self._label = VerticalLabel(parent=self, grid=(1, 0), text=text, bold=bold, orientation='vertical', vPolicy='fixed')
-        self._line2 = VLine(parent=self, grid=(0, 0), style=style, colour=colour, lineWidth=lineWidth, width=width, divisor=2, vPolicy='expanding')
+        self._line2 = VLine(parent=self, grid=(0, 0), style=style, colour=colour, lineWidth=lineWidth, width=width,
+                            vPolicy='expanding', hPolicy='minimumexpanding')
+
+        self.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Expanding)
 
         self._updateLines()
 
@@ -134,6 +133,8 @@ class LabeledVLine(Frame):
         self._updateLines()
 
     def _updateLines(self):
+        """Update the visibility of the top/bottom lines.
+        """
         if self._sides == 'bottom':
             self._line1.show()
             self._line2.hide()
@@ -152,32 +153,26 @@ class LabeledVLine(Frame):
         self._label.setVisible(txt)
 
     def setText(self, text):
-        """Set the text of the widget"""
+        """Set the text of the widget.
+        """
         self._label.setText(text)
         self._updateLines()
 
-    def _fixToSizeHint(self):
-        size = self.sizeHint()
-        val = size.width()
-
-        self._line1.setFixedWidth(val // 2)
-        self._line2.setFixedWidth(val // 2)
-        self.setFixedWidth(val)
-
 
 def main():
+    # required import
+    import ccpn.core
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
-    from ccpn.ui.gui.widgets.Slider import SliderSpinBox
 
+    # app needs to be referenced until termination of main
     app = TestApplication()
-    popup = CcpnDialog(windowTitle='Test slider', setLayout=True)
-    slider = SliderSpinBox(parent=popup, startVal=0, endVal=100, value=5, grid=(0, 0))
-    line = VLine(parent=popup, grid=(0, 1), gridSpan=(3, 1))
-    slider2 = SliderSpinBox(parent=popup, startVal=0, endVal=100, value=5, grid=(2, 0))
-    popup.show()
-    popup.raise_()
-    app.start()
+    popup = CcpnDialog(windowTitle='Test HLine', setLayout=True)
+    VLine(parent=popup, grid=(0, 0))
+    LabeledVLine(parent=popup, grid=(0, 1), text='a line with text')
+    VLine(parent=popup, grid=(0, 2), vPolicy='expanding', spacing=(0, 0))
+    LabeledVLine(parent=popup, grid=(0, 3), text='another line with text', sides='top')
+    popup.exec_()
 
 
 if __name__ == '__main__':

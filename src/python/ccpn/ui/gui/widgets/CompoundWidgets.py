@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-01 15:03:22 +0000 (Fri, December 01, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-04 14:22:46 +0000 (Mon, December 04, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -27,7 +27,6 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 import contextlib
 from functools import partial
 
-import ccpn.core
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
@@ -49,9 +48,7 @@ from ccpn.ui.gui.widgets.CompoundView import CompoundView
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
-from ccpn.ui.gui.widgets.Font import getFontHeight
 from ccpn.util.Colour import spectrumColours, fillColourPulldown
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 
 class ListCompoundWidget(CompoundBaseWidget):
@@ -1990,8 +1987,9 @@ class CompoundViewCompoundWidget(CompoundBaseWidget):
 #=========================================================================================
 
 def main():
+    # required import
+    import ccpn.core
     from ccpn.ui.gui.widgets.Application import TestApplication
-    from ccpn.ui.gui.widgets.BasePopup import BasePopup
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
     app = TestApplication()

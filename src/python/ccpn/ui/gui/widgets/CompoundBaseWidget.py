@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-16 12:51:36 +0000 (Thu, November 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-04 14:22:46 +0000 (Mon, December 04, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -29,11 +29,7 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 import contextlib
 from PyQt5 import QtCore
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.Base import SignalBlocking
-
-
-NULL = object()
 
 
 class CompoundBaseWidget(Frame, SignalBlocking):
@@ -41,6 +37,7 @@ class CompoundBaseWidget(Frame, SignalBlocking):
     Base widget for Compound classes; inherits from Frame (and hence Base)
     Implements the addNotifier and deleteNotifiers methods
     """
+
     def __init__(self, parent, layoutDict, orientation, showBorder, **kwds):
         """
         :param parent: parent widget
@@ -113,6 +110,8 @@ class CompoundBaseWidget(Frame, SignalBlocking):
         :param kwds: optional keyword arguments to func
         :return: Notifier instance
         """
+        from ccpn.core.lib.Notifiers import Notifier  # circular imports :|
+
         notifier = Notifier(theObject, triggers, targetName, func, *args, **kwds)
         self.addNotifier(notifier)
         return notifier

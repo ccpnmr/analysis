@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-01 19:07:05 +0000 (Fri, December 01, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-04 14:22:46 +0000 (Mon, December 04, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -1052,7 +1052,7 @@ class DimensionsTab(Widget):
             _magTransferLabel.setVisible(False)
 
         row += 1
-        hLine = HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 1), colour=getColours()[DIVIDER], height=15, divisor=2)
+        hLine = HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 2), colour=getColours()[DIVIDER], height=15)
         hLine.setContentsMargins(5, 0, 0, 0)
 
         row += 1
@@ -1083,7 +1083,7 @@ class DimensionsTab(Widget):
         Label(self, text="Second Cursor Offset (Hz) ", grid=(row, 0), hAlign='l', tipText=getAttributeTipText(Spectrum, 'doubleCrosshairOffsets'))
 
         row += 1
-        hLine = HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 1), colour=getColours()[DIVIDER], height=15, divisor=2)
+        hLine = HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 2), colour=getColours()[DIVIDER], height=15)
         hLine.setContentsMargins(5, 0, 0, 0)
 
         row += 1
@@ -1255,7 +1255,7 @@ class DimensionsTab(Widget):
         # add preferred order widgets for Nd and
         if spectrum.dimensionCount > 1:
             row += 1
-            hLine = HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 1), colour=getColours()[DIVIDER], height=15, divisor=2)
+            hLine = HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 2), colour=getColours()[DIVIDER], height=15)
             hLine.setContentsMargins(5, 0, 0, 0)
 
             row += 1

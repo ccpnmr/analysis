@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-01 19:07:04 +0000 (Fri, December 01, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-04 14:22:46 +0000 (Mon, December 04, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -563,7 +563,6 @@ class Separator(AttributeABC):
         else:
             self._frame = LabeledHLine(parent, text=self._name,
                                        grid=grid, gridSpan=(1, 1), lineWidth=1, height=None, colour=getColours()[DIVIDER])
-        self._frame._fixToSizeHint()
 
         self._content = self._container = None
         self.nextPosition()

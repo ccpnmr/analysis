@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-17 17:43:50 +0000 (Fri, November 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-04 14:22:46 +0000 (Mon, December 04, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -23,12 +23,14 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import sys
 from PyQt5 import QtGui, QtCore, QtWidgets
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.util.Colour import hexToRgb
+
+
+MINHEIGHT = 12
 
 
 class HLine(Widget):
@@ -37,14 +39,14 @@ class HLine(Widget):
     DASH_DOT_LINE = 'DashDotLine'
     DASH_DOT_DOT_LINE = 'DashDotDotLine'
 
-    styles = {
+    _styles = {
         SOLID_LINE       : QtCore.Qt.SolidLine,
         DASH_LINE        : QtCore.Qt.DashLine,
         DASH_DOT_LINE    : QtCore.Qt.DashDotLine,
         DASH_DOT_DOT_LINE: QtCore.Qt.DashDotDotLine,
         }
 
-    def __init__(self, parent=None, style=SOLID_LINE, colour=QtCore.Qt.black, height=10, lineWidth=2, divisor=3, **kwds):
+    def __init__(self, parent=None, style=SOLID_LINE, colour=QtCore.Qt.black, height=None, lineWidth=2, **kwds):
         """
         :param style: Options:
                               'SolidLine';
@@ -55,45 +57,38 @@ class HLine(Widget):
 
         super().__init__(parent, **kwds)
         self._parent = parent
-        self.style = style
-        self.colour = colour
-        self.height = height
-        self.divisor = divisor  #int(height / divisor)
-        self.lineWidth = lineWidth
-
-        # self.setMaximumHeight(10)
-        self.setFixedHeight(height)
+        self._style = style
+        self._colour = colour
+        self._lineWidth = lineWidth
+        self.setMinimumHeight(max(MINHEIGHT, height or MINHEIGHT))
 
     def paintEvent(self, e):
         qp = QtGui.QPainter()
         qp.begin(self)
-        self.drawLine(qp, self.style)
+        self.drawLine(qp, self._style)
         qp.end()
 
-    def drawLine(self, qp, style=None, colour=None):
+    def drawLine(self, qp, style=None):
 
-        geomRect = self.geometry()
-        geomHeight = geomRect.height() // self.divisor
-        lineHeight = geomHeight + self.contentsMargins().top()
-        left = 0
-        right = geomRect.width()
+        geomRect = self.rect()
+        linePos = (geomRect.top() + geomRect.bottom() + 2) // 2
 
-        if style in self.styles:
-            style = self.styles[style]
+        if style in self._styles:
+            style = self._styles[style]
             try:
-                pen = QtGui.QPen(self.colour, self.lineWidth, style)
+                pen = QtGui.QPen(self._colour, self._lineWidth, style)
             except:
-                pen = QtGui.QPen(QtGui.QColor(*hexToRgb(self.colour)), self.lineWidth, style)
+                pen = QtGui.QPen(QtGui.QColor(*hexToRgb(self._colour)), self._lineWidth, style)
 
             qp.setPen(pen)
-            qp.drawLine(left, lineHeight, right, lineHeight)
+            qp.drawLine(geomRect.left(), linePos, geomRect.right(), linePos)
 
 
 class LabeledHLine(Frame):
     """A class to make a Frame with an Hline - Label - Hline
     """
 
-    def __init__(self, parent=None, height=30, text=None, bold=False, sides='both',
+    def __init__(self, parent=None, height=None, text=None, bold=False, sides='both',
                  style=HLine.SOLID_LINE, colour=QtCore.Qt.black, lineWidth=2,
                  **kwds):
         """
@@ -113,13 +108,15 @@ class LabeledHLine(Frame):
         self._sides = sides
 
         super(LabeledHLine, self).__init__(parent=parent, setLayout=True, showBorder=False, **kwds)
-        height = height if height is not None else 30
-        self.setFixedHeight(height)
 
         # the label with text
-        self._line1 = HLine(parent=self, grid=(0, 0), style=style, colour=colour, lineWidth=lineWidth, height=height, divisor=2, hPolicy='expanding')
+        self._line1 = HLine(parent=self, grid=(0, 0), style=style, colour=colour, lineWidth=lineWidth, height=height,
+                            hPolicy='expanding', vPolicy='minimumexpanding')
         self._label = Label(parent=self, grid=(0, 1), text=text, bold=bold, hPolicy='fixed')
-        self._line2 = HLine(parent=self, grid=(0, 2), style=style, colour=colour, lineWidth=lineWidth, height=height, divisor=2, hPolicy='expanding')
+        self._line2 = HLine(parent=self, grid=(0, 2), style=style, colour=colour, lineWidth=lineWidth, height=height,
+                            hPolicy='expanding', vPolicy='minimumexpanding')
+
+        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
 
         self._updateLines()
 
@@ -136,6 +133,8 @@ class LabeledHLine(Frame):
         self._updateLines()
 
     def _updateLines(self):
+        """Update the visibility of the left/right lines.
+        """
         if self._sides == 'left':
             self._line1.show()
             self._line2.hide()
@@ -154,36 +153,27 @@ class LabeledHLine(Frame):
         self._label.setVisible(txt)
 
     def setText(self, text):
-        """Set the text of the widget"""
+        """Set the text of the widget.
+        """
         self._label.setText(text)
         self._updateLines()
 
-    def _fixToSizeHint(self):
-        size = self.sizeHint()
-        val = size.height()
-
-        self._line1.setFixedHeight(val // 2)
-        self._line2.setFixedHeight(val // 2)
-        self.setFixedHeight(val)
-
 
 def main():
-    app = QtWidgets.QApplication(sys.argv)
-    ex = HLine()
-    sys.exit(app.exec_())
-
-
-if __name__ == '__main__':
+    # required import
+    import ccpn.core
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
-
+    # app needs to be referenced until termination of main
     app = TestApplication()
     popup = CcpnDialog(windowTitle='Test HLine', setLayout=True)
     Label(parent=popup, grid=(0, 0), text='Just some text')
-    line = HLine(parent=popup, grid=(1, 0), hPolicy='expanding', spacing=(0, 0))
+    HLine(parent=popup, grid=(1, 0), hPolicy='expanding', spacing=(0, 0))
     Label(parent=popup, grid=(2, 0), text='Just some text to separate')
-    line2 = LabeledHLine(parent=popup, grid=(3, 0), text='a line with text')
-    popup.show()
-    popup.raise_()
-    app.start()
+    LabeledHLine(parent=popup, grid=(3, 0), text='a line with text')
+    popup.exec_()
+
+
+if __name__ == '__main__':
+    main()

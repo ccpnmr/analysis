@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-05 17:01:42 +0100 (Thu, October 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-04 14:22:46 +0000 (Mon, December 04, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -26,11 +26,9 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import sys
 from PyQt5.Qt import QDesktopServices, QUrl, QApplication, Qt
-from PyQt5.QtWidgets import QTextEdit
-
 from PyQt5 import QtGui, QtWidgets, QtCore, QtPrintSupport
+
 from ccpn.ui.gui.widgets.FileDialog import MacrosFileDialog
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Action import Action
@@ -39,7 +37,6 @@ from ccpn.ui.gui.widgets.Label import Label, ActiveLabel
 from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 from ccpn.util.Path import aPath
-from ccpn.ui.gui.widgets.MessageDialog import showMessage
 
 
 ATTRIBUTE_CHECK_LIST = ('_mouseStart', '_minimumWidth', '_widthStart', '_minimumHeight', '_heightStart')
@@ -324,6 +321,8 @@ class TextBrowser(QtWidgets.QTextBrowser, Base):
             self.setHtmlFilePath(self.htmlFilePath)
 
     def setHtmlFilePath(self, htmlFilePath):
+        from ccpn.ui.gui.widgets.MessageDialog import showMessage  # circular import
+
         path = aPath(htmlFilePath)
         if not path.exists():
             showMessage('Path not found', f'Could not load {path}')
@@ -546,11 +545,10 @@ class PlainTextEditor(QtWidgets.QPlainTextEdit, Base):
 #         self.move(rect.width() - 18, rect.height() - 18)
 
 
-if __name__ == '__main__':
+def main():
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
     from ccpn.ui.gui.widgets.Widget import Widget
-
 
     app = TestApplication()
 
@@ -560,3 +558,7 @@ if __name__ == '__main__':
     popup.show()
     popup.raise_()
     app.start()
+
+
+if __name__ == '__main__':
+    main()

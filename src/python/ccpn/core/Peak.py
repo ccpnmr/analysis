@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-04 15:40:55 +0100 (Fri, August 04, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-12-04 16:00:59 +0000 (Mon, December 04, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -1080,7 +1080,7 @@ class Peak(AbstractWrapperObject):
 
         if includeAllProperties:
             singleValueTags = ['height', 'volume', 'heightError', 'volumeError', 'figureOfMerit',
-                               'annotation', 'comment', ]
+                               'annotation', 'comment', 'clusterId']
             dimensionValueTags = ['ppmPositions', 'positionError', 'boxWidths', 'lineWidths', ]
         else:
             singleValueTags = []
@@ -1374,12 +1374,13 @@ class Peak(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(Peak)
-def _newPeak(self: PeakList, height: float = None, volume: float = None,
+def _newPeak(self: PeakList, *, height: float = None, volume: float = None,
              heightError: float = None, volumeError: float = None,
              figureOfMerit: float = 1.0, annotation: str = None, comment: str = None,
              ppmPositions: Sequence[float] = (), position: Sequence[float] = None, positionError: Sequence[float] = (),
              pointPositions: Sequence[float] = (), boxWidths: Sequence[float] = (),
              lineWidths: Sequence[float] = (), ppmLineWidths: Sequence[float] = (), pointLineWidths: Sequence[float] = (),
+             clusterId: int = None,
              ) -> Peak:
     """Create a new Peak within a peakList
 
@@ -1402,6 +1403,7 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
     :param pointPositions:
     :param boxWidths:
     :param lineWidths:
+    :param clusterId:
     :return: a new Peak instance.
     """
 
@@ -1411,7 +1413,8 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
     apiPeakList = self._apiPeakList
     apiPeak = apiPeakList.newPeak(height=height, volume=volume,
                                   heightError=heightError, volumeError=volumeError,
-                                  figOfMerit=figureOfMerit, annotation=annotation, details=comment)
+                                  figOfMerit=figureOfMerit, clusterId=clusterId,
+                                  annotation=annotation, details=comment)
     result = self._project._data2Obj.get(apiPeak)
     if result is None:
         raise RuntimeError('Unable to generate new Peak item')

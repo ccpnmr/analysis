@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-17 17:43:50 +0000 (Fri, November 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-04 14:00:14 +0000 (Mon, December 04, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -26,10 +26,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets, QtCore
+from PyQt5 import QtGui, QtWidgets
 from pyqtgraph.widgets.VerticalLabel import VerticalLabel as pyqtVerticalLabel
 
-from ccpn.ui.gui.widgets.Base import Base, HALIGN_DICT
+from ccpn.ui.gui.widgets.Base import Base
 from ccpn.framework.Translation import translator
 import ccpn.ui.gui.guiSettings as guiSettings
 from ccpn.ui.gui.widgets.Icon import Icon
@@ -284,12 +284,9 @@ class VerticalLabel(pyqtVerticalLabel, Base):
         self._setStyleSheet()
 
 
-if __name__ == '__main__':
+def main():
     from ccpn.ui.gui.widgets.Application import TestApplication
-    from ccpn.ui.gui.widgets.Button import Button
-    from ccpn.ui.gui.widgets.Icon import Icon
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
-
 
     mathExamples = [
         r'$\sqrt{\frac{1}{N}\sum_{i=0}^N (\alpha_i*\delta_i)^2}$',
@@ -299,7 +296,9 @@ if __name__ == '__main__':
     app = TestApplication()
     pixmap = maTex2Pixmap(f'A test label with equation:  {mathExamples[0]}')
     popup = CcpnDialog(windowTitle='Test Table', setLayout=True)
-    label = Label(popup, text='', icon=pixmap, grid=(0, 0))
-    popup.show()
-    popup.raise_()
-    app.start()
+    Label(popup, text='', icon=pixmap, grid=(0, 0))
+    popup.exec_()
+
+
+if __name__ == '__main__':
+    main()

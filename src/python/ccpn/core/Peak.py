@@ -4,8 +4,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-21 13:33:21 +0000 (Tue, November 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-05 14:43:22 +0000 (Tue, December 05, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -1090,7 +1090,7 @@ class Peak(AbstractWrapperObject):
 
         if includeAllProperties:
             singleValueTags = ['height', 'volume', 'heightError', 'volumeError', 'figureOfMerit',
-                               'annotation', 'comment', ]
+                               'annotation', 'comment', 'clusterId']
             dimensionValueTags = ['ppmPositions', 'positionError', 'boxWidths', 'lineWidths', ]
         else:
             singleValueTags = []
@@ -1384,12 +1384,13 @@ class Peak(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(Peak)
-def _newPeak(self: PeakList, height: float = None, volume: float = None,
+def _newPeak(self: PeakList, *, height: float = None, volume: float = None,
              heightError: float = None, volumeError: float = None,
              figureOfMerit: float = 1.0, annotation: str = None, comment: str = None,
              ppmPositions: Sequence[float] = (), position: Sequence[float] = None, positionError: Sequence[float] = (),
              pointPositions: Sequence[float] = (), boxWidths: Sequence[float] = (),
              lineWidths: Sequence[float] = (), ppmLineWidths: Sequence[float] = (), pointLineWidths: Sequence[float] = (),
+             clusterId: int = None,
              ) -> Peak:
     """Create a new Peak within a peakList
 
@@ -1412,6 +1413,7 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
     :param pointPositions:
     :param boxWidths:
     :param lineWidths:
+    :param clusterId:
     :return: a new Peak instance.
     """
 
@@ -1421,7 +1423,8 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
     apiPeakList = self._apiPeakList
     apiPeak = apiPeakList.newPeak(height=height, volume=volume,
                                   heightError=heightError, volumeError=volumeError,
-                                  figOfMerit=figureOfMerit, annotation=annotation, details=comment)
+                                  figOfMerit=figureOfMerit, clusterId=clusterId,
+                                  annotation=annotation, details=comment)
     result = self._project._data2Obj.get(apiPeak)
     if result is None:
         raise RuntimeError('Unable to generate new Peak item')

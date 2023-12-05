@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 15:25:12 +0100 (Tue, March 28, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-12-01 14:25:36 +0000 (Fri, December 01, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -195,24 +195,26 @@ def main():
     for row in range(table.rowCount()):
         for col in range(table.columnCount()):
             table.setBackground(row, col, QtGui.QColor(random.randint(0, 256**3) & 0x3f3f3f | 0x404040))
+            table.setForeground(row, col, QtGui.QColor(random.randint(0, 256**3) & 0x3f3f3f | 0x808080))
 
     # set some background colours
-    cells = ((0, 0, '#80C0FF'),
-             (1, 1, '#fe83cc'), (1, 2, '#fe83cc'),
-             (2, 3, '#83fbcc'),
-             (3, 2, '#e0ff87'), (3, 3, '#e0ff87'), (3, 4, '#e0ff87'), (3, 5, '#e0ff87'),
-             (4, 2, '#e0f08a'), (4, 3, '#e0f08a'), (4, 4, '#e0f08a'), (4, 5, '#e0f08a'),
-             (6, 2, '#70a04f'), (6, 6, '#70a04f'),
-             (7, 1, '#eebb43'), (7, 2, '#eebb43'),
-             (8, 4, '#7090ef'), (8, 5, '#7090ef'),
-             (9, 0, '#30f06f'), (9, 1, '#30f06f'),
-             (10, 2, '#e0d0e6'), (10, 3, '#e0d0e6'), (10, 4, '#e0d0e6'),
-             (11, 2, '#e0d0e6'), (11, 3, '#e0d0e6'), (11, 4, '#e0d0e6'),
+    cells = ((0, 0, '#80c0ff', '#ffe055'),
+             (1, 1, '#fe83cc', '#90efab'), (1, 2, '#fe83cc', '#90efab'),
+             (2, 3, '#83fbcc', '#a0a0cc'),
+             (3, 2, '#e0ff87', '#344546'), (3, 3, '#e0ff87', '#344546'), (3, 4, '#e0ff87', '#344546'), (3, 5, '#e0ff87', '#344546'),
+             (4, 2, '#e0f08a', '#030840'), (4, 3, '#e0f08a', '#401254'), (4, 4, '#e0f08a', '#401254'), (4, 5, '#e0f08a', '#401254'),
+             (6, 2, '#70a04f', '#246482'), (6, 6, '#70a04f', '#246377'),
+             (7, 1, '#eebb43', '#378773'), (7, 2, '#eebb43', '#822846'),
+             (8, 4, '#7090ef', '#b84dc5'), (8, 5, '#7090ef', '#010135'),
+             (9, 0, '#30f06f', '#015002'), (9, 1, '#30f06f', '#ab46cd'),
+             (10, 2, '#e0d0e6', '#015002'), (10, 3, '#e0d0e6', '#015002'), (10, 4, '#e0d0e6', '#015002'),
+             (11, 2, '#e0d0e6', '#015002'), (11, 3, '#e0d0e6', '#015002'), (11, 4, '#e0d0e6', '#015002'),
              )
 
-    for row, col, colour in cells:
+    for row, col, backCol, foreCol in cells:
         if 0 <= row < table.rowCount() and 0 <= col < table.columnCount():
-            table.setBackground(row, col, colour)
+            table.setBackground(row, col, backCol)
+            table.setForeground(row, col, foreCol)
 
     # set the horizontalHeader information
     header = table.horizontalHeader()

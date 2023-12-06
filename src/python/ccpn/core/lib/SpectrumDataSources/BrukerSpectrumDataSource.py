@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-10-09 12:09:35 +0100 (Mon, October 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-06 10:42:44 +0000 (Wed, December 06, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -127,6 +127,14 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 'EXP'        : 'experiment performed',
                 'FCUCHAN'    : 'routing between logical frequency channels and FCU s',
                 'FnMODE'     : 'Acquisition mode of the indirect dimensions (2D and 3D)',
+                                # Bruker FnMODE definitions
+                                # Bruker uses a number code for the FnMODE used. The numbers are coded in the 'acqu#' files, where the # is the channel number (blank, 2 or 3). The code is as follows:
+                                # 1 = QF
+                                # 2 = QSEQ
+                                # 3 = TPPI
+                                # 4 = States
+                                # 5 = States-TPPI
+                                # 6 = Echo-Antiecho
                 'FW'         : 'analog filter width',
                 'FIDRES'     : 'FID resolution',
                 'FQ1LIST'    : 'irradiation frequency lists',

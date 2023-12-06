@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-31 16:38:54 +0100 (Mon, July 31, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-12-06 09:36:50 +0000 (Wed, December 06, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -3155,6 +3155,8 @@ class GuiSpectrumDisplay(CcpnModule):
                 result = _newMark(self.mainWindow, colour=colour, positions=pos, axisCodes=axes,
                                   style=style, units=units, labels=lbls,
                                   )
+                print(f'MARK ==> {lbls}')
+
                 # add spectrumDisplay to the new mark
                 result.spectrumDisplays = [self]
 

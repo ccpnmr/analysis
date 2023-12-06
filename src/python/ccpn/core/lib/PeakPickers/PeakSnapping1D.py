@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-11-30 09:52:08 +0000 (Thu, November 30, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-06 09:36:50 +0000 (Wed, December 06, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -38,7 +38,8 @@ from collections import defaultdict
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.ContextManagers import  undoBlockWithoutSideBar, notificationEchoBlocking
 from ccpn.core.lib.PeakPickers.PeakPicker1D import _find1DMaxima
-from ccpn.core.lib.SpectrumLib import  _1DRawDataDict
+import pandas as pd
+from ccpn.core.lib.SpectrumLib import _1DRawDataDict
 from scipy import spatial, signal
 from scipy.spatial.distance import cdist
 from scipy.optimize import linear_sum_assignment
@@ -329,7 +330,7 @@ def _getSnappingPeakLimits(peak, otherPeaksPointPosition, deltaFactor = 0.5, def
     """
     :param peak:
     :param otherPeaksPointPosition:
-    :param deltaFactor:
+    :param deltaFactor: smaller to be closer to the maximum limit
     :param defaultLimit:
     :param maxLimit:
     :return:

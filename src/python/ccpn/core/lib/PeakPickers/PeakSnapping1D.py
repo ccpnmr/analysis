@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-12-06 17:44:31 +0000 (Wed, December 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-08 15:35:46 +0000 (Fri, December 08, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -37,7 +37,7 @@ import numpy as np
 from collections import defaultdict
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.ContextManagers import  undoBlockWithoutSideBar, notificationEchoBlocking
-from ccpn.core.lib.PeakPickers.PeakPicker1D import _find1DMaxima
+from ccpn.core.lib.PeakPickers.PeakPicker1D import _find1DMaxima,_find1DMaximaScipy
 import pandas as pd
 from ccpn.core.lib.SpectrumLib import _1DRawDataDict
 from scipy import spatial
@@ -46,132 +46,16 @@ def snap1DPeaks(peaks, **kwargs):
 
     with undoBlockWithoutSideBar():
         with notificationEchoBlocking():
-            _find1DCoordsForPeaks(peaks, **kwargs)
+            peaks = list(peaks)
+            peaks.sort(key=lambda x: x.height, reverse=True)
+            _find1DCoordsForPeaks(peaks, minimalHeightFactor=2.5, **kwargs)
+            unsnapped = [pk for pk in peaks if pk.heightError==1]
+            _find1DCoordsForPeaks(unsnapped, minimalHeightFactor=2, **kwargs)
+            unsnapped = [pk for pk in peaks if pk.heightError==1]
+            _find1DCoordsForPeaks(unsnapped, minimalHeightFactor=1, **kwargs)
+
 
 ## ~~~~~~~~~~~~~ Lib Snapping Functions ~~~~~~~~~~~~~~~~ ##
-
-def _snap(peak, x,y, maxima, minimalHeightThreshold,  defaultLimitPpm=0.15, maxLimitPpm=.5, figOfMeritLimit=0.5):
-    maxT = 100
-    positions, heights = maxima
-    otherPeaksPointPosition = np.array([peak.pointPositions[0] for peak in peak.peakList.peaks if peak.figureOfMerit>=figOfMeritLimit])
-    leftPpm, rightPpm = _getSnappingPeakLimits(peak, otherPeaksPointPosition=otherPeaksPointPosition, deltaFactor=0.5, defaultLimitPpm=defaultLimitPpm, maxLimitPpm=maxLimitPpm)
-    limitsRange = _getLimitsRange(peak, leftPpm, rightPpm, maxSteps=10)
-    found = False
-    # nextColour = next(iterator_colours)
-    # df = pd.DataFrame()
-    dd = defaultdict(list)
-    for i, limits in enumerate(limitsRange):
-        ## progressivly increase the searching Limits until the next peak or the max allowed
-        leftPpm, rightPpm = limits
-        # mainWindow.newMark(colour=str(nextColour), positions=[leftPpm], axisCodes=['F'], style='simple', units=(), labels=([f'{i}-L-{peak.serial}']), strips=None)
-        # mainWindow.newMark(colour=str(nextColour), positions=[rightPpm], axisCodes=['F'], style='simple', units=(), labels=([f'{i}-R-{peak.serial}']), strips=None)
-        deltaLimit = abs(abs(leftPpm) - abs(rightPpm))
-        maxHeightThreshold = float(np.max(y))
-        pickingThresholds = np.linspace(minimalHeightThreshold+1, maxHeightThreshold-1, maxT)
-        pickingThresholds = -np.sort(-pickingThresholds) #Largest first
-        for h, pickingThreshold in enumerate(pickingThresholds):
-            # mainWindow.newMark(colour=brush, positions=[pickingThreshold], axisCodes=['intensity'], style='simple', units=(), labels=(f'{h}'), strips=None)
-            xPos4Region, yPos4Region =  _1DregionsFromLimits(positions, heights, limits)
-            regionMaximaIndexes = np.argsort([yPos4Region > pickingThreshold]).flatten()
-            for index in regionMaximaIndexes:
-                pos = xPos4Region[index]
-                height = yPos4Region[index]
-                sn = height/minimalHeightThreshold
-                if sn >= 1.:
-                    found = True
-                    dd['deltaLimit'].append(deltaLimit)
-                    dd['pickingThreshold'].append(pickingThreshold)
-                    dd['sn'].append(sn)
-                    dd['ppm'].append(pos)
-                    dd['height'].append(height)
-
-    df = pd.DataFrame(dd)
-    if len(df)>0:
-        df = df.sort_values(['deltaLimit', 'pickingThreshold', 'sn'], ascending=[True, False, False])
-        pos = df['ppm'].values[0]
-        height = df['height'].values[0]
-        sn = df['sn'].values[0]
-        if sn > 1.:
-            position = float(pos)
-            height = float(height)
-            heightError = 0
-            peak.annotation = f'{peak.annotation} -- SNAPPED'
-            peak.position =  [position]
-            peak.height = height
-
-        else:
-            position = peak.position[0]
-            height = float(_getClosestHeight(x, y, position, peak.height))
-            heightError = 1
-            peak.annotation = f'{peak.annotation} -- STAY AT POS -NOISE'
-            peak.position = [position]
-            peak.height = height
-
-    else:
-        position = peak.position[0]
-        height = float(_getClosestHeight(x, y, position, peak.height))
-        heightError = 1
-        peak.annotation = f'{peak.annotation} -- STAY AT POS'
-        peak.position = [position]
-        peak.height = height
-
-    return [position], height, heightError
-
-
-def _find1DCoordsForPeaks(peaks,
-                      rawDataDict=None,
-                      ppmLimit=0.3,
-                      autoClusterPeaks = True,
-                      additionalClusterPeakPpmLimit=0.1,
-                      figOfMeritLimit=0.5,
-                      limits=None,
-                      doNeg=False):
-    """
-    :param peaks:
-    :param rawDataDict:
-    :param ppmLimit:
-    :param additionalClusterPeakPpmLimit:  When auto-detecting a cluster, add a +/- ppm rangeLimits to the edges of a cluster region
-    :param figOfMeritLimit:
-    :param doNeg:
-    :return: dict.
-                        Keys: peak.
-                        values: list of [ppmPosition, height, heightError]
-    """
-    limits = limits or {}
-    results = {peak:[peak.position, peak.height, peak.heightError] for peak in peaks}
-    rounding = 4
-    ## peaks can be from different spectra, so let's group first
-    spectraPeaks = defaultdict(list)
-    for _p in peaks:
-        if _p.figureOfMerit >= figOfMeritLimit:
-            spectraPeaks[_p.spectrum].append(_p)
-
-    if rawDataDict is None:
-        rawDataDict = _1DRawDataDict(list(spectraPeaks.keys()))
-
-    ## Start the snapping routine
-    for spectrum, grouppedPeaks in spectraPeaks.items():
-        if spectrum not in rawDataDict:
-            getLogger().warning(f'Raw data for {spectrum.pid}  not found')
-            continue
-        x,y = rawDataDict.get(spectrum)
-
-        ## peaks can be also different peakLists, so let's group first
-        peaksByPeakList = defaultdict(list)
-        for _p in grouppedPeaks:
-                peaksByPeakList[_p.peakList].append(_p)
-
-        ## Do a quick search of minimal height for a signal, the expected maxima, and calculate linewidths (pnts)
-        minimalHeightThreshold = float(np.median(y) + 2 * np.std(y))
-        mm, mx = _find1DMaxima(y, x, minimalHeightThreshold)
-        positions = np.array(mm).T[0]
-        heights = np.array(mm).T[1]
-        for pl, subPeakGroup in peaksByPeakList.items():
-            subPeakGroup = list(subPeakGroup)
-            subPeakGroup.sort(key=lambda x: x.height, reverse=True)  #sort by the highest (first)
-            for peak in subPeakGroup:
-                _snap(peak, x=x, y=y, maxima=[positions, heights],  minimalHeightThreshold=minimalHeightThreshold, figOfMeritLimit=figOfMeritLimit)
-
 
 def _getLimitsRange(peak, leftPpm, rightPpm, maxSteps=10):
     leftPopint = peak.spectrum.ppm2point(leftPpm, peak.spectrum.axisCodes[0])
@@ -186,6 +70,179 @@ def _getLimitsRange(peak, leftPpm, rightPpm, maxSteps=10):
         ppmRight = peak.spectrum.point2ppm(pointRight, peak.spectrum.axisCodes[0])
         limits.append([ppmLeft, ppmRight])
     return limits
+
+
+def _snap(peak, x,y, maxima, minimalHeightThreshold,  defaultLimitPpm=0.5, maxLimitPpm=1, figOfMeritLimit=0.5, deltaFactor=0.5, retry=True, doMarks=False):
+    # mainWindow.newMark(colour='#C71585', positions=[minimalHeightThreshold], axisCodes=['intensity'], style='simple', units=(), labels=(), strips=None)
+    # peak.annotation = '' if not peak.annotation else peak.annotation
+    maxT = 10
+    positions, heights = maxima
+    otherPeaksPointPosition = np.array([peak.pointPositions[0] for peak in peak.peakList.peaks if peak.figureOfMerit>=figOfMeritLimit])
+    leftPpm, rightPpm = _getSnappingPeakLimits(peak, otherPeaksPointPosition=otherPeaksPointPosition, deltaFactor=deltaFactor, defaultLimitPpm=defaultLimitPpm, maxLimitPpm=maxLimitPpm)
+    limitsRange = _getLimitsRange(peak, leftPpm, rightPpm, maxSteps=5)
+    # nextColour = next(iterator_colours)
+    columns = ['deltaPos', 'pickingThreshold','sn', 'ppm', 'height']
+    dd = {i:[] for i in columns}
+    seenPositions = []
+    for i, limits in enumerate(limitsRange):
+        ## progressivly increase the searching Limits until the next peak or the max allowed
+        leftPpm, rightPpm = limits
+        if doMarks:
+            mainWindow.newMark(colour=str(nextColour), positions=[leftPpm], axisCodes=['F'], style='simple', units=(), labels=([f'{i}-L-{peak.serial}']), strips=None)
+            mainWindow.newMark(colour=str(nextColour), positions=[rightPpm], axisCodes=['F'], style='simple', units=(), labels=([f'{i}-R-{peak.serial}']), strips=None)
+        deltaLimit = abs(abs(leftPpm) - abs(rightPpm))
+
+        maxHeightThreshold = float(np.max(y))
+        pickingThresholds = np.linspace(minimalHeightThreshold+1, maxHeightThreshold-1, maxT)
+        pickingThresholds = -np.sort(-pickingThresholds) #Largest first
+        seenPos = None
+        for h, pickingThreshold in enumerate(pickingThresholds):
+            # mainWindow.newMark(colour=brush, positions=[pickingThreshold], axisCodes=['intensity'], style='simple', units=(), labels=(f'{h}'), strips=None)
+            xPos4Region, yPos4Region =  _1DregionsFromLimits(positions, heights, limits)
+            regionMaximaIndexes = np.argsort([yPos4Region > pickingThreshold]).flatten()
+            pos = None
+            for index in regionMaximaIndexes:
+                pos = xPos4Region[index]
+                if pos not in seenPositions:
+                    height = yPos4Region[index]
+                    deltaPos =  abs(abs(peak.position[0]) - abs(pos))
+                    sn = height/minimalHeightThreshold
+                    dd['deltaPos'].append(deltaPos)
+                    dd['pickingThreshold'].append(pickingThreshold)
+                    dd['sn'].append(sn)
+                    dd['ppm'].append(pos)
+                    dd['height'].append(height)
+                    seenPos = pos
+                    seenPositions.append(pos)
+            if seenPos == pos:
+                break
+        # Don't break the  search. Let it explore all limits until the end.
+
+    df = pd.DataFrame(dd)
+    df = df[df['sn'] > 1.3]
+    if len(df)>0:
+
+        df.drop_duplicates(subset=['ppm', 'height'],  inplace=True)
+        df = df.sort_values(['deltaPos', 'pickingThreshold', 'sn'], ascending=[True, False, False])
+        pos = df['ppm'].values[0]
+        height = df['height'].values[0]
+
+        position = float(pos)
+        height = float(height)
+        heightError = 0
+        # if 'SNAPPED' not in peak.annotation:
+        #     peak.annotation = f'{peak.annotation} -- SNAPPED'
+        peak.position =  [position]
+        peak.height = height
+        peak.heightError = heightError
+        return [position], height, heightError
+
+    if retry:
+        return _snap(peak, x, y, maxima, minimalHeightThreshold,
+                     defaultLimitPpm=defaultLimitPpm, maxLimitPpm=maxLimitPpm,
+                     figOfMeritLimit=figOfMeritLimit, deltaFactor=0.1, retry=False,
+                     doMarks=False)
+    else:
+        position = peak.position[0]
+        height = float(_getClosestHeight(x, y, position, peak.height))
+        heightError = 1
+        # if 'STAY' not in peak.annotation:
+        #     peak.annotation = f'{peak.annotation} -- STAY AT POS'
+        peak.position = [position]
+        peak.height = height
+        peak.heightError = heightError
+    return [position], height, heightError
+
+
+def _find1DCoordsForPeaks(peaks,
+                      rawDataDict=None,
+                      ppmLimit=0.3,
+                      figOfMeritLimit=0.5,
+                      deltaFactor=0.5,
+                      minimalHeightFactor=2.0):
+    """
+    :param peaks:
+    :param rawDataDict:
+    :param ppmLimit:
+    :param additionalClusterPeakPpmLimit:  When auto-detecting a cluster, add a +/- ppm rangeLimits to the edges of a cluster region
+    :param figOfMeritLimit:
+    :param doNeg:
+    :return: dict.
+                        Keys: peak.
+                        values: list of [ppmPosition, height, heightError]
+    """
+    ## peaks can be from different spectra, so let's group first
+    spectraPeaks = defaultdict(list)
+    for _p in peaks:
+        if _p.figureOfMerit >= figOfMeritLimit:
+            spectraPeaks[_p.spectrum].append(_p)
+
+    if rawDataDict is None:
+        rawDataDict = _1DRawDataDict(list(spectraPeaks.keys()))
+
+    ## Start the snapping routine
+    for spectrum, grouppedPeaks in spectraPeaks.items():
+        if spectrum not in rawDataDict:
+            x,y = np.array(spectrum.positions), np.array(spectrum.intensities)
+        else:
+            x,y = rawDataDict.get(spectrum)
+
+        ## peaks can be also different peakLists, so let's group first
+        peaksByPeakList = defaultdict(list)
+        for _p in grouppedPeaks:
+                peaksByPeakList[_p.peakList].append(_p)
+
+        ## Do a quick search of minimal height for a signal, the expected maxima, and calculate linewidths (pnts)
+
+        minimalHeightThreshold = float(np.median(y) + minimalHeightFactor * np.std(y))
+        # could add a retry at lower Threshold if still cannot snap?
+        mm, mx = _find1DMaxima(y, x, minimalHeightThreshold)
+        positions = np.array(mm).T[0]
+        heights = np.array(mm).T[1]
+        for pl, subPeakGroup in peaksByPeakList.items():
+            subPeakGroup = list(subPeakGroup)
+            subPeakGroup.sort(key=lambda x: x.height, reverse=True)  #sort by the highest (first)
+            for peak in subPeakGroup:
+                _snap(peak, x=x, y=y,
+                      maxima=[positions, heights],
+                      minimalHeightThreshold=minimalHeightThreshold,
+                      figOfMeritLimit=figOfMeritLimit,
+                      defaultLimitPpm=ppmLimit,
+                      deltaFactor=deltaFactor)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ### NEW END =====
 
 def _getSnappingPeakLimits(peak, otherPeaksPointPosition, deltaFactor = 0.5, defaultLimitPpm = 0.250, maxLimitPpm = 1.0):
     """

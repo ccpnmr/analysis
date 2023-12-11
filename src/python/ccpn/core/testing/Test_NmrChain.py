@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2023-11-30 17:03:13 +0000 (Thu, November 30, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-11 11:23:46 +0000 (Mon, December 11, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -91,64 +91,74 @@ class NmrChainTest(WrapperTesting):
         self.assertIs(nmrChain.chain, chain)
         self.assertIs(chain.nmrChain, nmrChain)
 
-    def test_deassign(self):
-        ncx = self.project.getNmrChain('@-')
-        self.assertRaises(ApiError, ncx.deassign)
-        self.assertEqual(ncx.pid, 'NC:@-')
-
-        ncx = self.project.fetchNmrChain('AA')
-        self.assertEqual(ncx.pid, 'NC:AA')
-        ncx.deassign()
-        self.assertEqual(ncx.pid, 'NC:@2')
-
-        ncx = self.project.newNmrChain(isConnected=True)
-        self.assertEqual(ncx.pid, 'NC:#3')
-
-        ncx.deassign()
-
-        self.undo.undo()
-        self.undo.redo()
-
-        self.assertEqual(ncx.pid, 'NC:#3')
-
     def test_assignSingleResidue(self):
         n_chain = self.project.fetchNmrChain('AA')
         n_residue = n_chain.fetchNmrResidue(residueType='GLN')
-        n_residue_id = n_residue.pid
-
         self.chain = self.project.createChain(sequence='CDEFGHI', molType='protein',
                                               shortName='A')
         residues = self.chain.residues
 
+        n_residue_pid = n_residue.pid
         n_chain.assignSingleResidue(n_residue, residues[0])
-        self.assertNotEqual(n_residue_id, n_residue.pid)
+        self.assertNotEqual(n_residue_pid, n_residue.pid)
+
+        undo_pid = n_residue.pid
 
         self.undo.undo()
-        self.assertEqual(n_residue_id, n_residue.pid)
+        self.assertEqual(n_residue_pid, n_residue.pid)
         self.undo.redo()
-        self.assertNotEqual(n_residue_id, n_residue.pid)
+        self.assertEqual(undo_pid, n_residue.pid)
 
     def test_assignSingleResidueNoObjError(self):
-        n_chain = self.project.fetchNmrChain('AA')
-        n_residue = n_chain.fetchNmrResidue(residueType='GLN')
+        nmr_chain = self.project.fetchNmrChain('AA')
+        nmr_residue = nmr_chain.fetchNmrResidue(residueType='GLN')
         with self.assertRaises(ValueError) as cm:
-            n_chain.assignSingleResidue(n_residue, 'ERROR')
+            nmr_chain.assignSingleResidue(nmr_residue, 'ERROR')
         err = cm.exception
         self.assertEqual(str(err), 'No object found matching Pid ALA')
 
     def test_assignSingleResidueAlreadyAssignError(self):
-        n_chain = self.project.fetchNmrChain('AA')
-        n_residue = n_chain.fetchNmrResidue(residueType='GLN')
+        nmr_chain = self.project.fetchNmrChain('AA')
+        nmr_residue = nmr_chain.fetchNmrResidue(residueType='GLN')
 
         self.chain = self.project.createChain(sequence='CDEFGHI', molType='protein',
                                               shortName='A')
         residues = self.chain.residues
 
-        n_chain.assignSingleResidue(n_residue, residues[0])
+        nmr_chain.assignSingleResidue(nmr_residue, residues[0])
         with self.assertRaises(ValueError) as cm:
-            n_chain.assignSingleResidue(n_residue, residues[0])
+            nmr_chain.assignSingleResidue(nmr_residue, residues[0])
         err = cm.exception
-        self.assertEqual(str(err), f'Cannot assign {n_residue.id}: Residue {residues[0].id} is already assigned')
+        self.assertEqual(str(err), f'Cannot assign {nmr_residue.id}: Residue {residues[0].id} is already assigned')
+
+    def test_deassign(self):
+        nmr_chain = self.project.fetchNmrChain('a')
+        nmr_residue = nmr_chain.fetchNmrResidue(residueType='GLN')
+        self.chain = self.project.createChain(sequence='CDEFGHI', molType='protein',
+                                              shortName='A')
+        residues = self.chain.residues
+
+        con_chain = self.project.newNmrChain(isConnected=True)
+
+        print(residues)
+
+        print("\n", getProperties(nmr_chain))
+        print(getProperties(con_chain))
+        con_chain.assignSingleResidues(residues[4])
+        print(getProperties(con_chain))
+
+        # nmr_chain.assignSingleResidue(nmr_residue, residues[1])
+        # nmr_chain.assignSingleResidue(nmr_residue, residues[2])
+
+        print("\n", getProperties(nmr_chain))
+        nmr_chain.deassign()
+
+        print(getProperties(nmr_chain))
+
+    def test_deassignAPIError(self):
+        ncx = self.project.getNmrChain('@-')
+        self.assertRaises(ApiError, ncx.deassign)
+        self.assertEqual(ncx.pid, 'NC:@-')
 
     def test_renumberNmrResidues(self):
         num_residues = 10

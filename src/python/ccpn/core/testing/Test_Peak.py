@@ -111,6 +111,12 @@ class PeakTest(WrapperTesting):
         the data frame - a faster version simply compares a dataframe to an expected
         string this is a more generalized solution.
         """
+
+        # Changing this allows you to easily see on the commandline
+        # what will is being tested
+        verbose = False
+
+
         peakList1 = self.project.getPeakList('15NNoesy_182.1')
         peak1 = peakList1.getPeak(2)
         params = peak1.getAsDict()
@@ -121,9 +127,7 @@ class PeakTest(WrapperTesting):
                         'chemicalShiftList', 'boxWidths', 'assignedNmrAtoms',
                         'dimensionNmrAtoms', 'assignmentsByDimensions', 'annotation']
 
-        params_dict = {key: value for key, value in params.items()}
-        for key in param_filter:
-            del params_dict[key]
+        params_dict = {key: value for key, value in params.items() if key not in param_filter}
 
         df = peak1.getAsDataFrame()
         self.assertIsInstance(df, pd.DataFrame)
@@ -135,15 +139,20 @@ class PeakTest(WrapperTesting):
                     if key is 'assignments':
                         for a_i, a_val in enumerate(list_val):
                             if a_val is None:
+                                if verbose: print(f'Assign_F{a_i + 1}', '')
                                 self.assertEqual('', df.loc[2, f'Assign_F{a_i + 1}'])
                             else:
-                                self.assertEqual(str(a_val)[1:-1], df.loc[2, f'Assign_F{a_i+1}'])
+                                if verbose: print(f'Assign_F{a_i + 1}', a_val)
+                                self.assertEqual(str(a_val)[1:-1], df.loc[2, f'Assign_F{a_i + 1}'])
                     else:
-                        if key[-1:] is 's':
-                            self.assertEqual(value[i], df.loc[2, f"{key[:-1]}_F{i+1}"])
+                        if key.endswith('s'):
+                            if verbose: print(f"{key[:-1]}_F{i + 1}", value[i])
+                            self.assertEqual(value[i], df.loc[2, f"{key[:-1]}_F{i + 1}"])
                         else:
+                            if verbose: print(f"{key}_F{i + 1}", value[i])
                             self.assertEqual(value[i], df.loc[2, f"{key}_F{i + 1}"])
             else:
+                if verbose: print(key, value)
                 self.assertEqual(value, df.loc[2, key])
 
     @unittest.skip("A faster (but worse) version of the getDataFrame() test")

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2023-12-11 11:23:46 +0000 (Mon, December 11, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-11 16:24:06 +0000 (Mon, December 11, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -140,20 +140,10 @@ class NmrChainTest(WrapperTesting):
 
         con_chain = self.project.newNmrChain(isConnected=True)
 
-        print(residues)
-
-        print("\n", getProperties(nmr_chain))
-        print(getProperties(con_chain))
         con_chain.assignSingleResidues(residues[4])
-        print(getProperties(con_chain))
 
-        # nmr_chain.assignSingleResidue(nmr_residue, residues[1])
-        # nmr_chain.assignSingleResidue(nmr_residue, residues[2])
-
-        print("\n", getProperties(nmr_chain))
         nmr_chain.deassign()
 
-        print(getProperties(nmr_chain))
 
     def test_deassignAPIError(self):
         ncx = self.project.getNmrChain('@-')

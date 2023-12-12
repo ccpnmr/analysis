@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-31 16:38:54 +0100 (Mon, July 31, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2023-12-12 14:08:10 +0000 (Tue, December 12, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1355,6 +1355,9 @@ class GuiSpectrumDisplay(CcpnModule):
             # discard any further loads if project loaded (may be inconsistent)
             if list(filter(lambda obj: isinstance(obj, Project), objs)):
                 return
+
+            # this should only filter out internal objs that have already been processed
+            objs = list(filter(lambda obj: isinstance(obj, Spectrum), objs))
 
         elif DropBase.PIDS in data:
             # handle Pids

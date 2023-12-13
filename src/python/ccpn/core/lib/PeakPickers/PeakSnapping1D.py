@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-12-08 15:35:46 +0000 (Fri, December 08, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-13 17:04:10 +0000 (Wed, December 13, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -37,7 +37,7 @@ import numpy as np
 from collections import defaultdict
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.ContextManagers import  undoBlockWithoutSideBar, notificationEchoBlocking
-from ccpn.core.lib.PeakPickers.PeakPicker1D import _find1DMaxima,_find1DMaximaScipy
+from ccpn.core.lib.PeakPickers.PeakPicker1D import _find1DMaxima, _find1DPositiveMaxima
 import pandas as pd
 from ccpn.core.lib.SpectrumLib import _1DRawDataDict
 from scipy import spatial
@@ -48,11 +48,13 @@ def snap1DPeaks(peaks, **kwargs):
         with notificationEchoBlocking():
             peaks = list(peaks)
             peaks.sort(key=lambda x: x.height, reverse=True)
-            _find1DCoordsForPeaks(peaks, minimalHeightFactor=2.5, **kwargs)
-            unsnapped = [pk for pk in peaks if pk.heightError==1]
-            _find1DCoordsForPeaks(unsnapped, minimalHeightFactor=2, **kwargs)
-            unsnapped = [pk for pk in peaks if pk.heightError==1]
-            _find1DCoordsForPeaks(unsnapped, minimalHeightFactor=1, **kwargs)
+            factor = 1
+            minFactor = 0.5
+            snapped, unsnapped = [], peaks
+            while len(unsnapped) > 0 and factor >= minFactor:
+                snapped, unsnapped = _find1DCoordsForPeaks(unsnapped, minimalHeightFactor=factor, **kwargs)
+                factor -= 0.2
+
 
 
 ## ~~~~~~~~~~~~~ Lib Snapping Functions ~~~~~~~~~~~~~~~~ ##
@@ -72,7 +74,7 @@ def _getLimitsRange(peak, leftPpm, rightPpm, maxSteps=10):
     return limits
 
 
-def _snap(peak, x,y, maxima, minimalHeightThreshold,  defaultLimitPpm=0.5, maxLimitPpm=1, figOfMeritLimit=0.5, deltaFactor=0.5, retry=True, doMarks=False):
+def _snap(peak, x,y, maxima, minimalHeightThreshold,  defaultLimitPpm=0.5, maxLimitPpm=1, figOfMeritLimit=0.5, deltaFactor=0.5, retry=True, ):
     # mainWindow.newMark(colour='#C71585', positions=[minimalHeightThreshold], axisCodes=['intensity'], style='simple', units=(), labels=(), strips=None)
     # peak.annotation = '' if not peak.annotation else peak.annotation
     maxT = 10
@@ -87,11 +89,7 @@ def _snap(peak, x,y, maxima, minimalHeightThreshold,  defaultLimitPpm=0.5, maxLi
     for i, limits in enumerate(limitsRange):
         ## progressivly increase the searching Limits until the next peak or the max allowed
         leftPpm, rightPpm = limits
-        if doMarks:
-            mainWindow.newMark(colour=str(nextColour), positions=[leftPpm], axisCodes=['F'], style='simple', units=(), labels=([f'{i}-L-{peak.serial}']), strips=None)
-            mainWindow.newMark(colour=str(nextColour), positions=[rightPpm], axisCodes=['F'], style='simple', units=(), labels=([f'{i}-R-{peak.serial}']), strips=None)
         deltaLimit = abs(abs(leftPpm) - abs(rightPpm))
-
         maxHeightThreshold = float(np.max(y))
         pickingThresholds = np.linspace(minimalHeightThreshold+1, maxHeightThreshold-1, maxT)
         pickingThresholds = -np.sort(-pickingThresholds) #Largest first
@@ -126,12 +124,9 @@ def _snap(peak, x,y, maxima, minimalHeightThreshold,  defaultLimitPpm=0.5, maxLi
         df = df.sort_values(['deltaPos', 'pickingThreshold', 'sn'], ascending=[True, False, False])
         pos = df['ppm'].values[0]
         height = df['height'].values[0]
-
         position = float(pos)
         height = float(height)
         heightError = 0
-        # if 'SNAPPED' not in peak.annotation:
-        #     peak.annotation = f'{peak.annotation} -- SNAPPED'
         peak.position =  [position]
         peak.height = height
         peak.heightError = heightError
@@ -141,7 +136,7 @@ def _snap(peak, x,y, maxima, minimalHeightThreshold,  defaultLimitPpm=0.5, maxLi
         return _snap(peak, x, y, maxima, minimalHeightThreshold,
                      defaultLimitPpm=defaultLimitPpm, maxLimitPpm=maxLimitPpm,
                      figOfMeritLimit=figOfMeritLimit, deltaFactor=0.1, retry=False,
-                     doMarks=False)
+                     )
     else:
         position = peak.position[0]
         height = float(_getClosestHeight(x, y, position, peak.height))
@@ -159,7 +154,7 @@ def _find1DCoordsForPeaks(peaks,
                       ppmLimit=0.3,
                       figOfMeritLimit=0.5,
                       deltaFactor=0.5,
-                      minimalHeightFactor=2.0):
+                      minimalHeightFactor=1.0):
     """
     :param peaks:
     :param rawDataDict:
@@ -172,6 +167,7 @@ def _find1DCoordsForPeaks(peaks,
                         values: list of [ppmPosition, height, heightError]
     """
     ## peaks can be from different spectra, so let's group first
+    snapped, unsnapped = [], []
     spectraPeaks = defaultdict(list)
     for _p in peaks:
         if _p.figureOfMerit >= figOfMeritLimit:
@@ -196,7 +192,7 @@ def _find1DCoordsForPeaks(peaks,
 
         minimalHeightThreshold = float(np.median(y) + minimalHeightFactor * np.std(y))
         # could add a retry at lower Threshold if still cannot snap?
-        mm, mx = _find1DMaxima(y, x, minimalHeightThreshold)
+        mm, mx = _find1DPositiveMaxima(y, x, minimalHeightThreshold)
         positions = np.array(mm).T[0]
         heights = np.array(mm).T[1]
         for pl, subPeakGroup in peaksByPeakList.items():
@@ -209,6 +205,11 @@ def _find1DCoordsForPeaks(peaks,
                       figOfMeritLimit=figOfMeritLimit,
                       defaultLimitPpm=ppmLimit,
                       deltaFactor=deltaFactor)
+                if peak.heightError ==1:
+                    unsnapped.append(peak)
+                else:
+                    snapped.append(peak)
+    return snapped, unsnapped
 
 
 

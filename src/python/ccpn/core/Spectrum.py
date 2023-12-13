@@ -54,7 +54,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-11-15 15:01:48 +0000 (Wed, November 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-13 17:04:10 +0000 (Wed, December 13, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -2686,12 +2686,14 @@ class Spectrum(AbstractWrapperObject):
         newSpectrum._updateParameterValues()
 
         # Copy the peakList/peaks
-        for idx, pl in enumerate(self.peakLists):
-            if idx + 1 < len(newSpectrum.peakLists):
-                newSpectrum.newPeakList()
-            targetPl = newSpectrum.peakLists[idx]
-            pl.copyTo(targetSpectrum=newSpectrum, targetPeakList=targetPl)
-
+        try:
+            for idx, pl in enumerate(self.peakLists):
+                if idx + 1 < len(newSpectrum.peakLists):
+                    newSpectrum.newPeakList()
+                targetPl = newSpectrum.peakLists[idx]
+                pl.copyTo(targetSpectrum=newSpectrum, targetPeakList=targetPl)
+        except:
+            getLogger().warn('Error cloning peakLists')
         newSpectrum.appendComment('Cloned from %s' % self.name)
         return newSpectrum
 

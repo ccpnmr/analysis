@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-12-08 15:35:46 +0000 (Fri, December 08, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-13 17:04:10 +0000 (Wed, December 13, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -82,6 +82,45 @@ def _find1DMaxima(y, x, positiveThreshold, negativeThreshold=None, findNegative=
             filtered.append(p)
     return filtered, filteredNeg
 
+def _find1DPositiveMaxima(y, x, positiveThreshold=None):
+    """
+    The same routine as above but 100t times faster by just masking above the positive threshold
+    """
+    maxtab = []
+    mintab = []
+    mn, mx = np.Inf, -np.Inf
+    mnpos, mxpos = np.NaN, np.NaN
+    lookformax = True
+    if positiveThreshold is None:
+        positiveThreshold = float(np.median(y) + 1 * np.std(y))
+    _y = y
+    _x = x
+    mask = y>=positiveThreshold
+    y = y[mask]
+    x = x[mask]
+    for i in np.arange(len(y)):
+        this = y[i]
+        if this > mx:
+            mx = this
+            mxpos = x[i]
+        if this < mn:
+            mn = this
+            mnpos = x[i]
+        if lookformax:
+            this = abs(this)
+            if this < mx - positiveThreshold:
+                maxtab.append((float(mxpos), float(mx)))
+                mn = this
+                mnpos = x[i]
+                lookformax = False
+        else:
+            if this > mn + positiveThreshold:
+                mintab.append((float(mnpos), float(mn)))
+                mx = this
+                mxpos = x[i]
+                lookformax = True
+
+    return maxtab, mintab
 
 class PeakPicker1D(PeakPickerABC):
     """A peak picker based on  Eli Billauer, 3.4.05. algorithm (see _findMaxima function).

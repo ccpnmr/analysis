@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-31 20:07:03 +0100 (Thu, August 31, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-13 17:04:10 +0000 (Wed, December 13, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -572,7 +572,7 @@ class GuiPipe(Dock, GuiPipeDrop):
     def _closePipe(self):
         self.closePipe()
 
-    def _setSpectrumGroupPullDowns(self, widgetVariables, headerText='', headerEnabled=False, headerIcon=None):
+    def _setSpectrumGroupPullDowns(self, widgetVariables, headerText='N/A', headerEnabled=False, headerIcon=None):
         """ Used to set the spectrum groups pid in the pulldowns. Called from various guiPipes"""
         spectrumGroups = list(self.spectrumGroups)
         if len(spectrumGroups) > 0:

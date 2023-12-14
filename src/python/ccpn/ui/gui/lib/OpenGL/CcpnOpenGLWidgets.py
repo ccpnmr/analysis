@@ -5,8 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-02 15:53:00 +0000 (Thu, November 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 14:57:13 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -266,8 +266,6 @@ class GLRegion(QtWidgets.QWidget):
                     intArea.numVertices = len(thisRegion[1]) * 2
                     intArea.vertices = np.empty(intArea.numVertices * 2, dtype=np.float32)
 
-                    # NOTE:ED - need cleaner test
-
                     if not self._parent.spectrumDisplay._flipped:
                         # 1D region in normal orientation
                         intArea.vertices[::4] = thisRegion[1]
@@ -359,12 +357,12 @@ class GLExternalRegion(GLVertexArray):
         self.integralListView = integralListView
         self.GLContext = GLContext
 
-    def drawIndexArray(self):
+    def drawIndexImmediate(self):
         # draw twice to highlight the outline
         self.fillMode = GL.GL_LINE
-        super().drawIndexArray()
+        super().drawIndexImmediate()
         self.fillMode = GL.GL_FILL
-        super().drawIndexArray()
+        super().drawIndexImmediate()
 
     def defineIndexVBO(self):
         super().defineIndexVBO()
@@ -649,8 +647,7 @@ class GLIntegralRegion(GLExternalRegion):
         if colour in REGION_COLOURS.keys() and not brush:
             brush = REGION_COLOURS[colour]
 
-        # NOTE:ED - reconstructed region is already flipped here for 1D :|
-
+        # reconstructed region is already flipped here for 1D :|
         if orientation == 'h':
             axisCode = self._parent._axisCodes[1]
         elif orientation == 'v':
@@ -834,14 +831,14 @@ class GLIntegralRegion(GLExternalRegion):
             lims = reg._object.limits[0] if reg._object.limits else (0.0, 0.0)
             # assume 'ppm' axis units
             if axisIndex == 0:  # self._parent.spectrumDisplay._flipped:
-                # vertical region
+                # vertical ruler
                 pos0 = x0 = lims[0]  # reg.values[0]
                 pos1 = x1 = lims[1]  # reg.values[1]
                 reg._values = (pos0, pos1)  # not nice, but feed back in to current _values
                 y0 = axisT + pixelY
                 y1 = axisB - pixelY
             else:
-                # horizontal region - 1D flipped
+                # horizontal ruler - 1D flipped
                 pos0 = y0 = lims[0]  # reg.values[0]
                 pos1 = y1 = lims[1]  # reg.values[1]
                 reg._values = (pos0, pos1)  # not nice, but feed back in to current _values

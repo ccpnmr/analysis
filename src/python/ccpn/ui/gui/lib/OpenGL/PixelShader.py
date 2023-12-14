@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 16:56:13 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 17:51:48 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -99,6 +99,15 @@ class PixelShader(ShaderProgramABC):
     # methods available
     #=========================================================================================
 
+    def setProjection(self, left, right, bottom, top, near, far):
+        """Set the contents of the projection matrix
+        """
+        att = QtGui.QMatrix4x4()
+        att.ortho(left, right, bottom, top, near, far)
+        self._shader.setUniformValue(self.locations[self._PMATRIX], att)
+
+        return att
+
     def setPMatrix(self, matrix):
         """Set the contents of projection pMatrix
         :param matrix: consisting of 16 float32 elements
@@ -110,6 +119,22 @@ class PixelShader(ShaderProgramABC):
         :param matrix: consisting of 16 float32 elements
         """
         self.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, matrix)
+
+    def setMV(self, matrix):
+        """Set the contents of viewport mvMatrix
+        :param matrix: QtGui.QMatrix4x4
+        """
+        self._shader.setUniformValue(self.locations[self._MVMATRIX], matrix)
+
+    def setPMatrixToIdentity(self):
+        """Reset the contents of viewport mvMatrix to the identity-matrix
+        """
+        self._shader.setUniformValue(self.locations[self._PMATRIX], QtGui.QMatrix4x4())
+
+    def setMVMatrixToIdentity(self):
+        """Reset the contents of viewport mvMatrix to the identity-matrix
+        """
+        self._shader.setUniformValue(self.locations[self._MVMATRIX], QtGui.QMatrix4x4())
 
 
 #=========================================================================================

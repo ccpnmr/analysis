@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 16:39:50 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 17:51:48 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -750,13 +750,12 @@ class CcpnGLWidget(QOpenGLWidget):
             getLogger().debug(f'viewport not defined: {self}')
             return
 
-        currentShader = self.globalGL._shaderProgram1.bind()
+        shader = self.globalGL._shaderProgram1.bind()
 
         # set projection to axis coordinates
-        currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
+        shader.setProjection(self.axisL, self.axisR, self.axisB,
                                         self.axisT, -1.0, 1.0)
-        currentShader.setPMatrix(self._uPMatrix)
-        currentShader.setMVMatrix(self._IMatrix)
+        shader.setMVMatrixToIdentity()
 
         # needs to be offset from (0, 0) for mouse scaling
         if self._drawRightAxis and self._drawBottomAxis:
@@ -785,7 +784,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         vp = self.viewports.getViewportFromWH(self._currentView, self.w, self.h)
         vpwidth, vpheight = vp.width or 1, vp.height or 1
-        currentShader.setViewportMatrix(self._uVMatrix, 0, vpwidth, 0, vpheight,
+        shader.setViewportMatrix(self._uVMatrix, 0, vpwidth, 0, vpheight,
                                         -1.0, 1.0)
 
         self.pixelX = (self.axisR - self.axisL) / vpwidth
@@ -797,10 +796,10 @@ class CcpnGLWidget(QOpenGLWidget):
         self.symbolX = abs(self._symbolSize * self.pixelX)
         self.symbolY = abs(self._symbolSize * self.pixelY)
 
-        currentShader.setMVMatrix(self._IMatrix)
+        shader.setMVMatrixToIdentity()
 
         # map mouse coordinates to world coordinates - only needs to change on resize, move soon
-        currentShader.setViewportMatrix(self._aMatrix, self.axisL, self.axisR, self.axisB,
+        shader.setViewportMatrix(self._aMatrix, self.axisL, self.axisR, self.axisB,
                                         self.axisT, -1.0, 1.0)
 
         # calculate the screen to axes transform
@@ -812,14 +811,10 @@ class CcpnGLWidget(QOpenGLWidget):
         self.viewport = (GL.GLint * 4)()
 
         # change to the text shader
-        currentShader = self.globalGL._shaderProgramTex.bind()
-
-        currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
-        currentShader.setPTexMatrix(self._uPMatrix)
-
-        self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
-
-        currentShader.setAxisScale(self._axisScale)
+        self._axisScale = QtGui.QVector4D(self.pixelX, self.pixelY, 1.0, 1.0)
+        shader = self.globalGL._shaderProgramTex.bind()
+        shader.setProjection(self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
+        shader.setAxisScale(self._axisScale)
 
     def viewRange(self):
         return ((self.axisL, self.axisR),
@@ -1825,15 +1820,14 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self._setColourScheme()
         self.setBackgroundColour(self.background, silent=True)
-        _shader = self.globalGL._shaderProgramTex
-        _shader.bind()
-        _shader.setBlendEnabled(False)
-        _shader.setAlpha(1.0)
-
-        _shader = self.globalGL._shaderProgramTexAlias
-        _shader.bind()
-        _shader.setBlendEnabled(True)
-        _shader.setAlpha(1.0)
+        shader = self.globalGL._shaderProgramTex
+        shader.bind()
+        shader.setBlendEnabled(False)
+        shader.setAlpha(1.0)
+        shader = self.globalGL._shaderProgramTexAlias
+        shader.bind()
+        shader.setBlendEnabled(True)
+        shader.setAlpha(1.0)
 
         if self.strip:
             self.updateVisibleSpectrumViews()
@@ -3015,10 +3009,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def _setViewPortFontScale(self):
         # set the scale for drawing the overlay text correctly
-        self._axisScale[0:4] = [self.deltaX, self.deltaY, 1.0, 1.0]
-        self.globalGL._shaderProgramTex.setAxisScale(self._axisScale)
-        self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0, 1.0, -1.0, 1.0)
-        self.globalGL._shaderProgramTex.setPTexMatrix(self._uPMatrix)
+        self._axisScale = QtGui.QVector4D(self.deltaX, self.deltaY, 1.0, 1.0)
+        shader = self.globalGL._shaderProgramTex
+        shader.setAxisScale(self._axisScale)
+        shader.setProjection(0.0, 1.0, 0, 1.0, -1.0, 1.0)
 
     def updateVisibleSpectrumViews(self):
         self._visibleSpectrumViewsChange = True
@@ -3225,15 +3219,14 @@ class CcpnGLWidget(QOpenGLWidget):
         # reset the paint mode - need to check the logic here
         # self._paintMode = PaintModes.PAINT_ALL
 
-        currentShader = self.globalGL._shaderProgram1.bind()
-        currentShader.setMVMatrix(self._IMatrix)
+        shader = self.globalGL._shaderProgram1.bind()
+        shader.setMVMatrixToIdentity()
 
         # draw the spectra, need to reset the viewport
         self.viewports.setViewport(self._currentView)
 
         for _ in self._disableGLAliasing():
-            currentShader.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
-            currentShader.setPMatrix(self._uPMatrix)
+            shader.setProjection(0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
             self.buildCursors()
 
             for _ in self._enableLogicOp(GL.GL_INVERT):
@@ -3251,21 +3244,19 @@ class CcpnGLWidget(QOpenGLWidget):
         GL.glEnable(GL.GL_MULTISAMPLE)
         GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE)
 
-        currentShader = self.globalGL._shaderProgram1.bind()
+        shader = self.globalGL._shaderProgram1.bind()
 
         # start with the grid mapped to (0..1, 0..1) to remove zoom errors here
-        currentShader.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
-        currentShader.setPMatrix(self._uPMatrix)
-        currentShader.setMVMatrix(self._IMatrix)
+        shader.setProjection(0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
+        shader.setMVMatrixToIdentity()
 
         for _ in self._disableGLAliasing():
             # draw the grid components
             self.drawGrid()
 
         # set the scale to the axis limits, needs addressing correctly, possibly same as grid
-        currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
+        shader.setProjection(self.axisL, self.axisR, self.axisB,
                                         self.axisT, -1.0, 1.0)
-        currentShader.setPMatrix(self._uPMatrix)
 
         # draw the spectra, need to reset the viewport
         self.viewports.setViewport(self._currentView)
@@ -3298,14 +3289,13 @@ class CcpnGLWidget(QOpenGLWidget):
             self.drawAliasedLabels()
 
         # change to the text shader
-        currentShader = self.globalGL._shaderProgramTex.bind()
+        shader = self.globalGL._shaderProgramTex.bind()
 
-        currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
-        currentShader.setPTexMatrix(self._uPMatrix)
+        shader.setProjection(self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
 
-        self._axisScale[0:4] = [self.pixelX, self.pixelY, 0.0, 1.0]
-        currentShader.setAxisScale(self._axisScale)
-        currentShader.setStackOffset(np.array((0.0, 0.0), dtype=np.float32))
+        self._axisScale = QtGui.QVector4D(self.pixelX, self.pixelY, 1.0, 1.0)
+        shader.setAxisScale(self._axisScale)
+        shader.setStackOffset(QtGui.QVector2D(0.0, 0.0))
 
         if not self._stackingMode:
             if not (self.is1D and self.strip._isPhasingOn):
@@ -3315,26 +3305,25 @@ class CcpnGLWidget(QOpenGLWidget):
 
         else:
             # make the overlay/axis solid
-            currentShader.setBlendEnabled(False)
+            shader.setBlendEnabled(False)
             self._spectrumLabelling.drawStrings()
 
             # not fully implemented yet
             # self._legend.drawStrings()
 
-            currentShader.setBlendEnabled(True)
+            shader.setBlendEnabled(True)
 
         self.disableTextClientState()
 
-        currentShader = self.globalGL._shaderProgram1.bind()
+        shader = self.globalGL._shaderProgram1.bind()
 
-        self.drawTraces(currentShader)
-        currentShader.setMVMatrix(self._IMatrix)
+        self.drawTraces(shader)
+        shader.setMVMatrixToIdentity()
 
         for _ in self._disableGLAliasing():
             self.drawInfiniteLines()
 
-            currentShader.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
-            currentShader.setPMatrix(self._uPMatrix)
+            shader.setProjection(0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
 
             self.drawSelectionBox()
             self.drawMouseMoveLine()
@@ -3346,17 +3335,17 @@ class CcpnGLWidget(QOpenGLWidget):
                 # enable invert mode so that only the cursor needs to be refreshed in the other viewports
                 self.drawCursors()
 
-        currentShader = self.globalGL._shaderProgramTex.bind()
+        shader = self.globalGL._shaderProgramTex.bind()
         self.enableTextClientState()
         self._setViewPortFontScale()
 
         self.drawMouseCoords()
 
         # make the overlay/axis solid
-        currentShader.setBlendEnabled(False)
+        shader.setBlendEnabled(False)
         self.drawOverlayText()
         self.drawAxisLabels()
-        currentShader.setBlendEnabled(True)
+        shader.setBlendEnabled(True)
 
         self.disableTextClientState()
         self.disableTexture()
@@ -3708,12 +3697,10 @@ class CcpnGLWidget(QOpenGLWidget):
                 # put the axis labels into the bottom bar
                 self.viewports.setViewport(self._currentBottomAxisBarView)
 
-                self._axisScale[0:4] = [self.deltaX, 1.0, 1.0, 1.0]
-
+                self._axisScale = QtGui.QVector4D(self.deltaX, 1.0, 1.0, 1.0)
                 self.globalGL._shaderProgramTex.setAxisScale(self._axisScale)
-                self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0,
+                self.globalGL._shaderProgramTex.setProjection(0.0, 1.0, 0,
                                                                   self.AXIS_MARGINBOTTOM, -1.0, 1.0)
-                self.globalGL._shaderProgramTex.setPTexMatrix(self._uPMatrix)
 
                 for lb in self._axisXLabelling:
                     lb.drawTextArrayVBO()
@@ -3722,12 +3709,10 @@ class CcpnGLWidget(QOpenGLWidget):
                 # put the axis labels into the right bar
                 self.viewports.setViewport(self._currentRightAxisBarView)
 
-                self._axisScale[0:4] = [1.0, self.deltaY, 1.0, 1.0]
-
+                self._axisScale = QtGui.QVector4D(1.0, self.deltaY, 1.0, 1.0)
                 self.globalGL._shaderProgramTex.setAxisScale(self._axisScale)
-                self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, self.AXIS_MARGINRIGHT,
+                self.globalGL._shaderProgramTex.setProjection(0, self.AXIS_MARGINRIGHT,
                                                                   0.0, 1.0, -1.0, 1.0)
-                self.globalGL._shaderProgramTex.setPTexMatrix(self._uPMatrix)
 
                 for lb in self._axisYLabelling:
                     lb.drawTextArrayVBO()
@@ -5095,7 +5080,7 @@ class CcpnGLWidget(QOpenGLWidget):
                         # use the stacking matrix to offset the 1D spectra
                         shader.setMVMatrix(self._spectrumSettings[hTrace.spectrumView].stackedMatrix)
                     else:
-                        shader.setMVMatrix(np.array(self._IMatrix))
+                        shader.setMVMatrixToIdentity()
                     hTrace.drawVertexColorVBO()
 
             for vTrace in self._staticVTraces:
@@ -5105,7 +5090,7 @@ class CcpnGLWidget(QOpenGLWidget):
                         # use the stacking matrix to offset the 1D spectra
                         shader.setMVMatrix(self._spectrumSettings[vTrace.spectrumView].stackedMatrix)
                     else:
-                        shader.setMVMatrix(np.array(self._IMatrix))
+                        shader.setMVMatrixToIdentity()
                     vTrace.drawVertexColorVBO()
 
         # only paint if mouse is in the window, or menu has been raised in this strip

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 15:10:36 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 17:51:48 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -194,7 +194,7 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
         self.buildSymbols()
 
         # why is this not initialising?
-        shader.setMVMatrix(self._GLParent._IMatrix)
+        shader.setMVMatrixToIdentity()
 
         for integralListView, specView in self._visibleListViews:
             if not integralListView.isDeleted and integralListView in self._GLSymbols.keys():
@@ -210,7 +210,7 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
                         # draw the actual integral areas
                         integralArea._integralArea.drawVertexColorVBO()
 
-        shader.setMVMatrix(self._GLParent._IMatrix)
+        shader.setMVMatrixToIdentity()
 
     def drawSymbolRegions(self, spectrumSettings):
         if self.strip.isDeleted:
@@ -224,7 +224,7 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
                 # draw the boxes around the highlighted integral areas - multisampling not required here
                 self._GLSymbols[integralListView].drawIndexVBO()
 
-        self._GLParent.globalGL._shaderProgram1.setMVMatrix(self._GLParent._IMatrix)
+        self._GLParent.globalGL._shaderProgram1.setMVMatrixToIdentity()
 
     def _rescaleLabels(self, spectrumView=None, objListView=None, drawList=None):
         """Rescale all labels to the new dimensions of the screen

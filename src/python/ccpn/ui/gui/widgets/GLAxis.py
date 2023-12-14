@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 16:39:50 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 17:51:48 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -790,20 +790,19 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         GL.glClear(GL.GL_COLOR_BUFFER_BIT)
         GL.glEnable(GL.GL_MULTISAMPLE)
 
-        currentShader = self.globalGL._shaderProgram1.bind()
+        shader = self.globalGL._shaderProgram1.bind()
 
         # start with the grid mapped to (0..1, 0..1) to remove zoom errors here
-        currentShader.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
-        currentShader.setPMatrix(self._uPMatrix)
+        shader.setProjection(0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
 
         with self._disableGLAliasing():
             # draw the grid components
             self.drawGrid()
 
-        currentShader = self.globalGL._shaderProgramTex.bind()
+        shader = self.globalGL._shaderProgramTex.bind()
 
-        self._axisScale[:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
-        currentShader.setAxisScale(self._axisScale)
+        self._axisScale = QtGui.QVector4D(self.pixelX, self.pixelY, 1.0, 1.0)
+        shader.setAxisScale(self._axisScale)
 
         # draw the text to the screen
         self.enableTexture()
@@ -811,9 +810,9 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self._setViewPortFontScale()
 
         # make the overlay/axis solid
-        currentShader.setBlendEnabled(False)
+        shader.setBlendEnabled(False)
         self.drawAxisLabels()
-        currentShader.setBlendEnabled(True)
+        shader.setBlendEnabled(True)
 
         self.disableTextClientState()
         self.disableTexture()
@@ -1465,9 +1464,9 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         self._setColourScheme()
         self.setBackgroundColour(self.background, silent=True)
-        # _shader = self.globalGL._shaderProgramTex
-        # _shader.setBlendEnabled(0)
-        # _shader.setAlpha(1.0)
+        # shader = self.globalGL._shaderProgramTex
+        # shader.setBlendEnabled(0)
+        # shader.setAlpha(1.0)
 
         self.updateVisibleSpectrumViews()
         self.initialiseAxes()
@@ -1710,10 +1709,9 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
     def _setViewPortFontScale(self):
         # set the scale for drawing the overlay text correctly
-        self._axisScale[0:4] = [self.deltaX, self.deltaY, 1.0, 1.0]
+        self._axisScale = QtGui.QVector4D(self.deltaX, self.deltaY, 1.0, 1.0)
         self.globalGL._shaderProgramTex.setAxisScale(self._axisScale)
-        self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0, 1.0, -1.0, 1.0)
-        self.globalGL._shaderProgramTex.setPTexMatrix(self._uPMatrix)
+        self.globalGL._shaderProgramTex.setProjection(0.0, 1.0, 0, 1.0, -1.0, 1.0)
 
     def buildAxisLabels(self, refresh=False):
         # build axes labelling
@@ -1812,13 +1810,10 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 # put the axis labels into the bottom bar
                 self.viewports.setViewport(self._currentBottomAxisBarView)
 
-                # self._axisScale[0:4] = [self.pixelX, 1.0, 1.0, 1.0]
-                self._axisScale[0:4] = [self.deltaX, 1.0, 1.0, 1.0]
-
+                self._axisScale = QtGui.QVector4D(self.deltaX, 1.0, 1.0, 1.0)
                 self.globalGL._shaderProgramTex.setAxisScale(self._axisScale)
-                self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0,
+                self.globalGL._shaderProgramTex.setProjection(0.0, 1.0, 0,
                                                                   self.AXIS_MARGINBOTTOM, -1.0, 1.0)
-                self.globalGL._shaderProgramTex.setPTexMatrix(self._uPMatrix)
 
                 for lb in self._axisXLabelling:
                     lb.drawTextArrayVBO()
@@ -1827,13 +1822,10 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 # put the axis labels into the right bar
                 self.viewports.setViewport(self._currentRightAxisBarView)
 
-                # self._axisScale[0:4] = [1.0, self.pixelY, 1.0, 1.0]
-                self._axisScale[0:4] = [1.0, self.deltaY, 1.0, 1.0]
-
+                self._axisScale = QtGui.QVector4D(1.0, self.deltaY, 1.0, 1.0)
                 self.globalGL._shaderProgramTex.setAxisScale(self._axisScale)
-                self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, self.AXIS_MARGINRIGHT,
+                self.globalGL._shaderProgramTex.setProjection(0, self.AXIS_MARGINRIGHT,
                                                                   0.0, 1.0, -1.0, 1.0)
-                self.globalGL._shaderProgramTex.setPTexMatrix(self._uPMatrix)
 
                 for lb in self._axisYLabelling:
                     lb.drawTextArrayVBO()
@@ -2350,12 +2342,11 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         w = self.w
         h = self.h
 
-        currentShader = self.globalGL._shaderProgram1.bind()
+        shader = self.globalGL._shaderProgram1.bind()
 
         # set projection to axis coordinates
-        currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
+        shader.setProjection(self.axisL, self.axisR, self.axisB,
                                         self.axisT, -1.0, 1.0)
-        currentShader.setPMatrix(self._uPMatrix)
 
         # needs to be offset from (0,0) for mouse scaling
         if self._drawRightAxis and self._drawBottomAxis:
@@ -2386,7 +2377,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         # get the dimensions of the main view for the current strip
         vpwidth, vpheight = self._parentStrip.mainViewSize()
-        currentShader.setViewportMatrix(self._uVMatrix, 0, vpwidth, 0, vpheight,
+        shader.setViewportMatrix(self._uVMatrix, 0, vpwidth, 0, vpheight,
                                         -1.0, 1.0)
 
         self.pixelX = (self.axisR - self.axisL) / vpwidth
@@ -2398,11 +2389,11 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         #                           self.pixelX, self.pixelY, w, h,
         #                           0.2, 1.0, 0.4, 1.0,
         #                           0.3, 0.1, 1.0, 1.0]
-        # currentShader.setGLUniformMatrix4fv('dataMatrix', 1, GL.GL_FALSE, self._dataMatrix)
-        currentShader.setMVMatrix(self._IMatrix)
+        # shader.setGLUniformMatrix4fv('dataMatrix', 1, GL.GL_FALSE, self._dataMatrix)
+        shader.setMVMatrixToIdentity()
 
         # map mouse coordinates to world coordinates - only needs to change on resize, move soon
-        currentShader.setViewportMatrix(self._aMatrix, self.axisL, self.axisR, self.axisB,
+        shader.setViewportMatrix(self._aMatrix, self.axisL, self.axisR, self.axisB,
                                         self.axisT, -1.0, 1.0)
 
         # calculate the screen to axes transform
@@ -2423,18 +2414,10 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self.viewport = (GL.GLint * 4)()
 
         # change to the text shader
-        currentShader = self.globalGL._shaderProgramTex.bind()
-
-        currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
-        currentShader.setPTexMatrix(self._uPMatrix)
-
-        self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
-        # self._view[0:4] = [w - self.AXIS_MARGINRIGHT, h - self.AXIS_MOUSEYOFFSET, 1.0, 1.0]
-        # self._view[0:4] = [vpwidth, vpheight, 1.0, 1.0]
-
-        # self._axisScale[0:4] = [1.0/(self.axisR-self.axisL), 1.0/(self.axisT-self.axisB), 1.0, 1.0]
-        currentShader.setAxisScale(self._axisScale)
-        # currentShader.setGLUniform4fv('viewport', 1, self._view)
+        self._axisScale = QtGui.QVector4D(self.pixelX, self.pixelY, 1.0, 1.0)
+        shader = self.globalGL._shaderProgramTex.bind()
+        shader.setProjection(self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
+        shader.setAxisScale(self._axisScale)
 
     def _updateVisibleSpectrumViews(self):
         """Update the list of visible spectrumViews when change occurs
@@ -2765,7 +2748,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 for spec, settings in self._visibleOrderingDict:
                     try:
                         _axisCodes.append(spec.spectrum.axisCodes[settings.dimensionIndices[axis]])
-                    except Exception as es:
+                    except Exception:
                         # can skip for now
                         pass
                 _code = self._buildSingleWildCard(_axisCodes)

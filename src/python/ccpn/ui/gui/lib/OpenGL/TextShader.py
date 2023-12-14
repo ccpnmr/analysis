@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 16:56:13 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 17:51:48 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -53,7 +53,7 @@ class TextShader(ShaderProgramABC):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # shader attributes
 
-    _PMATRIX = 'pTexMatrix'
+    _PMATRIX = 'pMatrix'
     _AXISSCALE = 'axisScale'
     _STACKOFFSET = 'stackOffset'
     _VIEWPORT = 'viewport'
@@ -85,7 +85,7 @@ class TextShader(ShaderProgramABC):
     vertexShader = """
         #version 120
 
-        uniform   mat4  pTexMatrix;
+        uniform   mat4  pMatrix;
         uniform   vec4  axisScale;
         uniform   vec2  stackOffset;
         varying   vec4  _FC;
@@ -94,7 +94,7 @@ class TextShader(ShaderProgramABC):
 
         void main()
         {
-            gl_Position = pTexMatrix * vec4(gl_Vertex.xy * axisScale.xy + _offset.xy + stackOffset, 0.0, 1.0);
+            gl_Position = pMatrix * vec4(gl_Vertex.xy * axisScale.xy + _offset.xy + stackOffset, 0.0, 1.0);
 
             _texCoord = gl_MultiTexCoord0.st;
             _FC = gl_Color;
@@ -130,53 +130,47 @@ class TextShader(ShaderProgramABC):
         }
         """
 
-    # # attribute list for shader
-    # attributes = {'pTexMatrix'  : (16, np.float32),
-    #               'axisScale'   : (4, np.float32),
-    #               'stackOffset' : (2, np.float32),
-    #               'texture'     : (1, np.uint32),
-    #               'background'  : (4, np.float32),
-    #               'blendEnabled': (1, np.uint32),
-    #               'alpha'       : (1, np.float32),
-    #               }
-
     #=========================================================================================
     # methods available
     #=========================================================================================
 
-    def setPTexMatrix(self, matrix):
-        """Set the contents of projection pTexMatrix
+    def setProjection(self, left, right, bottom, top, near, far):
+        """Set the contents of the projection matrix
+        """
+        att = QtGui.QMatrix4x4()
+        att.ortho(left, right, bottom, top, near, far)
+        self._shader.setUniformValue(self.locations[self._PMATRIX], att)
+
+        return att
+
+    def setPMatrix(self, matrix):
+        """Set the contents of projection pMatrix
         :param matrix: consisting of 16 float32 elements
         """
-        self.setGLUniformMatrix4fv('pTexMatrix', 1, GL.GL_FALSE, matrix)
+        self.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, matrix)
+
+    def setPMatrixToIdentity(self):
+        """Reset the contents of viewport mvMatrix to the identity-matrix
+        """
+        self._shader.setUniformValue(self.locations[self._PMATRIX], QtGui.QMatrix4x4())
 
     def setAxisScale(self, axisScale):
         """Set the axisScale values
         :param axisScale: consisting of 4 float32 elements
         """
-        if len(axisScale) != 4 and not isinstance(axisScale, (list, tuple, type(np.array))):
-            raise TypeError('axisScale must tuple/list/numpy.array of 4 elements')
-        if not all(isinstance(val, (float, np.float32)) for val in axisScale):
-            raise TypeError('axisScale must be tuple/list/numpy.array of float/np.float32')
-
-        self.setGLUniform4fv('axisScale', 1, axisScale)
+        self._shader.setUniformValue(self.locations[self._AXISSCALE], axisScale)
 
     def setStackOffset(self, stackOffset):
         """Set the stacking value for the 1d widget
         :param stackOffset: consisting of 2 float32 elements, the stacking offset in thje X, Y dimensions
         """
-        if len(stackOffset) != 2 and not isinstance(stackOffset, (list, tuple, type(np.array))):
-            raise TypeError('stackOffset must tuple/list/numpy.array of 2 elements')
-        if not all(isinstance(val, (float, np.float32)) for val in stackOffset):
-            raise TypeError('stackOffset must be tuple/list/numpy.array of float/np.float32')
-
-        self.setGLUniform2fv('stackOffset', 1, stackOffset)
+        self._shader.setUniformValue(self.locations[self._STACKOFFSET], stackOffset)
 
     def setTextureID(self, textureID):
         """Set the texture ID, determines which texture the text bitmaps are taken from
         :param textureID: uint32
         """
-        self.setGLUniform1i('texture', textureID)
+        self._shader.setUniformValue(self.locations[self._TEXTURE], textureID)
 
     def setBackground(self, colour):
         """Set the background colour, for use with the solid text
@@ -198,7 +192,7 @@ class TextShader(ShaderProgramABC):
             raise TypeError('blendEnabled must be a bool')
         value = 1 if blendEnabled else 0
 
-        self.setGLUniform1i('blendEnabled', value)
+        self._shader.setUniformValue(self.locations[self._BLENDENABLED], value)
 
     def setAlpha(self, alpha):
         """Set the alpha value, a multiplier to the transparency 0 - completely transparent; 1 - solid
@@ -209,7 +203,12 @@ class TextShader(ShaderProgramABC):
             raise TypeError('value must be a float')
         value = float(np.clip(alpha, 0.0, 1.0))
 
-        self.setGLUniform1f('alpha', value)
+        self._shader.setUniformValue(self.locations[self._ALPHA], value)
+
+    def setViewport(self, viewport):
+        """Set the viewport pixel-sizes and devicePixelRatio
+        """
+        self._shader.setUniformValue(self.locations[self._VIEWPORT], viewport)
 
 
 #=========================================================================================
@@ -251,7 +250,7 @@ class AliasedTextShader(TextShader):
     vertexShader = """
         #version 120
 
-        uniform   mat4  pTexMatrix;
+        uniform   mat4  pMatrix;
         uniform   mat4  mvMatrix;
         uniform   vec4  axisScale;
         uniform   vec2  stackOffset;
@@ -263,7 +262,7 @@ class AliasedTextShader(TextShader):
 
         void main()
         {
-            gl_Position = pTexMatrix * mvMatrix * vec4(gl_Vertex.xy * axisScale.xy + _offset.xy + stackOffset, 0.0, 1.0);
+            gl_Position = pMatrix * mvMatrix * vec4(gl_Vertex.xy * axisScale.xy + _offset.xy + stackOffset, 0.0, 1.0);
 
             _texCoord = gl_MultiTexCoord0.st;
             _FC = gl_Color;
@@ -321,21 +320,9 @@ class AliasedTextShader(TextShader):
         }
         """
 
-    # # additional attribute list for shader
-    # _attributes = {
-    #     'mvMatrix'     : (16, np.float32),
-    #     'aliasPosition': (1, np.float32),
-    #     'aliasShade'   : (1, np.float32),
-    #     'aliasEnabled' : (1, np.uint32),
-    #     }
-
     #=========================================================================================
     # methods available
     #=========================================================================================
-
-    # def __init__(self):
-    #     self.attributes.update(self._attributes)
-    #     super().__init__()
 
     def setMVMatrix(self, matrix):
         """Set the contents of viewport mvMatrix
@@ -343,13 +330,24 @@ class AliasedTextShader(TextShader):
         """
         self.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, matrix)
 
+    def setMV(self, matrix):
+        """Set the contents of viewport mvMatrix
+        :param matrix: QtGui.QMatrix4x4
+        """
+        self._shader.setUniformValue(self.locations[self._MVMATRIX], matrix)
+
+    def setMVMatrixToIdentity(self):
+        """Reset the contents of viewport mvMatrix to the identity-matrix
+        """
+        self._shader.setUniformValue(self.locations[self._MVMATRIX], QtGui.QMatrix4x4())
+
     def setAliasPosition(self, aliasX, aliasY):
         """Set the alias position:
         Used to calculate whether the current peak is in the aliased region
         :param aliasX: X alias region
         :param aliasY: Y alias region
         """
-        self.setGLUniform1f('aliasPosition', getAliasSetting(aliasX, aliasY))
+        self._shader.setUniformValue(self.locations[self._ALIASPOSITION], float(getAliasSetting(aliasX, aliasY)))
 
     def setAliasShade(self, aliasShade):
         """Set the alias shade: a single float in range [0.0, 1.0]
@@ -360,7 +358,7 @@ class AliasedTextShader(TextShader):
             raise TypeError('aliasShade must be a float')
         value = float(np.clip(aliasShade, 0.0, 1.0))
 
-        self.setGLUniform1f('aliasShade', value)
+        self._shader.setUniformValue(self.locations[self._ALIASSHADE], value)
 
     def setAliasEnabled(self, aliasEnabled):
         """Set the alias enabled: bool True/False
@@ -372,4 +370,4 @@ class AliasedTextShader(TextShader):
             raise TypeError('aliasEnabled must be a bool')
         value = 1 if aliasEnabled else 0
 
-        self.setGLUniform1i('aliasEnabled', value)
+        self._shader.setUniformValue(self.locations[self._ALIASENABLED], value)

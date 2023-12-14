@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 16:39:50 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 17:51:48 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,7 @@ __date__ = "$Date: 2018-12-20 15:44:35 +0000 (Thu, December 20, 2018) $"
 #=========================================================================================
 
 import numpy as np
+from PyQt5 import QtGui
 from itertools import zip_longest, product
 
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
@@ -615,20 +616,17 @@ class GuiNdWidget(CcpnGLWidget):
     def drawAliasedLabels(self):
         """Draw all the labels that require aliasing to multiple regions
         """
-        _shader = self.globalGL._shaderProgramTexAlias.bind()
+        shader = self.globalGL._shaderProgramTexAlias.bind()
         # set the scale to the axis limits, needs addressing correctly, possibly same as grid
-        _shader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
-                                  self.axisT, -1.0, 1.0)
-        _shader.setPTexMatrix(self._uPMatrix)
+        self._axisScale = QtGui.QVector4D(self.pixelX, self.pixelY, 1.0, 1.0)
+        shader.setProjection(self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
+        shader.setAxisScale(self._axisScale)
+        shader.setStackOffset(QtGui.QVector2D(0.0, 0.0))
 
-        self._axisScale[:4] = [self.pixelX, self.pixelY, 0.0, 1.0]
-        _shader.setAxisScale(self._axisScale)
-        _shader.setStackOffset(np.array((0.0, 0.0), dtype=np.float32))
-
-        _shader.setAliasEnabled(self._aliasEnabled and self._aliasLabelsEnabled)
+        shader.setAliasEnabled(self._aliasEnabled and self._aliasLabelsEnabled)
 
         # change to correct value for shader
-        _shader.setAliasShade(self._aliasShade / 100.0)
+        shader.setAliasShade(self._aliasShade / 100.0)
 
         for specView in self._ordering:
 
@@ -656,9 +654,8 @@ class GuiNdWidget(CcpnGLWidget):
                         foldY = pow(-1, jj)
                         foldYOffset = -dyAF if foldY < 0 else 0
 
-                    self._axisScale[:4] = [foldX * self.pixelX / xScale, foldY * self.pixelY / yScale, 0.0, 1.0]
-
-                    _shader.setAxisScale(self._axisScale)
+                    self._axisScale = QtGui.QVector4D(foldX * self.pixelX / xScale, foldY * self.pixelY / yScale, 1.0, 1.0)
+                    shader.setAxisScale(self._axisScale)
 
                     specMatrix[:16] = [xScale * foldX, 0.0, 0.0, 0.0,
                                        0.0, yScale * foldY, 0.0, 0.0,
@@ -668,8 +665,8 @@ class GuiNdWidget(CcpnGLWidget):
                     # flipping in the same GL region -  xScale = -xScale
                     #                                   offset = fx0-dxAF
                     # circular -    offset = fx0 + dxAF*alias, alias = min->max
-                    _shader.setMVMatrix(specMatrix)
-                    _shader.setAliasPosition(ii, jj)
+                    shader.setMVMatrix(specMatrix)
+                    shader.setAliasPosition(ii, jj)
 
                     if self._peakLabelsEnabled:
                         self._GLPeaks.drawLabels(specView)
@@ -679,18 +676,17 @@ class GuiNdWidget(CcpnGLWidget):
     def drawAliasedSymbols(self, peakSymbolsEnabled, peakArrowsEnabled, multipletSymbolsEnabled, multipletArrowsEnabled):
         """Draw all the symbols that require aliasing to multiple regions
         """
-        _shader = self.globalGL._shaderProgramAlias.bind()
+        shader = self.globalGL._shaderProgramAlias.bind()
         # set the scale to the axis limits, needs addressing correctly, possibly same as grid
-        _shader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
+        shader.setProjection(self.axisL, self.axisR, self.axisB,
                                   self.axisT, -1.0, 1.0)
-        _shader.setPMatrix(self._uPMatrix)
 
         lineThickness = self._symbolThickness
         GL.glLineWidth(lineThickness * self.viewports.devicePixelRatio)
-        _shader.setAliasEnabled(self._aliasEnabled)
+        shader.setAliasEnabled(self._aliasEnabled)
 
         # change to correct value for shader
-        _shader.setAliasShade(self._aliasShade / 100.0)
+        shader.setAliasShade(self._aliasShade / 100.0)
 
         for specView in self._ordering:
 
@@ -725,8 +721,8 @@ class GuiNdWidget(CcpnGLWidget):
                     # flipping in the same GL region -  xScale = -xScale
                     #                                   offset = fx0-dxAF
                     # circular -    offset = fx0 + dxAF*alias, alias = min->max
-                    _shader.setMVMatrix(specMatrix)
-                    _shader.setAliasPosition(ii, jj)
+                    shader.setMVMatrix(specMatrix)
+                    shader.setAliasPosition(ii, jj)
 
                     if peakArrowsEnabled:
                         self._GLPeaks.drawArrows(specView)
@@ -748,10 +744,10 @@ class GuiNdWidget(CcpnGLWidget):
         if self.strip.isDeleted:
             return
 
-        currentShader = self.globalGL._shaderProgram1
+        shader = self.globalGL._shaderProgram1
 
         # set transform to identity - ensures only the pMatrix is applied
-        currentShader.setMVMatrix(self._IMatrix)
+        shader.setMVMatrixToIdentity()
 
         drawList = self.boundingBoxes
 
@@ -820,7 +816,7 @@ class GuiNdWidget(CcpnGLWidget):
         if self.strip.isDeleted:
             return
 
-        currentShader = self.globalGL._shaderProgram1
+        shader = self.globalGL._shaderProgram1
 
         GL.glLineWidth(self._contourThickness * self.viewports.devicePixelRatio)
         GL.glDisable(GL.GL_BLEND)
@@ -869,13 +865,13 @@ class GuiNdWidget(CcpnGLWidget):
                         # flipping in the same GL region -  xScale = -xScale
                         #                                   offset = fxMax-dxAF
                         # circular -    offset = fxMax + dxAF*alias, alias = min->max
-                        currentShader.setMVMatrix(specMatrix)
+                        shader.setMVMatrix(specMatrix)
 
                         self._contourList[spectrumView].drawIndexVBO()
 
                 else:
                     # set the scaling/offset for a single spectrum GL contour
-                    currentShader.setMVMatrix(self._spectrumSettings[spectrumView].matrix)
+                    shader.setMVMatrix(self._spectrumSettings[spectrumView].matrix)
 
                     self._contourList[spectrumView].drawIndexVBO()
 
@@ -1837,20 +1833,17 @@ class Gui1dWidget(CcpnGLWidget):
     def drawAliasedLabels(self):
         """Draw all the labels that require aliasing to multiple regions
         """
-        _shader = self.globalGL._shaderProgramTexAlias.bind()
+        shader = self.globalGL._shaderProgramTexAlias.bind()
         # set the scale to the axis limits, needs addressing correctly, possibly same as grid
-        _shader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
-                                  self.axisT, -1.0, 1.0)
-        _shader.setPTexMatrix(self._uPMatrix)
+        self._axisScale = QtGui.QVector4D(self.pixelX, self.pixelY, 1.0, 1.0)
+        shader.setProjection(self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
+        shader.setAxisScale(self._axisScale)
+        shader.setStackOffset(QtGui.QVector2D(0.0, 0.0))
 
-        self._axisScale[:4] = [self.pixelX, self.pixelY, 0.0, 1.0]
-        _shader.setAxisScale(self._axisScale)
-        _shader.setStackOffset(np.array((0.0, 0.0), dtype=np.float32))
-
-        _shader.setAliasEnabled(self._aliasEnabled and self._aliasLabelsEnabled)
+        shader.setAliasEnabled(self._aliasEnabled and self._aliasLabelsEnabled)
 
         # change to correct value for shader
-        _shader.setAliasShade(self._aliasShade / 100.0)
+        shader.setAliasShade(self._aliasShade / 100.0)
 
         for specView in self._ordering:
 
@@ -1884,22 +1877,22 @@ class Gui1dWidget(CcpnGLWidget):
                     if self.spectrumDisplay._flipped:
                         _matrix[5] = yScale * foldY
                         _matrix[13] += (fyMax + (jj * dyAF) + foldYOffset)
-                        self._axisScale[0:4] = [self.pixelX,
+                        self._axisScale = QtGui.QVector4D(self.pixelX,
                                                 foldY * self.pixelY / yScale,
-                                                0.0, 1.0]
+                                                0.0, 1.0)
                     else:
                         _matrix[0] = xScale * foldX
                         _matrix[12] += (fxMax + (ii * dxAF) + foldXOffset)
-                        self._axisScale[0:4] = [foldX * self.pixelX / xScale,
+                        self._axisScale = QtGui.QVector4D(foldX * self.pixelX / xScale,
                                                 self.pixelY,
-                                                0.0, 1.0]
+                                                0.0, 1.0)
 
                     # flipping in the same GL region -  xScale = -xScale
                     #                                   offset = fx0-dxAF
                     # circular -    offset = fx0 + dxAF*alias, alias = min->max
-                    _shader.setMVMatrix(_matrix)
-                    _shader.setAxisScale(self._axisScale)
-                    _shader.setAliasPosition(ii, jj)
+                    shader.setMVMatrix(_matrix)
+                    shader.setAxisScale(self._axisScale)
+                    shader.setAliasPosition(ii, jj)
 
                     if self._peakLabelsEnabled:
                         self._GLPeaks.drawLabels(specView)
@@ -1909,18 +1902,17 @@ class Gui1dWidget(CcpnGLWidget):
     def drawAliasedSymbols(self, peakSymbolsEnabled, peakArrowsEnabled, multipletSymbolsEnabled, multipletArrowsEnabled):
         """Draw all the symbols that require aliasing to multiple regions
         """
-        _shader = self.globalGL._shaderProgramAlias.bind()
+        shader = self.globalGL._shaderProgramAlias.bind()
         # set the scale to the axis limits, needs addressing correctly, possibly same as grid
-        _shader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
+        shader.setProjection(self.axisL, self.axisR, self.axisB,
                                   self.axisT, -1.0, 1.0)
-        _shader.setPMatrix(self._uPMatrix)
 
         lineThickness = self._symbolThickness
         GL.glLineWidth(lineThickness * self.viewports.devicePixelRatio)
-        _shader.setAliasEnabled(self._aliasEnabled)
+        shader.setAliasEnabled(self._aliasEnabled)
 
         # change to correct value for shader
-        _shader.setAliasShade(self._aliasShade / 100.0)
+        shader.setAliasShade(self._aliasShade / 100.0)
 
         for specView in self._ordering:
 
@@ -1962,8 +1954,8 @@ class Gui1dWidget(CcpnGLWidget):
                     # flipping in the same GL region -  xScale = -xScale
                     #                                   offset = fx0-dxAF
                     # circular -    offset = fx0 + dxAF*alias, alias = min->max
-                    _shader.setMVMatrix(_matrix)
-                    _shader.setAliasPosition(ii, jj)
+                    shader.setMVMatrix(_matrix)
+                    shader.setAliasPosition(ii, jj)
 
                     if peakArrowsEnabled:
                         self._GLPeaks.drawArrows(specView)
@@ -1997,7 +1989,7 @@ class Gui1dWidget(CcpnGLWidget):
         if self.strip.isDeleted:
             return
 
-        currentShader = self.globalGL._shaderProgram1
+        shader = self.globalGL._shaderProgram1
 
         # self.buildSpectra()
 
@@ -2031,7 +2023,7 @@ class Gui1dWidget(CcpnGLWidget):
         for spectrumView in _visibleSpecs:
             if self._stackingMode:
                 # use the stacking matrix to offset the 1D spectra
-                currentShader.setMVMatrix(self._spectrumSettings[spectrumView].stackedMatrix)
+                shader.setMVMatrix(self._spectrumSettings[spectrumView].stackedMatrix)
             # draw contours
             self._contourList[spectrumView].drawVertexColorVBO()
 
@@ -2044,7 +2036,7 @@ class Gui1dWidget(CcpnGLWidget):
         if self.strip._isPhasingOn and not self.showSpectraOnPhasing:
             return
 
-        currentShader = self.globalGL._shaderProgram1
+        shader = self.globalGL._shaderProgram1
 
         GL.glLineWidth(self._contourThickness * self.viewports.devicePixelRatio)
         GL.glDisable(GL.GL_BLEND)
@@ -2094,7 +2086,7 @@ class Gui1dWidget(CcpnGLWidget):
                             _matrix[0] = foldX
                             _matrix[12] += (ii * dxAF) + foldXOffset
 
-                        currentShader.setMVMatrix(_matrix)
+                        shader.setMVMatrix(_matrix)
 
                         if spectrumView in self._contourList:
                             self._contourList[spectrumView].drawVertexColorVBO()
@@ -2105,9 +2097,9 @@ class Gui1dWidget(CcpnGLWidget):
 
                         if self._stackingMode:
                             # use the stacking matrix to offset the 1D spectra
-                            currentShader.setMVMatrix(self._spectrumSettings[spectrumView].stackedMatrix)
+                            shader.setMVMatrix(self._spectrumSettings[spectrumView].stackedMatrix)
                         else:
-                            currentShader.setMVMatrix(self._IMatrix)
+                            shader.setMVMatrixToIdentity()
                         # draw contours
                         if spectrumView in self._contourList:
                             self._contourList[spectrumView].drawVertexColorVBO()

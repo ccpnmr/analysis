@@ -5,8 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-02 15:53:00 +0000 (Thu, November 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 14:45:47 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -329,3 +329,15 @@ class CursorFrameCounterModes(DataEnum):
     CURSOR_DEFAULT = 0, 'Default'
     CURSOR_DRAWLAST = 1, 'DrawLast'
     CURSOR_DRAWNEXT = 2, 'DrawNext'
+
+
+def getAliasSetting(aliasX, aliasY):
+    """Return the alias setting for alias value (aliasX, aliasY) for insertion into shader
+    """
+    if not isinstance(aliasX, int):
+        raise TypeError('aliasX must be an int')
+    if not isinstance(aliasY, int):
+        raise TypeError('aliasY must be an int')
+
+    # arbitrary value to pack into a single float
+    return (256 * aliasX) + aliasY

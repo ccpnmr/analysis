@@ -6,8 +6,8 @@ Currently this is peaks and multiplets
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-07 12:12:46 +0000 (Tue, November 07, 2023) $"
-__version__ = "$Revision: 3.2.2 $"
+__dateModified__ = "$dateModified: 2023-12-14 14:45:47 +0000 (Thu, December 14, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -42,7 +42,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import GLString
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_DRAW, GLRENDERMODE_RESCALE, GLRENDERMODE_REBUILD, \
     GLREFRESHMODE_NEVER, GLREFRESHMODE_REBUILD, GLSymbolArray, GLLabelArray
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import getAliasSetting
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import getAliasSetting
 from ccpn.ui.gui.lib.PeakListLib import line_rectangle_intersection
 
 # NOTE:ED - remember these for later, may create larger vertex arrays for symbols, but should be quicker
@@ -2357,7 +2357,7 @@ class GLLabelling():
                     drawStr.setStringOffset((tr, tw))
                 else:
                     drawStr.setStringOffset((r, w))
-                drawStr.updateTextArrayVBOAttribs()
+                drawStr.pushTextArrayVBOAttribs()
 
         elif symbolType == 1:
 
@@ -2367,7 +2367,7 @@ class GLLabelling():
                     drawStr.setStringOffset((lr, lw))
                 else:
                     drawStr.setStringOffset((GLDefs.STRINGSCALE * r, GLDefs.STRINGSCALE * w))
-                drawStr.updateTextArrayVBOAttribs()
+                drawStr.pushTextArrayVBOAttribs()
 
         elif symbolType == 2:
 
@@ -2377,7 +2377,7 @@ class GLLabelling():
                     drawStr.setStringOffset((lr, lw))
                 else:
                     drawStr.setStringOffset((GLDefs.STRINGSCALE * r, GLDefs.STRINGSCALE * w))
-                drawStr.updateTextArrayVBOAttribs()
+                drawStr.pushTextArrayVBOAttribs()
 
         else:
             raise ValueError('GL Error: bad symbol type')
@@ -3580,7 +3580,7 @@ class GL1dLabelling():
                     drawStr.setStringOffset((tr, tw))
                 else:
                     drawStr.setStringOffset((r, w))
-                drawStr.updateTextArrayVBOAttribs()
+                drawStr.pushTextArrayVBOAttribs()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Drawing

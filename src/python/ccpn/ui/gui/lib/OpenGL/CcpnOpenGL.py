@@ -46,8 +46,8 @@ By Mouse button:
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -56,8 +56,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-07 17:12:00 +0000 (Tue, November 07, 2023) $"
-__version__ = "$Revision: 3.2.2 $"
+__dateModified__ = "$dateModified: 2023-12-14 14:45:47 +0000 (Thu, December 14, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -2911,27 +2911,27 @@ class CcpnGLWidget(QOpenGLWidget):
                        0.0, 0.0]
 
             self.stripIDString.attribs[:] = offsets * self.stripIDString.numVertices
-            self.stripIDString.updateTextArrayVBOAttribs()
+            self.stripIDString.pushTextArrayVBOAttribs()
 
         if self._lockedStringTrue:
             dy = STRINGOFFSET * self.deltaY
             offsets = [0.0, dy, 0.0, 0.0]
             self._lockedStringTrue.attribs[:] = offsets * self._lockedStringTrue.numVertices
-            self._lockedStringTrue.updateTextArrayVBOAttribs()
+            self._lockedStringTrue.pushTextArrayVBOAttribs()
 
             if self._lockedStringTrue:
                 self._lockedStringFalse.attribs[:] = offsets * self._lockedStringFalse.numVertices
-                self._lockedStringFalse.updateTextArrayVBOAttribs()
+                self._lockedStringFalse.pushTextArrayVBOAttribs()
             dx = self._lockedStringTrue.width * self.deltaX
 
             offsets = [dx, dy, 0.0, 0.0]
             if self._fixedStringFalse:
                 self._fixedStringFalse.attribs[:] = offsets * self._fixedStringFalse.numVertices
-                self._fixedStringFalse.updateTextArrayVBOAttribs()
+                self._fixedStringFalse.pushTextArrayVBOAttribs()
 
             if self._fixedStringTrue:
                 self._fixedStringTrue.attribs[:] = offsets * self._fixedStringTrue.numVertices
-                self._fixedStringTrue.updateTextArrayVBOAttribs()
+                self._fixedStringTrue.pushTextArrayVBOAttribs()
 
     def _updateHighlightedIntegrals(self, spectrumView, integralListView):
         drawList = self._GLIntegralLists[integralListView]
@@ -4305,7 +4305,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 mark.attribs[pp:pp + 2] = offsets
 
             # redefine the mark's VBOs
-            mark.updateTextArrayVBOAttribs()
+            mark.pushTextArrayVBOAttribs()
 
     def rescaleMarksRulers(self):
         """rescale the marks
@@ -4585,7 +4585,7 @@ class CcpnGLWidget(QOpenGLWidget):
             oy = -min(max(_mouseOffsetT - 1.0, 0.0), _mouseOffsetB)
 
             self.mouseString.setStringOffset((ox, oy))
-            self.mouseString.updateTextArrayVBOAttribs()
+            self.mouseString.pushTextArrayVBOAttribs()
 
     def drawMouseCoords(self):
         # if self.underMouse() or self._disableCursorUpdate:  # and self.mouseString:  # crosshairVisible

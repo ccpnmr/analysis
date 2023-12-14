@@ -6,8 +6,8 @@ Code for exporting OpenGL stripDisplay to pdf and svg files.
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-02 15:53:00 +0000 (Thu, November 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 14:45:47 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -63,7 +63,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import viewportDimensions
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import SPECTRUM_STACKEDMATRIX, SPECTRUM_MATRIX, \
     GLLINE_STYLES_ARRAY, SPECTRUM_LIMITS, \
     SPECTRUM_AF, SPECTRUM_ALIASINGINDEX, SPECTRUM_FOLDINGMODE, \
-    SPECTRUM_SCALE, SPECTRUM_STACKEDMATRIXOFFSET
+    SPECTRUM_SCALE, SPECTRUM_STACKEDMATRIXOFFSET, getAliasSetting
 
 from ccpn.ui.gui.lib.OpenGL import GL
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLGRIDLINES, GLAXISLABELS, GLAXISMARKS, \
@@ -84,7 +84,6 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLGRIDLINES, GLAXISLABELS, GLA
     GLPRINTFONT, GLUSEPRINTFONT, GLSCALINGAXIS
 # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLWIDGET, GLAXISLINES, GLAXISMARKSINSIDE, \
 #     GLFULLLIST, GLEXTENDEDLIST, GLALIASENABLED, GLALIASLABELSENABLED
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import getAliasSetting
 from ccpn.ui.gui.popups.ExportStripToFile import PAGEPORTRAIT, DEFAULT_FONT, PAGESIZEA6, PAGESIZEA5, \
     PAGESIZEA4, PAGESIZEA3, PAGESIZEA2, PAGESIZEA1, PAGESIZEA0, PAGESIZELETTER, PAGESIZES
 # from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPDF, EXPORTSVG, EXPORTTYPES, \

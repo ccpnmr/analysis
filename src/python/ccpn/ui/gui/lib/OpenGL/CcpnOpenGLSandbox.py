@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 17:53:08 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 18:10:31 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -226,7 +226,7 @@ pass
 #     uniform vec4 viewport;
 #     varying vec4 FC;
 #     varying vec4 FO;
-#     varying vec2 _texCoord;
+#     varying vec2 texCoord;
 #     attribute vec2 offset;
 #
 #     void main()
@@ -244,7 +244,7 @@ pass
 #
 #     //      gl_Position = (pMatrix * vec4(offset, 0.0, 0.0)) + ((pMatrix * gl_Vertex) * axisScale);
 #
-#       _texCoord = gl_MultiTexCoord0.st;
+#       texCoord = gl_MultiTexCoord0.st;
 #       FC = gl_Color;
 #     }
 #     """
@@ -258,11 +258,11 @@ pass
 #     uniform vec4 background;
 #     uniform int  blendEnabled;
 #     varying vec4 FO;
-#     varying vec2 _texCoord;
+#     varying vec2 texCoord;
 #
 #     void main()
 #     {
-#       texFilter = texture2D(texture, _texCoord);
+#       texFilter = texture2D(texture, texCoord);
 #       // colour for blending enabled
 #       if (blendEnabled != 0)
 #         // multiply the character fade by the color fade to give the actual transparency
@@ -287,11 +287,11 @@ pass
 #     uniform vec4 background;
 #     uniform uint blendEnabled;
 #     varying vec4 FO;
-#     varying vec4 _texCoord;
+#     varying vec4 texCoord;
 #
 #     void main()
 #     {
-#       texFilter = texture2D(texture, _texCoord.xy);
+#       texFilter = texture2D(texture, texCoord.xy);
 #       gl_FragColor = vec4((FC.xyz * texFilter.w) + (1 - texFilter.w) * background.xyz, 1.0);
 #     }
 #     """

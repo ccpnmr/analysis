@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 17:53:08 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 18:10:31 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -52,11 +52,11 @@ class ShaderProgramABC(object):
     vertexShader = '''
                     #version 120
                     
-                    varying vec4 _FC;
+                    varying vec4 fragCol;
                     
                     void main()
                     {
-                      _FC = gl_Color;
+                      fragCol = gl_Color;
                     }
                     '''
     fragmentShader is similarly defined
@@ -205,22 +205,6 @@ class ShaderProgramABC(object):
     #=========================================================================================
     # Common methods
     #=========================================================================================
-
-    @staticmethod
-    def setProjectionAxes(attMatrix, left, right, bottom, top, near, far):
-        """Set the contents of the projection matrix
-        """
-        oa = 2.0 / (right - left) if abs(right - left) > 1.0e-7 else 1.0
-        ob = 2.0 / (top - bottom) if abs(top - bottom) > 1.0e-7 else 1.0
-        oc = -2.0 / (far - near) if abs(far - near) > 1.0e-7 else 1.0
-        od = -(far + near) / (far - near) if abs(far - near) > 1.0e-7 else 0.0
-        oe = -(top + bottom) / (top - bottom) if abs(top - bottom) > 1.0e-7 else 0.0
-        og = -(right + left) / (right - left) if abs(right - left) > 1.0e-7 else 0.0
-
-        attMatrix[0:16] = [oa, 0.0, 0.0, 0.0,
-                           0.0, ob, 0.0, 0.0,
-                           0.0, 0.0, oc, 0.0,
-                           og, oe, od, 1.0]
 
     @staticmethod
     def setViewportMatrix(viewMatrix, left, right, bottom, top, near, far):

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 17:51:48 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 18:10:31 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -67,13 +67,13 @@ class PixelShader(ShaderProgramABC):
 
         uniform mat4 pMatrix;
         uniform mat4 mvMatrix;
-        varying vec4 _FC;
+        varying vec4 fragCol;
 
         void main()
         {
             // calculate the position
             gl_Position = pMatrix * mvMatrix * gl_Vertex;
-            _FC = gl_Color;
+            fragCol = gl_Color;
         }
         """
 
@@ -81,12 +81,12 @@ class PixelShader(ShaderProgramABC):
     fragmentShader = """
         #version 120
 
-        varying vec4  _FC;
+        varying vec4  fragCol;
 
         void main()
         {
             // set the pixel colour
-            gl_FragColor = _FC;
+            gl_FragColor = fragCol;
         }
         """
 
@@ -181,15 +181,15 @@ class AliasedPixelShader(PixelShader):
         uniform   mat4  mvMatrix;
         attribute vec4  alias;
         uniform   float aliasPosition;
-        varying   float _aliased;
-        varying   vec4  _FC;
+        varying   float aliased;
+        varying   vec4  fragCol;
 
         void main()
         {
             // calculate the position, set shading value
             gl_Position = pMatrix * mvMatrix * vec4(gl_Vertex.xy, 0.0, 1.0);
-            _FC = gl_Color;
-            _aliased = (aliasPosition - gl_Vertex.z);
+            fragCol = gl_Color;
+            aliased = (aliasPosition - gl_Vertex.z);
         }
         """
 
@@ -200,19 +200,19 @@ class AliasedPixelShader(PixelShader):
         uniform vec4  background;
         uniform float aliasShade;
         uniform int   aliasEnabled;
-        varying vec4  _FC;
-        varying float _aliased;
+        varying vec4  fragCol;
+        varying float aliased;
 
         void main()
         {
             // set the pixel colour
-            if (abs(_aliased) < 0.5) {
-                gl_FragColor = _FC;
+            if (abs(aliased) < 0.5) {
+                gl_FragColor = fragCol;
             }
             else if (aliasEnabled != 0) {
                 // set the colour if aliasEnabled (set opaque or set the alpha)
-                gl_FragColor = (aliasShade * _FC) + (1 - aliasShade) * background;
-                //gl_FragColor = vec4(_FC.xyz, _FC.w * aliasShade);
+                gl_FragColor = (aliasShade * fragCol) + (1 - aliasShade) * background;
+                //gl_FragColor = vec4(fragCol.xyz, fragCol.w * aliasShade);
             }
             else {
                 // skip the pixel

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 17:51:48 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 18:10:31 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -41,7 +41,7 @@ class TextShader(ShaderProgramABC):
     """
     Main Text shader
 
-    Shader for plotting text, uses a billboard technique by using an _offset to determine pixel positions
+    Shader for plotting text, uses a billboard technique by using an offset to determine pixel positions
     Colour of the pixel is set by glColorPointer array.
     Alpha value is grabbed from the texture to give antialiasing and modified by the 'alpha' attribute to
     affect overall transparency.
@@ -88,16 +88,16 @@ class TextShader(ShaderProgramABC):
         uniform   mat4  pMatrix;
         uniform   vec4  axisScale;
         uniform   vec2  stackOffset;
-        varying   vec4  _FC;
-        varying   vec2  _texCoord;
-        attribute vec4  _offset;
+        varying   vec4  fragCol;
+        varying   vec2  texCoord;
+        attribute vec4  offset;
 
         void main()
         {
-            gl_Position = pMatrix * vec4(gl_Vertex.xy * axisScale.xy + _offset.xy + stackOffset, 0.0, 1.0);
+            gl_Position = pMatrix * vec4(gl_Vertex.xy * axisScale.xy + offset.xy + stackOffset, 0.0, 1.0);
 
-            _texCoord = gl_MultiTexCoord0.st;
-            _FC = gl_Color;
+            texCoord = gl_MultiTexCoord0.st;
+            fragCol = gl_Color;
         }
         """
 
@@ -109,24 +109,24 @@ class TextShader(ShaderProgramABC):
         uniform vec4      background;
         uniform int       blendEnabled;
         uniform float     alpha;
-        varying vec4      _FC;
-        varying vec2      _texCoord;
-                vec4      _texFilter;
-                float     _opacity;
+        varying vec4      fragCol;
+        varying vec2      texCoord;
+                vec4      texFilter;
+                float     opacity;
 
         void main()
         {
-            _texFilter = texture2D(texture, _texCoord);  // returns float due to glTexImage2D creation as GL_ALPHA
+            texFilter = texture2D(texture, texCoord);  // returns float due to glTexImage2D creation as GL_ALPHA
             // colour for blending enabled
-            _opacity = _texFilter.a * alpha;  // only has .alpha component
+            opacity = texFilter.a * alpha;  // only has .alpha component
 
             if (blendEnabled != 0)
                 // multiply the character fade by the color fade to give the actual transparency
-                gl_FragColor = vec4(_FC.xyz, _FC.w * _opacity);
+                gl_FragColor = vec4(fragCol.xyz, fragCol.w * opacity);
 
             else   
                 // plot a background box around the character
-                gl_FragColor = vec4((_FC.xyz * _opacity) + (1.0 - _opacity) * background.xyz, 1.0);
+                gl_FragColor = vec4((fragCol.xyz * opacity) + (1.0 - opacity) * background.xyz, 1.0);
         }
         """
 
@@ -219,7 +219,7 @@ class AliasedTextShader(TextShader):
     """
     Text shader for displaying text in aliased regions
 
-    Shader for plotting text, uses a billboard technique by using an _offset to determine pixel positions
+    Shader for plotting text, uses a billboard technique by using an offset to determine pixel positions
     Colour of the pixel is set by glColorPointer array.
     Alpha value is grabbed from the texture to give antialiasing and modified by the 'alpha' attribute to
     affect overall transparency.
@@ -255,18 +255,18 @@ class AliasedTextShader(TextShader):
         uniform   vec4  axisScale;
         uniform   vec2  stackOffset;
         uniform   float aliasPosition;
-        varying   float _aliased;
-        varying   vec4  _FC;
-        varying   vec2  _texCoord;
-        attribute vec4  _offset;
+        varying   float aliased;
+        varying   vec4  fragCol;
+        varying   vec2  texCoord;
+        attribute vec4  offset;
 
         void main()
         {
-            gl_Position = pMatrix * mvMatrix * vec4(gl_Vertex.xy * axisScale.xy + _offset.xy + stackOffset, 0.0, 1.0);
+            gl_Position = pMatrix * mvMatrix * vec4(gl_Vertex.xy * axisScale.xy + offset.xy + stackOffset, 0.0, 1.0);
 
-            _texCoord = gl_MultiTexCoord0.st;
-            _FC = gl_Color;
-            _aliased = (aliasPosition - gl_Vertex.z);
+            texCoord = gl_MultiTexCoord0.st;
+            fragCol = gl_Color;
+            aliased = (aliasPosition - gl_Vertex.z);
         }
         """
 
@@ -280,39 +280,39 @@ class AliasedTextShader(TextShader):
         uniform float     alpha;
         uniform float     aliasShade;
         uniform int       aliasEnabled;
-        varying vec4      _FC;
-        varying vec2      _texCoord;
-                vec4      _texFilter;
-                float     _opacity;
-        varying float     _aliased;
+        varying vec4      fragCol;
+        varying vec2      texCoord;
+                vec4      texFilter;
+                float     opacity;
+        varying float     aliased;
 
         void main()
         {
-            _texFilter = texture2D(texture, _texCoord);  // returns float due to glTexImage2D creation as GL_ALPHA
+            texFilter = texture2D(texture, texCoord);  // returns float due to glTexImage2D creation as GL_ALPHA
             // colour for blending enabled
-            _opacity = _texFilter.a * alpha;  // only has .alpha component
+            opacity = texFilter.a * alpha;  // only has .alpha component
 
             // set the pixel colour
-            if (abs(_aliased) < 0.5)
+            if (abs(aliased) < 0.5)
                 if (blendEnabled != 0)
                     // multiply the character fade by the color fade to give the actual transparency
-                    gl_FragColor = vec4(_FC.xyz, _FC.w * _opacity);
+                    gl_FragColor = vec4(fragCol.xyz, fragCol.w * opacity);
 
                 else   
                     // plot a background box around the character
-                    gl_FragColor = vec4((_FC.xyz * _opacity) + (1.0 - _opacity) * background.xyz, 1.0);
+                    gl_FragColor = vec4((fragCol.xyz * opacity) + (1.0 - opacity) * background.xyz, 1.0);
 
             else if (aliasEnabled != 0) {
                 // modify the opacity
-                _opacity *= aliasShade;
+                opacity *= aliasShade;
 
                 if (blendEnabled != 0)
                     // multiply the character fade by the color fade to give the actual transparency
-                    gl_FragColor = vec4(_FC.xyz, _FC.w * _opacity);
+                    gl_FragColor = vec4(fragCol.xyz, fragCol.w * opacity);
 
                 else   
                     // plot a background box around the character
-                    gl_FragColor = vec4((_FC.xyz * _opacity) + (1.0 - _opacity) * background.xyz, 1.0);
+                    gl_FragColor = vec4((fragCol.xyz * opacity) + (1.0 - opacity) * background.xyz, 1.0);
             }
             else
                 // skip the pixel

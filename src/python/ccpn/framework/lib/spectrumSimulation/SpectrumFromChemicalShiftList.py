@@ -566,6 +566,30 @@ class SimulatedSpectrum_HNCACB(SimulatedSpectrumByExperimentTypeABC):
                             ]
                          ]
 
+class SimulatedSpectrum_HBHAcoNH(SimulatedSpectrumByExperimentTypeABC):
+
+    experimentType      = 'HB/HAcoNH'
+    isotopeCodes        = ['1H', '1H', '15N']
+    axisCodes           = ['Hn', 'Hc', 'Nh']
+    spectralWidths      = [7, 14, 40]
+    referenceValues     = [12, 12, 140]
+    peakAtomNameMappers = None
+
+    @staticmethod
+    def _createAtomNameMappers():
+        from ccpn.core.lib.AssignmentLib import NEF_ATOM_NAMES
+
+        peakMappers = [[],]
+        for hatom in NEF_ATOM_NAMES.get('1H', []):
+            if 'A' in hatom or 'B' in hatom:
+                    atomNameMappers = [AtomNamesMapper(isotopeCode='1H', axisCode='Hn', offsetNmrAtomNames={0: 'H'}),
+                                       AtomNamesMapper(isotopeCode='1H', axisCode='Hc', offsetNmrAtomNames={-1: hatom}),
+                                       AtomNamesMapper(isotopeCode='15N', axisCode='Nh', offsetNmrAtomNames={0: 'N'})]
+                    peakMappers.append(atomNameMappers)
+
+        return(peakMappers)
+
+
 class SimulatedSpectrum_CANCO(SimulatedSpectrumByExperimentTypeABC):
 
     experimentType      = 'CANCO'
@@ -639,6 +663,7 @@ CSL2SPECTRUM_DICT = OrderedDict([
                             (SimulatedSpectrum_HNCA.experimentType, SimulatedSpectrum_HNCA),
                             (SimulatedSpectrum_HNCOCA.experimentType, SimulatedSpectrum_HNCOCA),
                             (SimulatedSpectrum_HNCACB.experimentType, SimulatedSpectrum_HNCACB),
+                            (SimulatedSpectrum_HBHAcoNH.experimentType, SimulatedSpectrum_HBHAcoNH),
                             (SimulatedSpectrum_CC.experimentType, SimulatedSpectrum_CC),
                             (SimulatedSpectrum_NCA.experimentType, SimulatedSpectrum_NCA),
                             (SimulatedSpectrum_NCO.experimentType, SimulatedSpectrum_NCO),

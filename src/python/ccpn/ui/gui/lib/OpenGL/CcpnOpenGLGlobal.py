@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 14:45:47 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 14:54:40 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -26,7 +26,6 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 # Start of code
 #=========================================================================================
 
-import numpy as np
 from PyQt5 import QtWidgets, QtGui
 from ccpn.ui.gui.lib.OpenGL import GL
 # from ccpn.ui.gui.lib.OpenGL.LineShader import LineShader
@@ -133,7 +132,7 @@ class GLGlobalData(QtWidgets.QWidget):
         """
         # add some shaders to the global data
         self.shaders = {}
-        for _shader in (PixelShader, TextShader, AliasedPixelShader, AliasedTextShader):
+        for _shader in (PixelShader, TextShader, AliasedPixelShader, AliasedTextShader, ):  # LineShader):
             _new = _shader()
             self.shaders[_new.name] = _new
 

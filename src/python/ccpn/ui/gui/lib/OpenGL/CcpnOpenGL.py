@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 18:35:03 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 18:49:09 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -484,7 +484,6 @@ class CcpnGLWidget(QOpenGLWidget):
         self._axisScale = np.zeros((4,), dtype=np.float32)
         self._background = np.zeros((4,), dtype=np.float32)
         self._parameterList = np.zeros((4,), dtype=np.int32)
-        # self._view = np.zeros((4,), dtype=np.float32)
         self._updateBackgroundColour = True
 
         # get information from the parent class (strip)
@@ -784,8 +783,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         vp = self.viewports.getViewportFromWH(self._currentView, self.w, self.h)
         vpwidth, vpheight = vp.width or 1, vp.height or 1
-        shader.setViewportMatrix(self._uVMatrix, 0, vpwidth, 0, vpheight,
-                                        -1.0, 1.0)
+        self._uVMatrix = shader.getViewportMatrix(0, vpwidth, 0, vpheight, -1.0, 1.0)
 
         self.pixelX = (self.axisR - self.axisL) / vpwidth
         self.pixelY = (self.axisT - self.axisB) / vpheight
@@ -799,16 +797,11 @@ class CcpnGLWidget(QOpenGLWidget):
         shader.setMVMatrixToIdentity()
 
         # map mouse coordinates to world coordinates - only needs to change on resize, move soon
-        shader.setViewportMatrix(self._aMatrix, self.axisL, self.axisR, self.axisB,
-                                        self.axisT, -1.0, 1.0)
+        self._aMatrix = shader.getViewportMatrix(self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
 
         # calculate the screen to axes transform
-        self.vInv = np.linalg.inv(self._uVMatrix.reshape((4, 4)))
-        self.mouseTransform = np.matmul(self._aMatrix.reshape((4, 4)), self.vInv)
-
-        self.modelViewMatrix = (GL.GLdouble * 16)()
-        self.projectionMatrix = (GL.GLdouble * 16)()
-        self.viewport = (GL.GLint * 4)()
+        self.vInv = self._uVMatrix.inverted()
+        self.mouseTransform = self._aMatrix * self.vInv[0]
 
         # change to the text shader
         self._axisScale = QtGui.QVector4D(self.pixelX, self.pixelY, 1.0, 1.0)
@@ -2107,8 +2100,9 @@ class CcpnGLWidget(QOpenGLWidget):
                 my = self.height() - pnt.y() - self.AXIS_MOUSEYOFFSET
             else:
                 my = self.height() - pnt.y()
+            result = self.mouseTransform * QtGui.QVector4D(mx, my, 0.0, 1.0)
+            return (result.x(), result.y())
 
-            return tuple(self.mouseTransform.dot([mx, my, 0.0, 1.0])[:2])
         else:
             return None
 
@@ -2357,7 +2351,9 @@ class CcpnGLWidget(QOpenGLWidget):
             my = self.height() - ev.pos().y()
             top = self.height()
         self._mouseStart = (mx, my)
-        self._startCoordinate = self.mouseTransform.dot([mx, my, 0.0, 1.0])
+        sc = self.mouseTransform * QtGui.QVector4D(mx, my, 0.0, 1.0)
+        self._startCoordinate = (sc.x(), sc.y())
+
         self._startMiddleDrag = False
         self._validRegionPick = False
         self._mouseInLabel = False
@@ -2660,16 +2656,16 @@ class CcpnGLWidget(QOpenGLWidget):
         point = self.mapFromGlobal(QtGui.QCursor.pos())
 
         # calculate mouse coordinate within the mainView
-        _mouseX = point.x()
+        mx = point.x()
         if self._drawBottomAxis:
-            _mouseY = self.height() - point.y() - self.AXIS_MOUSEYOFFSET
+            my = self.height() - point.y() - self.AXIS_MOUSEYOFFSET
             _top = self.height() - self.AXIS_MOUSEYOFFSET
         else:
-            _mouseY = self.height() - point.y()
+            my = self.height() - point.y()
             _top = self.height()
 
-        # translate from screen (0..w, 0..h) to NDC (-1..1, -1..1) to axes (axisL, axisR, axisT, axisB)
-        return self.mouseTransform.dot([_mouseX, _mouseY, 0.0, 1.0])
+        mt = self.mouseTransform * QtGui.QVector4D(mx, my, 0.0, 1.0)
+        return (mt.x(), mt.y(), mt.z(), mt.w())
 
     def mouseMoveEvent(self, event):
 
@@ -4136,16 +4132,16 @@ class CcpnGLWidget(QOpenGLWidget):
             currentPos = self.mapFromGlobal(QtGui.QCursor.pos())
 
             # calculate mouse coordinate within the mainView
-            _mouseX = currentPos.x()
+            mx = currentPos.x()
             if self._drawBottomAxis:
-                _mouseY = self.height() - currentPos.y() - self.AXIS_MOUSEYOFFSET
+                my = self.height() - currentPos.y() - self.AXIS_MOUSEYOFFSET
                 _top = self.height() - self.AXIS_MOUSEYOFFSET
             else:
-                _mouseY = self.height() - currentPos.y()
+                my = self.height() - currentPos.y()
                 _top = self.height()
 
-            # translate from screen (0..w, 0..h) to NDC (-1..1, -1..1) to axes (axisL, axisR, axisT, axisB)
-            result = self.mouseTransform.dot([_mouseX, _mouseY, 0.0, 1.0])
+            mt = self.mouseTransform * QtGui.QVector4D(mx, my, 0.0, 1.0)
+            result = (mt.x(), mt.y(), mt.z(), mt.w())
 
         else:
             result = self.cursorCoordinate

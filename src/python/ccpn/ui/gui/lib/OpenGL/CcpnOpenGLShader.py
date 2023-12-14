@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 18:10:31 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 18:49:09 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -206,24 +206,35 @@ class ShaderProgramABC(object):
     # Common methods
     #=========================================================================================
 
+    # @staticmethod
+    # def setViewportMatrix(viewMatrix, left, right, bottom, top, near, far):
+    #     """Set the contents of the viewport matrix
+    #     """
+    #     # return the viewport transformation matrix - mapping screen to NDC
+    #     #   normalised device coordinates
+    #     #   viewport * NDC_co-ord = world_co-ord
+    #     oa = (right - left) / 2.0  #if abs(right-left) > 1.0e-7 else 1.0
+    #     ob = (top - bottom) / 2.0  #if abs(top-bottom) > 1.0e-7 else 1.0
+    #     oc = (far - near) / 2.0  #if abs(far-near) > 1.0e-7 else 1.0
+    #     og = (right + left) / 2.0
+    #     oe = (top + bottom) / 2.0
+    #     od = (near + far) / 2.0
+    #
+    #     viewMatrix[0:16] = [oa, 0.0, 0.0, og,
+    #                         0.0, ob, 0.0, oe,
+    #                         0.0, 0.0, oc, od,
+    #                         0.0, 0.0, 0.0, 1.0]
+
     @staticmethod
-    def setViewportMatrix(viewMatrix, left, right, bottom, top, near, far):
+    def getViewportMatrix(left, right, bottom, top, near, far):
         """Set the contents of the viewport matrix
         """
-        # return the viewport transformation matrix - mapping screen to NDC
-        #   normalised device coordinates
-        #   viewport * NDC_co-ord = world_co-ord
-        oa = (right - left) / 2.0  #if abs(right-left) > 1.0e-7 else 1.0
-        ob = (top - bottom) / 2.0  #if abs(top-bottom) > 1.0e-7 else 1.0
-        oc = (far - near) / 2.0  #if abs(far-near) > 1.0e-7 else 1.0
-        og = (right + left) / 2.0
-        oe = (top + bottom) / 2.0
-        od = (near + far) / 2.0
+        # return the viewport transformation matrix - mapping screen to NDC (normalised device coordinates)
+        #   this is equivalent to - identity-translate-scale
+        viewMat = QtGui.QMatrix4x4()
+        viewMat.viewport(left, bottom, right - left, top - bottom, near, far)
 
-        viewMatrix[0:16] = [oa, 0.0, 0.0, og,
-                            0.0, ob, 0.0, oe,
-                            0.0, 0.0, oc, od,
-                            0.0, 0.0, 0.0, 1.0]
+        return viewMat
 
     #=========================================================================================
     # Methods available - Common attributes sizes

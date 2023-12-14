@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 18:35:04 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 18:49:09 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -1012,7 +1012,6 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self._axisScale = np.zeros((4,), dtype=np.float32)
         self._background = np.zeros((4,), dtype=np.float32)
         self._parameterList = np.zeros((4,), dtype=np.int32)
-        # self._view = np.zeros((4,), dtype=np.float32)
         self._updateBackgroundColour = True
 
         # get information from the parent class (strip)
@@ -2006,18 +2005,16 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             currentPos = self.mapFromGlobal(QtGui.QCursor.pos())
 
             # calculate mouse coordinate within the mainView
-            _mouseX = currentPos.x()
+            mx = currentPos.x()
             if not self._fullHeightRightAxis:
-                _mouseY = self.height() - currentPos.y() - self.AXIS_MOUSEYOFFSET
+                my = self.height() - currentPos.y() - self.AXIS_MOUSEYOFFSET
                 _top = self.height() - self.AXIS_MOUSEYOFFSET
             else:
-                _mouseY = self.height() - currentPos.y()
+                my = self.height() - currentPos.y()
                 _top = self.height()
 
-            # translate from screen (0..w, 0..h) to NDC (-1..1, -1..1) to axes (axisL, axisR, axisT, axisB)
-            result = self.mouseTransform.dot([_mouseX, _mouseY, 0.0, 1.0])
-
-            # print('updated current pos GLWidget:', currentPos, self.height(), self.AXIS_MOUSEYOFFSET, result[:2])
+            result = self.mouseTransform * QtGui.QVector4D(mx, my, 0.0, 1.0)
+            result = (result.x(), result.y(), result.z(), result.w())
 
         else:
             result = self.cursorCoordinate
@@ -2386,41 +2383,26 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         # get the dimensions of the main view for the current strip
         vpwidth, vpheight = self._parentStrip.mainViewSize()
-        shader.setViewportMatrix(self._uVMatrix, 0, vpwidth, 0, vpheight,
-                                        -1.0, 1.0)
+        self._uVMatrix = shader.getViewportMatrix(0, vpwidth, 0, vpheight, -1.0, 1.0)
 
         self.pixelX = (self.axisR - self.axisL) / vpwidth
         self.pixelY = (self.axisT - self.axisB) / vpheight
         self.deltaX = 1.0 / vpwidth
         self.deltaY = 1.0 / vpheight
 
-        # self._dataMatrix[0:16] = [self.axisL, self.axisR, self.axisT, self.axisB,
-        #                           self.pixelX, self.pixelY, w, h,
-        #                           0.2, 1.0, 0.4, 1.0,
-        #                           0.3, 0.1, 1.0, 1.0]
-        # shader.setGLUniformMatrix4fv('dataMatrix', 1, GL.GL_FALSE, self._dataMatrix)
         shader.setMVMatrixToIdentity()
 
         # map mouse coordinates to world coordinates - only needs to change on resize, move soon
-        shader.setViewportMatrix(self._aMatrix, self.axisL, self.axisR, self.axisB,
-                                        self.axisT, -1.0, 1.0)
+        self._aMatrix = shader.getViewportMatrix(self.axisL, self.axisR, self.axisB,
+                                                 self.axisT, -1.0, 1.0)
 
         # calculate the screen to axes transform
-        self.vInv = np.linalg.inv(self._uVMatrix.reshape((4, 4)))
-        self.mouseTransform = np.matmul(self._aMatrix.reshape((4, 4)), self.vInv)
+        self.vInv = self._uVMatrix.inverted()
+        self.mouseTransform = self._aMatrix * self.vInv[0]
 
-        # NOTE:ED - raising numpy runtimewarnings as errors
-        # with np.errstate(all='raise'):
-        #     try:
-        #         self.mouseTransform = np.matmul(self._aMatrix.reshape((4, 4)), self.vInv)
-        #     except Exception as es:
-        #         # catch runtime error and set to identity
-        #         print('>>> RuntimeWarning', str(es))
-        #         self.mouseTransform = self._IMatrix
-
-        self.modelViewMatrix = (GL.GLdouble * 16)()
-        self.projectionMatrix = (GL.GLdouble * 16)()
-        self.viewport = (GL.GLint * 4)()
+        # self.modelViewMatrix = (GL.GLdouble * 16)()
+        # self.projectionMatrix = (GL.GLdouble * 16)()
+        # self.viewport = (GL.GLint * 4)()
 
         # change to the text shader
         self._axisScale = QtGui.QVector4D(self.pixelX, self.pixelY, 1.0, 1.0)

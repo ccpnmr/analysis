@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 14:45:47 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 15:10:36 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -150,7 +150,7 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
     def _updateHighlightedSymbols(self, spectrumView, integralListView):
         drawList = self._GLSymbols[integralListView]
         drawList._rebuild()
-        drawList.updateTextArrayVBOColour()
+        drawList.pushTextArrayVBOColour()
 
     def _updateHighlightedLabels(self, spectrumView, objListView):
         if objListView not in self._GLLabels:
@@ -184,7 +184,7 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
                         cols = listCol
                     drawStr.setStringColour((*cols, GLDefs.INPLANEFADE))
 
-                drawStr.updateTextArrayVBOColour()
+                drawStr.pushTextArrayVBOColour()
 
     def drawSymbols(self, spectrumSettings, shader=None, stackingMode=True):
         if self.strip.isDeleted:

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 14:45:47 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 15:10:36 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -289,7 +289,7 @@ class GLSimpleStrings():
                 obj.setStringHexColour(_posColours[0], alpha=1.0)
 
                 # redefine the string's colour VBOs
-                obj.updateTextArrayVBOColour()
+                obj.pushTextArrayVBOColour()
 
             except Exception as es:
                 getLogger().warning('error setting string colour')
@@ -420,7 +420,7 @@ class GLSimpleLegend(GLSimpleStrings):
                 stringObj.setStringHexColour(_posColours[0], alpha=1.0)
 
                 # redefine the string's colour VBOs
-                stringObj.updateTextArrayVBOColour()
+                stringObj.pushTextArrayVBOColour()
 
             except Exception as es:
                 getLogger().warning('error setting legend string colour')

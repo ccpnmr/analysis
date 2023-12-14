@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 14:45:47 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 15:10:36 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -251,7 +251,7 @@ class GLLabelling():
 
                             self._removeArrow(spectrumView, objListView, obj)
                             # self._updateHighlightedArrows(spectrumView, objListView)
-                            self._GLArrows[objListView].updateAliasedIndexVBO()
+                            self._GLArrows[objListView].pushAliasedIndexVBO()
                             break
 
     # from ccpn.util.decorators import profile
@@ -270,7 +270,7 @@ class GLLabelling():
 
                             self._appendArrow(spectrumView, objListView, obj)
                             # self._updateHighlightedArrows(spectrumView, objListView)
-                            self._GLArrows[objListView].updateAliasedIndexVBO()
+                            self._GLArrows[objListView].pushAliasedIndexVBO()
                             break
 
     def _changeArrow(self, obj):
@@ -288,7 +288,7 @@ class GLLabelling():
                             self._removeArrow(spectrumView, objListView, obj)
                             self._appendArrow(spectrumView, objListView, obj)
                             # self._updateHighlightedArrows(spectrumView, objListView)
-                            self._GLArrows[objListView].updateAliasedIndexVBO()
+                            self._GLArrows[objListView].pushAliasedIndexVBO()
                             break
 
     def _removeArrow(self, spectrumView, objListView, delObj):
@@ -967,8 +967,8 @@ class GLLabelling():
             indexStart += numPoints
             vertexStart += numPoints
 
-        drawList.updateIndexVBOIndices()
-        drawList.updateTextArrayVBOColour()
+        drawList.pushIndexVBOIndices()
+        drawList.pushTextArrayVBOColour()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Handle notifiers
@@ -989,7 +989,7 @@ class GLLabelling():
 
                             self._removeSymbol(spectrumView, objListView, obj)
                             # self._updateHighlightedSymbols(spectrumView, objListView)
-                            self._GLSymbols[objListView].updateAliasedIndexVBO()
+                            self._GLSymbols[objListView].pushAliasedIndexVBO()
                             break
 
     # from ccpn.util.decorators import profile
@@ -1009,7 +1009,7 @@ class GLLabelling():
 
                             self._appendSymbol(spectrumView, objListView, obj)
                             # self._updateHighlightedSymbols(spectrumView, objListView)
-                            self._GLSymbols[objListView].updateAliasedIndexVBO()
+                            self._GLSymbols[objListView].pushAliasedIndexVBO()
                             break
 
     def _changeSymbol(self, obj):
@@ -1028,7 +1028,7 @@ class GLLabelling():
                             self._removeSymbol(spectrumView, objListView, obj)
                             self._appendSymbol(spectrumView, objListView, obj)
                             # self._updateHighlightedSymbols(spectrumView, objListView)
-                            self._GLSymbols[objListView].updateAliasedIndexVBO()
+                            self._GLSymbols[objListView].pushAliasedIndexVBO()
                             break
 
     def _deleteLabel(self, obj, parentList, spectrum):
@@ -2074,7 +2074,7 @@ class GLLabelling():
                             cols = listCol
 
                         drawStr.setStringColour((*cols, fade))
-                    drawStr.updateTextArrayVBOColour()
+                    drawStr.pushTextArrayVBOColour()
 
     def updateHighlightSymbols(self):
         """Respond to an update highlight notifier and update the highlighted symbols/labels
@@ -2260,8 +2260,8 @@ class GLLabelling():
         else:
             raise ValueError('GL Error: bad symbol type')
 
-        drawList.updateIndexVBOIndices()
-        drawList.updateTextArrayVBOColour()
+        drawList.pushIndexVBOIndices()
+        drawList.pushTextArrayVBOColour()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Rescaling
@@ -3071,8 +3071,8 @@ class GL1dLabelling():
             indexStart += numPoints
             vertexStart += numPoints
 
-        drawList.updateIndexVBOIndices()
-        drawList.updateTextArrayVBOColour()
+        drawList.pushIndexVBOIndices()
+        drawList.pushTextArrayVBOColour()
 
     def _buildArrows(self, spectrumView, objListView):
         spectrum = spectrumView.spectrum
@@ -3211,8 +3211,8 @@ class GL1dLabelling():
                 indexStart += numPoints
                 vertexStart += numPoints
 
-            drawList.updateIndexVBOIndices()
-            drawList.updateTextArrayVBOColour()
+            drawList.pushIndexVBOIndices()
+            drawList.pushTextArrayVBOColour()
 
         elif symbolType == 1 or symbolType == 2:
             pass

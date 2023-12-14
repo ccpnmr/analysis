@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 14:45:47 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 15:10:36 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -295,8 +295,6 @@ class GLmultipletListMethods():
             # get the correct coordinates based on the axisCodes
             pp = peak.pointPositions
             try:
-                # p1 = (pp[pIndex[0]] - 1.0, pp[pIndex[1]] - 1.0, alias, 0.0)
-                # posList += p1
                 _x, _y = pp[pIndex[0]] - 1.0, pp[pIndex[1]] - 1.0
                 posList += (_x, _y, alias, 0.0)
             except Exception:
@@ -331,8 +329,6 @@ class GLmultipletListMethods():
             # get the correct coordinates based on the axisCodes
             pp = peak.pointPositions
             try:
-                # p1 = (pp[pIndex[0]] - 1.0, pp[pIndex[1]] - 1.0, alias, 0.0)
-                # posList += p1
                 _x, _y = pp[pIndex[0]] - 1.0, pp[pIndex[1]] - 1.0
                 posList += (_x, _y, alias, 0.0)
             except Exception:

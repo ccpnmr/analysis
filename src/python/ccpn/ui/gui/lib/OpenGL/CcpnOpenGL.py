@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 18:59:15 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 19:09:09 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -466,16 +466,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self.w = 0
         self.h = 0
 
-        self._uPMatrix = np.zeros((16,), dtype=np.float32)
-        self._uMVMatrix = np.zeros((16,), dtype=np.float32)
-        self._uVMatrix = np.zeros((16,), dtype=np.float32)
-        self._dataMatrix = np.zeros((16,), dtype=np.float32)
-        self._aMatrix = np.zeros((16,), dtype=np.float32)
-        self._IMatrix = np.zeros((16,), dtype=np.float32)
-        self._IMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
-                               0.0, 1.0, 0.0, 0.0,
-                               0.0, 0.0, 1.0, 0.0,
-                               0.0, 0.0, 0.0, 1.0]
+        self._uVMatrix = QtGui.QMatrix4x4()
+        self._aMatrix = QtGui.QMatrix4x4()
 
         self.vInv = None
         self.mouseTransform = None
@@ -3249,7 +3241,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
         GL.glClear(GL.GL_COLOR_BUFFER_BIT)
         GL.glEnable(GL.GL_MULTISAMPLE)
-        GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE)
 
         shader = self.globalGL._shaderProgram1.bind()
 

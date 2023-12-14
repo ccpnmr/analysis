@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 18:59:15 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 19:09:09 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -657,15 +657,20 @@ class GuiNdWidget(CcpnGLWidget):
                     self._axisScale = QtGui.QVector4D(foldX * self.pixelX / xScale, foldY * self.pixelY / yScale, 1.0, 1.0)
                     shader.setAxisScale(self._axisScale)
 
-                    specMatrix[:16] = [xScale * foldX, 0.0, 0.0, 0.0,
-                                       0.0, yScale * foldY, 0.0, 0.0,
-                                       0.0, 0.0, 1.0, 0.0,
-                                       fxMax + (ii * dxAF) + foldXOffset, fyMax + (jj * dyAF) + foldYOffset, 0.0, 1.0]
+                    # specMatrix[:16] = [xScale * foldX, 0.0, 0.0, 0.0,
+                    #                    0.0, yScale * foldY, 0.0, 0.0,
+                    #                    0.0, 0.0, 1.0, 0.0,
+                    #                    fxMax + (ii * dxAF) + foldXOffset, fyMax + (jj * dyAF) + foldYOffset, 0.0, 1.0]
+
+                    mm = QtGui.QMatrix4x4()
+                    mm.translate(fxMax + (ii * dxAF) + foldXOffset, fyMax + (jj * dyAF) + foldYOffset)
+                    mm.scale(xScale * foldX, yScale * foldY, 1.0)
+                    shader.setMV(mm)
 
                     # flipping in the same GL region -  xScale = -xScale
                     #                                   offset = fx0-dxAF
                     # circular -    offset = fx0 + dxAF*alias, alias = min->max
-                    shader.setMVMatrix(specMatrix)
+                    # shader.setMVMatrix(specMatrix)
                     shader.setAliasPosition(ii, jj)
 
                     if self._peakLabelsEnabled:
@@ -720,12 +725,12 @@ class GuiNdWidget(CcpnGLWidget):
                     mm = QtGui.QMatrix4x4()
                     mm.translate(fxMax + (ii * dxAF) + foldXOffset, fyMax + (jj * dyAF) + foldYOffset)
                     mm.scale(xScale * foldX, yScale * foldY, 1.0)
+                    shader.setMV(mm)
 
                     # flipping in the same GL region -  xScale = -xScale
                     #                                   offset = fx0-dxAF
                     # circular -    offset = fx0 + dxAF*alias, alias = min->max
                     # _shader.setMVMatrix(specMatrix)
-                    shader.setMV(mm)
                     shader.setAliasPosition(ii, jj)
 
                     if peakArrowsEnabled:

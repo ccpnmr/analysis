@@ -5,8 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-02 15:53:01 +0000 (Thu, November 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 16:39:50 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -790,7 +790,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         GL.glClear(GL.GL_COLOR_BUFFER_BIT)
         GL.glEnable(GL.GL_MULTISAMPLE)
 
-        currentShader = self.globalGL._shaderProgram1.makeCurrent()
+        currentShader = self.globalGL._shaderProgram1.bind()
 
         # start with the grid mapped to (0..1, 0..1) to remove zoom errors here
         currentShader.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
@@ -800,7 +800,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             # draw the grid components
             self.drawGrid()
 
-        currentShader = self.globalGL._shaderProgramTex.makeCurrent()
+        currentShader = self.globalGL._shaderProgramTex.bind()
 
         self._axisScale[:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
         currentShader.setAxisScale(self._axisScale)
@@ -1680,11 +1680,11 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         GL.glClearColor(*col)
         self.background = np.array(col, dtype=np.float32)
 
-        self.globalGL._shaderProgramTex.makeCurrent()
+        self.globalGL._shaderProgramTex.bind()
         self.globalGL._shaderProgramTex.setBackground(self.background)
-        self.globalGL._shaderProgramAlias.makeCurrent()
+        self.globalGL._shaderProgramAlias.bind()
         self.globalGL._shaderProgramAlias.setBackground(self.background)
-        self.globalGL._shaderProgramTexAlias.makeCurrent()
+        self.globalGL._shaderProgramTexAlias.bind()
         self.globalGL._shaderProgramTexAlias.setBackground(self.background)
         if not silent:
             self.update()
@@ -2350,7 +2350,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         w = self.w
         h = self.h
 
-        currentShader = self.globalGL._shaderProgram1.makeCurrent()
+        currentShader = self.globalGL._shaderProgram1.bind()
 
         # set projection to axis coordinates
         currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
@@ -2423,7 +2423,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self.viewport = (GL.GLint * 4)()
 
         # change to the text shader
-        currentShader = self.globalGL._shaderProgramTex.makeCurrent()
+        currentShader = self.globalGL._shaderProgramTex.bind()
 
         currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
         currentShader.setPTexMatrix(self._uPMatrix)

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 14:45:47 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 16:56:13 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -43,13 +43,44 @@ class TextShader(ShaderProgramABC):
 
     Shader for plotting text, uses a billboard technique by using an _offset to determine pixel positions
     Colour of the pixel is set by glColorPointer array.
-    Alpha value is grabbed from the texture to give anti-aliasing and modified by the 'alpha' attribute to
+    Alpha value is grabbed from the texture to give antialiasing and modified by the 'alpha' attribute to
     affect overall transparency.
     """
 
     name = 'textShader'
     CCPNSHADER = True
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # shader attributes
+
+    _PMATRIX = 'pTexMatrix'
+    _AXISSCALE = 'axisScale'
+    _STACKOFFSET = 'stackOffset'
+    _VIEWPORT = 'viewport'
+    _GLCOLOR = 'glColor'
+    _GLMULTITEXCOORD = 'glMultiTexCoord'
+    _OFFSET = 'offset'
+    _TEXTURE = 'texture'
+    _BACKGROUND = 'background'
+    _BLENDENABLED = 'blendEnabled'
+    _ALPHA = 'alpha'
+
+    # attribute/uniform lists for shaders - needs to be a duplicate
+    attributes = {_GLCOLOR        : None,
+                  _GLMULTITEXCOORD: None,
+                  _OFFSET         : None,
+                  }
+    uniforms = {_PMATRIX     : (16, np.float32),
+                _AXISSCALE   : (2, np.float32),
+                _STACKOFFSET : (2, np.float32),
+                _VIEWPORT    : (3, np.float32),
+                _TEXTURE     : (1, np.uint32),
+                _BACKGROUND  : (4, np.float32),
+                _BLENDENABLED: (1, np.uint32),
+                _ALPHA       : (1, np.float32),
+                }
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # shader for plotting anti-aliased text to the screen
     vertexShader = """
         #version 120
@@ -99,15 +130,15 @@ class TextShader(ShaderProgramABC):
         }
         """
 
-    # attribute list for shader
-    attributes = {'pTexMatrix'  : (16, np.float32),
-                  'axisScale'   : (4, np.float32),
-                  'stackOffset' : (2, np.float32),
-                  'texture'     : (1, np.uint32),
-                  'background'  : (4, np.float32),
-                  'blendEnabled': (1, np.uint32),
-                  'alpha'       : (1, np.float32),
-                  }
+    # # attribute list for shader
+    # attributes = {'pTexMatrix'  : (16, np.float32),
+    #               'axisScale'   : (4, np.float32),
+    #               'stackOffset' : (2, np.float32),
+    #               'texture'     : (1, np.uint32),
+    #               'background'  : (4, np.float32),
+    #               'blendEnabled': (1, np.uint32),
+    #               'alpha'       : (1, np.float32),
+    #               }
 
     #=========================================================================================
     # methods available
@@ -191,13 +222,31 @@ class AliasedTextShader(TextShader):
 
     Shader for plotting text, uses a billboard technique by using an _offset to determine pixel positions
     Colour of the pixel is set by glColorPointer array.
-    Alpha value is grabbed from the texture to give anti-aliasing and modified by the 'alpha' attribute to
+    Alpha value is grabbed from the texture to give antialiasing and modified by the 'alpha' attribute to
     affect overall transparency.
     """
 
     name = 'aliasedTextShader'
     CCPNSHADER = True
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # additional shader attributes
+
+    _MVMATRIX = 'mvMatrix'
+    _ALIASPOSITION = 'aliasPosition'
+    _ALIASSHADE = 'aliasShade'
+    _ALIASENABLED = 'aliasEnabled'
+
+    # additional attribute/uniform lists for shaders - needs to be a duplicate
+    uniforms = dict(TextShader.uniforms)
+
+    uniforms |= {_MVMATRIX     : (16, np.float32),
+                 _ALIASPOSITION: (1, np.float32),
+                 _ALIASSHADE   : (1, np.float32),
+                 _ALIASENABLED : (1, np.uint32),
+                 }
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # shader for plotting smooth text to the screen in aliased Regions
     vertexShader = """
         #version 120
@@ -272,23 +321,21 @@ class AliasedTextShader(TextShader):
         }
         """
 
-    """
-    """
-    # additional attribute list for shader
-    _attributes = {
-        'mvMatrix'     : (16, np.float32),
-        'aliasPosition': (1, np.float32),
-        'aliasShade'   : (1, np.float32),
-        'aliasEnabled' : (1, np.uint32),
-        }
+    # # additional attribute list for shader
+    # _attributes = {
+    #     'mvMatrix'     : (16, np.float32),
+    #     'aliasPosition': (1, np.float32),
+    #     'aliasShade'   : (1, np.float32),
+    #     'aliasEnabled' : (1, np.uint32),
+    #     }
 
     #=========================================================================================
     # methods available
     #=========================================================================================
 
-    def __init__(self):
-        self.attributes.update(self._attributes)
-        super().__init__()
+    # def __init__(self):
+    #     self.attributes.update(self._attributes)
+    #     super().__init__()
 
     def setMVMatrix(self, matrix):
         """Set the contents of viewport mvMatrix

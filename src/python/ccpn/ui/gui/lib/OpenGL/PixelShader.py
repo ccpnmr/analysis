@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 14:45:47 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 16:56:13 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -48,6 +48,19 @@ class PixelShader(ShaderProgramABC):
     name = 'pixelShader'
     CCPNSHADER = True
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # shader attributes/uniforms
+
+    _PMATRIX = 'pMatrix'
+    _MVMATRIX = 'mvMatrix'
+
+    # attribute/uniform lists for shaders
+    attributes = {}
+    uniforms = {_PMATRIX : (16, np.float32),
+                _MVMATRIX: (16, np.float32),
+                }
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # vertex shader to determine the co-ordinates
     vertexShader = """
         #version 120
@@ -77,10 +90,10 @@ class PixelShader(ShaderProgramABC):
         }
         """
 
-    # attribute list for shader
-    attributes = {'pMatrix' : (16, np.float32),
-                  'mvMatrix': (16, np.float32),
-                  }
+    # # attribute list for shader
+    # attributes = {'pMatrix' : (16, np.float32),
+    #               'mvMatrix': (16, np.float32),
+    #               }
 
     #=========================================================================================
     # methods available
@@ -115,6 +128,26 @@ class AliasedPixelShader(PixelShader):
     name = 'aliasedPixelShader'
     CCPNSHADER = True
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # additional shader attributes
+
+    _ALIAS = 'alias'
+    _ALIASPOSITION = 'aliasPosition'
+    _BACKGROUND = 'background'
+    _ALIASSHADE = 'aliasShade'
+    _ALIASENABLED = 'aliasEnabled'
+
+    # attribute/uniform lists for shaders - needs to be a duplicate
+    attributes = {_ALIAS: (1, np.float32)}
+    uniforms = {PixelShader._PMATRIX : (16, np.float32),
+                PixelShader._MVMATRIX: (16, np.float32),
+                _ALIASPOSITION       : (1, np.float32),  # change to a set
+                _BACKGROUND          : (4, np.float32),
+                _ALIASSHADE          : (1, np.float32),
+                _ALIASENABLED        : (1, np.uint32),
+                }
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # vertex shader to determine the co-ordinates
     vertexShader = """
         #version 120
@@ -163,21 +196,21 @@ class AliasedPixelShader(PixelShader):
         }
         """
 
-    # additional attribute list for shader
-    _attributes = {
-        'aliasPosition': (1, np.float32),
-        'background'   : (4, np.float32),
-        'aliasShade'   : (1, np.float32),
-        'aliasEnabled' : (1, np.uint32),
-        }
+    # # additional attribute list for shader
+    # _attributes = {
+    #     'aliasPosition': (1, np.float32),
+    #     'background'   : (4, np.float32),
+    #     'aliasShade'   : (1, np.float32),
+    #     'aliasEnabled' : (1, np.uint32),
+    #     }
 
     #=========================================================================================
     # methods available
     #=========================================================================================
 
-    def __init__(self):
-        self.attributes.update(self._attributes)
-        super().__init__()
+    # def __init__(self):
+    #     self.attributes.update(self._attributes)
+    #     super().__init__()
 
     def setAliasPosition(self, aliasX, aliasY):
         """Set the alias position:

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 18:49:09 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 18:59:15 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -1701,14 +1701,16 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         """
         self._overlayArea.setOverlayArea(value)
 
-    def enableTextClientState(self):
+    @staticmethod
+    def enableTextClientState():
         _attribArrayIndex = 1
         GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
         GL.glEnableClientState(GL.GL_COLOR_ARRAY)
         GL.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY)
         GL.glEnableVertexAttribArray(_attribArrayIndex)
 
-    def disableTextClientState(self):
+    @staticmethod
+    def disableTextClientState():
         _attribArrayIndex = 1
         GL.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY)
         GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
@@ -1810,6 +1812,8 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         if self._axesVisible:
             self.buildAxisLabels()
 
+            shader = self.globalGL._shaderProgramTex
+
             if self._drawBottomAxis and self._drawRightAxis:
                 # NOTE:ED - this case should never occur
                 return
@@ -1819,9 +1823,8 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 self.viewports.setViewport(self._currentBottomAxisBarView)
 
                 self._axisScale = QtGui.QVector4D(self.deltaX, 1.0, 1.0, 1.0)
-                self.globalGL._shaderProgramTex.setAxisScale(self._axisScale)
-                self.globalGL._shaderProgramTex.setProjection(0.0, 1.0, 0,
-                                                                  self.AXIS_MARGINBOTTOM, -1.0, 1.0)
+                shader.setAxisScale(self._axisScale)
+                shader.setProjection(0.0, 1.0, 0, self.AXIS_MARGINBOTTOM, -1.0, 1.0)
 
                 for lb in self._axisXLabelling:
                     lb.drawTextArrayVBO()
@@ -1831,9 +1834,8 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 self.viewports.setViewport(self._currentRightAxisBarView)
 
                 self._axisScale = QtGui.QVector4D(1.0, self.deltaY, 1.0, 1.0)
-                self.globalGL._shaderProgramTex.setAxisScale(self._axisScale)
-                self.globalGL._shaderProgramTex.setProjection(0, self.AXIS_MARGINRIGHT,
-                                                                  0.0, 1.0, -1.0, 1.0)
+                shader.setAxisScale(self._axisScale)
+                shader.setProjection(0, self.AXIS_MARGINRIGHT, 0.0, 1.0, -1.0, 1.0)
 
                 for lb in self._axisYLabelling:
                     lb.drawTextArrayVBO()
@@ -2351,8 +2353,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         shader = self.globalGL._shaderProgram1.bind()
 
         # set projection to axis coordinates
-        shader.setProjection(self.axisL, self.axisR, self.axisB,
-                                        self.axisT, -1.0, 1.0)
+        shader.setProjection(self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
 
         # needs to be offset from (0,0) for mouse scaling
         if self._drawRightAxis and self._drawBottomAxis:

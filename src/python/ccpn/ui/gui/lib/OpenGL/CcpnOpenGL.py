@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 18:49:09 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 18:59:15 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -3172,7 +3172,8 @@ class CcpnGLWidget(QOpenGLWidget):
             self._paintGLMouseOnly()
 
     # @contextmanager
-    def _disableGLAliasing(self):
+    @staticmethod
+    def _disableGLAliasing():
         """Disable aliasing for the contained routines
         """
         try:
@@ -3182,7 +3183,8 @@ class CcpnGLWidget(QOpenGLWidget):
             GL.glEnable(GL.GL_MULTISAMPLE)
 
     # @contextmanager
-    def _enableGLAliasing(self):
+    @staticmethod
+    def _enableGLAliasing():
         """Enable aliasing for the contained routines
         """
         try:
@@ -3260,11 +3262,10 @@ class CcpnGLWidget(QOpenGLWidget):
             self.drawGrid()
 
         # set the scale to the axis limits, needs addressing correctly, possibly same as grid
-        shader.setProjection(self.axisL, self.axisR, self.axisB,
-                                        self.axisT, -1.0, 1.0)
+        shader.setProjection(self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
 
         # draw the spectra, need to reset the viewport
-        self.viewports.setViewport(self._currentView)
+        _w, _h = self.viewports.setViewport(self._currentView)
 
         self.drawSpectra()
         self.drawBoundingBoxes()
@@ -3349,7 +3350,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # make the overlay/axis solid
         shader.setBlendEnabled(False)
         self.drawOverlayText()
-        self.drawAxisLabels()
+        self.drawAxisLabels(shader)
         shader.setBlendEnabled(True)
 
         self.disableTextClientState()
@@ -3365,7 +3366,8 @@ class CcpnGLWidget(QOpenGLWidget):
         # GL.glActiveTexture(GL.GL_TEXTURE1)
         # GL.glBindTexture(GL.GL_TEXTURE_2D, self.getSmallFont(transparent=True).textureId)
 
-    def disableTexture(self):
+    @staticmethod
+    def disableTexture():
         GL.glDisable(GL.GL_BLEND)
 
     def buildAllContours(self):
@@ -3424,14 +3426,16 @@ class CcpnGLWidget(QOpenGLWidget):
         if rebuildFlag:
             self.rebuildTraces()
 
-    def enableTextClientState(self):
+    @staticmethod
+    def enableTextClientState():
         _attribArrayIndex = 1
         GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
         GL.glEnableClientState(GL.GL_COLOR_ARRAY)
         GL.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY)
         GL.glEnableVertexAttribArray(_attribArrayIndex)
 
-    def disableTextClientState(self):
+    @staticmethod
+    def disableTextClientState():
         _attribArrayIndex = 1
         GL.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY)
         GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
@@ -3692,7 +3696,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                      colour=labelColour, GLContext=self,
                                                      obj=None))
 
-    def drawAxisLabels(self):
+    def drawAxisLabels(self, shader):
         # draw axes labelling
 
         if self._axesVisible:
@@ -3700,24 +3704,34 @@ class CcpnGLWidget(QOpenGLWidget):
 
             if self._drawBottomAxis:
                 # put the axis labels into the bottom bar
-                self.viewports.setViewport(self._currentBottomAxisBarView)
+                _w, _h = self.viewports.setViewport(self._currentBottomAxisBarView)
 
                 self._axisScale = QtGui.QVector4D(self.deltaX, 1.0, 1.0, 1.0)
-                self.globalGL._shaderProgramTex.setAxisScale(self._axisScale)
-                self.globalGL._shaderProgramTex.setProjection(0.0, 1.0, 0,
-                                                                  self.AXIS_MARGINBOTTOM, -1.0, 1.0)
+                shader.setAxisScale(self._axisScale)
+                shader.setProjection(0.0, 1.0, 0,
+                                     self.AXIS_MARGINBOTTOM, -1.0, 1.0)
+                # shader.setViewport(QtGui.QVector4D(_w // self.devicePixelRatio(),
+                #                                    _h // self.devicePixelRatio(),
+                #                                    self.devicePixelRatioF(), 0.0
+                #                                    )
+                #                    )
 
                 for lb in self._axisXLabelling:
                     lb.drawTextArrayVBO()
 
             if self._drawRightAxis:
                 # put the axis labels into the right bar
-                self.viewports.setViewport(self._currentRightAxisBarView)
+                _w, _h = self.viewports.setViewport(self._currentRightAxisBarView)
 
                 self._axisScale = QtGui.QVector4D(1.0, self.deltaY, 1.0, 1.0)
-                self.globalGL._shaderProgramTex.setAxisScale(self._axisScale)
-                self.globalGL._shaderProgramTex.setProjection(0, self.AXIS_MARGINRIGHT,
-                                                                  0.0, 1.0, -1.0, 1.0)
+                shader.setAxisScale(self._axisScale)
+                shader.setProjection(0, self.AXIS_MARGINRIGHT,
+                                     0.0, 1.0, -1.0, 1.0)
+                # shader.setViewport(QtGui.QVector4D(_w // self.devicePixelRatio(),
+                #                                    _h // self.devicePixelRatio(),
+                #                                    self.devicePixelRatioF(), 0.0
+                #                                    )
+                #                    )
 
                 for lb in self._axisYLabelling:
                     lb.drawTextArrayVBO()
@@ -6502,7 +6516,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 if len(spectrumView.spectrum.axisCodes) == 1:
                     # should be sub-classed somewhere!
-                    # xOffset, yOffset = self._spectrumSettings[spectrumView].get(GLDefs.SPECTRUM_STACKEDMATRIXOFFSET)
                     xOffset, yOffset = self._spectrumSettings[spectrumView].stackedMatrixOffset
                     xDim, yDim = self._spectrumSettings[spectrumView].dimensionIndices
 

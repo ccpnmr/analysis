@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 17:51:48 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 18:59:15 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -678,8 +678,7 @@ class GuiNdWidget(CcpnGLWidget):
         """
         shader = self.globalGL._shaderProgramAlias.bind()
         # set the scale to the axis limits, needs addressing correctly, possibly same as grid
-        shader.setProjection(self.axisL, self.axisR, self.axisB,
-                                  self.axisT, -1.0, 1.0)
+        shader.setProjection(self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
 
         lineThickness = self._symbolThickness
         GL.glLineWidth(lineThickness * self.viewports.devicePixelRatio)
@@ -713,15 +712,20 @@ class GuiNdWidget(CcpnGLWidget):
                         foldY = pow(-1, jj)
                         foldYOffset = -dyAF if foldY < 0 else 0
 
-                    specMatrix[:16] = [xScale * foldX, 0.0, 0.0, 0.0,
-                                       0.0, yScale * foldY, 0.0, 0.0,
-                                       0.0, 0.0, 1.0, 0.0,
-                                       fxMax + (ii * dxAF) + foldXOffset, fyMax + (jj * dyAF) + foldYOffset, 0.0, 1.0]
+                    # specMatrix[:16] = [xScale * foldX, 0.0, 0.0, 0.0,
+                    #                    0.0, yScale * foldY, 0.0, 0.0,
+                    #                    0.0, 0.0, 1.0, 0.0,
+                    #                    fxMax + (ii * dxAF) + foldXOffset, fyMax + (jj * dyAF) + foldYOffset, 0.0, 1.0]
+
+                    mm = QtGui.QMatrix4x4()
+                    mm.translate(fxMax + (ii * dxAF) + foldXOffset, fyMax + (jj * dyAF) + foldYOffset)
+                    mm.scale(xScale * foldX, yScale * foldY, 1.0)
 
                     # flipping in the same GL region -  xScale = -xScale
                     #                                   offset = fx0-dxAF
                     # circular -    offset = fx0 + dxAF*alias, alias = min->max
-                    shader.setMVMatrix(specMatrix)
+                    # _shader.setMVMatrix(specMatrix)
+                    shader.setMV(mm)
                     shader.setAliasPosition(ii, jj)
 
                     if peakArrowsEnabled:
@@ -857,15 +861,20 @@ class GuiNdWidget(CcpnGLWidget):
                             foldY = pow(-1, jj)
                             foldYOffset = -dyAF if foldY < 0 else 0
 
-                        specMatrix[:16] = [xScale * foldX, 0.0, 0.0, 0.0,
-                                           0.0, yScale * foldY, 0.0, 0.0,
-                                           0.0, 0.0, 1.0, 0.0,
-                                           fxMax + (ii * dxAF) + foldXOffset, fyMax + (jj * dyAF) + foldYOffset, 0.0, 1.0]
+                        # specMatrix[:16] = [xScale * foldX, 0.0, 0.0, 0.0,
+                        #                    0.0, yScale * foldY, 0.0, 0.0,
+                        #                    0.0, 0.0, 1.0, 0.0,
+                        #                    fxMax + (ii * dxAF) + foldXOffset, fyMax + (jj * dyAF) + foldYOffset, 0.0, 1.0]
+
+                        mm = QtGui.QMatrix4x4()
+                        mm.translate(fxMax + (ii * dxAF) + foldXOffset, fyMax + (jj * dyAF) + foldYOffset)
+                        mm.scale(xScale * foldX, yScale * foldY, 1.0)
+                        shader.setMV(mm)
 
                         # flipping in the same GL region -  xScale = -xScale
                         #                                   offset = fxMax-dxAF
                         # circular -    offset = fxMax + dxAF*alias, alias = min->max
-                        shader.setMVMatrix(specMatrix)
+                        # shader.setMVMatrix(specMatrix)
 
                         self._contourList[spectrumView].drawIndexVBO()
 
@@ -1869,20 +1878,19 @@ class Gui1dWidget(CcpnGLWidget):
                         foldY = pow(-1, jj)
                         foldYOffset = -dyAF if foldY < 0 else 0
 
+                    mm = QtGui.QMatrix4x4()
                     if self._stackingMode:
-                        _matrix = np.array(specSettings.stackedMatrix)
-                    else:
-                        _matrix = np.array(self._IMatrix)
+                        mm.translate(*specSettings.stackedMatrixOffset)
 
                     if self.spectrumDisplay._flipped:
-                        _matrix[5] = yScale * foldY
-                        _matrix[13] += (fyMax + (jj * dyAF) + foldYOffset)
+                        mm.translate(0, fyMax + (jj * dyAF) + foldYOffset)
+                        mm.scale(1.0, yScale * foldY, 1.0)
                         self._axisScale = QtGui.QVector4D(self.pixelX,
                                                 foldY * self.pixelY / yScale,
                                                 0.0, 1.0)
                     else:
-                        _matrix[0] = xScale * foldX
-                        _matrix[12] += (fxMax + (ii * dxAF) + foldXOffset)
+                        mm.translate(fxMax + (ii * dxAF) + foldXOffset, 0)
+                        mm.scale(xScale * foldX, 1.0, 1.0)
                         self._axisScale = QtGui.QVector4D(foldX * self.pixelX / xScale,
                                                 self.pixelY,
                                                 0.0, 1.0)
@@ -1890,7 +1898,7 @@ class Gui1dWidget(CcpnGLWidget):
                     # flipping in the same GL region -  xScale = -xScale
                     #                                   offset = fx0-dxAF
                     # circular -    offset = fx0 + dxAF*alias, alias = min->max
-                    shader.setMVMatrix(_matrix)
+                    shader.setMV(mm)
                     shader.setAxisScale(self._axisScale)
                     shader.setAliasPosition(ii, jj)
 
@@ -1904,8 +1912,7 @@ class Gui1dWidget(CcpnGLWidget):
         """
         shader = self.globalGL._shaderProgramAlias.bind()
         # set the scale to the axis limits, needs addressing correctly, possibly same as grid
-        shader.setProjection(self.axisL, self.axisR, self.axisB,
-                                  self.axisT, -1.0, 1.0)
+        shader.setProjection(self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
 
         lineThickness = self._symbolThickness
         GL.glLineWidth(lineThickness * self.viewports.devicePixelRatio)
@@ -1938,23 +1945,22 @@ class Gui1dWidget(CcpnGLWidget):
                         foldY = pow(-1, jj)
                         foldYOffset = -dyAF if foldY < 0 else 0
 
+                    mm = QtGui.QMatrix4x4()
                     if self._stackingMode:
-                        _matrix = np.array(specSettings.stackedMatrix)
-                    else:
-                        _matrix = np.array(self._IMatrix)
+                        mm.translate(*specSettings.stackedMatrixOffset)
 
                     if self.spectrumDisplay._flipped:
                         # NOTE:ED - still too much hard-coding :|
-                        _matrix[5] = yScale * foldY
-                        _matrix[13] += (fyMax + (jj * dyAF) + foldYOffset)
+                        mm.translate(0, fyMax + (jj * dyAF) + foldYOffset)
+                        mm.scale(1.0, yScale * foldY, 1.0)
                     else:
-                        _matrix[0] = xScale * foldX
-                        _matrix[12] += (fxMax + (ii * dxAF) + foldXOffset)
+                        mm.translate(fxMax + (ii * dxAF) + foldXOffset, 0)
+                        mm.scale(xScale * foldX, 1.0, 1.0)
 
                     # flipping in the same GL region -  xScale = -xScale
                     #                                   offset = fx0-dxAF
                     # circular -    offset = fx0 + dxAF*alias, alias = min->max
-                    shader.setMVMatrix(_matrix)
+                    shader.setMV(mm)
                     shader.setAliasPosition(ii, jj)
 
                     if peakArrowsEnabled:
@@ -2074,19 +2080,18 @@ class Gui1dWidget(CcpnGLWidget):
                             foldY = pow(-1, jj)
                             foldYOffset = (2 * fyMax - dyAF) if foldY < 0 else 0
 
+                        mm = QtGui.QMatrix4x4()
                         if self._stackingMode:
-                            _matrix = np.array(specSettings.stackedMatrix)
-                        else:
-                            _matrix = np.array(self._IMatrix)
+                            mm.translate(*specSettings.stackedMatrixOffset)
 
                         if self.spectrumDisplay._flipped:
-                            _matrix[5] = foldY
-                            _matrix[13] += (jj * dyAF) + foldYOffset
+                            mm.translate(0, (jj * dyAF) + foldYOffset)
+                            mm.scale(1.0, foldY, 1.0)
                         else:
-                            _matrix[0] = foldX
-                            _matrix[12] += (ii * dxAF) + foldXOffset
+                            mm.translate((ii * dxAF) + foldXOffset, 0)
+                            mm.scale(foldX, 1.0, 1.0)
 
-                        shader.setMVMatrix(_matrix)
+                        shader.setMV(mm)
 
                         if spectrumView in self._contourList:
                             self._contourList[spectrumView].drawVertexColorVBO()
@@ -2095,11 +2100,11 @@ class Gui1dWidget(CcpnGLWidget):
                     if spectrumView in self._contourList.keys() and \
                             (spectrumView not in specTraces or self.showSpectraOnPhasing):
 
+                        # use the stacking matrix to offset the 1D spectra
+                        mm = QtGui.QMatrix4x4()
                         if self._stackingMode:
-                            # use the stacking matrix to offset the 1D spectra
-                            shader.setMVMatrix(self._spectrumSettings[spectrumView].stackedMatrix)
-                        else:
-                            shader.setMVMatrixToIdentity()
+                            mm.translate(*specSettings.stackedMatrixOffset)
+                        shader.setMV(mm)
                         # draw contours
                         if spectrumView in self._contourList:
                             self._contourList[spectrumView].drawVertexColorVBO()

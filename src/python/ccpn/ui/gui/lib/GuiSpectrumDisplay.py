@@ -5,8 +5,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-02 15:52:59 +0000 (Thu, November 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 14:46:02 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -447,7 +447,6 @@ class GuiSpectrumDisplay(CcpnModule):
                                                                 grid=(0, 0),
                                                                 xTexts=AXISUNITS, xAxisUnits=_general.xAxisUnits,
                                                                 yTexts=AXISUNITS, yAxisUnits=_general.yAxisUnits,
-                                                                # yTexts=_yTexts, yAxisUnits=_yAx,
                                                                 showXAxis=True if _showY else not bool(self._flipped),
                                                                 showYAxis=True if _showY else bool(self._flipped),
                                                                 _baseAspectRatioAxisCode=_general._baseAspectRatioAxisCode,

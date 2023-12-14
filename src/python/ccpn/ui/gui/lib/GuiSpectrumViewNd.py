@@ -5,8 +5,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-02 15:52:59 +0000 (Thu, November 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 14:46:02 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,8 @@ import numpy as np
 from itertools import product
 from collections import namedtuple
 from PyQt5 import QtCore
+from numba import jit
+
 from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView, SpectrumCache
 from ccpn.util import Colour
 from ccpn.util.Logging import getLogger
@@ -255,23 +257,64 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                                                           np.array(_negColours, dtype=np.float32),
                                                           not self._application.preferences.general.generateSinglePlaneContours)
 
-
         except Exception as es:
             getLogger().warning(f'Contouring error: {es}')
 
         finally:
             if contourList and contourList[1] > 0:
+
+                # self._expand(contourList[2])  # indices compressed inplace
+
                 # set the contour arrays for the GL object
                 glList.numVertices = contourList[1]
                 glList.indices = contourList[2]
                 glList.vertices = contourList[3]
                 glList.colors = contourList[4]
+
             else:
                 # clear the arrays
                 glList.numVertices = 0
                 glList.indices = np.array((), dtype=np.uint32)
                 glList.vertices = np.array((), dtype=np.float32)
                 glList.colors = np.array((), dtype=np.float32)
+
+            ...
+
+    # from ccpn.util.decorators import profile
+    #
+    # @profile()
+    # def _expand(self, indices):
+    #     size = self._expandContours(indices)
+    #
+    #     # inplace resizing of indices to remove spares at end
+    #     np.ndarray.resize(indices, size, refcheck=False)
+    #
+    #     return size
+    #
+    # @staticmethod
+    # @jit(nopython=True, nogil=True)
+    # def _expandContours(indices):
+    #     newInd = 1
+    #     for ind in range(1, len(indices) - 2, 2):
+    #         val0 = indices[ind]
+    #         val1 = indices[ind+1]
+    #
+    #         if val0 == val1:
+    #             # only need one copy of the vertex
+    #             indices[newInd] = val0
+    #             newInd += 1
+    #         else:
+    #             # close the last loop and start a new loop
+    #             indices[newInd] = val0
+    #             indices[newInd+1] = 0xFFFFFFFF  # loop restart flag
+    #             indices[newInd+2] = val1
+    #             newInd += 3
+    #
+    #     # last index
+    #     indices[newInd] = indices[-1]
+    #     indices[newInd + 1] = 0xFFFFFFFF  # loop restart flag - although resizing should remove the rest
+    #
+    #     return (newInd + 1)
 
     @staticmethod
     def _interpolateColours(colourList, levels):

@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 15:20:38 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 18:35:04 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -561,25 +561,26 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         # re-enable notifiers
         self.project.unblankNotification()
 
-    def setBackgroundColour(self, col, silent=False, makeCurrent=True):
+    def setBackgroundColour(self, col, silent=False, makeCurrent=False):
         """
         set all background colours in the shaders
         :param col - vec4, 4 element list e.g.: [0.05, 0.05, 0.05, 1.0], very dark gray
         """
         if makeCurrent:
             self.makeCurrent()
-        GL.glClearColor(*col)
-        self.background = col
 
+        GL.glClearColor(*col)
+        self.background = np.array(col, dtype=np.float32)
+        bg = QtGui.QVector4D(*col)
         shader = self.globalGL._shaderProgramTex
         shader.bind()
-        shader.setBackground(self.background)
+        shader.setBackground(bg)
         shader = self.globalGL._shaderProgramAlias
         shader.bind()
-        shader.setBackground(self.background)
+        shader.setBackground(bg)
         shader = self.globalGL._shaderProgramTexAlias
         shader.bind()
-        shader.setBackground(self.background)
+        shader.setBackground(bg)
 
         if not silent:
             self.update()

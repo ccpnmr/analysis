@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 18:10:31 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 18:35:04 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -251,12 +251,7 @@ class AliasedPixelShader(PixelShader):
         values outside range will be clipped
         :param colour: tuple/list
         """
-        if len(colour) != 4 and not isinstance(colour, (list, tuple, type(np.array))):
-            raise TypeError('colour must tuple/list/numpy.array of 4 elements')
-        if not all(isinstance(col, (float, np.float32)) for col in colour):
-            raise TypeError('colour must be tuple/list/numpy.array of float/np.float32')
-
-        self.setGLUniform4fv('background', 1, np.clip(colour, [0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 1.0, 1.0]))
+        self._shader.setUniformValue(self.locations[self._BACKGROUND], colour)
 
     def setAliasShade(self, aliasShade):
         """Set the alias shade: a single float in range [0.0, 1.0]

@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 17:51:48 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-14 18:35:03 +0000 (Thu, December 14, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -2074,22 +2074,31 @@ class CcpnGLWidget(QOpenGLWidget):
         # self._fixedStringTrue = GLString(text=GLDefs.FIXEDSTRING, font=smallFont, x=0, y=0,
         #                                  colour=self.highlightColour, GLContext=self)
 
-    def setBackgroundColour(self, col, silent=False):
+    def setBackgroundColour(self, col, silent=False, makeCurrent=False):
         """
         set all background colours in the shaders
         :param col - vec4, 4 element list e.g.: [0.05, 0.05, 0.05, 1.0], very dark gray
         """
+        if makeCurrent:
+            self.makeCurrent()
+
         GL.glClearColor(*col)
         self.background = np.array(col, dtype=np.float32)
+        bg = QtGui.QVector4D(*col)
+        shader = self.globalGL._shaderProgramTex
+        shader.bind()
+        shader.setBackground(bg)
+        shader = self.globalGL._shaderProgramAlias
+        shader.bind()
+        shader.setBackground(bg)
+        shader = self.globalGL._shaderProgramTexAlias
+        shader.bind()
+        shader.setBackground(bg)
 
-        self.globalGL._shaderProgramTex.bind()
-        self.globalGL._shaderProgramTex.setBackground(self.background)
-        self.globalGL._shaderProgramAlias.bind()
-        self.globalGL._shaderProgramAlias.setBackground(self.background)
-        self.globalGL._shaderProgramTexAlias.bind()
-        self.globalGL._shaderProgramTexAlias.setBackground(self.background)
         if not silent:
             self.update()
+        if makeCurrent:
+            self.doneCurrent()
 
     def mapMouseToAxis(self, pnt):
         if isinstance(pnt, QPoint):

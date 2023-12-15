@@ -7,6 +7,9 @@ import re
 from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown, ChemicalShiftListPulldown, ChainPulldown
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.ListWidget import ListWidgetPair
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
+import json
+
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.lib.GuiPath import PathEdit
 from ccpn.ui.gui.widgets.Label import Label
@@ -16,8 +19,7 @@ from ccpn.ui.gui.widgets.HLine import LabeledHLine
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.util.Path import aPath
 from ccpn.core.DataTable import TableFrame
-
-
+from ccpn.util.traits.CcpNmrTraits import Path
 
 class MMCif_DataSelectorImporter(CcpnDialogMainWidget):
     """
@@ -40,12 +42,14 @@ class MMCif_DataSelectorImporter(CcpnDialogMainWidget):
             self.application = mainWindow.application
             self.current = self.application.current
             self.project = mainWindow.project
+            self.stateJsonPath = os.path.join(self.project.path,"state","MMCif_DataSelector.json")
 
         else:
             self.mainWindow = None
             self.application = None
             self.current = None
             self.project = None
+            self.stateJsonPath = ""
 
         self._createWidgets()
 
@@ -57,6 +61,39 @@ class MMCif_DataSelectorImporter(CcpnDialogMainWidget):
 
         # initialise the buttons and dialog size
         self._postInit()
+
+
+    def save_to_json(self, data, file_path):
+        """
+        Save a dictionary to a JSON file.
+
+        Parameters:
+        - data: The dictionary to be saved.
+        - file_path: The path to the JSON file.
+        """
+        with open(file_path, 'w') as json_file:
+            json.dump(data, json_file, indent=2)
+        json_file.close()
+
+    def load_from_json(self, file_path):
+        """
+        Load a dictionary from a JSON file.
+
+        Parameters:
+        - file_path: The path to the JSON file.
+
+        Returns:
+        - A dictionary containing the data from the JSON file.
+        If the file doesn't exist, returns an empty dictionary.
+        """
+        if os.path.exists(file_path):
+            with open(file_path, 'r') as json_file:
+                print(file_path, json_file)
+                data = json.load(json_file)
+            return data
+        else:
+            # If the file doesn't exist, return an empty dictionary
+            return {}
 
     def _getPathFromDialog(self):
         """Select a new path from using a dialog
@@ -81,15 +118,32 @@ class MMCif_DataSelectorImporter(CcpnDialogMainWidget):
         self.pathData = PathEdit(pathFrame, grid=(row, 1), gridSpan=(1, 1), vAlign='t')
         self.pathData.setMinimumWidth(400)
 
-        row += 1
         self.pathDataButton = Button(pathFrame, grid=(row, 2), callback=self._getPathFromDialog,
                                      icon='icons/directory', hPolicy='fixed')
-        self.pathData.set('/Users/Eliza/Downloads/2af8.cif')
+
+        if os.path.exists(self.stateJsonPath):
+            loaded_data = self.load_from_json(self.stateJsonPath)
+
+            try:
+                self.pathData.set(loaded_data['pathToMMCif'])
+            except:
+                print('No previous data')
 
         row += 1
-        self.listWidgetPair = ListWidgetPair(self, grid=(row, 0), gridSpan=(1, 2))
+        self.useChainInfo = ChainPulldown(parent=self.mainWidget,grid = (row,0))
 
         row += 1
+        ssFrame = Frame(parent=self.mainWidget, setLayout=True, grid=(row, 0), gridSpan=(1, 5))
+
+        self.SSLabel = Label(parent=ssFrame,
+                             text="Import Secondary Structure Data",
+                             grid=(0, 0), hAlign='left')
+
+        self.SecStructCheck = CheckBox(parent=ssFrame,
+                                       checked = True, grid = (0,1))
+
+        row += 1
+        self.listWidgetPair = ListWidgetPair(self.mainWidget, grid=(row, 0), gridSpan=(1, 2))
 
 
     def _okCallback(self):
@@ -98,20 +152,97 @@ class MMCif_DataSelectorImporter(CcpnDialogMainWidget):
         print(self.listWidgetPair.rightList.getTexts())
         loopNames = self.listWidgetPair.rightList.getTexts()
         pathToMMCif = self.pathData.get()
+        chain = self.useChainInfo.getSelectedObject()
+        chainInfo = True
+
+        data_to_save = {'pathToMMCif': pathToMMCif}
+        # Save data to JSON file
+        self.save_to_json(data_to_save, self.stateJsonPath)
+
+        if ("_struct_conf"  in loopNames) or ("_struct_sheet_range" in loopNames) or self.SecStructCheck.isChecked():
+
+            _struct_confDict = {}
+            if chainInfo:
+                for residue in chain.residues:
+                    _struct_confDict[int(residue.sequenceCode)] = {}
+                    _struct_confDict[int(residue.sequenceCode)]['sequenceCode']  = residue.sequenceCode
+                    _struct_confDict[int(residue.sequenceCode)]['residueType']  = residue.residueType
+                    _struct_confDict[int(residue.sequenceCode)]['residuePID'] = residue.pid
+                    _struct_confDict[int(residue.sequenceCode)]['conf_type_id'] = "COIL"
+
+            # user wants secondary structure data
+            try:
+                dfHelix = self.getLoopData(pathToMMCif, "_struct_conf")
+            except:
+                dfHelix = None
+
+            try:
+                dfSheet = self.getLoopData(pathToMMCif, "_struct_sheet_range")
+            except:
+                dfSheet = None
+
+            print("type dfHelix", type(dfHelix), "type dfSheet", type(dfSheet))
+
+
+            if dfHelix is not None:
+                # Iterate over rows in the DataFrame
+                print("dfHelix\n",dfHelix.tail())
+                for index, row in dfHelix.iterrows():
+                    # Get the relevant values from the row
+                    conf_type_id = row['conf_type_id']
+                    startTLC = row['beg_label_comp_id']
+                    startID = row['beg_label_seq_id']
+                    endTLC = row['end_label_comp_id']
+                    endID = row['end_label_seq_id']
+                    print(conf_type_id, startID, endID)
+                    # Iterate over the range between startID and endID
+                    for id in range(int(startID), int(endID) + 1):
+                        # Set dictionary values for each 'id'
+                        try:
+                            _struct_confDict[id]['conf_type_id'] = conf_type_id
+                        except:
+                            print("Not found error. Likely mismatch between Chain and mmcif sequence")
+
+            if dfSheet is not None:
+                # Iterate over rows in the DataFrame
+                for index, row in dfSheet.iterrows():
+                    # Get the relevant values from the row
+                    conf_type_id = 'STRN' # set sheet info to PDB type for Beta Strand
+                    startTLC = row['beg_label_comp_id']
+                    startID = row['beg_label_seq_id']
+                    endTLC = row['end_label_comp_id']
+                    endID = row['end_label_seq_id']
+
+                    # Iterate over the range between startID and endID
+                    for id in range(int(startID), int(endID) + 1):
+                        # Set dictionary values for each 'id'
+                        try:
+                            _struct_confDict[id]['conf_type_id'] = conf_type_id
+                        except:
+                            print("Not found error. Likely mismatch between Chain and mmcif sequence")
+
+
+            # Convert the nested dictionary to a Pandas DataFrame
+            df1 = pd.DataFrame.from_dict(_struct_confDict, orient='index')
+
+            # reset the index to have a separate column for the index values
+            df1.reset_index(inplace=True)
+            df1.rename(columns={'index': 'id'}, inplace=True)
+
+            self.project.newDataTable(name="SecondaryStructure", data=df1, comment='Secondary Structure Data from MMCIF')
+
+
         for loopName in loopNames:
-            print(loopName)
+            if loopName == '_atom_site':
+                from ccpn.util.StructureData import EnsembleData, averageStructure
+                ensemble = EnsembleData.from_mmcif(str(pathToMMCif))
+                se = self.newStructureEnsemble(name="EnsembleData", data=ensemble)
 
-            df = self.getLoopData(pathToMMCif, loopName)
-            print(df.head())
-            if loopName == '_struct_conf':
-                    
-                    for residue in chain.residues:
-                        residue.sequenceCode
-                        residue.shortName,
-                        residue.residueType
+            else:
+                df = self.getLoopData(pathToMMCif, loopName)
+                print(df.head())
 
-
-            self.project.newDataTable(name=loopName, data=df, comment='MMCif Data '+loopName)
+                self.project.newDataTable(name=loopName, data=df, comment='MMCif Data '+loopName)
 
 
 
@@ -143,13 +274,12 @@ class MMCif_DataSelectorImporter(CcpnDialogMainWidget):
 
     def getLoopData(self, filename, loopName) -> pd.DataFrame:
         """
-        Create a Pandas DataFrame from an mmCIF file.
+        Create a Pandas DataFrame from an mmCIF file and a specified loop.
         """
         columns = []
         atomData = []
         loop_ = False
         _atom_siteLoop = False
-        print(filename)
         with open(filename) as f:
             for l in f:
                 l = l.strip()
@@ -174,8 +304,6 @@ class MMCif_DataSelectorImporter(CcpnDialogMainWidget):
                     split_data = [item.strip("'") for item in split_data]
                     atomData.append(split_data)
 
-
-        print(atomData, columns)
         df = pd.DataFrame(atomData, columns=columns)
         # df = df.infer_objects()  # This method returns the DataFrame with inferred data types
         df['idx'] = numpy.arange(1, df.shape[0] + 1)  # Create an 'idx' column

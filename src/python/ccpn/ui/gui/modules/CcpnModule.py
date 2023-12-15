@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-08-17 14:06:48 +0100 (Thu, August 17, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-12-15 17:04:44 +0000 (Fri, December 15, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -182,7 +182,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     settingsMinimumSizes = (100, 50)
     _restored = False
     _onlySingleInstance = False
-    _includeInLastSeen = True  # whether to restore or not after closing it (in the same project)
+    _includeInLastSeen = False  # whether to restore or not after closing it (in the same project)
     _allowRename = False
     _defaultName = MODULENAME  # used only when renaming is allowed, so that its original name is stored in the lastSeen widgetsState.
     _helpFilePath = None

@@ -69,8 +69,8 @@ class Application(QtWidgets.QApplication):
 
 class TestApplication(Application):
 
-    def __init__(self):
-        Application.__init__(self, 'testApplication', '1.0')
+    def __init__(self, applicationName='testApplication', applicationVersion='1.0.0',):
+        Application.__init__(self, applicationName=applicationName, applicationVersion=applicationVersion)
 
 
 def newTestApplication(projectPath=None, useTestProjects=False,

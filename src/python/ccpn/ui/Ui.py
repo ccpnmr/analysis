@@ -52,9 +52,21 @@ class Ui(NotifierBase):
 
     def __init__(self, application):
 
-        self.application = application
-        self.mainWindow = None
+        self._application = application
+        self._mainWindow = None
         self.pluginModules = []
+
+    @property
+    def application(self):
+        """:return the Application instance
+        """
+        return self._application
+
+    @property
+    def mainWindow(self):
+        """:return the MainWindow instance
+        """
+        return self._mainWindow
 
     @property
     def project(self):

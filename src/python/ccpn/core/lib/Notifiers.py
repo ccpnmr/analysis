@@ -54,6 +54,7 @@ import weakref
 DEBUG = False
 _debugIds = ()
 
+_STRICT = True  # Flag to enforce type checking; relaxed for testing v3memic code
 
 # _debugIds = (75, 84, 92, 94,95,96)  # for these _id's, debug will be True. This allows for selective debugging
 
@@ -545,9 +546,27 @@ class NotifierBase(object):
         # add the notifier
         objNotifiers[_id] = notifier
 
+    def _newNotifier(self, triggers: list, targetName: str, callback: Callable[..., Optional[str]], setterObject=None, **kwargs) -> Notifier:
+        """Create a new Notifier instance for self
+
+        :param triggers: list of triggers to trigger callback
+        :param targetName: valid className, attributeName or None (See Notifier doc string for details)
+        :param callback: callback function with signature: callback(obj, parameter2 [, *args] [, **kwargs])
+        :param **kwargs: optional keyword,value arguments to call back
+        :return: a Notifier instance
+
+        """
+        _notifier = Notifier(theObject=self,
+                             triggers=triggers,
+                             targetName=targetName,
+                             callback=callback,
+                             setterObject=setterObject,
+                             **kwargs)
+        return _notifier
+
     def setNotifier(self, theObject: 'AbstractWrapperObject', triggers: list, targetName: str, callback: Callable[..., Optional[str]], **kwargs) -> Notifier:
         """
-        Set Notifier for Ccpn V3 object theObject
+        Set Notifier for Ccpn V3 object theObject; store in own CcpNmrNotifiersDict for management.
 
         :param theObject: V3 object to register a notifier with
         :param triggers: list of triggers to trigger callback
@@ -556,14 +575,32 @@ class NotifierBase(object):
         :param **kwargs: optional keyword,value arguments to call back
         :return: a Notifier instance
         """
-        notifier = Notifier(theObject=theObject,
-                            triggers=triggers,
-                            targetName=targetName,
-                            callback=callback,
-                            setterObject=self,
-                            **kwargs)
-        self._addNotifier(notifier)
-        return notifier
+        from ccpn.framework.Current import Current
+        if isinstance(theObject, Current):
+            result = Notifier(theObject=theObject,
+                                triggers=triggers,
+                                targetName=targetName,
+                                callback=callback,
+                                setterObject=self,
+                                **kwargs)
+        else:
+            # GWV 15/12/23: This allows subclassing during v3mimic development
+            result = theObject._newNotifier(
+                                triggers=triggers,
+                                targetName=targetName,
+                                callback=callback,
+                                setterObject=self,
+                                **kwargs
+            )
+        if isinstance(result, list):
+            for _notifier in result:
+                self._addNotifier(_notifier)
+        elif isinstance(result, Notifier):
+            self._addNotifier(result)
+        else:
+            raise RuntimeError(f'setNotifier: unexpected result; got {result}')
+
+        return result
 
     def setGuiNotifier(self, theObject: 'AbstractWrapperObject', triggers: list, targetName: str, callback: Callable[..., Optional[str]], **kwargs) -> Notifier:
         """

@@ -205,7 +205,7 @@ class Gui(Ui):
         with notificationEchoBlocking():
             with undoStackBlocking():
                 # Set up mainWindow
-                self.mainWindow = self._setupMainWindow(mainWindow)
+                self._mainWindow = self._setupMainWindow(mainWindow)
                 self.application._initGraphics()
                 self.mainWindow._updateRestoreArchiveMenu()
                 self.application._updateCheckableMenuItems()

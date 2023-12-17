@@ -214,8 +214,8 @@ class NotesEditorModule(CcpnModule):
         change calls on any other attribute
         """
         self._noteNotifier = self.setNotifier(self.project,
-                                              [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE],
-                                              Note.__name__,
+                                              [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
+                                              Note.className,
                                               self._updateCallback)
         self._droppedNotifier = self.setGuiNotifier(self.mainWidget,
                                                    [GuiNotifier.DROPEVENT], [DropBase.PIDS],

@@ -360,7 +360,7 @@ def _newStripPlotFAItem(strip):
 
 def _deleteIntegralItem(strip):
     return _SCMitem(name='Delete Integral(s)',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Delete Integral(s) from project', callback=strip.mainWindow.deleteSelectedItems)
+                    typeItem=ItemTypes.get(ITEM), toolTip='Delete Integral(s) from project', callback=strip.mainWindow._deleteSelectedItems)
 
 
 ##############################  Common Multiplet menu items ##############################
@@ -368,7 +368,7 @@ def _deleteIntegralItem(strip):
 
 def _deleteMultipletItem(strip):
     return _SCMitem(name='Delete Multiplet(s)',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Delete Multiplet(s) from project', callback=strip.mainWindow.deleteSelectedItems)
+                    typeItem=ItemTypes.get(ITEM), toolTip='Delete Multiplet(s) from project', callback=strip.mainWindow._deleteSelectedItems)
 
 
 ##############################  Common Peak menu items ##############################
@@ -390,7 +390,7 @@ def _deletePeakItem():
     _app = getApplication()
     return _SCMitem(name='Delete Peak(s)',
                     typeItem=ItemTypes.get(ITEM), toolTip='Delete Peak(s) from project',
-                    callback=_app.mainWindow.deleteSelectedItems)
+                    callback=_app.mainWindow._deleteSelectedItems)
 
 
 def _editPeakAssignmentItem():
@@ -412,7 +412,7 @@ def _deassignPeaksItem():
     _app = getApplication()
     return _SCMitem(name='Deassign Peak(s)',
                     typeItem=ItemTypes.get(ITEM), toolTip='Deassign Peaks',
-                    callback=_app.mainWindow.deassignPeaks)
+                    callback=_app.mainWindow._deassignPeaks)
 
 
 def _setPeakAliasingItem():
@@ -421,7 +421,7 @@ def _setPeakAliasingItem():
     _app = getApplication()
     return _SCMitem(name='Set Aliasing...',
                     typeItem=ItemTypes.get(ITEM), toolTip='Set aliasing for current peak(s)',
-                    callback=_app.mainWindow.setPeakAliasing)
+                    callback=_app.mainWindow._setPeakAliasing)
 
 
 def _centreOnSelectedPeak():

@@ -48,22 +48,29 @@ class PythonConsoleModule(CcpnModule):
     # _helpFilePath = ccpnModuleHelpPath / 'PythonConsoleModuleHelp.html'
 
 
-    def __init__(self, mainWindow, name='Python Console', closeFunc=None, **kwds):
+    def __init__(self, mainWindow, name='Python Console', pythonConsoleWidget=None, closeFunc=None, **kwds):
+        """Create the iPython console module
+
+        """
         CcpnModule.__init__(self, mainWindow=mainWindow, name=name, closeFunc=closeFunc)
 
         self.mainWindow = mainWindow
         self.application = mainWindow.application
-        self.pythonConsoleWidget = self.mainWindow.pythonConsole
+
+        if not pythonConsoleWidget:
+            pythonConsoleWidget = self.mainWindow.pythonConsole
+        self.pythonConsoleWidget = pythonConsoleWidget
+
         if self.pythonConsoleWidget is None:  # For some reason it can get destroid!
             self.mainWindow.pythonConsole = self.pythonConsoleWidget = IpythonConsole(self)
         self.mainWidget.getLayout().addWidget(self.pythonConsoleWidget)
 
         self.pythonConsoleWidget._startChannels()
-        self.mainWindow.pythonConsoleModule = self
-        self._menuAction = self.mainWindow._findMenuAction('View', 'Python Console')
-        if self._menuAction:
-            self._menuAction.setChecked(True)
-
+        # self.mainWindow.pythonConsoleModule = self
+        # self._menuAction = self.mainWindow._findMenuAction('View', 'Python Console')
+        # if self._menuAction:
+        #     self._menuAction.setChecked(True)
+        #
         row = 0
         self.settingsEditorCheckBox = CheckBox(self.settingsWidget, checked=True, text='Show logging window', callback=self._toggleTextEditor,
                                                grid=(row, 0))

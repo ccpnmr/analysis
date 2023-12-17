@@ -1448,7 +1448,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
     #-----------------------------------------------------------------------------------------
     # Code moved from previously lib.GuiWindow
     #-----------------------------------------------------------------------------------------
-    def deassignPeaks(self):
+    def _deassignPeaks(self):
         """Deassign all from selected peaks
         """
         if self.current.peaks:
@@ -1458,7 +1458,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                     assignedDims = tuple([] for dd in assignedDims)
                     peak.dimensionNmrAtoms = assignedDims
 
-    def deleteSelectedItems(self, parent=None):
+    def _deleteSelectedItems(self, parent=None):
         """Delete peaks/integrals/multiplets from the project
         """
         # show simple delete items popup
@@ -1516,7 +1516,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         popup._selectPeaks(peaks)
         popup.exec_()
 
-    def setPeakAliasing(self):
+    def _setPeakAliasing(self):
         """Set the aliasing for the currently selected peaks
         """
         if self.current.peaks:
@@ -2393,4 +2393,4 @@ class MainWindow(_CoreClassMainWindow, GuiMainWindow):
         # patches for now:
         project._mainWindow = self
         application._mainWindow = self
-        application.ui.mainWindow = self
+        application.ui._mainWindow = self

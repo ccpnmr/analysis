@@ -16,13 +16,14 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-28 19:23:05 +0100 (Wed, June 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-15 11:58:48 +0000 (Wed, November 15, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
+
 #=========================================================================================
-__author__ = "$Author__author__ =  "$Author: Luca Mureddu $"
-__date__ = "$Date__date__ =    "$Date: 2021-05-20 12:34:46 +0100 (Thu, May 20, 2021) $"
+__author__ = "$Author: Luca Mureddu $"
+__date__ = "$Date: 2023-08-18 08:53:32 +0000 (Fri, August 18, 2023) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -45,7 +46,7 @@ spectra = current.strip.spectra #do only in the selected strip
 with undoBlockWithoutSideBar():
     mainWindow.clearMarks() # clean first the existing marks
     for spectrum in spectra:
-        positiveThreshold = spectrum.noiseLevel or spectrum.estimateNoise()
+        positiveThreshold = spectrum.noiseLevel
         negativeThreshold = spectrum.negativeNoiseLevel or -spectrum.noiseLevel
         hexColour = spectrum.sliceColour
         # Positive mark

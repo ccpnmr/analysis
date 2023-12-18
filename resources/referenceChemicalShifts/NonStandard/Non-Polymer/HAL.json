@@ -1,0 +1,44 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "HAL",
+  "compoundName": "N-{[2-({[1-(4-CARBOXYBUTANOYL)AMINO]-2-PHENYLETHYL}-HYDROXYPHOSPHINYL)OXY]ACETYL}-2-PHENYLETHYLAMINE",
+  "compoundCcpCode": "HAL",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "CA",
+      "atomElementName": "",
+      "atomAverageShift": 53.6,
+      "atomStdShift": 0,
+      "atomMinShift": 53.6,
+      "atomMaxShift": 53.6,
+      "atomDistributionRefValue": 53.6,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 6.3,
+      "atomStdShift": 0,
+      "atomMinShift": 6.3,
+      "atomMaxShift": 6.3,
+      "atomDistributionRefValue": 6.3,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

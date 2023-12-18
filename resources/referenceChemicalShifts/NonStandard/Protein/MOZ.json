@@ -1,0 +1,55 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "MOZ",
+  "compoundName": "(2Z)-2-amino-3-hydroxybut-2-enoic acid",
+  "compoundCcpCode": "MOZ",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "peptide linking",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H61",
+      "atomElementName": "",
+      "atomAverageShift": 1.492,
+      "atomStdShift": 0.057,
+      "atomMinShift": 1.451,
+      "atomMaxShift": 1.532,
+      "atomDistributionRefValue": 1.451,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H62",
+      "atomElementName": "",
+      "atomAverageShift": 1.492,
+      "atomStdShift": 0.057,
+      "atomMinShift": 1.451,
+      "atomMaxShift": 1.532,
+      "atomDistributionRefValue": 1.451,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H63",
+      "atomElementName": "",
+      "atomAverageShift": 1.492,
+      "atomStdShift": 0.057,
+      "atomMinShift": 1.451,
+      "atomMaxShift": 1.532,
+      "atomDistributionRefValue": 1.451,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "OMT",
+  "compoundName": "S-DIOXYMETHIONINE",
+  "compoundCcpCode": "OMT",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "L-peptide linking",
+  "compoundPrecursorName": "Methionine",
+  "atoms": [
+    {
+      "atomName": "CA",
+      "atomElementName": "",
+      "atomAverageShift": 54.857,
+      "atomStdShift": 0.038,
+      "atomMinShift": 54.83,
+      "atomMaxShift": 54.884,
+      "atomDistributionRefValue": 54.83,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CB",
+      "atomElementName": "",
+      "atomAverageShift": 26.49,
+      "atomStdShift": 0.003,
+      "atomMinShift": 26.488,
+      "atomMaxShift": 26.492,
+      "atomDistributionRefValue": 26.488,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CE",
+      "atomElementName": "",
+      "atomAverageShift": 42.43,
+      "atomStdShift": 0.008,
+      "atomMinShift": 42.424,
+      "atomMaxShift": 42.436,
+      "atomDistributionRefValue": 42.424,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CG",
+      "atomElementName": "",
+      "atomAverageShift": 52.944,
+      "atomStdShift": 0.008,
+      "atomMinShift": 52.938,
+      "atomMaxShift": 52.95,
+      "atomDistributionRefValue": 52.938,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 4.584,
+      "atomStdShift": 0.004,
+      "atomMinShift": 4.581,
+      "atomMaxShift": 4.587,
+      "atomDistributionRefValue": 4.581,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB2",
+      "atomElementName": "",
+      "atomAverageShift": 2.41,
+      "atomStdShift": 0.006,
+      "atomMinShift": 2.405,
+      "atomMaxShift": 2.414,
+      "atomDistributionRefValue": 2.405,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB3",
+      "atomElementName": "",
+      "atomAverageShift": 2.238,
+      "atomStdShift": 0.006,
+      "atomMinShift": 2.233,
+      "atomMaxShift": 2.242,
+      "atomDistributionRefValue": 2.233,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HE",
+      "atomElementName": "",
+      "atomAverageShift": 3.126,
+      "atomStdShift": 0.006,
+      "atomMinShift": 3.121,
+      "atomMaxShift": 3.13,
+      "atomDistributionRefValue": 3.121,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HG",
+      "atomElementName": "",
+      "atomAverageShift": 3.334,
+      "atomStdShift": 0.006,
+      "atomMinShift": 3.33,
+      "atomMaxShift": 3.338,
+      "atomDistributionRefValue": 3.33,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

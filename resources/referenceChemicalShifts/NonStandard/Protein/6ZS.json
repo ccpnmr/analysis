@@ -1,0 +1,77 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "6ZS",
+  "compoundName": "L-isovaline",
+  "compoundCcpCode": "6ZS",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "L-peptide linking",
+  "compoundPrecursorName": "Valine",
+  "atoms": [
+    {
+      "atomName": "H1",
+      "atomElementName": "",
+      "atomAverageShift": 0.823,
+      "atomStdShift": null,
+      "atomMinShift": 0.823,
+      "atomMaxShift": 0.823,
+      "atomDistributionRefValue": 0.823,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H10",
+      "atomElementName": "",
+      "atomAverageShift": 1.697,
+      "atomStdShift": null,
+      "atomMinShift": 1.697,
+      "atomMaxShift": 1.697,
+      "atomDistributionRefValue": 1.697,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H11",
+      "atomElementName": "",
+      "atomAverageShift": 1.736,
+      "atomStdShift": null,
+      "atomMinShift": 1.736,
+      "atomMaxShift": 1.736,
+      "atomDistributionRefValue": 1.736,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H4",
+      "atomElementName": "",
+      "atomAverageShift": 8.307,
+      "atomStdShift": null,
+      "atomMinShift": 8.307,
+      "atomMaxShift": 8.307,
+      "atomDistributionRefValue": 8.307,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H7",
+      "atomElementName": "",
+      "atomAverageShift": 1.411,
+      "atomStdShift": null,
+      "atomMinShift": 1.411,
+      "atomMaxShift": 1.411,
+      "atomDistributionRefValue": 1.411,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

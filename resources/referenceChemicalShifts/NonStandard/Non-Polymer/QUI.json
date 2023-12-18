@@ -1,0 +1,154 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "QUI",
+  "compoundName": "2-CARBOXYQUINOXALINE",
+  "compoundCcpCode": "QUI",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H1'",
+      "atomElementName": "",
+      "atomAverageShift": 4.093,
+      "atomStdShift": null,
+      "atomMinShift": 4.093,
+      "atomMaxShift": 4.093,
+      "atomDistributionRefValue": 4.093,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H10",
+      "atomElementName": "",
+      "atomAverageShift": 6.703,
+      "atomStdShift": null,
+      "atomMinShift": 6.703,
+      "atomMaxShift": 6.703,
+      "atomDistributionRefValue": 6.703,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H11",
+      "atomElementName": "",
+      "atomAverageShift": 7.59,
+      "atomStdShift": null,
+      "atomMinShift": 7.59,
+      "atomMaxShift": 7.59,
+      "atomDistributionRefValue": 7.59,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2",
+      "atomElementName": "",
+      "atomAverageShift": 7.276,
+      "atomStdShift": null,
+      "atomMinShift": 7.276,
+      "atomMaxShift": 7.276,
+      "atomDistributionRefValue": 7.276,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2'",
+      "atomElementName": "",
+      "atomAverageShift": 3.462,
+      "atomStdShift": null,
+      "atomMinShift": 3.462,
+      "atomMaxShift": 3.462,
+      "atomDistributionRefValue": 3.462,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H3",
+      "atomElementName": "",
+      "atomAverageShift": 7.217,
+      "atomStdShift": null,
+      "atomMinShift": 7.217,
+      "atomMaxShift": 7.217,
+      "atomDistributionRefValue": 7.217,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H4",
+      "atomElementName": "",
+      "atomAverageShift": 6.948,
+      "atomStdShift": null,
+      "atomMinShift": 6.948,
+      "atomMaxShift": 6.948,
+      "atomDistributionRefValue": 6.948,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H4'",
+      "atomElementName": "",
+      "atomAverageShift": 3.244,
+      "atomStdShift": null,
+      "atomMinShift": 3.244,
+      "atomMaxShift": 3.244,
+      "atomDistributionRefValue": 3.244,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H5",
+      "atomElementName": "",
+      "atomAverageShift": 7.599,
+      "atomStdShift": null,
+      "atomMinShift": 7.599,
+      "atomMaxShift": 7.599,
+      "atomDistributionRefValue": 7.599,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H5'",
+      "atomElementName": "",
+      "atomAverageShift": 1.236,
+      "atomStdShift": null,
+      "atomMinShift": 1.236,
+      "atomMaxShift": 1.236,
+      "atomDistributionRefValue": 1.236,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H8",
+      "atomElementName": "",
+      "atomAverageShift": 7,
+      "atomStdShift": null,
+      "atomMinShift": 7,
+      "atomMaxShift": 7,
+      "atomDistributionRefValue": 7,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H9",
+      "atomElementName": "",
+      "atomAverageShift": 7.053,
+      "atomStdShift": null,
+      "atomMinShift": 7.053,
+      "atomMaxShift": 7.053,
+      "atomDistributionRefValue": 7.053,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

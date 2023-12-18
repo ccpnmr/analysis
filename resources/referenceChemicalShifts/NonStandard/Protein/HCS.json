@@ -1,0 +1,88 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "HCS",
+  "compoundName": "2-AMINO-4-MERCAPTO-BUTYRIC ACID",
+  "compoundCcpCode": "HCS",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "L-peptide linking",
+  "compoundPrecursorName": "Cysteine",
+  "atoms": [
+    {
+      "atomName": "H",
+      "atomElementName": "",
+      "atomAverageShift": 7.953,
+      "atomStdShift": 0.484,
+      "atomMinShift": 7.61,
+      "atomMaxShift": 8.295,
+      "atomDistributionRefValue": 7.61,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB2",
+      "atomElementName": "",
+      "atomAverageShift": 1.912,
+      "atomStdShift": null,
+      "atomMinShift": 1.912,
+      "atomMaxShift": 1.912,
+      "atomDistributionRefValue": 1.912,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB3",
+      "atomElementName": "",
+      "atomAverageShift": 1.963,
+      "atomStdShift": null,
+      "atomMinShift": 1.963,
+      "atomMaxShift": 1.963,
+      "atomDistributionRefValue": 1.963,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HCA",
+      "atomElementName": "",
+      "atomAverageShift": 4.402,
+      "atomStdShift": 0.003,
+      "atomMinShift": 4.4,
+      "atomMaxShift": 4.404,
+      "atomDistributionRefValue": 4.4,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HG2",
+      "atomElementName": "",
+      "atomAverageShift": 2.485,
+      "atomStdShift": null,
+      "atomMinShift": 2.485,
+      "atomMaxShift": 2.485,
+      "atomDistributionRefValue": 2.485,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HG3",
+      "atomElementName": "",
+      "atomAverageShift": 2.642,
+      "atomStdShift": null,
+      "atomMinShift": 2.642,
+      "atomMaxShift": 2.642,
+      "atomDistributionRefValue": 2.642,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

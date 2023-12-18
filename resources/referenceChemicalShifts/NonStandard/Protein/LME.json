@@ -1,0 +1,88 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "LME",
+  "compoundName": "(2S,3R)-2-azanyl-3-methyl-pentanedioic acid",
+  "compoundCcpCode": "LME",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "L-peptide linking",
+  "compoundPrecursorName": "Glutamic Acid",
+  "atoms": [
+    {
+      "atomName": "H",
+      "atomElementName": "",
+      "atomAverageShift": 8.275,
+      "atomStdShift": null,
+      "atomMinShift": 8.275,
+      "atomMaxShift": 8.275,
+      "atomDistributionRefValue": 8.275,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 4.575,
+      "atomStdShift": null,
+      "atomMinShift": 4.575,
+      "atomMaxShift": 4.575,
+      "atomDistributionRefValue": 4.575,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB",
+      "atomElementName": "",
+      "atomAverageShift": 2.425,
+      "atomStdShift": null,
+      "atomMinShift": 2.425,
+      "atomMaxShift": 2.425,
+      "atomDistributionRefValue": 2.425,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HG1",
+      "atomElementName": "",
+      "atomAverageShift": 0.931,
+      "atomStdShift": null,
+      "atomMinShift": 0.931,
+      "atomMaxShift": 0.931,
+      "atomDistributionRefValue": 0.931,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HG22",
+      "atomElementName": "",
+      "atomAverageShift": 2.114,
+      "atomStdShift": null,
+      "atomMinShift": 2.114,
+      "atomMaxShift": 2.114,
+      "atomDistributionRefValue": 2.114,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HG23",
+      "atomElementName": "",
+      "atomAverageShift": 2.369,
+      "atomStdShift": null,
+      "atomMinShift": 2.369,
+      "atomMaxShift": 2.369,
+      "atomDistributionRefValue": 2.369,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

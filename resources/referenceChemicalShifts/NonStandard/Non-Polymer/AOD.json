@@ -1,0 +1,209 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "AOD",
+  "compoundName": "5-bromo-2-{[(1S,3R)-3-carboxycyclohexyl]amino}benzoic acid",
+  "compoundCcpCode": "AOD",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 3.89,
+      "atomStdShift": 0.305,
+      "atomMinShift": 3.477,
+      "atomMaxShift": 4.191,
+      "atomDistributionRefValue": 3.477,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB2",
+      "atomElementName": "",
+      "atomAverageShift": 1.423,
+      "atomStdShift": 0.139,
+      "atomMinShift": 1.227,
+      "atomMaxShift": 1.556,
+      "atomDistributionRefValue": 1.227,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB3",
+      "atomElementName": "",
+      "atomAverageShift": 1.423,
+      "atomStdShift": 0.139,
+      "atomMinShift": 1.227,
+      "atomMaxShift": 1.556,
+      "atomDistributionRefValue": 1.227,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HD2",
+      "atomElementName": "",
+      "atomAverageShift": 0.931,
+      "atomStdShift": 0.284,
+      "atomMinShift": 0.73,
+      "atomMaxShift": 1.132,
+      "atomDistributionRefValue": 0.73,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HD3",
+      "atomElementName": "",
+      "atomAverageShift": 0.931,
+      "atomStdShift": 0.284,
+      "atomMinShift": 0.73,
+      "atomMaxShift": 1.132,
+      "atomDistributionRefValue": 0.73,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HE2",
+      "atomElementName": "",
+      "atomAverageShift": 1.3,
+      "atomStdShift": 0.114,
+      "atomMinShift": 1.168,
+      "atomMaxShift": 1.372,
+      "atomDistributionRefValue": 1.168,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HE3",
+      "atomElementName": "",
+      "atomAverageShift": 1.3,
+      "atomStdShift": 0.114,
+      "atomMinShift": 1.168,
+      "atomMaxShift": 1.372,
+      "atomDistributionRefValue": 1.168,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HF2",
+      "atomElementName": "",
+      "atomAverageShift": 2.286,
+      "atomStdShift": 0.067,
+      "atomMinShift": 2.208,
+      "atomMaxShift": 2.328,
+      "atomDistributionRefValue": 2.208,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HF3",
+      "atomElementName": "",
+      "atomAverageShift": 2.286,
+      "atomStdShift": 0.067,
+      "atomMinShift": 2.208,
+      "atomMaxShift": 2.328,
+      "atomDistributionRefValue": 2.208,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HG2",
+      "atomElementName": "",
+      "atomAverageShift": 1.052,
+      "atomStdShift": 0.188,
+      "atomMinShift": 0.814,
+      "atomMaxShift": 1.254,
+      "atomDistributionRefValue": 0.814,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HG3",
+      "atomElementName": "",
+      "atomAverageShift": 1.052,
+      "atomStdShift": 0.188,
+      "atomMinShift": 0.814,
+      "atomMaxShift": 1.254,
+      "atomDistributionRefValue": 0.814,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HN",
+      "atomElementName": "",
+      "atomAverageShift": 7.536,
+      "atomStdShift": 0.444,
+      "atomMinShift": 6.938,
+      "atomMaxShift": 7.939,
+      "atomDistributionRefValue": 6.938,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HY2",
+      "atomElementName": "",
+      "atomAverageShift": 2.384,
+      "atomStdShift": 0.012,
+      "atomMinShift": 2.374,
+      "atomMaxShift": 2.398,
+      "atomDistributionRefValue": 2.374,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HY3",
+      "atomElementName": "",
+      "atomAverageShift": 2.384,
+      "atomStdShift": 0.012,
+      "atomMinShift": 2.374,
+      "atomMaxShift": 2.398,
+      "atomDistributionRefValue": 2.374,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HZ1",
+      "atomElementName": "",
+      "atomAverageShift": 0.915,
+      "atomStdShift": 0.003,
+      "atomMinShift": 0.913,
+      "atomMaxShift": 0.918,
+      "atomDistributionRefValue": 0.913,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HZ2",
+      "atomElementName": "",
+      "atomAverageShift": 0.915,
+      "atomStdShift": 0.003,
+      "atomMinShift": 0.913,
+      "atomMaxShift": 0.918,
+      "atomDistributionRefValue": 0.913,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HZ3",
+      "atomElementName": "",
+      "atomAverageShift": 0.915,
+      "atomStdShift": 0.003,
+      "atomMinShift": 0.913,
+      "atomMaxShift": 0.918,
+      "atomDistributionRefValue": 0.913,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-08-07 12:24:22 +0100 (Mon, August 07, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-10-10 20:03:17 +0100 (Tue, October 10, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -41,6 +41,7 @@ from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Chain as ApiChain
 from ccpnmodel.ccpncore.api.ccp.molecule import Molecule
 from ccpnmodel.ccpncore.api.ccp.lims import Sample
 
+NotFound = 'NotFound' # used to create missing residues
 
 class Chain(AbstractWrapperObject):
     """A molecular Chain, containing one or more Residues."""
@@ -158,7 +159,9 @@ class Chain(AbstractWrapperObject):
         """
         # extracted as function below.
         # - fires a single notifier for the chain creation
-        return _cloneChain(self, shortName=shortName)
+        raise DeprecationWarning('Clone has been deprecated in 3.2.1. Please use new chain')
+
+        # return _cloneChain(self, shortName=shortName)
 
     def _lock(self):
         """Finalise chain so that it can no longer be modified, and add missing data."""
@@ -216,6 +219,14 @@ class Chain(AbstractWrapperObject):
                 if c := residue.shortName:
                     sequence += c
         return sequence
+
+    @property
+    def sequenceCcpCode(self):
+        """
+        :return: A list of  CcpCodes used to build the sequence
+        """
+        ccpCodes = [residue.ccpCode for residue in self.residues]
+        return ccpCodes
 
     @property
     def _sequenceCodesAsIntegers(self):
@@ -328,9 +339,54 @@ def _getChain(self: Project, sequence: Union[str, Sequence[str]], compoundName: 
     pass
 
 
+def _convertSequence1LetterToCcpCode(project, sequence, molType):
+    """ Covert the One LetterCode sequence to the CcpCode. If an item is not found, then is replaced with a placeholder.
+     Ideally should be a gap but NOT raise Errors!"""
+    molTypes = ['protein', 'DNA', 'RNA']
+    if molType not in molTypes :
+        raise RuntimeError(f' Sequence of 1 Letter code is not available for molType: {molType}. Use one of {molTypes}')
+    chemCompData = project._chemCompsData.copy()
+    chemCompData = chemCompData[chemCompData['molType'] == molType]
+    ccpCodesSequence = []
+    for i, code in enumerate(sequence, start=1):
+        found = chemCompData[chemCompData.code1Letter == code.upper()]
+        ccpCode = None
+        for ix, row in found.iterrows():
+            chemComp = row.obj
+            if chemComp.className == 'StdChemComp': # not really a better way so far
+                ccpCode = chemComp.ccpCode
+                break
+        if not ccpCode:
+            #  it should be only one really
+            ccpCode = NotFound
+            getLogger().warning(f'One-Letter Code "{code}" at position {i} was not found for molType: {molType}."')
+        ccpCodesSequence.append(ccpCode)
+
+    return ccpCodesSequence
+
+def _validateSequenceCcpCode(project, sequence, molType):
+    if not isinstance(sequence, (tuple, list)):
+        raise RuntimeError(f'Sequence must be an iterable (tuple or list) of ccpCodes')
+
+    chemCompData = project._chemCompsData.copy()
+    chemCompData = chemCompData[chemCompData['molType'] == molType]
+
+    availableCodes = [i for i in chemCompData.ccpCode.unique() if i]
+    curatedSequence = []
+    for i, ccpCode in enumerate(sequence, start=1):
+        found = ccpCode in availableCodes
+        if not found:
+            getLogger().warning(f'CcpCode "{ccpCode}" at position {i} was not found for molType: {molType}.')
+            curatedSequence.append(f'{NotFound}')
+        else:
+            curatedSequence.append(ccpCode)
+    return curatedSequence
+
 # @newObject(Chain)
 @undoBlock()
-def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundName: str = None,
+def _createChain(self: Project, sequence: Union[str, Sequence[str]]=None, compoundName: str = None,
+                 sequence1Letter: str=None,
+                 sequenceCcpCode: Union[Sequence[str]] = None,
                  startNumber: int = 1, molType: str = None, isCyclic: bool = False,
                  shortName: str = None, role: str = None, comment: str = None,
                  expandFromAtomSets: bool = True,
@@ -343,9 +399,10 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
 
     See the Chain class for details.
 
-    :param Sequence sequence: string of one-letter codes or sequence of residue types
-                                E.g. 'HMRQPPLVT' or ('HMRQPPLVT',) 
-                                or ('ala', 'ala', 'ala')
+    :param Sequence: Deprecated
+    :param sequence1Letter: string of one-letter codes E.g. 'HMRQPPLVT'
+    :param Sequence sequence: sequence of  CcpCodes (also known as ChemComp Codes) are case-sensitive. E.G.:  ('Ala', 'Ala', 'Ala', 'Aba')
+
     :param str compoundName: name of new Substance (e.g. 'Lysozyme') Defaults to 'Molecule_n
     :param str molType: molType ('protein','DNA', 'RNA'). Needed only if sequence is a string.
     :param int startNumber: number of first residue in sequence
@@ -357,56 +414,15 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
                 See ccpn.core.lib.MoleculeLib.expandChainAtoms for details.
     :return: a new Chain instance.
     """
+    if sequence:
+        raise DeprecationWarning('Argument "sequence" is deprecated and will be removed in future releases. Use sequence1Letter or sequenceCcpCode')
+    if sequence1Letter:
+        sequence = _convertSequence1LetterToCcpCode(self.project, sequence1Letter, molType)
+    if sequenceCcpCode:
+        sequence = _validateSequenceCcpCode(self.project, sequenceCcpCode, molType)
 
-    # check sequence is valid first
-    # either string, or list/tuple of strings
-    # list must all be 3 chars long if more than 1 element in list
-    if not sequence:
-        raise ValueError('sequence must be defined')
-
-    if isinstance(sequence, str):
-
-        # alpha string
-        if not sequence.isalpha():
-            raise ValueError('sequence contains bad characters: %s' % str(sequence))
-
-        sequence = sequence.upper()
-
-    elif isinstance(sequence, Iterable):
-
-        # iterable
-        if len(sequence) == 1:
-
-            # single element in a list
-            sequence = sequence[0]
-            if not isinstance(sequence, str):
-                raise TypeError('sequence is not a valid string: %s' % str(sequence))
-            elif not sequence.isalpha():
-                raise TypeError('sequence contains bad characters: %s' % str(sequence))
-
-            sequence = sequence.upper()
-
-        elif len(sequence) > 1:
-            # iterate through all elements
-            newSeq = []
-            for s in sequence:
-
-                if not isinstance(s, str):
-                    raise TypeError('sequence element is not a valid string: %s' % str(s))
-                elif len(s) != 3:
-                    raise TypeError(
-                            'sequence elements must be 3 characters each, e.g., "ala ala ala"\nor sequence must be a single string, try removing spaces and return characters: %s' % str(
-                                    s))
-                elif not s.isalpha():
-                    raise TypeError('sequence element contains bad characters: %s' % str(s))
-
-                newSeq.append(s.upper())
-            sequence = tuple(newSeq)
-
-        else:
-            raise TypeError('sequence is not a valid string: %s' % str(sequence))
-    else:
-        raise TypeError('sequence is not a valid string: %s' % str(sequence))
+    if sequence1Letter and sequenceCcpCode:
+        raise RuntimeError('Create chain error. Please use "sequence1Letter" or  "sequenceCcpCode", not both.')
 
     apiMolSystem = self._wrappedData.molSystem
     shortName = (
@@ -437,7 +453,8 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
 
     apiMolecule = substance._apiSubstance.molecule
 
-    try:
+    # try:
+    if True:
         result = _newApiChain(self, apiMolecule, shortName, role, comment)
         if result and expandFromAtomSets:
             from ccpn.core.lib.MoleculeLib import expandChainAtoms
@@ -451,15 +468,18 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
                              pseudoNamingSystem='AQUA')
 
 
-    except Exception as es:
-        if substance:
+    # except Exception as es:
+    #     if substance:
             # clean up and remove the created substance
-            substance.delete()
-        raise RuntimeError('Unable to generate new Chain item') from es
+            # substance.delete()
+        # raise RuntimeError('Unable to generate new Chain item') from es
 
     for residue in result.residues:
         # Necessary as CCPN V2 default protonation states do not match tne NEF / V3 standard
         residue.resetVariantToDefault()
+        if not residue.residueType:
+            with undoBlock():
+                self.project.deleteObjects(*residue.atoms)
 
     return result
 
@@ -564,17 +584,19 @@ def _checkChemCompExists(project, ccpCode):
 
 def _fetchChemCompFromFile(project, filePath):
     """
-    Load a ChemComp from an xml file if not already present in the project, otherwise return the one available.
+    Load a ChemComp from a xml file if not already present in the project, otherwise return the one available.
     :param project: v3 project object.
     :param filePath: xml file path  for the chemcomp. Xml filename must contain the same strings as defined  in the
     guid inside the file.
     :return: The API chemComp object
     """
     from ccpnmodel.ccpncore.xml.memops.Implementation import loadFromStream
-    from ccpn.util.Path import aPath
-
+    from ccpn.util.Path import aPath, joinPath
+    from ccpn.framework.PathsAndUrls import CCPN_API_DIRECTORY
+    from ccpnmodel.ccpncore.lib.chemComp.ChemCompOverview import chemCompStdDict
+    filePathObj = aPath(filePath)
     memopsRoot = project._wrappedData.root
-    basename = aPath(filePath).basename
+    basename = filePathObj.basename
     ll = basename.split('+')  # assuming the file is an old xml type with + separators or created from Chembuild.
     if len(ll) > 1:
         ccpCode = ll[1]
@@ -588,7 +610,18 @@ def _fetchChemCompFromFile(project, filePath):
     else:
         with open(filePath) as stream:
             chemComp = loadFromStream(stream, topObject=memopsRoot, topObjId=topObjId, )
-
+            #update the 3letterCode because is needed on  V3 for some reasons...
+            if not chemComp.code3Letter:
+                chemComp.__dict__['code3Letter'] = chemComp.ccpCode.upper()
+    # need to copy the xml file to the project to be reopened
+    # Not sure why is not done automatically or about a better way of doing it
+    chemCompProjectSubPath = aPath(CCPN_API_DIRECTORY) / 'ccp' / 'molecule' / 'ChemComp'
+    chemCompProjectPath = joinPath(project.projectPath, chemCompProjectSubPath)
+    filePathObj.copyFile(chemCompProjectPath, overwrite=True)
+    ## update the massive dict on chemcomp ccpCode which is used by v3 to create chains
+    commonNames = chemComp.commonNames
+    commonName = commonNames[0] if len(commonNames) > 0 else ''
+    chemCompStdDict[chemComp.molType][chemComp.ccpCode] = [chemComp.code1Letter, chemComp.code3Letter, commonName, '' ]  #code1Letter, code3Letter, 'syn', 'formula'
     return chemComp
 
 
@@ -642,7 +675,10 @@ def _newChainFromChemComp(project, chemComp,
 def _cloneChain(self: Chain, shortName: str = None):
     """Make copy of chain.
     """
+
     # _newApiObject no longer fires a ny notifiers. Single notifier is now handled by the decorator
+    raise DeprecationWarning('Clone chain has been deprecated in 3.2.1. Please use new chain')
+    # FIXME This is broken for Non-Standard Residues. (probably never tested as it never implemented in V3)
     apiChain = self._wrappedData
     apiMolSystem = apiChain.molSystem
     dataObj = self._project._data2Obj

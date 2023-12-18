@@ -1,0 +1,55 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "NEP",
+  "compoundName": "N1-PHOSPHONOHISTIDINE",
+  "compoundCcpCode": "NEP",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "L-peptide linking",
+  "compoundPrecursorName": "L-Histidine",
+  "atoms": [
+    {
+      "atomName": "C",
+      "atomElementName": "",
+      "atomAverageShift": 178.498,
+      "atomStdShift": null,
+      "atomMinShift": 178.498,
+      "atomMaxShift": 178.498,
+      "atomDistributionRefValue": 178.498,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CA",
+      "atomElementName": "",
+      "atomAverageShift": 60.021,
+      "atomStdShift": null,
+      "atomMinShift": 60.021,
+      "atomMaxShift": 60.021,
+      "atomDistributionRefValue": 60.021,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CB",
+      "atomElementName": "",
+      "atomAverageShift": 28.969,
+      "atomStdShift": null,
+      "atomMinShift": 28.969,
+      "atomMaxShift": 28.969,
+      "atomDistributionRefValue": 28.969,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

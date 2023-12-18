@@ -1,0 +1,110 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "FDA",
+  "compoundName": "DIHYDROFLAVINE-ADENINE DINUCLEOTIDE",
+  "compoundCcpCode": "FDA",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "1HM7",
+      "atomElementName": "",
+      "atomAverageShift": 8.506,
+      "atomStdShift": null,
+      "atomMinShift": 8.506,
+      "atomMaxShift": 8.506,
+      "atomDistributionRefValue": 8.506,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "1HM8",
+      "atomElementName": "",
+      "atomAverageShift": 6.711,
+      "atomStdShift": null,
+      "atomMinShift": 6.711,
+      "atomMaxShift": 6.711,
+      "atomDistributionRefValue": 6.711,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "2HM8",
+      "atomElementName": "",
+      "atomAverageShift": 6.899,
+      "atomStdShift": null,
+      "atomMinShift": 6.899,
+      "atomMaxShift": 6.899,
+      "atomDistributionRefValue": 6.899,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "AH61",
+      "atomElementName": "",
+      "atomAverageShift": 7.163,
+      "atomStdShift": null,
+      "atomMinShift": 7.163,
+      "atomMaxShift": 7.163,
+      "atomDistributionRefValue": 7.163,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "AH62",
+      "atomElementName": "",
+      "atomAverageShift": 7.985,
+      "atomStdShift": null,
+      "atomMinShift": 7.985,
+      "atomMaxShift": 7.985,
+      "atomDistributionRefValue": 7.985,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "AN6",
+      "atomElementName": "",
+      "atomAverageShift": 84.432,
+      "atomStdShift": null,
+      "atomMinShift": 84.432,
+      "atomMaxShift": 84.432,
+      "atomDistributionRefValue": 84.432,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HN3",
+      "atomElementName": "",
+      "atomAverageShift": 10.604,
+      "atomStdShift": null,
+      "atomMinShift": 10.604,
+      "atomMaxShift": 10.604,
+      "atomDistributionRefValue": 10.604,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "N3",
+      "atomElementName": "",
+      "atomAverageShift": 118.095,
+      "atomStdShift": null,
+      "atomMinShift": 118.095,
+      "atomMaxShift": 118.095,
+      "atomDistributionRefValue": 118.095,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

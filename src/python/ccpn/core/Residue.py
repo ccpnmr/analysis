@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-21 13:24:43 +0000 (Tue, November 21, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-10-10 20:03:17 +0100 (Tue, October 10, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -106,6 +106,13 @@ class Residue(AbstractWrapperObject):
     @property
     def shortName(self) -> str:
         return self._wrappedData.chemCompVar.chemComp.code1Letter or '?'
+
+    @property
+    def ccpCode(self) -> str:
+        """Residue sequence ccpcode (e.g. 'Ala', 'Aba') retrieved from the ChemComp"""
+        obj = self._wrappedData
+        ccpCode = obj.ccpCode
+        return ccpCode
 
     @property
     def linking(self) -> str:

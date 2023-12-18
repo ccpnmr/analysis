@@ -1,0 +1,121 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "O1F",
+  "compoundName": "(5~{Z})-5-[(2,5-dimethoxy-4-oxidanyl-phenyl)methylidene]-2-sulfanylidene-1,3-thiazolidin-4-one",
+  "compoundCcpCode": "O1F",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H21",
+      "atomElementName": "",
+      "atomAverageShift": 6.277,
+      "atomStdShift": null,
+      "atomMinShift": 6.277,
+      "atomMaxShift": 6.277,
+      "atomDistributionRefValue": 6.277,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H231",
+      "atomElementName": "",
+      "atomAverageShift": 3.619,
+      "atomStdShift": null,
+      "atomMinShift": 3.619,
+      "atomMaxShift": 3.619,
+      "atomDistributionRefValue": 3.619,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H232",
+      "atomElementName": "",
+      "atomAverageShift": 3.619,
+      "atomStdShift": null,
+      "atomMinShift": 3.619,
+      "atomMaxShift": 3.619,
+      "atomDistributionRefValue": 3.619,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H233",
+      "atomElementName": "",
+      "atomAverageShift": 3.619,
+      "atomStdShift": null,
+      "atomMinShift": 3.619,
+      "atomMaxShift": 3.619,
+      "atomDistributionRefValue": 3.619,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H32",
+      "atomElementName": "",
+      "atomAverageShift": 6.967,
+      "atomStdShift": null,
+      "atomMinShift": 6.967,
+      "atomMaxShift": 6.967,
+      "atomDistributionRefValue": 6.967,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H331",
+      "atomElementName": "",
+      "atomAverageShift": 3.795,
+      "atomStdShift": null,
+      "atomMinShift": 3.795,
+      "atomMaxShift": 3.795,
+      "atomDistributionRefValue": 3.795,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H332",
+      "atomElementName": "",
+      "atomAverageShift": 3.795,
+      "atomStdShift": null,
+      "atomMinShift": 3.795,
+      "atomMaxShift": 3.795,
+      "atomDistributionRefValue": 3.795,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H333",
+      "atomElementName": "",
+      "atomAverageShift": 3.795,
+      "atomStdShift": null,
+      "atomMinShift": 3.795,
+      "atomMaxShift": 3.795,
+      "atomDistributionRefValue": 3.795,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H45",
+      "atomElementName": "",
+      "atomAverageShift": 8.049,
+      "atomStdShift": null,
+      "atomMinShift": 8.049,
+      "atomMaxShift": 8.049,
+      "atomDistributionRefValue": 8.049,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

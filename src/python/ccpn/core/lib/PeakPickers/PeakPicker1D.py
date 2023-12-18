@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-23 12:57:13 +0100 (Wed, August 23, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-15 17:03:22 +0000 (Fri, December 15, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -31,6 +31,7 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerABC, SimplePeak
 from numba import jit
 import numpy as np
+from scipy import spatial, signal
 # from ccpn.framework.Application import getApplication
 
 # @jit(nopython=True, nogil=True)
@@ -81,6 +82,52 @@ def _find1DMaxima(y, x, positiveThreshold, negativeThreshold=None, findNegative=
             filtered.append(p)
     return filtered, filteredNeg
 
+def _find1DPositiveMaxima(y, x, positiveThreshold=None):
+    """
+    The same routine as above but 100t times faster by just masking above the positive threshold
+    """
+    maxtab = []
+    mintab = []
+    mn, mx = np.Inf, -np.Inf
+    mnpos, mxpos = np.NaN, np.NaN
+    lookformax = True
+    if positiveThreshold is None:
+        positiveThreshold = float(np.median(y) + 1 * np.std(y))
+    _y = y
+    _x = x
+    mask = y>=positiveThreshold
+    y = y[mask]
+    x = x[mask]
+    for i in np.arange(len(y)):
+        this = y[i]
+        if this > mx:
+            mx = this
+            mxpos = x[i]
+        if this < mn:
+            mn = this
+            mnpos = x[i]
+        if lookformax:
+            this = abs(this)
+            if this < mx - positiveThreshold:
+                maxtab.append((float(mxpos), float(mx)))
+                mn = this
+                mnpos = x[i]
+                lookformax = False
+        else:
+            if this > mn + positiveThreshold:
+                mintab.append((float(mnpos), float(mn)))
+                mx = this
+                mxpos = x[i]
+                lookformax = True
+
+    return maxtab, mintab
+
+def _getPositionsHeights(x, y, minimalHeightThreshold):
+    mm, mx = _find1DPositiveMaxima(y, x, minimalHeightThreshold)
+    positions = np.array(mm).T[0]
+    heights = np.array(mm).T[1]
+    return positions, heights
+
 class PeakPicker1D(PeakPickerABC):
     """A peak picker based on  Eli Billauer, 3.4.05. algorithm (see _findMaxima function).
     """
@@ -94,21 +141,13 @@ class PeakPicker1D(PeakPickerABC):
         application = spectrum.project.application
         self._doNegativePeaks = application.preferences.general.negativePeakPick1D
 
-    def _setThresholds(self):
-        # first make sure the noiseLevel is set for the spectrum. Don't change this.
-        if not self.spectrum.noiseLevel:
-            self.spectrum.noiseLevel = self.spectrum.estimateNoise()
-        if not self.spectrum.negativeNoiseLevel:
-            self.spectrum.negativeNoiseLevel = -self.spectrum.noiseLevel
+    def _setThresholdsFromSpectrum(self):
+        """ Get the initial noise thresholds from the spectrum contour base"""
         if not self.positiveThreshold:
-            self.positiveThreshold = self.spectrum.noiseLevel
+            self.positiveThreshold = self.spectrum.positiveContourBase
+
         if not self.negativeThreshold:
-            self.negativeThreshold = self.spectrum.negativeNoiseLevel
-        # don't pick below the noise level.
-        if self.positiveThreshold <= self.spectrum.noiseLevel:
-            self.positiveThreshold = self.spectrum.noiseLevel
-        if abs(self.negativeThreshold) <= abs(self.spectrum.negativeNoiseLevel):
-            self.negativeThreshold = self.spectrum.negativeNoiseLevel
+            self.negativeThreshold = self.spectrum.negativeContourBase
 
     def _isHeightWithinIntesityLimits(self, height):
         """ check if value is within the intensity limits. This is a different check from the noise Thresholds.
@@ -136,7 +175,7 @@ class PeakPicker1D(PeakPickerABC):
         peaks = []
         start = int(self.spectrum.referencePoints[0])
         x = np.arange(start, start + len(data))
-        self._setThresholds()
+        self._setThresholdsFromSpectrum()
         maxValues, minValues = _find1DMaxima(y=data, x=x,
                                              positiveThreshold=self.positiveThreshold,
                                              negativeThreshold=self.negativeThreshold,

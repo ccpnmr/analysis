@@ -1,0 +1,66 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "5OC",
+  "compoundName": "2'-deoxy-5-hydroxycytidine 5'-(dihydrogen phosphate)",
+  "compoundCcpCode": "5OC",
+  "compoundType": "DNA",
+  "compoundTypeClassification": "DNA linking",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H1'",
+      "atomElementName": "",
+      "atomAverageShift": 5.572,
+      "atomStdShift": null,
+      "atomMinShift": 5.572,
+      "atomMaxShift": 5.572,
+      "atomDistributionRefValue": 5.572,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2'",
+      "atomElementName": "",
+      "atomAverageShift": 2.163,
+      "atomStdShift": null,
+      "atomMinShift": 2.163,
+      "atomMaxShift": 2.163,
+      "atomDistributionRefValue": 2.163,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2''",
+      "atomElementName": "",
+      "atomAverageShift": 2.385,
+      "atomStdShift": null,
+      "atomMinShift": 2.385,
+      "atomMaxShift": 2.385,
+      "atomDistributionRefValue": 2.385,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H6",
+      "atomElementName": "",
+      "atomAverageShift": 6.656,
+      "atomStdShift": null,
+      "atomMinShift": 6.656,
+      "atomMaxShift": 6.656,
+      "atomDistributionRefValue": 6.656,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

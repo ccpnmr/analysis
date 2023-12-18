@@ -1,0 +1,55 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "dzAbu",
+  "compoundName": "",
+  "compoundCcpCode": "dzAbu",
+  "compoundType": "Unclassified",
+  "compoundTypeClassification": "",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H",
+      "atomElementName": "",
+      "atomAverageShift": 9.55,
+      "atomStdShift": 0.366,
+      "atomMinShift": 9.27,
+      "atomMaxShift": 10.08,
+      "atomDistributionRefValue": 9.27,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB",
+      "atomElementName": "",
+      "atomAverageShift": 6.735,
+      "atomStdShift": 0.088,
+      "atomMinShift": 6.63,
+      "atomMaxShift": 6.83,
+      "atomDistributionRefValue": 6.63,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HG",
+      "atomElementName": "",
+      "atomAverageShift": 1.85,
+      "atomStdShift": null,
+      "atomMinShift": 1.85,
+      "atomMaxShift": 1.85,
+      "atomDistributionRefValue": 1.85,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

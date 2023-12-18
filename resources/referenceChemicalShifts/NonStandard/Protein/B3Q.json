@@ -1,0 +1,132 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "B3Q",
+  "compoundName": "(3S)-3,6-diamino-6-oxohexanoic acid",
+  "compoundCcpCode": "B3Q",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "L-peptide linking",
+  "compoundPrecursorName": "Glutamine",
+  "atoms": [
+    {
+      "atomName": "H11",
+      "atomElementName": "",
+      "atomAverageShift": 6.907,
+      "atomStdShift": null,
+      "atomMinShift": 6.907,
+      "atomMaxShift": 6.907,
+      "atomDistributionRefValue": 6.907,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H12",
+      "atomElementName": "",
+      "atomAverageShift": 7.663,
+      "atomStdShift": null,
+      "atomMinShift": 7.663,
+      "atomMaxShift": 7.663,
+      "atomDistributionRefValue": 7.663,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H8",
+      "atomElementName": "",
+      "atomAverageShift": 2.464,
+      "atomStdShift": 0.024,
+      "atomMinShift": 2.447,
+      "atomMaxShift": 2.481,
+      "atomDistributionRefValue": 2.447,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H9",
+      "atomElementName": "",
+      "atomAverageShift": 2.322,
+      "atomStdShift": null,
+      "atomMinShift": 2.322,
+      "atomMaxShift": 2.322,
+      "atomDistributionRefValue": 2.322,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 2.466,
+      "atomStdShift": 0.112,
+      "atomMinShift": 2.387,
+      "atomMaxShift": 2.545,
+      "atomDistributionRefValue": 2.387,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HAA",
+      "atomElementName": "",
+      "atomAverageShift": 2.542,
+      "atomStdShift": 0.005,
+      "atomMinShift": 2.538,
+      "atomMaxShift": 2.545,
+      "atomDistributionRefValue": 2.538,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB",
+      "atomElementName": "",
+      "atomAverageShift": 4.255,
+      "atomStdShift": 0.018,
+      "atomMinShift": 4.242,
+      "atomMaxShift": 4.268,
+      "atomDistributionRefValue": 4.242,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HG",
+      "atomElementName": "",
+      "atomAverageShift": 1.908,
+      "atomStdShift": 0,
+      "atomMinShift": 1.908,
+      "atomMaxShift": 1.908,
+      "atomDistributionRefValue": 1.908,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HGA",
+      "atomElementName": "",
+      "atomAverageShift": 1.876,
+      "atomStdShift": 0.214,
+      "atomMinShift": 1.725,
+      "atomMaxShift": 2.027,
+      "atomDistributionRefValue": 1.725,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HN",
+      "atomElementName": "",
+      "atomAverageShift": 7.845,
+      "atomStdShift": 0.494,
+      "atomMinShift": 7.496,
+      "atomMaxShift": 8.194,
+      "atomDistributionRefValue": 7.496,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

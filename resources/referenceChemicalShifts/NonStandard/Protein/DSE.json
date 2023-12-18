@@ -1,0 +1,66 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "DSE",
+  "compoundName": "N-METHYL-D-SERINE",
+  "compoundCcpCode": "DSE",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "D-peptide linking",
+  "compoundPrecursorName": "Serine",
+  "atoms": [
+    {
+      "atomName": "H",
+      "atomElementName": "",
+      "atomAverageShift": 3.08,
+      "atomStdShift": 0,
+      "atomMinShift": 3.08,
+      "atomMaxShift": 3.08,
+      "atomDistributionRefValue": 3.08,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 4.915,
+      "atomStdShift": 0.007,
+      "atomMinShift": 4.91,
+      "atomMaxShift": 4.92,
+      "atomDistributionRefValue": 4.91,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB2",
+      "atomElementName": "",
+      "atomAverageShift": 3.955,
+      "atomStdShift": 0.007,
+      "atomMinShift": 3.95,
+      "atomMaxShift": 3.96,
+      "atomDistributionRefValue": 3.95,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB3",
+      "atomElementName": "",
+      "atomAverageShift": 4.03,
+      "atomStdShift": 0,
+      "atomMinShift": 4.03,
+      "atomMaxShift": 4.03,
+      "atomDistributionRefValue": 4.03,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

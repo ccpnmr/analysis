@@ -1,0 +1,88 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "CTT",
+  "compoundName": "",
+  "compoundCcpCode": "CTT",
+  "compoundType": "Unclassified",
+  "compoundTypeClassification": "",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H15",
+      "atomElementName": "",
+      "atomAverageShift": 4.236,
+      "atomStdShift": 0.061,
+      "atomMinShift": 4.193,
+      "atomMaxShift": 4.279,
+      "atomDistributionRefValue": 4.193,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H16",
+      "atomElementName": "",
+      "atomAverageShift": 2.007,
+      "atomStdShift": 0.125,
+      "atomMinShift": 1.918,
+      "atomMaxShift": 2.095,
+      "atomDistributionRefValue": 1.918,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H17",
+      "atomElementName": "",
+      "atomAverageShift": 1.799,
+      "atomStdShift": 0.219,
+      "atomMinShift": 1.644,
+      "atomMaxShift": 1.954,
+      "atomDistributionRefValue": 1.644,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H19",
+      "atomElementName": "",
+      "atomAverageShift": 8.502,
+      "atomStdShift": 0.217,
+      "atomMinShift": 8.348,
+      "atomMaxShift": 8.655,
+      "atomDistributionRefValue": 8.348,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H20",
+      "atomElementName": "",
+      "atomAverageShift": 2.609,
+      "atomStdShift": 0.299,
+      "atomMinShift": 2.397,
+      "atomMaxShift": 2.82,
+      "atomDistributionRefValue": 2.397,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H21",
+      "atomElementName": "",
+      "atomAverageShift": 2.459,
+      "atomStdShift": 0.228,
+      "atomMinShift": 2.298,
+      "atomMaxShift": 2.62,
+      "atomDistributionRefValue": 2.298,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

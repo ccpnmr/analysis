@@ -1,0 +1,99 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "1VR",
+  "compoundName": "(3R)-3-amino-4-methylpentanoic acid",
+  "compoundCcpCode": "1VR",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "L-peptide linking",
+  "compoundPrecursorName": "Valine",
+  "atoms": [
+    {
+      "atomName": "H",
+      "atomElementName": "",
+      "atomAverageShift": 7.842,
+      "atomStdShift": 0.035,
+      "atomMinShift": 7.793,
+      "atomMaxShift": 7.873,
+      "atomDistributionRefValue": 7.793,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H3",
+      "atomElementName": "",
+      "atomAverageShift": 0.868,
+      "atomStdShift": 0.006,
+      "atomMinShift": 0.861,
+      "atomMaxShift": 0.876,
+      "atomDistributionRefValue": 0.861,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H6",
+      "atomElementName": "",
+      "atomAverageShift": 0.839,
+      "atomStdShift": 0.017,
+      "atomMinShift": 0.82,
+      "atomMaxShift": 0.852,
+      "atomDistributionRefValue": 0.82,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA1",
+      "atomElementName": "",
+      "atomAverageShift": 2.495,
+      "atomStdShift": 0.017,
+      "atomMinShift": 2.476,
+      "atomMaxShift": 2.512,
+      "atomDistributionRefValue": 2.476,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA2",
+      "atomElementName": "",
+      "atomAverageShift": 2.559,
+      "atomStdShift": 0.009,
+      "atomMinShift": 2.551,
+      "atomMaxShift": 2.568,
+      "atomDistributionRefValue": 2.551,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB",
+      "atomElementName": "",
+      "atomAverageShift": 3.991,
+      "atomStdShift": 0.014,
+      "atomMinShift": 3.976,
+      "atomMaxShift": 4.005,
+      "atomDistributionRefValue": 3.976,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HG",
+      "atomElementName": "",
+      "atomAverageShift": 1.763,
+      "atomStdShift": 0.014,
+      "atomMinShift": 1.742,
+      "atomMaxShift": 1.772,
+      "atomDistributionRefValue": 1.742,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

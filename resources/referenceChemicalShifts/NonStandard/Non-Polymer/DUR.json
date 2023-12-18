@@ -1,0 +1,121 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "DUR",
+  "compoundName": "2'-DEOXYURIDINE",
+  "compoundCcpCode": "DUR",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H1'",
+      "atomElementName": "",
+      "atomAverageShift": 6.13,
+      "atomStdShift": null,
+      "atomMinShift": 6.13,
+      "atomMaxShift": 6.13,
+      "atomDistributionRefValue": 6.13,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2'",
+      "atomElementName": "",
+      "atomAverageShift": 2.11,
+      "atomStdShift": null,
+      "atomMinShift": 2.11,
+      "atomMaxShift": 2.11,
+      "atomDistributionRefValue": 2.11,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2''",
+      "atomElementName": "",
+      "atomAverageShift": 2.39,
+      "atomStdShift": null,
+      "atomMinShift": 2.39,
+      "atomMaxShift": 2.39,
+      "atomDistributionRefValue": 2.39,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H3'",
+      "atomElementName": "",
+      "atomAverageShift": 4.66,
+      "atomStdShift": null,
+      "atomMinShift": 4.66,
+      "atomMaxShift": 4.66,
+      "atomDistributionRefValue": 4.66,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H4'",
+      "atomElementName": "",
+      "atomAverageShift": 4.22,
+      "atomStdShift": null,
+      "atomMinShift": 4.22,
+      "atomMaxShift": 4.22,
+      "atomDistributionRefValue": 4.22,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H5",
+      "atomElementName": "",
+      "atomAverageShift": 5.81,
+      "atomStdShift": null,
+      "atomMinShift": 5.81,
+      "atomMaxShift": 5.81,
+      "atomDistributionRefValue": 5.81,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H5'",
+      "atomElementName": "",
+      "atomAverageShift": 4.05,
+      "atomStdShift": null,
+      "atomMinShift": 4.05,
+      "atomMaxShift": 4.05,
+      "atomDistributionRefValue": 4.05,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H5''",
+      "atomElementName": "",
+      "atomAverageShift": 3.97,
+      "atomStdShift": null,
+      "atomMinShift": 3.97,
+      "atomMaxShift": 3.97,
+      "atomDistributionRefValue": 3.97,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H6",
+      "atomElementName": "",
+      "atomAverageShift": 7.8,
+      "atomStdShift": null,
+      "atomMinShift": 7.8,
+      "atomMaxShift": 7.8,
+      "atomDistributionRefValue": 7.8,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

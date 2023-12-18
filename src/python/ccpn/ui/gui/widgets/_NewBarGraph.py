@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-30 09:51:16 +0100 (Tue, May 30, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-10-13 10:30:17 +0100 (Fri, October 13, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import pyqtgraph as pg
-
+from ccpn.util.floatUtils import fExp, fMan
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pyqtgraph import getConfigOption
 from pyqtgraph import functions as fn
@@ -135,6 +135,7 @@ class BarGraph(pg.BarGraphItem):
         self._barsDict = {}
         self.width = 1
         self.halfWidth = self.width * 0.5
+        # self._multiplier = 1
 
         self.opts = dict(  # setting for BarGraphItem
                 x=self.xValues,
@@ -278,6 +279,10 @@ class BarGraph(pg.BarGraphItem):
             if y1 is None:
                 raise Exception('must specify either y1 or height')
             height = y1 - y0
+        # avgHeight = np.mean(height)
+        # heightExp = fExp(avgHeight)
+        # if abs(heightExp) > 4:
+        #     self._multiplier = float(f'1e{heightExp}')
 
         brushes = self.opts['brushes']
         if brushes is None:
@@ -320,6 +325,8 @@ class BarGraph(pg.BarGraphItem):
             else:
                 h = height[i]
 
+            # h = fMan(h)
+
             if x+width/2 in selected:
                 currentPen = selectedBarPen
             else:
@@ -327,6 +334,8 @@ class BarGraph(pg.BarGraphItem):
             p.setPen(currentPen)
 
             rect = QtCore.QRectF(x, y, w, h)
+            # once has been drawn, we can reconvert to its original number
+            # h *= self._multiplier
             _xRange = (x, x+w)
             _yRange = (y, h)
             self.itemXRanges.append(_xRange)
@@ -363,10 +372,12 @@ if __name__ == '__main__':
         print('SELe: ', data)
 
     def _testHover(data):
-        print('_testHover: ', data)
+        pass
+        # print('_testHover: ', data)
 
     x = np.arange(1, 20)
-    y = np.random.random(len(x))
+    y = np.random.random(len(x)) * 1e20
+    print(y)
     brushes = ['#CD5C5C']*len(x)
     pids = [f'#-{i}'  for i in range(len(x))]
     bars = BarGraph(xValues=x, yValues=y, pids=pids, brushes=brushes, selectionCallback=_testSelection, hoverCallback=_testHover)

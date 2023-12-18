@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:45 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-11-14 17:22:07 +0000 (Tue, November 14, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -279,6 +279,7 @@ class NoiseTab(Widget):
         self.current = self.mainWindow.current
         self.spectrum = spectrum
         self.strip = strip
+        self._lastNoiseValue = None
         self.noiseLevel = None
 
         # create the list of widgets and set the callbacks for each
@@ -366,6 +367,7 @@ class NoiseTab(Widget):
             for ii, region in enumerate(regions):
                 self.axisCodeLabels[ii].setText('( ' + ', '.join(['%.1f' % rr for rr in region]) + ' )')
 
+            self._lastNoiseValue = noise
             self._setLabels(noise.mean, noise.std, noise.min, noise.max, noise.noiseLevel)
 
     def _estimateFromRandomSamples(self):
@@ -375,7 +377,7 @@ class NoiseTab(Widget):
         # clear the range labels (full range is implied)
         for lbl in self.axisCodeLabels:
             lbl.setText('-')
-
+        self._lastNoiseValue = noise
         self._setLabels(noise.mean, noise.std, noise.min, noise.max, noise.noiseLevel)
 
     def _setLabels(self, mean, std, min, max, noiseLevel):
@@ -390,8 +392,12 @@ class NoiseTab(Widget):
         """Apply the current noiseLevel to the spectrum
         """
         value = float(self.noiseLevelSpinBox.value())
+        if self._lastNoiseValue is not None: # The user set the noise manually. how to deal with this!?
+            noiseSD = self._lastNoiseValue.std
+            self.spectrum._noiseSD = float(noiseSD)
         self.spectrum.noiseLevel = value
         self.spectrum.negativeNoiseLevel = -value if value > 0 else value * 2
+
         self._populate()
 
     def _setNoiseLevelToAll(self):
@@ -402,10 +408,15 @@ class NoiseTab(Widget):
 
         spectra = self._parent.orderedSpectra
         value = float(self.noiseLevelSpinBox.value())
+        noiseSD = None
+        if self._lastNoiseValue is not None:
+            noiseSD = self._lastNoiseValue.std
+
         with undoBlockWithoutSideBar():
             for spectrum in spectra:
                 spectrum.noiseLevel = value
                 spectrum.negativeNoiseLevel = -value if value > 0 else value * 2
+                spectrum._noiseSD = float(noiseSD)
         for tab in self._parent._noiseTab:
             tab._populate()
 

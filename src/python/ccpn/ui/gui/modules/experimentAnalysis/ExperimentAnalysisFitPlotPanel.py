@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-29 10:46:29 +0100 (Mon, May 29, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-10-12 16:56:58 +0100 (Thu, October 12, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -156,7 +156,7 @@ class FitPlotPanel(GuiPanel):
         ## Add and extra of filling data at the end of the fitted curve to don't just sharp end on the last raw data Point
         extra = percentage(50, max(Xs))
         initialPoint = min(Xs)
-        finalPoint = max(Xs) + extra
+        finalPoint = max(Xs) #+ extra
 
         ## Build the fitted curve arrays
         xf = np.linspace(initialPoint, finalPoint, 3000)

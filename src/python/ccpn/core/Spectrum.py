@@ -53,8 +53,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-07 17:25:14 +0100 (Thu, September 07, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-12-13 17:04:10 +0000 (Wed, December 13, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -162,7 +162,7 @@ class Spectrum(AbstractWrapperObject):
     _AdditionalAttribute = 'AdditionalAttribute'
     _ReferenceSubstancesPids = '_ReferenceSubstancesPids'
     _REFERENCESUBSTANCES = 'referenceSubstances'
-
+    _NOISESD = '_noiseSD'
     _INCLUDEPOSITIVECONTOURS = 'includePositiveContours'
     _INCLUDENEGATIVECONTOURS = 'includeNegativeContours'
     _PREFERREDAXISORDERING = '_preferredAxisOrdering'
@@ -2175,7 +2175,8 @@ class Spectrum(AbstractWrapperObject):
         """Set default contour values
         """
         if base is None:
-            base = self.noiseLevel * multiplier if self.noiseLevel else 1e6
+            base = self.dataSource._estimateInitialContourBase(multiplier)
+
         base = max(base, 1.0)  # Contour bases have to be > 0.0
 
         self.positiveContourBase = base
@@ -2242,10 +2243,31 @@ class Spectrum(AbstractWrapperObject):
         """Estimate and return the noise level, or None if it cannot be
         """
         if self.dataSource is not None:
-            noise = self.dataSource.estimateNoise()
+            from ccpn.core.lib.SpectrumLib import getNoiseEstimate
+            noiseObj = getNoiseEstimate(self)
+            noise = noiseObj.noiseLevel
         else:
             noise = None
         return noise
+
+    @property
+    def _noiseSD(self):
+        """_CCPN internal. Noise Standard deviation. This property must be cached as it is used by the peak.signalToNoiseRatio
+        """
+        result = self._getInternalParameter(self._NOISESD)
+        if result is None:
+            from ccpn.core.lib.SpectrumLib import getNoiseEstimate
+            noiseObj = getNoiseEstimate(self)
+            result = noiseObj.std
+            self._setInternalParameter(self._NOISESD, result) #set to internal so we have for the next time
+        return result
+
+    @_noiseSD.setter
+    def _noiseSD(self, value):
+        """Noise Standard deviation
+        """
+        # return save to internal
+        self._setInternalParameter(self._NOISESD, value)
 
     #-----------------------------------------------------------------------------------------
     # data access functions
@@ -2319,6 +2341,14 @@ class Spectrum(AbstractWrapperObject):
     @logCommand(get='self')
     def getPointValue(self, pointPositions) -> float:
         """Return the value interpolated at the position given in points (1-based, float values).
+        """
+        return self._getPointValue(pointPositions)
+
+    def _getPointValue(self, pointPositions) -> float:
+        """
+        Keep this routine without a logCommand for recursive calls.
+        :param pointPositions:
+        :return:
         """
         if len(pointPositions) != self.dimensionCount:
             raise ValueError('Length of %s does not match number of dimensions.' % str(pointPositions))
@@ -2656,12 +2686,14 @@ class Spectrum(AbstractWrapperObject):
         newSpectrum._updateParameterValues()
 
         # Copy the peakList/peaks
-        for idx, pl in enumerate(self.peakLists):
-            if idx + 1 < len(newSpectrum.peakLists):
-                newSpectrum.newPeakList()
-            targetPl = newSpectrum.peakLists[idx]
-            pl.copyTo(targetSpectrum=newSpectrum, targetPeakList=targetPl)
-
+        try:
+            for idx, pl in enumerate(self.peakLists):
+                if idx + 1 < len(newSpectrum.peakLists):
+                    newSpectrum.newPeakList()
+                targetPl = newSpectrum.peakLists[idx]
+                pl.copyTo(targetSpectrum=newSpectrum, targetPeakList=targetPl)
+        except:
+            getLogger().warn('Error cloning peakLists')
         newSpectrum.appendComment('Cloned from %s' % self.name)
         return newSpectrum
 
@@ -3223,10 +3255,7 @@ class Spectrum(AbstractWrapperObject):
         # Quietly set some values
         getLogger().debug2(f'Updating {self} parameters')
         with inactivity():
-            # getting the noiseLevel by calling estimateNoise() if not defined
-            if self.noiseLevel is None:
-                self.noiseLevel = self.estimateNoise()
-
+            # noiseLevel is not required at startup
             # Check  contourLevels, contourColours
             if self.positiveContourCount == 0 or self.negativeContourCount == 0:
                 self._setDefaultContourValues()
@@ -3971,7 +4000,6 @@ def _newSpectrum(project: Project, path: (str, Path), name: str = None) -> (Spec
         logger.error(f'{dataSource.errorString}')
         return None
 
-    dataSource.estimateNoise()
     spectrum = _newSpectrumFromDataSource(project, dataStore, dataSource, name)
 
     return spectrum

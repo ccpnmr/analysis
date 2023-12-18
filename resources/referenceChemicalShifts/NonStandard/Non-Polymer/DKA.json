@@ -1,0 +1,88 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "DKA",
+  "compoundName": "DECANOIC ACID",
+  "compoundCcpCode": "DKA",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H21",
+      "atomElementName": "",
+      "atomAverageShift": 2.303,
+      "atomStdShift": null,
+      "atomMinShift": 2.303,
+      "atomMaxShift": 2.303,
+      "atomDistributionRefValue": 2.303,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H31",
+      "atomElementName": "",
+      "atomAverageShift": 1.143,
+      "atomStdShift": null,
+      "atomMinShift": 1.143,
+      "atomMaxShift": 1.143,
+      "atomDistributionRefValue": 1.143,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H41",
+      "atomElementName": "",
+      "atomAverageShift": 1.007,
+      "atomStdShift": null,
+      "atomMinShift": 1.007,
+      "atomMaxShift": 1.007,
+      "atomDistributionRefValue": 1.007,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H51",
+      "atomElementName": "",
+      "atomAverageShift": 0.908,
+      "atomStdShift": null,
+      "atomMinShift": 0.908,
+      "atomMaxShift": 0.908,
+      "atomDistributionRefValue": 0.908,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H61",
+      "atomElementName": "",
+      "atomAverageShift": 0.841,
+      "atomStdShift": null,
+      "atomMinShift": 0.841,
+      "atomMaxShift": 0.841,
+      "atomDistributionRefValue": 0.841,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H71",
+      "atomElementName": "",
+      "atomAverageShift": 0.65,
+      "atomStdShift": null,
+      "atomMinShift": 0.65,
+      "atomMaxShift": 0.65,
+      "atomDistributionRefValue": 0.65,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

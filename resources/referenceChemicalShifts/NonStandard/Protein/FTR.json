@@ -1,0 +1,99 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "FTR",
+  "compoundName": "FLUOROTRYPTOPHANE",
+  "compoundCcpCode": "FTR",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "L-peptide linking",
+  "compoundPrecursorName": "Tryptophan",
+  "atoms": [
+    {
+      "atomName": "H",
+      "atomElementName": "",
+      "atomAverageShift": 9.24,
+      "atomStdShift": null,
+      "atomMinShift": 9.24,
+      "atomMaxShift": 9.24,
+      "atomDistributionRefValue": 9.24,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HD1",
+      "atomElementName": "",
+      "atomAverageShift": 6.8,
+      "atomStdShift": null,
+      "atomMinShift": 6.8,
+      "atomMaxShift": 6.8,
+      "atomDistributionRefValue": 6.8,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HE1",
+      "atomElementName": "",
+      "atomAverageShift": 9.95,
+      "atomStdShift": null,
+      "atomMinShift": 9.95,
+      "atomMaxShift": 9.95,
+      "atomDistributionRefValue": 9.95,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HE3",
+      "atomElementName": "",
+      "atomAverageShift": 7.2,
+      "atomStdShift": null,
+      "atomMinShift": 7.2,
+      "atomMaxShift": 7.2,
+      "atomDistributionRefValue": 7.2,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HH2",
+      "atomElementName": "",
+      "atomAverageShift": 6.8,
+      "atomStdShift": null,
+      "atomMinShift": 6.8,
+      "atomMaxShift": 6.8,
+      "atomDistributionRefValue": 6.8,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HZ2",
+      "atomElementName": "",
+      "atomAverageShift": 7.21,
+      "atomStdShift": null,
+      "atomMinShift": 7.21,
+      "atomMaxShift": 7.21,
+      "atomDistributionRefValue": 7.21,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "N",
+      "atomElementName": "",
+      "atomAverageShift": 123.83,
+      "atomStdShift": null,
+      "atomMinShift": 123.83,
+      "atomMaxShift": 123.83,
+      "atomDistributionRefValue": 123.83,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

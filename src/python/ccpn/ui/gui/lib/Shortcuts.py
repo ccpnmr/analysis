@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:41 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-11-15 11:58:49 +0000 (Wed, November 15, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -58,7 +58,7 @@ class Shortcuts( object ):
 
         context = QtCore.Qt.WidgetWithChildrenShortcut
         # addShortCut("c, h", self, self.toggleCrosshairAll, context=context)
-        addShortCut("e, n", self, mainWindow.estimateNoise, context=context)
+        addShortCut("e, n", self, mainWindow.showEstimateNoisePopup, context=context)
         addShortCut("g, s", self, mainWindow.toggleGridAll, context=context)
         addShortCut("Del", self, partial(mainWindow.deleteSelectedItems), context=context)
         addShortCut("Backspace", self, partial(mainWindow.deleteSelectedItems), context=context)

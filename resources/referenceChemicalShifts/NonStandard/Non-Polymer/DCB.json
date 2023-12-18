@@ -1,0 +1,154 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "DCB",
+  "compoundName": "2,4-DINITROPHENYL-2-DEOXY-2-FLUORO-BETA-D-CELLOBIOSIDE",
+  "compoundCcpCode": "DCB",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H",
+      "atomElementName": "",
+      "atomAverageShift": 8.224,
+      "atomStdShift": 0.38,
+      "atomMinShift": 7.9555,
+      "atomMaxShift": 8.4932,
+      "atomDistributionRefValue": 7.9555,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H1",
+      "atomElementName": "",
+      "atomAverageShift": 7.774,
+      "atomStdShift": null,
+      "atomMinShift": 7.7742,
+      "atomMaxShift": 7.7742,
+      "atomDistributionRefValue": 7.7742,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H4",
+      "atomElementName": "",
+      "atomAverageShift": 7.471,
+      "atomStdShift": null,
+      "atomMinShift": 7.4712,
+      "atomMaxShift": 7.4712,
+      "atomDistributionRefValue": 7.4712,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H5",
+      "atomElementName": "",
+      "atomAverageShift": 7.672,
+      "atomStdShift": null,
+      "atomMinShift": 7.6722,
+      "atomMaxShift": 7.6722,
+      "atomDistributionRefValue": 7.6722,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 4.634,
+      "atomStdShift": 0.106,
+      "atomMinShift": 4.5592,
+      "atomMaxShift": 4.7095,
+      "atomDistributionRefValue": 4.5592,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB1",
+      "atomElementName": "",
+      "atomAverageShift": 3.841,
+      "atomStdShift": null,
+      "atomMinShift": 3.8412,
+      "atomMaxShift": 3.8412,
+      "atomDistributionRefValue": 3.8412,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB2",
+      "atomElementName": "",
+      "atomAverageShift": 3.611,
+      "atomStdShift": 0.238,
+      "atomMinShift": 3.4425,
+      "atomMaxShift": 3.7792,
+      "atomDistributionRefValue": 3.4425,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB3",
+      "atomElementName": "",
+      "atomAverageShift": 3.803,
+      "atomStdShift": null,
+      "atomMinShift": 3.8025,
+      "atomMaxShift": 3.8025,
+      "atomDistributionRefValue": 3.8025,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HG",
+      "atomElementName": "",
+      "atomAverageShift": 8.276,
+      "atomStdShift": null,
+      "atomMinShift": 8.2755,
+      "atomMaxShift": 8.2755,
+      "atomDistributionRefValue": 8.2755,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HNG",
+      "atomElementName": "",
+      "atomAverageShift": 8.661,
+      "atomStdShift": null,
+      "atomMinShift": 8.6612,
+      "atomMaxShift": 8.6612,
+      "atomDistributionRefValue": 8.6612,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HZ1",
+      "atomElementName": "",
+      "atomAverageShift": 7.75,
+      "atomStdShift": null,
+      "atomMinShift": 7.7495,
+      "atomMaxShift": 7.7495,
+      "atomDistributionRefValue": 7.7495,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HZ2",
+      "atomElementName": "",
+      "atomAverageShift": 7.88,
+      "atomStdShift": null,
+      "atomMinShift": 7.8795,
+      "atomMaxShift": 7.8795,
+      "atomDistributionRefValue": 7.8795,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

@@ -4,19 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-07 14:39:42 +0100 (Tue, June 07, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-10-16 14:45:44 +0100 (Mon, October 16, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -46,7 +46,6 @@ from ccpn.ui.gui.widgets.MessageDialog import _stoppableProgressBar
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking
 from ccpn.ui.gui.widgets.Spacer import Spacer
 import numpy as np
-from ccpn.core.lib.SpectrumLib import estimateNoiseLevel1D
 
 Estimated = 'Estimated'
 Manual = 'Manual'
@@ -235,20 +234,6 @@ class PickPeak1DPopup(CcpnDialog):
     def _setWidgets(self):
 
         self.spectraSelectionWidget = SpectraSelectionWidget(self, mainWindow=self.mainWindow)
-
-        self.noiseLevelLabel = Label(self, text='Noise Level Threshold')
-        self.noiseLevelRadioButtons = RadioButtons(self,
-                                                   texts=[Estimated, Manual],
-                                                   selectedInd=0,
-                                                   callback=self._noiseLevelCallBack,
-                                                   tipTexts=None)
-
-        self.noiseLevelFactorLabel = Label(self, text='Noise Level Factor')
-        self.noiseLevelFactorSpinbox = DoubleSpinbox(self, value=0.1, min=0.01, step=0.1)
-        self.noiseLevelSpinbox = DoubleSpinbox(self)
-        self.noiseLevelSpinbox.hide()
-        self.noiseLevelSpinbox.setValue(10000)
-        self.noiseLevelSpinbox.setMaximum(np.inf)
         self.pickCancelButtons = ButtonList(self,
                                             texts=['Cancel', 'Find Peaks'],
                                             callbacks=[self.reject, self._pickFromSelectedSpectra],
@@ -260,53 +245,26 @@ class PickPeak1DPopup(CcpnDialog):
     def _addWidgetsToLayout(self):
         self.mainLayout.addWidget(self.tabWidget, 0, 0, 1, 2)
         self.tabGeneralSetupLayout.addWidget(self.spectraSelectionWidget, 1, 0, 1, 2)
-        self.tabGeneralSetupLayout.addWidget(self.noiseLevelLabel, 2, 0)
-        self.tabGeneralSetupLayout.addWidget(self.noiseLevelRadioButtons, 2, 1)
-        self.tabGeneralSetupLayout.addWidget(self.noiseLevelFactorLabel, 3, 0)
-        self.tabGeneralSetupLayout.addWidget(self.noiseLevelFactorSpinbox, 3, 1)
-        self.tabGeneralSetupLayout.addWidget(self.noiseLevelSpinbox, 3, 1)
         self.tabGeneralSetupLayout.addWidget(self.pickNegativeLabel, 6, 0)
         self.tabGeneralSetupLayout.addWidget(self.pickNegativeCheckBox, 6, 1)
         self.mainLayout.addWidget(self.pickCancelButtons, 10, 1)
-
-    def _noiseLevelCallBack(self):
-        selected = self.noiseLevelRadioButtons.get()
-        if selected == Estimated:
-            self.noiseLevelSpinbox.hide()
-            self.noiseLevelFactorSpinbox.show()
-            self.noiseLevelFactorLabel.show()
-        else:
-            self.noiseLevelSpinbox.show()
-            self.noiseLevelFactorSpinbox.hide()
-            self.noiseLevelFactorLabel.hide()
-
-    def _getNoiseThreshold(self):
-        selected = self.noiseLevelRadioButtons.get()
-        values = (0, self.noiseLevelSpinbox.value())
-        for selection, value in zip(self.noiseLevelRadioButtons.texts, values):
-            if selected == str(selection):
-                return value
 
     def _pickFromSelectedSpectra(self):
 
         spectra = list(set(self.spectraSelectionWidget._getSelectedSpectra() + self.spectraSelectionWidget._getSpectrumGroupsSpectra()))
         pickNegativePeaks = self.pickNegativeCheckBox.get()
         excludeRegions = self.excludedRegionsTab._getExcludedRegions()
-        noiseThreshold = self._getNoiseThreshold()
-        noiseThresholdFactor = self.noiseLevelFactorSpinbox.value()
+
         with notificationEchoBlocking():
             for spectrum in _stoppableProgressBar(spectra):
-                if noiseThreshold == 0:
-                    pNoiseT, nNoiseT = estimateNoiseLevel1D(spectrum.intensities, stdFactor=noiseThresholdFactor)
-                else:
-                    pNoiseT, nNoiseT = noiseThreshold, -noiseThreshold
+                pcb, ncb = spectrum.positiveContourBase, spectrum.negativeContourBase
                 ppmRegions = dict(zip(spectrum.axisCodes, spectrum.spectrumLimits))
                 peakPicker = spectrum._getPeakPicker()
                 peakPicker._excludePpmRegions[spectrum.axisCodes[0]] = excludeRegions
                 peakPicker._doNegativePeaks = pickNegativePeaks
                 spectrum.pickPeaks( peakList=None,
-                                    positiveThreshold=pNoiseT,
-                                    negativeThreshold=nNoiseT,
+                                    positiveThreshold=pcb,
+                                    negativeThreshold=ncb,
                                     **ppmRegions)
 
         self.accept()

@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-28 12:50:21 +0000 (Tue, November 28, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-10-24 13:54:29 +0100 (Tue, October 24, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1058,7 +1058,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.peakFactor1D.set(self.preferences.general.peakFactor1D * 100.0)
 
         _peakPickers = getPeakPickerTypes()
-        self.peakPicker1dData.setData(texts=sorted([name for name, pp in _peakPickers.items() if pp.onlyFor1D]))
+        self.peakPicker1dData.setData(texts=sorted([name for name, pp in _peakPickers.items()]))
         self.peakPickerNdData.setData(texts=sorted([name for name, pp in _peakPickers.items() if not pp.onlyFor1D]))
 
         default1DPickerType = self.preferences.general.peakPicker1d
@@ -2409,6 +2409,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         """Set the default peak picker for 1d spectra
         """
         self.preferences.general.peakPicker1d = value
+        spectra =  [sp for sp in  self.project.spectra if sp.dimensionCount  == 1]
+        self._updatePeakPickerOnSpectra(value, spectra)
 
     @queueStateChange(_verifyPopupApply)
     def _queueChangePeakPickerNdIndex(self, _value):
@@ -2420,6 +2422,24 @@ class PreferencesPopup(CcpnDialogMainWidget):
         """Set the default peak picker for Nd spectra
         """
         self.preferences.general.peakPickerNd = value
+        spectra =  [sp for sp in  self.project.spectra if sp.dimensionCount  > 1]
+        self._updatePeakPickerOnSpectra(value, spectra)
+
+    def _updatePeakPickerOnSpectra(self, value, spectra):
+        from ccpn.core.lib.ContextManagers import undoBlock
+        from ccpn.core.lib.PeakPickers.PeakPickerABC import getPeakPickerTypes
+
+        PeakPicker = getPeakPickerTypes().get(value)
+        if PeakPicker is None: # Don't use a fetch or fallback to default. User should select one.
+            raise RuntimeError(f'Cannot find a PeakPicker called {value}.')
+        getLogger().info(f'Setting the {value} PeakPicker to Spectra')
+        with undoBlock():
+            for sp in spectra:
+                if sp.peakPicker and sp.peakPicker.peakPickerType == value:
+                    continue # is the same. no need to reset.
+                sp.peakPicker = None
+                thePeakPicker = PeakPicker(spectrum=sp)
+                sp.peakPicker = thePeakPicker
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

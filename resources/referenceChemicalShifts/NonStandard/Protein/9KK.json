@@ -1,0 +1,99 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "9KK",
+  "compoundName": "N-methyl norleucine",
+  "compoundCcpCode": "9KK",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "L-peptide linking",
+  "compoundPrecursorName": "Leucine",
+  "atoms": [
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 5.434,
+      "atomStdShift": null,
+      "atomMinShift": 5.434,
+      "atomMaxShift": 5.434,
+      "atomDistributionRefValue": 5.434,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB2",
+      "atomElementName": "",
+      "atomAverageShift": 1.522,
+      "atomStdShift": null,
+      "atomMinShift": 1.522,
+      "atomMaxShift": 1.522,
+      "atomDistributionRefValue": 1.522,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB3",
+      "atomElementName": "",
+      "atomAverageShift": 1.926,
+      "atomStdShift": null,
+      "atomMinShift": 1.926,
+      "atomMaxShift": 1.926,
+      "atomDistributionRefValue": 1.926,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "QD",
+      "atomElementName": "",
+      "atomAverageShift": 1.242,
+      "atomStdShift": null,
+      "atomMinShift": 1.242,
+      "atomMaxShift": 1.242,
+      "atomDistributionRefValue": 1.242,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "QE",
+      "atomElementName": "",
+      "atomAverageShift": 0.82,
+      "atomStdShift": null,
+      "atomMinShift": 0.82,
+      "atomMaxShift": 0.82,
+      "atomDistributionRefValue": 0.82,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "QG",
+      "atomElementName": "",
+      "atomAverageShift": 1.074,
+      "atomStdShift": null,
+      "atomMinShift": 1.074,
+      "atomMaxShift": 1.074,
+      "atomDistributionRefValue": 1.074,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "QM",
+      "atomElementName": "",
+      "atomAverageShift": 3.481,
+      "atomStdShift": null,
+      "atomMinShift": 3.481,
+      "atomMaxShift": 3.481,
+      "atomDistributionRefValue": 3.481,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

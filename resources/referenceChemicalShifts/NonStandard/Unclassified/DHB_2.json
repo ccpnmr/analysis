@@ -1,0 +1,77 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "DHB_2",
+  "compoundName": "",
+  "compoundCcpCode": "DHB_2",
+  "compoundType": "Unclassified",
+  "compoundTypeClassification": "",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "CG2",
+      "atomElementName": "",
+      "atomAverageShift": 15.423,
+      "atomStdShift": null,
+      "atomMinShift": 15.423,
+      "atomMaxShift": 15.423,
+      "atomDistributionRefValue": 15.423,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H",
+      "atomElementName": "",
+      "atomAverageShift": 12.663,
+      "atomStdShift": null,
+      "atomMinShift": 12.663,
+      "atomMaxShift": 12.663,
+      "atomDistributionRefValue": 12.663,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB",
+      "atomElementName": "",
+      "atomAverageShift": 6.033,
+      "atomStdShift": null,
+      "atomMinShift": 6.033,
+      "atomMaxShift": 6.033,
+      "atomDistributionRefValue": 6.033,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HG21",
+      "atomElementName": "",
+      "atomAverageShift": 1.642,
+      "atomStdShift": null,
+      "atomMinShift": 1.642,
+      "atomMaxShift": 1.642,
+      "atomDistributionRefValue": 1.642,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "N",
+      "atomElementName": "",
+      "atomAverageShift": 139.087,
+      "atomStdShift": null,
+      "atomMinShift": 139.087,
+      "atomMaxShift": 139.087,
+      "atomDistributionRefValue": 139.087,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

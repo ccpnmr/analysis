@@ -1,0 +1,110 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "PYB",
+  "compoundName": "4-AMINO-(1-METHYLPYRROLE)-2-CARBOXYLIC ACID",
+  "compoundCcpCode": "PYB",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "C",
+      "atomElementName": "",
+      "atomAverageShift": 36.572,
+      "atomStdShift": null,
+      "atomMinShift": 36.572,
+      "atomMaxShift": 36.572,
+      "atomDistributionRefValue": 36.572,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CB",
+      "atomElementName": "",
+      "atomAverageShift": 121.075,
+      "atomStdShift": 1.07,
+      "atomMinShift": 118.964,
+      "atomMaxShift": 122.128,
+      "atomDistributionRefValue": 118.964,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CB1",
+      "atomElementName": "",
+      "atomAverageShift": 104.273,
+      "atomStdShift": 1.426,
+      "atomMinShift": 102.464,
+      "atomMaxShift": 106.588,
+      "atomDistributionRefValue": 102.464,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CD",
+      "atomElementName": "",
+      "atomAverageShift": 37.045,
+      "atomStdShift": 0.626,
+      "atomMinShift": 36.172,
+      "atomMaxShift": 37.845,
+      "atomDistributionRefValue": 36.172,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H",
+      "atomElementName": "",
+      "atomAverageShift": 9.854,
+      "atomStdShift": 0.585,
+      "atomMinShift": 9.135,
+      "atomMaxShift": 10.731,
+      "atomDistributionRefValue": 9.135,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB",
+      "atomElementName": "",
+      "atomAverageShift": 7.428,
+      "atomStdShift": 0.244,
+      "atomMinShift": 7.035,
+      "atomMaxShift": 7.663,
+      "atomDistributionRefValue": 7.035,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB1",
+      "atomElementName": "",
+      "atomAverageShift": 6.257,
+      "atomStdShift": 0.144,
+      "atomMinShift": 5.984,
+      "atomMaxShift": 6.451,
+      "atomDistributionRefValue": 5.984,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HD1",
+      "atomElementName": "",
+      "atomAverageShift": 3.737,
+      "atomStdShift": 0.141,
+      "atomMinShift": 3.54,
+      "atomMaxShift": 3.929,
+      "atomDistributionRefValue": 3.54,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

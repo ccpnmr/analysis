@@ -1,0 +1,77 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "KOB",
+  "compoundName": "2-(2,4-dinitrophenyl)-N-(4-fluorophenyl)hydrazinecarbothioamide",
+  "compoundCcpCode": "KOB",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H1",
+      "atomElementName": "",
+      "atomAverageShift": 7.102,
+      "atomStdShift": null,
+      "atomMinShift": 7.102,
+      "atomMaxShift": 7.102,
+      "atomDistributionRefValue": 7.102,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2",
+      "atomElementName": "",
+      "atomAverageShift": 7.542,
+      "atomStdShift": null,
+      "atomMinShift": 7.542,
+      "atomMaxShift": 7.542,
+      "atomDistributionRefValue": 7.542,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H3",
+      "atomElementName": "",
+      "atomAverageShift": 7.327,
+      "atomStdShift": null,
+      "atomMinShift": 7.327,
+      "atomMaxShift": 7.327,
+      "atomDistributionRefValue": 7.327,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H4",
+      "atomElementName": "",
+      "atomAverageShift": 7.982,
+      "atomStdShift": null,
+      "atomMinShift": 7.982,
+      "atomMaxShift": 7.982,
+      "atomDistributionRefValue": 7.982,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H5",
+      "atomElementName": "",
+      "atomAverageShift": 8.919,
+      "atomStdShift": null,
+      "atomMinShift": 8.919,
+      "atomMaxShift": 8.919,
+      "atomDistributionRefValue": 8.919,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

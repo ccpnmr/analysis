@@ -19,8 +19,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-07 15:16:42 +0100 (Thu, September 07, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-10-06 22:35:43 +0100 (Fri, October 06, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -70,6 +70,7 @@ def getDataLoaders() -> dict:
     from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
     from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
     from ccpn.framework.lib.DataLoaders.FastaDataLoader import FastaDataLoader
+    from ccpn.framework.lib.DataLoaders.ChemCompDataLoader import ChemCompDataLoader
     from ccpn.framework.lib.DataLoaders.ExelDataLoader import ExcelDataLoader
     from ccpn.framework.lib.DataLoaders.PdbDataLoader import PdbDataLoader
     from ccpn.framework.lib.DataLoaders.TextDataLoader import TextDataLoader

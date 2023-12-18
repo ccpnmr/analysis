@@ -1,0 +1,55 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "PHQ",
+  "compoundName": "benzyl chlorocarbonate",
+  "compoundCcpCode": "PHQ",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "HB2",
+      "atomElementName": "",
+      "atomAverageShift": 4.786,
+      "atomStdShift": null,
+      "atomMinShift": 4.78578,
+      "atomMaxShift": 4.78578,
+      "atomDistributionRefValue": 4.78578,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HD1",
+      "atomElementName": "",
+      "atomAverageShift": 7.107,
+      "atomStdShift": null,
+      "atomMinShift": 7.10712,
+      "atomMaxShift": 7.10712,
+      "atomDistributionRefValue": 7.10712,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HE1",
+      "atomElementName": "",
+      "atomAverageShift": 7.137,
+      "atomStdShift": null,
+      "atomMinShift": 7.13673,
+      "atomMaxShift": 7.13673,
+      "atomDistributionRefValue": 7.13673,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

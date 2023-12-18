@@ -1,9 +1,9 @@
 # Reference ChemicalShifts file template documentation
 
-New reference chemicalShifts need to be in a JSON file.
+New reference chemicalShifts need to be in a JSON file and inside a directory, e.g.: MyCustomProtein.
 See the Template for the general structure.
 
-## Top Level:
+## MetaData:
 
 **title**: Mandatory. Str. A short one/two word title.  This will appear in the GUI as an entry in ReferenceChemicalShifts selection widget(s)
 
@@ -17,17 +17,16 @@ See the Template for the general structure.
 
 **user**: Optional. Str. Who created the file
 
-**moleculeType**: Mandatory. Str. The molecule type described in the file
 
-**residues**:  Mandatory. List of dictionaries. Category containing information about  the residues. Open new level:  ***Residue Level*** , see below.
-
-## **Residue Level**
+## **Residue **
 
 **residueName**: Mandatory. Str. The residue name. Three letter code for protein. E.g.: Alanine
 
 **shortName**: Mandatory. Str. The residue short name. Three letter code for protein, Two letter code for DNA, etc. E.g.: ALA
 
 **ccpcode**: Optional. Str. The unique ccp code if available. E.g.: Ala
+
+**moleculeType**: Mandatory. Str. The molecule type described in the file
 
 **atoms**: Mandatory. List of dictionaries. Category containing information about the residue atoms. Open new level:  ***Atom Level*** , see below.
 

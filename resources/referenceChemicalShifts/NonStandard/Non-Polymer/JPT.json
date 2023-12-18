@@ -1,0 +1,88 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "JPT",
+  "compoundName": "6-(hydroxymethyl)-3-oxidanyl-2-(thiophen-3-ylmethyl)pyran-4-one",
+  "compoundCcpCode": "JPT",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H12",
+      "atomElementName": "",
+      "atomAverageShift": 7.13,
+      "atomStdShift": null,
+      "atomMinShift": 7.13,
+      "atomMaxShift": 7.13,
+      "atomDistributionRefValue": 7.13,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H13",
+      "atomElementName": "",
+      "atomAverageShift": 6.83,
+      "atomStdShift": null,
+      "atomMinShift": 6.83,
+      "atomMaxShift": 6.83,
+      "atomDistributionRefValue": 6.83,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2",
+      "atomElementName": "",
+      "atomAverageShift": 6.51,
+      "atomStdShift": null,
+      "atomMinShift": 6.51,
+      "atomMaxShift": 6.51,
+      "atomDistributionRefValue": 6.51,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H61",
+      "atomElementName": "",
+      "atomAverageShift": 4.44,
+      "atomStdShift": null,
+      "atomMinShift": 4.44,
+      "atomMaxShift": 4.44,
+      "atomDistributionRefValue": 4.44,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H62",
+      "atomElementName": "",
+      "atomAverageShift": 4.44,
+      "atomStdShift": null,
+      "atomMinShift": 4.44,
+      "atomMaxShift": 4.44,
+      "atomDistributionRefValue": 4.44,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H7",
+      "atomElementName": "",
+      "atomAverageShift": 5.13,
+      "atomStdShift": null,
+      "atomMinShift": 5.13,
+      "atomMaxShift": 5.13,
+      "atomDistributionRefValue": 5.13,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

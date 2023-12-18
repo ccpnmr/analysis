@@ -1,0 +1,66 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "3GL",
+  "compoundName": "(2S,4S)-2-amino-4-hydroxy-pentanedioic acid",
+  "compoundCcpCode": "3GL",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "L-peptide linking",
+  "compoundPrecursorName": "Glutamine",
+  "atoms": [
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 5.516,
+      "atomStdShift": null,
+      "atomMinShift": 5.516,
+      "atomMaxShift": 5.516,
+      "atomDistributionRefValue": 5.516,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB1C",
+      "atomElementName": "",
+      "atomAverageShift": 2.023,
+      "atomStdShift": null,
+      "atomMinShift": 2.023,
+      "atomMaxShift": 2.023,
+      "atomDistributionRefValue": 2.023,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB2C",
+      "atomElementName": "",
+      "atomAverageShift": 1.981,
+      "atomStdShift": null,
+      "atomMinShift": 1.981,
+      "atomMaxShift": 1.981,
+      "atomDistributionRefValue": 1.981,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HN",
+      "atomElementName": "",
+      "atomAverageShift": 7.086,
+      "atomStdShift": null,
+      "atomMinShift": 7.086,
+      "atomMaxShift": 7.086,
+      "atomDistributionRefValue": 7.086,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

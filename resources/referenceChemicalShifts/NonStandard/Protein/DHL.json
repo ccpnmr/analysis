@@ -1,0 +1,66 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "DHL",
+  "compoundName": "2-AMINO-ETHANETHIOL",
+  "compoundCcpCode": "DHL",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "L-peptide linking",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H",
+      "atomElementName": "",
+      "atomAverageShift": 8.283,
+      "atomStdShift": 0.01,
+      "atomMinShift": 8.272,
+      "atomMaxShift": 8.289,
+      "atomDistributionRefValue": 8.272,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 6.801,
+      "atomStdShift": 0.001,
+      "atomMinShift": 6.8,
+      "atomMaxShift": 6.802,
+      "atomDistributionRefValue": 6.8,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB2",
+      "atomElementName": "",
+      "atomAverageShift": 5.497,
+      "atomStdShift": 0.017,
+      "atomMinShift": 5.485,
+      "atomMaxShift": 5.516,
+      "atomDistributionRefValue": 5.485,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB3",
+      "atomElementName": "",
+      "atomAverageShift": 5.242,
+      "atomStdShift": null,
+      "atomMinShift": 5.242,
+      "atomMaxShift": 5.242,
+      "atomDistributionRefValue": 5.242,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

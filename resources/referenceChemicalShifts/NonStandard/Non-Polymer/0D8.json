@@ -1,0 +1,88 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "0D8",
+  "compoundName": "3-aminopropan-1-ol",
+  "compoundCcpCode": "0D8",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H14",
+      "atomElementName": "",
+      "atomAverageShift": 3.987,
+      "atomStdShift": null,
+      "atomMinShift": 3.987,
+      "atomMaxShift": 3.987,
+      "atomDistributionRefValue": 3.987,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H24",
+      "atomElementName": "",
+      "atomAverageShift": 3.682,
+      "atomStdShift": null,
+      "atomMinShift": 3.682,
+      "atomMaxShift": 3.682,
+      "atomDistributionRefValue": 3.682,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H89",
+      "atomElementName": "",
+      "atomAverageShift": 1.936,
+      "atomStdShift": null,
+      "atomMinShift": 1.936,
+      "atomMaxShift": 1.936,
+      "atomDistributionRefValue": 1.936,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H99",
+      "atomElementName": "",
+      "atomAverageShift": 1.936,
+      "atomStdShift": null,
+      "atomMinShift": 1.936,
+      "atomMaxShift": 1.936,
+      "atomDistributionRefValue": 1.936,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA21",
+      "atomElementName": "",
+      "atomAverageShift": 3.056,
+      "atomStdShift": null,
+      "atomMinShift": 3.056,
+      "atomMaxShift": 3.056,
+      "atomDistributionRefValue": 3.056,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA3",
+      "atomElementName": "",
+      "atomAverageShift": 3.056,
+      "atomStdShift": null,
+      "atomMinShift": 3.056,
+      "atomMaxShift": 3.056,
+      "atomDistributionRefValue": 3.056,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

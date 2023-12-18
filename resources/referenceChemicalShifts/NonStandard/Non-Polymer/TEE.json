@@ -1,0 +1,77 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "TEE",
+  "compoundName": "2-AMINO-ETHENETHIOL",
+  "compoundCcpCode": "TEE",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "CA",
+      "atomElementName": "",
+      "atomAverageShift": 132.158,
+      "atomStdShift": null,
+      "atomMinShift": 132.158,
+      "atomMaxShift": 132.158,
+      "atomDistributionRefValue": 132.158,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CB",
+      "atomElementName": "",
+      "atomAverageShift": 157.063,
+      "atomStdShift": null,
+      "atomMinShift": 157.063,
+      "atomMaxShift": 157.063,
+      "atomDistributionRefValue": 157.063,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 6.964,
+      "atomStdShift": null,
+      "atomMinShift": 6.964,
+      "atomMaxShift": 6.964,
+      "atomDistributionRefValue": 6.964,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB2",
+      "atomElementName": "",
+      "atomAverageShift": 5.725,
+      "atomStdShift": null,
+      "atomMinShift": 5.725,
+      "atomMaxShift": 5.725,
+      "atomDistributionRefValue": 5.725,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HN1",
+      "atomElementName": "",
+      "atomAverageShift": 8.57,
+      "atomStdShift": null,
+      "atomMinShift": 8.57,
+      "atomMaxShift": 8.57,
+      "atomDistributionRefValue": 8.57,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

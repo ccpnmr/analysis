@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-04 17:21:59 +0100 (Thu, May 04, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-10-23 09:19:35 +0100 (Mon, October 23, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -226,6 +226,16 @@ def onePhaseDecay_func(x, rate=1, amplitude=1):
     result = amplitude * np.exp(-rate * x)
     return result
 
+def onePhaseDecayPlateau_func(x, rate=1, amplitude=1, plateau=0):
+    """ Function used to describe the  decay rate in an exponential decay model with the extra argument plateau.
+    rate is the rate constant, expressed in reciprocal of the X axis time units.
+     If X is in seconds, then rate is expressed in inverse seconds, (Spower-1)
+     Y=(Y0 - Plateau)*exp(-K*X) + Plateau
+    """
+    rate = ls.not_zero(rate)
+    result = (amplitude - plateau) * np.exp(-rate * x) + plateau
+    return result
+
 def exponential_func(x, amplitude, decay):
     return amplitude * np.exp(decay * x)
 
@@ -374,6 +384,11 @@ def calculateRollingAverage(data, windowSize=10):
     """
     window = np.ones(int(windowSize))/float(windowSize)
     return np.convolve(data, window,  mode='same')
+
+
+def aad(data, axis=None):
+    """The mean absolute deviation. Do not confuse with the median absolute difference. """
+    return np.mean(np.absolute(data - np.mean(data, axis)), axis)
 
 ############################################################
 ############### Spectral density mapping functions ################

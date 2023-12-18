@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-22 10:51:24 +0100 (Tue, August 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-14 17:22:07 +0000 (Tue, November 14, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -379,35 +379,6 @@ def getSpectrumDataSource(path, dataFormat):
 
 #------------------------------------------------------------------------------------------------------
 
-
-# def _oldEstimateNoiseLevel1D(x, y, factor=3):
-#   """
-#   :param x,y:  spectrum.positions, spectrum.intensities
-#   :param factor: optional. Increase factor to increase the STD and therefore the noise level threshold
-#   :return: float of estimated noise threshold
-#   """
-#
-#   data = np.array([x, y])
-#   dataStd = np.std(data)
-#   data = np.array(data, np.float32)
-#   data = data.clip(-dataStd, dataStd)
-#   value = factor * np.std(data)
-#   return value
-
-
-def _oldEstimateNoiseLevel1D(y, factor=0.5):
-    """
-    Estimates the noise threshold based on the max intensity of the first portion of the spectrum where
-    only noise is present. To increase the threshold value: increase the factor.
-    return:  float of estimated noise threshold
-    """
-    if y is not None:
-        # print('_oldEstimateNoiseLevel1D',max(y[:int(len(y)/20)]) * factor, 'STD, ')
-        return max(y[:int(len(y) / 20)]) * factor
-    else:
-        return 0
-
-
 def _calibrateX1D(spectrum, currentPosition, newPosition):
     shift = newPosition - currentPosition
     spectrum.referenceValues = [spectrum.referenceValues[0] + shift]
@@ -500,27 +471,6 @@ def align2HSQCs(refSpectrum, querySpectrum, refPeakListIdx=-1, queryPeakListIdx=
     return shifts, correctedValues
 
 
-def _estimate1DSpectrumSNR(spectrum, engine='max'):
-    """
-
-    :param spectrum:
-    :type spectrum:
-    :param engine: max: calculate using the max intensity of all spectrum
-    :type engine:
-    :return:
-    :rtype:
-    """
-    engines = {'max': np.max, 'mean': np.mean, 'std': np.std}
-
-    if engine in engines:
-        func = engines.get(engine)
-    else:
-        func = np.max
-        getLogger().warning('Engine not recognised. Using Default')
-    _snr = estimateSNR(noiseLevels=[spectrum.noiseLevel, spectrum.negativeNoiseLevel],
-                       signalPoints=[func(spectrum.intensities)])
-
-    return _snr[0]
 
 
 # refSpectrum = project.spectra[]
@@ -1356,7 +1306,7 @@ def _getNoiseEstimate(spectrum, nsamples=1000, nsubsets=10, fraction=0.1):
     # create a list of random points in the spectrum, get only points that are not nan/inf
     # getPointValue is the slow bit
     allPts = [[min(n - 1, int(n * random.random()) + 1) for n in npts] for i in range(nsamples)]
-    _list = np.array([spectrum.getPointValue(pt) for pt in allPts], dtype=np.float32)
+    _list = np.array([spectrum._getPointValue(pt) for pt in allPts], dtype=np.float32)
     data = _list[np.isfinite(_list)]
     fails = nsamples - len(data)
 
@@ -1510,49 +1460,10 @@ def _getContourEstimate(spectrum, nsamples=1000, nsubsets=10, fraction=0.1):
     return value
 
 
-def _signalToNoiseFunc(noise, signal):
-    snr = math.log10(abs(np.mean(signal) ** 2 / np.mean(noise) ** 2))
-    return snr
-
-
-def estimateSignalRegion(y, nlMax=None, nlMin=None):
-    if y is None: return 0
-    if nlMax is None or nlMin is None:
-        nlMax, nlMin = estimateNoiseLevel1D(y)
-    eS = np.where(y >= nlMax)
-    eSN = np.where(y <= nlMin)
-    eN = np.where((y < nlMax) & (y > nlMin))
-    estimatedSignalRegionPos = y[eS]
-    estimatedSignalRegionNeg = y[eSN]
-    estimatedSignalRegion = np.concatenate((estimatedSignalRegionPos, estimatedSignalRegionNeg))
-    estimatedNoiseRegion = y[eN]
-    lenghtESR = len(estimatedSignalRegion)
-    lenghtENR = len(estimatedNoiseRegion)
-    if lenghtESR > lenghtENR:
-        l = lenghtENR
-    else:
-        l = lenghtESR
-    if l == 0:
-        return np.array([])
-    else:
-        noise = estimatedNoiseRegion[:l - 1]
-        signalAndNoise = estimatedSignalRegion[:l - 1]
-        signal = abs(signalAndNoise - noise)
-        signal[::-1].sort()  # descending
-        noise[::1].sort()
-        if hasattr(signal, 'compressed') and hasattr(noise, 'compressed'):
-            signal = signal.compressed()  # remove the mask
-            noise = noise.compressed()  # remove the mask
-        s = signal[:int(l / 2)]
-        n = noise[:int(l / 2)]
-        if len(signal) == 0:
-            return np.array([])
-        else:
-            return s
-
-
-def estimateSNR(noiseLevels, signalPoints, factor=2.5):
+def _old_estimateSNR(noiseLevels, signalPoints, factor=2.5):
     """
+    This calculation methods, internally known as the Varian Method,
+     is deprecated from Version 3.2.1 onwards.
     SNratio = factor*(height/|NoiseMax-NoiseMin|)
     :param noiseLevels: (max, min) floats
     :param signalPoints: iterable of floats estimated to be signal or peak heights
@@ -1588,30 +1499,6 @@ class _1DRawDataDict(dict):
                 dd[sp] = (sp.positions,sp.intensities)
         self.update(dd)
         getLogger().info('Building 1D raw data dictionary. Completed')
-
-
-def estimateNoiseLevel1D(y, f=10, stdFactor=0.5) -> Tuple[float, float]:
-    """
-
-    :param y: the y region of the spectrum.
-    :param f: percentage of the spectrum to use. If given a portion known to be just noise, set it to 100.
-    :param stdFactor: 0 to don't adjust the initial guess.
-    :return: tuple (float, float) of estimated noise threshold  as max and min
-    """
-    from ccpn.util.Common import percentage
-    eMax, eMin = 0, 0
-    if stdFactor == 0:
-        stdFactor = 1
-        getLogger().warning('stdFactor of value zero is not allowed.')
-    if y is None:
-        return eMax, eMin
-    percent = percentage(f, int(len(y)))
-    fy = y[:int(percent)]
-    stdValue = np.std(fy) * stdFactor
-    eMax = np.max(fy) + stdValue
-    eMin = np.min(fy) - stdValue
-    return float(eMax), float(eMin)
-
 
 def _filterROI1Darray(x, y, roi):
     """ Return region included in the ROI ppm position"""

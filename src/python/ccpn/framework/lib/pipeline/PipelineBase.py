@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-08 18:54:14 +0100 (Tue, August 08, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-13 17:04:10 +0000 (Wed, December 13, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from ccpn.util.Path import aPath, joinPath
-
+import numpy as np
 
 class Pipeline(object):
     '''
@@ -95,6 +95,17 @@ class Pipeline(object):
         savePath = joinPath(projectPipelinePath, pipelineName)
         self._filePath = str(savePath)
         return self._filePath
+
+    @staticmethod
+    def _updateTheNoiseSDBase(spectra, rawDataDict):
+        for spectrum in spectra:
+            if spectrum is None:
+                continue
+            if spectrum not in rawDataDict:
+                x, y = np.array(spectrum.positions), np.array(spectrum.intensities)
+            else:
+                x, y = rawDataDict.get(spectrum)
+            spectrum._noiseSD = float(np.median(y) + 1 * np.std(y))
 
     def _updateRunArgs(self, arg, value):
         self._kwargs[arg] = value

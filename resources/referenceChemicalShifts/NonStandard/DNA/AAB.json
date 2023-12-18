@@ -1,0 +1,66 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "AAB",
+  "compoundName": "2'-DEOXY-RIBOFURANOSE-5'-MONOPHOSPHATE",
+  "compoundCcpCode": "AAB",
+  "compoundType": "DNA",
+  "compoundTypeClassification": "DNA linking",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H1'",
+      "atomElementName": "",
+      "atomAverageShift": 5.69,
+      "atomStdShift": null,
+      "atomMinShift": 5.69,
+      "atomMaxShift": 5.69,
+      "atomDistributionRefValue": 5.69,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2'1",
+      "atomElementName": "",
+      "atomAverageShift": 2.038,
+      "atomStdShift": null,
+      "atomMinShift": 2.038,
+      "atomMaxShift": 2.038,
+      "atomDistributionRefValue": 2.038,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2'2",
+      "atomElementName": "",
+      "atomAverageShift": 2.242,
+      "atomStdShift": null,
+      "atomMinShift": 2.242,
+      "atomMaxShift": 2.242,
+      "atomDistributionRefValue": 2.242,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H3'",
+      "atomElementName": "",
+      "atomAverageShift": 4.668,
+      "atomStdShift": null,
+      "atomMinShift": 4.668,
+      "atomMaxShift": 4.668,
+      "atomDistributionRefValue": 4.668,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

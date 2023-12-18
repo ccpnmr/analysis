@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-21 11:46:44 +0000 (Mon, March 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-09-15 14:18:06 +0100 (Fri, September 15, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -698,29 +698,45 @@ class CcpnJsonDirectoryABC(OrderedDict):
     directory = None  # directory containing the json files
     sorted = False  # defines if objects needs sorting; if True, the objects generated from the json
                     # files require the __le__ and __lt__ methods
+    recursive = False
     extension = '.json'
+    searchPattern = '*.json'
     #--------------------------------------------------------------------------------------------
     # end to be subclassed
     #--------------------------------------------------------------------------------------------
 
     def __init__(self):
         super().__init__()
-        self.restoreFromJson()
+        self._traits = self.readFromJson()
+        self.populate()
 
-    def restoreFromJson(self):
-        "restore all records from directory; populate the ordered-dict"
-        records = []
-        for path in self.directory.glob('*.json'):
-            records.append(CcpNmrJson.newObjectFromJson(path))
+    def readFromJson(self):
+        "read from directory"
+        objs = []
+        if self.directory is None:
+            return objs
+        if isinstance(self.directory, str):
+            self.directory = aPath(self.directory)
+        for path in self.directory.glob(self.searchPattern):
+            try:
+                obj = CcpNmrJson.newObjectFromJson(path)
+                objs.append(obj)
+            except Exception as err:
+                getLogger().warn(f'Cannot load the file {path}. Skipping with error: {err}')
+        return objs
+
+    def populate(self):
+        " populate the ordered-dict"
         if self.sorted:
-            records.sort()
-        for record in records:
+            self._traits.sort()
+        for record in self._traits:
             key = getattr(record, self.attributeName)
             self[key] = record
 
-    def saveToJson(self):
+    def saveToJson(self, directory=None):
         "Save all records to json"
-        directory = aPath(self.directory)
+        if directory is None:
+            directory = aPath(self.directory)
         for key, record in self.items():
             path = directory / key + self.extension
             record.save(path)

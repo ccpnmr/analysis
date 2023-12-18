@@ -1,0 +1,66 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "MeLanDAb",
+  "compoundName": "",
+  "compoundCcpCode": "MeLanDAb",
+  "compoundType": "Unclassified",
+  "compoundTypeClassification": "",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H",
+      "atomElementName": "",
+      "atomAverageShift": 9,
+      "atomStdShift": 0.283,
+      "atomMinShift": 8.63,
+      "atomMaxShift": 9.32,
+      "atomDistributionRefValue": 8.63,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 4.92,
+      "atomStdShift": 0.267,
+      "atomMinShift": 4.62,
+      "atomMaxShift": 5.16,
+      "atomDistributionRefValue": 4.62,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB",
+      "atomElementName": "",
+      "atomAverageShift": 3.605,
+      "atomStdShift": 0.052,
+      "atomMinShift": 3.55,
+      "atomMaxShift": 3.67,
+      "atomDistributionRefValue": 3.55,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HG",
+      "atomElementName": "",
+      "atomAverageShift": 1.38,
+      "atomStdShift": 0.064,
+      "atomMinShift": 1.32,
+      "atomMaxShift": 1.47,
+      "atomDistributionRefValue": 1.32,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

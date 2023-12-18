@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-28 19:23:05 +0100 (Wed, June 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-18 16:07:32 +0100 (Wed, October 18, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -122,6 +122,8 @@ class MainPlotPanel(GuiPanel):
             self.mainPlotWidget.clear()
             return
         vr = self.mainPlotWidget._viewRect
+        self._appearancePanel._setThresholdValueForData()
+
         if self.viewMode == guiNameSpaces.PlotViewMode_Backbone:
             chainWidget = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_Chain)
             if chainWidget is not None:
@@ -413,9 +415,14 @@ class MainPlotPanel(GuiPanel):
         self.updatePanel(keepZoom=True)
         # update the widgets as well
         tw =  self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_ThreshValue)
-        if tw is not None:
-            tw.setValue(float(position))
+        optw =  self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_ThreshValueCalcOptions)
 
+        if tw is not None:
+            with tw.blockWidgetSignals():
+                tw.setValue(float(position))
+        if optw is not None:
+            with optw.blockWidgetSignals():
+                optw.select(guiNameSpaces.SELECT)
 
     def _updateAxisLabels(self):
         self.setXLabel(label=self.xColumnName)

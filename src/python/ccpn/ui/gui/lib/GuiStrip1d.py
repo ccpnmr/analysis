@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-22 10:51:25 +0100 (Tue, August 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-15 15:01:48 +0000 (Wed, November 15, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -27,6 +27,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtWidgets
+from ccpn.util.Colour import hexToRgbRatio
+from functools import partial
 from ccpn.core.PeakList import PeakList
 from ccpn.util import Phasing
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, \
@@ -171,7 +173,8 @@ class GuiStrip1d(GuiStrip):
 
         self.spectrumDisplay.phasingFrame.applyCallback = self._applyPhasing
         self.spectrumDisplay.phasingFrame.applyButton.setEnabled(True)
-        self._noiseThresholdLines = set()
+        self._noiseThresholdLines = {}
+        self._pickingExclusionAreas = {}
 
         self._setStripTiling()
 
@@ -316,6 +319,152 @@ class GuiStrip1d(GuiStrip):
                 #self.peakListViewDict[peakList] = peakListView
                 return peakListView
 
+
+    # -------- Noise threshold lines -------- #
+
+    def _removeNoiseThresholdLines(self):
+        for sp, lines in self._noiseThresholdLines.items():
+            for line in lines:
+                if line is not None:
+                    self._CcpnGLWidget.removeInfiniteLine(line)
+        self._noiseThresholdLines.clear()
+
+    def _updateNoiseThresholdLines(self):
+        """Re-draw the lines """
+        if not self._noiseThresholdLines:
+            return
+        self._removeNoiseThresholdLines()
+        self._initNoiseThresholdLines()
+
+    def toggleNoiseThresholdLines(self, *args):
+        value = self.sender().isChecked()
+        self._noiseThresholdLinesActive = value
+        if value:
+            self._initNoiseThresholdLines()
+        else:
+            self._removeNoiseThresholdLines()
+
+
+    def _updateVisibility(self):
+        """Update visibility list in the OpenGL
+        """
+        self._CcpnGLWidget.updateVisibleSpectrumViews()
+        self._updateNoiseThresholdLines()
+        self._updatePeakPickingExclusionArea()
+
+    def _initNoiseThresholdLines(self):
+        from ccpn.util.Colour import hexToRgbRatio
+        from functools import partial
+        if not self._noiseThresholdLinesActive:
+            return
+
+        visibleSpectra = [sv.spectrum for sv in self.spectrumViews if sv.isDisplayed]
+        for spectrum in visibleSpectra:
+            posValue = spectrum.noiseLevel or spectrum.estimateNoise()
+            if posValue is None:
+                posValue = 0
+            negValue = spectrum.negativeNoiseLevel or -posValue
+            if spectrum.noiseLevel is None:
+                spectrum.noiseLevel = posValue
+            if spectrum.negativeNoiseLevel is None:
+                spectrum.negativeNoiseLevel = negValue
+
+            brush = hexToRgbRatio(spectrum.sliceColour) + (0.3,)  # sliceCol plus an offset
+            positiveLine = self._CcpnGLWidget.addInfiniteLine(values=posValue, colour=brush, movable=True, lineStyle='dashed',
+                                                              lineWidth=2.0, obj=spectrum, orientation='h', )
+            negativeLine = self._CcpnGLWidget.addInfiniteLine(values=negValue, colour=brush, movable=True,
+                                                              lineStyle='dashed', obj=spectrum, orientation='h', lineWidth=2.0)
+            positiveLine.valuesChanged.connect(partial(self._lineThresholdChanged, positiveLine, spectrum, setPositiveThreshold=True))
+            negativeLine.valuesChanged.connect(partial(self._lineThresholdChanged, negativeLine, spectrum, setPositiveThreshold=False))
+            self._noiseThresholdLines[spectrum.pid] = [positiveLine ,negativeLine]
+
+    def _lineThresholdChanged(self, line, spectrum, setPositiveThreshold):
+        """ set the noise threshold to the spectrum based on the line move.
+        TODO add notifier when editing is finished (so to set the noiseLevel once only)."""
+        value = line.values
+        if spectrum is not None:
+            if setPositiveThreshold:
+                if value >0:
+                    spectrum.noiseLevel = value
+            else:
+                spectrum.negativeNoiseLevel = value
+
+        # Define the noiseSD, the standard deviation of the region between the lines boundary
+        intensities = np.array(spectrum.intensities)
+        posValue = spectrum.noiseLevel
+        negValue = spectrum.negativeNoiseLevel
+        try:
+            mask = (intensities >= negValue) & (intensities <= posValue)
+            noiseRegion =  intensities[mask]
+            _noiseSD = np.std(noiseRegion)
+            spectrum._noiseSD = _noiseSD
+        except Exception as exc:
+            getLogger().warning(f'Could not set the NoiseStandardDeviation. {exc}')
+
+    # -------- Picking Exclusion Area -------- #
+
+    def _removePickingExclusionArea(self):
+        for sp, region in self._pickingExclusionAreas.items():
+            if region is not None:
+                self._CcpnGLWidget.removeExternalRegion(region)
+        self._pickingExclusionAreas.clear()
+
+    def _updatePeakPickingExclusionArea(self):
+        """Re-draw the region """
+        if not self._pickingExclusionAreaActive:
+            return
+        if not self._pickingExclusionAreas:
+            return
+        self._removePickingExclusionArea()
+        self._initPickingExclusionArea()
+
+    def togglePickingExclusionArea(self):
+        value = self.sender().isChecked()
+        self._pickingExclusionAreaActive = value
+        if value:
+            self._initPickingExclusionArea()
+        else:
+            self._removePickingExclusionArea()
+
+    def _initPickingExclusionArea(self):
+
+        if not self._pickingExclusionAreaActive:
+            return
+
+        visibleSpectra = [sv.spectrum for sv in self.spectrumViews if sv.isDisplayed]
+        for spectrum in visibleSpectra:
+            posValue = spectrum.positiveContourBase
+            if posValue is None:
+                posValue = 0
+            negValue = spectrum.negativeContourBase or -posValue
+            colour = spectrum.positiveContourColour
+            brush = hexToRgbRatio(spectrum.sliceColour) + (0.3,)  # sliceCol plus an offset
+            _GLlinearRegions = self._CcpnGLWidget.addExternalRegion(values=(posValue, negValue), orientation='h', bounds=None,
+                                                                   brush=brush, colour=colour, movable=True)
+            # _GLlinearRegions.valuesChanged.connect(partial(self._setContourBaseValues, spectrum))
+            _GLlinearRegions.editingFinished.connect(partial(self._setContourBaseValues, spectrum))
+            self._pickingExclusionAreas[spectrum] = _GLlinearRegions
+
+    def _setContourBaseValues(self,  spectrum, _dict, *args):
+        values = _dict.get('values', [])
+        if len(values) == 0:
+            return
+        pos, neg = np.max(values), np.min(values)
+        if spectrum:
+            if pos > 0:
+                spectrum.positiveContourBase = float(pos)
+            else:
+                getLogger().warning('Setting Positive Contour Base Failed', 'Please use only positive values')
+                spectrum.positiveContourBase = 1
+                return
+            if neg < 0:
+                spectrum.negativeContourBase = float(neg)
+            else:
+                getLogger().warning('Setting Negative Contour Base Failed', 'Please use only negative values')
+                spectrum.negativeContourBase = -1
+
+    # ------- Calibrating ------- #
+
     def _addCalibrate1DXSpectrumWidget(self):
         """Add a new widget for calibrateX.
         """
@@ -345,59 +494,6 @@ class GuiStrip1d(GuiStrip):
         self.widgetIndex += 1
         self.calibrateY1DWidgets = CalibrateY1DWidgets(sdWid, mainWindow=self.mainWindow, strip=self,
                                                        grid=(self.widgetIndex, 0), gridSpan=(1, 7))
-
-    def _removeNoiseThresholdLines(self):
-        for line in self._noiseThresholdLines:
-            if line is not None:
-                self._CcpnGLWidget.removeInfiniteLine(line)
-
-    def _updateNoiseThresholdLines(self):
-        """Re-draw the lines """
-        self._removeNoiseThresholdLines()
-        self._initNoiseThresholdLines()
-
-    def toggleNoiseThresholdLines(self, *args):
-        value = self.sender().isChecked()
-        self._noiseThresholdLinesActive = value
-        self._updateNoiseThresholdLines()
-
-    def _updateVisibility(self):
-        """Update visibility list in the OpenGL
-        """
-        self._CcpnGLWidget.updateVisibleSpectrumViews()
-        self._updateNoiseThresholdLines()
-
-    def _initNoiseThresholdLines(self):
-        from ccpn.util.Colour import hexToRgbRatio
-        from functools import partial
-
-        if not self._noiseThresholdLinesActive:
-            return
-        visibleSpectrumViews = [sv.spectrum for sv in self.spectrumViews if sv.isDisplayed]
-        for spectrum in visibleSpectrumViews:
-            posValue = spectrum.noiseLevel or spectrum.estimateNoise()
-            if posValue is None:
-                posValue = 0
-            negValue = spectrum.negativeNoiseLevel or -posValue
-            brush = hexToRgbRatio(spectrum.sliceColour) + (0.3,)  # sliceCol plus an offset
-            positiveLine = self._CcpnGLWidget.addInfiniteLine(values=posValue, colour=brush, movable=True, lineStyle='dashed',
-                                                              lineWidth=2.0, obj=spectrum, orientation='h', )
-            negativeLine = self._CcpnGLWidget.addInfiniteLine(values=negValue, colour=brush, movable=True,
-                                                              lineStyle='dashed', obj=spectrum, orientation='h', lineWidth=2.0)
-            positiveLine.valuesChanged.connect(partial(self._lineThresholdChanged, positiveLine, spectrum, setPositiveThreshold=True))
-            negativeLine.valuesChanged.connect(partial(self._lineThresholdChanged, negativeLine, spectrum, setPositiveThreshold=False))
-            self._noiseThresholdLines.add(positiveLine)
-            self._noiseThresholdLines.add(negativeLine)
-
-    def _lineThresholdChanged(self, line, spectrum, setPositiveThreshold):
-        """ set the noise threshold to the spectrum based on the line move.
-        TODO add notifier when editing is finished (so to set the noiseLevel once only)."""
-        value = line.values
-        if spectrum is not None:
-            if setPositiveThreshold:
-                spectrum.noiseLevel = value
-            else:
-                spectrum.negativeNoiseLevel = value
 
     def toggleCalibrateY(self):
         if self.calibrateYAction.isChecked():

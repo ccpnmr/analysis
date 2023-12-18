@@ -11,9 +11,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-17 15:02:23 +0000 (Fri, November 17, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-09-06 14:28:31 +0100 (Wed, September 06, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -90,7 +90,7 @@ from ccpn.framework.PathsAndUrls import \
     tipOfTheDayConfig, \
     ccpnCodePath, \
     CCPN_DIRECTORY_SUFFIX
-
+from ccpn.framework.lib.resources.Resources import Resources
 from ccpn.ui.gui.Gui import Gui
 from ccpn.ui.gui.GuiBase import GuiBase
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
@@ -245,6 +245,9 @@ class Framework(NotifierBase, GuiBase):
         from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
 
         self._spectrumDataSourceFormats = getDataFormats()
+
+        # Resources
+        self.resources = Resources(self)
 
         # get a user interface; nb. ui.start() is called by the application
         self.ui = self._getUI()
@@ -617,6 +620,8 @@ class Framework(NotifierBase, GuiBase):
 
         # Now that all objects, including the graphics are there, restore current
         self.current._restoreStateFromFile(self.statePath)
+        # Load project specific resources.
+        self.resources._initProjectResources()
 
         if self.hasGui:
             self.ui.initialize(self._mainWindow)
@@ -1163,6 +1168,7 @@ class Framework(NotifierBase, GuiBase):
             self._project = None
             del (_project)
 
+        self.resources._deregisterProjectResources()
         self._cleanTemporaryDirectory()
         self._cleanGarbageCollector()
 

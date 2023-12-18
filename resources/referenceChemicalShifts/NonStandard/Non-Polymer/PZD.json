@@ -1,0 +1,209 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "PZD",
+  "compoundName": "(11aS)-7,8-dimethoxy-2-naphthalen-2-yl-1,10,11,11a-tetrahydro-5H-pyrrolo[2,1-c][1,4]benzodiazepin-5-one",
+  "compoundCcpCode": "PZD",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H10A",
+      "atomElementName": "",
+      "atomAverageShift": 7.45,
+      "atomStdShift": null,
+      "atomMinShift": 7.45,
+      "atomMaxShift": 7.45,
+      "atomDistributionRefValue": 7.45,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H11A",
+      "atomElementName": "",
+      "atomAverageShift": 7.47,
+      "atomStdShift": null,
+      "atomMinShift": 7.47,
+      "atomMaxShift": 7.47,
+      "atomDistributionRefValue": 7.47,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H12A",
+      "atomElementName": "",
+      "atomAverageShift": 7.79,
+      "atomStdShift": null,
+      "atomMinShift": 7.79,
+      "atomMaxShift": 7.79,
+      "atomDistributionRefValue": 7.79,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H13A",
+      "atomElementName": "",
+      "atomAverageShift": 7.8,
+      "atomStdShift": null,
+      "atomMinShift": 7.8,
+      "atomMaxShift": 7.8,
+      "atomDistributionRefValue": 7.8,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H14A",
+      "atomElementName": "",
+      "atomAverageShift": 7.85,
+      "atomStdShift": null,
+      "atomMinShift": 7.85,
+      "atomMaxShift": 7.85,
+      "atomDistributionRefValue": 7.85,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H15A",
+      "atomElementName": "",
+      "atomAverageShift": 8.2,
+      "atomStdShift": null,
+      "atomMinShift": 8.2,
+      "atomMaxShift": 8.2,
+      "atomDistributionRefValue": 8.2,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H16A",
+      "atomElementName": "",
+      "atomAverageShift": 7.6,
+      "atomStdShift": null,
+      "atomMinShift": 7.6,
+      "atomMaxShift": 7.6,
+      "atomDistributionRefValue": 7.6,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H17A",
+      "atomElementName": "",
+      "atomAverageShift": 8.05,
+      "atomStdShift": null,
+      "atomMinShift": 8.05,
+      "atomMaxShift": 8.05,
+      "atomDistributionRefValue": 8.05,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H18A",
+      "atomElementName": "",
+      "atomAverageShift": 3.99,
+      "atomStdShift": null,
+      "atomMinShift": 3.99,
+      "atomMaxShift": 3.99,
+      "atomDistributionRefValue": 3.99,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H19A",
+      "atomElementName": "",
+      "atomAverageShift": 4.03,
+      "atomStdShift": null,
+      "atomMinShift": 4.03,
+      "atomMaxShift": 4.03,
+      "atomDistributionRefValue": 4.03,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H1A",
+      "atomElementName": "",
+      "atomAverageShift": 4.13,
+      "atomStdShift": null,
+      "atomMinShift": 4.13,
+      "atomMaxShift": 4.13,
+      "atomDistributionRefValue": 4.13,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H20A",
+      "atomElementName": "",
+      "atomAverageShift": 5.84,
+      "atomStdShift": null,
+      "atomMinShift": 5.84,
+      "atomMaxShift": 5.84,
+      "atomDistributionRefValue": 5.84,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H21A",
+      "atomElementName": "",
+      "atomAverageShift": 8.3,
+      "atomStdShift": null,
+      "atomMinShift": 8.3,
+      "atomMaxShift": 8.3,
+      "atomDistributionRefValue": 8.3,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H4A",
+      "atomElementName": "",
+      "atomAverageShift": 3.98,
+      "atomStdShift": null,
+      "atomMinShift": 3.98,
+      "atomMaxShift": 3.98,
+      "atomDistributionRefValue": 3.98,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H5A",
+      "atomElementName": "",
+      "atomAverageShift": 3.84,
+      "atomStdShift": null,
+      "atomMinShift": 3.84,
+      "atomMaxShift": 3.84,
+      "atomDistributionRefValue": 3.84,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H8A",
+      "atomElementName": "",
+      "atomAverageShift": 7.17,
+      "atomStdShift": null,
+      "atomMinShift": 7.17,
+      "atomMaxShift": 7.17,
+      "atomDistributionRefValue": 7.17,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H9A",
+      "atomElementName": "",
+      "atomAverageShift": 6.6,
+      "atomStdShift": null,
+      "atomMinShift": 6.6,
+      "atomMaxShift": 6.6,
+      "atomDistributionRefValue": 6.6,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

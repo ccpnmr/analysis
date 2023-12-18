@@ -1,0 +1,88 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "B3T",
+  "compoundName": "3-amino-2,3,5-trideoxy-D-threo-pentonic acid",
+  "compoundCcpCode": "B3T",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "L-peptide linking",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H1D2",
+      "atomElementName": "",
+      "atomAverageShift": 1.022,
+      "atomStdShift": null,
+      "atomMinShift": 1.022,
+      "atomMaxShift": 1.022,
+      "atomDistributionRefValue": 1.022,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 2.475,
+      "atomStdShift": null,
+      "atomMinShift": 2.475,
+      "atomMaxShift": 2.475,
+      "atomDistributionRefValue": 2.475,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HAA",
+      "atomElementName": "",
+      "atomAverageShift": 2.582,
+      "atomStdShift": null,
+      "atomMinShift": 2.582,
+      "atomMaxShift": 2.582,
+      "atomDistributionRefValue": 2.582,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB",
+      "atomElementName": "",
+      "atomAverageShift": 4.069,
+      "atomStdShift": null,
+      "atomMinShift": 4.069,
+      "atomMaxShift": 4.069,
+      "atomDistributionRefValue": 4.069,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HG",
+      "atomElementName": "",
+      "atomAverageShift": 3.881,
+      "atomStdShift": null,
+      "atomMinShift": 3.881,
+      "atomMaxShift": 3.881,
+      "atomDistributionRefValue": 3.881,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HN",
+      "atomElementName": "",
+      "atomAverageShift": 7.168,
+      "atomStdShift": null,
+      "atomMinShift": 7.168,
+      "atomMaxShift": 7.168,
+      "atomDistributionRefValue": 7.168,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "GM1",
+  "compoundName": "AMINOMETHYLAMIDE",
+  "compoundCcpCode": "GM1",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "Glycine",
+  "atoms": [
+    {
+      "atomName": "H",
+      "atomElementName": "",
+      "atomAverageShift": 8.12,
+      "atomStdShift": null,
+      "atomMinShift": 8.12,
+      "atomMaxShift": 8.12,
+      "atomDistributionRefValue": 8.12,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H21",
+      "atomElementName": "",
+      "atomAverageShift": 3.62,
+      "atomStdShift": null,
+      "atomMinShift": 3.62,
+      "atomMaxShift": 3.62,
+      "atomDistributionRefValue": 3.62,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H22",
+      "atomElementName": "",
+      "atomAverageShift": 3.69,
+      "atomStdShift": null,
+      "atomMinShift": 3.69,
+      "atomMaxShift": 3.69,
+      "atomDistributionRefValue": 3.69,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA2",
+      "atomElementName": "",
+      "atomAverageShift": 3.95,
+      "atomStdShift": null,
+      "atomMinShift": 3.95,
+      "atomMaxShift": 3.95,
+      "atomDistributionRefValue": 3.95,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA3",
+      "atomElementName": "",
+      "atomAverageShift": 3.81,
+      "atomStdShift": null,
+      "atomMinShift": 3.81,
+      "atomMaxShift": 3.81,
+      "atomDistributionRefValue": 3.81,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HN11",
+      "atomElementName": "",
+      "atomAverageShift": 7.77,
+      "atomStdShift": null,
+      "atomMinShift": 7.77,
+      "atomMaxShift": 7.77,
+      "atomDistributionRefValue": 7.77,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "NH21",
+      "atomElementName": "",
+      "atomAverageShift": 7.26,
+      "atomStdShift": null,
+      "atomMinShift": 7.26,
+      "atomMaxShift": 7.26,
+      "atomDistributionRefValue": 7.26,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "NH22",
+      "atomElementName": "",
+      "atomAverageShift": 6.86,
+      "atomStdShift": null,
+      "atomMinShift": 6.86,
+      "atomMaxShift": 6.86,
+      "atomDistributionRefValue": 6.86,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

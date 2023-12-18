@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-07 16:50:12 +0100 (Wed, June 07, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-10-18 16:07:32 +0100 (Wed, October 18, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -252,6 +252,8 @@ TipText_ErrorMethod = 'Select the Fitting Error calculation Method'
 ##########  TAB: Appearance
 ############################################################
 
+SELECT = '<Select>'
+
 WidgetVarName_GenAppearanceSeparator = 'GeneralAppearanceSeparator'
 Label_GeneralAppearance = 'Appearance'
 TipText_GeneralAppearance = 'General Appearance settings'
@@ -318,11 +320,11 @@ TipText_setThreshValue = 'Recalculate the threshold value from the current data 
 
 WidgetVarName_ThreshValueCalcOptions = 'ThreshValueCalcOptions'
 Label_ThreshValueCalcOptions = 'Threshold Value Calculation'
-TipText_ThreshValueCalcOptions = 'Select the calculation method for the threshold line.'
+TipText_ThreshValueCalcOptions = 'Select the calculation method for the threshold line. (Note. Std, variance, AAD, MAD are added to the mean), '
 
-WidgetVarName_ThreshValueFactor = 'ThreshValueCalcFactor'
-Label_ThreshValueFactor = 'Threshold Factor'
-TipText_ThreshValueFactor = 'Increase (multiply) the threshold value by a factor.'
+WidgetVarName_SDThreshValueFactor = 'ThreshValueCalcFactor'
+Label_SDThreshValueFactor = 'SD Factor'
+TipText_SDThreshValueFactor = 'Increase (multiply) the Standard Deviation by a factor'
 
 WidgetVarName_WindowRollingAverage = 'WindowRolling'
 Label_WindowRollingAverage = 'Rolling Average Window'
@@ -459,9 +461,15 @@ _ExcludedFromPreferredYAxisOptions = [
                                      ] + seriesVariables.CONSTANT_STATS_OUTPUT_TABLE_COLUMNS
 
 ### Threshold Values calculation options
-ThrValuesCalcOptions = [seriesVariables.MAD,
-                        seriesVariables.AAD,
-                        seriesVariables.MEAN,
-                        seriesVariables.MEDIAN,
-                        seriesVariables.STD,
-                        seriesVariables.VARIANCE]
+
+DirectThresholdCalcOption = [
+    seriesVariables.MEAN,
+    seriesVariables.MEDIAN,
+    ]
+
+PlusThresholdCalcOption = [
+                seriesVariables.STD,
+                seriesVariables.VARIANCE,
+                seriesVariables.MAD,
+                seriesVariables.AAD,
+    ]

@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-30 09:51:16 +0100 (Tue, May 30, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-10-26 09:24:54 +0100 (Thu, October 26, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -204,7 +204,15 @@ class _ExperimentalAnalysisTableABC(Table):
     def addTableMenuOptions(self, menu):
         super().addTableMenuOptions(menu)
         editCollection = menu.addAction('Edit Collection', self._editCollection)
+        # refitCollections = menu.addAction('Refit Selected', self._refitSeletected)
+        # menu.moveActionAboveName(refitCollections, 'Export Visible Table')
         menu.moveActionAboveName(editCollection, 'Export Visible Table')
+
+    def _refitSeletected(self):
+        collections = self.getSelectedCollections()
+        for collection in collections:
+            self.guiModule.backendHandler.refitCollection(collection.pid)
+        self.guiModule.updateAll()
 
     def _editCollection(self):
         from ccpn.ui.gui.popups.CollectionPopup import CollectionPopup

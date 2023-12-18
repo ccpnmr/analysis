@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-04 18:16:17 +0000 (Mon, December 04, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-11-30 09:52:08 +0000 (Thu, November 30, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -75,10 +75,7 @@ class Peak(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = Nmr.Peak._metaclass.qualifiedName()
 
-    # Internal. Used as temporary holder during time-consuming and recursive peak snapping routines.
-    _tempPosition = None
-    _tempHeight = None
-    _tempHeightError = None
+    # Internal. Used as temporary holder during time-consuming and recursive peak routines.
     _tempAssignment = 0
 
     # CCPN properties
@@ -1341,42 +1338,6 @@ class Peak(AbstractWrapperObject):
     # new<Object> and other methods
     # Call appropriate routines in their respective locations
     #===========================================================================================
-
-    @property
-    def _temporaryHeight(self):
-        """Internal. Temporary height of Peak.
-         Used as temporary holder during time-consuming and recursive peak snapping routines."""
-        if self._tempHeight is None:
-            self._tempHeight = self.height
-        return self._tempHeight
-
-    @_temporaryHeight.setter
-    def _temporaryHeight(self, value):
-        self._tempHeight = value
-
-    @property
-    def _temporaryHeightError(self):
-        """Internal. Temporary height Error of Peak.
-         Used as temporary holder during time-consuming and recursive peak snapping routines."""
-        if self._tempHeightError is None:
-            self._tempHeightError = self.heightError
-        return self._tempHeightError
-
-    @_temporaryHeightError.setter
-    def _temporaryHeightError(self, value):
-        self._tempHeightError = value
-
-    @property
-    def _temporaryPosition(self):
-        """Internal. temporary Position of a Peak.
-         Used as temporary holder during time-consuming and recursive peak snapping routines."""
-        if self._tempPosition is None:
-            self._tempPosition = self.position
-        return self._tempPosition
-
-    @_temporaryPosition.setter
-    def _temporaryPosition(self, value):
-        self._tempPosition = value
 
 
 #=========================================================================================

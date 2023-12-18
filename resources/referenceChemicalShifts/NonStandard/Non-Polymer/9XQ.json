@@ -1,0 +1,77 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "9XQ",
+  "compoundName": "[azanyl-[(3-carboxyphenyl)amino]methylidene]azanium",
+  "compoundCcpCode": "9XQ",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "1HD",
+      "atomElementName": "",
+      "atomAverageShift": 8.038,
+      "atomStdShift": null,
+      "atomMinShift": 8.038,
+      "atomMaxShift": 8.038,
+      "atomDistributionRefValue": 8.038,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "2HD",
+      "atomElementName": "",
+      "atomAverageShift": 7.864,
+      "atomStdShift": null,
+      "atomMinShift": 7.864,
+      "atomMaxShift": 7.864,
+      "atomDistributionRefValue": 7.864,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "2HE",
+      "atomElementName": "",
+      "atomAverageShift": 7.56,
+      "atomStdShift": null,
+      "atomMinShift": 7.56,
+      "atomMaxShift": 7.56,
+      "atomDistributionRefValue": 7.56,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "3HE",
+      "atomElementName": "",
+      "atomAverageShift": 9.343,
+      "atomStdShift": null,
+      "atomMinShift": 9.343,
+      "atomMaxShift": 9.343,
+      "atomDistributionRefValue": 9.343,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HZ",
+      "atomElementName": "",
+      "atomAverageShift": 7.475,
+      "atomStdShift": null,
+      "atomMinShift": 7.475,
+      "atomMaxShift": 7.475,
+      "atomDistributionRefValue": 7.475,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

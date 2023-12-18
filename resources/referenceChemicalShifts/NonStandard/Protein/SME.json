@@ -1,0 +1,88 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "SME",
+  "compoundName": "METHIONINE SULFOXIDE",
+  "compoundCcpCode": "SME",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "L-peptide linking",
+  "compoundPrecursorName": "Methionine",
+  "atoms": [
+    {
+      "atomName": "H",
+      "atomElementName": "",
+      "atomAverageShift": 8.54,
+      "atomStdShift": null,
+      "atomMinShift": 8.54,
+      "atomMaxShift": 8.54,
+      "atomDistributionRefValue": 8.54,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 4.42,
+      "atomStdShift": null,
+      "atomMinShift": 4.42,
+      "atomMaxShift": 4.42,
+      "atomDistributionRefValue": 4.42,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB2",
+      "atomElementName": "",
+      "atomAverageShift": 2.08,
+      "atomStdShift": null,
+      "atomMinShift": 2.08,
+      "atomMaxShift": 2.08,
+      "atomDistributionRefValue": 2.08,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB3",
+      "atomElementName": "",
+      "atomAverageShift": 2,
+      "atomStdShift": null,
+      "atomMinShift": 2,
+      "atomMaxShift": 2,
+      "atomDistributionRefValue": 2,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HG2",
+      "atomElementName": "",
+      "atomAverageShift": 2.79,
+      "atomStdShift": null,
+      "atomMinShift": 2.79,
+      "atomMaxShift": 2.79,
+      "atomDistributionRefValue": 2.79,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HG3",
+      "atomElementName": "",
+      "atomAverageShift": 2.79,
+      "atomStdShift": null,
+      "atomMinShift": 2.79,
+      "atomMaxShift": 2.79,
+      "atomDistributionRefValue": 2.79,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

@@ -4,7 +4,7 @@ Nmrglue-based PeakPicker;
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
@@ -16,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-25 12:20:57 +0000 (Fri, March 25, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-10-24 13:54:29 +0100 (Tue, October 24, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -66,24 +66,17 @@ class NmrgluePeakPicker(PeakPickerABC):
         """
         from nmrglue.analysis.peakpick import pick as nmrgluePeakPick
 
-        table = nmrgluePeakPick(data=data, pthres=self.positiveThreshold, nthres=self.negativeThreshold,
-                                cluster=True, table=True)
+        results = nmrgluePeakPick(data=data, pthres=self.positiveThreshold, nthres=self.negativeThreshold,
+                                cluster=True, table=False) #Table=True has a bug in 3.2.0 env (numpy float).
+        ## Warning. The NmrGlue pick function returns a tuple of different lenght depending on the given calling arguments !!!! We could wrap it and fix that.
+        locations, cluster_ids, scales, amps = results
+
         peaks = []
-        for item in table:
-            values = item.tolist()
-
-            idx = 0
-            points = values[0:self.dimensionCount]
-            idx += self.dimensionCount
-
-            clusterId = values[idx]
-            idx += 1
-
-            lineWidths = values[idx:idx+self.dimensionCount]
-            idx += self.dimensionCount
-
-            volume = values[idx]
-
+        for i, location in enumerate(locations):
+            points = location
+            clusterId = cluster_ids[i]
+            lineWidths = [float(lw) for lw in scales[i]]
+            volume = float(amps[i])
             pk = SimplePeak(points=points, height=None, lineWidths=lineWidths, volume=volume, clusterId=clusterId)
             peaks.append(pk)
 

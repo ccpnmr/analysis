@@ -1,0 +1,132 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "LE1",
+  "compoundName": "3-sulfanyl-L-valine",
+  "compoundCcpCode": "LE1",
+  "compoundType": "Protein",
+  "compoundTypeClassification": "L-peptide linking",
+  "compoundPrecursorName": "Valine",
+  "atoms": [
+    {
+      "atomName": "H8",
+      "atomElementName": "",
+      "atomAverageShift": 1.11,
+      "atomStdShift": 0.2,
+      "atomMinShift": 0.935,
+      "atomMaxShift": 1.285,
+      "atomDistributionRefValue": 0.935,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H8A",
+      "atomElementName": "",
+      "atomAverageShift": 1.052,
+      "atomStdShift": 0.199,
+      "atomMinShift": 0.935,
+      "atomMaxShift": 1.282,
+      "atomDistributionRefValue": 0.935,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H8B",
+      "atomElementName": "",
+      "atomAverageShift": 1.052,
+      "atomStdShift": 0.199,
+      "atomMinShift": 0.935,
+      "atomMaxShift": 1.282,
+      "atomDistributionRefValue": 0.935,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H9",
+      "atomElementName": "",
+      "atomAverageShift": 1.151,
+      "atomStdShift": 0.078,
+      "atomMinShift": 1.086,
+      "atomMaxShift": 1.279,
+      "atomDistributionRefValue": 1.086,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H9A",
+      "atomElementName": "",
+      "atomAverageShift": 1.167,
+      "atomStdShift": 0.08,
+      "atomMinShift": 1.093,
+      "atomMaxShift": 1.279,
+      "atomDistributionRefValue": 1.093,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H9B",
+      "atomElementName": "",
+      "atomAverageShift": 1.167,
+      "atomStdShift": 0.08,
+      "atomMinShift": 1.093,
+      "atomMaxShift": 1.279,
+      "atomDistributionRefValue": 1.093,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 4.619,
+      "atomStdShift": 0.273,
+      "atomMinShift": 4.337,
+      "atomMaxShift": 4.98,
+      "atomDistributionRefValue": 4.337,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HN",
+      "atomElementName": "",
+      "atomAverageShift": 8.781,
+      "atomStdShift": 0.552,
+      "atomMinShift": 7.743,
+      "atomMaxShift": 9.277,
+      "atomDistributionRefValue": 7.743,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "QG1",
+      "atomElementName": "",
+      "atomAverageShift": 1.002,
+      "atomStdShift": null,
+      "atomMinShift": 1.002,
+      "atomMaxShift": 1.002,
+      "atomDistributionRefValue": 1.002,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "QG2",
+      "atomElementName": "",
+      "atomAverageShift": 1.21,
+      "atomStdShift": null,
+      "atomMinShift": 1.21,
+      "atomMaxShift": 1.21,
+      "atomDistributionRefValue": 1.21,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

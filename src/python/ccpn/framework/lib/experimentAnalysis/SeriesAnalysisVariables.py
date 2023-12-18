@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-07-31 15:08:47 +0100 (Mon, July 31, 2023) $"
+__dateModified__ = "$dateModified: 2023-10-23 09:19:35 +0100 (Mon, October 23, 2023) $"
 __version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
@@ -134,6 +134,8 @@ DECAY_ERR = f'{DECAY}{_ERR}'
 
 RATE = 'rate'
 RATE_ERR = f'{RATE}{_ERR}'
+PLATEAU = 'plateau'
+PLATEAU_ERR = f'{PLATEAU}{_ERR}'
 
 HETNOE = 'HetNoe'
 SAT = 'sat'
@@ -231,6 +233,7 @@ MEDIAN = 'Median'
 VARIANCE = 'Variance'
 MAD = 'MAD (Median Absolute Deviation)'
 AAD = 'AAD (Average Absolute Deviation)'
+TRIMMED_MEAN = 'Trimmed Mean'
 
 CALCULATION_MODEL = 'calculationModel'
 ### CSM Calculation Models
@@ -303,6 +306,7 @@ LEASTSQ = 'leastsq'
 InversionRecovery = 'InversionRecovery'
 ExponentialDecay = 'ExponentialDecay'
 OnePhaseDecay = 'OnePhaseDecay'
+OnePhaseDecayWithPlateau = 'OnePhaseDecayWithPlateau'
 USERDEFINEDEXPERIMENT = 'User-Defined'
 NONE = 'None'
 T1 = 'T1'

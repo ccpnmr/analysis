@@ -1,0 +1,66 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "8NK",
+  "compoundName": "7-methylguanosine 5'-diphosphate",
+  "compoundCcpCode": "8NK",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H11",
+      "atomElementName": "",
+      "atomAverageShift": 5.916,
+      "atomStdShift": null,
+      "atomMinShift": 5.9156,
+      "atomMaxShift": 5.9156,
+      "atomDistributionRefValue": 5.9156,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H12",
+      "atomElementName": "",
+      "atomAverageShift": 9.061,
+      "atomStdShift": null,
+      "atomMinShift": 9.0606,
+      "atomMaxShift": 9.0606,
+      "atomDistributionRefValue": 9.0606,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H13",
+      "atomElementName": "",
+      "atomAverageShift": 4.116,
+      "atomStdShift": null,
+      "atomMinShift": 4.1155,
+      "atomMaxShift": 4.1155,
+      "atomDistributionRefValue": 4.1155,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H9",
+      "atomElementName": "",
+      "atomAverageShift": 4.459,
+      "atomStdShift": null,
+      "atomMinShift": 4.4594,
+      "atomMaxShift": 4.4594,
+      "atomDistributionRefValue": 4.4594,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

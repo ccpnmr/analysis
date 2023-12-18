@@ -1,0 +1,99 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "HIE",
+  "compoundName": "4-[6,6-dimethyl-4-oxo-3-(trifluoromethyl)-4,5,6,7-tetrahydro-1H-indazol-1-yl]-2-[(cis-4-hydroxycyclohexyl)amino]benzamide",
+  "compoundCcpCode": "HIE",
+  "compoundType": "Non-Polymer",
+  "compoundTypeClassification": "non-polymer",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "CA",
+      "atomElementName": "",
+      "atomAverageShift": 60.119,
+      "atomStdShift": null,
+      "atomMinShift": 60.119,
+      "atomMaxShift": 60.119,
+      "atomDistributionRefValue": 60.119,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "CB",
+      "atomElementName": "",
+      "atomAverageShift": 29.903,
+      "atomStdShift": null,
+      "atomMinShift": 29.903,
+      "atomMaxShift": 29.903,
+      "atomDistributionRefValue": 29.903,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H",
+      "atomElementName": "",
+      "atomAverageShift": 8.417,
+      "atomStdShift": null,
+      "atomMinShift": 8.417,
+      "atomMaxShift": 8.417,
+      "atomDistributionRefValue": 8.417,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HA",
+      "atomElementName": "",
+      "atomAverageShift": 4.126,
+      "atomStdShift": null,
+      "atomMinShift": 4.126,
+      "atomMaxShift": 4.126,
+      "atomDistributionRefValue": 4.126,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB2",
+      "atomElementName": "",
+      "atomAverageShift": 3.264,
+      "atomStdShift": null,
+      "atomMinShift": 3.264,
+      "atomMaxShift": 3.264,
+      "atomDistributionRefValue": 3.264,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "HB3",
+      "atomElementName": "",
+      "atomAverageShift": 3.113,
+      "atomStdShift": null,
+      "atomMinShift": 3.113,
+      "atomMaxShift": 3.113,
+      "atomDistributionRefValue": 3.113,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "N",
+      "atomElementName": "",
+      "atomAverageShift": 117.457,
+      "atomStdShift": null,
+      "atomMinShift": 117.457,
+      "atomMaxShift": 117.457,
+      "atomDistributionRefValue": 117.457,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

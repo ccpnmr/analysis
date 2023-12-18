@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-28 12:49:05 +0000 (Tue, November 28, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-11-28 16:09:08 +0000 (Tue, November 28, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -452,10 +452,10 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                           'current'                 : self.application.current,
                           'preferences'             : self.application.preferences,
                           'redo'                    : self.application.redo,
-                          'undo'                    : self.application.undo,
-
+                          'undo'                  : self.application.undo,
                           'get'                     : self.application.get,
-                          'getGid'                  : self.application.ui.getByGid,
+                          'getByPid'            :  self.application.get,
+                          'getByGid'            : self.application.ui.getByGid,
                           'ui'                      : self.application.ui,
                           'mainWindow'              : self,
                           'project'                 : self.application.project,
@@ -1887,12 +1887,12 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         for spectrumDisplay in self.spectrumDisplays:
             spectrumDisplay.toggleCrosshair()
 
-    def estimateNoise(self):
+    def showEstimateNoisePopup(self):
         """estimate the noise in the visible region of the current strip
         """
         strip = self.application.current.strip
         if strip:
-            strip.estimateNoise()
+            strip._showEstimateNoisePopup()
 
     def createMark(self, axisIndex=None):
         """
@@ -2114,35 +2114,31 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                                         minDropFactor=minDropFactor, searchBoxMode=searchBoxMode, searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
                     if peak.spectrum.dimensionCount == 1 and peak.figureOfMerit < 1:
                         showWarning(f'Cannot snap peak', f'Figure of merit below the snapping threshold of 1.')
-                    if peak.spectrum.dimensionCount == 1 and peak.spectrum.negativeNoiseLevel < peak.height < peak.spectrum.noiseLevel:
-                        showWarning(f'Cannot snap peak', f'Adjust the noise level thresholds or move the peak closer to a signal.')
                 except Exception as es:
                     showWarning('Snap to Extremum', str(es))
 
             elif n > 1:
                 with progressManager(self, 'Snapping peaks to extrema'):
 
-                    try:
+                    # try:
                         _is1Ds = [p.spectrum.dimensionCount == 1 for p in peaks]
                         if all(_is1Ds):
-                            from ccpn.core.lib.PeakPickers.PeakSnapping1D import snap1DPeaksByGroup
+                            from ccpn.core.lib.PeakPickers.PeakSnapping1D import snap1DPeaks
 
-                            snap1DPeaksByGroup(peaks)
+                            snap1DPeaks(peaks)
                             nonSnappingPeaks = [pk for pk in peaks if pk.figureOfMerit < 1]
-                            nonSnappingPeaksBelowNoiseT = [pk for pk in peaks if pk.spectrum.negativeNoiseLevel < pk.height < pk.spectrum.noiseLevel]
+
                             msg = 'one of the selected peak' if len(nonSnappingPeaks) == 1 else 'some of the selected peaks'
                             if len(nonSnappingPeaks) > 0:
                                 showWarning(f'Cannot snap {msg}', f'Figure of merit below the snapping threshold of 1 for {nonSnappingPeaks}')
-                            if len(nonSnappingPeaksBelowNoiseT) > 0:
-                                showWarning(f'Cannot find new maxima', f'Some maxima could be in the noise. Adjust the noise level thresholds to include more results. Affected peaks: {nonSnappingPeaksBelowNoiseT}')
                         else:
                             peaks.sort(key=lambda x: x.position[0] if x.position and None not in x.position else 0, reverse=False)  # reorder peaks by position
                             for peak in peaks:
                                 peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4,
                                                     minDropFactor=minDropFactor, searchBoxMode=searchBoxMode, searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
 
-                    except Exception as es:
-                        showWarning('Snap to Extremum', str(es))
+                    # except Exception as es:
+                    #     showWarning('Snap to Extremum', str(es))
 
             else:
                 getLogger().warning('No selected peak/s. Select a peak first.')

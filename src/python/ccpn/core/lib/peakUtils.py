@@ -11,9 +11,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-21 13:24:43 +0000 (Tue, November 21, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-11-22 18:46:46 +0000 (Wed, November 22, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,7 +30,6 @@ from typing import Sequence, Union
 from scipy.optimize import curve_fit
 from collections import OrderedDict
 
-from ccpn.core.lib.PeakPickers.PeakSnapping1D import snap1DPeaksByGroup
 from ccpn.util.Logging import getLogger
 from ccpn.core.PeakList import GAUSSIANMETHOD, PARABOLICMETHOD
 from ccpn.core.lib.ContextManagers import newObject, undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
@@ -569,8 +568,8 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 4, halfBoxFitWidth: i
 
     if numDim == 1:
         # do the fit for 1D here
-        doNeg = getApp.preferences.general.negativePeakPick1D
-        snap1DPeaksByGroup([peak], ppmLimit=0.2, doNeg=doNeg)
+        from ccpn.core.lib.PeakPickers.PeakSnapping1D import snap1DPeaks
+        snap1DPeaks([peak])
 
     else:
         from ccpn.core.lib.SpectrumLib import fetchPeakPicker
@@ -617,7 +616,7 @@ def peakParabolicInterpolation(peak: 'Peak', update=False):
         raise ValueError('Expected a Peak, Pid or valid pid-string for the "peak" argument')
 
     spectrum = peak.peakList.spectrum
-    spectrum.checkValidPath()
+    # spectrum.checkValidPath() # not in 3.2.x
 
     # get the position as the nearest grid point
     position = [int(p + 0.5) for p in peak.pointPositions]
@@ -718,16 +717,6 @@ def recalculatePeaksHeightAtPosition(peaks):
                         peak.height = height
 
 
-def updatePeaksFigureOfMerits(peaks, newMerit=0):
-    """Set the figure of merit to the given value if the peak height is below the Noise threshold """
-    with undoBlockWithoutSideBar():
-        with notificationEchoBlocking():
-            if len(peaks) > 0:
-                for peak in peaks:  # peaks can be from diff peakLists
-                    if peak is not None:
-                        noiseLevel = peak.spectrum.noiseLevel or peak.spectrum.estimateNoise()
-                        if peak.height < noiseLevel:
-                            peak.figureOfMerit = newMerit
 
 
 def getSpectralPeakHeights(spectra, peakListIndexes: list = None) -> pd.DataFrame:
@@ -833,41 +822,21 @@ def _getSpectralPeakPropertyAsDataFrame(spectra, peakProperty=HEIGHT, NR_ID=NR_I
     return df[sortedCols]
 
 
-def _getPeakSNRatio(peak, factor=2.5):
+def _getPeakSNRatio(peak):
     """
-    Estimate the Signal to Noise ratio based on the spectrum Positive and Negative noise values.
-    If Noise thresholds are not defined in the spectrum, then they are estimated as well.
-    If only the positive noise threshold is defined, the negative noise threshold will be the inverse of the positive.
-        SNratio = |factor*(height/|NoiseMax-NoiseMin|)|
-                height is the peak height
-                NoiseMax is the spectrum positive noise threshold
-                NoiseMin is the spectrum negative noise threshold
-    :param factor: float, multiplication factor.
+    Estimate the Signal to Noise ratio
     :return: float, SignalToNoise Ratio value for the peak
     """
-    spectrum = peak._parent.spectrum
-    from ccpn.core.lib.SpectrumLib import estimateSNR
-
-    noiseLevel, negativeNoiseLevel = spectrum.noiseLevel, spectrum.negativeNoiseLevel
-    # if not negativeNoiseLevel and noiseLevel:
-    if negativeNoiseLevel is None and noiseLevel is not None:
-        negativeNoiseLevel = - noiseLevel if noiseLevel > 0 else noiseLevel * 2
-        spectrum.negativeNoiseLevel = negativeNoiseLevel
-        getLogger().warning('Spectrum Negative noise not defined for %s. Estimated default' % spectrum.pid)
-
-    # if not noiseLevel:  # estimate it
-    if noiseLevel is None:  # estimate it
-        noiseLevel = spectrum.estimateNoise()
-        negativeNoiseLevel = -noiseLevel
-        spectrum.noiseLevel, spectrum.negativeNoiseLevel = noiseLevel, negativeNoiseLevel
-        getLogger().warning('Spectrum noise level(s) not defined for %s. Estimated default' % spectrum.pid)
 
     if peak.height is None:
-        updateHeight(peak)
-        _getPeakSNRatio(peak)
+        return None
 
-    snr = estimateSNR(noiseLevels=[noiseLevel, negativeNoiseLevel], signalPoints=[peak.height], factor=factor)
-    return snr[0]  ## estimateSNR return a list with a length always > 0
+    spectrum = peak.spectrum
+    noiseSD = spectrum._noiseSD
+    if noiseSD is None or noiseSD <= 0:
+        return None
+    result = peak.height/noiseSD
+    return result
 
 
 def _getPeakId(peak):

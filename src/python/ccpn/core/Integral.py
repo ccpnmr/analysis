@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 12:06:24 +0100 (Fri, June 09, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-11-17 11:11:49 +0000 (Fri, November 17, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -237,7 +237,7 @@ class Integral(AbstractWrapperObject):
         """baseline of Integral"""
         baseline = self._wrappedData.offset
         if baseline is None or baseline == 0:
-            baseline = self.spectrum.noiseLevel or 0
+            baseline = self.spectrum.positiveContourBase or 0
         scale = self.integralList.spectrum.scale
         scale = scale if scale is not None else 1.0
         if -SCALETOLERANCE < scale < SCALETOLERANCE:

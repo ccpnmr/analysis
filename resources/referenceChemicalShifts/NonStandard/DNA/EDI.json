@@ -1,0 +1,99 @@
+{
+  "_metadata": {
+    "jsonVersion": 3,
+    "className": "ReferenceChemicalShift",
+    "classVersion": 1,
+    "user": "CCPN",
+    "lastPath": "",
+    "timestamp": "Fri Sep 15 15:17:45 2023",
+    "applicationVersion": 3.2
+  },
+  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
+  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
+  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
+  "compoundShortName": "EDI",
+  "compoundName": "2'-deoxy-1-(2-iodoethyl)inosine",
+  "compoundCcpCode": "EDI",
+  "compoundType": "DNA",
+  "compoundTypeClassification": "DNA linking",
+  "compoundPrecursorName": "",
+  "atoms": [
+    {
+      "atomName": "H1'",
+      "atomElementName": "",
+      "atomAverageShift": 6.12,
+      "atomStdShift": null,
+      "atomMinShift": 6.12,
+      "atomMaxShift": 6.12,
+      "atomDistributionRefValue": 6.12,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2",
+      "atomElementName": "",
+      "atomAverageShift": 7.74,
+      "atomStdShift": null,
+      "atomMinShift": 7.74,
+      "atomMaxShift": 7.74,
+      "atomDistributionRefValue": 7.74,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2'",
+      "atomElementName": "",
+      "atomAverageShift": 2.68,
+      "atomStdShift": null,
+      "atomMinShift": 2.68,
+      "atomMaxShift": 2.68,
+      "atomDistributionRefValue": 2.68,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H2''",
+      "atomElementName": "",
+      "atomAverageShift": 2.81,
+      "atomStdShift": null,
+      "atomMinShift": 2.81,
+      "atomMaxShift": 2.81,
+      "atomDistributionRefValue": 2.81,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H3'",
+      "atomElementName": "",
+      "atomAverageShift": 4.95,
+      "atomStdShift": null,
+      "atomMinShift": 4.95,
+      "atomMaxShift": 4.95,
+      "atomDistributionRefValue": 4.95,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H4'",
+      "atomElementName": "",
+      "atomAverageShift": 4.4,
+      "atomStdShift": null,
+      "atomMinShift": 4.4,
+      "atomMaxShift": 4.4,
+      "atomDistributionRefValue": 4.4,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    },
+    {
+      "atomName": "H8",
+      "atomElementName": "",
+      "atomAverageShift": 8.26,
+      "atomStdShift": null,
+      "atomMinShift": 8.26,
+      "atomMaxShift": 8.26,
+      "atomDistributionRefValue": 8.26,
+      "atomDistributionValuePerPoint": 1,
+      "atomStatisticalDistribution": []
+    }
+  ]
+}

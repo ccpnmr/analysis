@@ -35,7 +35,15 @@ from ccpn.util.Logging import getLogger
 
 
 class TraitBase(HasTraits):
-    """Class to give HasTraits dict-like methods keys, values, update, items and iteration 
+    """Class to give HasTraits dict-like methods keys, values, update, items and iteration
+
+    class attributes:
+    - keysInOrder = True   # If True, return key in order defined by _traitOrder attribute
+
+    specific .tag() keywords:
+    - reservedTrait:  True or False allow for selecting or skipping, respectively
+    - doPrint: False skips printing by the .print() method
+
     """
 
     keysInOrder = True   # If True, return key in order defined by _traitOrder attribute

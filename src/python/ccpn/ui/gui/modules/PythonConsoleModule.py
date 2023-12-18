@@ -66,7 +66,7 @@ class PythonConsoleModule(CcpnModule):
         self.mainWidget.getLayout().addWidget(self.pythonConsoleWidget)
 
         self.pythonConsoleWidget._startChannels()
-        # self.mainWindow.pythonConsoleModule = self
+        self.mainWindow.pythonConsoleModule = self
         # self._menuAction = self.mainWindow._findMenuAction('View', 'Python Console')
         # if self._menuAction:
         #     self._menuAction.setChecked(True)

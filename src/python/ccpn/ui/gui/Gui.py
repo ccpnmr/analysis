@@ -654,7 +654,7 @@ class Gui(Ui):
             self.mainWindow.sideBar.clearSideBar()
             self.mainWindow.sideBar.deleteLater()
             self.mainWindow.deleteLater()
-            self.mainWindow = None
+            self._mainWindow = None
 
     @logCommand('application.')
     def saveProjectAs(self, newPath=None, overwrite: bool = False) -> bool:

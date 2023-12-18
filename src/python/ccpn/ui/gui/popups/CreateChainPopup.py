@@ -117,7 +117,7 @@ class CreateChainPopup(AttributeEditorPopupABC):
         # attach the callbacks for the widgets
         self.moleculeEdit.textChanged.connect(self._queueSetMoleculeName)
         self.commentName.textChanged.connect(self._queueSetComment)
-        self.lineEdit1a.valueChanged.connect(self._queueSetSequenceStart)
+        self.startingSequenceCodeWidget.valueChanged.connect(self._queueSetSequenceStart)
         self.lineEdit2a.textChanged.connect(self._queueSetChainCode)
         self.sequence1CodeEditor.textChanged.connect(self._validate1LetterCodeSequence)
         self.sequenceCcpCodeEditor.textChanged.connect(self._validateFullLetterCodeSequence)
@@ -170,7 +170,7 @@ class CreateChainPopup(AttributeEditorPopupABC):
         self._toggleSequenceEditor()
         row += 1
         label4a = Label(self.mainWidget, 'Sequence Start', grid=(row, 0))
-        self.lineEdit1a = Spinbox(self.mainWidget, grid=(row, 1), value=1, min=-1000000, max=1000000)
+        self.startingSequenceCodeWidget = Spinbox(self.mainWidget, grid=(row, 1), value=1, min=-1000000, max=1000000)
         label5a = Label(self.mainWidget, 'Chain code', grid=(row, 2))
         self._code = _nextChainCode(self.project)
         self.lineEdit2a = LineEdit(self.mainWidget, grid=(row, 3), text=self._code)
@@ -247,7 +247,7 @@ class CreateChainPopup(AttributeEditorPopupABC):
                 if self.obj.sequenceCcpCode:
                     codes = ','.join(self.obj.sequenceCcpCode)
                     self.sequenceCcpCodeEditor.setText(codes)
-                self.lineEdit1a.set(self.obj.startNumber)
+                self.startingSequenceCodeWidget.set(self.obj.startNumber)
                 self.lineEdit2a.setText(self.obj.shortName)
                 self.expandAtomsFromAtomSetW.set(self.obj.expandFromAtomSets)
                 self.addNonstereoAtomsW.set(self.obj.addNonstereoAtoms)
@@ -367,7 +367,7 @@ class CreateChainPopup(AttributeEditorPopupABC):
     def _queueSetSequenceStart(self, value):
         """Queue changes to sequenceStart
         """
-        textFromValue = self.lineEdit1a.textFromValue
+        textFromValue = self.startingSequenceCodeWidget.textFromValue
         prefValue = textFromValue(self.obj.startNumber)
         if textFromValue(value) != prefValue:
             return partial(self._setSequenceStart, value)

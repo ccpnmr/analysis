@@ -229,6 +229,15 @@ class Chain(AbstractWrapperObject):
         return ccpCodes
 
     @property
+    def startingSequenceCode(self):
+        """
+        :return:  int. The first SequenceCode
+        """
+        codes = self._sequenceCodesAsIntegers
+        first = codes[0] if len(codes)>0 else 1
+        return first
+
+    @property
     def _sequenceCodesAsIntegers(self):
         """
         :return: list of sequence codes as integers. If a code cannot be interpreted as int it uses nan (float). This is to keep the same lenght as the residues and to allow

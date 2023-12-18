@@ -965,6 +965,16 @@ class _openItemChainTable(OpenItemABC):
     objectArgumentName = 'chain'
 
 
+    def _openContextMenu(self, parentWidget, position, thisObj, objs, deferExec=False):
+        """Open a context menu.
+        """
+        contextMenu = super()._openContextMenu(parentWidget, position, thisObj, objs, deferExec=True)
+        cloneAction = contextMenu.getActionByName('Clone')
+        if cloneAction is not None:
+            cloneAction.setText('New Chain from selected...')
+        contextMenu.move(position)
+        contextMenu.exec()
+
     def _cloneObject(self, objs):
         """Open a new popup prefilled from the current object"""
         objs  = [obj for obj in objs if isinstance(obj, Chain)]
@@ -982,6 +992,9 @@ class _openItemChainTable(OpenItemABC):
             popup.obj.molType = obj.chainType
             popup._populate()
             popup.sequenceEditorCodeOptions.set(CCPCODESELECTION)
+            popup.sequenceEditorCodeOptions.setEnabled(False) # only allow 3-Letter Codes because could include non-standard residues which might don't have a (unique) 1-Letter Code
+            popup.startingSequenceCodeWidget.set(obj.startingSequenceCode)
+            popup._reformatSequence()
             popup.exec()
 
 class _openItemResidueTable(OpenItemABC):

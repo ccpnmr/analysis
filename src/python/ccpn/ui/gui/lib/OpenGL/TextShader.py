@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 18:35:04 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-18 10:48:08 +0000 (Mon, December 18, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -50,9 +50,7 @@ class TextShader(ShaderProgramABC):
     name = 'textShader'
     CCPNSHADER = True
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # shader attributes
-
+    # shader attribute/uniform constants
     _PMATRIX = 'pMatrix'
     _AXISSCALE = 'axisScale'
     _STACKOFFSET = 'stackOffset'
@@ -65,7 +63,7 @@ class TextShader(ShaderProgramABC):
     _BLENDENABLED = 'blendEnabled'
     _ALPHA = 'alpha'
 
-    # attribute/uniform lists for shaders - needs to be a duplicate
+    # attribute/uniform lists for shaders
     attributes = {_GLCOLOR        : None,
                   _GLMULTITEXCOORD: None,
                   _OFFSET         : None,
@@ -80,7 +78,6 @@ class TextShader(ShaderProgramABC):
                 _ALPHA       : (1, np.float32),
                 }
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # shader for plotting anti-aliased text to the screen
     vertexShader = """
         #version 120
@@ -130,9 +127,9 @@ class TextShader(ShaderProgramABC):
         }
         """
 
-    #=========================================================================================
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # methods available
-    #=========================================================================================
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def setProjection(self, left, right, bottom, top, near, far):
         """Set the contents of the projection matrix
@@ -206,9 +203,9 @@ class TextShader(ShaderProgramABC):
         self._shader.setUniformValue(self.locations[self._VIEWPORT], viewport)
 
 
-#=========================================================================================
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Text shader for displaying text in aliased regions
-#=========================================================================================
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class AliasedTextShader(TextShader):
     """
@@ -223,15 +220,13 @@ class AliasedTextShader(TextShader):
     name = 'aliasedTextShader'
     CCPNSHADER = True
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # additional shader attributes
-
+    # shader attribute/uniform constants
     _MVMATRIX = 'mvMatrix'
     _ALIASPOSITION = 'aliasPosition'
     _ALIASSHADE = 'aliasShade'
     _ALIASENABLED = 'aliasEnabled'
 
-    # additional attribute/uniform lists for shaders - needs to be a duplicate
+    # additional attribute/uniform lists for shader
     uniforms = dict(TextShader.uniforms)
 
     uniforms |= {_MVMATRIX     : (16, np.float32),
@@ -240,7 +235,6 @@ class AliasedTextShader(TextShader):
                  _ALIASENABLED : (1, np.uint32),
                  }
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # shader for plotting smooth text to the screen in aliased Regions
     vertexShader = """
         #version 120
@@ -315,9 +309,9 @@ class AliasedTextShader(TextShader):
         }
         """
 
-    #=========================================================================================
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # methods available
-    #=========================================================================================
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def setMVMatrix(self, matrix):
         """Set the contents of viewport mvMatrix

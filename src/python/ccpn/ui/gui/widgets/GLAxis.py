@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 19:09:09 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-18 10:48:08 +0000 (Mon, December 18, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -1455,9 +1455,6 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         self._setColourScheme()
         self.setBackgroundColour(self.background, silent=True)
-        # shader = self.globalGL._shaderProgramTex
-        # shader.setBlendEnabled(0)
-        # shader.setAlpha(1.0)
 
         self.updateVisibleSpectrumViews()
         self.initialiseAxes()

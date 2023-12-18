@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 18:37:05 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-18 10:48:08 +0000 (Mon, December 18, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -27,14 +27,14 @@ __date__ = "$Date: 2023-12-14 14:18:53 +0100 (Thu, December 14, 2023) $"
 #=========================================================================================
 
 import numpy as np
-from PyQt5 import QtWidgets, QtGui
+from PyQt5 import QtGui
 from ccpn.ui.gui.lib.OpenGL import GL
-from ccpn.util.decorators import singleton
-from ccpn.framework.PathsAndUrls import openGLFontsPath
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import CcpnGLFont
+# from ccpn.util.decorators import singleton
+# from ccpn.framework.PathsAndUrls import openGLFontsPath
+# from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import CcpnGLFont
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLShader import ShaderProgramABC
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import getAliasSetting
-from ccpn.util.Logging import getLogger
+# from ccpn.util.Logging import getLogger
 
 
 class PixelShader(ShaderProgramABC):
@@ -48,19 +48,16 @@ class PixelShader(ShaderProgramABC):
     name = 'pixelShader'
     CCPNSHADER = True
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # shader attributes/uniforms
-
+    # shader attributes/uniform constants
     _PMATRIX = 'pMatrix'
     _MVMATRIX = 'mvMatrix'
 
-    # attribute/uniform lists for shaders
+    # attribute/uniform lists
     attributes = {}
     uniforms = {_PMATRIX : (16, np.float32),
                 _MVMATRIX: (16, np.float32),
                 }
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # vertex shader to determine the co-ordinates
     vertexShader = """
         #version 120
@@ -90,14 +87,9 @@ class PixelShader(ShaderProgramABC):
         }
         """
 
-    # # attribute list for shader
-    # attributes = {'pMatrix' : (16, np.float32),
-    #               'mvMatrix': (16, np.float32),
-    #               }
-
-    #=========================================================================================
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # methods available
-    #=========================================================================================
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def setProjection(self, left, right, bottom, top, near, far):
         """Set the contents of the projection matrix
@@ -137,9 +129,9 @@ class PixelShader(ShaderProgramABC):
         self._shader.setUniformValue(self.locations[self._MVMATRIX], QtGui.QMatrix4x4())
 
 
-#=========================================================================================
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Pixel shader for aliased peak plotting
-#=========================================================================================
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class AliasedPixelShader(PixelShader):
     """
@@ -153,26 +145,23 @@ class AliasedPixelShader(PixelShader):
     name = 'aliasedPixelShader'
     CCPNSHADER = True
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # additional shader attributes
-
+    # shader attributes/uniform constants
     _ALIAS = 'alias'
     _ALIASPOSITION = 'aliasPosition'
     _BACKGROUND = 'background'
     _ALIASSHADE = 'aliasShade'
     _ALIASENABLED = 'aliasEnabled'
 
-    # attribute/uniform lists for shaders - needs to be a duplicate
+    # attribute/uniform lists for shader
     attributes = {_ALIAS: (1, np.float32)}
     uniforms = {PixelShader._PMATRIX : (16, np.float32),
                 PixelShader._MVMATRIX: (16, np.float32),
-                _ALIASPOSITION       : (1, np.float32),  # change to a set
+                _ALIASPOSITION       : (1, np.float32),  # change to a set?
                 _BACKGROUND          : (4, np.float32),
                 _ALIASSHADE          : (1, np.float32),
                 _ALIASENABLED        : (1, np.uint32),
                 }
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # vertex shader to determine the co-ordinates
     vertexShader = """
         #version 120
@@ -195,7 +184,6 @@ class AliasedPixelShader(PixelShader):
 
     geometryShader = None
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # fragment shader to set the colour
     fragmentShader = """
         #version 120
@@ -224,21 +212,9 @@ class AliasedPixelShader(PixelShader):
         }
         """
 
-    # # additional attribute list for shader
-    # _attributes = {
-    #     'aliasPosition': (1, np.float32),
-    #     'background'   : (4, np.float32),
-    #     'aliasShade'   : (1, np.float32),
-    #     'aliasEnabled' : (1, np.uint32),
-    #     }
-
-    #=========================================================================================
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # methods available
-    #=========================================================================================
-
-    # def __init__(self):
-    #     self.attributes.update(self._attributes)
-    #     super().__init__()
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def setAliasPosition(self, aliasX, aliasY):
         """Set the alias position:

@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>When you double-click on a Peak in a Peak Table, then the currently selected SpectrumDisplay (the one with highlighted axes) will navigate to that Peak (if the Peak's Spectrum is contained in that SpectrumDisplay). Select a SpectrumDisplay by clicking on its canvas or axes.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 1,
+  "contents": [
+    "./graphics/DoubleClickOnPeakToNavigate.png"
+  ]
+}

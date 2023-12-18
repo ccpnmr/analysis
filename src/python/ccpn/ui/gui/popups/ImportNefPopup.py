@@ -5,8 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-12 16:15:39 +0100 (Wed, April 12, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-12-18 12:18:28 +0000 (Mon, December 18, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -54,8 +54,9 @@ from ccpn.ui.gui.widgets.Font import getFontHeight
 from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.VLine import VLine
-from ccpn.ui.gui.lib.Validators import LineEditValidator, LineEditValidatorWhiteSpace
 from ccpn.ui.gui.widgets.table.Table import Table
+from ccpn.ui.gui.widgets.table._TableModel import _TableModel, DISPLAY_ROLE
+from ccpn.ui.gui.lib.Validators import LineEditValidator, LineEditValidatorWhiteSpace
 from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS
 
 from ccpn.framework.lib.ccpnNef import CcpnNefIo
@@ -67,8 +68,7 @@ from ccpn.core.lib.Pid import Pid, IDSEP
 from ccpn.core.Project import Project
 from ccpn.core.StructureData import StructureData
 from ccpn.core.Collection import Collection
-from ccpn.util.nef import StarIo
-from ccpn.util.nef import NefImporter as Nef
+from ccpn.util.nef import StarIo, NefImporter as Nef
 from ccpn.util.Logging import getLogger
 from ccpn.util.PrintFormatter import PrintFormatter
 from ccpn.util.AttrDict import AttrDict
@@ -140,6 +140,35 @@ class _TreeValues:
     ccpnClassName = None
     pHandler = None
     newVal = None
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# _NefTableModel/NefTable
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class _NefTableModel(_TableModel):
+    """Modified model to display '.' insteaad of 'None' to match nef specification.
+    """
+
+    def data(self, index, role=DISPLAY_ROLE):
+        """Return the data/roles for the model.
+        """
+        if not index.isValid():
+            return None
+
+        result = super().data(index, role)
+        if role == DISPLAY_ROLE:
+            # change table occurrences of 'None' to '.'
+            if result == 'None':
+                return '.'
+
+        return result
+
+
+class NefTable(Table):
+    """Modified model - using modified model above - to display '.' insteaad of 'None' to match nef specification.
+    """
+    tableModelClass = _NefTableModel
 
 
 class NefDictFrame(Frame):
@@ -431,6 +460,9 @@ class NefDictFrame(Frame):
                 self._traverseTree(self.nefTreeView.headerItem, func=self._removeParentTreeState, data=_dd)
                 for itm in _dd:
                     itm.parent() and itm.parent().removeChild(itm)
+
+        # force an event to show/resize the horizontal-scrollbar correctly
+        self.nefTreeView.resizeColumnToContents(0)
 
     def _colourTreeView(self):
         projectSections = self.nefTreeView.nefToTreeViewMapping
@@ -872,10 +904,16 @@ class NefDictFrame(Frame):
             vals.row += 1
 
     def handleTreeViewSelectionGeneral(self, name=None, saveFrame=None, parentGroup=None, prefix=None, mappingCode=None,
-                                       errorCode=None, tableColourFunc=None, _handleAutoRename=False):
+                                       errorCode=None, tableColourFunc=None, _handleAutoRename=False, allowPeriod=True):
 
         for vals in self._handleTreeView(name, saveFrame, parentGroup, prefix, mappingCode, errorCode, tableColourFunc, _handleAutoRename):
-            vals.row, saveFrameData = self._addRenameWidgets(vals.item, vals.itemName, vals.plural, vals.row, saveFrame, vals.singular)
+            vals.row, saveFrameData = self._addRenameWidgets(vals.item,
+                                                             vals.itemName,
+                                                             vals.plural,
+                                                             vals.row,
+                                                             saveFrame,
+                                                             vals.singular,
+                                                             allowPeriod=allowPeriod)
             self._colourRenameWidgets(vals._errors, vals._fillColour, errorCode, vals.itemName, saveFrameData)
 
             self._makeCollectionPulldown(vals)
@@ -999,7 +1037,7 @@ class NefDictFrame(Frame):
         row += 1
         return row
 
-    def _addRenameWidgets(self, item, itemName, plural, row, saveFrame, singular):
+    def _addRenameWidgets(self, item, itemName, plural, row, saveFrame, singular, allowPeriod=True):
         saveFrameData = None
         if self._renameValid(item=item, saveFrame=saveFrame):
             Label(self.frameOptionsFrame, text=singular, grid=(row, 0))
@@ -1021,7 +1059,7 @@ class NefDictFrame(Frame):
             Button(self.frameOptionsFrame, text=texts, tipText=tipText, callback=_autoRenameCallback,
                    grid=(row, 2), gridSpan=(1, 1))
 
-            _validator = LineEditValidatorWhiteSpace(parent=saveFrameData, allowSpace=False, allowEmpty=False, allowPeriod=True)
+            _validator = LineEditValidatorWhiteSpace(parent=saveFrameData, allowSpace=False, allowEmpty=False, allowPeriod=allowPeriod)
             saveFrameData.setValidator(_validator)
             saveFrameData.returnPressed.connect(_renameCallback)
             row += 1
@@ -1076,6 +1114,7 @@ class NefDictFrame(Frame):
         Label(self.frameOptionsFrame, text=COLLECTION, grid=(values.row, 0))
 
         # map the className to a pid for the collection
+        _itmName = '' if _itmName in ['.', None] else _itmName
         _itmPid = Pid._join(values.ccpnClassName, _itmName) if values.ccpnClassName else _itmName
         values.itemPid = _itmPid
 
@@ -1165,6 +1204,8 @@ class NefDictFrame(Frame):
         # get the list of common collections for the selection, to set the pulldown
         _indexing = set()
         for (itmName, sFrame, parentGroup, primaryHandler, ccpnClassName) in _children:
+
+            itmName = '' if itmName in ['.', None] else itmName
 
             if parentGroup in ['restraintTables', 'violationTables']:
                 _itmStructureData = sFrame.get(DATANAME) or ''  # make sure isn't None
@@ -1364,8 +1405,9 @@ class NefDictFrame(Frame):
                 showWarning('Rename SaveFrame', str(es))
             else:
 
-                # rename in the nef collections
-                self._renameInCollections(item, _data, newName)
+                if itemName:
+                    # rename in the nef collections - empty named objects should not be in collections
+                    self._renameInCollections(item, _data, newName)
 
                 # everything okay - rebuild all for now, could make selective later
                 self._repopulateview(itemName, newName, parentName)
@@ -1778,13 +1820,15 @@ class NefDictFrame(Frame):
                                                prefix='nef_sequence_',
                                                mappingCode='nef_sequence_chain_code',
                                                errorCode='nef_sequence_chain_code',
-                                               tableColourFunc=table_nef_molecular_system)
+                                               tableColourFunc=table_nef_molecular_system,
+                                               allowPeriod=False)
 
     handleSaveFrames['nef_chemical_shift_list'] = partial(handleTreeViewSelectionGeneral,
                                                           prefix='nef_chemical_shift_',
                                                           mappingCode='nef_chemical_shift_list',
                                                           errorCode='nef_chemical_shift_list',
-                                                          tableColourFunc=None)
+                                                          tableColourFunc=None,
+                                                          allowPeriod=False)
 
     handleSaveFrames['nef_distance_restraint_list'] = partial(handleTreeViewSelectionStructureDataParent,
                                                               prefix='nef_distance_restraint_',
@@ -1820,13 +1864,15 @@ class NefDictFrame(Frame):
                                               prefix='ccpn_sample_component_',
                                               mappingCode='ccpn_sample',
                                               errorCode='ccpn_sample',
-                                              tableColourFunc=None)
+                                              tableColourFunc=None,
+                                              allowPeriod=False)
 
     handleSaveFrames['ccpn_complex'] = partial(handleTreeViewSelectionGeneral,
                                                prefix='ccpn_complex_chain_',
                                                mappingCode='ccpn_complex',
                                                errorCode='ccpn_complex',
-                                               tableColourFunc=None)
+                                               tableColourFunc=None,
+                                               allowPeriod=False)
 
     handleSaveFrames['ccpn_spectrum_group'] = partial(handleTreeViewSelectionGeneral,
                                                       prefix='ccpn_group_spectrum_',
@@ -1838,7 +1884,8 @@ class NefDictFrame(Frame):
                                             prefix='ccpn_note_',
                                             mappingCode='ccpn_notes',
                                             errorCode='ccpn_notes',
-                                            tableColourFunc=table_ccpn_notes)
+                                            tableColourFunc=table_ccpn_notes,
+                                            allowPeriod=False)
 
     handleSaveFrames['ccpn_peak_list'] = partial(handleTreeViewSelectionCcpnList,
                                                  prefix='nef_peak_',
@@ -1868,7 +1915,8 @@ class NefDictFrame(Frame):
                                             prefix='nmr_chain_',
                                             mappingCode='nmr_chain',
                                             errorCode='nmr_chain_serial',
-                                            tableColourFunc=table_ccpn_assignment)
+                                            tableColourFunc=table_ccpn_assignment,
+                                            allowPeriod=False)
 
     handleSaveFrames['ccpn_substance'] = partial(handleTreeViewSelectionGeneral,
                                                  prefix='ccpn_substance_synonym_',
@@ -1905,13 +1953,15 @@ class NefDictFrame(Frame):
                                                  prefix='ccpn_datatable_data_',
                                                  mappingCode='ccpn_datatable',
                                                  errorCode='ccpn_datatable',
-                                                 tableColourFunc=None)
+                                                 tableColourFunc=None,
+                                                 allowPeriod=False)
 
     handleSaveFrames['ccpn_collection'] = partial(handleTreeViewSelectionGeneralNoCollection,
                                                   prefix='ccpn_collection_',
                                                   mappingCode='ccpn_collections',
                                                   errorCode='ccpn_collections',
-                                                  tableColourFunc=table_ccpn_collections)
+                                                  tableColourFunc=table_ccpn_collections,
+                                                  allowPeriod=False)
 
     handleSaveFrames['ccpn_logging'] = partial(handleTreeViewSelectionGeneralNoCollection,
                                                prefix='ccpn_history_',
@@ -2454,9 +2504,9 @@ class NefDictFrame(Frame):
         frame = MoreLessFrame(self, name=_name, showMore=showMore, grid=(0, 0))
 
         # table = _newSimplePandasTable(frame.contentsFrame, pd.DataFrame(_data))
-        table = Table(frame.contentsFrame, df=pd.DataFrame(_data),
-                      selectionCallbackEnabled=False, actionCallbackEnabled=False,
-                      enableDelete=False)
+        table = NefTable(frame.contentsFrame, df=pd.DataFrame(_data),
+                         selectionCallbackEnabled=False, actionCallbackEnabled=False,
+                         enableDelete=False)
         table.setEditable(False)
 
         frame.contentsFrame.getLayout().addWidget(table, 0, 0)
@@ -2684,9 +2734,9 @@ class NefDictFrame(Frame):
 
             menu.addItem('<New Collection>', callback=partial(self._makeNewCollection, selectionWidget=selectionWidget))
             colNames = OrderedSet(
-                [col.name for col in self.project.collections]
-                + list(self._collections.keys())
-            )
+                    [col.name for col in self.project.collections]
+                    + list(self._collections.keys())
+                    )
             for col in colNames:
                 menu.addItem(col, callback=partial(self._addToCollection, col, selectionWidget=selectionWidget))
 
@@ -3155,8 +3205,8 @@ class ImportNefPopup(CcpnDialogMainWidget):
         else:
             ll = len(self._nefWindows)
             raise TypeError(
-                f"Invalid window number, must be 0{'-' if ll > 1 else ''}{ll - 1 if ll > 1 else ''}"
-            )
+                    f"Invalid window number, must be 0{'-' if ll > 1 else ''}{ll - 1 if ll > 1 else ''}"
+                    )
 
     def getActiveNefReader(self):
         """Get the current active nef reader for the dialog

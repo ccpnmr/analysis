@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can tidy up your project by deleting any unused NmrAtoms using the CCPN Macro <span style=%(purple)s>removeUnusedNmrAtoms</span>. Go to the <span style=%(purple)s>Macro</span> menu, <span style=%(purple)s>Run CCPN Macros</span> and <span style=%(purple)s>removeUnusedNmrAtoms</span>.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 1,
+  "contents": [
+    "./graphics/CCPNMacroRemoveUnusedNmrAtoms.png"
+  ]
+}

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-20 12:53:32 +0000 (Wed, December 20, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-20 15:19:07 +0000 (Wed, December 20, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -28,13 +28,8 @@ __date__ = "$Date: 2023-12-14 14:18:53 +0100 (Thu, December 14, 2023) $"
 
 import numpy as np
 from PyQt5 import QtGui
-from ccpn.ui.gui.lib.OpenGL import GL
-# from ccpn.util.decorators import singleton
-# from ccpn.framework.PathsAndUrls import openGLFontsPath
-# from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import CcpnGLFont
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLShader import ShaderProgramABC
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import getAliasSetting
-# from ccpn.util.Logging import getLogger
 
 
 class PixelShader(ShaderProgramABC):
@@ -51,11 +46,13 @@ class PixelShader(ShaderProgramABC):
     # shader attributes/uniform constants
     _PMATRIX = 'pMatrix'
     _MVMATRIX = 'mvMatrix'
+    _VIEWPORT = 'viewport'
 
     # attribute/uniform lists
     attributes = {}
     uniforms = {_PMATRIX : (16, np.float32),
                 _MVMATRIX: (16, np.float32),
+                _VIEWPORT: (4, np.float32),
                 }
 
     # vertex shader to determine the co-ordinates
@@ -64,6 +61,7 @@ class PixelShader(ShaderProgramABC):
 
         uniform mat4 pMatrix;
         uniform mat4 mvMatrix;
+        uniform vec4 viewport;
         varying vec4 fragCol;
 
         void main()
@@ -104,13 +102,13 @@ class PixelShader(ShaderProgramABC):
         """Set the contents of projection pMatrix
         :param matrix: consisting of 16 float32 elements
         """
-        self.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, matrix)
+        self._shader.setUniformValue(self.locations[self._PMATRIX], QtGui.QMatrix4x4(*matrix).transposed())
 
     def setMVMatrix(self, matrix):
         """Set the contents of viewport mvMatrix
         :param matrix: consisting of 16 float32 elements
         """
-        self.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, matrix)
+        self._shader.setUniformValue(self.locations[self._MVMATRIX], QtGui.QMatrix4x4(*matrix).transposed())
 
     def setMV(self, matrix):
         """Set the contents of viewport mvMatrix
@@ -127,6 +125,11 @@ class PixelShader(ShaderProgramABC):
         """Reset the contents of viewport mvMatrix to the identity-matrix
         """
         self._shader.setUniformValue(self.locations[self._MVMATRIX], QtGui.QMatrix4x4())
+
+    def setViewport(self, viewport):
+        """Set the viewport pixel-sizes and devicePixelRatio
+        """
+        self._shader.setUniformValue(self.locations[self._VIEWPORT], viewport)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -156,10 +159,10 @@ class AliasedPixelShader(PixelShader):
     attributes = {_ALIAS: (1, np.float32)}
     uniforms = dict(PixelShader.uniforms)
 
-    uniforms |= {_ALIASPOSITION       : (1, np.float32),  # change to a set?
-                 _BACKGROUND          : (4, np.float32),
-                 _ALIASSHADE          : (1, np.float32),
-                 _ALIASENABLED        : (1, np.uint32),
+    uniforms |= {_ALIASPOSITION: (1, np.float32),  # change to a set?
+                 _BACKGROUND   : (4, np.float32),
+                 _ALIASSHADE   : (1, np.float32),
+                 _ALIASENABLED : (1, np.uint32),
                  }
 
     # vertex shader to determine the co-ordinates
@@ -168,6 +171,7 @@ class AliasedPixelShader(PixelShader):
 
         uniform   mat4  pMatrix;
         uniform   mat4  mvMatrix;
+        uniform   vec4  viewport;
         attribute vec4  alias;
         uniform   float aliasPosition;
         varying   float aliased;

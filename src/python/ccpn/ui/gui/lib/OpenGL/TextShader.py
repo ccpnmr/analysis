@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-20 12:53:32 +0000 (Wed, December 20, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-20 15:19:07 +0000 (Wed, December 20, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -28,13 +28,8 @@ __date__ = "$Date: 2023-12-14 14:19:05 +0100 (Thu, December 14, 2023) $"
 
 import numpy as np
 from PyQt5 import QtGui
-from ccpn.ui.gui.lib.OpenGL import GL
-# from ccpn.util.decorators import singleton
-# from ccpn.framework.PathsAndUrls import openGLFontsPath
-# from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import CcpnGLFont
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLShader import ShaderProgramABC
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import getAliasSetting
-# from ccpn.util.Logging import getLogger
 
 
 class TextShader(ShaderProgramABC):
@@ -71,7 +66,7 @@ class TextShader(ShaderProgramABC):
     uniforms = {_PMATRIX     : (16, np.float32),
                 _AXISSCALE   : (2, np.float32),
                 _STACKOFFSET : (2, np.float32),
-                _VIEWPORT    : (3, np.float32),
+                _VIEWPORT    : (4, np.float32),
                 _TEXTURE     : (1, np.uint32),
                 _BACKGROUND  : (4, np.float32),
                 _BLENDENABLED: (1, np.uint32),
@@ -85,6 +80,7 @@ class TextShader(ShaderProgramABC):
         uniform   mat4  pMatrix;
         uniform   vec4  axisScale;
         uniform   vec2  stackOffset;
+        uniform   vec4  viewport;
         varying   vec4  fragCol;
         varying   vec2  texCoord;
         attribute vec4  offset;
@@ -144,7 +140,7 @@ class TextShader(ShaderProgramABC):
         """Set the contents of projection pMatrix
         :param matrix: consisting of 16 float32 elements
         """
-        self.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, matrix)
+        self._shader.setUniformValue(self.locations[self._PMATRIX], QtGui.QMatrix4x4(*matrix).transposed())
 
     def setPMatrixToIdentity(self):
         """Reset the contents of viewport mvMatrix to the identity-matrix
@@ -243,6 +239,7 @@ class AliasedTextShader(TextShader):
         uniform   mat4  mvMatrix;
         uniform   vec4  axisScale;
         uniform   vec2  stackOffset;
+        uniform   vec4  viewport;
         uniform   float aliasPosition;
         varying   float aliased;
         varying   vec4  fragCol;
@@ -317,7 +314,7 @@ class AliasedTextShader(TextShader):
         """Set the contents of viewport mvMatrix
         :param matrix: consisting of 16 float32 elements
         """
-        self.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, matrix)
+        self._shader.setUniformValue(self.locations[self._MVMATRIX], QtGui.QMatrix4x4(*matrix).transposed())
 
     def setMV(self, matrix):
         """Set the contents of viewport mvMatrix

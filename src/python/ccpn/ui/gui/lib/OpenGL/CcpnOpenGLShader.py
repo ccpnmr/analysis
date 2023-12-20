@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 18:49:09 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-20 15:19:07 +0000 (Wed, December 20, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -29,7 +29,6 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 import sys
 import os
 from PyQt5 import QtGui
-
 from ccpn.ui.gui.lib.OpenGL import GL
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.guiSettings import consoleStyle
@@ -38,9 +37,9 @@ from ccpn.ui.gui.guiSettings import consoleStyle
 _DEBUG = True
 
 
-#=========================================================================================
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ShaderProgramABC - Class defining a GL shader program
-#=========================================================================================
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class ShaderProgramABC(object):
     """
@@ -202,28 +201,9 @@ class ShaderProgramABC(object):
             getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.release   -   {id(self)}{consoleStyle.reset}')
         self._shader.release()
 
-    #=========================================================================================
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Common methods
-    #=========================================================================================
-
-    # @staticmethod
-    # def setViewportMatrix(viewMatrix, left, right, bottom, top, near, far):
-    #     """Set the contents of the viewport matrix
-    #     """
-    #     # return the viewport transformation matrix - mapping screen to NDC
-    #     #   normalised device coordinates
-    #     #   viewport * NDC_co-ord = world_co-ord
-    #     oa = (right - left) / 2.0  #if abs(right-left) > 1.0e-7 else 1.0
-    #     ob = (top - bottom) / 2.0  #if abs(top-bottom) > 1.0e-7 else 1.0
-    #     oc = (far - near) / 2.0  #if abs(far-near) > 1.0e-7 else 1.0
-    #     og = (right + left) / 2.0
-    #     oe = (top + bottom) / 2.0
-    #     od = (near + far) / 2.0
-    #
-    #     viewMatrix[0:16] = [oa, 0.0, 0.0, og,
-    #                         0.0, ob, 0.0, oe,
-    #                         0.0, 0.0, oc, od,
-    #                         0.0, 0.0, 0.0, 1.0]
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     @staticmethod
     def getViewportMatrix(left, right, bottom, top, near, far):
@@ -236,59 +216,9 @@ class ShaderProgramABC(object):
 
         return viewMat
 
-    #=========================================================================================
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Methods available - Common attributes sizes
-    #=========================================================================================
-
-    def setGLUniformMatrix4fv(self, uniformLocation=None, count=1, transpose=GL.GL_FALSE, value=None):
-        """Set a 4x4 float32 matrix in the shader
-        """
-        try:
-            self._shader.setUniformValue(self.locations[uniformLocation],
-                                         QtGui.QMatrix4x4(*value) if transpose else QtGui.QMatrix4x4(*value).transposed())
-        except Exception as es:
-            raise RuntimeError(f'Error setting setGLUniformMatrix4fv: {uniformLocation}   {es}')
-
-    def setGLUniform4fv(self, uniformLocation=None, count=1, value=None):
-        """Set a 4x1 float32 vector in the shader
-        """
-        try:
-            self._shader.setUniformValue(self.locations[uniformLocation], QtGui.QVector4D(*value))
-
-        except Exception as es:
-            raise RuntimeError(f'Error setting setGLUniform4fv: {uniformLocation}   {es}')
-
-    def setGLUniform4iv(self, uniformLocation=None, count=1, value=None):
-        """Set a 4x1 uint32 vector in the shader
-        """
-        try:
-            self._shader.setUniformValue(self.locations[uniformLocation], QtGui.QVector4D(*value))
-        except Exception as es:
-            raise RuntimeError(f'Error setting setGLUniform4iv: {uniformLocation}   {es}')
-
-    def setGLUniform2fv(self, uniformLocation=None, count=1, value=None):
-        """Set a 2x1 uint32 vector in the shader
-        """
-        try:
-            self._shader.setUniformValue(self.locations[uniformLocation], QtGui.QVector2D(*value))
-        except Exception as es:
-            raise RuntimeError(f'Error setting setGLUniform2fv: {uniformLocation}   {es}')
-
-    def setGLUniform1i(self, uniformLocation=None, value=None):
-        """Set a single uint32 attribute in the shader
-        """
-        try:
-            self._shader.setUniformValue(self.locations[uniformLocation], value)
-        except Exception as es:
-            raise RuntimeError(f'Error setting setGLUniform1i: {uniformLocation}   {es}')
-
-    def setGLUniform1f(self, uniformLocation=None, value=None):
-        """Set a single float32 attribute in the shader
-        """
-        try:
-            self._shader.setUniformValue(self.locations[uniformLocation], float(value))
-        except Exception as es:
-            raise RuntimeError(f'Error setting setGLUniform1f: {uniformLocation}   {es}')
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def uniformLocation(self, name):
         """Function to get location of an OpenGL uniform variable
@@ -306,9 +236,9 @@ class ShaderProgramABC(object):
         """
         return GL.glGetAttribLocation(self.program_id, name)
 
-    #=========================================================================================
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Implementation
-    #=========================================================================================
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def define(self, arrayObject):
         """Define the required vertex-array-objects and vertex-buffer-objects needed to buffer data

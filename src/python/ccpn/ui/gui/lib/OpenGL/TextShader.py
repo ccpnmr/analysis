@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-18 10:48:08 +0000 (Mon, December 18, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-20 12:53:32 +0000 (Wed, December 20, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -27,14 +27,14 @@ __date__ = "$Date: 2023-12-14 14:19:05 +0100 (Thu, December 14, 2023) $"
 #=========================================================================================
 
 import numpy as np
-from PyQt5 import QtWidgets, QtGui
+from PyQt5 import QtGui
 from ccpn.ui.gui.lib.OpenGL import GL
-from ccpn.util.decorators import singleton
-from ccpn.framework.PathsAndUrls import openGLFontsPath
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import CcpnGLFont
+# from ccpn.util.decorators import singleton
+# from ccpn.framework.PathsAndUrls import openGLFontsPath
+# from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import CcpnGLFont
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLShader import ShaderProgramABC
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import getAliasSetting
-from ccpn.util.Logging import getLogger
+# from ccpn.util.Logging import getLogger
 
 
 class TextShader(ShaderProgramABC):

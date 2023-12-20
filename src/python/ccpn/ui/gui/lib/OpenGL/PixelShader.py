@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-18 10:48:08 +0000 (Mon, December 18, 2023) $"
+__dateModified__ = "$dateModified: 2023-12-20 12:53:32 +0000 (Wed, December 20, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -154,13 +154,13 @@ class AliasedPixelShader(PixelShader):
 
     # attribute/uniform lists for shader
     attributes = {_ALIAS: (1, np.float32)}
-    uniforms = {PixelShader._PMATRIX : (16, np.float32),
-                PixelShader._MVMATRIX: (16, np.float32),
-                _ALIASPOSITION       : (1, np.float32),  # change to a set?
-                _BACKGROUND          : (4, np.float32),
-                _ALIASSHADE          : (1, np.float32),
-                _ALIASENABLED        : (1, np.uint32),
-                }
+    uniforms = dict(PixelShader.uniforms)
+
+    uniforms |= {_ALIASPOSITION       : (1, np.float32),  # change to a set?
+                 _BACKGROUND          : (4, np.float32),
+                 _ALIASSHADE          : (1, np.float32),
+                 _ALIASENABLED        : (1, np.uint32),
+                 }
 
     # vertex shader to determine the co-ordinates
     vertexShader = """
@@ -222,7 +222,7 @@ class AliasedPixelShader(PixelShader):
         :param aliasX: X alias region
         :param aliasY: Y alias region
         """
-        self.setGLUniform1f('aliasPosition', getAliasSetting(aliasX, aliasY))
+        self._shader.setUniformValue(self.locations[self._ALIASPOSITION], float(getAliasSetting(aliasX, aliasY)))
 
     def setBackground(self, colour):
         """Set the background colour, for use with the solid text
@@ -241,7 +241,7 @@ class AliasedPixelShader(PixelShader):
             raise TypeError('aliasShade must be a float')
         value = float(np.clip(aliasShade, 0.0, 1.0))
 
-        self.setGLUniform1f('aliasShade', value)
+        self._shader.setUniformValue(self.locations[self._ALIASSHADE], value)
 
     def setAliasEnabled(self, aliasEnabled):
         """Set the alias enabled: bool True/False
@@ -253,4 +253,4 @@ class AliasedPixelShader(PixelShader):
             raise TypeError('aliasEnabled must be a bool')
         value = 1 if aliasEnabled else 0
 
-        self.setGLUniform1i('aliasEnabled', value)
+        self._shader.setUniformValue(self.locations[self._ALIASENABLED], value)

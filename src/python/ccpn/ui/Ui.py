@@ -52,7 +52,10 @@ class Ui(NotifierBase):
 
     def __init__(self, application):
 
+        # set the forward/backlink with application already here, because subsequent initialisations
+        # do require this to be present
         self._application = application
+        application._ui = self
         self._mainWindow = None
         self.pluginModules = []
 

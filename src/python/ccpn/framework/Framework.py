@@ -160,6 +160,7 @@ class Framework(NotifierBase, GuiBase):
         #-----------------------------------------------------------------------------------------
         # Necessary as attribute is queried during initialisation:
         self._mainWindow = None
+        self._ui = None
 
         # This is needed to make project available in NoUi (if nothing else)
         self._project = None
@@ -247,11 +248,17 @@ class Framework(NotifierBase, GuiBase):
         self._spectrumDataSourceFormats = getDataFormats()
 
         # get a user interface; nb. ui.start() is called by the application
-        self.ui = self._getUI()
+        self._ui = self._getUI()
 
     #-----------------------------------------------------------------------------------------
     # properties of Framework
     #-----------------------------------------------------------------------------------------
+
+    @property
+    def ui(self):
+        """:return the user interface (Ui) instance
+        """
+        return self._ui
 
     @property
     def project(self) -> Project:
@@ -262,7 +269,7 @@ class Framework(NotifierBase, GuiBase):
     @property
     def current(self) -> Current:
         """Current contains selected peaks, selected restraints, cursor position, etc.
-        see Current.py for detailed descriptiom
+        see Current.py for detailed description
         :return the Current object
         """
         return self._current

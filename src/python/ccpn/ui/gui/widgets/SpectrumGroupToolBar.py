@@ -5,8 +5,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 19:17:57 +0100 (Wed, June 28, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-12-21 10:30:34 +0000 (Thu, December 21, 2023) $"
+__version__ = "$Revision: 3.3.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -139,7 +139,7 @@ class SpectrumGroupToolBar(ToolBar):
     def _setupContextMenu(self, action, spectrumGroup):
 
         popMenu = Menu('', self)
-        removeAction = popMenu.addAction('Remove', partial(self._deleteSpectrumGroup, action, spectrumGroup))
+        removeAction = popMenu.addAction('Remove', partial(self._removeSpectrumGroup, action, spectrumGroup))
         peakListAction = popMenu.addAction('PeakLists')
         peakListAction.setCheckable(True)
         peakListAction.toggled.connect(partial(self._showHidePeakListView, spectrumGroup))
@@ -173,39 +173,31 @@ class SpectrumGroupToolBar(ToolBar):
                         spectrumView.plot.hide()
                 self._hidePeakLists(spectrumGroupPeakLists, peakListViews)
 
-    def _deleteSpectrumGroup(self, action, spectrumGroup):
+    def _removeSpectrumGroup(self, action, spectrumGroup):
+        """Remove the spectrumGroup from the toolbar.
+        """
         strip = self._getStrip()
         if strip is not None:
-            from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, undoStackBlocking
+            from ccpn.core.lib.ContextManagers import undoStackBlocking
 
-            with undoBlockWithoutSideBar():
+            with undoStackBlocking() as _:  # do not add to undo/redo stack
+                if len(self.actions()) == 1 and self._project.application.preferences.appearance.closeSpectrumDisplayOnLastSpectrum:
+                    # close the spectrumDisplay
+                    self.spectrumDisplay.close()
+                    return
 
+                # remove the spectrumGroup
                 _spectra = [sp for group in [strip.project.getByPid(gr) for gr in strip.spectrumDisplay._getSpectrumGroups() if strip.project.getByPid(gr)]
                             for sp in group.spectra
                             if not sp.isDeleted]
 
-                self._removeAction(action, spectrumGroup)
-
-                with undoStackBlocking() as addUndoItem:
-                    # need to undo the removal of action
-                    addUndoItem(undo=strip._CcpnGLWidget.updateVisibleSpectrumViews,
-                                redo=partial(self._removeAction, action, spectrumGroup))
-
                 for spectrumView in strip.spectrumViews:
-                    # NOTE:ED - can only delete those that are not duplicated
-                    #           need count in all spectrumDisplay._getSpectrumGroups
+                    # can only delete those that are not duplicated
+                    #  - need count in all spectrumDisplay._getSpectrumGroups
                     if spectrumView.spectrum in spectrumGroup.spectra and _spectra.count(spectrumView.spectrum) == 1:
-                        spectrumView.delete()
+                        self.spectrumDisplay.removeSpectrum(spectrumView.spectrum)
 
-                with undoStackBlocking() as addUndoItem:
-                    # keep a handle to the action for reinserting
-                    addUndoItem(undo=partial(self._addAction, spectrumGroup, oldAction=action),
-                                redo=strip._CcpnGLWidget.updateVisibleSpectrumViews)
-
-                # if spectrumGroup in self._spectrumGroups:
-                #     self._spectrumGroups.remove(spectrumGroup)
-                # if len(strip.spectra) == 0:
-                #     self.spectrumDisplay._closeModule()
+                self._removeAction(action, spectrumGroup)
 
     def _spectrumGroupRename(self, data):
         """Rename the spectrumGroup in the toolbar from a notifier callback

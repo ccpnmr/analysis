@@ -26,8 +26,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-22 13:04:53 +0000 (Wed, November 22, 2023) $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2023-12-22 14:24:57 +0000 (Fri, December 22, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -71,6 +71,7 @@ from ccpn.core.ViolationTable import ViolationTable
 from ccpn.core._implementation.CollectionList import CollectionList
 from ccpn.core.Collection import Collection
 
+
 from ccpn.core.lib.Pid import Pid
 # from ccpn.ui.gui.guiSettings import sidebarFont
 from ccpn.ui.gui.widgets.Base import Base
@@ -82,6 +83,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Spacer import Spacer as CCPNSpacer
 from ccpn.util.Constants import ccpnmrJsonData
+from ccpn.util.Common import copyToClipboard
 from ccpn.core.lib.Notifiers import Notifier, NotifierBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.lib.mouseEvents import makeDragEvent
@@ -1308,6 +1310,9 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         if event.button() == QtCore.Qt.RightButton:
             self._raiseContextMenu(event)
             event.accept()
+        elif event.button() == QtCore.Qt.MiddleButton:
+            self._copyHoverPID()
+            event.accept()
         else:
             super().mouseReleaseEvent(event)
 
@@ -1468,6 +1473,16 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
                 menuAction(self.mainWindow, dataPid, sideBarObject,
                            QtCore.QPoint(event.globalPos().x(), event.globalPos().y() + 10),
                            objs)
+
+    def _copyHoverPID(self):
+        """Copies the PID object an object to the clipboard
+        """
+        for item in self.selectedItems():
+            if item is not None:
+                dataPid = item.data(0, QtCore.Qt.DisplayRole)
+                if objFromPid := self.project.getByPid(dataPid):
+                    copyToClipboard([objFromPid])
+
 
     # def _deleteItemObject(self, objs):
     #     """Removes the specified item from the sidebar and deletes it from the project.

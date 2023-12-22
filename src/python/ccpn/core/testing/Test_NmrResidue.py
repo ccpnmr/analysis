@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-19 15:36:53 +0100 (Wed, April 19, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2023-12-22 14:28:07 +0000 (Fri, December 22, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,7 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from unittest import skip
+import unittest
 from ccpn.core.testing.WrapperTesting import WrapperTesting, fixCheckAllValid
 
 
@@ -810,6 +810,107 @@ class NmrResidueTest(WrapperTesting):
         self.assertEqual(newNr.longPid, "NmrResidue:X.3.SER")
         self.undo.redo()
         self.assertEqual(newNr.longPid, "NmrResidue:X.@21.")
+
+    def test_sequenceCode_set(self):
+        """"Testing the sequenceCode setters
+        This does not test for errors, see test_sequenceCode_set_errors()
+        """
+        nchain = self.project.getByPid('NC:A')
+        nr1 = nchain.fetchNmrResidue('1010')
+        nr2 = nchain.fetchNmrResidue('1020')
+
+        nr1.sequenceCode = 'test'
+        nr2.sequenceCode = 'test2'
+
+        self.assertEquals(nr1.sequenceCode, 'test')
+        self.assertEquals(nr2.sequenceCode, 'test2')
+
+        self.assertIn('test', str(nr1.pid))
+        self.assertIn('test2', str(nr2.pid))
+
+        self.undo.undo()
+        self.assertNotEqual(nr2.sequenceCode, 'test2')
+        self.undo.undo()
+        self.assertNotEqual(nr1.sequenceCode, 'test')
+        self.undo.redo()
+        self.assertEquals(nr1.sequenceCode, 'test')
+        self.undo.redo()
+        self.assertEquals(nr2.sequenceCode, 'test2')
+
+    def test_sequenceCode_set_errors(self):
+        """Tests the Errors for sequenceCode setter.
+        Currently only tests error raising for:
+        - Value is not string or None
+        - Value is an empty string
+        - Value contains non-legal characters
+        - If the NmrResidue is assigned
+        Should also test error raising for:
+        - Random exception (?)
+        """
+        nchain = self.project.getByPid('NC:A')
+        nr1 = nchain.fetchNmrResidue('1010', 'GLY')
+        nr2 = nchain.nmrResidues[3]
+
+        with self.assertRaises(ValueError):
+            nr1.sequenceCode = 12
+        with self.assertRaises(ValueError):
+            nr1.sequenceCode = ''
+        with self.assertRaises(ValueError):
+            nr1.sequenceCode = '['
+
+        with self.assertRaises(RuntimeError):
+            nr2.sequenceCode = '1234'
+
+    def test_residueType_set(self):
+        """"Testing the residueType setters
+        This does not test for errors, see test_residueType_set_errors()
+        """
+        nchain = self.project.getByPid('NC:A')
+        nr1 = nchain.fetchNmrResidue('1010')
+        nr2 = nchain.fetchNmrResidue('1020')
+
+        nr1.residueType = 'GLY'
+        nr2.residueType = 'ALA'
+
+        self.assertEquals(nr1.residueType, 'GLY')
+        self.assertEquals(nr2.residueType, 'ALA')
+
+        self.assertIn('GLY', str(nr1.pid))
+        self.assertIn('ALA', str(nr2.pid))
+
+        self.undo.undo()
+        self.assertNotEqual(nr2.residueType, 'ALA')
+        self.undo.undo()
+        self.assertNotEqual(nr1.residueType, 'GLY')
+        self.undo.redo()
+        self.assertEquals(nr1.residueType, 'GLY')
+        self.undo.redo()
+        self.assertEquals(nr2.residueType, 'ALA')
+
+    @unittest.skip("currently giving strange behaviour")
+    def test_residueType_set_errors(self):
+        """Tests the Errors for residueType setter.
+        Currently only tests error raising for:
+        - Value is not string or None
+        - Value is an empty string
+        - Value contains non-legal characters
+        - If the NmrResidue is assigned
+        Should also test error raising for:
+        - Random exception (?)
+        """
+        nchain = self.project.getByPid('NC:A')
+        nr1 = nchain.fetchNmrResidue('1010', 'GLY')
+        nr2 = nchain.nmrResidues[3]
+
+        with self.assertRaises(ValueError):
+            nr1.residueType = 12
+        with self.assertRaises(ValueError):
+            nr1.residueType = ''
+        with self.assertRaises(ValueError):
+            nr1.residueType = '[]'
+
+        with self.assertRaises(RuntimeError):
+            nr2.residueType = 'ALA'
 
     def test_rename(self):
         nchain = self.project.getByPid('NC:A')

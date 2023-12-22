@@ -159,7 +159,7 @@ class NotifierABC(object):
         return self._isRegistered
 
     def newCallbackDict(self, trigger, previousValue=None, value=None, obj=None,
-                        oldpid=None, getpid=None, specifiers=None):
+                        oldpid=None, pid=None, specifiers=None):
         callbackDict = {
                 self.NOTIFIER     : self,
                 self.THEOBJECT    : self._theObject,
@@ -169,7 +169,7 @@ class NotifierABC(object):
                 self.VALUE        : value,
                 self.OBJECT       : obj,
                 self.OLDPID       : oldpid,
-                self.GETPID       : getpid,
+                self.GETPID       : pid,
                 self.SPECIFIERS   : specifiers,
                 }
         return callbackDict

@@ -181,6 +181,10 @@ class Framework(NotifierBase, GuiBase):
 
         self.args = args
 
+        # Blocking level for command echo and logging; required here because _echoBlocking init is required
+        self._echoBlocking = int(getattr(self.args, 'noDebugLogging', False))
+        self._enableLoggingToConsole = True
+
         # NOTE:ED - what is revision for? there are no uses and causes a new error for sphinx documentation unless a string
         # self.revision = Version.revision
 
@@ -207,9 +211,6 @@ class Framework(NotifierBase, GuiBase):
         # self._fontSettings = None
         # self._menuSpec = None
 
-        # Blocking level for command echo and logging
-        self._echoBlocking = int(getattr(self.args, 'noDebugLogging', False))
-        self._enableLoggingToConsole = True
         logger.disabled = getattr(self.args, 'noEchoLogging', False)  # overrides noDebugLogging
 
         # Process info
@@ -637,6 +638,7 @@ class Framework(NotifierBase, GuiBase):
     # Utilities
     #-----------------------------------------------------------------------------------------
 
+    @logCommand('application.')
     def setDebug(self, level: int):
         """Set the debugging level
         :param level: 0: off, 1-3: debug level 1-3

@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-21 13:24:43 +0000 (Tue, November 21, 2023) $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2023-12-22 14:23:54 +0000 (Fri, December 22, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -27,9 +27,10 @@ import re
 from collections import OrderedDict
 from ccpn.core.NmrResidue import NmrResidue, _getNmrResidue
 from ccpn.core.lib.AssignmentLib import CCP_CODES_SORTED, getNmrResiduePrediction
+from ccpn.core.lib.ContextManagers import notificationEchoBlocking
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC, _attribContainer
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, PulldownListCompoundWidget, CheckBoxCompoundWidget
-from ccpn.ui.gui.widgets.MessageDialog import showYesNoWarning, showMulti, showWarning
+from ccpn.ui.gui.widgets.MessageDialog import showYesNoWarning, showMulti, showWarning, showOkCancelWarning
 from ccpn.util.OrderedSet import OrderedSet
 
 
@@ -157,31 +158,114 @@ class NmrResidueEditPopup(AttributeEditorPopupABC):
     def _applyAllChanges(self, changes):
         """Apply all changes - move nmrResidue to new chain as required
         """
-        # if self._deassignClicked:
-        #     print('   beep')
-        #     if self.sequenceCode.getText():
-        #         raise RuntimeError('To deassign the nmrResidue, please leave the sequenceCode blank.')
-        #     else:
-        #         self.obj.disconnect()
-        #         return
 
         merge = self.mergetoExisting.isChecked()
         create = False # self.createNew.isChecked()
         deassign = False # self.deassign.isChecked()
 
-        if deassign:
-            pass
-            # if self.sequenceCode.getText():
-            #     raise RuntimeError('To deassign the nmrResidue, please leave the sequenceCode blank.')
-            # else:
-            #     self.obj.disconnect()
 
-        else:
+
+        #         #     else:
+        #
+        #         changeList = []
+        #         if (resType := re.sub(REMOVEPERCENT, '', self.residueType.getText())) != self.obj.residueType:
+        #             changeList.append('Residue Type')
+        #         if (seqCode := re.sub(REMOVEPERCENT, '', self.sequenceCode.getText())) != self.obj.sequenceCode:
+        #             changeList.append('Sequence Code')
+        #         if not create or (self.obj == destNmrResidue):
+        #             if self.obj.residue:
+        #                 # check for assignment
+        #                 _msg = f'You are changing the {", ".join(changeList)} of an assigned nmrResidue.\n' \
+        #                        'This change will currently not be applied to the attached residue,\n' \
+        #                        'and it will become unassigned.\n\n' \
+        #                        'Do you want to continue?'
+        #
+        #                 # another button can be added as required
+        #                 options = OrderedDict((v, i) for i, v in enumerate(['Cancel', 'Ok']))
+        #                 buttons = list(options)
+        #                 _ok = showMulti(f'Edit NmrResidue {self.obj.id}', _msg, texts=buttons)
+        #
+        #                 if _ok == 'Temp':
+        #                     raise RuntimeWarning(f'Cannot change the {", ".join(changeList)} of an NmrResidue in an '
+        #                                          f'assigned NmrChain')
+        #
+        #                 elif _ok == 'Ok':
+        #                     self.obj.deassign()
+        #                     # assign to the same nmrResidue, includes changing just the residueType
+        #                     self.obj.moveToNmrChain(_chainPid,
+        #                                             # self.sequenceCode.getText(),
+        #                                             seqCode,
+        #                                             resType
+        #                                             )
+        #                 else:
+        #                     # cancel does nothing - keep the popup open
+        #                     return True
+        #
+        #             else:
+        #                 # assign to the same nmrResidue, includes changing just the residueType
+        #                 self.obj.moveToNmrChain(_chainPid,
+        #                                         # self.sequenceCode.getText(),
+        #                                         seqCode,
+        #                                         resType
+        #                                         )
+        #         else:
+        #             # fetch a new residue, sequenceCode has changed
+        #             self.obj = _nmrChain.fetchNmrResidue(seqCode,
+        #                                                 # self.sequenceCode.getText(),
+        #                                                  resType
+        #                                                  )
+        #         self.obj.comment = self.comment.getText()
+
+        # current values
+        curRes, curSeq = self.obj.residueType, self.obj.sequenceCode
+        #  new values
+        resType = re.sub(REMOVEPERCENT, '', self.residueType.getText())
+        resType = resType if len(resType) else None
+        seqCode = self.sequenceCode.getText()
+        # seqCode = seqCode if len(seqCode) else None
+        comment = self.comment.getText()
+
+        # if not deassign:
+        #     _chainId = self.nmrChain.getText()
+        #     _chainPid = 'NC:{}'.format(self.nmrChain.getText())
+        #
+        #     # create a new nmrChain as required
+        #     _nmrChain = self.project.fetchNmrChain(_chainId)
+        #
+        #     # find the existing nmrResidue
+        #     destNmrResidue = _getNmrResidue(_nmrChain,
+        #                                     seqCode,
+        #                                     resType if _nmrChain else None)
+        #
+        #     if destNmrResidue and (self.obj != destNmrResidue):
+        #         # move to an existing nmrResidue requires a merge
+        #         _ok = True
+        #         if not merge:
+        #             # popup warning if merge not specified
+        #             _msg = 'Cannot move NmrResidue to an existing NmrResidue without merging.\n\nDo you want to merge?'
+        #             _ok = showYesNoWarning(str(self.windowTitle()), _msg)
+        #
+        #         if not _ok:
+        #             # keep the popup open
+        #             return True
+        #
+        #         destNmrResidue.mergeNmrResidues(self.obj)
+        #         destNmrResidue.comment = comment
+        #
+        #     elif create or (self.obj != destNmrResidue):
+        #         # create new residue
+        #         self.obj = _nmrChain.fetchNmrResidue(seqCode, resType)
+        #         if comment != self.obj.comment:
+        #             self.obj.comment = comment
+        #         return
+
+        if not deassign:
             _chainId = self.nmrChain.getText()
             _chainPid = 'NC:{}'.format(self.nmrChain.getText())
 
             # create a new nmrChain as required
-            _nmrChain = self.project.fetchNmrChain(_chainId)
+            with notificationEchoBlocking():
+                _nmrChain = self.project.fetchNmrChain(_chainId)
 
             # find the existing nmrResidue
             destNmrResidue = _getNmrResidue(_nmrChain,
@@ -201,49 +285,48 @@ class NmrResidueEditPopup(AttributeEditorPopupABC):
                     return True
 
                 destNmrResidue.mergeNmrResidues(self.obj)
-                destNmrResidue.comment = self.comment.getText()
+                if comment != (self.obj.comment or None):
+                    self.obj.comment = comment
 
             else:
-                resType = re.sub(REMOVEPERCENT, '', self.residueType.getText())
-                if not create or (self.obj == destNmrResidue):
-                    if res := self.obj.residue:
-                        # check for assignment
-                        _msg = 'You are changing the residueType of an assigned nmrResidue.\n' \
+                errors = []
+                try:
+                    if resType != curRes:
+                        try:
+                            self.obj.residueType = resType
+                        except ValueError as err:
+                            errors.append(f'• {err}')
+                    if seqCode != curSeq:
+                        try:
+                            self.obj.sequenceCode = seqCode
+                        except ValueError as err:
+                            errors.append(f'• {err}')
+                except RuntimeError as err:
+                    if 'assigned' in str(err) and not errors:
+                        _msg = f'You are changing the Sequence Code/ResidueType of an assigned nmrResidue.\n' \
                                'This change will currently not be applied to the attached residue,\n' \
                                'and it will become unassigned.\n\n' \
                                'Do you want to continue?'
-
-                        # another button can be added as required
-                        options = OrderedDict((v, i) for i, v in enumerate(['Cancel', 'Ok']))
-                        buttons = list(options)
-                        _ok = showMulti(f'Edit NmrResidue {self.obj.id}', _msg, texts=buttons)
-
-                        if _ok == 'Temp':
-                            raise RuntimeWarning('Cannot change the residueType of an NmrResidue in an assigned NmrChain')
-
-                        elif _ok == 'Ok':
+                        _ok = showOkCancelWarning(str(self.windowTitle()), _msg)
+                        if _ok:
                             self.obj.deassign()
-                            # assign to the same nmrResidue, includes changing just the residueType
-                            self.obj.moveToNmrChain(_chainPid,
-                                                    self.sequenceCode.getText(),
-                                                    resType
-                                                    )
-                        else:
-                            # cancel does nothing - keep the popup open
-                            return True
-
+                            self.obj.residueType = resType
+                            self.obj.sequenceCode = seqCode
+                            if comment != self.obj.comment:
+                                self.obj.comment = comment
                     else:
-                        # assign to the same nmrResidue, includes changing just the residueType
-                        self.obj.moveToNmrChain(_chainPid,
-                                                self.sequenceCode.getText(),
-                                                resType
-                                                )
-                else:
-                    # fetch a new residue, sequenceCode has changed
-                    self.obj = _nmrChain.fetchNmrResidue(self.sequenceCode.getText(),
-                                                         resType
-                                                         )
-                self.obj.comment = self.comment.getText()
+                        errors.append(f'• {err}')
+
+                if errors:
+                    _msg = (f'Your current values raise the following error{"s" if len(errors) > 1 else ""}:\n\n' +
+                            '\n'.join(errors) +
+                            '\n\nCanceling all value changes')
+                    _ok = showWarning(str(self.windowTitle()), _msg)
+                    return True
+
+                elif comment != (self.obj.comment or None):
+                    self.obj.comment = comment
+
 
     def storeWidgetState(self):
         """Store the state of the checkBoxes between popups
@@ -298,7 +381,8 @@ class NmrResidueNewPopup(AttributeEditorPopupABC):
         _chainPid = 'NC:{}'.format(self.nmrChain.getText())
 
         # create a new nmrChain as required
-        _nmrChain = self.project.fetchNmrChain(_chainId)
+        with notificationEchoBlocking():
+            _nmrChain = self.project.fetchNmrChain(_chainId)
 
         # find the existing nmrResidue
         destNmrResidue = _getNmrResidue(_nmrChain,

@@ -5,8 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-17 15:38:10 +0000 (Fri, February 17, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2023-12-22 14:46:39 +0000 (Fri, December 22, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -233,6 +233,33 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
 
         return (self._leftPadding + value)
 
+    @staticmethod
+    def _mergeColors(color1, color2, weight1=0.5, weight2=0.5):
+        """
+        Merge two QColor instances by calculating the weighted average of their color components.
+
+        Parameters:
+        - color1: First QColor instance
+        - color2: Second QColor instance
+        - weight1: Weight for color1 (default is 0.5)
+        - weight2: Weight for color2 (default is 0.5)
+
+        Returns:
+        - Merged QColor instance
+        """
+        r = int(color1.red() * weight1 + color2.red() * weight2)
+        g = int(color1.green() * weight1 + color2.green() * weight2)
+        b = int(color1.blue() * weight1 + color2.blue() * weight2)
+        a = int(color1.alpha() * weight1 + color2.alpha() * weight2)
+
+        # Ensure the values are within the valid range (0-255)
+        r = max(0, min(255, r))
+        g = max(0, min(255, g))
+        b = max(0, min(255, b))
+        a = max(0, min(255, a))
+
+        return QtGui.QColor(r, g, b, a)
+
     def paint(self, painter, option, index):
         """Paint the contents of the cell.
         """
@@ -243,29 +270,40 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
         focus = (option.state & QtWidgets.QStyle.State_HasFocus)
         option.state = option.state & ~QtWidgets.QStyle.State_HasFocus
 
-        super().paint(painter, option, index)
-
-        # alternative method to add selection border to the focussed cell
-        if (brush := index.data(QtCore.Qt.BackgroundRole)) and (option.state & QtWidgets.QStyle.State_Selected):
+        if option.state & QtWidgets.QStyle.State_Selected:
             # fade the background and paint over the top of selected cell
             # - ensures that different coloured backgrounds are still visible
             # - does, however, modify the foreground colour :|
-            painter.setClipRect(option.rect)
-            brush.setAlphaF(0.20)
-            painter.setCompositionMode(painter.CompositionMode_SourceOver)
-            painter.fillRect(option.rect, brush)
+            if back := index.data(QtCore.Qt.BackgroundRole):
+                back = self._mergeColors(back, option.palette.color(QtGui.QPalette.Highlight), 0.18, 0.82)
+                option.palette.setColor(QtGui.QPalette.Highlight, back)
+            if fore := index.data(QtCore.Qt.ForegroundRole):
+                fore = self._mergeColors(fore, option.palette.color(QtGui.QPalette.HighlightedText), 0.5, 0.5)
+                option.palette.setColor(QtGui.QPalette.HighlightedText, fore)
 
-            if focus:
-                painter.setPen(self._focusPen)
-                painter.drawRect(option.rect)
+        super().paint(painter, option, index)
 
-            elif not focus and index.data(BORDER_ROLE):
-                # move the focus rectangle drawing to after, otherwise, alternative-background-color is used
-                painter.setPen(self._noFocusPen)
-                painter.setRenderHint(QtGui.QPainter.Antialiasing)
-                painter.drawRoundedRect(option.rect, 4, 4)
+        # alternative method to add selection border to the focussed cell
+        # if (option.state & QtWidgets.QStyle.State_Selected) and (brush := index.data(QtCore.Qt.BackgroundRole)):
+        #     # fade the background and paint over the top of selected cell
+        #     # - ensures that different coloured backgrounds are still visible
+        #     # - does, however, modify the foreground colour :|
+        #     painter.setClipRect(option.rect)
+        #     brush.setAlphaF(0.20)
+        #     painter.setCompositionMode(painter.CompositionMode_SourceOver)
+        #     painter.fillRect(option.rect, brush)
+        #
+        #     if focus:
+        #         painter.setPen(self._focusPen)
+        #         painter.drawRect(option.rect)
+        #
+        #     elif not focus and index.data(BORDER_ROLE):
+        #         # move the focus rectangle drawing to after, otherwise, alternative-background-color is used
+        #         painter.setPen(self._noFocusPen)
+        #         painter.setRenderHint(QtGui.QPainter.Antialiasing)
+        #         painter.drawRoundedRect(option.rect, 4, 4)
 
-        elif focus:
+        if focus:
             painter.setClipRect(option.rect)
             painter.setPen(self._focusPen)
             painter.drawRect(option.rect)

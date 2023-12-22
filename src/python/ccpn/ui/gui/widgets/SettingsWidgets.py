@@ -5,8 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-28 16:36:55 +0100 (Fri, July 28, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2023-12-22 14:46:39 +0000 (Fri, December 22, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -589,9 +589,9 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                 AXISASPECTRATIOS       : aspectRatios,
                 SYMBOLTYPE             : self.symbol.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
                 ANNOTATIONTYPE         : self.annotationsData.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
-                SYMBOLSIZE             : int(self.symbolSizePixelData.text()),
-                SYMBOLTHICKNESS        : int(self.symbolThicknessData.text()),
-                CONTOURTHICKNESS       : int(self.contourThicknessData.text()),
+                SYMBOLSIZE             : self.symbolSizePixelData.value(),
+                SYMBOLTHICKNESS        : self.symbolThicknessData.value(),
+                CONTOURTHICKNESS       : self.contourThicknessData.value(),
                 MULTIPLETANNOTATIONTYPE: self.multipletAnnotationData.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
                 MULTIPLETTYPE          : self.multipletSymbol.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
                 ALIASENABLED           : self.aliasEnabledData.isChecked(),
@@ -604,8 +604,8 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                 MULTIPLETLABELSENABLED : self.multipletLabelsEnabledData.isChecked(),
                 MULTIPLETARROWSENABLED : self.multipletArrowsEnabledData.isChecked(),
                 ARROWTYPES             : self.arrow.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
-                ARROWSIZE              : int(self.arrowSizeData.text()),
-                ARROWMINIMUM           : int(self.arrowMinimumData.text()),
+                ARROWSIZE              : self.arrowSizeData.value(),
+                ARROWMINIMUM           : self.arrowMinimumData.value(),
                 }
 
     def _aspectRatioModeChanged(self):

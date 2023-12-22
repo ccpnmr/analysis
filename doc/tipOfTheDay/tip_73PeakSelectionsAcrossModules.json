@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>When you select one or more Peaks in one module, they will also be selected in all the other modules where that Peak is present. So it is up to you whether you find it easier to select your Peaks in a Peak Table or in a SpectrumDisplay.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 1,
+  "contents": [
+    "./graphics/PeakSelectionsAcrossModules.png"
+  ]
+}

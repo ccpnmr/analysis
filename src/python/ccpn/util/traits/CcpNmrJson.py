@@ -867,9 +867,10 @@ class CcpNmrJson(TraitBase):
 
         try:
             data = json.loads(string)
-        except json.JSONDecodeError:
-            getLogger().warning('%s.fromJson: error decoding, retaining default values' % self.__class__.__name__)
-            return self
+        except json.JSONDecodeError as es:
+            txt = f'{self.__class__.__name__}.fromJson: error while decoding: {es}'
+            getLogger().warning(txt)
+            raise RuntimeError(txt)
 
         # check for updates
         try:

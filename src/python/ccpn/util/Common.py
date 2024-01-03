@@ -9,9 +9,9 @@ from __future__ import unicode_literals
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -20,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-17 20:43:48 +0100 (Tue, October 17, 2023) $"
-__version__ = "$Revision: 3.2.0.1 $"
+__dateModified__ = "$dateModified: 2024-01-03 16:37:07 +0000 (Wed, January 03, 2024) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -42,15 +42,12 @@ import collections
 from collections.abc import Iterable
 from itertools import islice
 from string import whitespace
+from contextlib import suppress
 
-# from ccpn.core.lib.AxisCodeLib import _axisCodeMapIndices
 from ccpn.util.OrderedSet import OrderedSet
-
 from ccpn.util import Constants
 from ccpn.util.decorators import singleton
 
-
-# from ccpn.util.isotopes import isotopeRecords
 
 # define a simple sentinel
 NOTHING = object()
@@ -95,16 +92,18 @@ WHITESPACE_AND_NULL = {'\x00', '\t', '\n', '\r', '\x0b', '\x0c'}
 
 
 def incrementName(name, split: str = '_'):
-    """Add '_1' to name or change suffix '_n' to '_(n+1)
+    """Add '_1' to name or change suffix '_n' to '_(n+1).
+    If name is only a number increment by 1
     """
     ll = name.rsplit(split, 1)
     if len(ll) == 2:
-        try:
+        with suppress(ValueError):
             ll[1] = str(int(ll[1]) + 1)
             return split.join(ll)
 
-        except ValueError:
-            pass
+    elif len(ll) == 1:
+        with suppress(ValueError):
+            return str(int(ll[0]) + 1)
 
     return name + split + '1'
 

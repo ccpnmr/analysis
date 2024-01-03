@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can extract the 1D slices of a Peak using the CCPN Macro <span style=%(purple)s>extractSliceAtPeakPosition</span>. Simply select your Peak, go to the <span style=%(purple)s>Macro</span> menu, <span style=%(purple)s>Run CCPN Macros</span> and <span style=%(purple)s>extractSliceAtPeakPosition</span>. The slices will be added as 1D Spectra in the <span style=%(purple)s>Spectra</span> section of the sidebar.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 1,
+  "contents": [
+    "./graphics/CCPNMacroExtractSliceAtPeakPosn.png"
+  ]
+}

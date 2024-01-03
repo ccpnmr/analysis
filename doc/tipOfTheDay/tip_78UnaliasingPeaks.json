@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can unalias peaks by selecting <span style=%(purple)s>Set Aliasing...</span> in the peak context/mouse menu. Select the corrected position from the drop-down menu and whether to navigate to the new position or not.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 1,
+  "contents": [
+    "./graphics/UnaliasingPeaks.png"
+  ]
+}

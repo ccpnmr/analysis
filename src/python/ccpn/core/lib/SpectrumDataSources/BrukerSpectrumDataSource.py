@@ -8,9 +8,9 @@ See SpectrumDataSourceABC for a description of the attributes and methods
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -18,29 +18,41 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:39 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-01-03 16:37:07 +0000 (Wed, January 03, 2024) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: gvuister $"
 __date__ = "$Date: 2020-11-20 10:28:48 +0000 (Fri, November 20, 2020) $"
+
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
-import os
-from typing import Sequence
+from difflib import get_close_matches
 from itertools import permutations, combinations_with_replacement
 
 from ccpn.util.Path import Path, aPath
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import flatten
 from ccpn.util.traits.CcpNmrTraits import CPath
+from ccpn.util.isotopes import DEFAULT_ISOTOPE_DICT
 import ccpn.core.lib.SpectrumLib as specLib
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
-from ccpn.framework.constants import NO_SUFFIX, ANY_SUFFIX
+from ccpn.framework.constants import NO_SUFFIX
+
+
+def _findClosestMatch(input_string, string_list):
+    # Set the number of desired matches (1 in this case, the closest match)
+    num_matches = 1
+
+    # Use get_close_matches to find the closest match
+    closest_match = get_close_matches(input_string, string_list, n=num_matches, cutoff=0.01)
+
+    # If a match is found, return it; otherwise, return None
+    return closest_match[0] if closest_match else None
 
 
 def _makeBrukerFileNames(dimensionCount) -> tuple:
@@ -58,8 +70,8 @@ def _makeBrukerFileNames(dimensionCount) -> tuple:
     _names = list(set(_second))
     _names.sort()
 
-    # creat in reverse order so that 'rrr' comes first
-    return tuple(f'{dimensionCount}' +''.join(_n) for _n in _names[::-1])
+    # create in reverse order so that 'rrr' comes first
+    return tuple(f'{dimensionCount}' + ''.join(_n) for _n in _names[::-1])
 
 
 class BrukerSpectrumDataSource(SpectrumDataSourceABC):
@@ -94,8 +106,9 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         (6, _makeBrukerFileNames(6)),
         (7, _makeBrukerFileNames(7)),
         (8, _makeBrukerFileNames(8)),
-    ])
-    _processedDataFiles = [f for f in flatten(_processedDataFilesDict.values())]  # all the possible processed data files as a list
+        ])
+    _processedDataFiles = [f for f in
+                           flatten(_processedDataFilesDict.values())]  # all the possible processed data files as a list
     _acqusFiles = 'acqus acqu2s acqu3s acqu4s acqu5s acqu6s acqu7s acqu8s'.split()
     _procFiles = 'procs proc2s proc3s proc4s proc5s proc6s proc7s proc8s'.split()
     _PDATA = 'pdata'
@@ -185,12 +198,12 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
 
     #=========================================================================================
 
-    _brukerRoot = CPath(default_value=None, allow_none=True).tag(info =
-                                        'an attribute to store the path to the Bruker root directory; used during parsing'
+    _brukerRoot = CPath(default_value=None, allow_none=True).tag(info=
+                                                                 'an attribute to store the path to the Bruker root directory; used during parsing'
                                                                  )
-    _pdataDir = CPath(default_value=None, allow_none=True).tag(info =
-                                        'an attribute to store the path to the Bruker pdata directory; used during parsing'
-                                                           )
+    _pdataDir = CPath(default_value=None, allow_none=True).tag(info=
+                                                               'an attribute to store the path to the Bruker pdata directory; used during parsing'
+                                                               )
 
     #=========================================================================================
 
@@ -209,9 +222,10 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         hasAcquFiles = len(path.globList('acqu*')) > 0
         pdata = path / self._PDATA
         return path is not None and path.exists() and path.is_dir() and \
-               ((pdata.exists() and pdata.is_dir()) or hasAcquFiles)
+            ((pdata.exists() and pdata.is_dir()) or hasAcquFiles)
 
-    def _hasBinaryData(self, path) -> bool:
+    @staticmethod
+    def _hasBinaryData(path) -> bool:
         """Return True if path contains  bruker binary data
         """
         if path is None:
@@ -247,7 +261,7 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         hasBrukerTopdir = self._isBrukerTopDir(path.parent.parent)
         isPdata = path.parent.stem == self._PDATA
         return path.exists() and path.is_dir() and isPdata and hasBrukerTopdir and \
-               (hasProcFiles or self._hasBinaryData(path))
+            (hasProcFiles or self._hasBinaryData(path))
 
     def _getDimensionality(self):
         """Return dimensionality from proc files in self._pdataDir
@@ -295,7 +309,7 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         if self._pdataDir is None or not self._pdataDir.exists():
             return None
         else:
-            return self._pdataDir /  self._procFiles[0]
+            return self._pdataDir / self._procFiles[0]
 
     def nameFromPath(self):
         """Return a name derived from _brukerRoot and pdataDir
@@ -322,11 +336,11 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
 
         # acqu files
         for _p in self._acqusFiles[0:self.dimensionCount]:
-            result.append( self._brukerRoot / _p )
+            result.append(self._brukerRoot / _p)
 
         # proc files:
         for _p in self._procFiles[0:self.dimensionCount]:
-            result.append( self._pdataDir / _p )
+            result.append(self._pdataDir / _p)
         return result
 
     def copyFiles(self, destinationDirectory, overwrite=False) -> list:
@@ -340,7 +354,7 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
             raise ValueError(f'"{_destination}" is not a valid directory')
 
         _dir, _base, _suffix = self._brukerRoot.split3()
-        result = self._brukerRoot.copyDir(_destination / _base, overwrite=overwrite )
+        result = self._brukerRoot.copyDir(_destination / _base, overwrite=overwrite)
         return [result]
 
     def setPath(self, path, checkSuffix=False):
@@ -539,19 +553,24 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 self.pointCounts[dimIndx] = int(dimDict['SI'])
                 if self.dimensionTypes[dimIndx] == specLib.DIMENSION_TIME:
                     tdeff = int(dimDict['TDeff'])
-                    if tdeff > 0 and tdeff < self.pointCounts[dimIndx]:
+                    if 0 < tdeff < self.pointCounts[dimIndx]:
                         self.pointCounts[dimIndx] = tdeff
 
                 self.blockSizes[dimIndx] = int(dimDict['XDIM'])
                 if self.blockSizes[dimIndx] == 0:
                     self.blockSizes[dimIndx] = self.pointCounts[dimIndx]
                 else:
-                    # for 1D data blockSizes can be > numPoints, which is wrongaaaaaaaaa
-                    # (comment from orginal V2-based code)
+                    # for 1D data blockSizes can be > numPoints, which is wrong
+                    # (comment from original V2-based code)
                     self.blockSizes[dimIndx] = min(self.blockSizes[dimIndx], self.pointCounts[dimIndx])
 
-                self.isotopeCodes[dimIndx] = dimDict.get('AXNUC')
-                self.axisLabels[dimIndx] = dimDict.get('AXNAME')
+                # find the closest compatible isotopeCode
+                _axNuc = dimDict.get('AXNUC', '').replace(' ', '_')  # remove whitespace
+                axNuc = _findClosestMatch(_axNuc, DEFAULT_ISOTOPE_DICT.values()) or _axNuc
+                if _axNuc not in DEFAULT_ISOTOPE_DICT.values():
+                    getLogger().warning(f'axisCode {_axNuc!r} not found - using closest replacement {axNuc}')
+                self.isotopeCodes[dimIndx] = axNuc
+                self.axisLabels[dimIndx] = dimDict.get('AXNAME', '').replace(' ', '_')
 
                 # SW_p is in Hz; from the procs file, likely denotes "SW_processed", not "SW_ppm"
                 # SW_p can be zero in topspin 4.1.4 for time domain dimensions
@@ -577,7 +596,7 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 self.spectrometerFrequencies[dimIndx] = sf
 
                 self.referenceValues[dimIndx] = float(dimDict.get('OFFSET', 0.0))
-                self.referencePoints[dimIndx] = float(dimDict.get('refPoint', 1.0)) # CCPN first point is defined as 1
+                self.referencePoints[dimIndx] = float(dimDict.get('refPoint', 1.0))  # CCPN first point is defined as 1
                 # origNumPoints[i] = int(dimDict.get('$FTSIZE', 0))
                 # pointOffsets[i] = int(dimDict.get('$STSR', 0))
                 self.phases0[dimIndx] = float(dimDict.get('PHC0', 0.0))
@@ -617,6 +636,7 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
 
             self.procs.append(_params)
 
+
 # Register this format
 BrukerSpectrumDataSource._registerFormat()
 
@@ -624,7 +644,8 @@ import locale
 import io
 from nmrglue.fileio.bruker import parse_jcamp_line
 
-def read_jcamp(filename:str, encoding:str = locale.getpreferredencoding()) -> dict:
+
+def read_jcamp(filename: str, encoding: str = locale.getpreferredencoding()) -> dict:
     """
     Read a Bruker JCAMP-DX file into a dictionary.
 
@@ -659,11 +680,11 @@ def read_jcamp(filename:str, encoding:str = locale.getpreferredencoding()) -> di
     with io.open(filename, 'r', encoding=encoding, errors='replace') as f:
         endOfFile = False
         lineIndex = 0
-        while not endOfFile:     # loop until end of file is found
+        while not endOfFile:  # loop until end of file is found
 
             lineIndex += 1
-            line = f.readline().rstrip()    # read a line
-            if line == '':      # end of file found
+            line = f.readline().rstrip()  # read a line
+            if line == '':  # end of file found
                 endOfFile = True
                 continue
 
@@ -687,3 +708,22 @@ def read_jcamp(filename:str, encoding:str = locale.getpreferredencoding()) -> di
                 getLogger().warning("%s (line:%d): Extraneous %r" % (filename, lineIndex, line))
 
     return dic
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# _main - quick check for closest match to an isotope code
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+def _main():
+    # Example usage:
+    word_to_match = "   _1  5  n"
+    closest_match = _findClosestMatch(word_to_match, DEFAULT_ISOTOPE_DICT.values())
+
+    if closest_match:
+        print(f"The closest match to '{word_to_match}' is: {closest_match}")
+    else:
+        print(f"No close match found for '{word_to_match}' in the list.")
+
+
+if __name__ == '__main__':
+    _main()

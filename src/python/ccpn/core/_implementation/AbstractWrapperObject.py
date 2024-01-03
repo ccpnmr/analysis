@@ -4,9 +4,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-11 18:55:44 +0100 (Wed, October 11, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-01-03 12:25:09 +0000 (Wed, January 03, 2024) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,28 +27,24 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import functools
+import traceback
 import typing
 import re
-from contextlib import contextmanager
-from collections import OrderedDict, defaultdict
+from collections import OrderedDict
 from copy import deepcopy
-
 import pandas as pd
-from decorator import decorator
 
+from ccpnmodel.ccpncore.api.memops import Implementation as ApiImplementation
 import ccpn.core._implementation.resetSerial
 from ccpn.core._implementation.CoreModel import CoreModel
 from ccpn.core._implementation.Updater import Updater, \
     UPDATE_POST_OBJECT_INITIALISATION, UPDATE_POST_PROJECT_INITIALISATION, \
     UPDATE_PRE_OBJECT_INITIALISATION
-
 from ccpn.core.lib import Pid
-
-from ccpnmodel.ccpncore.api.memops import Implementation as ApiImplementation
 from ccpn.core.lib.ContextManagers import deleteObject, notificationBlanking, \
     apiNotificationBlanking, ccpNmrV3CoreSetter
 from ccpn.core.lib.Notifiers import NotifierBase
-from ccpn.framework.Version import VersionString, applicationVersion
+from ccpn.framework.Version import VersionString
 from ccpn.framework.Application import getApplication
 from ccpn.util import Common as commonUtil
 from ccpn.util.decorators import logCommand
@@ -840,7 +836,8 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         while len(objsToBeChecked) > 0:
             obj = objsToBeChecked.pop()
             if obj:
-                obj._checkDelete(apiObjectlist, objsToBeChecked, linkCounter, topObjectsToCheck)  # This builds the list/set
+                obj._checkDelete(apiObjectlist, objsToBeChecked, linkCounter,
+                                 topObjectsToCheck)  # This builds the list/set
 
         for topObjectToCheck in topObjectsToCheck:
             if (not (topObjectToCheck.__dict__.get('isModifiable'))):
@@ -1010,7 +1007,8 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
                     except RuntimeError as es:
                         _text = 'Error restoring api-child %r of %s (%s)' % (apiObj.qualifiedName, self, es)
                         getLogger().warning(_text)
-                        # raise RuntimeError(_text)
+                        if app and app._isInDebugMode:
+                            print(traceback.print_exc())
 
     def _postRestore(self):
         """Handle post-initialising children after all children have been restored
@@ -1505,7 +1503,9 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
                         if not i.startswith('_'):
                             od[i] = att
             except Exception as e:
-                getLogger().warning('Potential error for the property %s in creating dictionary from object: %s . Error: %s' % (i, self, e))
+                getLogger().warning(
+                    'Potential error for the property %s in creating dictionary from object: %s . Error: %s' % (
+                    i, self, e))
         return od
 
     def getAsDataFrame(self) -> pd.DataFrame:

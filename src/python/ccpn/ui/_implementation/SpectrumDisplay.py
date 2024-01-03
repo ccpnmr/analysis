@@ -4,9 +4,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 14:29:32 +0100 (Wed, June 28, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-01-03 12:49:26 +0000 (Wed, January 03, 2024) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -577,7 +577,10 @@ class SpectrumDisplay(AbstractWrapperObject):
         if spectrum.dimensionCount > self.dimensionCount:
             raise RuntimeError(f'Cannot display {spectrum} onto {self}; dimensionality mismatch')
 
-        spectrumAxisCodes = spectrum._mapAxisCodes(self.axisCodes)[:spectrum.dimensionCount]
+        try:
+            spectrumAxisCodes = spectrum._mapAxisCodes(self.axisCodes)[:spectrum.dimensionCount]
+        except Exception as es:
+            raise RuntimeError(f'Cannot display {spectrum} on {self}; incompatible axisCodes') from es
         if None in spectrumAxisCodes:
             raise RuntimeError(f'Cannot display {spectrum} on {self}; incompatible axisCodes')
 

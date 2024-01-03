@@ -4,9 +4,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2023-12-22 14:21:45 +0000 (Fri, December 22, 2023) $"
+__dateModified__ = "$dateModified: 2024-01-03 13:31:05 +0000 (Wed, January 03, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -435,7 +435,8 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
             - Whitespace: space, tab, linefeed, return, formfeed, and vertical tab
             - Empty: '' or ""
             - None: None
-            - Limited Chars: Allowable characters are abcdefghijklmnopqrstuvwxyz upper or lower, 0123456789, @ and, %
+            - Limited Chars: Allowable characters are abcdefghijklmnopqrstuvwxyz upper or lower,
+              0123456789, @, %, + and, -
         """
         if value is None and not allowNone:
             raise ValueError(f'{cls.__name__}: None not allowed for {attribName!r}')
@@ -454,8 +455,10 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
             if not allowWhitespace and commonUtil.contains_whitespace(value):
                 raise ValueError(f'{cls.__name__}: Whitespace not allowed in {attribName!r}; got {value!r}')
 
-            if limitChars and not set(value).issubset(set(string.ascii_letters) | set(string.digits) | set('@%')):
-                raise ValueError(f'{cls.__name__}: {attribName} should only contain alphanumeric characters and @ or %')
+            if limitChars and not set(value).issubset(set(string.ascii_letters) | set(string.digits) | set('@%-+')):
+                raise ValueError(f'{cls.__name__}: {attribName} should only contain alphanumeric characters and'
+                                 f' @, %, + or -')
+
 
     # @staticmethod
     # def _nextAvailableName(cls, project):

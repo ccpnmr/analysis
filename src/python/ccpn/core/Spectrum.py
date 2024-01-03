@@ -43,9 +43,9 @@ from __future__ import annotations  # pycharm still highlights as errors
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -54,13 +54,14 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-02 15:52:58 +0000 (Thu, November 02, 2023) $"
+__dateModified__ = "$dateModified: 2024-01-03 17:02:38 +0000 (Wed, January 03, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
+
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -85,25 +86,22 @@ from ccpn.core.lib.SpectrumLib import _includeInDimensionalCopy, _includeInCopy,
     checkSpectrumPropertyValue, _setDefaultAxisOrdering, MAXALIASINGRANGE
 
 from ccpn.core.lib.ContextManagers import \
-    newObject, deleteObject, ccpNmrV3CoreUndoBlock, \
-    undoStackBlocking, renameObject, undoBlock, notificationBlanking, \
+    newObject, ccpNmrV3CoreUndoBlock, \
+    undoStackBlocking, renameObject, undoBlock, \
     ccpNmrV3CoreSetter, inactivity, undoBlockWithoutSideBar, notificationEchoBlocking
 
-from ccpn.core.lib.DataStore import DataStore, DataStoreTrait
+from ccpn.core.lib.DataStore import DataStore
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC, getDataFormats
 from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
 from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumDataSource
-from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerTrait
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatch
 from ccpn.framework.PathsAndUrls import CCPN_STATE_DIRECTORY, CCPN_SPECTRA_DIRECTORY
-from ccpn.framework.Application import getApplication
 
 from ccpn.util.Constants import SCALETOLERANCE
-from ccpn.util.Common import isIterable, _getObjectsByPids
+from ccpn.util.Common import isIterable
 from ccpn.util.Logging import getLogger
-from ccpn.util.decorators import logCommand, singleton
+from ccpn.util.decorators import logCommand
 from ccpn.util.Path import Path, aPath
-from ccpn.util.OrderedSet import OrderedSet
 
 
 # defined here too as imported from Spectrum throughout the code base
@@ -1213,7 +1211,8 @@ class Spectrum(AbstractWrapperObject):
             if expDim is None:
                 result.append(None)
             else:
-                referenceExperimentDimension = (expDim.ccpnInternalData and expDim.ccpnInternalData.get('expDimToRefExpDim')) or None
+                referenceExperimentDimension = (expDim.ccpnInternalData and expDim.ccpnInternalData.get(
+                        'expDimToRefExpDim')) or None
                 result.append(referenceExperimentDimension)
 
         return tuple(result)
@@ -1359,7 +1358,8 @@ class Spectrum(AbstractWrapperObject):
         newSubs = self.project.getObjectsByPids(substances, objectTypes=(Substance, str))
 
         # remember the previous pids
-        oldSubs = set(self.project.getByPids(self._getInternalParameter(self._REFERENCESUBSTANCES) or []))  # don't remove current pids
+        oldSubs = set(self.project.getByPids(
+                self._getInternalParameter(self._REFERENCESUBSTANCES) or []))  # don't remove current pids
 
         # set the new pids
         self._setInternalParameter(self._REFERENCESUBSTANCES, [su.pid for su in newSubs])
@@ -1613,7 +1613,8 @@ class Spectrum(AbstractWrapperObject):
                     dim1, dim2, transferType, isIndirect = tt
                     expDimRefs = (mainExpDimRefs[dim1 - 1], mainExpDimRefs[dim2 - 1])
                 except Exception:
-                    raise ValueError(f"Attempt to set incorrect magnetisationTransfer value {tt} in spectrum {self.pid}")
+                    raise ValueError(
+                            f"Attempt to set incorrect magnetisationTransfer value {tt} in spectrum {self.pid}")
 
                 apiExperiment.newExpTransfer(expDimRefs=expDimRefs, transferType=transferType,
                                              isDirect=(not isIndirect))
@@ -2211,7 +2212,8 @@ class Spectrum(AbstractWrapperObject):
             newRanges = list(aliasRanges[0])
             for ii, alias in enumerate(aliasRanges[1:]):
                 if alias is not None:
-                    newRanges = tuple((min(minL, minR), max(maxL, maxR)) for (minL, maxL), (minR, maxR) in zip(alias, newRanges))
+                    newRanges = tuple(
+                            (min(minL, minR), max(maxL, maxR)) for (minL, maxL), (minR, maxR) in zip(alias, newRanges))
 
             return newRanges
 
@@ -2823,7 +2825,8 @@ class Spectrum(AbstractWrapperObject):
         :param path:
         :return: None
         """
-        self._extractToFile(axisCodes=self.axisCodes, position=[1] * self.dimensionCount, path=path, dataFormat='Hdf5', tag='toHdf5')
+        self._extractToFile(axisCodes=self.axisCodes, position=[1] * self.dimensionCount, path=path, dataFormat='Hdf5',
+                            tag='toHdf5')
 
     def _extractToFile(self, axisCodes, position, path, dataFormat, tag):
         """Local helper routine to prevent code duplication across extractSliceToFile, extractPlaneToFile,
@@ -2921,9 +2924,11 @@ class Spectrum(AbstractWrapperObject):
                 if not any(pk in pkList.peaks for pkList in self.peakLists):
                     raise ValueError('Spectrum.setPeakAliasing: peaks must belong to one of spectrum.peakLists')
             if not isinstance(aliasingIndexes, (tuple, list)) and len(aliasingIndexes) == self.dimensionCount:
-                raise ValueError(f'Spectrum.setPeakAliasing: aliasingIndexes must be tuple/list of length {self.dimensionCount}')
+                raise ValueError(
+                        f'Spectrum.setPeakAliasing: aliasingIndexes must be tuple/list of length {self.dimensionCount}')
             if not all(-MAXALIASINGRANGE <= aa <= MAXALIASINGRANGE for aa in aliasingIndexes):
-                raise ValueError(f'Spectrum.setPeakAliasing: aliasingIndexes must be in range [{-MAXALIASINGRANGE}, {MAXALIASINGRANGE}]')
+                raise ValueError(
+                        f'Spectrum.setPeakAliasing: aliasingIndexes must be in range [{-MAXALIASINGRANGE}, {MAXALIASINGRANGE}]')
             if not isinstance(updateSpectrumAliasingIndexes, bool):
                 raise ValueError('Spectrum.setPeakAliasing: updateSpectrumAliasingIndexes must be True/False')
 
@@ -2935,7 +2940,8 @@ class Spectrum(AbstractWrapperObject):
 
                 newLimits = [(min(fold) + (min(*aa, newAl) * width),
                               max(fold) + (max(*aa, newAl) * width))
-                             for dim, (aa, fold, width, newAl) in enumerate(zip(aliasInds, folding, widths, aliasingIndexes))]
+                             for dim, (aa, fold, width, newAl) in
+                             enumerate(zip(aliasInds, folding, widths, aliasingIndexes))]
                 self.aliasingLimits = newLimits
 
             for pk in pks:
@@ -2955,7 +2961,8 @@ class Spectrum(AbstractWrapperObject):
         if len(axisCodes) != 2:
             raise ValueError('Invalid axisCodes %s, len should be 2' % axisCodes)
 
-        axisDims = self.getByAxisCodes('dimensions', axisCodes, exactMatch=exactMatch)  # check and optionally expand axisCodes
+        axisDims = self.getByAxisCodes('dimensions', axisCodes,
+                                       exactMatch=exactMatch)  # check and optionally expand axisCodes
         if axisDims[0] == axisDims[1]:
             raise ValueError('Invalid axisCodes %s; identical' % axisCodes)
 
@@ -2997,7 +3004,8 @@ class Spectrum(AbstractWrapperObject):
         PSEUDO_AXIS_TYPE = specLib.DIMENSION_TIME
 
         # we first establish what the "Pseudo" dimension is; there should only one:
-        _tCodes = [(dim, ac) for dimIndex, ac, dim in self.dimensionTriples if self.dimensionTypes[dimIndex] == PSEUDO_AXIS_TYPE]
+        _tCodes = [(dim, ac) for dimIndex, ac, dim in self.dimensionTriples if
+                   self.dimensionTypes[dimIndex] == PSEUDO_AXIS_TYPE]
         if len(_tCodes) != 1:
             getLogger().debug(f'There should be exactly one pseudo/time dimension; instead they are: {_tCodes}')
             return 0
@@ -3018,7 +3026,8 @@ class Spectrum(AbstractWrapperObject):
         from ccpn.core.SpectrumGroup import SpectrumGroup
 
         if spectrumGroup is not None and not isinstance(spectrumGroup, SpectrumGroup):
-            raise ValueError(f'Invalid spectrumGroup ({spectrumGroup}, type {type(spectrumGroup)}); expected SpectrumGroup instance')
+            raise ValueError(
+                    f'Invalid spectrumGroup ({spectrumGroup}, type {type(spectrumGroup)}); expected SpectrumGroup instance')
 
         if pathTemplate is None:
             pathTemplate = str(self.path.parent / f'{self.name}_%003d')
@@ -3029,7 +3038,8 @@ class Spectrum(AbstractWrapperObject):
 
         # we get the "Pseudo" dimension; there should only one:
         if (pseudoDimension := self._getPseudoDimension()) == 0:
-            raise RuntimeError(f'There should be exactly one pseudo/time dimension; instead they are: {self.dimensionTypes}')
+            raise RuntimeError(
+                    f'There should be exactly one pseudo/time dimension; instead they are: {self.dimensionTypes}')
         # dims and positions are 1-based; python lists/tuples are zero-based; hence pseudoDimensionIndex
         pseudoDimensionIndex = pseudoDimension - 1
 
@@ -3142,7 +3152,8 @@ class Spectrum(AbstractWrapperObject):
             try:
                 if not _attr.startswith(('_', '__')):
                     vv = getattr(self, _attr)
-                    if isinstance(vv, (list, tuple)) and len(vv) == self.dimensionCount:  # skip non-dimensional properties
+                    if isinstance(vv, (list, tuple)) and \
+                            len(vv) == self.dimensionCount:  # skip non-dimensional properties
                         if isinstance(vv[0], (str, float, int)):  #skip objects
                             for dim in self.dimensionIndices:
                                 df.loc[0, f'{_attr}_{str(dim)}'] = vv[dim]  # write to df.
@@ -3710,7 +3721,8 @@ class Spectrum(AbstractWrapperObject):
         return _newSpectrumHit(self, substanceName=substanceName, pointNumber=pointNumber,
                                pseudoDimensionNumber=pseudoDimensionNumber, pseudoDimension=pseudoDimension,
                                figureOfMerit=figureOfMerit, meritCode=meritCode, normalisedChange=normalisedChange,
-                               isConfirmed=isConfirmed, concentration=concentration, concentrationError=concentrationError,
+                               isConfirmed=isConfirmed, concentration=concentration,
+                               concentrationError=concentrationError,
                                concentrationUnit=concentrationUnit, comment=comment, **kwds)
 
     #-----------------------------------------------------------------------------------------
@@ -3718,8 +3730,13 @@ class Spectrum(AbstractWrapperObject):
     #-----------------------------------------------------------------------------------------
 
     def __str__(self):
-        return '<%s (%s); %dD (%s)>' % (self.pid, self.dataFormat,
-                                        self.dimensionCount, ','.join(self.axisCodes))
+        try:
+            # this is not very nice
+            # - need to find why __str__ is requested before the object is fully instantiated
+            return '<%s (%s); %dD (%s)>' % (self.pid, self.dataFormat,
+                                            self.dimensionCount, ','.join(self.axisCodes))
+        except Exception:
+            return '<%s (%s); %dD (%s)>' % (self.pid, '-', 0, '-')
 
     def _infoString(self, includeDimensions=False):
         """Return info string about self, optionally including dimensional
@@ -3916,7 +3933,8 @@ def _newEmptySpectrum(project: Project, isotopeCodes: Sequence[str], dimensionCo
     return spectrum
 
 
-def _newHdf5Spectrum(project: Project, isotopeCodes: Sequence[str], name: str = 'hdf5Spectrum', path=None, **parameters) -> Spectrum:
+def _newHdf5Spectrum(project: Project, isotopeCodes: Sequence[str], name: str = 'hdf5Spectrum', path=None,
+                     **parameters) -> Spectrum:
     """Creation of new hdf5 Spectrum (without data) at path (autogenerated temporary path when None);
     :return: Spectrum instance or None on error
     """

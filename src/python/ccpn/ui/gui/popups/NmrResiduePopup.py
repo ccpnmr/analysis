@@ -1,9 +1,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -12,13 +12,14 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2023-12-22 14:23:54 +0000 (Fri, December 22, 2023) $"
+__dateModified__ = "$dateModified: 2024-01-03 13:30:35 +0000 (Wed, January 03, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
+
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -44,7 +45,8 @@ def _getResidueTypeProb(self, currentNmrResidue):
     """Get the probabilities of the residueTypes
     """
     # ignore if no chemical shifts or a <new> nmrResidue - which chemicalShiftList?
-    if self.project.chemicalShiftLists and len(self.project.chemicalShiftLists) > 0 and not isinstance(currentNmrResidue, _attribContainer):
+    if self.project.chemicalShiftLists and len(self.project.chemicalShiftLists) > 0 and not isinstance(
+            currentNmrResidue, _attribContainer):
         predictions = getNmrResiduePrediction(currentNmrResidue, self.project.chemicalShiftLists[0])
         preds1 = [' '.join([x[0].upper(), x[1]]) for x in predictions]  # if not currentNmrResidue.residueType]
         preds1 = list(OrderedSet(preds1))
@@ -93,8 +95,10 @@ class NmrResidueEditPopup(AttributeEditorPopupABC):
                   ('NmrChain', PulldownListCompoundWidget, getattr, setattr, _getNmrChainList, None, {}),
                   ('Sequence Code', EntryCompoundWidget, getattr, setattr, None, None, {}),
                   # ('Create New', CheckBoxCompoundWidget, None, None, None, None, {'checked': False, 'checkable':True}),
-                  ('Residue Type', PulldownListCompoundWidget, getattr, setattr, _getResidueTypeProb, _checkNmrResidue, {}),
-                  ('Merge to Existing', CheckBoxCompoundWidget, None, None, None, None, {'checked': False, 'checkable':True}),
+                  ('Residue Type', PulldownListCompoundWidget, getattr, setattr, _getResidueTypeProb, _checkNmrResidue,
+                   {}),
+                  ('Merge to Existing', CheckBoxCompoundWidget, None, None, None, None,
+                   {'checked': False, 'checkable': True}),
                   # ('Deassign', CheckBoxCompoundWidget, None, None, None, None, {'checked': False, 'checkable':True}),
                   ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
                   ]
@@ -111,7 +115,9 @@ class NmrResidueEditPopup(AttributeEditorPopupABC):
         CCPN-Internal to be called at the end of __init__ - required as may need to insert more objects into dialog
         """
         # add a new button to de-assign/disconnect nmrResidue
-        self.setUserButton(callback=self._userCallback, tipText='Deassign the nmrResidue and return to the default nmrChain NC:@-', text='Deassign', enabled=True)
+        self.setUserButton(callback=self._userCallback,
+                           tipText='Deassign the nmrResidue and return to the default nmrChain NC:@-', text='Deassign',
+                           enabled=True)
 
         super()._postInit()
 
@@ -160,11 +166,42 @@ class NmrResidueEditPopup(AttributeEditorPopupABC):
         """
 
         merge = self.mergetoExisting.isChecked()
-        create = False # self.createNew.isChecked()
-        deassign = False # self.deassign.isChecked()
+        create = False  # self.createNew.isChecked()
+        deassign = False  # self.deassign.isChecked()
 
-
-
+        # if not deassign:
+        #     _chainId = self.nmrChain.getText()
+        #     _chainPid = 'NC:{}'.format(self.nmrChain.getText())
+        #
+        #     # create a new nmrChain as required
+        #     _nmrChain = self.project.fetchNmrChain(_chainId)
+        #
+        #     # find the existing nmrResidue
+        #     destNmrResidue = _getNmrResidue(_nmrChain,
+        #                                     seqCode,
+        #                                     resType if _nmrChain else None)
+        #
+        #     if destNmrResidue and (self.obj != destNmrResidue):
+        #         # move to an existing nmrResidue requires a merge
+        #         _ok = True
+        #         if not merge:
+        #             # popup warning if merge not specified
+        #             _msg = 'Cannot move NmrResidue to an existing NmrResidue without merging.\n\nDo you want to merge?'
+        #             _ok = showYesNoWarning(str(self.windowTitle()), _msg)
+        #
+        #         if not _ok:
+        #             # keep the popup open
+        #             return True
+        #
+        #         destNmrResidue.mergeNmrResidues(self.obj)
+        #         destNmrResidue.comment = comment
+        #
+        #     elif create or (self.obj != destNmrResidue):
+        #         # create new residue
+        #         self.obj = _nmrChain.fetchNmrResidue(seqCode, resType)
+        #         if comment != self.obj.comment:
+        #             self.obj.comment = comment
+        #         return
         #         #     else:
         #
         #         changeList = []
@@ -220,44 +257,12 @@ class NmrResidueEditPopup(AttributeEditorPopupABC):
         curRes, curSeq = self.obj.residueType, self.obj.sequenceCode
         #  new values
         resType = re.sub(REMOVEPERCENT, '', self.residueType.getText())
-        resType = resType if len(resType) else None
         seqCode = self.sequenceCode.getText()
-        # seqCode = seqCode if len(seqCode) else None
         comment = self.comment.getText()
 
-        # if not deassign:
-        #     _chainId = self.nmrChain.getText()
-        #     _chainPid = 'NC:{}'.format(self.nmrChain.getText())
-        #
-        #     # create a new nmrChain as required
-        #     _nmrChain = self.project.fetchNmrChain(_chainId)
-        #
-        #     # find the existing nmrResidue
-        #     destNmrResidue = _getNmrResidue(_nmrChain,
-        #                                     seqCode,
-        #                                     resType if _nmrChain else None)
-        #
-        #     if destNmrResidue and (self.obj != destNmrResidue):
-        #         # move to an existing nmrResidue requires a merge
-        #         _ok = True
-        #         if not merge:
-        #             # popup warning if merge not specified
-        #             _msg = 'Cannot move NmrResidue to an existing NmrResidue without merging.\n\nDo you want to merge?'
-        #             _ok = showYesNoWarning(str(self.windowTitle()), _msg)
-        #
-        #         if not _ok:
-        #             # keep the popup open
-        #             return True
-        #
-        #         destNmrResidue.mergeNmrResidues(self.obj)
-        #         destNmrResidue.comment = comment
-        #
-        #     elif create or (self.obj != destNmrResidue):
-        #         # create new residue
-        #         self.obj = _nmrChain.fetchNmrResidue(seqCode, resType)
-        #         if comment != self.obj.comment:
-        #             self.obj.comment = comment
-        #         return
+        # empty string catcher - currently unused
+        # resType = resType if len(resType) else None
+        # seqCode = seqCode if len(seqCode) else None
 
         if not deassign:
             _chainId = self.nmrChain.getText()
@@ -270,7 +275,8 @@ class NmrResidueEditPopup(AttributeEditorPopupABC):
             # find the existing nmrResidue
             destNmrResidue = _getNmrResidue(_nmrChain,
                                             self.sequenceCode.getText(),
-                                            re.sub(REMOVEPERCENT, '', self.residueType.getText())) if _nmrChain else None
+                                            re.sub(REMOVEPERCENT, '',
+                                                   self.residueType.getText())) if _nmrChain else None
 
             if destNmrResidue and (self.obj != destNmrResidue):
                 # move to an existing nmrResidue requires a merge
@@ -285,8 +291,9 @@ class NmrResidueEditPopup(AttributeEditorPopupABC):
                     return True
 
                 destNmrResidue.mergeNmrResidues(self.obj)
-                if comment != (self.obj.comment or None):
-                    self.obj.comment = comment
+
+                if comment is not None:
+                    destNmrResidue.comment = comment
 
             else:
                 errors = []
@@ -327,7 +334,6 @@ class NmrResidueEditPopup(AttributeEditorPopupABC):
                 elif comment != (self.obj.comment or None):
                     self.obj.comment = comment
 
-
     def storeWidgetState(self):
         """Store the state of the checkBoxes between popups
         """
@@ -366,7 +372,8 @@ class NmrResidueNewPopup(AttributeEditorPopupABC):
     klass = NmrResidue
     attributes = [('NmrChain', PulldownListCompoundWidget, getattr, setattr, _getNmrChainList, None, {}),
                   ('Sequence Code', EntryCompoundWidget, getattr, setattr, None, None, {}),
-                  ('Residue Type', PulldownListCompoundWidget, getattr, setattr, _getResidueTypeProb, _checkNmrResidue, {}),
+                  ('Residue Type', PulldownListCompoundWidget, getattr, setattr, _getResidueTypeProb, _checkNmrResidue,
+                   {}),
                   ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
                   ]
 

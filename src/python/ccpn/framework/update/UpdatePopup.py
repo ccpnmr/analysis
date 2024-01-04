@@ -4,9 +4,9 @@ Module Documentation Here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-30 10:35:39 +0000 (Thu, November 30, 2023) $"
-__version__ = "$Revision: 3.2.0.1 $"
+__dateModified__ = "$dateModified: 2024-01-04 16:36:34 +0000 (Thu, January 04, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -44,7 +44,7 @@ from ccpn.ui.gui.widgets.Font import getFontHeight
 from ccpn.ui.gui.lib.DynamicSizeAdjust import dynamicSizeAdjust
 from ccpn.util.Update import UpdateAgent, FAIL_UNEXPECTED
 from ccpn.util.Common import isWindowsOS
-from ccpn.framework.Version import applicationVersion, VersionString
+from ccpn.framework.Version import applicationVersion, VersionString, _lastApplicationVersion
 from ccpn.framework.PathsAndUrls import ccpnBinPath, ccpnBatchPath
 
 
@@ -362,7 +362,7 @@ class UpdatePopup(CcpnDialogMainWidget):
 
             for version, rec in reversed(sorted(records.items(), key=lambda dd: VersionString(dd[0]))):
                 # make a simple header for each update section
-                if VersionString(version) < applicationVersion:
+                if not(applicationVersion <= VersionString(version) <= _lastApplicationVersion):
                     # skip updates that are too old
                     continue
 

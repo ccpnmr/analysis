@@ -4,9 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-28 12:50:21 +0000 (Tue, November 28, 2023) $"
+__dateModified__ = "$dateModified: 2024-01-05 15:02:25 +0000 (Fri, January 05, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -91,6 +91,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
     FIXEDHEIGHT = True
     ENABLEICONS = False
     DONTSHOWENABLED = False
+    FORCEWIDTHTOTITLE = True
     _defaultResponse = None
 
     EDITMODE = True
@@ -210,20 +211,27 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         """
         # get the initial size as a QSize
         try:
-            size = self._size if isinstance(self._size, QtCore.QSize) else QtCore.QSize(*self._size) if self._size else None
+            size = self._size if isinstance(self._size, QtCore.QSize) else \
+                QtCore.QSize(*self._size) if self._size else None
         except Exception:
             raise TypeError(f'bad size {self._size}') from None
 
-        _size = QtCore.QSize(size.width() if size else self.sizeHint().width(),
+        # get the size of the title
+        fontMetric = QtGui.QFontMetrics(self.font())
+        # get an estimate for an average character width - 100 is arbitrary
+        _w = max(self.sizeHint().width(),
+                 (100 + fontMetric.boundingRect(self.windowTitle()).width()) if self.FORCEWIDTHTOTITLE else 0)
+        _size = QtCore.QSize(size.width() if size else _w,
                              size.height() if size else self.sizeHint().height())
 
         # get the initial minimumSize as a QSize
         try:
-            minimumSize = self._minimumSize if isinstance(self._minimumSize, QtCore.QSize) else QtCore.QSize(*self._minimumSize) if self._minimumSize else None
+            minimumSize = self._minimumSize if isinstance(self._minimumSize, QtCore.QSize) else \
+                QtCore.QSize(*self._minimumSize) if self._minimumSize else None
         except Exception:
             raise TypeError(f'bad minimumSize {self._minimumSize}') from None
 
-        _minimumSize = QtCore.QSize(minimumSize.width() if minimumSize else self.sizeHint().width(),
+        _minimumSize = QtCore.QSize(minimumSize.width() if minimumSize else _w,
                                     minimumSize.height() if minimumSize else self.sizeHint().height())
 
         # set the fixed sized policies as required
@@ -834,7 +842,8 @@ def _verifyPopupApply(self, attributeName, value, last, *postArgs, **postKwds):
             # delete from dict - empty dict implies no changes
             del self._changes[attributeName]
 
-        getLogger().debug2(f">>>attrib {attributeName} {self._changes[attributeName] if attributeName in self._changes else 'None'}")
+        getLogger().debug2(
+                f">>>attrib {attributeName} {self._changes[attributeName] if attributeName in self._changes else 'None'}")
 
         if getattr(self, 'LIVEDIALOG', None):
             self._changeSettings()

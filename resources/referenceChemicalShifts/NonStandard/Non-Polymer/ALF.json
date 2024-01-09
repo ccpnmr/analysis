@@ -1,66 +1,255 @@
-{
-  "_metadata": {
-    "jsonVersion": 3,
-    "className": "ReferenceChemicalShift",
-    "classVersion": 1,
-    "user": "CCPN",
-    "lastPath": "",
-    "timestamp": "Fri Sep 15 15:17:45 2023",
-    "applicationVersion": 3.2
-  },
-  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
-  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
-  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
-  "compoundShortName": "ALF",
-  "compoundName": "TETRAFLUOROALUMINATE ION",
-  "compoundCcpCode": "ALF",
-  "compoundType": "Non-Polymer",
-  "compoundTypeClassification": "non-polymer",
-  "compoundPrecursorName": "",
-  "atoms": [
+[
+  [
+    "_metadata",
     {
-      "atomName": "F1",
-      "atomElementName": "",
-      "atomAverageShift": -138.86,
-      "atomStdShift": 2.588,
-      "atomMinShift": -140.69,
-      "atomMaxShift": -137.03,
-      "atomDistributionRefValue": -140.69,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "F2",
-      "atomElementName": "",
-      "atomAverageShift": -130.67,
-      "atomStdShift": 0.014,
-      "atomMinShift": -130.68,
-      "atomMaxShift": -130.66,
-      "atomDistributionRefValue": -130.68,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "F3",
-      "atomElementName": "",
-      "atomAverageShift": -135.535,
-      "atomStdShift": 11.971,
-      "atomMinShift": -144,
-      "atomMaxShift": -127.07,
-      "atomDistributionRefValue": -144,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "F4",
-      "atomElementName": "",
-      "atomAverageShift": -139.33,
-      "atomStdShift": 1.895,
-      "atomMinShift": -140.67,
-      "atomMaxShift": -137.99,
-      "atomDistributionRefValue": -140.67,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
+      "jsonVersion": 3,
+      "className": "ReferenceChemicalShift",
+      "classVersion": 1,
+      "user": "CCPN",
+      "lastPath": "/Users/luca/Projects/AnalysisV3/resources/referenceChemicalShifts/NonStandard/Non-Polymer/ALF.json",
+      "timestamp": "Tue Jan  9 15:18:40 2024",
+      "applicationVersion": 3.2
     }
+  ],
+  [
+    "chemicalShiftName",
+    "Non-Standard Residues / Small Molecules"
+  ],
+  [
+    "chemicalShiftComment",
+    "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB"
+  ],
+  [
+    "chemicalShiftEntryDate",
+    "2023-09-14-14:25:08"
+  ],
+  [
+    "compoundName",
+    "TETRAFLUOROALUMINATE ION"
+  ],
+  [
+    "compoundShortName",
+    "ALF"
+  ],
+  [
+    "compoundCcpCode",
+    "ALF"
+  ],
+  [
+    "compoundType",
+    "Non-Polymer"
+  ],
+  [
+    "compoundTypeClassification",
+    "non-polymer"
+  ],
+  [
+    "compoundPrecursorName",
+    ""
+  ],
+  [
+    "loadingLevel",
+    0
+  ],
+  [
+    "atoms",
+    [
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:40 2024"
+          }
+        ],
+        [
+          "atomName",
+          "F1"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          -138.86
+        ],
+        [
+          "atomStdShift",
+          2.588
+        ],
+        [
+          "atomMinShift",
+          -140.69
+        ],
+        [
+          "atomMaxShift",
+          -137.03
+        ],
+        [
+          "atomDistributionRefValue",
+          -140.69
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:40 2024"
+          }
+        ],
+        [
+          "atomName",
+          "F2"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          -130.67
+        ],
+        [
+          "atomStdShift",
+          0.014
+        ],
+        [
+          "atomMinShift",
+          -130.68
+        ],
+        [
+          "atomMaxShift",
+          -130.66
+        ],
+        [
+          "atomDistributionRefValue",
+          -130.68
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:40 2024"
+          }
+        ],
+        [
+          "atomName",
+          "F3"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          -135.535
+        ],
+        [
+          "atomStdShift",
+          11.971
+        ],
+        [
+          "atomMinShift",
+          -144.0
+        ],
+        [
+          "atomMaxShift",
+          -127.07
+        ],
+        [
+          "atomDistributionRefValue",
+          -144.0
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:40 2024"
+          }
+        ],
+        [
+          "atomName",
+          "F4"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          -139.33
+        ],
+        [
+          "atomStdShift",
+          1.895
+        ],
+        [
+          "atomMinShift",
+          -140.67
+        ],
+        [
+          "atomMaxShift",
+          -137.99
+        ],
+        [
+          "atomDistributionRefValue",
+          -140.67
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ]
+    ]
   ]
-}
+]

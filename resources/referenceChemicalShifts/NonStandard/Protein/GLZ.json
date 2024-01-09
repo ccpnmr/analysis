@@ -1,55 +1,206 @@
-{
-  "_metadata": {
-    "jsonVersion": 3,
-    "className": "ReferenceChemicalShift",
-    "classVersion": 1,
-    "user": "CCPN",
-    "lastPath": "",
-    "timestamp": "Fri Sep 15 15:17:45 2023",
-    "applicationVersion": 3.2
-  },
-  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
-  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
-  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
-  "compoundShortName": "GLZ",
-  "compoundName": "AMINO-ACETALDEHYDE",
-  "compoundCcpCode": "GLZ",
-  "compoundType": "Protein",
-  "compoundTypeClassification": "L-peptide linking",
-  "compoundPrecursorName": "Glycine",
-  "atoms": [
+[
+  [
+    "_metadata",
     {
-      "atomName": "CA",
-      "atomElementName": "",
-      "atomAverageShift": 46.93,
-      "atomStdShift": null,
-      "atomMinShift": 46.93,
-      "atomMaxShift": 46.93,
-      "atomDistributionRefValue": 46.93,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "H",
-      "atomElementName": "",
-      "atomAverageShift": 8.06,
-      "atomStdShift": null,
-      "atomMinShift": 8.06,
-      "atomMaxShift": 8.06,
-      "atomDistributionRefValue": 8.06,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "N",
-      "atomElementName": "",
-      "atomAverageShift": 114.56,
-      "atomStdShift": null,
-      "atomMinShift": 114.56,
-      "atomMaxShift": 114.56,
-      "atomDistributionRefValue": 114.56,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
+      "jsonVersion": 3,
+      "className": "ReferenceChemicalShift",
+      "classVersion": 1,
+      "user": "CCPN",
+      "lastPath": "/Users/luca/Projects/AnalysisV3/resources/referenceChemicalShifts/NonStandard/Protein/GLZ.json",
+      "timestamp": "Tue Jan  9 15:18:05 2024",
+      "applicationVersion": 3.2
     }
+  ],
+  [
+    "chemicalShiftName",
+    "Non-Standard Residues / Small Molecules"
+  ],
+  [
+    "chemicalShiftComment",
+    "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB"
+  ],
+  [
+    "chemicalShiftEntryDate",
+    "2023-09-14-14:25:08"
+  ],
+  [
+    "compoundName",
+    "AMINO-ACETALDEHYDE"
+  ],
+  [
+    "compoundShortName",
+    "GLZ"
+  ],
+  [
+    "compoundCcpCode",
+    "GLZ"
+  ],
+  [
+    "compoundType",
+    "Protein"
+  ],
+  [
+    "compoundTypeClassification",
+    "L-peptide linking"
+  ],
+  [
+    "compoundPrecursorName",
+    "Glycine"
+  ],
+  [
+    "loadingLevel",
+    0
+  ],
+  [
+    "atoms",
+    [
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:05 2024"
+          }
+        ],
+        [
+          "atomName",
+          "CA"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          46.93
+        ],
+        [
+          "atomStdShift",
+          null
+        ],
+        [
+          "atomMinShift",
+          46.93
+        ],
+        [
+          "atomMaxShift",
+          46.93
+        ],
+        [
+          "atomDistributionRefValue",
+          46.93
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:05 2024"
+          }
+        ],
+        [
+          "atomName",
+          "H"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          8.06
+        ],
+        [
+          "atomStdShift",
+          null
+        ],
+        [
+          "atomMinShift",
+          8.06
+        ],
+        [
+          "atomMaxShift",
+          8.06
+        ],
+        [
+          "atomDistributionRefValue",
+          8.06
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:05 2024"
+          }
+        ],
+        [
+          "atomName",
+          "N"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          114.56
+        ],
+        [
+          "atomStdShift",
+          null
+        ],
+        [
+          "atomMinShift",
+          114.56
+        ],
+        [
+          "atomMaxShift",
+          114.56
+        ],
+        [
+          "atomDistributionRefValue",
+          114.56
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ]
+    ]
   ]
-}
+]

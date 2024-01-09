@@ -1,66 +1,255 @@
-{
-  "_metadata": {
-    "jsonVersion": 3,
-    "className": "ReferenceChemicalShift",
-    "classVersion": 1,
-    "user": "CCPN",
-    "lastPath": "",
-    "timestamp": "Fri Sep 15 15:17:45 2023",
-    "applicationVersion": 3.2
-  },
-  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
-  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
-  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
-  "compoundShortName": "GYC",
-  "compoundName": "[(4Z)-2-[(1R)-1-AMINO-2-MERCAPTOETHYL]-4-(4-HYDROXYBENZYLIDENE)-5-OXO-4,5-DIHYDRO-1H-IMIDAZOL-1-YL]ACETIC ACID",
-  "compoundCcpCode": "GYC",
-  "compoundType": "Protein",
-  "compoundTypeClassification": "L-peptide linking",
-  "compoundPrecursorName": "CYS TYR GLY",
-  "atoms": [
+[
+  [
+    "_metadata",
     {
-      "atomName": "CA",
-      "atomElementName": "",
-      "atomAverageShift": 48.94,
-      "atomStdShift": 0.597,
-      "atomMinShift": 48.518,
-      "atomMaxShift": 49.362,
-      "atomDistributionRefValue": 48.518,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "CB",
-      "atomElementName": "",
-      "atomAverageShift": 25.279,
-      "atomStdShift": 0.748,
-      "atomMinShift": 24.75,
-      "atomMaxShift": 25.808,
-      "atomDistributionRefValue": 24.75,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "H",
-      "atomElementName": "",
-      "atomAverageShift": 7.379,
-      "atomStdShift": 0.081,
-      "atomMinShift": 7.321,
-      "atomMaxShift": 7.436,
-      "atomDistributionRefValue": 7.321,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "N",
-      "atomElementName": "",
-      "atomAverageShift": 114.605,
-      "atomStdShift": 1.51,
-      "atomMinShift": 113.537,
-      "atomMaxShift": 115.672,
-      "atomDistributionRefValue": 113.537,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
+      "jsonVersion": 3,
+      "className": "ReferenceChemicalShift",
+      "classVersion": 1,
+      "user": "CCPN",
+      "lastPath": "/Users/luca/Projects/AnalysisV3/resources/referenceChemicalShifts/NonStandard/Protein/GYC.json",
+      "timestamp": "Tue Jan  9 15:18:08 2024",
+      "applicationVersion": 3.2
     }
+  ],
+  [
+    "chemicalShiftName",
+    "Non-Standard Residues / Small Molecules"
+  ],
+  [
+    "chemicalShiftComment",
+    "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB"
+  ],
+  [
+    "chemicalShiftEntryDate",
+    "2023-09-14-14:25:08"
+  ],
+  [
+    "compoundName",
+    "[(4Z)-2-[(1R)-1-AMINO-2-MERCAPTOETHYL]-4-(4-HYDROXYBENZYLIDENE)-5-OXO-4,5-DIHYDRO-1H-IMIDAZOL-1-YL]ACETIC ACID"
+  ],
+  [
+    "compoundShortName",
+    "GYC"
+  ],
+  [
+    "compoundCcpCode",
+    "GYC"
+  ],
+  [
+    "compoundType",
+    "Protein"
+  ],
+  [
+    "compoundTypeClassification",
+    "L-peptide linking"
+  ],
+  [
+    "compoundPrecursorName",
+    "CYS TYR GLY"
+  ],
+  [
+    "loadingLevel",
+    0
+  ],
+  [
+    "atoms",
+    [
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:08 2024"
+          }
+        ],
+        [
+          "atomName",
+          "CA"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          48.94
+        ],
+        [
+          "atomStdShift",
+          0.597
+        ],
+        [
+          "atomMinShift",
+          48.518
+        ],
+        [
+          "atomMaxShift",
+          49.362
+        ],
+        [
+          "atomDistributionRefValue",
+          48.518
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:08 2024"
+          }
+        ],
+        [
+          "atomName",
+          "CB"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          25.279
+        ],
+        [
+          "atomStdShift",
+          0.748
+        ],
+        [
+          "atomMinShift",
+          24.75
+        ],
+        [
+          "atomMaxShift",
+          25.808
+        ],
+        [
+          "atomDistributionRefValue",
+          24.75
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:08 2024"
+          }
+        ],
+        [
+          "atomName",
+          "H"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          7.379
+        ],
+        [
+          "atomStdShift",
+          0.081
+        ],
+        [
+          "atomMinShift",
+          7.321
+        ],
+        [
+          "atomMaxShift",
+          7.436
+        ],
+        [
+          "atomDistributionRefValue",
+          7.321
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:08 2024"
+          }
+        ],
+        [
+          "atomName",
+          "N"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          114.605
+        ],
+        [
+          "atomStdShift",
+          1.51
+        ],
+        [
+          "atomMinShift",
+          113.537
+        ],
+        [
+          "atomMaxShift",
+          115.672
+        ],
+        [
+          "atomDistributionRefValue",
+          113.537
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ]
+    ]
   ]
-}
+]

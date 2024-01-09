@@ -1,44 +1,157 @@
-{
-  "_metadata": {
-    "jsonVersion": 3,
-    "className": "ReferenceChemicalShift",
-    "classVersion": 1,
-    "user": "CCPN",
-    "lastPath": "",
-    "timestamp": "Fri Sep 15 15:17:45 2023",
-    "applicationVersion": 3.2
-  },
-  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
-  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
-  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
-  "compoundShortName": "M2G",
-  "compoundName": "N2-DIMETHYLGUANOSINE-5'-MONOPHOSPHATE",
-  "compoundCcpCode": "M2G",
-  "compoundType": "RNA",
-  "compoundTypeClassification": "RNA linking",
-  "compoundPrecursorName": "Guanosine-5'-Monophosphate",
-  "atoms": [
+[
+  [
+    "_metadata",
     {
-      "atomName": "H1",
-      "atomElementName": "",
-      "atomAverageShift": 12.686,
-      "atomStdShift": null,
-      "atomMinShift": 12.686,
-      "atomMaxShift": 12.686,
-      "atomDistributionRefValue": 12.686,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "N1",
-      "atomElementName": "",
-      "atomAverageShift": 148.402,
-      "atomStdShift": null,
-      "atomMinShift": 148.402,
-      "atomMaxShift": 148.402,
-      "atomDistributionRefValue": 148.402,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
+      "jsonVersion": 3,
+      "className": "ReferenceChemicalShift",
+      "classVersion": 1,
+      "user": "CCPN",
+      "lastPath": "/Users/luca/Projects/AnalysisV3/resources/referenceChemicalShifts/NonStandard/RNA/M2G.json",
+      "timestamp": "Tue Jan  9 15:18:50 2024",
+      "applicationVersion": 3.2
     }
+  ],
+  [
+    "chemicalShiftName",
+    "Non-Standard Residues / Small Molecules"
+  ],
+  [
+    "chemicalShiftComment",
+    "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB"
+  ],
+  [
+    "chemicalShiftEntryDate",
+    "2023-09-14-14:25:08"
+  ],
+  [
+    "compoundName",
+    "N2-DIMETHYLGUANOSINE-5'-MONOPHOSPHATE"
+  ],
+  [
+    "compoundShortName",
+    "M2G"
+  ],
+  [
+    "compoundCcpCode",
+    "M2G"
+  ],
+  [
+    "compoundType",
+    "RNA"
+  ],
+  [
+    "compoundTypeClassification",
+    "RNA linking"
+  ],
+  [
+    "compoundPrecursorName",
+    "Guanosine-5'-Monophosphate"
+  ],
+  [
+    "loadingLevel",
+    0
+  ],
+  [
+    "atoms",
+    [
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:50 2024"
+          }
+        ],
+        [
+          "atomName",
+          "H1"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          12.686
+        ],
+        [
+          "atomStdShift",
+          null
+        ],
+        [
+          "atomMinShift",
+          12.686
+        ],
+        [
+          "atomMaxShift",
+          12.686
+        ],
+        [
+          "atomDistributionRefValue",
+          12.686
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:50 2024"
+          }
+        ],
+        [
+          "atomName",
+          "N1"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          148.402
+        ],
+        [
+          "atomStdShift",
+          null
+        ],
+        [
+          "atomMinShift",
+          148.402
+        ],
+        [
+          "atomMaxShift",
+          148.402
+        ],
+        [
+          "atomDistributionRefValue",
+          148.402
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ]
+    ]
   ]
-}
+]

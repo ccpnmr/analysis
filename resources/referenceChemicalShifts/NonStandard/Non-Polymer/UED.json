@@ -1,44 +1,157 @@
-{
-  "_metadata": {
-    "jsonVersion": 3,
-    "className": "ReferenceChemicalShift",
-    "classVersion": 1,
-    "user": "CCPN",
-    "lastPath": "",
-    "timestamp": "Fri Sep 15 15:17:45 2023",
-    "applicationVersion": 3.2
-  },
-  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
-  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
-  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
-  "compoundShortName": "UED",
-  "compoundName": "N~2~-[(benzyloxy)carbonyl]-N-{(2S)-1-hydroxy-3-[(3S)-2-oxopyrrolidin-3-yl]propan-2-yl}-L-leucinamide",
-  "compoundCcpCode": "UED",
-  "compoundType": "Non-Polymer",
-  "compoundTypeClassification": "non-polymer",
-  "compoundPrecursorName": "",
-  "atoms": [
+[
+  [
+    "_metadata",
     {
-      "atomName": "C21",
-      "atomElementName": "",
-      "atomAverageShift": 85.667,
-      "atomStdShift": 8.377,
-      "atomMinShift": 76,
-      "atomMaxShift": 90.8,
-      "atomDistributionRefValue": 76,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "H29",
-      "atomElementName": "",
-      "atomAverageShift": 5.127,
-      "atomStdShift": 0.455,
-      "atomMinShift": 4.82,
-      "atomMaxShift": 5.65,
-      "atomDistributionRefValue": 4.82,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
+      "jsonVersion": 3,
+      "className": "ReferenceChemicalShift",
+      "classVersion": 1,
+      "user": "CCPN",
+      "lastPath": "/Users/luca/Projects/AnalysisV3/resources/referenceChemicalShifts/NonStandard/Non-Polymer/UED.json",
+      "timestamp": "Tue Jan  9 15:18:45 2024",
+      "applicationVersion": 3.2
     }
+  ],
+  [
+    "chemicalShiftName",
+    "Non-Standard Residues / Small Molecules"
+  ],
+  [
+    "chemicalShiftComment",
+    "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB"
+  ],
+  [
+    "chemicalShiftEntryDate",
+    "2023-09-14-14:25:08"
+  ],
+  [
+    "compoundName",
+    "N~2~-[(benzyloxy)carbonyl]-N-{(2S)-1-hydroxy-3-[(3S)-2-oxopyrrolidin-3-yl]propan-2-yl}-L-leucinamide"
+  ],
+  [
+    "compoundShortName",
+    "UED"
+  ],
+  [
+    "compoundCcpCode",
+    "UED"
+  ],
+  [
+    "compoundType",
+    "Non-Polymer"
+  ],
+  [
+    "compoundTypeClassification",
+    "non-polymer"
+  ],
+  [
+    "compoundPrecursorName",
+    ""
+  ],
+  [
+    "loadingLevel",
+    0
+  ],
+  [
+    "atoms",
+    [
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:45 2024"
+          }
+        ],
+        [
+          "atomName",
+          "C21"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          85.667
+        ],
+        [
+          "atomStdShift",
+          8.377
+        ],
+        [
+          "atomMinShift",
+          76.0
+        ],
+        [
+          "atomMaxShift",
+          90.8
+        ],
+        [
+          "atomDistributionRefValue",
+          76.0
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:45 2024"
+          }
+        ],
+        [
+          "atomName",
+          "H29"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          5.127
+        ],
+        [
+          "atomStdShift",
+          0.455
+        ],
+        [
+          "atomMinShift",
+          4.82
+        ],
+        [
+          "atomMaxShift",
+          5.65
+        ],
+        [
+          "atomDistributionRefValue",
+          4.82
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ]
+    ]
   ]
-}
+]

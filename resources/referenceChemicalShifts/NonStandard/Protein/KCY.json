@@ -1,44 +1,157 @@
-{
-  "_metadata": {
-    "jsonVersion": 3,
-    "className": "ReferenceChemicalShift",
-    "classVersion": 1,
-    "user": "CCPN",
-    "lastPath": "",
-    "timestamp": "Fri Sep 15 15:17:45 2023",
-    "applicationVersion": 3.2
-  },
-  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
-  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
-  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
-  "compoundShortName": "KCY",
-  "compoundName": "D-homocysteine",
-  "compoundCcpCode": "KCY",
-  "compoundType": "Protein",
-  "compoundTypeClassification": "D-peptide linking",
-  "compoundPrecursorName": "Cysteine",
-  "atoms": [
+[
+  [
+    "_metadata",
     {
-      "atomName": "HA",
-      "atomElementName": "",
-      "atomAverageShift": 4.27,
-      "atomStdShift": null,
-      "atomMinShift": 4.27,
-      "atomMaxShift": 4.27,
-      "atomDistributionRefValue": 4.27,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "HN",
-      "atomElementName": "",
-      "atomAverageShift": 8.66,
-      "atomStdShift": null,
-      "atomMinShift": 8.66,
-      "atomMaxShift": 8.66,
-      "atomDistributionRefValue": 8.66,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
+      "jsonVersion": 3,
+      "className": "ReferenceChemicalShift",
+      "classVersion": 1,
+      "user": "CCPN",
+      "lastPath": "/Users/luca/Projects/AnalysisV3/resources/referenceChemicalShifts/NonStandard/Protein/KCY.json",
+      "timestamp": "Tue Jan  9 15:18:01 2024",
+      "applicationVersion": 3.2
     }
+  ],
+  [
+    "chemicalShiftName",
+    "Non-Standard Residues / Small Molecules"
+  ],
+  [
+    "chemicalShiftComment",
+    "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB"
+  ],
+  [
+    "chemicalShiftEntryDate",
+    "2023-09-14-14:25:08"
+  ],
+  [
+    "compoundName",
+    "D-homocysteine"
+  ],
+  [
+    "compoundShortName",
+    "KCY"
+  ],
+  [
+    "compoundCcpCode",
+    "KCY"
+  ],
+  [
+    "compoundType",
+    "Protein"
+  ],
+  [
+    "compoundTypeClassification",
+    "D-peptide linking"
+  ],
+  [
+    "compoundPrecursorName",
+    "Cysteine"
+  ],
+  [
+    "loadingLevel",
+    0
+  ],
+  [
+    "atoms",
+    [
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:01 2024"
+          }
+        ],
+        [
+          "atomName",
+          "HA"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          4.27
+        ],
+        [
+          "atomStdShift",
+          null
+        ],
+        [
+          "atomMinShift",
+          4.27
+        ],
+        [
+          "atomMaxShift",
+          4.27
+        ],
+        [
+          "atomDistributionRefValue",
+          4.27
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:01 2024"
+          }
+        ],
+        [
+          "atomName",
+          "HN"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          8.66
+        ],
+        [
+          "atomStdShift",
+          null
+        ],
+        [
+          "atomMinShift",
+          8.66
+        ],
+        [
+          "atomMaxShift",
+          8.66
+        ],
+        [
+          "atomDistributionRefValue",
+          8.66
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ]
+    ]
   ]
-}
+]

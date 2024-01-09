@@ -1,44 +1,157 @@
-{
-  "_metadata": {
-    "jsonVersion": 3,
-    "className": "ReferenceChemicalShift",
-    "classVersion": 1,
-    "user": "CCPN",
-    "lastPath": "",
-    "timestamp": "Fri Sep 15 15:17:45 2023",
-    "applicationVersion": 3.2
-  },
-  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
-  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
-  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
-  "compoundShortName": "PH8",
-  "compoundName": "5-phenyl-L-norvaline",
-  "compoundCcpCode": "PH8",
-  "compoundType": "Protein",
-  "compoundTypeClassification": "L-peptide linking",
-  "compoundPrecursorName": "Valine",
-  "atoms": [
+[
+  [
+    "_metadata",
     {
-      "atomName": "HA",
-      "atomElementName": "",
-      "atomAverageShift": 4.135,
-      "atomStdShift": 0.021,
-      "atomMinShift": 4.12,
-      "atomMaxShift": 4.15,
-      "atomDistributionRefValue": 4.12,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "HN",
-      "atomElementName": "",
-      "atomAverageShift": 7.755,
-      "atomStdShift": 0.106,
-      "atomMinShift": 7.68,
-      "atomMaxShift": 7.83,
-      "atomDistributionRefValue": 7.68,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
+      "jsonVersion": 3,
+      "className": "ReferenceChemicalShift",
+      "classVersion": 1,
+      "user": "CCPN",
+      "lastPath": "/Users/luca/Projects/AnalysisV3/resources/referenceChemicalShifts/NonStandard/Protein/PH8.json",
+      "timestamp": "Tue Jan  9 15:18:10 2024",
+      "applicationVersion": 3.2
     }
+  ],
+  [
+    "chemicalShiftName",
+    "Non-Standard Residues / Small Molecules"
+  ],
+  [
+    "chemicalShiftComment",
+    "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB"
+  ],
+  [
+    "chemicalShiftEntryDate",
+    "2023-09-14-14:25:08"
+  ],
+  [
+    "compoundName",
+    "5-phenyl-L-norvaline"
+  ],
+  [
+    "compoundShortName",
+    "PH8"
+  ],
+  [
+    "compoundCcpCode",
+    "PH8"
+  ],
+  [
+    "compoundType",
+    "Protein"
+  ],
+  [
+    "compoundTypeClassification",
+    "L-peptide linking"
+  ],
+  [
+    "compoundPrecursorName",
+    "Valine"
+  ],
+  [
+    "loadingLevel",
+    0
+  ],
+  [
+    "atoms",
+    [
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:10 2024"
+          }
+        ],
+        [
+          "atomName",
+          "HA"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          4.135
+        ],
+        [
+          "atomStdShift",
+          0.021
+        ],
+        [
+          "atomMinShift",
+          4.12
+        ],
+        [
+          "atomMaxShift",
+          4.15
+        ],
+        [
+          "atomDistributionRefValue",
+          4.12
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:10 2024"
+          }
+        ],
+        [
+          "atomName",
+          "HN"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          7.755
+        ],
+        [
+          "atomStdShift",
+          0.106
+        ],
+        [
+          "atomMinShift",
+          7.68
+        ],
+        [
+          "atomMaxShift",
+          7.83
+        ],
+        [
+          "atomDistributionRefValue",
+          7.68
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ]
+    ]
   ]
-}
+]

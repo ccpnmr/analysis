@@ -372,15 +372,21 @@ class Enum(_Enum, _CcpNmrTrait):
         _CcpNmrTrait.__init__(self)
 
     def validate(self, obj, value):
+        """Validate value to be one of self.values or None if allowed
+        """
         if value is None and self.allow_none:
             return value
-        else:
-            return _Enum.validate(self, obj, value)
+
+        if value not in self.values:
+            raise ValueError(f'setting {self.name} for {obj}: "{value}" is invalid; should be one of {tuple(self.values)}')
+
+        return value
+
 
     def info(self):
         """:return info string
         """
-        return f'an Enum; one of {list(self.values)}'
+        return f'an Enumeration: one of {tuple(self.values)}'
 
 
 class CEnum(Enum):
@@ -417,17 +423,22 @@ class CEnum(Enum):
 
         if value in self._mapping.values():
             # first check if value is already ok before attempting a mapping
-            pass
+            return value
+
         elif value in self._mapping.keys():
             # not in values, so check if it is a keys and do the mapping
             value = self._mapping[value]
+            return value
 
-        return super().validate(obj, value)
+        else:
+            _values1 = tuple(self._mapping.values())
+            _values2 = tuple(self._mapping.keys())
+            raise ValueError(f'setting {self.name} for {obj}: "{value}" is invalid; should be one of {_values1} or {_values2}')
 
     def info(self):
         """:return info string
         """
-        return f'an CEnum; one of {list(self._mapping.values())} or {list(self._mapping.keys())}'
+        return f'an Enumeration with casting; one of {list(self._mapping.values())} or {list(self._mapping.keys())}'
 
     class jsonHandler(TraitJsonHandlerBase):
         def encode(self, value):

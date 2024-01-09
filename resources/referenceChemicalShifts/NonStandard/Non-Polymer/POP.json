@@ -1,44 +1,157 @@
-{
-  "_metadata": {
-    "jsonVersion": 3,
-    "className": "ReferenceChemicalShift",
-    "classVersion": 1,
-    "user": "CCPN",
-    "lastPath": "",
-    "timestamp": "Fri Sep 15 15:17:45 2023",
-    "applicationVersion": 3.2
-  },
-  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
-  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
-  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
-  "compoundShortName": "POP",
-  "compoundName": "PYROPHOSPHATE 2-",
-  "compoundCcpCode": "POP",
-  "compoundType": "Non-Polymer",
-  "compoundTypeClassification": "non-polymer",
-  "compoundPrecursorName": "",
-  "atoms": [
+[
+  [
+    "_metadata",
     {
-      "atomName": "PA",
-      "atomElementName": "",
-      "atomAverageShift": -13.185,
-      "atomStdShift": 1.351,
-      "atomMinShift": -14.14,
-      "atomMaxShift": -12.23,
-      "atomDistributionRefValue": -14.14,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "PB",
-      "atomElementName": "",
-      "atomAverageShift": -12.24,
-      "atomStdShift": 1.853,
-      "atomMinShift": -13.55,
-      "atomMaxShift": -10.93,
-      "atomDistributionRefValue": -13.55,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
+      "jsonVersion": 3,
+      "className": "ReferenceChemicalShift",
+      "classVersion": 1,
+      "user": "CCPN",
+      "lastPath": "/Users/luca/Projects/AnalysisV3/resources/referenceChemicalShifts/NonStandard/Non-Polymer/POP.json",
+      "timestamp": "Tue Jan  9 15:18:45 2024",
+      "applicationVersion": 3.2
     }
+  ],
+  [
+    "chemicalShiftName",
+    "Non-Standard Residues / Small Molecules"
+  ],
+  [
+    "chemicalShiftComment",
+    "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB"
+  ],
+  [
+    "chemicalShiftEntryDate",
+    "2023-09-14-14:25:08"
+  ],
+  [
+    "compoundName",
+    "PYROPHOSPHATE 2-"
+  ],
+  [
+    "compoundShortName",
+    "POP"
+  ],
+  [
+    "compoundCcpCode",
+    "POP"
+  ],
+  [
+    "compoundType",
+    "Non-Polymer"
+  ],
+  [
+    "compoundTypeClassification",
+    "non-polymer"
+  ],
+  [
+    "compoundPrecursorName",
+    ""
+  ],
+  [
+    "loadingLevel",
+    0
+  ],
+  [
+    "atoms",
+    [
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:45 2024"
+          }
+        ],
+        [
+          "atomName",
+          "PA"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          -13.185
+        ],
+        [
+          "atomStdShift",
+          1.351
+        ],
+        [
+          "atomMinShift",
+          -14.14
+        ],
+        [
+          "atomMaxShift",
+          -12.23
+        ],
+        [
+          "atomDistributionRefValue",
+          -14.14
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:45 2024"
+          }
+        ],
+        [
+          "atomName",
+          "PB"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          -12.24
+        ],
+        [
+          "atomStdShift",
+          1.853
+        ],
+        [
+          "atomMinShift",
+          -13.55
+        ],
+        [
+          "atomMaxShift",
+          -10.93
+        ],
+        [
+          "atomDistributionRefValue",
+          -13.55
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ]
+    ]
   ]
-}
+]

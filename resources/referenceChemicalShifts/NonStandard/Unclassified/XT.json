@@ -1,198 +1,843 @@
-{
-  "_metadata": {
-    "jsonVersion": 3,
-    "className": "ReferenceChemicalShift",
-    "classVersion": 1,
-    "user": "CCPN",
-    "lastPath": "",
-    "timestamp": "Fri Sep 15 15:17:45 2023",
-    "applicationVersion": 3.2
-  },
-  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
-  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
-  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
-  "compoundShortName": "XT",
-  "compoundName": "",
-  "compoundCcpCode": "XT",
-  "compoundType": "Unclassified",
-  "compoundTypeClassification": "",
-  "compoundPrecursorName": "",
-  "atoms": [
+[
+  [
+    "_metadata",
     {
-      "atomName": "C1p",
-      "atomElementName": "",
-      "atomAverageShift": 86.192,
-      "atomStdShift": 0.185,
-      "atomMinShift": 85.987,
-      "atomMaxShift": 86.428,
-      "atomDistributionRefValue": 85.987,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "C3p",
-      "atomElementName": "",
-      "atomAverageShift": 71.928,
-      "atomStdShift": 3.054,
-      "atomMinShift": 68.446,
-      "atomMaxShift": 74.15,
-      "atomDistributionRefValue": 68.446,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "C5p",
-      "atomElementName": "",
-      "atomAverageShift": 60.507,
-      "atomStdShift": 0.638,
-      "atomMinShift": 60.108,
-      "atomMaxShift": 61.243,
-      "atomDistributionRefValue": 60.108,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "C6",
-      "atomElementName": "",
-      "atomAverageShift": 137.164,
-      "atomStdShift": 0.339,
-      "atomMinShift": 136.674,
-      "atomMaxShift": 137.405,
-      "atomDistributionRefValue": 136.674,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "H1p",
-      "atomElementName": "",
-      "atomAverageShift": 5.719,
-      "atomStdShift": 0.109,
-      "atomMinShift": 5.59,
-      "atomMaxShift": 5.834,
-      "atomDistributionRefValue": 5.59,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "H2p",
-      "atomElementName": "",
-      "atomAverageShift": 2.505,
-      "atomStdShift": 0.079,
-      "atomMinShift": 2.433,
-      "atomMaxShift": 2.59,
-      "atomDistributionRefValue": 2.433,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "H2pp",
-      "atomElementName": "",
-      "atomAverageShift": 2.289,
-      "atomStdShift": 0.287,
-      "atomMinShift": 2.086,
-      "atomMaxShift": 2.492,
-      "atomDistributionRefValue": 2.086,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "H3",
-      "atomElementName": "",
-      "atomAverageShift": 14.15,
-      "atomStdShift": 0.756,
-      "atomMinShift": 13.293,
-      "atomMaxShift": 14.721,
-      "atomDistributionRefValue": 13.293,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "H3p",
-      "atomElementName": "",
-      "atomAverageShift": 4.581,
-      "atomStdShift": 0.131,
-      "atomMinShift": 4.408,
-      "atomMaxShift": 4.726,
-      "atomDistributionRefValue": 4.408,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "H4p",
-      "atomElementName": "",
-      "atomAverageShift": 3.816,
-      "atomStdShift": 0.021,
-      "atomMinShift": 3.801,
-      "atomMaxShift": 3.83,
-      "atomDistributionRefValue": 3.801,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "H5p",
-      "atomElementName": "",
-      "atomAverageShift": 3.833,
-      "atomStdShift": 0.284,
-      "atomMinShift": 3.637,
-      "atomMaxShift": 4.159,
-      "atomDistributionRefValue": 3.637,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "H5pp",
-      "atomElementName": "",
-      "atomAverageShift": 2.694,
-      "atomStdShift": 0.67,
-      "atomMinShift": 2.267,
-      "atomMaxShift": 3.467,
-      "atomDistributionRefValue": 2.267,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "H6",
-      "atomElementName": "",
-      "atomAverageShift": 7.131,
-      "atomStdShift": 0.177,
-      "atomMinShift": 6.968,
-      "atomMaxShift": 7.364,
-      "atomDistributionRefValue": 6.968,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "H71",
-      "atomElementName": "",
-      "atomAverageShift": 1.881,
-      "atomStdShift": 0.077,
-      "atomMinShift": 1.765,
-      "atomMaxShift": 1.923,
-      "atomDistributionRefValue": 1.765,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "H72",
-      "atomElementName": "",
-      "atomAverageShift": 1.881,
-      "atomStdShift": 0.077,
-      "atomMinShift": 1.765,
-      "atomMaxShift": 1.923,
-      "atomDistributionRefValue": 1.765,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "H73",
-      "atomElementName": "",
-      "atomAverageShift": 1.881,
-      "atomStdShift": 0.077,
-      "atomMinShift": 1.765,
-      "atomMaxShift": 1.923,
-      "atomDistributionRefValue": 1.765,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
+      "jsonVersion": 3,
+      "className": "ReferenceChemicalShift",
+      "classVersion": 1,
+      "user": "CCPN",
+      "lastPath": "/Users/luca/Projects/AnalysisV3/resources/referenceChemicalShifts/NonStandard/Unclassified/XT.json",
+      "timestamp": "Tue Jan  9 15:18:13 2024",
+      "applicationVersion": 3.2
     }
+  ],
+  [
+    "chemicalShiftName",
+    "Non-Standard Residues / Small Molecules"
+  ],
+  [
+    "chemicalShiftComment",
+    "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB"
+  ],
+  [
+    "chemicalShiftEntryDate",
+    "2023-09-14-14:25:08"
+  ],
+  [
+    "compoundName",
+    ""
+  ],
+  [
+    "compoundShortName",
+    "XT"
+  ],
+  [
+    "compoundCcpCode",
+    "XT"
+  ],
+  [
+    "compoundType",
+    "Unclassified"
+  ],
+  [
+    "compoundTypeClassification",
+    ""
+  ],
+  [
+    "compoundPrecursorName",
+    ""
+  ],
+  [
+    "loadingLevel",
+    0
+  ],
+  [
+    "atoms",
+    [
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:13 2024"
+          }
+        ],
+        [
+          "atomName",
+          "C1p"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          86.192
+        ],
+        [
+          "atomStdShift",
+          0.185
+        ],
+        [
+          "atomMinShift",
+          85.987
+        ],
+        [
+          "atomMaxShift",
+          86.428
+        ],
+        [
+          "atomDistributionRefValue",
+          85.987
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:13 2024"
+          }
+        ],
+        [
+          "atomName",
+          "C3p"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          71.928
+        ],
+        [
+          "atomStdShift",
+          3.054
+        ],
+        [
+          "atomMinShift",
+          68.446
+        ],
+        [
+          "atomMaxShift",
+          74.15
+        ],
+        [
+          "atomDistributionRefValue",
+          68.446
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:13 2024"
+          }
+        ],
+        [
+          "atomName",
+          "C5p"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          60.507
+        ],
+        [
+          "atomStdShift",
+          0.638
+        ],
+        [
+          "atomMinShift",
+          60.108
+        ],
+        [
+          "atomMaxShift",
+          61.243
+        ],
+        [
+          "atomDistributionRefValue",
+          60.108
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:13 2024"
+          }
+        ],
+        [
+          "atomName",
+          "C6"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          137.164
+        ],
+        [
+          "atomStdShift",
+          0.339
+        ],
+        [
+          "atomMinShift",
+          136.674
+        ],
+        [
+          "atomMaxShift",
+          137.405
+        ],
+        [
+          "atomDistributionRefValue",
+          136.674
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:13 2024"
+          }
+        ],
+        [
+          "atomName",
+          "H1p"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          5.719
+        ],
+        [
+          "atomStdShift",
+          0.109
+        ],
+        [
+          "atomMinShift",
+          5.59
+        ],
+        [
+          "atomMaxShift",
+          5.834
+        ],
+        [
+          "atomDistributionRefValue",
+          5.59
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:13 2024"
+          }
+        ],
+        [
+          "atomName",
+          "H2p"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          2.505
+        ],
+        [
+          "atomStdShift",
+          0.079
+        ],
+        [
+          "atomMinShift",
+          2.433
+        ],
+        [
+          "atomMaxShift",
+          2.59
+        ],
+        [
+          "atomDistributionRefValue",
+          2.433
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:13 2024"
+          }
+        ],
+        [
+          "atomName",
+          "H2pp"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          2.289
+        ],
+        [
+          "atomStdShift",
+          0.287
+        ],
+        [
+          "atomMinShift",
+          2.086
+        ],
+        [
+          "atomMaxShift",
+          2.492
+        ],
+        [
+          "atomDistributionRefValue",
+          2.086
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:13 2024"
+          }
+        ],
+        [
+          "atomName",
+          "H3"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          14.15
+        ],
+        [
+          "atomStdShift",
+          0.756
+        ],
+        [
+          "atomMinShift",
+          13.293
+        ],
+        [
+          "atomMaxShift",
+          14.721
+        ],
+        [
+          "atomDistributionRefValue",
+          13.293
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:13 2024"
+          }
+        ],
+        [
+          "atomName",
+          "H3p"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          4.581
+        ],
+        [
+          "atomStdShift",
+          0.131
+        ],
+        [
+          "atomMinShift",
+          4.408
+        ],
+        [
+          "atomMaxShift",
+          4.726
+        ],
+        [
+          "atomDistributionRefValue",
+          4.408
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:13 2024"
+          }
+        ],
+        [
+          "atomName",
+          "H4p"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          3.816
+        ],
+        [
+          "atomStdShift",
+          0.021
+        ],
+        [
+          "atomMinShift",
+          3.801
+        ],
+        [
+          "atomMaxShift",
+          3.83
+        ],
+        [
+          "atomDistributionRefValue",
+          3.801
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:13 2024"
+          }
+        ],
+        [
+          "atomName",
+          "H5p"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          3.833
+        ],
+        [
+          "atomStdShift",
+          0.284
+        ],
+        [
+          "atomMinShift",
+          3.637
+        ],
+        [
+          "atomMaxShift",
+          4.159
+        ],
+        [
+          "atomDistributionRefValue",
+          3.637
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:13 2024"
+          }
+        ],
+        [
+          "atomName",
+          "H5pp"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          2.694
+        ],
+        [
+          "atomStdShift",
+          0.67
+        ],
+        [
+          "atomMinShift",
+          2.267
+        ],
+        [
+          "atomMaxShift",
+          3.467
+        ],
+        [
+          "atomDistributionRefValue",
+          2.267
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:13 2024"
+          }
+        ],
+        [
+          "atomName",
+          "H6"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          7.131
+        ],
+        [
+          "atomStdShift",
+          0.177
+        ],
+        [
+          "atomMinShift",
+          6.968
+        ],
+        [
+          "atomMaxShift",
+          7.364
+        ],
+        [
+          "atomDistributionRefValue",
+          6.968
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:13 2024"
+          }
+        ],
+        [
+          "atomName",
+          "H71"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          1.881
+        ],
+        [
+          "atomStdShift",
+          0.077
+        ],
+        [
+          "atomMinShift",
+          1.765
+        ],
+        [
+          "atomMaxShift",
+          1.923
+        ],
+        [
+          "atomDistributionRefValue",
+          1.765
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:13 2024"
+          }
+        ],
+        [
+          "atomName",
+          "H72"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          1.881
+        ],
+        [
+          "atomStdShift",
+          0.077
+        ],
+        [
+          "atomMinShift",
+          1.765
+        ],
+        [
+          "atomMaxShift",
+          1.923
+        ],
+        [
+          "atomDistributionRefValue",
+          1.765
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:13 2024"
+          }
+        ],
+        [
+          "atomName",
+          "H73"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          1.881
+        ],
+        [
+          "atomStdShift",
+          0.077
+        ],
+        [
+          "atomMinShift",
+          1.765
+        ],
+        [
+          "atomMaxShift",
+          1.923
+        ],
+        [
+          "atomDistributionRefValue",
+          1.765
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ]
+    ]
   ]
-}
+]

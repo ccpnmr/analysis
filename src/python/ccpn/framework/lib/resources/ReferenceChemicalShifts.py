@@ -4,9 +4,9 @@ A module to handle Reference ChemicalShifts loaded from disk as JSON files.
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-09-15 14:42:22 +0100 (Fri, September 15, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-01-09 15:28:43 +0000 (Tue, January 09, 2024) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -45,7 +45,7 @@ class ReferenceChemicalShifts(object):
         e.g.:
         - get all data by the "DNA" moleculeType:
             data =  referenceChemicalShifts.dataFrame
-            dnaData = referenceChemicalShifts.getBy(dataFrame=data, theProperty='moleculeType', values=['DNA'])
+            dnaData = referenceChemicalShifts.getBy(dataFrame=data, theProperty='compoundType', values=['DNA'])
         - keep filtering by "C" atomName:
             dnaData = referenceChemicalShifts.getBy(dataFrame=dnaData, theProperty='atomName', values=['P'])
         - keepFiltering by stdShift:
@@ -226,7 +226,7 @@ class ReferenceChemicalShifts(object):
         """ remove the registered class and unload the RCS. E.g. done when switching projects.
         """
         if theClass not in self._registeredClasses:
-            getLogger().warning(f'Cannot deregister {theClass} from {self.__class__.__name__}. Value not in the _registeredClasses.')
+            getLogger().debug(f'Cannot deregister {theClass} from {self.__class__.__name__}. Value not in the _registeredClasses.')
             return
         self._registeredClasses.pop(theClass)
         if unloadObjects:

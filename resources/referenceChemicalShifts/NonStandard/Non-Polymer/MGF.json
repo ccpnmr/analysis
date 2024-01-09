@@ -1,55 +1,206 @@
-{
-  "_metadata": {
-    "jsonVersion": 3,
-    "className": "ReferenceChemicalShift",
-    "classVersion": 1,
-    "user": "CCPN",
-    "lastPath": "",
-    "timestamp": "Fri Sep 15 15:17:45 2023",
-    "applicationVersion": 3.2
-  },
-  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
-  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
-  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
-  "compoundShortName": "MGF",
-  "compoundName": "TRIFLUOROMAGNESATE",
-  "compoundCcpCode": "MGF",
-  "compoundType": "Non-Polymer",
-  "compoundTypeClassification": "non-polymer",
-  "compoundPrecursorName": "",
-  "atoms": [
+[
+  [
+    "_metadata",
     {
-      "atomName": "FA",
-      "atomElementName": "",
-      "atomAverageShift": -147.985,
-      "atomStdShift": 1.435,
-      "atomMinShift": -149,
-      "atomMaxShift": -146.97,
-      "atomDistributionRefValue": -149,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "FB",
-      "atomElementName": "",
-      "atomAverageShift": -152.665,
-      "atomStdShift": 1.181,
-      "atomMinShift": -153.5,
-      "atomMaxShift": -151.83,
-      "atomDistributionRefValue": -153.5,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "FC",
-      "atomElementName": "",
-      "atomAverageShift": -165.635,
-      "atomStdShift": 9.143,
-      "atomMinShift": -172.1,
-      "atomMaxShift": -159.17,
-      "atomDistributionRefValue": -172.1,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
+      "jsonVersion": 3,
+      "className": "ReferenceChemicalShift",
+      "classVersion": 1,
+      "user": "CCPN",
+      "lastPath": "/Users/luca/Projects/AnalysisV3/resources/referenceChemicalShifts/NonStandard/Non-Polymer/MGF.json",
+      "timestamp": "Tue Jan  9 15:18:19 2024",
+      "applicationVersion": 3.2
     }
+  ],
+  [
+    "chemicalShiftName",
+    "Non-Standard Residues / Small Molecules"
+  ],
+  [
+    "chemicalShiftComment",
+    "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB"
+  ],
+  [
+    "chemicalShiftEntryDate",
+    "2023-09-14-14:25:08"
+  ],
+  [
+    "compoundName",
+    "TRIFLUOROMAGNESATE"
+  ],
+  [
+    "compoundShortName",
+    "MGF"
+  ],
+  [
+    "compoundCcpCode",
+    "MGF"
+  ],
+  [
+    "compoundType",
+    "Non-Polymer"
+  ],
+  [
+    "compoundTypeClassification",
+    "non-polymer"
+  ],
+  [
+    "compoundPrecursorName",
+    ""
+  ],
+  [
+    "loadingLevel",
+    0
+  ],
+  [
+    "atoms",
+    [
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:19 2024"
+          }
+        ],
+        [
+          "atomName",
+          "FA"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          -147.985
+        ],
+        [
+          "atomStdShift",
+          1.435
+        ],
+        [
+          "atomMinShift",
+          -149.0
+        ],
+        [
+          "atomMaxShift",
+          -146.97
+        ],
+        [
+          "atomDistributionRefValue",
+          -149.0
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:19 2024"
+          }
+        ],
+        [
+          "atomName",
+          "FB"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          -152.665
+        ],
+        [
+          "atomStdShift",
+          1.181
+        ],
+        [
+          "atomMinShift",
+          -153.5
+        ],
+        [
+          "atomMaxShift",
+          -151.83
+        ],
+        [
+          "atomDistributionRefValue",
+          -153.5
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:19 2024"
+          }
+        ],
+        [
+          "atomName",
+          "FC"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          -165.635
+        ],
+        [
+          "atomStdShift",
+          9.143
+        ],
+        [
+          "atomMinShift",
+          -172.1
+        ],
+        [
+          "atomMaxShift",
+          -159.17
+        ],
+        [
+          "atomDistributionRefValue",
+          -172.1
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ]
+    ]
   ]
-}
+]

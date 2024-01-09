@@ -1,44 +1,157 @@
-{
-  "_metadata": {
-    "jsonVersion": 3,
-    "className": "ReferenceChemicalShift",
-    "classVersion": 1,
-    "user": "CCPN",
-    "lastPath": "",
-    "timestamp": "Fri Sep 15 15:17:45 2023",
-    "applicationVersion": 3.2
-  },
-  "chemicalShiftName": "Non-Standard Residues / Small Molecules",
-  "chemicalShiftComment": "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB",
-  "chemicalShiftEntryDate": "2023-09-14-14:25:08",
-  "compoundShortName": "M5U",
-  "compoundName": "dimethyl 2,2'-((12Z,122Z,4S,6Z,8E,10E,15S,17Z,19E,21E)-2,13-dioxo-3,14-dioxa-1(4,2),12(2,4)-dioxazolacyclodocosaphane-6,8,10,17,19,21-hexaene-4,15-diyl)(2S,2'S,3S,3'S,4E,4'E)-bis(3-hydroxyhex-4-enoate)",
-  "compoundCcpCode": "M5U",
-  "compoundType": "Non-Polymer",
-  "compoundTypeClassification": "non-polymer",
-  "compoundPrecursorName": "",
-  "atoms": [
+[
+  [
+    "_metadata",
     {
-      "atomName": "H3",
-      "atomElementName": "",
-      "atomAverageShift": 12.992,
-      "atomStdShift": 0.793,
-      "atomMinShift": 12.431,
-      "atomMaxShift": 13.553,
-      "atomDistributionRefValue": 12.431,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
-    },
-    {
-      "atomName": "N3",
-      "atomElementName": "",
-      "atomAverageShift": 159.133,
-      "atomStdShift": 1.162,
-      "atomMinShift": 158.311,
-      "atomMaxShift": 159.954,
-      "atomDistributionRefValue": 158.311,
-      "atomDistributionValuePerPoint": 1,
-      "atomStatisticalDistribution": []
+      "jsonVersion": 3,
+      "className": "ReferenceChemicalShift",
+      "classVersion": 1,
+      "user": "CCPN",
+      "lastPath": "/Users/luca/Projects/AnalysisV3/resources/referenceChemicalShifts/NonStandard/Non-Polymer/M5U.json",
+      "timestamp": "Tue Jan  9 15:18:41 2024",
+      "applicationVersion": 3.2
     }
+  ],
+  [
+    "chemicalShiftName",
+    "Non-Standard Residues / Small Molecules"
+  ],
+  [
+    "chemicalShiftComment",
+    "The CCPN Analysis Version 3 ReferenceChemical shifts retrieved from BMRB"
+  ],
+  [
+    "chemicalShiftEntryDate",
+    "2023-09-14-14:25:08"
+  ],
+  [
+    "compoundName",
+    "dimethyl 2,2'-((12Z,122Z,4S,6Z,8E,10E,15S,17Z,19E,21E)-2,13-dioxo-3,14-dioxa-1(4,2),12(2,4)-dioxazolacyclodocosaphane-6,8,10,17,19,21-hexaene-4,15-diyl)(2S,2'S,3S,3'S,4E,4'E)-bis(3-hydroxyhex-4-enoate)"
+  ],
+  [
+    "compoundShortName",
+    "M5U"
+  ],
+  [
+    "compoundCcpCode",
+    "M5U"
+  ],
+  [
+    "compoundType",
+    "Non-Polymer"
+  ],
+  [
+    "compoundTypeClassification",
+    "non-polymer"
+  ],
+  [
+    "compoundPrecursorName",
+    ""
+  ],
+  [
+    "loadingLevel",
+    0
+  ],
+  [
+    "atoms",
+    [
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:41 2024"
+          }
+        ],
+        [
+          "atomName",
+          "H3"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          12.992
+        ],
+        [
+          "atomStdShift",
+          0.793
+        ],
+        [
+          "atomMinShift",
+          12.431
+        ],
+        [
+          "atomMaxShift",
+          13.553
+        ],
+        [
+          "atomDistributionRefValue",
+          12.431
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ],
+      [
+        [
+          "_metadata",
+          {
+            "jsonVersion": 3.0,
+            "className": "AtomChemicalShift",
+            "classVersion": 1.0,
+            "user": "luca",
+            "lastPath": "undefined",
+            "timestamp": "Tue Jan  9 15:18:41 2024"
+          }
+        ],
+        [
+          "atomName",
+          "N3"
+        ],
+        [
+          "atomElementName",
+          ""
+        ],
+        [
+          "atomAverageShift",
+          159.133
+        ],
+        [
+          "atomStdShift",
+          1.162
+        ],
+        [
+          "atomMinShift",
+          158.311
+        ],
+        [
+          "atomMaxShift",
+          159.954
+        ],
+        [
+          "atomDistributionRefValue",
+          158.311
+        ],
+        [
+          "atomDistributionValuePerPoint",
+          1.0
+        ],
+        [
+          "atomStatisticalDistribution",
+          []
+        ]
+      ]
+    ]
   ]
-}
+]

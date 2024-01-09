@@ -140,7 +140,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-01-09 15:05:07 +0000 (Tue, January 09, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-09 20:41:02 +0000 (Tue, January 09, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -593,7 +593,7 @@ class CcpNmrJson(TraitBase):
         kwds are passed to the class instantiation
         CCPNMRINTERNAL: used in recursive handler classes (see below)
         """
-        theDict = CcpNmrJson._updateToJson3_1(theData)
+        theDict = CcpNmrJson._updateToJson3_1_0(theData)
 
         if not Constants.OBJECT_UID in theDict:
             raise RuntimeError(f'_newObjectFromDict(): unable to get {Constants.OBJECT_UID} from theData')
@@ -874,7 +874,7 @@ class CcpNmrJson(TraitBase):
 
         # check for updates
         try:
-            dataDict = self._updateToJson3_1(data)
+            dataDict = self._updateToJson3_1_0(data)
             dataDict = self._update(dataDict)
         except Exception as es:
             getLogger().debug(f'updating from JSON raised errror: {es}')
@@ -965,14 +965,20 @@ class CcpNmrJson(TraitBase):
 
     #--------------------------------------------------------------------------------------------
     @classmethod
-    def _updateToJson3_1(cls, theData) -> dict:
+    def _updateToJson3_1_0(cls, theData) -> dict:
         """
         Update the data from 3.0 to json 3.1.0 defs
         :return: theData as an updated dict
         """
-        # 3.0 json file was saved as list of (trait, value) tuples
-        if isinstance(theData, dict):
-            # Some data, e,g, resources, were already stored as a dict
+        if isinstance(theData, dict) \
+            and (jsonVersion := theData.get(Constants.CCPNMRJSON)) is not None \
+            and jsonVersion >= '3.1.0':
+            # 3.1.0 No change: return unaltered
+            return theData
+
+        if isinstance(theData, dict) and (_metaData := theData.get('_metadata')) is not None:
+            _metaData['jsonVersion'] = 3.0
+            # reverted to 3.0 list of tuples for Luca's resource's files
             theData = list(theData.items())
 
         if isinstance(theData, list):
@@ -984,8 +990,15 @@ class CcpNmrJson(TraitBase):
 
             _metaData = theData[0][1]
 
+            # jsonversion
             if (_jsonVersion := _metaData.get(Constants.JSONVERSION, None)) is None:
                 raise RuntimeError(f'No {Constants.JSONVERSION}: The data do not represent a valid JSON encoded 3.0 object')
+            if isinstance(_jsonVersion, int):
+                _jsonVersion = float(_jsonVersion)
+            # Should be json 3.0 float
+            if not isinstance(_jsonVersion, float) or _jsonVersion != 3.0:
+                raise RuntimeError(f'Updating from JSON 3.0: Undefined JSON version {_jsonVersion}')
+            del(_metaData[Constants.JSONVERSION])
 
             # Not all 3.0 have a _uid; i.e. they do now if generated later for backward
             # compatibility, but not if originating from previous code
@@ -995,11 +1008,6 @@ class CcpNmrJson(TraitBase):
             else:
                 # cannot generate now, as this is a classmethod; i.e. we do not have a object yet
                 _uid = None
-
-            # Should be json 3.0 float
-            if not isinstance(_jsonVersion, float) or _jsonVersion != 3.0:
-                raise RuntimeError(f'Updating from JSON 3.0: Undefined JSON version {_jsonVersion}')
-            del(_metaData[Constants.JSONVERSION])
 
             _objectdata = {}
             _objectdata[Constants.CLASSNAME] = _metaData.get(Constants.CLASSNAME)
@@ -1036,11 +1044,6 @@ class CcpNmrJson(TraitBase):
 
             return _newData
 
-        elif isinstance(theData, dict) and \
-                theData.get(Constants.CCPNMRJSON) is not None:
-            # 3.1.0 No change: return unaltered
-            return theData
-
         else:
             raise RuntimeError(f'updating JSON 3.0 to 3.1.0: unrecognised data {theData}')
 
@@ -1050,7 +1053,7 @@ class CcpNmrJson(TraitBase):
         :raises RuntimeError
         """
         # this should not be necessary, but just a check
-        dataDict = cls._updateToJson3_1(dataDict)
+        dataDict = cls._updateToJson3_1_0(dataDict)
 
         if hasattr(cls, Constants.UPDATEHANDLERS):
             # We have updates
@@ -1132,13 +1135,15 @@ class CcpnJsonDirectoryABC(OrderedDict):
         self._traits = self.readFromJson()
         self.populate()
 
-    def readFromJson(self):
-        "read from directory"
+    def readFromJson(self) -> list:
+        """read json file(s) in directory to create a list of object(s)
+        """
         objs = []
         if self.directory is None:
             return objs
         if isinstance(self.directory, str):
             self.directory = aPath(self.directory)
+
         for path in self.directory.glob(self.searchPattern):
             try:
                 obj = CcpNmrJson.newObjectFromJson(path)

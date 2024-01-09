@@ -4,9 +4,9 @@ A module to handle Reference ChemicalShifts loaded from disk as JSON files.
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-09-15 14:18:06 +0100 (Fri, September 15, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-01-09 20:41:02 +0000 (Tue, January 09, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,12 +28,13 @@ __date__ = "$Date: 2023-08-30 15:14:00 +0100 (Wed, August 30, 2023) $"
 
 from ccpn.framework.lib.resources import ResourcesNameSpaces as rns
 from ccpn.framework.lib.resources.ResourcesNameSpaces import ResourcesLoadingLevel
-from ccpn.util.traits.CcpNmrJson import CcpNmrJson, CcpnJsonDirectoryABC
-from ccpn.util.traits.CcpNmrTraits import Unicode, Int, Float, Bool, RecursiveList, List, Tuple, CTuple
+from ccpn.util.traits.CcpNmrJson import CcpNmrJson, CcpnJsonDirectoryABC, register
+from ccpn.util.traits.CcpNmrTraits import Unicode, Int, Float, Bool, RecursiveList, List, Tuple, CTuple, OWTraits, TList
 from ccpn.framework.PathsAndUrls import ccpnResourcesChemicalShifts, userCcpnResourcesPath
 from ccpn.util.Path import aPath
 import numpy as np
 from scipy.stats import norm
+
 
 class AtomChemicalShift(CcpNmrJson):
     """Class to store ReferenceChemicalShift information for a single Atom
@@ -50,6 +51,7 @@ class AtomChemicalShift(CcpNmrJson):
     atomDistributionRefValue = Float(allow_none=True, default_value=0.0).tag(info='')
     atomDistributionValuePerPoint = Float(allow_none=True, default_value=0.0).tag(info='')
     atomStatisticalDistribution = List(default_value=[]).tag(info='The probability distribution values at the various ppm observations.')
+
     _isIntensitiesReconstructed = False # False if the distribution definition is not given and the plottable intensitiesArray is reconstructed by the other definitions
     _defaultArrayLength = 100
 
@@ -107,11 +109,15 @@ class AtomChemicalShift(CcpNmrJson):
     def __repr__(self):
         return f'{self.__class__.__name__}("{self.atomName}")'
 
+AtomChemicalShift.register()
+
+
 class ReferenceChemicalShift(CcpNmrJson):
     """Class to store ReferenceChemicalShift information for a compound
     """
     classVersion = rns.VERSION
     saveAllTraitsToJson = True
+
     chemicalShiftName = Unicode(allow_none=False, default_value='??').tag(info='')
     chemicalShiftComment = Unicode(allow_none=False, default_value='??').tag(info='')
     chemicalShiftEntryDate = Unicode(allow_none=True, default_value='??').tag(info='')
@@ -122,7 +128,9 @@ class ReferenceChemicalShift(CcpNmrJson):
     compoundTypeClassification = Unicode(allow_none=True, default_value='??').tag(info='The moleculeType classification, e.g.: Peptide linking, etc')
     compoundPrecursorName = Unicode(allow_none=True, default_value='??').tag(info='Usually used for Non-Standards. The full precursor or parent compound name, e.g.: Alanine, for a the ALPHA-AMINOBUTYRIC ACID ')
     loadingLevel = Int(allow_none=False, default_value='??').tag(info='The loading source level. e.g.: 0 for distribution, 1 for internal, 2 for project. Set automatically, not read from json ')
-    atoms = RecursiveList()
+
+    # atoms = TList(OWTraits(klass=AtomChemicalShift), default_value=[]).tag(info='The list with AtomChemicalShift instances')
+    atoms = List(default_value=[]).tag(info='The list with AtomChemicalShift instances')
 
     def _setAtomTraits(self):
         atoms = []
@@ -145,6 +153,7 @@ class ReferenceChemicalShift(CcpNmrJson):
 
 ReferenceChemicalShift.register()
 
+
 class _ReferenceChemicalShiftsABC(CcpnJsonDirectoryABC):
     """
     Class to handle the loading of ReferenceChemicalShifts from Json Files.
@@ -165,7 +174,7 @@ class _ReferenceChemicalShiftsABC(CcpnJsonDirectoryABC):
 
     def __init__(self):
         super().__init__() # will trigger the loading from super class
-        self._setAtomTraits()
+        self._setAtomTraits()  # GWV: not needed; just duplicates what the json restore mechanism is doing
         self._setLoadingLevel()
 
     def _setAtomTraits(self):
@@ -177,6 +186,7 @@ class _ReferenceChemicalShiftsABC(CcpnJsonDirectoryABC):
         """ set the _setLoadingLevel to each element"""
         for k, res in self.items():
             res.loadingLevel = self.loadingLevel.value
+
 
 class _DefaultReferenceChemicalShiftsLoader(_ReferenceChemicalShiftsABC):
     loadingLevel = ResourcesLoadingLevel.INSTALLATION

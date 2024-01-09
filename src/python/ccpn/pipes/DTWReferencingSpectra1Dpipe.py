@@ -1,9 +1,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-12-15 17:03:22 +0000 (Fri, December 15, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-01-09 14:19:15 +0000 (Tue, January 09, 2024) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -36,6 +36,7 @@ from ccpn.framework.lib.pipeline.PipeBase import SpectraPipe, PIPE_SCREEN
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.PeakPickers.PeakSnapping1D import _1DregionsFromLimits
 from ccpn.core.lib.PeakPickers.PeakPicker1D import _find1DPositiveMaxima, _getPositionsHeights
+from scipy import signal
 
 
 ########################################################################################################################
@@ -207,7 +208,6 @@ class DTWReferencingSpectra(SpectraPipe):
                     rightLimit = maxPeak + 100 # arbitrary pnts
                     leftPpm = originSpectrum.point2ppm(leftLimit, originSpectrum.axisCodes[0])
                     rightPpm = originSpectrum.point2ppm(rightLimit, originSpectrum.axisCodes[0])
-                    print(f'Working with limits: {leftPpm}-{rightPpm}')
                     x1f, y1f = _1DregionsFromLimits(xOrigin, yOrigin, limits=[leftPpm, rightPpm])
                     x2f, y2f = _1DregionsFromLimits(xDestination, yDestination, limits=[leftLimit, rightPpm])
 
@@ -223,9 +223,14 @@ class DTWReferencingSpectra(SpectraPipe):
                 path = dtw(positions1, positions2)
                 deltas = np.array([positions2[j] - positions1[i] for i, j in path])
                 delta_shift = np.median(deltas)
-                print(f'FOUND a shift of: {delta_shift} --- {originSpectrum} <-> {destinationSpectrum}')
-                # Plot original curves
-                destinationSpectrum.referenceValues = [destinationSpectrum.referenceValues[0] - delta_shift]
+
+                simple_shift = (np.argmax(signal.correlate(heights1, heights2)) - (len(heights2) - 1)) * np.mean(np.diff(positions1))
+                print(f'Before > {destinationSpectrum.referenceValues} - Applying the {simple_shift} INSTEAD OF {delta_shift} -> ')
+                b = destinationSpectrum.referenceValues
+                destinationSpectrum.referenceValues = [destinationSpectrum.referenceValues[0] + simple_shift]
+                diff = destinationSpectrum.referenceValues[0] - b[0]
+                print(f'AFTER > {destinationSpectrum.referenceValues}  -- DIFF: {diff}')
+
         return spectra
 
 DTWReferencingSpectra.register()  # Registers the pipe in the pipeline

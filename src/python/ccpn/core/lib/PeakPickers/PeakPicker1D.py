@@ -4,9 +4,9 @@ Simple 1D PeakPicker; for testing only
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                )
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-12-15 17:03:22 +0000 (Fri, December 15, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-01-09 14:19:15 +0000 (Tue, January 09, 2024) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -119,13 +119,44 @@ def _find1DPositiveMaxima(y, x, positiveThreshold=None):
                 mx = this
                 mxpos = x[i]
                 lookformax = True
-
     return maxtab, mintab
 
+def _find1DMaximaIndexes(y, positiveThreshold=None):
+    """
+    The same routine as above but 100t times faster by just masking above the positive threshold
+    """
+    mn, mx = np.Inf, -np.Inf
+    lookformax = True
+    if positiveThreshold is None:
+        positiveThreshold = float(np.median(y) + 1 * np.std(y))
+    mask = y>=positiveThreshold
+    y = y[mask]
+    indexes = []
+    for i in np.arange(len(y)):
+        this = y[i]
+        if this > mx:
+            mx = this
+        if this < mn:
+            mn = this
+        if lookformax:
+            this = abs(this)
+            if this < mx - positiveThreshold:
+                indexes.append(i)
+                mn = this
+                lookformax = False
+        else:
+            if this > mn + positiveThreshold:
+                indexes.append(i)
+                mx = this
+                lookformax = True
+    return np.array(indexes)
+
 def _getPositionsHeights(x, y, minimalHeightThreshold):
-    mm, mx = _find1DPositiveMaxima(y, x, minimalHeightThreshold)
-    positions = np.array(mm).T[0]
-    heights = np.array(mm).T[1]
+    maxtab, mintab = _find1DPositiveMaxima(y, x, minimalHeightThreshold)
+    if len(maxtab) == 0:
+        return [], []
+    positions = np.array(maxtab).T[0]
+    heights = np.array(maxtab).T[1]
     return positions, heights
 
 class PeakPicker1D(PeakPickerABC):

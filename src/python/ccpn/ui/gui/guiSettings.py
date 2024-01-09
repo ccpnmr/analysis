@@ -427,7 +427,7 @@ def getColourScheme():
     if application:
         colourScheme = application._colourScheme
         if colourScheme not in COLOUR_SCHEMES:
-            getLogger().warning('Undefined colour scheme')
+            getLogger().warning('getColourScheme: Undefined colour scheme')
             return DEFAULT
         return colourScheme
 
@@ -449,6 +449,12 @@ def setColourScheme(colourScheme):
 
     else:
         getLogger().warning('Application not defined; colourScheme not set')
+
+
+def setDefaultColourScheme():
+    """Conveniance to set default colour scheme
+    """
+    setColourScheme(DEFAULT)
 
 
 @singleton

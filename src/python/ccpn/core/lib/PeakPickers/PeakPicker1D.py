@@ -32,7 +32,8 @@ from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerABC, SimplePeak
 from numba import jit
 import numpy as np
 from scipy import spatial, signal
-# from ccpn.framework.Application import getApplication
+from ccpn.framework.Application import getApplication
+
 
 # @jit(nopython=True, nogil=True)
 def _find1DMaxima(y, x, positiveThreshold, negativeThreshold=None, findNegative=False):
@@ -138,7 +139,7 @@ class PeakPicker1D(PeakPickerABC):
     def __init__(self, spectrum):
         super().__init__(spectrum=spectrum)
         self.noise = None
-        application = spectrum.project.application
+        application = getApplication()
         self._doNegativePeaks = application.preferences.general.negativePeakPick1D
 
     def _setThresholdsFromSpectrum(self):

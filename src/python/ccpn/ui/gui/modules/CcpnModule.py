@@ -1013,7 +1013,6 @@ class CcpnModuleLabel(DockLabel):
     TOP_LEFT = 'TOP_LEFT'
     TOP_RIGHT = 'TOP_RIGHT'
 
-    # TODO:GEERTEN check colours handling
     # defined here, as the updateStyle routine is called from the
     # DockLabel instantiation; changed later on
 
@@ -1190,7 +1189,7 @@ class CcpnModuleLabel(DockLabel):
         contextMenu.addSeparator()
 
         gidAction = contextMenu.addAction('Copy Gid to clipboard', self._copyPidToClipboard)
-        gidAction.setToolTip('Usage, On Python Console type: ui.getByGid(Pasted_Gid) to get this module as an object')
+        gidAction.setToolTip('Usage, On Python Console type: get(<pasted-pid>) to get this module as an object')
 
         renameAction.setEnabled(self.module._allowRename)
         # numDocks = len(self.module.getDocksInParentArea())

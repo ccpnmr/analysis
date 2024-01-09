@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-22 18:27:04 +0000 (Wed, November 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-11-29 12:08:45 +0000 (Wed, November 29, 2023) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -110,6 +110,9 @@ _ChemicalShiftListFrame.register()
 
 from ccpn.core._implementation.Updater import updateObject, UPDATE_POST_OBJECT_INITIALISATION
 from ccpn.core._implementation.updates.update_3_0_4 import _updateChemicalShiftList_3_0_4_to_3_1_0
+
+# define the default chemical-shift-list name
+DEFAULT_CHEMICALSHIFTLIST = 'default'
 
 
 @updateObject('3.0.4', '3.1.0', _updateChemicalShiftList_3_0_4_to_3_1_0, UPDATE_POST_OBJECT_INITIALISATION)

@@ -11,9 +11,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-09-06 14:28:31 +0100 (Wed, September 06, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-11-29 12:08:47 +0000 (Wed, November 29, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -160,6 +160,7 @@ class Framework(NotifierBase, GuiBase):
         #-----------------------------------------------------------------------------------------
         # Necessary as attribute is queried during initialisation:
         self._mainWindow = None
+        self._ui = None
 
         # This is needed to make project available in NoUi (if nothing else)
         self._project = None
@@ -179,6 +180,10 @@ class Framework(NotifierBase, GuiBase):
         self._created = datetime.now().strftime("%H%M")  # adds the app creation time to the end of the logger filename
 
         self.args = args
+
+        # Blocking level for command echo and logging; required here because _echoBlocking init is required
+        self._echoBlocking = int(getattr(self.args, 'noDebugLogging', False))
+        self._enableLoggingToConsole = True
 
         # NOTE:ED - what is revision for? there are no uses and causes a new error for sphinx documentation unless a string
         # self.revision = Version.revision
@@ -206,9 +211,6 @@ class Framework(NotifierBase, GuiBase):
         # self._fontSettings = None
         # self._menuSpec = None
 
-        # Blocking level for command echo and logging
-        self._echoBlocking = int(getattr(self.args, 'noDebugLogging', False))
-        self._enableLoggingToConsole = True
         logger.disabled = getattr(self.args, 'noEchoLogging', False)  # overrides noDebugLogging
 
         # Process info
@@ -250,11 +252,17 @@ class Framework(NotifierBase, GuiBase):
         self.resources = Resources(self)
 
         # get a user interface; nb. ui.start() is called by the application
-        self.ui = self._getUI()
+        self._ui = self._getUI()
 
     #-----------------------------------------------------------------------------------------
     # properties of Framework
     #-----------------------------------------------------------------------------------------
+
+    @property
+    def ui(self):
+        """:return the user interface (Ui) instance
+        """
+        return self._ui
 
     @property
     def project(self) -> Project:
@@ -265,7 +273,7 @@ class Framework(NotifierBase, GuiBase):
     @property
     def current(self) -> Current:
         """Current contains selected peaks, selected restraints, cursor position, etc.
-        see Current.py for detailed descriptiom
+        see Current.py for detailed description
         :return the Current object
         """
         return self._current
@@ -635,6 +643,7 @@ class Framework(NotifierBase, GuiBase):
     # Utilities
     #-----------------------------------------------------------------------------------------
 
+    @logCommand('application.')
     def setDebug(self, level: int):
         """Set the debugging level
         :param level: 0: off, 1-3: debug level 1-3
@@ -1047,36 +1056,44 @@ class Framework(NotifierBase, GuiBase):
         """Load project defined by path
         :return a Project instance
         """
+        getLogger().debug(f'--> Loading Project {path}')
         result = self.ui.loadProject(path)
-        getLogger().debug('--> LOADED PROJECT')
 
         return result
 
-    def _saveProjectAs(self, newPath=None, overwrite=False) -> bool:
+    def _saveProjectAs(self, newPath=None, overwrite=False, copySubDirectories: bool = True) -> bool:
         """Save project to newPath (optionally overwrite)
+
+        :param newPath: new path for storing project files
+        :param overwrite: flag to overwrite if path exists
+        :param copySubDirectories: flag to set the copying of the project's subdirectories
         :return True if successful
         """
-        if self.preferences.general.keepSpectraInsideProject:
-            self.project.copySpectraToProject()
+        # GWV 27/7/2023: disabled
+        # if self.preferences.general.keepSpectraInsideProject:
+        #     self.project.copySpectraToProject()
 
         try:
-            self.project.saveAs(newPath=newPath, overwrite=overwrite)
+            self.project.saveAs(newPath=newPath, overwrite=overwrite, copySubDirectories=copySubDirectories)
             Layout.saveLayoutToJson(self.ui.mainWindow)
             self.current._dumpStateToFile(self.statePath)
             self._getUndo().markSave()
 
-        except (PermissionError, FileNotFoundError):
+        except (PermissionError, FileNotFoundError) as es:
+            getLogger().debug(f'_saveProjectAs() caught: {es}')
             failMessage = f'Folder {newPath} may be read-only'
             getLogger().warning(failMessage)
-            raise
+            raise es
 
         except RuntimeWarning as es:
+            getLogger().debug(f'_saveProjectAs() caught: {es}')
             failMessage = f'saveAs: unable to save {es}'
             getLogger().warning(failMessage)
-            raise
+            raise es
 
         except Exception as es:
-            failMessage = f'saveAs: unable to save {es}'
+            getLogger().debug(f'_saveProjectAs() caught: {es}')
+            failMessage = f'saveAs: {es}'
             getLogger().warning(failMessage)
             return False
 
@@ -1105,8 +1122,9 @@ class Framework(NotifierBase, GuiBase):
                 getLogger().warning('Project is read-only')
                 return True
 
-            if self.preferences.general.keepSpectraInsideProject:
-                self.project.copySpectraToProject()
+            # GWV 27/7/2023: disabled
+            # if self.preferences.general.keepSpectraInsideProject:
+            #     self.project.copySpectraToProject()
 
             try:
                 self.project.save()
@@ -1117,7 +1135,7 @@ class Framework(NotifierBase, GuiBase):
             except (PermissionError, FileNotFoundError):
                 failMessage = 'Folder may be read-only'
                 getLogger().info(failMessage)
-                raise
+                raise RuntimeError(failMessage)
 
             except Exception as es:
                 failMessage = f'save: unable to save {es}'
@@ -1133,8 +1151,6 @@ class Framework(NotifierBase, GuiBase):
         :param overwrite: flag to indicate overwriting of existing path
         :return True if successful
         """
-        # self._saveOverride = False
-
         with self._setSaveOverride(True):
             # override read-only for a save to a new folder
             #   project can still be read-only for next load
@@ -1396,7 +1412,7 @@ class Framework(NotifierBase, GuiBase):
         :return Project instance (either newly created or the existing)
         CCPNINTERNAL: called from NefDataLoader.load()
         """
-        from ccpn.core.Project import DEFAULT_CHEMICALSHIFTLIST
+        from ccpn.core.ChemicalShiftList import ChemicalShiftList, DEFAULT_CHEMICALSHIFTLIST
         from ccpn.core.lib.ProjectLib import checkProjectName
 
         TOBEDELETED = '_toBeDeleted'
@@ -1409,7 +1425,8 @@ class Framework(NotifierBase, GuiBase):
 
         # TODO: find a different solution for this
         with rebuildSidebar(application=self):
-            if _newProject and (ch := project.getChemicalShiftList(DEFAULT_CHEMICALSHIFTLIST)):
+            if _newProject and \
+                (ch := project._getChild(ChemicalShiftList, DEFAULT_CHEMICALSHIFTLIST)):
                 # rename the existing chemical-shift-list, hopefully an unused name
                 ch.rename(TOBEDELETED)
 

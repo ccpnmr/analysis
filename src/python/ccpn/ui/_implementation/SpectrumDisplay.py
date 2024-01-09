@@ -700,7 +700,10 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
         if spectrum.dimensionTypes[0] == specLib.DIMENSION_FREQUENCY:
             apiSpectrumDisplay.newFrequencyAxis(code=axisCodes[0], stripSerial=1, unit=AXISUNIT_PPM)
         elif spectrum.dimensionTypes[0] == specLib.DIMENSION_TIME:
-            apiSpectrumDisplay.newFidAxis('time', stripSerial=1, unit=AXISUNIT_POINT)
+            # Cannot do newFidAxis; all falls apart
+            # apiSpectrumDisplay.newFidAxis('time', stripSerial=1, unit=AXISUNIT_POINT)
+            apiAxis = apiSpectrumDisplay.newFrequencyAxis(code='Time', stripSerial=1, unit=AXISUNIT_POINT)
+            _unit = apiAxis.unit
 
         # SpectrumDisplay Y; i.e. Intensity
         apiSpectrumDisplay.newIntensityAxis(code=SpectrumDisplay.INTENSITY, stripSerial=1, unit=AXISUNIT_NUMBER)

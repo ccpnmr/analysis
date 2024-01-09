@@ -16,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-11 15:29:55 +0100 (Wed, October 11, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-11-29 12:08:45 +0000 (Wed, November 29, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -68,7 +68,8 @@ from ccpn.framework.PathsAndUrls import \
     CCPN_LOGS_DIRECTORY, \
     CCPN_BACKUPS_DIRECTORY, \
     CCPN_DIRECTORY_SUFFIX, \
-    CCPN_PLOTS_DIRECTORY
+    CCPN_PLOTS_DIRECTORY, \
+    CCPN_SAVEAS_SUB_DIRECTORIES
 
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
 from ccpnmodel.ccpncore.memops import Notifiers
@@ -80,29 +81,6 @@ from ccpnmodel.ccpncore.api.ccp.nmr.NmrExpPrototype import RefExperiment
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 # from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
-
-
-# TODO These should be merged with the same constants in CcpnNefIo
-# (and likely those in ExportNefPopup) and moved elsewhere
-CHAINS = 'chains'
-CHEMICALSHIFTLISTS = 'chemicalShiftLists'
-RESTRAINTTABLES = 'restraintTables'
-PEAKLISTS = 'peakLists'
-INTEGRALLISTS = 'integralLists'
-MULTIPLETLISTS = 'multipletLists'
-SAMPLES = 'samples'
-SUBSTANCES = 'substances'
-NMRCHAINS = 'nmrChains'
-# DATASETS = 'dataSets'
-STRUCTUREDATA = 'structureData'
-COMPLEXES = 'complexes'
-SPECTRUMGROUPS = 'spectrumGroups'
-NOTES = 'notes'
-# _PEAKCLUSTERS = '_peakClusters'
-COLLECTIONS = 'collections'
-
-# define the default chemical-shift-list name
-DEFAULT_CHEMICALSHIFTLIST = 'default'
 
 
 class Project(AbstractWrapperObject):
@@ -154,6 +132,8 @@ class Project(AbstractWrapperObject):
     #TODO: do we still have this limitation?
     _MAX_PROJECT_NAME_LENGTH = 32
     _READONLY = 'readOnly'
+
+    _LOWEST_COMPATIBLE_VERSION = '3.1.0'
 
     #-----------------------------------------------------------------------------------------
     # Property Attributes of the data structure
@@ -922,6 +902,26 @@ class Project(AbstractWrapperObject):
         bPath = _dir / _base + CCPN_BACKUP_SUFFIX + CCPN_DIRECTORY_SUFFIX
         return bPath
 
+    def _getSubdirectorySizes(self, subDirectories=None, sizeInMB=False) -> dict:
+        """Calculate the sizes of the subDirectories (if they exist) of the project
+        :param subDirectories: a list of sub directories; defaults to CCPN_SUB_DIRECTORIES
+        :param sizeInMB: flag to return size in MB
+        :return a Dict with (subDir, sizeInBytes)
+        """
+        if subDirectories is None:
+            subDirectories = CCPN_SUB_DIRECTORIES
+
+        _MB = 1024*1024
+        result = {}
+        for _subdir in subDirectories:
+            _path = self.projectPath / _subdir
+            if _path.exists():
+                _size = _path.getSize()
+                if sizeInMB:
+                    _size /= _MB
+                result[_subdir] = _size
+        return result
+
     #-----------------------------------------------------------------------------------------
     # Implementation methods
     #-----------------------------------------------------------------------------------------
@@ -942,14 +942,20 @@ class Project(AbstractWrapperObject):
         if xmlLoader.apiNmrProject is None or not isinstance(xmlLoader.apiNmrProject, ApiNmrProject):
             raise RuntimeError('No valid ApiNmrProject defined')
 
+        # reference to XmlLoader instance;
+        self._xmlLoader = xmlLoader
+
         # Setup object handling dictionaries
         self._data2Obj = {}
         self._pid2Obj = {}
+
+        self._name = xmlLoader.name  # AbstractWrapperObject init needs name to be set
 
         #==> AbstractWrapper defines:
         # linkage attributes
         #   self._project = self
         #   self._wrappedData = wrappedData
+        #   self._id
         # Tuple to hold children that explicitly need finalising after atomic operations
         #   self._finaliseChildren = []
         #   self._childActions = []
@@ -961,13 +967,6 @@ class Project(AbstractWrapperObject):
         # self._appBase = None (delt with below)
         # Reference to application; defined by Framework
         self._application = None
-
-        self._name = xmlLoader.name
-        self._id = self._name
-        self._resetIds()
-
-        # reference to XmlLoader instance;
-        self._xmlLoader = xmlLoader
 
         # Set up notification machinery
         # Active notifiers - saved for later cleanup. CORE APPLICATION ONLY
@@ -1079,11 +1078,12 @@ class Project(AbstractWrapperObject):
         if (dataloader := CcpNmrV3ProjectDataLoader.checkForValidFormat(path)) is None:
             raise ValueError('Path "%s" does not define a valid ccpn project' % path)
 
-        if (projectHistory := getProjectSaveHistory(dataloader.path)):
-            # check whether the history exists
-            return projectHistory.lastSavedVersion <= '3.0.4'
-
-        return True
+        return dataloader.projectNeedsUpgrade
+        # if (projectHistory := getProjectSaveHistory(dataloader.path)):
+        #     # check whether the saved version
+        #     return projectHistory.lastSavedVersion < Project._LOWEST_COMPATIBLE_VERSION
+        #
+        # return True
 
     @property
     def _data(self):
@@ -1128,6 +1128,7 @@ class Project(AbstractWrapperObject):
         This routine is called from Framework, as some other machinery first needs to set up
         (linkages, Current, notifiers and such)
         """
+        from ccpn.core.ChemicalShiftList import DEFAULT_CHEMICALSHIFTLIST
 
         self._logger = createLogger(self, now=self.application._created)
 
@@ -1257,9 +1258,6 @@ class Project(AbstractWrapperObject):
     # Save, SaveAs, Close
     #-----------------------------------------------------------------------------------------
 
-    def _close(self):
-        self.close()
-
     def _closeApiObjects(self):
         """Close and purge all api-objects
         WARNING: project is irrecoverable after this
@@ -1328,11 +1326,12 @@ class Project(AbstractWrapperObject):
         getLogger().debug('Done purge')
 
     def close(self):
+        raise RuntimeError('Please use application.closeProject()')
+
+    def _close(self):
         """Clean up the wrapper project previous to deleting or replacing
         Cleanup includes wrapped data graphics objects (e.g. Window, Strip, ...)
         """
-        # only update the logger if there have been changes to the project
-        self._updateLoggerState(readOnly=self.readOnly or not self.isModified)
 
         getLogger().info(f"Closing {self.path}")
 
@@ -1346,22 +1345,26 @@ class Project(AbstractWrapperObject):
         # Remove undo stack:
         self._resetUndo(maxWaypoints=0)
 
+        # only update the logger if there have been changes to the project
+        self._updateLoggerState(readOnly=self.readOnly or not self.isModified)
         Logging._clearLogHandlers()
+
         self._clearAllApiNotifiers()
         self.deleteAllNotifiers()
         # clear the lookup dicts
         self._data2Obj.clear()
         self._pid2Obj.clear()
-        # self.__dict__.clear()  # GWV: dangerous; why done?
 
-    def saveAs(self, newPath: str, overwrite: bool = False):
+    def saveAs(self, newPath: str, overwrite: bool = False, copySubDirectories: bool = True):
         """Save project to newPath (optionally overwrite);
            Derive the new project name from newPath
            :param newPath: new path for storing project files
            :param overwrite: flag to overwrite if path exists
+           :param copySubDirectories: flag to set the copying of the project's subdirectories
         """
         from ccpn.core.lib.XmlLoader import XmlLoader
 
+        _oldPath = aPath(self.path)
         _newPath = aPath(newPath).assureSuffix(CCPN_DIRECTORY_SUFFIX)
         if _newPath.exists() and overwrite:
             parent = _newPath.parent
@@ -1370,26 +1373,51 @@ class Project(AbstractWrapperObject):
 
         # redirect only if _newXmlLoader is successful?
         for sp in self.spectra:
-            # check if any spectra are referenced as ALONGSIDE and update to the new path
-            if sp._isAlongside and sp.hasValidPath() and aPath(self.path).parent != _newPath.parent:
-                getLogger().debug(f'Redirecting spectrum {aPath(self.path).parent} -> {_newPath.parent}')
+            # check if spectrum is referenced as ALONGSIDE and require an update
+            # to absolute path
+            if sp._isAlongside and sp.hasValidPath() and \
+               _oldPath.parent != _newPath.parent:
+                getLogger().warning(f'Redirecting spectrum {sp.name} from {_oldPath.parent} -> {_newPath.parent}')
                 sp._makeAbsolutePath()
+
+            # check if spectrum is referenced as INSIDE and and require an update
+            # to absolute path
+            if sp._isInside and sp.hasValidPath() and \
+               not copySubDirectories:
+                getLogger().warning(f'Redirecting spectrum {sp.name} from {_oldPath.parent} -> {_newPath.parent}')
+                sp._makeAbsolutePath()
+
+        # only update the logger if there have been changes to the project
+        self._updateLoggerState(readOnly=self.readOnly or not self.isModified)
+        # clear the logging handlers, to be opened after all saving and copying
+        Logging._clearLogHandlers()
 
         _newXmlLoader = XmlLoader.newFromLoader(self._xmlLoader, path=_newPath, create=True)
         self._xmlLoader = _newXmlLoader
         self._path = _newXmlLoader.path.asString()
         self._name = _newXmlLoader.name
+        self._resetIds()
+
+        # Optionally copy and check subdirectories
+        if copySubDirectories:
+            for _subdir in CCPN_SAVEAS_SUB_DIRECTORIES:
+                _source = _oldPath / _subdir
+                _dest = _newPath / _subdir
+                if _source.exists():
+                    _source.copyDir(_dest, overwrite=False)
         self._checkProjectSubDirectories()
+
+        # create a new logger
+        self._logger = createLogger(self, now=self.application._created)
+
         self._saveHistory = newProjectSaveHistory(self.path)
         self.save(comment='saveAs')
-
-        # check for application and Gui;
-        if self.application and self.application.hasGui:
-            self.application.mainWindow.sideBar.setProjectName(self)
 
     def save(self, comment='regular save', autoBackup: bool = False):
         """Save project; add optional comment to save records
         """
+        from ccpn.core.lib.ProjectArchiver import ProjectArchiver
+
         if self.readOnly:
             getLogger().warning('save skipped: Project is read-only')
             return
@@ -1425,6 +1453,10 @@ class Project(AbstractWrapperObject):
             self._saveHistory.addSaveRecord(comment=f'{self.name}: {comment}')
             self._saveHistory.save()
             self._updateLoggerState(readOnly=self.readOnly, flush=True)
+
+            # make last-saved archive
+            archiver = ProjectArchiver(projectPath=self.path)
+            archiver.makeArchive(name=f'{self.name}_lastSaved', overwrite=True)
 
             self._isTemporary = False
             self._isNew = False
@@ -2457,8 +2489,8 @@ class Project(AbstractWrapperObject):
         """
         result = []
         with undoBlock():
-            for sp in self.spectra:
-                _files = sp.copyDataToProject()
+            for spec in [sp for sp in self.spectra if sp.hasValidPath() and not sp._isInside]:
+                _files = spec.copyDataToProject()
                 result.extend(_files)
         return result
 
@@ -3065,6 +3097,7 @@ def _loadProject(application, path: str) -> Project:
     """
     from ccpn.core.lib.XmlLoader import XmlLoader
     from ccpn.core._implementation.updates.update_v2 import updateProject_fromV2
+    from ccpn.core.lib.ProjectArchiver import ProjectArchiver
 
     _path = aPath(path)
     if not _path.exists():
@@ -3146,5 +3179,10 @@ def _loadProject(application, path: str) -> Project:
 
     # the initialisation is completed by Framework._initialiseProject when it has done its things
     # project._initialiseProject()
+
+    # make last-opened archive
+    if not project.readOnly:
+        archiver = ProjectArchiver(projectPath=project.path)
+        archiver.makeArchive(name=f'{project.name}_lastOpened', overwrite=True)
 
     return project

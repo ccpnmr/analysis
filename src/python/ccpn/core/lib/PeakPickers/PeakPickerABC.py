@@ -16,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-24 13:54:29 +0100 (Tue, October 24, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-11-29 12:08:46 +0000 (Wed, November 29, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -106,7 +106,10 @@ class PeakPickerABC(CcpNmrJson):
     """ABC for implementation of a peak picker
     """
 
-    classVersion = 1.0  # For json saving
+    keysInOrder = True  # maintain the definition order
+    classVersion = '1.0.0'  # For json saving
+    saveAllTraitsToJson = True
+    _encodeAsJson_3_0 = True  # needs to be readible by all versions
 
     #=========================================================================================
     # to be subclassed
@@ -141,11 +144,6 @@ class PeakPickerABC(CcpNmrJson):
     # parameter definitions and mappings onto the Spectrum class
     #=========================================================================================
 
-    keysInOrder = True  # maintain the definition order
-
-    saveAllTraitsToJson = True
-    classVersion = 1.0  # for json saving
-
     # list of core peakPicker attributes that need to be restored when the spectrum is loaded
     dimensionCount = CInt(default_value=0)
     pointExtension = CInt(default_value=0)
@@ -172,8 +170,8 @@ class PeakPickerABC(CcpNmrJson):
 
         if spectrum is None:
             raise ValueError('%s: spectrum is None' % self.__class__.__name__)
-        if not isinstance(spectrum, Spectrum):
-            raise ValueError('%s: spectrum is not of Spectrum class' % self.__class__.__name__)
+        # if not isinstance(spectrum, Spectrum):
+        #     raise ValueError('%s: spectrum is not of Spectrum class' % self.__class__.__name__)
 
         if spectrum.dimensionCount > 1 and self.onlyFor1D:
             raise ValueError('%s only works for 1D spectra' % self.__class__.__name__)
@@ -426,19 +424,20 @@ class PeakPickerABC(CcpNmrJson):
 
 #end class
 
-from ccpn.util.traits.CcpNmrTraits import Instance
-from ccpn.util.traits.TraitJsonHandlerBase import CcpNmrJsonClassHandlerABC
+# GWV: moved to ccpn.core.lib.CoreTraits
+# from ccpn.util.traits.CcpNmrTraits import Instance, OWTraits
+# from ccpn.util.traits.TraitJsonHandlerBase import CcpNmrJsonClassHandlerABC
+#
+#
+# class PeakPickerTrait(OWTraits):
+#     """Specific trait for a PeakPicker instance.
+#     """
+#     klass = PeakPickerABC
 
-
-class PeakPickerTrait(Instance):
-    """Specific trait for a PeakPicker instance.
-    """
-    klass = PeakPickerABC
-
-    def __init__(self, **kwds):
-        Instance.__init__(self, klass=self.klass, allow_none=True, **kwds)
-
-
-    class jsonHandler(CcpNmrJsonClassHandlerABC):
-        # klass = PeakPickerABC
-        pass
+    # def __init__(self, **kwds):
+    #     Instance.__init__(self, klass=self.klass, allow_none=True, **kwds)
+    #
+    #
+    # class jsonHandler(CcpNmrJsonClassHandlerABC):
+    #     # klass = PeakPickerABC
+    #     pass

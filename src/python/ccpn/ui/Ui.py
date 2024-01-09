@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-08-30 19:22:14 +0100 (Wed, August 30, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-11-29 12:08:47 +0000 (Wed, November 29, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -52,9 +52,24 @@ class Ui(NotifierBase):
 
     def __init__(self, application):
 
-        self.application = application
-        self.mainWindow = None
+        # set the forward/backlink with application already here, because subsequent initialisations
+        # do require this to be present
+        self._application = application
+        application._ui = self
+        self._mainWindow = None
         self.pluginModules = []
+
+    @property
+    def application(self):
+        """:return the Application instance
+        """
+        return self._application
+
+    @property
+    def mainWindow(self):
+        """:return the MainWindow instance
+        """
+        return self._mainWindow
 
     @property
     def project(self):
@@ -189,10 +204,12 @@ class Ui(NotifierBase):
         _app = getApplication()
 
         if dataLoader is None and path is not None:
-            dataLoader = checkPathForDataLoader(path)
+            if (dataLoader := checkPathForDataLoader(path)) is None:
+                getLogger().error(f'Loading project: No suitable dataLoader found for {path}')
+                return None
 
         if dataLoader is None:
-            getLogger().error('No suitable dataLoader found')
+            getLogger().error('Loading project: No suitable dataLoader')
             return None
 
         if not dataLoader.createNewProject:

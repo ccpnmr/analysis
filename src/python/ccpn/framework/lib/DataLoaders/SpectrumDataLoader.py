@@ -18,9 +18,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:40 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-11-29 12:08:47 +0000 (Wed, November 29, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,8 +32,8 @@ __date__ = "$Date: 2021-06-30 10:28:41 +0000 (Fri, June 30, 2021) $"
 
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC, NO_SUFFIX, ANY_SUFFIX
 from ccpn.core.Spectrum import _newSpectrumFromDataSource
-from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import DataSourceTrait
-from ccpn.core.lib.DataStore import DataStore, DataStoreTrait
+from ccpn.core.lib.DataStore import DataStore
+from ccpn.core.lib.CoreTraits import DataStoreTrait, DataSourceTrait
 
 
 class SpectrumDataLoaderABC(DataLoaderABC):
@@ -197,3 +197,9 @@ class JcampSpectrumLoader(SpectrumDataLoaderABC):
     from ccpn.core.lib.SpectrumDataSources.JcampSpectrumDataSource import JcampSpectrumDataSource
     spectumDataSourceClass = JcampSpectrumDataSource
 JcampSpectrumLoader._initClass()   # also registers
+
+
+class JeolSpectrumLoader(SpectrumDataLoaderABC):
+    from ccpn.core.lib.SpectrumDataSources.JeolSpectrumDataSource import JeolSpectrumDataSource
+    spectumDataSourceClass = JeolSpectrumDataSource
+JeolSpectrumLoader._initClass()   # also registers

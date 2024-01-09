@@ -39,6 +39,7 @@ import sys
 import string
 import platform
 import collections
+import inspect
 from collections.abc import Iterable
 from itertools import islice
 from string import whitespace
@@ -471,6 +472,15 @@ def stringifier(*fields, **options):
 
     return formatter
 
+def classType(obj) -> str:
+    """Helper function to yield a more managable class description for an object (either class or instance)
+    (in lieu of type())
+    :parameter obj: object (class or instance) to get the type (name) from
+    """
+    if inspect.isclass(obj):
+        return f'<class {repr(obj.__name__)}>'
+    else:
+        return f'<class {repr(obj.__class__.__name__)}>'
 
 def contains_whitespace(s):
     return True in [c in s for c in string.whitespace]

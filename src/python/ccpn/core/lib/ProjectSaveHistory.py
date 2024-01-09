@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 18:46:14 +0100 (Tue, March 28, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-11-29 12:08:46 +0000 (Wed, November 29, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -36,7 +36,8 @@ from ccpn.framework.Version import VersionString, applicationVersion
 from ccpn.util.Time import now
 from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
-from ccpn.util.traits.CcpNmrJson import CcpNmrJson, TraitJsonHandlerBase
+from ccpn.util.traits.CcpNmrJson import CcpNmrJson, Constants
+from ccpn.util.traits.TraitJsonHandlerBase import TraitJsonHandlerBase
 from ccpn.util.traits.CcpNmrTraits import List, Path
 
 
@@ -84,7 +85,8 @@ class ProjectSaveHistory(CcpNmrJson):
     stores (version, datetime, user, platform, comment) tuples
     """
 
-    classVersion = 1.0  # Json classVersion
+    classVersion = '1.0.0'  # Json classVersion
+    _encodeAsJson_3_0 = True  # History need to be readible by all versions
 
     SaveRecord = namedtuple('SaveRecord', 'version datetime user platform comment')
 
@@ -96,13 +98,13 @@ class ProjectSaveHistory(CcpNmrJson):
     class RecordListHandler(TraitJsonHandlerBase):
         """Record-list handling by Json"""
 
-        def decode(self, obj, trait, value):
+        def decode(self, value):
             """uses value to generate and set the new (or modified) obj"""
             newValue = []
             for item in value:
-                record = obj._newRecord(*item)
+                record = self.obj._newRecord(*item)
                 newValue.append(record)
-            setattr(obj, trait, newValue)
+            return newValue
 
 
     # the list of entries

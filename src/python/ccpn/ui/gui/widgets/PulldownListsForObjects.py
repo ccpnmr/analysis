@@ -152,10 +152,16 @@ class _PulldownABC(PulldownListCompoundWidget):
 
         # add a notifier to update the pulldown list
         if self.project:
-            self.addNotifier(Notifier(self.project,
-                                      [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
-                                      self._className,
-                                      self._updatePulldownList))
+            # self.addNotifier(Notifier(self.project,
+            #                           [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
+            #                           self._className,
+            #                           self._updatePulldownList))
+            # GWV 15/12/23: implementation change while working on mimics
+            _notifier = self.project.setNotifier(self.project,
+                                      triggers = [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
+                                      targetName = self._className,
+                                      callback = self._updatePulldownList)
+            self.addNotifier(_notifier)
             if self._followCurrent:
                 self.addNotifier(Notifier(self.current,
                                           [Notifier.CURRENT],

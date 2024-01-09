@@ -21,43 +21,37 @@ __version__ = "$Revision: 3.2.1 $"
 # Created
 #=========================================================================================
 __author__ = "$Author: gvuister $"
-__date__ = "$Date: 2022-11-14 11:28:58 +0100 (Mon, November 14, 2022) $"
+__date__ = "$Date: 2023-07-10 11:28:58 +0100 (Mon, July 10, 2023) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
-# import ccpn.core.lib.SpectrumLib as specLib
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
-# from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
-from ccpn.ui.gui.widgets.MessageDialog import progressManager, showWarning
-from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
+from ccpn.ui.gui.widgets.MessageDialog import progressManager, showOkCancelWarning, showInfo, showWarning
 from ccpn.ui.gui.popups._CcpnDialogWithOutputPathPopupABC import CcpnDialogWithOutputPathPopupABC
 from ccpn.ui.gui.popups.ExportDialog import ExportDialogABC
-# from ccpn.util.Path import aPath
 
 
-class PseudoToSpectrumGroupPopup(CcpnDialogWithOutputPathPopupABC):  # ExportDialogABC):
+class ConvertToHdf5Popup(CcpnDialogWithOutputPathPopupABC):
     FIXEDHEIGHT = True
     FIXEDWIDTH = False
 
-    def __init__(self, parent=None, mainWindow=None, title='Pseudo-nD Spectrum to SpectrumGroup', **kwds):
+    def __init__(self, parent=None, mainWindow=None, title='Convert spectrum (binary) data to Hdf5', **kwds):
 
         # for CcpnDialogMainWidget:
         super().__init__(parent=parent, mainWindow=mainWindow, title=title, **kwds)
 
         if self.project:
             # Only select 3D's for now
-            self.validSpectra = [sp for sp in self.project.spectra if sp._getPseudoDimension() != 0]
+            self.validSpectra = [sp for sp in self.project.spectra if not sp.dataSource.isEmptySpectrum]
 
-        if not self.validSpectra:  # not None or len==0
-            showWarning('No valid spectra', 'No 3D spectra in current dataset')
-            self.errorFlag = True
-            return
+            if not self.validSpectra:
+                from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
-        self.pseudoDimension = None
+                showWarning('No valid spectra', 'No non-Hdf5 spectra in current project')
+                self.errorFlag = True
+                return
+
         self.spectrum = self.validSpectra[0]
 
         # for CcpnDialogMainWidget:
@@ -74,24 +68,20 @@ class PseudoToSpectrumGroupPopup(CcpnDialogWithOutputPathPopupABC):  # ExportDia
         # spectrum selection
         rowIndex = 0
         rowIndex += self.initialiseSpectrumWidgets(userFrame, rowIndex=rowIndex)
-        # Hide in inPath info as it is not really needed
-        self.inPathLabel.setVisible(False)
-        self.inPathWidget.setVisible(False)
+
+        self.removeInPathCheckBox = CheckBox(userFrame, text='Remove on completion',
+                                             checked=False, grid=(rowIndex, 1), callback=self._removeInPathCallback)
+        rowIndex += 1
 
         userFrame.addSpacer(10, 20, grid=(rowIndex, 1), expandX=True, expandY=True)
         rowIndex += 1
 
         rowIndex += self.initialiseOutputPathWidgets(userFrame, rowIndex=rowIndex)
 
-        # Contour  checkbox
-        Label(userFrame, 'Contours', grid=(rowIndex, 0), **self._alignLabel)
-        self.contourCheckBox = CheckBox(userFrame, text='keep settings', checked=True, grid=(rowIndex, 1))
-        rowIndex += 1
-
         userFrame.addSpacer(5, 5, grid=(rowIndex, 1), expandX=True, expandY=True)
 
     def actionButtons(self):
-        self.setOkButton(callback=self.makeSpectrumGroup, text='Make SpectrumGroup', tipText='Extract spectra along pseudo dimensions and close dialog')
+        self.setOkButton(callback=self.convertSpectrum, text='Convert to Hdf5', tipText='Convert spectrum to Hdf5 and close dialog')
         self.setCloseButton(callback=self.reject, text='Close', tipText='Close')
         self.setDefaultButton(ExportDialogABC.CLOSEBUTTON)
 
@@ -99,35 +89,36 @@ class PseudoToSpectrumGroupPopup(CcpnDialogWithOutputPathPopupABC):  # ExportDia
         """Return a string for the info widget field
         Should be subclassed
         """
-        return self.spectrum.dataSource._fileInfoString2
+        return self.spectrum.dataSource._fileInfoString1
 
-    def getName(self) -> str:
-        """Return a string for the name of the file
-        Can be subclassed
-        """
-        return f'{self.spectrum.name}_%03d'
+    def _removeInPathCallback(self):
+        """Callback for removeInPath checkbox"""
+        checked = self.removeInPathCheckBox.get()
 
-    def _setSpectrumCallback(self, spectrumPid):
-        """Callback for selecting spectrum
-        """
-        self.spectrum = self.project.getByPid(spectrumPid)
-        self.pseudoDimension = self.spectrum._getPseudoDimension()
-        super()._setSpectrumCallback(spectrumPid)
-
-    def makeSpectrumGroup(self):
-        """Make SpectrumGroup from the specified spectrum.
-
-        Spectrum is saved alongside the original spectrum, if this folder is not available then
-        the spectrum is saved in the project/data/spectra folder.
+    def convertSpectrum(self):
+        """Convert the selected spectrum.
         """
         if self.spectrum is not None:
-            with progressManager(self, f'Making SpectrumGroup from "{self.spectrum.name}"'):
-                spectrumGroup = self.spectrum.pseudoToSpectrumGroup(pathTemplate=self.dataStore.path.asString())
+            removeInPath = self.removeInPathCheckBox.get()
+            inDataSource = self.spectrum.dataSource  # Originating dataStore instance; keep a handle to optionally delete original spectrum data
 
-                if not self.contourCheckBox.isChecked():
-                    # values are copied by default
-                    for sp in spectrumGroup.spectra:
-                        sp._setDefaultContourValues()
-                        sp._setDefaultContourColours()
+            with progressManager(self, f'Converting "{self.spectrum.name}" to {self.dataFormat}'):
+                outDataSource = self.spectrum.convertToHdf5(self.dataStore.path)
 
-            self.accept()
+            title = f'Spectrum "{self.spectrum.name}"'
+            message = f'Successfully converted the "{inDataSource.dataFormat}" spectral data to "{outDataSource.dataFormat}"\n'
+            if removeInPath:
+                files = inDataSource.getAllFilePaths()
+                message += f'\nDo you want to delete the original {len(files)} {inDataSource.dataFormat}-file(s)? (Can not undo!)'
+                ok = showOkCancelWarning(title, message, parent=self)
+                if ok:
+                    for _f in files:
+                        _f.remove()
+            else:
+                showInfo(title, message, parent=self)
+
+        self.accept()
+
+
+# popup = ConvertToHdf5Popup(parent=mainWindow, mainWindow=mainWindow)
+# popup.show()

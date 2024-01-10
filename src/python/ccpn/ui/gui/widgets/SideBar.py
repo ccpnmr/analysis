@@ -748,7 +748,7 @@ class SidebarClassSpectrumTreeItems(SidebarClassABC):
         """Get the children of <obj> by class type <klass>.
         Get the spectra belonging to spectrumGroup.
         """
-        return obj._getSpectrumGroupChildrenByClass(klass)
+        return obj._getSpectrumGroupChildrenByClass(klass) if not klass.isDeleted else []
 
 
 class SidebarClassNmrResidueTreeItems(SidebarClassABC):

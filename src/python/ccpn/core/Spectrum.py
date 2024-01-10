@@ -3948,13 +3948,16 @@ def _newHdf5Spectrum(project: Project, isotopeCodes: Sequence[str], name: str = 
     if not isIterable(isotopeCodes) or len(isotopeCodes) == 0:
         raise ValueError('invalid isotopeCodes "%s"' % isotopeCodes)
 
+    name = Spectrum._uniqueName(project=project, name=name)
     if path is None:
         path = Path('$INSIDE') / CCPN_SPECTRA_DIRECTORY / name
         path = path.assureSuffix(Hdf5SpectrumDataSource.suffixes[0])
 
+    autoVersioning = parameters.get('autoVersioning', True)
+    overwrite = parameters.get('overwrite', False)
     dataStore = DataStore.newFromPath(path,
                                       dataFormat=Hdf5SpectrumDataSource.dataFormat,
-                                      autoVersioning=True)
+                                      autoVersioning=autoVersioning)
 
     # Initialise a Hdf5 dataSource instance
     dataSource = Hdf5SpectrumDataSource()
@@ -3972,7 +3975,7 @@ def _newHdf5Spectrum(project: Project, isotopeCodes: Sequence[str], name: str = 
             if hasattr(dataSource, param):
                 setattr(dataSource, param, value)
     # Create the file
-    with dataSource.openNewFile(path=dataStore.aPath()) as hdf5File:
+    with dataSource.openNewFile(path=dataStore.aPath(), overwrite=overwrite) as hdf5File:
         hdf5File.writeParameters()
 
     # create a Spectrum instance

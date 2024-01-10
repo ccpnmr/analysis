@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-10 14:15:31 +0000 (Wed, January 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-10 15:34:32 +0000 (Wed, January 10, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -239,11 +239,8 @@ class DTWReferencingSpectra(SpectraPipe):
                     deltas = deltas[mask]
                     deltaShift = np.median(deltas)
 
-                print(f'Before > {destinationSpectrum.referenceValues} --> ')
                 b = destinationSpectrum.referenceValues
                 destinationSpectrum.referenceValues = [destinationSpectrum.referenceValues[0] - deltaShift]
-                diff = destinationSpectrum.referenceValues[0] - b[0]
-                print(f'AFTER > {destinationSpectrum.referenceValues}  -- DIFF: {diff}')
 
         return spectra
 

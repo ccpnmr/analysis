@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-09 14:19:15 +0000 (Tue, January 09, 2024) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2024-01-10 14:15:31 +0000 (Wed, January 10, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -202,14 +202,19 @@ class DTWReferencingSpectra(SpectraPipe):
                 originPeakList = originSpectrum.peakLists[defaultPeakListIndice]
                 if len(originPeakList.peaks)>1:
                     peaksPoints = [pk.pointPositions[0] for pk in originPeakList.peaks if pk.figureOfMerit >= toleranceFoM]
-                    minPeak = np.min(peaksPoints)
-                    maxPeak = np.max(peaksPoints)
-                    leftLimit = minPeak - 100 # arbitrary pnts
-                    rightLimit = maxPeak + 100 # arbitrary pnts
-                    leftPpm = originSpectrum.point2ppm(leftLimit, originSpectrum.axisCodes[0])
-                    rightPpm = originSpectrum.point2ppm(rightLimit, originSpectrum.axisCodes[0])
-                    x1f, y1f = _1DregionsFromLimits(xOrigin, yOrigin, limits=[leftPpm, rightPpm])
-                    x2f, y2f = _1DregionsFromLimits(xDestination, yDestination, limits=[leftLimit, rightPpm])
+                    if len(peaksPoints) == 0:
+                        x1f, y1f = xOrigin, yOrigin
+                        x2f, y2f = xDestination, yDestination
+                        print('Something odd for originPeakList', originPeakList)
+                    else:
+                        minPeak = np.nanmin(peaksPoints)
+                        maxPeak = np.nanmax(peaksPoints)
+                        leftLimit = minPeak - 100 # arbitrary pnts
+                        rightLimit = maxPeak + 100 # arbitrary pnts
+                        leftPpm = originSpectrum.point2ppm(leftLimit, originSpectrum.axisCodes[0])
+                        rightPpm = originSpectrum.point2ppm(rightLimit, originSpectrum.axisCodes[0])
+                        x1f, y1f = _1DregionsFromLimits(xOrigin, yOrigin, limits=[leftPpm, rightPpm])
+                        x2f, y2f = _1DregionsFromLimits(xDestination, yDestination, limits=[leftLimit, rightPpm])
 
                 else:
                     # use the whole spectrum
@@ -218,16 +223,25 @@ class DTWReferencingSpectra(SpectraPipe):
 
                 mh1 = float(np.median(y1f) + 3 * np.std(y1f)) #quick picking at high threshold.
                 mh2 = float(np.median(y2f) + 3 * np.std(y2f))
+                deltaShift = 0
                 positions1, heights1 = _getPositionsHeights(x1f, y1f, mh1)
                 positions2, heights2 = _getPositionsHeights(x2f, y2f, mh2)
-                path = dtw(positions1, positions2)
-                deltas = np.array([positions2[j] - positions1[i] for i, j in path])
-                delta_shift = np.median(deltas)
+                lenPositions1 = len(positions1)
+                lenPositions2 = len(positions2)
+                if lenPositions1 == 0 or lenPositions2 == 0:
+                    deltaShift = 0
+                else:
+                    path = dtw(positions1, positions2)
+                    deltas = np.array([positions2[j] - positions1[i] for i, j in path])
+                    maxDelta = 1
+                    minDelta = -maxDelta  #ppm
+                    mask = (deltas >= minDelta) & (deltas <= maxDelta)
+                    deltas = deltas[mask]
+                    deltaShift = np.median(deltas)
 
-                simple_shift = (np.argmax(signal.correlate(heights1, heights2)) - (len(heights2) - 1)) * np.mean(np.diff(positions1))
-                print(f'Before > {destinationSpectrum.referenceValues} - Applying the {simple_shift} INSTEAD OF {delta_shift} -> ')
+                print(f'Before > {destinationSpectrum.referenceValues} --> ')
                 b = destinationSpectrum.referenceValues
-                destinationSpectrum.referenceValues = [destinationSpectrum.referenceValues[0] + simple_shift]
+                destinationSpectrum.referenceValues = [destinationSpectrum.referenceValues[0] - deltaShift]
                 diff = destinationSpectrum.referenceValues[0] - b[0]
                 print(f'AFTER > {destinationSpectrum.referenceValues}  -- DIFF: {diff}')
 

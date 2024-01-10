@@ -140,7 +140,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-01-09 20:41:02 +0000 (Tue, January 09, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-10 11:06:39 +0000 (Wed, January 10, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -475,14 +475,16 @@ class CcpNmrJson(TraitBase):
                 CcpNmrJson._errorStack = []
 
     @contextmanager
-    def _doProcessJson(self, encoding=False):
+    def _doProcessJson(self, action=''):
         """Context method for restoring / saving.
+
         with obj._doRestoreJson() as _objectDict:
+
             actions; e.g. checking if obj already present
             if obj.isRestoring:
                 ....
 
-        :parameter encoding: True if encoding (for context only)
+        :parameter action: e.g. 'encoding', 'decoding', 'importing' (for context only)
         :yields _objectDict
         """
         CcpNmrJson._setRestoring(True)
@@ -493,13 +495,12 @@ class CcpNmrJson(TraitBase):
         except Exception as es:
             _isRestoring = CcpNmrJson._isRestoring
             # print(f'Exception level: {_isRestoring}')
-            _action = 'encoding' if encoding else 'decoding'
-            _error = f'While {_action} {self} from JSON: {es}'
+            _error = f'While {action} {self}: {es}'
             CcpNmrJson._errorStack.append(_error)
             if _isRestoring == 1:
                 # We are at the starting restore level
                 _error = CcpNmrJson._errorStack[0]
-                getLogger().debug(f'_doProcessJson() {_action}: caught exception: {_error}')
+                getLogger().debug(f'_doProcessJson() {action}: caught exception: {_error}')
                 CcpNmrJson._setRestoring(False)
                 raise RuntimeError(_error)
             else:
@@ -792,7 +793,7 @@ class CcpNmrJson(TraitBase):
         if self._encodeAsJson_3_0:
             return self._encode_3_0()
 
-        with self._doProcessJson(encoding=True) as _objectDict:
+        with self._doProcessJson(action='encoding') as _objectDict:
             _uid = self._getJsonUid()
             if _uid in _objectDict:
                 # The data for this object have already been encoded; No need to do it again
@@ -838,7 +839,7 @@ class CcpNmrJson(TraitBase):
         :return self as 3.0 encoded dict to maintain compatiblity with earlier versions;
         i.e. allowing those versions to read it and determine save-version
         """
-        with self._doProcessJson(encoding=True) as _objectDict:
+        with self._doProcessJson(action='encoding-3.0') as _objectDict:
             _uid = self._getJsonUid()
             if _uid in _objectDict:
                 raise RuntimeError(f'encode_3_0(): object can only be encoded once in JSON 3.0')
@@ -887,7 +888,7 @@ class CcpNmrJson(TraitBase):
                 f'trying to restore from JSON encoded class {_className} incompatible with class {self.__class__.__name__}'
             )
 
-        with self._doProcessJson():
+        with self._doProcessJson(action='decoding'):
             self._decode(dataDict)
         return self
 
@@ -917,13 +918,13 @@ class CcpNmrJson(TraitBase):
         if not isinstance(dataDict, dict):
             raise RuntimeError(f'decode(): invalid dataDict; got {dataDict}')
 
-        with self._doProcessJson() as _objectDict:
+        with self._doProcessJson(action='decoding') as _objectDict:
             # NB errors are logged by the context manager
 
             if not Constants.OBJECT_UID in dataDict:
                 raise RuntimeError(f'{_className}._decode(): unable to get {Constants.OBJECT_UID} from dataDict')
             _uid = dataDict[Constants.OBJECT_UID]
-            # fix _uid if it was None ( 3.0 encoding)
+            # fix _uid if it was None (which happens if dataDict was upgraded from 3.0 encoding)
             if _uid is None:
                 _uid = self._getJsonUid()
                 dataDict[Constants.OBJECT_UID] = _uid
@@ -935,6 +936,11 @@ class CcpNmrJson(TraitBase):
                 return _objectDict[_uid]
 
             # We need to decode;
+
+            # Store the object-id for future reference usage;
+            # need to do this here, as handling of traits might recurse and then need to skip self.
+            _objectDict[_uid] = self
+
             # check the presence of object data
             if (_objectdata := dataDict.get(Constants.OBJECTDATA), None) is None:
                 raise RuntimeError(f'{_className}._decode(): unable to get {Constants.OBJECTDATA} from dataDict')
@@ -942,17 +948,12 @@ class CcpNmrJson(TraitBase):
             # check the presence of metadata
             if (_metadata := dataDict.get(Constants.METADATA), None) is None:
                 raise RuntimeError(f'{_className}._decode(): unable to get {Constants.METADATA} from dataDict')
+            # decode the metadata
+            self._decodeTrait(Constants.METADATA, dataDict)
 
             # Get the data encoding the traits
             if (_data := dataDict.get(Constants.DATA), None) is None:
                 raise RuntimeError(f'{_className}._decode(): unable to get {Constants.DATA} from dataDict')
-
-            # Store the object-id for future reference usage;
-            # need to do this here, as handling of traits might recurse and then need to skip self.
-            _objectDict[_uid] = self
-
-            # decode the metadata
-            self._decodeTrait(Constants.METADATA, dataDict)
 
             # Handle the data; Update currently defined traits
             # Handle without any notifications; values should be correct
@@ -995,7 +996,7 @@ class CcpNmrJson(TraitBase):
                 raise RuntimeError(f'No {Constants.JSONVERSION}: The data do not represent a valid JSON encoded 3.0 object')
             if isinstance(_jsonVersion, int):
                 _jsonVersion = float(_jsonVersion)
-            # Should be json 3.0 float
+            # Should now be json 3.0 float
             if not isinstance(_jsonVersion, float) or _jsonVersion != 3.0:
                 raise RuntimeError(f'Updating from JSON 3.0: Undefined JSON version {_jsonVersion}')
             del(_metaData[Constants.JSONVERSION])
@@ -1007,6 +1008,7 @@ class CcpNmrJson(TraitBase):
                 del _metaData[Constants.OBJECT_UID]
             else:
                 # cannot generate now, as this is a classmethod; i.e. we do not have a object yet
+                # Set to None, so it is done later
                 _uid = None
 
             _objectdata = {}

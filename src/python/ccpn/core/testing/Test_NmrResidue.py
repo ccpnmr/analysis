@@ -4,9 +4,9 @@ Test code for NmrResidue
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-19 15:36:53 +0100 (Wed, April 19, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2024-01-10 14:57:38 +0000 (Wed, January 10, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -37,7 +37,7 @@ class ResidueAllNmrResiduesTest(WrapperTesting):
     def setUp(self):
 
         with self.initialSetup():
-            self.chain = self.project.createChain(sequence='CDEFGHI', molType='protein',
+            self.chain = self.project.createChain(sequence1Letter='CDEFGHI', molType='protein',
                                                   shortName='A')
 
     def testAllNmrResidues(self):
@@ -101,7 +101,7 @@ class NmrStretchTest(WrapperTesting):
     def setUp(self):
 
         with self.initialSetup():
-            self.chain = self.project.createChain(sequence='QWERTYIPASD', molType='protein',
+            self.chain = self.project.createChain(sequence1Letter='QWERTYIPASD', molType='protein',
                                                   shortName='X')
 
     def test_connect_nmr_residues_0(self):

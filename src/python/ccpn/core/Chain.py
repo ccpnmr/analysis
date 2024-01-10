@@ -3,9 +3,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-10 20:03:17 +0100 (Tue, October 10, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-01-10 14:57:38 +0000 (Wed, January 10, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -393,7 +393,7 @@ def _validateSequenceCcpCode(project, sequence, molType):
 
 # @newObject(Chain)
 @undoBlock()
-def _createChain(self: Project, sequence: Union[str, Sequence[str]]=None, compoundName: str = None,
+def _createChain(self: Project, compoundName: str = None,
                  sequence1Letter: str=None,
                  sequenceCcpCode: Union[Sequence[str]] = None,
                  startNumber: int = 1, molType: str = None, isCyclic: bool = False,
@@ -401,6 +401,7 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]]=None, compou
                  expandFromAtomSets: bool = True,
                  addPseudoAtoms: bool = True,
                  addNonstereoAtoms: bool = True,
+                 **kwargs,
                  ) -> Chain:
     """Create new chain from sequence of residue codes, using default variants.
 
@@ -411,6 +412,7 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]]=None, compou
     :param Sequence: Deprecated
     :param sequence1Letter: string of one-letter codes E.g. 'HMRQPPLVT'
     :param Sequence sequence: sequence of  CcpCodes (also known as ChemComp Codes) are case-sensitive. E.G.:  ('Ala', 'Ala', 'Ala', 'Aba')
+                Note: We use the CcpCode and not Residue3LetterCode because the ccpCode allows more flexibility and allows the usage of non-standard compounds.
 
     :param str compoundName: name of new Substance (e.g. 'Lysozyme') Defaults to 'Molecule_n
     :param str molType: molType ('protein','DNA', 'RNA'). Needed only if sequence is a string.
@@ -423,7 +425,7 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]]=None, compou
                 See ccpn.core.lib.MoleculeLib.expandChainAtoms for details.
     :return: a new Chain instance.
     """
-    if sequence:
+    if 'sequence' in kwargs:
         raise DeprecationWarning('Argument "sequence" is deprecated and will be removed in future releases. Use sequence1Letter or sequenceCcpCode')
     if sequence1Letter:
         sequence = _convertSequence1LetterToCcpCode(self.project, sequence1Letter, molType)

@@ -4,9 +4,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 12:01:42 +0100 (Fri, June 09, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2024-01-10 14:57:38 +0000 (Wed, January 10, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -63,7 +63,7 @@ class SubstanceTest(WrapperTesting):
         """
         Test renaming of Substance and links
         """
-        chain1 = self.project.createChain(sequence='ACDC', compoundName='hardrock', shortName='X',
+        chain1 = self.project.createChain(sequence1Letter='ACDC', compoundName='hardrock', shortName='X',
                                           molType='protein')
         substance1 = chain1.substances[0]
         chain2 = substance1.createChain(shortName='Y')
@@ -156,14 +156,14 @@ class Test_Substance_SpectrumLink(WrapperTesting):
             self.spectrum1 = self.project.newEmptySpectrum(isotopeCodes=('13C', '1H', '15N'), name='COHnNh')
             self.assertEqual(self.spectrum1.isotopeCodes, ['13C', '1H', '15N'])
 
-            self.chain1 = self.project.createChain(sequence='ACDC', compoundName='sequence1', shortName='cC1',
+            self.chain1 = self.project.createChain(sequence1Letter='ACDC', compoundName='sequence1', shortName='cC1',
                                                    molType='protein')
 
             self.spectrum2 = self.project.newEmptySpectrum(isotopeCodes=('1H', '19F', '31P', '1H'), name='HpFPhH')
             self.assertEqual(self.spectrum2.isotopeCodes, ['1H', '19F', '31P', '1H'])
             self.assertEqual(self.spectrum2.name, 'HpFPhH')
 
-            self.chain2 = self.project.createChain(sequence='ACDC', compoundName='sequence2', shortName='cC2',
+            self.chain2 = self.project.createChain(sequence1Letter='ACDC', compoundName='sequence2', shortName='cC2',
                                                    molType='protein')
 
             self.substance1 = self.chain1.substances[0]

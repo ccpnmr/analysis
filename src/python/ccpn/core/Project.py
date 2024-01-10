@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-10 14:19:41 +0000 (Wed, January 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-10 14:57:38 +0000 (Wed, January 10, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -2755,7 +2755,7 @@ class Project(AbstractWrapperObject):
         return _newSpectrumGroup(self, name=name, spectra=spectra, **kwds)
 
     @logCommand('project.')
-    def createChain(self, sequence: Union[str, Sequence[str]]=None,
+    def createChain(self,
                     sequence1Letter: str = None,
                     sequenceCcpCode: Union[Sequence[str]] = None,
                     compoundName: str = None,
@@ -2775,7 +2775,7 @@ class Project(AbstractWrapperObject):
         :param Sequence: Deprecated
         :param sequence1Letter: string of one-letter codes E.g. 'HMRQPPLVT'
         :param Sequence sequence: sequence of  CcpCodes (also known as ChemComp Codes) are case-sensitive. E.G.:  ('Ala', 'Ala', 'Ala', 'Aba')
-        Note: CcpCode and not Residue3LetterCode because the ccpCode allows more flexibility and less unambiguity.
+        Note: We use the CcpCode and not Residue3LetterCode because the ccpCode allows more flexibility and allows the usage of non-standard compounds.
 
         :param str compoundName: name of new Substance (e.g. 'Lysozyme') Defaults to 'Molecule_n
         :param str molType: molType ('protein','DNA', 'RNA'). Needed only if sequence is a string.
@@ -2790,7 +2790,7 @@ class Project(AbstractWrapperObject):
         """
         from ccpn.core.Chain import _createChain
 
-        return _createChain(self, sequence=sequence,
+        return _createChain(self,
                             sequence1Letter=sequence1Letter,
                             sequenceCcpCode=sequenceCcpCode,
                             compoundName=compoundName,

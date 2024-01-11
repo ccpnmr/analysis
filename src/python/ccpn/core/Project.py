@@ -6,9 +6,9 @@ from __future__ import annotations
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -16,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-29 12:08:45 +0000 (Wed, November 29, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-01-11 11:33:38 +0000 (Thu, January 11, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -2304,7 +2304,7 @@ class Project(AbstractWrapperObject):
             sequences = fastaIo.parseFastaFile(path)
             chains = []
             for sequence in sequences:
-                newChain = self.createChain(sequence=sequence[1], compoundName=sequence[0],
+                newChain = self.createChain(sequence1Letter=sequence[1], compoundName=sequence[0],
                                             molType='protein')
                 chains.append(newChain)
 
@@ -2787,7 +2787,7 @@ class Project(AbstractWrapperObject):
         return _newSpectrumGroup(self, name=name, spectra=spectra, **kwds)
 
     @logCommand('project.')
-    def createChain(self, sequence: Union[str, Sequence[str]]=None,
+    def createChain(self,
                     sequence1Letter: str = None,
                     sequenceCcpCode: Union[Sequence[str]] = None,
                     compoundName: str = None,
@@ -2807,7 +2807,7 @@ class Project(AbstractWrapperObject):
         :param Sequence: Deprecated
         :param sequence1Letter: string of one-letter codes E.g. 'HMRQPPLVT'
         :param Sequence sequence: sequence of  CcpCodes (also known as ChemComp Codes) are case-sensitive. E.G.:  ('Ala', 'Ala', 'Ala', 'Aba')
-        Note: CcpCode and not Residue3LetterCode because the ccpCode allows more flexibility and less unambiguity.
+        Note: We use the CcpCode and not Residue3LetterCode because the ccpCode allows more flexibility and allows the usage of non-standard compounds.
 
         :param str compoundName: name of new Substance (e.g. 'Lysozyme') Defaults to 'Molecule_n
         :param str molType: molType ('protein','DNA', 'RNA'). Needed only if sequence is a string.
@@ -2822,7 +2822,7 @@ class Project(AbstractWrapperObject):
         """
         from ccpn.core.Chain import _createChain
 
-        return _createChain(self, sequence=sequence,
+        return _createChain(self,
                             sequence1Letter=sequence1Letter,
                             sequenceCcpCode=sequenceCcpCode,
                             compoundName=compoundName,

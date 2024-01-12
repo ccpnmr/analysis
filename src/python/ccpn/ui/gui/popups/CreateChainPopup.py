@@ -4,9 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-10 20:03:17 +0100 (Tue, October 10, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-01-12 11:48:31 +0000 (Fri, January 12, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -254,24 +254,30 @@ class CreateChainPopup(AttributeEditorPopupABC):
                 self.addPseudoAtomsW.set(self.obj.addPseudoAtoms)
                 self.makeCyclicPolymer.set(self.obj.isCyclic)
 
-
-    def _reformatSequence(self):
-        # format the 1LetterCode
+    def _reformat1LetterCode(self):
         value1LetterCode = self.sequence1CodeEditor.toPlainText()
         formatted = '\n'.join(textwrap.wrap(value1LetterCode, self._formattingLenght))
         self.sequence1CodeEditor.setText(formatted)
-        # Format the ccpCode
+
+    def _reformatCcpCode(self):
         valueCcpCode = self.sequenceCcpCodeEditor.toPlainText()
-        valueCcpCode = valueCcpCode.replace(' ', '')
+        valueCcpCode = ''.join(valueCcpCode.split())
+        valueCcpCode = valueCcpCode.replace('\n', '')
         codes = valueCcpCode.split(',')
         codes = [f'{code}' for code in codes]
         chunks = list(divideChunks(codes, self._formattingLenght))
-        if len(chunks)>0:
-            formattedCodes =   ','.join(chunks[0]) + ','
+        if len(chunks) > 0:
+            formattedCodes = ','.join(chunks[0]) + ','
             for chunk in chunks[1:]:
                 formattedCodes += '\n' + ','.join(chunk) + ','
             formattedCodes = formattedCodes.strip(',')
             self.sequenceCcpCodeEditor.setText(formattedCodes)
+
+    def _reformatSequence(self):
+        # format the 1LetterCode
+        self._reformat1LetterCode()
+        # Format the ccpCode
+        self._reformatCcpCode()
 
     def _createSequence(self):
         """Creates a sequence using the values specified in the text widget.

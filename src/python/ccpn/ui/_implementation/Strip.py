@@ -4,9 +4,9 @@ GUI Display Strip class
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 14:29:32 +0100 (Wed, June 28, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-01-15 18:52:11 +0000 (Mon, January 15, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -87,18 +87,6 @@ class Strip(AbstractWrapperObject):
         return self._project._data2Obj.get(self._wrappedData.spectrumDisplay)
 
     _parent = spectrumDisplay
-
-    @property
-    def spectrumViews(self) -> list:
-        """SpectrumViews shown in Strip"""
-        # STUB for now; hot-fixed later
-        return []
-
-    @property
-    def axes(self) -> list:
-        """The axes of Strip"""
-        # STUB for now; hot-fixed later
-        return []
 
     #GWV: moved here from _implementation/Axis.py
     @property
@@ -461,6 +449,123 @@ class Strip(AbstractWrapperObject):
 
         # move the strip
         self._wrappedData.moveTo(newIndex)
+
+    #=========================================================================================
+    # property STUBS: hot-fixed later
+    #=========================================================================================
+
+    @property
+    def axes(self) -> list['Axis']:
+        """STUB: hot-fixed later
+        :return: a list of axes in the Strip
+        """
+        return []
+
+    @property
+    def integralListViews(self) -> list['IntegralListView']:
+        """STUB: hot-fixed later
+        :return: a list of integralListViews in the Strip
+        """
+        return []
+
+    @property
+    def integralViews(self) -> list['IntegralView']:
+        """STUB: hot-fixed later
+        :return: a list of integralViews in the Strip
+        """
+        return []
+
+    @property
+    def multipletListViews(self) -> list['MultipletListView']:
+        """STUB: hot-fixed later
+        :return: a list of multipletListViews in the Strip
+        """
+        return []
+
+    @property
+    def multipletViews(self) -> list['MultipletView']:
+        """STUB: hot-fixed later
+        :return: a list of multipletViews in the Strip
+        """
+        return []
+
+    @property
+    def peakListViews(self) -> list['PeakListView']:
+        """STUB: hot-fixed later
+        :return: a list of peakListViews in the Strip
+        """
+        return []
+
+    @property
+    def peakViews(self) -> list['PeakView']:
+        """STUB: hot-fixed later
+        :return: a list of peakViews in the Strip
+        """
+        return []
+
+    @property
+    def spectrumViews(self) -> list['SpectrumView']:
+        """STUB: hot-fixed later
+        :return: a list of spectrumViews in the Strip
+        """
+        return []
+
+    #=========================================================================================
+    # getter STUBS: hot-fixed later
+    #=========================================================================================
+
+    def getAxis(self, relativeId: str) -> 'Axis | None':
+        """STUB: hot-fixed later
+        :return: an instance of Axis, or None
+        """
+        return None
+
+    def getIntegralListView(self, relativeId: str) -> 'IntegralListView | None':
+        """STUB: hot-fixed later
+        :return: an instance of IntegralListView, or None
+        """
+        return None
+
+    def getIntegralView(self, relativeId: str) -> 'IntegralView | None':
+        """STUB: hot-fixed later
+        :return: an instance of IntegralView, or None
+        """
+        return None
+
+    def getMultipletListView(self, relativeId: str) -> 'MultipletListView | None':
+        """STUB: hot-fixed later
+        :return: an instance of MultipletListView, or None
+        """
+        return None
+
+    def getMultipletView(self, relativeId: str) -> 'MultipletView | None':
+        """STUB: hot-fixed later
+        :return: an instance of MultipletView, or None
+        """
+        return None
+
+    def getPeakListView(self, relativeId: str) -> 'PeakListView | None':
+        """STUB: hot-fixed later
+        :return: an instance of PeakListView, or None
+        """
+        return None
+
+    def getPeakView(self, relativeId: str) -> 'PeakView | None':
+        """STUB: hot-fixed later
+        :return: an instance of PeakView, or None
+        """
+        return None
+
+    def getSpectrumView(self, relativeId: str) -> 'SpectrumView | None':
+        """STUB: hot-fixed later
+        :return: an instance of SpectrumView, or None
+        """
+        return None
+
+
+#=========================================================================================
+# CCPN functions
+#=========================================================================================
 
 def _copyStrip(self: SpectrumDisplay, strip: Strip, newIndex=None) -> Strip:
     """Make copy of strip in self, at position newIndex - or rightmost.

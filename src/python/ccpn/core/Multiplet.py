@@ -3,9 +3,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-13 16:56:35 +0100 (Thu, July 13, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-01-15 18:52:09 +0000 (Mon, January 15, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,19 +26,17 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import numpy as np
+from typing import Optional, Tuple, Any, Union, Sequence, List
 
+from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Multiplet as ApiMultiplet
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
 from ccpn.core.MultipletList import MultipletList
-from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Multiplet as apiMultiplet
-from typing import Optional, Tuple, Any, Union, Sequence, List
+from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, undoBlock
 from ccpn.util.Common import makeIterableList
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, undoBlock
-from ccpn.util.Logging import getLogger
-from ccpn.util.Constants import SCALETOLERANCE
 
 
 MULTIPLET_TYPES = ['singlet', 'doublet', 'triplet', 'quartet', 'quintet', 'sextet', 'septet', 'octet', 'nonet',
@@ -142,14 +140,14 @@ class Multiplet(AbstractWrapperObject):
     _childClasses = []
 
     # Qualified name of matching API class
-    _apiClassQualifiedName = apiMultiplet._metaclass.qualifiedName()
+    _apiClassQualifiedName = ApiMultiplet._metaclass.qualifiedName()
 
     # the attribute name used by current
     _currentAttributeName = 'multiplets'
 
     # CCPN properties
     @property
-    def _apiMultiplet(self) -> apiMultiplet:
+    def _apiMultiplet(self) -> ApiMultiplet:
         """API multiplets matching Multiplet."""
         return self._wrappedData
 
@@ -546,7 +544,7 @@ class Multiplet(AbstractWrapperObject):
     #                  onceOnly=True, debug=True)
 
     @classmethod
-    def _getAllWrappedData(cls, parent: MultipletList) -> Tuple[apiMultiplet, ...]:
+    def _getAllWrappedData(cls, parent: MultipletList) -> list[ApiMultiplet]:
         """get wrappedData (Multiplets) for all Multiplet children of parent MultipletList"""
         return parent._wrappedData.sortedMultiplets()
 

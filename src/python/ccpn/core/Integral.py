@@ -4,9 +4,9 @@ Module documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-11-17 11:11:49 +0000 (Fri, November 17, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-01-15 18:52:09 +0000 (Mon, January 15, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,17 +26,18 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import numpy as np
+from typing import Optional, Tuple, Sequence, List, Union
+from scipy.integrate import trapz
+
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Integral as ApiIntegral
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakDim as ApiPeakDim
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.Peak import Peak
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Integral as ApiIntegral
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakDim as ApiPeakDim
-from typing import Optional, Tuple, Sequence, List, Union
-import numpy as np
-from scipy.integrate import trapz
-from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter
+from ccpn.util.decorators import logCommand
 from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import SCALETOLERANCE
 
@@ -408,7 +409,7 @@ class Integral(AbstractWrapperObject):
     #=========================================================================================
 
     @classmethod
-    def _getAllWrappedData(cls, parent: IntegralList) -> Tuple[ApiIntegral, ...]:
+    def _getAllWrappedData(cls, parent: IntegralList) -> list[ApiIntegral]:
         """get wrappedData (Integrals) for all Integral children of parent IntegralList"""
         return parent._wrappedData.sortedIntegrals()
 

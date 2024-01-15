@@ -3,9 +3,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-01 19:39:56 +0100 (Thu, June 01, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-01-15 18:52:10 +0000 (Mon, January 15, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,14 +25,14 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+from typing import Sequence, Union
+
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import MultipletList as ApiMultipletList
 from ccpn.core.Peak import Peak
 from ccpn.core.Spectrum import Spectrum
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import MultipletList as ApiMultipletList
-from typing import Tuple, Sequence, Union
-from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter
-from ccpn.util.Logging import getLogger
 from ccpn.core._implementation.PMIListABC import PMIListABC
+from ccpn.util.decorators import logCommand
 
 
 MULTIPLETAVERAGE = 'Average'
@@ -103,20 +103,46 @@ class MultipletList(PMIListABC):
         if not isinstance(value, str):
             raise ValueError("multipletAveraging must be a string")
         if value not in MULTIPLETAVERAGINGTYPES:
-            raise ValueError("multipletAveraging %s not defined correctly, must be in %s" % (value, MULTIPLETAVERAGINGTYPES))
+            raise ValueError(
+                    "multipletAveraging %s not defined correctly, must be in %s" % (value, MULTIPLETAVERAGINGTYPES))
 
         self._setInternalParameter(self._MULTIPLETAVERAGING, MULTIPLETAVERAGINGTYPES.index(value))
 
     #=========================================================================================
-    # Implementation functions
+    # property STUBS: hot-fixed later
+    #=========================================================================================
+
+    @property
+    def multiplets(self) -> list['Multiplet']:
+        """STUB: hot-fixed later
+        :return: a list of multiplets in the MultipletList
+        """
+        return []
+
+    #=========================================================================================
+    # getter STUBS: hot-fixed later
+    #=========================================================================================
+
+    def getMultiplet(self, relativeId: str) -> 'Multiplet | None':
+        """STUB: hot-fixed later
+        :return: an instance of Multiplet, or None
+        """
+        return None
+
+    #=========================================================================================
+    # Core methods
+    #=========================================================================================
+
+    #=========================================================================================
+    # Implementation methods
     #=========================================================================================
 
     @classmethod
-    def _getAllWrappedData(cls, parent: Spectrum) -> Tuple[ApiMultipletList, ...]:
+    def _getAllWrappedData(cls, parent: Spectrum) -> list[ApiMultipletList]:
         """get wrappedData (MultipletLists) for all MultipletList children of parent MultipletListList"""
         return parent._wrappedData.sortedMultipletLists()
 
-    def _finaliseAction(self, action: str):
+    def _finaliseAction(self, action: str, **actionKwds):
         """Subclassed to notify changes to associated peakListViews
         """
         if not super()._finaliseAction(action):

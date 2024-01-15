@@ -4,9 +4,9 @@ Module documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-09 19:41:07 +0100 (Mon, October 09, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-01-15 18:52:10 +0000 (Mon, January 15, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,18 +28,18 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import typing
 
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
+from ccpnmodel.ccpncore.lib.Constants import defaultNmrChainCode
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.Project import Project
 from ccpn.core.Residue import Residue
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core._implementation.AbsorbResonance import absorbResonance
 from ccpn.core.lib import Pid
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
-from ccpnmodel.ccpncore.lib.Constants import defaultNmrChainCode
-from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, \
     renameObject, undoBlock
 from ccpn.util.Common import makeIterableList
+from ccpn.util.decorators import logCommand
 from ccpn.util.Logging import getLogger
 from ccpn.util.DataEnum import DataEnum
 
@@ -113,7 +113,10 @@ class NmrResidue(AbstractWrapperObject):
     # Number of fields that comprise the object's pid; Used to get parent id's
     _numberOfIdFields = 2
 
+    #=========================================================================================
     # CCPN properties
+    #=========================================================================================
+
     @property
     def _apiResonanceGroup(self) -> ApiResonanceGroup:
         """ CCPN resonanceGroup matching Residue"""
@@ -312,6 +315,31 @@ class NmrResidue(AbstractWrapperObject):
                 result = nextResidue.nmrResidue
         #
         return result
+
+    #=========================================================================================
+    # property STUBS: hot-fixed later
+    #=========================================================================================
+
+    @property
+    def nmrAtoms(self) -> list['NmrAtom']:
+        """STUB: hot-fixed later
+        :return: a list of nmrAtoms in the NmrResidue
+        """
+        return []
+
+    #=========================================================================================
+    # getter STUBS: hot-fixed later
+    #=========================================================================================
+
+    def getNmrAtom(self, relativeId: str) -> 'NmrAtom | None':
+        """STUB: hot-fixed later
+        :return: an instance of NmrAtom, or None
+        """
+        return None
+
+    #=========================================================================================
+    # Core methods
+    #=========================================================================================
 
     @logCommand(get='self')
     def connectNext(self, nmrResidue: typing.Union['NmrResidue', str]) -> NmrChain:
@@ -995,7 +1023,8 @@ class NmrResidue(AbstractWrapperObject):
             self._wrappedData.moveDirectNmrChain(self.nmrChain._wrappedData, end.description)
 
     @logCommand(get='self')
-    def moveToNmrChain(self, newNmrChain: typing.Union['NmrChain', str] = 'NC:@-', sequenceCode: str = None, residueType: str = None):
+    def moveToNmrChain(self, newNmrChain: typing.Union['NmrChain', str] = 'NC:@-', sequenceCode: str = None,
+                       residueType: str = None):
         """Move residue to newNmrChain, breaking connected NmrChain if necessary.
         Optionally rename residue using sequenceCode and residueType
 
@@ -1176,7 +1205,8 @@ class NmrResidue(AbstractWrapperObject):
     @logCommand(get='self')
     def mergeNmrResidues(self, nmrResidues: typing.Sequence['NmrResidue']):
         nmrResidues = makeIterableList(nmrResidues)
-        nmrResidues = [self.project.getByPid(nmrResidue) if isinstance(nmrResidue, str) else nmrResidue for nmrResidue in nmrResidues]
+        nmrResidues = [self.project.getByPid(nmrResidue) if isinstance(nmrResidue, str) else nmrResidue for nmrResidue
+                       in nmrResidues]
         if not all(isinstance(nmrResidue, NmrResidue) for nmrResidue in nmrResidues):
             raise TypeError('nmrResidues can only contain items of type NmrResidue')
         if self in nmrResidues:
@@ -1211,8 +1241,56 @@ class NmrResidue(AbstractWrapperObject):
     #   finally:
     #     self._endCommandEchoBlock()
 
+    def delete(self):
+        """Delete routine to check whether the item can be deleted otherwise raise api error.
+        """
+        try:
+            # fetching the api tree will raise api errors for those objects that cannot be deleted/modified
+            # and skip the actual delete
+            self._getApiObjectTree()
+
+            # need to do a special delete here as the api always reinserts the nmrResidue at the end of the chain
+            self._delete()
+
+        except Exception as es:
+            raise es
+
+    @renameObject()
+    @logCommand(get='self')
+    def rename(self, sequenceCode: str = None, residueType: str = None):
+        """Rename NmrResidue. changing its sequenceCode and residueType.
+
+        Specifying None for the sequenceCode will reset the nmrResidue to its canonical form, '@<serial>."""
+
+        apiResonanceGroup = self._apiResonanceGroup
+        self._validateStringValue('sequenceCode', sequenceCode, allowNone=True)
+        self._validateStringValue('residueType', residueType, allowNone=True, allowEmpty=True)
+        sequenceCode = sequenceCode or None
+        residueType = residueType or None
+
+        if sequenceCode:
+            # Check if name is not already used
+            partialId = '%s.%s.' % (self._parent._id, sequenceCode.translate(Pid.remapSeparators))
+            ll = self._project.getObjectsByPartialId(className=self.className, idStartsWith=partialId)
+            if ll and ll != [self]:
+                raise ValueError(
+                    f'Cannot rename {self} to {self.nmrChain.id}.{sequenceCode}.{residueType or ""} - assignment already exists')
+
+        oldSequenceCode = apiResonanceGroup.sequenceCode
+        oldResidueType = apiResonanceGroup.residueType
+        # self._oldPid = self.pid
+
+        # rename functions from here - both values are always changed
+        apiResonanceGroup.sequenceCode = sequenceCode
+        apiResonanceGroup.resetResidueType(residueType)
+
+        # now handled by _finaliseAction
+        # self._renameChildren()
+
+        return (oldSequenceCode, oldResidueType)
+
     #=========================================================================================
-    # Implementation functions
+    # Implementation methods
     #=========================================================================================
 
     @classmethod
@@ -1276,60 +1354,14 @@ class NmrResidue(AbstractWrapperObject):
 
             # remove all the mmrAtoms from their associated chemicalShifts
             # - clearing before the delete handles the notifiers nicely
-            _shs = {sh for nmrRes in (self,) + self.offsetNmrResidues for nmrAt in nmrRes.nmrAtoms for sh in nmrAt.chemicalShifts}
+            _shs = {sh for nmrRes in (self,) + self.offsetNmrResidues for nmrAt in nmrRes.nmrAtoms for sh in
+                    nmrAt.chemicalShifts}
             for sh in _shs:
                 sh.nmrAtom = None
             super().delete()
             # clean-up/delete the chemical-shifts
             for sh in _shs:
                 sh.delete()
-
-    def delete(self):
-        """Delete routine to check whether the item can be deleted otherwise raise api error.
-        """
-        try:
-            # fetching the api tree will raise api errors for those objects that cannot be deleted/modified
-            # and skip the actual delete
-            self._getApiObjectTree()
-
-            # need to do a special delete here as the api always reinserts the nmrResidue at the end of the chain
-            self._delete()
-
-        except Exception as es:
-            raise es
-
-    @renameObject()
-    @logCommand(get='self')
-    def rename(self, sequenceCode: str = None, residueType: str = None):
-        """Rename NmrResidue. changing its sequenceCode and residueType.
-
-        Specifying None for the sequenceCode will reset the nmrResidue to its canonical form, '@<serial>."""
-
-        apiResonanceGroup = self._apiResonanceGroup
-        self._validateStringValue('sequenceCode', sequenceCode, allowNone=True)
-        self._validateStringValue('residueType', residueType, allowNone=True, allowEmpty=True)
-        sequenceCode = sequenceCode or None
-        residueType = residueType or None
-
-        if sequenceCode:
-            # Check if name is not already used
-            partialId = '%s.%s.' % (self._parent._id, sequenceCode.translate(Pid.remapSeparators))
-            ll = self._project.getObjectsByPartialId(className=self.className, idStartsWith=partialId)
-            if ll and ll != [self]:
-                raise ValueError(f'Cannot rename {self} to {self.nmrChain.id}.{sequenceCode}.{residueType or ""} - assignment already exists')
-
-        oldSequenceCode = apiResonanceGroup.sequenceCode
-        oldResidueType = apiResonanceGroup.residueType
-        # self._oldPid = self.pid
-
-        # rename functions from here - both values are always changed
-        apiResonanceGroup.sequenceCode = sequenceCode
-        apiResonanceGroup.resetResidueType(residueType)
-
-        # now handled by _finaliseAction
-        # self._renameChildren()
-
-        return (oldSequenceCode, oldResidueType)
 
     def _renameChildren(self):
         """Update the chemicalShifts to the rename
@@ -1338,10 +1370,6 @@ class NmrResidue(AbstractWrapperObject):
             # actions to be called outside of rename - must be last thing to set?
             nmrAt._childActions.append(nmrAt._renameChemicalShifts)
             nmrAt._finaliseChildren.extend((sh, 'change') for sh in nmrAt.chemicalShifts)
-
-    #=========================================================================================
-    # CCPN functions
-    #=========================================================================================
 
     #===========================================================================================
     # new<Object> and other methods

@@ -3,9 +3,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-10 20:03:17 +0100 (Tue, October 10, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-01-15 18:52:10 +0000 (Mon, January 15, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,15 +27,14 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import typing
 from functools import partial
-from ccpn.util import Common as commonUtil
-from ccpn.core.Project import Project
+from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Residue as ApiResidue
 from ccpn.core.Chain import Chain
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
-from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Residue as ApiResidue
-from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import deleteObject, undoStackBlocking, renameObject, undoBlock, \
+from ccpn.core.lib.ContextManagers import undoStackBlocking, renameObject, undoBlock, \
     undoBlockWithoutSideBar, notificationEchoBlocking
+from ccpn.util import Common as commonUtil
+from ccpn.util.decorators import logCommand
 
 
 class Residue(AbstractWrapperObject):
@@ -65,7 +64,10 @@ class Residue(AbstractWrapperObject):
     # Number of fields that comprise the object's pid; Used to get parent id's
     _numberOfIdFields = 2
 
+    #=========================================================================================
     # CCPN properties
+    #=========================================================================================
+
     @property
     def _apiResidue(self) -> ApiResidue:
         """ API residue matching Residue"""
@@ -230,7 +232,28 @@ class Residue(AbstractWrapperObject):
             raise ValueError("%s configuration must be one of %s" % (self, allowedValues))
 
     #=========================================================================================
-    # CCPN functions
+    # property STUBS: hot-fixed later
+    #=========================================================================================
+
+    @property
+    def atoms(self) -> list['Atom']:
+        """STUB: hot-fixed later
+        :return: a list of atoms in the Residue
+        """
+        return []
+
+    #=========================================================================================
+    # getter STUBS: hot-fixed later
+    #=========================================================================================
+
+    def getAtom(self, relativeId: str) -> 'Atom | None':
+        """STUB: hot-fixed later
+        :return: an instance of Atom, or None
+        """
+        return None
+
+    #=========================================================================================
+    # Core methods
     #=========================================================================================
 
     @property
@@ -321,7 +344,7 @@ class Residue(AbstractWrapperObject):
             return None
 
     @property
-    def allNmrResidues(self) -> typing.Tuple['NmrResidue']:
+    def allNmrResidues(self) -> tuple['NmrResidue']:
         """AllNmrResidues corresponding to Residue - E.g. (for MR:A.87)
         NmrResidues NR:A.87, NR:A.87+0, NR:A.88-1, NR:A.82+5, etc.
         """
@@ -362,7 +385,7 @@ class Residue(AbstractWrapperObject):
         return any([a.isAssigned for a in self.atoms])
 
     #=========================================================================================
-    # Implementation functions
+    # Implementation methods
     #=========================================================================================
 
     @classmethod

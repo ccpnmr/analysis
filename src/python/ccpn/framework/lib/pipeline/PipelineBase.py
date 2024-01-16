@@ -4,9 +4,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-12-13 17:04:10 +0000 (Wed, December 13, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-01-16 17:48:55 +0000 (Tue, January 16, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -44,8 +44,9 @@ class Pipeline(object):
 
         self.inputData = set()
         self.spectrumGroups = set()
-        self.queue = []  # Pipes to be ran
+        self.queue = []  # Pipes to be run
         self.updateInputData = False
+        self.isRunning = False
 
         self._rawDataDict = None
 
@@ -57,8 +58,9 @@ class Pipeline(object):
             self.project = self.application.project
             self.mainWindow = self.ui.mainWindow
 
+        # ~~~ Instantiate all the Core Pipe Classes here ~~~
         if pipes is not None:
-            self.pipes = [cls(application=application) for cls in pipes]
+            self.pipes = [Pipe(application=application) for Pipe in pipes]
         else:
             self.pipes = []
 
@@ -123,14 +125,18 @@ class Pipeline(object):
             with notificationEchoBlocking():
                 self._kwargs = {}
                 if len(self.queue) > 0:
-                    for pipe in self.queue:
+                    self.isRunning = True
+
+                    for i, pipe in enumerate(self.queue):
                         if pipe is not None:
                             self.updateInputData = False
                             pipe.inputData = self.inputData
                             pipe.spectrumGroups = self.spectrumGroups
-                            result = pipe.runPipe(self.inputData)
-                            # if not result: # that means the ran pipe does not return a valid data to use as input for next pipes
-                            #   break
+                            result = pipe.runPipe(self.inputData, pipeIndex=i)
                             self.inputData = result or set()
 
-                return self.inputData
+        return self.inputData
+
+    def stopPipeline(self):
+        """ Set the stop Signal (to True)"""
+        self.isRunning = False

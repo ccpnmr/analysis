@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-10 15:34:32 +0000 (Wed, January 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-16 17:48:56 +0000 (Tue, January 16, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -164,7 +164,7 @@ class DTWReferencingSpectra(SpectraPipe):
         ToleranceFoM:               DefaultToleranceFoM,
         }
 
-    def runPipe(self, spectra):
+    def runPipe(self, spectra, **kwargs):
         '''
         :param spectra: inputData
         :return: aligned spectra

@@ -4,9 +4,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-12-13 17:04:10 +0000 (Wed, December 13, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-01-16 17:48:57 +0000 (Tue, January 16, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -393,8 +393,9 @@ class PipelineDropArea(DockArea):
             return (obj)
         else:
             boxes = []
-            for i in range(obj.count()):
-                boxes.append(self.orderedBoxes(obj.widget(i)))
+            if hasattr(obj, 'count'):
+                for i in range(obj.count()):
+                    boxes.append(self.orderedBoxes(obj.widget(i)))
             return boxes
 
     def _restoreState(self, state):
@@ -483,6 +484,16 @@ class GuiPipe(Dock, GuiPipeDrop):
         if self.pipe is not None:
             self.pipe._kwargs = self._kwargs
 
+            self.pipe._progressSignal.connect(self._updateProgress)
+
+    @property
+    def _runningIndex(self):
+        return self.pipe.pipeIndex
+
+    def _updateProgress(self,  progressDict):
+        self._parent._updatePipeProgress(progressDict)
+
+
     # def initialiseGui(self):
     #   """Define this function on the new pipe file"""
     #   pass
@@ -560,7 +571,7 @@ class GuiPipe(Dock, GuiPipeDrop):
         self.label = PipelineBoxLabel(name.upper(), self)
         self.label.closeButton.clicked.connect(self._closePipe)
         self.label.dock = self
-        # self.label.arrowDownButton.clicked.connect(self.moveBoxDown)
+        # self.label.arrowDownButton.clicked.connect(self.moveBoxDown)§
         # self.label.arrowUpButton.clicked.connect(self.moveBoxUp)
         self.moveLabel = True
         self.orientation = 'horizontal'
@@ -835,6 +846,7 @@ class PipelineBoxLabel(DockLabel, VerticalLabel):
                                                   color:black;
                                                   border: 0px solid transparent}""")
         self.closeButton.setIconSize(QtCore.QSize(15, 15))
+        self.progressLabel = Label(self, text='N/A')
 
     def mousePressEvent(self, ev):
 
@@ -865,6 +877,8 @@ class PipelineBoxLabel(DockLabel, VerticalLabel):
 
         pos = QtCore.QPoint(ev.size().width() - 20, 0)
         self.closeButton.move(pos)
+        pos = QtCore.QPoint(ev.size().width() -  200, 0)
+        self.progressLabel.move(pos)
         super(DockLabel, self).resizeEvent(ev)
 
     def mouseMoveEvent(self, ev):

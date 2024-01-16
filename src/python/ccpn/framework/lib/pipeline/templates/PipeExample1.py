@@ -61,7 +61,7 @@ class DemoPipe1(SpectraPipe):
         ReferenceSpectrum: 'spectrum2'
         }
 
-    def runPipe(self, spectra):
+    def runPipe(self, spectra, **kwargs):
         output = myAlgorithm(spectra)
         return spectra
 

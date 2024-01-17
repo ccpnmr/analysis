@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-01-04 16:36:34 +0000 (Thu, January 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-17 14:42:21 +0000 (Wed, January 17, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -300,7 +300,7 @@ class UpdatePopup(CcpnDialogMainWidget):
             self.accept()
 
     def _doUpdate(self):
-        self._resetMd5()
+        self._updatePopupAgent._resetMd5()
         self._updateButton.setEnabled(False)
 
     def reject(self):

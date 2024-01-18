@@ -4,9 +4,9 @@ Module to manage Star files in ccpn context
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                )
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -16,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:08 +0100 (Wed, October 12, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-01-18 13:30:44 +0100 (Thu, January 18, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -131,6 +131,14 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
         csRow.nefAtomName = self._getNefName(csRow.ntDef)
 
         csRow.skip = False
+
+        # Check for an error encountered from files exported from POKY: identical sequenceCodes for different
+        # residues could be defined
+        _sequenceCodeToResidueTypeDict = dict([(seqCode,resType) for resType, seqCode in self._seqResDict.keys()])
+        _residueType = _sequenceCodeToResidueTypeDict.get(csRow.sequenceCode, None)
+        if _residueType != None and _residueType != csRow.residueType:
+            raise RuntimeError(f'While parsing saveFrame of type "{self._sf_category}" named "{self.name}", scanning loop "{self._LOOP_KEY}": \n'
+                               f'"{csRow.sequenceCode}.{csRow.residueType}" incompatible with previously defined residue "{csRow.sequenceCode}.{_residueType}"')
 
         dd = self._seqResDict.setdefault((csRow.residueType, csRow.sequenceCode), [])
         dd.append(csRow)
@@ -311,7 +319,7 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
                                                      )
         chainCode = self.parent.chainCode if self.parent.chainCode else \
                     self.entryName
-        #TODO isConnected should be True; after ficing the model issues
+        #TODO isConnected should be True; after fixing the model issues
         nmrChain = project.newNmrChain(shortName=chainCode, isConnected=False, comment=comment)
 
         # A two-stage conversion, as sometimes we need to look back or forward

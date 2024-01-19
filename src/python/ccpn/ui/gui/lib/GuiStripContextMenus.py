@@ -8,9 +8,9 @@ To create a menu:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -18,9 +18,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-12 15:31:27 +0100 (Fri, May 12, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-01-19 11:45:00 +0000 (Fri, January 19, 2024) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -369,6 +369,20 @@ def _deleteIntegralItem(strip):
 def _deleteMultipletItem(strip):
     return _SCMitem(name='Delete Multiplet(s)',
                     typeItem=ItemTypes.get(ITEM), toolTip='Delete Multiplet(s) from project', callback=strip.mainWindow.deleteSelectedItems)
+
+
+def _mergeMultipletItem(strip):
+    return _SCMitem(name='Merge Multiplet',
+                    typeItem=ItemTypes.get(ITEM),
+                    toolTip='Merge multiplets and its associated peaks to a single multiplet', shortcut='XM',
+                    callback=strip.mainWindow.mergeCurrentMultiplet)
+
+
+def _mergePeaksAndMultiplets(strip):
+    return _SCMitem(name='Merge Peaks And Multiplets',
+                    typeItem=ItemTypes.get(ITEM),
+                    toolTip='Merge selected peaks and multiplets into a single multiplet', shortcut='XX',
+                    callback=strip.mainWindow.mergePeaksAndMultiplets)
 
 
 ##############################  Common Peak menu items ##############################
@@ -1026,6 +1040,9 @@ def _get1dMultipletMenu(guiStrip1d) -> Menu:
         _deleteMultipletItem(guiStrip1d),
         _separator(),
         _markMultipletsItem(),
+        _separator(),
+        _mergeMultipletItem(guiStrip1d),
+        _mergePeaksAndMultiplets(guiStrip1d),
         ]
     items = [itm for itm in items if itm is not None]
     return _createMenu(guiStrip1d, items)
@@ -1223,6 +1240,9 @@ def _getNdMultipletMenu(guiStripNd) -> Menu:
         _deleteMultipletItem(guiStripNd),
         _separator(),
         _markMultipletsItem(),
+        _separator(),
+        _mergeMultipletItem(guiStripNd),
+        _mergePeaksAndMultiplets(guiStripNd)
         ]
     items = [itm for itm in items if itm is not None]
     return _createMenu(guiStripNd, items)

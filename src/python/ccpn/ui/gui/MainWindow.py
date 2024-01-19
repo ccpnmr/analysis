@@ -4,9 +4,9 @@ This file contains the MainWindow class
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-28 12:49:05 +0000 (Tue, November 28, 2023) $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-01-19 11:44:28 +0000 (Fri, January 19, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -34,6 +34,7 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtCore import pyqtSlot
 
+from ccpn.core import Multiplet
 from ccpn.util import Logging
 from ccpn.core.Project import Project
 
@@ -1744,6 +1745,30 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                              peak in self.application.current.peaks]
                     multiplet = multipletList.newMultiplet(peaks=peaks)
                     self.application.current.multiplet = multiplet
+
+    def mergePeaksAndMultiplets(self):
+        """Merge current peaks into current multiplet
+
+        mouseMultiplet: multiplet to be merged into, if there is no current multiplet object under
+        the mouse then default to first multiplet currently selected.
+        """
+        mouseMultiplet = self.application.current.strip.getObjectsUnderMouse().get('multiplets')
+
+        allPeaks = self.application.current.peaks
+        allMultiplets = self.application.current.multiplets
+        multiplet = self.application.current.multiplet if mouseMultiplet is None else mouseMultiplet
+
+        multiplet.mergePeaksAndMultiplets(peaks=allPeaks, multiplets=allMultiplets)
+
+    def mergeCurrentMultiplet(self):
+        """Merge multiple multiplets together - ignores any selected peaks"""
+        mouseMultiplet = self.application.current.strip.getObjectsUnderMouse().get('multiplets')
+        multiplet = self.application.current.multiplet if mouseMultiplet is None else mouseMultiplet
+
+        allMultiplets = self.application.current.multiplets
+        oldMultiplets = [mp for mp in allMultiplets if mp is not multiplet]
+
+        multiplet.mergeMultiplet(multiplets=oldMultiplets)
 
     def newCollectionOfCurrentPeaks(self):
         """add current peaks to a new collection"""

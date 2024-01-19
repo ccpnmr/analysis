@@ -3,9 +3,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,14 +13,17 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-13 16:56:35 +0100 (Thu, July 13, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-01-19 11:44:05 +0000 (Fri, January 19, 2024) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: Ed Brooksbank $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
+
+from itertools import chain
+
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -42,7 +45,8 @@ from ccpn.util.Constants import SCALETOLERANCE
 
 
 MULTIPLET_TYPES = ['singlet', 'doublet', 'triplet', 'quartet', 'quintet', 'sextet', 'septet', 'octet', 'nonet',
-                   'doublet of doublets', 'doublet of triplets', 'triplet of doublets', 'doublet of doublet of doublets']
+                   'doublet of doublets', 'doublet of triplets', 'triplet of doublets',
+                   'doublet of doublet of doublets']
 
 
 def _calculateCenterOfMass(multiplet):
@@ -699,6 +703,57 @@ class Multiplet(AbstractWrapperObject):
         if trigger in ['change']:
             self._finaliseAction(trigger)
 
+    @logCommand(get='self')
+    def mergeMultiplet(self, multiplets: list['Multiplet']):
+        """Merge a list of multiplets and their peaks into this multiplet
+
+        Note: All multiplets other than this one is deleted after merging
+        all the peaks.
+
+        :param multiplets: a list of peaks to be merged into the multiplet.
+        """
+        with undoBlock():
+            for mp in multiplets:
+                if mp is not self:
+                    pkAdd = mp.peaks
+
+                    mp.removePeaks(mp.peaks)
+                    self.addPeaks(pkAdd)
+                    mp.delete()  # Unsure if we should deleted empty multiplet
+
+    @logCommand(get='self')
+    def mergePeaksAndMultiplets(self, peaks : list[Peak], multiplets : list['Multiplet']):
+        """Merge any combination of multiplet and peak objects together.
+
+        Note: Peaks being added associated with another multiplet will be
+        removed from their original multiplet and if that multiplet is then
+        empty it will be deleted
+
+        :param peaks: a list of peaks to be merged into the multiplet
+        :type multiplets: a lift of multiplets to merged into the current multiplet
+        """
+        multipletsPeaks = chain.from_iterable([mp.peaks for mp in multiplets if mp is not self])
+        alonePeaks = [pk for pk in peaks if not pk.multiplets]
+        newPeaks = [pk for pk in peaks if self not in pk.multiplets]
+
+        multiPeaks = (set(newPeaks) - (set(alonePeaks))) | set(multipletsPeaks)
+
+        delMultiplet = []
+        [delMultiplet.append(pk.multiplets[0]) for pk in multiPeaks if pk.multiplets[0] not in delMultiplet]
+
+        multiPeaks.union(alonePeaks)
+
+        with undoBlock():
+            for pk in multiPeaks:
+                pk.multiplets[0].removePeaks(pk)
+
+            self.addPeaks(newPeaks)
+
+            for mt in delMultiplet:
+                # Unsure if we should deleted empty multiplet
+                if mt.numPeaks < 1:
+                    mt.delete()
+
     #===========================================================================================
     # new<Object> and other methods
     # Call appropriate routines in their respective locations
@@ -710,14 +765,14 @@ class Multiplet(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(Multiplet)
-def _newMultiplet(self: MultipletList,
-                  height: float = 0.0, heightError: float = 0.0,
-                  volume: float = 0.0, volumeError: float = 0.0,
-                  offset: float = 0.0, constraintWeight: float = 0.0,
-                  figureOfMerit: float = 1.0, annotation: str = None, comment: str = None,
-                  limits: Sequence[Tuple[float, float]] = (), slopes: List[float] = (),
-                  pointLimits: Sequence[Tuple[float, float]] = (),
-                  peaks: Sequence[Union['Peak', str]] = ()) -> Multiplet:
+def _newAPIMultiplet(self: MultipletList,
+                     height: float = 0.0, heightError: float = 0.0,
+                     volume: float = 0.0, volumeError: float = 0.0,
+                     offset: float = 0.0, constraintWeight: float = 0.0,
+                     figureOfMerit: float = 1.0, annotation: str = None, comment: str = None,
+                     limits: Sequence[Tuple[float, float]] = (), slopes: List[float] = (),
+                     pointLimits: Sequence[Tuple[float, float]] = (),
+                     peaks: Sequence[Union['Peak', str]] = ()) -> Multiplet:
     """Create a new Multiplet within a multipletList
 
     See the Multiplet class for details.
@@ -772,6 +827,36 @@ def _newMultiplet(self: MultipletList,
         raise RuntimeError('Unable to generate new Multiplet item')
 
     return result
+
+
+def _newMultiplet(self: MultipletList,
+                  height: float = 0.0, heightError: float = 0.0,
+                  volume: float = 0.0, volumeError: float = 0.0,
+                  offset: float = 0.0, constraintWeight: float = 0.0,
+                  figureOfMerit: float = 1.0, annotation: str = None, comment: str = None,
+                  limits: Sequence[Tuple[float, float]] = (), slopes: List[float] = (),
+                  pointLimits: Sequence[Tuple[float, float]] = (),
+                  peaks: Sequence[Union['Peak', str]] = ()) -> Multiplet:
+    with undoBlock():
+        peakList = makeIterableList(peaks)
+        pks = [self.project.getByPid(peak) if isinstance(peak, str) else peak
+               for peak in peakList]
+
+        assignment = []
+        for pk in pks:
+            if (a := list(chain.from_iterable(pk.assignedNmrAtoms))) is not None or len(a) < 1:
+                for atom in a:
+                    if atom is not None and atom not in assignment:
+                        assignment.append(atom)
+
+        result = _newAPIMultiplet(self, height, heightError, volume, volumeError, offset, constraintWeight,
+                                  figureOfMerit, annotation, comment, limits, slopes, pointLimits, peaks)
+
+        from ccpn.core.lib.AssignmentLib import _assignNmrAtomsToPeaks
+        for a in assignment:
+            _assignNmrAtomsToPeaks(nmrAtoms=[a], peaks=list(pks))
+
+        return result
 
 
 # EJB 20181127: removed

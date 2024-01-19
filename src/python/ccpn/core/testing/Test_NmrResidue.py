@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-01-02 11:15:23 +0000 (Tue, January 02, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-19 11:42:00 +0000 (Fri, January 19, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -842,7 +842,6 @@ class NmrResidueTest(WrapperTesting):
         Currently only tests error raising for:
         - Value is not string or None
         - Value is an empty string
-        - Value contains non-legal characters
         - If the NmrResidue is assigned
         Should also test error raising for:
         - Random exception (?)
@@ -855,8 +854,8 @@ class NmrResidueTest(WrapperTesting):
             nr1.sequenceCode = 12
         with self.assertRaises(ValueError):
             nr1.sequenceCode = ''
-        with self.assertRaises(ValueError):
-            nr1.sequenceCode = '['
+        # with self.assertRaises(ValueError): # limitChars=True removed
+        #     nr1.sequenceCode = '['
 
         with self.assertRaises(RuntimeError):
             nr2.sequenceCode = '1234'
@@ -891,7 +890,6 @@ class NmrResidueTest(WrapperTesting):
         """Tests the Errors for residueType setter.
         Currently only tests error raising for:
         - Value is not string or None
-        - Value contains non-legal characters
         - If the NmrResidue is assigned
         Should also test error raising for:
         - Random exception (?)
@@ -902,8 +900,8 @@ class NmrResidueTest(WrapperTesting):
 
         with self.assertRaises(ValueError):
             nr1.residueType = 12
-        with self.assertRaises(ValueError):
-            nr1.residueType = '[]'
+        # with self.assertRaises(ValueError):  # limitChars=True removed
+        #     nr1.residueType = '[]'
 
         with self.assertRaises(RuntimeError):
             nr2.residueType = 'ALA'

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-19 13:54:29 +0000 (Fri, January 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-19 18:30:10 +0000 (Fri, January 19, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -103,6 +103,7 @@ class SequenceHandler():
             sequence =  ['Ala', 'Ala', 'Ala']
 
         ~~~~~~~~~~~
+        Ambiguities:
         NOT ALLOWED / not supported will Raise Value Error:
         - 3-Code or CcpCode as a single string un-separated
             sequence =  'ALAALAALAALA'
@@ -113,6 +114,20 @@ class SequenceHandler():
         - Mix and match of the formats or Types:
             sequence = 'ALA', 'A'
             sequence = ['ALA', ], 'A'
+            sequence = 'ALA Ala ALA'
+
+        Problems:
+        what is this:
+            sequence = 'CSS' (or ALA!)
+            is a Code3Letter?
+            is three times a Code1Letter?
+            is a CcpCode for a single non-standard which we need to create an nmrChain?
+
+        what is this:
+            sequence = 'ALA'
+            is a Code3Letter?
+            is three Code1Letter?
+            Raise Value error?
 
         :param sequence: str or list
         :return: dict
@@ -159,6 +174,7 @@ class SequenceHandler():
             result[CODE1LETTER] = sequence
             result[CODE3LETTER] = self.oneToThreeCode(sequence)
             result[CCPCODE] = self.oneToCcpCode(sequence)
+            return result
 
         ##  deal with 3CodeLetter
         is3Code = all([i.isupper for i in sequence])
@@ -167,26 +183,60 @@ class SequenceHandler():
             result[CODE1LETTER] = self.threeToOneCode(sequence)
             result[CODE3LETTER] = sequence
             result[CCPCODE] = self.threeToCcpCode(sequence)
+            return result
 
-        ##  it might be a CcpCode format. We can try to convertions.
+        ##  deal with a CcpCode format.
+        if self._isCcpCodeSequence(sequence):
+            result[CCPCODE] = sequence
+            try:
+                code1Letter = self.threeToOneCode(sequence)
+                result[CODE1LETTER] = code1Letter
+            except Exception as _error:
+                error = f'Could not convert to 1CodeLetter. Failed with error: {_error} '
+                result['error'] = error
+                getLogger().warn(error)
+            return result
 
-        # isCcpCode if any of these:
-        #  len >= 3
-        #  has lower Case values
-        #  has numbers
-        # if when all upper is not in the standard 3LetterCodes of any know Protein/DNA/RNA/SMALL
-
-        result[CCPCODE] = sequence
-        try:
-            code1Letter = self.threeToOneCode(sequence)
-            result[CODE1LETTER] = code1Letter
-        except Exception as _error:
-            error = f'Could not convert to 1CodeLetter. Failed with error: {_error} '
-            result['error'] = error
-            getLogger().warn(error)
+        return result
 
 
-            return sequence
+    def _isCcpCodeSequence(self, sequence:list):
+        """
+       it is a CcpCode if at least any of the sequence item meets the CcpCode pattern.
+        CcpCodes are case-sensitive and user-defined, project specific. E.G.: CcpCode 'AsP' might not be 'ASP' as 3CodeLetter
+        DO NOT simply convert to upper and check if matches any of  the standard 3LetterCodes of any know Protein/DNA/RNA/SmallMolecules
+        :param sequence: a list of strings
+        :return: bool
+        """
+        allCodes = []
+        for item in sequence:
+            allCodes.append(self._isCcpCodeLike(item))
+        return any(allCodes)
+
+    @staticmethod
+    def _isCcpCodeLike(ccpCode):
+        """Check if a string matches a CcpCode pattern.
+            Note CcpCodes can be user defined, and be of any format.
+            As in V3.2, CcpCodes for standard and known non-standard residues, are simply a Title case of the Code3 letters.
+            E.g.: ccpCode Ala is ALA in code3Letter.
+            Standard RNA , CcpCode and Code3 and Code1 letter are identical.
+        """
+
+        patterns = {
+            'All Lowercase'                                           : re.compile(r'^[a-z]*$'),
+            'All Lowercase with Numbers'                    : re.compile(r'^[a-z0-9]*$'),
+            'All Uppercase with Numbers'                    : re.compile(r'^[A-Z0-9]*$'),
+            'Mixed Lower and Upper'                           : re.compile(r'^[a-zA-Z]*$'),
+            'Mixed Lower and Upper with Numbers'    : re.compile(r'^[a-zA-Z0-9]*$'),
+            'All of the Above Plus Extra Characters'     : re.compile(r'^[a-zA-Z0-9!@#$%^&*()]*$'),
+            }
+
+        if not ccpCode or len(ccpCode) == 0:
+            return False
+        for condition, pattern in patterns.items():
+            if bool(pattern.match(ccpCode)):
+                return True
+        return False
 
     def _strToList(self, sequence):
         tokens = re.split(r'[,\s]+', sequence)  # just splitting by space and/or comma

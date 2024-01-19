@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-01-19 11:44:05 +0000 (Fri, January 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-19 12:10:14 +0000 (Fri, January 19, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -725,34 +725,37 @@ class Multiplet(AbstractWrapperObject):
     def mergePeaksAndMultiplets(self, peaks : list[Peak], multiplets : list['Multiplet']):
         """Merge any combination of multiplet and peak objects together.
 
-        Note: Peaks being added associated with another multiplet will be
-        removed from their original multiplet and if that multiplet is then
-        empty it will be deleted
+        Note: if a peak is currently in another multiplet it will not merge.
 
         :param peaks: a list of peaks to be merged into the multiplet
         :type multiplets: a lift of multiplets to merged into the current multiplet
         """
-        multipletsPeaks = chain.from_iterable([mp.peaks for mp in multiplets if mp is not self])
+        # multipletsPeaks = chain.from_iterable([mp.peaks for mp in multiplets if mp is not self])
+        # alonePeaks = [pk for pk in peaks if not pk.multiplets]
+        # newPeaks = [pk for pk in peaks if self not in pk.multiplets]
+        #
+        # multiPeaks = (set(newPeaks) - (set(alonePeaks))) | set(multipletsPeaks)
+        #
+        # delMultiplet = []
+        # [delMultiplet.append(pk.multiplets[0]) for pk in multiPeaks if pk.multiplets[0] not in delMultiplet]
+        #
+        # multiPeaks.union(alonePeaks)
+        #
+        # with undoBlock():
+        #     for pk in multiPeaks:
+        #         pk.multiplets[0].removePeaks(pk)
+        #
+        #     self.addPeaks(newPeaks)
+        #
+        #     for mt in delMultiplet:
+        #         # Unsure if we should deleted empty multiplet
+        #         if mt.numPeaks < 1:
+        #             mt.delete()
         alonePeaks = [pk for pk in peaks if not pk.multiplets]
-        newPeaks = [pk for pk in peaks if self not in pk.multiplets]
-
-        multiPeaks = (set(newPeaks) - (set(alonePeaks))) | set(multipletsPeaks)
-
-        delMultiplet = []
-        [delMultiplet.append(pk.multiplets[0]) for pk in multiPeaks if pk.multiplets[0] not in delMultiplet]
-
-        multiPeaks.union(alonePeaks)
 
         with undoBlock():
-            for pk in multiPeaks:
-                pk.multiplets[0].removePeaks(pk)
-
-            self.addPeaks(newPeaks)
-
-            for mt in delMultiplet:
-                # Unsure if we should deleted empty multiplet
-                if mt.numPeaks < 1:
-                    mt.delete()
+            self.mergeMultiplet(multiplets)
+            self.addPeaks(alonePeaks)
 
     #===========================================================================================
     # new<Object> and other methods

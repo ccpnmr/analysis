@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
                "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 18:10:31 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2024-01-19 13:51:02 +0000 (Fri, January 19, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -126,7 +126,7 @@ pass
 #
 # don't need the above bit
 # if self._testSpectrum.renderMode == GLRENDERMODE_DRAW:
-#   GL.glUseProgram(self.globalGL._shaderProgram2.program_id)
+#   GL.glUseProgram(self._shaderProgram2.program_id)
 #
 #   # must be called after glUseProgram
 #   # GL.glUniformMatrix4fv(self.uPMatrix, 1, GL.GL_FALSE, self._uPMatrix)
@@ -152,8 +152,8 @@ pass
 #                            0.0, 0.0, 1.0, 0.0,
 #                            0.0, 0.0, 0.0, 1.0]
 #
-#   self.globalGL._shaderProgram2.setPMatrix(self._uPMatrix)
-#   self.globalGL._shaderProgram2.setMVMatrix(self._uMVMatrix)
+#   self._shaderProgram2.setPMatrix(self._uPMatrix)
+#   self._shaderProgram2.setMVMatrix(self._uMVMatrix)
 #
 #   self.set2DProjectionFlat()
 #   self._testSpectrum.drawIndexArray()

@@ -45,7 +45,7 @@ By Mouse button:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
                "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 18:35:04 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2024-01-19 13:51:02 +0000 (Fri, January 19, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -382,7 +382,8 @@ class CcpnGLWidgetABC(QOpenGLWidget):
 
         # initialise a common to all OpenGL windows
         self.globalGL = GLGlobalData(parent=self, mainWindow=self.mainWindow)
-
+        self.globalGL.initialiseShaders(self)
+        
         # initialise the arrays for the grid and axes
         self.gridList = []
         for li in range(3):
@@ -464,7 +465,7 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
 
         self.setBackgroundColour(self.background, makeCurrent=False)
-        shader = self.globalGL._shaderProgramTex
+        shader = self._shaderText
         shader.bind()
         shader.setBlendEnabled(False)
         shader.setAlpha(1.0)
@@ -483,7 +484,7 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         # stop notifiers interfering with paint event
         self.project.blankNotification()
 
-        shader = self.globalGL._shaderProgram1.bind()
+        shader = self._shaderPixel.bind()
 
         # start with the grid mapped to (0..1, 0..1) to remove zoom errors here
         shader.setProjection(0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
@@ -499,7 +500,7 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         self.viewports.setViewport(self._currentView)
 
         # change to the text shader
-        shader = self.globalGL._shaderProgramTex.bind()
+        shader = self._shaderText.bind()
 
         shader.setProjection(self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
 
@@ -507,7 +508,7 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         shader.setAxisScale(self._axisScale)
 
         self.enableTexture()
-        shader = self.globalGL._shaderProgram1.bind()
+        shader = self._shaderPixel.bind()
         shader.resetMVMatrix()
 
         shader.setProjection(0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
@@ -515,21 +516,21 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         self.drawSelectionBox()
         self.drawCursors()
 
-        self.globalGL._shaderProgramTex.bind()
+        self._shaderText.bind()
 
         self._setViewPortFontScale()
         self.drawMouseCoords()
 
         # make the overlay/axis solid
-        self.globalGL._shaderProgramTex.setBlendEnabled(False)
+        self._shaderText.setBlendEnabled(False)
         self.drawOverlayText()
         self.drawAxisLabels()
-        self.globalGL._shaderProgramTex.setBlendEnabled(True)
+        self._shaderText.setBlendEnabled(True)
 
         self.disableTexture()
 
         # use the current viewport matrix to display the last bit of the axes
-        shader = self.globalGL._shaderProgram1.bind()
+        shader = self._shaderPixel.bind()
         shader.setProjection(0, w - self.AXIS_MARGINRIGHT, -1, h - self.AXIS_MOUSEYOFFSET,
                              -1.0, 1.0)
 
@@ -572,13 +573,13 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         GL.glClearColor(*col)
         self.background = np.array(col, dtype=np.float32)
         bg = QtGui.QVector4D(*col)
-        shader = self.globalGL._shaderProgramTex
+        shader = self._shaderText
         shader.bind()
         shader.setBackground(bg)
-        shader = self.globalGL._shaderProgramAlias
+        shader = self._shaderPixelAlias
         shader.bind()
         shader.setBackground(bg)
-        shader = self.globalGL._shaderProgramTexAlias
+        shader = self._shaderTextAlias
         shader.bind()
         shader.setBackground(bg)
 

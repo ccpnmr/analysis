@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
                "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-18 10:48:08 +0000 (Mon, December 18, 2023) $"
+__dateModified__ = "$dateModified: 2024-01-19 13:51:02 +0000 (Fri, January 19, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -107,6 +107,10 @@ class _AxisOverlay(QtWidgets.QWidget):
 
         p.end()
 
+
+#=========================================================================================
+# Gui1dWidgetAxis
+#=========================================================================================
 
 class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
     is1D = True
@@ -790,24 +794,28 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         GL.glClear(GL.GL_COLOR_BUFFER_BIT)
         GL.glEnable(GL.GL_MULTISAMPLE)
 
-        shader = self.globalGL._shaderProgram1.bind()
+        shader = self._shaderPixel.bind()
 
         # start with the grid mapped to (0..1, 0..1) to remove zoom errors here
         shader.setProjection(0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
+        shader.setMVMatrixToIdentity()
 
         with self._disableGLAliasing():
             # draw the grid components
             self.drawGrid()
 
-        shader = self.globalGL._shaderProgramTex.bind()
+        shader = self._shaderText.bind()
+        shader.setBlendEnabled(True)
 
-        self._axisScale = QtGui.QVector4D(self.pixelX, self.pixelY, 1.0, 1.0)
-        shader.setAxisScale(self._axisScale)
+        # shader.setProjection(self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
+        # self._axisScale = QtGui.QVector4D(self.pixelX, self.pixelY, 1.0, 1.0)
+        # shader.setAxisScale(self._axisScale)
+        # shader.setStackOffset(QtGui.QVector2D(0.0, 0.0))
 
         # draw the text to the screen
         self.enableTexture()
         self.enableTextClientState()
-        self._setViewPortFontScale()
+        # self._setViewPortFontScale()
 
         # make the overlay/axis solid
         shader.setBlendEnabled(False)
@@ -1432,6 +1440,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         # initialise a common to all OpenGL windows
         self.globalGL = GLGlobalData(parent=self, mainWindow=self.mainWindow)  #, strip=None, spectrumDisplay=self.spectrumDisplay)
+        self.globalGL.initialiseShaders(self)
 
         # initialise the arrays for the grid and axes
         self.gridList = []
@@ -1450,11 +1459,13 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         #   think this was an old QT bug
         # GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
         GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)  # arbitrary order
-        # GL.glBlendFunc(GL.GL_SRC_ALPHA_SATURATE, GL.GL_ONE)  # interesting, not sure what this does
-        #                                                      # think is for ordered polygons - nearest to farthest
 
         self._setColourScheme()
         self.setBackgroundColour(self.background, silent=True)
+        shader = self._shaderText
+        shader.bind()
+        shader.setBlendEnabled(False)
+        shader.setAlpha(1.0)
 
         self.updateVisibleSpectrumViews()
         self.initialiseAxes()
@@ -1670,13 +1681,13 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         GL.glClearColor(*col)
         self.background = np.array(col, dtype=np.float32)
         bg = QtGui.QVector4D(*col)
-        shader = self.globalGL._shaderProgramTex
+        shader = self._shaderText
         shader.bind()
         shader.setBackground(bg)
-        shader = self.globalGL._shaderProgramAlias
+        shader = self._shaderPixelAlias
         shader.bind()
         shader.setBackground(bg)
-        shader = self.globalGL._shaderProgramTexAlias
+        shader = self._shaderTextAlias
         shader.bind()
         shader.setBackground(bg)
 
@@ -1709,8 +1720,9 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
     def _setViewPortFontScale(self):
         # set the scale for drawing the overlay text correctly
         self._axisScale = QtGui.QVector4D(self.deltaX, self.deltaY, 1.0, 1.0)
-        self.globalGL._shaderProgramTex.setAxisScale(self._axisScale)
-        self.globalGL._shaderProgramTex.setProjection(0.0, 1.0, 0, 1.0, -1.0, 1.0)
+        shader = self._shaderText
+        shader.setAxisScale(self._axisScale)
+        shader.setProjection(0.0, 1.0, 0, 1.0, -1.0, 1.0)
 
     def buildAxisLabels(self, refresh=False):
         # build axes labelling
@@ -1801,7 +1813,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         if self._axesVisible:
             self.buildAxisLabels()
 
-            shader = self.globalGL._shaderProgramTex
+            shader = self._shaderText
 
             if self._drawBottomAxis and self._drawRightAxis:
                 # NOTE:ED - this case should never occur
@@ -1809,7 +1821,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
             if self._drawBottomAxis and self._axisType == GLDefs.BOTTOMAXIS:
                 # put the axis labels into the bottom bar
-                self.viewports.setViewport(self._currentBottomAxisBarView)
+                _w, _h = self.viewports.setViewport(self._currentBottomAxisBarView)
 
                 self._axisScale = QtGui.QVector4D(self.deltaX, 1.0, 1.0, 1.0)
                 shader.setAxisScale(self._axisScale)
@@ -1820,7 +1832,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
             if self._drawRightAxis and self._axisType == GLDefs.RIGHTAXIS:
                 # put the axis labels into the right bar
-                self.viewports.setViewport(self._currentRightAxisBarView)
+                _w, _h = self.viewports.setViewport(self._currentRightAxisBarView)
 
                 self._axisScale = QtGui.QVector4D(1.0, self.deltaY, 1.0, 1.0)
                 shader.setAxisScale(self._axisScale)
@@ -2339,7 +2351,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         w = self.w
         h = self.h
 
-        shader = self.globalGL._shaderProgram1.bind()
+        shader = self._shaderPixel.bind()
 
         # set projection to axis coordinates
         shader.setProjection(self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
@@ -2396,7 +2408,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         # change to the text shader
         self._axisScale = QtGui.QVector4D(self.pixelX, self.pixelY, 1.0, 1.0)
-        shader = self.globalGL._shaderProgramTex.bind()
+        shader = self._shaderText.bind()
         shader.setProjection(self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
         shader.setAxisScale(self._axisScale)
 
@@ -2796,6 +2808,10 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             if rescale:
                 self._rescaleYAxis(rescale=rescale, update=update)
 
+
+#=========================================================================================
+# GuiNdWidgetAxis
+#=========================================================================================
 
 class GuiNdWidgetAxis(Gui1dWidgetAxis):
     """Testing a widget that only contains a right axis

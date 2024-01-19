@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
                "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 14:54:40 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2024-01-19 13:51:02 +0000 (Fri, January 19, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -75,7 +75,7 @@ class GLGlobalData(QtWidgets.QWidget):
         """
 
         super().__init__()
-        self._parent = parent
+        # self._parent = parent  # this isn't correct :| not consistent
         self.mainWindow = mainWindow
 
         self.fonts = {}
@@ -90,7 +90,7 @@ class GLGlobalData(QtWidgets.QWidget):
         getLogger().debug(f"Surface: {_format.version()}")
 
         self.loadFonts()
-        self.initialiseShaders()
+        # self.initialiseShaders()
 
         self._texturesBound = False
 
@@ -127,17 +127,19 @@ class GLGlobalData(QtWidgets.QWidget):
                 fnt._bindFontTexture()
             self._texturesBound = True
 
-    def initialiseShaders(self):
-        """Initialise the shaders
+    @staticmethod
+    def initialiseShaders(glWidget):
+        """Initialise the shaders for the specified glWidget
         """
         # add some shaders to the global data
-        self.shaders = {}
+        # not sure that this loop is required in this form, may need duplicates of the same type?
+        glWidget.shaders = {}
         for _shader in (PixelShader, TextShader, AliasedPixelShader, AliasedTextShader, ):  # LineShader):
             _new = _shader()
-            self.shaders[_new.name] = _new
+            glWidget.shaders[_new.name] = _new
 
-        self._shaderProgram1 = self.shaders[PixelShader.name]
-        self._shaderProgramTex = self.shaders[TextShader.name]
-        self._shaderProgramAlias = self.shaders[AliasedPixelShader.name]
-        self._shaderProgramTexAlias = self.shaders[AliasedTextShader.name]
-        # self._shaderProgramLine = self.shaders[LineShader.name]
+        glWidget._shaderPixel = glWidget.shaders[PixelShader.name]
+        glWidget._shaderText = glWidget.shaders[TextShader.name]
+        glWidget._shaderPixelAlias = glWidget.shaders[AliasedPixelShader.name]
+        glWidget._shaderTextAlias = glWidget.shaders[AliasedTextShader.name]
+        # self.glWidget._shaderLine = self.glWidget.shaders[LineShader.name]

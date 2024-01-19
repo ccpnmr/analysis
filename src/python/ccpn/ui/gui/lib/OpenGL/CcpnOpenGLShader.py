@@ -4,7 +4,7 @@ Module containing functions for defining GLSL shaders.
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
                "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-20 15:19:07 +0000 (Wed, December 20, 2023) $"
+__dateModified__ = "$dateModified: 2024-01-19 13:51:02 +0000 (Fri, January 19, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -34,7 +34,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.guiSettings import consoleStyle
 
 
-_DEBUG = True
+_DEBUG = False
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -113,9 +113,12 @@ class ShaderProgramABC(object):
 
         try:
             self._shader = shader = QtGui.QOpenGLShaderProgram()
-            self.vs_id = shader.addShaderFromSourceCode(QtGui.QOpenGLShader.Vertex, self.vertexShader) if self.vertexShader else None
-            self.geom_id = shader.addShaderFromSourceCode(QtGui.QOpenGLShader.Geometry, self.geometryShader) if self.geometryShader else None
-            self.frag_id = shader.addShaderFromSourceCode(QtGui.QOpenGLShader.Fragment, self.fragmentShader) if self.fragmentShader else None
+            self.vs_id = shader.addShaderFromSourceCode(QtGui.QOpenGLShader.Vertex,
+                                                        self.vertexShader) if self.vertexShader else None
+            self.geom_id = shader.addShaderFromSourceCode(QtGui.QOpenGLShader.Geometry,
+                                                          self.geometryShader) if self.geometryShader else None
+            self.frag_id = shader.addShaderFromSourceCode(QtGui.QOpenGLShader.Fragment,
+                                                          self.fragmentShader) if self.fragmentShader else None
             shader.link()
 
             self.program_id = shader.programId()
@@ -135,20 +138,20 @@ class ShaderProgramABC(object):
             raise RuntimeError(msg)
 
         if _DEBUG:
-            getLogger().debug(f'{self.name} - {self.vs_id} {self.geom_id} {self.frag_id} ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+            getLogger().debug(f'{self.name} - {self.vs_id} {self.geom_id} {self.frag_id} ~~~~~~~~~~~~~~~')
 
         self.locations = {}
 
         # define attributes to be passed to the shaders
         for att in self.attributes:
             if (val := shader.attributeLocation(att)) == -1:
-                getLogger().debug(f'--> {self.name:20} attribute {att} is not defined')
+                getLogger().debug2(f'--> {self.name:20} attribute {att} is not defined')
             self.locations[att] = val
 
         # define uniforms to be passed to the shaders
         for uni in self.uniforms:
             if (val := shader.uniformLocation(uni)) == -1:
-                getLogger().debug(f'--> {self.name:20} uniform {uni} is not defined')
+                getLogger().debug2(f'--> {self.name:20} uniform {uni} is not defined')
             self.locations[uni] = val
 
         if _DEBUG:
@@ -190,7 +193,8 @@ class ShaderProgramABC(object):
         """Make self the current shader
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.bind   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.bind   -   {id(self)}'
+                              f'{consoleStyle.reset}')
         self._shader.bind()
         return self
 
@@ -198,7 +202,8 @@ class ShaderProgramABC(object):
         """Unbind the current shader
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.release   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.release   -   {id(self)}'
+                              f'{consoleStyle.reset}')
         self._shader.release()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

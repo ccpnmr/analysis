@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
                "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 17:51:48 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2024-01-19 13:51:02 +0000 (Fri, January 19, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -224,7 +224,7 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
                 # draw the boxes around the highlighted integral areas - multisampling not required here
                 self._GLSymbols[integralListView].drawIndexVBO()
 
-        self._GLParent.globalGL._shaderProgram1.setMVMatrixToIdentity()
+        self._GLParent._shaderPixel.setMVMatrixToIdentity()
 
     def _rescaleLabels(self, spectrumView=None, objListView=None, drawList=None):
         """Rescale all labels to the new dimensions of the screen

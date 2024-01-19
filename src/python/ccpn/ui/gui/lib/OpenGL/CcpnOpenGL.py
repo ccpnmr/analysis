@@ -45,7 +45,7 @@ By Mouse button:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
                "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 19:09:09 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2024-01-19 13:51:02 +0000 (Fri, January 19, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -722,6 +722,12 @@ class CcpnGLWidget(QOpenGLWidget):
     def resizeGL(self, w, h):
         """Resize event from the openGL architecture
         """
+        # if self.visibleRegion().isEmpty():
+        #     return
+
+        # would need to defer resizing until first visible paint?
+        # print(f'--> resizeGL   {id(self)}   {self.strip}   {not self.visibleRegion()}')
+
         # must be set here to catch the change of screen - possibly when unplugging a monitor
         self.refreshDevicePixelRatio()
         self.w, self.h = w, h
@@ -741,7 +747,7 @@ class CcpnGLWidget(QOpenGLWidget):
             getLogger().debug(f'viewport not defined: {self}')
             return
 
-        shader = self.globalGL._shaderProgram1.bind()
+        shader = self._shaderPixel.bind()
 
         # set projection to axis coordinates
         shader.setProjection(self.axisL, self.axisR, self.axisB,
@@ -797,7 +803,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # change to the text shader
         self._axisScale = QtGui.QVector4D(self.pixelX, self.pixelY, 1.0, 1.0)
-        shader = self.globalGL._shaderProgramTex.bind()
+        shader = self._shaderText.bind()
         shader.setProjection(self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
         shader.setAxisScale(self._axisScale)
 
@@ -1696,7 +1702,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # initialise a common to all OpenGL windows
         self.globalGL = GLGlobalData(parent=self, mainWindow=self.mainWindow)
-
+        self.globalGL.initialiseShaders(self)
+        
         # move outside GLGlobalData to check threading on windows
         self.globalGL.bindFonts()
 
@@ -1801,15 +1808,17 @@ class CcpnGLWidget(QOpenGLWidget):
         self.buildOverlayStrings()
 
         # This is the correct blend function to ignore stray surface blending functions
-        GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
+        #   think this was an old QT bug
+        # GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
+        GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
 
         self._setColourScheme()
         self.setBackgroundColour(self.background, silent=True)
-        shader = self.globalGL._shaderProgramTex
+        shader = self._shaderText
         shader.bind()
         shader.setBlendEnabled(False)
         shader.setAlpha(1.0)
-        shader = self.globalGL._shaderProgramTexAlias
+        shader = self._shaderTextAlias
         shader.bind()
         shader.setBlendEnabled(True)
         shader.setAlpha(1.0)
@@ -2070,13 +2079,13 @@ class CcpnGLWidget(QOpenGLWidget):
         GL.glClearColor(*col)
         self.background = np.array(col, dtype=np.float32)
         bg = QtGui.QVector4D(*col)
-        shader = self.globalGL._shaderProgramTex
+        shader = self._shaderText
         shader.bind()
         shader.setBackground(bg)
-        shader = self.globalGL._shaderProgramAlias
+        shader = self._shaderPixelAlias
         shader.bind()
         shader.setBackground(bg)
-        shader = self.globalGL._shaderProgramTexAlias
+        shader = self._shaderTextAlias
         shader.bind()
         shader.setBackground(bg)
 
@@ -3007,7 +3016,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def _setViewPortFontScale(self):
         # set the scale for drawing the overlay text correctly
         self._axisScale = QtGui.QVector4D(self.deltaX, self.deltaY, 1.0, 1.0)
-        shader = self.globalGL._shaderProgramTex
+        shader = self._shaderText
         shader.setAxisScale(self._axisScale)
         shader.setProjection(0.0, 1.0, 0, 1.0, -1.0, 1.0)
 
@@ -3093,6 +3102,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
         if self.strip.isDeleted:
             return
+
+        # if self.visibleRegion().isEmpty():
+        #     return
+        # print(f'--> paintGL   {id(self)}   {self.strip}   {not self.visibleRegion()}')
 
         # NOTE:ED - testing, remove later
         # self._paintMode = PaintModes.PAINT_ALL
@@ -3218,7 +3231,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # reset the paint mode - need to check the logic here
         # self._paintMode = PaintModes.PAINT_ALL
 
-        shader = self.globalGL._shaderProgram1.bind()
+        shader = self._shaderPixel.bind()
         shader.setMVMatrixToIdentity()
 
         # draw the spectra, need to reset the viewport
@@ -3242,7 +3255,7 @@ class CcpnGLWidget(QOpenGLWidget):
         GL.glClear(GL.GL_COLOR_BUFFER_BIT)
         GL.glEnable(GL.GL_MULTISAMPLE)
 
-        shader = self.globalGL._shaderProgram1.bind()
+        shader = self._shaderPixel.bind()
 
         # start with the grid mapped to (0..1, 0..1) to remove zoom errors here
         shader.setProjection(0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
@@ -3266,11 +3279,11 @@ class CcpnGLWidget(QOpenGLWidget):
             self.drawAliasedSymbols(self._peakSymbolsEnabled, self._peakArrowsEnabled,
                                     self._multipletSymbolsEnabled, self._multipletArrowsEnabled)
 
-        self.globalGL._shaderProgram1.bind()
+        self._shaderPixel.bind()
 
         if not self._stackingMode:
             if not (self.is1D and self.strip._isPhasingOn):  # other mouse buttons checks needed here
-                self._GLIntegrals.drawSymbols(self._spectrumSettings, shader=self.globalGL._shaderProgram1)
+                self._GLIntegrals.drawSymbols(self._spectrumSettings, shader=self._shaderPixel)
                 for _ in self._disableGLAliasing():
                     self._GLIntegrals.drawSymbolRegions(self._spectrumSettings)
                     self.drawRegions()
@@ -3286,7 +3299,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self.drawAliasedLabels()
 
         # change to the text shader
-        shader = self.globalGL._shaderProgramTex.bind()
+        shader = self._shaderText.bind()
 
         shader.setProjection(self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
 
@@ -3312,7 +3325,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.disableTextClientState()
 
-        shader = self.globalGL._shaderProgram1.bind()
+        shader = self._shaderPixel.bind()
 
         self.drawTraces(shader)
         shader.setMVMatrixToIdentity()
@@ -3332,7 +3345,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 # enable invert mode so that only the cursor needs to be refreshed in the other viewports
                 self.drawCursors()
 
-        shader = self.globalGL._shaderProgramTex.bind()
+        shader = self._shaderText.bind()
         self.enableTextClientState()
         self._setViewPortFontScale()
 

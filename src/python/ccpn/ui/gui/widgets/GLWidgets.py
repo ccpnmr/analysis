@@ -5,7 +5,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
                "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 19:09:09 +0000 (Thu, December 14, 2023) $"
+__dateModified__ = "$dateModified: 2024-01-19 13:51:02 +0000 (Fri, January 19, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -616,7 +616,7 @@ class GuiNdWidget(CcpnGLWidget):
     def drawAliasedLabels(self):
         """Draw all the labels that require aliasing to multiple regions
         """
-        shader = self.globalGL._shaderProgramTexAlias.bind()
+        shader = self._shaderTextAlias.bind()
         # set the scale to the axis limits, needs addressing correctly, possibly same as grid
         self._axisScale = QtGui.QVector4D(self.pixelX, self.pixelY, 1.0, 1.0)
         shader.setProjection(self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
@@ -681,7 +681,7 @@ class GuiNdWidget(CcpnGLWidget):
     def drawAliasedSymbols(self, peakSymbolsEnabled, peakArrowsEnabled, multipletSymbolsEnabled, multipletArrowsEnabled):
         """Draw all the symbols that require aliasing to multiple regions
         """
-        shader = self.globalGL._shaderProgramAlias.bind()
+        shader = self._shaderPixelAlias.bind()
         # set the scale to the axis limits, needs addressing correctly, possibly same as grid
         shader.setProjection(self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
 
@@ -753,7 +753,7 @@ class GuiNdWidget(CcpnGLWidget):
         if self.strip.isDeleted:
             return
 
-        shader = self.globalGL._shaderProgram1
+        shader = self._shaderPixel
 
         # set transform to identity - ensures only the pMatrix is applied
         shader.setMVMatrixToIdentity()
@@ -825,7 +825,7 @@ class GuiNdWidget(CcpnGLWidget):
         if self.strip.isDeleted:
             return
 
-        shader = self.globalGL._shaderProgram1
+        shader = self._shaderPixel
 
         GL.glLineWidth(self._contourThickness * self.viewports.devicePixelRatio)
         GL.glDisable(GL.GL_BLEND)
@@ -1847,7 +1847,7 @@ class Gui1dWidget(CcpnGLWidget):
     def drawAliasedLabels(self):
         """Draw all the labels that require aliasing to multiple regions
         """
-        shader = self.globalGL._shaderProgramTexAlias.bind()
+        shader = self._shaderTextAlias.bind()
         # set the scale to the axis limits, needs addressing correctly, possibly same as grid
         self._axisScale = QtGui.QVector4D(self.pixelX, self.pixelY, 1.0, 1.0)
         shader.setProjection(self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
@@ -1915,7 +1915,7 @@ class Gui1dWidget(CcpnGLWidget):
     def drawAliasedSymbols(self, peakSymbolsEnabled, peakArrowsEnabled, multipletSymbolsEnabled, multipletArrowsEnabled):
         """Draw all the symbols that require aliasing to multiple regions
         """
-        shader = self.globalGL._shaderProgramAlias.bind()
+        shader = self._shaderPixelAlias.bind()
         # set the scale to the axis limits, needs addressing correctly, possibly same as grid
         shader.setProjection(self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
 
@@ -2000,7 +2000,7 @@ class Gui1dWidget(CcpnGLWidget):
         if self.strip.isDeleted:
             return
 
-        shader = self.globalGL._shaderProgram1
+        shader = self._shaderPixel
 
         # self.buildSpectra()
 
@@ -2047,7 +2047,7 @@ class Gui1dWidget(CcpnGLWidget):
         if self.strip._isPhasingOn and not self.showSpectraOnPhasing:
             return
 
-        shader = self.globalGL._shaderProgram1
+        shader = self._shaderPixel
 
         GL.glLineWidth(self._contourThickness * self.viewports.devicePixelRatio)
         GL.glDisable(GL.GL_BLEND)

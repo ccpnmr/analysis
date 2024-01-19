@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-01-19 13:51:02 +0000 (Fri, January 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-19 14:47:19 +0000 (Fri, January 19, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -164,7 +164,8 @@ class _VBOGLVertexArray:
         Indexed with vertices and colour.
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawIndexImmediate   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawIndexImmediate'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)
@@ -197,7 +198,8 @@ class _VBOGLVertexArray:
             attribs:        array of float for defining aliasPosition
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.defineIndexVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.defineIndexVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         # if not self.VAO:
         #     self.VAO = [GL.glGenVertexArrays(1)]
@@ -241,7 +243,8 @@ class _VBOGLVertexArray:
         """Push Indices/Colours/Vertices to graphics card
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushIndexVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushIndexVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         # if not self.VAO:
         if self._vertexVBO is None:
@@ -268,7 +271,8 @@ class _VBOGLVertexArray:
         Only the index array.
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushIndexVBOIndices   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushIndexVBOIndices'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         # if not self.VAO:
         if self._indexVBO is None:
@@ -287,7 +291,8 @@ class _VBOGLVertexArray:
         Indexed mode with vertices and colour.
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawIndexVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawIndexVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         if not self.indices.size:
             return
@@ -365,7 +370,8 @@ class _VBOGLVertexArray:
             attribs:        array of float for defining aliasPosition
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.defineAliasedIndexVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.defineAliasedIndexVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         # if not self.VAO:
         #     self.VAO = [GL.glGenVertexArrays(1)]
@@ -414,7 +420,8 @@ class _VBOGLVertexArray:
         """Push Indices/Colours/Vertices/attribs to graphics card
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushAliasedIndexVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushAliasedIndexVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         # if not self.VAO:
         if self._vertexVBO is None:
@@ -442,7 +449,8 @@ class _VBOGLVertexArray:
         Only the index array.
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushAliasedIndexVBOIndices   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushAliasedIndexVBOIndices'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         # if not self.VAO:
         if self._indexVBO is None:
@@ -461,7 +469,8 @@ class _VBOGLVertexArray:
         Indexed mode with vertices and colour.
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawAliasedIndexVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawAliasedIndexVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         if not self.indices.size:
             return
@@ -534,7 +543,8 @@ class _VBOGLVertexArray:
         Only vertices and colour required.
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawVertexColorImmediate   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawVertexColorImmediate'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)
@@ -564,7 +574,8 @@ class _VBOGLVertexArray:
             colors:         (R, G, B, a) * vertices
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.defineVertexColorVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.defineVertexColorVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         # if not self.VAO:
         #     self.VAO = [GL.glGenVertexArrays(1)]
@@ -603,7 +614,8 @@ class _VBOGLVertexArray:
         """Push Colours/Vertices to graphics card
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushVertexColorVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushVertexColorVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         if self._vertexVBO is None:
             getLogger().debug(f'{self.__class__.__name__}.pushVertexColorVBO: OpenGL Error - {self}')
@@ -621,7 +633,8 @@ class _VBOGLVertexArray:
         Only vertices and colour required.
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawVertexColorVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawVertexColorVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         # if not self.VAO:
         if self._vertexVBO is None:
@@ -660,7 +673,8 @@ class _VBOGLVertexArray:
         Only vertices are required.
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawVertexNoColorImmediate   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawVertexNoColorImmediate'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)
@@ -687,7 +701,8 @@ class _VBOGLVertexArray:
         Facilitates drawing of fonts.
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawTextArrayImmediate   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawTextArrayImmediate'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)
@@ -726,7 +741,8 @@ class _VBOGLVertexArray:
             attribs         (a, b) * vertices
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.defineTextArrayVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.defineTextArrayVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         # if not self.VAO:
         #     self.VAO = [GL.glGenVertexArrays(1)]
@@ -778,7 +794,8 @@ class _VBOGLVertexArray:
         """Push vertices/colours/texture co-ordinates/attribs/indices to graphics card
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushTextArrayVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushTextArrayVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         # if not self.VAO:
         if self._vertexVBO is None:
@@ -807,7 +824,8 @@ class _VBOGLVertexArray:
         Only update the attributes used for moving text.
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushTextArrayVBOAttribs   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushTextArrayVBOAttribs'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         if self._attribVBO is None:
             getLogger().debug(f'{self.__class__.__name__}.pushTextArrayVBOAttribs: OpenGL Error - {self}')
@@ -823,7 +841,8 @@ class _VBOGLVertexArray:
         Only update the colour, used for highlighting text.
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushTextArrayVBOColour   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushTextArrayVBOColour'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         if self._colorVBO is None:
             getLogger().debug(f'{self.__class__.__name__}.pushTextArrayVBOColour: OpenGL Error - {self}')
@@ -855,7 +874,8 @@ class _VBOGLVertexArray:
         Indexed mode with vertices, colour, texture and attributes.
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawTextArrayVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawTextArrayVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         # if not self.VAO:
         if self._vertexVBO is None:
@@ -918,7 +938,8 @@ class _VBOGLVertexArray:
             colors:         packed(R, G, B, a)
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.defineIntIndexVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.defineIntIndexVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         # if not self.VAO:
         #     self.VAO = [GL.glGenVertexArrays(1)]
@@ -959,7 +980,8 @@ class _VBOGLVertexArray:
         """Push Indices/Colours/Vertices to graphics card
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushIntIndexVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushIntIndexVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         if self._vertexVBO is None:
             getLogger().debug(f'{self.__class__.__name__}.pushIntIndexVBO: OpenGL Error - {self}')
@@ -978,7 +1000,8 @@ class _VBOGLVertexArray:
         Indexed mode with vertices and colour.
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawIntIndexVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawIntIndexVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         if not self.vertices.size:
             return
@@ -1132,7 +1155,8 @@ class _GLVertexArray:
         Indexed with vertices and colour.
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawIndexImmediate   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawIndexImmediate'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)
@@ -1165,7 +1189,8 @@ class _GLVertexArray:
             attribs:        array of float for defining aliasPosition
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.defineIndexVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.defineIndexVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         # if not self.VAO:
         #     self.VAO = [GL.glGenVertexArrays(1)]
@@ -1209,7 +1234,8 @@ class _GLVertexArray:
         """Push Indices/Colours/Vertices to graphics card
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushIndexVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushIndexVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         # if not self.VAO:
         if not self._vertexVBO:
@@ -1234,7 +1260,8 @@ class _GLVertexArray:
         Only the index array.
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushIndexVBOIndices   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushIndexVBOIndices'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         # if not self.VAO:
         if not self._indexVBO:
@@ -1252,7 +1279,8 @@ class _GLVertexArray:
         Indexed mode with vertices and colour.
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawIndexVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawIndexVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         if not self.indices.size:
             return
@@ -1328,7 +1356,8 @@ class _GLVertexArray:
             attribs:        array of float for defining aliasPosition
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.defineAliasedIndexVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.defineAliasedIndexVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         # if not self.VAO:
         #     self.VAO = [GL.glGenVertexArrays(1)]
@@ -1377,7 +1406,8 @@ class _GLVertexArray:
         """Push Indices/Colours/Vertices/attribs to graphics card
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushAliasedIndexVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushAliasedIndexVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         # if not self.VAO:
         if not self._vertexVBO:
@@ -1404,7 +1434,8 @@ class _GLVertexArray:
         Only the index array.
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushAliasedIndexVBOIndices   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushAliasedIndexVBOIndices'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         # if not self.VAO:
         if not self._indexVBO:
@@ -1423,7 +1454,8 @@ class _GLVertexArray:
         Indexed mode with vertices and colour.
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawAliasedIndexVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawAliasedIndexVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         if not self.indices.size:
             return
@@ -1494,7 +1526,8 @@ class _GLVertexArray:
         Only vertices and colour required.
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawVertexColorImmediate   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawVertexColorImmediate'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)
@@ -1524,7 +1557,8 @@ class _GLVertexArray:
             colors:         (R, G, B, a) * vertices
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.defineVertexColorVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.defineVertexColorVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         # if not self.VAO:
         #     self.VAO = [GL.glGenVertexArrays(1)]
@@ -1563,7 +1597,8 @@ class _GLVertexArray:
         """Push Colours/Vertices to graphics card
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushVertexColorVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushVertexColorVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self._vertexVBO[0])
         GL.glBufferData(GL.GL_ARRAY_BUFFER, self.vertices.nbytes, self.vertices, _USAGE)
@@ -1577,7 +1612,8 @@ class _GLVertexArray:
         Only vertices and colour required.
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawVertexColorVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawVertexColorVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         # if not self.VAO:
         if not self._vertexVBO:
@@ -1614,7 +1650,8 @@ class _GLVertexArray:
         Only vertices are required.
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawVertexNoColorImmediate   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawVertexNoColorImmediate'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)
@@ -1641,7 +1678,8 @@ class _GLVertexArray:
         Facilitates drawing of fonts.
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawTextArrayImmediate   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawTextArrayImmediate'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)
@@ -1680,7 +1718,8 @@ class _GLVertexArray:
             attribs         (a, b) * vertices
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.defineTextArrayVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.defineTextArrayVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         # if not self.VAO:
         #     self.VAO = [GL.glGenVertexArrays(1)]
@@ -1734,7 +1773,8 @@ class _GLVertexArray:
         """Push vertices/colours/texture co-ordinates/attribs/indices to graphics card
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushTextArrayVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushTextArrayVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         # if not self.VAO:
         if not self._vertexVBO:
@@ -1762,7 +1802,8 @@ class _GLVertexArray:
         Only update the attributes used for moving text.
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushTextArrayVBOAttribs   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushTextArrayVBOAttribs'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         if not self._attribVBO:
             getLogger().debug(f'{self.__class__.__name__}.pushTextArrayVBOAttribs: OpenGL Error - {self}')
@@ -1778,7 +1819,8 @@ class _GLVertexArray:
         Only update the colour, used for highlighting text.
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushTextArrayVBOColour   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushTextArrayVBOColour'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         if not self._colorVBO:
             getLogger().debug(f'{self.__class__.__name__}.pushTextArrayVBOColour: OpenGL Error - {self}')
@@ -1808,7 +1850,8 @@ class _GLVertexArray:
         Indexed mode with vertices, colour, texture and attributes.
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawTextArrayVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawTextArrayVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         # if not self.VAO:
         if not self._vertexVBO:
@@ -1869,7 +1912,8 @@ class _GLVertexArray:
             colors:         packed(R, G, B, a)
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.defineIntIndexVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.defineIntIndexVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         # if not self.VAO:
         #     self.VAO = [GL.glGenVertexArrays(1)]
@@ -1909,7 +1953,8 @@ class _GLVertexArray:
         """Push Indices/Colours/Vertices to graphics card
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushIntIndexVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.pushIntIndexVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         if not self._vertexVBO:
             getLogger().debug(f'{self.__class__.__name__}.pushIntIndexVBO: OpenGL Error - {self}')
@@ -1928,7 +1973,8 @@ class _GLVertexArray:
         Indexed mode with vertices and colour.
         """
         if _DEBUG:
-            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawIntIndexVBO   -   {id(self)}{consoleStyle.reset}')
+            getLogger().debug(f'{consoleStyle.fg.darkyellow}-->  {self.__class__.__name__}.drawIntIndexVBO'
+                              f'   -   {id(self)}{consoleStyle.reset}')
 
         if not self.vertices.size:
             return
@@ -1963,6 +2009,7 @@ class _GLVertexArray:
         # GL.glDrawArrays(GL.GL_POINTS, 0, self.vertices.size // 2)
         #
         # GL.glBindVertexArray(0)
+
 
 #=========================================================================================
 # Windows again - doesn't appear to correctly accelerate all GL objects

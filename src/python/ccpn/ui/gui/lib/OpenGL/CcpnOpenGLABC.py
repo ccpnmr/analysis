@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-01-19 13:51:02 +0000 (Fri, January 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-19 14:47:19 +0000 (Fri, January 19, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -67,7 +67,6 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 # Start of code
 #=========================================================================================
 
-import sys
 import re
 # from threading import Thread
 # from queue import Queue
@@ -383,7 +382,7 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         # initialise a common to all OpenGL windows
         self.globalGL = GLGlobalData(parent=self, mainWindow=self.mainWindow)
         self.globalGL.initialiseShaders(self)
-        
+
         # initialise the arrays for the grid and axes
         self.gridList = []
         for li in range(3):
@@ -493,8 +492,7 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         # self.drawGrid()
 
         # set the scale to the axis limits, needs addressing correctly, possibly same as grid
-        shader.setProjection(self.axisL, self.axisR, self.axisB,
-                                    self.axisT, -1.0, 1.0)
+        shader.setProjection(self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
 
         # draw the spectra, need to reset the viewport
         self.viewports.setViewport(self._currentView)

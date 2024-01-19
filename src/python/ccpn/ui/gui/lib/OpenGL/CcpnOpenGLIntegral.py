@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-01-19 13:51:02 +0000 (Fri, January 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-19 14:47:20 +0000 (Fri, January 19, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -162,9 +162,11 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
         # pls = peakListView.peakList
         pls = self.objectList(objListView)
 
-        listCol = getAutoColourRgbRatio(objListView.textColour or GLDefs.DEFAULTCOLOUR, pls.spectrum, self.autoColour,
+        listCol = getAutoColourRgbRatio(objListView.textColour or GLDefs.DEFAULTCOLOUR,
+                                        pls.spectrum, self.autoColour,
                                         getColours()[CCPNGLWIDGET_FOREGROUND])
-        meritCol = getAutoColourRgbRatio(objListView.meritColour or GLDefs.DEFAULTCOLOUR, pls.spectrum, self.autoColour,
+        meritCol = getAutoColourRgbRatio(objListView.meritColour or GLDefs.DEFAULTCOLOUR,
+                                         pls.spectrum, self.autoColour,
                                          getColours()[CCPNGLWIDGET_FOREGROUND])
         meritEnabled = objListView.meritEnabled
         meritThreshold = objListView.meritThreshold
@@ -255,7 +257,8 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
     def _buildSymbols(self, spectrumView, integralListView):
 
         if integralListView not in self._GLSymbols:
-            self._GLSymbols[integralListView] = GLIntegralRegion(project=self.strip.project, GLContext=self._GLParent,
+            self._GLSymbols[integralListView] = GLIntegralRegion(project=self.strip.project,
+                                                                 GLContext=self._GLParent,
                                                                  spectrumView=spectrumView,
                                                                  integralListView=integralListView)
 
@@ -268,9 +271,11 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
             drawList._clearRegions()
 
             ils = integralListView.integralList
-            listCol = getAutoColourRgbRatio(integralListView.symbolColour or GLDefs.DEFAULTCOLOUR, ils.spectrum, self.autoColour,
+            listCol = getAutoColourRgbRatio(integralListView.symbolColour or GLDefs.DEFAULTCOLOUR,
+                                            ils.spectrum, self.autoColour,
                                             getColours()[CCPNGLWIDGET_FOREGROUND])
-            meritCol = getAutoColourRgbRatio(integralListView.meritColour or GLDefs.DEFAULTCOLOUR, ils.spectrum, self.autoColour,
+            meritCol = getAutoColourRgbRatio(integralListView.meritColour or GLDefs.DEFAULTCOLOUR,
+                                             ils.spectrum, self.autoColour,
                                              getColours()[CCPNGLWIDGET_FOREGROUND])
             meritEnabled = integralListView.meritEnabled
             meritThreshold = integralListView.meritThreshold
@@ -393,9 +398,11 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
             cols = self._GLParent.highlightColour[:3]
         else:
 
-            listCol = getAutoColourRgbRatio(objListView.textColour or GLDefs.DEFAULTCOLOUR, pls.spectrum, self.autoColour,
+            listCol = getAutoColourRgbRatio(objListView.textColour or GLDefs.DEFAULTCOLOUR,
+                                            pls.spectrum, self.autoColour,
                                             getColours()[CCPNGLWIDGET_FOREGROUND])
-            meritCol = getAutoColourRgbRatio(objListView.meritColour or GLDefs.DEFAULTCOLOUR, pls.spectrum, self.autoColour,
+            meritCol = getAutoColourRgbRatio(objListView.meritColour or GLDefs.DEFAULTCOLOUR,
+                                             pls.spectrum, self.autoColour,
                                              getColours()[CCPNGLWIDGET_FOREGROUND])
             meritEnabled = objListView.meritEnabled
             meritThreshold = objListView.meritThreshold

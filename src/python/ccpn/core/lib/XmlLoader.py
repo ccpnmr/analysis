@@ -1125,8 +1125,10 @@ class XmlLoader(XmlLoaderABC):
     #--------------------------------------------------------------------------------------------
 
     # @debug1Enter()
-    def newProject(self, overwrite=False):
+    def newProject(self, initGraphics, overwrite=False):
         """Creates new project;
+        :param initGraphics: flag to also initialise the graphics objects
+        :param overwrite: flag to overwrite existing self.path
         :return a (api) NmrProject instance
         :raises FileExistsError or RuntimeError
         """
@@ -1159,8 +1161,7 @@ class XmlLoader(XmlLoaderABC):
             self.apiNmrProject = self.memopsRoot.newNmrProject(name=self.name)  # creates the Nmr repository
             self._initApiData()
 
-            app = getApplication()
-            if not app or app.hasGui:
+            if initGraphics:
                 # And the Graphics data
                 self._initApiGraphicsData()
 
@@ -1169,12 +1170,17 @@ class XmlLoader(XmlLoaderABC):
 
         self.setUnmodified()
 
-        self._debugInfo('After newProject:')
+        # self._debugInfo('After newProject:')
         return self.apiNmrProject
 
     @classmethod
     def newFromLoader(cls, xmlLoader, path=None, create=False) -> XmlLoader:
-        """Create a new instance using loader; set path, memopsRoot and apiNmrProject
+        """Create a new XmlLoader instance using loader;
+        set path, memopsRoot and apiNmrProject
+
+        :param xmlLoader: an XmlLoader instance
+        :param path: optional path, set from xmlLoader if None
+        :param create: flag to create the directory defined by path
         :return An XmlLoader instance
         """
         if not isinstance(xmlLoader, XmlLoader):
@@ -1250,8 +1256,9 @@ class XmlLoader(XmlLoaderABC):
     #--------------------------------------------------------------------------------------------
 
     # @debug1Enter()
-    def loadProject(self) -> NmrProject:
+    def loadProject(self, initGraphics:bool) -> NmrProject:
         """Loads ccpn project as defined by self.path;
+        :param initGraphics: flag to also initialise the graphics objects
         :return api NmrProject instance
         :raises FileNotFoundError and RuntimeError
         """
@@ -1308,27 +1315,17 @@ class XmlLoader(XmlLoaderABC):
             # upgrade api data
             correctFinalResult(self.memopsRoot)
 
-            # # init the v3 objects
-            # with self.blockReading():
-            #     self._initApiData()
-            #     # And the Graphics data
-            #     self._initApiGraphicsData()
-
-            # This traverses all repositories/packages and loads and checks values
-            # self.memopsRoot.checkAllValid()
-
         # init the V3 project data
         self._initApiData()
 
-        app = getApplication()
-        if not app or app.hasGui:
-            # init the Graphics data
+        # Optionally init the Graphics data
+        if initGraphics:
             self._initApiGraphicsData()
 
         self._updateTopObjects()
         self.setUnmodified()
         self._updateUserChemComps()
-        self._debugInfo('After loadProject:')
+        # self._debugInfo('After loadProject:')
         return self.apiNmrProject
 
     # @debug2Leave()
@@ -1409,7 +1406,7 @@ class XmlLoader(XmlLoaderABC):
             #     except (PermissionError, FileNotFoundError):
             #         self.logger.warning('Folder may be read-only')
 
-        self._debugInfo('After loading memopsRoot:')
+        # self._debugInfo('After loading memopsRoot:')
 
     #--------------------------------------------------------------------------------------------
     # Saving

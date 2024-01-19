@@ -1,9 +1,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -11,9 +11,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-29 12:08:47 +0000 (Wed, November 29, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-01-19 16:55:02 +0100 (Fri, January 19, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -605,25 +605,6 @@ class Framework(NotifierBase, GuiBase):
         # NOTE:ED - testing here, project seems to be modified after loading
         newProject._xmlLoader.setUnmodified()
 
-        # GWV: this really should not be here; moved to the_update_v2 method
-        #      that already existed and gets called
-        # if newProject._isUpgradedFromV2:
-        #     getLogger().debug('initialising v2 noise and contour levels')
-        #     with inactivity(application=self):
-        #         for spectrum in newProject.spectra:
-        #             # calculate the new noise level
-        #             spectrum.noiseLevel = spectrum.estimateNoise()
-        #
-        #             # Check  contourLevels, contourColours
-        #             spectrum._setDefaultContourValues()
-        #
-        #             # set the initial contour colours
-        #             (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
-        #             spectrum.sliceColour = spectrum.positiveContourColour
-        #
-        #             # set the initial axis ordering
-        #             _getDefaultOrdering(spectrum)
-
         # the project is now ready to use
 
         # Now that all objects, including the graphics are there, restore current
@@ -997,10 +978,12 @@ class Framework(NotifierBase, GuiBase):
         return Path(path)
 
     def _cleanTemporaryDirectory(self):
-        """Remove all files in the temporary path.
+        """Remove all filesin the temporary directory.
         the cleanup() method of the _temporaryDirectory instance seems not to do the job
         """
-        for _path in [Path(p) for p in Path(self._temporaryDirectory.name).glob('*')]:
+        _paths = [Path(p) for p in Path(self._temporaryDirectory.name).glob('*')]
+
+        for _path in _paths:
             try:
                 # causes crash in Windows with temporary folder
                 if _path.is_dir():
@@ -1029,6 +1012,7 @@ class Framework(NotifierBase, GuiBase):
 
         # NB _closeProject includes a gui cleanup call
         self._closeProject()
+        self._setSaveOverride(True)
         result = _newProject(self, name=name, path=path, isTemporary=True)
         self._initialiseProject(result)  # This also set the linkages
 
@@ -1177,15 +1161,17 @@ class Framework(NotifierBase, GuiBase):
             self.current._unregisterNotifiers()
             self._current = None
 
+        self.resources._deregisterProjectResources()
+
         if self.project is not None:
             # Cleans up wrapper project, including graphics data objects (Window, Strip, etc.)
             _project = self.project
             _project._close()
+            if _project.isTemporary:
+                _project.projectPath.removeDir()
             self._project = None
             del (_project)
 
-        self.resources._deregisterProjectResources()
-        self._cleanTemporaryDirectory()
         self._cleanGarbageCollector()
 
     #-----------------------------------------------------------------------------------------
@@ -1301,34 +1287,37 @@ class Framework(NotifierBase, GuiBase):
 
     def _loadV2Project(self, path) -> List[Project]:
         """Actual V2 project loader
+        :return list with project (for compatibility with loader mechanism) or empty list
+
         CCPNINTERNAL: called from CcpNmrV2ProjectDataLoader
         """
-        from ccpn.core.Project import _loadProject
+        from ccpn.core.Project import _loadV2Project
 
-        # always close first
-        self._closeProject()
-        project = _loadProject(application=self, path=str(path))
-        self._initialiseProject(project)  # This also sets the linkages
-
-        # Now that all has been restored and updated: save the result
+        result = []
         try:
-            project.save()
-            getLogger().info(f'==> Saved {project} as {project.path!r}')
-        except Exception as es:
-            getLogger().warning(f'Failed saving {project} ({str(es)})')
+            project = _loadV2Project(application=self, path=path)
 
-        return [project]
+        except (ValueError, RuntimeError) as es:
+            getLogger().warning(f'Error loading "{path}": {es}')
+
+        else:
+            self._closeProject()  # close old project; also clean directory
+            self._initialiseProject(project)  # This also set the linkages
+            result = [project]
+
+        return result
 
     def _loadV3Project(self, path) -> List[Project]:
         """Actual V3 project loader
+        :return list with project (for compatibility with loader mechanism) or empty list
+
         CCPNINTERNAL: called from CcpNmrV3ProjectDataLoader
         """
-        from ccpn.core.Project import _loadProject
+        from ccpn.core.Project import _loadV3Project
 
-        # always close first
-        # self._closeProject()
+        result = []
         try:
-            project = _loadProject(application=self, path=path)
+            project = _loadV3Project(application=self, path=path)
 
         except (ValueError, RuntimeError) as es:
             getLogger().warning(f'Error loading "{path}": {es}')
@@ -1336,7 +1325,9 @@ class Framework(NotifierBase, GuiBase):
         else:
             self._closeProject()  # close old project
             self._initialiseProject(project)  # This also set the linkages
-            return [project]
+            result = [project]
+
+        return result
 
     def _loadSparkyFile(self, path: str, createNewProject=True) -> Project:
         """Load Project from Sparky file at path, and do necessary setup
@@ -1356,8 +1347,9 @@ class Framework(NotifierBase, GuiBase):
         else:
             project = self.project
 
-        with self.pauseAutoBackups(delay=True):
-            sparkyReader.importSparkyProject(project, dataBlock)
+        with rebuildSidebar(application=self):
+            with self.pauseAutoBackups(delay=True):
+                sparkyReader.importSparkyProject(project, dataBlock)
 
         return project
 

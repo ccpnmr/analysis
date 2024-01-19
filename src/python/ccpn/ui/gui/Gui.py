@@ -4,9 +4,9 @@ The top-level Gui class for all user interactions
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-29 12:08:47 +0000 (Wed, November 29, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-01-19 16:55:02 +0100 (Fri, January 19, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -384,11 +384,10 @@ class Gui(Ui):
             dataLoader.createNewProject = True
             ok = MessageDialog.showYesNoWarning('Load Project',
                                                 f'Project "{path.name}" was created with version-2 Analysis.\n'
-                                                '\n'
-                                                'CAUTION:\n'
-                                                'The project will be converted to a version-3 project and saved as a new directory with .ccpn extension.\n'
-                                                '\n'
-                                                'Do you want to continue loading?')
+                                                f'The project will be converted to a version-3 project in a temporary directory,\n'
+                                                f'after which you can decide to save it.\n'
+                                                 '\n'
+                                                 'Do you want to continue loading? (Conversion may take a bit of time)')
 
             if not ok:
                 # skip loading so that user can back-up/copy project
@@ -665,15 +664,17 @@ class Gui(Ui):
         :return True if successful
         """
         from ccpn.core.lib.ProjectLib import checkProjectName
+
         title = 'Project SaveAs'
         oldPath = Path(self.project.path)
 
         if newPath is None:
             # try to create a new path from the old one
             if self.project.isTemporary:
-                _newPath = (aPath('~') / 'myNewProject').assureSuffix(CCPN_DIRECTORY_SUFFIX)
+                _newName = self.project.name
+                _newPath = (aPath('~') / _newName).assureSuffix(CCPN_DIRECTORY_SUFFIX)
             else:
-                _newName = f'{oldPath.basename}_new'
+                _newName = f'{self.project.name}_new'
                 _newPath = oldPath.with_name(_newName).assureSuffix(CCPN_DIRECTORY_SUFFIX)
             # query for this path
             dialog = FileDialog.ProjectSaveFileDialog(parent=self.mainWindow,

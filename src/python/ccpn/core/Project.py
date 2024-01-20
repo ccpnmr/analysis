@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-10 14:57:38 +0000 (Wed, January 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-20 13:42:29 +0000 (Sat, January 20, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -389,12 +389,16 @@ class Project(AbstractWrapperObject):
         Return a Pandas DataFrame with the loaded ChemComps definitions.
         Columns:  'molType', 'ccpCode', 'code3Letter', 'code1Letter', 'obj'.
         """
+        from ccpn.core.lib.ChainLib import CODE3LETTER, CODE1LETTER, CCPCODE, MOLTYPE, ISSTANDARD, OBJ
         df = pd.DataFrame()
-        attrs = [ 'molType', 'ccpCode', 'code3Letter', 'code1Letter']
+        attrs = [MOLTYPE, ISSTANDARD, CODE1LETTER, CODE3LETTER, CCPCODE]
         for i, chemComp in enumerate(self._wrappedData.root.chemComps):
             for attr in attrs:
                 df.loc[i, attr] = getattr(chemComp, attr, None)
-            df.loc[i,'obj'] = chemComp
+            isStandard = chemComp.stdChemComp == chemComp
+            df.loc[i, ISSTANDARD] = isStandard
+            df.loc[i, OBJ] = chemComp
+
         return df
 
     @property

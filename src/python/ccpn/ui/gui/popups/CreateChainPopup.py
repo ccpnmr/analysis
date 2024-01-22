@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-22 16:20:46 +0000 (Mon, January 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-22 17:18:17 +0000 (Mon, January 22, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -28,11 +28,13 @@ __date__ = "$Date: 2017-07-04 15:21:16 +0000 (Tue, July 04, 2017) $"
 
 import string
 from functools import partial
+from PyQt5 import QtWidgets
 from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning
 import textwrap
 from ccpn.core.Chain import Chain
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
+from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
@@ -137,14 +139,24 @@ class CreateChainPopup(AttributeEditorPopupABC):
     def _setWidgets(self):
         """Set up the widgets
         """
-        row = 2
-        label2a = Label(self.mainWidget, text="Substance Name", grid=(row, 0))
-        self.moleculeEdit = LineEdit(self.mainWidget, text="", grid=(row, 1), gridSpan=(1, 1), textAlignment='l', backgroundText='> Enter name <')
-        label2b = Label(self.mainWidget, text="Molecule Type", grid=(row, 2))
-        self.molTypePulldown = PulldownList(self.mainWidget, grid=(row, 3))
+        minimumWidth = 180
+        minimumWidthEditors = 300
+        minimumHeightEditors = 200
+
+        row = 1
+        label5a = Label(self.mainWidget, 'Chain Name', grid=(row, 0))
+        self._code = _nextChainCode(self.project)
+        self.lineEdit2a = LineEdit(self.mainWidget, grid=(row, 1), text=self._code, hAlign='left', minimumWidth=minimumWidth)
+
+        row += 1
+        label2a = Label(self.mainWidget, text="Substance Name", grid=(row, 0), )
+        self.moleculeEdit = LineEdit(self.mainWidget, text="", grid=(row, 1), textAlignment='l', backgroundText='> Enter name <', hAlign='left', minimumWidth=minimumWidth)
+        row += 1
+        label2b = Label(self.mainWidget, text="Molecule Type", grid=(row, 0))
+        self.molTypePulldown = PulldownList(self.mainWidget, grid=(row, 1), hAlign='left', minimumWidth=minimumWidth)
         row += 1
         comment = Label(self.mainWidget, text="Comment", grid=(row, 0))
-        self.commentName = LineEdit(self.mainWidget, text="", grid=(row, 1), gridSpan=(1, 1), textAlignment='l', backgroundText='> Optional <')
+        self.commentName = LineEdit(self.mainWidget, text="", grid=(row, 1),  textAlignment='l', backgroundText='> Optional <', hAlign='left', minimumWidth=minimumWidth)
 
         row += 1
         self.molTypes = ['protein', 'DNA', 'RNA', 'other']
@@ -157,46 +169,54 @@ class CreateChainPopup(AttributeEditorPopupABC):
                                                       selectedInd=0,
                                                       callback=self._toggleSequenceEditor,
                                                       direction='v',
-                                                      grid=(row, 1), gridSpan=(1, 3), tipText=tipText)
+                                                      grid=(row, 1),  tipText=tipText, hAlign='left', minimumWidth=minimumWidth)
         row += 1
         label3a = Label(self.mainWidget, text="Sequence", grid=(row, 0))
+        demoSequence = '''ARN or  A R N or A, R, N  '''
         self.sequence1CodeEditor = TextEditor(self.mainWidget,
-                                              backgroundText='ARND',
-                                              grid=(row, 1), gridSpan=(1, 3), tipText=tipText)
+                                              backgroundText=demoSequence,
+                                              grid=(row, 1), gridSpan=(1, 3), tipText=tipText,
+                                              minimumWidth=minimumWidthEditors,
+                                              minimumHeight=minimumHeightEditors)
         row += 1
+        demoSequence = '''ALA ARG ASN  or  ALA, ARG, ASN '''
         self.sequence3CodeEditor = TextEditor(self.mainWidget,
-                                              backgroundText='ALA, ARG, ASN',
-                                              grid=(row, 1), gridSpan=(1, 3), tipText=tipText)
+                                              backgroundText=demoSequence,
+                                              grid=(row, 1), gridSpan=(1, 3),
+                                              tipText=tipText,
+                                              minimumWidth=minimumWidthEditors,
+                                              minimumHeight=minimumHeightEditors)
 
-        demoSequence = 'Ala Arg Aba '
+        demoSequence = '''Ala Arg Aba or Ala, Arg, Aba '''
         self.sequenceCcpCodeEditor = TextEditor(self.mainWidget,
                                                 backgroundText=demoSequence,
-                                                grid=(row, 1), gridSpan=(1, 3), tipText=tipText)
+                                                grid=(row, 1), gridSpan=(1, 3), tipText=tipText,
+                                                minimumWidth=minimumWidthEditors,
+                                                minimumHeight=minimumHeightEditors)
         row += 1
-        self._tidyButton = Button(self.mainWidget, text='Format sequence',
-                                                callback=self._reformatSequence,
-                                                grid=(row, 1), gridSpan=(1, 3), tipText='Format sequence')
+        self._reformatButton = Button(self.mainWidget, text='Format sequence',
+                                      callback=self._reformatSequence,
+                                      grid=(row, 1), gridSpan=(1, 3), tipText='Format sequence', hAlign='left', minimumWidth=minimumWidth)
         self._toggleSequenceEditor()
         row += 1
         label4a = Label(self.mainWidget, 'Sequence Start', grid=(row, 0))
-        self.startingSequenceCodeWidget = Spinbox(self.mainWidget, grid=(row, 1), value=1, min=-1000000, max=1000000)
-        label5a = Label(self.mainWidget, 'Chain code', grid=(row, 2))
-        self._code = _nextChainCode(self.project)
-        self.lineEdit2a = LineEdit(self.mainWidget, grid=(row, 3), text=self._code)
+        self.startingSequenceCodeWidget = Spinbox(self.mainWidget, grid=(row, 1), value=1, min=-1000000,
+                                                  max=1000000, hAlign='left', minimumWidth=minimumWidth)
+
 
         row += 1
         tipText6a = "E.g., for a VAL residue, the set of HG11, HG12, HG13 (NMR equivalent) atoms will create a new atom HG1%;\n" \
                     "        also the set HG1%, HG2% will create a new atom HG%"
         label6a = Label(self.mainWidget, 'Expand Atoms From AtomSets', tipText=tipText6a, grid=(row, 0))
         self.expandAtomsFromAtomSetW = CheckBox(self.mainWidget, checked=DefaultAddAtomGroups,
-                                                tipText=tipText6a, grid=(row, 1))
+                                                tipText=tipText6a, grid=(row, 1), hAlign='left')
         row += 1
         tipText7a = "Add new atoms for Non-stereo Specific Atoms (if any).\n" \
                     "E.g., for a VAL residue, HGx%, HGy% will be added if atoms HG1% and HG2% are present.\n" \
                     "This option is available only if 'Expand Atoms From AtomSets' is selected."
         label7a = Label(self.mainWidget, 'Add Non-Stereo Specific Atoms', tipText=tipText7a, grid=(row, 0))
         self.addNonstereoAtomsW = CheckBox(self.mainWidget, checked=DefaultAddNonstereoAtoms,
-                                           tipText=tipText7a, grid=(row, 1), )
+                                           tipText=tipText7a, grid=(row, 1), hAlign='left', minimumWidth=minimumWidth)
         row += 1
         tipText8a = "E.g., for a VAL residue, the set of HG11, HG12, HG13 (NMR equivalent) atoms\n" \
                     "        will create a new atom HG1% and an extra pseudo-atom MG1;\n" \
@@ -204,7 +224,7 @@ class CreateChainPopup(AttributeEditorPopupABC):
                     "This option is available only if 'Expand Atoms From AtomSets' is selected and proton groups."
         label8a = Label(self.mainWidget, 'Add extra Pseudo-Atoms', tipText=tipText8a, grid=(row, 0))
         self.addPseudoAtomsW = CheckBox(self.mainWidget, checked=DefaultAddPseudoAtoms,
-                                        tipText=tipText8a, grid=(row, 1), )
+                                        tipText=tipText8a, grid=(row, 1), hAlign='left', minimumWidth=minimumWidth)
         self._togglePseudoAtomOptions(self.expandAtomsFromAtomSetW.get())
 
         row += 1
@@ -212,7 +232,7 @@ class CreateChainPopup(AttributeEditorPopupABC):
                     "    H1, H2, H3 and OXT atoms will be removed."
         label8a = Label(self.mainWidget, 'Cyclic Polymer', tipText=tipText9a, grid=(row, 0))
         self.makeCyclicPolymer = CheckBox(self.mainWidget, checked=False,
-                                          tipText=tipText9a, grid=(row, 1), )
+                                          tipText=tipText9a, grid=(row, 1), hAlign='left', minimumWidth=minimumWidth)
 
     def _defineObject(self):
         """Initialise the new object

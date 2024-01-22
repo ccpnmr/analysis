@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-10 14:19:41 +0000 (Wed, January 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-22 14:57:06 +0000 (Mon, January 22, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1181,7 +1181,7 @@ class CcpnSparkyReader:
             seq = attData.getDataValues(SPARKY_SEQUENCE, firstOnly=True)
             firstRes = attData.getDataValues(SPARKY_FIRSTRESIDUENUM, firstOnly=True)
             if seq and firstRes:
-                newChain = project.createChain(sequence1Letter=seq,
+                newChain = project.createChain(sequence=seq,
                                                molType='protein',
                                                startNumber=int(firstRes),
                                                compoundName=molName)

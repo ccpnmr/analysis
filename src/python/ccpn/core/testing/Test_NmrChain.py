@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-10 14:57:38 +0000 (Wed, January 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-22 14:57:07 +0000 (Mon, January 22, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -70,7 +70,7 @@ class NmrChainTest(WrapperTesting):
         self.assertRaises(ValueError, self.project.newNmrChain, shortName='@-_new')
 
     def test_NmrChain_Chain(self):
-        chain = self.project.createChain(sequence1Letter='AACKC', shortName='x', molType='protein')
+        chain = self.project.createChain(sequence='AACKC', shortName='x', molType='protein')
         nmrChain = self.project.newNmrChain(shortName='x')
         self.undo.undo()
         self.undo.redo()

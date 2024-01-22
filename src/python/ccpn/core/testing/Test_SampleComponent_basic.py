@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-10 14:57:38 +0000 (Wed, January 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-22 14:57:07 +0000 (Mon, January 22, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -153,7 +153,7 @@ class TestSampleComponentLinks(WrapperTesting):
         """
         Test that the cross-links are created correctly.
         """
-        chain1 = self.project.createChain(sequence1Letter='QWERTYIPASDF', molType='protein',
+        chain1 = self.project.createChain(sequence='QWERTYIPASDF', molType='protein',
                                           compoundName='typewriter')
         dna = self.project.createPolymerSubstance(sequence='ATTACGCAT', name='attackcat',
                                                   molType='DNA', )

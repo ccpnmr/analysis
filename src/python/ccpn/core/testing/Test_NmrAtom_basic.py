@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-10 14:57:38 +0000 (Wed, January 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-22 14:57:06 +0000 (Mon, January 22, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -299,7 +299,7 @@ class TestNmrAtomReceivedProperties(WrapperTesting):
     # sort-of, move to new residue and link that
     def test_AtomAtom(self):
         self.assertIsNone(self.nmrAtom.atom)
-        ch = self.project.createChain(sequence1Letter='ag', molType='protein')
+        ch = self.project.createChain(sequence='ag', molType='protein')
         self.nmrResidue.residue = ch.residues[1]
         self.assertEqual(self.nmrAtom.atom.pid, 'MA:A.2.GLY.H')
 

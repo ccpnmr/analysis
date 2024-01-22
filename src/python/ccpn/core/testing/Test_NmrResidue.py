@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-10 14:57:38 +0000 (Wed, January 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-22 14:57:07 +0000 (Mon, January 22, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -37,7 +37,7 @@ class ResidueAllNmrResiduesTest(WrapperTesting):
     def setUp(self):
 
         with self.initialSetup():
-            self.chain = self.project.createChain(sequence1Letter='CDEFGHI', molType='protein',
+            self.chain = self.project.createChain(sequence='CDEFGHI', molType='protein',
                                                   shortName='A')
 
     def testAllNmrResidues(self):
@@ -101,7 +101,7 @@ class NmrStretchTest(WrapperTesting):
     def setUp(self):
 
         with self.initialSetup():
-            self.chain = self.project.createChain(sequence1Letter='QWERTYIPASD', molType='protein',
+            self.chain = self.project.createChain(sequence='QWERTYIPASD', molType='protein',
                                                   shortName='X')
 
     def test_connect_nmr_residues_0(self):

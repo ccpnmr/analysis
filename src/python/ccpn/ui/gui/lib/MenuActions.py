@@ -4,9 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-10 20:03:17 +0100 (Tue, October 10, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-01-22 16:20:46 +0000 (Mon, January 22, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -969,17 +969,29 @@ class _openItemChainTable(OpenItemABC):
         """Open a context menu.
         """
         contextMenu = super()._openContextMenu(parentWidget, position, thisObj, objs, deferExec=True)
-        cloneAction = contextMenu.getActionByName('Clone')
-        if cloneAction is not None:
-            cloneAction.setText('New Chain from selected...')
+        newFromAction = contextMenu.addAction('New Chain from selected...', partial(self._newFromSelected, objs))
+        contextMenu.moveActionBelowName(newFromAction, 'Clone')
         contextMenu.move(position)
         contextMenu.exec()
 
     def _cloneObject(self, objs):
+        objs  = [obj for obj in objs if isinstance(obj, Chain)]
+        if len(objs)>1:
+            showWarning('New Chain from selected', 'Creating a from is available for only a single selection')
+            return
+        if len(objs) == 1:
+            obj = objs[0]
+            chain = obj
+            try:
+                chain.clone()
+            except Exception as error:
+                showWarning('Clone Chain Failed', f'{error}')
+
+    def _newFromSelected(self, objs):
         """Open a new popup prefilled from the current object"""
         objs  = [obj for obj in objs if isinstance(obj, Chain)]
         if len(objs)>1:
-            showWarning('Clone Chain', 'Cloning is available for one chain at a time')
+            showWarning('New Chain from selected', 'Creating a from is available for only a single selection')
             return
         if len(objs) == 1:
             obj = objs[0]
@@ -987,7 +999,7 @@ class _openItemChainTable(OpenItemABC):
             popup.setWindowTitle(f'New Chain from {obj.pid}')
             # popup.obj.compoundName = obj.compoundName #this could be set but needs to ensure a unique name
             popup.obj.comment = obj.comment
-            popup.obj.sequenceCcpCode = obj.sequenceCcpCode
+            popup.obj.sequenceCcpCodes = obj.sequenceCcpCodes
             popup.obj.isCyclic = obj.isCyclic
             popup.obj.molType = obj.chainType
             popup._populate()

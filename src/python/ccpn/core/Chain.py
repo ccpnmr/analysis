@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-22 14:50:31 +0000 (Mon, January 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-22 16:20:46 +0000 (Mon, January 22, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -159,9 +159,8 @@ class Chain(AbstractWrapperObject):
         """
         # extracted as function below.
         # - fires a single notifier for the chain creation
-        raise DeprecationWarning('Clone has been deprecated in 3.2.1. Please use new chain')
 
-        # return _cloneChain(self, shortName=shortName)
+        return _cloneChain(self, shortName=shortName)
 
     def _lock(self):
         """Finalise chain so that it can no longer be modified, and add missing data."""
@@ -221,7 +220,7 @@ class Chain(AbstractWrapperObject):
         return sequence
 
     @property
-    def sequenceCcpCode(self):
+    def sequenceCcpCodes(self):
         """
         :return: A list of  CcpCodes used to build the sequence
         """
@@ -645,8 +644,21 @@ def _cloneChain(self: Chain, shortName: str = None):
     """
 
     # _newApiObject no longer fires a ny notifiers. Single notifier is now handled by the decorator
-    raise DeprecationWarning('Clone chain has been deprecated in 3.2.1. Please use new chain')
     # FIXME This is broken for Non-Standard Residues. (probably never tested as it never implemented in V3)
+    # Check if there are Non-standards. Clone is not yet available for Non-Standards
+    from ccpn.core.lib.ChainLib import SequenceHandler
+    chain = self
+    sequenceHandler = SequenceHandler(chain.project, moleculeType=chain.chainType)
+    standardCcpCodes = sequenceHandler.getAvailableCcpCodes(onlyStandard=True)
+    ccpCodes = chain.sequenceCcpCodes
+    nonStandardResidues = set()
+    for ccpCode in ccpCodes:
+        if ccpCode not in standardCcpCodes:
+            nonStandardResidues.add(ccpCode)
+    if len(nonStandardResidues)>0:
+        nstdResiduesStr = ', '.join(list(nonStandardResidues))
+        raise ValueError(f'''The chain {chain} contains Non-Standard Residue(s): "{nstdResiduesStr}". Clone is not yet available for this chain''')
+
     apiChain = self._wrappedData
     apiMolSystem = apiChain.molSystem
     dataObj = self._project._data2Obj

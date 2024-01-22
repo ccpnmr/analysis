@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-12 11:48:31 +0000 (Fri, January 12, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-22 16:20:46 +0000 (Mon, January 22, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -49,7 +49,8 @@ DefaultAddAtomGroups = True
 DefaultAddPseudoAtoms = False
 DefaultAddNonstereoAtoms = True
 DefaultSetBoundsForAtomGroups = False
-CODE1LETTER = 'One Letter Code'
+ONELETTERCODE = 'One-Letter Code'
+THREELETTERCODE = 'Three-Letter Code'
 CCPCODESELECTION = 'Ccp Code (ChemComp)'
 
 
@@ -120,6 +121,8 @@ class CreateChainPopup(AttributeEditorPopupABC):
         self.startingSequenceCodeWidget.valueChanged.connect(self._queueSetSequenceStart)
         self.lineEdit2a.textChanged.connect(self._queueSetChainCode)
         self.sequence1CodeEditor.textChanged.connect(self._validate1LetterCodeSequence)
+        self.sequence3CodeEditor.textChanged.connect(self._validate1LetterCodeSequence)
+
         self.sequenceCcpCodeEditor.textChanged.connect(self._validateFullLetterCodeSequence)
 
         self.molTypePulldown.currentIndexChanged.connect(self._queueSetMolType)
@@ -135,7 +138,7 @@ class CreateChainPopup(AttributeEditorPopupABC):
         """Set up the widgets
         """
         row = 2
-        label2a = Label(self.mainWidget, text="Name", grid=(row, 0))
+        label2a = Label(self.mainWidget, text="Substance Name", grid=(row, 0))
         self.moleculeEdit = LineEdit(self.mainWidget, text="", grid=(row, 1), gridSpan=(1, 1), textAlignment='l', backgroundText='> Enter name <')
         label2b = Label(self.mainWidget, text="Molecule Type", grid=(row, 2))
         self.molTypePulldown = PulldownList(self.mainWidget, grid=(row, 3))
@@ -150,16 +153,22 @@ class CreateChainPopup(AttributeEditorPopupABC):
         tipText = ""
         # self.sequenceEditor = TextEditor(self.mainWidget, grid=(row, 1), gridSpan=(1, 3), tipText=tipText)
         self.sequenceEditorCodeOptions = RadioButtons(self.mainWidget,
-                                                      texts=[CODE1LETTER, CCPCODESELECTION],
+                                                      texts=[ONELETTERCODE, THREELETTERCODE, CCPCODESELECTION],
                                                       selectedInd=0,
                                                       callback=self._toggleSequenceEditor,
+                                                      direction='v',
                                                       grid=(row, 1), gridSpan=(1, 3), tipText=tipText)
         row += 1
         label3a = Label(self.mainWidget, text="Sequence", grid=(row, 0))
         self.sequence1CodeEditor = TextEditor(self.mainWidget,
-                                              backgroundText='ARNDCQEGHILKMFPSTWYV',
+                                              backgroundText='ARND',
                                               grid=(row, 1), gridSpan=(1, 3), tipText=tipText)
-        demoSequence = 'Ala,Arg,Asn,Asp,Cys,Gln,Glu,Gly,His,Ile,Leu,Lys,Met,Phe,Pro,Ser,Thr,Trp,Tyr,Val,Aba,'
+        row += 1
+        self.sequence3CodeEditor = TextEditor(self.mainWidget,
+                                              backgroundText='ALA, ARG, ASN',
+                                              grid=(row, 1), gridSpan=(1, 3), tipText=tipText)
+
+        demoSequence = 'Ala Arg Aba '
         self.sequenceCcpCodeEditor = TextEditor(self.mainWidget,
                                                 backgroundText=demoSequence,
                                                 grid=(row, 1), gridSpan=(1, 3), tipText=tipText)
@@ -213,8 +222,8 @@ class CreateChainPopup(AttributeEditorPopupABC):
         self.obj.compoundName = None
         self.obj.startNumber = 1
         self.obj.shortName = self._code
-        self.obj.sequence1Letter = None
-        self.obj.sequenceCcpCode = None
+        self.obj.sequence = None
+        self.obj.sequenceCcpCodes = None
 
         self.obj.comment = None
         self.obj.molType = self.molTypes[0]
@@ -242,10 +251,10 @@ class CreateChainPopup(AttributeEditorPopupABC):
                 self.moleculeEdit.setText(self.obj.compoundName)
                 self.commentName.setText(self.obj.comment)
                 self.molTypePulldown.setCurrentText(self.obj.molType)
-                if self.obj.sequence1Letter:
-                    self.sequence1CodeEditor.setText(self.obj.sequence1Letter)
-                if self.obj.sequenceCcpCode:
-                    codes = ','.join(self.obj.sequenceCcpCode)
+                if self.obj.sequence:
+                    self.sequence1CodeEditor.setText(self.obj.sequence)
+                if self.obj.sequenceCcpCodes:
+                    codes = ','.join(self.obj.sequenceCcpCodes)
                     self.sequenceCcpCodeEditor.setText(codes)
                 self.startingSequenceCodeWidget.set(self.obj.startNumber)
                 self.lineEdit2a.setText(self.obj.shortName)
@@ -284,19 +293,24 @@ class CreateChainPopup(AttributeEditorPopupABC):
 
         """
         mode = self.sequenceEditorCodeOptions.getSelectedText()
-        if mode == CODE1LETTER:
-            self.obj.sequenceCcpCode = None
         if mode == CCPCODESELECTION:
-            self.obj.sequence1Letter = None
+            self.obj.sequence = None
         self.project.createChain(**self.obj)
 
     def _toggleSequenceEditor(self):
         selected = self.sequenceEditorCodeOptions.getSelectedText()
-        if selected == CODE1LETTER:
+        if selected == ONELETTERCODE:
             self.sequence1CodeEditor.show()
+            self.sequence3CodeEditor.hide()
+            self.sequenceCcpCodeEditor.hide()
+
+        elif selected == THREELETTERCODE:
+            self.sequence1CodeEditor.hide()
+            self.sequence3CodeEditor.show()
             self.sequenceCcpCodeEditor.hide()
         else:
             self.sequence1CodeEditor.hide()
+            self.sequence3CodeEditor.hide()
             self.sequenceCcpCodeEditor.show()
 
     def _togglePseudoAtomOptions(self, value):
@@ -398,30 +412,30 @@ class CreateChainPopup(AttributeEditorPopupABC):
 
     def _validate1LetterCodeSequence(self, *args):
         value1Code = self.sequence1CodeEditor.toPlainText()
-        valueCcpCode = self.sequenceCcpCodeEditor.toPlainText()
-        if not value1Code:
-            return
-        msg = None
-        # search empty spaces
-        result = value1Code.split(' ')
-        if len(result)>1:
-            msg = 'Empty spaces are not allowed. Ensure you are using 1Letter Code only'
-            showWarning('Sequence Error', msg)
-            return
-        # search commas
-        result = value1Code.split(',')
-        if len(result) > 1:
-            msg = 'Commas are not allowed. Ensure you are using 1Letter Code only'
-            showWarning('Sequence Error', msg)
-            return
+        # valueCcpCode = self.sequenceCcpCodeEditor.toPlainText()
+        # if not value1Code:
+        #     return
+        # msg = None
+        # # search empty spaces
+        # result = value1Code.split(' ')
+        # if len(result)>1:
+        #     msg = 'Empty spaces are not allowed. Ensure you are using 1Letter Code only'
+        #     showWarning('Sequence Error', msg)
+        #     return
+        # # search commas
+        # result = value1Code.split(',')
+        # if len(result) > 1:
+        #     msg = 'Commas are not allowed. Ensure you are using 1Letter Code only'
+        #     showWarning('Sequence Error', msg)
+        #     return
 
         self._queueSetSequence(*args)
 
     def _validateFullLetterCodeSequence(self, *args):
 
-        valueCcpCode = self.sequenceCcpCodeEditor.toPlainText()
-        if not valueCcpCode:
-            return
+        # valueCcpCode = self.sequenceCcpCodeEditor.toPlainText()
+        # if not valueCcpCode:
+        #     return
 
         self._queueSetSequenceCcpCode(*args)
 
@@ -451,26 +465,28 @@ class CreateChainPopup(AttributeEditorPopupABC):
         value = self.sequence1CodeEditor.toPlainText()
         if self.sequence1CodeEditor.isVisible():
             value = self.sequence1CodeEditor.toPlainText()
+        elif self.sequence3CodeEditor.isVisible():
+            value = self.sequence3CodeEditor.toPlainText()
 
-        prefValue = self.obj.sequence1Letter
+        prefValue = self.obj.sequence
         if value != prefValue:
-            return partial(self._setSequence1Letter, value)
+            return partial(self._setsequence, value)
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetSequenceCcpCode(self):
         value = self.sequenceCcpCodeEditor.toPlainText()
         codes = value.split(',')
         codes = [f'{code}' for code in codes]
-        prefValue = self.obj.sequenceCcpCode or None
+        prefValue = self.obj.sequenceCcpCodes or None
         if codes != prefValue:
             return partial(self._setSequenceCcpCode, codes)
 
-    def _setSequence1Letter(self, value: str):
+    def _setsequence(self, value: str):
         """Sets the sequence
         """
         value = value.replace(' ', '')
         value = value.replace('\n', '')
-        self.obj.sequence1Letter = value
+        self.obj.sequence = value
 
     def _setSequenceCcpCode(self, values: str):
         """Sets the sequence
@@ -480,7 +496,7 @@ class CreateChainPopup(AttributeEditorPopupABC):
             value = value.replace(' ', '')
             value = value.replace('\n', '')
             formattedValues.append(value)
-        self.obj.sequenceCcpCode = formattedValues
+        self.obj.sequenceCcpCodes = formattedValues
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetMolType(self, value):

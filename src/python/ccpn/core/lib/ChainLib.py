@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-22 14:50:31 +0000 (Mon, January 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-22 16:20:46 +0000 (Mon, January 22, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -61,23 +61,32 @@ class SequenceHandler():
     def data(self):
         return  self._getDataForMolType(self.moleculeType)
 
-    def getAvailableCode3Letter(self):
+    def getAvailableCode3Letter(self, onlyStandard=True):
         """
         :return: A list of all available Code3Letter from the loaded ChemComps in the project for the defined MoleculeType
         """
-        return list(self.data[CODE3LETTER].values)
+        df = self.data
+        if onlyStandard:
+            df = self.data[self.data[ISSTANDARD]]
+        return list(df[CODE3LETTER].values)
 
-    def getAvailableCode1Letter(self):
+    def getAvailableCode1Letter(self, onlyStandard=True):
         """
         :return: A list of all available Code1Letter from the loaded ChemComps in the project for the defined MoleculeType
         """
-        return list(self.data[CODE1LETTER].values)
+        df = self.data
+        if onlyStandard:
+            df = self.data[self.data[ISSTANDARD]]
+        return list(df[CODE1LETTER].values)
 
-    def getAvailableCcpCodes(self):
+    def getAvailableCcpCodes(self, onlyStandard=True):
         """
         :return: A list of all available CcpCode from the loaded ChemComps in the project for the defined MoleculeType
         """
-        return list(self.data[CCPCODE].values)
+        df = self.data
+        if onlyStandard:
+            df = self.data[self.data[ISSTANDARD]]
+        return list(df[CCPCODE].values)
 
     def oneToThreeCode(self, sequence1Letter) -> list:
         """ Convert one To ThreeCode for Standard residues only """
@@ -326,7 +335,7 @@ class SequenceHandler():
         :param sequence: a list of strings
         :return: bool
         """
-        availableCcpCodes = self.getAvailableCcpCodes()
+        availableCcpCodes = self.getAvailableCcpCodes(onlyStandard=False)
         for item in sequence:
             if item in availableCcpCodes:
                 return True

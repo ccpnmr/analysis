@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-10 14:57:38 +0000 (Wed, January 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-22 14:50:31 +0000 (Mon, January 22, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -348,54 +348,11 @@ def _getChain(self: Project, sequence: Union[str, Sequence[str]], compoundName: 
     pass
 
 
-def _convertSequence1LetterToCcpCode(project, sequence, molType):
-    """ Covert the One LetterCode sequence to the CcpCode. If an item is not found, then is replaced with a placeholder.
-     Ideally should be a gap but NOT raise Errors!"""
-    molTypes = ['protein', 'DNA', 'RNA']
-    if molType not in molTypes :
-        raise RuntimeError(f' Sequence of 1 Letter code is not available for molType: {molType}. Use one of {molTypes}')
-    chemCompData = project._chemCompsData.copy()
-    chemCompData = chemCompData[chemCompData['molType'] == molType]
-    ccpCodesSequence = []
-    for i, code in enumerate(sequence, start=1):
-        found = chemCompData[chemCompData.code1Letter == code.upper()]
-        ccpCode = None
-        for ix, row in found.iterrows():
-            chemComp = row.obj
-            if chemComp.className == 'StdChemComp': # not really a better way so far
-                ccpCode = chemComp.ccpCode
-                break
-        if not ccpCode:
-            #  it should be only one really
-            ccpCode = NotFound
-            getLogger().warning(f'One-Letter Code "{code}" at position {i} was not found for molType: {molType}."')
-        ccpCodesSequence.append(ccpCode)
-
-    return ccpCodesSequence
-
-def _validateSequenceCcpCode(project, sequence, molType):
-    if not isinstance(sequence, (tuple, list)):
-        raise RuntimeError(f'Sequence must be an iterable (tuple or list) of ccpCodes')
-
-    chemCompData = project._chemCompsData.copy()
-    chemCompData = chemCompData[chemCompData['molType'] == molType]
-
-    availableCodes = [i for i in chemCompData.ccpCode.unique() if i]
-    curatedSequence = []
-    for i, ccpCode in enumerate(sequence, start=1):
-        found = ccpCode in availableCodes
-        if not found:
-            getLogger().warning(f'CcpCode "{ccpCode}" at position {i} was not found for molType: {molType}.')
-            curatedSequence.append(f'{NotFound}')
-        else:
-            curatedSequence.append(ccpCode)
-    return curatedSequence
-
 # @newObject(Chain)
 @undoBlock()
 def _createChain(self: Project, compoundName: str = None,
-                 sequence1Letter: str=None,
-                 sequenceCcpCode: Union[Sequence[str]] = None,
+                 sequence:str=None,
+                 sequenceCcpCodes: Union[Sequence[str]] = None,
                  startNumber: int = 1, molType: str = None, isCyclic: bool = False,
                  shortName: str = None, role: str = None, comment: str = None,
                  expandFromAtomSets: bool = True,
@@ -408,12 +365,11 @@ def _createChain(self: Project, compoundName: str = None,
     Automatically creates the corresponding polymer Substance if the compoundName is not already taken
 
     See the Chain class for details.
-
-    :param Sequence: Deprecated
-    :param sequence1Letter: string of one-letter codes E.g. 'HMRQPPLVT'
-    :param Sequence sequence: sequence of  CcpCodes (also known as ChemComp Codes) are case-sensitive. E.G.:  ('Ala', 'Ala', 'Ala', 'Aba')
-                Note: We use the CcpCode and not Residue3LetterCode because the ccpCode allows more flexibility and allows the usage of non-standard compounds.
-
+    :param sequence: str or list of str. Only for standard Residues. One of the following options:
+                                - string of Code1Letter un-separated or space/comma-separated;
+                                - string of Code3Letter space/comma-separated;
+                                - list of single strings either of Code1Letter or Code3Letter
+    :param sequenceCcpCodes: str or list of str.  a string of CcpCodes, space or comma-separated or a list of single strings.
     :param str compoundName: name of new Substance (e.g. 'Lysozyme') Defaults to 'Molecule_n
     :param str molType: molType ('protein','DNA', 'RNA'). Needed only if sequence is a string.
     :param int startNumber: number of first residue in sequence
@@ -425,16 +381,17 @@ def _createChain(self: Project, compoundName: str = None,
                 See ccpn.core.lib.MoleculeLib.expandChainAtoms for details.
     :return: a new Chain instance.
     """
-    if 'sequence' in kwargs:
-        raise DeprecationWarning('Argument "sequence" is deprecated and will be removed in future releases. Use sequence1Letter or sequenceCcpCode')
-    if sequence1Letter:
-        sequence = _convertSequence1LetterToCcpCode(self.project, sequence1Letter, molType)
-    if sequenceCcpCode:
-        sequence = _validateSequenceCcpCode(self.project, sequenceCcpCode, molType)
+    from ccpn.core.lib.ChainLib import SequenceHandler, CCPCODE
 
-    if sequence1Letter and sequenceCcpCode:
-        raise RuntimeError('Create chain error. Please use "sequence1Letter" or  "sequenceCcpCode", not both.')
+    sequenceHandler = SequenceHandler(self.project, moleculeType=molType)
+    sequenceMap = sequenceHandler._getSequenceMapTemplate()
+    if sequence is not None:
+        sequenceMap = sequenceHandler.parseSequence(sequence)
 
+    elif sequenceCcpCodes is not None:
+        sequenceMap = sequenceHandler.parseSequenceCcpCodes(sequenceCcpCodes)
+
+    ccpCodes = sequenceMap.get(CCPCODE)
     apiMolSystem = self._wrappedData.molSystem
     shortName = (
         Chain._uniqueName(project=self, name=shortName)
@@ -458,7 +415,7 @@ def _createChain(self: Project, compoundName: str = None,
                 "If you want to create a second identical chain from an existing substance, please clone the chain."
                 % compoundName)
 
-    substance = self.createPolymerSubstance(sequence=sequence, name=name,
+    substance = self.createPolymerSubstance(sequence=ccpCodes, name=name,
                                             startNumber=startNumber, molType=molType,
                                             isCyclic=isCyclic, comment=comment)
 

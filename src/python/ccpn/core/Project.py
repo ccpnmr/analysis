@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-20 13:42:29 +0000 (Sat, January 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-22 14:50:31 +0000 (Mon, January 22, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -2760,8 +2760,8 @@ class Project(AbstractWrapperObject):
 
     @logCommand('project.')
     def createChain(self,
-                    sequence1Letter: str = None,
-                    sequenceCcpCode: Union[Sequence[str]] = None,
+                    sequence: Union[str, Sequence[str]] = None,
+                    sequenceCcpCodes: Union[Sequence[str]] = None,
                     compoundName: str = None,
                     startNumber: int = 1, molType: str = None, isCyclic: bool = False,
                     shortName: str = None, role: str = None, comment: str = None,
@@ -2769,17 +2769,46 @@ class Project(AbstractWrapperObject):
                     addPseudoAtoms: bool = True, addNonstereoAtoms: bool = True,
                     **kwds):
         """Create new chain from sequence of residue codes, using default variants.
-
         Automatically creates the corresponding polymer Substance if the compoundName is not already taken
-
         See the Chain class for details.
-
         Optional keyword arguments can be passed in; see Chain._createChain for details.
+        :param sequence: str or list of str. Only for standard Residues.
+                    allowed sequence formats:
+                        - 1-Letter-Code
+                            sequence =  'AAAAAA'
+                            sequence =  'A A A A A A'
+                            sequence =  'A, A, A, A, A, A'
+                            sequence =  ['A', 'A', 'A', 'A', 'A']
+                        - 3-Letter-Code
+                            sequence =  'ALA ALA ALA ALA'
+                            sequence =  'ALA, ALA, ALA, ALA'
+                            sequence =  ['ALA', 'ALA', 'ALA']
+                        Notes:
+                        a sequence of exactly three letters for molType 'protein' is ambiguous and is parsed as three individual 1-Letter-Code. e.g.:
+                            sequence =  'ALA' translates to 'ALA LEU ALA'
+                        not supported:
+                            - mix of 1-Letter-Code and 3-Letter-Code either as string or list of strings
+                            - sequence of string  of 3-Letter-Code without separators. e.g.: sequence =  'ALAALAALAALA'.
+                              you can use the sequenceHandler, see docs:
+                              'newSequence = sequenceHandler._strSequenceToList(sequence, splitByLength=3)'
 
-        :param Sequence: Deprecated
-        :param sequence1Letter: string of one-letter codes E.g. 'HMRQPPLVT'
-        :param Sequence sequence: sequence of  CcpCodes (also known as ChemComp Codes) are case-sensitive. E.G.:  ('Ala', 'Ala', 'Ala', 'Aba')
-        Note: We use the CcpCode and not Residue3LetterCode because the ccpCode allows more flexibility and allows the usage of non-standard compounds.
+        :param sequenceCcpCodes: str or list of str.  a string of CcpCodes, space or comma-separated or a list of single strings.
+                    A CcpCode is case-sensitive and uniquely defines a Compound, also known as ChemComp. Every ChemComp has a CcpCode.
+                    Standard Residues have a CcpCode too
+                    allowed  format:
+                        - sequence containing Standard residue(s):
+                            sequence = 'Ala Leu Ala'
+                            sequence = 'Ala, Leu, Ala'
+                            sequence = ['Ala', 'Leu', 'Ala']
+                        - sequence containing Non-Standard residue(s), e.g.:
+                            sequence = ['Ala', 'Aba', Orn]
+                        - sequence of a small-molecule: (Note you need to import the ChemComp first if not available in the Project. see docs)
+                            sequence = 'Dal'
+                            sequence = ['Atp']
+                            sequence = ['MySmallMolecule']
+                    not supported:
+                        - mix of CcpCodes and 3-Letter-Code either as string or list of strings. Covert 3-Letter-Code to CcpCode first. See SequenceHandler docs.
+                        - sequence of string of CcpCodes without separators. e.g.: sequence = 'AlaAbaOrn'
 
         :param str compoundName: name of new Substance (e.g. 'Lysozyme') Defaults to 'Molecule_n
         :param str molType: molType ('protein','DNA', 'RNA'). Needed only if sequence is a string.
@@ -2795,8 +2824,8 @@ class Project(AbstractWrapperObject):
         from ccpn.core.Chain import _createChain
 
         return _createChain(self,
-                            sequence1Letter=sequence1Letter,
-                            sequenceCcpCode=sequenceCcpCode,
+                            sequence=sequence,
+                            sequenceCcpCodes=sequenceCcpCodes,
                             compoundName=compoundName,
                             startNumber=startNumber, molType=molType, isCyclic=isCyclic,
                             shortName=shortName, role=role, comment=comment,

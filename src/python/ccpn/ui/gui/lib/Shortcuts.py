@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-01-19 11:42:48 +0000 (Fri, January 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-23 14:05:40 +0000 (Tue, January 23, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -98,7 +98,6 @@ class Shortcuts( object ):
 
         addShortCut("a, m", self, mainWindow.addMultiplet, context=context)
         addShortCut("x, m", self, mainWindow.mergeCurrentMultiplet, context=context)
-        addShortCut("x, x", self, mainWindow.mergePeaksAndMultiplets, context=context)
         addShortCut("c, c", self, mainWindow.newCollectionOfCurrentPeaks, context=context)
         addShortCut("i, 1", self, mainWindow.add1DIntegral, context=context)
         addShortCut("g, p", self, mainWindow.getCurrentPositionAndStrip, context=context)

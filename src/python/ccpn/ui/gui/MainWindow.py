@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-01-19 11:44:28 +0000 (Fri, January 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-23 14:43:09 +0000 (Tue, January 23, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -1746,7 +1746,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                     multiplet = multipletList.newMultiplet(peaks=peaks)
                     self.application.current.multiplet = multiplet
 
-    def mergePeaksAndMultiplets(self):
+    def mergeCurrentMultiplet(self):
         """Merge current peaks into current multiplet
 
         mouseMultiplet: multiplet to be merged into, if there is no current multiplet object under
@@ -1758,17 +1758,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         allMultiplets = self.application.current.multiplets
         multiplet = self.application.current.multiplet if mouseMultiplet is None else mouseMultiplet
 
-        multiplet.mergePeaksAndMultiplets(peaks=allPeaks, multiplets=allMultiplets)
-
-    def mergeCurrentMultiplet(self):
-        """Merge multiple multiplets together - ignores any selected peaks"""
-        mouseMultiplet = self.application.current.strip.getObjectsUnderMouse().get('multiplets')
-        multiplet = self.application.current.multiplet if mouseMultiplet is None else mouseMultiplet
-
-        allMultiplets = self.application.current.multiplets
-        oldMultiplets = [mp for mp in allMultiplets if mp is not multiplet]
-
-        multiplet.mergeMultiplet(multiplets=oldMultiplets)
+        multiplet.mergeMultiplet(peaks=allPeaks, multiplets=allMultiplets)
 
     def newCollectionOfCurrentPeaks(self):
         """add current peaks to a new collection"""

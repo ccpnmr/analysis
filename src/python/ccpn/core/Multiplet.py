@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-01-19 12:10:14 +0000 (Fri, January 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-23 14:42:39 +0000 (Tue, January 23, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -704,7 +704,7 @@ class Multiplet(AbstractWrapperObject):
             self._finaliseAction(trigger)
 
     @logCommand(get='self')
-    def mergeMultiplet(self, multiplets: list['Multiplet']):
+    def mergeOnlyMultiplet(self, multiplets: list['Multiplet']):
         """Merge a list of multiplets and their peaks into this multiplet
 
         Note: All multiplets other than this one is deleted after merging
@@ -722,39 +722,19 @@ class Multiplet(AbstractWrapperObject):
                     mp.delete()  # Unsure if we should deleted empty multiplet
 
     @logCommand(get='self')
-    def mergePeaksAndMultiplets(self, peaks : list[Peak], multiplets : list['Multiplet']):
+    def mergeMultiplet(self, peaks : list[Peak], multiplets : list['Multiplet']):
         """Merge any combination of multiplet and peak objects together.
 
-        Note: if a peak is currently in another multiplet it will not merge.
+        Note: if a peak is currently in another multiplet it will not merge unless
+        that multiplet is also selected.
 
         :param peaks: a list of peaks to be merged into the multiplet
         :type multiplets: a lift of multiplets to merged into the current multiplet
         """
-        # multipletsPeaks = chain.from_iterable([mp.peaks for mp in multiplets if mp is not self])
-        # alonePeaks = [pk for pk in peaks if not pk.multiplets]
-        # newPeaks = [pk for pk in peaks if self not in pk.multiplets]
-        #
-        # multiPeaks = (set(newPeaks) - (set(alonePeaks))) | set(multipletsPeaks)
-        #
-        # delMultiplet = []
-        # [delMultiplet.append(pk.multiplets[0]) for pk in multiPeaks if pk.multiplets[0] not in delMultiplet]
-        #
-        # multiPeaks.union(alonePeaks)
-        #
-        # with undoBlock():
-        #     for pk in multiPeaks:
-        #         pk.multiplets[0].removePeaks(pk)
-        #
-        #     self.addPeaks(newPeaks)
-        #
-        #     for mt in delMultiplet:
-        #         # Unsure if we should deleted empty multiplet
-        #         if mt.numPeaks < 1:
-        #             mt.delete()
         alonePeaks = [pk for pk in peaks if not pk.multiplets]
 
         with undoBlock():
-            self.mergeMultiplet(multiplets)
+            self.mergeOnlyMultiplet(multiplets)
             self.addPeaks(alonePeaks)
 
     #===========================================================================================
@@ -776,7 +756,9 @@ def _newAPIMultiplet(self: MultipletList,
                      limits: Sequence[Tuple[float, float]] = (), slopes: List[float] = (),
                      pointLimits: Sequence[Tuple[float, float]] = (),
                      peaks: Sequence[Union['Peak', str]] = ()) -> Multiplet:
-    """Create a new Multiplet within a multipletList
+    """Create a new api Multiplet within a multipletList
+    Note: does not do assignments for peaks (see _newMultiplet)
+    mostly exists to allow proper undo blocking for _newMultiplet
 
     See the Multiplet class for details.
 
@@ -840,24 +822,50 @@ def _newMultiplet(self: MultipletList,
                   limits: Sequence[Tuple[float, float]] = (), slopes: List[float] = (),
                   pointLimits: Sequence[Tuple[float, float]] = (),
                   peaks: Sequence[Union['Peak', str]] = ()) -> Multiplet:
+    """
+    Create a new Multiplet within a multiplet list
+
+    Note: If there is only one assigned peak or if multiple assigned peaks
+    have the same assignment, then copy that assignment to any other non-assigned
+    constituent peaks.
+
+    :param self:
+    :param height:
+    :param heightError:
+    :param volume:
+    :param volumeError:
+    :param offset:
+    :param constraintWeight:
+    :param figureOfMerit:
+    :param annotation:
+    :param comment:
+    :param limits:
+    :param slopes:
+    :param pointLimits:
+    :param peaks:
+    :return:
+    """
     with undoBlock():
+        result = _newAPIMultiplet(**locals())
+
         peakList = makeIterableList(peaks)
         pks = [self.project.getByPid(peak) if isinstance(peak, str) else peak
                for peak in peakList]
 
         assignment = []
+        doAssign = True
         for pk in pks:
-            if (a := list(chain.from_iterable(pk.assignedNmrAtoms))) is not None or len(a) < 1:
-                for atom in a:
-                    if atom is not None and atom not in assignment:
-                        assignment.append(atom)
+            tempAssign = pk.assignedNmrAtoms
+            if not assignment:  # nothing assigned yet
+                assignment = tempAssign
+                assignPeak = pk
+            elif assignment != tempAssign and len(tempAssign) != 0:  # if non matching assigned that isnt empty
+                doAssign = False
+                break
 
-        result = _newAPIMultiplet(self, height, heightError, volume, volumeError, offset, constraintWeight,
-                                  figureOfMerit, annotation, comment, limits, slopes, pointLimits, peaks)
-
-        from ccpn.core.lib.AssignmentLib import _assignNmrAtomsToPeaks
-        for a in assignment:
-            _assignNmrAtomsToPeaks(nmrAtoms=[a], peaks=list(pks))
+        if doAssign:
+            for pk in pks:
+                assignPeak.copyAssignmentTo(pk)
 
         return result
 

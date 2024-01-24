@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-01-24 13:48:37 +0000 (Wed, January 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-24 14:01:56 +0000 (Wed, January 24, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -704,7 +704,7 @@ class Multiplet(AbstractWrapperObject):
             self._finaliseAction(trigger)
 
     @logCommand(get='self')
-    def mergeOnlyMultiplet(self, multiplets: list['Multiplet']):
+    def mergeOnlyMultiplets(self, multiplets: list['Multiplet']):
         """Merge a list of multiplets and their peaks into this multiplet
 
         Note: All multiplets other than this one is deleted after merging
@@ -722,7 +722,7 @@ class Multiplet(AbstractWrapperObject):
                     mp.delete()  # Unsure if we should deleted empty multiplet
 
     @logCommand(get='self')
-    def mergeMultiplet(self, peaks : list[Peak], multiplets : list['Multiplet']):
+    def mergeMultiplets(self, peaks : list[Peak], multiplets : list['Multiplet']):
         """Merge any combination of multiplet and peak objects together.
 
         Note: if a peak is currently in another multiplet it will not merge unless
@@ -734,7 +734,7 @@ class Multiplet(AbstractWrapperObject):
         alonePeaks = [pk for pk in peaks if not pk.multiplets]
 
         with undoBlock():
-            self.mergeOnlyMultiplet(multiplets)
+            self.mergeOnlyMultiplets(multiplets)
             self.addPeaks(alonePeaks)
 
     #===========================================================================================
@@ -818,6 +818,10 @@ def _assignNewMultipletPeaks(self, peaks):
     peakList = makeIterableList(peaks)
     pks = [self.project.getByPid(peak) if isinstance(peak, str) else peak
            for peak in peakList]
+
+    for pp in pks:
+        if not isinstance(pp, Peak):
+            raise TypeError(f'newMultiplet: {pp} is not of type Peak')
 
     assignment = []
     doAssign = False

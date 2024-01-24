@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-01-03 13:01:00 +0000 (Wed, January 03, 2024) $"
-__version__ = "$Revision: 3.3.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-01-24 16:46:40 +0000 (Wed, January 24, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,6 +30,8 @@ import functools
 import traceback
 import typing
 import re
+import sys
+
 from collections import OrderedDict
 from copy import deepcopy
 import pandas as pd
@@ -995,10 +997,10 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
         project = self._project
         data2Obj = project._data2Obj
+        app = getApplication()
 
         for childClass in self._childClasses:
 
-            app = getApplication()
             if childClass._isGuiClass and app and not app.hasGui:
                 # if gui is disabled then skip all gui-core-classes
                 getLogger().debug(f'-->  _restoreChildren: skipping gui-class {childClass} for NoUi interface')
@@ -1017,7 +1019,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
                         _text = 'Error restoring api-child %r of %s (%s)' % (apiObj.qualifiedName, self, es)
                         getLogger().warning(_text)
                         if app and app._isInDebugMode:
-                            print(traceback.print_exc())
+                            sys.stderr.write(f'{traceback.print_exc()}\n')
 
     def _postRestore(self):
         """Handle post-initialising children after all children have been restored

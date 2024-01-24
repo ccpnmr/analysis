@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-01-23 14:42:39 +0000 (Tue, January 23, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-24 13:48:37 +0000 (Wed, January 24, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -814,6 +814,29 @@ def _newAPIMultiplet(self: MultipletList,
     return result
 
 
+def _assignNewMultipletPeaks(self, peaks):
+    peakList = makeIterableList(peaks)
+    pks = [self.project.getByPid(peak) if isinstance(peak, str) else peak
+           for peak in peakList]
+
+    assignment = []
+    doAssign = False
+    for pk in pks:
+        tempAssign = pk.assignedNmrAtoms
+        if not assignment:  # nothing assigned yet
+            assignment = tempAssign
+            assignPeak = pk
+            doAssign = True
+            # assignPeak = {'peak': pk, 'assigns': pk.assignedNmrAtoms}
+        elif assignment != tempAssign and len(tempAssign) != 0:  # if non matching assigned that isnt empty
+            doAssign = False
+            break
+
+    if doAssign:
+        for pk in pks:
+            assignPeak.copyAssignmentTo(pk)
+
+
 def _newMultiplet(self: MultipletList,
                   height: float = 0.0, heightError: float = 0.0,
                   volume: float = 0.0, volumeError: float = 0.0,
@@ -846,27 +869,8 @@ def _newMultiplet(self: MultipletList,
     :return:
     """
     with undoBlock():
+        _assignNewMultipletPeaks(self, peaks)
         result = _newAPIMultiplet(**locals())
-
-        peakList = makeIterableList(peaks)
-        pks = [self.project.getByPid(peak) if isinstance(peak, str) else peak
-               for peak in peakList]
-
-        assignment = []
-        doAssign = True
-        for pk in pks:
-            tempAssign = pk.assignedNmrAtoms
-            if not assignment:  # nothing assigned yet
-                assignment = tempAssign
-                assignPeak = pk
-            elif assignment != tempAssign and len(tempAssign) != 0:  # if non matching assigned that isnt empty
-                doAssign = False
-                break
-
-        if doAssign:
-            for pk in pks:
-                assignPeak.copyAssignmentTo(pk)
-
         return result
 
 

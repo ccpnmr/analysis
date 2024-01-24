@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-01-24 16:54:54 +0000 (Wed, January 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-24 17:57:19 +0000 (Wed, January 24, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -558,21 +558,6 @@ class Framework(NotifierBase, GuiBase):
             # NOTE:ED - check with Geerten whether it needs to do anything else here
             self.project._backup()
 
-            # from ccpnmodel.ccpncore.lib.Io import Api as apiIo
-            #
-            # apiIo.backupProject(self.project._wrappedData.parent)
-            # backupPath = self.project.backupPath
-            #
-            # backupStatePath = fetchDir(backupPath, Layout.StateDirName)
-            #
-            # copy_tree(self.statePath, backupStatePath)
-            # layoutFile = os.path.join(backupStatePath, Layout.DefaultLayoutFileName)
-            # Layout.saveLayoutToJson(self.ui.mainWindow, layoutFile)
-            # self.current._dumpStateToFile(backupStatePath)
-
-            # Spectra should not be copied over. Dangerous for disk space
-            # backupDataPath = fetchDir(backupPath, DataDirName)
-
         except (PermissionError, FileNotFoundError):
             getLogger().info('Backup failed: Folder may be read-only')
 
@@ -609,6 +594,7 @@ class Framework(NotifierBase, GuiBase):
         # newProject._resetUndo(debug=self._debugLevel <= Logging.DEBUG2,
         #                       application=self)
 
+        # GWV 24/2/24: moved to Project._initialise()
         # # Logging
         # logger = getLogger()
         # Logging.setLevel(logger, self._debugLevel)
@@ -620,6 +606,7 @@ class Framework(NotifierBase, GuiBase):
 
         # Now that all objects, including the graphics are there, restore current
         self.current._restoreStateFromFile(self.statePath)
+
         # Load project specific resources.
         self.resources._initProjectResources()
 
@@ -730,143 +717,145 @@ class Framework(NotifierBase, GuiBase):
                 mark.colour = autoCorrectHexColour(mark.colour,
                                                    getColours()[CCPNGLWIDGET_HEXBACKGROUND])
 
-    def _initGraphics(self):
-        """Set up graphics system after loading
-        """
-        from ccpn.ui.gui.lib import GuiStrip
-
-        project = self.project
-        mainWindow = self.ui.mainWindow
-
-        # 20191113:ED Initial insertion of spectrumDisplays into the moduleArea
-        try:
-            insertPoint = mainWindow.moduleArea
-            for spectrumDisplay in mainWindow.spectrumDisplays:
-                mainWindow.moduleArea.addModule(spectrumDisplay,
-                                                position='right',
-                                                relativeTo=insertPoint)
-                insertPoint = spectrumDisplay
-
-        except Exception:
-            getLogger().warning('Impossible to restore SpectrumDisplays')
-
-        try:
-            if self.preferences.general.restoreLayoutOnOpening and \
-                    mainWindow.moduleLayouts:
-                Layout.restoreLayout(mainWindow, mainWindow.moduleLayouts, restoreSpectrumDisplay=False)
-        except Exception as e:
-            getLogger().warning(f'Impossible to restore Layout {e}')
-
-        # New LayoutManager implementation; awaiting completion
-        # try:
-        #     from ccpn.framework.LayoutManager import LayoutManager
-        #     layout = LayoutManager(mainWindow)
-        #     path = self.statePath / 'Layout.json'
-        #     layout.restoreState(path)
-        #     layout.saveState()
+    # GWV 24/1/24: moved to Gui
+    # def _initGraphics(self):
+    #     """Set up graphics system after loading
+    #     """
+    #     # from ccpn.ui.gui.lib import GuiStrip
         #
+        # project = self.project
+        # mainWindow = self.ui.mainWindow
+        #
+        # # 20191113:ED Initial insertion of spectrumDisplays into the moduleArea
+        # try:
+        #     insertPoint = mainWindow.moduleArea
+        #     for spectrumDisplay in mainWindow.spectrumDisplays:
+        #         mainWindow.moduleArea.addModule(spectrumDisplay,
+        #                                         position='right',
+        #                                         relativeTo=insertPoint)
+        #         insertPoint = spectrumDisplay
+        #
+        # except Exception:
+        #     getLogger().warning('Impossible to restore SpectrumDisplays')
+        #
+        # try:
+        #     if self.preferences.general.restoreLayoutOnOpening and \
+        #             mainWindow.moduleLayouts:
+        #         Layout.restoreLayout(mainWindow, mainWindow.moduleLayouts, restoreSpectrumDisplay=False)
+        # except Exception as e:
+        #     getLogger().warning(f'Impossible to restore Layout {e}')
+        #
+        # # New LayoutManager implementation; awaiting completion
+        # # try:
+        # #     from ccpn.framework.LayoutManager import LayoutManager
+        # #     layout = LayoutManager(mainWindow)
+        # #     path = self.statePath / 'Layout.json'
+        # #     layout.restoreState(path)
+        # #     layout.saveState()
+        # #
+        # # except Exception as es:
+        # #     getLogger().warning('Error restoring layout: %s' % es)
+        #
+        # # check that the top moduleArea is correctly formed - strange special case when all modules have
+        # #   been moved to tempAreas
+        # mArea = self.ui.mainWindow.moduleArea
+        # if mArea.topContainer is not None and mArea.topContainer._container is None:
+        #     getLogger().debug('Correcting empty topContainer')
+        #     mArea.topContainer = None
+        #
+        # try:
+        #     # Initialise colours
+        #     # # for spectrumDisplay in project.windows[0].spectrumDisplays:  # there is exactly one window
+        #     #
+        #     # for spectrumDisplay in mainWindow.spectrumDisplays:  # there is exactly one window
+        #     #     pass  # GWV: poor solution; removed the routine spectrumDisplay._resetRemoveStripAction()
+        #
+        #     # initialise any colour changes before generating gui strips
+        #     self._correctColours()
         # except Exception as es:
-        #     getLogger().warning('Error restoring layout: %s' % es)
+        #     getLogger().warning(f'Impossible to restore colours - {es}')
+        #
+        # # Initialise Strips
+        # for spectrumDisplay in mainWindow.spectrumDisplays:
+        #     try:
+        #         for si, strip in enumerate(spectrumDisplay.orderedStrips):
+        #
+        #             # temporary to catch bad strips from ordering bug
+        #             if not strip:
+        #                 continue
+        #
+        #             # get the new tilePosition of the strip - tilePosition is always (x, y) relative to screen stripArrangement
+        #             #                                       changing screen arrangement does NOT require flipping tilePositions
+        #             #                                       i.e. Y = (across, down); X = (down, across)
+        #             #                                       - check delete/undo/redo strips
+        #             tilePosition = strip.tilePosition
+        #
+        #             # move to the correct place in the widget - check stripDirection to display as row or column
+        #             if spectrumDisplay.stripArrangement == 'Y':
+        #                 if True:  # tilePosition is None:
+        #                     spectrumDisplay.stripFrame.layout().addWidget(strip, 0, si)  #stripIndex)
+        #                     strip.tilePosition = (0, si)
+        #                 # else:
+        #                 #     spectrumDisplay.stripFrame.layout().addWidget(strip, tilePosition[0], tilePosition[1])
+        #
+        #             elif spectrumDisplay.stripArrangement == 'X':
+        #                 if True:  #tilePosition is None:
+        #                     spectrumDisplay.stripFrame.layout().addWidget(strip, si, 0)  #stripIndex)
+        #                     strip.tilePosition = (0, si)
+        #                 # else:
+        #                 #     spectrumDisplay.stripFrame.layout().addWidget(strip, tilePosition[1], tilePosition[0])
+        #
+        #             elif spectrumDisplay.stripArrangement == 'T':
+        #                 # NOTE:ED - Tiled plots not fully implemented yet
+        #                 getLogger().warning(f'Tiled plots not implemented for spectrumDisplay: {str(spectrumDisplay)}')
+        #             else:
+        #                 getLogger().warning(f'Strip direction is not defined for spectrumDisplay: {str(spectrumDisplay)}')
+        #
+        #             if not spectrumDisplay.is1D:
+        #                 for _strip in spectrumDisplay.strips:
+        #                     _strip._updatePlaneAxes()
+        #
+        #         if spectrumDisplay.isGrouped:
+        #             # set up the spectrumGroup toolbar
+        #
+        #             spectrumDisplay.spectrumToolBar.hide()
+        #             spectrumDisplay.spectrumGroupToolBar.show()
+        #
+        #             _spectrumGroups = [project.getByPid(pid) for pid in spectrumDisplay._getSpectrumGroups()]
+        #
+        #             for group in _spectrumGroups:
+        #                 spectrumDisplay.spectrumGroupToolBar._forceAddAction(group)
+        #
+        #         else:
+        #             # set up the spectrum toolbar
+        #
+        #             spectrumDisplay.spectrumToolBar.show()
+        #             spectrumDisplay.spectrumGroupToolBar.hide()
+        #             spectrumDisplay.setToolbarButtons()
+        #
+        #         # some strips may not be instantiated at this point
+        #         # resize the stripFrame to the spectrumDisplay - ready for first resize event
+        #         # spectrumDisplay.stripFrame.resize(spectrumDisplay.width() - 2, spectrumDisplay.stripFrame.height())
+        #         spectrumDisplay.showAxes(stretchValue=True, widths=True,
+        #                                  minimumWidth=GuiStrip.STRIP_MINIMUMWIDTH)
+        #
+        #     except Exception as e:
+        #         getLogger().warning(f'Impossible to restore spectrumDisplay(s) {e}')
+        #
+        # try:
+        #     if self.current.strip is None and len(mainWindow.strips) > 0:
+        #         self.current.strip = mainWindow.strips[0]
+        # except Exception as e:
+        #     getLogger().warning(f'Error restoring current.strip: {e}')
 
-        # check that the top moduleArea is correctly formed - strange special case when all modules have
-        #   been moved to tempAreas
-        mArea = self.ui.mainWindow.moduleArea
-        if mArea.topContainer is not None and mArea.topContainer._container is None:
-            getLogger().debug('Correcting empty topContainer')
-            mArea.topContainer = None
+    #-----------------------------------------------------------------------------------------
 
-        try:
-            # Initialise colours
-            # # for spectrumDisplay in project.windows[0].spectrumDisplays:  # there is exactly one window
-            #
-            # for spectrumDisplay in mainWindow.spectrumDisplays:  # there is exactly one window
-            #     pass  # GWV: poor solution; removed the routine spectrumDisplay._resetRemoveStripAction()
-
-            # initialise any colour changes before generating gui strips
-            self._correctColours()
-        except Exception as es:
-            getLogger().warning(f'Impossible to restore colours - {es}')
-
-        # Initialise Strips
-        for spectrumDisplay in mainWindow.spectrumDisplays:
-            try:
-                for si, strip in enumerate(spectrumDisplay.orderedStrips):
-
-                    # temporary to catch bad strips from ordering bug
-                    if not strip:
-                        continue
-
-                    # get the new tilePosition of the strip - tilePosition is always (x, y) relative to screen stripArrangement
-                    #                                       changing screen arrangement does NOT require flipping tilePositions
-                    #                                       i.e. Y = (across, down); X = (down, across)
-                    #                                       - check delete/undo/redo strips
-                    tilePosition = strip.tilePosition
-
-                    # move to the correct place in the widget - check stripDirection to display as row or column
-                    if spectrumDisplay.stripArrangement == 'Y':
-                        if True:  # tilePosition is None:
-                            spectrumDisplay.stripFrame.layout().addWidget(strip, 0, si)  #stripIndex)
-                            strip.tilePosition = (0, si)
-                        # else:
-                        #     spectrumDisplay.stripFrame.layout().addWidget(strip, tilePosition[0], tilePosition[1])
-
-                    elif spectrumDisplay.stripArrangement == 'X':
-                        if True:  #tilePosition is None:
-                            spectrumDisplay.stripFrame.layout().addWidget(strip, si, 0)  #stripIndex)
-                            strip.tilePosition = (0, si)
-                        # else:
-                        #     spectrumDisplay.stripFrame.layout().addWidget(strip, tilePosition[1], tilePosition[0])
-
-                    elif spectrumDisplay.stripArrangement == 'T':
-                        # NOTE:ED - Tiled plots not fully implemented yet
-                        getLogger().warning(f'Tiled plots not implemented for spectrumDisplay: {str(spectrumDisplay)}')
-                    else:
-                        getLogger().warning(f'Strip direction is not defined for spectrumDisplay: {str(spectrumDisplay)}')
-
-                    if not spectrumDisplay.is1D:
-                        for _strip in spectrumDisplay.strips:
-                            _strip._updatePlaneAxes()
-
-                if spectrumDisplay.isGrouped:
-                    # set up the spectrumGroup toolbar
-
-                    spectrumDisplay.spectrumToolBar.hide()
-                    spectrumDisplay.spectrumGroupToolBar.show()
-
-                    _spectrumGroups = [project.getByPid(pid) for pid in spectrumDisplay._getSpectrumGroups()]
-
-                    for group in _spectrumGroups:
-                        spectrumDisplay.spectrumGroupToolBar._forceAddAction(group)
-
-                else:
-                    # set up the spectrum toolbar
-
-                    spectrumDisplay.spectrumToolBar.show()
-                    spectrumDisplay.spectrumGroupToolBar.hide()
-                    spectrumDisplay.setToolbarButtons()
-
-                # some strips may not be instantiated at this point
-                # resize the stripFrame to the spectrumDisplay - ready for first resize event
-                # spectrumDisplay.stripFrame.resize(spectrumDisplay.width() - 2, spectrumDisplay.stripFrame.height())
-                spectrumDisplay.showAxes(stretchValue=True, widths=True,
-                                         minimumWidth=GuiStrip.STRIP_MINIMUMWIDTH)
-
-            except Exception as e:
-                getLogger().warning(f'Impossible to restore spectrumDisplay(s) {e}')
-
-        try:
-            if self.current.strip is None and len(mainWindow.strips) > 0:
-                self.current.strip = mainWindow.strips[0]
-        except Exception as e:
-            getLogger().warning(f'Error restoring current.strip: {e}')
-
+    def _initTipOfTheDay(self):
         # GST slightly complicated as we have to wait for any license or other
         # startup dialogs to close before we display tip of the day
         loadTipsSetup(tipOfTheDayConfig, [ccpnCodePath])
         self._tip_of_the_day_wait_dialogs = (RegisterPopup,)
         self._startupShowTipofTheDay()
-
-    #-----------------------------------------------------------------------------------------
 
     def _startupShowTipofTheDay(self):
         if self._shouldDisplayTipOfTheDay():

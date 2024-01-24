@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-01-24 16:54:54 +0000 (Wed, January 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-24 17:57:19 +0000 (Wed, January 24, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -41,6 +41,8 @@ from ccpn.core.lib.ContextManagers import notificationEchoBlocking, catchExcepti
     logCommandManager, undoStackBlocking
 
 from ccpn.ui.Ui import Ui
+from ccpn.ui.gui import Layout
+
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup, NewTermsConditionsPopup
 from ccpn.ui.gui.widgets.Application import Application
 from ccpn.ui.gui.widgets import MessageDialog
@@ -209,10 +211,167 @@ class Gui(Ui):
             with undoStackBlocking():
                 # Set up mainWindow
                 self._setupMainWindow()
-                self.application._initGraphics()
-                self.mainWindow._updateRestoreArchiveMenu()
-                self.application._updateCheckableMenuItems()
+                self._restoreSpectrumDisplayModules()
+                # self.application._updateCheckableMenuItems()
+                self._updateCheckableMenuItems()
                 self._makeActiveWindow()
+
+    def _restoreSpectrumDisplayModules(self):
+        """Code from Framework, restoring spectruDisplay's
+        """
+        from ccpn.ui.gui.lib import GuiStrip
+
+        project = self.project
+        mainWindow = self.mainWindow
+        current = self.application.current
+        preferences = self.application.preferences
+
+        # 20191113:ED Initial insertion of spectrumDisplays into the moduleArea
+        try:
+            insertPoint = mainWindow.moduleArea
+            for spectrumDisplay in mainWindow.spectrumDisplays:
+                mainWindow.moduleArea.addModule(spectrumDisplay,
+                                                position='right',
+                                                relativeTo=insertPoint)
+                insertPoint = spectrumDisplay
+
+        except Exception:
+            getLogger().warning('Impossible to restore SpectrumDisplays')
+
+        try:
+            if preferences.general.restoreLayoutOnOpening and \
+                    mainWindow.moduleLayouts:
+                Layout.restoreLayout(mainWindow, mainWindow.moduleLayouts, restoreSpectrumDisplay=False)
+        except Exception as e:
+            getLogger().warning(f'Impossible to restore Layout {e}')
+
+        # New LayoutManager implementation; awaiting completion
+        # try:
+        #     from ccpn.framework.LayoutManager import LayoutManager
+        #     layout = LayoutManager(mainWindow)
+        #     path = self.statePath / 'Layout.json'
+        #     layout.restoreState(path)
+        #     layout.saveState()
+        #
+        # except Exception as es:
+        #     getLogger().warning('Error restoring layout: %s' % es)
+
+        # check that the top moduleArea is correctly formed - strange special case when all modules have
+        #   been moved to tempAreas
+        mArea = mainWindow.moduleArea
+        if mArea.topContainer is not None and mArea.topContainer._container is None:
+            getLogger().debug('Correcting empty topContainer')
+            mArea.topContainer = None
+
+        try:
+            # Initialise colours
+
+            # initialise any colour changes before generating gui strips
+            self.application._correctColours()
+
+        except Exception as es:
+            getLogger().warning(f'Impossible to restore colours - {es}')
+
+        # Initialise Strips
+        for spectrumDisplay in mainWindow.spectrumDisplays:
+            try:
+                for si, strip in enumerate(spectrumDisplay.orderedStrips):
+
+                    # temporary to catch bad strips from ordering bug
+                    if not strip:
+                        continue
+
+                    # get the new tilePosition of the strip - tilePosition is always (x, y) relative to screen stripArrangement
+                    #                                       changing screen arrangement does NOT require flipping tilePositions
+                    #                                       i.e. Y = (across, down); X = (down, across)
+                    #                                       - check delete/undo/redo strips
+                    tilePosition = strip.tilePosition
+
+                    # move to the correct place in the widget - check stripDirection to display as row or column
+                    if spectrumDisplay.stripArrangement == 'Y':
+                        if True:  # tilePosition is None:
+                            spectrumDisplay.stripFrame.layout().addWidget(strip, 0, si)  #stripIndex)
+                            strip.tilePosition = (0, si)
+                        # else:
+                        #     spectrumDisplay.stripFrame.layout().addWidget(strip, tilePosition[0], tilePosition[1])
+
+                    elif spectrumDisplay.stripArrangement == 'X':
+                        if True:  #tilePosition is None:
+                            spectrumDisplay.stripFrame.layout().addWidget(strip, si, 0)  #stripIndex)
+                            strip.tilePosition = (0, si)
+                        # else:
+                        #     spectrumDisplay.stripFrame.layout().addWidget(strip, tilePosition[1], tilePosition[0])
+
+                    elif spectrumDisplay.stripArrangement == 'T':
+                        # NOTE:ED - Tiled plots not fully implemented yet
+                        getLogger().warning(f'Tiled plots not implemented for spectrumDisplay: {str(spectrumDisplay)}')
+                    else:
+                        getLogger().warning(f'Strip direction is not defined for spectrumDisplay: {str(spectrumDisplay)}')
+
+                    if not spectrumDisplay.is1D:
+                        for _strip in spectrumDisplay.strips:
+                            _strip._updatePlaneAxes()
+
+                if spectrumDisplay.isGrouped:
+                    # set up the spectrumGroup toolbar
+
+                    spectrumDisplay.spectrumToolBar.hide()
+                    spectrumDisplay.spectrumGroupToolBar.show()
+
+                    _spectrumGroups = [project.getByPid(pid) for pid in spectrumDisplay._getSpectrumGroups()]
+
+                    for group in _spectrumGroups:
+                        spectrumDisplay.spectrumGroupToolBar._forceAddAction(group)
+
+                else:
+                    # set up the spectrum toolbar
+
+                    spectrumDisplay.spectrumToolBar.show()
+                    spectrumDisplay.spectrumGroupToolBar.hide()
+                    spectrumDisplay.setToolbarButtons()
+
+                # some strips may not be instantiated at this point
+                # resize the stripFrame to the spectrumDisplay - ready for first resize event
+                # spectrumDisplay.stripFrame.resize(spectrumDisplay.width() - 2, spectrumDisplay.stripFrame.height())
+                spectrumDisplay.showAxes(stretchValue=True, widths=True,
+                                         minimumWidth=GuiStrip.STRIP_MINIMUMWIDTH)
+
+            except Exception as e:
+                getLogger().warning(f'Impossible to restore spectrumDisplay(s) {e}')
+
+        try:
+            if current.strip is None and len(mainWindow.strips) > 0:
+                current.strip = mainWindow.strips[0]
+        except Exception as e:
+            getLogger().warning(f'Error restoring current.strip: {e}')
+
+    def _updateCheckableMenuItems(self):
+        # This has to be kept in sync with menu items below which are checkable,
+        # and also with MODULE_DICT keys
+        # The code is terrible because Qt has no easy way to get hold of menus / actions
+
+        mainWindow = self.mainWindow
+        if mainWindow is None:
+            # We have a UI with no mainWindow - nothing to do.
+            return
+
+        menuChildren = mainWindow.menuBar().findChildren(QtWidgets.QMenu)
+        if not menuChildren:
+            return
+
+        topActionDict = {}
+        for topMenu in menuChildren:
+            mainActionDict = {mainAction.text(): mainAction for mainAction in topMenu.actions()}
+
+            topActionDict[topMenu.title()] = mainActionDict
+
+        openModuleKeys = set(mainWindow.moduleArea.modules.keys())
+        for key, topActionText, mainActionText in (('SEQUENCE', 'Molecules', 'Show Sequence'),
+                                                   ('PYTHON CONSOLE', 'View', 'Python Console')):
+            if key in openModuleKeys:
+                if mainActionDict := topActionDict.get(topActionText):
+                    if mainAction := mainActionDict.get(mainActionText):
+                        mainAction.setChecked(True)
 
     def _makeActiveWindow(self):
         """Show and et self.mainWindow as the active window
@@ -226,6 +385,7 @@ class Gui(Ui):
         """Start the UI
         """
         self._makeActiveWindow()
+        self.application._initTipOfTheDay()
 
         # check whether to skip the execution loop for testing with mainWindow
         import builtins
@@ -257,6 +417,7 @@ class Gui(Ui):
         """Set up mainWindow
         """
         self.mainWindow.sideBar.buildTree(self.project, clear=True)
+        self.mainWindow._updateRestoreArchiveMenu()
         self.mainWindow.namespace['current'] = self.application.current
 
     def echoCommands(self, commands: typing.List[str]):

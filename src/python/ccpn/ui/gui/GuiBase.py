@@ -5,9 +5,9 @@ A first step towards separating them from the Framework class
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-29 12:08:47 +0000 (Wed, November 29, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-01-24 17:57:19 +0000 (Wed, January 24, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -754,33 +754,34 @@ class GuiBase(object):
         for n, menuItem in enumerate(menuItems):
             self._addApplicationMenuItem(menuName, menuItem, position + n)
 
-    def _updateCheckableMenuItems(self):
-        # This has to be kept in sync with menu items below which are checkable,
-        # and also with MODULE_DICT keys
-        # The code is terrible because Qt has no easy way to get hold of menus / actions
-
-        mainWindow = self.ui.mainWindow
-        if mainWindow is None:
-            # We have a UI with no mainWindow - nothing to do.
-            return
-
-        menuChildren = mainWindow.menuBar().findChildren(QtWidgets.QMenu)
-        if not menuChildren:
-            return
-
-        topActionDict = {}
-        for topMenu in menuChildren:
-            mainActionDict = {mainAction.text(): mainAction for mainAction in topMenu.actions()}
-
-            topActionDict[topMenu.title()] = mainActionDict
-
-        openModuleKeys = set(mainWindow.moduleArea.modules.keys())
-        for key, topActionText, mainActionText in (('SEQUENCE', 'Molecules', 'Show Sequence'),
-                                                   ('PYTHON CONSOLE', 'View', 'Python Console')):
-            if key in openModuleKeys:
-                if mainActionDict := topActionDict.get(topActionText):
-                    if mainAction := mainActionDict.get(mainActionText):
-                        mainAction.setChecked(True)
+    # GWV 24/1/24: moved to Gui.py
+    # def _updateCheckableMenuItems(self):
+    #     # This has to be kept in sync with menu items below which are checkable,
+    #     # and also with MODULE_DICT keys
+    #     # The code is terrible because Qt has no easy way to get hold of menus / actions
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if mainWindow is None:
+    #         # We have a UI with no mainWindow - nothing to do.
+    #         return
+    #
+    #     menuChildren = mainWindow.menuBar().findChildren(QtWidgets.QMenu)
+    #     if not menuChildren:
+    #         return
+    #
+    #     topActionDict = {}
+    #     for topMenu in menuChildren:
+    #         mainActionDict = {mainAction.text(): mainAction for mainAction in topMenu.actions()}
+    #
+    #         topActionDict[topMenu.title()] = mainActionDict
+    #
+    #     openModuleKeys = set(mainWindow.moduleArea.modules.keys())
+    #     for key, topActionText, mainActionText in (('SEQUENCE', 'Molecules', 'Show Sequence'),
+    #                                                ('PYTHON CONSOLE', 'View', 'Python Console')):
+    #         if key in openModuleKeys:
+    #             if mainActionDict := topActionDict.get(topActionText):
+    #                 if mainAction := mainActionDict.get(mainActionText):
+    #                     mainAction.setChecked(True)
 
     @staticmethod
     def _testShortcuts0():

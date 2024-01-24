@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-01-23 14:43:09 +0000 (Tue, January 23, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-24 14:02:14 +0000 (Wed, January 24, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -1758,7 +1758,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         allMultiplets = self.application.current.multiplets
         multiplet = self.application.current.multiplet if mouseMultiplet is None else mouseMultiplet
 
-        multiplet.mergeMultiplet(peaks=allPeaks, multiplets=allMultiplets)
+        multiplet.mergeMultiplets(peaks=allPeaks, multiplets=allMultiplets)
 
     def newCollectionOfCurrentPeaks(self):
         """add current peaks to a new collection"""

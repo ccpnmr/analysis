@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-01-23 14:43:23 +0000 (Tue, January 23, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-24 13:50:33 +0000 (Wed, January 24, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -372,11 +372,10 @@ def _deleteMultipletItem(strip):
 
 
 def _mergeMultipletItem(strip):
-    return _SCMitem(name='Merge Multiplet',
+    return _SCMitem(name='Merge Multiplet(s)',
                     typeItem=ItemTypes.get(ITEM),
-                    toolTip='Merge multiplets and its associated peaks to a single multiplet', shortcut='XM',
+                    toolTip='Merge Multiplet(s) and Peak(s) into a single Multiplet', shortcut='XM',
                     callback=strip.mainWindow.mergeCurrentMultiplet)
-
 
 ##############################  Common Peak menu items ##############################
 ## These items are used to create both 1D and Nd Peak menus

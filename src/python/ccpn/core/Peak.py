@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
                "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2023-12-22 14:46:38 +0000 (Fri, December 22, 2023) $"
+__dateModified__ = "$dateModified: 2024-01-24 13:49:44 +0000 (Wed, January 24, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -859,8 +859,7 @@ class Peak(AbstractWrapperObject):
                     getLogger().debug2(f'Impossible to set isotopeCode to {na}. {err}')
 
     @logCommand(get='self')
-    def assignDimensions(self, axisCodes: list,
-                         values: List[Union[Union[str, 'NmrAtom'], Sequence[Union[str, 'NmrAtom']]]] = None):
+    def assignDimensions(self, axisCodes: list, values:  list[str | NmrAtom | Sequence[str | NmrAtom]] | None = None):
         """Assign dimensions with axisCode to values (NmrAtom, or Pid or sequence of either, or None).
         """
         specAxisCodes = self.spectrum.axisCodes
@@ -1058,6 +1057,11 @@ class Peak(AbstractWrapperObject):
         assigned = tuple(() for _ in range(self.peakList.spectrum.dimensionCount))
 
         with undoBlockWithoutSideBar():
+            # remove from any associated multiplets
+            if mp := self.multiplets:
+                for m in mp:
+                    m.removePeaks([self])
+
             self.dimensionNmrAtoms = assigned
             self._delete()
 

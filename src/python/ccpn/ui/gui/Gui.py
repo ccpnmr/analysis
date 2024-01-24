@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-01-19 16:55:02 +0100 (Fri, January 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-24 16:54:54 +0000 (Wed, January 24, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -196,25 +196,36 @@ class Gui(Ui):
         # styles = QtWidgets.QStyleFactory()
         # self.qtApp.setStyle(styles.create('fusion'))
 
-    def initialize(self, mainWindow):
+    def initialize(self, mainWindow, project):
         """UI operations done after every project load/create
         """
         if mainWindow is None:
-            raise ValueError('Gui.initialize: Undefined mainWindow')
+            raise ValueError('Gui.initialize(): Undefined mainWindow')
+
+        # super().__init__() also defines self._mainWindow and self._project
+        super().initialize(mainWindow=mainWindow, project=project)
 
         with notificationEchoBlocking():
             with undoStackBlocking():
                 # Set up mainWindow
-                self._mainWindow = self._setupMainWindow(mainWindow)
+                self._setupMainWindow()
                 self.application._initGraphics()
                 self.mainWindow._updateRestoreArchiveMenu()
                 self.application._updateCheckableMenuItems()
+                self._makeActiveWindow()
+
+    def _makeActiveWindow(self):
+        """Show and et self.mainWindow as the active window
+        """
+        # The next two lines are essential to have the QT main event loop associated
+        # with the new mainWindow; without these, the program just terminates
+        self.mainWindow.show()
+        QtWidgets.QApplication.setActiveWindow(self.mainWindow)
 
     def startUi(self):
         """Start the UI
         """
-        self.mainWindow.show()
-        QtWidgets.QApplication.setActiveWindow(self.mainWindow)
+        self._makeActiveWindow()
 
         # check whether to skip the execution loop for testing with mainWindow
         import builtins
@@ -242,15 +253,11 @@ class Gui(Ui):
             popup.exec_()
             self.qtApp.processEvents()
 
-    def _setupMainWindow(self, mainWindow):
-        # Set up mainWindow
-
-        project = self.application.project
-        mainWindow.sideBar.buildTree(project, clear=True)
-
-        # mainWindow.raise_()  # whaaaaaat? causes the menu-bar to be unresponsive
-        mainWindow.namespace['current'] = self.application.current
-        return mainWindow
+    def _setupMainWindow(self):
+        """Set up mainWindow
+        """
+        self.mainWindow.sideBar.buildTree(self.project, clear=True)
+        self.mainWindow.namespace['current'] = self.application.current
 
     def echoCommands(self, commands: typing.List[str]):
         """Echo commands strings, one by one, to logger
@@ -526,8 +533,7 @@ class Gui(Ui):
             newProject = self.application._newProject(name=_name)
             if newProject is None:
                 raise RuntimeError('Unable to create new project')
-            newProject._mainWindow.show()
-            QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
+
             self.mainWindow.move(oldMainWindowPos)
 
             return newProject
@@ -551,6 +557,7 @@ class Gui(Ui):
         oldProjectLoader = None
         oldProjectIsTemporary = True
         oldMainWindowPos = self.mainWindow and self.mainWindow.pos()
+
         if self.project:
             # if not self.project.isTemporary:
             if self.project._undo is None or self.project._undo.isDirty():
@@ -580,13 +587,6 @@ class Gui(Ui):
 
             newProject = _loaded[0]
 
-            # # Note that the newProject has its own MainWindow; i.e. it is not self
-            # newProject._mainWindow.sideBar.buildTree(newProject)
-            # The next two lines are essential to have the QT main event loop associated
-            # with the new window; without these, the programs just terminates
-            newProject._mainWindow.show()
-            QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
-
             # if the new project contains invalid spectra then open the popup to see them
             self.mainWindow._checkForBadSpectra(newProject)
             if oldMainWindowPos:
@@ -605,12 +605,6 @@ class Gui(Ui):
                 newProject = self.application._newProject()
             elif oldProjectLoader:
                 newProject = oldProjectLoader.load()[0]  # dataLoaders return a list
-
-            if newProject:
-                # The next two lines are essential to have the QT main event loop associated
-                # with the new window; without these, the programs just terminates
-                newProject._mainWindow.show()
-                QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
 
         return newProject
 

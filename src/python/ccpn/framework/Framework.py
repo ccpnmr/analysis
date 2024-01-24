@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-01-19 16:55:02 +0100 (Fri, January 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-24 16:54:54 +0000 (Wed, January 24, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -283,7 +283,8 @@ class Framework(NotifierBase, GuiBase):
         """:returns: MainWindow instance if application has a Gui or None otherwise
         """
         if self.hasGui:
-            return self.ui.mainWindow
+            # During setup, project has hold of mainWindow
+            return (self.ui.mainWindow or self.project._mainWindow)
         return None
 
     @property
@@ -582,43 +583,45 @@ class Framework(NotifierBase, GuiBase):
 
     def _initialiseProject(self, newProject: Project):
         """Initialise a project and set up links and objects that involve it
+        Previous project should have been closed by _closeProject()
         """
+        if self._project is not None:
+            raise RuntimeError(f'Cannot initialise {newProject} withoout closing {self._project} first')
 
-        # # Linkages; need to be here as downstream code depends on it
+        # Linkages; need to be here as downstream code depends on it
         self._project = newProject
         newProject._application = self
 
-        newProject._resetUndo(debug=self._debugLevel <= Logging.DEBUG2,
-                              application=self)
-
-        # Logging
-        logger = getLogger()
-        Logging.setLevel(logger, self._debugLevel)
-        logger.debug('Framework._initialiseProject>>>')
-
-        # Set up current; we need it when restoring project graphics data below
+        # Set up current before project; we need it when restoring project graphics data below
         self._current = Current(project=newProject)
 
-        # This wraps the underlying data, including the wrapped graphics data
-        newProject._initialiseProject()
+        # newProject._initialise() wraps the underlying data, including the wrapped graphics data;
+        # i.e. it obtains a new MainWindow instance and returns this for further initialisations
+        self._project, _mainWindow = newProject._initialise(application=self, debugLevel=self._debugLevel)
 
-        # NOTE:ED - testing here, project seems to be modified after loading
-        newProject._xmlLoader.setUnmodified()
+        if self.hasGui:
+            self.ui.initialize(mainWindow=_mainWindow, project=newProject)
+        else:
+            # The NoUi version has no mainWindow
+            self.ui.initialize(mainWindow=None, project=newProject)
 
-        # the project is now ready to use
+        # GWV 24/2/24: moved to Project._initialise()
+        # newProject._resetUndo(debug=self._debugLevel <= Logging.DEBUG2,
+        #                       application=self)
+
+        # # Logging
+        # logger = getLogger()
+        # Logging.setLevel(logger, self._debugLevel)
+
+        # GWV 24/2/24: moved to Project._initialise()
+        # # NOTE:ED - testing here, project seems to be modified after loading
+        # newProject._xmlLoader.setUnmodified()
+        # # the project is now ready to use
 
         # Now that all objects, including the graphics are there, restore current
         self.current._restoreStateFromFile(self.statePath)
         # Load project specific resources.
         self.resources._initProjectResources()
-
-        if self.hasGui:
-            self.ui.initialize(self._mainWindow)
-            # Get the mainWindow out of the application top level once it's been transferred to ui
-            del self._mainWindow
-        else:
-            # The NoUi version has no mainWindow
-            self.ui.initialize(None)
 
     #-----------------------------------------------------------------------------------------
     # Utilities

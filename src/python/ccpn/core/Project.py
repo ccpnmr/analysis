@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-01-19 16:55:02 +0100 (Fri, January 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-24 16:54:54 +0000 (Wed, January 24, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1022,6 +1022,9 @@ class Project(AbstractWrapperObject):
         self._collectionList = None
         self._crossReferencing = None
 
+        # reference to MainWindow, set by MainWindow.__init__(); to pass to Framework/Gui
+        self._mainWindow = None
+
     #-----------------------------------------------------------------------------------------
     # Attributes
     #-----------------------------------------------------------------------------------------
@@ -1125,18 +1128,79 @@ class Project(AbstractWrapperObject):
             except (PermissionError, FileNotFoundError):
                 getLogger().info('Folder may be read-only')
 
-    def _initialiseProject(self):
+    # GWV 24/2/24: replaced with Project._initialise()
+    # def _initialiseProject(self):
+    #     """Complete initialisation of project,
+    #     set up logger and notifiers, and wrap underlying data
+    #     This routine is called from Framework, as some other machinery first needs to set up
+    #     (linkages, Current, notifiers and such)
+    #     """
+    #     from ccpn.core.ChemicalShiftList import DEFAULT_CHEMICALSHIFTLIST
+    #
+    #     self._logger = createLogger(self, now=self.application._created)
+    #
+    #     # Set up notifiers
+    #     self._registerPresetApiNotifiers()
+    #
+    #     # initialise, creating the children; pass in self as we are initialising
+    #     with inactivity(project=self):
+    #         self._restoreChildren()
+    #         # perform any required restoration of project not covered by children
+    #         self._restoreObject(self, self._wrappedData)
+    #
+    #         # we always have the default chemicalShift list
+    #         if not self.chemicalShiftLists:
+    #             self.newChemicalShiftList(name=DEFAULT_CHEMICALSHIFTLIST)
+    #
+    #         # Call any updates
+    #         self._update()
+    #
+    #         # finalise restoration of project
+    #         self._postRestore()
+    #
+    #     # NOTE:ED - testing here, project seems to be modified after loading
+    #     self._xmlLoader.setUnmodified()
+    #
+    #     # check directories for possible read-only
+    #     _projectPath = aPath(self.path)
+    #     _subDirs = [self.projectPath / sub for sub in CCPN_SUB_DIRECTORIES]
+    #     _readOnlyDirs = [p for p in [self.projectPath.parent] + _subDirs \
+    #                     if p.exists() and p.is_dir() and not p.isWriteable()]
+    #     if len(_readOnlyDirs) > 0:
+    #         getLogger().warning(f'Project contains {len(_readOnlyDirs)} read-only directories:\n{tuple(_readOnlyDirs)}')
+    #         self.setReadOnly(True)
+    #     else:
+    #         self.setReadOnly(self.readOnly)
+    #
+    #     # the project is now ready to use
+    #     getLogger().debug(f'Project {self}: initialiseProject() completed')
+
+
+    def _initialise(self, application, debugLevel):
         """Complete initialisation of project,
-        set up logger and notifiers, and wrap underlying data
+        set up logger, undo stack and notifiers, and wrap underlying data
         This routine is called from Framework, as some other machinery first needs to set up
         (linkages, Current, notifiers and such)
+
+        :param application: the application instance
+        :param debugLevel: the current debug level, used for settng the logger and undo
+        :return (self, mainWindow)
         """
         from ccpn.core.ChemicalShiftList import DEFAULT_CHEMICALSHIFTLIST
 
-        self._logger = createLogger(self, now=self.application._created)
+        self._application = application
+
+        # logger
+        self._logger = createLogger(self, now=application._created)
+        Logging.setLevel(self._logger, debugLevel)
 
         # Set up notifiers
         self._registerPresetApiNotifiers()
+
+        # undo
+        self._resetUndo(debug=debugLevel <= Logging.DEBUG2, application=application)
+
+        self._mainWindow = None  # set by MainWindow.__init__()
 
         # initialise, creating the children; pass in self as we are initialising
         with inactivity(project=self):
@@ -1154,6 +1218,9 @@ class Project(AbstractWrapperObject):
             # finalise restoration of project
             self._postRestore()
 
+        # NOTE:ED - testing here, project seems to be modified after loading
+        self._xmlLoader.setUnmodified()
+
         # check directories for possible read-only
         _projectPath = aPath(self.path)
         _subDirs = [self.projectPath / sub for sub in CCPN_SUB_DIRECTORIES]
@@ -1163,7 +1230,14 @@ class Project(AbstractWrapperObject):
             getLogger().warning(f'Project contains {len(_readOnlyDirs)} read-only directories:\n{tuple(_readOnlyDirs)}')
             self.setReadOnly(True)
         else:
-            self.setReadOnly(False)
+            self.setReadOnly(self.readOnly)
+
+        _mainWindow = self._mainWindow
+        self._mainWindow = None
+
+        # the project is now ready to use
+        getLogger().debug(f'Project {self}: initialise() completed')
+        return self, _mainWindow
 
     @classmethod
     def _restoreObject(cls, project, apiObj):

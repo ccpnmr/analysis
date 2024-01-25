@@ -1,9 +1,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -11,9 +11,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-10 17:28:03 +0100 (Tue, October 10, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-01-25 17:22:05 +0000 (Thu, January 25, 2024) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -239,16 +239,25 @@ class MacroEditor(CcpnModule):
                                                                      compoundKwds={'hAlign':'left',},
                                                                      grid=(hGrid, 0), gridSpan=(1, 1))
 
+    def runBlocked(self):
+        from ccpn.core.lib.ContextManagers import undoBlock
+        from ccpn.core.lib.ContextManagers import notificationEchoBlocking
+
+        with undoBlock():
+            self.application.ui.echoCommands([f'macroEditor.run({self.filePath})'])
+            with notificationEchoBlocking():
+                self.run()
+
     def run(self):
-        if self._pythonConsole is not None:
-            if self.autoOpenPythonConsole:
-                self._openPythonConsoleModule()
-            if self.filePath:
-                self.preferences.recentMacros.append(self.filePath)
-                self._pythonConsole._runMacro(self.filePath)
-        else:
-            # Used when running the editor outside of Analysis. Run from an external IpythonConsole
-            self._runOnTempIPythonConsole()
+            if self._pythonConsole is not None:
+                if self.autoOpenPythonConsole:
+                    self._openPythonConsoleModule()
+                if self.filePath:
+                    self.preferences.recentMacros.append(self.filePath)
+                    self._pythonConsole._runMacro(self.filePath)
+            else:
+                # Used when running the editor outside of Analysis. Run from an external IpythonConsole
+                self._runOnTempIPythonConsole()
 
     def _getProfilerArgs(self):
         """
@@ -468,6 +477,16 @@ class MacroEditor(CcpnModule):
                 ('callback', self.run),
                 ('enabled', True),
                 ('shortcut', '⌃r')
+                ))),
+            ('RunBlocked', od((
+                ('text', 'Run'),
+                ('toolTip', 'Run the macro in the IpythonConsole.\n'
+                            'All operations grouped into 1 undo/redo.\n'
+                            'Shortcut:NOTE: Not Created'),
+                ('icon', Icon('icons/play-undo')),
+                ('callback', self.runBlocked),
+                ('enabled', True),
+                ('shortcut', '^r')
                 ))),
             ('Run-Profile', od((
                 ('text', 'Run with a profiler'),

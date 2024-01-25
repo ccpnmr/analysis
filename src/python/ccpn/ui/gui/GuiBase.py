@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-01-24 17:57:19 +0000 (Wed, January 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-25 19:35:37 +0000 (Thu, January 25, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -69,8 +69,8 @@ class GuiBase(object):
         # GWV these attributes should move to the GUI class (in 3.x.0 ??)
         # For now, initialised by calls in Gui.__init_ as we need programme
         # arguments and preferences to have been initialised
-        self._styleSheet = None
-        self._colourScheme = None
+        # self._styleSheet = None
+        # self._colourScheme = None
         self._fontSettings = None
         self._menuSpec = None
 
@@ -355,31 +355,32 @@ class GuiBase(object):
             ]
                    ))
 
-    def _setColourSchemeAndStyleSheet(self):
-        """Set the colourScheme and stylesheet as determined by arguments --dark, --light or preferences
-        """
-        if self.args.darkColourScheme:
-            colourScheme = 'dark'
-        elif self.args.lightColourScheme:
-            colourScheme = 'light'
-        else:
-            colourScheme = self.preferences.general.colourScheme
-
-        if colourScheme is None:
-            raise RuntimeError('invalid colourScheme')
-        self._colourScheme = colourScheme
-
-        _qssPath = widgetsPath / ('%sStyleSheet.qss' % colourScheme.capitalize())
-        with _qssPath.open(mode='r') as fp:
-            styleSheet = fp.read()
-
-        if platform.system() == 'Linux':
-            _qssPath = widgetsPath / ('%sAdditionsLinux.qss' % colourScheme.capitalize())
-            with _qssPath.open(mode='r') as fp:
-                additions = fp.read()
-            styleSheet += additions
-
-        self._styleSheet = styleSheet
+    # GWV 25/1/24: moved to Gui.py
+    # def _setColourSchemeAndStyleSheet(self):
+    #     """Set the colourScheme and stylesheet as determined by arguments --dark, --light or preferences
+    #     """
+    #     if self.args.darkColourScheme:
+    #         colourScheme = 'dark'
+    #     elif self.args.lightColourScheme:
+    #         colourScheme = 'light'
+    #     else:
+    #         colourScheme = self.preferences.general.colourScheme
+    #
+    #     if colourScheme is None:
+    #         raise RuntimeError('invalid colourScheme')
+    #     self._colourScheme = colourScheme
+    #
+    #     _qssPath = widgetsPath / ('%sStyleSheet.qss' % colourScheme.capitalize())
+    #     with _qssPath.open(mode='r') as fp:
+    #         styleSheet = fp.read()
+    #
+    #     if platform.system() == 'Linux':
+    #         _qssPath = widgetsPath / ('%sAdditionsLinux.qss' % colourScheme.capitalize())
+    #         with _qssPath.open(mode='r') as fp:
+    #             additions = fp.read()
+    #         styleSheet += additions
+    #
+    #     self._styleSheet = styleSheet
 
     #-----------------------------------------------------------------------------------------
     # callback methods

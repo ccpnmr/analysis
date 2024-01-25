@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-01-24 17:57:19 +0000 (Wed, January 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-25 19:35:37 +0000 (Thu, January 25, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -29,6 +29,8 @@ __date__ = "$Date: 2017-03-16 18:20:01 +0000 (Thu, March 16, 2017) $"
 import sys
 import typing
 import re
+import platform
+
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 from ccpn.core.Project import Project
@@ -42,6 +44,7 @@ from ccpn.core.lib.ContextManagers import notificationEchoBlocking, catchExcepti
 
 from ccpn.ui.Ui import Ui
 from ccpn.ui.gui import Layout
+from ccpn.ui.gui.guiSettings import LIGHT, DARK
 
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup, NewTermsConditionsPopup
 from ccpn.ui.gui.widgets.Application import Application
@@ -160,7 +163,11 @@ class Gui(Ui):
 
         # GWV: this is not ideal and needs to move into the Gui class
         application._fontSettings = FontSettings(application.preferences)
-        application._setColourSchemeAndStyleSheet()
+
+        # defined by _setColourSchemeAndStyleSheet()
+        self._styleSheet = None
+        self._colourScheme = None
+
         application._setupMenus()
 
         self._initQtApp()
@@ -186,6 +193,8 @@ class Gui(Ui):
                                  self.application.applicationVersion,
                                  organizationName='CCPN', organizationDomain='ccpn.ac.uk')
 
+        self._setColourSchemeAndStyleSheet(self.application.args, self.application.preferences)
+
         # patch for icon sizes in menus, etc.
         styles = QtWidgets.QStyleFactory()
         myStyle = _MyAppProxyStyle(styles.create('fusion'))
@@ -194,9 +203,33 @@ class Gui(Ui):
         # read the current system-fonts
         getSystemFonts()
 
-        # # original - no patch for icon sizes
-        # styles = QtWidgets.QStyleFactory()
-        # self.qtApp.setStyle(styles.create('fusion'))
+    def _setColourSchemeAndStyleSheet(self, args, preferences):
+        """Set the colourScheme and stylesheet as determined by arguments --dark, --light or preferences
+        """
+        from ccpn.framework.PathsAndUrls import widgetsPath
+
+        if args.darkColourScheme:
+            colourScheme = DARK
+        elif args.lightColourScheme:
+            colourScheme = LIGHT
+        else:
+            colourScheme = preferences.general.colourScheme
+
+        if colourScheme is None:
+            raise RuntimeError('invalid colourScheme')
+        self._colourScheme = colourScheme
+
+        _qssPath = widgetsPath / ('%sStyleSheet.qss' % colourScheme.capitalize())
+        with _qssPath.open(mode='r') as fp:
+            styleSheet = fp.read()
+
+        if platform.system() == 'Linux':
+            _qssPath = widgetsPath / ('%sAdditionsLinux.qss' % colourScheme.capitalize())
+            with _qssPath.open(mode='r') as fp:
+                additions = fp.read()
+            styleSheet += additions
+
+        self._styleSheet = styleSheet
 
     def initialize(self, mainWindow, project):
         """UI operations done after every project load/create

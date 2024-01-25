@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-22 17:18:17 +0000 (Mon, January 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-25 10:11:30 +0000 (Thu, January 25, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -26,6 +26,7 @@ __date__ = "$Date: 2017-07-04 15:21:16 +0000 (Tue, July 04, 2017) $"
 # Start of code
 #=========================================================================================
 
+import numpy as np
 import string
 from functools import partial
 from PyQt5 import QtWidgets
@@ -40,11 +41,21 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.Frame import Frame
+
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
 from ccpn.util.AttrDict import AttrDict
 from ccpn.ui.gui.popups.Dialog import _verifyPopupApply
 from ccpn.core.lib.ContextManagers import queueStateChange, catchExceptions
+from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+from ccpn.ui.gui.widgets.Widget import Widget
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QTextEdit, QLabel
+from itertools import accumulate
+from ccpn.core.lib.ChainLib import SequenceHandler, CCPCODE
+from ccpn.framework.Application import getApplication, getProject
+from PyQt5.QtGui import QTextCursor, QTextCharFormat, QColor
 
 
 DefaultAddAtomGroups = True
@@ -86,6 +97,167 @@ def _nextChainCode(project):
     return code
 
 
+class _SequenceEditorBaseWidget(ScrollArea):
+
+    def __init__(self, parent, popup, maxCodesPerLine=10,  demoSequence='ACDFEG', **kwargs):
+        super(_SequenceEditorBaseWidget, self).__init__(parent=parent, setLayout=True, **kwargs)
+
+        self._scrollFrame = Frame(self, setLayout=True, showBorder=False,
+                                 hPolicy='expanding',
+                                 vAlign='top', vPolicy='minimal')
+        self.setWidget(self._scrollFrame)
+        self._popup = popup
+        self.editor = TextEditor(self._scrollFrame,  backgroundText=demoSequence, grid=(0, 0))
+        self.codeCounter = Label(self._scrollFrame, grid=(0, 1))
+        self.editor.textChanged.connect(self._textChangedCallback)
+        self.editor.verticalScrollBar().setVisible(False)
+        self.editor.horizontalScrollBar().setVisible(False)
+        self._maxCodesPerLine = maxCodesPerLine
+        self._project = getProject()
+        self._molType = self._getMolType()
+        self._sequenceHandler = SequenceHandler(self._project, moleculeType=self._molType)
+        self._startingCode = self._popup.startingSequenceCodeWidget.get()
+        self._popup.startingSequenceCodeWidget.valueChanged.connect(self._setStartingSequenceCode)
+
+    def _getMolType(self):
+        return self._popup.molTypePulldown.get()
+
+    def getSequence(self):
+        pass
+
+    def setSequence(self, sequence):
+        pass
+
+    def _setStartingSequenceCode(self, *args):
+        self._startingCode = self._popup.startingSequenceCodeWidget.get()
+        self._textChangedCallback()
+
+    def _textChangedCallback(self):
+        pass
+
+    def _formatText(self, text):
+        pass
+
+    def _updateCodeCounter(self):
+       pass
+
+class SequenceEditor1Code(_SequenceEditorBaseWidget):
+
+    def __init__(self, parent, popup, maxCodesPerLine=10,  **kwargs):
+        super().__init__(parent=parent, popup=popup, maxCodesPerLine=maxCodesPerLine, **kwargs)
+
+    def getSequence(self):
+        text = self.editor.toPlainText()
+        text = self._sequenceHandler._cleanString(text)
+        return text
+
+    def _textChangedCallback(self):
+        text = self.editor.toPlainText()
+        text = self._sequenceHandler._cleanString(text)
+        cursor = self.editor.textCursor()
+        currentCursorPosition = cursor.position()
+        allowed = self._sequenceHandler.getAvailableCode1Letter(onlyStandard=True)
+        formattedText = self.formatTextHtml(text, allowed, self._maxCodesPerLine)
+        with self.editor.blockWidgetSignals():
+            self.editor.setText(formattedText)
+            self._updateCodeCounter()
+
+        new_cursor = self.editor.textCursor()
+        totCount = self._getCursorCount()
+        # two know behaviours for cursor: We are editing the middle: keep current cursor pos. Else: send to End
+
+        # if oldCursorPosition < totCount:
+        # print('======= currentCursorPosition:',currentCursorPosition, '==== totCount:', totCount, )
+        # if currentCursorPosition == totCount: #we are at the end
+        #     new_cursor.movePosition(cursor.End)
+        # else:
+        #     print('We are in the middle')
+        new_cursor.setPosition(currentCursorPosition)
+        self.editor.setTextCursor(new_cursor)
+
+        if self._isSequenceValid:
+            self._popup._queueSetSequence()
+            if self._popup.getButton(self._popup.OKBUTTON):
+                self._popup.getButton(self._popup.OKBUTTON).setEnabled(True)
+        else:
+            # self._popup.
+            if self._popup.getButton(self._popup.OKBUTTON):
+                self._popup.getButton(self._popup.OKBUTTON).setEnabled(False)
+
+    def formatTextHtml(self, text, allowedChars, maxCodesPerLine):
+        # Wrap the text into lines
+        wrappedLines = textwrap.wrap(text, maxCodesPerLine)
+
+        # Create a list to store formatted lines
+        formattedLines = []
+
+        # Iterate through each line
+        isInvalid = False
+        for line in wrappedLines:
+            formattedLine = ''
+            # Iterate through each character in the line
+            for char in line:
+                # Check if the character is allowed
+                if char in allowedChars:
+                    formattedLine += f'<span style="color:black">{char}</span>'
+                else:
+                    formattedLine += f'<span style="color:red">{char}</span>'
+                    isInvalid = True
+
+            # Append the formatted line to the list
+            formattedLines.append(formattedLine)
+
+        # Join the formatted lines with line breaks
+        formattedHtml = '<br>'.join(formattedLines)
+        self._isSequenceValid = not isInvalid
+        return formattedHtml
+
+    def _getCursorCount(self):
+        """ Get how many chars are in the editor including the \n"""
+        text = self.editor.toPlainText()
+        lines = [len(line) for line in text.split('\n')]
+        # print('++++>', lines, 'SUM LINES: ',sum(lines) ,  'LEN LINES:',len(lines))
+        count = sum(lines) +(len(lines)-1) #ad the row count excluding the first
+        return count
+
+    def _updateCodeCounter(self):
+        self.codeCounter.clear()
+        text = self.editor.toPlainText()
+        lines = [list(line) for line in text.split('\n')]
+        labels  = ''
+        count = 0
+        for i, line in enumerate(lines):
+            if i == 0:
+                label = list(np.arange(self._startingCode, len(lines[i])+self._startingCode))
+                if not label:
+                    break
+                labels += f'{label.pop()}\n'
+                count += len(lines[i])
+            else:
+                mm = (self._maxCodesPerLine * i)+self._startingCode
+                label = list(np.arange(mm, len(lines[i])+mm))
+                labels += f'{label.pop()}\n'
+            count += (len(lines[i]))*i
+        self.codeCounter.setText(labels)
+        self.codeCounter.setAlignment(Qt.AlignTop | Qt.AlignRight)
+        return count
+
+
+class SequenceEditor3Code(_SequenceEditorBaseWidget):
+
+    def __init__(self, parent, popup, maxCodesPerLine=10, **kwargs):
+        super().__init__(parent=parent, popup=popup,
+                         maxCodesPerLine=maxCodesPerLine,
+                         demoSequence='ALA LEU VAL', **kwargs)
+
+
+class SequenceEditorCcpCode(_SequenceEditorBaseWidget):
+
+    def __init__(self, parent, popup, maxCodesPerLine=10, **kwargs):
+        super().__init__(parent=parent, popup=popup,
+                         maxCodesPerLine=maxCodesPerLine,
+                         demoSequence='Ala Leu Atp', **kwargs)
+
 class CreateChainPopup(AttributeEditorPopupABC):
     """
     Create new chain popup
@@ -122,10 +294,10 @@ class CreateChainPopup(AttributeEditorPopupABC):
         self.commentName.textChanged.connect(self._queueSetComment)
         self.startingSequenceCodeWidget.valueChanged.connect(self._queueSetSequenceStart)
         self.lineEdit2a.textChanged.connect(self._queueSetChainCode)
-        self.sequence1CodeEditor.textChanged.connect(self._validate1LetterCodeSequence)
-        self.sequence3CodeEditor.textChanged.connect(self._validate1LetterCodeSequence)
-
-        self.sequenceCcpCodeEditor.textChanged.connect(self._validateFullLetterCodeSequence)
+        # self.sequence1CodeEditor.textChanged.connect(self._validate1LetterCodeSequence)
+        # self.sequence3CodeEditor.textChanged.connect(self._validate1LetterCodeSequence)
+        #
+        # self.sequenceCcpCodeEditor.textChanged.connect(self._validateFullLetterCodeSequence)
 
         self.molTypePulldown.currentIndexChanged.connect(self._queueSetMolType)
         self.expandAtomsFromAtomSetW.clicked.connect(self._queueSetExpandAtomsFromAtomSets)
@@ -171,16 +343,23 @@ class CreateChainPopup(AttributeEditorPopupABC):
                                                       direction='v',
                                                       grid=(row, 1),  tipText=tipText, hAlign='left', minimumWidth=minimumWidth)
         row += 1
+        label = Label(self.mainWidget, 'Sequence Start', grid=(row, 0))
+        self.startingSequenceCodeWidget = Spinbox(self.mainWidget, grid=(row, 1), value=1, min=-1000000,
+                                                  max=1000000, hAlign='left', minimumWidth=minimumWidth)
+        row += 1
+
         label3a = Label(self.mainWidget, text="Sequence", grid=(row, 0))
-        demoSequence = '''ARN or  A R N or A, R, N  '''
-        self.sequence1CodeEditor = TextEditor(self.mainWidget,
-                                              backgroundText=demoSequence,
-                                              grid=(row, 1), gridSpan=(1, 3), tipText=tipText,
-                                              minimumWidth=minimumWidthEditors,
-                                              minimumHeight=minimumHeightEditors)
+
+        self.sequence1CodeEditor = SequenceEditor1Code(self.mainWidget,
+                                                      popup=self,
+
+                                                      grid=(row, 1), gridSpan=(1, 3), tipText=tipText,
+                                                      minimumWidth=minimumWidthEditors,
+                                                      minimumHeight=minimumHeightEditors)
         row += 1
         demoSequence = '''ALA ARG ASN  or  ALA, ARG, ASN '''
-        self.sequence3CodeEditor = TextEditor(self.mainWidget,
+        self.sequence3CodeEditor = SequenceEditor3Code(self.mainWidget,
+                                                        popup=self,
                                               backgroundText=demoSequence,
                                               grid=(row, 1), gridSpan=(1, 3),
                                               tipText=tipText,
@@ -188,20 +367,16 @@ class CreateChainPopup(AttributeEditorPopupABC):
                                               minimumHeight=minimumHeightEditors)
 
         demoSequence = '''Ala Arg Aba or Ala, Arg, Aba '''
-        self.sequenceCcpCodeEditor = TextEditor(self.mainWidget,
+        self.sequenceCcpCodeEditor = SequenceEditorCcpCode(self.mainWidget,
+                                                          popup=self,
                                                 backgroundText=demoSequence,
+
                                                 grid=(row, 1), gridSpan=(1, 3), tipText=tipText,
                                                 minimumWidth=minimumWidthEditors,
                                                 minimumHeight=minimumHeightEditors)
-        row += 1
-        self._reformatButton = Button(self.mainWidget, text='Format sequence',
-                                      callback=self._reformatSequence,
-                                      grid=(row, 1), gridSpan=(1, 3), tipText='Format sequence', hAlign='left', minimumWidth=minimumWidth)
+
         self._toggleSequenceEditor()
-        row += 1
-        label4a = Label(self.mainWidget, 'Sequence Start', grid=(row, 0))
-        self.startingSequenceCodeWidget = Spinbox(self.mainWidget, grid=(row, 1), value=1, min=-1000000,
-                                                  max=1000000, hAlign='left', minimumWidth=minimumWidth)
+
 
 
         row += 1
@@ -272,10 +447,10 @@ class CreateChainPopup(AttributeEditorPopupABC):
                 self.commentName.setText(self.obj.comment)
                 self.molTypePulldown.setCurrentText(self.obj.molType)
                 if self.obj.sequence:
-                    self.sequence1CodeEditor.setText(self.obj.sequence)
+                    self.sequence1CodeEditor.setSequence(self.obj.sequence)
                 if self.obj.sequenceCcpCodes:
                     codes = ','.join(self.obj.sequenceCcpCodes)
-                    self.sequenceCcpCodeEditor.setText(codes)
+                    self.sequenceCcpCodeEditor.setSequence(codes)
                 self.startingSequenceCodeWidget.set(self.obj.startNumber)
                 self.lineEdit2a.setText(self.obj.shortName)
                 self.expandAtomsFromAtomSetW.set(self.obj.expandFromAtomSets)
@@ -471,7 +646,6 @@ class CreateChainPopup(AttributeEditorPopupABC):
         for code in valueCcpCodes:
             if code not in availableCcpCodes:
                 notFound.append(code)
-        print(notFound, 'rtgefwdqas')
         if len(notFound)>0:
             return False, notFound
         else:
@@ -481,12 +655,11 @@ class CreateChainPopup(AttributeEditorPopupABC):
     def _queueSetSequence(self, *args, **kwds):
         """Queue changes to sequence
         """
-
-        value = self.sequence1CodeEditor.toPlainText()
+        value = ''
         if self.sequence1CodeEditor.isVisible():
-            value = self.sequence1CodeEditor.toPlainText()
+            value = self.sequence1CodeEditor.getSequence()
         elif self.sequence3CodeEditor.isVisible():
-            value = self.sequence3CodeEditor.toPlainText()
+            value = self.sequence3CodeEditor.getSequence()
 
         prefValue = self.obj.sequence
         if value != prefValue:

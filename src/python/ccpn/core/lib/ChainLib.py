@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-22 16:20:46 +0000 (Mon, January 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-25 10:11:30 +0000 (Thu, January 25, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -52,10 +52,7 @@ class SequenceHandler():
     def __init__(self, project, moleculeType:str):
         self.project = project
         self._chemCompsData = self.project._chemCompsData.copy() # needs to be a copy to ensure we don't modify the original dataframe
-        availableMolTypes = self._chemCompsData[MOLTYPE].values
-        self.moleculeType = moleculeType
-        if moleculeType not in availableMolTypes:
-            raise ValueError(f'Molecule Type {moleculeType} is not recognised. Use one of:  {availableMolTypes}')
+        self.setMoleculeType(moleculeType)
 
     @property
     def data(self):
@@ -111,13 +108,18 @@ class SequenceHandler():
     def ccpCodeToThreeCode(self, sequence3Letters) -> list:
         """ Convert CcpCodes To Three Code for Standard residuals only. """
         result = self._standardResiduesConversion(sequence3Letters, CCPCODE, CODE3LETTER)
-
         return result
 
     def threeToOneCode(self, sequence3Letters) -> list:
         """ Convert ThreeCodes To OneCode for Standard residuals only/ """
         result = self._standardResiduesConversion(sequence3Letters, CODE3LETTER, CODE1LETTER)
         return result
+
+    def setMoleculeType(self, moleculeType):
+        availableMolTypes = self._chemCompsData[MOLTYPE].values
+        if moleculeType not in availableMolTypes:
+            raise ValueError(f'Molecule Type {moleculeType} is not recognised. Use one of:  {availableMolTypes}')
+        self.moleculeType = moleculeType
 
     def isValidSequence(self, sequence):
         return self._isValidSequence(sequence)
@@ -349,6 +351,10 @@ class SequenceHandler():
         """
         pattern = re.compile(r'[ ,]')
         return pattern.search(string)
+
+    def _cleanString(self, string):
+        """Remove any space, comma etc"""
+        return ''.join(char for char in string if char.isalpha())
 
     def _splitStrBySeparators(self, sequence):
         """ split by commas or spaces. Others are not allowed here."""

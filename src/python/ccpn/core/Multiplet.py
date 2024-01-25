@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-01-24 14:01:56 +0000 (Wed, January 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-25 17:21:29 +0000 (Thu, January 25, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -693,6 +693,10 @@ class Multiplet(AbstractWrapperObject):
         with undoBlock():
             for pk in pks:
                 self._wrappedData.removePeak(pk._wrappedData)
+
+            # leaves single component multiplet (however makes GUI interaction impossible)
+            if self.numPeaks < 1:
+                self.delete()
 
     def _propagateAction(self, data):
         from ccpn.core.lib.Notifiers import Notifier

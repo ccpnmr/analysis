@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-25 10:11:30 +0000 (Thu, January 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-25 17:32:14 +0000 (Thu, January 25, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -40,9 +40,9 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
-from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.Frame import Frame
-
+from PyQt5 import QtGui
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
 from ccpn.util.AttrDict import AttrDict
@@ -51,12 +51,11 @@ from ccpn.core.lib.ContextManagers import queueStateChange, catchExceptions
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Widget import Widget
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QTextEdit, QLabel
 from itertools import accumulate
 from ccpn.core.lib.ChainLib import SequenceHandler, CCPCODE
 from ccpn.framework.Application import getApplication, getProject
 from PyQt5.QtGui import QTextCursor, QTextCharFormat, QColor
-
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QMenu, QAction
 
 DefaultAddAtomGroups = True
 DefaultAddPseudoAtoms = False
@@ -97,6 +96,34 @@ def _nextChainCode(project):
     return code
 
 
+class _SequenceTextEditor(TextEditor):
+
+    _copyAs1Code = 'Copy Selected as 1LetterCodes'
+    _copyAs3Code = 'Copy Selected as 3LetterCodes'
+    _copyAsCcpCodes = 'Copy Selected as CcpCodes'
+
+    def __init__(self, parent,  **kwargs):
+        super().__init__(parent, **kwargs)
+
+    def context_menu(self):
+        self.standardContextMenu = self.createStandardContextMenu()
+        # Create a custom context menu
+        self.customContextMenu = menu = Menu('Editor', self)
+        self.customContextMenu.addActions(self.standardContextMenu.actions())  # Add standard actions
+        self.customContextMenu.addSeparator()
+        menu.addItem(text=self._copyAs1Code, callback=self._copySelectedAs1CodeLetter, enabled=False)
+        menu.addItem(text=self._copyAs3Code, callback=self._copySelectedAs3CodeLetter, enabled=False)
+        menu.addItem(text=self._copyAsCcpCodes, callback=self._copySelectedAsCcpCode, enabled=False)
+        self.customContextMenu.exec_(QtGui.QCursor.pos())
+
+    def _copySelectedAs1CodeLetter(self):
+        pass
+    def _copySelectedAs3CodeLetter(self):
+        pass
+    def _copySelectedAsCcpCode(self):
+        pass
+
+
 class _SequenceEditorBaseWidget(ScrollArea):
 
     def __init__(self, parent, popup, maxCodesPerLine=10,  demoSequence='ACDFEG', **kwargs):
@@ -107,7 +134,7 @@ class _SequenceEditorBaseWidget(ScrollArea):
                                  vAlign='top', vPolicy='minimal')
         self.setWidget(self._scrollFrame)
         self._popup = popup
-        self.editor = TextEditor(self._scrollFrame,  backgroundText=demoSequence, grid=(0, 0))
+        self.editor = _SequenceTextEditor(self._scrollFrame,  backgroundText=demoSequence, grid=(0, 0))
         self.codeCounter = Label(self._scrollFrame, grid=(0, 1))
         self.editor.textChanged.connect(self._textChangedCallback)
         self.editor.verticalScrollBar().setVisible(False)
@@ -118,6 +145,7 @@ class _SequenceEditorBaseWidget(ScrollArea):
         self._sequenceHandler = SequenceHandler(self._project, moleculeType=self._molType)
         self._startingCode = self._popup.startingSequenceCodeWidget.get()
         self._popup.startingSequenceCodeWidget.valueChanged.connect(self._setStartingSequenceCode)
+
 
     def _getMolType(self):
         return self._popup.molTypePulldown.get()
@@ -152,9 +180,11 @@ class SequenceEditor1Code(_SequenceEditorBaseWidget):
         return text
 
     def _textChangedCallback(self):
+
         text = self.editor.toPlainText()
         text = self._sequenceHandler._cleanString(text)
         cursor = self.editor.textCursor()
+        cursorAtEnd = cursor.atEnd()
         currentCursorPosition = cursor.position()
         allowed = self._sequenceHandler.getAvailableCode1Letter(onlyStandard=True)
         formattedText = self.formatTextHtml(text, allowed, self._maxCodesPerLine)
@@ -162,19 +192,16 @@ class SequenceEditor1Code(_SequenceEditorBaseWidget):
             self.editor.setText(formattedText)
             self._updateCodeCounter()
 
+        ## set the cursor in the right position.
         new_cursor = self.editor.textCursor()
-        totCount = self._getCursorCount()
-        # two know behaviours for cursor: We are editing the middle: keep current cursor pos. Else: send to End
-
-        # if oldCursorPosition < totCount:
-        # print('======= currentCursorPosition:',currentCursorPosition, '==== totCount:', totCount, )
-        # if currentCursorPosition == totCount: #we are at the end
-        #     new_cursor.movePosition(cursor.End)
-        # else:
-        #     print('We are in the middle')
-        new_cursor.setPosition(currentCursorPosition)
+        if cursorAtEnd: #we are at the end
+            new_cursor.movePosition(cursor.End)
+        else:
+            # We are in the middle of a block. Preserve the position
+            new_cursor.setPosition(currentCursorPosition)
         self.editor.setTextCursor(new_cursor)
 
+        ## we can now set the sequence to the main popup.
         if self._isSequenceValid:
             self._popup._queueSetSequence()
             if self._popup.getButton(self._popup.OKBUTTON):
@@ -458,10 +485,6 @@ class CreateChainPopup(AttributeEditorPopupABC):
                 self.addPseudoAtomsW.set(self.obj.addPseudoAtoms)
                 self.makeCyclicPolymer.set(self.obj.isCyclic)
 
-    def _reformat1LetterCode(self):
-        value1LetterCode = self.sequence1CodeEditor.toPlainText()
-        formatted = '\n'.join(textwrap.wrap(value1LetterCode, self._formattingLenght))
-        self.sequence1CodeEditor.setText(formatted)
 
     def _reformatCcpCode(self):
         valueCcpCode = self.sequenceCcpCodeEditor.toPlainText()
@@ -478,9 +501,7 @@ class CreateChainPopup(AttributeEditorPopupABC):
             self.sequenceCcpCodeEditor.setText(formattedCodes)
 
     def _reformatSequence(self):
-        # format the 1LetterCode
-        self._reformat1LetterCode()
-        # Format the ccpCode
+
         self._reformatCcpCode()
 
     def _createSequence(self):

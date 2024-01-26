@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-01-25 19:35:37 +0000 (Thu, January 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-26 13:08:28 +0000 (Fri, January 26, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -71,8 +71,11 @@ class GuiBase(object):
         # arguments and preferences to have been initialised
         # self._styleSheet = None
         # self._colourScheme = None
-        self._fontSettings = None
+        # self._fontSettings = None
+
+        # GWV: this is not ideal and needs to move into the Gui class
         self._menuSpec = None
+        self._setupMenus()
 
     def _setupMenus(self):
         """Set up the menu specification.

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-01-25 19:35:37 +0000 (Thu, January 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-26 13:08:28 +0000 (Fri, January 26, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -152,6 +152,17 @@ class _MyAppProxyStyle(QtWidgets.QProxyStyle):
 # Gui
 #=========================================================================================
 
+
+def getFontSettings():
+    """:return the font settings object, intialised by Gui or None if non-gui
+    """
+    app = getApplication()
+    if app.hasGui:
+        return app.ui._fontSettings
+    else:
+        return None
+
+
 class Gui(Ui):
     """Top class for the GUI interface
     """
@@ -161,14 +172,12 @@ class Gui(Ui):
         # sets self.mainWindow (None), self.application and self.pluginModules
         Ui.__init__(self, application)
 
-        # GWV: this is not ideal and needs to move into the Gui class
-        application._fontSettings = FontSettings(application.preferences)
+        self._fontSettings = FontSettings(application.preferences)
 
         # defined by _setColourSchemeAndStyleSheet()
         self._styleSheet = None
         self._colourScheme = None
-
-        application._setupMenus()
+        self._setColourSchemeAndStyleSheet(application.args, application.preferences)
 
         self._initQtApp()
 
@@ -192,8 +201,6 @@ class Gui(Ui):
         self.qtApp = Application(self.application.applicationName,
                                  self.application.applicationVersion,
                                  organizationName='CCPN', organizationDomain='ccpn.ac.uk')
-
-        self._setColourSchemeAndStyleSheet(self.application.args, self.application.preferences)
 
         # patch for icon sizes in menus, etc.
         styles = QtWidgets.QStyleFactory()

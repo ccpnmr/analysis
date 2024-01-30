@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-25 10:11:30 +0000 (Thu, January 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-30 15:32:59 +0000 (Tue, January 30, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -38,7 +38,9 @@ ISSTANDARD = 'isStandard'
 OBJ = 'obj'
 ERRORS = 'errors'
 INPUT = 'input'
-
+PROTEIN = 'protein'
+DNA= 'DNA'
+RNA = 'RNA'
 
 class SequenceHandler():
     """ A  tool designed for converting compound codes between 1-letter, 3-letter and ccpCode representations.
@@ -84,6 +86,21 @@ class SequenceHandler():
         if onlyStandard:
             df = self.data[self.data[ISSTANDARD]]
         return list(df[CCPCODE].values)
+
+    def getAvailableCodeByType(self, codeType):
+        """
+        :return: A list of all available Codes by the given type
+        """
+        funcs = {
+            CODE1LETTER:self.getAvailableCode1Letter,
+            CODE3LETTER: self.getAvailableCode3Letter,
+           CCPCODE: self.getAvailableCcpCodes}
+        func = funcs.get(codeType)
+        if func is None:
+            getLogger().warning('Code type not recognised')
+            return []
+        return func()
+
 
     def oneToThreeCode(self, sequence1Letter) -> list:
         """ Convert one To ThreeCode for Standard residues only """
@@ -297,6 +314,15 @@ class SequenceHandler():
         result = [df.loc[df[columnOrigin] == item, columnTarget].values[0] for item in inputList]
         return result
 
+    def _get3CodeLengthByMolType(self):
+        lengths = {
+                        PROTEIN : 3,
+                        DNA: 2,
+                        RNA: 1,
+                        }
+        length = lengths.get(self.moleculeType, -1)
+        return length
+
     def _getInvalidItemIndex(self, inputList, columnType):
         invalidIndex = []
         available = self.data[columnType].values
@@ -354,7 +380,8 @@ class SequenceHandler():
 
     def _cleanString(self, string):
         """Remove any space, comma etc"""
-        return ''.join(char for char in string if char.isalpha())
+        string = re.sub(r'\s|[,;:.]', '', string)
+        return ''.join(string)
 
     def _splitStrBySeparators(self, sequence):
         """ split by commas or spaces. Others are not allowed here."""
@@ -401,3 +428,5 @@ class SequenceHandler():
                 invalidPositions.append(i)
         isValidSequence = len(invalidPositions)>0
         return isValidSequence, invalidPositions
+
+

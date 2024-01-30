@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-29 11:45:33 +0000 (Mon, January 29, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-30 15:32:59 +0000 (Tue, January 30, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -34,6 +34,7 @@ from functools import partial
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.core.lib.MoleculeLib import _nextChainCode
 import textwrap
+import re
 import pandas as pd
 from ccpn.core.Chain import Chain
 from ccpn.ui.gui.widgets.Label import Label
@@ -50,7 +51,7 @@ from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
 from ccpn.util.AttrDict import AttrDict
 from ccpn.ui.gui.popups.Dialog import _verifyPopupApply
 from ccpn.core.lib.ContextManagers import queueStateChange
-from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from PyQt5.QtCore import Qt
 from ccpn.core.lib.ChainLib import SequenceHandler, CCPCODE, CODE1LETTER, CODE3LETTER
 from ccpn.framework.Application import getProject
@@ -82,54 +83,61 @@ class _SequenceTextEditorBase(TextEditor):
         'Copy Selected as CcpCodes': {'callback': None, 'enabled': True},
         }
 
-    def __init__(self, parent, parentPopup, sequenceStartsAt=1,  maxColumns=10,  **kwargs):
+    def __init__(self, parent, parentPopup, maxColumns=10,  **kwargs):
         super().__init__(parent, backgroundText=self.demoSequence,  **kwargs)
 
         self.parentPopup = parentPopup # needed to get notifications on dynamic value changes.
         self.maxColumns = maxColumns
-        self.sequenceStartsAt = sequenceStartsAt
         self._project = getProject()
         self._molType = self._getMolType()
         self._sequenceHandler = SequenceHandler(self._project, moleculeType=self._molType)
-        self.sequenceStartsAt = 13# self.parentPopup.startingSequenceCodeWidget.get()
+        self.sequenceStartsAt = self.parentPopup.startingSequenceCodeWidget.get()
         self.parentPopup.startingSequenceCodeWidget.valueChanged.connect(self._setStartingSequenceCode)
         self.parentPopup.molTypePulldown.currentIndexChanged.connect(self._setMolType)
-        self.textChangedSignal.connect(self._textChangedCallback)
         self.setPlaceholderText(str(self.backgroundText))
-
 
     def toPlainText(self):
         html_string = self.toHtml()
         soup = BeautifulSoup(html_string, 'html.parser')
         # Find and extract all <span> tags with style attribute for subscript
         subscripts = soup.find_all('span', style=lambda value: value and 'vertical-align:sub' in value)
-
         # Remove the found <span> tags
         for sub in subscripts:
             sub.decompose()
-        # Get the modified HTML content
         textStrip = soup.getText(' ', strip=True)
         return textStrip
 
-    def _textChangedCallback(self):
-        text = self.toPlainText()
-        with self.blockWidgetSignals():
-            self.setSequence(text)
-
-    def setSequence(self, sequence:str):
+    def setHtmlSequence(self, sequence:str):
         df = self._sequenceToDataFrame(sequence)
-        sequenceHtml = self._dataFrameToHtml(df, )
+        sequenceHtml = self._dataFrameToHtml(df)
         self.setHtml(sequenceHtml)
+
+    def setPlainSequence(self, sequence:str, separator=' '):
+        if self._codeType in [CODE1LETTER, CODE3LETTER]:
+            sequence = sequence.upper()
+        sequenceMap = self._parseSequence(sequence)
+        formattedSequence = sequenceMap.get(self._codeType)
+        sequence = separator.join(formattedSequence)
+        self.setText(sequence)
 
     def getSequence(self):
         text = self.toPlainText()
-        sequenceMap = self._sequenceHandler.parseSequence(text)
+        sequenceMap = self._parseSequence(text)
         formattedSequence = sequenceMap.get(self._codeType)
         return formattedSequence
 
+    def  _parseSequence(self, sequence):
+        """Parse the sequence depending on the TextEditor subclass behaviour.
+        :param sequence: str
+        :return dict
+        """
+
+        sequenceMap = self._sequenceHandler.parseSequence(sequence)
+        return sequenceMap
+
     def getSequenceAsCcpCode(self):
         text = self.toPlainText()
-        sequenceMap = self._sequenceHandler.parseSequence(text)
+        sequenceMap = self._parseSequence(text)
         ccpCodeSequence = sequenceMap.get(CCPCODE)
         return ccpCodeSequence
 
@@ -137,8 +145,8 @@ class _SequenceTextEditorBase(TextEditor):
         if self._codeType in [CODE1LETTER, CODE3LETTER]:
             text = text.upper()
 
-        sequence = self._sequenceHandler.parseSequence(text)
-        formattedSequence = sequence.get(self._codeType)
+        sequenceMap = self._parseSequence(text)
+        formattedSequence = sequenceMap.get(self._codeType)
         df = self._listToDataFrame(formattedSequence, maxColumns=self.maxColumns, startAccumulatedCount=1)
         return df
 
@@ -161,40 +169,53 @@ class _SequenceTextEditorBase(TextEditor):
         df.set_index(accumulatedCount, inplace=True)
         return df
 
-    def _dataFrameToHtml(self, dataFrame):
-        allowedValues = []
-        html = "<table style='border-collapse: collapse; width: 100%;'>"
+    def _getDataFrameSequenceCodes(self, dataFrame):
 
-        for i, (inx, row) in enumerate(dataFrame.iterrows()):
+        sequenceCodesDF = pd.DataFrame(index=dataFrame.index, columns=dataFrame.columns)
+        sequenceStartsAt =self.sequenceStartsAt
+        for i in range(dataFrame.shape[0]):
+            for j in range(dataFrame.shape[1]):
+                sequenceCodesDF.iloc[i, j] = sequenceStartsAt
+                sequenceStartsAt += 1
+        return sequenceCodesDF
+
+    def _dataFrameToHtml(self, dataFrame):
+        allowedValues = self._sequenceHandler.getAvailableCodeByType(self._codeType)
+        html = "<table style='border-collapse: collapse; width: 100%;'>"
+        sequenceCodesDF = self._getDataFrameSequenceCodes(dataFrame)
+        for (colSeqNum, seqNumRow), (inx, row) in zip(sequenceCodesDF.iterrows(), dataFrame.iterrows()):
             html += "<tr>"
-            for j, (inxRow, value) in enumerate(row.items(), start=0):
-                underline_style = ''
-                subscript = ''
+            for (ixSeqNum, seqNum), (inxRow, value) in zip(seqNumRow.items(), row.items()):
+                value = str(value).replace(' ', '').replace(',', '').replace('None', '')
+                cellColor = 'red' if value not in allowedValues else 'black'
                 if value:
-                    cc = self.sequenceStartsAt + j
-                    if j == 4:
-                        value += f'<sub>{j + 1}</sub>'
+                    if int(seqNum) % 5 == 0 or int(seqNum) % 10 == 0: # add a subscript if is a multiple of 5/10
+                        value += f'<sub>{seqNum}</sub>'
                     # underline_style = 'text-decoration: underline;' if self.isMultipleOfMaxColumnsCount(cc) else ''
-                cleanedValue = str(value).replace(' ', '').replace(',', '').replace('None', '')
-                cellColor = 'red' if cleanedValue not in allowedValues else 'black'
-                html += f"<td style='color: {cellColor}; text-align: center; padding: 3px; {subscript} '>{cleanedValue}</td>"
+                html += f"<td style='color: {cellColor}; text-align: center; padding: 3px '>{value}</td>"
             html += "</tr>"
         html += "</table>"
         return html
 
-    def _update(self):
-        self._textChangedCallback()
+    def formatSequenceAsHTML(self):
+        text = self.toPlainText()
+        with self.blockWidgetSignals():
+            self.setHtmlSequence(text)
+
+    def formatSequenceAsText(self):
+        text = self.toPlainText()
+        with self.blockWidgetSignals():
+            self.setPlainSequence(text)
 
     def _getMolType(self):
         return self.parentPopup.molTypePulldown.get()
 
     def _setStartingSequenceCode(self, *args):
         self.sequenceStartsAt = self.parentPopup.startingSequenceCodeWidget.get()
-        self._update()
 
     def _setMolType(self, *args):
         self._molType = self.parentPopup.molTypePulldown.get()
-        self._update()
+        self._sequenceHandler.setMoleculeType(self._molType)
 
     def context_menu(self):
         self.standardContextMenu = self.createStandardContextMenu()
@@ -215,6 +236,16 @@ class _SequenceTextEditorBase(TextEditor):
     def _copySelectedAsCcpCode(self):
         pass
 
+    def keyPressEvent(self, event):
+
+        if event.key() in [
+                           Qt.Key_Return,
+                            Qt.Key_Enter]:
+            self.textChangedSignal.emit()
+            return super().keyPressEvent(event)
+
+        return super().keyPressEvent(event)
+
 
 class _1LetterCodeSequenceEditor(_SequenceTextEditorBase):
 
@@ -228,35 +259,32 @@ class _1LetterCodeSequenceEditor(_SequenceTextEditorBase):
         'Copy Selected as CcpCodes'    : {'callback': None, 'enabled': True},
         }
 
-
-    def keyPressEvent(self, event):
-
-        text = event.text()
-        alphabet = string.ascii_uppercase
-
-        if event.key() in [
-                           Qt.Key_Return,
-                            Qt.Key_Enter]:
-            self.textChangedSignal.emit()
-        elif text in alphabet:
-            allowed = self._sequenceHandler.getAvailableCode1Letter(onlyStandard=True)
-            notAllowed = set(alphabet) - set(allowed)
-            if text.upper() in allowed:
-                self.insertPlainText(text.upper())
-            elif text.upper in notAllowed:
-                showWarning('Not allowed', 'One-Letter code  not recognised. Use standard residues only.')
-            else:
-                print('event.key()', event.key())
-                super().keyPressEvent(event)
-        else:
-            print('event.key() _codeType:', event.key())
-            super().keyPressEvent(event)
-
+    def  _parseSequence(self, sequence):
+        """Parse the sequence ensuring is alwyas a one-Letter code .
+        :param sequence: str
+        :return dict
+        """
+        # Remove spaces, newline characters, and common separators
+        sequence = self._sequenceHandler._cleanString(sequence)
+        sequenceMap = self._sequenceHandler.parseSequence(sequence)
+        return sequenceMap
 
 class _3LetterCodeSequenceEditor(_SequenceTextEditorBase):
     _codeType = CODE3LETTER
     _name = THREELETTERCODE
     demoSequence = '''Standard residues only: ALA ARG ASN'''
+
+    def  _parseSequence(self, sequence):
+        """Parse the sequence ensuring is alwyas a one-Letter code .
+        :param sequence: str
+        :return dict
+        """
+        # Remove spaces, newline characters, and common separators
+        sequence = self._sequenceHandler._cleanString(sequence)
+        codeLength = self._sequenceHandler._get3CodeLengthByMolType()
+        sequence = list(divideChunks(sequence, codeLength))
+        sequenceMap = self._sequenceHandler.parseSequence(sequence)
+        return sequenceMap
 
 class _CcpCodeSequenceEditor(_SequenceTextEditorBase):
     _codeType = CCPCODE
@@ -285,7 +313,8 @@ class _SequenceTabs(Tabs):
         sequence = sequenceEditor.getSequence()
         return sequence
 
-    def getCcpCodeSequence(self):
+    def getSequenceAsCcpCode(self):
+        """Get the sequence from the selected Editor and convert it to a CcpCode. """
         tabName = self.getSelectedTabText()
         sequenceEditor = self._tabEditors.get(tabName)
         sequence = sequenceEditor.getSequenceAsCcpCode()
@@ -294,12 +323,22 @@ class _SequenceTabs(Tabs):
     def setSequence(self, sequence, editorName=None):
         if editorName is None: #set  the sequence to all tabs
             for k, sequenceEditor in self._tabEditors.items():
-                sequenceEditor.setSequence(sequence)
+                sequenceEditor.setHtmlSequence(sequence)
         else:
             sequenceEditor = self._tabEditors.get(editorName)
             if sequenceEditor is not None:
-                sequenceEditor.setSequence(sequence)
+                sequenceEditor.setHtmlSequence(sequence)
                 self.selectTabText(editorName)
+
+    def _reformatSelected(self):
+        sequenceEditor = self._tabEditors.get(self.getSelectedTabText())
+        if sequenceEditor is not None:
+            sequenceEditor.formatSequenceAsHTML()
+
+    def _setPlainSequence(self):
+        sequenceEditor = self._tabEditors.get(self.getSelectedTabText())
+        if sequenceEditor is not None:
+            sequenceEditor.formatSequenceAsText()
 
 
 class CreateChainPopup(AttributeEditorPopupABC):
@@ -383,7 +422,11 @@ class CreateChainPopup(AttributeEditorPopupABC):
                                                      setLayout=True, grid=(row, 1), gridSpan=(1, 3),
                                                       minimumWidth=minimumWidthEditors,
                                                       minimumHeight=minimumHeightEditors)
-        self.sequenceTabWidget.setSequence('AAWWQAAAAAAAWWQAAAAAAAWWQAAAAAAAWWQAAAAA')
+        row += 1
+        self.sequenceButtons = ButtonList(self.mainWidget, texts=['',''],
+                                          tipTexts=['Reformat the sequence in a single block','Reformat the sequence in blocks of 10'],
+                                          icons=['icons/sequenceBy1.png', 'icons/ReFormat.png'], callbacks=[self._setPlainSequence, self._reformatSequence],
+                                          hAlign='right',   grid=(row, 1), gridSpan=(1, 3))
 
         row += 1
         tipText6a = "E.g., for a VAL residue, the set of HG11, HG12, HG13 (NMR equivalent) atoms will create a new atom HG1%;\n" \
@@ -442,7 +485,7 @@ class CreateChainPopup(AttributeEditorPopupABC):
         """
         super()._applyAllChanges(changes)
 
-        self._createSequence()
+        self._createChain()
 
     def _populate(self):
         """Populate the widgets
@@ -452,9 +495,8 @@ class CreateChainPopup(AttributeEditorPopupABC):
                 self.moleculeEdit.setText(self.obj.compoundName)
                 self.commentName.setText(self.obj.comment)
                 self.molTypePulldown.setCurrentText(self.obj.molType)
-
                 if self.obj.sequenceCcpCodes:
-                    sequenceCcpCodes = ','.join(self.obj.sequenceCcpCodes)
+                    sequenceCcpCodes = ' '.join(self.obj.sequenceCcpCodes)
                     self.sequenceTabWidget.setSequence(sequenceCcpCodes, editorName=CCPCODESELECTION)
                 self.startingSequenceCodeWidget.set(self.obj.startNumber)
                 self.lineEdit2a.setText(self.obj.shortName)
@@ -464,29 +506,16 @@ class CreateChainPopup(AttributeEditorPopupABC):
                 self.makeCyclicPolymer.set(self.obj.isCyclic)
 
 
-    def _reformatCcpCode(self):
-        valueCcpCode = self.sequenceCcpCodeEditor.toPlainText()
-        valueCcpCode = ''.join(valueCcpCode.split())
-        valueCcpCode = valueCcpCode.replace('\n', '')
-        codes = valueCcpCode.split(',')
-        codes = [f'{code}' for code in codes]
-        chunks = list(divideChunks(codes, self._formattingLenght))
-        if len(chunks) > 0:
-            formattedCodes = ','.join(chunks[0]) + ','
-            for chunk in chunks[1:]:
-                formattedCodes += '\n' + ','.join(chunk) + ','
-            formattedCodes = formattedCodes.strip(',')
-            self.sequenceCcpCodeEditor.setText(formattedCodes)
-
     def _reformatSequence(self):
+        self.sequenceTabWidget._reformatSelected()
 
-        self._reformatCcpCode()
+    def _setPlainSequence(self):
+        self.sequenceTabWidget._setPlainSequence()
 
-    def _createSequence(self):
-        """Creates a sequence using the values specified in the text widget.
-
+    def _createChain(self):
+        """Creates the chain.
         """
-        self.obj.sequenceCcpCodes = self.sequenceTabWidget.getCcpCodeSequence()
+        self.obj.sequenceCcpCodes = self.sequenceTabWidget.getSequenceAsCcpCode()
         self.project.createChain(**self.obj)
 
     def _togglePseudoAtomOptions(self, value):
@@ -585,68 +614,6 @@ class CreateChainPopup(AttributeEditorPopupABC):
         """Sets chain code for sequence being created.
         """
         self.obj.shortName = value
-
-
-    def _validateSequence(self, *args):
-
-        self._queueSetSequenceCcpCode(*args)
-
-
-    def _isSequenceCcpCodeValid(self):
-
-        molType = self.molTypePulldown.getText()
-        availableChemComps = self.project._chemCompsData
-        availableChemComps = availableChemComps[availableChemComps.molType == molType]
-        availableCcpCodes = availableChemComps.ccpCode.unique()
-        valueCcpCodes = self.sequenceCcpCodeEditor.toPlainText().split(',')
-        notFound = []
-        for code in valueCcpCodes:
-            if code not in availableCcpCodes:
-                notFound.append(code)
-        if len(notFound)>0:
-            return False, notFound
-        else:
-            return True, []
-
-    @queueStateChange(_verifyPopupApply)
-    def _queueSetSequence(self, *args, **kwds):
-        """Queue changes to sequence
-        """
-        value = ''
-        if self.sequence1CodeEditor.isVisible():
-            value = self.sequence1CodeEditor.getSequence()
-        elif self.sequence3CodeEditor.isVisible():
-            value = self.sequence3CodeEditor.getSequence()
-
-        prefValue = self.obj.sequence
-        if value != prefValue:
-            return partial(self._setsequence, value)
-
-    @queueStateChange(_verifyPopupApply)
-    def _queueSetSequenceCcpCode(self):
-        value = self.sequenceCcpCodeEditor.toPlainText()
-        codes = value.split(',')
-        codes = [f'{code}' for code in codes]
-        prefValue = self.obj.sequenceCcpCodes or None
-        if codes != prefValue:
-            return partial(self._setSequenceCcpCode, codes)
-
-    def _setsequence(self, value: str):
-        """Sets the sequence
-        """
-        value = value.replace(' ', '')
-        value = value.replace('\n', '')
-        self.obj.sequence = value
-
-    def _setSequenceCcpCode(self, values: str):
-        """Sets the sequence
-        """
-        formattedValues = []
-        for value in values:
-            value = value.replace(' ', '')
-            value = value.replace('\n', '')
-            formattedValues.append(value)
-        self.obj.sequenceCcpCodes = formattedValues
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetMolType(self, value):

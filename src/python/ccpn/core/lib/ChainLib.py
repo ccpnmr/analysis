@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-30 15:32:59 +0000 (Tue, January 30, 2024) $"
+__dateModified__ = "$dateModified: 2024-01-31 13:34:57 +0000 (Wed, January 31, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,7 @@ from typing import Tuple, Optional, Union, Sequence, Iterable
 import re
 from ccpn.util.Logging import getLogger
 import textwrap
+import warnings
 
 # definitions as they appear in the dataframe and in the underlining objects
 CODE1LETTER =  'code1Letter'
@@ -48,13 +49,15 @@ class SequenceHandler():
     The underlining objects that make these routine possible are ChemComps definitions.
     Note, not every Chemical Compound has a 1Letter or 3Letter code representation, so conversions are not always possible.
     DNA and RNA have 2 and 1 characters for the 3-Letter Code
-
+    errorMode: str. Raise or warn
     """
 
-    def __init__(self, project, moleculeType:str):
+    def __init__(self, project, moleculeType:str, errorMode:str='warn'):
         self.project = project
         self._chemCompsData = self.project._chemCompsData.copy() # needs to be a copy to ensure we don't modify the original dataframe
         self.setMoleculeType(moleculeType)
+        self._errorMode = errorMode
+
 
     @property
     def data(self):
@@ -101,35 +104,46 @@ class SequenceHandler():
             return []
         return func()
 
-
-    def oneToThreeCode(self, sequence1Letter) -> list:
-        """ Convert one To ThreeCode for Standard residues only """
-        result = self._standardResiduesConversion(sequence1Letter, CODE1LETTER, CODE3LETTER)
+    def oneToThreeCode(self, sequence1Letter, standardsOnly=True) -> list:
+        """ Convert one To ThreeCode"""
+        result = self._sequenceConversionBase(sequence1Letter,
+                                              CODE1LETTER, CODE3LETTER,
+                                              standardsOnly=standardsOnly)
         return result
 
-    def oneToCcpCode(self, sequence1Letter) -> list:
-        """ Convert one To CcpCode for Standard residues only"""
-        result = self._standardResiduesConversion(sequence1Letter, CODE1LETTER, CCPCODE)
+    def oneToCcpCode(self, sequence1Letter, standardsOnly=True) -> list:
+        """ Convert one To CcpCode for Standard """
+        result = self._sequenceConversionBase(sequence1Letter,
+                                              CODE1LETTER, CCPCODE,
+                                              standardsOnly=standardsOnly)
         return result
 
-    def ccpCodeToOneCode(self, sequence3Letters) -> list:
-        """ Convert CcpCodes To OneCode for Standard residues only/ """
-        result = self._standardResiduesConversion(sequence3Letters, CCPCODE, CODE1LETTER)
+    def ccpCodeToOneCode(self, sequence3Letters, standardsOnly=True) -> list:
+        """ Convert CcpCodes To OneCode """
+        result = self._sequenceConversionBase(sequence3Letters,
+                                              CCPCODE, CODE1LETTER,
+                                              standardsOnly=standardsOnly)
         return result
 
-    def threeToCcpCode(self, sequence3Letters) -> list:
+    def threeToCcpCode(self, sequence3Letters, standardsOnly=False) -> list:
         """ Convert  Three to CcpCode """
-        result = self._standardResiduesConversion(sequence3Letters, CODE3LETTER, CCPCODE)
+        result = self._sequenceConversionBase(sequence3Letters,
+                                              CODE3LETTER, CCPCODE,
+                                              standardsOnly=standardsOnly)
         return result
 
-    def ccpCodeToThreeCode(self, sequence3Letters) -> list:
-        """ Convert CcpCodes To Three Code for Standard residuals only. """
-        result = self._standardResiduesConversion(sequence3Letters, CCPCODE, CODE3LETTER)
+    def ccpCodeToThreeCode(self, sequence3Letters, standardsOnly=False) -> list:
+        """ Convert CcpCodes To Three Code. """
+        result = self._sequenceConversionBase(sequence3Letters,
+                                              CCPCODE, CODE3LETTER,
+                                              standardsOnly=standardsOnly)
         return result
 
-    def threeToOneCode(self, sequence3Letters) -> list:
-        """ Convert ThreeCodes To OneCode for Standard residuals only/ """
-        result = self._standardResiduesConversion(sequence3Letters, CODE3LETTER, CODE1LETTER)
+    def threeToOneCode(self, sequence3Letters, standardsOnly=True) -> list:
+        """ Convert ThreeCodes To OneCode"""
+        result = self._sequenceConversionBase(sequence3Letters,
+                                              CODE3LETTER, CODE1LETTER,
+                                              standardsOnly=standardsOnly)
         return result
 
     def setMoleculeType(self, moleculeType):
@@ -137,6 +151,14 @@ class SequenceHandler():
         if moleculeType not in availableMolTypes:
             raise ValueError(f'Molecule Type {moleculeType} is not recognised. Use one of:  {availableMolTypes}')
         self.moleculeType = moleculeType
+
+    def setErrorMode(self, errorMode):
+        """
+        set the error mode when parsing a sequence to raise or warn
+        :param errorMode: str. one of raise or warn
+        :return:
+        """
+        self.errorMode = errorMode
 
     def isValidSequence(self, sequence):
         return self._isValidSequence(sequence)
@@ -166,7 +188,7 @@ class SequenceHandler():
         """ Run this if you uploaded new ChemComps and you have an instance opened of this class"""
         self._chemCompsData = self.project._chemCompsData.copy()
 
-    def parseSequence(self, sequence):
+    def parseSequence(self, sequence, standardsOnly=False):
         """
         Parse a generic formatted sequence.
         :param sequence: str or list of str. Only for standard Residues. For Non-Standards use 'parseSequenceCcpCodes'
@@ -203,12 +225,10 @@ class SequenceHandler():
 
         if not isinstance(sequence, list):
             error = 'Sequence must be a List to be parsed at this point.'
-            result['error'] = error
-            return result
+            raise RuntimeError(error)
 
         if len(sequence) == 0:
-            error = 'Sequence must be a List to be parsed at this point.'
-            result['error'] = error
+            error = 'Sequence is empty'
             getLogger().warn(error)
             return result
 
@@ -219,22 +239,21 @@ class SequenceHandler():
         if is1Code:
             # All conversions should be safe.
             result[CODE1LETTER] = sequence
-            result[CODE3LETTER] = self.oneToThreeCode(sequence)
-            result[CCPCODE] = self.oneToCcpCode(sequence)
+            result[CODE3LETTER] = self.oneToThreeCode(sequence, standardsOnly=True) #can be only standards
+            result[CCPCODE] = self.oneToCcpCode(sequence, standardsOnly=True) #can be only standards
             return result
 
         ##  deal with 3CodeLetter
         is3Code = self._isCode3LetterSequence(sequence)
         if is3Code:
             # Conversions should be safe.
-            result[CODE1LETTER] = self.threeToOneCode(sequence)
+            result[CODE1LETTER] = self.threeToOneCode(sequence, standardsOnly=standardsOnly)
             result[CODE3LETTER] = sequence
-            result[CCPCODE] = self.threeToCcpCode(sequence)
+            result[CCPCODE] = self.threeToCcpCode(sequence, standardsOnly=standardsOnly)
             return result
 
         ##  deal with a CcpCode format.
         if self._isCcpCodeSequence(sequence):
-            #should we raise Value Error?
             return self.parseSequenceCcpCodes(sequence)
         return result
 
@@ -296,7 +315,7 @@ class SequenceHandler():
             ERRORS               : None,
             }
 
-    def _standardResiduesConversion(self, sequence, inputType, outputType, splitByLength=1) -> list:
+    def _sequenceConversionBase(self, sequence, inputType, outputType, standardsOnly=True) -> list:
         """
          Convert for Standard residues only
         :param sequence: the sequence to convert
@@ -306,12 +325,34 @@ class SequenceHandler():
         """
         if isinstance(sequence, str):
             sequence = self._strSequenceToList(sequence)
-        df = self.data[self.data[ISSTANDARD]]
+        df = self.data
+        if standardsOnly:
+            df = self.data[self.data[ISSTANDARD]]
         result = self._covertCodes(df, sequence, inputType,  outputType )
         return result
 
-    def _covertCodes(self, df, inputList, columnOrigin,  columnTarget ):
-        result = [df.loc[df[columnOrigin] == item, columnTarget].values[0] for item in inputList]
+    def _covertCodes(self, df, sequence, columnOrigin,  columnTarget ):
+
+        """
+        Convert the code from one CodeType to another based on the df definitions.
+        # FYI:This is a one-liner if we were 100% sure the input was valid:
+        # result = [df.loc[df[columnOrigin] == item, columnTarget].values[0] for item in sequence]
+        """
+        result = []
+        if not columnOrigin in df or not columnTarget in df:
+            raise RuntimeError('Cannot convert. DataFrame does not contain the proper columns.')
+        for i, code in enumerate(sequence):
+            foundDf = df[df[columnOrigin] == code]
+            if foundDf.empty:
+                msg = f'Cannot convert {code} from {columnOrigin} to {columnTarget}.'
+                if self._errorMode in ['raise', 'strict', 'ValueError']:
+                    raise RuntimeError(msg)
+                else:
+                    convertedCode = None
+                    warnings.warn(msg)
+            else:
+                convertedCode = foundDf[columnTarget].values[-1]
+            result.append(convertedCode)
         return result
 
     def _get3CodeLengthByMolType(self):
@@ -323,39 +364,29 @@ class SequenceHandler():
         length = lengths.get(self.moleculeType, -1)
         return length
 
-    def _getInvalidItemIndex(self, inputList, columnType):
-        invalidIndex = []
-        available = self.data[columnType].values
-        for i, item in enumerate(inputList):
-            if item not in available:
-                invalidIndex.append(i)
-        return invalidIndex
-
     def _isCode1LetterSequence(self, sequence: list):
         """
-       it is a Code1Letter  sequence  if all the codes are present in the list of available Code1Letter
+        True if at least a Code is present in the list of available Code1Letter. Standards Only.
         :param sequence: a list of strings
         :return: bool
         """
-        code1LetterCount = 0
-        availableCodes = self.getAvailableCode1Letter()
+        availableCodes = self.getAvailableCode1Letter(onlyStandard=True)
         for item in sequence:
             if item in availableCodes:
-                code1LetterCount += 1
-        return code1LetterCount == len(sequence)
+                return True
+        return False
 
     def _isCode3LetterSequence(self, sequence: list):
         """
-       it is a Code3Letter  sequence  if all the codes are present in the list of available Code3Letter
+       True if at least a Code is present in the list of available Code3Letter. Standards and non
         :param sequence: a list of strings
         :return: bool
         """
-        code3LetterCount = 0
-        availableCodes = self.getAvailableCode3Letter()
+        availableCodes = self.getAvailableCode3Letter(onlyStandard=False)
         for item in sequence:
             if item in availableCodes:
-                code3LetterCount += 1
-        return code3LetterCount == len(sequence)
+                return True
+        return False
 
     def _isCcpCodeSequence(self, sequence:list):
         """
@@ -420,13 +451,6 @@ class SequenceHandler():
     def _isValidSequence(self, sequence):
         """Check if the single element in a sequence are known.
         :return bool, list of indexes for the invalid elements"""
-        availableCodes = self._getAvailableCodes()
-        invalidPositions = []
-        for i, element in enumerate(sequence):
-            isValid = element in availableCodes
-            if not isValid:
-                invalidPositions.append(i)
-        isValidSequence = len(invalidPositions)>0
-        return isValidSequence, invalidPositions
+        pass
 
 

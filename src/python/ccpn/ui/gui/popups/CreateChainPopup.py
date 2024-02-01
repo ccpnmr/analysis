@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-30 15:32:59 +0000 (Tue, January 30, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-01 20:05:56 +0000 (Thu, February 01, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -131,7 +131,6 @@ class _SequenceTextEditorBase(TextEditor):
         :param sequence: str
         :return dict
         """
-
         sequenceMap = self._sequenceHandler.parseSequence(sequence)
         return sequenceMap
 
@@ -180,7 +179,8 @@ class _SequenceTextEditorBase(TextEditor):
         return sequenceCodesDF
 
     def _dataFrameToHtml(self, dataFrame):
-        allowedValues = self._sequenceHandler.getAvailableCodeByType(self._codeType)
+        standardsOnly = self._codeType != CODE1LETTER
+        allowedValues = self._sequenceHandler.getAvailableCodeByType(self._codeType, standardsOnly=standardsOnly)
         html = "<table style='border-collapse: collapse; width: 100%;'>"
         sequenceCodesDF = self._getDataFrameSequenceCodes(dataFrame)
         for (colSeqNum, seqNumRow), (inx, row) in zip(sequenceCodesDF.iterrows(), dataFrame.iterrows()):
@@ -295,6 +295,15 @@ class _CcpCodeSequenceEditor(_SequenceTextEditorBase):
         'Copy Selected as CcpCodes'    : {'callback': None, 'enabled': True},
         }
 
+    def  _parseSequence(self, sequence):
+        """Parse the sequence ensuring is alwyas a one-Letter code .
+        :param sequence: str
+        :return dict
+        """
+        # Remove spaces, newline characters, and common separators
+        sequence = self._sequenceHandler._strSequenceToList(sequence, codeLength=-1)
+        sequenceMap = self._sequenceHandler.parseSequence(sequence)
+        return sequenceMap
 
 class _SequenceTabs(Tabs):
     def __init__(self, parent, parentPopup, **kwds):
@@ -515,7 +524,7 @@ class CreateChainPopup(AttributeEditorPopupABC):
     def _createChain(self):
         """Creates the chain.
         """
-        self.obj.sequenceCcpCodes = self.sequenceTabWidget.getSequenceAsCcpCode()
+        self.obj.sequence = self.sequenceTabWidget.getSequenceAsCcpCode()
         self.project.createChain(**self.obj)
 
     def _togglePseudoAtomOptions(self, value):

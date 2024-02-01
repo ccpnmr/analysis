@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-22 16:20:46 +0000 (Mon, January 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-01 20:05:55 +0000 (Thu, February 01, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -351,7 +351,6 @@ def _getChain(self: Project, sequence: Union[str, Sequence[str]], compoundName: 
 @undoBlock()
 def _createChain(self: Project, compoundName: str = None,
                  sequence:str=None,
-                 sequenceCcpCodes: Union[Sequence[str]] = None,
                  startNumber: int = 1, molType: str = None, isCyclic: bool = False,
                  shortName: str = None, role: str = None, comment: str = None,
                  expandFromAtomSets: bool = True,
@@ -366,9 +365,9 @@ def _createChain(self: Project, compoundName: str = None,
     See the Chain class for details.
     :param sequence: str or list of str. Only for standard Residues. One of the following options:
                                 - string of Code1Letter un-separated or space/comma-separated;
-                                - string of Code3Letter space/comma-separated;
-                                - list of single strings either of Code1Letter or Code3Letter
-    :param sequenceCcpCodes: str or list of str.  a string of CcpCodes, space or comma-separated or a list of single strings.
+                                - string of Code3Letter/CcpCodes space/comma-separated; if Only one residue, must be given as a List
+                                - list of single strings either of Code1Letter or Code3Letter or CcpCodes
+
     :param str compoundName: name of new Substance (e.g. 'Lysozyme') Defaults to 'Molecule_n
     :param str molType: molType ('protein','DNA', 'RNA'). Needed only if sequence is a string.
     :param int startNumber: number of first residue in sequence
@@ -380,17 +379,17 @@ def _createChain(self: Project, compoundName: str = None,
                 See ccpn.core.lib.MoleculeLib.expandChainAtoms for details.
     :return: a new Chain instance.
     """
-    from ccpn.core.lib.ChainLib import SequenceHandler, CCPCODE
-
-    sequenceHandler = SequenceHandler(self.project, moleculeType=molType)
-    sequenceMap = sequenceHandler._getSequenceMapTemplate()
+    from ccpn.core.lib.ChainLib import SequenceHandler, CCPCODE, ISVALID, ERRORS
+    ccpCodes = []
     if sequence is not None:
+        sequenceHandler = SequenceHandler(self.project, moleculeType=molType)
         sequenceMap = sequenceHandler.parseSequence(sequence)
+        isValid = sequenceMap[ISVALID]
+        if not isValid:
+            msg = f'The given sequence is not valid. Found errors at positions(s): {sequenceMap[ERRORS]}'
+            raise RuntimeError(msg)
+        ccpCodes = sequenceMap.get(CCPCODE)
 
-    elif sequenceCcpCodes is not None:
-        sequenceMap = sequenceHandler.parseSequenceCcpCodes(sequenceCcpCodes)
-
-    ccpCodes = sequenceMap.get(CCPCODE)
     apiMolSystem = self._wrappedData.molSystem
     shortName = (
         Chain._uniqueName(project=self, name=shortName)

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-31 13:34:57 +0000 (Wed, January 31, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-01 20:05:55 +0000 (Thu, February 01, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -42,6 +42,7 @@ INPUT = 'input'
 PROTEIN = 'protein'
 DNA= 'DNA'
 RNA = 'RNA'
+ISVALID = 'isValid'
 
 class SequenceHandler():
     """ A  tool designed for converting compound codes between 1-letter, 3-letter and ccpCode representations.
@@ -63,34 +64,34 @@ class SequenceHandler():
     def data(self):
         return  self._getDataForMolType(self.moleculeType)
 
-    def getAvailableCode3Letter(self, onlyStandard=True):
+    def getAvailableCode3Letter(self, standardsOnly=True):
         """
         :return: A list of all available Code3Letter from the loaded ChemComps in the project for the defined MoleculeType
         """
         df = self.data
-        if onlyStandard:
+        if standardsOnly:
             df = self.data[self.data[ISSTANDARD]]
         return list(df[CODE3LETTER].values)
 
-    def getAvailableCode1Letter(self, onlyStandard=True):
+    def getAvailableCode1Letter(self, standardsOnly=True):
         """
         :return: A list of all available Code1Letter from the loaded ChemComps in the project for the defined MoleculeType
         """
         df = self.data
-        if onlyStandard:
+        if standardsOnly:
             df = self.data[self.data[ISSTANDARD]]
         return list(df[CODE1LETTER].values)
 
-    def getAvailableCcpCodes(self, onlyStandard=True):
+    def getAvailableCcpCodes(self, standardsOnly=True):
         """
         :return: A list of all available CcpCode from the loaded ChemComps in the project for the defined MoleculeType
         """
         df = self.data
-        if onlyStandard:
+        if standardsOnly:
             df = self.data[self.data[ISSTANDARD]]
         return list(df[CCPCODE].values)
 
-    def getAvailableCodeByType(self, codeType):
+    def getAvailableCodeByType(self, codeType, standardsOnly=True):
         """
         :return: A list of all available Codes by the given type
         """
@@ -102,7 +103,7 @@ class SequenceHandler():
         if func is None:
             getLogger().warning('Code type not recognised')
             return []
-        return func()
+        return func(standardsOnly=standardsOnly)
 
     def oneToThreeCode(self, sequence1Letter, standardsOnly=True) -> list:
         """ Convert one To ThreeCode"""
@@ -191,7 +192,10 @@ class SequenceHandler():
     def parseSequence(self, sequence, standardsOnly=False):
         """
         Parse a generic formatted sequence.
-        :param sequence: str or list of str. Only for standard Residues. For Non-Standards use 'parseSequenceCcpCodes'
+        Note  A CcpCode is case-sensitive and uniquely defines a Compound, also known as ChemComp. Every ChemComp has a CcpCode.
+        Not every ChemComp has a 1LetterCode and 3LetterCode. So conversions are  not always possible.
+        :param sequence: str or list of str.
+
             allowed sequence formats:
                 - 1-Letter-Code
                     sequence =  'AAAAAA'
@@ -202,14 +206,32 @@ class SequenceHandler():
                     sequence =  'ALA ALA ALA ALA'
                     sequence =  'ALA, ALA, ALA, ALA'
                     sequence =  ['ALA', 'ALA', 'ALA']
+                - ccpCodes:
+                    - sequence containing Standard residue(s) CcpCodes e.g.::
+                        sequence = 'Ala Leu Ala'
+                        sequence = 'Ala, Leu, Ala'
+                        sequence = ['Ala', 'Leu', 'Ala']
+                    - sequence containing Non-Standard residue(s) CcpCodes e.g.:
+                        sequence = ['Ala', 'Aba', Orn]
+                    - sequence of a small-molecule CcpCodes: (Note you need to import the ChemComp first if not available in the Project. see docs)
+                        sequence = ['Atp']
+                        sequence = ['MySmallMolecule']
+
+            not supported:
+                - mix of CcpCodes and 3-Letter-Code either as string or list of strings
+                - sequence of string of CcpCodes without separators. e.g.: sequence = 'AlaAbaOrn'
+
                 Notes:
-                a sequence of exactly three letters for molType 'protein' is ambiguous and is parsed as three individual 1-Letter-Code. e.g.:
+                Sequence of one single 3LetterCode or CcpCode MUST BE a list.
+                Otherwise is ambiguous and is  parsed as  individual 1-Letter-Code. e.g.:
                     sequence =  'ALA' translates to 'ALA LEU ALA'
                 not supported:
                     - mix of 1-Letter-Code and 3-Letter-Code either as string or list of strings
                     - sequence of string  of 3-Letter-Code without separators. e.g.: sequence =  'ALAALAALAALA'.
                       you can use the sequenceHandler, see docs:
                       'newSequence = sequenceHandler._strSequenceToList(sequence, splitByLength=3)'
+                     - mix of CcpCodes and 3-Letter-Code either as string or list of strings
+                     - sequence of string of CcpCodes without separators. e.g.: sequence = 'AlaAbaOrn'
 
         :param sequence: str or list
         :return: dict
@@ -233,80 +255,48 @@ class SequenceHandler():
             return result
 
         # ~~~~ error checking done ~~~~ #
-
+        isValid = False
         ##  deal with 1CodeLetter
         is1Code = self._isCode1LetterSequence(sequence)
         if is1Code:
-            # All conversions should be safe.
+            isValid, errorIndices = self._isValidSequence(sequence, CODE1LETTER, standardsOnly=True)
+            result[ISVALID] = isValid
             result[CODE1LETTER] = sequence
             result[CODE3LETTER] = self.oneToThreeCode(sequence, standardsOnly=True) #can be only standards
             result[CCPCODE] = self.oneToCcpCode(sequence, standardsOnly=True) #can be only standards
+            result[ERRORS] = errorIndices
             return result
 
         ##  deal with 3CodeLetter
         is3Code = self._isCode3LetterSequence(sequence)
         if is3Code:
-            # Conversions should be safe.
+            isValid, errorIndices = self._isValidSequence(sequence, CODE3LETTER, standardsOnly=standardsOnly)
+            result[ISVALID] = isValid
             result[CODE1LETTER] = self.threeToOneCode(sequence, standardsOnly=standardsOnly)
             result[CODE3LETTER] = sequence
             result[CCPCODE] = self.threeToCcpCode(sequence, standardsOnly=standardsOnly)
+            result[ERRORS] = errorIndices
             return result
 
         ##  deal with a CcpCode format.
         if self._isCcpCodeSequence(sequence):
-            return self.parseSequenceCcpCodes(sequence)
+            isValid, errorIndices = self._isValidSequence(sequence, CCPCODE, standardsOnly=False)
+            errorMode = self._errorMode
+            self._errorMode = 'warning' # only because the conversion to 1-3 letter code is not guaranteed to be available, but still be a valid sequence
+            result[CODE1LETTER] = self.ccpCodeToOneCode(sequence, standardsOnly=True)
+            result[CODE3LETTER] = self.ccpCodeToThreeCode(sequence, standardsOnly=standardsOnly)
+            result[CCPCODE] = sequence
+            self._errorMode = errorMode
+            result[ISVALID] = isValid
+            result[ERRORS] = errorIndices
+
         return result
 
-    def parseSequenceCcpCodes(self, sequenceCcpCodes):
-        """
-        :param sequenceCcpCodes: str or list of str.  a string of CcpCodes, space or comma-separated or a list of single strings.
-            A CcpCode is case-sensitive and uniquely defines a Compound, also known as ChemComp. Every ChemComp has a CcpCode.
-            Standard Residues have a CcpCode too
-            allowed  format:
-                - sequence containing Standard residue(s) CcpCodes e.g.::
-                    sequence = 'Ala Leu Ala'
-                    sequence = 'Ala, Leu, Ala'
-                    sequence = ['Ala', 'Leu', 'Ala']
-                - sequence containing Non-Standard residue(s) CcpCodes e.g.:
-                    sequence = ['Ala', 'Aba', Orn]
-                - sequence of a small-molecule CcpCodes: (Note you need to import the ChemComp first if not available in the Project. see docs)
-                    sequence = 'Dal'
-                    sequence = ['Atp']
-                    sequence = ['MySmallMolecule']
-
-            not supported:
-                - mix of CcpCodes and 3-Letter-Code either as string or list of strings
-                - sequence of string of CcpCodes without separators. e.g.: sequence = 'AlaAbaOrn'
-        :return:
-        """
-        sequence = sequenceCcpCodes
-        result = self._getSequenceMapTemplate()
-        result[INPUT] = sequence
-        # ~~~~ error checking ~~~~ #
-
-        if isinstance(sequence, str):
-            # Convert to a list of string to allow a unified handling
-            sequence = self._strSequenceToList(sequence, codeLength=-1)
-
-        if not isinstance(sequence, list):
-            error = 'Sequence must be a List to be parsed at this point.'
-            result['error'] = error
-            return result
-
-        if len(sequence) == 0:
-            error = 'Sequence must be a List to be parsed at this point.'
-            result['error'] = error
-            getLogger().warn(error)
-            return result
-
-        # ~~~~ error checking done ~~~~ #
-        # we need to validate
-        result[CCPCODE] = sequence
-        return result
 
     def _getSequenceMapTemplate(self):
         """ The dictionary template used for conversions and parsing"""
         return {
+            ISVALID                   : None,
             INPUT                   : None,
             CODE3LETTER    : [],
             CODE1LETTER    : [],
@@ -370,7 +360,7 @@ class SequenceHandler():
         :param sequence: a list of strings
         :return: bool
         """
-        availableCodes = self.getAvailableCode1Letter(onlyStandard=True)
+        availableCodes = self.getAvailableCode1Letter(standardsOnly=True)
         for item in sequence:
             if item in availableCodes:
                 return True
@@ -382,7 +372,7 @@ class SequenceHandler():
         :param sequence: a list of strings
         :return: bool
         """
-        availableCodes = self.getAvailableCode3Letter(onlyStandard=False)
+        availableCodes = self.getAvailableCode3Letter(standardsOnly=False)
         for item in sequence:
             if item in availableCodes:
                 return True
@@ -394,7 +384,7 @@ class SequenceHandler():
         :param sequence: a list of strings
         :return: bool
         """
-        availableCcpCodes = self.getAvailableCcpCodes(onlyStandard=False)
+        availableCcpCodes = self.getAvailableCcpCodes(standardsOnly=False)
         for item in sequence:
             if item in availableCcpCodes:
                 return True
@@ -448,9 +438,14 @@ class SequenceHandler():
         codes = list(set([i for i in codes if i is not None]))
         return codes
 
-    def _isValidSequence(self, sequence):
+    def _isValidSequence(self, sequence, seqType, standardsOnly=True):
         """Check if the single element in a sequence are known.
         :return bool, list of indexes for the invalid elements"""
-        pass
 
+        invalidIndices = []
+        allowedValues = self.getAvailableCodeByType(seqType, standardsOnly=standardsOnly)
+        for i, code in enumerate(sequence):
+            if code not in allowedValues:
+                invalidIndices.append(i)
+        return len(invalidIndices)==0, invalidIndices
 

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-01 20:05:55 +0000 (Thu, February 01, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-02 09:52:44 +0000 (Fri, February 02, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -279,13 +279,13 @@ class SequenceHandler():
             return result
 
         ##  deal with a CcpCode format.
-        if self._isCcpCodeSequence(sequence):
+        else:
             isValid, errorIndices = self._isValidSequence(sequence, CCPCODE, standardsOnly=False)
             errorMode = self._errorMode
             self._errorMode = 'warning' # only because the conversion to 1-3 letter code is not guaranteed to be available, but still be a valid sequence
             result[CODE1LETTER] = self.ccpCodeToOneCode(sequence, standardsOnly=True)
             result[CODE3LETTER] = self.ccpCodeToThreeCode(sequence, standardsOnly=standardsOnly)
-            result[CCPCODE] = sequence
+            result[CCPCODE] = self._validateCcpCode(sequence)
             self._errorMode = errorMode
             result[ISVALID] = isValid
             result[ERRORS] = errorIndices
@@ -296,13 +296,13 @@ class SequenceHandler():
     def _getSequenceMapTemplate(self):
         """ The dictionary template used for conversions and parsing"""
         return {
-            ISVALID                   : None,
+            ISVALID                 : False,
             INPUT                   : None,
             CODE3LETTER    : [],
             CODE1LETTER    : [],
             CCPCODE            : [],
             MOLTYPE             : self.moleculeType,
-            ERRORS               : None,
+            ERRORS               : [],
             }
 
     def _sequenceConversionBase(self, sequence, inputType, outputType, standardsOnly=True) -> list:
@@ -378,17 +378,20 @@ class SequenceHandler():
                 return True
         return False
 
-    def _isCcpCodeSequence(self, sequence:list):
+    def _validateCcpCode(self, sequence:list):
         """
        it is a CcpCode sequence  if at least one code is present in the list of available CcpCodes
         :param sequence: a list of strings
         :return: bool
         """
         availableCcpCodes = self.getAvailableCcpCodes(standardsOnly=False)
+        curatedSequence = []
         for item in sequence:
             if item in availableCcpCodes:
-                return True
-        return False
+                curatedSequence.append(item)
+            else:
+                curatedSequence.append(None)
+        return curatedSequence
 
     def _strContainsSpacesCommas(self, string):
         """

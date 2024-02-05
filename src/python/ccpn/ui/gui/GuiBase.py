@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-05 12:07:04 +0000 (Mon, February 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-05 14:45:33 +0000 (Mon, February 05, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -156,6 +156,9 @@ class GuiBase(object):
         _fillRecentProjectsMenu in GuiMainWindow
 
         """
+        app = self
+        gui = self.ui
+
         self._menuSpec = ms = []
 
         self._menuSpec.extend([
@@ -174,7 +177,7 @@ class GuiBase(object):
             ("Import", (("Nef File", self._importNefCallback, [('shortcut', 'in'), ('enabled', True)]),
                         ("NmrStar File", self._loadNMRStarFileCallback, [('shortcut', 'bi')]),
                         )),
-            ("Export", (("Nef File", self._exportNEF, [('shortcut', 'ex'), ('enabled', True)]),
+            ("Export", (("Nef File", app._exportNEF, [('shortcut', 'ex'), ('enabled', True)]),
                         )),
             (),
             ("Layout", (("Save", self._saveLayoutCallback, [('enabled', True)]),
@@ -197,8 +200,8 @@ class GuiBase(object):
         ),
 
         ('Edit', [
-            ("Undo", self.undo, [('shortcut', '⌃z')]),  # Unicode U+2303, NOT the carrot on your keyboard.
-            ("Redo", self.redo, [('shortcut', '⌃y')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+            ("Undo", app.undo, [('shortcut', '⌃z')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+            ("Redo", app.redo, [('shortcut', '⌃y')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             (),
 
             ("Cut", self._nyi, [('shortcut', '⌃x'), ('enabled', False)]),

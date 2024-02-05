@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-01-24 17:57:19 +0000 (Wed, January 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-05 14:45:33 +0000 (Mon, February 05, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -169,38 +169,57 @@ class Framework(NotifierBase, GuiBase):
         self._plugins = []  # Hack for now, how should we store these?
         # used in GuiMainWindow by startPlugin()
 
-        # set to True to override the read-only status of a project
-        #   required to use save/saveAs but keep the project.readOnly status until the next load
-        self._saveOverrideState = False
+        # _echoBlocking context manager
+        self._echoBlocking = 0
 
         #-----------------------------------------------------------------------------------------
         # Initialisations
         #-----------------------------------------------------------------------------------------
 
-        self._created = datetime.now().strftime("%H%M")  # adds the app creation time to the end of the logger filename
-
         self.args = args
 
-        # Blocking level for command echo and logging; required here because _echoBlocking init is required
-        self._echoBlocking = int(getattr(self.args, 'noDebugLogging', False))
-        self._enableLoggingToConsole = True
+        # set to True to override the read-only status of a project
+        #   required to use save/saveAs but keep the project.readOnly status until the next load
+        self._saveOverrideState = False
+
+        self._created = datetime.now().strftime("%H%M")  # adds the app creation time to the end of the logger filename
 
         # NOTE:ED - what is revision for? there are no uses and causes a new error for sphinx documentation unless a string
         # self.revision = Version.revision
 
-        self.useFileLogger = not getattr(self.args, 'noLogging', False)
+        # Process info
+        self._process = getProcess()
 
-        # map to 0-3, with 0 no debug
+        # Create a temporary directory; Need to hold on to the original temp-file object, as otherwise
+        # gets garbage collected. Access path name by using the "name" attribute.
+        self._temporaryDirectory = tempfile.TemporaryDirectory(prefix='CcpNmr_')
+
+        # Debugging: map to 0-3, with 0 no debug
         _level = ([self.args.debug,
                    self.args.debug2,
                    self.args.debug3 or self.args.debug3_backup_thread,
                    True].index(True) + 1) % 4
         self.setDebug(_level)
 
+        # Logging: TODO: clean up these definitions and options
+        # Optionally increase blocking level for command echo and logging
+        if getattr(self.args, 'noDebugLogging', False):
+            self._increaseNotificationBlocking()
+        self._enableLoggingToConsole = True
+        self._useFileLogger = True
+        if getattr(self.args, 'noLogging', False):
+            self._useFileLogger = False
+        logger.disabled = getattr(self.args, 'noEchoLogging', False)  # overrides noDebugLogging
+        self._ccpnLogging = getattr(self.args, 'ccpnLogging', False)
+
+        # Preferences:
         self.preferences = Preferences(application=self)
         if not self.args.skipUserPreferences:
             sys.stderr.write('==> Getting user preferences\n')
             self.preferences._getUserPreferences()
+
+        # language; (requires self.args and self.preferences)
+        self._language = self._setLanguage()
 
         self.layout = None  # initialised by self._getUserLayout
 
@@ -211,41 +230,31 @@ class Framework(NotifierBase, GuiBase):
         # self._fontSettings = None
         # self._menuSpec = None
 
-        logger.disabled = getattr(self.args, 'noEchoLogging', False)  # overrides noDebugLogging
-
-        # Process info
-        self._process = getProcess()
-
+        # set by _updateAutoBackup(), called from  _startApplication()
         self._autoBackupThread = None
 
         self._tip_of_the_day = None
         self._initial_show_timer = None
         self._key_concepts = None
 
+        # initialised in _startApplication
         self._registrationDict = {}
 
-        self._setLanguage()
-
-        self._experimentClassifications = None  # initialised in _startApplication once a project has loaded
+        # initialised in _startApplication once a project has loaded
+        self._experimentClassifications = None
 
         self._disableUndoException = getattr(self.args, 'disableUndoException', False)
         self._disableModuleException = getattr(self.args, 'disableModuleException', False)
         self._disableQueueException = getattr(self.args, 'disableQueueException', False)
-        self._readOnly = getattr(self.args, 'readOnly', False)
-        self._ccpnLogging = getattr(self.args, 'ccpnLogging', False)
 
-        # Create a temporary directory; Need to hold on to the original temp-file object, as otherwise
-        # gets garbage collected. Access path name by using the "name" attribute.
-        self._temporaryDirectory = tempfile.TemporaryDirectory(prefix='CcpNmr_')
+        self._readOnly = getattr(self.args, 'readOnly', False)
 
         # register dataLoaders for the first and only time
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders
-
         self._dataLoaders = getDataLoaders()
 
         # register SpectrumDataSource formats for the first and only time
         from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
-
         self._spectrumDataSourceFormats = getDataFormats()
 
         # Resources
@@ -648,17 +657,22 @@ class Framework(NotifierBase, GuiBase):
         self.preferences._saveUserPreferences()
 
     def _setLanguage(self):
-        # Language, check for command line override, or use preferences
+        """
+        Set and return language, check for command line override, or use preferences
+        :return: language
+        """
         if self.args.language:
             language = self.args.language
         elif self.preferences.general.language:
             language = self.preferences.general.language
         else:
             language = defaultLanguage
-        if not translator.setLanguage(language):
-            self.preferences.general.language = language
+
+        translator.setLanguage(language)
         # translator.setDebug(True)
-        sys.stderr.write('==> Language set to "%s"\n' % translator._language)
+
+        sys.stderr.write('==> Language set to "%s"\n' % language)
+        return language
 
     @staticmethod
     def _cleanGarbageCollector():
@@ -2465,7 +2479,6 @@ def main():
 
     container = ApplicationContainer()
     container.register(application)
-    application.useFileLogger = True
 
     # show the mainWindow
     application.start()

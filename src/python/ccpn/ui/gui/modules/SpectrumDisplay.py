@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-01-24 16:54:54 +0000 (Wed, January 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-05 16:03:43 +0000 (Mon, February 05, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -90,8 +90,9 @@ class SpectrumDisplay1d(SpectrumDisplay, GuiSpectrumDisplay):
         """
         getLogger().debug(f'SpectrumDisplay1d>> project: {project}, project._mainWindow: {project._mainWindow}')
         SpectrumDisplay.__init__(self, project, wrappedData)
-        # project has _mainWindow
-        GuiSpectrumDisplay.__init__(self, mainWindow=project._mainWindow, useScrollArea=True)
+        # project (on restore) or ui (on newSpectrumDisplay) has _mainWindow
+        _mainWindow = project._mainWindow or project.application.ui.mainWindow
+        GuiSpectrumDisplay.__init__(self, mainWindow=_mainWindow, useScrollArea=True)
 
 
 class SpectrumDisplayNd(SpectrumDisplay, GuiSpectrumDisplay):
@@ -137,8 +138,9 @@ class SpectrumDisplayNd(SpectrumDisplay, GuiSpectrumDisplay):
         """
         getLogger().debug(f'SpectrumDisplayNd>> project: {project}, project._mainWindow: {project._mainWindow}')
         SpectrumDisplay.__init__(self, project, wrappedData)
-        # project has _mainWindow
-        GuiSpectrumDisplay.__init__(self, mainWindow=project._mainWindow, useScrollArea=True)
+        # project (on restore) or ui (on newSpectrumDisplay) has _mainWindow
+        _mainWindow = project._mainWindow or project.application.ui.mainWindow
+        GuiSpectrumDisplay.__init__(self, mainWindow=_mainWindow, useScrollArea=True)
 
     # Expose some methods for the nD case
 

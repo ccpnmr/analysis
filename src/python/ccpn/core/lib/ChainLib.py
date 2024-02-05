@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-05 16:01:25 +0000 (Mon, February 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-05 18:33:10 +0000 (Mon, February 05, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -29,6 +29,7 @@ import re
 from ccpn.util.Logging import getLogger
 import textwrap
 import warnings
+import pandas as pd
 
 # definitions as they appear in the dataframe and in the underlining objects
 CODE1LETTER =  'code1Letter'
@@ -451,3 +452,14 @@ class SequenceHandler():
                 invalidIndices.append(i)
         return len(invalidIndices)==0, invalidIndices
 
+
+def _copySequenceToClipboard(sequenceMap, codeType, separatorType):
+
+    if not sequenceMap.get(ISVALID):
+        getLogger().warn(f'Cannot copy Sequence as {codeType}. Inspect: {sequenceMap}')
+        return
+
+    sequence = sequenceMap.get(codeType, '')
+    values = separatorType.join(sequence)
+    df = pd.DataFrame([values])
+    df.to_clipboard(index=False, header=False)

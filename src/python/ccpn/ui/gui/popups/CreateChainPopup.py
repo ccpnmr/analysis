@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-05 17:19:49 +0000 (Mon, February 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-05 18:33:10 +0000 (Mon, February 05, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -53,7 +53,7 @@ from ccpn.ui.gui.popups.Dialog import _verifyPopupApply
 from ccpn.core.lib.ContextManagers import queueStateChange
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from PyQt5.QtCore import Qt
-from ccpn.core.lib.ChainLib import SequenceHandler, CCPCODE, CODE1LETTER, CODE3LETTER, ISVALID, ISSTANDARD, INPUT, ERRORS
+from ccpn.core.lib.ChainLib import SequenceHandler, CCPCODE, CODE1LETTER, CODE3LETTER, ISVALID, ISSTANDARD, INPUT, ERRORS, _copySequenceToClipboard
 from ccpn.framework.Application import getProject
 from bs4 import BeautifulSoup
 from PyQt5.QtCore import pyqtSignal, Qt
@@ -74,16 +74,15 @@ def divideChunks(l, n):
   for i in range(0, len(l), n):
     yield l[i:i + n]
 
-
 class _SequenceTextEditorBase(TextEditor):
     textChangedSignal = pyqtSignal()
     _codeType = CODE1LETTER
     _plainTextSeparator = ''
     demoSequence = 'ABCD'
     extraContextMenuActions = {
-        'Copy Selected as 1LetterCodes' : { 'callback':None, 'enabled':True},
-        'Copy Selected as 3LetterCodes': {'callback': None, 'enabled': True},
-        'Copy Selected as CcpCodes': {'callback': None, 'enabled': True},
+        'Copy all to clipboard as 1LetterCodes' : { 'codeType':CODE1LETTER, 'separatorType': '', 'enabled':True},
+        'Copy all to clipboard as 3LetterCodes': {'codeType':CODE3LETTER, 'separatorType':' ', 'enabled': True},
+        'Copy all to clipboard as CcpCodes': {'codeType':CCPCODE, 'separatorType':' ',  'enabled': True},
         }
 
     def __init__(self, parent, parentPopup, maxColumns=10,  callback=None,  **kwargs):
@@ -123,7 +122,7 @@ class _SequenceTextEditorBase(TextEditor):
         if self._codeType in [CODE1LETTER, CODE3LETTER]:
             sequence = sequence.upper()
         sequenceMap = self._parseSequence(sequence)
-        formattedSequence = sequenceMap.get(self._codeType)
+        formattedSequence = sequenceMap.get(self._codeType, '')
         sequence = self._plainTextSeparator.join(formattedSequence)
         self.setText(sequence)
 
@@ -257,22 +256,20 @@ class _SequenceTextEditorBase(TextEditor):
         self.customContextMenu.addActions(self.standardContextMenu.actions())  # Add standard actions
         self.customContextMenu.addSeparator()
         for key, values in self.extraContextMenuActions.items():
-            menu.addItem(text=key, callback=values.get('callback'), enabled=values.get('enabled'))
+            codeType = values.get('codeType')
+            separatorType = values.get('separatorType','')
+            sequenceMap = self.getSequenceMap()
+            enabled = values.get('enabled')
+            if not self._isValidSequence() or not self.getSequence():
+                enabled = False
+            callback = partial(_copySequenceToClipboard, sequenceMap, codeType, separatorType)
+            menu.addItem(text=key, callback=callback, enabled=enabled)
         self.customContextMenu.exec_(QtGui.QCursor.pos())
 
     def _editingFinishedCallback(self, *args, **kwargs):
         if self.callback:
             sequenceMap = self.getSequenceMap()
             self.callback(sequenceMap)
-
-    def _copySelectedAs1CodeLetter(self):
-        pass
-
-    def _copySelectedAs3CodeLetter(self):
-        pass
-
-    def _copySelectedAsCcpCode(self):
-        pass
 
     def keyPressEvent(self, event):
 
@@ -291,12 +288,6 @@ class _1LetterCodeSequenceEditor(_SequenceTextEditorBase):
     _name = ONELETTERCODE
     demoSequence = '''Standard residues only: ALSTWYA'''
 
-    extraContextMenuActions = {
-        'Copy Selected as 1LetterCodes': {'callback': None, 'enabled': True},
-        'Copy Selected as 3LetterCodes': {'callback': None, 'enabled': True},
-        'Copy Selected as CcpCodes'    : {'callback': None, 'enabled': True},
-        }
-
     def  _parseSequence(self, sequence):
         """Parse the sequence ensuring is alwyas a one-Letter code .
         :param sequence: str
@@ -310,7 +301,7 @@ class _1LetterCodeSequenceEditor(_SequenceTextEditorBase):
 class _3LetterCodeSequenceEditor(_SequenceTextEditorBase):
     _codeType = CODE3LETTER
     _name = THREELETTERCODE
-    demoSequence = '''Standard residues only: ALA ARG ASN'''
+    demoSequence = '''Three letter codes space or comma-separated. E.G.:  ALA ARG ASN'''
     _plainTextSeparator = ' '
 
     def  _parseSequence(self, sequence):
@@ -331,9 +322,7 @@ class _CcpCodeSequenceEditor(_SequenceTextEditorBase):
     _plainTextSeparator = ' '
 
     demoSequence = '''Any CcpCode: \n Ala Arg Ser or \n Ala Arg Ser Atp or \n MyCcpCode etc '''
-    extraContextMenuActions = {
-        'Copy Selected as CcpCodes'    : {'callback': None, 'enabled': True},
-        }
+
 
     def  _parseSequence(self, sequence):
         """Parse the sequence ensuring is alwyas a one-Letter code .

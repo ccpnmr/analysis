@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-02 09:52:44 +0000 (Fri, February 02, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-05 17:19:48 +0000 (Mon, February 05, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -649,7 +649,7 @@ def _cloneChain(self: Chain, shortName: str = None):
     from ccpn.core.lib.ChainLib import SequenceHandler
     chain = self
     sequenceHandler = SequenceHandler(chain.project, moleculeType=chain.chainType)
-    standardCcpCodes = sequenceHandler.getAvailableCcpCodes(onlyStandard=True)
+    standardCcpCodes = sequenceHandler.getAvailableCcpCodes(standardsOnly=True)
     ccpCodes = chain.sequenceCcpCodes
     nonStandardResidues = set()
     for ccpCode in ccpCodes:

@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-05 16:01:25 +0000 (Mon, February 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-05 17:19:49 +0000 (Mon, February 05, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -559,6 +559,7 @@ class CreateChainPopup(AttributeEditorPopupABC):
                 self.addNonstereoAtomsW.set(self.obj.addNonstereoAtoms)
                 self.addPseudoAtomsW.set(self.obj.addPseudoAtoms)
                 self.makeCyclicPolymer.set(self.obj.isCyclic)
+            self._reformatSequence()
 
     def _isValidSequence(self):
         """Return True if the Sequence in the current editor can create a valid chain """

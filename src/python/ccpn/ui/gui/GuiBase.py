@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-01-26 13:08:28 +0000 (Fri, January 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-05 12:07:04 +0000 (Mon, February 05, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -75,7 +75,7 @@ class GuiBase(object):
 
         # GWV: this is not ideal and needs to move into the Gui class
         self._menuSpec = None
-        self._setupMenus()
+        # self._setupMenus()  # can't do here
 
     def _setupMenus(self):
         """Set up the menu specification.
@@ -158,7 +158,9 @@ class GuiBase(object):
         """
         self._menuSpec = ms = []
 
-        ms.append(('File', [
+        self._menuSpec.extend([
+
+        ('File', [
             ("New", self._newProjectCallback, [('shortcut', '⌃n')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             (),
             ("Open...", self._openProjectCallback, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the carrot on your keyboard.
@@ -192,9 +194,9 @@ class GuiBase(object):
             (),
             ("Quit", self._quitCallback, [('shortcut', '⌃q')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ]
-                   ))
+        ),
 
-        ms.append(('Edit', [
+        ('Edit', [
             ("Undo", self.undo, [('shortcut', '⌃z')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ("Redo", self.redo, [('shortcut', '⌃y')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             (),
@@ -204,9 +206,9 @@ class GuiBase(object):
             ("Paste", self._nyi, [('shortcut', '⌃v'), ('enabled', False)]),
             ("Select all", self._nyi, [('shortcut', '⌃a'), ('enabled', False)]),
             ]
-                   ))
+        ),
 
-        ms.append(('View', [
+        ('View', [
             ("Chemical Shift Table", partial(self.showChemicalShiftTable, selectFirstItem=True), [('shortcut', 'ct')]),
             ("NmrResidue Table", partial(self.showNmrResidueTable, selectFirstItem=True), [('shortcut', 'nt')]),
             ("Residue Table", partial(self.showResidueTable, selectFirstItem=True)),
@@ -254,9 +256,9 @@ class GuiBase(object):
             ("Python Console", self._toggleConsoleCallback, [('shortcut', '  '),
                                                              ])
             ]
-                   ))
+        ),
 
-        ms.append(('Spectrum', [
+        ('Spectrum', [
             ("Load Spectra...", self._loadSpectraCallback, [('shortcut', 'ls')]),
             (),
             # ("Spectrum Groups...", self.showSpectrumGroupsPopup, [('shortcut', 'ss')]), # multiple edit temporarly disabled
@@ -284,9 +286,9 @@ class GuiBase(object):
             (),
             ("Print to File...", self.showPrintSpectrumDisplayPopup, [('shortcut', '⌃p')]),
             ]
-                   ))
+        ),
 
-        ms.append(('Molecules', [
+        ('Molecules', [
             ("Load ChemComp from Xml...", self._loadDataCallback),
             (),
             ("Chain from FASTA...", self._loadDataCallback),
@@ -300,9 +302,9 @@ class GuiBase(object):
             (),
             ("Edit Molecular Bonds", self.showMolecularBondsPopup, ),
             ]
-                   ))
+        ),
 
-        ms.append(('Macro', [
+        ('Macro', [
             ("New Macro Editor", self._showMacroEditorCallback, [('shortcut', 'nm')]),
             (),
             ("Open User Macro...", self._openMacroCallback, [('shortcut', 'om')]),
@@ -317,28 +319,31 @@ class GuiBase(object):
             (),
             ("Define Macro Shortcuts...", self.defineUserShortcuts, [('shortcut', 'du')]),
             ]
-                   ))
+        ),
 
-        ms.append(('Plugins', [
+        ('Plugins', [
             (CCPNPLUGINSMENU, ()),
             (PLUGINSMENU, ()),
             ]
-                   ))
+        ),
+        ])
 
         if self._isInDebugMode:
-            ms.append(('Development', [
+            ms.append(
+        ('Development', [
                 ("Set debug off", partial(self.setDebug, 0)),
                 ("Set debug level 1", partial(self.setDebug, 1)),
                 ("Set debug level 2", partial(self.setDebug, 2)),
                 ("Set debug level 3", partial(self.setDebug, 3)),
                 ]
-                       ))
+        ))
 
-        ms.append(('Help', [
+        ms.append(
+        ('Help', [
             (TUTORIALSMENU, ([
-                ("None", None, [('checkable', True),
-                                ('checked', False)])
-                ])),
+                ("None", None, [('checkable', True), ('checked', False)])
+                ])
+             ),
             ("Show Tip of the Day", partial(self._displayTipOfTheDay, standalone=True)),
             ("Key Concepts", self._displayKeyConcepts),
             ("Show Shortcuts", self._showShortcuts),
@@ -356,7 +361,7 @@ class GuiBase(object):
             (),
             ("About CcpNmr V3...", self._showAboutPopup),
             ]
-                   ))
+        ))
 
     # GWV 25/1/24: moved to Gui.py
     # def _setColourSchemeAndStyleSheet(self):

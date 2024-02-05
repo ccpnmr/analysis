@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-01-25 19:35:37 +0000 (Thu, January 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-05 12:07:04 +0000 (Mon, February 05, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -453,8 +453,10 @@ def setColourScheme(colourScheme):
 
 def setDefaultColourScheme():
     """Conveniance to set default colour scheme
+    :return the Default colour scheme
     """
     setColourScheme(DEFAULT)
+    return DEFAULT
 
 
 @singleton

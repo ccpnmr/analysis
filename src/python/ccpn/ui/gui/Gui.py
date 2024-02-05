@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-01-26 13:08:28 +0000 (Fri, January 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-05 12:07:04 +0000 (Mon, February 05, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -178,6 +178,8 @@ class Gui(Ui):
         self._styleSheet = None
         self._colourScheme = None
         self._setColourSchemeAndStyleSheet(application.args, application.preferences)
+
+        application._setupMenus()
 
         self._initQtApp()
 

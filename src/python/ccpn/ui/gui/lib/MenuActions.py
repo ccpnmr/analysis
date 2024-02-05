@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-05 17:19:49 +0000 (Mon, February 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-05 17:32:46 +0000 (Mon, February 05, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -999,7 +999,7 @@ class _openItemChainTable(OpenItemABC):
             popup.setWindowTitle(f'New Chain from {obj.pid}')
             # popup.obj.compoundName = obj.compoundName #this could be set but needs to ensure a unique name
             popup.obj.comment = obj.comment
-            popup.obj.startNumber = obj.startingSequenceCode
+            popup.obj.startNumber = obj.startNumber
             popup.obj.sequenceCcpCodes = obj.sequenceCcpCodes
             popup.obj.isCyclic = obj.isCyclic
             popup.obj.molType = obj.chainType

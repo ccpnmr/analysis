@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-05 18:33:10 +0000 (Mon, February 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-05 18:40:46 +0000 (Mon, February 05, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -28,36 +28,28 @@ __date__ = "$Date: 2017-07-04 15:21:16 +0000 (Tue, July 04, 2017) $"
 # Start of code
 #=========================================================================================
 
-import string
-import numpy as np
-from functools import partial
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.core.lib.MoleculeLib import _nextChainCode
-import textwrap
-import re
 import pandas as pd
+from bs4 import BeautifulSoup
+from functools import partial
+from ccpn.util.AttrDict import AttrDict
+from ccpn.framework.Application import getProject
 from ccpn.core.Chain import Chain
+from ccpn.core.lib.ChainLib import SequenceHandler, CCPCODE, CODE1LETTER, CODE3LETTER, ISVALID, ISSTANDARD, INPUT, ERRORS, _copySequenceToClipboard
+from ccpn.core.lib.MoleculeLib import _nextChainCode
+from ccpn.core.lib.ContextManagers import queueStateChange
+from PyQt5 import QtGui
+from PyQt5.QtCore import pyqtSignal, Qt
+from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
+from ccpn.ui.gui.popups.Dialog import _verifyPopupApply
+from ccpn.ui.gui.widgets.Menu import Menu
+from ccpn.ui.gui.widgets.Tabs import Tabs
+from ccpn.ui.gui.widgets.TextEditor import TextEditor
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
-from ccpn.ui.gui.widgets.Menu import Menu
-from ccpn.ui.gui.widgets.Tabs import Tabs
-from PyQt5 import QtGui
-from ccpn.ui.gui.widgets.TextEditor import TextEditor
-from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
-from ccpn.util.AttrDict import AttrDict
-from ccpn.ui.gui.popups.Dialog import _verifyPopupApply
-from ccpn.core.lib.ContextManagers import queueStateChange
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from PyQt5.QtCore import Qt
-from ccpn.core.lib.ChainLib import SequenceHandler, CCPCODE, CODE1LETTER, CODE3LETTER, ISVALID, ISSTANDARD, INPUT, ERRORS, _copySequenceToClipboard
-from ccpn.framework.Application import getProject
-from bs4 import BeautifulSoup
-from PyQt5.QtCore import pyqtSignal, Qt
-from PyQt5.QtGui import QTextCharFormat
 
 DefaultAddAtomGroups = True
 DefaultAddPseudoAtoms = False
@@ -289,7 +281,7 @@ class _1LetterCodeSequenceEditor(_SequenceTextEditorBase):
     demoSequence = '''Standard residues only: ALSTWYA'''
 
     def  _parseSequence(self, sequence):
-        """Parse the sequence ensuring is alwyas a one-Letter code .
+        """Parse the sequence ensuring is always a one-Letter code .
         :param sequence: str
         :return dict
         """
@@ -468,7 +460,7 @@ class CreateChainPopup(AttributeEditorPopupABC):
                                                       minimumHeight=minimumHeightEditors)
         row += 1
         self.sequenceButtons = ButtonList(self.mainWidget, texts=['',''],
-                                          tipTexts=['Reformat the sequence in a single block','Reformat the sequence in blocks of 10'],
+                                          tipTexts=['Reformat the sequence as plain text block','Reformat and validate the sequence in blocks of 10'],
                                           icons=['icons/sequenceBy1.png', 'icons/ReFormat.png'], callbacks=[self._setPlainSequence, self._reformatSequence],
                                           hAlign='right',   grid=(row, 1), gridSpan=(1, 3))
 

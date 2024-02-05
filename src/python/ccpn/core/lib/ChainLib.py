@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-02 09:52:44 +0000 (Fri, February 02, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-05 16:01:25 +0000 (Mon, February 05, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -53,11 +53,12 @@ class SequenceHandler():
     errorMode: str. Raise or warn
     """
 
-    def __init__(self, project, moleculeType:str, errorMode:str='warn'):
+    def __init__(self, project, moleculeType:str, errorMode:str='raise', supressWarning=False):
         self.project = project
         self._chemCompsData = self.project._chemCompsData.copy() # needs to be a copy to ensure we don't modify the original dataframe
         self.setMoleculeType(moleculeType)
         self._errorMode = errorMode
+        self._supressWarning = supressWarning
 
 
     @property
@@ -237,10 +238,7 @@ class SequenceHandler():
         :return: dict
         """
         result = self._getSequenceMapTemplate()
-        result[INPUT] = sequence
-
         # ~~~~ error checking ~~~~ #
-
         if isinstance(sequence, str):
             # Convert to a list of string to allow a unified handling
             sequence = self._strSequenceToList(sequence)
@@ -250,12 +248,11 @@ class SequenceHandler():
             raise RuntimeError(error)
 
         if len(sequence) == 0:
-            error = 'Sequence is empty'
-            getLogger().warn(error)
+            result[ISVALID] = True ## This will allow to create empty chains
             return result
 
         # ~~~~ error checking done ~~~~ #
-        isValid = False
+        result[INPUT] = sequence
         ##  deal with 1CodeLetter
         is1Code = self._isCode1LetterSequence(sequence)
         if is1Code:
@@ -281,14 +278,15 @@ class SequenceHandler():
         ##  deal with a CcpCode format.
         else:
             isValid, errorIndices = self._isValidSequence(sequence, CCPCODE, standardsOnly=False)
-            errorMode = self._errorMode
-            self._errorMode = 'warning' # only because the conversion to 1-3 letter code is not guaranteed to be available, but still be a valid sequence
-            result[CODE1LETTER] = self.ccpCodeToOneCode(sequence, standardsOnly=True)
-            result[CODE3LETTER] = self.ccpCodeToThreeCode(sequence, standardsOnly=standardsOnly)
             result[CCPCODE] = self._validateCcpCode(sequence)
-            self._errorMode = errorMode
             result[ISVALID] = isValid
             result[ERRORS] = errorIndices
+            ## temporarily switch to warning mode to try the conversion to 1-3 letter code.
+            errorMode = self._errorMode
+            self._errorMode = 'warning' # only because the conversion to 1-3 letter code is not guaranteed to be available, but still be a valid sequence
+            result[CODE1LETTER] = self.ccpCodeToOneCode(sequence, standardsOnly=True) #1letter is only for standards!
+            result[CODE3LETTER] = self.ccpCodeToThreeCode(sequence, standardsOnly=standardsOnly)
+            self._errorMode = errorMode
 
         return result
 
@@ -339,7 +337,8 @@ class SequenceHandler():
                     raise RuntimeError(msg)
                 else:
                     convertedCode = None
-                    warnings.warn(msg)
+                    if not self._supressWarning:
+                        warnings.warn(msg)
             else:
                 convertedCode = foundDf[columnTarget].values[-1]
             result.append(convertedCode)

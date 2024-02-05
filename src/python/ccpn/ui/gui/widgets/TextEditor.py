@@ -4,9 +4,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-05 17:01:42 +0100 (Thu, October 05, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2024-02-05 16:01:25 +0000 (Mon, February 05, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -49,6 +49,7 @@ ATTRIBUTE_HEIGHT_LIST = ('_minimumHeight')
 class TextEditor(QtWidgets.QTextEdit, Base):
     editingFinished = QtCore.pyqtSignal()
     receivedFocus = QtCore.pyqtSignal()
+    mouseLeft = QtCore.pyqtSignal()
 
     _minimumHeight = 25
     MINIMUM_CHARS_WIDTH = 8
@@ -147,6 +148,10 @@ class TextEditor(QtWidgets.QTextEdit, Base):
             self._anchor = None
 
         super().mouseReleaseEvent(e)
+
+    def leaveEvent(self, event):
+        self.mouseLeft.emit()
+        super().leaveEvent(event)
 
     def _toggleWordWrap(self):
         wordWrap = (self.lineWrapMode() != QtWidgets.QTextEdit.WidgetWidth)

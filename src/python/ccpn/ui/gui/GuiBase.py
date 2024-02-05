@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-05 14:45:33 +0000 (Mon, February 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-05 16:02:48 +0000 (Mon, February 05, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -177,7 +177,7 @@ class GuiBase(object):
             ("Import", (("Nef File", self._importNefCallback, [('shortcut', 'in'), ('enabled', True)]),
                         ("NmrStar File", self._loadNMRStarFileCallback, [('shortcut', 'bi')]),
                         )),
-            ("Export", (("Nef File", app._exportNEF, [('shortcut', 'ex'), ('enabled', True)]),
+            ("Export", (("Nef File", self._exportNEFCallback, [('shortcut', 'ex'), ('enabled', True)]),
                         )),
             (),
             ("Layout", (("Save", self._saveLayoutCallback, [('enabled', True)]),
@@ -234,23 +234,23 @@ class GuiBase(object):
             # ("Chemical Shift Mapping (alpha)", self.showChemicalShiftMappingModule, [('shortcut', 'ma')]),
             # ("Relaxation (alpha)", self.showRelaxationModule, [('shortcut', 're')]),
             (),
-            ("In Active Spectrum Display", (("Show/Hide Toolbar", self.toggleToolbar, [('shortcut', 'tb')]),
-                                            ("Show/Hide Spectrum Toolbar", self.toggleSpectrumToolbar, [('shortcut', 'sb')]),
-                                            ("Show/Hide Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')]),
+            ("In Active Spectrum Display", (("Show/Hide Toolbar", self._toggleToolbarCallback, [('shortcut', 'tb')]),
+                                            ("Show/Hide Spectrum Toolbar", self._toggleSpectrumToolbarCallback, [('shortcut', 'sb')]),
+                                            ("Show/Hide Phasing Console", self._togglePhaseConsoleCallback, [('shortcut', 'pc')]),
                                             (),
-                                            ("Set Zoom...", self._setZoomPopup, [('shortcut', 'sz')]),
-                                            # ("Reset Zoom", self.resetZoom, [('shortcut', 'rz')]),
+                                            ("Set Zoom...", self._setZoomCallback, [('shortcut', 'sz')]),
+                                            # ("Reset Zoom", self._resetZoomCallback, [('shortcut', 'rz')]),
                                             (),
-                                            ("New SpectrumDisplay with New Strip, Same Axes", self.copyStrip, []),
+                                            ("New SpectrumDisplay with New Strip, Same Axes", self._copyStripCallback, []),
                                             (" .. with X-Y Axes Flipped", self._flipXYAxisCallback, [('shortcut', 'xy')]),
                                             (" .. with X-Z Axes Flipped", self._flipXZAxisCallback, [('shortcut', 'xz')]),
                                             (" .. with Y-Z Axes Flipped", self._flipYZAxisCallback, [('shortcut', 'yz')]),
-                                            (" .. with Axes Flipped...", self.showFlipArbitraryAxisPopup, [('shortcut', 'fa')]),
+                                            (" .. with Axes Flipped...", self._flipArbitraryAxisCallback, [('shortcut', 'fa')]),
                                             (),
-                                            ("Auto-arrange Labels", self.arrangeLabels, [('shortcut', 'av')]),
-                                            ("Reset Labels", self.resetLabels, [('shortcut', 'rv')]),
+                                            ("Auto-arrange Labels", self._arrangeLabelsCallback, [('shortcut', 'av')]),
+                                            ("Reset Labels", self._resetLabelsCallback, [('shortcut', 'rv')]),
                                             )),
-            ("Show/Hide Crosshairs", self.toggleCrosshairAll, [('shortcut', 'ch')]),
+            ("Show/Hide Crosshairs", self._toggleCrosshairCallback, [('shortcut', 'ch')]),
             (),
             (SHOWMODULESMENU, ([
                 ("None", None, [('checkable', True),
@@ -278,7 +278,7 @@ class GuiBase(object):
             # (),
             ("Estimate Peak Volumes...", self.showEstimateVolumesPopup, [('shortcut', 'ev')]),
             ("Estimate Current Peak Volumes", self.showEstimateCurrentVolumesPopup, [('shortcut', 'ec')]),
-            ("Reorder PeakList Axes...", self.showReorderPeakListAxesPopup, [('shortcut', 'rl')]),
+            ("Reorder PeakList Axes...", self._reorderPeakListAxesCallback, [('shortcut', 'rl')]),
             (),
             ("Make Strip Plot...", self.makeStripPlotPopup, [('shortcut', 'sp')]),
 
@@ -331,13 +331,13 @@ class GuiBase(object):
         ),
         ])
 
-        if self._isInDebugMode:
+        if app._isInDebugMode:
             ms.append(
         ('Development', [
-                ("Set debug off", partial(self.setDebug, 0)),
-                ("Set debug level 1", partial(self.setDebug, 1)),
-                ("Set debug level 2", partial(self.setDebug, 2)),
-                ("Set debug level 3", partial(self.setDebug, 3)),
+                ("Set debug off", partial(app.setDebug, 0)),
+                ("Set debug level 1", partial(app.setDebug, 1)),
+                ("Set debug level 2", partial(app.setDebug, 2)),
+                ("Set debug level 3", partial(app.setDebug, 3)),
                 ]
         ))
 
@@ -427,6 +427,43 @@ class GuiBase(object):
         from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
 
         self.ui.loadData(formatFilter=(NefDataLoader.dataFormat,))
+
+    def _exportNEFCallback(self):
+        """
+        Export the current project as a Nef file
+        Temporary routine because I don't know how else to do it yet
+        """
+        from ccpn.ui.gui.popups.ExportNefPopup import ExportNefPopup
+        from ccpn.framework.lib.ccpnNef.CcpnNefIo import NEFEXTENSION
+
+        _path = aPath(self.preferences.general.userWorkingPath or '~').filepath / (self.project.name + NEFEXTENSION)
+        dialog = ExportNefPopup(self.ui.mainWindow,
+                                mainWindow=self.ui.mainWindow,
+                                selectFile=_path,
+                                fileFilter='*.nef',
+                                minimumSize=(400, 550))
+
+        # an exclusion dict comes out of the dialog as it
+        result = dialog.exec_()
+
+        if not result:
+            return
+
+        nefPath = result['filename']
+        flags = result['flags']
+        pidList = result['pidList']
+
+        # flags are skipPrefixes, expandSelection
+        skipPrefixes = flags['skipPrefixes']
+        expandSelection = flags['expandSelection']
+        includeOrphans = flags['includeOrphans']
+
+        self.project.exportNef(nefPath,
+                               overwriteExisting=True,
+                               skipPrefixes=skipPrefixes,
+                               expandSelection=expandSelection,
+                               includeOrphans=includeOrphans,
+                               pidList=pidList)
 
     def _loadNMRStarFileCallback(self):
         """menu callback; use ui.loadData to do the lifting
@@ -569,6 +606,146 @@ class GuiBase(object):
         ok = MessageDialog.showOkCancel(title, _msg, parent=self.mainWindow)
         if ok:
             self.project.copySpectraToProject()
+
+    def _reorderPeakListAxesCallback(self):
+        """
+        Displays Reorder PeakList Axes Popup.
+        """
+        if not self.project.peakLists:
+            getLogger().warning('Reorder PeakList Axes: Project has no peakLists.')
+            MessageDialog.showWarning('Reorder PeakList Axes', 'Project has no peakLists.')
+        else:
+            from ccpn.ui.gui.popups.ReorderPeakListAxes import ReorderPeakListAxes
+
+            popup = ReorderPeakListAxes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+            popup.exec_()
+
+    #-----------------------------------------------------------------------------------------
+    # View -->
+    #-----------------------------------------------------------------------------------------
+
+    def _toggleToolbarCallback(self):
+        if self.current.strip is not None:
+            self.current.strip.spectrumDisplay.toggleToolbar()
+        else:
+            getLogger().warning('Toggle toolbar: No strip selected')
+            MessageDialog.showWarning('Toggle toolbar', 'No strip selected')
+
+    def _toggleSpectrumToolbarCallback(self):
+        if self.current.strip is not None:
+            self.current.strip.spectrumDisplay.toggleSpectrumToolbar()
+        else:
+            getLogger().warning('Toggle spectrum toolbar: No strip selected')
+            MessageDialog.showWarning('Toggle spectrum toolbar', 'No strip selected')
+
+    def _togglePhaseConsoleCallback(self):
+        if self.current.strip is not None:
+            self.current.strip.spectrumDisplay.togglePhaseConsole()
+        else:
+            getLogger().warning('Toggle pahsing console: No strip selected')
+            MessageDialog.showWarning('Toggle phasing console', 'No strip selected')
+
+    def _setZoomCallback(self):
+        if self.current.strip is not None:
+            self.current.strip._setZoomPopup()
+        else:
+            getLogger().warning('Zoom: No strip selected')
+            MessageDialog.showWarning('Zoom', 'No strip selected')
+
+    def _resetZoomCallback(self):
+        if self.current.strip is not None:
+            self.current.strip.resetZoom()
+        else:
+            getLogger().warning('Reset zoom: No strip selected')
+            MessageDialog.showWarning('Reset zoom', 'No strip selected')
+
+    def _copyStripCallback(self):
+        if self.current.strip is not None:
+            self.current.strip.copyStrip()
+        else:
+            getLogger().warning('Copy strip: No strip selected')
+            MessageDialog.showWarning('Copy strip', 'No strip selected')
+
+    def _arrangeLabelsCallback(self):
+        """Auto-arrange the peak/multiplet labels to minimise any overlaps.
+        """
+        if (strp := self.current.strip) is None:
+            getLogger().warning('No strip selected')
+
+        else:
+            strp.spectrumDisplay.arrangeLabels()
+
+    def _resetLabelsCallback(self):
+        """Reset arrangement of peak/multiplet labels.
+        """
+        if (strp := self.current.strip) is None:
+            getLogger().warning('No strip selected')
+
+        else:
+            strp.spectrumDisplay.resetLabels()
+
+    def _flipXYAxisCallback(self):
+        """Callback to flip XY axes
+        """
+        if self.current.strip is not None:
+            self.current.strip.flipXYAxis()
+        else:
+            getLogger().warning('Flip XY axes: No strip selected')
+            MessageDialog.showWarning('Flip XY axes', 'No strip selected')
+
+    def _flipXZAxisCallback(self):
+        """Callback to flip XZ axes
+        """
+        if self.current.strip is not None:
+            self.current.strip.flipXZAxis()
+        else:
+            getLogger().warning('Flip XZ axes: No strip selected')
+            MessageDialog.showWarning('Flip XZ axes', 'No strip selected')
+
+    def _flipYZAxisCallback(self):
+        """Callback to flip YZ axes
+        """
+        if self.current.strip is not None:
+            self.current.strip.flipYZAxis()
+        else:
+            getLogger().warning('Flip YZ axes: No strip selected')
+            MessageDialog.showWarning('Flip YZ axes', 'No strip selected')
+
+    def _flipArbitraryAxisCallback(self, usePosition=False):
+        """Callback to flip arbitrary axes
+        """
+        if (strp := self.current.strip) is None:
+            getLogger().warning('Flip axes: No strip selected')
+            MessageDialog.showWarning('Flip axes', 'No strip selected')
+
+        elif self.current.strip.spectrumDisplay.is1D:
+            getLogger().warning('Flip axes: not permitted on 1D spectra')
+            MessageDialog.showWarning('Flip axes', 'Not permitted on 1D spectra')
+
+        else:
+            from ccpn.ui.gui.popups.CopyStripFlippedAxesPopup import CopyStripFlippedSpectraPopup
+
+            try:
+                mDict = usePosition and self.current.mouseMovedDict[1]
+                positions = [poss[0] if (poss := mDict.get(ax)) else None
+                             for ax in strp.axisCodes] if usePosition else None
+                popup = CopyStripFlippedSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
+                                                     strip=strp, label=strp.id,
+                                                     positions=positions)
+                popup.exec_()
+            except Exception as es:
+                getLogger().warning(f'Cannot show popup: {es}')
+
+    def _toggleConsoleCallback(self):
+        """Toggles whether python console is displayed at bottom of the main window.
+        """
+        self.mainWindow.toggleConsole()
+
+    def _toggleCrosshairCallback(self):
+        """Toggles whether crosshairs are displayed in all windows.
+        """
+        for window in self.project.windows:
+            window.toggleCrosshair()
 
     #-----------------------------------------------------------------------------------------
     # Help -->

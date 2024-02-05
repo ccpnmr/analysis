@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-05 14:45:33 +0000 (Mon, February 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-05 16:02:48 +0000 (Mon, February 05, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1441,42 +1441,43 @@ class Framework(NotifierBase, GuiBase):
 
         return project
 
-    def _exportNEF(self):
-        """
-        Export the current project as a Nef file
-        Temporary routine because I don't know how else to do it yet
-        """
-        from ccpn.ui.gui.popups.ExportNefPopup import ExportNefPopup
-        from ccpn.framework.lib.ccpnNef.CcpnNefIo import NEFEXTENSION
-
-        _path = aPath(self.preferences.general.userWorkingPath or '~').filepath / (self.project.name + NEFEXTENSION)
-        dialog = ExportNefPopup(self.ui.mainWindow,
-                                mainWindow=self.ui.mainWindow,
-                                selectFile=_path,
-                                fileFilter='*.nef',
-                                minimumSize=(400, 550))
-
-        # an exclusion dict comes out of the dialog as it
-        result = dialog.exec_()
-
-        if not result:
-            return
-
-        nefPath = result['filename']
-        flags = result['flags']
-        pidList = result['pidList']
-
-        # flags are skipPrefixes, expandSelection
-        skipPrefixes = flags['skipPrefixes']
-        expandSelection = flags['expandSelection']
-        includeOrphans = flags['includeOrphans']
-
-        self.project.exportNef(nefPath,
-                               overwriteExisting=True,
-                               skipPrefixes=skipPrefixes,
-                               expandSelection=expandSelection,
-                               includeOrphans=includeOrphans,
-                               pidList=pidList)
+    # GWV 5/2/24: moved To GuiBase
+    # def _exportNEF(self):
+    #     """
+    #     Export the current project as a Nef file
+    #     Temporary routine because I don't know how else to do it yet
+    #     """
+    #     from ccpn.ui.gui.popups.ExportNefPopup import ExportNefPopup
+    #     from ccpn.framework.lib.ccpnNef.CcpnNefIo import NEFEXTENSION
+    #
+    #     _path = aPath(self.preferences.general.userWorkingPath or '~').filepath / (self.project.name + NEFEXTENSION)
+    #     dialog = ExportNefPopup(self.ui.mainWindow,
+    #                             mainWindow=self.ui.mainWindow,
+    #                             selectFile=_path,
+    #                             fileFilter='*.nef',
+    #                             minimumSize=(400, 550))
+    #
+    #     # an exclusion dict comes out of the dialog as it
+    #     result = dialog.exec_()
+    #
+    #     if not result:
+    #         return
+    #
+    #     nefPath = result['filename']
+    #     flags = result['flags']
+    #     pidList = result['pidList']
+    #
+    #     # flags are skipPrefixes, expandSelection
+    #     skipPrefixes = flags['skipPrefixes']
+    #     expandSelection = flags['expandSelection']
+    #     includeOrphans = flags['includeOrphans']
+    #
+    #     self.project.exportNef(nefPath,
+    #                            overwriteExisting=True,
+    #                            skipPrefixes=skipPrefixes,
+    #                            expandSelection=expandSelection,
+    #                            includeOrphans=includeOrphans,
+    #                            pidList=pidList)
 
     def _getRecentProjectFiles(self, oldPath=None) -> list:
         """Get and return a list of recent project files, setting reference to
@@ -2196,119 +2197,121 @@ class Framework(NotifierBase, GuiBase):
                                                   )
             exportDialog.exec_()
 
-    def toggleToolbar(self):
-        if self.current.strip is not None:
-            self.current.strip.spectrumDisplay.toggleToolbar()
-        else:
-            getLogger().warning('No strip selected')
+    # GWV 5/2/24:to GuiBase
+    # def toggleToolbar(self):
+    #     if self.current.strip is not None:
+    #         self.current.strip.spectrumDisplay.toggleToolbar()
+    #     else:
+    #         getLogger().warning('No strip selected')
+    #
+    # def toggleSpectrumToolbar(self):
+    #     if self.current.strip is not None:
+    #         self.current.strip.spectrumDisplay.toggleSpectrumToolbar()
+    #     else:
+    #         getLogger().warning('No strip selected')
+    #
+    # def togglePhaseConsole(self):
+    #     if self.current.strip is not None:
+    #         self.current.strip.spectrumDisplay.togglePhaseConsole()
+    #     else:
+    #         getLogger().warning('No strip selected')
+    #
+    # def _setZoomPopup(self):
+    #     if self.current.strip is not None:
+    #         self.current.strip._setZoomPopup()
+    #     else:
+    #         getLogger().warning('No strip selected')
+    #
+    # def resetZoom(self):
+    #     if self.current.strip is not None:
+    #         self.current.strip.resetZoom()
+    #     else:
+    #         getLogger().warning('No strip selected')
+    #
+    # def copyStrip(self):
+    #     if self.current.strip is not None:
+    #         self.current.strip.copyStrip()
+    #     else:
+    #         getLogger().warning('No strip selected')
+    #
+    # def showFlipArbitraryAxisPopup(self, usePosition=False):
+    #     if (strp := self.current.strip) is None:
+    #         getLogger().warning('No strip selected')
+    #
+    #     elif self.current.strip.spectrumDisplay.is1D:
+    #         getLogger().warning('Function not permitted on 1D spectra')
+    #
+    #     else:
+    #         from ccpn.ui.gui.popups.CopyStripFlippedAxesPopup import CopyStripFlippedSpectraPopup
+    #
+    #         try:
+    #             mDict = usePosition and self.current.mouseMovedDict[1]
+    #             positions = [poss[0] if (poss := mDict.get(ax)) else None
+    #                          for ax in strp.axisCodes] if usePosition else None
+    #             popup = CopyStripFlippedSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
+    #                                                  strip=strp, label=strp.id,
+    #                                                  positions=positions)
+    #             popup.exec_()
+    #         except Exception as es:
+    #             getLogger().warning(f'Cannot show popup: {es}')
+    #
+    # def arrangeLabels(self):
+    #     """Auto-arrange the peak/multiplet labels to minimise any overlaps.
+    #     """
+    #     if (strp := self.current.strip) is None:
+    #         getLogger().warning('No strip selected')
+    #
+    #     else:
+    #         strp.spectrumDisplay.arrangeLabels()
+    #
+    # def resetLabels(self):
+    #     """Reset arrangement of peak/multiplet labels.
+    #     """
+    #     if (strp := self.current.strip) is None:
+    #         getLogger().warning('No strip selected')
+    #
+    #     else:
+    #         strp.spectrumDisplay.resetLabels()
+    #
+    # def showReorderPeakListAxesPopup(self):
+    #     """
+    #     Displays Reorder PeakList Axes Popup.
+    #     """
+    #     if not self.project.peakLists:
+    #         getLogger().warning('Reorder PeakList Axes: Project has no peakLists.')
+    #         MessageDialog.showWarning('Reorder PeakList Axes', 'Project has no peakLists.')
+    #     else:
+    #         from ccpn.ui.gui.popups.ReorderPeakListAxes import ReorderPeakListAxes
+    #
+    #         popup = ReorderPeakListAxes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+    #         popup.exec_()
 
-    def toggleSpectrumToolbar(self):
-        if self.current.strip is not None:
-            self.current.strip.spectrumDisplay.toggleSpectrumToolbar()
-        else:
-            getLogger().warning('No strip selected')
-
-    def togglePhaseConsole(self):
-        if self.current.strip is not None:
-            self.current.strip.spectrumDisplay.togglePhaseConsole()
-        else:
-            getLogger().warning('No strip selected')
-
-    def _setZoomPopup(self):
-        if self.current.strip is not None:
-            self.current.strip._setZoomPopup()
-        else:
-            getLogger().warning('No strip selected')
-
-    def resetZoom(self):
-        if self.current.strip is not None:
-            self.current.strip.resetZoom()
-        else:
-            getLogger().warning('No strip selected')
-
-    def copyStrip(self):
-        if self.current.strip is not None:
-            self.current.strip.copyStrip()
-        else:
-            getLogger().warning('No strip selected')
-
-    def showFlipArbitraryAxisPopup(self, usePosition=False):
-        if (strp := self.current.strip) is None:
-            getLogger().warning('No strip selected')
-
-        elif self.current.strip.spectrumDisplay.is1D:
-            getLogger().warning('Function not permitted on 1D spectra')
-
-        else:
-            from ccpn.ui.gui.popups.CopyStripFlippedAxesPopup import CopyStripFlippedSpectraPopup
-
-            try:
-                mDict = usePosition and self.current.mouseMovedDict[1]
-                positions = [poss[0] if (poss := mDict.get(ax)) else None
-                             for ax in strp.axisCodes] if usePosition else None
-                popup = CopyStripFlippedSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
-                                                     strip=strp, label=strp.id,
-                                                     positions=positions)
-                popup.exec_()
-            except Exception as es:
-                getLogger().warning(f'Cannot show popup: {es}')
-
-    def arrangeLabels(self):
-        """Auto-arrange the peak/multiplet labels to minimise any overlaps.
-        """
-        if (strp := self.current.strip) is None:
-            getLogger().warning('No strip selected')
-
-        else:
-            strp.spectrumDisplay.arrangeLabels()
-
-    def resetLabels(self):
-        """Reset arrangement of peak/multiplet labels.
-        """
-        if (strp := self.current.strip) is None:
-            getLogger().warning('No strip selected')
-
-        else:
-            strp.spectrumDisplay.resetLabels()
-
-    def showReorderPeakListAxesPopup(self):
-        """
-        Displays Reorder PeakList Axes Popup.
-        """
-        if not self.project.peakLists:
-            getLogger().warning('Reorder PeakList Axes: Project has no peakLists.')
-            MessageDialog.showWarning('Reorder PeakList Axes', 'Project has no peakLists.')
-        else:
-            from ccpn.ui.gui.popups.ReorderPeakListAxes import ReorderPeakListAxes
-
-            popup = ReorderPeakListAxes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-            popup.exec_()
-
-    def _flipXYAxisCallback(self):
-        """Callback to flip axes"""
-        if self.current.strip is not None:
-            self.current.strip.flipXYAxis()
-        else:
-            getLogger().warning('No strip selected')
-
-    def _flipXZAxisCallback(self):
-        """Callback to flip axes"""
-        if self.current.strip is not None:
-            self.current.strip.flipXZAxis()
-        else:
-            getLogger().warning('No strip selected')
-
-    def _flipYZAxisCallback(self):
-        """Callback to flip axes"""
-        if self.current.strip is not None:
-            self.current.strip.flipYZAxis()
-        else:
-            getLogger().warning('No strip selected')
-
-    def _toggleConsoleCallback(self):
-        """Toggles whether python console is displayed at bottom of the main window.
-        """
-        self.ui.mainWindow.toggleConsole()
+    # GWV 5/2/24:to GuiBase
+    # def _flipXYAxisCallback(self):
+    #     """Callback to flip axes"""
+    #     if self.current.strip is not None:
+    #         self.current.strip.flipXYAxis()
+    #     else:
+    #         getLogger().warning('No strip selected')
+    #
+    # def _flipXZAxisCallback(self):
+    #     """Callback to flip axes"""
+    #     if self.current.strip is not None:
+    #         self.current.strip.flipXZAxis()
+    #     else:
+    #         getLogger().warning('No strip selected')
+    #
+    # def _flipYZAxisCallback(self):
+    #     """Callback to flip axes"""
+    #     if self.current.strip is not None:
+    #         self.current.strip.flipYZAxis()
+    #     else:
+    #         getLogger().warning('No strip selected')
+    #
+    # def _toggleConsoleCallback(self):
+    #     """Toggles whether python console is displayed at bottom of the main window.
+    #     """
+    #     self.ui.mainWindow.toggleConsole()
 
     @deprecated('Use showChemicalShiftMappingModule to access the latest implementation')
     def showChemicalShiftMapping(self, position: str = 'top', relativeTo: CcpnModule = None):
@@ -2334,11 +2337,12 @@ class Framework(NotifierBase, GuiBase):
         mainWindow.moduleArea.addModule(relGuiModule, position=position, relativeTo=relativeTo)
         return relGuiModule
 
-    def toggleCrosshairAll(self):
-        """Toggles whether crosshairs are displayed in all windows.
-        """
-        for window in self.project.windows:
-            window.toggleCrosshair()
+    # GWV 5/2/24: to GuiBase
+    # def toggleCrosshairAll(self):
+    #     """Toggles whether crosshairs are displayed in all windows.
+    #     """
+    #     for window in self.project.windows:
+    #         window.toggleCrosshair()
 
     #################################################################################################
     ## MENU callbacks:  Macro

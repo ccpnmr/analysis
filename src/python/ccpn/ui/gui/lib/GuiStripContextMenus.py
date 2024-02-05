@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-01-24 16:54:54 +0000 (Wed, January 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-05 16:02:48 +0000 (Mon, February 05, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -360,7 +360,7 @@ def _newStripPlotFAItem(strip):
     return _SCMitem(name='New Spectrum Display with Axes flipped...',
                     typeItem=ItemTypes.get(ITEM), toolTip='Create new Spectrum Display from the current strip',
                     shortcut='fa',
-                    callback=partial(app.showFlipArbitraryAxisPopup, usePosition=True))
+                    callback=partial(app._flipArbitraryAxisCallback, usePosition=True))
 
 
 ##############################  Common Integral menu items ##############################

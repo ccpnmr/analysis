@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-01-25 17:21:29 +0000 (Thu, January 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-06 10:34:48 +0000 (Tue, February 06, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -720,10 +720,8 @@ class Multiplet(AbstractWrapperObject):
             for mp in multiplets:
                 if mp is not self:
                     pkAdd = mp.peaks
-
-                    mp.removePeaks(mp.peaks)
+                    mp.removePeaks(mp.peaks)  # empty multiplet should be deleted here.
                     self.addPeaks(pkAdd)
-                    mp.delete()  # Unsure if we should deleted empty multiplet
 
     @logCommand(get='self')
     def mergeMultiplets(self, peaks : list[Peak], multiplets : list['Multiplet']):
@@ -733,7 +731,7 @@ class Multiplet(AbstractWrapperObject):
         that multiplet is also selected.
 
         :param peaks: a list of peaks to be merged into the multiplet
-        :type multiplets: a lift of multiplets to merged into the current multiplet
+        :param multiplets: a lift of multiplets to merged into the current multiplet
         """
         alonePeaks = [pk for pk in peaks if not pk.multiplets]
 

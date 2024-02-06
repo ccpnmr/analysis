@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-05 16:02:48 +0000 (Mon, February 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-06 15:19:48 +0000 (Tue, February 06, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -212,27 +212,21 @@ class GuiBase(object):
         ),
 
         ('View', [
-            ("Chemical Shift Table", partial(self.showChemicalShiftTable, selectFirstItem=True), [('shortcut', 'ct')]),
-            ("NmrResidue Table", partial(self.showNmrResidueTable, selectFirstItem=True), [('shortcut', 'nt')]),
-            ("Residue Table", partial(self.showResidueTable, selectFirstItem=True)),
-            ("Peak Table", partial(self.showPeakTable, selectFirstItem=True), [('shortcut', 'pt')]),
-            ("Integral Table", partial(self.showIntegralTable, selectFirstItem=True), [('shortcut', 'it')]),
-            ("Multiplet Table", partial(self.showMultipletTable, selectFirstItem=True), [('shortcut', 'mt')]),
-            ("Restraint Table", partial(self.showRestraintTable, selectFirstItem=True), [('shortcut', 'rt')]),
-            ("Structure Table", partial(self.showStructureTable, selectFirstItem=True), [('shortcut', 'st')]),
-            ("Data Table", partial(self.showDataTable, selectFirstItem=True), [('shortcut', 'dt')]),
-            ("Violation Table", partial(self.showViolationTable, selectFirstItem=True), [('shortcut', 'vt')]),
+            ("Chemical Shift Table", partial(app.showChemicalShiftTable, selectFirstItem=True), [('shortcut', 'ct')]),
+            ("NmrResidue Table", partial(app.showNmrResidueTable, selectFirstItem=True), [('shortcut', 'nt')]),
+            ("Residue Table", partial(app.showResidueTable, selectFirstItem=True)),
+            ("Peak Table", partial(app.showPeakTable, selectFirstItem=True), [('shortcut', 'pt')]),
+            ("Integral Table", partial(app.showIntegralTable, selectFirstItem=True), [('shortcut', 'it')]),
+            ("Multiplet Table", partial(app.showMultipletTable, selectFirstItem=True), [('shortcut', 'mt')]),
+            ("Data Table", partial(app.showDataTable, selectFirstItem=True), [('shortcut', 'dt')]),
+            ("Restraint Table", partial(app.showRestraintTable, selectFirstItem=True), [('shortcut', 'rt')]),
+            ("Violation Table", partial(app.showViolationTable, selectFirstItem=True), [('shortcut', 'vt')]),
+            ("Structure Table", partial(app.showStructureTable, selectFirstItem=True), [('shortcut', 'st')]),
             (),
-            ("Restraint Analysis Inspector", partial(self.showRestraintAnalysisTable, selectFirstItem=True), [('shortcut', 'at')]),
-            ("Chemical Shift Mapping (Beta)", self.showChemicalShiftMappingModule, [('shortcut', 'cm')]),
-            ("Relaxation Analysis (Beta)", self.showRelaxationModule, [('shortcut', 'ra')]),
-
-            ("Notes Editor", partial(self.showNotesEditor, selectFirstItem=True), [('shortcut', 'no'),
-                                                                                   # ('icon', 'icons/null')
-                                                                                   ]),
-            # (),
-            # ("Chemical Shift Mapping (alpha)", self.showChemicalShiftMappingModule, [('shortcut', 'ma')]),
-            # ("Relaxation (alpha)", self.showRelaxationModule, [('shortcut', 're')]),
+            ("Restraint Analysis Inspector", partial(app.showRestraintAnalysisTable, selectFirstItem=True), [('shortcut', 'at')]),
+            ("Chemical Shift Mapping (Beta)", app.showChemicalShiftMappingModule, [('shortcut', 'cm')]),
+            ("Relaxation Analysis (Beta)", app.showRelaxationModule, [('shortcut', 'ra')]),
+            ("Notes Editor", partial(app.showNotesEditor, selectFirstItem=True), [('shortcut', 'no')]),
             (),
             ("In Active Spectrum Display", (("Show/Hide Toolbar", self._toggleToolbarCallback, [('shortcut', 'tb')]),
                                             ("Show/Hide Spectrum Toolbar", self._toggleSpectrumToolbarCallback, [('shortcut', 'sb')]),
@@ -256,54 +250,50 @@ class GuiBase(object):
                 ("None", None, [('checkable', True),
                                 ('checked', False)])
                 ])),
-            ("Python Console", self._toggleConsoleCallback, [('shortcut', '  '),
-                                                             ])
+            ("Python Console", self._toggleConsoleCallback, [('shortcut', '  ')])
             ]
         ),
 
         ('Spectrum', [
             ("Load Spectra...", self._loadSpectraCallback, [('shortcut', 'ls')]),
             (),
-            # ("Spectrum Groups...", self.showSpectrumGroupsPopup, [('shortcut', 'ss')]), # multiple edit temporarly disabled
-            ("Set Experiment Types...", self.showExperimentTypePopup, [('shortcut', 'et')]),
-            ("Validate Paths...", self.showValidateSpectraPopup, [('shortcut', 'vp')]),
+            # ("Spectrum Groups...", self._spectrumGroupsCallback, [('shortcut', 'ss')]), # multiple edit temporarly disabled
+            ("Set Experiment Types...", self._experimentTypesCallback, [('shortcut', 'et')]),
+            ("Validate Paths...", self._validatePathsCallback, [('shortcut', 'vp')]),
             ("Copy into Project...", self._copyToProjectCallback, []),
             (),
-            ("Pick Peaks", (("Pick 1D Peaks...", self.showPeakPick1DPopup, [('shortcut', 'p1')]),
-                            ("Pick ND Peaks...", self.showPeakPickNDPopup, [('shortcut', 'pp')])
+            ("Pick Peaks", (("Pick 1D Peaks...", self._peakPick1DCallback, [('shortcut', 'p1')]),
+                            ("Pick ND Peaks...", self._peakPickNDCallback, [('shortcut', 'pp')])
                             )),
-            ("Copy PeakList...", self.showCopyPeakListPopup, [('shortcut', 'cl')]),
-            ("Copy Peaks...", self.showCopyPeaks, [('shortcut', 'cp')]),
-            ("Peak Collections...", self.showPeakCollectionsPopup, [('shortcut', 'sc')]),
+            ("Copy PeakList...", self._copyPeakListCallback, [('shortcut', 'cl')]),
+            ("Copy Peaks...", self._copyPeaksCallback, [('shortcut', 'cp')]),
+            ("Peak Collections...", self._peakCollectionsCallback, [('shortcut', 'sc')]),
             # (),
-            ("Estimate Peak Volumes...", self.showEstimateVolumesPopup, [('shortcut', 'ev')]),
-            ("Estimate Current Peak Volumes", self.showEstimateCurrentVolumesPopup, [('shortcut', 'ec')]),
+            ("Estimate Peak Volumes...", self._estimateVolumesCallback, [('shortcut', 'ev')]),
+            ("Estimate Current Peak Volumes", self._estimateCurrentVolumesCallback, [('shortcut', 'ec')]),
             ("Reorder PeakList Axes...", self._reorderPeakListAxesCallback, [('shortcut', 'rl')]),
             (),
-            ("Make Strip Plot...", self.makeStripPlotPopup, [('shortcut', 'sp')]),
+            ("Make Strip Plot...", app.makeStripPlot, [('shortcut', 'sp')]),
 
             (),
-            ("Pseudo Spectrum to SpectrumGroup...", self.showPseudoSpectrumPopup),
-            ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj')]),
-            ("Convert...", self.showConvertSpectrumPopup, []),
+            ("Pseudo Spectrum to SpectrumGroup...", self._pseudoSpectrumCallback),
+            ("Make Projection...", self._makeProjectionCallback, [('shortcut', 'pj')]),
+            ("Convert...", self._convertSpectrumCallback, []),
             (),
-            ("Print to File...", self.showPrintSpectrumDisplayPopup, [('shortcut', '⌃p')]),
+            ("Print to File...", self._printToFileCallback, [('shortcut', '⌃p')]),
             ]
         ),
 
         ('Molecules', [
-            ("Load ChemComp from Xml...", self._loadDataCallback),
-            (),
+            ("New Chain...", self._createChainCallback),
             ("Chain from FASTA...", self._loadDataCallback),
             (),
-            ("New Chain...", self.showCreateChainPopup),
-            ("Inspect...", self.inspectMolecule, [('enabled', False)]),
+            ("Load ChemComp from Xml...", self._loadDataCallback),
+            ("Edit Molecular Bonds", self._editMolecularBondsCallback, ),
+            # ("Inspect...", self.inspectMolecule, [('enabled', False)]),
             (),
-            ("Residue Information", self.showResidueInformation, [('shortcut', 'ri')]),
-            (),
-            ("Reference Chemical Shifts", self.showReferenceChemicalShifts, [('shortcut', 'rc')]),
-            (),
-            ("Edit Molecular Bonds", self.showMolecularBondsPopup, ),
+            ("Residue Information", app.showResidueInformation, [('shortcut', 'ri')]),
+            ("Reference Chemical Shifts", app.showReferenceChemicalShifts, [('shortcut', 'rc')]),
             ]
         ),
 
@@ -313,14 +303,14 @@ class GuiBase(object):
             ("Open User Macro...", self._openMacroCallback, [('shortcut', 'om')]),
             ("Open CCPN Macro...", partial(self._openMacroCallback, directory=macroPath)),
             (),
-            ("Run...", self.runMacro, [('shortcut', 'rm')]),
+            ("Run...", app.runMacro, [('shortcut', 'rm')]),
             ("Run Recent", ()),
             (CCPNMACROSMENU, ([
                 ("None", None, [('checkable', True),
                                 ('checked', False)])
                 ])),
             (),
-            ("Define Macro Shortcuts...", self.defineUserShortcuts, [('shortcut', 'du')]),
+            ("Define Macro Shortcuts...", self._defineUserShortcutsCallback, [('shortcut', 'du')]),
             ]
         ),
 
@@ -399,7 +389,7 @@ class GuiBase(object):
 
     def _nyi(self):
         """Not yet implemented"""
-        pass
+        MessageDialog.showNYI()
 
     #-----------------------------------------------------------------------------------------
     # File --> callback methods
@@ -425,7 +415,6 @@ class GuiBase(object):
         """menu callback; use ui.loadData to do the lifting
         """
         from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
-
         self.ui.loadData(formatFilter=(NefDataLoader.dataFormat,))
 
     def _exportNEFCallback(self):
@@ -469,7 +458,6 @@ class GuiBase(object):
         """menu callback; use ui.loadData to do the lifting
         """
         from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
-
         self.ui.loadData(formatFilter=(StarDataLoader.dataFormat,))
 
     def _saveCallback(self):
@@ -478,15 +466,8 @@ class GuiBase(object):
             # if temporary then use the saveAs dialog
             self.ui.saveProjectAs()
 
-        # elif self.project.readOnly:
-        #     MessageDialog.showWarning('Save Project', 'Project is read-only')
-
         else:
             self.saveProject()
-            # successful = self.saveProject()
-            # if not successful:
-            #     getLogger().warning("Error saving project")
-            #     MessageDialog.showError('Save Project', f'Error saving {self.project}')
 
     def _saveAsCallback(self):
         """Opens save Project as dialog box and saves project to path specified
@@ -547,19 +528,16 @@ class GuiBase(object):
         """Show the Project summary popup.
         """
         from ccpn.ui.gui.popups.ProjectSummaryPopup import ProjectSummaryPopup
-
-        if self.ui:
-            popup = ProjectSummaryPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, modal=True)
-            popup.show()
-            popup.raise_()
-            popup.exec_()
+        popup = ProjectSummaryPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, modal=True)
+        popup.show()
+        popup.raise_()
+        popup.exec_()
 
     def _showApplicationPreferences(self):
         """
         Displays Application Preferences Popup.
         """
         from ccpn.ui.gui.popups.PreferencesPopup import PreferencesPopup
-
         popup = PreferencesPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, preferences=self.preferences)
         popup.exec_()
 
@@ -577,13 +555,41 @@ class GuiBase(object):
         """Load all the spectra callback
         """
         self.ui.loadSpectra()
+        
+    def _experimentTypesCallback(self):
+        """
+        Displays experiment type popup.
+        """
+        if not self.project.spectra:
+            getLogger().warning('Experiment Type Selection: Project has no Spectra.')
+            MessageDialog.showWarning('Experiment Type Selection', 'Project has no Spectra.')
+        else:
+            from ccpn.ui.gui.popups.ExperimentTypePopup import ExperimentTypePopup
+            popup = ExperimentTypePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+            popup.exec_()
 
-    def showConvertSpectrumPopup(self):
+    def _validatePathsCallback(self, spectra=None, defaultSelected=None):
+        """
+        Displays validate spectra popup.
+        """
+        if not self.project.spectra:
+            getLogger().warning('Validate Spectrum Paths Selection: Project has no Spectra.')
+            MessageDialog.showWarning('Validate Spectrum Paths Selection', 'Project has no Spectra.')
+        else:
+            from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraPopup
+            popup = ValidateSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra, defaultSelected=defaultSelected)
+            popup.exec_()
+
+    def _convertSpectrumCallback(self):
         """Show the convertToHdf5 popup
         """
-        from ccpn.ui.gui.popups.ConvertToHdf5Popup import ConvertToHdf5Popup
-        popup = ConvertToHdf5Popup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-        popup.exec_()
+        if not self.project.spectra:
+            getLogger().warning('Convert spectra: Project has no Spectra.')
+            MessageDialog.showWarning('Convert spectra', 'Project has no Spectra.')
+        else:
+            from ccpn.ui.gui.popups.ConvertToHdf5Popup import ConvertToHdf5Popup
+            popup = ConvertToHdf5Popup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+            popup.exec_()
 
     def _copyToProjectCallback(self):
         """Callback for Spectrum -> Copy into Project
@@ -616,10 +622,143 @@ class GuiBase(object):
             MessageDialog.showWarning('Reorder PeakList Axes', 'Project has no peakLists.')
         else:
             from ccpn.ui.gui.popups.ReorderPeakListAxes import ReorderPeakListAxes
-
             popup = ReorderPeakListAxes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
             popup.exec_()
 
+    def _peakPick1DCallback(self):
+        """
+        Callback to display Peak Picking 1D Popup.
+        """
+        if not self.project.peakLists:
+            getLogger().warning('Peak Picking: Project has no peakLists.')
+            MessageDialog.showWarning('Peak Picking', 'Project has no peakLists.')
+        else:
+            spectra = [spec for spec in self.project.spectra if spec.dimensionCount == 1]
+            if spectra:
+                from ccpn.ui.gui.popups.PickPeaks1DPopup import PickPeak1DPopup
+                popup = PickPeak1DPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+                popup.exec_()
+            else:
+                getLogger().warning('Peak Picking: Project has no 1d Spectra.')
+                MessageDialog.showWarning('Peak Picking', 'Project has no 1d Spectra.')
+
+    def _peakPickNDCallback(self):
+        """
+        Callback to display Peak Picking ND Popup.
+        """
+        if not self.project.peakLists:
+            getLogger().warning('Peak Picking: Project has no peakLists.')
+            MessageDialog.showWarning('Peak Picking', 'Project has no peakLists.')
+        else:
+            spectra = [spec for spec in self.project.spectra if spec.dimensionCount > 1]
+            if spectra:
+                from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
+                popup = PeakFindPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+                popup.exec_()
+            else:
+                getLogger().warning('Peak Picking: Project has no Nd Spectra.')
+                MessageDialog.showWarning('Peak Picking', 'Project has no Nd Spectra.')
+
+    def _copyPeakListCallback(self):
+        """Callback to display CopyPeakList popup
+        """
+        if not self.project.peakLists:
+            txt = 'Project has no PeakList\'s. Peak Lists cannot be copied'
+            getLogger().warning(txt)
+            MessageDialog.showWarning('Cannot perform a copy', txt)
+            return
+        else:
+            from ccpn.ui.gui.popups.CopyPeakListPopup import CopyPeakListPopup
+            popup = CopyPeakListPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+            popup.exec_()
+
+    def _copyPeaksCallback(self):
+        """Callback to display CopyPeaks popup
+        """
+        if not self.project.peakLists:
+            getLogger().warning('Project has no Peak Lists. Peak Lists cannot be copied')
+            MessageDialog.showWarning('Project has no Peak Lists.', 'Peak Lists cannot be copied')
+            return
+        else:
+            from ccpn.ui.gui.popups.CopyPeaksPopup import CopyPeaks
+            popup = CopyPeaks(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+            peaks = self.current.peaks
+            popup._selectPeaks(peaks)
+            popup.exec()
+            popup.raise_()
+
+    def _peakCollectionsCallback(self):
+        if not self.project.spectra:
+            getLogger().warning('Project has no Spectra. Spectrum groups cannot be displayed')
+            MessageDialog.showWarning('Project contains no spectra.', 'Spectrum groups cannot be displayed')
+        else:
+            from ccpn.ui.gui.popups.SeriesPeakCollectionPopup import SeriesPeakCollectionPopup
+            popup = SeriesPeakCollectionPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+            popup.exec_()
+            return popup
+        
+    def _estimateVolumesCallback(self):
+        """
+        Displays Estimate Volumes Popup.
+        """
+        self.mainWindow._showEstimateVolumesPopup
+
+    def _estimateCurrentVolumesCallback(self):
+        """
+        Calculate volumes for the currently selected peaks
+        """
+        self.mainWindow._showEstimateCurrentVolumesPopup
+
+    def _spectrumGroupsCallback(self):
+        if not self.project.spectra:
+            getLogger().warning('Project has no Spectra. Spectrum groups cannot be displayed')
+            MessageDialog.showWarning('Project contains no spectra.', 'Spectrum groups cannot be displayed')
+        
+        else:
+            from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
+            if not self.project.spectrumGroups:
+                #GST This seems to have problems MessageDialog wraps it which looks bad...
+                # MessageDialog.showWarning('Project has no Spectrum Groups.',
+                #                           'Create them using:\nSidebar → SpectrumGroups → <New SpectrumGroup>\n ')
+                SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editMode=False).exec_()
+
+            else:
+                SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editMode=True, obj=self.project.spectrumGroups[0]).exec_()
+ 
+    def _pseudoSpectrumCallback(self):
+        if not self.project.spectra:
+            getLogger().warning('Project has no Spectra. Pseudo Spectrum to SpectrumGroup Popup cannot be displayed')
+            MessageDialog.showWarning('Project contains no spectra.', 'Pseudo Spectrum to SpectrumGroup Popup cannot be displayed')
+        else:
+            from ccpn.ui.gui.popups.PseudoToSpectrumGroupPopup import PseudoToSpectrumGroupPopup
+
+            popup = PseudoToSpectrumGroupPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+            popup.exec_()
+
+    def _makeProjectionCallback(self):
+        if not self.project.spectra:
+            getLogger().warning('Project has no Spectra. Make Projection Popup cannot be displayed')
+            MessageDialog.showWarning('Project contains no spectra.', 'Make Projection Popup cannot be displayed')
+        else:
+            from ccpn.ui.gui.popups.SpectrumProjectionPopup import SpectrumProjectionPopup
+            popup = SpectrumProjectionPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+            popup.exec_()
+
+    def _printToFileCallback(self):
+        """Show the print spectrumDisplay dialog
+        """
+        from ccpn.ui.gui.popups.ExportStripToFile import ExportStripToFilePopup
+
+        if len(self.project.spectrumDisplays) == 0:
+            MessageDialog.showWarning('', 'No SpectrumDisplay found')
+        else:
+            exportDialog = ExportStripToFilePopup(parent=self.ui.mainWindow,
+                                                  mainWindow=self.ui.mainWindow,
+                                                  strips=self.project.strips,
+                                                  selectedStrip=self.current.strip
+                                                  )
+            exportDialog.exec_()
+            
     #-----------------------------------------------------------------------------------------
     # View -->
     #-----------------------------------------------------------------------------------------
@@ -748,22 +887,66 @@ class GuiBase(object):
             window.toggleCrosshair()
 
     #-----------------------------------------------------------------------------------------
+    # Molecules -->
+    #-----------------------------------------------------------------------------------------
+
+    def _createChainCallback(self):
+        """
+        Displays sequence creation popup.
+        """
+        from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
+        popup = CreateChainPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+        popup.exec_()
+        
+    # def inspectMolecule(self):
+    #     pass
+
+    def _editMolecularBondsCallback(self):
+        """Displays the molecular-bonds popup.
+        """
+        from ccpn.ui.gui.popups.MolecularBondsPopup import MolecularBondsPopup
+        popup = MolecularBondsPopup(parent=self.mainWindow, mainWindow=self.mainWindow)
+        popup.exec_()
+
+    #-----------------------------------------------------------------------------------------
+    # Macro -->
+    #-----------------------------------------------------------------------------------------
+
+    def _showMacroEditorCallback(self):
+        """Displays macro editor. Just handing down to MainWindow for now
+        """
+        self.mainWindow.newMacroEditor()
+
+    def _openMacroCallback(self, directory=None):
+        """ Select macro file and on MacroEditor.
+        """
+        from ccpn.ui.gui.widgets.FileDialog import MacrosFileDialog
+
+        mainWindow = self.ui.mainWindow
+        dialog = MacrosFileDialog(parent=mainWindow, acceptMode='open', fileFilter='*.py', directory=directory)
+        dialog._show()
+        path = dialog.selectedFile()
+        if path is not None:
+            mainWindow.newMacroEditor(path=path)
+
+    def _defineUserShortcutsCallback(self):
+        from ccpn.ui.gui.popups.ShortcutsPopup import ShortcutsPopup
+        ShortcutsPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow).exec_()
+
+    #-----------------------------------------------------------------------------------------
     # Help -->
     #-----------------------------------------------------------------------------------------
 
     def _showBeginnersTutorial(self):
         from ccpn.framework.PathsAndUrls import beginnersTutorialPath
-
         self._systemOpen(beginnersTutorialPath)
 
     def _showBackboneTutorial(self):
         from ccpn.framework.PathsAndUrls import backboneAssignmentTutorialPath
-
         self._systemOpen(backboneAssignmentTutorialPath)
 
     def _showCSPtutorial(self):
         from ccpn.framework.PathsAndUrls import cspTutorialPath
-
         self._systemOpen(cspTutorialPath)
 
     def _showScreenTutorial(self):
@@ -785,33 +968,27 @@ class GuiBase(object):
         """Displays Forum in a module.
         """
         from ccpn.framework.PathsAndUrls import ccpnForum
-
         self._showHtmlFile("Analysis Version-3 Forum", ccpnForum)
 
     def _showShortcuts(self):
         from ccpn.framework.PathsAndUrls import shortcutsPath
-
         self._systemOpen(shortcutsPath)
 
     def _showAboutPopup(self):
         from ccpn.ui.gui.popups.AboutPopup import AboutPopup
-
         popup = AboutPopup(parent=self.ui.mainWindow)
         popup.exec_()
 
     def _showAboutCcpn(self):
         from ccpn.framework.PathsAndUrls import ccpnUrl
-
         self._showHtmlFile("About CCPN", ccpnUrl)
 
     def _showIssuesList(self):
         from ccpn.framework.PathsAndUrls import ccpnIssuesUrl
-
         self._showHtmlFile("CCPN Issues", ccpnIssuesUrl)
 
     def _showTutorials(self):
         from ccpn.framework.PathsAndUrls import ccpnTutorials
-
         self._showHtmlFile("CCPN Tutorials", ccpnTutorials)
 
     def _showRegisterPopup(self):
@@ -821,7 +998,6 @@ class GuiBase(object):
 
     def _showCcpnLicense(self):
         from ccpn.framework.PathsAndUrls import ccpnLicenceUrl
-
         self._showHtmlFile("CCPN Licence", ccpnLicenceUrl)
 
     def _showUpdatePopup(self):

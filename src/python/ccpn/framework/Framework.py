@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-05 16:02:48 +0000 (Mon, February 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-06 15:19:48 +0000 (Tue, February 06, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -457,12 +457,10 @@ class Framework(NotifierBase, GuiBase):
         """
         if self.args.interface == 'Gui':
             from ccpn.ui.gui.Gui import Gui
-
             ui = Gui(application=self)
 
         else:
             from ccpn.ui.Ui import NoUi
-
             ui = NoUi(application=self)
 
         return ui
@@ -1689,208 +1687,218 @@ class Framework(NotifierBase, GuiBase):
     ## MENU callbacks:  Spectrum
     ###################################################################################################################
 
-    def showSpectrumGroupsPopup(self):
-        if not self.project.spectra:
-            getLogger().warning('Project has no Spectra. Spectrum groups cannot be displayed')
-            MessageDialog.showWarning('Project contains no spectra.', 'Spectrum groups cannot be displayed')
-        else:
-            from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
+    # GWV 6/2/24: to GuiBase
+    # def showSpectrumGroupsPopup(self):
+    #     if not self.project.spectra:
+    #         getLogger().warning('Project has no Spectra. Spectrum groups cannot be displayed')
+    #         MessageDialog.showWarning('Project contains no spectra.', 'Spectrum groups cannot be displayed')
+    #     else:
+    #         from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
+    #
+    #         if not self.project.spectrumGroups:
+    #             #GST This seems to have problems MessageDialog wraps it which looks bad...
+    #             # MessageDialog.showWarning('Project has no Spectrum Groups.',
+    #             #                           'Create them using:\nSidebar → SpectrumGroups → <New SpectrumGroup>\n ')
+    #             SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editMode=False).exec_()
+    #
+    #         else:
+    #             SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editMode=True, obj=self.project.spectrumGroups[0]).exec_()
+    # #
+    # # def showPeakCollectionsPopup(self):
+    # #     if not self.project.spectra:
+    # #         getLogger().warning('Project has no Spectra. Spectrum groups cannot be displayed')
+    # #         MessageDialog.showWarning('Project contains no spectra.', 'Spectrum groups cannot be displayed')
+    # #     else:
+    # #         from ccpn.ui.gui.popups.SeriesPeakCollectionPopup import SeriesPeakCollectionPopup
+    # #
+    # #         popup = SeriesPeakCollectionPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+    # #         popup.exec_()
+    # #         return popup
+    #
+    # def showPseudoSpectrumPopup(self):
+    #     if not self.project.spectra:
+    #         getLogger().warning('Project has no Spectra. Pseudo Spectrum to SpectrumGroup Popup cannot be displayed')
+    #         MessageDialog.showWarning('Project contains no spectra.', 'Pseudo Spectrum to SpectrumGroup Popup cannot be displayed')
+    #     else:
+    #         from ccpn.ui.gui.popups.PseudoToSpectrumGroupPopup import PseudoToSpectrumGroupPopup
+    #
+    #         popup = PseudoToSpectrumGroupPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+    #         popup.exec_()
+    #
+    # def showProjectionPopup(self):
+    #     if not self.project.spectra:
+    #         getLogger().warning('Project has no Spectra. Make Projection Popup cannot be displayed')
+    #         MessageDialog.showWarning('Project contains no spectra.', 'Make Projection Popup cannot be displayed')
+    #     else:
+    #         from ccpn.ui.gui.popups.SpectrumProjectionPopup import SpectrumProjectionPopup
+    #
+    #         popup = SpectrumProjectionPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+    #         popup.exec_()
 
-            if not self.project.spectrumGroups:
-                #GST This seems to have problems MessageDialog wraps it which looks bad...
-                # MessageDialog.showWarning('Project has no Spectrum Groups.',
-                #                           'Create them using:\nSidebar → SpectrumGroups → <New SpectrumGroup>\n ')
-                SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editMode=False).exec_()
-
-            else:
-                SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editMode=True, obj=self.project.spectrumGroups[0]).exec_()
-
-    def showPeakCollectionsPopup(self):
-        if not self.project.spectra:
-            getLogger().warning('Project has no Spectra. Spectrum groups cannot be displayed')
-            MessageDialog.showWarning('Project contains no spectra.', 'Spectrum groups cannot be displayed')
-        else:
-            from ccpn.ui.gui.popups.SeriesPeakCollectionPopup import SeriesPeakCollectionPopup
-
-            popup = SeriesPeakCollectionPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-            popup.exec_()
-            return popup
-
-    def showPseudoSpectrumPopup(self):
-        if not self.project.spectra:
-            getLogger().warning('Project has no Spectra. Pseudo Spectrum to SpectrumGroup Popup cannot be displayed')
-            MessageDialog.showWarning('Project contains no spectra.', 'Pseudo Spectrum to SpectrumGroup Popup cannot be displayed')
-        else:
-            from ccpn.ui.gui.popups.PseudoToSpectrumGroupPopup import PseudoToSpectrumGroupPopup
-
-            popup = PseudoToSpectrumGroupPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-            popup.exec_()
-
-    def showProjectionPopup(self):
-        if not self.project.spectra:
-            getLogger().warning('Project has no Spectra. Make Projection Popup cannot be displayed')
-            MessageDialog.showWarning('Project contains no spectra.', 'Make Projection Popup cannot be displayed')
-        else:
-            from ccpn.ui.gui.popups.SpectrumProjectionPopup import SpectrumProjectionPopup
-
-            popup = SpectrumProjectionPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-            popup.exec_()
-
-    def showExperimentTypePopup(self):
+    # GWV 6/2/24: moved to GuiBase
+    # def showExperimentTypePopup(self):
+    #     """
+    #     Displays experiment type popup.
+    #     """
+    #     if not self.project.spectra:
+    #         getLogger().warning('Experiment Type Selection: Project has no Spectra.')
+    #         MessageDialog.showWarning('Experiment Type Selection', 'Project has no Spectra.')
+    #     else:
+    #         from ccpn.ui.gui.popups.ExperimentTypePopup import ExperimentTypePopup
+    #
+    #         popup = ExperimentTypePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+    #         popup.exec_()
+    #
+    # def showValidateSpectraPopup(self, spectra=None, defaultSelected=None):
+    #     """
+    #     Displays validate spectra popup.
+    #     """
+    #     if not self.project.spectra:
+    #         getLogger().warning('Validate Spectrum Paths Selection: Project has no Spectra.')
+    #         MessageDialog.showWarning('Validate Spectrum Paths Selection', 'Project has no Spectra.')
+    #     else:
+    #         from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraPopup
+    #
+    #         popup = ValidateSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra, defaultSelected=defaultSelected)
+    #         popup.exec_()
+    #
+    # def showPeakPick1DPopup(self):
+    #     """
+    #     Displays Peak Picking 1D Popup.
+    #     """
+    #     if not self.project.peakLists:
+    #         getLogger().warning('Peak Picking: Project has no peakLists.')
+    #         MessageDialog.showWarning('Peak Picking', 'Project has no peakLists.')
+    #     else:
+    #         spectra = [spec for spec in self.project.spectra if spec.dimensionCount == 1]
+    #         if spectra:
+    #             from ccpn.ui.gui.popups.PickPeaks1DPopup import PickPeak1DPopup
+    #
+    #             popup = PickPeak1DPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+    #             popup.exec_()
+    #         else:
+    #             getLogger().warning('Peak Picking: Project has no 1d Spectra.')
+    #             MessageDialog.showWarning('Peak Picking', 'Project has no 1d Spectra.')
+    #
+    # def showPeakPickNDPopup(self):
+    #     """
+    #     Displays Peak Picking ND Popup.
+    #     """
+    #     if not self.project.peakLists:
+    #         getLogger().warning('Peak Picking: Project has no peakLists.')
+    #         MessageDialog.showWarning('Peak Picking', 'Project has no peakLists.')
+    #     else:
+    #         spectra = [spec for spec in self.project.spectra if spec.dimensionCount > 1]
+    #         if spectra:
+    #             from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
+    #
+    #             popup = PeakFindPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+    #             popup.exec_()
+    #         else:
+    #             getLogger().warning('Peak Picking: Project has no Nd Spectra.')
+    #             MessageDialog.showWarning('Peak Picking', 'Project has no Nd Spectra.')
+    #
+    # def showCopyPeakListPopup(self):
+    #     if not self.project.peakLists:
+    #         txt = 'Project has no PeakList\'s. Peak Lists cannot be copied'
+    #         getLogger().warning(txt)
+    #         MessageDialog.showWarning('Cannot perform a copy', txt)
+    #         return
+    #     else:
+    #         from ccpn.ui.gui.popups.CopyPeakListPopup import CopyPeakListPopup
+    #
+    #         popup = CopyPeakListPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+    #         popup.exec_()
+    #
+    # def showCopyPeaks(self):
+    #     if not self.project.peakLists:
+    #         getLogger().warning('Project has no Peak Lists. Peak Lists cannot be copied')
+    #         MessageDialog.showWarning('Project has no Peak Lists.', 'Peak Lists cannot be copied')
+    #         return
+    #     else:
+    #         from ccpn.ui.gui.popups.CopyPeaksPopup import CopyPeaks
+    #
+    #         popup = CopyPeaks(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+    #         peaks = self.current.peaks
+    #         popup._selectPeaks(peaks)
+    #         popup.exec()
+    #         popup.raise_()
+    #
+    # GWV 6/2/24: to MainWindow
+    # def showEstimateVolumesPopup(self):
+    #     """
+    #     Displays Estimate Volumes Popup.
+    #     """
+    #     if not self.project.peakLists:
+    #         getLogger().warning('Estimate Volumes: Project has no peakLists.')
+    #         MessageDialog.showWarning('Estimate Volumes', 'Project has no peakLists.')
+    #     else:
+    #         from ccpn.ui.gui.popups.EstimateVolumes import EstimatePeakListVolumes
+    #
+    #         if self.current.strip and not self.current.strip.isDeleted:
+    #             spectra = [specView.spectrum for specView in self.current.strip.spectrumDisplay.spectrumViews]
+    #         else:
+    #             spectra = self.project.spectra
+    #
+    #         if spectra:
+    #             popup = EstimatePeakListVolumes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra)
+    #             popup.exec_()
+    #         else:
+    #             getLogger().warning('Estimate Volumes: no specta selected.')
+    #             MessageDialog.showWarning('Estimate Volumes', 'no specta selected.')
+    #
+    # GWV 6/2/24: to MainWindow
+    # def showEstimateCurrentVolumesPopup(self):
+    #     """
+    #     Calculate volumes for the currently selected peaks
+    #     """
+    #     # self.mainWindow.estimateVolumes()
+    #
+    #     from ccpn.ui.gui.popups.EstimateVolumes import EstimateCurrentVolumes
+    #
+    #     if self.current.peaks:
+    #         popup = EstimateCurrentVolumes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+    #         popup.exec_()
+    #     else:
+    #         getLogger().warning('Estimate Current Volumes: no current.peaks')
+    #         MessageDialog.showWarning('Estimate Current Volumes', 'no current.peaks')
+    #
+    @logCommand('application.')
+    def makeStripPlot(self, includePeakLists=True, includeNmrChains=True, includeNmrChainPullSelection=True):
+        """Make a strip plot from peaks or nmrChains
         """
-        Displays experiment type popup.
-        """
-        if not self.project.spectra:
-            getLogger().warning('Experiment Type Selection: Project has no Spectra.')
-            MessageDialog.showWarning('Experiment Type Selection', 'Project has no Spectra.')
-        else:
-            from ccpn.ui.gui.popups.ExperimentTypePopup import ExperimentTypePopup
-
-            popup = ExperimentTypePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-            popup.exec_()
-
-    def showValidateSpectraPopup(self, spectra=None, defaultSelected=None):
-        """
-        Displays validate spectra popup.
-        """
-        if not self.project.spectra:
-            getLogger().warning('Validate Spectrum Paths Selection: Project has no Spectra.')
-            MessageDialog.showWarning('Validate Spectrum Paths Selection', 'Project has no Spectra.')
-        else:
-            from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraPopup
-
-            popup = ValidateSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra, defaultSelected=defaultSelected)
-            popup.exec_()
-
-    def showPeakPick1DPopup(self):
-        """
-        Displays Peak Picking 1D Popup.
-        """
-        if not self.project.peakLists:
-            getLogger().warning('Peak Picking: Project has no peakLists.')
-            MessageDialog.showWarning('Peak Picking', 'Project has no peakLists.')
-        else:
-            spectra = [spec for spec in self.project.spectra if spec.dimensionCount == 1]
-            if spectra:
-                from ccpn.ui.gui.popups.PickPeaks1DPopup import PickPeak1DPopup
-
-                popup = PickPeak1DPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-                popup.exec_()
-            else:
-                getLogger().warning('Peak Picking: Project has no 1d Spectra.')
-                MessageDialog.showWarning('Peak Picking', 'Project has no 1d Spectra.')
-
-    def showPeakPickNDPopup(self):
-        """
-        Displays Peak Picking ND Popup.
-        """
-        if not self.project.peakLists:
-            getLogger().warning('Peak Picking: Project has no peakLists.')
-            MessageDialog.showWarning('Peak Picking', 'Project has no peakLists.')
-        else:
-            spectra = [spec for spec in self.project.spectra if spec.dimensionCount > 1]
-            if spectra:
-                from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
-
-                popup = PeakFindPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-                popup.exec_()
-            else:
-                getLogger().warning('Peak Picking: Project has no Nd Spectra.')
-                MessageDialog.showWarning('Peak Picking', 'Project has no Nd Spectra.')
-
-    def showCopyPeakListPopup(self):
-        if not self.project.peakLists:
-            txt = 'Project has no PeakList\'s. Peak Lists cannot be copied'
-            getLogger().warning(txt)
-            MessageDialog.showWarning('Cannot perform a copy', txt)
-            return
-        else:
-            from ccpn.ui.gui.popups.CopyPeakListPopup import CopyPeakListPopup
-
-            popup = CopyPeakListPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-            popup.exec_()
-
-    def showCopyPeaks(self):
-        if not self.project.peakLists:
-            getLogger().warning('Project has no Peak Lists. Peak Lists cannot be copied')
-            MessageDialog.showWarning('Project has no Peak Lists.', 'Peak Lists cannot be copied')
-            return
-        else:
-            from ccpn.ui.gui.popups.CopyPeaksPopup import CopyPeaks
-
-            popup = CopyPeaks(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-            peaks = self.current.peaks
-            popup._selectPeaks(peaks)
-            popup.exec()
-            popup.raise_()
-
-    def showEstimateVolumesPopup(self):
-        """
-        Displays Estimate Volumes Popup.
-        """
-        if not self.project.peakLists:
-            getLogger().warning('Estimate Volumes: Project has no peakLists.')
-            MessageDialog.showWarning('Estimate Volumes', 'Project has no peakLists.')
-        else:
-            from ccpn.ui.gui.popups.EstimateVolumes import EstimatePeakListVolumes
-
-            if self.current.strip and not self.current.strip.isDeleted:
-                spectra = [specView.spectrum for specView in self.current.strip.spectrumDisplay.spectrumViews]
-            else:
-                spectra = self.project.spectra
-
-            if spectra:
-                popup = EstimatePeakListVolumes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra)
-                popup.exec_()
-            else:
-                getLogger().warning('Estimate Volumes: no specta selected.')
-                MessageDialog.showWarning('Estimate Volumes', 'no specta selected.')
-
-    def showEstimateCurrentVolumesPopup(self):
-        """
-        Calculate volumes for the currently selected peaks
-        """
-        # self.mainWindow.estimateVolumes()
-
-        from ccpn.ui.gui.popups.EstimateVolumes import EstimateCurrentVolumes
-
-        if self.current.peaks:
-            popup = EstimateCurrentVolumes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-            popup.exec_()
-        else:
-            getLogger().warning('Estimate Current Volumes: no current.peaks')
-            MessageDialog.showWarning('Estimate Current Volumes', 'no current.peaks')
-
-    def makeStripPlotPopup(self, includePeakLists=True, includeNmrChains=True, includeNmrChainPullSelection=True):
         if not self.project.peaks and not self.project.nmrResidues and not self.project.nmrChains:
             getLogger().warning('Cannot make strip plot, nothing to display')
             MessageDialog.showWarning('Cannot make strip plot,', 'nothing to display')
             return
-        else:
-            if self.current.strip and not self.current.strip.isDeleted:
-                from ccpn.ui.gui.popups.StripPlotPopup import StripPlotPopup
 
-                popup = StripPlotPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
-                                       spectrumDisplay=self.current.strip.spectrumDisplay,
-                                       includePeakLists=includePeakLists, includeNmrChains=includeNmrChains,
-                                       includeNmrChainPullSelection=includeNmrChainPullSelection, includeSpectrumTable=False)
-                popup.exec_()
-            else:
-                MessageDialog.showWarning('Make Strip Plot', 'No selected spectrumDisplay')
+        if self.current.strip is None or self.current.strip.isDeleted:
+            MessageDialog.showWarning('Make Strip Plot', 'No selected spectrumDisplay')
+            return
+
+        from ccpn.ui.gui.popups.StripPlotPopup import StripPlotPopup
+        popup = StripPlotPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
+                               spectrumDisplay=self.current.strip.spectrumDisplay,
+                               includePeakLists=includePeakLists,
+                               includeNmrChains=includeNmrChains,
+                               includeNmrChainPullSelection=includeNmrChainPullSelection,
+                               includeSpectrumTable=False)
+        popup.exec_()
 
     ################################################################################################
     ## MENU callbacks:  Molecule
     ################################################################################################
 
-    @logCommand('application.')
-    def showCreateChainPopup(self):
-        """
-        Displays sequence creation popup.
-        """
-        from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
-
-        popup = CreateChainPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-        popup.exec_()
+    # GWV 6/2/24: to GuiBase
+    # @logCommand('application.')
+    # def showCreateChainPopup(self):
+    #     """
+    #     Displays sequence creation popup.
+    #     """
+    #     from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
+    #
+    #     popup = CreateChainPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+    #     popup.exec_()
 
     # @logCommand('application.')
     # def toggleSequenceModule(self):
@@ -1927,8 +1935,8 @@ class Framework(NotifierBase, GuiBase):
     #         self.sequenceModule.close()
     #         delattr(self, 'sequenceModule')
 
-    def inspectMolecule(self):
-        pass
+    # def inspectMolecule(self):
+    #     pass
 
     @logCommand('application.')
     def showResidueInformation(self, position: str = 'bottom', relativeTo: CcpnModule = None):
@@ -1960,15 +1968,15 @@ class Framework(NotifierBase, GuiBase):
         refChemShifts = ReferenceChemicalShifts(mainWindow=mainWindow)
         mainWindow.moduleArea.addModule(refChemShifts, position=position, relativeTo=relativeTo)
         return refChemShifts
-
-    @logCommand('gui.')
-    def showMolecularBondsPopup(self):
-        """Displays the molecular-bonds popup.
-        """
-        from ccpn.ui.gui.popups.MolecularBondsPopup import MolecularBondsPopup
-
-        popup = MolecularBondsPopup(parent=self.mainWindow, mainWindow=self.mainWindow)
-        popup.exec_()
+    #
+    # @logCommand('gui.')
+    # def showMolecularBondsPopup(self):
+    #     """Displays the molecular-bonds popup.
+    #     """
+    #     from ccpn.ui.gui.popups.MolecularBondsPopup import MolecularBondsPopup
+    #
+    #     popup = MolecularBondsPopup(parent=self.mainWindow, mainWindow=self.mainWindow)
+    #     popup.exec_()
 
     ###################################################################################################################
     ## MENU callbacks:  VIEW
@@ -2182,20 +2190,20 @@ class Framework(NotifierBase, GuiBase):
             restraintAnalysisTableModule.selectPeakList(peakList)
         return restraintAnalysisTableModule
 
-    def showPrintSpectrumDisplayPopup(self):
-        """Show the print spectrumDisplay dialog
-        """
-        from ccpn.ui.gui.popups.ExportStripToFile import ExportStripToFilePopup
-
-        if len(self.project.spectrumDisplays) == 0:
-            MessageDialog.showWarning('', 'No SpectrumDisplay found')
-        else:
-            exportDialog = ExportStripToFilePopup(parent=self.ui.mainWindow,
-                                                  mainWindow=self.ui.mainWindow,
-                                                  strips=self.project.strips,
-                                                  selectedStrip=self.current.strip
-                                                  )
-            exportDialog.exec_()
+    # def showPrintSpectrumDisplayPopup(self):
+    #     """Show the print spectrumDisplay dialog
+    #     """
+    #     from ccpn.ui.gui.popups.ExportStripToFile import ExportStripToFilePopup
+    #
+    #     if len(self.project.spectrumDisplays) == 0:
+    #         MessageDialog.showWarning('', 'No SpectrumDisplay found')
+    #     else:
+    #         exportDialog = ExportStripToFilePopup(parent=self.ui.mainWindow,
+    #                                               mainWindow=self.ui.mainWindow,
+    #                                               strips=self.project.strips,
+    #                                               selectedStrip=self.current.strip
+    #                                               )
+    #         exportDialog.exec_()
 
     # GWV 5/2/24:to GuiBase
     # def toggleToolbar(self):
@@ -2348,27 +2356,27 @@ class Framework(NotifierBase, GuiBase):
     ## MENU callbacks:  Macro
     #################################################################################################
 
-    @logCommand('application.')
-    def _showMacroEditorCallback(self):
-        """Displays macro editor. Just handing down to MainWindow for now
-        """
-        self.mainWindow.newMacroEditor()
-
-    def _openMacroCallback(self, directory=None):
-        """ Select macro file and on MacroEditor.
-        """
-        mainWindow = self.ui.mainWindow
-        dialog = MacrosFileDialog(parent=mainWindow, acceptMode='open', fileFilter='*.py', directory=directory)
-        dialog._show()
-        path = dialog.selectedFile()
-        if path is not None:
-            self.mainWindow.newMacroEditor(path=path)
-
-    def defineUserShortcuts(self):
-
-        from ccpn.ui.gui.popups.ShortcutsPopup import ShortcutsPopup
-
-        ShortcutsPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow).exec_()
+    # @logCommand('application.')
+    # def _showMacroEditorCallback(self):
+    #     """Displays macro editor. Just handing down to MainWindow for now
+    #     """
+    #     self.mainWindow.newMacroEditor()
+    #
+    # def _openMacroCallback(self, directory=None):
+    #     """ Select macro file and on MacroEditor.
+    #     """
+    #     mainWindow = self.ui.mainWindow
+    #     dialog = MacrosFileDialog(parent=mainWindow, acceptMode='open', fileFilter='*.py', directory=directory)
+    #     dialog._show()
+    #     path = dialog.selectedFile()
+    #     if path is not None:
+    #         self.mainWindow.newMacroEditor(path=path)
+    #
+    # def defineUserShortcuts(self):
+    #
+    #     from ccpn.ui.gui.popups.ShortcutsPopup import ShortcutsPopup
+    #
+    #     ShortcutsPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow).exec_()
 
     def runMacro(self, macroFile: str = None, extraCommands=None):
         """

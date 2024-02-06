@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-05 16:02:48 +0000 (Mon, February 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-06 15:19:48 +0000 (Tue, February 06, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -475,7 +475,7 @@ def _estimateVolumesItem(menuId):
     return _SCMitem(name='Estimate Peak Volumes...',
                     typeItem=ItemTypes.get(ITEM), toolTip='Estimate peak volume(s)', shortcut='EV',
                     stripMethodName=f'_estimateVolumesItem{menuId}',
-                    callback=_app.showEstimateVolumesPopup)
+                    callback=_app.mainWindow._showEstimateVolumesPopup)
 
 
 def _estimateCurrentVolumesItem():
@@ -484,7 +484,7 @@ def _estimateCurrentVolumesItem():
     _app = getApplication()
     return _SCMitem(name='Estimate Current Peak Volume(s)',
                     typeItem=ItemTypes.get(ITEM), toolTip='Estimate peak volumes for the currently selected peaks', shortcut='EC',
-                    callback=_app.showEstimateCurrentVolumesPopup)
+                    callback=_app.mainWindow._showEstimateCurrentVolumesPopup)
 
 
 def _recalculatePeakHeightsItem():

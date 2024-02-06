@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-05 18:40:46 +0000 (Mon, February 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-06 13:52:51 +0000 (Tue, February 06, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -29,10 +29,11 @@ __date__ = "$Date: 2017-07-04 15:21:16 +0000 (Tue, July 04, 2017) $"
 #=========================================================================================
 
 import pandas as pd
-from bs4 import BeautifulSoup
+import re
 from functools import partial
 from ccpn.util.AttrDict import AttrDict
 from ccpn.framework.Application import getProject
+from html.parser import HTMLParser
 from ccpn.core.Chain import Chain
 from ccpn.core.lib.ChainLib import SequenceHandler, CCPCODE, CODE1LETTER, CODE3LETTER, ISVALID, ISSTANDARD, INPUT, ERRORS, _copySequenceToClipboard
 from ccpn.core.lib.MoleculeLib import _nextChainCode
@@ -66,6 +67,58 @@ def divideChunks(l, n):
   for i in range(0, len(l), n):
     yield l[i:i + n]
 
+
+class _HTMLSequenceEditorParser(HTMLParser):
+    """ This is a custom parser to ensure the SequenceEditor.plainText works properly and without any subscripts.
+    html to plainText
+     Note: This class could be redundant if we had BeautifulSoup:
+     html to plainText  could be achieved with BeautifulSoup package in a couple E.g.:
+
+     >>>   def toPlainText(self:SequenceEditor): ...
+            soup = BeautifulSoup(html_string, 'html.parser')
+            subscripts = soup.find_all('span', style=lambda value: value and 'vertical-align:sub' in value)
+            for sub in subscripts:
+                sub.decompose()
+            return soup.getText(' ', strip=True)
+
+     """
+
+    def __init__(self):
+        super().__init__()
+        self.text = ""
+        self.inStyle = False
+        self.inSubscript = False
+        self.firstDataEncountered = False
+
+    def feed(self, data: str) -> None:
+        index = data.find("<!DOCTYPE")
+        # If "<!DOCTYPE" is found, remove everything before it
+        if index != -1:
+            data = data[index:]
+        return super().feed(data)
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "style":
+            self.inStyle = True
+        elif tag == "span":
+            for attr in attrs:
+                if attr[0] == "style" and "vertical-align:sub" in attr[1]:
+                    self.inSubscript = True
+
+    def handle_endtag(self, tag):
+        if tag == "style":
+            self.inStyle = False
+        elif tag == "span":
+            self.inSubscript = False
+
+    def handle_data(self, data):
+        if not self.inStyle and not self.inSubscript and data.strip():
+            if not self.firstDataEncountered:
+                self.text += data.strip() + " "
+                self.firstDataEncountered = True
+            else:
+                self.text += data.strip() + " "
+
 class _SequenceTextEditorBase(TextEditor):
     textChangedSignal = pyqtSignal()
     _codeType = CODE1LETTER
@@ -95,15 +148,10 @@ class _SequenceTextEditorBase(TextEditor):
 
 
     def toPlainText(self):
-        html_string = self.toHtml()
-        soup = BeautifulSoup(html_string, 'html.parser')
-        # Find and extract all <span> tags with style attribute for subscript
-        subscripts = soup.find_all('span', style=lambda value: value and 'vertical-align:sub' in value)
-        # Remove the found <span> tags
-        for sub in subscripts:
-            sub.decompose()
-        textStrip = soup.getText(' ', strip=True)
-        return textStrip
+        htmlString = self.toHtml()
+        parser = _HTMLSequenceEditorParser()
+        parser.feed(htmlString)
+        return parser.text.strip()
 
     def setHtmlSequence(self, sequence:str):
         df = self._sequenceToDataFrame(sequence)
@@ -225,7 +273,6 @@ class _SequenceTextEditorBase(TextEditor):
         with self.blockWidgetSignals():
             self.setPlainSequence(text)
         self._htmlFormattingMode = False
-
 
     def _getMolType(self):
         return self.parentPopup.molTypePulldown.get()

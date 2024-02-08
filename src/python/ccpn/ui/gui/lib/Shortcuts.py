@@ -4,9 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-11-15 11:58:49 +0000 (Wed, November 15, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-02-08 15:49:38 +0000 (Thu, February 08, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -194,7 +194,7 @@ def addShortCut(keys=None, obj=None, func=None, context=None):
     :param func - function to attach:
     :param context - context; e.g., WidgetShortcut|ApplicationShortcut:
     """
-    from ccpn.ui.gui.lib.GuiMainWindow import GuiMainWindow
+    from ccpn.ui.gui.MainWindow import MainWindow
     if isinstance(keys, str):
         # print(keys, func)
         keys = QtGui.QKeySequence(keys)
@@ -202,7 +202,7 @@ def addShortCut(keys=None, obj=None, func=None, context=None):
     shortcut = QtWidgets.QShortcut(keys, obj, func, context=context)
     storeShortcut(keys, obj, func, context, shortcut)
     tl =  keys.toString()
-    if isinstance(obj, GuiMainWindow):
+    if isinstance(obj, MainWindow):
         obj._storeShortcut(tl,func)
     return shortcut
 

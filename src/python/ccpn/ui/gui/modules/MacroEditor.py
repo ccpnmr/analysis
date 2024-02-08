@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-01-25 17:22:05 +0000 (Thu, January 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-08 14:20:04 +0000 (Thu, February 08, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -28,8 +28,11 @@ import os
 import datetime
 import tempfile
 from collections import OrderedDict as od
+
+from PyQt5.QtWidgets import QLabel
 from pyqode.python.widgets import PyInteractiveConsole
 from pyqode.core.api import TextHelper
+from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
 from ccpn.framework.PathsAndUrls import macroPath as ccpnMacroPath
 from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
@@ -81,7 +84,7 @@ ShowMaxLines = OrderedDict([
     
     - add local history of files.
      E.g.: dumping to json every xMinutes
-     This is not "simply" and undo. But will allow to add a GUI with a preview to older states and recover it. (bit like Pycharm)
+     This is not "simply" an undo. But will allow to add a GUI with a preview to older states and recover it. (bit like Pycharm)
         macros_dir 
             myMacro.py
             myMacro_history.json
@@ -91,6 +94,7 @@ ShowMaxLines = OrderedDict([
                   }
     - add pre-defined code blocks. E.g.: ccpn common commands or common imports
 '''
+
 
 class MacroEditor(CcpnModule):
     """
@@ -206,13 +210,19 @@ class MacroEditor(CcpnModule):
     def _createWidgetSettings(self):
         hGrid = 0
         from ccpn.ui.gui.widgets import CompoundWidgets as CW
-
         self.safeProfileFileCheckBox = CW.CheckBoxCompoundWidget(self.settingsWidget,
                                                        labelText='Save Profiler to disk',
-                                                       checked=True,
+                                                       checked=self.preferences.general.macroSaveProfile, # True,
                                                        orientation='left', hAlign='left',
                                                        tipText='When running with the Profiler, save the stats to disk '
                                                                '(in the same dir as the running macro)',
+                                                       grid=(hGrid, 0), gridSpan=(1, 1))
+        hGrid += 1
+        self.autoSaveCheckBox = CW.CheckBoxCompoundWidget(self.settingsWidget,
+                                                       labelText='Autosave',
+                                                       checked=self.preferences.general.macroAutosave,  # True,
+                                                       orientation='left', hAlign='left',
+                                                       tipText='Code written in the macro editor will automatically save',
                                                        grid=(hGrid, 0), gridSpan=(1, 1))
         hGrid +=1
         sortingModes = PROFILING_SORTINGS.keys()
@@ -238,13 +248,16 @@ class MacroEditor(CcpnModule):
                                                                      toolTips=showLinesTipText,
                                                                      compoundKwds={'hAlign':'left',},
                                                                      grid=(hGrid, 0), gridSpan=(1, 1))
+        hGrid += 1
+
+        self.warningLabel = Label(parent=self.settingsWidget,
+                                  text="Settings only apply to this instance\nof the macro editor",
+                                  vAlign='centre',
+                                  grid=(hGrid, 0))
 
     def runBlocked(self):
-        from ccpn.core.lib.ContextManagers import undoBlock
-        from ccpn.core.lib.ContextManagers import notificationEchoBlocking
-
         with undoBlock():
-            self.application.ui.echoCommands([f'macroEditor.run({self.filePath})'])
+            self.application.ui.echoCommands([f'macroEditor.run({os.path.basename(self.filePath)})'])
             with notificationEchoBlocking():
                 self.run()
 
@@ -321,7 +334,7 @@ class MacroEditor(CcpnModule):
             self._saveTextToFile()
             self.openPath(filePath)
         else:
-            self._checkFileStauts()
+            self._checkFileStatus()
 
     def exportToPdf(self):
         self.textEditor.saveToPDF()
@@ -336,9 +349,12 @@ class MacroEditor(CcpnModule):
                 else:
                     with open(aPath(filePath), 'r') as f:
                         self.textEditor.textChanged.disconnect()
+                        self.textEditor.setUndoRedoEnabled(False)
                         self.textEditor.clear()
-                        for line in f.readlines():
-                            self.textEditor.insertPlainText(line)
+                        # for line in f.readlines():  # changed to f.read() instead of line by line.
+                        #     self.textEditor.insertPlainText(line)
+                        self.textEditor.insertPlainText(f.read())
+                        self.textEditor.setUndoRedoEnabled(True)
                         # self.macroFile = f
                         self._removeMacroFromCurrent()
                         self.filePath = filePath
@@ -365,14 +381,15 @@ class MacroEditor(CcpnModule):
             self.textEditor.insertPlainText(self._preEditorText)
 
     def _textedChanged(self, *args):
-        self.saveMacro()
-        self.textEditor._on_text_changed()
-        self._lastTimestp = os.stat(self.filePath).st_mtime
+        if self.autoSaveCheckBox.isChecked():
+            self.saveMacro()
+            self.textEditor._on_text_changed()
+            self._lastTimestp = os.stat(self.filePath).st_mtime
 
     def _focusInEvent(self, *ags):
-        self._checkFileStauts(*ags)
+        self._checkFileStatus(*ags)
 
-    def _checkFileStauts(self, *args):
+    def _checkFileStatus(self, *args):
         nf = 'File not found. Deleted or renamed externally. It will be recreated automatically'
         if not os.path.exists(self.filePath):
             getLogger().warning(nf)
@@ -409,6 +426,13 @@ class MacroEditor(CcpnModule):
                 ('toolTip', 'Open a Python File'),
                 ('icon', Icon('icons/document_open_recent')),
                 ('callback', self._openMacroFile),
+                ('enabled', True)
+                ))),
+            ('Save', od((
+                ('text', 'Save'),
+                ('toolTip', 'Save file'),
+                ('icon', Icon('icons/save')),
+                ('callback', self.saveMacro),
                 ('enabled', True)
                 ))),
             ('Save as', od((
@@ -649,7 +673,6 @@ class MacroEditor(CcpnModule):
             self.current.removeMacroFile(self.filePath)
 
     def _isDirty(self):
-
         if self._preEditorText != self.textEditor.get():
             return self._lastSaved != self.textEditor.get()
         return False

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-02-06 10:34:48 +0000 (Tue, February 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-08 14:17:43 +0000 (Thu, February 08, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -738,12 +738,27 @@ class Multiplet(AbstractWrapperObject):
         with undoBlock():
             self.mergeOnlyMultiplets(multiplets)
             self.addPeaks(alonePeaks)
+            self._unifyAssignments()
 
     #===========================================================================================
     # new<Object> and other methods
     # Call appropriate routines in their respective locations
     #===========================================================================================
 
+    def _unifyAssignments(self):
+        """Force all peaks in the multiplet to share assignments"""
+        axisCodes = self.axisCodes
+        assignments = [[] for _ in axisCodes]
+        for pk in self.peaks:
+            dimensionMapping = pk.spectrum.getByAxisCodes('dimensions', axisCodes, exactMatch=False)
+            if pk.assignedNmrAtoms:
+                [a] = pk.getByDimensions('assignedNmrAtoms', dimensionMapping)
+                for dim in range(len(assignments)):
+                    if a[dim] not in assignments[dim] and a[dim] is not None:
+                        assignments[dim].append(a[dim])
+
+        for pk in self.peaks:
+            pk.assignDimensions(axisCodes, assignments)
 
 #=========================================================================================
 # Connections to parents
@@ -815,32 +830,32 @@ def _newAPIMultiplet(self: MultipletList,
 
     return result
 
-
-def _assignNewMultipletPeaks(self, peaks):
-    peakList = makeIterableList(peaks)
-    pks = [self.project.getByPid(peak) if isinstance(peak, str) else peak
-           for peak in peakList]
-
-    for pp in pks:
-        if not isinstance(pp, Peak):
-            raise TypeError(f'newMultiplet: {pp} is not of type Peak')
-
-    assignment = []
-    doAssign = False
-    for pk in pks:
-        tempAssign = pk.assignedNmrAtoms
-        if not assignment:  # nothing assigned yet
-            assignment = tempAssign
-            assignPeak = pk
-            doAssign = True
-            # assignPeak = {'peak': pk, 'assigns': pk.assignedNmrAtoms}
-        elif assignment != tempAssign and len(tempAssign) != 0:  # if non matching assigned that isnt empty
-            doAssign = False
-            break
-
-    if doAssign:
-        for pk in pks:
-            assignPeak.copyAssignmentTo(pk)
+# changed after multiplet discussion feb 2 2024
+# def _assignNewMultipletPeaks(self, peaks):
+#     peakList = makeIterableList(peaks)
+#     pks = [self.project.getByPid(peak) if isinstance(peak, str) else peak
+#            for peak in peakList]
+#
+#     for pp in pks:
+#         if not isinstance(pp, Peak):
+#             raise TypeError(f'newMultiplet: {pp} is not of type Peak')
+#
+#     assignment = []
+#     doAssign = False
+#     for pk in pks:
+#         tempAssign = pk.assignedNmrAtoms
+#         if not assignment:  # nothing assigned yet
+#             assignment = tempAssign
+#             assignPeak = pk
+#             doAssign = True
+#             # assignPeak = {'peak': pk, 'assigns': pk.assignedNmrAtoms}
+#         elif assignment != tempAssign and len(tempAssign) != 0:  # if non matching assigned that isnt empty
+#             doAssign = False
+#             break
+#
+#     if doAssign:
+#         for pk in pks:
+#             assignPeak.copyAssignmentTo(pk)
 
 
 def _newMultiplet(self: MultipletList,
@@ -875,8 +890,8 @@ def _newMultiplet(self: MultipletList,
     :return:
     """
     with undoBlock():
-        _assignNewMultipletPeaks(self, peaks)
         result = _newAPIMultiplet(**locals())
+        result._unifyAssignments()
         return result
 
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-05 17:32:46 +0000 (Mon, February 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-08 15:13:29 +0000 (Thu, February 08, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -386,7 +386,8 @@ def _createChain(self: Project, compoundName: str = None,
         sequenceMap = sequenceHandler.parseSequence(sequence)
         isValid = sequenceMap[ISVALID]
         if not isValid:
-            errors = ', '.join(sequenceMap.get(ERRORS, []))
+            errorsIndices = sequenceMap.get(ERRORS, [])
+            errors = ', '.join(map(str, errorsIndices))
             msg = f'''The given sequence is not valid. Found errors at positions(s): {errors} '''
             raise RuntimeError(msg)
         ccpCodes = sequenceMap.get(CCPCODE)

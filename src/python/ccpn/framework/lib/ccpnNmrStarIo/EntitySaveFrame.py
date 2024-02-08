@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-08 14:58:39 +0000 (Thu, February 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-08 15:13:29 +0000 (Thu, February 08, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -51,6 +51,7 @@ class EntitySaveFrame(SaveFrameABC):
     # These keys map the row onto the V3 ChemicalShift object
     _SEQUENCE_CODE_TAG = 'comp_index_id'
     _RESIDUE_TYPE_TAG = 'mon_id'
+    _POLYMER_TYPE = 'polymer_type'
 
     @property
     def residues(self) ->list :
@@ -65,15 +66,16 @@ class EntitySaveFrame(SaveFrameABC):
         Translate the Polymer_type from BMRB to molType used in Ccpn
         :return:
         """
-        polymerType = self.get('polymer_type')
         polymerTypes = {'polydeoxyribonucleotide' : 'DNA',
                                     'polyribonucleotide':'RNA',
                                     'polypeptide(L)':'protein',
                                     'polypeptide(D)': 'protein',
                                     'cyclic-pseudo-peptide': 'protein',
                                     'other': 'other',
+                                    # 'polysaccharide(D)': 'polysaccharide', Not yet supported
+                                    # 'polydeoxyribonucleotide/polyribonucleotide hybrid' : 'DNA/RNA', Not yet supported
                                     }
-        molType = polymerTypes.get(polymerType, 'other')
+        molType = polymerTypes.get( self.get(self._POLYMER_TYPE), 'other')
         return molType
 
     def importIntoProject(self, project) -> list:

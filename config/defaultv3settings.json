@@ -121,7 +121,11 @@
         "multipletArrowsEnabled"               : true,
         "arrowMinimum"                         : 25,
         "peakPicker1d"                         : "PeakPicker1D",
-        "peakPickerNd"                         : "PeakPickerNd"
+        "peakPickerNd"                         : "PeakPickerNd",
+        "macroAutosave"                        : true,
+        "macroSaveProfile"                     : true,
+        "macroSortProfile"                     : "time",
+        "macroShowLines"                       : "Minimal"
     },
     "proxySettings"    : {
         "verifySSL"        : true,

@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-08 15:13:29 +0000 (Thu, February 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-08 15:21:38 +0000 (Thu, February 08, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -72,8 +72,8 @@ class EntitySaveFrame(SaveFrameABC):
                                     'polypeptide(D)': 'protein',
                                     'cyclic-pseudo-peptide': 'protein',
                                     'other': 'other',
-                                    # 'polysaccharide(D)': 'polysaccharide', Not yet supported
-                                    # 'polydeoxyribonucleotide/polyribonucleotide hybrid' : 'DNA/RNA', Not yet supported
+                                    'polysaccharide(D)': 'polysaccharide', #Not yet supported
+                                    'polydeoxyribonucleotide/polyribonucleotide hybrid' : 'DNA/RNA', #Not yet supported
                                     }
         molType = polymerTypes.get( self.get(self._POLYMER_TYPE), 'other')
         return molType
@@ -93,15 +93,18 @@ class EntitySaveFrame(SaveFrameABC):
             startNumber = min([res[self._SEQUENCE_CODE_TAG] for res in self.residues])
 
         molType = self.molType()
-        chain = project.newChain(shortName=chainCode, molType=molType,
-                                 sequence=sequence, startNumber=startNumber,
-                                 comment=comment)
+        try:
+            chain = project.newChain(shortName=chainCode, molType=molType,
+                                     sequence=sequence, startNumber=startNumber,
+                                     comment=comment)
 
-        text = f'\n==> saveFrame "{self.name}"\n'
-        text += f'Imported as {chain}  ({len(chain.residues)} Residues, {len(chain.atoms)} Atoms)\n'
-        self.parent.note.appendText(text)
-
-        return [chain]
+            text = f'\n==> saveFrame "{self.name}"\n'
+            text += f'Imported as {chain}  ({len(chain.residues)} Residues, {len(chain.atoms)} Atoms)\n'
+            self.parent.note.appendText(text)
+            return [chain]
+        except Exception as error:
+            getLogger().warn(f'Error creating chain {chainCode}: {error}')
+        return []
 
 EntitySaveFrame._registerSaveFrame()
 

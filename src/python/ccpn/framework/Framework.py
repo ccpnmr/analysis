@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-06 15:19:48 +0000 (Tue, February 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-08 14:53:59 +0000 (Thu, February 08, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -266,6 +266,13 @@ class Framework(NotifierBase, GuiBase):
     #-----------------------------------------------------------------------------------------
     # properties of Framework
     #-----------------------------------------------------------------------------------------
+
+    @property
+    def application(self):
+        """:return application; i.e. self
+        To retain consistency across top-level objects having access to application, project, current and mainWindow
+        """
+        return self
 
     @property
     def ui(self):

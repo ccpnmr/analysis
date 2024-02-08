@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-01-24 16:54:54 +0000 (Wed, January 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-08 14:53:59 +0000 (Thu, February 08, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1046,7 +1046,8 @@ class Project(AbstractWrapperObject):
         return self._application
 
     # GWV: 20181102: insert _appBase to retain consistency with current data loading models
-    _appBase = application
+    # GWV: 20240208: removed
+    # _appBase = application
 
     @property
     def isNew(self):

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-06 15:19:48 +0000 (Tue, February 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-08 14:53:59 +0000 (Thu, February 08, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -156,7 +156,7 @@ class GuiBase(object):
         _fillRecentProjectsMenu in GuiMainWindow
 
         """
-        app = self
+        app = self.application
         gui = self.ui
 
         self._menuSpec = ms = []
@@ -200,8 +200,8 @@ class GuiBase(object):
         ),
 
         ('Edit', [
-            ("Undo", app.undo, [('shortcut', '⌃z')]),  # Unicode U+2303, NOT the carrot on your keyboard.
-            ("Redo", app.redo, [('shortcut', '⌃y')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+            ("Undo", self._undoCallback, [('shortcut', '⌃z')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+            ("Redo", self._redoCallback, [('shortcut', '⌃y')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             (),
 
             ("Cut", self._nyi, [('shortcut', '⌃x'), ('enabled', False)]),
@@ -286,7 +286,7 @@ class GuiBase(object):
 
         ('Molecules', [
             ("New Chain...", self._createChainCallback),
-            ("Chain from FASTA...", self._loadDataCallback),
+            ("New Chain from FASTA...", self._loadDataCallback),
             (),
             ("Load ChemComp from Xml...", self._loadDataCallback),
             ("Edit Molecular Bonds", self._editMolecularBondsCallback, ),
@@ -319,26 +319,14 @@ class GuiBase(object):
             (PLUGINSMENU, ()),
             ]
         ),
-        ])
 
-        if app._isInDebugMode:
-            ms.append(
-        ('Development', [
-                ("Set debug off", partial(app.setDebug, 0)),
-                ("Set debug level 1", partial(app.setDebug, 1)),
-                ("Set debug level 2", partial(app.setDebug, 2)),
-                ("Set debug level 3", partial(app.setDebug, 3)),
-                ]
-        ))
-
-        ms.append(
         ('Help', [
             (TUTORIALSMENU, ([
                 ("None", None, [('checkable', True), ('checked', False)])
                 ])
              ),
-            ("Show Tip of the Day", partial(self._displayTipOfTheDay, standalone=True)),
-            ("Key Concepts", self._displayKeyConcepts),
+            ("Show Tip of the Day", partial(app._displayTipOfTheDay, standalone=True)),
+            ("Key Concepts", app._displayKeyConcepts),
             ("Show Shortcuts", self._showShortcuts),
             ("Show API Documentation", self._showVersion3Documentation),
             ("Show License", self._showCcpnLicense),
@@ -354,6 +342,19 @@ class GuiBase(object):
             (),
             ("About CcpNmr V3...", self._showAboutPopup),
             ]
+         ),
+
+        ])
+
+        # optionally add debug menu
+        if app._isInDebugMode:
+            ms.insert( -1,
+        ('Development', [
+                ("Set debug off", partial(app.setDebug, 0)),
+                ("Set debug level 1", partial(app.setDebug, 1)),
+                ("Set debug level 2", partial(app.setDebug, 2)),
+                ("Set debug level 3", partial(app.setDebug, 3)),
+                ]
         ))
 
     # GWV 25/1/24: moved to Gui.py
@@ -467,7 +468,7 @@ class GuiBase(object):
             self.ui.saveProjectAs()
 
         else:
-            self.saveProject()
+            self.application.saveProject()
 
     def _saveAsCallback(self):
         """Opens save Project as dialog box and saves project to path specified
@@ -477,7 +478,7 @@ class GuiBase(object):
 
     def _archiveProjectCallback(self):
 
-        if (path := self.saveToArchive()) is None:
+        if (path := self.application.saveToArchive()) is None:
             MessageDialog.showInfo('Archive Project',
                                    'Unable to archive Project')
 
@@ -499,7 +500,7 @@ class GuiBase(object):
         archivePath = dialog.selectedFile()
 
         if archivePath and \
-                (newProject := self.restoreFromArchive(archivePath)) is not None:
+                (newProject := self.application.restoreFromArchive(archivePath)) is not None:
             MessageDialog.showInfo('Restore from Archive',
                                    'Project restored as %s' % newProject.path)
 
@@ -517,20 +518,20 @@ class GuiBase(object):
 
     def _restoreLastSavedLayoutCallback(self):
         self.ui.mainWindow.moduleArea._closeAll()
-        Layout.restoreLayout(self.ui.mainWindow, self.layout, restoreSpectrumDisplay=True)
+        Layout.restoreLayout(self.ui.mainWindow, self.application.layout, restoreSpectrumDisplay=True)
 
     def _restoreLayoutFromFileCallback(self):
         if (path := _getOpenLayoutPath(self.mainWindow)) is None:
             return
-        self._restoreLayoutFromFile(path)
+        self.application._restoreLayoutFromFile(path)
 
     def _showProjectSummaryPopup(self):
         """Show the Project summary popup.
         """
         from ccpn.ui.gui.popups.ProjectSummaryPopup import ProjectSummaryPopup
         popup = ProjectSummaryPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, modal=True)
-        popup.show()
-        popup.raise_()
+        # popup.show()
+        # popup.raise_()
         popup.exec_()
 
     def _showApplicationPreferences(self):
@@ -538,7 +539,7 @@ class GuiBase(object):
         Displays Application Preferences Popup.
         """
         from ccpn.ui.gui.popups.PreferencesPopup import PreferencesPopup
-        popup = PreferencesPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, preferences=self.preferences)
+        popup = PreferencesPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, preferences=self.application.preferences)
         popup.exec_()
 
     def _quitCallback(self, event=None):
@@ -547,6 +548,20 @@ class GuiBase(object):
         Closes Application.
         """
         self.ui.mainWindow._closeEvent(event=event)
+
+    #-----------------------------------------------------------------------------------------
+    # Edit --> callback methods
+    #-----------------------------------------------------------------------------------------
+
+    def _undoCallback(self):
+        """Callback for Edit --> Undo
+        """
+        self.application.undo()
+
+    def _redoCallback(self):
+        """Callback for Edit --> Redo
+        """
+        self.application.redo()
 
     #-----------------------------------------------------------------------------------------
     # Spectra --> callback methods
@@ -675,17 +690,16 @@ class GuiBase(object):
     def _copyPeaksCallback(self):
         """Callback to display CopyPeaks popup
         """
-        if not self.project.peakLists:
-            getLogger().warning('Project has no Peak Lists. Peak Lists cannot be copied')
-            MessageDialog.showWarning('Project has no Peak Lists.', 'Peak Lists cannot be copied')
+        if not self.project.peaks:
+            getLogger().warning('Project has no Peaks: Peaks cannot be copied')
+            MessageDialog.showWarning('Project has no Peaks', 'Peaks cannot be copied')
             return
         else:
             from ccpn.ui.gui.popups.CopyPeaksPopup import CopyPeaks
             popup = CopyPeaks(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
             peaks = self.current.peaks
             popup._selectPeaks(peaks)
-            popup.exec()
-            popup.raise_()
+            popup.exec_()
 
     def _peakCollectionsCallback(self):
         if not self.project.spectra:
@@ -695,7 +709,7 @@ class GuiBase(object):
             from ccpn.ui.gui.popups.SeriesPeakCollectionPopup import SeriesPeakCollectionPopup
             popup = SeriesPeakCollectionPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
             popup.exec_()
-            return popup
+            # return popup
         
     def _estimateVolumesCallback(self):
         """
@@ -731,7 +745,6 @@ class GuiBase(object):
             MessageDialog.showWarning('Project contains no spectra.', 'Pseudo Spectrum to SpectrumGroup Popup cannot be displayed')
         else:
             from ccpn.ui.gui.popups.PseudoToSpectrumGroupPopup import PseudoToSpectrumGroupPopup
-
             popup = PseudoToSpectrumGroupPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
             popup.exec_()
 
@@ -809,8 +822,8 @@ class GuiBase(object):
         """Auto-arrange the peak/multiplet labels to minimise any overlaps.
         """
         if (strp := self.current.strip) is None:
-            getLogger().warning('No strip selected')
-
+            getLogger().warning('Arrange labels: No strip selected')
+            MessageDialog.showWarning('Arrange Labels', 'No strip selected')
         else:
             strp.spectrumDisplay.arrangeLabels()
 
@@ -818,8 +831,8 @@ class GuiBase(object):
         """Reset arrangement of peak/multiplet labels.
         """
         if (strp := self.current.strip) is None:
-            getLogger().warning('No strip selected')
-
+            getLogger().warning('Reset labels: No strip selected')
+            MessageDialog.showWarning('reset Labels', 'No strip selected')
         else:
             strp.spectrumDisplay.resetLabels()
 
@@ -860,7 +873,6 @@ class GuiBase(object):
         elif self.current.strip.spectrumDisplay.is1D:
             getLogger().warning('Flip axes: not permitted on 1D spectra')
             MessageDialog.showWarning('Flip axes', 'Not permitted on 1D spectra')
-
         else:
             from ccpn.ui.gui.popups.CopyStripFlippedAxesPopup import CopyStripFlippedSpectraPopup
 
@@ -881,10 +893,9 @@ class GuiBase(object):
         self.mainWindow.toggleConsole()
 
     def _toggleCrosshairCallback(self):
-        """Toggles whether crosshairs are displayed in all windows.
+        """Toggles whether crosshairs are displayed in all SpectrumDisplays.
         """
-        for window in self.project.windows:
-            window.toggleCrosshair()
+        self.mainWindow.toggleCrosshair()
 
     #-----------------------------------------------------------------------------------------
     # Molecules -->
@@ -939,40 +950,39 @@ class GuiBase(object):
 
     def _showBeginnersTutorial(self):
         from ccpn.framework.PathsAndUrls import beginnersTutorialPath
-        self._systemOpen(beginnersTutorialPath)
+        self.application._systemOpen(beginnersTutorialPath)
 
     def _showBackboneTutorial(self):
         from ccpn.framework.PathsAndUrls import backboneAssignmentTutorialPath
-        self._systemOpen(backboneAssignmentTutorialPath)
+        self.application._systemOpen(backboneAssignmentTutorialPath)
 
     def _showCSPtutorial(self):
         from ccpn.framework.PathsAndUrls import cspTutorialPath
-        self._systemOpen(cspTutorialPath)
+        self.application._systemOpen(cspTutorialPath)
 
     def _showScreenTutorial(self):
         from ccpn.framework.PathsAndUrls import screenTutorialPath
-
-        self._systemOpen(screenTutorialPath)
+        self.application._systemOpen(screenTutorialPath)
 
     def _showVersion3Documentation(self):
         """Displays CCPN wrapper documentation in a module.
         """
         from ccpn.framework.PathsAndUrls import ccpnDocumentationUrl, documentationPath
 
-        if self.preferences.appearance.useOnlineDocumentation:
-            self._showHtmlFile("Analysis Version-3 Documentation", ccpnDocumentationUrl)
+        if self.application.preferences.appearance.useOnlineDocumentation:
+            self.application._showHtmlFile("Analysis Version-3 Documentation", ccpnDocumentationUrl)
         else:
-            self._showHtmlFile("Analysis Version-3 Documentation", documentationPath)
+            self.application._showHtmlFile("Analysis Version-3 Documentation", documentationPath)
 
     def _showForum(self):
         """Displays Forum in a module.
         """
         from ccpn.framework.PathsAndUrls import ccpnForum
-        self._showHtmlFile("Analysis Version-3 Forum", ccpnForum)
+        self.application._showHtmlFile("Analysis Version-3 Forum", ccpnForum)
 
     def _showShortcuts(self):
         from ccpn.framework.PathsAndUrls import shortcutsPath
-        self._systemOpen(shortcutsPath)
+        self.application._systemOpen(shortcutsPath)
 
     def _showAboutPopup(self):
         from ccpn.ui.gui.popups.AboutPopup import AboutPopup
@@ -981,15 +991,15 @@ class GuiBase(object):
 
     def _showAboutCcpn(self):
         from ccpn.framework.PathsAndUrls import ccpnUrl
-        self._showHtmlFile("About CCPN", ccpnUrl)
+        self.application._showHtmlFile("About CCPN", ccpnUrl)
 
     def _showIssuesList(self):
         from ccpn.framework.PathsAndUrls import ccpnIssuesUrl
-        self._showHtmlFile("CCPN Issues", ccpnIssuesUrl)
+        self.application._showHtmlFile("CCPN Issues", ccpnIssuesUrl)
 
     def _showTutorials(self):
         from ccpn.framework.PathsAndUrls import ccpnTutorials
-        self._showHtmlFile("CCPN Tutorials", ccpnTutorials)
+        self.application._showHtmlFile("CCPN Tutorials", ccpnTutorials)
 
     def _showRegisterPopup(self):
         """Open the registration popup
@@ -998,7 +1008,7 @@ class GuiBase(object):
 
     def _showCcpnLicense(self):
         from ccpn.framework.PathsAndUrls import ccpnLicenceUrl
-        self._showHtmlFile("CCPN Licence", ccpnLicenceUrl)
+        self.application._showHtmlFile("CCPN Licence", ccpnLicenceUrl)
 
     def _showUpdatePopup(self):
         """Open the update popup
@@ -1026,8 +1036,7 @@ class GuiBase(object):
 
     def _showLicense(self):
         from ccpn.framework.PathsAndUrls import licensePath
-
-        self._showHtmlFile("CCPN Licence", licensePath)
+        self.application._showHtmlFile("CCPN Licence", licensePath)
 
     def _showSubmitMacroPopup(self):
         """Open the submit macro popup
@@ -1071,7 +1080,7 @@ class GuiBase(object):
         """Displays html files in program QT viewer or using native webbrowser
         depending on useNativeWebbrowser option in preferences
         """
-        useNative = self.preferences.general.useNativeWebbrowser
+        useNative = self.application.preferences.general.useNativeWebbrowser
 
         if useNative:
             import webbrowser

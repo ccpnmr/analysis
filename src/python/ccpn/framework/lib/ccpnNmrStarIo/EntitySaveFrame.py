@@ -4,9 +4,9 @@ Module to manage Star files in ccpn context
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                )
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -16,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:08 +0100 (Wed, October 12, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2024-02-08 14:58:39 +0000 (Thu, February 08, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -60,6 +60,22 @@ class EntitySaveFrame(SaveFrameABC):
             return []
         return _loop.data
 
+    def molType(self):
+        """
+        Translate the Polymer_type from BMRB to molType used in Ccpn
+        :return:
+        """
+        polymerType = self.get('polymer_type')
+        polymerTypes = {'polydeoxyribonucleotide' : 'DNA',
+                                    'polyribonucleotide':'RNA',
+                                    'polypeptide(L)':'protein',
+                                    'polypeptide(D)': 'protein',
+                                    'cyclic-pseudo-peptide': 'protein',
+                                    'other': 'other',
+                                    }
+        molType = polymerTypes.get(polymerType, 'other')
+        return molType
+
     def importIntoProject(self, project) -> list:
         """Import the data of self into project.
         :param project: a Project instance.
@@ -70,9 +86,12 @@ class EntitySaveFrame(SaveFrameABC):
         comment = f'Chain {chainCode} ({self.name}) from {self.entryName}'
 
         sequence = [res[self._RESIDUE_TYPE_TAG] for res in self.residues]
-        startNumber = min([res[self._SEQUENCE_CODE_TAG] for res in self.residues])
+        startNumber = 1
+        if len(sequence)>0:
+            startNumber = min([res[self._SEQUENCE_CODE_TAG] for res in self.residues])
 
-        chain = project.newChain(shortName=chainCode,
+        molType = self.molType()
+        chain = project.newChain(shortName=chainCode, molType=molType,
                                  sequence=sequence, startNumber=startNumber,
                                  comment=comment)
 

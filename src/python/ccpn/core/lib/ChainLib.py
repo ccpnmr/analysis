@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-05 18:33:10 +0000 (Mon, February 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-08 14:58:39 +0000 (Thu, February 08, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -150,7 +150,7 @@ class SequenceHandler():
         return result
 
     def setMoleculeType(self, moleculeType):
-        availableMolTypes = self._chemCompsData[MOLTYPE].values
+        availableMolTypes = self._chemCompsData[MOLTYPE].unique()
         if moleculeType not in availableMolTypes:
             raise ValueError(f'Molecule Type {moleculeType} is not recognised. Use one of:  {availableMolTypes}')
         self.moleculeType = moleculeType

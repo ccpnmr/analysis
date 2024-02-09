@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-06 15:19:48 +0000 (Tue, February 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-09 12:14:30 +0000 (Fri, February 09, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -58,8 +58,9 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Action import Action
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
-from ccpn.ui.gui.widgets.Menu import Menu, MenuBar, SHOWMODULESMENU, CCPNMACROSMENU, \
-    USERMACROSMENU, TUTORIALSMENU, PLUGINSMENU, CCPNPLUGINSMENU, HOWTOSMENU
+from ccpn.ui.gui.widgets.Menu import Menu, MenuBar
+from ccpn.ui.gui.Menus import VIEW_MENU, MACRO_MENU, USER_MACROS_MENU, SHOW_MODULES_MENU, \
+    CCPN_MACROS_MENU, TUTORIALS_MENU, PLUGINS_MENU, CCPN_PLUGINS_MENU, HOWTOS_MENU
 from ccpn.ui.gui.widgets.SideBar import SideBar  #,SideBar
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
@@ -527,7 +528,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         """
 
         self._menuBar = self.menuBar()
-        for m in self.application._menuSpec:
+        for m in self.ui._menuDefs:
             self._createMenu(m)
         self._menuBar.setNativeMenuBar(self.application.preferences.general.useNativeMenus)
 
@@ -545,31 +546,31 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         self._attachTutorialsMenuAction()
 
         # hide this option for now
-        modulesMenu = self.searchMenuAction(SHOWMODULESMENU)
+        modulesMenu = self.searchMenuAction(SHOW_MODULES_MENU)
         modulesMenu.setVisible(False)
 
     def _attachModulesMenuAction(self):
         # add a connect to call _fillModulesMenu when the menu item is about to show
         # so it is always up-to-date
-        modulesMenu = self.searchMenuAction(SHOWMODULESMENU)
+        modulesMenu = self.searchMenuAction(SHOW_MODULES_MENU)
         modulesMenu.aboutToShow.connect(self._fillModulesMenu)
 
     def _attachCCPNMacrosMenuAction(self):
         # add a connect to call _fillCCPNMacrosMenu when the menu item is about to show
         # so it is always up-to-date
-        modulesMenu = self.searchMenuAction(CCPNMACROSMENU)
+        modulesMenu = self.searchMenuAction(CCPN_MACROS_MENU)
         modulesMenu.aboutToShow.connect(self._fillCCPNMacrosMenu)
 
     def _attachUserMacrosMenuAction(self):
         # add a connect to call _fillUserMacrosMenu when the menu item is about to show
         # so it is always up-to-date
-        modulesMenu = self.searchMenuAction(USERMACROSMENU)
+        modulesMenu = self.searchMenuAction(USER_MACROS_MENU)
         modulesMenu.aboutToShow.connect(self._fillUserMacrosMenu)
 
     def _attachTutorialsMenuAction(self):
         # add a connect to call _fillTutorialsMenu when the menu item is about to show
         # so it is always up-to-date
-        modulesMenu = self.searchMenuAction(TUTORIALSMENU)
+        modulesMenu = self.searchMenuAction(TUTORIALS_MENU)
         modulesMenu.aboutToShow.connect(self._fillTutorialsMenu)
 
     def _createMenu(self, spec, targetMenu=None):
@@ -814,7 +815,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         targetMenu.addAction(action)
 
     def _fillModulesMenu(self):
-        modulesMenu = self.searchMenuAction(SHOWMODULESMENU)
+        modulesMenu = self.searchMenuAction(SHOW_MODULES_MENU)
         modulesMenu.clear()
 
         moduleSize = self.sideBar.size()
@@ -840,7 +841,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             getLogger().warning('Error expanding module: %s', module.name())
 
     def _fillCCPNMacrosMenu(self):
-        modulesMenu = self.searchMenuAction(CCPNMACROSMENU)
+        modulesMenu = self.searchMenuAction(CCPN_MACROS_MENU)
         modulesMenu.clear()
 
         from ccpn.framework.PathsAndUrls import macroPath
@@ -877,7 +878,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                                                  callback=partial(self._runCCPNMacro, file, self)))
 
     def _fillUserMacrosMenu(self):
-        modulesMenu = self.searchMenuAction(USERMACROSMENU)
+        modulesMenu = self.searchMenuAction(USER_MACROS_MENU)
         modulesMenu.clear()
 
         macroPath = self.application.preferences.general.userMacroPath
@@ -915,7 +916,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             getLogger().warning('Error running User Macro: %s' % str(filename))
 
     def _fillTutorialsMenu(self):
-        modulesMenu = self.searchMenuAction(TUTORIALSMENU)
+        modulesMenu = self.searchMenuAction(TUTORIALS_MENU)
         modulesMenu.clear()
         import ccpn.framework.PathsAndUrls as pa
         from ccpn.util.Path import aPath
@@ -952,7 +953,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         modulesMenu.addSeparator()
 
         # add the How-Tos submenu
-        howtosMenu = self._addMenu(HOWTOSMENU, modulesMenu)
+        howtosMenu = self._addMenu(HOWTOS_MENU, modulesMenu)
         howtosFiles = aPath(pa.howTosPath).listDirFiles('pdf')
         for filePath in sorted(howtosFiles, key=lambda ff: ff.basename):
             _label = camelCaseToString(filePath.basename)
@@ -1052,10 +1053,10 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
 
         from ccpn.plugins import loadedPlugins
 
-        pluginsMenu = self.searchMenuAction(CCPNPLUGINSMENU)
+        pluginsMenu = self.searchMenuAction(CCPN_PLUGINS_MENU)
         pluginsMenu.clear()
         for Plugin in loadedPlugins:
-            self._addPluginSubMenu(CCPNPLUGINSMENU, Plugin)
+            self._addPluginSubMenu(CCPN_PLUGINS_MENU, Plugin)
         pluginsMenu.addSeparator()
         pluginsMenu.addAction(Action(pluginsMenu, text='Reload',
                                      callback=self._reloadCcpnPlugins))
@@ -1085,10 +1086,10 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
 
         from ccpn.plugins import loadedUserPlugins
 
-        pluginsMenu = self.searchMenuAction(PLUGINSMENU)
+        pluginsMenu = self.searchMenuAction(PLUGINS_MENU)
         pluginsMenu.clear()
         for Plugin in loadedUserPlugins:
-            self._addPluginSubMenu(PLUGINSMENU, Plugin)
+            self._addPluginSubMenu(PLUGINS_MENU, Plugin)
         pluginsMenu.addSeparator()
         pluginsMenu.addAction(Action(pluginsMenu, text='Reload',
                                      callback=self._reloadUserPlugins))

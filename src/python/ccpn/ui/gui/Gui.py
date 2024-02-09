@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-05 12:07:04 +0000 (Mon, February 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-09 12:14:30 +0000 (Fri, February 09, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -45,6 +45,7 @@ from ccpn.core.lib.ContextManagers import notificationEchoBlocking, catchExcepti
 from ccpn.ui.Ui import Ui
 from ccpn.ui.gui import Layout
 from ccpn.ui.gui.guiSettings import LIGHT, DARK
+from ccpn.ui.gui.Menus import getMenuDefs
 
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup, NewTermsConditionsPopup
 from ccpn.ui.gui.widgets.Application import Application
@@ -179,7 +180,8 @@ class Gui(Ui):
         self._colourScheme = None
         self._setColourSchemeAndStyleSheet(application.args, application.preferences)
 
-        application._setupMenus()
+        # Get menu definitions; subclassed by various application-specific Gui's
+        self._menuDefs = self._getMenuDefs()
 
         self._initQtApp()
 
@@ -211,6 +213,13 @@ class Gui(Ui):
 
         # read the current system-fonts
         getSystemFonts()
+
+    def _getMenuDefs(self):
+        """:return the MenuDefs instance
+        Subclassed for modification in various AnalysisAssign, AnalysisScreen, ... programmes
+        """
+        from ccpn.ui.gui.Menus import getMenuDefs
+        return getMenuDefs()
 
     def _setColourSchemeAndStyleSheet(self, args, preferences):
         """Set the colourScheme and stylesheet as determined by arguments --dark, --light or preferences
@@ -494,7 +503,22 @@ class Gui(Ui):
     def _execUpdates(self):
         """Use the Update popup to execute any updates
         """
-        return self.application._showUpdatePopup()
+        from ccpn.framework.update.UpdatePopup import UpdatePopup
+        from ccpn.util import Url
+
+        # check valid internet connection first
+        if Url.checkInternetConnection():
+            updatePopup = UpdatePopup(parent=self.mainWindow, mainWindow=self.mainWindow)
+            updatePopup.exec_()
+
+            # if updates have been installed then popup the quit dialog with no cancel button
+            if updatePopup._updatesInstalled:
+                self.mainWindow._closeWindowFromUpdate(disableCancel=True)
+
+        else:
+            MessageDialog.showWarning('Check For Updates',
+                                      'Could not connect to the update server, please check your internet connection.')
+
 
     #-----------------------------------------------------------------------------------------
     # Helper methods

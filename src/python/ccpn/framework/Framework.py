@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-08 14:53:59 +0000 (Thu, February 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-09 12:14:30 +0000 (Fri, February 09, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -92,7 +92,7 @@ from ccpn.framework.PathsAndUrls import \
     CCPN_DIRECTORY_SUFFIX
 from ccpn.framework.lib.resources.Resources import Resources
 from ccpn.ui.gui.Gui import Gui
-from ccpn.ui.gui.GuiBase import GuiBase
+# from ccpn.ui.gui.GuiBase import GuiBase
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
@@ -129,7 +129,7 @@ MAXITEMLOGGING = 4
 # Framework
 #=========================================================================================
 
-class Framework(NotifierBase, GuiBase):
+class Framework(NotifierBase):
     """
     The Framework class is the base class for all applications.
     """
@@ -143,7 +143,7 @@ class Framework(NotifierBase, GuiBase):
     def __init__(self, args=Arguments()):
 
         NotifierBase.__init__(self)
-        GuiBase.__init__(self)
+        # GuiBase.__init__(self)
 
         printCreditsText(sys.stderr, self.applicationName, self.applicationVersion)
 
@@ -222,13 +222,6 @@ class Framework(NotifierBase, GuiBase):
         self._language = self._setLanguage()
 
         self.layout = None  # initialised by self._getUserLayout
-
-        # GWV these attributes should move to the GUI class (in 3.2x ??)
-        # For now, they are set in GuiBase and initialised by calls in Gui.__init_
-        # self._styleSheet = None
-        # self._colourScheme = None
-        # self._fontSettings = None
-        # self._menuSpec = None
 
         # set by _updateAutoBackup(), called from  _startApplication()
         self._autoBackupThread = None
@@ -461,6 +454,7 @@ class Framework(NotifierBase, GuiBase):
     def _getUI(self):
         """Get the user interface
         :return a Ui instance
+        Subclassed in various Analysis versions
         """
         if self.args.interface == 'Gui':
             from ccpn.ui.gui.Gui import Gui

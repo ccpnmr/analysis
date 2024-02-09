@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-09 12:14:30 +0000 (Fri, February 09, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-09 15:12:59 +0000 (Fri, February 09, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -84,7 +84,7 @@ from ccpn.framework.credits import printCreditsText
 from ccpn.framework.Current import Current
 from ccpn.framework.Translation import defaultLanguage
 from ccpn.framework.Translation import translator
-from ccpn.framework.Preferences import Preferences
+from ccpn.framework.Preferences import Preferences, RECENT_MACROS
 from ccpn.framework.PathsAndUrls import \
     userCcpnMacroPath, \
     tipOfTheDayConfig, \
@@ -2392,9 +2392,10 @@ class Framework(NotifierBase):
             if not macroFile:
                 return
 
-        if not macroFile in self.preferences.recentMacros:
+        _recentMacros = self.preferences.get(RECENT_MACROS, [])
+        if not macroFile in _recentMacros:
             if extraCommands is None:
-                self.preferences.recentMacros.append(macroFile)
+                self.preferences.addRecentMacro(macroFile)
         self.ui.mainWindow.pythonConsole._runMacro(macroFile, extraCommands=extraCommands)
 
     #################################################################################################

@@ -54,8 +54,8 @@
 #     NMRStarFileDialog
 #
 # from ccpn.ui.gui.widgets.Menu import \
-#     SHOW_MODULES_MENU, \
-#     CCPN_MACROS_MENU, \
+#     VIEW_SHOW_MODULES, \
+#     MACRO_RUN_CCPN, \
 #     TUTORIALS_MENU, \
 #     CCPN_PLUGINS_MENU, \
 #     PLUGINS_MENU
@@ -247,7 +247,7 @@
 #         #                                     )),
 #         #     ("Show/Hide Crosshairs", self._toggleCrosshairCallback, [('shortcut', 'ch')]),
 #         #     (),
-#         #     (SHOW_MODULES_MENU, ([
+#         #     (VIEW_SHOW_MODULES, ([
 #         #         ("None", None, [('checkable', True),
 #         #                         ('checked', False)])
 #         #         ])),
@@ -308,7 +308,7 @@
 #         #     (),
 #         #     ("Run...", app.runMacro, [('shortcut', 'rm')]),
 #         #     ("Run Recent", ()),
-#         #     (CCPN_MACROS_MENU, ([
+#         #     (MACRO_RUN_CCPN, ([
 #         #         ("None", None, [('checkable', True),
 #         #                         ('checked', False)])
 #         #         ])),

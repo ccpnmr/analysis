@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-09 12:14:30 +0000 (Fri, February 09, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-09 15:13:00 +0000 (Fri, February 09, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1125,3 +1125,34 @@ class Gui(Ui):
             result = self.application._loadData(spectrumLoaders)
 
         return result
+
+    def _flipArbitraryAxes(self, strip, usePosition=False):
+        """Flip arbitrary axes of strip (defaults to current.strip)
+        :param usePosition: Optionally use current cursor position
+        """
+        if strip is None:
+            strip = self.current.strip
+
+        if strip is None:
+            getLogger().warning('Flip axes: No strip')
+            MessageDialog.showWarning('Flip axes', 'No strip')
+            return
+
+        if strip.spectrumDisplay.is1D:
+            getLogger().warning('Flip axes: not permitted on 1D spectra')
+            MessageDialog.showWarning('Flip axes', 'Not permitted on 1D spectra')
+            return
+
+        from ccpn.ui.gui.popups.CopyStripFlippedAxesPopup import CopyStripFlippedSpectraPopup
+
+        try:
+            mDict = usePosition and self.current.mouseMovedDict[1]
+            positions = [poss[0] if (poss := mDict.get(ax)) else None
+                         for ax in strip.axisCodes] if usePosition else None
+            popup = CopyStripFlippedSpectraPopup(parent=self.mainWindow, mainWindow=self.ui.mainWindow,
+                                                 strip=strip, label=strip.id,
+                                                 positions=positions)
+            popup.exec_()
+
+        except Exception as es:
+            getLogger().warning(f'Cannot show popup: {es}')

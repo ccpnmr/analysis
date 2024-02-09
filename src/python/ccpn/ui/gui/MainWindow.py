@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-09 12:14:30 +0000 (Fri, February 09, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-09 15:13:00 +0000 (Fri, February 09, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -40,6 +40,8 @@ from ccpn.core.Project import Project
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
 
+from ccpn.framework.Preferences import getPreferences, RECENT_MACROS
+
 ## MainWindow class
 from ccpn.ui._implementation.Window import Window as _CoreClassMainWindow
 
@@ -59,8 +61,8 @@ from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Action import Action
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
 from ccpn.ui.gui.widgets.Menu import Menu, MenuBar
-from ccpn.ui.gui.Menus import VIEW_MENU, MACRO_MENU, USER_MACROS_MENU, SHOW_MODULES_MENU, \
-    CCPN_MACROS_MENU, TUTORIALS_MENU, PLUGINS_MENU, CCPN_PLUGINS_MENU, HOWTOS_MENU
+from ccpn.ui.gui.Menus import VIEW_MENU, MACRO_MENU, VIEW_SHOW_MODULES, \
+    MACRO_RUN_CCPN, TUTORIALS_MENU, PLUGINS_MENU, CCPN_PLUGINS_MENU, HOWTOS_MENU
 from ccpn.ui.gui.widgets.SideBar import SideBar  #,SideBar
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
@@ -546,26 +548,26 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         self._attachTutorialsMenuAction()
 
         # hide this option for now
-        modulesMenu = self.searchMenuAction(SHOW_MODULES_MENU)
+        modulesMenu = self.searchMenuAction(VIEW_SHOW_MODULES)
         modulesMenu.setVisible(False)
 
     def _attachModulesMenuAction(self):
         # add a connect to call _fillModulesMenu when the menu item is about to show
         # so it is always up-to-date
-        modulesMenu = self.searchMenuAction(SHOW_MODULES_MENU)
+        modulesMenu = self.searchMenuAction(VIEW_SHOW_MODULES)
         modulesMenu.aboutToShow.connect(self._fillModulesMenu)
 
     def _attachCCPNMacrosMenuAction(self):
         # add a connect to call _fillCCPNMacrosMenu when the menu item is about to show
         # so it is always up-to-date
-        modulesMenu = self.searchMenuAction(CCPN_MACROS_MENU)
+        modulesMenu = self.searchMenuAction(MACRO_RUN_CCPN)
         modulesMenu.aboutToShow.connect(self._fillCCPNMacrosMenu)
 
-    def _attachUserMacrosMenuAction(self):
-        # add a connect to call _fillUserMacrosMenu when the menu item is about to show
-        # so it is always up-to-date
-        modulesMenu = self.searchMenuAction(USER_MACROS_MENU)
-        modulesMenu.aboutToShow.connect(self._fillUserMacrosMenu)
+    # def _attachUserMacrosMenuAction(self):
+    #     # add a connect to call _fillUserMacrosMenu when the menu item is about to show
+    #     # so it is always up-to-date
+    #     modulesMenu = self.searchMenuAction(MACRO_RUN_USER)
+    #     modulesMenu.aboutToShow.connect(self._fillUserMacrosMenu)
 
     def _attachTutorialsMenuAction(self):
         # add a connect to call _fillTutorialsMenu when the menu item is about to show
@@ -739,59 +741,59 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                         callback=self._fillPredefinedLayoutMenu)
         prelayoutMenu.addAction(action)
 
-    def _fillMacrosMenu(self):
-        """
-        Populates recent macros menu with last ten macros ran.
-        """
-        #TODO: make sure that running a macro adds it to the prefs and calls this function
-
-        recentMacrosMenu = self.getMenuAction('Macro->Run Recent')
-        recentMacrosMenu.clear()
-
-        from ccpn.framework.PathsAndUrls import macroPath as ccpnMacroPath
-
-        try:
-            ccpnMacros = os.listdir(ccpnMacroPath)
-            ccpnMacros = [f for f in ccpnMacros if
-                          os.path.isfile(os.path.join(ccpnMacroPath, f))]
-            ccpnMacros = [f for f in ccpnMacros if f.split('.')[-1] == 'py']
-            ccpnMacros = [f for f in ccpnMacros if not f.startswith('.')]
-            ccpnMacros = [f for f in ccpnMacros if not f.startswith('_')]
-            ccpnMacros = sorted(ccpnMacros)
-
-            recentMacrosMenu.clear()
-            for macro in ccpnMacros:
-                action = Action(self, text=macro, translate=False,
-                                callback=partial(self.runMacro,
-                                                 macroFile=os.path.join(ccpnMacroPath, macro)))
-                recentMacrosMenu.addAction(action)
-            if len(ccpnMacros) > 0:
-                recentMacrosMenu.addSeparator()
-        except FileNotFoundError:
-            pass
+    # GWV 9/2/24: This code was never reached
+    # def _fillMacrosMenu(self):
+    #     """
+    #     Populates macros menu with ten macros ran.
+    #     """
+    #
+    #     recentMacrosMenu = self.getMenuAction('Macro->Run Recent')
+    #     recentMacrosMenu.clear()
+    #
+    #     from ccpn.framework.PathsAndUrls import macroPath as ccpnMacroPath
+    #
+    #     try:
+    #         ccpnMacros = os.listdir(ccpnMacroPath)
+    #         ccpnMacros = [f for f in ccpnMacros if
+    #                       os.path.isfile(os.path.join(ccpnMacroPath, f))]
+    #         ccpnMacros = [f for f in ccpnMacros if f.split('.')[-1] == 'py']
+    #         ccpnMacros = [f for f in ccpnMacros if not f.startswith('.')]
+    #         ccpnMacros = [f for f in ccpnMacros if not f.startswith('_')]
+    #         ccpnMacros = sorted(ccpnMacros)
+    #
+    #         recentMacrosMenu.clear()
+    #         for macro in ccpnMacros:
+    #             action = Action(self, text=macro, translate=False,
+    #                             callback=partial(self.runMacro,
+    #                                              macroFile=os.path.join(ccpnMacroPath, macro)))
+    #             recentMacrosMenu.addAction(action)
+    #         if len(ccpnMacros) > 0:
+    #             recentMacrosMenu.addSeparator()
+    #     except FileNotFoundError:
+    #         pass
 
     def _clearRecentMacros(self):
-        self.application.preferences.recentMacros = []
+        getPreferences().clearRecentMacros()
         self._fillRecentMacrosMenu()
 
     def _fillRecentMacrosMenu(self):
         """
         Populates recent macros menu with last ten macros ran.
-        TODO: make sure that running a macro adds it to the prefs and calls this function
         """
-        recentMacrosMenu = self.getMenuAction('Macro->Run Recent')
-        recentMacros = self.application.preferences.recentMacros
-        if len(recentMacros) < 0:
-            self._fillMacrosMenu()  #uses the default Macros
-
-        else:
-            recentMacros = recentMacros[-10:]
-            recentMacrosMenu.clear()
-            for recentMacro in sorted(recentMacros, reverse=True):
-                action = Action(self, text=recentMacro, translate=False,
-                                callback=partial(self.application.runMacro, macroFile=recentMacro))
-                recentMacrosMenu.addAction(action)
-            recentMacrosMenu.addSeparator()
+        from ccpn.ui.gui.Menus import MACRO_MENU, MACRO_RUN_RECENT
+        recentMacrosMenu = self.getMenuAction(f'{MACRO_MENU}->{MACRO_RUN_RECENT}')
+        recentMacros = getPreferences().get(RECENT_MACROS)
+        # if len(recentMacros) < 0:
+        #     self._fillMacrosMenu()  #uses the default Macros
+        #
+        # else:
+        #     recentMacros = recentMacros[-10:]
+        recentMacrosMenu.clear()
+        for recentMacro in sorted(recentMacros, reverse=True):
+            action = Action(self, text=recentMacro, translate=False,
+                            callback=partial(self.application.runMacro, macroFile=recentMacro))
+            recentMacrosMenu.addAction(action)
+        recentMacrosMenu.addSeparator()
 
         recentMacrosMenu.addAction(Action(recentMacrosMenu, text='Refresh',
                                           callback=self._fillRecentMacrosMenu))
@@ -815,7 +817,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         targetMenu.addAction(action)
 
     def _fillModulesMenu(self):
-        modulesMenu = self.searchMenuAction(SHOW_MODULES_MENU)
+        modulesMenu = self.searchMenuAction(VIEW_SHOW_MODULES)
         modulesMenu.clear()
 
         moduleSize = self.sideBar.size()
@@ -841,7 +843,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             getLogger().warning('Error expanding module: %s', module.name())
 
     def _fillCCPNMacrosMenu(self):
-        modulesMenu = self.searchMenuAction(CCPN_MACROS_MENU)
+        modulesMenu = self.searchMenuAction(MACRO_RUN_CCPN)
         modulesMenu.clear()
 
         from ccpn.framework.PathsAndUrls import macroPath
@@ -877,25 +879,25 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                     modulesMenu.addAction(Action(modulesMenu, text=os.path.basename(filename),
                                                  callback=partial(self._runCCPNMacro, file, self)))
 
-    def _fillUserMacrosMenu(self):
-        modulesMenu = self.searchMenuAction(USER_MACROS_MENU)
-        modulesMenu.clear()
-
-        macroPath = self.application.preferences.general.userMacroPath
-        from os import walk
-
-        # read the macros file directory - only top level
-        macroFiles = []
-        for (dirpath, dirnames, filenames) in walk(os.path.expanduser(macroPath)):
-            macroFiles.extend([os.path.join(dirpath, filename) for filename in filenames])
-            break
-
-        for file in macroFiles:
-            filename, fileExt = os.path.splitext(file)
-
-            if fileExt == '.py':
-                modulesMenu.addAction(Action(modulesMenu, text=os.path.basename(filename),
-                                             callback=partial(self._runUserMacro, file, self)))
+    # def _fillUserMacrosMenu(self):
+    #     modulesMenu = self.searchMenuAction(MACRO_RUN_USER)
+    #     modulesMenu.clear()
+    #
+    #     macroPath = self.application.preferences.general.userMacroPath
+    #     from os import walk
+    #
+    #     # read the macros file directory - only top level
+    #     macroFiles = []
+    #     for (dirpath, dirnames, filenames) in walk(os.path.expanduser(macroPath)):
+    #         macroFiles.extend([os.path.join(dirpath, filename) for filename in filenames])
+    #         break
+    #
+    #     for file in macroFiles:
+    #         filename, fileExt = os.path.splitext(file)
+    #
+    #         if fileExt == '.py':
+    #             modulesMenu.addAction(Action(modulesMenu, text=os.path.basename(filename),
+    #                                          callback=partial(self._runUserMacro, file, self)))
 
     def _runCCPNMacro(self, filename, modulesMenu):
         """Run a CCPN macro from the populated menu

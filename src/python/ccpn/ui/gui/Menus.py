@@ -89,7 +89,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-09 12:14:30 +0000 (Fri, February 09, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-09 15:13:00 +0000 (Fri, February 09, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -128,14 +128,18 @@ from ccpn.ui.gui.widgets.FileDialog import \
 
 
 VIEW_MENU = 'View'
-SHOW_MODULES_MENU = 'Show/hide Modules'
+VIEW_SHOW_MODULES = 'Show/hide Modules'
+
 MACRO_MENU = 'Macro'
-CCPN_MACROS_MENU = 'Run CCPN Macros'
-USER_MACROS_MENU = 'Run User Macros'
+MACRO_RUN_CCPN = 'Run CCPN Macros'
+MACRO_RUN_RECENT = 'Run Recent'
+
 TUTORIALS_MENU = 'Tutorials'
 HOWTOS_MENU = 'How-Tos'
 PLUGINS_MENU = 'User Plugins'
 CCPN_PLUGINS_MENU = 'CCPN Plugins'
+
+DYNAMIC_FILL = ()
 
 
 def getMenuDefs():
@@ -260,7 +264,7 @@ class MenusDefs(list):
                                             (" .. with X-Y Axes Flipped", self._flipXYAxisCallback, [('shortcut', 'xy')]),
                                             (" .. with X-Z Axes Flipped", self._flipXZAxisCallback, [('shortcut', 'xz')]),
                                             (" .. with Y-Z Axes Flipped", self._flipYZAxisCallback, [('shortcut', 'yz')]),
-                                            (" .. with Axes Flipped...", self._flipArbitraryAxisCallback, [('shortcut', 'fa')]),
+                                            (" .. with Axes Flipped...", self._flipArbitraryAxesCallback, [('shortcut', 'fa')]),
                                             (),
                                             ("Auto-arrange Labels", self._arrangeLabelsCallback, [('shortcut', 'av')]),
                                             ("Reset Labels", self._resetLabelsCallback, [('shortcut', 'rv')]),
@@ -268,10 +272,11 @@ class MenusDefs(list):
             ),
             ("Show/Hide Crosshairs", self._toggleCrosshairCallback, [('shortcut', 'ch')]),
             (),
-            (SHOW_MODULES_MENU, ([
-                                ("None", None, [('checkable', True), ('checked', False)])
-                ])
-             ),
+            # (VIEW_SHOW_MODULES, ([
+            #                     ("None", None, [('checkable', True), ('checked', False)])
+            #     ])
+            # ),
+            (VIEW_SHOW_MODULES, DYNAMIC_FILL),
             ("Python Console", self._toggleConsoleCallback, [('shortcut', '  ')]),
             ]
         ),
@@ -325,11 +330,8 @@ class MenusDefs(list):
             ("Open CCPN Macro...", partial(self._openMacroCallback, directory=macroPath)),
             (),
             ("Run...", app.runMacro, [('shortcut', 'rm')]),
-            ("Run Recent", ()),
-            (CCPN_MACROS_MENU, ([
-                ("None", None, [('checkable', True),('checked', False)])
-                ])
-             ),
+            (MACRO_RUN_RECENT, DYNAMIC_FILL),
+            (MACRO_RUN_CCPN, DYNAMIC_FILL),
             (),
             ("Define Macro Shortcuts...", self._defineUserShortcutsCallback, [('shortcut', 'du')]),
             ]
@@ -858,29 +860,10 @@ class MenusDefs(list):
             getLogger().warning('Flip YZ axes: No strip selected')
             MessageDialog.showWarning('Flip YZ axes', 'No strip selected')
 
-    def _flipArbitraryAxisCallback(self, usePosition=False):
+    def _flipArbitraryAxesCallback(self):
         """Callback to flip arbitrary axes
         """
-        if (strp := self.current.strip) is None:
-            getLogger().warning('Flip axes: No strip selected')
-            MessageDialog.showWarning('Flip axes', 'No strip selected')
-
-        elif self.current.strip.spectrumDisplay.is1D:
-            getLogger().warning('Flip axes: not permitted on 1D spectra')
-            MessageDialog.showWarning('Flip axes', 'Not permitted on 1D spectra')
-        else:
-            from ccpn.ui.gui.popups.CopyStripFlippedAxesPopup import CopyStripFlippedSpectraPopup
-
-            try:
-                mDict = usePosition and self.current.mouseMovedDict[1]
-                positions = [poss[0] if (poss := mDict.get(ax)) else None
-                             for ax in strp.axisCodes] if usePosition else None
-                popup = CopyStripFlippedSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
-                                                     strip=strp, label=strp.id,
-                                                     positions=positions)
-                popup.exec_()
-            except Exception as es:
-                getLogger().warning(f'Cannot show popup: {es}')
+        self.ui._flipArbitraryAxes(strip=self.current.strip, usePosition=False)
 
     def _toggleConsoleCallback(self):
         """Toggles whether python console is displayed at bottom of the main window.
@@ -1222,3 +1205,14 @@ def _getSaveLayoutPath(mainWindow):
 
     newPath.assureSuffix(jsonType)
     return newPath
+
+
+"""
+gui._updateCheckableMenuItems
+mainMwindow._createMenu  
+
+dynamic menus:; uses aboutToShow PyQt signal
+_fill ....
+How-to's menu
+
+"""

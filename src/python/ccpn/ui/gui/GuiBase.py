@@ -58,7 +58,7 @@
 #     MACRO_RUN_CCPN, \
 #     TUTORIALS_MENU, \
 #     CCPN_PLUGINS_MENU, \
-#     PLUGINS_MENU
+#     USER_PLUGINS_MENU
 #
 #
 # class GuiBase(object):
@@ -319,7 +319,7 @@
 #         #
 #         # ('Plugins', [
 #         #     (CCPN_PLUGINS_MENU, ()),
-#         #     (PLUGINS_MENU, ()),
+#         #     (USER_PLUGINS_MENU, ()),
 #         #     ]
 #         # ),
 #         #

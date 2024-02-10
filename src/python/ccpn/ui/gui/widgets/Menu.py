@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-09 15:13:00 +0000 (Fri, February 09, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-10 17:50:44 +0000 (Sat, February 10, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -41,7 +41,7 @@ from ccpn.ui.gui.widgets.Font import setWidgetFont
 # MACRO_RUN_USER = 'Run User Macros'
 # TUTORIALS_MENU = 'Tutorials'
 # HOWTOS_MENU = 'How-Tos'
-# PLUGINS_MENU = 'User Plugins'
+# USER_PLUGINS_MENU = 'User Plugins'
 # CCPN_PLUGINS_MENU = 'CCPN Plugins'
 
 

@@ -1,78 +1,12 @@
 """
-    The menus are specified by a list of lists (actually, an iterable of iterables, but the term
-    ‘list’ will be used here to mean any iterable).  Framework provides 7 menus: Project, Spectrum,
-    Molecules, View, Macro, Plugins, Help.  If you want to create your own menu in a subclass of
-    Framework, you need to create a list in the style described below, then call
-    self.addApplicationMenuSpec and pass in your menu specification list.
+    The menus are specified by a (recursive) list of lists of lists
+    (actually, an iterable of iterables of iterables, but the term ‘list’ will be used here to mean any iterable).
 
-    Menu specification lists are composed of two items, the first being a string which is the menu’s
-    title, the second is a list of sub-menu items.  Each item can be zero, two or three items long.
-    A zero-length list indicates a separator.  If the list is length two and the second item is a
-    list, then it specifies a sub-menu in a recursive manner.  If the list is length two and the
-    second item is callable, it specifies a menu action with the first item specifying the label
-    and the second the callable that is triggered when the menu item is selected.  If the list is
-    length three, it is treated as a menu item specification, with the third item a list of keyword,
-    value pairs.
-
-    The examples below may make this more clear…
-
-    Create a menu called ‘Test’ with two items and a separator:
-
-    | - Test
-    |   | - Item One
-    |   | - ------
-    |   | - Item Two
-
-    Where clicking on ‘Item One’ calls method self.itemOneMethod and clicking on ‘Item Two’
-    calls self.itemTwoMethod
-
-    |    def setupMenus(self):
-    |      menuSpec = (‘Test’, [(‘Item One’, self.itemOneMethod),
-    |                           (),
-    |                           (‘Item Two’, self.itemTwoMethod),
-    |                          ]
-    |      self.addApplicationMenuSpec(menuSpec)
-
-
-
-    More complicated menus are possible.  For example, to create the following menu
-
-    | - Test
-    |   | - Item A     ia
-    |   | - ------
-    |   | - Submenu B
-    |      | - Item B1
-    |      | - Item B2
-    |   | - Item C     id
-
-    where Item A can be activated using the two-key shortcut ‘ia’,
-    Submenu B contains two static menu items, B1 and B2
-    Submenu item B2 is checkable, but not checked by default
-    Item C is disabled by default and has a shortcut of ‘ic’
-
-    |   def setupMenus(self):
-    |     subMenuSpecB = [(‘Item B1’, self.itemB1),
-    |                     (‘Item B2’, self.itemB2, [(‘checkable’, True),
-    |                                               (‘checked’, False)])
-    |                    ]
-    |
-    |     menuSpec = (‘Test’, [(‘Item A’, self.itemA, [(‘shortcut’, ‘ia’)]),
-    |                          (),
-    |                          (‘Submenu B’, subMenuB),
-    |                          (‘Item C’, self.itemA, [(‘shortcut’, ‘ic’),
-    |                                                  (‘enabled’, False)]),
-    |                         ]
-    |     self.addApplicationMenuSpec(menuSpec)
-
-
-    If we’re using the PyQt GUI, we can get the Qt action representing Item B2 somewhere in our code
-    (for example, to change the checked status,) via:
-
-    |   action = application.ui.mainWindow.getMenuAction(‘Test->Submenu B->Item B2’)
-    |   action.setChecked(True)
-
-    To see how to add items dynamically, see clearRecentProjects in this class and
-    _fillRecentProjectsMenu in GuiMainWindow
+    Menu specification lists are composed of:
+    - A (name, callable) tuple or (name, callable, options) tuple that specifies a menu action with the callable
+      that is triggered when the menu item is selected. Options is a list of (keyword, value) pairs.
+    - A (name, list) tuple where the list defines the sub-menu items.
+    - A zero-length () tuple, that indicates a separator.
 
 """
 #=========================================================================================
@@ -89,7 +23,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-09 15:13:00 +0000 (Fri, February 09, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-10 17:50:44 +0000 (Sat, February 10, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -118,6 +52,8 @@ from ccpn.util.Common import isWindowsOS
 from ccpn.util.Logging import getLogger
 from ccpn.util.Path import aPath
 from ccpn.util.decorators import singleton
+from ccpn.util.Tree import Tree
+
 
 import ccpn.ui.gui.Layout as Layout
 from ccpn.ui.gui.widgets import MessageDialog
@@ -126,6 +62,10 @@ from ccpn.ui.gui.widgets.FileDialog import \
     LayoutsFileDialog, \
     NMRStarFileDialog
 
+
+FILE_MENU = 'File'
+FILE_OPEN_RECENT = 'Open Recent'
+FILE_RESTORE_FROM_ARCHIVE = 'Restore From Archive...'
 
 VIEW_MENU = 'View'
 VIEW_SHOW_MODULES = 'Show/hide Modules'
@@ -136,7 +76,9 @@ MACRO_RUN_RECENT = 'Run Recent'
 
 TUTORIALS_MENU = 'Tutorials'
 HOWTOS_MENU = 'How-Tos'
-PLUGINS_MENU = 'User Plugins'
+
+PLUGINS_MENU = 'Plugins'
+USER_PLUGINS_MENU = 'User Plugins'
 CCPN_PLUGINS_MENU = 'CCPN Plugins'
 
 DYNAMIC_FILL = ()
@@ -183,15 +125,15 @@ class MenusDefs(list):
         app = self.application
         ui = self.application.ui
 
-        self[:] = []
-
+        # Populate self
+        self.clear()
         self.extend([
 
-        ('File', [
+        (FILE_MENU, [
             ("New", self._newProjectCallback, [('shortcut', '⌃n')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             (),
             ("Open...", self._openProjectCallback, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the carrot on your keyboard.
-            ("Open Recent", ()),
+            (FILE_OPEN_RECENT, DYNAMIC_FILL),
 
             ("Load Data...", self._loadDataCallback, [('shortcut', 'ld')]),
             (),
@@ -210,12 +152,12 @@ class MenusDefs(list):
                         ("Restore last", self._restoreLastSavedLayoutCallback, [('enabled', True)]),
                         ("Restore from file...", self._restoreLayoutFromFileCallback, [('enabled', True)]),
                         (),
-                        ("Open pre-defined", ()),
+                        ("Open pre-defined", DYNAMIC_FILL),
 
                         )),
             ("Summary", self._showProjectSummaryPopup),
             ("Archive", self._archiveProjectCallback, [('enabled', False)]),
-            ("Restore From Archive...", self._restoreFromArchiveCallback, [('enabled', False)]),
+            (FILE_RESTORE_FROM_ARCHIVE, self._restoreFromArchiveCallback, [('enabled', False)]),
             (),
             ("Preferences...", self._showApplicationPreferences, [('shortcut', '⌃,')]),
             (),
@@ -272,10 +214,6 @@ class MenusDefs(list):
             ),
             ("Show/Hide Crosshairs", self._toggleCrosshairCallback, [('shortcut', 'ch')]),
             (),
-            # (VIEW_SHOW_MODULES, ([
-            #                     ("None", None, [('checkable', True), ('checked', False)])
-            #     ])
-            # ),
             (VIEW_SHOW_MODULES, DYNAMIC_FILL),
             ("Python Console", self._toggleConsoleCallback, [('shortcut', '  ')]),
             ]
@@ -337,9 +275,9 @@ class MenusDefs(list):
             ]
         ),
 
-        ('Plugins', [
-            (CCPN_PLUGINS_MENU, ()),
-            (PLUGINS_MENU, ()),
+        (PLUGINS_MENU, [
+            (CCPN_PLUGINS_MENU, DYNAMIC_FILL),
+            (USER_PLUGINS_MENU, DYNAMIC_FILL),
             ]
         ),
 
@@ -988,27 +926,6 @@ class MenusDefs(list):
         from ccpn.framework.PathsAndUrls import ccpnLicenceUrl
         self.application._showHtmlFile("CCPN Licence", ccpnLicenceUrl)
 
-    # GWV 9/2/24: to Gui
-    # def _showUpdatePopup(self):
-    #     """Open the update popup
-    #     CCPNINTERNAL: Also called from.Gui._executeUpdates
-    #     """
-    #     from ccpn.framework.update.UpdatePopup import UpdatePopup
-    #     from ccpn.util import Url
-    #
-    #     # check valid internet connection first
-    #     if Url.checkInternetConnection():
-    #         updatePopup = UpdatePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-    #         updatePopup.exec_()
-    #
-    #         # if updates have been installed then popup the quit dialog with no cancel button
-    #         if updatePopup._updatesInstalled:
-    #             self.ui.mainWindow._closeWindowFromUpdate(disableCancel=True)
-    #
-    #     else:
-    #         MessageDialog.showWarning('Check For Updates',
-    #                                   'Could not connect to the update server, please check your internet connection.')
-
     #-----------------------------------------------------------------------------------------
     # Inactive
     #-----------------------------------------------------------------------------------------
@@ -1051,6 +968,8 @@ class MenusDefs(list):
             MessageDialog.showWarning('Submit Feedback',
                                       'Could not connect to the server, please check your internet connection.')
 
+    def _getAsDict(self) -> dict:
+        """:return self as a dict-of-dict-of-ActionDict"""
     #-----------------------------------------------------------------------------------------
     # Implementation methods
     #-----------------------------------------------------------------------------------------
@@ -1113,35 +1032,6 @@ class MenusDefs(list):
         #  no matches found; return -1
         return -1
 
-    # GWV 24/1/24: moved to Gui.py
-    # def _updateCheckableMenuItems(self):
-    #     # This has to be kept in sync with menu items below which are checkable,
-    #     # and also with MODULE_DICT keys
-    #     # The code is terrible because Qt has no easy way to get hold of menus / actions
-    #
-    #     mainWindow = self.ui.mainWindow
-    #     if mainWindow is None:
-    #         # We have a UI with no mainWindow - nothing to do.
-    #         return
-    #
-    #     menuChildren = mainWindow.menuBar().findChildren(QtWidgets.QMenu)
-    #     if not menuChildren:
-    #         return
-    #
-    #     topActionDict = {}
-    #     for topMenu in menuChildren:
-    #         mainActionDict = {mainAction.text(): mainAction for mainAction in topMenu.actions()}
-    #
-    #         topActionDict[topMenu.title()] = mainActionDict
-    #
-    #     openModuleKeys = set(mainWindow.moduleArea.modules.keys())
-    #     for key, topActionText, mainActionText in (('SEQUENCE', 'Molecules', 'Show Sequence'),
-    #                                                ('PYTHON CONSOLE', 'View', 'Python Console')):
-    #         if key in openModuleKeys:
-    #             if mainActionDict := topActionDict.get(topActionText):
-    #                 if mainAction := mainActionDict.get(mainActionText):
-    #                     mainAction.setChecked(True)
-
     @staticmethod
     def _testShortcuts0():
         print('>>> Testing shortcuts0')
@@ -1149,16 +1039,6 @@ class MenusDefs(list):
     @staticmethod
     def _testShortcuts1():
         print('>>> Testing shortcuts1')
-
-    # GWV 22022/1/24: Copied from Ui
-    # def addMenu(self, name, position=None):
-    #     """
-    #     Add a menu specification for the top menu bar.
-    #     """
-    #     if position is None:
-    #         position = len(self._menuSpec)
-    #     self._menuSpec.insert(position, (str(name), []))
-
 
 #end class
 
@@ -1207,9 +1087,107 @@ def _getSaveLayoutPath(mainWindow):
     return newPath
 
 
+class MenuNode(dict, Tree):
+    """Just a class to define the MenuNode and store the Menu and Action objects
+    """
+    def __init__(self, parent, name, callback=None, isSeparator=False, isAction=False, options={}):
+
+        super().__init__()
+        Tree.__init__(self, parent=None)
+
+        # self.parent = parent
+        self.name = name
+        self.callback = callback
+        self.isSeparator = isSeparator
+        self.isAction = isAction
+        self.options = options
+
+        self.isDynamic = False
+        self.dynamicCallback = None
+
+        self.widget = None
+
+        if parent is not None:
+            parent._addChild(self)
+
+    @property
+    def level(self) -> int:
+        """
+        :return the level of the MenuNode in the nested structure (root has level 0)
+        """
+        return len(self.anchestors())
+        # _result = 0
+        # _node = self
+        # while _node.parent is not None:
+        #     _result += 1
+        #     _node = _node.parent
+        # return _result
+
+    def makeDynamic(self, callback):
+        """Make MenuNode a dynamically updated one, calling callback when it is about to show
+        """
+        self.isDynamic = True
+        self.dynamicCallback = callback
+        if self.widget is None:
+            raise RuntimeError('Cannot make MenuNode dynamic without a widget')
+        self.widget.aboutToShow.connect(callback)
+
+    def print(self):
+        """
+        print Tree of self with indentation
+        """
+        level = self.level
+        tabs = '\t'*level if level else ''
+        print(f'{tabs}{self}  {self.options}')
+        for key, val in self.items():
+            val.print()
+
+    def __str__(self):
+        return f'<MenuNode: {self.name}, level={self.level}>'
+
+    __repr__ = __str__
+
+
+def traverse(theList, parent=None, name='root') -> MenuNode:
+    """Traverse the menuDefs list, converting it to a nested MenuNode data structure.
+    """
+    result = MenuNode(parent=parent, name=name)
+    separatorIndex = 0  # This gives each separator a unique name
+
+    for item in theList:
+        if len(item) == 0:
+            name = f'separator_{separatorIndex}'
+            result[name] = MenuNode(parent=result, name=name, isSeparator=True)
+            separatorIndex += 1
+
+        elif len(item) == 1:
+            # this should not happen
+            raise RuntimeError('Invalid menu definitions')
+
+        elif len(item) == 2:
+            name = item[0]
+            if isinstance(item[1], (tuple, list)):
+                result[name]=traverse(item[1], parent=result, name=name)
+            elif callable(item[1]):
+                callback=item[1]
+                result[name]=MenuNode(parent=result, name=name, callback=callback, isAction=True)
+            else:
+                raise RuntimeError('Invalid menu definitions')
+
+        elif len(item) == 3:
+            name = item[0]
+            callback=item[1]
+            options = dict(item[2])
+            result[name] = MenuNode(parent=result, name=name, callback=callback, options=options)
+
+    return result
+
+
+
+
 """
 gui._updateCheckableMenuItems
-mainMwindow._createMenu  
+mainWindow._createMenu  
 
 dynamic menus:; uses aboutToShow PyQt signal
 _fill ....

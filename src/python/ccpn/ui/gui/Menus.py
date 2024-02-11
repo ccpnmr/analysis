@@ -4,9 +4,19 @@
 
     Menu specification lists are composed of:
     - A (name, callable) tuple or (name, callable, options) tuple that specifies a menu action with the callable
-      that is triggered when the menu item is selected. Options is a list of (keyword, value) pairs.
-    - A (name, list) tuple where the list defines the sub-menu items.
-    - A zero-length () tuple, that indicates a separator.
+      that is triggered when the menu item is selected. Options is a list or dict of (keyword, value) pairs.
+      Valid options (from Action widget):
+        :param shortcut: optional two letter shortcut
+        :param checked: optional checked flag (if checkable, default: True)
+        :param checkable: optional checkable flag (default: False)
+        :param icon: optional icon
+        :param enabled: optional enable flag (default: True)
+        :param toolTip: optional tooltip
+
+    - A (name, list) tuple where the list defines the sub-menu items. A zero-length list denotes a
+      dynamically filled menu
+
+    - A zero-length () tuple, indicating a separator.
 
 """
 #=========================================================================================
@@ -23,7 +33,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-10 17:50:44 +0000 (Sat, February 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-11 15:47:52 +0000 (Sun, February 11, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -65,7 +75,11 @@ from ccpn.ui.gui.widgets.FileDialog import \
 
 FILE_MENU = 'File'
 FILE_OPEN_RECENT = 'Open Recent'
+FILE_ARCHIVE = 'Archive'
 FILE_RESTORE_FROM_ARCHIVE = 'Restore From Archive...'
+FILE_LAYOUT = 'Layout'
+FILE_LAYOUT_OPEN_PREDEFINED = 'Open pre-defined'
+
 
 VIEW_MENU = 'View'
 VIEW_SHOW_MODULES = 'Show/hide Modules'
@@ -74,14 +88,16 @@ MACRO_MENU = 'Macro'
 MACRO_RUN_CCPN = 'Run CCPN Macros'
 MACRO_RUN_RECENT = 'Run Recent'
 
-TUTORIALS_MENU = 'Tutorials'
-HOWTOS_MENU = 'How-Tos'
-
 PLUGINS_MENU = 'Plugins'
 USER_PLUGINS_MENU = 'User Plugins'
 CCPN_PLUGINS_MENU = 'CCPN Plugins'
 
-DYNAMIC_FILL = ()
+HELP_MENU = 'Help'
+TUTORIALS_MENU = 'Tutorials'
+HOWTOS_MENU = 'How-Tos'
+
+SEPARATOR = ()
+DYNAMIC_FILL = []
 
 
 def getMenuDefs():
@@ -134,29 +150,33 @@ class MenusDefs(list):
             (),
             ("Open...", self._openProjectCallback, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             (FILE_OPEN_RECENT, DYNAMIC_FILL),
-
             ("Load Data...", self._loadDataCallback, [('shortcut', 'ld')]),
             (),
             ("Save", self._saveCallback, [('shortcut', '⌃s')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ("Save As...", self._saveAsCallback, [('shortcut', 'sa')]),
             (),
-            ("Import", (("Nef File", self._importNefCallback, [('shortcut', 'in'), ('enabled', True)]),
-                        ("NmrStar File", self._loadNMRStarFileCallback, [('shortcut', 'bi')]),
-                        )),
-            ("Export", (("Nef File", self._exportNEFCallback, [('shortcut', 'ex'), ('enabled', True)]),
-                        )),
+            ("Import", [
+                ("Nef File", self._importNefCallback, [('shortcut', 'in'), ('enabled', True)]),
+                ("NmrStar File", self._loadNMRStarFileCallback, [('shortcut', 'bi')]),
+                ]
+            ),
+            ("Export", [
+                ("Nef File", self._exportNEFCallback, [('shortcut', 'ex'), ('enabled', True)]),
+                ]
+            ),
             (),
-            ("Layout", (("Save", self._saveLayoutCallback, [('enabled', True)]),
-                        ("Save as...", self._saveLayoutAsCallback, [('enabled', True)]),
-                        (),
-                        ("Restore last", self._restoreLastSavedLayoutCallback, [('enabled', True)]),
-                        ("Restore from file...", self._restoreLayoutFromFileCallback, [('enabled', True)]),
-                        (),
-                        ("Open pre-defined", DYNAMIC_FILL),
-
-                        )),
+            (FILE_LAYOUT, [
+                ("Save", self._saveLayoutCallback, [('enabled', True)]),
+                ("Save as...", self._saveLayoutAsCallback, [('enabled', True)]),
+                (),
+                ("Restore last", self._restoreLastSavedLayoutCallback, [('enabled', True)]),
+                ("Restore from file...", self._restoreLayoutFromFileCallback, [('enabled', True)]),
+                (),
+                (FILE_LAYOUT_OPEN_PREDEFINED, DYNAMIC_FILL),
+                ]
+            ),
             ("Summary", self._showProjectSummaryPopup),
-            ("Archive", self._archiveProjectCallback, [('enabled', False)]),
+            (FILE_ARCHIVE, self._archiveProjectCallback, [('enabled', False)]),
             (FILE_RESTORE_FROM_ARCHIVE, self._restoreFromArchiveCallback, [('enabled', False)]),
             (),
             ("Preferences...", self._showApplicationPreferences, [('shortcut', '⌃,')]),
@@ -169,7 +189,6 @@ class MenusDefs(list):
             ("Undo", self._undoCallback, [('shortcut', '⌃z')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ("Redo", self._redoCallback, [('shortcut', '⌃y')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             (),
-
             ("Cut", self._nyi, [('shortcut', '⌃x'), ('enabled', False)]),
             ("Copy", self._nyi, [('shortcut', '⌃c'), ('enabled', False)]),
             ("Paste", self._nyi, [('shortcut', '⌃v'), ('enabled', False)]),
@@ -194,23 +213,23 @@ class MenusDefs(list):
             ("Relaxation Analysis (Beta)", app.showRelaxationModule, [('shortcut', 'ra')]),
             ("Notes Editor", partial(app.showNotesEditor, selectFirstItem=True), [('shortcut', 'no')]),
             (),
-            ("In Active Spectrum Display", (
-                                            ("Show/Hide Toolbar", self._toggleToolbarCallback, [('shortcut', 'tb')]),
-                                            ("Show/Hide Spectrum Toolbar", self._toggleSpectrumToolbarCallback, [('shortcut', 'sb')]),
-                                            ("Show/Hide Phasing Console", self._togglePhaseConsoleCallback, [('shortcut', 'pc')]),
-                                            (),
-                                            ("Set Zoom...", self._setZoomCallback, [('shortcut', 'sz')]),
-                                            # ("Reset Zoom", self._resetZoomCallback, [('shortcut', 'rz')]),
-                                            (),
-                                            ("New SpectrumDisplay with New Strip, Same Axes", self._copyStripCallback, []),
-                                            (" .. with X-Y Axes Flipped", self._flipXYAxisCallback, [('shortcut', 'xy')]),
-                                            (" .. with X-Z Axes Flipped", self._flipXZAxisCallback, [('shortcut', 'xz')]),
-                                            (" .. with Y-Z Axes Flipped", self._flipYZAxisCallback, [('shortcut', 'yz')]),
-                                            (" .. with Axes Flipped...", self._flipArbitraryAxesCallback, [('shortcut', 'fa')]),
-                                            (),
-                                            ("Auto-arrange Labels", self._arrangeLabelsCallback, [('shortcut', 'av')]),
-                                            ("Reset Labels", self._resetLabelsCallback, [('shortcut', 'rv')]),
-                                            )
+            ("In Active Spectrum Display", [
+                ("Show/Hide Toolbar", self._toggleToolbarCallback, [('shortcut', 'tb')]),
+                ("Show/Hide Spectrum Toolbar", self._toggleSpectrumToolbarCallback, [('shortcut', 'sb')]),
+                ("Show/Hide Phasing Console", self._togglePhaseConsoleCallback, [('shortcut', 'pc')]),
+                (),
+                ("Set Zoom...", self._setZoomCallback, [('shortcut', 'sz')]),
+                # ("Reset Zoom", self._resetZoomCallback, [('shortcut', 'rz')]),
+                (),
+                ("New SpectrumDisplay with New Strip, Same Axes", self._copyStripCallback, []),
+                (" .. with X-Y Axes Flipped", self._flipXYAxisCallback, [('shortcut', 'xy')]),
+                (" .. with X-Z Axes Flipped", self._flipXZAxisCallback, [('shortcut', 'xz')]),
+                (" .. with Y-Z Axes Flipped", self._flipYZAxisCallback, [('shortcut', 'yz')]),
+                (" .. with Axes Flipped...", self._flipArbitraryAxesCallback, [('shortcut', 'fa')]),
+                (),
+                ("Auto-arrange Labels", self._arrangeLabelsCallback, [('shortcut', 'av')]),
+                ("Reset Labels", self._resetLabelsCallback, [('shortcut', 'rv')]),
+                ]
             ),
             ("Show/Hide Crosshairs", self._toggleCrosshairCallback, [('shortcut', 'ch')]),
             (),
@@ -229,7 +248,7 @@ class MenusDefs(list):
             (),
             ("Pick Peaks", [
                 ("Pick 1D Peaks...", self._peakPick1DCallback, [('shortcut', 'p1')]),
-                ("Pick ND Peaks...", self._peakPickNDCallback, [('shortcut', 'pp')]),
+                ("Pick nD Peaks...", self._peakPickNDCallback, [('shortcut', 'pp')]),
                 ]
             ),
             ("Copy PeakList...", self._copyPeakListCallback, [('shortcut', 'cl')]),
@@ -253,7 +272,7 @@ class MenusDefs(list):
             ("New Chain from FASTA...", self._loadDataCallback),
             (),
             ("Load ChemComp from Xml...", self._loadDataCallback),
-            ("Edit Molecular Bonds", self._editMolecularBondsCallback, ),
+            ("Edit Molecular Bonds...", self._editMolecularBondsCallback, ),
             # ("Inspect...", self.inspectMolecule, [('enabled', False)]),
             (),
             ("Residue Information", app.showResidueInformation, [('shortcut', 'ri')]),
@@ -281,16 +300,12 @@ class MenusDefs(list):
             ]
         ),
 
-        ('Help', [
-            (TUTORIALS_MENU, ([
-                ("None", None, [('checkable', True), ('checked', False)])
-                ])
-             ),
+        (HELP_MENU, [
+            (TUTORIALS_MENU, DYNAMIC_FILL),
             ("Show Tip of the Day", partial(app._displayTipOfTheDay, standalone=True)),
             ("Key Concepts", app._displayKeyConcepts),
             ("Show Shortcuts", self._showShortcuts),
             ("Show API Documentation", self._showVersion3Documentation),
-            ("Show License", self._showCcpnLicense),
             (),
             ("CcpNmr Homepage", self._showAboutCcpn),
             ("CcpNmr V3 Forum", self._showForum),
@@ -298,8 +313,9 @@ class MenusDefs(list):
             # ("Inspect Code...", self.showCodeInspectionPopup, [('shortcut', 'gv'), ('enabled', False)]),
             # ("Show Issues...", self.showIssuesList),
             ("Check for Updates...", ui._checkForUpdates),
-            ("Register...", self._showRegisterPopup),
             (),
+            ("Register...", self._showRegisterPopup),
+            ("Show License...", self._showCcpnLicense),
             ("About CcpNmr V3...", self._showAboutPopup),
             ]
         ),
@@ -310,11 +326,11 @@ class MenusDefs(list):
         if app._isInDebugMode:
             self._addMenuDef(
         ('Development', [
-                ("Set debug off", partial(app.setDebug, 0)),
-                ("Set debug level 1", partial(app.setDebug, 1)),
-                ("Set debug level 2", partial(app.setDebug, 2)),
-                ("Set debug level 3", partial(app.setDebug, 3)),
-                ]
+            ("Set debug off", partial(app.setDebug, 0)),
+            ("Set debug level 1", partial(app.setDebug, 1)),
+            ("Set debug level 2", partial(app.setDebug, 2)),
+            ("Set debug level 3", partial(app.setDebug, 3)),
+            ]
         ), position = -1
 
         )  # end insert
@@ -1186,11 +1202,46 @@ def traverse(theList, parent=None, name='root') -> MenuNode:
 
 
 """
-gui._updateCheckableMenuItems
-mainWindow._createMenu  
+gui. -->
+    _updateCheckableMenuItems
+    
+mainWindow.  -->
+    _createMenu
+    _addMenu
+    _setupMenus
+    _storeShortcut 
+    _storeMainMenuShortcuts
+    _addMenuActions
+    _addPluginSubMenu
+    _attachModulesMenuAction 
+    _attachCCPNMacrosMenuAction
+    _attachTutorialsMenuAction
+    _fillCcpnPluginsMenu
+    _fillUserPluginsMenu
+    _fillPredefinedLayoutMenu
+    _fillMacrosMenu (Never reached/Used!)
+    _fillRecentProjectsMenu
+    _fillRecentMacrosMenu
+    _fillModulesMenu
+    _fillCCPNMacrosMenu
+    _fillUserMacrosMenu
+    _fillTutorialsMenu
+    _updateRestoreArchiveMenu
+    getMenuAction
+    searchMenuAction
+    _clearRecentProjects
+    _clearRecentMacros
+    
+GuiMainWindow.  -->
+    _attacheTutorialsMenuAction
+    _fillTutorialsMenu
+        --> How-to's menu
 
+FrameWork.  -->
+    _getProjectFiles
+    
+    
 dynamic menus:; uses aboutToShow PyQt signal
 _fill ....
-How-to's menu
 
 """

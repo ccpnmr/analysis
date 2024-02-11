@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-09 15:12:59 +0000 (Fri, February 09, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-11 15:47:51 +0000 (Sun, February 11, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,7 @@ import json
 
 from ccpn.ui.gui.guiSettings import FONTLIST
 from ccpn.util.AttrDict import AttrDict
-from ccpn.util.decorators import singleton
+from ccpn.util.decorators import singleton, logCommand
 from ccpn.util.Path import aPath, Path
 from ccpn.util.Common import uniquify, isMacOS, isLinux
 
@@ -185,6 +185,7 @@ class Preferences(AttrDict):
         else:
             raise KeyError(f'invalid key {repr(key)}; unable to decode')
 
+    @logCommand('application.preferences.')
     def print(self):
         """Print items of self
         """
@@ -192,19 +193,20 @@ class Preferences(AttrDict):
         self._recursivePrint(self)
 
     _maxRecentMacros = 10
-    def clearRecentMacro(self):
+    @logCommand('application.preferences.')
+    def clearRecentMacros(self):
         """Clear the recentMacros settings
         """
         self[RECENT_MACROS] = []
 
-    def addRecentMacro(self, recentMacro):
-        """Add a recentMacro to the list, assuring uniqueness and limiting to
+    def _addRecentMacro(self, macroFile):
+        """Add a macroFile to the list, assuring uniqueness and limiting to
         maxRecentMacros (currently 10)
         """
-        if recentMacro is None or not isinstance(recentMacro, (str, Path)):
-            raise ValueError(f'Preferences.addRecentMacro: {recentMacro} is invalid')
+        if macroFile is None or not isinstance(macroFile, (str, Path)):
+            raise ValueError(f'Preferences._addRecentMacro: {macroFile} is invalid')
         _recentMacros = self.get(RECENT_MACROS, [])
-        _recentMacros.append(recentMacro)
+        _recentMacros.append(macroFile)
         self._cleanRecentMacros()
 
     def _cleanRecentMacros(self):
@@ -216,6 +218,12 @@ class Preferences(AttrDict):
         if len(_recentMacros) > self._maxRecentMacros:
             _recentMacros = _recentMacros[-self._maxRecentMacros:]
             self[RECENT_MACROS] = _recentMacros
+
+    @logCommand('application.preferences.')
+    def clearRecentFiles(self):
+        """Clear the recentFiles settings
+        """
+        self[RECENT_FILES] = []
 
     def __str__(self):
         return f'<Preferences: {repr(self._lastPath)}>'

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-10 17:50:44 +0000 (Sat, February 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-11 15:47:51 +0000 (Sun, February 11, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -824,8 +824,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         visible = moduleSize.width() != 0 and moduleSize.height() != 0 and self.sideBar.isVisible()
         modulesMenu.addAction(Action(modulesMenu, text='Sidebar',
                                      checkable=True, checked=visible,
-                                     # callback=partial(self._showSideBarModule, self._sideBarFrame, self, visible)))
-                                     callback=partial(self._showSideBarModule, self._sideBarFrame, self, visible)))
+                                     callback=partial(self._showSideBar, visible)))
 
         for module in self.moduleArea.ccpnModules:
             visible = module.isVisible()
@@ -963,10 +962,6 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
 
     def _showCCPNTutorials(self):
         from ccpn.framework.PathsAndUrls import ccpnVideos
-
-        # import webbrowser
-
-        # webbrowser.open(ccpnVideos)
         self.application._showHtmlFile('Video Tutorials', ccpnVideos)
 
     def _showTutorial(self, filename, modulesMenu):
@@ -980,17 +975,14 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
 
     def _showTutorialData(self):
         from ccpn.framework.PathsAndUrls import ccpnTutorials
-
         self.application._showHtmlFile("Tutorial Data", ccpnTutorials)
 
-    def _showSideBarModule(self, module, modulesMenu, visible):
+    def _showSideBar(self, visible):
         try:
-            # if module.size().height() != 0 and module.size().width() != 0:  #menuItem.isChecked():    # opposite as it has toggled
-
             if visible:
-                module.hide()
+                self._sideBarFrame.hide()
             else:
-                module.show()
+                self._sideBarFrame.show()
         except Exception as es:
             getLogger().warning('Error expanding module: sideBar')
 

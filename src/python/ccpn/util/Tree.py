@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-10 17:50:44 +0000 (Sat, February 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-11 15:47:52 +0000 (Sun, February 11, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -93,6 +93,15 @@ class Tree(object):
         child._parent = None
         child._setRoot(child)
         return child
+
+    def _removeAllChildren(self):
+        """Remove all children from self
+        Dedicated routine as looping over self._children while removing from the same list yields
+        not the desired result.
+        """
+        # remove the children; first make a "copy" into a list, otherwise
+        for child in list(self._children):
+            self._removeChild(child)
 
     def _getChildrenByClass(self, klass) -> list:
         """Conveniance function to get all children, optionally filtered for klass

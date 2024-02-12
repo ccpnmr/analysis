@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-12 15:25:48 +0000 (Mon, February 12, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-12 21:49:37 +0000 (Mon, February 12, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -470,7 +470,7 @@ class Gui(Ui):
         """Set up mainWindow
         """
         self.mainWindow.sideBar.buildTree(self.project, clear=True)
-        self.mainWindow._updateRestoreArchiveMenu()
+        # self.mainWindow._updateRestoreArchiveMenu()
         self.mainWindow.namespace['current'] = self.application.current
 
     def echoCommands(self, commands: typing.List[str]):
@@ -1160,7 +1160,7 @@ class Gui(Ui):
             getLogger().warning(f'Cannot show popup: {es}')
 
     #-----------------------------------------------------------------------------------------
-    # All "show"methods, to be retained in a 4.x refactored version
+    # All methods, to be retained in a 4.x refactored version
     #-----------------------------------------------------------------------------------------
 
     def _showHtmlFile(self, title, urlPath):

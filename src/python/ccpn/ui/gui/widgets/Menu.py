@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-10 17:50:44 +0000 (Sat, February 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-12 15:25:48 +0000 (Mon, February 12, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -39,10 +39,10 @@ from ccpn.ui.gui.widgets.Font import setWidgetFont
 # MACROS_MENU = 'User Macros'
 # MACRO_RUN_CCPN = 'Run CCPN Macros'
 # MACRO_RUN_USER = 'Run User Macros'
-# TUTORIALS_MENU = 'Tutorials'
-# HOWTOS_MENU = 'How-Tos'
-# USER_PLUGINS_MENU = 'User Plugins'
-# CCPN_PLUGINS_MENU = 'CCPN Plugins'
+# HELP_TUTORIALS = 'Tutorials'
+# HELP_HOWTOS = 'How-Tos'
+# USER_PLUGINS = 'User Plugins'
+# CCPN_PLUGINS = 'CCPN Plugins'
 
 
 class Menu(QtWidgets.QMenu, Base):

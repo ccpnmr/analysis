@@ -1,10 +1,11 @@
 """
-    The menus are specified by a (recursive) list of lists of lists
-    (actually, an iterable of iterables of iterables, but the term ‘list’ will be used here to mean any iterable).
+    The menus are specified by a (recursive) list of tuples composed of either:
 
-    Menu specification lists are composed of:
-    - A (name, callable) tuple or (name, callable, options) tuple that specifies a menu action with the callable
-      that is triggered when the menu item is selected. Options is a list or dict of (keyword, value) pairs.
+    - A (name, callable) tuple or
+        (name, callable, options) tuple
+      that specifies a menu action with the callable that is triggered when the menu item is selected.
+
+      Options is a list or dict of (keyword, value) pairs.
       Valid options (from Action widget):
         :param shortcut: optional two letter shortcut
         :param checked: optional checked flag (if checkable, default: True)
@@ -13,10 +14,72 @@
         :param enabled: optional enable flag (default: True)
         :param toolTip: optional tooltip
 
-    - A (name, list) tuple where the list defines the sub-menu items. A zero-length list denotes a
-      dynamically filled menu
+    - A (name, list) tuple
+      where the list defines the sub-menu items. A zero-length list denotes a dynamically filled menu.
 
     - A zero-length () tuple, indicating a separator.
+
+
+This code replaces:
+
+gui. -->
+    _updateCheckableMenuItems called from Gui.initialize
+
+mainWindow.
+    dynamic menus:; uses aboutToShow PyQt signal
+    _fill ....
+
+    -->
+    _createMenu
+    _addMenu
+    _setupMenus
+    _storeShortcut
+    _storeMainMenuShortcuts
+    _addMenuActions
+    _addPluginSubMenu
+    _attachModulesMenuAction
+    _attachCCPNMacrosMenuAction
+    _attachTutorialsMenuAction
+    _updateRestoreArchiveMenu
+    getMenuAction
+    searchMenuAction
+    _clearRecentProjects
+    _clearRecentMacros
+
+GuiMainWindow.  -->
+    _attacheTutorialsMenuAction
+    _fillTutorialsMenu
+        --> How-to's menu
+    _fillCcpnPluginsMenu
+    _fillUserPluginsMenu
+    _fillPredefinedLayoutMenu
+    _fillMacrosMenu (Never reached/Used!)
+    _fillRecentProjectsMenu
+    _fillRecentMacrosMenu
+    _fillModulesMenu
+    _fillCCPNMacrosMenu
+    _fillUserMacrosMenu
+    _fillTutorialsMenu
+    _runCCPNMacro
+    _runUserMacro
+    _reloadUserPlugins
+    _reloadCCPNPlugins
+    _addPluginSubMenu
+
+FrameWork.  -->
+    _getProjectFiles
+
+
+        # try:
+        #     # _n = node.widget.addSection('section-test')
+        #     # _n.setEnabled(False)
+        #     node.widget.addSeparator()
+        #     node.widget.addItem('\tsection-test',enabled=False)
+        #     # node.widget.addItem('---- section-test ----',enabled=False)
+        #     node.widget.addMenu('test')
+        # except Exception as es:
+        #     print(f'ERROR>>{es}')
+
 
 """
 #=========================================================================================
@@ -33,7 +96,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-11 15:47:52 +0000 (Sun, February 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-12 15:25:48 +0000 (Mon, February 12, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -80,21 +143,23 @@ FILE_RESTORE_FROM_ARCHIVE = 'Restore From Archive...'
 FILE_LAYOUT = 'Layout'
 FILE_LAYOUT_OPEN_PREDEFINED = 'Open pre-defined'
 
-
 VIEW_MENU = 'View'
 VIEW_SHOW_MODULES = 'Show/hide Modules'
+
+SPECTRUM_MENU = 'Spectrum'
+SPECTRUM_LOAD_SPECTRA = 'Load Spectra...'
 
 MACRO_MENU = 'Macro'
 MACRO_RUN_CCPN = 'Run CCPN Macros'
 MACRO_RUN_RECENT = 'Run Recent'
 
 PLUGINS_MENU = 'Plugins'
-USER_PLUGINS_MENU = 'User Plugins'
-CCPN_PLUGINS_MENU = 'CCPN Plugins'
+USER_PLUGINS = 'User Plugins'
+CCPN_PLUGINS = 'CCPN Plugins'
 
 HELP_MENU = 'Help'
-TUTORIALS_MENU = 'Tutorials'
-HOWTOS_MENU = 'How-Tos'
+HELP_TUTORIALS = 'Tutorials'
+HELP_HOWTOS = 'How-Tos'
 
 SEPARATOR = ()
 DYNAMIC_FILL = []
@@ -109,12 +174,11 @@ def getMenuDefs():
 
 @singleton
 class MenusDefs(list):
-    """A class to implement the menu definitions and callback rountines
+    """A class (list) to implement the menu definitions and callback routines
     Used by MainWindow to initialiase the menuBar
     """
 
     def __init__(self, application):
-
         super().__init__()
         self.application = application
         self._defineMenus()
@@ -134,6 +198,10 @@ class MenusDefs(list):
     @property
     def ui(self):
         return self.application.ui
+
+    #-----------------------------------------------------------------------------------------
+    # The actual Menu definitions
+    #-----------------------------------------------------------------------------------------
 
     def _defineMenus(self):
         """Set up the menu specification.
@@ -238,8 +306,8 @@ class MenusDefs(list):
             ]
         ),
 
-        ('Spectrum', [
-            ("Load Spectra...", self._loadSpectraCallback, [('shortcut', 'ls')]),
+        (SPECTRUM_MENU, [
+            (SPECTRUM_LOAD_SPECTRA, self._loadSpectraCallback, [('shortcut', 'ls')]),
             # ("Spectrum Groups...", self._spectrumGroupsCallback, [('shortcut', 'ss')]), # multiple edit temporarly disabled
             # (),
             ("Validate Paths...", self._validatePathsCallback, [('shortcut', 'vp')]),
@@ -295,20 +363,24 @@ class MenusDefs(list):
         ),
 
         (PLUGINS_MENU, [
-            (CCPN_PLUGINS_MENU, DYNAMIC_FILL),
-            (USER_PLUGINS_MENU, DYNAMIC_FILL),
+            (CCPN_PLUGINS, DYNAMIC_FILL),
+            (USER_PLUGINS, DYNAMIC_FILL),
+            (),
+            ("Reload", app._reloadPlugins),
             ]
         ),
 
         (HELP_MENU, [
-            (TUTORIALS_MENU, DYNAMIC_FILL),
-            ("Show Tip of the Day", partial(app._displayTipOfTheDay, standalone=True)),
+            (HELP_TUTORIALS, DYNAMIC_FILL),
+            (HELP_HOWTOS, DYNAMIC_FILL),
+            (),
+            ("Tip of the Day", partial(app._displayTipOfTheDay, standalone=True)),
             ("Key Concepts", app._displayKeyConcepts),
             ("Show Shortcuts", self._showShortcuts),
-            ("Show API Documentation", self._showVersion3Documentation),
             (),
             ("CcpNmr Homepage", self._showAboutCcpn),
             ("CcpNmr V3 Forum", self._showForum),
+            ("CcpNmr API Documentation", self._showVersion3Documentation),
             (),
             # ("Inspect Code...", self.showCodeInspectionPopup, [('shortcut', 'gv'), ('enabled', False)]),
             # ("Show Issues...", self.showIssuesList),
@@ -880,37 +952,20 @@ class MenusDefs(list):
     # Help -->
     #-----------------------------------------------------------------------------------------
 
-    def _showBeginnersTutorial(self):
-        from ccpn.framework.PathsAndUrls import beginnersTutorialPath
-        self.application._systemOpen(beginnersTutorialPath)
-
-    def _showBackboneTutorial(self):
-        from ccpn.framework.PathsAndUrls import backboneAssignmentTutorialPath
-        self.application._systemOpen(backboneAssignmentTutorialPath)
-
-    def _showCSPtutorial(self):
-        from ccpn.framework.PathsAndUrls import cspTutorialPath
-        self.application._systemOpen(cspTutorialPath)
-
-    def _showScreenTutorial(self):
-        from ccpn.framework.PathsAndUrls import screenTutorialPath
-        self.application._systemOpen(screenTutorialPath)
-
     def _showVersion3Documentation(self):
         """Displays CCPN wrapper documentation in a module.
         """
         from ccpn.framework.PathsAndUrls import ccpnDocumentationUrl, documentationPath
-
         if self.application.preferences.appearance.useOnlineDocumentation:
-            self.application._showHtmlFile("Analysis Version-3 Documentation", ccpnDocumentationUrl)
+            self.ui._showHtmlFile("Analysis Version-3 Documentation", ccpnDocumentationUrl)
         else:
-            self.application._showHtmlFile("Analysis Version-3 Documentation", documentationPath)
+            self.ui._showHtmlFile("Analysis Version-3 Documentation", documentationPath)
 
     def _showForum(self):
         """Displays Forum in a module.
         """
         from ccpn.framework.PathsAndUrls import ccpnForum
-        self.application._showHtmlFile("Analysis Version-3 Forum", ccpnForum)
+        self.ui._showHtmlFile("Analysis Version-3 Forum", ccpnForum)
 
     def _showShortcuts(self):
         from ccpn.framework.PathsAndUrls import shortcutsPath
@@ -923,15 +978,7 @@ class MenusDefs(list):
 
     def _showAboutCcpn(self):
         from ccpn.framework.PathsAndUrls import ccpnUrl
-        self.application._showHtmlFile("About CCPN", ccpnUrl)
-
-    def _showIssuesList(self):
-        from ccpn.framework.PathsAndUrls import ccpnIssuesUrl
-        self.application._showHtmlFile("CCPN Issues", ccpnIssuesUrl)
-
-    def _showTutorials(self):
-        from ccpn.framework.PathsAndUrls import ccpnTutorials
-        self.application._showHtmlFile("CCPN Tutorials", ccpnTutorials)
+        self.ui._showHtmlFile("About CCPN", ccpnUrl)
 
     def _showRegisterPopup(self):
         """Open the registration popup
@@ -940,15 +987,19 @@ class MenusDefs(list):
 
     def _showCcpnLicense(self):
         from ccpn.framework.PathsAndUrls import ccpnLicenceUrl
-        self.application._showHtmlFile("CCPN Licence", ccpnLicenceUrl)
+        self.ui._showHtmlFile("CCPN Licence", ccpnLicenceUrl)
 
     #-----------------------------------------------------------------------------------------
     # Inactive
     #-----------------------------------------------------------------------------------------
 
+    def _showIssuesList(self):
+        from ccpn.framework.PathsAndUrls import ccpnIssuesUrl
+        self.ui._showHtmlFile("CCPN Issues", ccpnIssuesUrl)
+
     def _showLicense(self):
         from ccpn.framework.PathsAndUrls import licensePath
-        self.application._showHtmlFile("CCPN Licence", licensePath)
+        self.ui._showHtmlFile("CCPN Licence", licensePath)
 
     def _showSubmitMacroPopup(self):
         """Open the submit macro popup
@@ -984,41 +1035,9 @@ class MenusDefs(list):
             MessageDialog.showWarning('Submit Feedback',
                                       'Could not connect to the server, please check your internet connection.')
 
-    def _getAsDict(self) -> dict:
-        """:return self as a dict-of-dict-of-ActionDict"""
     #-----------------------------------------------------------------------------------------
     # Implementation methods
     #-----------------------------------------------------------------------------------------
-
-    def _showHtmlFile(self, title, urlPath):
-        """Display html files
-        Optional program QT viewer or native webbrowser (currently disabled)
-        depending on useNativeWebbrowser option in preferences
-        """
-        useNative = self.application.preferences.general.useNativeWebbrowser
-        if not useNative:
-            getLogger().debug('non-native HtmlModule has been disabled due to PyQT bugs')
-
-        if True:
-            import webbrowser
-            import posixpath
-
-            # may be a Path object
-            urlPath = str(urlPath)
-
-            urlPath = urlPath or ''
-            if (urlPath.startswith('http://') or urlPath.startswith('https://')):
-                pass
-            elif urlPath.startswith('file://'):
-                urlPath = urlPath[len('file://'):]
-                urlPath = urlPath.replace(os.sep, posixpath.sep) if isWindowsOS() else f'file://{urlPath}'
-
-            elif isWindowsOS():
-                urlPath = urlPath.replace(os.sep, posixpath.sep)
-            else:
-                urlPath = f'file://{urlPath}'
-
-            webbrowser.open(urlPath)
 
     def _addMenuDef(self, menuDef, position):
         """Add an new menuDef tuple at specified position
@@ -1048,15 +1067,7 @@ class MenusDefs(list):
         #  no matches found; return -1
         return -1
 
-    @staticmethod
-    def _testShortcuts0():
-        print('>>> Testing shortcuts0')
-
-    @staticmethod
-    def _testShortcuts1():
-        print('>>> Testing shortcuts1')
-
-#end class
+# end class #-----------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------------------
 # Helper code
@@ -1103,145 +1114,5 @@ def _getSaveLayoutPath(mainWindow):
     return newPath
 
 
-class MenuNode(dict, Tree):
-    """Just a class to define the MenuNode and store the Menu and Action objects
-    """
-    def __init__(self, parent, name, callback=None, isSeparator=False, isAction=False, options={}):
-
-        super().__init__()
-        Tree.__init__(self, parent=None)
-
-        # self.parent = parent
-        self.name = name
-        self.callback = callback
-        self.isSeparator = isSeparator
-        self.isAction = isAction
-        self.options = options
-
-        self.isDynamic = False
-        self.dynamicCallback = None
-
-        self.widget = None
-
-        if parent is not None:
-            parent._addChild(self)
-
-    @property
-    def level(self) -> int:
-        """
-        :return the level of the MenuNode in the nested structure (root has level 0)
-        """
-        return len(self.anchestors())
-        # _result = 0
-        # _node = self
-        # while _node.parent is not None:
-        #     _result += 1
-        #     _node = _node.parent
-        # return _result
-
-    def makeDynamic(self, callback):
-        """Make MenuNode a dynamically updated one, calling callback when it is about to show
-        """
-        self.isDynamic = True
-        self.dynamicCallback = callback
-        if self.widget is None:
-            raise RuntimeError('Cannot make MenuNode dynamic without a widget')
-        self.widget.aboutToShow.connect(callback)
-
-    def print(self):
-        """
-        print Tree of self with indentation
-        """
-        level = self.level
-        tabs = '\t'*level if level else ''
-        print(f'{tabs}{self}  {self.options}')
-        for key, val in self.items():
-            val.print()
-
-    def __str__(self):
-        return f'<MenuNode: {self.name}, level={self.level}>'
-
-    __repr__ = __str__
 
 
-def traverse(theList, parent=None, name='root') -> MenuNode:
-    """Traverse the menuDefs list, converting it to a nested MenuNode data structure.
-    """
-    result = MenuNode(parent=parent, name=name)
-    separatorIndex = 0  # This gives each separator a unique name
-
-    for item in theList:
-        if len(item) == 0:
-            name = f'separator_{separatorIndex}'
-            result[name] = MenuNode(parent=result, name=name, isSeparator=True)
-            separatorIndex += 1
-
-        elif len(item) == 1:
-            # this should not happen
-            raise RuntimeError('Invalid menu definitions')
-
-        elif len(item) == 2:
-            name = item[0]
-            if isinstance(item[1], (tuple, list)):
-                result[name]=traverse(item[1], parent=result, name=name)
-            elif callable(item[1]):
-                callback=item[1]
-                result[name]=MenuNode(parent=result, name=name, callback=callback, isAction=True)
-            else:
-                raise RuntimeError('Invalid menu definitions')
-
-        elif len(item) == 3:
-            name = item[0]
-            callback=item[1]
-            options = dict(item[2])
-            result[name] = MenuNode(parent=result, name=name, callback=callback, options=options)
-
-    return result
-
-
-
-
-"""
-gui. -->
-    _updateCheckableMenuItems
-    
-mainWindow.  -->
-    _createMenu
-    _addMenu
-    _setupMenus
-    _storeShortcut 
-    _storeMainMenuShortcuts
-    _addMenuActions
-    _addPluginSubMenu
-    _attachModulesMenuAction 
-    _attachCCPNMacrosMenuAction
-    _attachTutorialsMenuAction
-    _fillCcpnPluginsMenu
-    _fillUserPluginsMenu
-    _fillPredefinedLayoutMenu
-    _fillMacrosMenu (Never reached/Used!)
-    _fillRecentProjectsMenu
-    _fillRecentMacrosMenu
-    _fillModulesMenu
-    _fillCCPNMacrosMenu
-    _fillUserMacrosMenu
-    _fillTutorialsMenu
-    _updateRestoreArchiveMenu
-    getMenuAction
-    searchMenuAction
-    _clearRecentProjects
-    _clearRecentMacros
-    
-GuiMainWindow.  -->
-    _attacheTutorialsMenuAction
-    _fillTutorialsMenu
-        --> How-to's menu
-
-FrameWork.  -->
-    _getProjectFiles
-    
-    
-dynamic menus:; uses aboutToShow PyQt signal
-_fill ....
-
-"""

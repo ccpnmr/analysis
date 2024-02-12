@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-11 15:47:51 +0000 (Sun, February 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-12 15:25:48 +0000 (Mon, February 12, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -202,6 +202,7 @@ class Preferences(AttrDict):
     def _addRecentMacro(self, macroFile):
         """Add a macroFile to the list, assuring uniqueness and limiting to
         maxRecentMacros (currently 10)
+        #CCPNINTERNAL: called from Framework.runMacro
         """
         if macroFile is None or not isinstance(macroFile, (str, Path)):
             raise ValueError(f'Preferences._addRecentMacro: {macroFile} is invalid')
@@ -215,8 +216,9 @@ class Preferences(AttrDict):
         """
         _recentMacros = self.get(RECENT_MACROS, [])
         _recentMacros = uniquify(_recentMacros)
-        if len(_recentMacros) > self._maxRecentMacros:
-            _recentMacros = _recentMacros[-self._maxRecentMacros:]
+        _len = len(_recentMacros)
+        if _len > self._maxRecentMacros:
+            _recentMacros = _recentMacros[_len-self._maxRecentMacros:]
             self[RECENT_MACROS] = _recentMacros
 
     @logCommand('application.preferences.')

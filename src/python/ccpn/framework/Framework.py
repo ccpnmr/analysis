@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-11 15:47:51 +0000 (Sun, February 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-12 15:25:48 +0000 (Mon, February 12, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -84,7 +84,8 @@ from ccpn.framework.credits import printCreditsText
 from ccpn.framework.Current import Current
 from ccpn.framework.Translation import defaultLanguage
 from ccpn.framework.Translation import translator
-from ccpn.framework.Preferences import Preferences, RECENT_MACROS
+from ccpn.framework.Preferences import Preferences, \
+    RECENT_MACROS, RECENT_FILES, USER_PLUGIN_PATH
 from ccpn.framework.PathsAndUrls import \
     userCcpnMacroPath, \
     tipOfTheDayConfig, \
@@ -680,6 +681,27 @@ class Framework(NotifierBase):
         import gc
 
         gc.collect()
+
+    def _reloadPlugins(self):
+        """Reload CCPN and user plugins
+        """
+        from ccpn import plugins
+        from importlib import reload
+        import importlib.util
+
+        reload(plugins)
+
+        # Finding user plugins
+        pluginUserPath = aPath(self.preferences.get(USER_PLUGIN_PATH))
+        # filePaths = [(aPath(r) / file) for r, d, f in os.walk(aPath(pluginUserPath))
+        #              for file in f if os.path.splitext(file)[1] == '.py']
+        filePaths = pluginUserPath.globList('*.py')
+
+        for filePath in filePaths:
+            # iterate and load the .py files in the plugins directory
+            spec = importlib.util.spec_from_file_location(".", filePath)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
 
     #-----------------------------------------------------------------------------------------
 
@@ -2392,10 +2414,8 @@ class Framework(NotifierBase):
             if not macroFile:
                 return
 
-        _recentMacros = self.preferences.get(RECENT_MACROS, [])
-        if not macroFile in _recentMacros:
-            if extraCommands is None:
-                self.preferences._addRecentMacro(macroFile)
+        if extraCommands is None:
+            self.preferences._addRecentMacro(macroFile)
         self.ui.mainWindow.pythonConsole._runMacro(macroFile, extraCommands=extraCommands)
 
     #################################################################################################

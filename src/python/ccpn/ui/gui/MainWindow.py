@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-11 15:47:51 +0000 (Sun, February 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-12 15:25:48 +0000 (Mon, February 12, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -62,7 +62,7 @@ from ccpn.ui.gui.widgets.Action import Action
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
 from ccpn.ui.gui.widgets.Menu import Menu, MenuBar
 from ccpn.ui.gui.Menus import FILE_MENU, FILE_RESTORE_FROM_ARCHIVE, VIEW_MENU, MACRO_MENU, VIEW_SHOW_MODULES, \
-    MACRO_RUN_CCPN, TUTORIALS_MENU, PLUGINS_MENU, USER_PLUGINS_MENU, CCPN_PLUGINS_MENU, HOWTOS_MENU
+    MACRO_RUN_CCPN, HELP_TUTORIALS, PLUGINS_MENU, USER_PLUGINS, CCPN_PLUGINS, HELP_HOWTOS
 from ccpn.ui.gui.widgets.SideBar import SideBar  #,SideBar
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
@@ -524,9 +524,6 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         """
         Creates menu bar for main window and creates the appropriate menus according to the arguments
         passed at startup.
-
-        This currently pulls info on what menus to create from Framework.  Once GUI and Project are
-        separated, Framework should be able to call a method to set the menus.
         """
 
         self._menuBar = self.menuBar()
@@ -572,7 +569,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
     def _attachTutorialsMenuAction(self):
         # add a connect to call _fillTutorialsMenu when the menu item is about to show
         # so it is always up-to-date
-        modulesMenu = self.searchMenuAction(TUTORIALS_MENU)
+        modulesMenu = self.searchMenuAction(HELP_TUTORIALS)
         modulesMenu.aboutToShow.connect(self._fillTutorialsMenu)
 
     def _createMenu(self, spec, targetMenu=None):
@@ -917,7 +914,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             getLogger().warning('Error running User Macro: %s' % str(filename))
 
     def _fillTutorialsMenu(self):
-        modulesMenu = self.searchMenuAction(TUTORIALS_MENU)
+        modulesMenu = self.searchMenuAction(HELP_TUTORIALS)
         modulesMenu.clear()
         import ccpn.framework.PathsAndUrls as pa
         from ccpn.util.Path import aPath
@@ -932,8 +929,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                          ('Screen Tutorial', pa.screeningTutorialPath))
 
         # add link to website videos
-        modulesMenu.addAction(Action(modulesMenu, text='Video Tutorials && Manual', callback=self._showCCPNTutorials))
-        modulesMenu.addAction(Action(modulesMenu, text='Tutorial Data', callback=self._showTutorialData))
+        modulesMenu.addAction(Action(modulesMenu, text='Video Tutorials && Manual', callback=self.application.ui._showCCPNVideos))
+        modulesMenu.addAction(Action(modulesMenu, text='Tutorial Data', callback=self.application.ui._showTutorialData))
         modulesMenu.addSeparator()
 
         # add the main tutorials
@@ -954,15 +951,15 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         modulesMenu.addSeparator()
 
         # add the How-Tos submenu
-        howtosMenu = self._addMenu(HOWTOS_MENU, modulesMenu)
+        howtosMenu = self._addMenu(HELP_HOWTOS, modulesMenu)
         howtosFiles = aPath(pa.howTosPath).listDirFiles('pdf')
         for filePath in sorted(howtosFiles, key=lambda ff: ff.basename):
             _label = camelCaseToString(filePath.basename)
             howtosMenu.addAction(Action(howtosMenu, text=_label, callback=partial(self._showTutorial, filePath, self)))
 
-    def _showCCPNTutorials(self):
-        from ccpn.framework.PathsAndUrls import ccpnVideos
-        self.application._showHtmlFile('Video Tutorials', ccpnVideos)
+    # def _showCCPNVideos(self):
+    #     from ccpn.framework.PathsAndUrls import ccpnVideos
+    #     self._showHtmlFile('Video Tutorials', ccpnVideos)
 
     def _showTutorial(self, filename, modulesMenu):
         """Run a CCPN macro from the populated menu
@@ -973,9 +970,6 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         except Exception as es:
             getLogger().warning('Error opening tutorial: %s' % str(filename))
 
-    def _showTutorialData(self):
-        from ccpn.framework.PathsAndUrls import ccpnTutorials
-        self.application._showHtmlFile("Tutorial Data", ccpnTutorials)
 
     def _showSideBar(self, visible):
         try:
@@ -1047,32 +1041,33 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
 
         from ccpn.plugins import loadedPlugins
 
-        pluginsMenu = self.searchMenuAction(CCPN_PLUGINS_MENU)
+        pluginsMenu = self.searchMenuAction(CCPN_PLUGINS)
         pluginsMenu.clear()
         for Plugin in loadedPlugins:
-            self._addPluginSubMenu(CCPN_PLUGINS_MENU, Plugin)
+            self._addPluginSubMenu(CCPN_PLUGINS, Plugin)
         pluginsMenu.addSeparator()
         pluginsMenu.addAction(Action(pluginsMenu, text='Reload',
                                      callback=self._reloadCcpnPlugins))
 
     def _reloadCcpnPlugins(self):
-        from ccpn import plugins
-        from importlib import reload
-        from ccpn.util.Path import aPath
-
-        reload(plugins)
-
-        pluginUserPath = self.application.preferences.general.userPluginPath
-        import importlib.util
-
-        filePaths = [(aPath(r) / file) for r, d, f in os.walk(aPath(pluginUserPath)) for file in f if os.path.splitext(file)[1] == '.py']
-
-        for filePath in filePaths:
-            # iterate and load the .py files in the plugins directory
-            spec = importlib.util.spec_from_file_location(".", filePath)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-
+        # GWV 12/2/24: Core functionality as Framework._reloadPlugins
+        # from ccpn import plugins
+        # from importlib import reload
+        # from ccpn.util.Path import aPath
+        #
+        # reload(plugins)
+        #
+        # pluginUserPath = self.application.preferences.general.userPluginPath
+        # import importlib.util
+        #
+        # filePaths = [(aPath(r) / file) for r, d, f in os.walk(aPath(pluginUserPath)) for file in f if os.path.splitext(file)[1] == '.py']
+        #
+        # for filePath in filePaths:
+        #     # iterate and load the .py files in the plugins directory
+        #     spec = importlib.util.spec_from_file_location(".", filePath)
+        #     module = importlib.util.module_from_spec(spec)
+        #     spec.loader.exec_module(module)
+        self.application._reloadPlugins()
         self._fillCcpnPluginsMenu()
         self._fillUserPluginsMenu()
 
@@ -1080,10 +1075,10 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
 
         from ccpn.plugins import loadedUserPlugins
 
-        pluginsMenu = self.searchMenuAction(USER_PLUGINS_MENU)
+        pluginsMenu = self.searchMenuAction(USER_PLUGINS)
         pluginsMenu.clear()
         for Plugin in loadedUserPlugins:
-            self._addPluginSubMenu(USER_PLUGINS_MENU, Plugin)
+            self._addPluginSubMenu(USER_PLUGINS, Plugin)
         pluginsMenu.addSeparator()
         pluginsMenu.addAction(Action(pluginsMenu, text='Reload',
                                      callback=self._reloadUserPlugins))

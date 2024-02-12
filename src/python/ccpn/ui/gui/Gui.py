@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-09 15:13:00 +0000 (Fri, February 09, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-12 15:25:48 +0000 (Mon, February 12, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -27,6 +27,7 @@ __date__ = "$Date: 2017-03-16 18:20:01 +0000 (Thu, March 16, 2017) $"
 #=========================================================================================
 
 import sys
+import os
 import typing
 import re
 import platform
@@ -264,11 +265,11 @@ class Gui(Ui):
                 self._setupMainWindow()
                 self._restoreSpectrumDisplayModules()
                 # self.application._updateCheckableMenuItems()
-                self._updateCheckableMenuItems()
+                # self._updateCheckableMenuItems()
                 self._makeActiveWindow()
 
     def _restoreSpectrumDisplayModules(self):
-        """Code from Framework, restoring spectruDisplay's
+        """Code from Framework, restoring spectrumDisplay's
         """
         from ccpn.ui.gui.lib import GuiStrip
 
@@ -396,33 +397,34 @@ class Gui(Ui):
         except Exception as e:
             getLogger().warning(f'Error restoring current.strip: {e}')
 
-    def _updateCheckableMenuItems(self):
-        # This has to be kept in sync with menu items below which are checkable,
-        # and also with MODULE_DICT keys
-        # The code is terrible because Qt has no easy way to get hold of menus / actions
-
-        mainWindow = self.mainWindow
-        if mainWindow is None:
-            # We have a UI with no mainWindow - nothing to do.
-            return
-
-        menuChildren = mainWindow.menuBar().findChildren(QtWidgets.QMenu)
-        if not menuChildren:
-            return
-
-        topActionDict = {}
-        for topMenu in menuChildren:
-            mainActionDict = {mainAction.text(): mainAction for mainAction in topMenu.actions()}
-
-            topActionDict[topMenu.title()] = mainActionDict
-
-        openModuleKeys = set(mainWindow.moduleArea.modules.keys())
-        for key, topActionText, mainActionText in (('SEQUENCE', 'Molecules', 'Show Sequence'),
-                                                   ('PYTHON CONSOLE', 'View', 'Python Console')):
-            if key in openModuleKeys:
-                if mainActionDict := topActionDict.get(topActionText):
-                    if mainAction := mainActionDict.get(mainActionText):
-                        mainAction.setChecked(True)
+    # GWV 12/2/24; replaced by other implementation
+    # def _updateCheckableMenuItems(self):
+    #     # This has to be kept in sync with menu items below which are checkable,
+    #     # and also with MODULE_DICT keys
+    #     # The code is terrible because Qt has no easy way to get hold of menus / actions
+    #
+    #     mainWindow = self.mainWindow
+    #     if mainWindow is None:
+    #         # We have a UI with no mainWindow - nothing to do.
+    #         return
+    #
+    #     menuChildren = mainWindow.menuBar().findChildren(QtWidgets.QMenu)
+    #     if not menuChildren:
+    #         return
+    #
+    #     topActionDict = {}
+    #     for topMenu in menuChildren:
+    #         mainActionDict = {mainAction.text(): mainAction for mainAction in topMenu.actions()}
+    #
+    #         topActionDict[topMenu.title()] = mainActionDict
+    #
+    #     openModuleKeys = set(mainWindow.moduleArea.modules.keys())
+    #     for key, topActionText, mainActionText in (('SEQUENCE', 'Molecules', 'Show Sequence'),
+    #                                                ('PYTHON CONSOLE', 'View', 'Python Console')):
+    #         if key in openModuleKeys:
+    #             if mainActionDict := topActionDict.get(topActionText):
+    #                 if mainAction := mainActionDict.get(mainActionText):
+    #                     mainAction.setChecked(True)
 
     def _makeActiveWindow(self):
         """Show and et self.mainWindow as the active window
@@ -1156,3 +1158,55 @@ class Gui(Ui):
 
         except Exception as es:
             getLogger().warning(f'Cannot show popup: {es}')
+
+    #-----------------------------------------------------------------------------------------
+    # All "show"methods, to be retained in a 4.x refactored version
+    #-----------------------------------------------------------------------------------------
+
+    def _showHtmlFile(self, title, urlPath):
+        """Display html files
+        Optional program QT viewer or native webbrowser (currently disabled)
+        depending on useNativeWebbrowser option in preferences
+        """
+        from ccpn.util.Common import isWindowsOS
+
+        useNative = self.application.preferences.general.useNativeWebbrowser
+        if not useNative:
+            getLogger().debug('non-native HtmlModule has been disabled due to PyQT bugs')
+
+        if True:
+            import webbrowser
+            import posixpath
+
+            # may be a Path object
+            urlPath = str(urlPath)
+
+            urlPath = urlPath or ''
+            if (urlPath.startswith('http://') or urlPath.startswith('https://')):
+                pass
+            elif urlPath.startswith('file://'):
+                urlPath = urlPath[len('file://'):]
+                urlPath = urlPath.replace(os.sep, posixpath.sep) if isWindowsOS() else f'file://{urlPath}'
+
+            elif isWindowsOS():
+                urlPath = urlPath.replace(os.sep, posixpath.sep)
+            else:
+                urlPath = f'file://{urlPath}'
+
+            webbrowser.open(urlPath)
+
+    def _showPath(self, path):
+        """Show path
+        """
+        try:
+            self.application._systemOpen(path)
+        except Exception as es:
+            getLogger().warning(f'Error opening {path}')
+
+    def _showTutorialData(self):
+        from ccpn.framework.PathsAndUrls import ccpnTutorials
+        self._showHtmlFile("Tutorial Data", ccpnTutorials)
+
+    def _showCCPNVideos(self):
+        from ccpn.framework.PathsAndUrls import ccpnVideos
+        self._showHtmlFile('Video Tutorials', ccpnVideos)

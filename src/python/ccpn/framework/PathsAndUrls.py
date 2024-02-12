@@ -3,9 +3,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-29 12:08:47 +0000 (Wed, November 29, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-02-12 15:25:48 +0000 (Mon, February 12, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -77,6 +77,7 @@ analysisMetabolomicsPath        = ccpnPythonPath / 'AnalysisMetabolomics'
 ccpnApplicationPaths            = (analysisAssignPath, analysisScreenPath, analysisStructurePath, analysisMetabolomicsPath)
 
 macroPath                       = ccpnPythonPath / 'macros'
+macroPaths                      = (macroPath, macroPath / 'relaxation')
 pluginPath                      = ccpnPythonPath / 'plugins'
 pipePath                        = ccpnPythonPath / 'pipes'
 pipeTemplates                   = ccpnPythonPath / 'framework' / 'lib' / 'pipeline' / 'templates'
@@ -90,16 +91,23 @@ ccpnModuleHelpPath              = ccpnGUIPath / 'modules' / 'moduleHelp'
 
 # Program tutorials and documentation
 shortcutsPath                   = ccpnCodePath / 'doc' / 'static' / 'AnalysisShortcuts.htm'
+
 tutorialsPath                   = ccpnCodePath / 'tutorials'
-beginnersTutorialPath           = ccpnCodePath / 'tutorials' / 'BeginnersTutorial.pdf'
-backboneAssignmentTutorialPath  = ccpnCodePath / 'tutorials' / 'BackboneAssignmentTutorial.pdf'
-screenTutorialPath              = ccpnCodePath / 'tutorials' / 'CcpNmr_AnalysisScreen_Tutorial_Beta2Release.pdf'
-cspTutorialPath                 = ccpnCodePath / 'tutorials' / 'CSPTutorial.pdf'
-solidStatePeptideTutorialPath   = ccpnCodePath / 'tutorials' / 'SolidStatePeptideAssignmentTutorial.pdf'
-solidStateHETsTutorialPath      = ccpnCodePath / 'tutorials' / 'SolidStateHETsAssignmentTutorial.pdf'
-solidStateSH3TutorialPath       = ccpnCodePath / 'tutorials' / 'SolidStateSH3AssignmentTutorial.pdf'
-macroWritingTutorialPath        = ccpnCodePath / 'tutorials' / 'MacroWritingTutorial.pdf'
-screeningTutorialPath           = ccpnCodePath / 'tutorials' / 'ScreeningTutorial.pdf'
+beginnersTutorialPath           = tutorialsPath / 'BeginnersTutorial.pdf'
+backboneAssignmentTutorialPath  = tutorialsPath / 'BackboneAssignmentTutorial.pdf'
+cspTutorialPath                 = tutorialsPath / 'CSPTutorial.pdf'
+# screenTutorialPath              = ccpnCodePath / 'tutorials' / 'CcpNmr_AnalysisScreen_Tutorial_Beta2Release.pdf'
+solidStatePeptideTutorialPath   = tutorialsPath / 'SolidStatePeptideAssignmentTutorial.pdf'
+solidStateHETsTutorialPath      = tutorialsPath / 'SolidStateHETsAssignmentTutorial.pdf'
+solidStateSH3TutorialPath       = tutorialsPath / 'SolidStateSH3AssignmentTutorial.pdf'
+screeningTutorialPath           = tutorialsPath / 'ScreeningTutorial.pdf'
+macroWritingTutorialPath        = tutorialsPath / 'MacroWritingTutorial.pdf'
+definedTutorialPaths            = (beginnersTutorialPath, backboneAssignmentTutorialPath,
+                                   cspTutorialPath,
+                                   solidStatePeptideTutorialPath, solidStateHETsTutorialPath, solidStateSH3TutorialPath,
+                                   screeningTutorialPath,
+                                   macroWritingTutorialPath
+                                   )
 howTosPath                      = tutorialsPath / 'How-Tos'
 
 documentationPath               = ccpnCodePath / 'doc' / 'build' / 'html' / 'index.html'
@@ -116,7 +124,7 @@ userCcpnPath                    = Path.aPath('~/.ccpn')
 userCcpnDataPath                = userCcpnPath / 'data'
 userCcpnMacroPath               = userCcpnPath / 'macro'
 userCcpnPipesPath               = userCcpnPath / 'pipes'
-userCcpnResourcesPath               = userCcpnPath / CCPN_RESOURCES_DIRECTORY
+userCcpnResourcesPath           = userCcpnPath / CCPN_RESOURCES_DIRECTORY
 userCcpnPathSubDirectories      = ['data', 'macros', 'pipes']  # These get created by framework
 
 userDefaultProjectPath          = userCcpnDataPath / 'default.ccpn'

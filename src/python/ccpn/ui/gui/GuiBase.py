@@ -56,9 +56,9 @@
 # from ccpn.ui.gui.widgets.Menu import \
 #     VIEW_SHOW_MODULES, \
 #     MACRO_RUN_CCPN, \
-#     TUTORIALS_MENU, \
-#     CCPN_PLUGINS_MENU, \
-#     USER_PLUGINS_MENU
+#     HELP_TUTORIALS, \
+#     CCPN_PLUGINS, \
+#     USER_PLUGINS
 #
 #
 # class GuiBase(object):
@@ -318,13 +318,13 @@
 #         # ),
 #         #
 #         # ('Plugins', [
-#         #     (CCPN_PLUGINS_MENU, ()),
-#         #     (USER_PLUGINS_MENU, ()),
+#         #     (CCPN_PLUGINS, ()),
+#         #     (USER_PLUGINS, ()),
 #         #     ]
 #         # ),
 #         #
 #         # ('Help', [
-#         #     (TUTORIALS_MENU, ([
+#         #     (HELP_TUTORIALS, ([
 #         #         ("None", None, [('checkable', True), ('checked', False)])
 #         #         ])
 #         #      ),

@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-08 14:53:59 +0000 (Thu, February 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-12 16:10:49 +0000 (Mon, February 12, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1684,7 +1684,7 @@ class Project(AbstractWrapperObject):
         """
         updateLogger(self.application.applicationName,
                      self.projectPath / CCPN_LOGS_DIRECTORY,
-                     level=self.application._debugLevel,
+                     level=self.application._loggingLevel,
                      readOnly=readOnly,
                      flush=flush,
                      now=self.application._created

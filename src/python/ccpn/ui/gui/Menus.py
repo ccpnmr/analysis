@@ -96,7 +96,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-12 15:25:48 +0000 (Mon, February 12, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-12 16:10:49 +0000 (Mon, February 12, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -160,6 +160,9 @@ CCPN_PLUGINS = 'CCPN Plugins'
 HELP_MENU = 'Help'
 HELP_TUTORIALS = 'Tutorials'
 HELP_HOWTOS = 'How-Tos'
+
+DEVELOPMENT_MENU = 'Development'
+DEVELOPMENT_DEBUG = 'Debug'
 
 SEPARATOR = ()
 DYNAMIC_FILL = []
@@ -397,11 +400,8 @@ class MenusDefs(list):
         # optionally add debug menu
         if app._isInDebugMode:
             self._addMenuDef(
-        ('Development', [
-            ("Set debug off", partial(app.setDebug, 0)),
-            ("Set debug level 1", partial(app.setDebug, 1)),
-            ("Set debug level 2", partial(app.setDebug, 2)),
-            ("Set debug level 3", partial(app.setDebug, 3)),
+        (DEVELOPMENT_MENU, [
+            (DEVELOPMENT_DEBUG, DYNAMIC_FILL),
             ]
         ), position = -1
 

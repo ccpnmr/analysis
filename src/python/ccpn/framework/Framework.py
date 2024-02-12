@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-12 15:25:48 +0000 (Mon, February 12, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-12 16:10:49 +0000 (Mon, February 12, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -623,19 +623,32 @@ class Framework(NotifierBase):
     # Utilities
     #-----------------------------------------------------------------------------------------
 
+    @property
+    def _loggingLevel(self) -> int:
+        """Convert the project _debugLevel (0, 1-3)
+        :return the Logging defined levels
+        """
+        _conversion = {
+            3 : Logging.DEBUG3,
+            2 : Logging.DEBUG2,
+            1 : Logging.DEBUG,
+            0 : Logging.INFO,
+        }
+        return _conversion.get(self._debugLevel, Logging.INFO)
+
+    @property
+    def debugLevel(self) -> int:
+        """:return the current debug level; 0: off, 1-3: debug level 1-3
+        """
+        return self._debugLevel
+
     @logCommand('application.')
     def setDebug(self, level: int):
         """Set the debugging level
         :param level: 0: off, 1-3: debug level 1-3
         """
-        if level == 3:
-            self._debugLevel = Logging.DEBUG3
-        elif level == 2:
-            self._debugLevel = Logging.DEBUG2
-        elif level == 1:
-            self._debugLevel = Logging.DEBUG
-        elif level == 0:
-            self._debugLevel = Logging.INFO
+        if 0 <= level <= 3:
+            self._debugLevel = level
         else:
             raise ValueError(f'Invalid debug level ({level}); should be 0-3')
 
@@ -644,11 +657,7 @@ class Framework(NotifierBase):
         """:return True if either of the debug flags has been set
         CCPNINTERNAL: used throughout to check
         """
-        if self._debugLevel == Logging.DEBUG1 or \
-                self._debugLevel == Logging.DEBUG2 or \
-                self._debugLevel == Logging.DEBUG3:
-            return True
-        return False
+        return self._debugLevel > 0
 
     def _savePreferences(self):
         """Save the user preferences to file

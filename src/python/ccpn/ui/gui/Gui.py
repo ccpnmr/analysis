@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-12 21:49:37 +0000 (Mon, February 12, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-13 21:32:18 +0000 (Tue, February 13, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -965,8 +965,8 @@ class Gui(Ui):
                     return False
 
         self.mainWindow._updateWindowTitle()
-        self.application._getRecentProjectFiles(oldPath=oldPath.asString())  # this will also update the list
-        self.mainWindow._fillRecentProjectsMenu()  # Update the menu
+        # self.application._getRecentProjectFiles(oldPath=oldPath.asString())  # this will also update the list
+        # self.mainWindow._fillRecentProjectsMenu()  # Update the menu
         self.mainWindow.sideBar.setProjectName(self.project)
 
         successMessage = f'Project successfully saved to "{self.project.path}"'
@@ -1128,6 +1128,10 @@ class Gui(Ui):
 
         return result
 
+    #-----------------------------------------------------------------------------------------
+    # All methods, to be retained in a 4.x refactored version
+    #-----------------------------------------------------------------------------------------
+
     def _flipArbitraryAxes(self, strip, usePosition=False):
         """Flip arbitrary axes of strip (defaults to current.strip)
         :param usePosition: Optionally use current cursor position
@@ -1159,9 +1163,6 @@ class Gui(Ui):
         except Exception as es:
             getLogger().warning(f'Cannot show popup: {es}')
 
-    #-----------------------------------------------------------------------------------------
-    # All methods, to be retained in a 4.x refactored version
-    #-----------------------------------------------------------------------------------------
 
     def _showHtmlFile(self, title, urlPath):
         """Display html files

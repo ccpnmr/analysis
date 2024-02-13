@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-12 16:10:49 +0000 (Mon, February 12, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-13 21:32:18 +0000 (Tue, February 13, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1233,6 +1233,7 @@ class Project(AbstractWrapperObject):
         else:
             self.setReadOnly(self.readOnly)
 
+        # remove mainWindow from Project instance, and return to caller (i.e. Framework)
         _mainWindow = self._mainWindow
         self._mainWindow = None
 
@@ -3219,7 +3220,7 @@ def _loadV3Project(application, path: str) -> Project:
         project._saveHistory.addSaveRecord(version=project._objectVersion,
                                            comment='Path/name has changed')
 
-    # the Project initialisation is completed by Project._initialiseProject(), which is called from
+    # the Project initialisation is completed by Project._initialise(), which is called from
     # Framework._initialiseProject when it has done its things.
     # This also checks for the writing of the directories and sets the linkages between
     # application and project.

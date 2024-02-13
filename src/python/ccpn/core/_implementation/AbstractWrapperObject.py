@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-13 09:26:52 +0000 (Tue, February 13, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-13 21:32:18 +0000 (Tue, February 13, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -781,7 +781,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
             app = getApplication()
             if childClass._isGuiClass and app and not app.hasGui:
-                getLogger().debug(f'-->  _getApiChildren: skipping gui-class {childClass} for NoUi interface')
+                getLogger().debug2(f'-->  _getApiChildren(classes={classes}): skipping gui-class {childClass} for NoUi interface')
                 continue
 
             if ('all' in classes) or \

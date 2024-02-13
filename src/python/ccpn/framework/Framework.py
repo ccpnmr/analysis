@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-12 16:10:49 +0000 (Mon, February 12, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-13 21:32:18 +0000 (Tue, February 13, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -196,6 +196,7 @@ class Framework(NotifierBase):
         self._temporaryDirectory = tempfile.TemporaryDirectory(prefix='CcpNmr_')
 
         # Debugging: map to 0-3, with 0 no debug
+        self._debugLevel = 0
         _level = ([self.args.debug,
                    self.args.debug2,
                    self.args.debug3 or self.args.debug3_backup_thread,

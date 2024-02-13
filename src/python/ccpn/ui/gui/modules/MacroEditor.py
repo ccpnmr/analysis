@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-02-08 14:20:04 +0000 (Thu, February 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-13 15:43:58 +0000 (Tue, February 13, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -29,7 +29,6 @@ import datetime
 import tempfile
 from collections import OrderedDict as od
 
-from PyQt5.QtWidgets import QLabel
 from pyqode.python.widgets import PyInteractiveConsole
 from pyqode.core.api import TextHelper
 from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
@@ -255,22 +254,34 @@ class MacroEditor(CcpnModule):
                                   vAlign='centre',
                                   grid=(hGrid, 0))
 
-    def runBlocked(self):
-        with undoBlock():
-            self.application.ui.echoCommands([f'macroEditor.run({os.path.basename(self.filePath)})'])
-            with notificationEchoBlocking():
-                self.run()
-
     def run(self):
-            if self._pythonConsole is not None:
-                if self.autoOpenPythonConsole:
-                    self._openPythonConsoleModule()
-                if self.filePath:
-                    self.preferences.recentMacros.append(self.filePath)
-                    self._pythonConsole._runMacro(self.filePath)
-            else:
-                # Used when running the editor outside of Analysis. Run from an external IpythonConsole
-                self._runOnTempIPythonConsole()
+        """Runs the macro.
+        .. note::
+            This method calls _run, and wraps it with notification and
+            undo blocking.
+        """
+        with undoBlock():
+            self.application.ui.echoCommands([f'macroEditor.run(\'{os.path.basename(self.filePath)}\')'])
+            with notificationEchoBlocking():
+                self._run()
+
+    def _run(self):
+        """Private method that runs the macro, called by run.
+
+        .. warning::
+            This function runs without any notification or undo blocking,
+            and so should only be ran by users who wish to exploit that
+            behaviour
+        """
+        if self._pythonConsole is not None:
+            if self.autoOpenPythonConsole:
+                self._openPythonConsoleModule()
+            if self.filePath:
+                self.preferences.recentMacros.append(self.filePath)
+                self._pythonConsole._runMacro(self.filePath)
+        else:
+            # Used when running the editor outside of Analysis. Run from an external IpythonConsole
+            self._runOnTempIPythonConsole()
 
     def _getProfilerArgs(self):
         """
@@ -502,16 +513,6 @@ class MacroEditor(CcpnModule):
                 ('enabled', True),
                 ('shortcut', '⌃r')
                 ))),
-            ('RunBlocked', od((
-                ('text', 'Run'),
-                ('toolTip', 'Run the macro in the IpythonConsole.\n'
-                            'All operations grouped into 1 undo/redo.\n'
-                            'Shortcut:NOTE: Not Created'),
-                ('icon', Icon('icons/play-undo')),
-                ('callback', self.runBlocked),
-                ('enabled', True),
-                ('shortcut', '^r')
-                ))),
             ('Run-Profile', od((
                 ('text', 'Run with a profiler'),
                 ('toolTip', 'Run the macro in the IpythonConsole with a profiler.\nShortcut: cmd(ctrl)+p'),
@@ -549,7 +550,7 @@ class MacroEditor(CcpnModule):
             sp.shortcutWidget._addToFirstAvailableShortCut(self.filePath)
             sp.exec()
         else:
-            MessageDialog.showMessage('Set shortcuts', 'This option is availble only within Analysis')
+            MessageDialog.showMessage('Set shortcuts', 'This option is available only within Analysis')
 
     def _processDroppedItems(self, data):
         """

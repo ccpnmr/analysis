@@ -3,9 +3,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-01 19:39:56 +0100 (Thu, June 01, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-02-13 15:44:37 +0000 (Tue, February 13, 2024) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,7 +32,7 @@ from typing import Sequence, Optional, Union
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakList as ApiPeakList
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices, _axisCodeMapIndices
-from ccpn.core.lib.ContextManagers import newObject, undoBlockWithoutSideBar
+from ccpn.core.lib.ContextManagers import newObject, undoBlockWithoutSideBar, notificationEchoBlocking, undoBlock
 from ccpn.core._implementation.PMIListABC import PMIListABC
 from ccpn.util.decorators import logCommand
 from ccpn.util import Common as commonUtil
@@ -508,6 +508,30 @@ class PeakList(PMIListABC):
             dfs.append(peak.getAsDataFrame())
         return pd.concat(dfs, axis=0)
 
+    @logCommand(get="self")
+    def fetchMultiplets(self, peaks: list['Peak'] = None) -> tuple['Multiplet']:
+        """Fetches Multiplets from selected Peaks or all peaks in the PeakList
+
+        From the peaks chosen, all associated multiplets will be returned,
+        if a peak has no associated multiplet one will be created for it.
+
+        :param peaks: List of Peaks, if blank then all peaks in
+                      this peak list are used.
+
+        """
+        with undoBlock():
+            with notificationEchoBlocking():
+                spec = self.spectrum
+                peaks = peaks if peaks is not None else self.peaks
+                mps = set()
+                for peak in peaks:
+                    if not peak.multiplets:
+                        tempML = spec.newMultipletList()
+                        mps.add(tempML.newMultiplet(peak))
+                    else:
+                        mps.update(peak.multiplets)
+                mps = set(mps)
+        return tuple(mps)
 
 #=========================================================================================
 # Connections to parents:

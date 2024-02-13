@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-01-24 16:46:40 +0000 (Wed, January 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-13 09:26:52 +0000 (Tue, February 13, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1010,16 +1010,27 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
             apiObjs = childClass._getAllWrappedData(self)
             for apiObj in apiObjs:
                 obj = data2Obj.get(apiObj)
-
                 if obj is None:
-                    try:
-                        obj = childClass._restoreObject(project=project, apiObj=apiObj)
+                    # obj does not exist; restore it from apiObj
 
-                    except RuntimeError as es:
-                        _text = 'Error restoring api-child %r of %s (%s)' % (apiObj.qualifiedName, self, es)
-                        getLogger().warning(_text)
-                        if app and app._isInDebugMode:
-                            sys.stderr.write(f'{traceback.print_exc()}\n')
+                    # GWV 13 Feb 24: Catching this here at such a low level is a bad idea
+                    # as the project and it's window is in an undefined state. Better raise a hard
+                    # error
+
+                    # try:
+                    #     obj = childClass._restoreObject(project=project, apiObj=apiObj)
+                    #
+                    # except RuntimeError as es:
+                    #     _text = 'Error restoring api-child %r of %s (%s)' % (apiObj.qualifiedName, self, es)
+                    #     getLogger().warning(_text)
+                    #     if app and app._isInDebugMode:
+                    #         sys.stderr.write(f'{traceback.print_exc()}\n')
+
+                    obj = childClass._restoreObject(project=project, apiObj=apiObj)
+
+                # obj should exist now
+                if obj is None:
+                    raise RuntimeError(f'Error restoring api-child {apiObj.qualifiedName!r} of {self}')
 
     def _postRestore(self):
         """Handle post-initialising children after all children have been restored

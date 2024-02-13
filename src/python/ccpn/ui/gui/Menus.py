@@ -3,30 +3,36 @@
 
     - A (name, callable) tuple or
         (name, callable, options) tuple or
-        (name, callable, options, checkEnable-callable) tuple or
-      that specifies a menu action with the callable that is triggered when the menu item is selected.
+        (name, callable, options, check-callable) tuple or
 
-      Options is a list or dict of (keyword, value) pairs.
-      Valid options (from Action widget):
-        :param shortcut: optional two letter shortcut
-        :param checked: optional checked flag (if checkable, default: True)
-        :param checkable: optional checkable flag (default: False)
-        :param icon: optional icon
-        :param enabled: optional enable flag (default: True)
-        :param toolTip: optional tooltip
+        that specifies a menu action with the callable that is triggered when
+        the menu item is selected.
 
-      Signature checkEnable-callable:
-        checkEnable-callable(node)
+        Options is a list or dict of (keyword, value) pairs.
+        Valid options (from Action widget):
+            :param shortcut: optional two letter shortcut
+            :param checked: optional checked flag (if checkable, default: True)
+            :param checkable: optional checkable flag (default: False)
+            :param icon: optional icon
+            :param enabled: optional enable flag (default: True)
+            :param toolTip: optional tooltip
 
-    - A (name, list) tuple
-      where the list defines the (sub-)menu items. A zero-length list denotes
-      a dynamically filled menu.
+        Signature check-callable:
+            check-callable(node:MenuNode) -> bool
+
+    - A (name, list) tuple or
+        (name, list, {} check-callable) tuple
+
+        where the list defines the (sub-)menu items.
+        A zero-length list denotes a dynamically filled menu.
+
+        Signature check-callable: see above
 
     - A (name,) length 1 tuple (Note the comma!)
-      indicating a section with name
+        indicating a section with name
 
     - A zero-length () tuple,
-      indicating a separator.
+        indicating a separator.
 
 
 This code replaces:
@@ -77,17 +83,13 @@ GuiMainWindow.  -->
 
 FrameWork.  -->
     _getProjectFiles
+    lotts of callbacks
 
 
-        # try:
-        #     # _n = node.widget.addSection('section-test')
-        #     # _n.setEnabled(False)
-        #     node.widget.addSeparator()
-        #     node.widget.addItem('\tsection-test',enabled=False)
-        #     # node.widget.addItem('---- section-test ----',enabled=False)
-        #     node.widget.addMenu('test')
-        # except Exception as es:
-        #     print(f'ERROR>>{es}')
+STRANGE:
+In GuiMainWindow.__init__
+        self._project._undo.undoChanged.add(self._undoChangeCallback)
+
 
 
 """
@@ -105,7 +107,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-12 21:49:38 +0000 (Mon, February 12, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-13 10:52:58 +0000 (Tue, February 13, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -177,6 +179,10 @@ DEVELOPMENT_DEBUG = 'Debug'
 
 SEPARATOR = ()
 DYNAMIC_FILL = []
+
+def Section(name) -> tuple:
+    """Conveniance; avoids tuple errors"""
+    return (name,)
 
 
 def getMenuDefs():
@@ -296,34 +302,30 @@ class MenusDefs(list):
             ("Notes Editor", partial(app.showNotesEditor, selectFirstItem=True), [('shortcut', 'no')]),
             (),
             ("In Active SpectrumDisplay", [
-                ("Show/Hide",),
+
+                Section("Show/Hide"),
                 ("Toolbar", self._toggleToolbarCallback, [('shortcut', 'tb')]),
                 ("Spectrum Toolbar", self._toggleSpectrumToolbarCallback, [('shortcut', 'sb')]),
                 ("Phasing Console", self._togglePhaseConsoleCallback, [('shortcut', 'pc')]),
                 ("Crosshairs", self._toggleCrosshairCallback, [('shortcut', 'ch')]),
 
-                ("Zoom",),
+                Section("Zoom"),
                 ("Set Zoom...", self._setZoomCallback, [('shortcut', 'sz')]),
                 ("Reset", self._resetZoomCallback, [('shortcut', 'rz')]),
 
-                ("New SpectrumDisplay with",),
+                Section("New SpectrumDisplay with"),
                 ("Same Axes", self._copyStripCallback, []),
                 ("X-Y Axes Flipped", self._flipXYAxisCallback, [('shortcut', 'xy')]),
                 ("X-Z Axes Flipped", self._flipXZAxisCallback, [('shortcut', 'xz')]),
                 ("Y-Z Axes Flipped", self._flipYZAxisCallback, [('shortcut', 'yz')]),
                 ("Axes Flipped...", self._flipArbitraryAxesCallback, [('shortcut', 'fa')]),
-                # (),
-                # (),
-                # ("New SpectrumDisplay with New Strip, Same Axes", self._copyStripCallback, []),
-                # (" .. with X-Y Axes Flipped", self._flipXYAxisCallback, [('shortcut', 'xy')]),
-                # (" .. with X-Z Axes Flipped", self._flipXZAxisCallback, [('shortcut', 'xz')]),
-                # (" .. with Y-Z Axes Flipped", self._flipYZAxisCallback, [('shortcut', 'yz')]),
-                # (" .. with Axes Flipped...", self._flipArbitraryAxesCallback, [('shortcut', 'fa')]),
-                # (),
-                ("Labels",),
+
+                Section("Labels"),
                 ("Auto-arrange", self._arrangeLabelsCallback, [('shortcut', 'av')]),
                 ("Reset", self._resetLabelsCallback, [('shortcut', 'rv')]),
-                ]
+                ],  # end sub-menu
+
+             {}, _hasActiveDisplay
             ),
             (),
             (VIEW_SHOW_MODULES, DYNAMIC_FILL),
@@ -332,31 +334,31 @@ class MenusDefs(list):
         ),
 
         (SPECTRUM_MENU, [
-            (SPECTRUM_LOAD_SPECTRA, self._loadSpectraCallback, [('shortcut', 'ls')]),
-            # ("Spectrum Groups...", self._spectrumGroupsCallback, [('shortcut', 'ss')]), # multiple edit temporarly disabled
+            (SPECTRUM_LOAD_SPECTRA, self._loadSpectraCallback, {'shortcut':'ls'}),
+            # ("Spectrum Groups...", self._spectrumGroupsCallback, {'shortcut':'ss'}), # multiple edit temporarly disabled
             # (),
             ("Validate Paths...", self._validatePathsCallback, {'shortcut':'vp'}, _projectHasSpectra),
             ("Set Experiment Types...", self._experimentTypesCallback, {'shortcut':'et'}, _projectHasSpectra),
             ("Copy into Project...", self._copyToProjectCallback, {}, _projectHasSpectra),
             (),
             ("Pick Peaks", [
-                ("Pick 1D Peaks...", self._peakPick1DCallback, [('shortcut', 'p1')], _projectHasSpectra),
-                ("Pick nD Peaks...", self._peakPickNDCallback, [('shortcut', 'pp')], _projectHasSpectra),
-                ]
+                ("Pick 1D Peaks...", self._peakPick1DCallback, {'shortcut':'p1'}, _projectHasSpectra),
+                ("Pick nD Peaks...", self._peakPickNDCallback, {'shortcut':'pp'}, _projectHasSpectra),
+                ], {}, _projectHasSpectra
             ),
-            ("Copy PeakList...", self._copyPeakListCallback, [('shortcut', 'cl')], _projectHasSpectra),
-            ("Copy Peaks...", self._copyPeaksCallback, [('shortcut', 'cp')], _projectHasPeaks),
-            ("Peak Collections...", self._peakCollectionsCallback, [('shortcut', 'sc')], _projectHasPeaks),
-            ("Estimate Peak Volumes...", self._estimateVolumesCallback, [('shortcut', 'ev')], _projectHasPeaks),
-            ("Estimate Current Peak Volumes", self._estimateCurrentVolumesCallback, [('shortcut', 'ec')], _projectHasPeaks),
-            ("Reorder PeakList Axes...", self._reorderPeakListAxesCallback, [('shortcut', 'rl')], _projectHasSpectra),
+            ("Copy PeakList...", self._copyPeakListCallback, {'shortcut':'cl'}, _projectHasSpectra),
+            ("Copy Peaks...", self._copyPeaksCallback, {'shortcut':'cp'}, _projectHasPeaks),
+            ("Peak Collections...", self._peakCollectionsCallback, {'shortcut':'sc'}, _projectHasPeaks),
+            ("Estimate Peak Volumes...", self._estimateVolumesCallback, {'shortcut':'ev'}, _projectHasPeaks),
+            ("Estimate Current Peak Volumes", self._estimateCurrentVolumesCallback, {'shortcut':'ec'}, _projectHasPeaks),
+            ("Reorder PeakList Axes...", self._reorderPeakListAxesCallback, {'shortcut':'rl'}, _projectHasSpectra),
             (),
             ("Pseudo-Spectrum to SpectrumGroup...", self._pseudoSpectrumCallback, {}, _projectHasSpectra),
-            ("Make Projection...", self._makeProjectionCallback, [('shortcut', 'pj')], _projectHasSpectra),
+            ("Make Projection...", self._makeProjectionCallback, {'shortcut':'pj'}, _projectHasSpectra),
             ("Convert...", self._convertSpectrumCallback, {}, _projectHasSpectra),
             (),
-            ("Make Strip Plot...", app.makeStripPlot, [('shortcut', 'sp')], _projectHasSpectra),
-            ("Print to File...", self._printToFileCallback, [('shortcut', '⌃p')], _projectHasSpectra),
+            ("Make Strip Plot...", app.makeStripPlot, {'shortcut':'sp'}, _projectHasSpectra),
+            ("Print to File...", self._printToFileCallback, {'shortcut':'⌃p'}, _projectHasSpectra),
             ]
         ),
 
@@ -1179,20 +1181,19 @@ class MenuNode(Tree):
 
     def setDynamicNode(self, callback):
         """Make MenuNode a dynamically updated one, defining callback when it is about to show
-        param callback: a function with signature callback(node)
+        param callback: a function with signature callback(node:MenuNode)
         """
         if not self.isMenu:
             raise RuntimeError(f'setDynamicNode: invalid for {self}')
         self.isDynamic = True
-        # use partial to add self to callback
-        self.dynamicCallback = partial(callback, self)
+        self.dynamicCallback = callback
 
     def clearNode(self):
         """For a dynamic Menu node only:
         clear self; clear and remove all decendant nodes
         """
         if not (self.isMenu and self.isDynamic):
-            raise RuntimeError(f'Cannot clear {self}')
+            raise RuntimeError(f'clearNode: Cannot clear {self}')
 
         if self.widget:
             self.widget.clear()
@@ -1200,17 +1201,11 @@ class MenuNode(Tree):
         self._removeAllChildren()
 
     def setCheckedNode(self, callback):
-        """Make Action node a checked one, defining callback for checking by parent
-        param callback: a function with signature callback(node)
+        """Make node a checked one, defining callback for checking by parent
+        param callback: a function with signature callback(node:MenuNode) -> bool
         """
-        if not self.isAction:
-            raise RuntimeError(f'setCheckedNode: invalid for {self}')
-        if self.parent.isDynamic:
-            raise RuntimeError(f'setCheckedNode: cannot set checkedNode for {self}; parent is dynamic')
-
         self.checkEnable = True
-        # use partial to add self to callback
-        self.checkEnableCallback = partial(callback, self)
+        self.checkEnableCallback = callback
 
     def setEnabled(self, flag):
         """Set the enabled status of widget to flag
@@ -1263,14 +1258,22 @@ class MenuNode(Tree):
 
         :return A list of nodes added
         """
+        def _str120(val):
+            """truncate str(val) to 120 chars
+            """
+            _tmp = str(val)
+            if len(_tmp) > 120:
+                _tmp = f'{_tmp[0:54]}    ....    {_tmp[-54:]}'
+            return _tmp
+
         if not isinstance(theList, list):
-            raise ValueError(f'addNodesFromList: expected list; got {type(theList)}')
+            raise ValueError(f'addNodesFromList to {self}: expected list; got {type(theList)}')
 
         result = []
         separatorIndex = 0  # This gives each separator a unique name
         for item in theList:
             if not isinstance(item, tuple):
-                raise RuntimeError(f'Invalid menu definition {item}')
+                raise RuntimeError(f'addNodesFromList to {self}: Invalid menu definition: \n>>> {_str120(item)}')
 
             if len(item) == 0:
                 # A separator
@@ -1285,13 +1288,13 @@ class MenuNode(Tree):
                 node = self.addNode(name=name, nodeType=NodeType.SECTION)
                 result.append(node)
 
-            elif len(item) in (2,3) and isinstance(item[1], list):
+            elif len(item) in (2,4) and isinstance(item[1], list):
                 # a (sub-)Menu
                 name = item[0]
                 val = item[1]
                 node = self.newFromList(theList=val, parent=self, name=name)
 
-                checkCallback = item[2] if len(item) >= 3 else None
+                checkCallback = item[3] if len(item) >= 4 else None
                 if checkCallback is not None:
                     node.setCheckedNode(checkCallback)
 
@@ -1316,7 +1319,7 @@ class MenuNode(Tree):
 
             else:
                 # this should not happen
-                raise RuntimeError(f'Invalid menu definition {item}')
+                raise RuntimeError(f'addNodesFromList to {self}: We should not be here! Invalid menu definition: \n>>> {_str120(item)}')
 
         return result
 
@@ -1388,7 +1391,9 @@ class MenuManager(object):
         # MenuNode root's widget is the MenuBar instance
         self.menuNodes.widget = self.menuBar
 
+        #-------------------------------------------------------------------------------------
         # define dynamic nodes
+        #-------------------------------------------------------------------------------------
 
         # File->Open Recent
         _node = self.menuNodes[FILE_MENU][FILE_OPEN_RECENT]
@@ -1486,6 +1491,9 @@ class MenuManager(object):
                 elif node.level > 1:
                     node.widget = _parent.widget.addMenu(node.name)
 
+                # Always set callback for Menu nodes;
+                node.widget.aboutToShow.connect(partial(self._updateMenuNodeCallback, node))
+
             elif node.isSeparator:
                 node.widget = _parent.widget.addSeparator()
 
@@ -1497,17 +1505,14 @@ class MenuManager(object):
             else:
                 raise RuntimeError(f'Invalid: {node} is ill-defined')
 
-            # Set callback for dynamic nodes;
-            if node.isDynamic and node.dynamicCallback is not None:
-                node.widget.aboutToShow.connect(node.dynamicCallback)
 
-            if node.checkEnable and node.checkEnableCallback is not None:
-                # This node needs checking for enabling;
-                # set callback on parent which will check all its children
-                if node.parent is None or \
-                    node.parent.widget is None or not node.parent.isMenu:
-                    raise RuntimeError(f'Unable to activate checkEnable for {node}')
-                node.parent.widget.aboutToShow.connect(partial(self._updateMenuNode, node.parent))
+            # if node.checkEnable and node.checkEnableCallback is not None:
+            #     # This node needs checking for enabling;
+            #     # set callback on parent which will check all its children
+            #     if node.parent is None or \
+            #         node.parent.widget is None or not node.parent.isMenu:
+            #         raise RuntimeError(f'Unable to activate checkEnable for {node}')
+            #     node.parent.widget.aboutToShow.connect(partial(self._updateMenuNode, node.parent))
 
         # recurse into children
         for _child in node._children:
@@ -1517,22 +1522,33 @@ class MenuManager(object):
     # Callback's from dynamic nodes
     #-----------------------------------------------------------------------------------------
 
-    def _updateMenuNode(self, node:MenuNode):
-        """Update Menu node, checking child-nodes for checkEnable
-        and enabling/disabling corresponding widgets.
+    def _updateMenuNodeCallback(self, node:MenuNode):
+        """Callback to update Menu node:
+        - optionally adding dynamic nodes
+        - checking self for checkEnable
+        - checking child-nodes for checkEnable and enabling/disabling corresponding widgets.
         """
-        # a = 1
-        for child in [_c for _c in node._children if _c.checkEnable]:
-            child.setEnabled(child.checkEnableCallback())
+        if node.isDynamic and node.dynamicCallback:
+            node.dynamicCallback(node)
 
-    def _updateDynamicNode(self, node:MenuNode, menuDefs:list):
-        """Update dynamic node using menuDefs to generate child-nodes and corresponding
+        if node.checkEnable:
+            node.checkEnableCallback(node)
+
+        for child in [_c for _c in node._children if _c.checkEnable]:
+            enabled = child.checkEnableCallback(child)
+            child.setEnabled(enabled)
+
+    def _updateDynamicNode(self, node:MenuNode, defs:list):
+        """Update dynamic node using defs to generate child-nodes and corresponding
         Menu widgets.
         """
+        if not node.isDynamic:
+            raise RuntimeError(f'_updateDynamicNode: not allowed for {node}')
+
         # clear this node and its decendants
         node.clearNode()
         # construct the new decendant nodes from the defs
-        node.addNodesFromList(menuDefs)
+        node.addNodesFromList(defs)
         # make the menu's
         for _child in node._children:
             self.makeMenus(_child)
@@ -1549,7 +1565,7 @@ class MenuManager(object):
             SEPARATOR,
             ('Clear', self.application.preferences.clearRecentFiles)
         ])
-        self._updateDynamicNode(node=node, menuDefs=_defs)
+        self._updateDynamicNode(node=node, defs=_defs)
 
     def _fillFilePredefinedLayoutsCallback(self, node):
         """Callback to fill File->Layouts->Open pre-defined
@@ -1560,7 +1576,7 @@ class MenuManager(object):
         _defs = [ (f.basename, partial(self.application._restoreLayoutFromFile, f))
                    for f in _files
                 ]
-        self._updateDynamicNode(node=node, menuDefs=_defs)
+        self._updateDynamicNode(node=node, defs=_defs)
 
     def _toggleWidget(self, widget):
         _visible = widget.isVisible()
@@ -1586,13 +1602,13 @@ class MenuManager(object):
                 shortcut = None
 
             _defs.append(
-                    (name, partial(self._toggleWidget, widget),
-                     dict(checkable=True, checked=widget.isVisible(), shortcut=shortcut)
-                    )
+                (name, partial(self._toggleWidget, widget),
+                 dict(checkable=True, checked=widget.isVisible(), shortcut=shortcut)
+                )
             )
             count += 1
 
-        self._updateDynamicNode(node=node, menuDefs=_defs)
+        self._updateDynamicNode(node=node, defs=_defs)
 
     def _fillMacroRunRecentCallback(self, node):
         """Callback to fill Macro->Run Recent Menu
@@ -1606,7 +1622,7 @@ class MenuManager(object):
             SEPARATOR,
             ('Clear', self.application.preferences.clearRecentMacros)
         ])
-        self._updateDynamicNode(node=node, menuDefs=_defs)
+        self._updateDynamicNode(node=node, defs=_defs)
 
     def _fillMacroRunCCPNCallback(self, node):
         """Callback to fill Macro->Run CCPN Menu
@@ -1614,7 +1630,8 @@ class MenuManager(object):
         from ccpn.framework.PathsAndUrls import macroPaths
 
         _defs = []
-        # loop over directories to find macro's, skip any that start with underscore, i.e. '_'
+        # loop over directories to find macro's, skip any that start with underscore,
+        # i.e. '_'
         for path in macroPaths:
             _defs.append(
                     (path.basename,)
@@ -1624,7 +1641,7 @@ class MenuManager(object):
                 [(f.basename, partial(self.application.runMacro, f)) for f in _files]
             )
 
-        self._updateDynamicNode(node=node, menuDefs=_defs)
+        self._updateDynamicNode(node=node, defs=_defs)
 
     def _fillUserPluginsCallback(self, node):
         """Callback to fill Plugins->User Plugins
@@ -1638,7 +1655,7 @@ class MenuManager(object):
             (f.PLUGINNAME, partial(self.mainWindow.startPlugin, f)) for f in loadedUserPlugins
         ])
 
-        self._updateDynamicNode(node=node, menuDefs=_defs)
+        self._updateDynamicNode(node=node, defs=_defs)
 
     def _fillCCPNPluginsCallback(self, node):
         """Callback to fill Plugins->CCPN Plugins
@@ -1652,7 +1669,7 @@ class MenuManager(object):
             (f.PLUGINNAME, partial(self.mainWindow.startPlugin, f)) for f in loadedPlugins
         ])
 
-        self._updateDynamicNode(node=node, menuDefs=_defs)
+        self._updateDynamicNode(node=node, defs=_defs)
 
     def _fillHelpTutorialsCallback(self, node):
         """Callback to fill Help->Tutorials Menu
@@ -1682,7 +1699,7 @@ class MenuManager(object):
                 (camelCaseToString(f.basename), partial(self.ui._showPath, f)) for f in _files
             ])
 
-        self._updateDynamicNode(node=node, menuDefs=_defs)
+        self._updateDynamicNode(node=node, defs=_defs)
 
     def _fillHelpHowtosCallback(self, node):
         """Callback to fill Help->How-to's
@@ -1702,7 +1719,7 @@ class MenuManager(object):
                 (camelCaseToString(f.basename), partial(self.ui._showPath, f)) for f in _files
             ])
 
-        self._updateDynamicNode(node=node, menuDefs=_defs)
+        self._updateDynamicNode(node=node, defs=_defs)
 
     def _fillDevelopmentDebugCallback(self, node):
         """Callback to fill Development->Debug Menu
@@ -1716,7 +1733,7 @@ class MenuManager(object):
                     )
             )
 
-        self._updateDynamicNode(node=node, menuDefs=_defs)
+        self._updateDynamicNode(node=node, defs=_defs)
 
     #-----------------------------------------------------------------------------------------
 
@@ -1801,8 +1818,8 @@ def _hasActiveDisplay(node) -> bool:
     app = getApplication()
     if app.current.strip is not None:
         _sd = app.current.strip.spectrumDisplay
-        node.setTitle(f'In {_sd.pid}')
+        node.widget.setTitle(f'In SpectrumDisplay {_sd.id}')
         return True
     else:
-        node.setTitle('Select Strip in SpectrumDisplay')
+        node.widget.setTitle('Select Strip in SpectrumDisplay')
         return False

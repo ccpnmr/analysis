@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-02-08 14:17:43 +0000 (Thu, February 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-13 15:44:15 +0000 (Tue, February 13, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -753,9 +753,9 @@ class Multiplet(AbstractWrapperObject):
             dimensionMapping = pk.spectrum.getByAxisCodes('dimensions', axisCodes, exactMatch=False)
             if pk.assignedNmrAtoms:
                 [a] = pk.getByDimensions('assignedNmrAtoms', dimensionMapping)
-                for dim in range(len(assignments)):
-                    if a[dim] not in assignments[dim] and a[dim] is not None:
-                        assignments[dim].append(a[dim])
+                for dim, assign in enumerate(assignments):
+                    if a[dim] not in assign and a[dim is not None]:
+                        assign.append(a[dim])
 
         for pk in self.peaks:
             pk.assignDimensions(axisCodes, assignments)

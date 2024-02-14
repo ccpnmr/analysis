@@ -9,7 +9,7 @@ from __future__ import unicode_literals
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
                "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -19,9 +19,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-12 16:05:28 +0000 (Tue, December 12, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-02-14 12:12:37 +0000 (Wed, February 14, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -39,6 +39,7 @@ import sys
 import string
 import platform
 import collections
+import inspect
 from collections.abc import Iterable
 from itertools import islice
 from string import whitespace
@@ -471,6 +472,15 @@ def stringifier(*fields, **options):
 
     return formatter
 
+def classType(obj) -> str:
+    """Helper function to yield a more managable class description for an object (either class or instance)
+    (in lieu of type())
+    :parameter obj: object (class or instance) to get the type (name) from
+    """
+    if inspect.isclass(obj):
+        return f'<class {repr(obj.__name__)}>'
+    else:
+        return f'<class {repr(obj.__class__.__name__)}>'
 
 def contains_whitespace(s):
     return True in [c in s for c in string.whitespace]

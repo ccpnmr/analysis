@@ -6,9 +6,9 @@ rotuines and info
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                )
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -19,8 +19,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:40 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-02-14 12:12:34 +0000 (Wed, February 14, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,8 +32,8 @@ __date__ = "$Date: 2021-06-30 10:28:41 +0000 (Fri, June 30, 2021) $"
 
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC, NO_SUFFIX, ANY_SUFFIX
 from ccpn.core.Spectrum import _newSpectrumFromDataSource
-from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import DataSourceTrait
-from ccpn.core.lib.DataStore import DataStore, DataStoreTrait
+from ccpn.core.lib.DataStore import DataStore
+from ccpn.core.lib.CoreTraits import DataStoreTrait, DataSourceTrait
 
 
 class SpectrumDataLoaderABC(DataLoaderABC):
@@ -197,3 +197,9 @@ class JcampSpectrumLoader(SpectrumDataLoaderABC):
     from ccpn.core.lib.SpectrumDataSources.JcampSpectrumDataSource import JcampSpectrumDataSource
     spectumDataSourceClass = JcampSpectrumDataSource
 JcampSpectrumLoader._initClass()   # also registers
+
+
+class JeolSpectrumLoader(SpectrumDataLoaderABC):
+    from ccpn.core.lib.SpectrumDataSources.JeolSpectrumDataSource import JeolSpectrumDataSource
+    spectumDataSourceClass = JeolSpectrumDataSource
+JeolSpectrumLoader._initClass()   # also registers

@@ -4,9 +4,9 @@ This file contains the MainWindow class
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-11-28 16:09:08 +0000 (Tue, November 28, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-02-14 12:12:35 +0000 (Wed, February 14, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -40,6 +40,8 @@ from ccpn.core.Project import Project
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
 
+from ccpn.framework.Preferences import getPreferences, RECENT_MACROS
+
 ## MainWindow class
 from ccpn.ui._implementation.Window import Window as _CoreClassMainWindow
 
@@ -58,8 +60,9 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Action import Action
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
-from ccpn.ui.gui.widgets.Menu import Menu, MenuBar, SHOWMODULESMENU, CCPNMACROSMENU, \
-    USERMACROSMENU, TUTORIALSMENU, PLUGINSMENU, CCPNPLUGINSMENU, HOWTOSMENU
+from ccpn.ui.gui.widgets.Menu import Menu, MenuBar
+from ccpn.ui.gui.Menus import FILE_MENU, FILE_RESTORE_FROM_ARCHIVE, VIEW_MENU, MACRO_MENU, VIEW_SHOW_MODULES, \
+    MACRO_RUN_CCPN, HELP_TUTORIALS, PLUGINS_MENU, USER_PLUGINS, CCPN_PLUGINS, HELP_HOWTOS
 from ccpn.ui.gui.widgets.SideBar import SideBar  #,SideBar
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
@@ -366,13 +369,13 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         self.statusBar().showMessage(msg)
         msg2 = 'project = %sProject("%s")' % (('new' if isNew else 'open'), path)
 
-        self._fillRecentProjectsMenu()
+        # self._fillRecentProjectsMenu()
         self.pythonConsole.setProject(project)
         self._updateWindowTitle()
-        if self.application.project.isTemporary:
-            self.getMenuAction('File->Archive').setEnabled(False)
-        else:
-            self.getMenuAction('File->Archive').setEnabled(True)
+        # if self.application.project.isTemporary:
+        #     self.getMenuAction('File->Archive').setEnabled(False)
+        # else:
+        #     self.getMenuAction('File->Archive').setEnabled(True)
 
         from copy import deepcopy
 
@@ -406,42 +409,42 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
 
         self.setWindowTitle(windowTitle)
 
-    def getMenuAction(self, menuString, topMenuAction=None):
-        from ccpn.framework.Translation import translator
-
-        if topMenuAction is None:
-            topMenuAction = self._menuBar
-        splitMenuString = menuString.split('->')
-        splitMenuString = [translator.translate(text) for text in splitMenuString]
-        if len(splitMenuString) > 1:
-            topMenuAction = self.getMenuAction('->'.join(splitMenuString[:-1]), topMenuAction)
-        for a in topMenuAction.actions():
-            # print ('>>>', menuString, a.text())
-            if a.text() == splitMenuString[-1]:
-                return a.menu() or a
-        raise ValueError('Menu item %r not found' % menuString)
-
-    def searchMenuAction(self, menuString, topMenuAction=None):
-        from ccpn.framework.Translation import translator
-
-        found = None
-        if topMenuAction is None:
-            topMenuAction = self._menuBar
-        splitMenuString = menuString.split('->')
-        splitMenuString = [translator.translate(text) for text in splitMenuString]
-        if len(splitMenuString) > 1:
-            topMenuAction = self.getMenuAction('->'.join(splitMenuString[:-1]), topMenuAction)
-        for a in topMenuAction.actions():
-            # print ('>>>', menuString, a.text())
-            if a.text() == splitMenuString[-1]:
-                found = a.menu() or a
-                break
-            else:
-                if a.menu():
-                    found = self.searchMenuAction(menuString, topMenuAction=a.menu())
-                    if found:
-                        break
-        return found
+    # def getMenuAction(self, menuString, topMenuAction=None):
+    #     from ccpn.framework.Translation import translator
+    #
+    #     if topMenuAction is None:
+    #         topMenuAction = self._menuBar
+    #     splitMenuString = menuString.split('->')
+    #     splitMenuString = [translator.translate(text) for text in splitMenuString]
+    #     if len(splitMenuString) > 1:
+    #         topMenuAction = self.getMenuAction('->'.join(splitMenuString[:-1]), topMenuAction)
+    #     for a in topMenuAction.actions():
+    #         # print ('>>>', menuString, a.text())
+    #         if a.text() == splitMenuString[-1]:
+    #             return a.menu() or a
+    #     raise ValueError('Menu item %r not found' % menuString)
+    #
+    # def searchMenuAction(self, menuString, topMenuAction=None):
+    #     from ccpn.framework.Translation import translator
+    #
+    #     found = None
+    #     if topMenuAction is None:
+    #         topMenuAction = self._menuBar
+    #     splitMenuString = menuString.split('->')
+    #     splitMenuString = [translator.translate(text) for text in splitMenuString]
+    #     if len(splitMenuString) > 1:
+    #         topMenuAction = self.getMenuAction('->'.join(splitMenuString[:-1]), topMenuAction)
+    #     for a in topMenuAction.actions():
+    #         # print ('>>>', menuString, a.text())
+    #         if a.text() == splitMenuString[-1]:
+    #             found = a.menu() or a
+    #             break
+    #         else:
+    #             if a.menu():
+    #                 found = self.searchMenuAction(menuString, topMenuAction=a.menu())
+    #                 if found:
+    #                     break
+    #     return found
 
     def _setupWindow(self):
         """
@@ -521,71 +524,71 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         """
         Creates menu bar for main window and creates the appropriate menus according to the arguments
         passed at startup.
-
-        This currently pulls info on what menus to create from Framework.  Once GUI and Project are
-        separated, Framework should be able to call a method to set the menus.
         """
+        from ccpn.ui.gui.Menus import MenuManager
+        self._menuManager = MenuManager(mainWindow=self, menuDefs=self.ui._menuDefs)
+        self._menuManager.makeMenus()
+        return
 
-        self._menuBar = self.menuBar()
-        for m in self.application._menuSpec:
-            self._createMenu(m)
-        self._menuBar.setNativeMenuBar(self.application.preferences.general.useNativeMenus)
+    #     # self._menuBar = self.menuBar()
+    #     # for m in self.ui._menuDefs:
+    #     #     self._createMenu(m)
+    #     # self._menuBar.setNativeMenuBar(self.application.preferences.general.useNativeMenus)
+    #     #
+    #     # self._fillRecentProjectsMenu()
+    #     # self._fillPredefinedLayoutMenu()
+    #     # self._fillRecentMacrosMenu()
+    #     # self._reloadCcpnPlugins()
+    #     # # self._fillCcpnPluginsMenu()
+    #     # # self._fillUserPluginsMenu()
+    #     #
+    #     # self._attachModulesMenuAction()
+    #     # self._attachCCPNMacrosMenuAction()
+    #     # # self._attachUserMacrosMenuAction()
+    #     # self._attachTutorialsMenuAction()
+    #     #
+    #     # # hide this option for now
+    #     # modulesMenu = self.searchMenuAction(VIEW_SHOW_MODULES)
+    #     # modulesMenu.setVisible(False)
+    #
+    # def _attachModulesMenuAction(self):
+    #     # add a connect to call _fillModulesMenu when the menu item is about to show
+    #     # so it is always up-to-date
+    #     modulesMenu = self.searchMenuAction(VIEW_SHOW_MODULES)
+    #     modulesMenu.aboutToShow.connect(self._fillModulesMenu)
+    #
+    # def _attachCCPNMacrosMenuAction(self):
+    #     # add a connect to call _fillCCPNMacrosMenu when the menu item is about to show
+    #     # so it is always up-to-date
+    #     modulesMenu = self.searchMenuAction(MACRO_RUN_CCPN)
+    #     modulesMenu.aboutToShow.connect(self._fillCCPNMacrosMenu)
 
-        self._fillRecentProjectsMenu()
-        self._fillPredefinedLayoutMenu()
-        self._fillRecentMacrosMenu()
-        #TODO:ED needs fixing
-        self._reloadCcpnPlugins()
-        # self._fillCcpnPluginsMenu()
-        # self._fillUserPluginsMenu()
+    # def _attachUserMacrosMenuAction(self):
+    #     # add a connect to call _fillUserMacrosMenu when the menu item is about to show
+    #     # so it is always up-to-date
+    #     modulesMenu = self.searchMenuAction(MACRO_RUN_USER)
+    #     modulesMenu.aboutToShow.connect(self._fillUserMacrosMenu)
 
-        self._attachModulesMenuAction()
-        self._attachCCPNMacrosMenuAction()
-        # self._attachUserMacrosMenuAction()
-        self._attachTutorialsMenuAction()
-
-        # hide this option for now
-        modulesMenu = self.searchMenuAction(SHOWMODULESMENU)
-        modulesMenu.setVisible(False)
-
-    def _attachModulesMenuAction(self):
-        # add a connect to call _fillModulesMenu when the menu item is about to show
-        # so it is always up-to-date
-        modulesMenu = self.searchMenuAction(SHOWMODULESMENU)
-        modulesMenu.aboutToShow.connect(self._fillModulesMenu)
-
-    def _attachCCPNMacrosMenuAction(self):
-        # add a connect to call _fillCCPNMacrosMenu when the menu item is about to show
-        # so it is always up-to-date
-        modulesMenu = self.searchMenuAction(CCPNMACROSMENU)
-        modulesMenu.aboutToShow.connect(self._fillCCPNMacrosMenu)
-
-    def _attachUserMacrosMenuAction(self):
-        # add a connect to call _fillUserMacrosMenu when the menu item is about to show
-        # so it is always up-to-date
-        modulesMenu = self.searchMenuAction(USERMACROSMENU)
-        modulesMenu.aboutToShow.connect(self._fillUserMacrosMenu)
-
-    def _attachTutorialsMenuAction(self):
-        # add a connect to call _fillTutorialsMenu when the menu item is about to show
-        # so it is always up-to-date
-        modulesMenu = self.searchMenuAction(TUTORIALSMENU)
-        modulesMenu.aboutToShow.connect(self._fillTutorialsMenu)
-
-    def _createMenu(self, spec, targetMenu=None):
-        menu = self._addMenu(spec[0], targetMenu)
-        setWidgetFont(menu)
-        self._addMenuActions(menu, spec[1])
-
-    def _addMenu(self, menuTitle, targetMenu=None):
-        if targetMenu is None:
-            targetMenu = self._menuBar
-        if isinstance(targetMenu, MenuBar):
-            menu = Menu(menuTitle, self)
-            targetMenu.addMenu(menu)
-        else:
-            menu = targetMenu.addMenu(menuTitle)
-        return menu
+    # def _attachTutorialsMenuAction(self):
+    #     # add a connect to call _fillTutorialsMenu when the menu item is about to show
+    #     # so it is always up-to-date
+    #     modulesMenu = self.searchMenuAction(HELP_TUTORIALS)
+    #     modulesMenu.aboutToShow.connect(self._fillTutorialsMenu)
+    #
+    # def _createMenu(self, spec, targetMenu=None):
+    #     menu = self._addMenu(spec[0], targetMenu)
+    #     setWidgetFont(menu)
+    #     self._addMenuActions(menu, spec[1])
+    #
+    # def _addMenu(self, menuTitle, targetMenu=None):
+    #     if targetMenu is None:
+    #         targetMenu = self._menuBar
+    #     if isinstance(targetMenu, MenuBar):
+    #         menu = Menu(menuTitle, self)
+    #         targetMenu.addMenu(menu)
+    #     else:
+    #         menu = targetMenu.addMenu(menuTitle)
+    #     return menu
 
     def _storeShortcut(self, twoLetters, thecallable):
         if twoLetters is not None:
@@ -606,24 +609,24 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                 twoLetters = kwDict.get('shortcut')
                 self._storeShortcut(twoLetters, thecallable)
 
-    def _addMenuActions(self, menu, actions):
-        self._storeMainMenuShortcuts(actions)
-        for action in actions:
-            if len(action) == 0:
-                menu.addSeparator()
-            elif len(action) == 2:
-                if callable(action[1]):
-                    _action = Action(self, action[0], callback=action[1])
-                    menu.addAction(_action)
-                else:
-                    self._createMenu(action, menu)
-            elif len(action) == 3:
-                kwDict = dict(action[2])
-                for k, v in kwDict.items():
-                    if (k == 'shortcut') and v.startswith('⌃'):  # Unicode U+2303, NOT the carrot on your keyboard.
-                        kwDict[k] = QKeySequence('Ctrl+{}'.format(v[1:]))
-                menuAction = Action(self, action[0], callback=action[1], **kwDict)
-                menu.addAction(menuAction)
+    # def _addMenuActions(self, menu, actions):
+    #     self._storeMainMenuShortcuts(actions)
+    #     for action in actions:
+    #         if len(action) == 0:
+    #             menu.addSeparator()
+    #         elif len(action) == 2:
+    #             if callable(action[1]):
+    #                 _action = Action(self, action[0], callback=action[1])
+    #                 menu.addAction(_action)
+    #             else:
+    #                 self._createMenu(action, menu)
+    #         elif len(action) == 3:
+    #             kwDict = dict(action[2])
+    #             for k, v in kwDict.items():
+    #                 if (k == 'shortcut') and v.startswith('⌃'):  # Unicode U+2303, NOT the carrot on your keyboard.
+    #                     kwDict[k] = QKeySequence('Ctrl+{}'.format(v[1:]))
+    #             menuAction = Action(self, action[0], callback=action[1], **kwDict)
+    #             menu.addAction(menuAction)
 
     def _checkForBadSpectra(self, project):
         """Report bad spectra in a popup
@@ -689,146 +692,145 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             with MessageDialog.progressManager(self, 'Loading Nef file %s ... ' % dataLoader.path):
                 dataLoader.load()
 
-    def _clearRecentProjects(self):
-        self.application.preferences.recentFiles = []
-        self._fillRecentProjectsMenu()
+    # def _clearRecentProjects(self):
+    #     self.application.preferences.recentFiles = []
+    #     self._fillRecentProjectsMenu()
+    #
+    # def _fillRecentProjectsMenu(self):
+    #     """
+    #     Populates recent projects menu with 10 most recently loaded projects
+    #     specified in the preferences file.
+    #     """
+    #     recentFileLocations = self.application._getRecentProjectFiles()
+    #     recentFileMenu = self.getMenuAction('File->Open Recent')
+    #     recentFileMenu.clear()
+    #     for recentFile in recentFileLocations:
+    #         # action = Action(self, text=recentFile, translate=False,
+    #         #                callback=partial(self.application.loadProject, path=recentFile))
+    #
+    #         action = Action(self, text=recentFile, translate=False,
+    #                         callback=partial(self.ui.loadProject, path=recentFile))
+    #         recentFileMenu.addAction(action)
+    #     recentFileMenu.addSeparator()
+    #     recentFileMenu.addAction(Action(recentFileMenu, text='Clear',
+    #                                     callback=self._clearRecentProjects))
+    #
+    # def _fillPredefinedLayoutMenu(self):
+    #     """
+    #     Populates predefined Layouts
+    #     """
+    #     from ccpn.ui.gui import Layout
+    #     from ccpn.framework.PathsAndUrls import predefinedLayouts
+    #
+    #     userDefinedLayoutDirPath = self.application.preferences.general.get('userLayoutsPath')
+    #     prelayouts = Layout._dictLayoutsNamePath(Layout._getPredefinedLayouts(predefinedLayouts))
+    #     prelayoutMenu = self.getMenuAction('File->Layout->Open pre-defined')
+    #     prelayoutMenu.clear()
+    #     for name, path in prelayouts.items():
+    #         action = Action(self, text=name, translate=False,
+    #                         callback=partial(self.application._restoreLayoutFromFile, path))
+    #         prelayoutMenu.addAction(action)
+    #     prelayoutMenu.addSeparator()
+    #     userLayouts = Layout._dictLayoutsNamePath(Layout._getPredefinedLayouts(userDefinedLayoutDirPath))
+    #     for name, path in userLayouts.items():
+    #         action = Action(self, text=name, translate=False,
+    #                         callback=partial(self.application._restoreLayoutFromFile, path))
+    #         prelayoutMenu.addAction(action)
+    #     prelayoutMenu.addSeparator()
+    #     action = Action(self, text='Update', translate=False,
+    #                     callback=self._fillPredefinedLayoutMenu)
+    #     prelayoutMenu.addAction(action)
 
-    def _fillRecentProjectsMenu(self):
-        """
-        Populates recent projects menu with 10 most recently loaded projects
-        specified in the preferences file.
-        """
-        recentFileLocations = self.application._getRecentProjectFiles()
-        recentFileMenu = self.getMenuAction('File->Open Recent')
-        recentFileMenu.clear()
-        for recentFile in recentFileLocations:
-            # action = Action(self, text=recentFile, translate=False,
-            #                callback=partial(self.application.loadProject, path=recentFile))
+    # GWV 9/2/24: This code was never reached
+    # def _fillMacrosMenu(self):
+    #     """
+    #     Populates macros menu with ten macros ran.
+    #     """
+    #
+    #     recentMacrosMenu = self.getMenuAction('Macro->Run Recent')
+    #     recentMacrosMenu.clear()
+    #
+    #     from ccpn.framework.PathsAndUrls import macroPath as ccpnMacroPath
+    #
+    #     try:
+    #         ccpnMacros = os.listdir(ccpnMacroPath)
+    #         ccpnMacros = [f for f in ccpnMacros if
+    #                       os.path.isfile(os.path.join(ccpnMacroPath, f))]
+    #         ccpnMacros = [f for f in ccpnMacros if f.split('.')[-1] == 'py']
+    #         ccpnMacros = [f for f in ccpnMacros if not f.startswith('.')]
+    #         ccpnMacros = [f for f in ccpnMacros if not f.startswith('_')]
+    #         ccpnMacros = sorted(ccpnMacros)
+    #
+    #         recentMacrosMenu.clear()
+    #         for macro in ccpnMacros:
+    #             action = Action(self, text=macro, translate=False,
+    #                             callback=partial(self.runMacro,
+    #                                              macroFile=os.path.join(ccpnMacroPath, macro)))
+    #             recentMacrosMenu.addAction(action)
+    #         if len(ccpnMacros) > 0:
+    #             recentMacrosMenu.addSeparator()
+    #     except FileNotFoundError:
+    #         pass
 
-            action = Action(self, text=recentFile, translate=False,
-                            callback=partial(self.ui.loadProject, path=recentFile))
-            recentFileMenu.addAction(action)
-        recentFileMenu.addSeparator()
-        recentFileMenu.addAction(Action(recentFileMenu, text='Clear',
-                                        callback=self._clearRecentProjects))
-
-    def _fillPredefinedLayoutMenu(self):
-        """
-        Populates predefined Layouts
-        """
-        from ccpn.ui.gui import Layout
-        from ccpn.framework.PathsAndUrls import predefinedLayouts
-
-        userDefinedLayoutDirPath = self.application.preferences.general.get('userLayoutsPath')
-        prelayouts = Layout._dictLayoutsNamePath(Layout._getPredefinedLayouts(predefinedLayouts))
-        prelayoutMenu = self.getMenuAction('File->Layout->Open pre-defined')
-        prelayoutMenu.clear()
-        for name, path in prelayouts.items():
-            action = Action(self, text=name, translate=False,
-                            callback=partial(self.application._restoreLayoutFromFile, path))
-            prelayoutMenu.addAction(action)
-        prelayoutMenu.addSeparator()
-        userLayouts = Layout._dictLayoutsNamePath(Layout._getPredefinedLayouts(userDefinedLayoutDirPath))
-        for name, path in userLayouts.items():
-            action = Action(self, text=name, translate=False,
-                            callback=partial(self.application._restoreLayoutFromFile, path))
-            prelayoutMenu.addAction(action)
-        prelayoutMenu.addSeparator()
-        action = Action(self, text='Update', translate=False,
-                        callback=self._fillPredefinedLayoutMenu)
-        prelayoutMenu.addAction(action)
-
-    def _fillMacrosMenu(self):
-        """
-        Populates recent macros menu with last ten macros ran.
-        """
-        #TODO: make sure that running a macro adds it to the prefs and calls this function
-
-        recentMacrosMenu = self.getMenuAction('Macro->Run Recent')
-        recentMacrosMenu.clear()
-
-        from ccpn.framework.PathsAndUrls import macroPath as ccpnMacroPath
-
-        try:
-            ccpnMacros = os.listdir(ccpnMacroPath)
-            ccpnMacros = [f for f in ccpnMacros if
-                          os.path.isfile(os.path.join(ccpnMacroPath, f))]
-            ccpnMacros = [f for f in ccpnMacros if f.split('.')[-1] == 'py']
-            ccpnMacros = [f for f in ccpnMacros if not f.startswith('.')]
-            ccpnMacros = [f for f in ccpnMacros if not f.startswith('_')]
-            ccpnMacros = sorted(ccpnMacros)
-
-            recentMacrosMenu.clear()
-            for macro in ccpnMacros:
-                action = Action(self, text=macro, translate=False,
-                                callback=partial(self.runMacro,
-                                                 macroFile=os.path.join(ccpnMacroPath, macro)))
-                recentMacrosMenu.addAction(action)
-            if len(ccpnMacros) > 0:
-                recentMacrosMenu.addSeparator()
-        except FileNotFoundError:
-            pass
-
-    def _clearRecentMacros(self):
-        self.application.preferences.recentMacros = []
-        self._fillRecentMacrosMenu()
-
-    def _fillRecentMacrosMenu(self):
-        """
-        Populates recent macros menu with last ten macros ran.
-        TODO: make sure that running a macro adds it to the prefs and calls this function
-        """
-        recentMacrosMenu = self.getMenuAction('Macro->Run Recent')
-        recentMacros = self.application.preferences.recentMacros
-        if len(recentMacros) < 0:
-            self._fillMacrosMenu()  #uses the default Macros
-
-        else:
-            recentMacros = recentMacros[-10:]
-            recentMacrosMenu.clear()
-            for recentMacro in sorted(recentMacros, reverse=True):
-                action = Action(self, text=recentMacro, translate=False,
-                                callback=partial(self.application.runMacro, macroFile=recentMacro))
-                recentMacrosMenu.addAction(action)
-            recentMacrosMenu.addSeparator()
-
-        recentMacrosMenu.addAction(Action(recentMacrosMenu, text='Refresh',
-                                          callback=self._fillRecentMacrosMenu))
-        recentMacrosMenu.addAction(Action(recentMacrosMenu, text='Browse...',
-                                          callback=self.application.runMacro))
-        recentMacrosMenu.addAction(Action(recentMacrosMenu, text='Clear',
-                                          callback=self._clearRecentMacros))
-
-    def _addPluginSubMenu(self, MENU, Plugin):
-        targetMenu = pluginsMenu = self.searchMenuAction(MENU)
-        if '...' in Plugin.PLUGINNAME:
-            package, name = Plugin.PLUGINNAME.split('...')
-            try:
-                targetMenu = self.getMenuAction(package, topMenuAction=pluginsMenu)
-            except ValueError:
-                targetMenu = self._addMenu(package, targetMenu=pluginsMenu)
-        else:
-            name = Plugin.PLUGINNAME
-        action = Action(self, text=name, translate=False,
-                        callback=partial(self.startPlugin, Plugin=Plugin))
-        targetMenu.addAction(action)
-
-    def _fillModulesMenu(self):
-        modulesMenu = self.searchMenuAction(SHOWMODULESMENU)
-        modulesMenu.clear()
-
-        moduleSize = self.sideBar.size()
-        visible = moduleSize.width() != 0 and moduleSize.height() != 0 and self.sideBar.isVisible()
-        modulesMenu.addAction(Action(modulesMenu, text='Sidebar',
-                                     checkable=True, checked=visible,
-                                     # callback=partial(self._showSideBarModule, self._sideBarFrame, self, visible)))
-                                     callback=partial(self._showSideBarModule, self._sideBarFrame, self, visible)))
-
-        for module in self.moduleArea.ccpnModules:
-            visible = module.isVisible()
-            modulesMenu.addAction(Action(modulesMenu, text=module.name(),
-                                         checkable=True, checked=visible,
-                                         callback=partial(self._showModule, module)))
+    # def _clearRecentMacros(self):
+    #     getPreferences().clearRecentMacros()
+    #     self._fillRecentMacrosMenu()
+    #
+    # def _fillRecentMacrosMenu(self):
+    #     """
+    #     Populates recent macros menu with last ten macros ran.
+    #     """
+    #     from ccpn.ui.gui.Menus import MACRO_MENU, MACRO_RUN_RECENT
+    #     recentMacrosMenu = self.getMenuAction(f'{MACRO_MENU}->{MACRO_RUN_RECENT}')
+    #     recentMacros = getPreferences().get(RECENT_MACROS)
+    #     # if len(recentMacros) < 0:
+    #     #     self._fillMacrosMenu()  #uses the default Macros
+    #     #
+    #     # else:
+    #     #     recentMacros = recentMacros[-10:]
+    #     recentMacrosMenu.clear()
+    #     for recentMacro in sorted(recentMacros, reverse=True):
+    #         action = Action(self, text=recentMacro, translate=False,
+    #                         callback=partial(self.application.runMacro, macroFile=recentMacro))
+    #         recentMacrosMenu.addAction(action)
+    #     recentMacrosMenu.addSeparator()
+    #
+    #     recentMacrosMenu.addAction(Action(recentMacrosMenu, text='Refresh',
+    #                                       callback=self._fillRecentMacrosMenu))
+    #     recentMacrosMenu.addAction(Action(recentMacrosMenu, text='Browse...',
+    #                                       callback=self.application.runMacro))
+    #     recentMacrosMenu.addAction(Action(recentMacrosMenu, text='Clear',
+    #                                       callback=self._clearRecentMacros))
+    #
+    # def _addPluginSubMenu(self, MENU, Plugin):
+    #     targetMenu = pluginsMenu = self.searchMenuAction(MENU)
+    #     if '...' in Plugin.PLUGINNAME:
+    #         package, name = Plugin.PLUGINNAME.split('...')
+    #         try:
+    #             targetMenu = self.getMenuAction(package, topMenuAction=pluginsMenu)
+    #         except ValueError:
+    #             targetMenu = self._addMenu(package, targetMenu=pluginsMenu)
+    #     else:
+    #         name = Plugin.PLUGINNAME
+    #     action = Action(self, text=name, translate=False,
+    #                     callback=partial(self.startPlugin, Plugin=Plugin))
+    #     targetMenu.addAction(action)
+    #
+    # def _fillModulesMenu(self):
+    #     modulesMenu = self.searchMenuAction(VIEW_SHOW_MODULES)
+    #     modulesMenu.clear()
+    #
+    #     moduleSize = self.sideBar.size()
+    #     visible = moduleSize.width() != 0 and moduleSize.height() != 0 and self.sideBar.isVisible()
+    #     modulesMenu.addAction(Action(modulesMenu, text='Sidebar',
+    #                                  checkable=True, checked=visible,
+    #                                  callback=partial(self._showSideBar, visible)))
+    #
+    #     for module in self.moduleArea.ccpnModules:
+    #         visible = module.isVisible()
+    #         modulesMenu.addAction(Action(modulesMenu, text=module.name(),
+    #                                      checkable=True, checked=visible,
+    #                                      callback=partial(self._showModule, module)))
 
     def _showModule(self, module):
         try:
@@ -839,155 +841,144 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         except Exception as es:
             getLogger().warning('Error expanding module: %s', module.name())
 
-    def _fillCCPNMacrosMenu(self):
-        modulesMenu = self.searchMenuAction(CCPNMACROSMENU)
-        modulesMenu.clear()
+    # def _fillCCPNMacrosMenu(self):
+    #     modulesMenu = self.searchMenuAction(MACRO_RUN_CCPN)
+    #     modulesMenu.clear()
+    #
+    #     from ccpn.framework.PathsAndUrls import macroPath
+    #     from os import walk
+    #
+    #     # read the macros file directory - all levels, but sectioned by sub-folder
+    #     startpath = None
+    #     for (dirpath, dirnames, filenames) in walk(os.path.expanduser(macroPath)):
+    #         startpath = startpath or dirpath
+    #
+    #         macroFiles = []
+    #         for filename in filenames:
+    #             if filename.startswith('_'):
+    #                 continue
+    #             elif filename.startswith('__'):
+    #                 continue
+    #             if filename.endswith('.py'):
+    #                 _macroName = os.path.join(dirpath, filename)
+    #                 macroFiles.append(_macroName)
+    #
+    #         thispath = dirpath[len(startpath):]
+    #         if any(thispath.startswith(nn) for nn in ['/old', '/ideas']):
+    #             continue
+    #         # remove underscores
+    #         if macroFiles:
+    #             if thispath:
+    #                 dirname = modulesMenu.addAction(f'---  {thispath}  ---')
+    #                 dirname.setEnabled(False)
+    #
+    #             for file in sorted(macroFiles):
+    #                 filename, fileExt = os.path.splitext(file)
+    #
+    #                 modulesMenu.addAction(Action(modulesMenu, text=os.path.basename(filename),
+    #                                              callback=partial(self._runCCPNMacro, file, self)))
 
-        from ccpn.framework.PathsAndUrls import macroPath
-        from os import walk
+    # def _fillUserMacrosMenu(self):
+    #     modulesMenu = self.searchMenuAction(MACRO_RUN_USER)
+    #     modulesMenu.clear()
+    #
+    #     macroPath = self.application.preferences.general.userMacroPath
+    #     from os import walk
+    #
+    #     # read the macros file directory - only top level
+    #     macroFiles = []
+    #     for (dirpath, dirnames, filenames) in walk(os.path.expanduser(macroPath)):
+    #         macroFiles.extend([os.path.join(dirpath, filename) for filename in filenames])
+    #         break
+    #
+    #     for file in macroFiles:
+    #         filename, fileExt = os.path.splitext(file)
+    #
+    #         if fileExt == '.py':
+    #             modulesMenu.addAction(Action(modulesMenu, text=os.path.basename(filename),
+    #                                          callback=partial(self._runUserMacro, file, self)))
 
-        # read the macros file directory - all levels, but sectioned by sub-folder
-        startpath = None
-        for (dirpath, dirnames, filenames) in walk(os.path.expanduser(macroPath)):
-            startpath = startpath or dirpath
+    # def _runCCPNMacro(self, filename, modulesMenu):
+    #     """Run a CCPN macro from the populated menu
+    #     """
+    #     try:
+    #         self.application.runMacro(filename)
+    #
+    #     except Exception as es:
+    #         getLogger().warning('Error running CCPN Macro: %s' % str(filename))
+    #
+    # def _runUserMacro(self, filename, modulesMenu):
+    #     """Run a User macro from the populated menu
+    #     """
+    #     try:
+    #         self.application.runMacro(filename)
+    #
+    #     except Exception as es:
+    #         getLogger().warning('Error running User Macro: %s' % str(filename))
 
-            macroFiles = []
-            for filename in filenames:
-                if filename.startswith('_'):
-                    continue
-                elif filename.startswith('__'):
-                    continue
-                if filename.endswith('.py'):
-                    _macroName = os.path.join(dirpath, filename)
-                    macroFiles.append(_macroName)
+    # def _fillTutorialsMenu(self):
+    #     modulesMenu = self.searchMenuAction(HELP_TUTORIALS)
+    #     modulesMenu.clear()
+    #     import ccpn.framework.PathsAndUrls as pa
+    #     from ccpn.util.Path import aPath
+    #
+    #     importantList = (('Beginners Tutorial', pa.beginnersTutorialPath),
+    #                      ('Backbone Assignment Tutorial', pa.backboneAssignmentTutorialPath),
+    #                      ('Chemical Shift Perturbation Tutorial', pa.cspTutorialPath),
+    #                      ('Solid State Peptide Tutorial', pa.solidStatePeptideTutorialPath),
+    #                      ('Solid State SH3 Tutorial', pa.solidStateSH3TutorialPath),
+    #                      ('Solid State HETs Tutorial', pa.solidStateHETsTutorialPath),
+    #                      ('Macro Writing Tutorial', pa.macroWritingTutorialPath),
+    #                      ('Screen Tutorial', pa.screeningTutorialPath))
+    #
+    #     # add link to website videos
+    #     modulesMenu.addAction(Action(modulesMenu, text='Video Tutorials && Manual', callback=self.application.ui._showCCPNVideos))
+    #     modulesMenu.addAction(Action(modulesMenu, text='Tutorial Data', callback=self.application.ui._showTutorialData))
+    #     modulesMenu.addSeparator()
+    #
+    #     # add the main tutorials
+    #     for text, file in importantList:
+    #         filePath = aPath(file)
+    #         if filePath.exists() and filePath.suffix == '.pdf':
+    #             modulesMenu.addAction(Action(modulesMenu, text=text, callback=partial(self._showTutorial, file, self)))
+    #     modulesMenu.addSeparator()
+    #
+    #     # add the remaining tutorials from the tutorials top directory
+    #     tutorialsFiles = aPath(pa.tutorialsPath).listDirFiles('pdf')
+    #     for filePath in sorted(tutorialsFiles, key=lambda ff: ff.basename):
+    #         if filePath not in [ff[1] for ff in importantList]:
+    #             _label = camelCaseToString(filePath.basename)
+    #             _label = _label.replace('Chem Build', 'ChemBuild')
+    #             modulesMenu.addAction(Action(modulesMenu, text=_label,
+    #                                          callback=partial(self._showTutorial, filePath, self)))
+    #     modulesMenu.addSeparator()
+    #
+    #     # add the How-Tos submenu
+    #     howtosMenu = self._addMenu(HELP_HOWTOS, modulesMenu)
+    #     howtosFiles = aPath(pa.howTosPath).listDirFiles('pdf')
+    #     for filePath in sorted(howtosFiles, key=lambda ff: ff.basename):
+    #         _label = camelCaseToString(filePath.basename)
+    #         howtosMenu.addAction(Action(howtosMenu, text=_label, callback=partial(self._showTutorial, filePath, self)))
+    #
+    # def _showCCPNVideos(self):
+    #     from ccpn.framework.PathsAndUrls import ccpnVideos
+    #     self._showHtmlFile('Video Tutorials', ccpnVideos)
 
-            thispath = dirpath[len(startpath):]
-            if any(thispath.startswith(nn) for nn in ['/old', '/ideas']):
-                continue
-            # remove underscores
-            if macroFiles:
-                if thispath:
-                    dirname = modulesMenu.addAction(f'---  {thispath}  ---')
-                    dirname.setEnabled(False)
+    # def _showTutorial(self, filename, modulesMenu):
+    #     """Run a CCPN macro from the populated menu
+    #     """
+    #     try:
+    #         self.application._systemOpen(filename)
+    #
+    #     except Exception as es:
+    #         getLogger().warning('Error opening tutorial: %s' % str(filename))
 
-                for file in sorted(macroFiles):
-                    filename, fileExt = os.path.splitext(file)
-
-                    modulesMenu.addAction(Action(modulesMenu, text=os.path.basename(filename),
-                                                 callback=partial(self._runCCPNMacro, file, self)))
-
-    def _fillUserMacrosMenu(self):
-        modulesMenu = self.searchMenuAction(USERMACROSMENU)
-        modulesMenu.clear()
-
-        macroPath = self.application.preferences.general.userMacroPath
-        from os import walk
-
-        # read the macros file directory - only top level
-        macroFiles = []
-        for (dirpath, dirnames, filenames) in walk(os.path.expanduser(macroPath)):
-            macroFiles.extend([os.path.join(dirpath, filename) for filename in filenames])
-            break
-
-        for file in macroFiles:
-            filename, fileExt = os.path.splitext(file)
-
-            if fileExt == '.py':
-                modulesMenu.addAction(Action(modulesMenu, text=os.path.basename(filename),
-                                             callback=partial(self._runUserMacro, file, self)))
-
-    def _runCCPNMacro(self, filename, modulesMenu):
-        """Run a CCPN macro from the populated menu
-        """
+    def _showSideBar(self, visible):
         try:
-            self.application.runMacro(filename)
-
-        except Exception as es:
-            getLogger().warning('Error running CCPN Macro: %s' % str(filename))
-
-    def _runUserMacro(self, filename, modulesMenu):
-        """Run a User macro from the populated menu
-        """
-        try:
-            self.application.runMacro(filename)
-
-        except Exception as es:
-            getLogger().warning('Error running User Macro: %s' % str(filename))
-
-    def _fillTutorialsMenu(self):
-        modulesMenu = self.searchMenuAction(TUTORIALSMENU)
-        modulesMenu.clear()
-        import ccpn.framework.PathsAndUrls as pa
-        from ccpn.util.Path import aPath
-
-        importantList = (('Beginners Tutorial', pa.beginnersTutorialPath),
-                         ('Backbone Assignment Tutorial', pa.backboneAssignmentTutorialPath),
-                         ('Chemical Shift Perturbation Tutorial', pa.cspTutorialPath),
-                         ('Solid State Peptide Tutorial', pa.solidStatePeptideTutorialPath),
-                         ('Solid State SH3 Tutorial', pa.solidStateSH3TutorialPath),
-                         ('Solid State HETs Tutorial', pa.solidStateHETsTutorialPath),
-                         ('Macro Writing Tutorial', pa.macroWritingTutorialPath),
-                         ('Screen Tutorial', pa.screeningTutorialPath))
-
-        # add link to website videos
-        modulesMenu.addAction(Action(modulesMenu, text='Video Tutorials && Manual', callback=self._showCCPNTutorials))
-        modulesMenu.addAction(Action(modulesMenu, text='Tutorial Data', callback=self._showTutorialData))
-        modulesMenu.addSeparator()
-
-        # add the main tutorials
-        for text, file in importantList:
-            filePath = aPath(file)
-            if filePath.exists() and filePath.suffix == '.pdf':
-                modulesMenu.addAction(Action(modulesMenu, text=text, callback=partial(self._showTutorial, file, self)))
-        modulesMenu.addSeparator()
-
-        # add the remaining tutorials from the tutorials top directory
-        tutorialsFiles = aPath(pa.tutorialsPath).listDirFiles('pdf')
-        for filePath in sorted(tutorialsFiles, key=lambda ff: ff.basename):
-            if filePath not in [ff[1] for ff in importantList]:
-                _label = camelCaseToString(filePath.basename)
-                _label = _label.replace('Chem Build', 'ChemBuild')
-                modulesMenu.addAction(Action(modulesMenu, text=_label,
-                                             callback=partial(self._showTutorial, filePath, self)))
-        modulesMenu.addSeparator()
-
-        # add the How-Tos submenu
-        howtosMenu = self._addMenu(HOWTOSMENU, modulesMenu)
-        howtosFiles = aPath(pa.howTosPath).listDirFiles('pdf')
-        for filePath in sorted(howtosFiles, key=lambda ff: ff.basename):
-            _label = camelCaseToString(filePath.basename)
-            howtosMenu.addAction(Action(howtosMenu, text=_label, callback=partial(self._showTutorial, filePath, self)))
-
-    def _showCCPNTutorials(self):
-        from ccpn.framework.PathsAndUrls import ccpnVideos
-
-        # import webbrowser
-
-        # webbrowser.open(ccpnVideos)
-        self.application._showHtmlFile('Video Tutorials', ccpnVideos)
-
-    def _showTutorial(self, filename, modulesMenu):
-        """Run a CCPN macro from the populated menu
-        """
-        try:
-            self.application._systemOpen(filename)
-
-        except Exception as es:
-            getLogger().warning('Error opening tutorial: %s' % str(filename))
-
-    def _showTutorialData(self):
-        from ccpn.framework.PathsAndUrls import ccpnTutorials
-
-        self.application._showHtmlFile("Tutorial Data", ccpnTutorials)
-
-    def _showSideBarModule(self, module, modulesMenu, visible):
-        try:
-            # if module.size().height() != 0 and module.size().width() != 0:  #menuItem.isChecked():    # opposite as it has toggled
-
             if visible:
-                module.hide()
+                self._sideBarFrame.hide()
             else:
-                module.show()
+                self._sideBarFrame.show()
         except Exception as es:
             getLogger().warning('Error expanding module: sideBar')
 
@@ -1048,53 +1039,54 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             self._lastKeyList = []
             self._lastKeyStatus.setText('')
 
-    def _fillCcpnPluginsMenu(self):
-
-        from ccpn.plugins import loadedPlugins
-
-        pluginsMenu = self.searchMenuAction(CCPNPLUGINSMENU)
-        pluginsMenu.clear()
-        for Plugin in loadedPlugins:
-            self._addPluginSubMenu(CCPNPLUGINSMENU, Plugin)
-        pluginsMenu.addSeparator()
-        pluginsMenu.addAction(Action(pluginsMenu, text='Reload',
-                                     callback=self._reloadCcpnPlugins))
-
-    def _reloadCcpnPlugins(self):
-        from ccpn import plugins
-        from importlib import reload
-        from ccpn.util.Path import aPath
-
-        reload(plugins)
-
-        pluginUserPath = self.application.preferences.general.userPluginPath
-        import importlib.util
-
-        filePaths = [(aPath(r) / file) for r, d, f in os.walk(aPath(pluginUserPath)) for file in f if os.path.splitext(file)[1] == '.py']
-
-        for filePath in filePaths:
-            # iterate and load the .py files in the plugins directory
-            spec = importlib.util.spec_from_file_location(".", filePath)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-
-        self._fillCcpnPluginsMenu()
-        self._fillUserPluginsMenu()
-
-    def _fillUserPluginsMenu(self):
-
-        from ccpn.plugins import loadedUserPlugins
-
-        pluginsMenu = self.searchMenuAction(PLUGINSMENU)
-        pluginsMenu.clear()
-        for Plugin in loadedUserPlugins:
-            self._addPluginSubMenu(PLUGINSMENU, Plugin)
-        pluginsMenu.addSeparator()
-        pluginsMenu.addAction(Action(pluginsMenu, text='Reload',
-                                     callback=self._reloadUserPlugins))
-
-    def _reloadUserPlugins(self):
-        self._reloadCcpnPlugins()
+    # def _fillCcpnPluginsMenu(self):
+    #
+    #     from ccpn.plugins import loadedPlugins
+    #
+    #     pluginsMenu = self.searchMenuAction(CCPN_PLUGINS)
+    #     pluginsMenu.clear()
+    #     for Plugin in loadedPlugins:
+    #         self._addPluginSubMenu(CCPN_PLUGINS, Plugin)
+    #     pluginsMenu.addSeparator()
+    #     pluginsMenu.addAction(Action(pluginsMenu, text='Reload',
+    #                                  callback=self._reloadCcpnPlugins))
+    #
+    # def _reloadCcpnPlugins(self):
+        # GWV 12/2/24: Core functionality as Framework._reloadPlugins
+        # from ccpn import plugins
+        # from importlib import reload
+        # from ccpn.util.Path import aPath
+        #
+        # reload(plugins)
+        #
+        # pluginUserPath = self.application.preferences.general.userPluginPath
+        # import importlib.util
+        #
+        # filePaths = [(aPath(r) / file) for r, d, f in os.walk(aPath(pluginUserPath)) for file in f if os.path.splitext(file)[1] == '.py']
+        #
+        # for filePath in filePaths:
+        #     # iterate and load the .py files in the plugins directory
+        #     spec = importlib.util.spec_from_file_location(".", filePath)
+        #     module = importlib.util.module_from_spec(spec)
+        #     spec.loader.exec_module(module)
+        # self.application._reloadPlugins()
+        # self._fillCcpnPluginsMenu()
+        # self._fillUserPluginsMenu()
+    #
+    # def _fillUserPluginsMenu(self):
+    #
+    #     from ccpn.plugins import loadedUserPlugins
+    #
+    #     pluginsMenu = self.searchMenuAction(USER_PLUGINS)
+    #     pluginsMenu.clear()
+    #     for Plugin in loadedUserPlugins:
+    #         self._addPluginSubMenu(USER_PLUGINS, Plugin)
+    #     pluginsMenu.addSeparator()
+    #     pluginsMenu.addAction(Action(pluginsMenu, text='Reload',
+    #                                  callback=self._reloadUserPlugins))
+    # #
+    # def _reloadUserPlugins(self):
+    #     self._reloadCcpnPlugins()
 
     def startPlugin(self, Plugin):
         plugin = Plugin(application=self.application)
@@ -1123,20 +1115,22 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
 
     def _updateRestoreArchiveMenu(self):
 
-        action = self.getMenuAction('File->Restore From Archive...')
+        action = self.getMenuAction(f'{FILE_MENU}->{FILE_RESTORE_FROM_ARCHIVE}')
         action.setEnabled(bool(self._project._getArchivePaths()))
 
-    def undo(self):
-        self._project._undo.undo()
+    # GWV 10/2/24: This should not be here!
+    # def undo(self):
+    #     self._project._undo.undo()
+    #
+    # def redo(self):
+    #     self._project._undo.redo()
 
-    def redo(self):
-        self._project._undo.redo()
-
-    def saveLogFile(self):
-        pass
-
-    def clearLogFile(self):
-        pass
+    # GWV 10/2/24: No function
+    # def saveLogFile(self):
+    #     pass
+    #
+    # def clearLogFile(self):
+    #     pass
 
     def _closeMainWindowModules(self):
         """Close modules in main window;
@@ -1317,8 +1311,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             #         if st != strip:
             #             st.pinned = False
 
-    def printToFile(self):
-        self.application.showPrintSpectrumDisplayPopup()
+    # def printToFile(self):
+    #     self.application.showPrintSpectrumDisplayPopup()
 
     def _mousePositionMoved(self, strip: GuiStrip.GuiStrip, position: QtCore.QPointF):
         """ CCPN INTERNAL: called from ViewBox
@@ -1338,10 +1332,14 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         # to stop overloading of the log
 
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import _getPotentialDataLoaders
+        from ccpn.ui.gui.widgets.SideBar import SideBar
 
         urls = [str(url) for url in data.get(DropBase.URLS, []) if len(url) > 0]
         if urls is None:
             return []
+
+        _obj = data.get('theObject')
+        _droppedOnSideBar = (_obj is not None and isinstance(_obj, SideBar))
 
         getLogger().info('Handling urls ...')
 
@@ -1354,7 +1352,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             # try finding a data loader, catch any errors for recognised but
             # incomplete/invalid url's (i.e. incomplete spectral data)
             try:
-                dataLoader, createsNewProject, ignore = self.ui._getDataLoader(url)
+                dataLoader, createsNewProject, ignore = self.ui._getDataLoader(url, droppedOnSideBar=_droppedOnSideBar)
                 dataLoaders.append((url, dataLoader, createsNewProject, ignore))
 
             except (RuntimeError, ValueError) as es:
@@ -1444,7 +1442,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
     #-----------------------------------------------------------------------------------------
     # Code moved from previously lib.GuiWindow
     #-----------------------------------------------------------------------------------------
-    def deassignPeaks(self):
+    def _deassignPeaks(self):
         """Deassign all from selected peaks
         """
         if self.current.peaks:
@@ -1454,7 +1452,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                     assignedDims = tuple([] for dd in assignedDims)
                     peak.dimensionNmrAtoms = assignedDims
 
-    def deleteSelectedItems(self, parent=None):
+    def _deleteSelectedItems(self, parent=None):
         """Delete peaks/integrals/multiplets from the project
         """
         # show simple delete items popup
@@ -1512,7 +1510,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         popup._selectPeaks(peaks)
         popup.exec_()
 
-    def setPeakAliasing(self):
+    def _setPeakAliasing(self):
         """Set the aliasing for the currently selected peaks
         """
         if self.current.peaks:
@@ -1640,6 +1638,41 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                 list(map(lambda x: updateHeight(x), peaks))
 
         getLogger().info('Recalculating peak height(s) completed.')
+
+    def _showEstimateVolumesPopup(self):
+        """
+        Displays Estimate Volumes Popup.
+        """
+        if not self.project.peakLists:
+            getLogger().warning('Estimate Volumes: Project has no peakLists.')
+            MessageDialog.showWarning('Estimate Volumes', 'Project has no peakLists.')
+        else:
+            from ccpn.ui.gui.popups.EstimateVolumes import EstimatePeakListVolumes
+
+            if self.current.strip and not self.current.strip.isDeleted:
+                spectra = [specView.spectrum for specView in self.current.strip.spectrumDisplay.spectrumViews]
+            else:
+                spectra = self.project.spectra
+
+            if spectra:
+                popup = EstimatePeakListVolumes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra)
+                popup.exec_()
+            else:
+                getLogger().warning('Estimate Volumes: no specta selected.')
+                MessageDialog.showWarning('Estimate Volumes', 'no specta selected.')
+
+    def _showEstimateCurrentVolumesPopup(self):
+        """
+        Calculate volumes for the currently selected peaks
+        """
+        from ccpn.ui.gui.popups.EstimateVolumes import EstimateCurrentVolumes
+
+        if self.current.peaks:
+            popup = EstimateCurrentVolumes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+            popup.exec_()
+        else:
+            getLogger().warning('Estimate Current Volumes: no current.peaks')
+            MessageDialog.showWarning('Estimate Current Volumes', 'no current.peaks')
 
     def estimateVolumes(self):
         """Estimate volumes of peaks selected by right-mouse menu
@@ -2384,5 +2417,5 @@ class MainWindow(_CoreClassMainWindow, GuiMainWindow):
 
         # patches for now:
         project._mainWindow = self
-        application._mainWindow = self
-        application.ui.mainWindow = self
+        # application._mainWindow = self
+        # application.ui._mainWindow = self

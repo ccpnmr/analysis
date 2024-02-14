@@ -8,9 +8,9 @@ To create a menu:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -18,9 +18,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-11-15 11:58:49 +0000 (Wed, November 15, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-02-14 12:12:35 +0000 (Wed, February 14, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -266,12 +266,12 @@ def _phasingConsoleItem(strip):
 def _mouseModeItem(strip):
     from ccpn.framework.Application import getApplication
 
-    _app = getApplication()
+    # _app = getApplication()
     return _SCMitem(name='Peak-Picking Mouse Mode',
                     typeItem=ItemTypes.get(ITEM), toolTip='Mouse mode for peak-picking using single mouse-click',
                     checkable=True, checked=(getCurrentMouseMode() == PICK),
                     stripMethodName='mouseModeAction',
-                    shortcut='MM', callback=_app.mainWindow.switchMouseMode)
+                    shortcut='MM', callback=strip.mainWindow.switchMouseMode)
 
 
 def _marksItem(strip):
@@ -360,7 +360,7 @@ def _newStripPlotFAItem(strip):
     return _SCMitem(name='New Spectrum Display with Axes flipped...',
                     typeItem=ItemTypes.get(ITEM), toolTip='Create new Spectrum Display from the current strip',
                     shortcut='fa',
-                    callback=partial(app.showFlipArbitraryAxisPopup, usePosition=True))
+                    callback=partial(app.ui._flipArbitraryAxes, usePosition=True))
 
 
 ##############################  Common Integral menu items ##############################
@@ -368,7 +368,7 @@ def _newStripPlotFAItem(strip):
 
 def _deleteIntegralItem(strip):
     return _SCMitem(name='Delete Integral(s)',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Delete Integral(s) from project', callback=strip.mainWindow.deleteSelectedItems)
+                    typeItem=ItemTypes.get(ITEM), toolTip='Delete Integral(s) from project', callback=strip.mainWindow._deleteSelectedItems)
 
 
 ##############################  Common Multiplet menu items ##############################
@@ -376,7 +376,7 @@ def _deleteIntegralItem(strip):
 
 def _deleteMultipletItem(strip):
     return _SCMitem(name='Delete Multiplet(s)',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Delete Multiplet(s) from project', callback=strip.mainWindow.deleteSelectedItems)
+                    typeItem=ItemTypes.get(ITEM), toolTip='Delete Multiplet(s) from project', callback=strip.mainWindow._deleteSelectedItems)
 
 
 ##############################  Common Peak menu items ##############################
@@ -398,7 +398,7 @@ def _deletePeakItem():
     _app = getApplication()
     return _SCMitem(name='Delete Peak(s)',
                     typeItem=ItemTypes.get(ITEM), toolTip='Delete Peak(s) from project',
-                    callback=_app.mainWindow.deleteSelectedItems)
+                    callback=_app.mainWindow._deleteSelectedItems)
 
 
 def _editPeakAssignmentItem():
@@ -420,7 +420,7 @@ def _deassignPeaksItem():
     _app = getApplication()
     return _SCMitem(name='Deassign Peak(s)',
                     typeItem=ItemTypes.get(ITEM), toolTip='Deassign Peaks',
-                    callback=_app.mainWindow.deassignPeaks)
+                    callback=_app.mainWindow._deassignPeaks)
 
 
 def _setPeakAliasingItem():
@@ -429,7 +429,7 @@ def _setPeakAliasingItem():
     _app = getApplication()
     return _SCMitem(name='Set Aliasing...',
                     typeItem=ItemTypes.get(ITEM), toolTip='Set aliasing for current peak(s)',
-                    callback=_app.mainWindow.setPeakAliasing)
+                    callback=_app.mainWindow._setPeakAliasing)
 
 
 def _centreOnSelectedPeak():
@@ -475,7 +475,7 @@ def _estimateVolumesItem(menuId):
     return _SCMitem(name='Estimate Peak Volumes...',
                     typeItem=ItemTypes.get(ITEM), toolTip='Estimate peak volume(s)', shortcut='EV',
                     stripMethodName=f'_estimateVolumesItem{menuId}',
-                    callback=_app.showEstimateVolumesPopup)
+                    callback=_app.mainWindow._showEstimateVolumesPopup)
 
 
 def _estimateCurrentVolumesItem():
@@ -484,7 +484,7 @@ def _estimateCurrentVolumesItem():
     _app = getApplication()
     return _SCMitem(name='Estimate Current Peak Volume(s)',
                     typeItem=ItemTypes.get(ITEM), toolTip='Estimate peak volumes for the currently selected peaks', shortcut='EC',
-                    callback=_app.showEstimateCurrentVolumesPopup)
+                    callback=_app.mainWindow._showEstimateCurrentVolumesPopup)
 
 
 def _recalculatePeakHeightsItem():

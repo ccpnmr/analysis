@@ -4,9 +4,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-08-30 19:22:14 +0100 (Wed, August 30, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-02-14 12:12:34 +0000 (Wed, February 14, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -52,17 +52,43 @@ class Ui(NotifierBase):
 
     def __init__(self, application):
 
-        self.application = application
-        self.mainWindow = None
+        # set the forward/backlink with application already here, because subsequent initialisations
+        # do require this to be present
+        self._application = application
+        application._ui = self
+        # set by initialise
+        self._project = None
+        self._mainWindow = None
+        # plugin Modules list
         self.pluginModules = []
 
     @property
-    def project(self):
-        return self.application.project
+    def application(self):
+        """:return the Application instance
+        """
+        return self._application
 
-    def initialize(self, mainWindow):
-        """UI operations done after every project load/create"""
-        pass
+    @property
+    def mainWindow(self):
+        """:return the MainWindow instance
+        """
+        return self._mainWindow
+
+    @property
+    def project(self):
+        return self._project
+
+    @property
+    def current(self):
+        """:return the Current instance
+        """
+        return self.application.current
+
+    def initialize(self, mainWindow, project):
+        """UI operations done after every project load/create
+        """
+        self._mainWindow = mainWindow
+        self._project = project
 
     def startUi(self):
         """Start the ui execution
@@ -189,10 +215,12 @@ class Ui(NotifierBase):
         _app = getApplication()
 
         if dataLoader is None and path is not None:
-            dataLoader = checkPathForDataLoader(path)
+            if (dataLoader := checkPathForDataLoader(path)) is None:
+                getLogger().error(f'Loading project: No suitable dataLoader found for {path}')
+                return None
 
         if dataLoader is None:
-            getLogger().error('No suitable dataLoader found')
+            getLogger().error('Loading project: No suitable dataLoader')
             return None
 
         if not dataLoader.createNewProject:

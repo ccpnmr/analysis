@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-01 20:05:55 +0000 (Thu, February 01, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-02-14 12:12:32 +0000 (Wed, February 14, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -68,7 +68,8 @@ from ccpn.framework.PathsAndUrls import \
     CCPN_LOGS_DIRECTORY, \
     CCPN_BACKUPS_DIRECTORY, \
     CCPN_DIRECTORY_SUFFIX, \
-    CCPN_PLOTS_DIRECTORY
+    CCPN_PLOTS_DIRECTORY, \
+    CCPN_SAVEAS_SUB_DIRECTORIES
 
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
 from ccpnmodel.ccpncore.memops import Notifiers
@@ -80,29 +81,6 @@ from ccpnmodel.ccpncore.api.ccp.nmr.NmrExpPrototype import RefExperiment
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 # from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
-
-
-# TODO These should be merged with the same constants in CcpnNefIo
-# (and likely those in ExportNefPopup) and moved elsewhere
-CHAINS = 'chains'
-CHEMICALSHIFTLISTS = 'chemicalShiftLists'
-RESTRAINTTABLES = 'restraintTables'
-PEAKLISTS = 'peakLists'
-INTEGRALLISTS = 'integralLists'
-MULTIPLETLISTS = 'multipletLists'
-SAMPLES = 'samples'
-SUBSTANCES = 'substances'
-NMRCHAINS = 'nmrChains'
-# DATASETS = 'dataSets'
-STRUCTUREDATA = 'structureData'
-COMPLEXES = 'complexes'
-SPECTRUMGROUPS = 'spectrumGroups'
-NOTES = 'notes'
-# _PEAKCLUSTERS = '_peakClusters'
-COLLECTIONS = 'collections'
-
-# define the default chemical-shift-list name
-DEFAULT_CHEMICALSHIFTLIST = 'default'
 
 
 class Project(AbstractWrapperObject):
@@ -154,6 +132,8 @@ class Project(AbstractWrapperObject):
     #TODO: do we still have this limitation?
     _MAX_PROJECT_NAME_LENGTH = 32
     _READONLY = 'readOnly'
+
+    _LOWEST_COMPATIBLE_VERSION = '3.1.0'
 
     #-----------------------------------------------------------------------------------------
     # Property Attributes of the data structure
@@ -926,14 +906,36 @@ class Project(AbstractWrapperObject):
         bPath = _dir / _base + CCPN_BACKUP_SUFFIX + CCPN_DIRECTORY_SUFFIX
         return bPath
 
+    def _getSubdirectorySizes(self, subDirectories=None, sizeInMB=False) -> dict:
+        """Calculate the sizes of the subDirectories (if they exist) of the project
+        :param subDirectories: a list of sub directories; defaults to CCPN_SUB_DIRECTORIES
+        :param sizeInMB: flag to return size in MB
+        :return a Dict with (subDir, sizeInBytes)
+        """
+        if subDirectories is None:
+            subDirectories = CCPN_SUB_DIRECTORIES
+
+        _MB = 1024*1024
+        result = {}
+        for _subdir in subDirectories:
+            _path = self.projectPath / _subdir
+            if _path.exists():
+                _size = _path.getSize()
+                if sizeInMB:
+                    _size /= _MB
+                result[_subdir] = _size
+        return result
+
     #-----------------------------------------------------------------------------------------
     # Implementation methods
     #-----------------------------------------------------------------------------------------
 
-    def __init__(self, xmlLoader) -> Project:
+    def __init__(self, xmlLoader, name=None) -> Project:
         """ Init for Project object using data from xmlLoader
         NB Project is NOT complete before the _initProject function is run.
         :param path: Path to the project; name is extracted from it
+        :param name: Optional name; taken from xmlLoader if None
+        :return Project instance
         """
         from ccpn.core.lib.XmlLoader import XmlLoader
 
@@ -946,6 +948,15 @@ class Project(AbstractWrapperObject):
         if xmlLoader.apiNmrProject is None or not isinstance(xmlLoader.apiNmrProject, ApiNmrProject):
             raise RuntimeError('No valid ApiNmrProject defined')
 
+        # reference to XmlLoader instance;
+        self._xmlLoader = xmlLoader
+
+        # name; AbstractWrapperObject init needs name to be set
+        if name is None:
+            self._name = xmlLoader.name
+        else:
+            self._name = name
+
         # Setup object handling dictionaries
         self._data2Obj = {}
         self._pid2Obj = {}
@@ -954,6 +965,7 @@ class Project(AbstractWrapperObject):
         # linkage attributes
         #   self._project = self
         #   self._wrappedData = wrappedData
+        #   self._id
         # Tuple to hold children that explicitly need finalising after atomic operations
         #   self._finaliseChildren = []
         #   self._childActions = []
@@ -965,13 +977,6 @@ class Project(AbstractWrapperObject):
         # self._appBase = None (delt with below)
         # Reference to application; defined by Framework
         self._application = None
-
-        self._name = xmlLoader.name
-        self._id = self._name
-        self._resetIds()
-
-        # reference to XmlLoader instance;
-        self._xmlLoader = xmlLoader
 
         # Set up notification machinery
         # Active notifiers - saved for later cleanup. CORE APPLICATION ONLY
@@ -1010,13 +1015,19 @@ class Project(AbstractWrapperObject):
         # reference to the logger; defined in call to _initialiseProject())
         self._logger = None
 
-        # flag to indicate if the project is temporary, i.e., opened as a default project
-        # set by _newProject or _loadProject
+        # flags to indicate if the project is temporary, i.e., opened as a default project
+        # or new project or imported from V2
+        # set by _newProject or _loadV2Project or _loadV3Project
         self._isTemporary = False
+        self._isNew = False
+        self._isUpgradedFromV2 = False
 
         # reference to special v3 core lists without abstractWrapperObject
         self._collectionList = None
         self._crossReferencing = None
+
+        # reference to MainWindow, set by MainWindow.__init__(); to pass to Framework/Gui
+        self._mainWindow = None
 
     #-----------------------------------------------------------------------------------------
     # Attributes
@@ -1039,7 +1050,8 @@ class Project(AbstractWrapperObject):
         return self._application
 
     # GWV: 20181102: insert _appBase to retain consistency with current data loading models
-    _appBase = application
+    # GWV: 20240208: removed
+    # _appBase = application
 
     @property
     def isNew(self):
@@ -1060,12 +1072,6 @@ class Project(AbstractWrapperObject):
         """
         return self._wrappedData.root.isProjectModified()
 
-    @property
-    def _isUpgradedFromV2(self):
-        """Return True if project was upgraded from V2
-        """
-        return self._apiNmrProject.root._upgradedFromV2
-
     @staticmethod
     def _needsUpgrading(path) -> bool:
         """
@@ -1083,11 +1089,12 @@ class Project(AbstractWrapperObject):
         if (dataloader := CcpNmrV3ProjectDataLoader.checkForValidFormat(path)) is None:
             raise ValueError('Path "%s" does not define a valid ccpn project' % path)
 
-        if (projectHistory := getProjectSaveHistory(dataloader.path)):
-            # check whether the history exists
-            return projectHistory.lastSavedVersion <= '3.0.4'
-
-        return True
+        return dataloader.projectNeedsUpgrade
+        # if (projectHistory := getProjectSaveHistory(dataloader.path)):
+        #     # check whether the saved version
+        #     return projectHistory.lastSavedVersion < Project._LOWEST_COMPATIBLE_VERSION
+        #
+        # return True
 
     @property
     def _data(self):
@@ -1126,17 +1133,79 @@ class Project(AbstractWrapperObject):
             except (PermissionError, FileNotFoundError):
                 getLogger().info('Folder may be read-only')
 
-    def _initialiseProject(self):
+    # GWV 24/2/24: replaced with Project._initialise()
+    # def _initialiseProject(self):
+    #     """Complete initialisation of project,
+    #     set up logger and notifiers, and wrap underlying data
+    #     This routine is called from Framework, as some other machinery first needs to set up
+    #     (linkages, Current, notifiers and such)
+    #     """
+    #     from ccpn.core.ChemicalShiftList import DEFAULT_CHEMICALSHIFTLIST
+    #
+    #     self._logger = createLogger(self, now=self.application._created)
+    #
+    #     # Set up notifiers
+    #     self._registerPresetApiNotifiers()
+    #
+    #     # initialise, creating the children; pass in self as we are initialising
+    #     with inactivity(project=self):
+    #         self._restoreChildren()
+    #         # perform any required restoration of project not covered by children
+    #         self._restoreObject(self, self._wrappedData)
+    #
+    #         # we always have the default chemicalShift list
+    #         if not self.chemicalShiftLists:
+    #             self.newChemicalShiftList(name=DEFAULT_CHEMICALSHIFTLIST)
+    #
+    #         # Call any updates
+    #         self._update()
+    #
+    #         # finalise restoration of project
+    #         self._postRestore()
+    #
+    #     # NOTE:ED - testing here, project seems to be modified after loading
+    #     self._xmlLoader.setUnmodified()
+    #
+    #     # check directories for possible read-only
+    #     _projectPath = aPath(self.path)
+    #     _subDirs = [self.projectPath / sub for sub in CCPN_SUB_DIRECTORIES]
+    #     _readOnlyDirs = [p for p in [self.projectPath.parent] + _subDirs \
+    #                     if p.exists() and p.is_dir() and not p.isWriteable()]
+    #     if len(_readOnlyDirs) > 0:
+    #         getLogger().warning(f'Project contains {len(_readOnlyDirs)} read-only directories:\n{tuple(_readOnlyDirs)}')
+    #         self.setReadOnly(True)
+    #     else:
+    #         self.setReadOnly(self.readOnly)
+    #
+    #     # the project is now ready to use
+    #     getLogger().debug(f'Project {self}: initialiseProject() completed')
+
+
+    def _initialise(self, application, debugLevel):
         """Complete initialisation of project,
-        set up logger and notifiers, and wrap underlying data
+        set up logger, undo stack and notifiers, and wrap underlying data
         This routine is called from Framework, as some other machinery first needs to set up
         (linkages, Current, notifiers and such)
-        """
 
-        self._logger = createLogger(self, now=self.application._created)
+        :param application: the application instance
+        :param debugLevel: the current debug level, used for settng the logger and undo
+        :return (self, mainWindow)
+        """
+        from ccpn.core.ChemicalShiftList import DEFAULT_CHEMICALSHIFTLIST
+
+        self._application = application
+
+        # logger
+        self._logger = createLogger(self, now=application._created)
+        Logging.setLevel(self._logger, debugLevel)
 
         # Set up notifiers
         self._registerPresetApiNotifiers()
+
+        # undo
+        self._resetUndo(debug=debugLevel <= Logging.DEBUG2, application=application)
+
+        self._mainWindow = None  # set by MainWindow.__init__()
 
         # initialise, creating the children; pass in self as we are initialising
         with inactivity(project=self):
@@ -1153,6 +1222,28 @@ class Project(AbstractWrapperObject):
 
             # finalise restoration of project
             self._postRestore()
+
+        # NOTE:ED - testing here, project seems to be modified after loading
+        self._xmlLoader.setUnmodified()
+
+        # check directories for possible read-only
+        _projectPath = aPath(self.path)
+        _subDirs = [self.projectPath / sub for sub in CCPN_SUB_DIRECTORIES]
+        _readOnlyDirs = [p for p in [self.projectPath.parent] + _subDirs \
+                        if p.exists() and p.is_dir() and not p.isWriteable()]
+        if len(_readOnlyDirs) > 0:
+            getLogger().warning(f'Project contains {len(_readOnlyDirs)} read-only directories:\n{tuple(_readOnlyDirs)}')
+            self.setReadOnly(True)
+        else:
+            self.setReadOnly(self.readOnly)
+
+        # remove mainWindow from Project instance, and return to caller (i.e. Framework)
+        _mainWindow = self._mainWindow
+        self._mainWindow = None
+
+        # the project is now ready to use
+        getLogger().debug(f'Project {self}: initialise() completed')
+        return self, _mainWindow
 
     @classmethod
     def _restoreObject(cls, project, apiObj):
@@ -1261,9 +1352,6 @@ class Project(AbstractWrapperObject):
     # Save, SaveAs, Close
     #-----------------------------------------------------------------------------------------
 
-    def _close(self):
-        self.close()
-
     def _closeApiObjects(self):
         """Close and purge all api-objects
         WARNING: project is irrecoverable after this
@@ -1332,11 +1420,12 @@ class Project(AbstractWrapperObject):
         getLogger().debug('Done purge')
 
     def close(self):
+        raise RuntimeError('Please use application.closeProject()')
+
+    def _close(self):
         """Clean up the wrapper project previous to deleting or replacing
         Cleanup includes wrapped data graphics objects (e.g. Window, Strip, ...)
         """
-        # only update the logger if there have been changes to the project
-        self._updateLoggerState(readOnly=self.readOnly or not self.isModified)
 
         getLogger().info(f"Closing {self.path}")
 
@@ -1350,22 +1439,26 @@ class Project(AbstractWrapperObject):
         # Remove undo stack:
         self._resetUndo(maxWaypoints=0)
 
+        # only update the logger if there have been changes to the project
+        self._updateLoggerState(readOnly=self.readOnly or not self.isModified)
         Logging._clearLogHandlers()
+
         self._clearAllApiNotifiers()
         self.deleteAllNotifiers()
         # clear the lookup dicts
         self._data2Obj.clear()
         self._pid2Obj.clear()
-        # self.__dict__.clear()  # GWV: dangerous; why done?
 
-    def saveAs(self, newPath: str, overwrite: bool = False):
+    def saveAs(self, newPath: str, overwrite: bool = False, copySubDirectories: bool = True):
         """Save project to newPath (optionally overwrite);
            Derive the new project name from newPath
            :param newPath: new path for storing project files
            :param overwrite: flag to overwrite if path exists
+           :param copySubDirectories: flag to set the copying of the project's subdirectories
         """
         from ccpn.core.lib.XmlLoader import XmlLoader
 
+        _oldPath = aPath(self.path)
         _newPath = aPath(newPath).assureSuffix(CCPN_DIRECTORY_SUFFIX)
         if _newPath.exists() and overwrite:
             parent = _newPath.parent
@@ -1374,26 +1467,51 @@ class Project(AbstractWrapperObject):
 
         # redirect only if _newXmlLoader is successful?
         for sp in self.spectra:
-            # check if any spectra are referenced as ALONGSIDE and update to the new path
-            if sp._isAlongside and sp.hasValidPath() and aPath(self.path).parent != _newPath.parent:
-                getLogger().debug(f'Redirecting spectrum {aPath(self.path).parent} -> {_newPath.parent}')
+            # check if spectrum is referenced as ALONGSIDE and require an update
+            # to absolute path
+            if sp._isAlongside and sp.hasValidPath() and \
+               _oldPath.parent != _newPath.parent:
+                getLogger().warning(f'Redirecting spectrum {sp.name} from {_oldPath.parent} -> {_newPath.parent}')
                 sp._makeAbsolutePath()
+
+            # check if spectrum is referenced as INSIDE and and require an update
+            # to absolute path
+            if sp._isInside and sp.hasValidPath() and \
+               not copySubDirectories:
+                getLogger().warning(f'Redirecting spectrum {sp.name} from {_oldPath.parent} -> {_newPath.parent}')
+                sp._makeAbsolutePath()
+
+        # only update the logger if there have been changes to the project
+        self._updateLoggerState(readOnly=self.readOnly or not self.isModified)
+        # clear the logging handlers, to be opened after all saving and copying
+        Logging._clearLogHandlers()
 
         _newXmlLoader = XmlLoader.newFromLoader(self._xmlLoader, path=_newPath, create=True)
         self._xmlLoader = _newXmlLoader
         self._path = _newXmlLoader.path.asString()
         self._name = _newXmlLoader.name
+        self._resetIds()
+
+        # Optionally copy and check subdirectories
+        if copySubDirectories:
+            for _subdir in CCPN_SAVEAS_SUB_DIRECTORIES:
+                _source = _oldPath / _subdir
+                _dest = _newPath / _subdir
+                if _source.exists():
+                    _source.copyDir(_dest, overwrite=False)
         self._checkProjectSubDirectories()
+
+        # create a new logger
+        self._logger = createLogger(self, now=self.application._created)
+
         self._saveHistory = newProjectSaveHistory(self.path)
         self.save(comment='saveAs')
-
-        # check for application and Gui;
-        if self.application and self.application.hasGui:
-            self.application.mainWindow.sideBar.setProjectName(self)
 
     def save(self, comment='regular save', autoBackup: bool = False):
         """Save project; add optional comment to save records
         """
+        from ccpn.core.lib.ProjectArchiver import ProjectArchiver
+
         if self.readOnly:
             getLogger().warning('save skipped: Project is read-only')
             return
@@ -1429,6 +1547,10 @@ class Project(AbstractWrapperObject):
             self._saveHistory.addSaveRecord(comment=f'{self.name}: {comment}')
             self._saveHistory.save()
             self._updateLoggerState(readOnly=self.readOnly, flush=True)
+
+            # make last-saved archive
+            archiver = ProjectArchiver(projectPath=self.path)
+            archiver.makeArchive(name=f'{self.name}_lastSaved', overwrite=True)
 
             self._isTemporary = False
             self._isNew = False
@@ -1522,13 +1644,17 @@ class Project(AbstractWrapperObject):
                     obj.delete()
 
     @property
-    def readOnly(self):
-        """Return the read-only state of the project.
+    def readOnly(self) -> bool:
+        """:return the read-only state of the project.
         """
         # _saveOverride allows the readOnly state to be temporarily set to False during save/saveAs
         # _readOnly sets all projects as read-only from the command-line switch --read-only
-        return ((self._getInternalParameter(self._READONLY) or False) or self.application._readOnly) and \
-            not self.application._saveOverride
+        # use getApplication() as this property is queried during initialisation of Project
+        # when not all linkages are established.
+        from ccpn.framework.Application import getApplication
+        _app = getApplication()
+        return ((self._getInternalParameter(self._READONLY) or False) or _app._readOnly)\
+               and not _app._saveOverride
 
     @logCommand('project.')
     @ccpNmrV3CoreUndoBlock(readOnlyChanged=True)
@@ -1563,7 +1689,7 @@ class Project(AbstractWrapperObject):
         """
         updateLogger(self.application.applicationName,
                      self.projectPath / CCPN_LOGS_DIRECTORY,
-                     level=self.application._debugLevel,
+                     level=self.application._loggingLevel,
                      readOnly=readOnly,
                      flush=flush,
                      now=self.application._created
@@ -2461,8 +2587,8 @@ class Project(AbstractWrapperObject):
         """
         result = []
         with undoBlock():
-            for sp in self.spectra:
-                _files = sp.copyDataToProject()
+            for spec in [sp for sp in self.spectra if sp.hasValidPath() and not sp._isInside]:
+                _files = spec.copyDataToProject()
                 result.extend(_files)
         return result
 
@@ -3054,113 +3180,144 @@ def _newProject(application, name: str, path: Path, isTemporary: bool = False) -
     from ccpn.core.lib.ProjectSaveHistory import newProjectSaveHistory
 
     xmlLoader = XmlLoader(path=path, name=name, create=True)
-    xmlLoader.newProject(overwrite=True)
+    xmlLoader.newProject(initGraphics=application.hasGui, overwrite=True)
 
-    project = Project(xmlLoader)
+    project = Project(xmlLoader, name=name)
     xmlLoader.project = project
+
     project._isNew = True
     project._isTemporary = isTemporary
-    # NB: linkages are set in Framework._initialiseProject()
+    project._isUpgradedFromV2 = False
 
     project._objectVersion = application.applicationVersion
     project._saveHistory = newProjectSaveHistory(project.path)
 
-    application._saveOverride = False
-    project._application = application
-    project._updateReadOnlyState()
+    # project._updateReadOnlyState()
 
-    # the initialisation is completed by Framework._initialiseProject when it has done its things
-    # project._initialiseProject()
+    # the Project initialisation is completed by Project._initialiseProject(), which is called from
+    # Framework._initialiseProject when it has done its things.
+    # This also checks for the writing of the directories and sets the linkages between
+    # application and project.
 
     return project
 
 
-def _loadProject(application, path: str) -> Project:
-    """Load the project defined by path
+def _loadV3Project(application, path: str) -> Project:
+    """Load the V3-project defined by path
     :return Project instance
     """
     from ccpn.core.lib.XmlLoader import XmlLoader
-    from ccpn.core._implementation.updates.update_v2 import updateProject_fromV2
+    from ccpn.core.lib.ProjectArchiver import ProjectArchiver
 
     _path = aPath(path)
     if not _path.exists():
         raise ValueError(f'Path {_path} does not exist')
 
     xmlLoader = XmlLoader(path=_path, readOnly=True)  # application._readOnly)  always read-only during load
-    xmlLoader.loadProject()
+    xmlLoader.loadProject(initGraphics=application.hasGui)
 
-    _isV2 = xmlLoader.isV2  # save this, because if V2, we are going to change the xmlLoader
-    # If path pointed to a V2 project, we need to do some manipulations
-    if _isV2:
-        _newPath = _path.withSuffix(CCPN_DIRECTORY_SUFFIX).uniqueVersion()
-        _newXmlLoader = XmlLoader.newFromLoader(xmlLoader, path=_newPath, create=True)
-        xmlLoader = _newXmlLoader
+    # If path pointed to a V2 project, something has gone wrong
+    if xmlLoader.isV2:
+        raise RuntimeError(f'Trying to load V2-project as V3-project; this should not happen')
 
     project = Project(xmlLoader)
     # back linkage
     xmlLoader.project = project
 
-    if not os.access(_path.parent, os.W_OK) or \
-            next((dd for root, dirs, files in os.walk(_path)
-                  for dd in dirs if not os.access(aPath(root) / dd, os.W_OK)), False):
-        getLogger().warning('Project contains a read-only folder')
-
-    project._application = application  # bit of a hack, isn't set until initialise
-    project._updateReadOnlyState()
+    project._isNew = False
+    project._isTemporary = False
+    project._isUpgradedFromV2 = False
 
     # project._saveHistory = fetchProjectSaveHistory(project.path, project.readOnly)
     project._saveHistory = getProjectSaveHistory(project.path)
 
-    # If path pointed to a V2 project, call the updates, and save the data
-    if _isV2:
-        try:
-            # call the update
-            getLogger().info(f'==> Upgrading {project} to version-3')
-            updateProject_fromV2(project)
-        except Exception as es:
-            txt = f'Failed upgrading {project} from version-2: {es}'
-            getLogger().warning(txt)
-            raise RuntimeError(txt) from es
-
-        getLogger().debug(f'after update: Saving project to {xmlLoader.path}')
-        # Save using the xmlLoader only as we do not have a complete and valid V3-Project yet
-        if not project.readOnly:
-            try:
-                # xmlLoader.saveUserData(keepFallBack=False)
-                project._saveHistory.addSaveRecord(version=project._objectVersion,
-                                                   comment='upgraded from version-2')
-                # project._saveHistory.save()
-            except (PermissionError, FileNotFoundError):
-                getLogger().info('Folder may be read-only')
-
-        project._isNew = True
-        project._isTemporary = True
-
-    elif xmlLoader.pathHasChanged or xmlLoader.nameHasChanged:
+    if xmlLoader.pathHasChanged or xmlLoader.nameHasChanged:
         # path or name have changed (actually, they are connected)
-        # save it, keeping a fallback for if all goes wrong
-        # Save using the xmlLoader only as we do not have a complete and valid V3-Project yet
-        if not project.readOnly:
-            try:
-                # NOTE:ED - shouldn't actually be doing any writes now?
-                #   in which case remove the error-check
+        project._saveHistory.addSaveRecord(version=project._objectVersion,
+                                           comment='Path/name has changed')
 
-                # xmlLoader.saveUserData(keepFallBack=True)
-                project._saveHistory.addSaveRecord(version=project._objectVersion,
-                                                   comment='Path/name has changed')
-                # project._saveHistory.save()
+    # the Project initialisation is completed by Project._initialise(), which is called from
+    # Framework._initialiseProject when it has done its things.
+    # This also checks for the writing of the directories and sets the linkages between
+    # application and project.
 
-            except (PermissionError, FileNotFoundError):
-                getLogger().info('Folder may be read-only')
+    # make last-opened archive
+    if not project.readOnly:
+        archiver = ProjectArchiver(projectPath=project.path)
+        archiver.makeArchive(name=f'{project.name}_lastOpened', overwrite=True)
 
-        project._isNew = False
-        project._isTemporary = False
+    return project
 
-    else:
-        project._isNew = False
-        project._isTemporary = False
 
-    # the initialisation is completed by Framework._initialiseProject when it has done its things
-    # project._initialiseProject()
+def _loadV2Project(application, path: str | Path) -> Project:
+    """Load the V2-project defined by path; convert to V3 as new, temporary project.
+    :param path: the path to a V2 project
+    :return Project instance
+    """
+    from ccpn.core.lib.XmlLoader import XmlLoader
+    from ccpn.core._implementation.updates.update_v2 import updateProject_fromV2
+    from ccpn.core.lib.ProjectArchiver import ProjectArchiver
+
+    _path = aPath(path)
+    if not _path.exists():
+        raise ValueError(f'Path {_path} does not exist')
+
+    xmlV2Loader = XmlLoader(path=_path, readOnly=True)  # application._readOnly)  always read-only during load
+    if not xmlV2Loader.isV2:
+        raise RuntimeError(f'Trying to load V3-project as V2-project; this should not happen')
+
+    # load the V2-project xml's; this will also upgrade any api-data to V3
+    xmlV2Loader.loadProject(initGraphics=application.hasGui)
+
+    # Path pointed to a V2 project, we need to create a V3-XmlLoader at a new location,
+    # retaining the upgraded info from the V2-project
+    # Get a path in the temporary directory
+    name = f'{xmlV2Loader.name}_importedFromV2'
+    newPath = application._getTemporaryPath(prefix=f'{name}_', suffix=CCPN_DIRECTORY_SUFFIX)
+    xmlV3Loader = XmlLoader.newFromLoader(xmlV2Loader, path=newPath, create=True)
+    # Save using the xmlLoader only as we do not have a complete and valid V3-Project yet
+    try:
+        xmlV3Loader.saveUserData(keepFallBack=False)
+    except (PermissionError, FileNotFoundError) as es:
+        txt = f'Failed upgrading {path} from version-2: {es}\n' \
+              f'Directory {xmlV3Loader.path} may be read-only'
+        getLogger().warning(txt)
+        raise RuntimeError(txt) from es
+
+    # create the Project
+    project = Project(xmlV3Loader, name=name)
+    # back linkage
+    xmlV3Loader.project = project
+
+    project._isNew = True
+    project._isTemporary = True
+
+    # Path pointed to a V2 project, call the V3 update machinery, and save the xml-data
+    try:
+        # call the update
+        getLogger().info(f'==> Upgrading {project} to version-3')
+        updateProject_fromV2(project)
+    except Exception as es:
+        txt = f'Failed upgrading {project} from version-2: {es}'
+        getLogger().warning(txt)
+        raise RuntimeError(txt) from es
+
+    project._isUpgradedFromV2 = True
+    project._objectVersion = application.applicationVersion
+
+    # project._saveHistory = fetchProjectSaveHistory(project.path, project.readOnly)
+    project._saveHistory = getProjectSaveHistory(project.path)
+    project._saveHistory.addSaveRecord(version=project._objectVersion,
+                                       comment='upgraded from version-2')
+
+    # the Project initialisation is completed by Project._initialiseProject(), which is called from
+    # Framework._initialiseProject when it has done its things.
+    # This also checks for the writing of the directories and sets the linkages between
+    # application and project.
+
+    # make last-opened archive
+    if not project.readOnly:
+        archiver = ProjectArchiver(projectPath=project.path)
+        archiver.makeArchive(name=f'{project.name}_importedFromV2', overwrite=True)
 
     return project

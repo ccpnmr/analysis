@@ -4,9 +4,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-30 14:03:32 +0100 (Fri, June 30, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-02-14 12:12:35 +0000 (Wed, February 14, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -48,22 +48,29 @@ class PythonConsoleModule(CcpnModule):
     # _helpFilePath = ccpnModuleHelpPath / 'PythonConsoleModuleHelp.html'
 
 
-    def __init__(self, mainWindow, name='Python Console', closeFunc=None, **kwds):
+    def __init__(self, mainWindow, name='Python Console', pythonConsoleWidget=None, closeFunc=None, **kwds):
+        """Create the iPython console module
+
+        """
         CcpnModule.__init__(self, mainWindow=mainWindow, name=name, closeFunc=closeFunc)
 
         self.mainWindow = mainWindow
         self.application = mainWindow.application
-        self.pythonConsoleWidget = self.mainWindow.pythonConsole
+
+        if not pythonConsoleWidget:
+            pythonConsoleWidget = self.mainWindow.pythonConsole
+        self.pythonConsoleWidget = pythonConsoleWidget
+
         if self.pythonConsoleWidget is None:  # For some reason it can get destroid!
             self.mainWindow.pythonConsole = self.pythonConsoleWidget = IpythonConsole(self)
         self.mainWidget.getLayout().addWidget(self.pythonConsoleWidget)
 
         self.pythonConsoleWidget._startChannels()
         self.mainWindow.pythonConsoleModule = self
-        self._menuAction = self.mainWindow._findMenuAction('View', 'Python Console')
-        if self._menuAction:
-            self._menuAction.setChecked(True)
-
+        # self._menuAction = self.mainWindow._findMenuAction('View', 'Python Console')
+        # if self._menuAction:
+        #     self._menuAction.setChecked(True)
+        #
         row = 0
         self.settingsEditorCheckBox = CheckBox(self.settingsWidget, checked=True, text='Show logging window', callback=self._toggleTextEditor,
                                                grid=(row, 0))

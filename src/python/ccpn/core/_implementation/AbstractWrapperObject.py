@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-01-03 13:01:00 +0000 (Wed, January 03, 2024) $"
-__version__ = "$Revision: 3.3.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-02-14 12:12:32 +0000 (Wed, February 14, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,6 +30,8 @@ import functools
 import traceback
 import typing
 import re
+import sys
+
 from collections import OrderedDict
 from copy import deepcopy
 import pandas as pd
@@ -219,7 +221,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         className = self.className
         if parent is None:
             # This is the project
-            _id = self._wrappedData.name
+            _id = self.name
             sortKey = ('',)
         elif parent is project:
             _id = str(self._key)
@@ -709,6 +711,15 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
     #     for child in node._childClasses:
     #         self._printClassTree(child, tabs=tabs + 1)
 
+    def _getChild(self, klazz, name):
+        """Get the child of type klazz with name
+        :param klazz: class identifier: either className, shortClassName of a CoreClass
+        :param name: the name of the child object
+        :return the child or None
+        """
+        _pid = Pid.new(klazz, name)
+        return self.project.getByPid(_pid)
+
     def _getAllDecendants(self) -> list:
         """Get all objects descending from self; i.e. children, grandchildren, etc
         """
@@ -719,7 +730,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
     def _getChildrenByClass(self, klass) -> list:
         """GWV: Convenience: get the children of type klass of self.
-        klass is string (e.g. 'Peak') or V3 core class
+        klass is string (e.g. 'Peak') or V3 core class instance
         returns empty list if klass is not a child of self
         """
         klass = klass if isinstance(klass, str) else getattr(klass, 'className')
@@ -770,7 +781,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
             app = getApplication()
             if childClass._isGuiClass and app and not app.hasGui:
-                getLogger().debug(f'-->  _getApiChildren: skipping gui-class {childClass} for NoUi interface')
+                getLogger().debug2(f'-->  _getApiChildren(classes={classes}): skipping gui-class {childClass} for NoUi interface')
                 continue
 
             if ('all' in classes) or \
@@ -986,10 +997,10 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
         project = self._project
         data2Obj = project._data2Obj
+        app = getApplication()
 
         for childClass in self._childClasses:
 
-            app = getApplication()
             if childClass._isGuiClass and app and not app.hasGui:
                 # if gui is disabled then skip all gui-core-classes
                 getLogger().debug(f'-->  _restoreChildren: skipping gui-class {childClass} for NoUi interface')
@@ -999,16 +1010,27 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
             apiObjs = childClass._getAllWrappedData(self)
             for apiObj in apiObjs:
                 obj = data2Obj.get(apiObj)
-
                 if obj is None:
-                    try:
-                        obj = childClass._restoreObject(project=project, apiObj=apiObj)
+                    # obj does not exist; restore it from apiObj
 
-                    except RuntimeError as es:
-                        _text = 'Error restoring api-child %r of %s (%s)' % (apiObj.qualifiedName, self, es)
-                        getLogger().warning(_text)
-                        if app and app._isInDebugMode:
-                            print(traceback.print_exc())
+                    # GWV 13 Feb 24: Catching this here at such a low level is a bad idea
+                    # as the project and it's window is in an undefined state. Better raise a hard
+                    # error
+
+                    # try:
+                    #     obj = childClass._restoreObject(project=project, apiObj=apiObj)
+                    #
+                    # except RuntimeError as es:
+                    #     _text = 'Error restoring api-child %r of %s (%s)' % (apiObj.qualifiedName, self, es)
+                    #     getLogger().warning(_text)
+                    #     if app and app._isInDebugMode:
+                    #         sys.stderr.write(f'{traceback.print_exc()}\n')
+
+                    obj = childClass._restoreObject(project=project, apiObj=apiObj)
+
+                # obj should exist now
+                if obj is None:
+                    raise RuntimeError(f'Error restoring api-child {apiObj.qualifiedName!r} of {self}')
 
     def _postRestore(self):
         """Handle post-initialising children after all children have been restored

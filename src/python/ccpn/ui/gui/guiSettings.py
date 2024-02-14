@@ -5,9 +5,9 @@ Settings used in gui modules, widgets and popups
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-26 18:58:09 +0100 (Mon, June 26, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-02-14 12:12:35 +0000 (Wed, February 14, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -420,14 +420,14 @@ colourSchemes[DARK][MARKS_COLOURS] = MARK_LINE_COLOUR_DICT_DARK
 def getColourScheme():
     """Get the current colourScheme
 
-    :return: colourScheme
+    :return: colourScheme setting maintained by Gui or DEFAULT if ill-defined
     """
 
     application = getApplication()
-    if application:
-        colourScheme = application._colourScheme
+    if application.hasGui:
+        colourScheme = application.ui._colourScheme
         if colourScheme not in COLOUR_SCHEMES:
-            getLogger().warning('Undefined colour scheme')
+            getLogger().warning('getColourScheme: Undefined colour scheme')
             return DEFAULT
         return colourScheme
 
@@ -440,15 +440,23 @@ def setColourScheme(colourScheme):
     """
 
     application = getApplication()
-    if application:
+    if application and application.hasGui:
         if colourScheme not in COLOUR_SCHEMES:
             raise RuntimeError('Undefined colour scheme')
 
-        application._colourScheme = colourScheme
+        application.ui._colourScheme = colourScheme
         ColourDict(colourScheme).setColourScheme(colourScheme)
 
     else:
         getLogger().warning('Application not defined; colourScheme not set')
+
+
+def setDefaultColourScheme():
+    """Conveniance to set default colour scheme
+    :return the Default colour scheme
+    """
+    setColourScheme(DEFAULT)
+    return DEFAULT
 
 
 @singleton

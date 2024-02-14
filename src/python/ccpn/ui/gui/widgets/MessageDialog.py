@@ -4,9 +4,9 @@ This file contains the routines for message dialogues
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-28 12:50:21 +0000 (Tue, November 28, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-02-14 12:12:37 +0000 (Wed, February 14, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -457,6 +457,15 @@ def showRetryIgnoreCancel(title, message, parent=None, iconPath=None):
 
 
 def showSaveDiscardCancel(title, message, parent=None, iconPath=None):
+    """Save, Discard, Cancel query box.
+
+    :param title: title of the widget
+    :param message: message to be displayed
+    :param parent: parent widget
+    :param iconPath: optional icon to display
+    :return: True for Save, False for Discard or None for Cancel
+    """
+
     dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
 
     dialog.setStandardButtons(Save | Discard | Cancel)
@@ -474,6 +483,31 @@ def showSaveDiscardCancel(title, message, parent=None, iconPath=None):
     else:
         return None
 
+def showYesNoCancel(title, message, parent=None, iconPath=None):
+    """Yes, No, Cancel query box.
+
+    :param title: title of the widget
+    :param message: message to be displayed
+    :param parent: parent widget
+    :param iconPath: optional icon to display
+    :return: True for Yes, False for No or None for Cancel
+    """
+    dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
+
+    dialog.setStandardButtons(Yes | No | Cancel)
+    dialog.setDefaultButton(Yes)
+
+    dialog.raise_()
+    result = dialog.exec_()
+
+    if result == Yes:
+        return True
+
+    elif result == No:
+        return False
+
+    else:
+        return None
 
 def showWarning(title, message, parent=None, iconPath=None, scrollableMessage=False):
     dialog = MessageDialog(title='Warning', basicText=title, message=message, icon=Warning, iconPath=iconPath, parent=parent,

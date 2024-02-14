@@ -97,7 +97,7 @@ api.memops.implementation
 ==> <memops.Implementation.Repository ['generalData']>
 ccpnmr.AnalysisProfile
 ==> <memops.Implementation.Repository ['refData']>
-ccp.molecule.ChemComp
+ccp.molecule.ChemComp  --> data in ccp/molecule/ChemComp/
 ccp.molecule.ChemCompCoord
 ccp.molecule.ChemCompCharge
 ccp.molecule.ChemElement
@@ -503,15 +503,19 @@ class TopObject(XmlLoaderABC):
                 if not self.package.path.exists():
                     self.package.path.mkdir(parents=True, exist_ok=False)
 
-                with self.path.open('w') as fp:
-                    saveToStream(fp, self.apiTopObject)
+                if not self.path.parent.isWriteable():
+                    raise PermissionError(f'No write permission for {self.path.parent}')
 
-                if updateIsModified:
-                    # make sure that isModified is not updated if the file is not saved
-                    forceSetattr(self.apiTopObject, 'isModified', False)
+            except (PermissionError, FileNotFoundError) as es:
+                self.logger.info(f'Saving: {es}')
+                return
 
-            except (PermissionError, FileNotFoundError):
-                self.logger.info('Saving: folder may be read-only')
+            with self.path.saveWriteToFile(mode='w', overwrite=True) as fp:
+                saveToStream(fp, self.apiTopObject)
+
+            if updateIsModified:
+                # make sure that isModified is not updated if the file is not saved
+                forceSetattr(self.apiTopObject, 'isModified', False)
 
             self.isLoaded = True  # xml-file reflects contents
 
@@ -1121,8 +1125,10 @@ class XmlLoader(XmlLoaderABC):
     #--------------------------------------------------------------------------------------------
 
     # @debug1Enter()
-    def newProject(self, overwrite=False):
+    def newProject(self, initGraphics, overwrite=False):
         """Creates new project;
+        :param initGraphics: flag to also initialise the graphics objects
+        :param overwrite: flag to overwrite existing self.path
         :return a (api) NmrProject instance
         :raises FileExistsError or RuntimeError
         """
@@ -1155,8 +1161,7 @@ class XmlLoader(XmlLoaderABC):
             self.apiNmrProject = self.memopsRoot.newNmrProject(name=self.name)  # creates the Nmr repository
             self._initApiData()
 
-            app = getApplication()
-            if not app or app.hasGui:
+            if initGraphics:
                 # And the Graphics data
                 self._initApiGraphicsData()
 
@@ -1165,12 +1170,17 @@ class XmlLoader(XmlLoaderABC):
 
         self.setUnmodified()
 
-        self._debugInfo('After newProject:')
+        # self._debugInfo('After newProject:')
         return self.apiNmrProject
 
     @classmethod
     def newFromLoader(cls, xmlLoader, path=None, create=False) -> XmlLoader:
-        """Create a new instance using loader; set path, memopsRoot and apiNmrProject
+        """Create a new XmlLoader instance using loader;
+        set path, memopsRoot and apiNmrProject
+
+        :param xmlLoader: an XmlLoader instance
+        :param path: optional path, set from xmlLoader if None
+        :param create: flag to create the directory defined by path
         :return An XmlLoader instance
         """
         if not isinstance(xmlLoader, XmlLoader):
@@ -1246,19 +1256,27 @@ class XmlLoader(XmlLoaderABC):
     #--------------------------------------------------------------------------------------------
 
     # @debug1Enter()
-    def loadProject(self) -> NmrProject:
+    def loadProject(self, initGraphics:bool) -> NmrProject:
         """Loads ccpn project as defined by self.path;
+        :param initGraphics: flag to also initialise the graphics objects
         :return api NmrProject instance
         :raises FileNotFoundError and RuntimeError
         """
 
-        if not self.path.exists():
-            raise FileNotFoundError(f'path "{self.path}" does not exist')
+        def _checkPath(_path):
+            if not _path.exists():
+                raise FileNotFoundError(f'loadProject: Essential path "{_path}" does not exist')
+            if not _path.is_dir():
+                raise FileNotFoundError(f'loadProject: Essential path "{_path}" is not a directory')
 
-        if not self.path.is_dir():
-            raise FileNotFoundError(f'path "{self.path}" is not a directory')
-
+        # Check for presence of some essential paths
+        _checkPath(self.path)
         self.isV2 = isV2project(self.path)
+
+        if not self.isV2:
+            _checkPath(self.v3Path)
+            _checkPath(self.v3MemopsPath)
+            _checkPath(self.v3ImplementationPath)
 
         # load memops; sets self.memopsRoot
         _projectXml = self._getXmlProjectFile()
@@ -1304,27 +1322,17 @@ class XmlLoader(XmlLoaderABC):
             # upgrade api data
             correctFinalResult(self.memopsRoot)
 
-            # # init the v3 objects
-            # with self.blockReading():
-            #     self._initApiData()
-            #     # And the Graphics data
-            #     self._initApiGraphicsData()
-
-            # This traverses all repositories/packages and loads and checks values
-            # self.memopsRoot.checkAllValid()
-
         # init the V3 project data
         self._initApiData()
 
-        app = getApplication()
-        if not app or app.hasGui:
-            # init the Graphics data
+        # Optionally init the Graphics data
+        if initGraphics:
             self._initApiGraphicsData()
 
         self._updateTopObjects()
         self.setUnmodified()
         self._updateUserChemComps()
-        self._debugInfo('After loadProject:')
+        # self._debugInfo('After loadProject:')
         return self.apiNmrProject
 
     # @debug2Leave()
@@ -1345,7 +1353,7 @@ class XmlLoader(XmlLoaderABC):
         if len(projectFiles) > 0:
             return aPath(projectFiles[0]).resolve()
 
-        raise FileNotFoundError(f'No valid xml-file in "{self.v3ImplementationPath}"')
+        raise FileNotFoundError(f'No valid xml-file in {self.v3ImplementationPath}')
 
     # @debug3Enter()
     def _loadMemopsFromXml(self, xmlProjectFile=None, partialLoad=False):
@@ -1405,7 +1413,7 @@ class XmlLoader(XmlLoaderABC):
             #     except (PermissionError, FileNotFoundError):
             #         self.logger.warning('Folder may be read-only')
 
-        self._debugInfo('After loading memopsRoot:')
+        # self._debugInfo('After loading memopsRoot:')
 
     #--------------------------------------------------------------------------------------------
     # Saving
@@ -1630,20 +1638,29 @@ class XmlLoader(XmlLoaderABC):
         Even if the custom chemComp is present in the project and the chain containing it
          is now created upon loading the project correctly,
         new chains that requires that ChemComp are not created correctly if this dict is not updated with the missing defs!!
+
+        Note:  (see also core.Chain:635)
+                                                              #code1Letter, code3Letter, 'syn', 'formula'
+        chemCompStdDict[chemComp.molType][chemComp.ccpCode] = [chemComp.code1Letter, chemComp.code3Letter, commonName, '' ]
+
+        chemComp.molType one of: ('protein', 'DNA', 'RNA', 'other', 'carbohydrate')
+
+
         """
         from ccpnmodel.ccpncore.lib.chemComp.ChemCompOverview import chemCompStdDict
-        chemComps = self.apiNmrProject.root.chemComps
+
+        chemComps = self.memopsRoot.chemComps
         for chemComp in chemComps:
             if chemComp.molType not in chemCompStdDict.keys():
                 continue
             if not chemComp.ccpCode:
                 continue
             syn = chemComp.commonNames[0] if len(chemComp.commonNames)>0 else ''
-            chemCompStdDict[chemComp.molType][chemComp.ccpCode] = [
+            chemCompStdDict[chemComp.molType][chemComp.ccpCode] = (
                                                                    chemComp.code1Letter,
                                                                    chemComp.code3Letter,
                                                                    syn,
-                                                                   '']  # 'formula'. not store in the chemComp. could be backcalculated.
+                                                                   '')  # 'formula'. not store in the chemComp. could be backcalculated.
 
 
     # @debug3Enter()
@@ -1737,7 +1754,7 @@ def saveToStream(stream, apiTopObject, mapping=None, comment=None, simplified=Tr
                             expanded=expanded)
 
     except Exception as es:
-        getLogger().error(f'While saving xml file: {es}')
+        getLogger().error(f'saveToStream: While saving xml file: {es}')
         raise RuntimeError(es) from es
 
     finally:
@@ -1760,7 +1777,7 @@ def loadFromStream(stream, topObjId=None, topObject=None, partialLoad=False):
         gc.disable()
 
     try:
-        getLogger().debug2(f'{consoleStyle.fg.darkblue}Loading stream {topObject}{consoleStyle.reset}')
+        getLogger().debug2(f'{consoleStyle.fg.darkblue}loadFromStream: {topObject}{consoleStyle.reset}')
         result = XmlImp.loadFromStream(stream,
                                        topObjId=topObjId,
                                        topObject=topObject,
@@ -1821,7 +1838,7 @@ def _getXmlPathFromApiTopObject(package, apiTopObject) -> Path:
     # (GWV: why is the storage so complicated, dependent on file-name syntax and inconsistent??)
 
     if apiTopObject is None:
-        raise RuntimeError(f'Undefined apiTopObject')
+        raise RuntimeError(f'_getXmlPathFromApiTopObject: Undefined apiTopObject')
 
     _keys = [re.sub('[\[\]<>+-. \'\"]', '_', str(key)) for key in apiTopObject.getFullKey()]
     _keyStr = KEY_SEPARATOR.join(_keys)
@@ -1851,16 +1868,20 @@ def forceGetattr(obj, attributeName):
 # Hot-fixing:
 #   MemopsRoot.refreshTopObjects
 #=========================================================================================
+def _red(text:str) -> str:
+    """Get red text"""
+    return f'{consoleStyle.fg.red}{text}{consoleStyle.reset}'
+
 
 def _refreshTopObjects(memopsRoot, packageName):
     """Load the xml-files of packageName;
     Hot-fixed method
     """
     if not isinstance(memopsRoot, Implementation.MemopsRoot):
-        raise ValueError(f'invalid memopsRoot: {memopsRoot}')
+        raise ValueError(f'refreshTopObjects: Invalid memopsRoot: {memopsRoot}')
 
     if packageName is None or packageName == MEMOPS_PACKAGE:
-        raise ValueError(f'Invalid packageName "{packageName}"')
+        raise ValueError(f'refreshTopObjects: Invalid packageName "{packageName}"')
 
     # # fix absence of active repositories; not sure if/why this happens
     # activeRepositories = memopsRoot.__dict__[ACTIVE_REPOSITORIES_ATTR]
@@ -1874,7 +1895,7 @@ def _refreshTopObjects(memopsRoot, packageName):
         # xmlLoader = XmlLoader.newFromMemops(memopsRoot)
         # setattr(memopsRoot, XML_LOADER_ATTR, xmlLoader)
         # raise RuntimeError(f'MemopsRoot.refreshTopObjects: no XmlLoader instance')
-        getLogger().debug(f'MemopsRoot.refreshTopObjects: no xmlLoader (yet), skipping loading {packageName}')
+        getLogger().debug2(_red(f'refreshTopObjects: no xmlLoader (yet), skipping loading {packageName}'))
         return
 
     # getLogger().debug(f'MemopsRoot.refreshTopObjects: try loading {packageName}')
@@ -1882,6 +1903,7 @@ def _refreshTopObjects(memopsRoot, packageName):
     xmlLoader = getattr(memopsRoot, XML_LOADER_ATTR)  # use back linkage
 
     if xmlLoader.readingBlockingLevel:
+        getLogger().debug2(_red(f'refreshTopObjects: skipping, readingBlockingLevel={xmlLoader.readingBlockingLevel}'))
         return
 
     # We have to find the package: that is a problem as a package has no info on its
@@ -1897,7 +1919,7 @@ def _refreshTopObjects(memopsRoot, packageName):
         pass
 
     else:
-        getLogger().debug2(f'No Package instance found for "{packageName}"; skipping')
+        getLogger().debug2(_red(f'refreshTopObjects: No Package instance found for "{packageName}"; loading skipped'))
         return
 
     # print(f'>DEBUG refreshTopObjects> {pkg}: loaded:{pkg.isLoaded}')

@@ -4,9 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-12 16:15:39 +0100 (Wed, April 12, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-02-14 12:12:32 +0000 (Wed, February 14, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -116,7 +116,8 @@ def undoBlockWithSideBar(application=None):
     if application is None:
         raise RuntimeError('Error getting application')
 
-    getLogger().debug2('_enterUndoBlock')
+    _arrow = '-'*(application._echoBlocking) + '>'
+    getLogger().debug2(f'{_arrow} UndoBlock: echoBlocking={application._echoBlocking}')
 
     # get the undo stack
     undo = application._getUndo()
@@ -145,7 +146,8 @@ def undoBlockWithSideBar(application=None):
         if undo is not None:
             undo.decreaseWaypointBlocking()
 
-        getLogger().debug2(f'_exitUndoBlock: echoBlocking={application._echoBlocking}')
+        _arrow = '<' + '-'*(application._echoBlocking)
+        getLogger().debug2(f'{_arrow} UndoBlock: echoBlocking={application._echoBlocking}')
 
 
 @contextmanager
@@ -159,7 +161,7 @@ def undoBlockWithoutSideBar(application=None):
     if application is None:
         raise RuntimeError('Error getting application')
 
-    getLogger().debug2('_enterUndoBlockWithoutSideBar')
+    getLogger().debug2(f'_enterUndoBlockWithoutSideBar: echoBlocking={application._echoBlocking})')
 
     # get the undo stack
     undo = application._getUndo()
@@ -187,7 +189,7 @@ def undoBlockWithoutSideBar(application=None):
         if undo is not None:
             undo.decreaseWaypointBlocking()
 
-        getLogger().debug2(f'_enterUndoBlockWithoutSideBar: echoBlocking={application._echoBlocking}')
+        getLogger().debug2(f'_exitUndoBlockWithoutSideBar: echoBlocking={application._echoBlocking}')
 
 
 undoBlock = undoBlockWithSideBar

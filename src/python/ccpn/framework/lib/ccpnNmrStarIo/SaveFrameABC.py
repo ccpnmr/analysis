@@ -4,9 +4,9 @@ Module to manage Star files in ccpn context
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                )
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -16,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:08 +0100 (Wed, October 12, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-02-14 12:12:34 +0000 (Wed, February 14, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -66,8 +66,8 @@ class SaveFrameABC(NmrSaveFrame):
         return self._parent
 
     @property
-    def entry_id(self) -> str:
-        """:return the entry-Id as a str
+    def entry_id(self) -> str | None:
+        """:return the entry-Id as a str or None
         """
         _id = self.get(self._ENTRY_ID_TAG)
         if _id is None:
@@ -78,7 +78,10 @@ class SaveFrameABC(NmrSaveFrame):
     def entryName(self) -> str:
         """:return the entryName (derived from entry_id) as a str
         """
-        return  f'bmrb{self.entry_id}'
+        if (_id := self.entry_id) is None:
+            return f'bmrb'
+        else:
+            return  f'bmrb_{_id}'
 
     def importIntoProject(self, project) -> list:
         """Import the data of self into project.

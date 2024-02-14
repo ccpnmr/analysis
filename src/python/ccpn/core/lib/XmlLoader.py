@@ -97,7 +97,7 @@ api.memops.implementation
 ==> <memops.Implementation.Repository ['generalData']>
 ccpnmr.AnalysisProfile
 ==> <memops.Implementation.Repository ['refData']>
-ccp.molecule.ChemComp
+ccp.molecule.ChemComp  --> data in ccp/molecule/ChemComp/
 ccp.molecule.ChemCompCoord
 ccp.molecule.ChemCompCharge
 ccp.molecule.ChemElement
@@ -1638,20 +1638,29 @@ class XmlLoader(XmlLoaderABC):
         Even if the custom chemComp is present in the project and the chain containing it
          is now created upon loading the project correctly,
         new chains that requires that ChemComp are not created correctly if this dict is not updated with the missing defs!!
+
+        Note:  (see also core.Chain:635)
+                                                              #code1Letter, code3Letter, 'syn', 'formula'
+        chemCompStdDict[chemComp.molType][chemComp.ccpCode] = [chemComp.code1Letter, chemComp.code3Letter, commonName, '' ]
+
+        chemComp.molType one of: ('protein', 'DNA', 'RNA', 'other', 'carbohydrate')
+
+
         """
         from ccpnmodel.ccpncore.lib.chemComp.ChemCompOverview import chemCompStdDict
-        chemComps = self.apiNmrProject.root.chemComps
+
+        chemComps = self.memopsRoot.chemComps
         for chemComp in chemComps:
             if chemComp.molType not in chemCompStdDict.keys():
                 continue
             if not chemComp.ccpCode:
                 continue
             syn = chemComp.commonNames[0] if len(chemComp.commonNames)>0 else ''
-            chemCompStdDict[chemComp.molType][chemComp.ccpCode] = [
+            chemCompStdDict[chemComp.molType][chemComp.ccpCode] = (
                                                                    chemComp.code1Letter,
                                                                    chemComp.code3Letter,
                                                                    syn,
-                                                                   '']  # 'formula'. not store in the chemComp. could be backcalculated.
+                                                                   '')  # 'formula'. not store in the chemComp. could be backcalculated.
 
 
     # @debug3Enter()

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-14 12:12:35 +0000 (Wed, February 14, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-15 21:07:00 +0000 (Thu, February 15, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -108,20 +108,21 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         # Shortcuts only inserts methods
         super(QtWidgets.QMainWindow, self).__init__()
 
+        logger = getLogger()
+
         # format = QtGui.QSurfaceFormat()
         # format.setSwapInterval(0)
         # QtGui.QSurfaceFormat.setDefaultFormat(format)
 
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
+
         # Layout
         layout = self.layout()
-
-        logger = getLogger()
-        logger.debug('GuiMainWindow: layout: %s' % layout)
-
         if layout is not None:
             layout.setContentsMargins(0, 0, 0, 0)
             layout.setSpacing(0)
+        # logger.debug2('GuiMainWindow: layout: %s' % layout)
+
 
         self.setGeometry(200, 40, 1100, 900)
 
@@ -132,16 +133,18 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
 
         # Module area
         self.moduleArea = CcpnModuleArea(mainWindow=self)
+        self.moduleArea.setGeometry(0, 0, 1000, 800)
+        # GST can't seem to do this with style sheets...
+        self.moduleArea.setContentsMargins(0, 2, 2, 0)
+
         self._hiddenModules = CcpnModuleArea(mainWindow=self)
         self._hiddenModules.setVisible(False)
 
         self.pythonConsoleModule = None  # Python console module; defined upon first time Class initialisation. Either by toggleConsole or Restoring layouts
         self.namespace = None
 
-        logger.debug('GuiMainWindow.moduleArea: layout: %s' % self.moduleArea.layout)  ## pyqtgraph object
-        self.moduleArea.setGeometry(0, 0, 1000, 800)
-        # GST can't seem to do this with style sheets...
-        self.moduleArea.setContentsMargins(0, 2, 2, 0)
+        # logger.debug('GuiMainWindow.moduleArea: layout: %s' % self.moduleArea.layout)  ## pyqtgraph object
+
         self.setCentralWidget(self.moduleArea)
         self._shortcutsDict = {}
 
@@ -388,8 +391,11 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                     self.moduleLayouts = _mLayouts
                     self._spectrumModuleLayouts = deepcopy(self.moduleLayouts)
 
-            except (PermissionError, FileNotFoundError):
-                getLogger().debug('Folder may be read-only')
+            except (PermissionError):
+                getLogger().debug2('MainWindow._initProject restoring Layouts: Folder may be read-only')
+
+            except (FileNotFoundError):
+                getLogger().debug2('MainWindow._initProject restoring Layouts: File not found')
 
     def _updateWindowTitle(self):
         """
@@ -1113,11 +1119,11 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         # TODO: open as pop-out, not as part of MainWindow
         # self.moduleArea.moveModule(pluginModule, position='above', neighbor=None)
 
-    def _updateRestoreArchiveMenu(self):
-
-        action = self.getMenuAction(f'{FILE_MENU}->{FILE_RESTORE_FROM_ARCHIVE}')
-        action.setEnabled(bool(self._project._getArchivePaths()))
-
+    # def _updateRestoreArchiveMenu(self):
+    #
+    #     action = self.getMenuAction(f'{FILE_MENU}->{FILE_RESTORE_FROM_ARCHIVE}')
+    #     action.setEnabled(bool(self._project._getArchivePaths()))
+    #
     # GWV 10/2/24: This should not be here!
     # def undo(self):
     #     self._project._undo.undo()
@@ -2407,15 +2413,18 @@ class MainWindow(_CoreClassMainWindow, GuiMainWindow):
 
     def __init__(self, project: Project, wrappedData: 'ApiWindow'):
         logger = Logging.getLogger()
-        logger.debug(f'MainWindow>> project: {project}')
-        logger.debug(f'MainWindow>> project.application: {project.application}')
+        logger.debug3(f'MainWindow>> project: {project}')
+        logger.debug3(f'MainWindow>> project.application: {project.application}')
 
         _CoreClassMainWindow.__init__(self, project, wrappedData)
 
         application = project.application
         GuiMainWindow.__init__(self, application=application)
 
-        # patches for now:
+        # patches for now; insert MainWindow back into project:
         project._mainWindow = self
         # application._mainWindow = self
         # application.ui._mainWindow = self
+
+        getLogger().debug(f'Initialised {self}')
+

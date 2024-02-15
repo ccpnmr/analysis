@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-14 12:12:34 +0000 (Wed, February 14, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-15 21:07:00 +0000 (Thu, February 15, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -143,6 +143,7 @@ class SpectrumDisplay(AbstractWrapperObject):
     def _postRestore(self):
         """Handle post-initialising children after all children have been restored
         """
+
         # debug
         _strips = self.strips
 

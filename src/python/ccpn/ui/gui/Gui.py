@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-14 12:12:34 +0000 (Wed, February 14, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-15 21:07:00 +0000 (Thu, February 15, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -269,7 +269,7 @@ class Gui(Ui):
                 self._makeActiveWindow()
 
     def _restoreSpectrumDisplayModules(self):
-        """Code from Framework, restoring spectrumDisplay's
+        """Code from Framework/Project, restoring spectrumDisplay's
         """
         from ccpn.ui.gui.lib import GuiStrip
 
@@ -327,11 +327,26 @@ class Gui(Ui):
         # Initialise Strips
         for spectrumDisplay in mainWindow.spectrumDisplays:
             try:
+                _badStrip = False
                 for si, strip in enumerate(spectrumDisplay.orderedStrips):
 
                     # temporary to catch bad strips from ordering bug
                     if not strip:
                         continue
+
+                    # GWV 15/2/24: Adapted from Code in Project._restoreObject
+                    if not strip.axes:
+                        # set the border to red
+                        spectrumDisplay.mainWidget.setStyleSheet('Frame { border: 3px solid #FF1234; }')
+                        spectrumDisplay.mainWidget.setEnabled(False)
+                        spectrumDisplay.setEnabled(False)
+
+                        getLogger().error(
+                            f'Strip {strip} contains bad axes - please close SpectrumDisplay {spectrumDisplay} outlined in red.'
+                        )
+                        _badStrip = True
+                        break
+
 
                     # get the new tilePosition of the strip - tilePosition is always (x, y) relative to screen stripArrangement
                     #                                       changing screen arrangement does NOT require flipping tilePositions

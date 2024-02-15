@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-14 12:12:32 +0000 (Wed, February 14, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-15 21:07:00 +0000 (Thu, February 15, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1192,12 +1192,13 @@ class Project(AbstractWrapperObject):
         :return (self, mainWindow)
         """
         from ccpn.core.ChemicalShiftList import DEFAULT_CHEMICALSHIFTLIST
+        from ccpn.ui.gui.guiSettings import _styleBlue
 
         self._application = application
 
         # logger
         self._logger = createLogger(self, now=application._created)
-        Logging.setLevel(self._logger, debugLevel)
+        Logging.setLevel(self._logger, application._loggingLevel)
 
         # Set up notifiers
         self._registerPresetApiNotifiers()
@@ -1209,35 +1210,53 @@ class Project(AbstractWrapperObject):
 
         # initialise, creating the children; pass in self as we are initialising
         with inactivity(project=self):
-            self._restoreChildren()
-            # perform any required restoration of project not covered by children
-            self._restoreObject(self, self._wrappedData)
+
+            with AbstractWrapperObject._doRestore(self.__class__):
+
+                # indented debugging just to be sure is running in the correct order
+                # Used with _postRestore debug output at the completion
+                self._indentedDebug2(text=f'_initialise: {self}', enter=True)
+
+                self._restoreChildren()
+
+                # strange bug that v2 window is missing and needs replacing
+                if application.hasGui and self._mainWindow is None:
+                    self._mainWindow = self._newWindow(title='MainWindow')
+
+                # perform any required restoration of project not covered by children
+                self._makeCollections()
+                self._makeCrossReferences()
+
+                # Call any updates
+                self._update()
+
+                # finalise restoration of project
+                self._postRestore()
+
+            # end restoring objects
+
+            # NOTE:ED - testing here, project seems to be modified after loading
+            self._xmlLoader.setUnmodified()
 
             # we always have the default chemicalShift list
             if not self.chemicalShiftLists:
+                getLogger().debug(f'Project.initialise: creating ChemicalShiftList {DEFAULT_CHEMICALSHIFTLIST!r}')
                 self.newChemicalShiftList(name=DEFAULT_CHEMICALSHIFTLIST)
 
-            # Call any updates
-            self._update()
+            # check directories for possible read-only
+            _projectPath = aPath(self.path)
+            _subDirs = [self.projectPath / sub for sub in CCPN_SUB_DIRECTORIES]
+            _readOnlyDirs = [p for p in [self.projectPath.parent] + _subDirs \
+                             if p.exists() and p.is_dir() and not p.isWriteable()
+                            ]
+            if len(_readOnlyDirs) > 0:
+                getLogger().warning(f'Project contains {len(_readOnlyDirs)} read-only directories:\n{tuple(_readOnlyDirs)}')
+                self.setReadOnly(True)
+            else:
+                self.setReadOnly(self.readOnly)
 
-            # finalise restoration of project
-            self._postRestore()
-
-        # NOTE:ED - testing here, project seems to be modified after loading
-        self._xmlLoader.setUnmodified()
-
-        # check directories for possible read-only
-        _projectPath = aPath(self.path)
-        _subDirs = [self.projectPath / sub for sub in CCPN_SUB_DIRECTORIES]
-        _readOnlyDirs = [p for p in [self.projectPath.parent] + _subDirs \
-                        if p.exists() and p.is_dir() and not p.isWriteable()]
-        if len(_readOnlyDirs) > 0:
-            getLogger().warning(f'Project contains {len(_readOnlyDirs)} read-only directories:\n{tuple(_readOnlyDirs)}')
-            self.setReadOnly(True)
-        else:
-            self.setReadOnly(self.readOnly)
-
-        # remove mainWindow from Project instance, and return to caller (i.e. Framework)
+        # remove mainWindow from Project instance, and to be returned+
+        # to caller (i.e. Framework)
         _mainWindow = self._mainWindow
         self._mainWindow = None
 
@@ -1245,52 +1264,74 @@ class Project(AbstractWrapperObject):
         getLogger().debug(f'Project {self}: initialise() completed')
         return self, _mainWindow
 
-    @classmethod
-    def _restoreObject(cls, project, apiObj):
-        """Process data that must always be performed after updating all children
+    def _makeCollections(self):
+        """Create Collection objects from the panda's dataFrame
         """
         from ccpn.core._implementation.CollectionList import CollectionList
+
+        # create new collection table
+        self._collectionList = CollectionList(project=self)
+        # create new collections from table
+        self._collectionList._restoreObject(self, None)
+
+    def _makeCrossReferences(self):
+        """Create the cross-references table
+        """
         from ccpn.core._implementation.CrossReferenceHandler import CrossReferenceHandler
 
-        if project.application.hasGui:
-            # strange bug that v2 window is missing and needs replacing
-            from ccpn.ui.gui.MainWindow import MainWindow
-
-            if not MainWindow._getAllWrappedData(project):
-                # NOTE:ED - need to create a mainWindow
-                #   there must be a bug in saving that deletes the v2 ccpnmr.gui.Window.Window object :|
-                getLogger().debug('>>> Creating new mainWindow')
-                project.newWindow(title='default')
-
         # create new collection table
-        project._collectionList = CollectionList(project=project)
-
+        self._crossReferencing = CrossReferenceHandler(project=self)
         # create new collections from table
-        project._collectionList._restoreObject(project, None)
+        self._crossReferencing._restoreObject(self, None)
 
-        # create new collection table
-        project._crossReferencing = CrossReferenceHandler(project=project)
+    # @classmethod
+    # def _restoreObject(cls, project, apiObj):
+    #     """Process data that must always be performed after updating all children
+    #     """
+    #     from ccpn.core._implementation.CollectionList import CollectionList
+    #     from ccpn.core._implementation.CrossReferenceHandler import CrossReferenceHandler
 
-        # create new collections from table
-        project._crossReferencing._restoreObject(project, None)
+        # GWV 15/2/24: Moved to Project._initialise()
+        # if project.application.hasGui:
+        #     # strange bug that v2 window is missing and needs replacing
+        #     from ccpn.ui.gui.MainWindow import MainWindow
+        #
+        #     if not MainWindow._getAllWrappedData(project):
+        #         # NOTE:ED - need to create a mainWindow
+        #         #   there must be a bug in saving that deletes the v2 ccpnmr.gui.Window.Window object :|
+        #         getLogger().debug('>>> Creating new mainWindow')
+        #         project.newWindow(title='default')
 
-        # check that strips have been recovered correctly
-        try:
-            for sd in project.application.mainWindow.spectrumDisplays:
-                for strp in sd.strips:
-                    if not strp.axes:
-                        # set the border to red
-                        sd.mainWidget.setStyleSheet('Frame { border: 3px solid #FF1234; }')
-                        sd.mainWidget.setEnabled(False)
-                        strp.setEnabled(False)
+        # # create new collection table
+        # project._collectionList = CollectionList(project=project)
+        #
+        # # create new collections from table
+        # project._collectionList._restoreObject(project, None)
 
-                        getLogger().error(f'Strip {strp} contains bad axes - please close SpectrumDisplay {sd} outlined in red.')
+        # # create new collection table
+        # project._crossReferencing = CrossReferenceHandler(project=project)
+        #
+        # # create new collections from table
+        # project._crossReferencing._restoreObject(project, None)
 
-        except Exception:
-            getLogger().warning('There was an issue checking the spectrumDisplays')
+        # GWV 15/2/24: re-implemented as part of Gui._restoreSpectrumDisplayModules
+        # # check that strips have been recovered correctly
+        # try:
+        #     for sd in project.application.mainWindow.spectrumDisplays:
+        #         for strp in sd.strips:
+        #             if not strp.axes:
+        #                 # set the border to red
+        #                 sd.mainWidget.setStyleSheet('Frame { border: 3px solid #FF1234; }')
+        #                 sd.mainWidget.setEnabled(False)
+        #                 strp.setEnabled(False)
+        #
+        #                 getLogger().error(f'Strip {strp} contains bad axes - please close SpectrumDisplay {sd} outlined in red.')
+        #
+        # except Exception:
+        #     getLogger().warning('There was an issue checking the spectrumDisplays')
 
-        # don't need to call super here
-        return project
+        # # don't need to call super here
+        # return project
 
     def _postRestore(self):
         """Finalise restoration of core objects.
@@ -1433,7 +1474,7 @@ class Project(AbstractWrapperObject):
         for sp in self.spectra:
             sp._close()
 
-        # purge all ap-Objects
+        # purge all api-Objects
         self._closeApiObjects()
 
         # Remove undo stack:
@@ -2327,8 +2368,11 @@ class Project(AbstractWrapperObject):
         return apiStatus
 
     def _update(self):
-        """Call the _updateObject method on all objects, including self
+        """Call the _updateObject(UPDATE_POST_PROJECT_INITIALISATION) method on
+        all objects, including self
         """
+        self._indentedDebug2(f'{self}._update() : calling _updateObject() on self and all descendants', enter=True, dots=True)
+
         self._updateObject(UPDATE_POST_PROJECT_INITIALISATION)
         objs = self._getAllDecendants()
         for obj in objs:
@@ -2575,7 +2619,6 @@ class Project(AbstractWrapperObject):
         # GWV: 13Jan2023: made into private method; only FrameWork needs this.
         # NOTE:ED - better than being in spectrumLib but still needs moving
         from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import getExpClassificationDict
-
         return getExpClassificationDict(self._wrappedData)
 
     @logCommand('project.')
@@ -2702,11 +2745,11 @@ class Project(AbstractWrapperObject):
         :return: a new Note instance.
         """
         from ccpn.core.Note import _newNote
-
         return _newNote(self, name=name, text=text, comment=comment, **kwds)
 
-    @logCommand('project.')
-    def newWindow(self, title: str = None, position: tuple = (), size: tuple = (), **kwds):
+    # GWV 15/2/24: made private as a user should never see this
+    # @logCommand('project.')
+    def _newWindow(self, title: str = None, position: tuple = (), size: tuple = (), **kwds):
         """Create new child Window.
 
         See the Window class for details.
@@ -2719,7 +2762,6 @@ class Project(AbstractWrapperObject):
         :return: a new Window instance.
         """
         from ccpn.ui._implementation.Window import _newWindow
-
         return _newWindow(self, title=title, position=position, size=size, **kwds)
 
     @logCommand('project.')

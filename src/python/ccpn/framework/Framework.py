@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-14 12:12:34 +0000 (Wed, February 14, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-15 21:07:00 +0000 (Thu, February 15, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -496,7 +496,10 @@ class Framework(NotifierBase):
         if not self.ui._checkRegistration():
             return
 
-        self._experimentClassifications = project._getExperimentClassifications()
+        # We have a project needed to read experiment classification (to be refactored to be standalone)
+        self._experimentClassifications = self._getExperimentClassifications()
+
+        # Starting autobackup
         self._updateAutoBackup()
 
         sys.stderr.write('==> Done, %s is starting\n' % self.applicationName)
@@ -614,8 +617,10 @@ class Framework(NotifierBase):
         # newProject._xmlLoader.setUnmodified()
         # # the project is now ready to use
 
-        # Now that all objects, including the graphics are there, restore current
-        self.current._restoreStateFromFile(self.statePath)
+        # Now that all objects, including the graphics, are there restore current
+        # for non-temporary projects
+        if not self.project.isTemporary:
+            self.current._restoreStateFromFile(self.statePath)
 
         # Load project specific resources.
         self.resources._initProjectResources()
@@ -627,7 +632,7 @@ class Framework(NotifierBase):
     @property
     def _loggingLevel(self) -> int:
         """Convert the project _debugLevel (0, 1-3)
-        :return the Logging defined levels
+        :return the Logging defined level
         """
         _conversion = {
             3 : Logging.DEBUG3,
@@ -650,6 +655,9 @@ class Framework(NotifierBase):
         """
         if 0 <= level <= 3:
             self._debugLevel = level
+            # update the logger
+            logger = getLogger()
+            Logging.setLevel(logger, level=self._loggingLevel)
         else:
             raise ValueError(f'Invalid debug level ({level}); should be 0-3')
 
@@ -1210,6 +1218,13 @@ class Framework(NotifierBase):
             del (_project)
 
         self._cleanGarbageCollector()
+
+    def _getExperimentClassifications(self) -> dict:
+        """Get a dictionary of dictionaries of dimensionCount:sortedNuclei:ExperimentClassification named tuples.
+        For now: ask project; to be refactored in the future
+        """
+        getLogger().debug(f'Reading experiment prototypes')
+        return self.project._getExperimentClassifications()
 
     #-----------------------------------------------------------------------------------------
     # Data loaders

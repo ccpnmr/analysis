@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-14 12:12:32 +0000 (Wed, February 14, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-15 21:07:00 +0000 (Thu, February 15, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -33,13 +33,20 @@ import traceback
 import signal
 import pandas as pd
 from functools import partial
+
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QPainter
+
 from contextlib import contextmanager, nullcontext, suppress
 from collections.abc import Iterable
+
 from ccpn.core.lib import Util as coreUtil
 from ccpn.util.Logging import getLogger
 from ccpn.framework.Application import getApplication
+
+from ccpn.ui.gui.guiSettings import _styleMagenta
+
+#--------------------------------------------------------------------------------------------
 
 
 @contextmanager
@@ -116,15 +123,17 @@ def undoBlockWithSideBar(application=None):
     if application is None:
         raise RuntimeError('Error getting application')
 
-    _arrow = '-'*(application._echoBlocking) + '>'
-    getLogger().debug2(f'{_arrow} UndoBlock: echoBlocking={application._echoBlocking}')
-
     # get the undo stack
-    undo = application._getUndo()
+    if (undo := application._getUndo()) is None:
+        raise RuntimeError(f'Unable to get the undo stack')
 
-    if undo is not None:
-        undo.newWaypoint()  # DO NOT CHANGE
-        undo.increaseWaypointBlocking()
+    _arrow = '-'*(undo._waypointBlockingLevel) + '>'
+    getLogger().debug2(
+        _styleMagenta(f'{_arrow} UndoBlockWithSideBar')
+    )
+
+    undo.newWaypoint()  # DO NOT CHANGE
+    undo.increaseWaypointBlocking()
 
     if application.ui and application.ui.mainWindow:
         sidebar = application.ui.mainWindow.sideBar
@@ -146,8 +155,10 @@ def undoBlockWithSideBar(application=None):
         if undo is not None:
             undo.decreaseWaypointBlocking()
 
-        _arrow = '<' + '-'*(application._echoBlocking)
-        getLogger().debug2(f'{_arrow} UndoBlock: echoBlocking={application._echoBlocking}')
+        _arrow = '<' + '-'*(undo._waypointBlockingLevel)
+        getLogger().debug2(
+            _styleMagenta(f'{_arrow} UndoBlockWithSideBar')
+        )
 
 
 @contextmanager
@@ -161,13 +172,17 @@ def undoBlockWithoutSideBar(application=None):
     if application is None:
         raise RuntimeError('Error getting application')
 
-    getLogger().debug2(f'_enterUndoBlockWithoutSideBar: echoBlocking={application._echoBlocking})')
-
     # get the undo stack
-    undo = application._getUndo()
-    if undo is not None:
-        undo.newWaypoint()  # DO NOT CHANGE
-        undo.increaseWaypointBlocking()
+    if (undo := application._getUndo()) is None:
+        raise RuntimeError(f'Unable to get the undo stack')
+
+    _arrow = '-'*(undo._waypointBlockingLevel) + '>'
+    getLogger().debug2(
+        _styleMagenta(f'{_arrow} UndoBlockWithoutSideBar')
+    )
+
+    undo.newWaypoint()  # DO NOT CHANGE
+    undo.increaseWaypointBlocking()
 
     if application.ui and application.ui.mainWindow:
         sidebar = application.ui.mainWindow.sideBar
@@ -189,8 +204,10 @@ def undoBlockWithoutSideBar(application=None):
         if undo is not None:
             undo.decreaseWaypointBlocking()
 
-        getLogger().debug2(f'_exitUndoBlockWithoutSideBar: echoBlocking={application._echoBlocking}')
-
+        _arrow = '<' + '-'*(undo._waypointBlockingLevel)
+        getLogger().debug2(
+            _styleMagenta(f'{_arrow} UndoBlockWithoutSideBar')
+        )
 
 undoBlock = undoBlockWithSideBar
 

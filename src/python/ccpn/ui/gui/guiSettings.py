@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-14 12:12:35 +0000 (Wed, February 14, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-15 21:07:00 +0000 (Thu, February 15, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -506,8 +506,8 @@ class consoleStyle():
     """Colors class:reset all colors with colors.reset; two
     subclasses fg for foreground
     and bg for background; use as colors.subclass.colorname.
-    i.e. colors.fg.red or colors.bg.greenalso, the generic bold, disable,
-    underline, reverse, strike through,
+    i.e. colors.fg.red or colors.bg.green
+         also, the generic bold, disable, underline, reverse, strike through,
     and invisible work with the main class i.e. colors.bold
     """
     reset = '\033[0m'
@@ -557,3 +557,21 @@ class consoleStyle():
         magenta = '\033[105m'
         cyan = '\033[106m'
         white = '\033[107m'
+
+def _style(colour, text:str) -> str:
+    """:return text with colour
+    """
+    _col = getattr(consoleStyle.fg, colour, consoleStyle.fg.default)
+    return f'{_col}{text}{consoleStyle.reset}'
+
+def _styleRed(text:str) -> str:
+    """Get red text"""
+    return f'{consoleStyle.fg.red}{text}{consoleStyle.reset}'
+
+def _styleBlue(text:str) -> str:
+    """Get blue text"""
+    return f'{consoleStyle.fg.darkblue}{text}{consoleStyle.reset}'
+
+def _styleMagenta(text:str) -> str:
+    """Get magenta text"""
+    return f'{consoleStyle.fg.magenta}{text}{consoleStyle.reset}'

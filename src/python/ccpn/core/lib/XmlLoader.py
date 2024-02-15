@@ -8,6 +8,7 @@ The routines are adapted from and (partially/mostly/all?) replace :
   ccpnmodel.ccpncore.lib.ApiPath
   ccpnmodel/ccpncore/memops/format/xml/XmlIO.py
 
+V2 data structure:
 
 api.memops.implementation
 <MemopsRoot>
@@ -58,6 +59,7 @@ api.memops.implementation
                                             inserts Path.CCPN_API_DIRECTORY via ApiPath.getTopObjIdFromFileName
                                         --> calls XmlIo.loadFromStream)topObject=MemeosRoot):
                                         --> ultimately calls xml.Implementation.loadFromStream(topObject=MemopsRoot)
+    NB: Hotfixed with _refreshTopObjects from this file
 
     def save()
 
@@ -96,6 +98,7 @@ api.memops.implementation
 
 ==> <memops.Implementation.Repository ['generalData']>
 ccpnmr.AnalysisProfile
+
 ==> <memops.Implementation.Repository ['refData']>
 ccp.molecule.ChemComp  --> data in ccp/molecule/ChemComp/
 ccp.molecule.ChemCompCoord
@@ -106,7 +109,9 @@ ccp.molecule.StereoChemistry
 ccp.nmr.NmrExpPrototype
 ccp.nmr.NmrReference
 ccpnmr.AnalysisProfile
+
 ==> <memops.Implementation.Repository ['backup']>
+
 ==> <memops.Implementation.Repository ['userData']>
 ccp.molecule.ChemCompLabel
 ccp.molecule.ChemComp
@@ -238,7 +243,7 @@ from ccpn.framework.PathsAndUrls import \
     userCcpnDataPath, \
     CCPN_BACKUPS_DIRECTORY
 
-from ccpn.ui.gui.guiSettings import consoleStyle
+from ccpn.ui.gui.guiSettings import _styleRed, _styleBlue
 
 
 #--------------------------------------------------------------------------------------------
@@ -282,7 +287,7 @@ REFDATA_PACKAGES = ['ccp.molecule.ChemCompCoord',
                     'ccp.nmr.NmrReference'
                     ]
 
-#TODO: original code implemented silencing of garbage collection on reading/writing: still valid?
+#original code implemented silencing of garbage collection on reading/writing: still valid?
 SILENCE_GARBAGE_COLLECTION = False
 
 
@@ -407,7 +412,7 @@ class TopObject(XmlLoaderABC):
         return f'{_atop.className}-{_name}'
 
     def load(self, reload: bool = False) -> TopObject:
-        """Load self, either as a new api topObject or reload for an existing api topObject
+        """Load self, either as a new apiTopObject or reload for an existing apiTopObject
         :param reload: flag to indicated reloading an existing apiTopObject (from xml)
         :return self
         """
@@ -419,9 +424,8 @@ class TopObject(XmlLoaderABC):
         if self.apiTopObject is None:
             _apiTopObjects = forceGetattr(self.root.memopsRoot, 'topObjects')
             self.apiTopObject = _apiTopObjects.get(self.guid)
-            if not self.apiTopObject:
-                getLogger().debug2(f'{consoleStyle.fg.darkyellow}Undefined apiTopObject {self.guid}{consoleStyle.reset}')
 
+        # some code to be able to examine the loading s
         _stack = self.root.loadingStack
         _stack.append(self)
         self._loadFromXml()
@@ -441,13 +445,18 @@ class TopObject(XmlLoaderABC):
         return guid
 
     def _loadFromXml(self):
-        """Load api topObject from self.path
+        """Load self.apiTopObject from self.path, either as initial load or reload
+        Calls very finnicky loadFromStream() with strange (horrible!) call signature
+        Sets self.apiTopObject
+
+        :raises FileNotFound if self.path does not exist; RuntimeError on failure to load
         """
         if not self.path.exists():
             raise FileNotFoundError(f'Failed to load {self.path!r}: file does not exist')
 
         if not self.isReading:
             self.isReading += 1
+
             with self.path.open('r') as fp:
                 if self.apiTopObject is None:
                     try:
@@ -461,7 +470,7 @@ class TopObject(XmlLoaderABC):
                 else:
                     try:
                         apiTopObject = self.apiTopObject
-                        # Routine does not return an object if called with apiTopObj!!
+                        # Routine does not return an object if called without apiTopObject!!
                         result = loadFromStream(stream=fp,
                                                 topObject=apiTopObject,
                                                 topObjId=apiTopObject.guid,
@@ -469,10 +478,10 @@ class TopObject(XmlLoaderABC):
 
 
                     except Exception as es:
-                        raise RuntimeError(f'Failed to load "{self.path}": {es}') from es
+                        raise RuntimeError(f'Failed to load {self} from "{self.path}": {es}') from es
 
             if apiTopObject is None:
-                raise RuntimeError(f'Failed to load "{self.path}": unknown error')
+                raise RuntimeError(f'Failed to load {self} from "{self.path}": unknown error')
 
             self.apiTopObject = apiTopObject
             self.isLoaded = True  # xml-file reflects contents
@@ -490,7 +499,7 @@ class TopObject(XmlLoaderABC):
         """Save the apiTopObject to the xml file defined by self.path
         """
         if self.apiTopObject is None:
-            getLogger().warning(f'{consoleStyle.fg.red}Cannot save {self._path}: undefined apiTopObject{consoleStyle.reset}')
+            getLogger().warning(_styleRed(f'Cannot save {self._path}: undefined apiTopObject'))
             return
 
         if self.apiTopObject.isDeleted:
@@ -523,7 +532,7 @@ class TopObject(XmlLoaderABC):
         """Save the apiTopObject to the xml file defined by self.path / CCPN_BACKUPS_DIRECTORY
         """
         if self.apiTopObject is None:
-            getLogger().warning(f'{consoleStyle.fg.red}Cannot save {self._path}: undefined apiTopObject{consoleStyle.reset}')
+            getLogger().warning(_styleRed(f'Cannot save {self._path}: undefined apiTopObject'))
             return
 
         if self.apiTopObject.isDeleted:
@@ -1729,10 +1738,11 @@ class XmlLoader(XmlLoaderABC):
         return f'<XmlLoader: "{self.name}" ({version})>'
 
     __repr__ = __str__
-
-
 #end class
 
+#=========================================================================================
+# helper routines
+#=========================================================================================
 
 def saveToStream(stream, apiTopObject, mapping=None, comment=None, simplified=True, compact=True, expanded=False):
     """ wrapper function, to handle garbage collection for Xml export.
@@ -1777,7 +1787,7 @@ def loadFromStream(stream, topObjId=None, topObject=None, partialLoad=False):
         gc.disable()
 
     try:
-        getLogger().debug2(f'{consoleStyle.fg.darkblue}loadFromStream: {topObject}{consoleStyle.reset}')
+        getLogger().debug3(_styleBlue(f'loadFromStream: {topObjId}'))
         result = XmlImp.loadFromStream(stream,
                                        topObjId=topObjId,
                                        topObject=topObject,
@@ -1813,10 +1823,11 @@ def _getIdFromTopObject(topObj) -> tuple:
 
     if not activeRepositories:
         # getLogger().debug(f'No repository found for "{packageName}"')
-        raise RuntimeError(f'No repository found for {topObj}')
+        raise RuntimeError(f'_getIdFromTopObject: No repository found for {topObj}')
 
     elif len(activeRepositories) > 1:
-        getLogger().debug(f'Several repositories found for {topObj}; using first one {repositories[0]}')
+        getLogger().debug2(_styleRed(f'_getIdFromTopObject: Several repositories found for {topObj}; using first one {activeRepositories[0]}'))
+
     apiRepo = activeRepositories[0]
 
     return (apiRepo.name, topObj.packageName, topObj.guid)
@@ -1868,10 +1879,6 @@ def forceGetattr(obj, attributeName):
 # Hot-fixing:
 #   MemopsRoot.refreshTopObjects
 #=========================================================================================
-def _red(text:str) -> str:
-    """Get red text"""
-    return f'{consoleStyle.fg.red}{text}{consoleStyle.reset}'
-
 
 def _refreshTopObjects(memopsRoot, packageName):
     """Load the xml-files of packageName;
@@ -1895,7 +1902,7 @@ def _refreshTopObjects(memopsRoot, packageName):
         # xmlLoader = XmlLoader.newFromMemops(memopsRoot)
         # setattr(memopsRoot, XML_LOADER_ATTR, xmlLoader)
         # raise RuntimeError(f'MemopsRoot.refreshTopObjects: no XmlLoader instance')
-        getLogger().debug2(_red(f'refreshTopObjects: no xmlLoader (yet), skipping loading {packageName}'))
+        getLogger().debug2(_styleRed(f'refreshTopObjects: no xmlLoader (yet), skipping loading {packageName}'))
         return
 
     # getLogger().debug(f'MemopsRoot.refreshTopObjects: try loading {packageName}')
@@ -1903,7 +1910,7 @@ def _refreshTopObjects(memopsRoot, packageName):
     xmlLoader = getattr(memopsRoot, XML_LOADER_ATTR)  # use back linkage
 
     if xmlLoader.readingBlockingLevel:
-        getLogger().debug2(_red(f'refreshTopObjects: skipping, readingBlockingLevel={xmlLoader.readingBlockingLevel}'))
+        getLogger().debug2(_styleRed(f'refreshTopObjects: readingBlockingLevel={xmlLoader.readingBlockingLevel}; skipping {packageName}'))
         return
 
     # We have to find the package: that is a problem as a package has no info on its
@@ -1919,7 +1926,7 @@ def _refreshTopObjects(memopsRoot, packageName):
         pass
 
     else:
-        getLogger().debug2(_red(f'refreshTopObjects: No Package instance found for "{packageName}"; loading skipped'))
+        getLogger().debug2(_styleRed(f'refreshTopObjects: No Package instance found for "{packageName}"; loading skipped'))
         return
 
     # print(f'>DEBUG refreshTopObjects> {pkg}: loaded:{pkg.isLoaded}')

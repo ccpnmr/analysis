@@ -3,9 +3,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-08-17 14:06:48 +0100 (Thu, August 17, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-02-16 12:00:38 +0000 (Fri, February 16, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -62,8 +62,8 @@ class StructureData(AbstractWrapperObject):
     _apiClassQualifiedName = ApiNmrConstraintStore._metaclass.qualifiedName()
 
     # Internal NameSpace
-    _MoleculeFilePath = '_MoleculeFilePath'
-    _MOLECULEFILEPATH = 'moleculeFilePath'
+    _MoleculeFilePath = '_MoleculeFilePath'  # old
+    _MOLECULEFILEPATH = 'moleculeFilePath'  # current
 
     # CCPN properties
     @property
@@ -172,7 +172,6 @@ class StructureData(AbstractWrapperObject):
         E.g., PDB file path for displaying molecules in a molecular viewer
         """
         path = self._getInternalParameter(self._MOLECULEFILEPATH)
-
         return path
 
     @moleculeFilePath.setter
@@ -261,14 +260,21 @@ class StructureData(AbstractWrapperObject):
     def _restoreObject(cls, project, apiObj):
         """Subclassed to allow for initialisations on restore
         """
-        resList = super()._restoreObject(project, apiObj)
+        obj = super()._restoreObject(project, apiObj)
 
-        # update the list of substances
-        if resList._MoleculeFilePath in resList._ccpnInternalData:
-            value = resList._ccpnInternalData.get(resList._MoleculeFilePath)
+        # move moleculeFilePath into the internal parameter space
+        if obj._MoleculeFilePath in obj._ccpnInternalData:
+            value = obj._ccpnInternalData.get(obj._MoleculeFilePath)
             if value:
-                resList._setInternalParameter(resList._MOLECULEFILEPATH, value)
-            del resList._ccpnInternalData[resList._MoleculeFilePath]
+                obj._setInternalParameter(obj._MOLECULEFILEPATH, value)
+            del obj._ccpnInternalData[obj._MoleculeFilePath]
+
+        return obj
+
+    # def _postRestore(self):
+    #     """Handle post-initialising children after all children have been restored
+    #     """
+    #     super()._postRestore()
 
     # @classmethod
     # def _restoreObject(cls, project, apiObj):

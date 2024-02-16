@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-01-03 13:01:00 +0000 (Wed, January 03, 2024) $"
-__version__ = "$Revision: 3.3.0 $"
+__dateModified__ = "$dateModified: 2024-02-16 11:40:24 +0000 (Fri, February 16, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -648,7 +648,15 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
     if window is None or not isinstance(window, Window):
         raise ValueError('Expected window argument; got %r' % window)
     apiWindow = window._wrappedData
-    apiTask = apiWindow.getGuiTask()
+    if not (apiTask := apiWindow.getGuiTask()):
+        # fix for bad project with bad guiTasks
+        #   - make sure there is a correctly attached guiTask to the window
+        getLogger().warning(f'--> project contains badly defined guiTask')
+        apiTask = apiWindow.root.findFirstGuiTask(nameSpace='user', name='View') or \
+                  apiWindow.root.newGuiTask(nameSpace='user', name='View')
+        if apiWindow not in apiTask.windows:
+            getLogger().warning(f'--> repairing window/guiTask')
+            apiTask.addWindow(apiWindow)
     project = window.project
 
     if (spectrum := project.getByPid(spectrum) if isinstance(spectrum, str) else spectrum) is None:

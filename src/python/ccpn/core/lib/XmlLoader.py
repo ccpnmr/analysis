@@ -1129,6 +1129,12 @@ class XmlLoader(XmlLoaderABC):
         """
         return self.lookup((REFDATA, None, None))
 
+    @property
+    def packages(self) -> list:
+        """:return a list of all packages
+        """
+        return [pk for repo in self.repositories for pk in repo.packages]
+
     #--------------------------------------------------------------------------------------------
     # New
     #--------------------------------------------------------------------------------------------
@@ -1909,10 +1915,6 @@ def _refreshTopObjects(memopsRoot, packageName):
 
     xmlLoader = getattr(memopsRoot, XML_LOADER_ATTR)  # use back linkage
 
-    if xmlLoader.readingBlockingLevel:
-        getLogger().debug2(_styleRed(f'refreshTopObjects: readingBlockingLevel={xmlLoader.readingBlockingLevel}; skipping {packageName}'))
-        return
-
     # We have to find the package: that is a problem as a package has no info on its
     # parent repository, and (potentially?) package's by the same name can live in two
     # repositories!
@@ -1926,12 +1928,18 @@ def _refreshTopObjects(memopsRoot, packageName):
         pass
 
     else:
-        getLogger().debug2(_styleRed(f'refreshTopObjects: No Package instance found for "{packageName}"; loading skipped'))
+        getLogger().debug2(f'refreshTopObjects: No Package instance found for "{packageName}"; nothing to load')
+        return
+
+    if xmlLoader.readingBlockingLevel:
+        getLogger().debug2(_styleRed(f'refreshTopObjects: readingBlockingLevel={xmlLoader.readingBlockingLevel}; skipping {pkg}'))
         return
 
     # print(f'>DEBUG refreshTopObjects> {pkg}: loaded:{pkg.isLoaded}')
     if not pkg.isLoaded:
         pkg.load(reload=False)
+    else:
+        getLogger().debug2(f'refreshTopObjects: {pkg} already loaded')
 
     return
 

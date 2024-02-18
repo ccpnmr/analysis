@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-15 21:07:00 +0000 (Thu, February 15, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-18 13:06:47 +0000 (Sun, February 18, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -506,11 +506,14 @@ class Framework(NotifierBase):
         self.ui.startUi()
         # self._cleanup()
 
-    def _cleanup(self):
-        """Cleanup at the end of program execution; i.e. once the command loop
-        has stopped
-        """
-        self._updateAutoBackup(kill=True)
+    # GWV 18/2/24: nevr called/used!
+    # def _cleanup(self):
+    #     """Cleanup at the end of program execution; i.e. once the command loop
+    #     has stopped
+    #     """
+    #     self._updateAutoBackup(kill=True)
+    #     self.preferences._saveUserPreferences()
+
 
     #-----------------------------------------------------------------------------------------
     # Backup (TODO: need refactoring in AutoBackupManager)
@@ -1102,11 +1105,14 @@ class Framework(NotifierBase):
         # if self.preferences.general.keepSpectraInsideProject:
         #     self.project.copySpectraToProject()
 
+
+
         try:
             self.project.saveAs(newPath=newPath, overwrite=overwrite, copySubDirectories=copySubDirectories)
             Layout.saveLayoutToJson(self.ui.mainWindow)
             self.current._dumpStateToFile(self.statePath)
             self._getUndo().markSave()
+            self.preferences._addRecentFiles(self.project.path)
 
         except (PermissionError, FileNotFoundError) as es:
             getLogger().debug(f'_saveProjectAs() caught: {es}')
@@ -1211,9 +1217,15 @@ class Framework(NotifierBase):
         if self.project is not None:
             # Cleans up wrapper project, including graphics data objects (Window, Strip, etc.)
             _project = self.project
+            if not _project.isTemporary:
+                # Not a temporary project; add to recentFiles list
+                self.preferences._addRecentFiles(self.project.path)
+
             _project._close()
             if _project.isTemporary:
+                # Temporary project; close it
                 _project.projectPath.removeDir()
+
             self._project = None
             del (_project)
 
@@ -1525,28 +1537,29 @@ class Framework(NotifierBase):
     #                            includeOrphans=includeOrphans,
     #                            pidList=pidList)
 
-    def _getRecentProjectFiles(self, oldPath=None) -> list:
-        """Get and return a list of recent project files, setting reference to
-           self as first element, unless it is a temp project
-           update the preferences with the new list
-
-           CCPNINTERNAL: called by MainWindow
-        """
-        project = self.project
-        path = project.path
-        recentFiles = self.preferences.recentFiles
-
-        if not project.isTemporary:
-            if path in recentFiles:
-                recentFiles.remove(path)
-            elif oldPath in recentFiles:
-                recentFiles.remove(oldPath)
-            elif len(recentFiles) >= 10:
-                recentFiles.pop()
-            recentFiles.insert(0, path)
-        recentFiles = uniquify(recentFiles)
-        self.preferences.recentFiles = recentFiles
-        return recentFiles
+    # GWV 18/2/24: replaced by Preferences._addRecentFiles, Preferences.clearRecentFiles methods
+    # def _getRecentProjectFiles(self, oldPath=None) -> list:
+    #     """Get and return a list of recent project files, setting reference to
+    #        self as first element, unless it is a temp project
+    #        update the preferences with the new list
+    #
+    #        CCPNINTERNAL: called by MainWindow
+    #     """
+    #     project = self.project
+    #     path = project.path
+    #     recentFiles = self.preferences.recentFiles
+    #
+    #     if not project.isTemporary:
+    #         if path in recentFiles:
+    #             recentFiles.remove(path)
+    #         elif oldPath in recentFiles:
+    #             recentFiles.remove(oldPath)
+    #         elif len(recentFiles) >= 10:
+    #             recentFiles.pop()
+    #         recentFiles.insert(0, path)
+    #     recentFiles = uniquify(recentFiles)
+    #     self.preferences.recentFiles = recentFiles
+    #     return recentFiles
 
     #-----------------------------------------------------------------------------------------
     # undo/redo

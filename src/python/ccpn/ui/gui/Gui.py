@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-15 21:07:00 +0000 (Thu, February 15, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-18 13:06:47 +0000 (Sun, February 18, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -815,6 +815,7 @@ class Gui(Ui):
             oldProjectLoader = CcpNmrV3ProjectDataLoader(self.project.path)
             oldProjectIsTemporary = self.project.isTemporary
 
+        error = False
         try:
             if self.project:
                 # NOTE:ED - getting a strange QT bug disabling the menu-bar from here
@@ -836,19 +837,26 @@ class Gui(Ui):
             if oldMainWindowPos:
                 self.mainWindow.move(oldMainWindowPos)
 
+            error = False
+
         except (RuntimeError, ValueError, ApiError) as es:
             MessageDialog.showError('Error loading Project:', f'{es}', parent=self.mainWindow)
-            return None
+            error = True
 
         except NotImplementedError as es:
             MessageDialog.showError('Error loading Project:', f'{es}', parent=self.mainWindow)
+            error = True
 
-            # Try to restore the state
-            newProject = None
-            if oldProjectIsTemporary:
-                newProject = self.application._newProject()
-            elif oldProjectLoader:
-                newProject = oldProjectLoader.load()[0]  # dataLoaders return a list
+        finally:
+            if error:
+                # Try to restore the state
+                # reload existing or create a new temporary one (as the original temporary
+                # get deleted by the closing)
+                newProject = None
+                if oldProjectIsTemporary:
+                    newProject = self.application._newProject()
+                elif oldProjectLoader:
+                    newProject = oldProjectLoader.load()[0]  # dataLoaders return a list
 
         return newProject
 

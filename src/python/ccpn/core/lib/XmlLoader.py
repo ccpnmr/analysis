@@ -1395,7 +1395,6 @@ class XmlLoader(XmlLoaderABC):
 
         # We appear to have to do this often, as 'stray' topObjects appear
         self._updateTopObjects()
-        # self.userData.load(reload=False)  # load all remaining userdata
 
         if self.isV2:
             # Following previous code (Api.py:460): Special hack for moving data
@@ -1406,6 +1405,9 @@ class XmlLoader(XmlLoaderABC):
 
             # upgrade api data
             correctFinalResult(self.memopsRoot)
+
+        # load all remaining userdata
+        self.userData.load(reload=False)
 
         # init the V3 project data
         self._initApiData()

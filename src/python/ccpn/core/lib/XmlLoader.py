@@ -364,6 +364,7 @@ class TopObject(XmlLoaderABC):
     _guid = Unicode(default_value=None, allow_none=True)
     _path = CPath(default_value=None, allow_none=True)
     isLoaded = Bool(False)  # Flag to indicate load has been completed
+    isNew = Bool(False)  # Flag to indicate that it was created by XmlLoader.updateTopObjects() call
     isReading = Int(default_value=0)  # Reading indicator, as topObjects recursive get called to load!
 
     # parent
@@ -411,6 +412,22 @@ class TopObject(XmlLoaderABC):
         _name = _atop.name if hasattr(_atop, 'name') else 'noName'
         return f'{_atop.className}-{_name}'
 
+    @property
+    def repository(self):
+        """:return the repository for self
+        """
+        return self.package.repository
+
+    @property
+    def isUserData(self) -> bool:
+        """:return True if self is a user-data topObject
+        """
+        return self.repository == self.root.userData
+
+    #-----------------------------------------------------------------------------------------
+    # Functionalities
+    #-----------------------------------------------------------------------------------------
+
     def load(self, reload: bool = False) -> TopObject:
         """Load self, either as a new apiTopObject or reload for an existing apiTopObject
         :param reload: flag to indicated reloading an existing apiTopObject (from xml)
@@ -444,6 +461,44 @@ class TopObject(XmlLoaderABC):
         guid = xmlPath.basename.split(KEY_SEPARATOR)[-1]
         return guid
 
+    def _validateXml(self, path) -> bool:
+        """Validate the xml-file path defining topObject self
+        :param path, a path instance to the xml-file
+        :return True if the file is valid
+        :raise FileNotFoundError, RuntimeError on any errors found
+        """
+        from xml.etree import ElementTree
+
+        getLogger().debug2(f'_validateXml: {self}:')
+        getLogger().debug2(f'              xml-file: {path}')
+
+        if path is None:
+            raise RuntimeError(f'_validateXml: undefined path')
+
+        if isinstance(path, str):
+            path = aPath(path)
+
+        if not path.exists():
+            raise FileNotFoundError(f'_validateXml: path {path} does not exist')
+
+        xtree = ElementTree.parse(str(path))
+        root = xtree.getroot()
+        # print(root.items())
+        if root.tag != '_StorageUnit':
+            raise RuntimeError(f'_validateXml: expected xml-root "_StorageUnit"')
+
+        nodes = list(root)
+        if len(nodes)!= 1:
+            raise RuntimeError(f'_validateXml: expected exactely one sub-node, got {len(nodes)}')
+
+        node = nodes[0]
+        _guid = dict(node.items()).get('guid', None)
+        if _guid != self.guid:
+            raise RuntimeError(f'_validateXml: expected guid "{self.guid}", found "{_guid}" in xml-file')
+
+        # no problems found
+        return True
+
     def _loadFromXml(self):
         """Load self.apiTopObject from self.path, either as initial load or reload
         Calls very finnicky loadFromStream() with strange (horrible!) call signature
@@ -451,11 +506,21 @@ class TopObject(XmlLoaderABC):
 
         :raises FileNotFound if self.path does not exist; RuntimeError on failure to load
         """
+        # Tweak the output a bit, as the reference repositoriy generates too much otherwise
+        if self.isUserData:
+            getLogger().debug2(f'_loadFromXml: {self}: isReading={self.isReading}')
+        else:
+            getLogger().debug3(f'_loadFromXml: {self}: isReading={self.isReading}')
+
         if not self.path.exists():
-            raise FileNotFoundError(f'Failed to load {self.path!r}: file does not exist')
+            raise FileNotFoundError(f'Failed to load "{self.path}": file does not exist')
 
         if not self.isReading:
             self.isReading += 1
+
+            # Validate the user xml's prior to loading
+            if self.isUserData:
+                self._validateXml(self.path)
 
             with self.path.open('r') as fp:
                 if self.apiTopObject is None:
@@ -495,9 +560,11 @@ class TopObject(XmlLoaderABC):
 
         return
 
-    def save(self, updateIsModified=True):
+    def saveToXml(self, updateIsModified=True):
         """Save the apiTopObject to the xml file defined by self.path
         """
+        getLogger().debug2(f'saveToXml: {self}, readOnly={self.readOnly}, blocking={self.root.writeBlockingLevel}')
+
         if self.apiTopObject is None:
             getLogger().warning(_styleRed(f'Cannot save {self._path}: undefined apiTopObject'))
             return
@@ -519,7 +586,8 @@ class TopObject(XmlLoaderABC):
                 self.logger.info(f'Saving: {es}')
                 return
 
-            with self.path.saveWriteToFile(mode='w', overwrite=True) as fp:
+            with self.path.saveWriteToFile(mode='w', overwrite=True,
+                                           keepOnError=True, validator=self._validateXml) as fp:
                 saveToStream(fp, self.apiTopObject)
 
             if updateIsModified:
@@ -549,7 +617,8 @@ class TopObject(XmlLoaderABC):
                 if not path.parent.exists():
                     path.parent.mkdir(parents=True, exist_ok=False)
 
-                with path.open('w') as fp:
+                with self.path.saveWriteToFile(mode='w', overwrite=True,
+                                               keepOnError=True, validator=self._validateXml) as fp:
                     saveToStream(fp, self.apiTopObject)
 
                 if updateIsModified:
@@ -563,7 +632,8 @@ class TopObject(XmlLoaderABC):
 
     def __str__(self):
         _loaded = 'loaded' if self.isLoaded else 'not-loaded'
-        return f'<{self.__class__.__name__}: ({self.package.repository.name},{self.package.name}) "{self.guid}" ({_loaded})>'
+        _status = 'new' if self.isNew else 'existing'
+        return f'<{self.__class__.__name__}: ({self.package.repository.name}, {self.package.name}) {_status}, {_loaded}>'
 
     __repr__ = __str__
 
@@ -1442,6 +1512,8 @@ class XmlLoader(XmlLoaderABC):
                                  which should not change the isModified status.
         :raises RuntimeError on error
         """
+        getLogger().debug2(f'saveUserData: keepFallBack={keepFallBack}, updateIsModified={updateIsModified}, autoBackup={autoBackup}')
+
         # NOTE:ED - quick hack for backup
         if autoBackup:
             self.backupUserData(updateIsModified=False)
@@ -1493,7 +1565,7 @@ class XmlLoader(XmlLoaderABC):
 
             # save all topObject to xml files in v3Path
             for topObject in topObjects:
-                topObject.save(updateIsModified=updateIsModified)
+                topObject.saveToXml(updateIsModified=updateIsModified)
 
     def _saveMemopsToXml(self, updateIsModified=True):
         """Saves memopsRoot to self.xmlProjectFile;
@@ -1618,6 +1690,7 @@ class XmlLoader(XmlLoaderABC):
         allocating each one to a repository/package;
         """
         count = 0
+        newCount = 0
         for apiTopObj in self.memopsRoot.topObjects:
 
             _guid = apiTopObj.guid
@@ -1639,13 +1712,15 @@ class XmlLoader(XmlLoaderABC):
 
                 _xmlPath = _getXmlPathFromApiTopObject(_pkg, apiTopObj)
                 _topObj = _pkg._addTopObject(path=_xmlPath)
+                _topObj.isNew = True
                 _topObj.apiTopObject = apiTopObj
-                _topObj.save()
+                _topObj.saveToXml()
+                newCount += 1
 
             _topObj.apiTopObject = apiTopObj
             count += 1
 
-        getLogger().debug(f'Updated {count} TopObjects')
+        getLogger().debug(f'Checked {count} TopObjects, created {newCount} new ones')
 
     def _updateUserChemComps(self):
         """This routine is necessary because a 20K+ dictionary of chemComp definitions exists at API level.
@@ -1890,6 +1965,10 @@ def _refreshTopObjects(memopsRoot, packageName):
     """Load the xml-files of packageName;
     Hot-fixed method
     """
+    # This method gets called so often (mostly without much effect).
+    # Hence, allow some easy tweaking of debugging output
+    _debug = getLogger().debug3
+
     if not isinstance(memopsRoot, Implementation.MemopsRoot):
         raise ValueError(f'refreshTopObjects: Invalid memopsRoot: {memopsRoot}')
 
@@ -1908,7 +1987,7 @@ def _refreshTopObjects(memopsRoot, packageName):
         # xmlLoader = XmlLoader.newFromMemops(memopsRoot)
         # setattr(memopsRoot, XML_LOADER_ATTR, xmlLoader)
         # raise RuntimeError(f'MemopsRoot.refreshTopObjects: no XmlLoader instance')
-        getLogger().debug2(_styleRed(f'refreshTopObjects: no xmlLoader (yet), skipping loading {packageName}'))
+        _debug(_styleRed(f'refreshTopObjects: no xmlLoader (yet), skipping loading {packageName}'))
         return
 
     # getLogger().debug(f'MemopsRoot.refreshTopObjects: try loading {packageName}')
@@ -1928,18 +2007,18 @@ def _refreshTopObjects(memopsRoot, packageName):
         pass
 
     else:
-        getLogger().debug2(f'refreshTopObjects: No Package instance found for "{packageName}"; nothing to load')
+        _debug(f'refreshTopObjects: No Package instance found for "{packageName}"; nothing to load')
         return
 
     if xmlLoader.readingBlockingLevel:
-        getLogger().debug2(_styleRed(f'refreshTopObjects: readingBlockingLevel={xmlLoader.readingBlockingLevel}; skipping {pkg}'))
+        _debug(_styleRed(f'refreshTopObjects: readingBlockingLevel={xmlLoader.readingBlockingLevel}; skipping {pkg}'))
         return
 
     # print(f'>DEBUG refreshTopObjects> {pkg}: loaded:{pkg.isLoaded}')
     if not pkg.isLoaded:
         pkg.load(reload=False)
     else:
-        getLogger().debug2(f'refreshTopObjects: {pkg} already loaded')
+        _debug(f'refreshTopObjects: {pkg} already loaded')
 
     return
 

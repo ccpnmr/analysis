@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-18 13:06:47 +0000 (Sun, February 18, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-19 15:54:39 +0000 (Mon, February 19, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1450,12 +1450,8 @@ class Framework(NotifierBase):
         """Load html file path into a HtmlModule
         CCPNINTERNAL: called from HtmlDataLoader
         """
-        # mainWindow = self.mainWindow
-        # path = aPath(path)
-        # mainWindow.newHtmlModule(urlPath=str(path), position='top', relativeTo=mainWindow.moduleArea)
-
         # non-native webview is currently disabled
-        self._showHtmlFile('', str(path))
+        self.ui._showHtmlFile('', str(path))
         return []
 
     #-----------------------------------------------------------------------------------------

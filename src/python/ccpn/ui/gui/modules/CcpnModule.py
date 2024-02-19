@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-14 12:12:35 +0000 (Wed, February 14, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-19 17:38:14 +0000 (Mon, February 19, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -238,7 +238,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self._borderOverlay = BorderOverlay(self)
         self._borderOverlay.raise_()
 
-        Logging.getLogger().debug(f'CcpnModule>>> {type(self)} {mainWindow}')
+        Logging.getLogger().debug(f'Opening CcpnModule {self}')
 
         # Logging.getLogger().debug('module:"%s"' % (name,))
         self.closeFunc = closeFunc

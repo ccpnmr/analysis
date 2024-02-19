@@ -25,7 +25,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-14 12:12:33 +0000 (Wed, February 14, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-19 17:38:14 +0000 (Mon, February 19, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -115,16 +115,18 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
     #=========================================================================================
 
-    def __init__(self, path=None, spectrum=None, dimensionCount=None):
+    def __init__(self, path=None, spectrum=None, dimensionCount=None, checkValid=True):
         """initialise instance; optionally set path or associate with and import from
         a Spectrum instance or set dimensionCount
 
         :param path: optional, path of the (binary) spectral data
         :param spectrum: associate instance with spectrum and import spectrum's parameters
         :param dimensionCount: limit instance to dimensionCount dimensions
+        :param checkValid:flag to do validity check (default=False)
+
         """
         self._hdf5Metadata = Hdf5Metadata()
-        super().__init__(path=path, spectrum=spectrum, dimensionCount=dimensionCount)
+        super().__init__(path=path, spectrum=spectrum, dimensionCount=dimensionCount, checkValid=checkValid)
 
     @property
     def spectrumData(self):

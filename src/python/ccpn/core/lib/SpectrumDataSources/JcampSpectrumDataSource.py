@@ -8,9 +8,9 @@ See SpectrumDataSourceABC for a description of the methods
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -18,9 +18,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:06 +0100 (Wed, October 12, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-02-19 17:38:14 +0000 (Mon, February 19, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -61,8 +61,17 @@ class JcampSpectrumDataSource(SpectrumDataSourceABC):
     openMethod = open
     defaultOpenReadMode = 'r'
 
-    def __init__(self, path=None, spectrum=None, dimensionCount=None):
-        super().__init__(path=path, spectrum=spectrum, dimensionCount=dimensionCount)
+    def __init__(self, path=None, spectrum=None, dimensionCount=None, checkValid=True):
+        """initialise instance; optionally set path or associate with and import from
+        a Spectrum instance or set dimensionCount
+
+        :param path: optional, path of the (binary) spectral data
+        :param spectrum: associate instance with spectrum and import spectrum's parameters
+        :param dimensionCount: limit instance to dimensionCount dimensions
+        :param checkValid:flag to do validity check (default=False)
+
+        """
+        super().__init__(path=path, spectrum=spectrum, dimensionCount=dimensionCount, checkValid=checkValid)
         self._realData = None  # storage for the real data array
         self._imaginaryData = None  # storage for the imaginary data
         self._params = None  # the nmrGlue parsed parameters dictionary

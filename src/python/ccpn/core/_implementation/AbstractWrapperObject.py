@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-15 21:07:00 +0000 (Thu, February 15, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-19 17:46:20 +0000 (Mon, February 19, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -977,12 +977,10 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
     def _indentedDebug2(cls, text, enter, dots=False):
         """Create indented blue debug2(text) with enter or leave arrow
         """
-        _indent = "." * (cls._objectRestoreLevel+1) if dots else \
-                  "-" * (cls._objectRestoreLevel+1)
-        _arrow = f'{_indent}>' if enter else f'<{_indent}'
-        getLogger().debug2(
-            _styleBlue(f'{_arrow:5} {text}')
-        )
+        _indent = "-" * (cls._objectRestoreLevel) if dots else \
+                  "=" * (cls._objectRestoreLevel)
+        _arrow = f'>{_indent}>' if enter else f'<{_indent}<'
+        getLogger().debug2( _styleBlue(f'{_arrow:7} {text}'))
 
     @classmethod
     def _restoreObject(cls, project, apiObj):

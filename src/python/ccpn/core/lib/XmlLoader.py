@@ -469,8 +469,7 @@ class TopObject(XmlLoaderABC):
         """
         from xml.etree import ElementTree
 
-        getLogger().debug2(f'_validateXml: {self}:')
-        getLogger().debug2(f'              xml-file: {path}')
+        getLogger().debug2(f'_validateXml: xml-file {path}')
 
         if path is None:
             raise RuntimeError(f'_validateXml: undefined path')
@@ -563,7 +562,7 @@ class TopObject(XmlLoaderABC):
     def saveToXml(self, updateIsModified=True):
         """Save the apiTopObject to the xml file defined by self.path
         """
-        getLogger().debug2(f'saveToXml: {self}, readOnly={self.readOnly}, blocking={self.root.writeBlockingLevel}')
+        getLogger().debug2(f'saveToXml:    {self}, readOnly={self.readOnly}, blocking={self.root.writeBlockingLevel}')
 
         if self.apiTopObject is None:
             getLogger().warning(_styleRed(f'Cannot save {self._path}: undefined apiTopObject'))
@@ -571,7 +570,7 @@ class TopObject(XmlLoaderABC):
 
         if self.apiTopObject.isDeleted:
             # ignore deleted objects
-            self.logger.debug2(f'ignoring deleted object {self.apiTopObject}')
+            self.logger.debug2(_styleRed(f'Ignoring deleted object {self.apiTopObject}'))
             return
 
         if not self.readOnly and not self.root.writeBlockingLevel:
@@ -1380,7 +1379,7 @@ class XmlLoader(XmlLoaderABC):
 
         setattr(self.memopsRoot, XML_LOADER_ATTR, self)  # back linkage
 
-        # call to sortedNmrProjects will also load the topObjects via
+        # call to sortedNmrProjects will also load (some of) the topObjects via
         # memopsRoot.refreshTopObjects
         nmrProjects = self.memopsRoot.sortedNmrProjects()
         if nmrProjects is None or len(nmrProjects) == 0:
@@ -1728,31 +1727,36 @@ class XmlLoader(XmlLoaderABC):
         """This routine is necessary because a 20K+ dictionary of chemComp definitions exists at API level.
         It is surprisingly used to create new V3 chains. (converting ccpCode to 3LetterCode etc).
         Even if the custom chemComp is present in the project and the chain containing it
-         is now created upon loading the project correctly,
-        new chains that requires that ChemComp are not created correctly if this dict is not updated with the missing defs!!
+        is now created upon loading the project correctly,
+
+        New chains that requires that ChemComp are not created correctly if this dict is not updated
+        with the missing defs!!
 
         Note:  (see also core.Chain:635)
                                                               #code1Letter, code3Letter, 'syn', 'formula'
         chemCompStdDict[chemComp.molType][chemComp.ccpCode] = [chemComp.code1Letter, chemComp.code3Letter, commonName, '' ]
 
         chemComp.molType one of: ('protein', 'DNA', 'RNA', 'other', 'carbohydrate')
-
-
         """
         from ccpnmodel.ccpncore.lib.chemComp.ChemCompOverview import chemCompStdDict
 
         chemComps = self.memopsRoot.chemComps
+        getLogger().debug(f'Updating chemCompStdDict with {len(chemComps)} ChemComps')
+
         for chemComp in chemComps:
             if chemComp.molType not in chemCompStdDict.keys():
                 continue
             if not chemComp.ccpCode:
                 continue
-            syn = chemComp.commonNames[0] if len(chemComp.commonNames)>0 else ''
+
+            synonym = chemComp.commonNames[0] if len(chemComp.commonNames)>0 else ''
+            formula = ''  # not storee in the chemComp. could be back-enginered.
             chemCompStdDict[chemComp.molType][chemComp.ccpCode] = (
-                                                                   chemComp.code1Letter,
-                                                                   chemComp.code3Letter,
-                                                                   syn,
-                                                                   '')  # 'formula'. not store in the chemComp. could be backcalculated.
+                       chemComp.code1Letter,
+                       chemComp.code3Letter,
+                       synonym,
+                       formula,
+            )
 
 
     # @debug3Enter()

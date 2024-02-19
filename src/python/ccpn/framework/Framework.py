@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-19 15:54:39 +0000 (Mon, February 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-19 17:46:20 +0000 (Mon, February 19, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1357,6 +1357,9 @@ class Framework(NotifierBase):
         """
         from ccpn.core.Project import _loadV2Project
 
+        # close old project; also cleans directory
+        self._closeProject()
+
         result = []
         try:
             project = _loadV2Project(application=self, path=path)
@@ -1365,7 +1368,6 @@ class Framework(NotifierBase):
             getLogger().warning(f'Error loading "{path}": {es}')
 
         else:
-            self._closeProject()  # close old project; also clean directory
             self._initialiseProject(project)  # This also set the linkages
             result = [project]
 
@@ -1379,6 +1381,9 @@ class Framework(NotifierBase):
         """
         from ccpn.core.Project import _loadV3Project
 
+        # close old project, also cleans directory
+        self._closeProject()
+
         result = []
         try:
             project = _loadV3Project(application=self, path=path)
@@ -1387,7 +1392,6 @@ class Framework(NotifierBase):
             getLogger().warning(f'Error loading "{path}": {es}')
 
         else:
-            self._closeProject()  # close old project
             self._initialiseProject(project)  # This also set the linkages
             result = [project]
 

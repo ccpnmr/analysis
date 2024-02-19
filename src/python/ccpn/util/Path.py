@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-14 12:12:37 +0000 (Wed, February 14, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-19 15:53:37 +0000 (Mon, February 19, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -314,7 +314,7 @@ class Path(_Path_):
     _tempSuffix = '~temp'
 
     @contextmanager
-    def saveWriteToFile(self, mode:str = 'w', overwrite:bool = False, keepOnError:bool  = True):
+    def saveWriteToFile(self, mode:str = 'w', overwrite:bool = False, keepOnError:bool  = True, validator=None):
         """Initiate a save write to file:
         Write to temporary file first; catch any errors on writing. Generate result as atomic
         operation by moving temporary file as self.
@@ -327,13 +327,17 @@ class Path(_Path_):
         :param mode: usual string defining write (w) or append (a) access, text or binary (b)
         :param overwrite: flag to indicate overwriting of existing file
         :param keepOnError: flag to keep the intermediate file on error
+        :param validator: A function to validate the result prior to moving, returning True for a valid file,
+                          False in case of error. Can raise any error which will be caught and passed as RuntimeError
+                          signature: validator(path:Path) -> bool
 
         :raise RunTimeError upon catching any error during open, write, close, ..
         """
 
         _tempFile = aPath(self + self._tempSuffix).uniqueVersion()
 
-        success = False
+        error = False
+        validatorError = False
         errorString = ''
         fp = None
 
@@ -354,31 +358,37 @@ class Path(_Path_):
 
             fp = _tempFile.open(mode=mode)
             yield fp
-            success = True
+            error = False
 
         except Exception as es:
-            success = False
+            error = True
             errorString = str(es)
 
         finally:
             if fp:
                 fp.close()
 
-            if success:
-                # We have successfully written the file to a temporary file.
+            # Once we have closed the file and there is no error:
+            # Optionally call the validator to check _tempFile before moving
+            if not error and validator is not None:
+                error = not validator(_tempFile)
+                if error:
+                    errorString = 'Validation failed'
+
+            if error:
+                # An error occurred
+                if _tempFile.exists() and not keepOnError:
+                    _tempFile.remove()
+                raise RuntimeError(f'While writing to {self} an error occured: {errorString}')
+
+            else:
+                # We have successfully written (and optionally validated) the file to a temporary file.
                 # We already have checked if we can overwrite the file, so now just remove
                 # it and rename the temporary file
                 if self.exists():
                     self.remove()
                 # use the os.rename call to cut out any intermediary
                 os.rename(_tempFile.asString(), aPath(self).asString())
-
-            else:
-                # An error occurred
-                if _tempFile.exists() and not keepOnError:
-                    _tempFile.remove()
-
-                raise RuntimeError(f'While writing to {self} an error occured: {errorString}')
 
     def globList(self, pattern='*') -> list:
         """Return a list rather than a generator

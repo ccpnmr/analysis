@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-19 17:38:14 +0000 (Mon, February 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-19 17:44:46 +0000 (Mon, February 19, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -683,7 +683,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         :param path: optional, path of the (binary) spectral data
         :param spectrum: associate instance with spectrum and import spectrum's parameters
         :param dimensionCount: limit instance to dimensionCount dimensions
-        :param checkValid:flag to do validity check (default=False)
+        :param checkValid: flag to do validity check (default=False)
 
         """
         if self.dataFormat is None:
@@ -717,7 +717,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
         # if not self.hasBlockCached:
         #     self.disableCache()
 
-        self.checkValid()
+        if checkValid:
+            self.checkValid()
 
     def setDefaultParameters(self, nDim=MAXDIM):
         """Set default values for all parameters

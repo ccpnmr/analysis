@@ -53,9 +53,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-01-03 13:01:00 +0000 (Wed, January 03, 2024) $"
-__version__ = "$Revision: 3.3.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2024-02-20 17:17:10 +0000 (Tue, February 20, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -583,6 +583,7 @@ class Spectrum(AbstractWrapperObject):
 
     @noiseLevel.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter(allChanged=True)
     def noiseLevel(self, value: float):
         scale = self.scale if self.scale is not None else 1.0
         val = float(value) if value is not None else None
@@ -608,6 +609,7 @@ class Spectrum(AbstractWrapperObject):
 
     @negativeNoiseLevel.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter(allChanged=True)
     def negativeNoiseLevel(self, value):
         """Stored in Internal """
 
@@ -2253,14 +2255,10 @@ class Spectrum(AbstractWrapperObject):
 
     @property
     def _noiseSD(self):
-        """_CCPN internal. Noise Standard deviation. This property must be cached as it is used by the peak.signalToNoiseRatio
+        """_CCPN internal. Noise Standard deviation.  Where for Noise is intended the spectrum region data between the noiseLevel and negativeNoiseLevel
+        This property must be cached as it is used by the peak.signalToNoiseRatio (if and only the spectrum.noiseLevel is set by the user)
         """
         result = self._getInternalParameter(self._NOISESD)
-        if result is None:
-            from ccpn.core.lib.SpectrumLib import getNoiseEstimate
-            noiseObj = getNoiseEstimate(self)
-            result = noiseObj.std
-            self._setInternalParameter(self._NOISESD, result) #set to internal so we have for the next time
         return result
 
     @_noiseSD.setter

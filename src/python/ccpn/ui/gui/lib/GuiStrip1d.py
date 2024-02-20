@@ -4,9 +4,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-11-15 15:01:48 +0000 (Wed, November 15, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-02-20 17:17:10 +0000 (Tue, February 20, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -384,22 +384,22 @@ class GuiStrip1d(GuiStrip):
         value = line.values
         if spectrum is not None:
             if setPositiveThreshold:
-                if value >0:
+                if value > 0:
                     spectrum.noiseLevel = value
             else:
                 spectrum.negativeNoiseLevel = value
 
-        # Define the noiseSD, the standard deviation of the region between the lines boundary
-        intensities = np.array(spectrum.intensities)
-        posValue = spectrum.noiseLevel
-        negValue = spectrum.negativeNoiseLevel
-        try:
-            mask = (intensities >= negValue) & (intensities <= posValue)
-            noiseRegion =  intensities[mask]
-            _noiseSD = np.std(noiseRegion)
-            spectrum._noiseSD = _noiseSD
-        except Exception as exc:
-            getLogger().warning(f'Could not set the NoiseStandardDeviation. {exc}')
+        # Define the noiseSD, the standard deviation of the region between the lines boun  dary
+        # intensities = np.array(spectrum.intensities)
+        # posValue = spectrum.noiseLevel
+        # negValue = spectrum.negativeNoiseLevel
+        # # try:
+        #     mask = (intensities >= negValue) & (intensities <= posValue)
+        #     noiseRegion =  intensities[mask]
+        #     _noiseSD = np.std(noiseRegion)
+        #     spectrum._noiseSD = _noiseSD
+        # except Exception as exc:
+        #     getLogger().warning(f'Could not set the NoiseStandardDeviation. {exc}')
 
     # -------- Picking Exclusion Area -------- #
 

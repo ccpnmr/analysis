@@ -3,9 +3,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-11-14 17:22:07 +0000 (Tue, November 14, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-02-20 17:17:10 +0000 (Tue, February 20, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1268,6 +1268,14 @@ def _noiseFunc(value):
                               min=value.min, max=value.max,
                               noiseLevel=abs(value.mean) + 3.5 * value.std)
 
+def _getNoiseRegionFromNoiseLevel(spectrum):
+    """Get the sd from the region between the noiseLevel value"""
+    yValues = spectrum.getAllRegionData().flatten()
+    yUpper = spectrum.noiseLevel
+    yLower = spectrum.negativeNoiseLevel or yUpper*-1
+    indices = (yValues >= yLower) & (yValues <= yUpper)
+    noiseRegion = yValues[indices]
+    return noiseRegion
 
 def _getNoiseEstimate(spectrum, nsamples=1000, nsubsets=10, fraction=0.1):
     """

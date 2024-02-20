@@ -34,6 +34,9 @@
     - A zero-length () tuple,
         indicating a separator.
 
+Use insertAfter() or insertBefore() methods to dynamically add to the MenuDefs instance
+
+---------------------------------------------------------------------------------------
 
 This code replaces:
 
@@ -83,7 +86,9 @@ GuiMainWindow.  -->
 
 FrameWork.  -->
     _getProjectFiles
-    lotts of callbacks
+    lots of callbacks
+
+---------------------------------------------------------------------------------------
 
 
 STRANGE:
@@ -107,7 +112,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-14 12:12:35 +0000 (Wed, February 14, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-20 13:09:56 +0000 (Tue, February 20, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -130,7 +135,7 @@ from ccpn.framework.PathsAndUrls import \
     macroPath, \
     widgetsPath, \
     CCPN_ARCHIVES_DIRECTORY
-from ccpn.framework.Application import getApplication
+from ccpn.framework.Application import getApplication, getProject, getCurrent
 
 from ccpn.util.Common import isWindowsOS
 from ccpn.util.Logging import getLogger
@@ -179,6 +184,7 @@ DEVELOPMENT_DEBUG = 'Debug'
 
 SEPARATOR = ()
 DYNAMIC_FILL = []
+
 
 def Section(name) -> tuple:
     """Conveniance; avoids tuple errors"""
@@ -240,7 +246,7 @@ class MenusDefs(list):
             (FILE_OPEN_RECENT, DYNAMIC_FILL),
             ("Load Data...", self._loadDataCallback, [('shortcut', 'ld')]),
             (),
-            ("Save", self._saveCallback, [('shortcut', '⌃s')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+            ("Save", self._saveCallback, [('shortcut', '⌃s')], _projectIsNotTemporary),  # Unicode U+2303, NOT the carrot on your keyboard.
             ("Save As...", self._saveAsCallback, [('shortcut', 'sa')]),
             (),
             ("Import", [
@@ -421,15 +427,14 @@ class MenusDefs(list):
 
         ])  # end extend
 
-        # optionally add debug menu
-        if app._isInDebugMode:
-            self._addMenuDef(
+        developmentMenu = \
         (DEVELOPMENT_MENU, [
-            (DEVELOPMENT_DEBUG, DYNAMIC_FILL),
-            ]
-        ), position = -1
-
-        )  # end insert
+                    (DEVELOPMENT_DEBUG, DYNAMIC_FILL),
+                    ]
+        )
+        # optionally add development menu before Help menu
+        if app._isInDebugMode:
+            self.insertBefore([HELP_MENU], menuDef=developmentMenu)
 
     #-----------------------------------------------------------------------------------------
     # callback methods
@@ -1068,33 +1073,82 @@ class MenusDefs(list):
     # Implementation methods
     #-----------------------------------------------------------------------------------------
 
-    def _addMenuDef(self, menuDef, position):
-        """Add an new menuDef tuple at specified position
-        """
-        self.insert(position, menuDef)
+    def insertAfter(self, menuKeys:list, menuDef:tuple):
+        """Insert menuDef after the menu/action/section defined by menuKeys, i.e. a list
+        of names or indices that recursively define the menu;
+        e.g. ['File', 'New']
 
-    def _addMenuItem(self, menuName, menuItem, position):
-        """Add a new menuItem to the existing menuName at specified position
-        """
-        if (indx := self._getMenuIndex(menuName)) == -1:
-            raise ValueError(f'No menu with name {menuName}')
-        self[indx][1].insert(position, menuItem)
+        NB. to get something at the end, use -1; e.g. at the end of 'File' menu:
+            insertAfter(['File', -1], ....)
 
-    def _addMenuItems(self, menuName, menuItems, position):
-        """Add a new menuItems to the existing menuName starting at specified position
+        :param menuKeys: a list of names or position-indices defining the menu/action/section
+        :param menuDef: a list define the menu/action/separator/section to be inserted
         """
-        for n, menuItem in enumerate(menuItems):
-            self._addMenuItem(menuName, menuItem, position + n)
+        _indx, currentMenu = self._findMenu(menuKeys=menuKeys)
+        if _indx < 0:
+            # Correct the _indx to positive numbers, i.e. -1 is last item
+            _indx += len(currentMenu)
+        currentMenu.insert(_indx+1, menuDef)
 
-    def _getMenuIndex(self, menuName) -> int:
-        """:return index for menuName or -1 when not found
+    def insertBefore(self, menuKeys:list, menuDef:tuple):
+        """Insert menuDef before the menu/action/section defined by menuKeys, i.e. a list
+        of names or indices that recursively define the menu;
+        e.g. ['File', 'New']
+
+        NB. to get something as the first menu/action, use 0; e.g. at the start of 'File' menu:
+            insertBefore(['File', 0], ....)
+
+        :param menuKeys: a list of names or position-indices defining the menu/action/section
+        :param menuDef: a list define the menu/action/separator/section to be inserted
         """
-        for indx, mDef in enumerate(self):
-            if mDef[0] == menuName:
-                return indx
+        _indx, currentMenu = self._findMenu(menuKeys=menuKeys)
+        if _indx < 0:
+            # Correct the _indx to positive numbers, i.e. -1 is last item
+            _indx += len(currentMenu)
+        currentMenu.insert(_indx, menuDef)
 
-        #  no matches found; return -1
-        return -1
+    def _findMenu(self, menuKeys:list, currentMenu=None):
+        """(Recursively) find menu/action/section defined by menuKeys, i.e. a list
+        of names or indices that recursively define the menu;
+        e.g. ['File', 'New']
+
+        :param menuKeys: a list of names or position-indices defining the menu/action
+        :param currentMenu: a list to be used for the recursion; defaults to None at intialisation
+
+        :return (indx, currentMenu) tuple: the index and the menu for which menu[indx] was defined
+                                           by the menuKeys list
+                                           
+        :raise ValueError for invalid arguments, or RuntimeError if menus defines a non
+               existing menu/action.
+        """
+        if not isinstance(menuKeys, list) or len(menuKeys) == 0:
+            raise ValueError(f'_findMenu: invalid menus {menuKeys}')
+
+        if currentMenu is None:
+            currentMenu = self
+
+        key = menuKeys[0]
+        if isinstance(key, str):
+            _keys = [t[0] if len(t)>0 else None for t in currentMenu]
+            try:
+                _indx = _keys.index(key)
+            except ValueError:
+                raise RuntimeError(f'_findMenu: key "{key}" not found')
+        elif isinstance(key, int) and key < len(currentMenu):
+            _indx = key
+        else:
+            raise RuntimeError(f'_findMenu: invalid key "{key}"')
+
+        if len(menuKeys) > 1:
+            return self._findMenu(menuKeys=menuKeys[1:], currentMenu=currentMenu[_indx][1])
+
+        else:
+            return _indx, currentMenu
+
+    def __str__(self):
+        return f'<MenuDef of {self.application}>'
+
+    __repr__ = __str__
 
 # end class #-----------------------------------------------------------------------------
 
@@ -1791,33 +1845,33 @@ def _getSaveLayoutPath(mainWindow):
 def _projectIsNotTemporary(node) -> bool:
     """callback to test if project is temporary
     """
-    app = getApplication()
-    return not app.project.isTemporary
+    project = getProject()
+    return project and not project.isTemporary
 
 def _projectHasArchives(node) -> bool:
     """callback to test if project has archives
     """
-    app = getApplication()
-    return bool(app.project._getArchivePaths())
+    project = getProject()
+    return bool(project and project._getArchivePaths())
 
 def _projectHasPeaks(node) -> bool:
     """callback to test if project has peaks
     """
-    app = getApplication()
-    return bool(app.project.peaks)
+    project = getProject()
+    return bool(project and project.peaks)
 
 def _projectHasSpectra(node) -> bool:
     """callback to test if project has spectra
     """
-    app = getApplication()
-    return bool(app.project.spectra)
+    project = getProject()
+    return bool(project and project.spectra)
 
 def _hasActiveDisplay(node) -> bool:
     """callback to test if project has spectra
     """
-    app = getApplication()
-    if app.current.strip is not None:
-        _sd = app.current.strip.spectrumDisplay
+    current = getCurrent()
+    if current and current.strip is not None:
+        _sd = current.strip.spectrumDisplay
         node.widget.setTitle(f'In SpectrumDisplay {_sd.id}')
         return True
     else:

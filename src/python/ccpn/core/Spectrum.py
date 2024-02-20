@@ -54,7 +54,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-14 12:12:32 +0000 (Wed, February 14, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-20 08:39:28 +0000 (Tue, February 20, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -304,7 +304,7 @@ class Spectrum(AbstractWrapperObject):
             raise ValueError(f'Invalid peakPicker: already linked to {pkPicker.spectrum}')
 
         if pkPicker:
-            with undoBlockWithoutSideBar():
+            with undoBlockWithoutSideBar(debugText=f'peakPicker.setter: {pkPicker}'):
                 # set the current peakPicker
                 self._spectrumTraits.peakPicker = pkPicker
                 # automatically store in the spectrum CCPN internal store
@@ -312,7 +312,7 @@ class Spectrum(AbstractWrapperObject):
                 getLogger().debug(f'Setting peakPicker to {pkPicker}')
         elif self._spectrumTraits.peakPicker is not None:
             # clear the current peakPicker
-            with undoBlockWithoutSideBar():
+            with undoBlockWithoutSideBar(debugText=f'peakPicker.setter: {pkPicker}'):
                 self._spectrumTraits.peakPicker._detachFromSpectrum()
                 self._spectrumTraits.peakPicker = None
                 getLogger().debug('Clearing current peakPicker')
@@ -3349,8 +3349,7 @@ class Spectrum(AbstractWrapperObject):
         """This method check, and if needed updates specific parameter values
         """
         # Quietly set some values
-        getLogger().debug2(f'Updating {self} parameters')
-        with inactivity():
+        with inactivity(debugText=f'Spectrum {self}: _updateParameterValues'):
             # noiseLevel is not required at startup
             # Check  contourLevels, contourColours
             if self.positiveContourCount == 0 or self.negativeContourCount == 0:
@@ -3412,26 +3411,29 @@ class Spectrum(AbstractWrapperObject):
     def _postRestore(self):
         """Handle post-initialising children after all children have been restored
         """
-        # This will set all Spectrum traits, including dataStore, dataSource and peakPicker
-        self._spectrumTraits._restoreFromSpectrum()
 
-        # Assure at least one peakList
-        if len(self.peakLists) == 0:
-            self.newPeakList()
-            getLogger().warning(f'{self} had no peakList; created one')
+        with inactivity(debugText=f'Spectrum {self} _postRestore'):
 
-        # This will fix any spurious settings on the aliasing (also in update_3_0_4 code)
-        _aIndices = self.aliasingIndices
-        self.aliasingIndices = _aIndices
+            # This will set all Spectrum traits, including dataStore, dataSource and peakPicker
+            self._spectrumTraits._restoreFromSpectrum()
 
-        # Assure a setting of crucial attributes
-        self._updateParameterValues()
+            # Assure at least one peakList
+            if len(self.peakLists) == 0:
+                self.newPeakList()
+                getLogger().warning(f'{self} had no peakList; created one')
 
-        # # save the self metadata
-        # self._saveSpectrumMetaData()
+            # This will fix any spurious settings on the aliasing (also in update_3_0_4 code)
+            _aIndices = self.aliasingIndices
+            self.aliasingIndices = _aIndices
 
-        # set the initial axis ordering
-        specLib._getDefaultOrdering(self)
+            # Assure a setting of crucial attributes
+            self._updateParameterValues()
+
+            # # save the self metadata
+            # self._saveSpectrumMetaData()
+
+            # set the initial axis ordering
+            specLib._getDefaultOrdering(self)
 
         super()._postRestore()
 
@@ -3968,7 +3970,7 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
     spectrum._apiExperiment = apiExperiment
 
     # initialise the dimensional SpectrumReference objects
-    with inactivity():
+    with inactivity(debugText=f'Initialising Spectrum {spectrum} SpectrumReference objects'):
         for dim in dataSource.dimensions:
             _newSpectrumReference(spectrum, dimension=dim, dataSource=dataSource)
 
@@ -3988,7 +3990,7 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
     spectrum._getPeakPicker()
 
     # Quietly update some essentials
-    with inactivity():
+    with inactivity(debugText=f'Spectrum {spectrum}: initialising'):
         # Link to default (i.e. first) chemicalShiftList, make sure it is always there
         spectrum.chemicalShiftList = project.chemicalShiftLists[0]
         # Assure at least one peakList

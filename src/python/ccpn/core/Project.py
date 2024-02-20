@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-15 21:07:00 +0000 (Thu, February 15, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-20 08:39:28 +0000 (Tue, February 20, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1209,7 +1209,7 @@ class Project(AbstractWrapperObject):
         self._mainWindow = None  # set by MainWindow.__init__()
 
         # initialise, creating the children; pass in self as we are initialising
-        with inactivity(project=self):
+        with inactivity(project=self, debugText='Initialising project'):
 
             with AbstractWrapperObject._doRestore(self.__class__):
 
@@ -1410,7 +1410,7 @@ class Project(AbstractWrapperObject):
             apiHint = 'None'  # for debug message
 
             # block everything
-            with undoStackBlocking() as _:
+            with undoStackBlocking(debugText='_closeApiObjects') as _:
                 with notificationEchoBlocking():
                     with apiNotificationBlanking():
 

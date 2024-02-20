@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-18 13:06:47 +0000 (Sun, February 18, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-20 08:39:28 +0000 (Tue, February 20, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -260,7 +260,7 @@ class Gui(Ui):
         super().initialize(mainWindow=mainWindow, project=project)
 
         with notificationEchoBlocking():
-            with undoStackBlocking():
+            with undoStackBlocking(debugText='Gui.initialize'):
                 # Set up mainWindow
                 self._setupMainWindow()
                 self._restoreSpectrumDisplayModules()

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-19 17:46:20 +0000 (Mon, February 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-20 08:39:28 +0000 (Tue, February 20, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1309,7 +1309,7 @@ class Framework(NotifierBase):
 
         with self.pauseAutoBackups(delay=True):
             # Now do the remaining ones; put in one undo block
-            with undoBlockWithSideBar():
+            with undoBlockWithSideBar(debugText=f'_loadData: {len(dataLoaders)} dataLoaders'):
                 for dataLoader in dataLoaders:
                     with logCommandManager('application.', 'loadData', dataLoader.path):
                         result = self.ui._loadData(dataLoader=dataLoader)

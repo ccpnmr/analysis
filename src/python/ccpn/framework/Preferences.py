@@ -4,9 +4,9 @@ This file contains the Preference object and related methods;
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-02 14:35:22 +0000 (Thu, November 02, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-02-20 14:02:58 +0000 (Tue, February 20, 2024) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -72,7 +72,7 @@ class Preferences(AttrDict):
     implemented as a AttrDict-of-AttrDict-of-AttrDict
     """
 
-    def __init__(self, application):
+    def __init__(self, application, userPreferences=True):
         super().__init__()
 
         self._applicationVersion = str(application.applicationVersion)
@@ -83,10 +83,11 @@ class Preferences(AttrDict):
 
         # read the default preference and populate self so all valid keys
         # are defined
-        if not (_prefs := self._readPreferencesFile(defaultPreferencesPath)):
-            raise ValueError(f'Preferences._readPreferences: path {defaultPreferencesPath} does not exist')
+        self.update(self._getDefaultPreferences())
+        if userPreferences:
+            self._getUserPreferences()
 
-        self.update(_prefs)
+        self._overrideDefaults(self)
 
     def _readPreferencesFile(self, path):
         """Read the preference from the json file path,
@@ -101,24 +102,51 @@ class Preferences(AttrDict):
 
         self._lastPath = str(path)
 
-        self._overrideDefaults(_prefs)
+        # self._overrideDefaults(_prefs)
 
         return _prefs
+
+    def _getDefaultPreferences(self):
+        """Return the default preferences file.
+        """
+        if _prefs := self._readPreferencesFile(defaultPreferencesPath):
+            return _prefs
+        raise ValueError(f'Preferences._readPreferences: path {defaultPreferencesPath} does not exist')
 
     def _getUserPreferences(self):
         """Read the user preferences file, updating the current values
         """
-        if (_prefs := self._readPreferencesFile(userPreferencesPath)):
+        if _prefs := self._readPreferencesFile(userPreferencesPath):
             self._recursiveUpdate(theDict=self, updateDict=_prefs)
-
         # just some patches to the data
         self.recentMacros = uniquify(self.recentMacros)
+        return _prefs
 
     def _saveUserPreferences(self):
         """Save the current preferences to the user preferences file
         """
+        diffDict = {"_applicationVersion" : self._applicationVersion,
+                    "_lastPath" : self._lastPath}
+
+        _defPrefs = self._readPreferencesFile(defaultPreferencesPath)
+
+        self.recentMacros = self.recentMacros[-10:]
+        self.recentFiles = self.recentFiles[-10:]
+
+        for dd in self:
+            if isinstance(tab := self[dd], (AttrDict, dict)):
+                for key, value in tab.items():
+                    # set to new value if not default
+                    if value != _defPrefs[dd][key]:
+                        if dd not in diffDict.keys():
+                            diffDict[dd] = dict()
+                        diffDict[dd][key] = value
+
+            if isinstance(ll := self[dd], list) and ll:
+                diffDict[dd] = ll
+
         with userPreferencesPath.open(mode='w') as fp:
-            json.dump(self, fp, indent=4)
+            json.dump(diffDict, fp, indent=4)
 
     def _recursiveUpdate(self, theDict, updateDict):
         """update theDict with key,value from updateDict, if key exists in theDict
@@ -132,7 +160,7 @@ class Preferences(AttrDict):
 
         for key, value in theDict.items():
             # check and update for any keys in theDict that are in updateDict
-            if key in updateDict:
+            if key in updateDict :
                 updateValue = updateDict[key]
 
                 if isinstance(value, (dict, AttrDict)):

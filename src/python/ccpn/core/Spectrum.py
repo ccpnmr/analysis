@@ -54,7 +54,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-21 12:49:35 +0000 (Wed, February 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-21 13:35:45 +0000 (Wed, February 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -2243,6 +2243,7 @@ class Spectrum(AbstractWrapperObject):
         self._copyNonDimensionalParameters(target)
         self._copyDimensionalParameters(axisCodes, target)
 
+    @logCommand(get='self')
     def estimateNoise(self):
         """Estimate and return the noise level, or None if it cannot be
         """

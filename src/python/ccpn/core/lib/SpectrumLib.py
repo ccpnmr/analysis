@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-21 12:49:35 +0000 (Wed, February 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-21 13:35:45 +0000 (Wed, February 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1175,7 +1175,8 @@ def getNoiseEstimateFromRegion(spectrum, strip):
         regionDict[ac] = tuple(region)
 
     # get the data
-    dataArray = spectrum.getRegion(**regionDict)
+    with notificationEchoBlocking():
+        dataArray = spectrum.getRegion(**regionDict)
 
     # calculate the noise values
     flatData = dataArray.flatten()

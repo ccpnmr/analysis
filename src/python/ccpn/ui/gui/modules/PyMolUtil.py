@@ -4,20 +4,20 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
 __dateModified__ = "$Date: 2021-04-26 12:13:48 +0100 (Mon, April 26, 2021) $"
-__dateModified__ = "$dateModified: 2022-07-05 17:30:47 +0100 (Tue, July 05, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2024-02-21 14:41:29 +0000 (Wed, February 21, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -196,6 +196,7 @@ def _CSMSelection2PyMolFile(filePath, pdbPath, aboveThresholdResidues, belowThre
         imp = codeBlock.addImport
         cmd = codeBlock.addCmd
         imp('from pymol import cmd')
+        cmd('cmd.reinitialize', )
         cmd('cmd.load', pdbPath)
         cmd('cmd.hide', 'lines')
         cmd('cmd.show', 'cartoon')
@@ -226,6 +227,7 @@ def _CSMSelection2PyMolFileNew(filePath, pdbPath, coloursDict, selection):
         imp = codeBlock.addImport
         cmd = codeBlock.addCmd
         imp('from pymol import cmd')
+        cmd('cmd.reinitialize', )
         cmd('cmd.load', pdbPath)
         cmd('cmd.hide', 'lines')
         cmd('cmd.show', 'cartoon')
@@ -265,6 +267,7 @@ def _restraintsSelection2PyMolFile(pymolScriptPath, pdbPath, restraints):
     cmd = codeBlock.addCmd
 
     imp('from pymol import cmd')
+    cmd('cmd.reinitialize', )
     cmd('cmd.load', pdbPath)
     cmd('cmd.util.cbaw',)
     cmd('cmd.dss', )

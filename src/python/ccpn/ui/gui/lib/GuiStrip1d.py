@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-21 12:49:35 +0000 (Wed, February 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-21 15:28:04 +0000 (Wed, February 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -476,13 +476,12 @@ class GuiStrip1d(GuiStrip):
                 spectrum.positiveContourBase = float(pos)
             else:
                 getLogger().warning('Setting Positive Contour Base Failed', 'Please use only positive values')
-                spectrum.positiveContourBase = 1
                 return
             if neg < 0:
                 spectrum.negativeContourBase = float(neg)
             else:
                 getLogger().warning('Setting Negative Contour Base Failed', 'Please use only negative values')
-                spectrum.negativeContourBase = -1
+                # spectrum.negativeContourBase = -1
 
     # ------- Calibrating ------- #
 

@@ -54,7 +54,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-20 17:17:10 +0000 (Tue, February 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-21 12:49:35 +0000 (Wed, February 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -106,6 +106,7 @@ from ccpn.util.Path import Path, aPath
 # defined here too as imported from Spectrum throughout the code base
 _SCALECHANGED = 'scaleChanged'
 _ALLCHANGED = 'allChanged'
+_REBUILDCONTOURS = 'rebuildContours'
 _UPDATECHEMICALSHIFTS = 'updateChemicalShifts'
 _IGNORECHILDREN = 'ignoreChildren'
 
@@ -583,7 +584,7 @@ class Spectrum(AbstractWrapperObject):
 
     @noiseLevel.setter
     @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreSetter(allChanged=True)
+    @ccpNmrV3CoreSetter(allChanged=True, rebuildContours=False)
     def noiseLevel(self, value: float):
         scale = self.scale if self.scale is not None else 1.0
         val = float(value) if value is not None else None
@@ -609,7 +610,7 @@ class Spectrum(AbstractWrapperObject):
 
     @negativeNoiseLevel.setter
     @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreSetter(allChanged=True)
+    @ccpNmrV3CoreSetter(allChanged=True, rebuildContours=False)
     def negativeNoiseLevel(self, value):
         """Stored in Internal """
 
@@ -2255,10 +2256,19 @@ class Spectrum(AbstractWrapperObject):
 
     @property
     def _noiseSD(self):
-        """_CCPN internal. Noise Standard deviation.  Where for Noise is intended the spectrum region data between the noiseLevel and negativeNoiseLevel
+        """_CCPN internal. Noise Standard deviation.  Where for Noise is intended the spectrum region data where only noise occurs.
         This property must be cached as it is used by the peak.signalToNoiseRatio (if and only the spectrum.noiseLevel is set by the user)
         """
+        if self.noiseLevel is None:
+            self._setInternalParameter(self._NOISESD, None) #ensure we don't go out of sync with the NoiseLevel.
+
         result = self._getInternalParameter(self._NOISESD)
+        if result is None and self.noiseLevel:
+            # We have the noiseLevel, we can backcalculate the noise sd
+            from ccpn.core.lib.SpectrumLib import  _estimateNoiseSDforSpectrumNoiseLevel
+            result = _estimateNoiseSDforSpectrumNoiseLevel(self)
+            self._setInternalParameter(self._NOISESD, result) #ensure we don't go out of sync with the NoiseLevel.
+
         return result
 
     @_noiseSD.setter
@@ -3458,16 +3468,17 @@ class Spectrum(AbstractWrapperObject):
             # get the changed attribute states - defined in the ccpNmrV3CoreSetter arguments
             scaleChanged = actionKwds.get(_SCALECHANGED, False)
             allChanged = actionKwds.get(_ALLCHANGED, False)
-
-            for specView in self.spectrumViews:
-                if specView:
-                    # force a rebuild of the contours/etc.
-                    if scaleChanged:
-                        specView.buildContoursOnly = scaleChanged
-                    elif allChanged:
-                        specView.buildContours = allChanged
-                    # other changes may need to be recognised here
-                    specView._finaliseAction(action)
+            rebuildContours = actionKwds.get(_REBUILDCONTOURS, True)
+            if rebuildContours:
+                for specView in self.spectrumViews:
+                    if specView:
+                        # force a rebuild of the contours/etc.
+                        if scaleChanged:
+                            specView.buildContoursOnly = scaleChanged
+                        elif allChanged:
+                            specView.buildContours = allChanged
+                        # other changes may need to be recognised here
+                        specView._finaliseAction(action)
 
             if actionKwds.get(_IGNORECHILDREN, False):  # here or before specView?
                 return

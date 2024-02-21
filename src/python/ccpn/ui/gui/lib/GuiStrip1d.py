@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-20 17:17:10 +0000 (Tue, February 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-21 12:49:35 +0000 (Wed, February 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -41,6 +41,7 @@ from ccpn.ui.gui.lib.GuiStripContextMenus import _get1dPhasingMenu, _get1dDefaul
 from ccpn.ui.gui.widgets.Frame import OpenGLOverlayFrame
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.util.Colour import colorSchemeTable
+from ccpn.core.lib.ContextManagers import undoBlockWithSideBar as undoBlock
 
 
 class GuiStrip1d(GuiStrip):
@@ -362,44 +363,64 @@ class GuiStrip1d(GuiStrip):
         for spectrum in visibleSpectra:
             posValue = spectrum.noiseLevel or spectrum.estimateNoise()
             if posValue is None:
-                posValue = 0
+                posValue = np.finfo(np.float64).tiny
             negValue = spectrum.negativeNoiseLevel or -posValue
-            if spectrum.noiseLevel is None:
-                spectrum.noiseLevel = posValue
-            if spectrum.negativeNoiseLevel is None:
-                spectrum.negativeNoiseLevel = negValue
 
             brush = hexToRgbRatio(spectrum.sliceColour) + (0.3,)  # sliceCol plus an offset
             positiveLine = self._CcpnGLWidget.addInfiniteLine(values=posValue, colour=brush, movable=True, lineStyle='dashed',
                                                               lineWidth=2.0, obj=spectrum, orientation='h', )
             negativeLine = self._CcpnGLWidget.addInfiniteLine(values=negValue, colour=brush, movable=True,
                                                               lineStyle='dashed', obj=spectrum, orientation='h', lineWidth=2.0)
-            positiveLine.valuesChanged.connect(partial(self._lineThresholdChanged, positiveLine, spectrum, setPositiveThreshold=True))
-            negativeLine.valuesChanged.connect(partial(self._lineThresholdChanged, negativeLine, spectrum, setPositiveThreshold=False))
+
+            positiveLine.editingFinished.connect(partial(self._posLineThresholdMoveFinished, positiveLine, spectrum))
+            negativeLine.editingFinished.connect(partial(self._negLineThresholdMoveFinished, negativeLine, spectrum))
             self._noiseThresholdLines[spectrum.pid] = [positiveLine ,negativeLine]
 
-    def _lineThresholdChanged(self, line, spectrum, setPositiveThreshold):
-        """ set the noise threshold to the spectrum based on the line move.
-        TODO add notifier when editing is finished (so to set the noiseLevel once only)."""
-        value = line.values
-        if spectrum is not None:
-            if setPositiveThreshold:
-                if value > 0:
-                    spectrum.noiseLevel = value
-            else:
-                spectrum.negativeNoiseLevel = value
+            # init the noiseLevel if None
+            if spectrum.noiseLevel is None:
+                self._setNoiseLevelsFromLines(spectrum, negValue, posValue)
 
-        # Define the noiseSD, the standard deviation of the region between the lines boun  dary
-        # intensities = np.array(spectrum.intensities)
-        # posValue = spectrum.noiseLevel
-        # negValue = spectrum.negativeNoiseLevel
-        # # try:
-        #     mask = (intensities >= negValue) & (intensities <= posValue)
-        #     noiseRegion =  intensities[mask]
-        #     _noiseSD = np.std(noiseRegion)
-        #     spectrum._noiseSD = _noiseSD
-        # except Exception as exc:
-        #     getLogger().warning(f'Could not set the NoiseStandardDeviation. {exc}')
+    def _setNoiseLevelsFromLines(self, spectrum, negValue, posValue):
+
+        try:
+            from ccpn.core.lib.SpectrumLib import _getNoiseRegionFromLimits
+            intensities = np.array(spectrum.intensities)
+            noiseRegion = _getNoiseRegionFromLimits(intensities, negValue, posValue)
+            noiseSD = np.std(noiseRegion)
+
+            with undoBlock():
+                spectrum._noiseSD = float(noiseSD) # need to set this first. Setting the noiseLevel will call a notifier to update the gui items etc
+                spectrum.noiseLevel = float(posValue)
+                spectrum.negativeNoiseLevel = float(negValue)
+
+        except Exception as exc:
+            getLogger().warning(f'Could not set the NoiseStandardDeviation. {exc}')
+
+    def _posLineThresholdMoveFinished(self, line, spectrum, **kwargs):
+        """ set the Positive noise threshold to the spectrum when the line move action is finished"""
+        posValue = line.values
+        if spectrum is not None:
+                if posValue < 0:
+                    posValue = np.finfo(np.float64).tiny
+
+        # Define the noiseSD, the standard deviation of the region between the lines boundary
+        negValue = spectrum.negativeNoiseLevel
+        if negValue is None:
+            negValue = - posValue
+        self._setNoiseLevelsFromLines(spectrum, negValue, posValue)
+
+    def _negLineThresholdMoveFinished(self, line, spectrum, **kwargs):
+        """ set the Positive noise threshold to the spectrum when the line move action is finished"""
+        negValue = line.values
+        if spectrum is not None:
+            posValue = spectrum.noiseLevel
+            if negValue >= posValue:
+                negValue = posValue
+
+            # Define the noiseSD, the standard deviation of the region between the lines boundary
+            self._setNoiseLevelsFromLines(spectrum, negValue, posValue)
+
+
 
     # -------- Picking Exclusion Area -------- #
 

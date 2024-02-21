@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-20 17:17:10 +0000 (Tue, February 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-21 12:49:35 +0000 (Wed, February 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1165,7 +1165,6 @@ def getNoiseEstimateFromRegion(spectrum, strip):
 
     # calculate the region over which to estimate the noise
     sortedSelectedRegion = getClippedRegion(spectrum, strip, sort=True)
-
     if spectrum.dimensionCount == 1:
         indices = [1]
     else:
@@ -1268,14 +1267,26 @@ def _noiseFunc(value):
                               min=value.min, max=value.max,
                               noiseLevel=abs(value.mean) + 3.5 * value.std)
 
-def _getNoiseRegionFromNoiseLevel(spectrum):
-    """Get the sd from the region between the noiseLevel value"""
-    yValues = spectrum.getAllRegionData().flatten()
-    yUpper = spectrum.noiseLevel
-    yLower = spectrum.negativeNoiseLevel or yUpper*-1
+def _getNoiseRegionFromLimits(regionData, yLower, yUpper):
+    """Get the sd from the region between two limits value"""
+    yValues = regionData
     indices = (yValues >= yLower) & (yValues <= yUpper)
     noiseRegion = yValues[indices]
     return noiseRegion
+
+def _estimateNoiseSDforSpectrumNoiseLevel(spectrum, stdFactor=1.1, noiseLevelFactor=3.5):
+
+    regionData = spectrum.getAllRegionData()
+    regionData = regionData.flatten()
+    noiseLevel = spectrum.noiseLevel
+    if spectrum.noiseLevel is None:
+        raise ValueError('This routine requires the noiseLevel to be set')
+    yUpper =  noiseLevel/noiseLevelFactor
+    yLower =  - yUpper
+    noiseRegion = _getNoiseRegionFromLimits(regionData, yLower, yUpper)
+    sd = np.std(noiseRegion)
+    sd *= stdFactor
+    return float(sd)
 
 def _getNoiseEstimate(spectrum, nsamples=1000, nsubsets=10, fraction=0.1):
     """

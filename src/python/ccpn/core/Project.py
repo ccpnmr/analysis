@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-01 20:05:55 +0000 (Thu, February 01, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-22 15:58:35 +0000 (Thu, February 22, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1632,12 +1632,6 @@ class Project(AbstractWrapperObject):
         return self._undo.waypointBlocking
 
     #-----------------------------------------------------------------------------------------
-
-    # Should be removed:
-    # @property
-    # def _residueName2chemCompId(self) -> dict:
-    #     """dict of {residueName:(molType,ccpCode)}"""
-    #     return MoleculeQuery.fetchStdResNameMap(self._wrappedData.root)
 
     @property
     def _experimentTypeMap(self) -> OrderedDict:

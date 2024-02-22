@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-08 15:13:29 +0000 (Thu, February 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-22 15:58:35 +0000 (Thu, February 22, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -561,7 +561,6 @@ def _fetchChemCompFromFile(project, filePath):
     from ccpnmodel.ccpncore.xml.memops.Implementation import loadFromStream
     from ccpn.util.Path import aPath, joinPath
     from ccpn.framework.PathsAndUrls import CCPN_API_DIRECTORY
-    from ccpnmodel.ccpncore.lib.chemComp.ChemCompOverview import chemCompStdDict
     filePathObj = aPath(filePath)
     memopsRoot = project._wrappedData.root
     basename = filePathObj.basename
@@ -586,10 +585,6 @@ def _fetchChemCompFromFile(project, filePath):
     chemCompProjectSubPath = aPath(CCPN_API_DIRECTORY) / 'ccp' / 'molecule' / 'ChemComp'
     chemCompProjectPath = joinPath(project.projectPath, chemCompProjectSubPath)
     filePathObj.copyFile(chemCompProjectPath, overwrite=True)
-    ## update the massive dict on chemcomp ccpCode which is used by v3 to create chains
-    commonNames = chemComp.commonNames
-    commonName = commonNames[0] if len(commonNames) > 0 else ''
-    chemCompStdDict[chemComp.molType][chemComp.ccpCode] = [chemComp.code1Letter, chemComp.code3Letter, commonName, '' ]  #code1Letter, code3Letter, 'syn', 'formula'
     return chemComp
 
 

@@ -1,19 +1,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: VickyAH $"
-__dateModified__ = "$dateModified: 2022-06-27 14:19:35 +0100 (Mon, June 27, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2024-02-22 15:58:35 +0000 (Thu, February 22, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,25 +31,7 @@ definitions.
 Molecule Types: protein, DNA, RNA
 """
 
-def convertResidueCode(residueName, inputCodeType='oneLetter', outputCodeType='threeLetter', molType ='protein'):
-    """
-    :param inputCodeType: oneLetter, threeLetter, synonym, molFormula
-    :type inputCodeType: str
-    :param molType: 'protein', 'DNA', 'RNA'
-    :type molType: str
-    :return: the same residue with the new letter code/name
-    :rtype: str
-    """
-    from ccpnmodel.ccpncore.lib.chemComp.ChemCompOverview import chemCompStdDict
-    modes = ['oneLetter', 'threeLetter', 'synonym', 'molFormula'] # order as they come from ChemCom dictionary
-    if inputCodeType not in modes or outputCodeType not in modes:
-        print('Code type not recognised. It has to be one of: ', modes)
-        return
-    for k, v in chemCompStdDict.get(molType).items():
-        dd = {i:j for i,j in zip(modes,v)}
-        if residueName == dd.get(inputCodeType):
-            return dd.get(outputCodeType)
-
+from ccpn.core.lib.ChainLib import SequenceHandler
 
 def convertNmrChain1to3LetterCode(nmrChain, molType='protein'):
     """
@@ -58,9 +40,14 @@ def convertNmrChain1to3LetterCode(nmrChain, molType='protein'):
     :param molType: 'protein', 'DNA', 'RNA'
     :return:
     """
-    for nmrResidue in nmrChain.nmrResidues:
+    project = nmrChain.project
+    sequence = [nmrResidue.residueType for nmrResidue in nmrChain.nmrResidues]
+    sequenceHandler = SequenceHandler(project, moleculeType=molType)
+    sequence3LetterCodes = sequenceHandler.oneToThreeCode(sequence)
+
+    for i, nmrResidue in enumerate(nmrChain.nmrResidues):
         if len(nmrResidue.residueType) == 1:
-            newNmrResidueName = convertResidueCode(nmrResidue.residueType, inputCodeType='oneLetter', outputCodeType='threeLetter', molType=molType)
+            newNmrResidueName = sequence3LetterCodes[i]
             try:
                 nmrResidue.rename(nmrResidue.sequenceCode, newNmrResidueName)
             except Exception as err:

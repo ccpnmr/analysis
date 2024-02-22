@@ -54,7 +54,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-02-22 16:00:59 +0000 (Thu, February 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-22 16:49:08 +0000 (Thu, February 22, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -3317,7 +3317,7 @@ class Spectrum(AbstractWrapperObject):
         """Rename Spectrum, changing its name and Pid.
         """
         self._deleteSpectrumMetaData()
-        self._validateStringValue('name', value, filePathLimit=True)
+        self._validateStringValue('name', value, filePathChars=True)
         result = self._rename(value)
         self._saveSpectrumMetaData()
         return result

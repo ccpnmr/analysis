@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-01-03 13:31:05 +0000 (Wed, January 03, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-22 16:00:21 +0000 (Thu, February 22, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -57,6 +57,7 @@ from ccpn.util.Logging import getLogger
 
 
 _RENAME_SENTINEL = Pid.Pid('Dummy:_rename')
+ILLEGAL_PATH_CHARS = r'<>:"/\|?*'
 
 
 @functools.total_ordering
@@ -417,7 +418,8 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
                              allowWhitespace: bool = False,
                              allowEmpty: bool = False,
                              allowNone: bool = False,
-                             limitChars: bool = False):
+                             limitChars: bool = False,
+                             filePathLimit: bool = False):
         """Validate the value of any string
 
         :param attribName: used for reporting
@@ -459,6 +461,8 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
                 raise ValueError(f'{cls.__name__}: {attribName} should only contain alphanumeric characters and'
                                  f' @, %, + or -')
 
+            if filePathLimit and not set(value).isdisjoint(ILLEGAL_PATH_CHARS):
+                raise ValueError(f'{cls.__name__}: {attribName} should not include {ILLEGAL_PATH_CHARS}')
 
     # @staticmethod
     # def _nextAvailableName(cls, project):

@@ -1,9 +1,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -11,9 +11,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-09-06 14:28:31 +0100 (Wed, September 06, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-02-22 14:58:52 +0000 (Thu, February 22, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -33,6 +33,8 @@ import tempfile
 import faulthandler
 import contextlib
 from datetime import datetime
+import time
+
 from ccpn.util.decorators import deprecated
 
 
@@ -502,6 +504,8 @@ class Framework(NotifierBase, GuiBase):
             return
 
         if self._autoBackupThread is None:
+            self._setBackupModifiedTime()
+            self._setLastBackupTime()
             self._autoBackupThread = AutoBackupHandler(eventFunction=self._backupProject,
                                                        eventInterval=self.preferences.general.autoBackupFrequency * 60
                                                        )
@@ -539,15 +543,37 @@ class Framework(NotifierBase, GuiBase):
         finally:
             self._updateAutoBackup()
 
+    def _getBackupModifiedTime(self):
+        return self._backupModifiedTime
+
+    def _setBackupModifiedTime(self):
+        """Set the last time that a core-object was modified.
+        """
+        self._backupModifiedTime = time.perf_counter()
+
+    def _getLastBackupTime(self):
+        return self._lastBackupTime
+
+    def _setLastBackupTime(self):
+        """Set the last time that a backup was performed.
+        """
+        self._lastBackupTime = time.perf_counter()
+
     def _backupProject(self):
         try:
             if self.project.readOnly:
                 # skip if the project is read-only
                 getLogger().debug('Backup skipped: Project is read-only')
                 return
+            if (self._getBackupModifiedTime() < self._getLastBackupTime()):
+                # ignore if there were no modifications since the last backup, even if project is modified
+                getLogger().debug('Backup skipped: Not modified since last backup')
+                return
 
             # NOTE:ED - check with Geerten whether it needs to do anything else here
-            self.project._backup()
+            if self.project._backup():
+                # log the time that a backup was completed
+                self._setLastBackupTime()
 
             # from ccpnmodel.ccpncore.lib.Io import Api as apiIo
             #
@@ -1492,17 +1518,31 @@ class Framework(NotifierBase, GuiBase):
 
     @logCommand('application.')
     def undo(self):
+        from ccpn.core.lib.ContextManagers import busyHandler
+
         if self.project._undo.canUndo():
-            with MessageDialog.progressManager(self.ui.mainWindow, 'performing undo'):
-                self.project._undo.undo()
+            if not self.project._undo.locked:
+                with busyHandler(title='Busy', text='Undo...', autoClose=False, closeDelay=1000,
+                                 raiseErrors=True) as progress:
+                    # set extra progress-dialog settings here
+                    progress.checkCancelled()  # will raise ProgressCancelled exception if pressed
+                    progress.setValue(0)  # update the progress-bar if matches step-size
+                    self.project._undo.undo()
         else:
             getLogger().warning('nothing to undo')
 
     @logCommand('application.')
     def redo(self):
+        from ccpn.core.lib.ContextManagers import busyHandler
+
         if self.project._undo.canRedo():
-            with MessageDialog.progressManager(self.ui.mainWindow, 'performing redo'):
-                self.project._undo.redo()
+            if not self.project._undo.locked:
+                with busyHandler(title='Busy', text='Redo...', autoClose=False, closeDelay=1000,
+                                 raiseErrors=True) as progress:
+                    # set extra progress-dialog settings here
+                    progress.checkCancelled()  # will raise ProgressCancelled exception if pressed
+                    progress.setValue(0)  # update the progress-bar if matches step-size
+                    self.project._undo.redo()
         else:
             getLogger().warning('nothing to redo.')
 

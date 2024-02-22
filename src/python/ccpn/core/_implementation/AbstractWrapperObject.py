@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-01-03 13:01:00 +0000 (Wed, January 03, 2024) $"
-__version__ = "$Revision: 3.3.0 $"
+__dateModified__ = "$dateModified: 2024-02-22 14:58:51 +0000 (Thu, February 22, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1445,6 +1445,8 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
             self._childActions = []
 
         project = self.project
+        # log the time the state of the core-object changed
+        project.application._setBackupModifiedTime()
         if project._notificationBlanking:
             return
 

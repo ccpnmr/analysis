@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-01 20:05:55 +0000 (Thu, February 01, 2024) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-02-22 14:58:51 +0000 (Thu, February 22, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -34,7 +34,6 @@ import typing
 import operator
 from typing import Sequence, Union, Optional, List, Any
 from collections import OrderedDict
-# from time import time
 from datetime import datetime
 from collections.abc import Iterable
 import pandas as pd
@@ -1444,7 +1443,7 @@ class Project(AbstractWrapperObject):
             getLogger().debug('Project is not modified: ignoring backup')
             return
 
-        # stop the auto-backups so they don't clash with current save
+        # stop the auto-backups, so they don't clash with current save
         with self.application.pauseAutoBackups():
 
             try:
@@ -1462,7 +1461,9 @@ class Project(AbstractWrapperObject):
                 getLogger().warning(f'Error checking project status: {str(es)}')
 
             self._xmlLoader.backupUserData(updateIsModified=False)
-
+            # there was a valid save
+            return True
+            
             # don't touch anything else for the minute
 
     #-----------------------------------------------------------------------------------------
@@ -2070,8 +2071,8 @@ class Project(AbstractWrapperObject):
 
         try:
             oldWrapperObject = wrappedData._oldWrapperObject
-        except AttributeError:
-            raise ApiError("Wrapper object to undelete wrongly set up - lacks _oldWrapperObject attribute") from None
+        except AttributeError as es:
+            raise ApiError("Wrapper object to undelete wrongly set up - lacks _oldWrapperObject attribute") from es
 
         # put back in from wrapped2Obj
         self._data2Obj[wrappedData] = oldWrapperObject

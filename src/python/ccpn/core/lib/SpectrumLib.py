@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-21 13:35:45 +0000 (Wed, February 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-23 16:58:09 +0000 (Fri, February 23, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1187,7 +1187,7 @@ def getNoiseEstimateFromRegion(spectrum, strip):
     mean = np.mean(flatData)
 
     value = NoiseEstimateTuple(mean=mean,
-                               std=std * 1.1 if std != 0 else 1.0,
+                               std=std if std != 0 else 1.0,
                                min=min, max=max,
                                noiseLevel=None)
 
@@ -1363,7 +1363,7 @@ def _getNoiseEstimate(spectrum, nsamples=1000, nsubsets=10, fraction=0.1):
     if valid:
         value = min(valid, key=lambda mSD: mSD.std)
         value = NoiseEstimateTuple(mean=value.mean,
-                                   std=value.std * 1.1 if value.std != 0 else 1.0,
+                                   std=value.std if value.std != 0 else 1.0,
                                    min=value.min, max=value.max,
                                    noiseLevel=None)
 

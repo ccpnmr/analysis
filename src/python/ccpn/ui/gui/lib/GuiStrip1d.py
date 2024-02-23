@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-23 16:53:41 +0000 (Fri, February 23, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-23 19:50:33 +0000 (Fri, February 23, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -376,7 +376,7 @@ class GuiStrip1d(GuiStrip):
         self._updatePeakPickingExclusionArea()
 
     def _initNoiseThresholdLines(self):
-
+        """Create the threshold line for the strip.  """
         visibleSpectra = [sv.spectrum for sv in self.spectrumViews if sv.isDisplayed]
         for spectrum in visibleSpectra:
             posValue = spectrum.noiseLevel or spectrum.estimateNoise()
@@ -409,8 +409,6 @@ class GuiStrip1d(GuiStrip):
                 spectrum._noiseSD = float(noiseSD) # need to set this first. Setting the noiseLevel will call a notifier to update the gui items etc
                 spectrum.noiseLevel = float(posValue)
                 spectrum.negativeNoiseLevel = float(negValue)
-                print('SETTING THE NOISE LEVEL', spectrum)
-
         except Exception as exc:
             getLogger().warning(f'Could not set the NoiseStandardDeviation. {exc}')
 
@@ -448,22 +446,39 @@ class GuiStrip1d(GuiStrip):
                 self._CcpnGLWidget.removeExternalRegion(region)
         self._pickingExclusionAreas.clear()
 
-    def _updatePeakPickingExclusionArea(self):
-        """Re-draw the region """
-        if not self._pickingExclusionAreaActive:
-            return
-        if not self._pickingExclusionAreas:
-            return
-        self._removePickingExclusionArea()
-        self._initPickingExclusionArea()
+    def _updatePeakPickingExclusionArea(self, spectrumViewChanged=False, setAllVisible=False):
+        """toggle/update the lines """
 
-    def togglePickingExclusionArea(self):
+        if spectrumViewChanged:
+            visibleSpectra =  self.getVisibleSpectra()
+            for spectrumView in self.spectrumViews:
+                spectrum = spectrumView.spectrum
+                isVisibleSpectrum = spectrum in visibleSpectra
+                if spectrum is None:
+                    continue
+                region = self._pickingExclusionAreas.get(spectrum.pid)
+                if not region:
+                    continue
+                region.setVisible(isVisibleSpectrum)
+                #we need to update the lines if the Level changed.
+                if isVisibleSpectrum:
+                    contoursLevelValues = (spectrum.positiveContourBase, spectrum.negativeContourBase)
+                    linesValues = region.values
+                    if contoursLevelValues != linesValues:
+                        region.setValue(contoursLevelValues, emitValuesChanged=False)
+            return
+        else:
+            if len(self._pickingExclusionAreas) == 0:
+                self._initPickingExclusionArea()
+                return
+            for sp, region in self._noiseThresholdLines.items():
+                    region.setVisible(setAllVisible)
+
+    def togglePickingExclusionArea(self, *args):
         value = self.sender().isChecked()
         self._pickingExclusionAreaActive = value
-        if value:
-            self._initPickingExclusionArea()
-        else:
-            self._removePickingExclusionArea()
+        self._updatePeakPickingExclusionArea(spectrumViewChanged=False, setAllVisible=value)
+
 
     def _initPickingExclusionArea(self):
 
@@ -482,7 +497,7 @@ class GuiStrip1d(GuiStrip):
                                                                    brush=brush, colour=colour, movable=True)
             # _GLlinearRegions.valuesChanged.connect(partial(self._setContourBaseValues, spectrum))
             _GLlinearRegions.editingFinished.connect(partial(self._setContourBaseValues, spectrum))
-            self._pickingExclusionAreas[spectrum] = _GLlinearRegions
+            self._pickingExclusionAreas[spectrum.pid] = _GLlinearRegions
 
     def _setContourBaseValues(self,  spectrum, _dict, *args):
         values = _dict.get('values', [])

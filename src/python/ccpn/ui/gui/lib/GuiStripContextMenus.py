@@ -8,9 +8,9 @@ To create a menu:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -19,8 +19,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-11-15 11:58:49 +0000 (Wed, November 15, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-02-23 19:50:33 +0000 (Fri, February 23, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -294,18 +294,16 @@ def _showEstimateNoisePopup(strip):
 
 def _showNoise(strip):
     return _SCMitem(name='Show Noise Thresholds',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Show the spectral noise thresholds as dotted lines', shortcut='SL',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Show the spectral noise thresholds as dotted lines',
                     checkable=True, checked=strip._noiseThresholdLinesActive,
                     callback=strip.toggleNoiseThresholdLines)
 
 def _showPeakPickingThresholds(strip):
     tt = 'Show the Peak Picking Exclusion Area which enables to select and adjust the thresholds values.'
     return _SCMitem(name='Show Peak Picking Exclusion Area',
-                    typeItem=ItemTypes.get(ITEM), toolTip=tt, shortcut='EA',
+                    typeItem=ItemTypes.get(ITEM), toolTip=tt,
                     checkable=True, checked=strip._pickingExclusionAreaActive,
                     callback=strip.togglePickingExclusionArea)
-
-
 
 def _makeStripPlot(strip):
     return _SCMitem(name='Make Strip Plot...',
@@ -904,7 +902,7 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
 
         _showEstimateNoisePopup(guiStrip1d),
         _showNoise(guiStrip1d),
-        _showPeakPickingThresholds(guiStrip1d),
+        # _showPeakPickingThresholds(guiStrip1d), #FIXME broken
         _makeStripPlot(guiStrip1d),
         _separator(),
 

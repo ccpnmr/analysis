@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-21 12:49:35 +0000 (Wed, February 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-23 16:53:41 +0000 (Fri, February 23, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -86,6 +86,9 @@ class GLRegion(QtWidgets.QWidget):
 
     # def _mouseDrag(self, values):
     #     self.valuesChanged.emit(list(values))
+
+    def setVisible(self, bool):
+        self.visible = bool
 
     @property
     def values(self):

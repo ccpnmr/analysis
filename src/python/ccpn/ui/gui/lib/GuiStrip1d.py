@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-21 15:28:04 +0000 (Wed, February 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-23 16:53:41 +0000 (Fri, February 23, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -42,7 +42,8 @@ from ccpn.ui.gui.widgets.Frame import OpenGLOverlayFrame
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.util.Colour import colorSchemeTable
 from ccpn.core.lib.ContextManagers import undoBlockWithSideBar as undoBlock
-
+from ccpn.util.Colour import hexToRgbRatio
+from functools import partial
 
 class GuiStrip1d(GuiStrip):
     """Strip class for display of 1D spectra
@@ -330,20 +331,41 @@ class GuiStrip1d(GuiStrip):
                     self._CcpnGLWidget.removeInfiniteLine(line)
         self._noiseThresholdLines.clear()
 
-    def _updateNoiseThresholdLines(self):
-        """Re-draw the lines """
-        if not self._noiseThresholdLines:
+    def _updateNoiseThresholdLines(self, spectrumViewChanged=True,  setAllVisible=False):
+        """toggle/update the lines """
+        if spectrumViewChanged:
+            visibleSpectra =  self.getVisibleSpectra()
+            for spectrumView in self.spectrumViews:
+                spectrum = spectrumView.spectrum
+                isVisibleSpectrum = spectrum in visibleSpectra
+                if spectrum is None:
+                    continue
+                lines = self._noiseThresholdLines.get(spectrum.pid, [])
+                if len(lines) == 0:
+                    continue
+                for line in lines:
+                    line.setVisible(isVisibleSpectrum)
+                #we need to update the lines if the NoiseLevel changed.
+                if isVisibleSpectrum:
+                    noiseLevelLine, negativeNoiseLevelLine = lines[0], lines[1]
+                    noiseLevelValues = (spectrum.noiseLevel, spectrum.negativeNoiseLevel)
+                    linesValues = (noiseLevelLine.values, negativeNoiseLevelLine.values)
+                    if noiseLevelValues != linesValues:
+                        for l, v in zip(lines, noiseLevelValues):
+                            l.setValue(v if v else l.values, emitValuesChanged=False)
             return
-        self._removeNoiseThresholdLines()
-        self._initNoiseThresholdLines()
+        else:
+            if len(self._noiseThresholdLines) == 0:
+                self._initNoiseThresholdLines()
+                return
+            for sp, lines in self._noiseThresholdLines.items():
+                for line in lines:
+                    line.setVisible(setAllVisible)
 
     def toggleNoiseThresholdLines(self, *args):
         value = self.sender().isChecked()
         self._noiseThresholdLinesActive = value
-        if value:
-            self._initNoiseThresholdLines()
-        else:
-            self._removeNoiseThresholdLines()
+        self._updateNoiseThresholdLines(spectrumViewChanged=False, setAllVisible=value)
 
 
     def _updateVisibility(self):
@@ -354,10 +376,6 @@ class GuiStrip1d(GuiStrip):
         self._updatePeakPickingExclusionArea()
 
     def _initNoiseThresholdLines(self):
-        from ccpn.util.Colour import hexToRgbRatio
-        from functools import partial
-        if not self._noiseThresholdLinesActive:
-            return
 
         visibleSpectra = [sv.spectrum for sv in self.spectrumViews if sv.isDisplayed]
         for spectrum in visibleSpectra:
@@ -374,8 +392,7 @@ class GuiStrip1d(GuiStrip):
 
             positiveLine.editingFinished.connect(partial(self._posLineThresholdMoveFinished, positiveLine, spectrum))
             negativeLine.editingFinished.connect(partial(self._negLineThresholdMoveFinished, negativeLine, spectrum))
-            self._noiseThresholdLines[spectrum.pid] = [positiveLine ,negativeLine]
-
+            self._noiseThresholdLines[spectrum.pid] = [positiveLine, negativeLine]
             # init the noiseLevel if None
             if spectrum.noiseLevel is None:
                 self._setNoiseLevelsFromLines(spectrum, negValue, posValue)
@@ -392,6 +409,7 @@ class GuiStrip1d(GuiStrip):
                 spectrum._noiseSD = float(noiseSD) # need to set this first. Setting the noiseLevel will call a notifier to update the gui items etc
                 spectrum.noiseLevel = float(posValue)
                 spectrum.negativeNoiseLevel = float(negValue)
+                print('SETTING THE NOISE LEVEL', spectrum)
 
         except Exception as exc:
             getLogger().warning(f'Could not set the NoiseStandardDeviation. {exc}')

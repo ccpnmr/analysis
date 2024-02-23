@@ -45,9 +45,9 @@ By Mouse button:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -55,9 +55,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-16 13:13:51 +0100 (Mon, October 16, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-02-23 10:46:28 +0000 (Fri, February 23, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -5356,27 +5356,30 @@ class CcpnGLWidget(QOpenGLWidget):
                         # skip if one of the axes is zero
                         continue
 
-                    nlTarget = 10.**i
+                    nlTarget = 10.**i  # i: 0 -> major tick-marks, 1 -> minor, (2 -> tiny-minor :) if needed)
                     _pow = np.log10(abs(dist / nlTarget)) + 0.5
                     d = 10.**np.floor(_pow)
                     if 0 in d:
                         continue
 
-                    ul1 = np.floor(ul / d) * d
-                    br1 = np.ceil(br / d) * d
+                    ul1 = np.ceil(ul / d) * d  # get the first tick-mark inside
+                    br1 = np.ceil(br / d) * d  # get the last tick-mark outside
                     dist = br1 - ul1
-                    nl = (dist / d) + 0.5
+                    nl = (dist / d) + 0.5  # tick marks to draw - 0.5 fixes rounding errors for small numbers
+                    # _kk = 0
+                    # print(f'i:{i}  dx:{(br-ul)[_kk]:0.5f}    dist:{dist[_kk]:5}  _pow:{_pow[_kk]:5}'
+                    #       f'  d:{d[_kk]:5}  min:{ul1[_kk]:5}  max:{br1[_kk]:5}  nl:{nl[_kk]:5}')
 
-                    _minPow = np.floor(_pow) if _minPow is None else np.minimum(_minPow, np.floor(_pow))
+                    # _minPow = np.floor(_pow) if _minPow is None else np.minimum(_minPow, np.floor(_pow))
                     _minOrder = d if _minOrder is None else np.minimum(_minOrder, d)
+                    p1 = np.array([0., 0.])
+                    p2 = np.array([0., 0.])
                     for ax in axisList:  #   range(0,2):  ## Draw grid for both axes
 
                         c = 30.0 + (scaleOrder * 20)
-                        bx = (ax + 1) % 2
+                        bx = (ax + 1) % 2  # x-y ordering
 
                         for x in range(0, int(nl[ax])):
-                            p1 = np.array([0., 0.])
-                            p2 = np.array([0., 0.])
                             p1[ax] = ul1[ax] + x * d[ax]
                             p2[ax] = p1[ax]
                             p1[bx] = ul[bx]

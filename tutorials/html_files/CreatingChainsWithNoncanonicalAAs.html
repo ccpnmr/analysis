@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Creating Chains with Non-canonical Amino Acids</title>
+    <link rel="stylesheet" href="CcpnVideoTutorials.css">
+</head>
+<body>
+<div class="header"><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a
+        href="index.html" class="button">Video<br> Tutorials<br> & Manual</a><a href="https://forums.ccpn.ac.uk"><img
+        src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 15px"></a></div>
+<br>
+<div class="headerBar">Creating Chains with Non-canonical Amino Acids</div>
+<div class="tutorial">
+
+    <div class="videoContainer">
+        <div class="videoWrapper">
+            <iframe src="https://www.youtube.com/embed/" frameborder="0"
+                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <h2>Creating Chains with Non-canonical Amino Acids</h2>
+    <h4>Note that this is a new feature introduced in Version 3.2.2</h4>
+    <h3>ChemComps</h3>
+    <p>When you create a protein Chain in CcpNmr AnalysisAssign, the program will base this on a set of amino acid template files. These template files are so-called ChemComp files, written in xml format. They contain information about the amino acid's atoms, bonds, protonation states, names, codes, magnetic equivalent groups, prochiral groups etc. If you want to create a Chain which contains a non-canonical amino acid, you will therefore need a ChemComp file describing it. You can find out how to find or create such a file in our information on <a href="CreatingNoncanonicalAAChemComps.html">Creating Non-canonical Amino Acid ChemComps</a>.</p>
+    <h3>Importing a ChemComp .xml file</h3>
+    <p>You can import a ChemComp .xml file either by dragging and dropping it into your project or using <span class="action">File / Load Data</span> (shortcut <span class="action">LD</span>). The file will then be saved in the <span class="action">my_project.ccpn/ccpnv3/ccp/molecule/ChemComp</span> directory of your project and be available to you at any point when you are using that project.</p>
+    <h3>Ccp Codes</h3>
+    <p>When adding your protein sequence, you have the choice of using either the standard <span class="action">One-Letter Code</span> format (<span class="action">A</span> for alanine etc.), the <span class="action">Three-Letter Code</span> format (<span class="action">ALA</span> for alanine etc.) or using the <span class="action">Ccp Code</span> format. In order to add non-canonical amino acids you will need to use the <span class="action">Ccp Code</span> format. For the standard amino acids the Ccp Code is simply the three letter amino acid code in Title Case: <span class="action">Ala, Arg, Asn, ...</span>. For amino acids whose ChemComp files you have downloaded from <a href="https://github.com/VuisterLab/CcpNmr-ChemComps/tree/master/data/pdbe/chemComp/archive/ChemComp/protein">our ChemComp repository on GitHub</a> you need to use the three character code in the file name following <span class="action">protein+</span>. So, for example, for 3-chloro-4-hydroxyphenylglycine, the ChemComp file name is <span class="action">protein+Chp+msd_ccpnRef_2007-12-11-10-20-11_00013.xml</span> and so the Ccp Code is <span class="action">Chp</span>. The Ccp Code is also given near the top of the file as <span class="action">ccpCode="Chp"</span>. For non-canonical amino acid ChemComps that you have <a href="CreatingNoncanonicalAAChemComps.html">created yourself in ChemBuild</a>, the Ccp Code is the one you entered as part of the <span class="action">Compound Information</span>. As for the other ChemComp files, it will also be in the .xml file name and near the top of the file.</p>
+    <h3>Creating the Chain</h3>
+    <p>In the sidebar, expand the <span class="action">Chain</span> section and double-click on <span class="action">New Chain</span>. Alternatively, select <span class="action">New Chain...</span> from the <span class="action">Molecules</span> menu. Fill in your options <a href="AddingSequences.html">as normal</a>. For the sequence you will need to use the CcpCode option. This can be a bit awkward, because you don't always have the sequence formatted as <span class="action">Met Tyr Pro Arg Thr Glu Ile Asn</span>. So if you wish, you can copy and paste your sequence into the <span class="action">One-Letter Code</span> tab and then <span class="action">right-click</span> and select <span class="action">Copy all to Clipboard as Ccp Codes</span> and then paste this into the <span class="action">Ccp Code</span> tab, inserting your non-canonical amino acid Ccp codes at this point.</p>
+    <p>Note that you can use the little number button to tidy and verify your sequence or the orange back arrow to go back to plain text.</p>
+    <p>Finally, click on <span class="action">OK</span>. Your new <span class="action">Chain</span> will be created and your protein/peptide will be added to the project as a <span class="action">Substance</span>.</p>
+</div>
+</body>
+</html>

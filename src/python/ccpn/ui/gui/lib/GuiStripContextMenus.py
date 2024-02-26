@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-23 19:50:33 +0000 (Fri, February 23, 2024) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-02-26 15:48:56 +0000 (Mon, February 26, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -902,7 +902,7 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
 
         _showEstimateNoisePopup(guiStrip1d),
         _showNoise(guiStrip1d),
-        # _showPeakPickingThresholds(guiStrip1d), #FIXME broken
+        _showPeakPickingThresholds(guiStrip1d), #FIXME broken
         _makeStripPlot(guiStrip1d),
         _separator(),
 

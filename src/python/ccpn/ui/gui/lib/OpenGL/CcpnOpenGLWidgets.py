@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-23 16:53:41 +0000 (Fri, February 23, 2024) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-02-26 15:48:56 +0000 (Mon, February 26, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -26,6 +26,7 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 # Start of code
 #=========================================================================================
 
+import traceback
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import pyqtSignal
 from ccpn.util.Logging import getLogger
@@ -122,7 +123,7 @@ class GLRegion(QtWidgets.QWidget):
         # use the region to simulate an infinite line - calls setter above
         oldValue = self._valuesChangedEnabled
         self._valuesChangedEnabled = emitValuesChanged
-        self.values = (val, val)
+        self.values = val  # (val, val)  NOTE:ED - why tuple?
         self._valuesChangedEnabled = oldValue
 
     @property
@@ -552,7 +553,8 @@ class GLExternalRegion(GLVertexArray):
 
         self.clearArrays()
         for reg in self._regions:
-
+            if not reg.visible:
+                continue
             axisIndex = 0
             for ps, psCode in enumerate(self._parent.axisOrder[0:2]):
                 if self._parent._preferences.matchAxisCode == 0:  # default - match atom type

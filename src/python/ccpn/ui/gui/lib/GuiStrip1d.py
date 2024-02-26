@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-23 19:50:33 +0000 (Fri, February 23, 2024) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-02-26 15:48:56 +0000 (Mon, February 26, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -446,7 +446,7 @@ class GuiStrip1d(GuiStrip):
                 self._CcpnGLWidget.removeExternalRegion(region)
         self._pickingExclusionAreas.clear()
 
-    def _updatePeakPickingExclusionArea(self, spectrumViewChanged=False, setAllVisible=False):
+    def _updatePeakPickingExclusionArea(self, spectrumViewChanged=True, setAllVisible=False):
         """toggle/update the lines """
 
         if spectrumViewChanged:
@@ -471,8 +471,8 @@ class GuiStrip1d(GuiStrip):
             if len(self._pickingExclusionAreas) == 0:
                 self._initPickingExclusionArea()
                 return
-            for sp, region in self._noiseThresholdLines.items():
-                    region.setVisible(setAllVisible)
+            for sp, region in self._pickingExclusionAreas.items():
+                region.setVisible(setAllVisible)
 
     def togglePickingExclusionArea(self, *args):
         value = self.sender().isChecked()

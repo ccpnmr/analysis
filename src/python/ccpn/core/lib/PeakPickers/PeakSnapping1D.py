@@ -22,8 +22,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-09 14:19:15 +0000 (Tue, January 09, 2024) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2024-02-27 10:50:08 +0000 (Tue, February 27, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -34,13 +34,27 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import numpy as np
+import pandas as pd
+from scipy import spatial
 from collections import defaultdict
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.ContextManagers import  undoBlockWithoutSideBar, notificationEchoBlocking
 from ccpn.core.lib.PeakPickers.PeakPicker1D import _find1DMaxima, _find1DPositiveMaxima
-import pandas as pd
 from ccpn.core.lib.SpectrumLib import _1DRawDataDict
-from scipy import spatial
+from ccpn.util.DataEnum import DataEnum
+
+class _SnapFlag(DataEnum):
+    """
+    A set of flags set to (internal) peak after a snapping reflecting the snap outcome.
+    """
+    _0 = 0, 'New position and maximum above thresholds'
+    _1 = 1, 'New position and maximum above thresholds after an "on-the-fly" local re-referencing'
+    _3 = 3, 'New position and maximum below thresholds after an "on-the-fly" local re-referencing'
+    _4 = 4, 'Same position and new maximum above thresholds'
+    _2 = 2, 'New position and maximum below thresholds'
+    _5 = 5, 'Same position and new maximum below thresholds'
+    _6 = 6, 'Same position new maximum below thresholds but maxima candidates above thresholds near snapping boundaries'
+    _7 = 7, 'Failed. Position and height are unchanged'
 
 def snap1DPeaks(peaks, **kwargs):
 

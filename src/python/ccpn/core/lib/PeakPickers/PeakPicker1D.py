@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-09 14:19:15 +0000 (Tue, January 09, 2024) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2024-02-27 10:50:08 +0000 (Tue, February 27, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,8 +31,11 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerABC, SimplePeak
 from numba import jit
 import numpy as np
-from scipy import spatial, signal
-# from ccpn.framework.Application import getApplication
+from scipy.integrate import trapz
+from lmfit.models import LorentzianModel, GaussianModel
+from ccpn.util.UnitConverters import  _getSpUnitConversionArguments, _pnt2hz
+from scipy.integrate import quad
+from ccpn.util.Logging import getLogger
 
 # @jit(nopython=True, nogil=True)
 def _find1DMaxima(y, x, positiveThreshold, negativeThreshold=None, findNegative=False):
@@ -172,6 +175,7 @@ class PeakPicker1D(PeakPickerABC):
         application = spectrum.project.application
         self._doNegativePeaks = application.preferences.general.negativePeakPick1D
 
+
     def _setThresholdsFromSpectrum(self):
         """ Get the initial noise thresholds from the spectrum contour base"""
         if not self.positiveThreshold:
@@ -224,5 +228,56 @@ class PeakPicker1D(PeakPickerABC):
                     peaks.append(pk)
 
         return peaks
+
+    def fitExistingPeaks(self, peaks, calculateVolume=False):
+        """Refit the current selected peaks.
+        Must be called with peaks that belong to this peakList
+        """
+        from ccpn.core.PeakList import GAUSSIANMETHOD, LORENTZIANMETHOD, PARABOLICMETHOD # here for bad imports
+
+        self._models = {
+                                GAUSSIANMETHOD: GaussianModel,
+                                LORENTZIANMETHOD: LorentzianModel
+                                }
+
+        spectrum = peaks[0].spectrum
+        x = np.arange(1, spectrum.pointCounts[0]+1)
+        y = spectrum.intensities
+        npoints, sfs, sws, refppms, refpts = _getSpUnitConversionArguments(spectrum)
+        npoint, sf, sw, refppm, refpt = npoints[0], sfs[0], sws[0], refppms[0], refpts[0]
+        modelCls = self._models.get(self.fitMethod, LorentzianModel)
+        if self.fitMethod not in self._models:
+            getLogger().info(f'Selected Fitting model {self.fitMethod} is not available for this PeakPicker {self}. Used {modelCls.name} instead')
+
+        for peak in peaks:
+            height = peak.height
+            position = int(peak.pointPositions[0])
+            # Create a  model with fixed height and position
+            model = modelCls()
+            params = model.make_params(amplitude=height, center=position)
+            # Fit the Lorentzian model to the data with fixed parameters
+            result = model.fit(y, params, x=x)
+            # Extract the param values from the fitted model
+            fwhm = result.params['fwhm'].value
+            amplitude, center, sigma = result.params['amplitude'].value, result.params['center'].value, result.params['sigma'].value
+            fwhmLeft = center - fwhm / 2
+            fwhmRight = center + fwhm / 2
+            # covert points to Hz
+            leftHz = _pnt2hz(fwhmLeft, npoint, sf, sw, refppm, refpt)
+            rightHz = _pnt2hz(fwhmRight, npoint, sf, sw, refppm, refpt)
+            hwhmHz = abs(rightHz - leftHz)
+            peak.lineWidths = [hwhmHz]
+
+            # calculate volume from the traps. Quad method is much slower
+            if calculateVolume:
+                try:
+                    indicesInRange = (x >= fwhmLeft) & (x <= fwhmRight)
+                    xRange = x[indicesInRange]
+                    yRange = y[indicesInRange]
+                    volume = float(trapz(yRange, xRange))
+                    peak.volume = abs(volume)
+                except Exception as err:
+                    peak.volume = None
+                    getLogger().warn(f'Cannot calculate volume for peak {peak}. {err}')
 
 PeakPicker1D._registerPeakPicker()

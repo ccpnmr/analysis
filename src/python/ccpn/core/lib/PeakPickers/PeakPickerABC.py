@@ -4,9 +4,9 @@ PeakPicker abstract base class
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                )
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-24 13:54:29 +0100 (Tue, October 24, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-02-27 10:50:08 +0000 (Tue, February 27, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -195,6 +195,10 @@ class PeakPickerABC(CcpNmrJson):
         self._excludePpmRegions = defaultdict(list)  # {axisCode:[[start,stop],...]]} regions to be excluded when picking, e.g.: solvents
         # attribute needed for 1D when manually picking within a SpectrumDisplay box
         self._intensityLimits = (np.inf, -np.inf)
+
+    @property
+    def name(self):
+        return self.__class__.__name__
 
     def setDefaultParameters(self):
         """Set default values for all parameters
@@ -418,10 +422,10 @@ class PeakPickerABC(CcpNmrJson):
 
     def fitExistingPeaks(self, peaks):
 
-        raise NotImplementedError('This routine is not implemented for the current picker.')
+        raise NotImplementedError(f'This routine is not implemented for the current picker. {self.name}')
 
     def __str__(self):
-        return '<%s for %r>' % (self.__class__.__name__, self.spectrum.name)
+        return '<%s for %r>' % (self.name, self.spectrum.name)
 
 
 #end class

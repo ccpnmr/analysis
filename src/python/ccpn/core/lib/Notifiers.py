@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-14 12:12:33 +0000 (Wed, February 14, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-28 14:42:46 +0000 (Wed, February 28, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -277,8 +277,11 @@ class Notifier(NotifierABC):
         from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC  # local import to avoid cycles
         from ccpn.framework.Current import Current  # local import to avoid cycles
 
-        if theObject is None or not isinstance(theObject, (Current, AbstractWrapperObject, V3CoreObjectABC)):
-            raise RuntimeError('Notifier: invalid object %r' % theObject)
+        if theObject is None:
+            raise ValueError('Notifier: object is None')
+
+        if _STRICT and not isinstance(theObject, (Current, AbstractWrapperObject, V3CoreObjectABC)):
+            raise ValueError(f'Notifier: invalid object; expected Current, AbstractWrapper or V3CoreObject, got {type(theObject)}')
 
         super().__init__(theObject=theObject,
                          triggers=triggers,

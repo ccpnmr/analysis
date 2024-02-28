@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-15 21:07:00 +0000 (Thu, February 15, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-28 14:42:46 +0000 (Wed, February 28, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -58,11 +58,8 @@ from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets.PlotterWidget import plotter
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.Action import Action
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
-from ccpn.ui.gui.widgets.Menu import Menu, MenuBar
-from ccpn.ui.gui.Menus import FILE_MENU, FILE_RESTORE_FROM_ARCHIVE, VIEW_MENU, MACRO_MENU, VIEW_SHOW_MODULES, \
-    MACRO_RUN_CCPN, HELP_TUTORIALS, PLUGINS_MENU, USER_PLUGINS, CCPN_PLUGINS, HELP_HOWTOS
+
 from ccpn.ui.gui.widgets.SideBar import SideBar  #,SideBar
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
@@ -71,6 +68,7 @@ from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 from ccpn.ui.gui.widgets.Label import Label, ActiveLabel
 from ccpn.ui.gui.widgets.MessageDialog import showWarning, progressManager, showInfo, showError
 from ccpn.util.Common import camelCaseToString
+
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
 from ccpn.util.Colour import colorSchemeTable
@@ -525,6 +523,23 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         self.setStyleSheet('QToolTip {{ background-color: {TOOLTIP_BACKGROUND}; '
                            'color: {TOOLTIP_FOREGROUND}; '
                            'font-size: {_size}pt ; }}'.format(_size=self.font().pointSize(), **getColours()))
+
+    @property
+    def _widget(self):
+        """Property for forward Version-4 compatibility;
+        Top Widget for the MainWindow object; for Version-3 equals to self
+        """
+        return self
+
+    def _getMenuBarWidget(self):
+        """Helper routine to get the menubar widget; different implementation between different version
+        """
+        return self.menuBar()
+
+    def _getSideBarWidget(self):
+        """Helper routine to get the sidebar widget; different implementation between different version
+        """
+        return self._sideBarFrame
 
     def _setupMenus(self):
         """

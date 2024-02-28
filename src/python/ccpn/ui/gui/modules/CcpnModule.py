@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-19 17:38:14 +0000 (Mon, February 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-28 14:42:46 +0000 (Wed, February 28, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -453,6 +453,13 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     #=========================================================================================
     # Widget Methods
     #=========================================================================================
+
+    @property
+    def _widget(self):
+        """Property for forward Version-4 compatibility;
+        Top Widget for the CcpnModule object; for Version-3 equals to self
+        """
+        return self
 
     def _getModulePidFields(self):
         """

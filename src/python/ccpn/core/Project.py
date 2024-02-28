@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-20 08:39:28 +0000 (Tue, February 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-28 14:42:46 +0000 (Wed, February 28, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1070,7 +1070,9 @@ class Project(AbstractWrapperObject):
     def isModified(self):
         """Return true if any part of the project has been modified
         """
-        return self._wrappedData.root.isProjectModified()
+        if self._undo is None:
+            raise RuntimeError(f'Undefined undo-stack; This should not happen!')
+        return self._undo.isDirty() or self._wrappedData.root.isProjectModified()
 
     @staticmethod
     def _needsUpgrading(path) -> bool:
@@ -1474,15 +1476,20 @@ class Project(AbstractWrapperObject):
         for sp in self.spectra:
             sp._close()
 
+        # only update the logger if there have been changes to the project
+        self._updateLoggerState(readOnly=self.readOnly or not self.isModified)
+        Logging._clearLogHandlers()
+
         # purge all api-Objects
         self._closeApiObjects()
 
         # Remove undo stack:
         self._resetUndo(maxWaypoints=0)
 
-        # only update the logger if there have been changes to the project
-        self._updateLoggerState(readOnly=self.readOnly or not self.isModified)
-        Logging._clearLogHandlers()
+        # GWV 28/2/28: moved to above
+        # # only update the logger if there have been changes to the project
+        # self._updateLoggerState(readOnly=self.readOnly or not self.isModified)
+        # Logging._clearLogHandlers()
 
         self._clearAllApiNotifiers()
         self.deleteAllNotifiers()

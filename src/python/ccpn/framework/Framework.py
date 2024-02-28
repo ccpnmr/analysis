@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-20 08:39:28 +0000 (Tue, February 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-28 14:42:46 +0000 (Wed, February 28, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -300,8 +300,9 @@ class Framework(NotifierBase):
 
     @property
     def hasGui(self) -> bool:
-        """:return True if application has a gui"""
-        return isinstance(self.ui, Gui)
+        """:return True if application has a gui user interface
+        """
+        return self.ui and self.ui._hasGui
 
     @property
     def _saveOverride(self):
@@ -1026,7 +1027,7 @@ class Framework(NotifierBase):
         return Path(path)
 
     def _cleanTemporaryDirectory(self):
-        """Remove all filesin the temporary directory.
+        """Remove all files in the temporary directory.
         the cleanup() method of the _temporaryDirectory instance seems not to do the job
         """
         _paths = [Path(p) for p in Path(self._temporaryDirectory.name).glob('*')]
@@ -1041,9 +1042,9 @@ class Framework(NotifierBase):
             except (PermissionError, FileNotFoundError):
                 getLogger().debug('Folder may be read-only')
 
-    def _newProject(self, name: str = 'default') -> Project:
+    def _newProject(self, name:str = 'newProject', isTemporary=True) -> Project:
         """Create new, empty project with name
-        All new projects are created as temporary, to be saved later at another location
+        All new projects are created as temporary if isTemporary=True, to be saved later at another location
         :return a Project instance
         """
         # local import to avoid cycles
@@ -1055,16 +1056,19 @@ class Framework(NotifierBase):
         if checkProjectName(name, correctName=False) is None:
             raise ValueError(f'Invalid project name "{name}"; check log/console for details')
 
-        # Get a path in the temporary directory
-        path = self._getTemporaryPath(prefix=f'{name}_', suffix=CCPN_DIRECTORY_SUFFIX)
-
+        if isTemporary:
+            # Get a path in the temporary directory
+            path = self._getTemporaryPath(prefix=f'{name}_', suffix=CCPN_DIRECTORY_SUFFIX)
+        else:
+            path = aPath(f'./{name}').withSuffix(CCPN_DIRECTORY_SUFFIX)
+            
         # NB _closeProject includes a gui cleanup call
         self._closeProject()
         self._setSaveOverride(True)
-        result = _newProject(self, name=name, path=path, isTemporary=True)
-        self._initialiseProject(result)  # This also set the linkages
+        _project = _newProject(self, name=name, path=path, isTemporary=True)
+        self._initialiseProject(_project)  # This also set the linkages
 
-        getLogger().debug(f'Opened project "{name}" at {result.path}')
+        getLogger().debug(f'Opened project "{name}" at {_project.path}')
 
         # update the logger read-only state
         self.project._updateReadOnlyState()
@@ -1072,7 +1076,7 @@ class Framework(NotifierBase):
         if self.mainWindow:
             self.mainWindow._setReadOnlyIcon()
 
-        return result
+        return _project
 
     # @logCommand('application.')  # decorated in ui class
     def newProject(self, name: str = 'default') -> Project:

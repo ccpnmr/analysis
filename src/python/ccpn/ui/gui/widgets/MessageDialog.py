@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-14 12:12:37 +0000 (Wed, February 14, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-28 14:42:46 +0000 (Wed, February 28, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -141,7 +141,7 @@ class MessageDialog(QtWidgets.QMessageBox):
 
     def __init__(self, title, basicText, message, icon=Information, iconPath=None, parent=None, scrollableMessage=False,
                  dontShowEnabled=False, defaultResponse=None, popupId=None):
-        super().__init__(parent)
+        super().__init__(parent=parent)
 
         # set modality to take control
         self.setWindowModality(QtCore.Qt.ApplicationModal)
@@ -890,7 +890,7 @@ if __name__ == '__main__':
         # print(showInfo('My info window', 'test info'))
         # print(showMulti('Test', 'Multi Choice', ['Apples', 'Bananas', 'Pears']))
         # print(showError('Test', 'This is a test error message'))
-        # print(showYesNo('Test', 'Yes or No message'))
+        print(showYesNo('Test', 'Yes or No message'))
         # # print(showOkCancel('Test', 'Ok or Cancel message'))
         # # print(showRetryIgnoreCancel('Test', 'Some message'))
         # # print(showWarning('Test', 'Warning message'))
@@ -898,16 +898,16 @@ if __name__ == '__main__':
         #     'Test for a basic popup with a long line of text as the basic text and a path: /Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt',
         #     'Warning message'))
 
-        print(showWarning('Another Warning',
-                          'Test for a basic popup with a long line of text as the basic text and a path:\n/Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt'))
-
-        print(showWarning('Another Warning and Test for a basic popup with a long line of text as the basic text',
-                          'Test for a basic popup with a long line of text as the basic text and a path\n/Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt '
-                          'and text with no spaces qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789'))
-
-        print(showWarning('Another Warning and Test qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789\n for a basic popup with a long line of text as the basic text',
-                          'Test for a basic popup with a long line of text as the basic text and a path\n/Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt '
-                          'and text with no spaces qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789 something\n else'))
+        # print(showWarning('Another Warning',
+        #                   'Test for a basic popup with a long line of text as the basic text and a path:\n/Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt'))
+        #
+        # print(showWarning('Another Warning and Test for a basic popup with a long line of text as the basic text',
+        #                   'Test for a basic popup with a long line of text as the basic text and a path\n/Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt '
+        #                   'and text with no spaces qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789'))
+        #
+        # print(showWarning('Another Warning and Test qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789\n for a basic popup with a long line of text as the basic text',
+        #                   'Test for a basic popup with a long line of text as the basic text and a path\n/Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt '
+        #                   'and text with no spaces qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789 something\n else'))
 
 
     # app = TestApplication()

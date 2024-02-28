@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-20 08:39:28 +0000 (Tue, February 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-28 14:42:46 +0000 (Wed, February 28, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -67,6 +67,8 @@ from ccpn.util.Path import aPath, Path
 from ccpn.util.decorators import logCommand
 
 from ccpnmodel.ccpncore.memops.ApiError import ApiError
+
+from ._Gui import _Gui
 
 
 #-----------------------------------------------------------------------------------------
@@ -165,9 +167,12 @@ def getFontSettings():
         return None
 
 
-class Gui(Ui):
+
+class Gui(Ui,_Gui):
     """Top class for the GUI interface
     """
+
+    _hasGui = True
 
     def __init__(self, application):
 
@@ -256,7 +261,6 @@ class Gui(Ui):
         if mainWindow is None:
             raise ValueError('Gui.initialize(): Undefined mainWindow')
 
-        # super().__init__() also defines self._mainWindow and self._project
         super().initialize(mainWindow=mainWindow, project=project)
 
         with notificationEchoBlocking():
@@ -762,11 +766,10 @@ class Gui(Ui):
 
         oldMainWindowPos = self.mainWindow.pos()
         # if not self.project.isTemporary:
-        if self.project and (self.project._undo is None or self.project._undo.isDirty()):
-            message = f"Do you really want to create a new project (current project will be closed {' and any changes will be lost' if self.project.isModified else ''})?"
+        message = f"Do you really want to create a new project (current project will be closed {' and any changes will be lost' if self.project.isModified else ''})?"
 
-            if not (_ok := MessageDialog.showYesNo('New Project', message, parent=self.mainWindow)):
-                return
+        if not (_ok := MessageDialog.showYesNo('New Project', message, parent=self.mainWindow)):
+            return
 
         if (_name := checkProjectName(name, correctName=True)) != name:
             MessageDialog.showInfo('New Project', f'Project name changed from "{name}" to "{_name}"\nSee console/log for details', parent=self)
@@ -1151,86 +1154,3 @@ class Gui(Ui):
 
         return result
 
-    #-----------------------------------------------------------------------------------------
-    # All methods, to be retained in a 4.x refactored version
-    #-----------------------------------------------------------------------------------------
-
-    def _flipArbitraryAxes(self, strip, usePosition=False):
-        """Flip arbitrary axes of strip (defaults to current.strip)
-        :param usePosition: Optionally use current cursor position
-        """
-        if strip is None:
-            strip = self.current.strip
-
-        if strip is None:
-            getLogger().warning('Flip axes: No strip')
-            MessageDialog.showWarning('Flip axes', 'No strip')
-            return
-
-        if strip.spectrumDisplay.is1D:
-            getLogger().warning('Flip axes: not permitted on 1D spectra')
-            MessageDialog.showWarning('Flip axes', 'Not permitted on 1D spectra')
-            return
-
-        from ccpn.ui.gui.popups.CopyStripFlippedAxesPopup import CopyStripFlippedSpectraPopup
-
-        try:
-            mDict = usePosition and self.current.mouseMovedDict[1]
-            positions = [poss[0] if (poss := mDict.get(ax)) else None
-                         for ax in strip.axisCodes] if usePosition else None
-            popup = CopyStripFlippedSpectraPopup(parent=self.mainWindow, mainWindow=self.ui.mainWindow,
-                                                 strip=strip, label=strip.id,
-                                                 positions=positions)
-            popup.exec_()
-
-        except Exception as es:
-            getLogger().warning(f'Cannot show popup: {es}')
-
-
-    def _showHtmlFile(self, title, urlPath):
-        """Display html files
-        Optional program QT viewer or native webbrowser (currently disabled)
-        depending on useNativeWebbrowser option in preferences
-        """
-        from ccpn.util.Common import isWindowsOS
-
-        useNative = self.application.preferences.general.useNativeWebbrowser
-        if not useNative:
-            getLogger().debug('non-native HtmlModule has been disabled due to PyQT bugs')
-
-        if True:
-            import webbrowser
-            import posixpath
-
-            # may be a Path object
-            urlPath = str(urlPath)
-
-            urlPath = urlPath or ''
-            if (urlPath.startswith('http://') or urlPath.startswith('https://')):
-                pass
-            elif urlPath.startswith('file://'):
-                urlPath = urlPath[len('file://'):]
-                urlPath = urlPath.replace(os.sep, posixpath.sep) if isWindowsOS() else f'file://{urlPath}'
-
-            elif isWindowsOS():
-                urlPath = urlPath.replace(os.sep, posixpath.sep)
-            else:
-                urlPath = f'file://{urlPath}'
-
-            webbrowser.open(urlPath)
-
-    def _showPath(self, path):
-        """Show path
-        """
-        try:
-            self.application._systemOpen(path)
-        except Exception as es:
-            getLogger().warning(f'Error opening {path}')
-
-    def _showTutorialData(self):
-        from ccpn.framework.PathsAndUrls import ccpnTutorials
-        self._showHtmlFile("Tutorial Data", ccpnTutorials)
-
-    def _showCCPNVideos(self):
-        from ccpn.framework.PathsAndUrls import ccpnVideos
-        self._showHtmlFile('Video Tutorials', ccpnVideos)

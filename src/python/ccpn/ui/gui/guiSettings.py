@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-15 21:07:00 +0000 (Thu, February 15, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-28 14:42:46 +0000 (Wed, February 28, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -448,7 +448,7 @@ def setColourScheme(colourScheme):
         ColourDict(colourScheme).setColourScheme(colourScheme)
 
     else:
-        getLogger().warning('Application not defined; colourScheme not set')
+        getLogger().warning('Gui interface of application not defined; colourScheme not set')
 
 
 def setDefaultColourScheme():

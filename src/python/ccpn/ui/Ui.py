@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-18 13:06:47 +0000 (Sun, February 18, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-28 14:42:46 +0000 (Wed, February 28, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -45,10 +45,15 @@ from ccpn.util.decorators import logCommand
 
 
 class Ui(NotifierBase):
-    """Superclass for all user interface classes"""
+    """Superclass for all user interface classes
+    """
 
-    # Factory functions for UI-specific instantiation of wrapped graphics classes
-    _factoryFunctions = {}
+    # Can be subclassed
+    _hasGui = False
+
+    # GWV 26/2/24: Not used
+    # # Factory functions for UI-specific instantiation of wrapped graphics classes
+    # _factoryFunctions = {}
 
     def __init__(self, application):
 
@@ -57,7 +62,6 @@ class Ui(NotifierBase):
         self._application = application
         application._ui = self
         # set by initialise
-        self._project = None
         self._mainWindow = None
         # plugin Modules list
         self.pluginModules = []
@@ -76,7 +80,7 @@ class Ui(NotifierBase):
 
     @property
     def project(self):
-        return self._project
+        return self.application.project
 
     @property
     def current(self):
@@ -88,7 +92,6 @@ class Ui(NotifierBase):
         """UI operations done after every project load/create
         """
         self._mainWindow = mainWindow
-        self._project = project
 
     def startUi(self):
         """Start the ui execution

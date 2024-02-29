@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-29 09:39:21 +0000 (Thu, February 29, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-29 17:38:10 +0000 (Thu, February 29, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -108,10 +108,10 @@ class Pipeline(object):
             else:
                 x, y = rawDataDict.get(spectrum)
             if not spectrum._noiseSD:
-                _noiseSD = float(np.median(y) + 1 * np.std(y))
+                _noiseSD = float(np.median(y) + np.std(y))
                 spectrum._noiseSD = _noiseSD
                 if spectrum.noiseLevel is None:
-                    spectrum.noiseLevel = _noiseSD * 3.5
+                    spectrum.noiseLevel = _noiseSD * 2
 
     def _updateRunArgs(self, arg, value):
         self._kwargs[arg] = value

@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-05 16:01:25 +0000 (Mon, February 05, 2024) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-02-29 18:19:10 +0000 (Thu, February 29, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -25,10 +25,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-
-import sys
-from PyQt5.Qt import QDesktopServices, QUrl, QApplication, Qt
-from PyQt5.QtWidgets import QTextEdit
 
 from PyQt5 import QtGui, QtWidgets, QtCore, QtPrintSupport
 from ccpn.ui.gui.widgets.FileDialog import MacrosFileDialog
@@ -131,10 +127,10 @@ class TextEditor(QtWidgets.QTextEdit, Base):
         """
         if self._enableWebLinks:
             if _anchor := self.anchorAt(e.pos()):
-                QApplication.setOverrideCursor(Qt.PointingHandCursor)
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.PointingHandCursor)
                 self.setToolTip(_anchor)
             else:
-                QApplication.setOverrideCursor(Qt.ArrowCursor)
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.ArrowCursor)
                 self.setToolTip(None)
 
         super().mouseMoveEvent(e)
@@ -143,8 +139,8 @@ class TextEditor(QtWidgets.QTextEdit, Base):
         """Open a new web-page to the link under the mouse.
         """
         if self._enableWebLinks and self._anchor:
-            QDesktopServices.openUrl(QUrl(self._anchor))
-            QApplication.setOverrideCursor(Qt.ArrowCursor)
+            QtGui.QDesktopServices.openUrl(QtCore.QUrl(self._anchor))
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.ArrowCursor)
             self._anchor = None
 
         super().mouseReleaseEvent(e)

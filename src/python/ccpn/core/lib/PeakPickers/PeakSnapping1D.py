@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-27 10:50:08 +0000 (Tue, February 27, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-29 09:39:21 +0000 (Thu, February 29, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -46,15 +46,20 @@ from ccpn.util.DataEnum import DataEnum
 class _SnapFlag(DataEnum):
     """
     A set of flags set to (internal) peak after a snapping reflecting the snap outcome.
+    Not in any particular order, Just enumerated flags. However,
+        - a positive value will indicate a successful snap to a new maximum and/or position;
+        - a negative value will suggest a failure.
+        This format ensure conditions can be checked: eg. if peakA._snapFlag > 0 ...
     """
-    _0 = 0, 'New position and maximum above thresholds'
-    _1 = 1, 'New position and maximum above thresholds after an "on-the-fly" local re-referencing'
-    _3 = 3, 'New position and maximum below thresholds after an "on-the-fly" local re-referencing'
-    _4 = 4, 'Same position and new maximum above thresholds'
-    _2 = 2, 'New position and maximum below thresholds'
-    _5 = 5, 'Same position and new maximum below thresholds'
-    _6 = 6, 'Same position new maximum below thresholds but maxima candidates above thresholds near snapping boundaries'
-    _7 = 7, 'Failed. Position and height are unchanged'
+    ## Successful snaps
+    NEW_POS_HEIGHT = 1, 'New position and maximum above S/N thresholds'
+    NEW_POS_HEIGHT_ALIGN = 2, 'New position and maximum above S/N thresholds after an "on-the-fly" local re-referencing'
+
+    ## Unsuccessful snaps
+    CLOSEST_HEIGHT_AT_POS = -10, 'Closest maximum at the same position'
+    CLOSEST_HEIGHT_AT_POS_BUT_CANDIDATES = -20, 'Closest maximum at the same position but maxima candidates above S/N thresholds near snapping boundaries'
+    FAILED = -30, 'Failed. Position and height are unchanged. No maxima found nearby'
+
 
 def snap1DPeaks(peaks, **kwargs):
 
@@ -97,7 +102,7 @@ def _snap(peak, x,y, maxima, minimalHeightThreshold,  defaultLimitPpm=0.5, maxLi
     leftPpm, rightPpm = _getSnappingPeakLimits(peak, otherPeaksPointPosition=otherPeaksPointPosition, deltaFactor=deltaFactor, defaultLimitPpm=defaultLimitPpm, maxLimitPpm=maxLimitPpm)
     limitsRange = _getLimitsRange(peak, leftPpm, rightPpm, maxSteps=5)
     # nextColour = next(iterator_colours)
-    columns = ['deltaPos', 'pickingThreshold','sn', 'ppm', 'height']
+    columns = ['deltaPos', 'pickingThreshold','minimalHeightThresholdRatio', 'ppm', 'height']
     dd = {i:[] for i in columns}
     seenPositions = []
     for i, limits in enumerate(limitsRange):
@@ -118,33 +123,34 @@ def _snap(peak, x,y, maxima, minimalHeightThreshold,  defaultLimitPpm=0.5, maxLi
                 if pos not in seenPositions:
                     height = yPos4Region[index]
                     deltaPos =  abs(abs(peak.position[0]) - abs(pos))
-                    sn = height/minimalHeightThreshold
+                    minimalHeightThresholdRatio = height/minimalHeightThreshold
                     dd['deltaPos'].append(deltaPos)
                     dd['pickingThreshold'].append(pickingThreshold)
-                    dd['sn'].append(sn)
+                    dd['minimalHeightThresholdRatio'].append(minimalHeightThresholdRatio)
                     dd['ppm'].append(pos)
                     dd['height'].append(height)
                     seenPos = pos
                     seenPositions.append(pos)
             if seenPos == pos:
                 break
-        # Don't break the  search. Let it explore all limits until the end.
+        # Don't break here the search. Let it explore all limits until the end.
 
     df = pd.DataFrame(dd)
-    df = df[df['sn'] > 1.3]
+    df = df[df['minimalHeightThresholdRatio'] > 1.3] ## Experimentally selected. Value decided after inspecting thousands of signals. this is a sort of S/N ratio.
+                                                                                ## if too low the found maximum is obviously noise, too high will miss good peaks.
     if len(df)>0:
-
+        # We have a good snap
         df.drop_duplicates(subset=['ppm', 'height'],  inplace=True)
-        df = df.sort_values(['deltaPos', 'pickingThreshold', 'sn'], ascending=[True, False, False])
+        df = df.sort_values(['deltaPos', 'pickingThreshold', 'minimalHeightThresholdRatio'], ascending=[True, False, False])
         pos = df['ppm'].values[0]
         height = df['height'].values[0]
         position = float(pos)
         height = float(height)
-        heightError = 0
-        peak.position =  [position]
+        peak.position = [position]
         peak.height = height
-        peak.heightError = heightError
-        return [position], height, heightError
+        snapFlag = _SnapFlag.NEW_POS_HEIGHT.value
+        peak._snapFlag = snapFlag
+        return [position], height, snapFlag
 
     if retry:
         return _snap(peak, x, y, maxima, minimalHeightThreshold,
@@ -154,13 +160,12 @@ def _snap(peak, x,y, maxima, minimalHeightThreshold,  defaultLimitPpm=0.5, maxLi
     else:
         position = peak.position[0]
         height = float(_getClosestHeight(x, y, position, peak.height))
-        heightError = 1
-        # if 'STAY' not in peak.annotation:
-        #     peak.annotation = f'{peak.annotation} -- STAY AT POS'
         peak.position = [position]
         peak.height = height
-        peak.heightError = heightError
-    return [position], height, heightError
+        snapFlag = _SnapFlag.CLOSEST_HEIGHT_AT_POS.value
+        peak._snapFlag = snapFlag
+
+    return [position], height, snapFlag
 
 
 def _find1DCoordsForPeaks(peaks,
@@ -170,15 +175,7 @@ def _find1DCoordsForPeaks(peaks,
                       deltaFactor=0.5,
                       minimalHeightFactor=1.0):
     """
-    :param peaks:
-    :param rawDataDict:
-    :param ppmLimit:
-    :param additionalClusterPeakPpmLimit:  When auto-detecting a cluster, add a +/- ppm rangeLimits to the edges of a cluster region
-    :param figOfMeritLimit:
-    :param doNeg:
-    :return: dict.
-                        Keys: peak.
-                        values: list of [ppmPosition, height, heightError]
+
     """
     ## peaks can be from different spectra, so let's group first
     snapped, unsnapped = [], []
@@ -217,35 +214,46 @@ def _find1DCoordsForPeaks(peaks,
                       figOfMeritLimit=figOfMeritLimit,
                       defaultLimitPpm=ppmLimit,
                       deltaFactor=deltaFactor)
-                if peak.heightError ==1:
+                if peak._snapFlag <0:
                     unsnapped.append(peak)
                 else:
                     snapped.append(peak)
     return snapped, unsnapped
 
 
+def _countCloseValuesForB(A, B, tolerance):
+    """
+    For each element in B, find how many elements in A are close within a specified tolerance.
+    Parameters:
+    - A: NumPy array of floats.
+    - B: NumPy array of floats.
+    - tolerance: Tolerance for closeness between elements in A and B (float).
 
+    Returns:
+    - close_counts: NumPy array containing the count of close values in A for each element in B.
+    """
+    # Count the number of elements in A close to each element in B within the tolerance
+    counts = np.sum(np.isclose(A[:, None], B, atol=tolerance), axis=0)
 
+    return counts
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+def _countNearUnpickedMaxima(peaks, tolerancePpm = 1):
+    """
+    """
+    spectrum = peaks[0].spectrum
+    x, y = np.array(spectrum.positions), np.array(spectrum.intensities)
+    minimalHeightThreshold = spectrum._noiseSD * 2
+    mm, mx = _find1DPositiveMaxima(y, x, minimalHeightThreshold)
+    positions = np.array(mm).T[0]  # allMaximaPositions
+    # heights = np.array(mm).T[1]
+    A = positions
+    B = np.array([pk.position[0] for pk in peaks])
+    # Check if any element of A is close to any element of B within the tolerance
+    close_to_b = np.any(np.isclose(A[:, None], B, atol=1.e-2), axis=1)
+    C = A[~close_to_b]  # C are the maxima available on the spectrum which haven't been picked
+    counts = np.sum(np.isclose(C[:, None], B, atol=tolerancePpm), axis=0)
+    ##  for each element in B find how many maxima are closeby in C
+    return counts
 
 
 

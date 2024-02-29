@@ -3,9 +3,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-11-30 09:52:08 +0000 (Thu, November 30, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-02-29 09:39:21 +0000 (Thu, February 29, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -77,6 +77,7 @@ class Peak(AbstractWrapperObject):
 
     # Internal. Used as temporary holder during time-consuming and recursive peak routines.
     _tempAssignment = 0
+    _SNAPFLAG = '_snapFlag'
 
     # CCPN properties
     @property
@@ -577,6 +578,22 @@ class Peak(AbstractWrapperObject):
                 dimResonances.append(resonances)
 
         apiPeak.assignByDimensions(dimResonances)
+
+    @property
+    def _snapFlag(self) -> int:
+        """ An enumerated flag set to a peak after a snapping routine, indicating the quality of the snap.
+        A positive value will indicate a successful snap to a new maximum and/or position; a negative value will suggest a failure.
+        See ccpn/core/lib/PeakPickers/PeakSnapping1D._SnapFlag.
+        _internal. Used mainly in Screening, where the peak.figureOfMerit is already used for other purposes"""
+
+        return self._getInternalParameter(self._SNAPFLAG)
+
+    @_snapFlag.setter
+    def _snapFlag(self, value):
+        """Set the peak  _snapFlag. positive or negative int
+        """
+        self._setInternalParameter(self._SNAPFLAG, value)
+
 
     @staticmethod
     def _recalculatePeakShifts(nmrResidues, shifts):

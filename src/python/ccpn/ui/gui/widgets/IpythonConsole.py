@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-19 12:56:41 +0000 (Mon, February 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-29 15:49:49 +0000 (Thu, February 29, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -88,10 +88,10 @@ class IpythonConsole(Widget):
     focusedIn = QtCore.pyqtSignal(QtGui.QFocusEvent)
     mouseMoved = QtCore.pyqtSignal(QtGui.QMouseEvent)
 
-    def __init__(self, mainWindow, namespace=None, **kwds):
+    def __init__(self, mainWindow, namespace, **kwds):
 
         if namespace is None:
-            namespace = mainWindow.namespace
+            raise ValueError(f'IpythonConsole: undefined namespace')
 
         super().__init__(parent=mainWindow, setLayout=True, **kwds)
         # Base._init(self, setLayout=True, **kwds)

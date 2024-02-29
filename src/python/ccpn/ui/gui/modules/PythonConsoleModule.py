@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-14 12:12:35 +0000 (Wed, February 14, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-29 15:49:49 +0000 (Thu, February 29, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -62,7 +62,7 @@ class PythonConsoleModule(CcpnModule):
         self.pythonConsoleWidget = pythonConsoleWidget
 
         if self.pythonConsoleWidget is None:  # For some reason it can get destroid!
-            self.mainWindow.pythonConsole = self.pythonConsoleWidget = IpythonConsole(self)
+            self.mainWindow.pythonConsole = self.pythonConsoleWidget = IpythonConsole(mainWindow=mainWindow, namespace=mainWindow.namespace)
         self.mainWidget.getLayout().addWidget(self.pythonConsoleWidget)
 
         self.pythonConsoleWidget._startChannels()

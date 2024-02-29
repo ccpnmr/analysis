@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-28 14:42:46 +0000 (Wed, February 28, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-29 15:49:49 +0000 (Thu, February 29, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -253,7 +253,10 @@ class Framework(NotifierBase):
         self._spectrumDataSourceFormats = getDataFormats()
 
         # Resources
-        self.resources = Resources(self)
+        sys.stderr.write('==> Loading resources... ')
+        self.resources = None
+        # self.resources = Resources(self)
+        sys.stderr.write('Done!\n')
 
         # get a user interface; nb. ui.start() is called by the application
         self._ui = self._getUI()
@@ -322,24 +325,25 @@ class Framework(NotifierBase):
             if self.mainWindow:
                 self.mainWindow._setReadOnlyIcon()
 
-    @property
-    def defaultReadOnly(self):
-        """Return the deafult read-only state for all projects.
-        Overrides project.readOnly except for using save/saveAs as necessary
-        """
-        return self._readOnly
-
-    @defaultReadOnly.setter
-    def defaultReadOnly(self, value):
-        if not isinstance(value, bool):
-            raise TypeError(f'{self.__class__.__name__}.defaultReadOnly must be a bool')
-
-        self._readOnly = value
-        if self.project:
-            self.project._updateReadOnlyState()
-            self.project._updateLoggerState()
-            if self.mainWindow:
-                self.mainWindow._setReadOnlyIcon()
+    # GWV 29/2/2024: Not used (!?)
+    # @property
+    # def defaultReadOnly(self):
+    #     """Return the deafult read-only state for all projects.
+    #     Overrides project.readOnly except for using save/saveAs as necessary
+    #     """
+    #     return self._readOnly
+    #
+    # @defaultReadOnly.setter
+    # def defaultReadOnly(self, value):
+    #     if not isinstance(value, bool):
+    #         raise TypeError(f'{self.__class__.__name__}.defaultReadOnly must be a bool')
+    #
+    #     self._readOnly = value
+    #     if self.project:
+    #         self.project._updateReadOnlyState()
+    #         self.project._updateLoggerState()
+    #         if self.mainWindow:
+    #             self.mainWindow._setReadOnlyIcon()
 
     #-----------------------------------------------------------------------------------------
     # Useful (?) directories as Path instances
@@ -627,7 +631,8 @@ class Framework(NotifierBase):
             self.current._restoreStateFromFile(self.statePath)
 
         # Load project specific resources.
-        self.resources._initProjectResources()
+        if self.resources:
+            self.resources._initProjectResources()
 
     #-----------------------------------------------------------------------------------------
     # Utilities
@@ -1216,7 +1221,8 @@ class Framework(NotifierBase):
             self.current._unregisterNotifiers()
             self._current = None
 
-        self.resources._deregisterProjectResources()
+        if self.resources:
+            self.resources._deregisterProjectResources()
 
         if self.project is not None:
             # Cleans up wrapper project, including graphics data objects (Window, Strip, etc.)

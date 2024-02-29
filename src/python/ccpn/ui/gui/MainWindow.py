@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-28 14:42:46 +0000 (Wed, February 28, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-29 15:49:49 +0000 (Thu, February 29, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -134,16 +134,21 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         self.moduleArea.setGeometry(0, 0, 1000, 800)
         # GST can't seem to do this with style sheets...
         self.moduleArea.setContentsMargins(0, 2, 2, 0)
+        self.setCentralWidget(self.moduleArea)
 
         self._hiddenModules = CcpnModuleArea(mainWindow=self)
         self._hiddenModules.setVisible(False)
 
-        self.pythonConsoleModule = None  # Python console module; defined upon first time Class initialisation. Either by toggleConsole or Restoring layouts
-        self.namespace = None
+        # Python console module; defined upon first time Class initialisation. Either by toggleConsole or Restoring layouts
+        self.pythonConsoleModule = None
+        # IPythonConsole instance; defined in _setupWindow()
+        self.pythonConsole = None
+        # IPythonConsole namespace; filled in _setupWindow() and
+        self.namespace = {}
 
         # logger.debug('GuiMainWindow.moduleArea: layout: %s' % self.moduleArea.layout)  ## pyqtgraph object
 
-        self.setCentralWidget(self.moduleArea)
+        # self.setCentralWidget(self.moduleArea)
         self._shortcutsDict = {}
 
         setWidgetFont(self, )
@@ -450,19 +455,27 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
     #                     break
     #     return found
 
+    def _initPythonConsoleModule(self):
+        """Initialise a PythonConsoleModule
+        """
+        from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
+        self.pythonConsoleModule = PythonConsoleModule(self)
+        self.moduleArea.addModule(self.pythonConsoleModule, 'bottom')
+
     def _setupWindow(self):
         """
         Sets up SideBar, python console and splitters to divide up main window properly.
 
         """
+
         self.namespace = {'application'             : self.application,
                           'current'                 : self.application.current,
                           'preferences'             : self.application.preferences,
                           'redo'                    : self.application.redo,
-                          'undo'                  : self.application.undo,
+                          'undo'                    : self.application.undo,
                           'get'                     : self.application.get,
-                          'getByPid'            :  self.application.get,
-                          'getByGid'            : self.application.ui.getByGid,
+                          'getByPid'                :  self.application.get,
+                          'getByGid'                : self.application.ui.getByGid,
                           'ui'                      : self.application.ui,
                           'mainWindow'              : self,
                           'project'                 : self.application.project,
@@ -479,7 +492,9 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                           'notificationEchoBlocking': notificationEchoBlocking,
                           'plotter'                 : plotter
                           }
-        self.pythonConsole = IpythonConsole(self)
+
+        # Make a PythonConsole
+        self.pythonConsole = IpythonConsole(mainWindow=self, namespace=self.namespace)
 
         # create the sidebar
         self._sideBarFrame = Frame(self, setLayout=True)  # in this frame is inserted the search widget
@@ -524,6 +539,10 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                            'color: {TOOLTIP_FOREGROUND}; '
                            'font-size: {_size}pt ; }}'.format(_size=self.font().pointSize(), **getColours()))
 
+    #---------------------------------------------------------------------------------------------
+    # Version-3/4 compatibility functionalities
+    #---------------------------------------------------------------------------------------------
+
     @property
     def _widget(self):
         """Property for forward Version-4 compatibility;
@@ -540,6 +559,16 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         """Helper routine to get the sidebar widget; different implementation between different version
         """
         return self._sideBarFrame
+
+    def _getPythonConsoleWidget(self):
+        """Helper routine to get the Python console widget; different implementation between different version
+        :return widget or None if it does not exist
+        """
+        return self.pythonConsoleModule
+
+    #---------------------------------------------------------------------------------------------
+    # Menu's
+    #---------------------------------------------------------------------------------------------
 
     def _setupMenus(self):
         """
@@ -853,14 +882,14 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
     #                                      checkable=True, checked=visible,
     #                                      callback=partial(self._showModule, module)))
 
-    def _showModule(self, module):
-        try:
-            menuItem = self.searchMenuAction(module.name())
-            if menuItem:
-                module.setVisible(not module.isVisible())
-
-        except Exception as es:
-            getLogger().warning('Error expanding module: %s', module.name())
+    # def _showModule(self, module):
+    #     try:
+    #         menuItem = self.searchMenuAction(module.name())
+    #         if menuItem:
+    #             module.setVisible(not module.isVisible())
+    #
+    #     except Exception as es:
+    #         getLogger().warning('Error expanding module: %s', module.name())
 
     # def _fillCCPNMacrosMenu(self):
     #     modulesMenu = self.searchMenuAction(MACRO_RUN_CCPN)
@@ -994,14 +1023,14 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
     #     except Exception as es:
     #         getLogger().warning('Error opening tutorial: %s' % str(filename))
 
-    def _showSideBar(self, visible):
-        try:
-            if visible:
-                self._sideBarFrame.hide()
-            else:
-                self._sideBarFrame.show()
-        except Exception as es:
-            getLogger().warning('Error expanding module: sideBar')
+    # def _showSideBar(self, visible):
+    #     try:
+    #         if visible:
+    #             self._sideBarFrame.hide()
+    #         else:
+    #             self._sideBarFrame.show()
+    #     except Exception as es:
+    #         getLogger().warning('Error expanding module: sideBar')
 
     def keyReleaseEvent(self, event: QtGui.QKeyEvent) -> None:
         # this MUST be a keyRelease event (isAutoRepeat MUST be false for keysequence-actions)
@@ -2320,41 +2349,49 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                 mode = MouseModes[i]
                 self._setMouseMode(mode)
 
-    def _findMenuAction(self, menubarText, menuText):
-        # not sure if this function will be needed more widely or just in console context
-        # CCPN internal: now also used in SequenceModule._closeModule
-        # Should be stored in a dictionary upon initialisation!
+    # def _findMenuAction(self, menubarText, menuText):
+    #     # not sure if this function will be needed more widely or just in console context
+    #     # CCPN internal: now also used in SequenceModule._closeModule
+    #     # Should be stored in a dictionary upon initialisation!
+    #
+    #     for menuBarAction in self._menuBar.actions():
+    #         if menuBarAction.text() == menubarText:
+    #             break
+    #     else:
+    #         return None
+    #
+    #     for menuAction in menuBarAction.menu().actions():
+    #         if menuAction.text() == menuText:
+    #             return menuAction
+    #
+    #     return None
 
-        for menuBarAction in self._menuBar.actions():
-            if menuBarAction.text() == menubarText:
-                break
+    def _toggleConsole(self):
+        """
+        - Show/hide the pythonConsole module .
+        """
+        # GWV: Somehow the code (Layout restore?) cannot deal with the PythonConsoleModule
+        # being initialised by MainWindow, but hidden until needed. So we initialise it here
+        # if there is not PythonConsoleModule
+        _init = False
+        if self.pythonConsoleModule is None:
+            # No pythonConsole module detected, so create one.
+            self._initPythonConsoleModule()
+            _init = True
+
+        if self.pythonConsoleModule.isHidden() or _init:
+            self.pythonConsoleModule.show()
         else:
-            return None
+            self.pythonConsoleModule.hide()
 
-        for menuAction in menuBarAction.menu().actions():
-            if menuAction.text() == menuText:
-                return menuAction
-
-        return None
-
-    def toggleConsole(self):
+    def _toggleSidebar(self):
+        """Toggle the visibility of the Sidebar
         """
-
-        - Opens a new pythonConsole module if none available.
-        - Show/hide the pythonConsole module if already one available.
-        """
-        from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
-
-        _justCreated = False
-        if self.pythonConsoleModule is None:  # No pythonConsole module detected, so create one.
-            self.moduleArea.addModule(PythonConsoleModule(self), 'bottom')
-            _justCreated = True
-        if self.pythonConsoleModule:
-            if self.pythonConsoleModule.isHidden():
-                self.pythonConsoleModule.show()
-            else:
-                if not _justCreated:
-                    self.pythonConsoleModule.hide()
+        _sidebar = self._getSideBarWidget()
+        if _sidebar.isHidden():
+            _sidebar.show()
+        else:
+            _sidebar.hide()
 
     def _lowerContourBaseCallback(self):
         """Callback to lower the contour level for the currently

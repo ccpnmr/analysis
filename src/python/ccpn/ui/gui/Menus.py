@@ -62,8 +62,10 @@ mainWindow.
     _updateRestoreArchiveMenu
     getMenuAction
     searchMenuAction
+    findeMenuAction
     _clearRecentProjects
     _clearRecentMacros
+    _showModule
 
 GuiMainWindow.  -->
     _attacheTutorialsMenuAction
@@ -113,7 +115,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-28 14:42:46 +0000 (Wed, February 28, 2024) $"
+__dateModified__ = "$dateModified: 2024-02-29 15:49:49 +0000 (Thu, February 29, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -334,7 +336,10 @@ class MenusDefs(list):
             ),
             Separator(),
             (VIEW_SHOW_MODULES, DYNAMIC_FILL),
-            ("Python Console", self._toggleConsoleCallback, [('shortcut', '  ')]),
+            ("Show/hide Sidebar", self._toggleSidebarCallback, {'shortcut':' s', 'checkable':True, 'checked':True}),
+            ("Show/hide Python Console", self._toggleConsoleCallback,
+                                        {'shortcut':'  ', 'checkable':True, 'checked':True}, _updatePythonConsole
+            ),
             ]
         ),
 
@@ -590,7 +595,7 @@ class MenusDefs(list):
         Displays Application Preferences Popup.
         """
         from ccpn.ui.gui.popups.PreferencesPopup import PreferencesPopup
-        popup = PreferencesPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, preferences=self.application.preferences)
+        popup = PreferencesPopup(parent=self.ui.mainWindow._widget, mainWindow=self.ui.mainWindow, preferences=self.application.preferences)
         popup.exec_()
 
     def _quitCallback(self, event=None):
@@ -924,10 +929,15 @@ class MenusDefs(list):
             getLogger().warning('Flip arbitrary axes: No strip selected')
             MessageDialog.showWarning('Flip arbitrary axes', 'No strip selected')
 
-    def _toggleConsoleCallback(self):
-        """Toggles whether python console is displayed at bottom of the main window.
+    def _toggleSidebarCallback(self):
+        """Toggles whether the sidebar is displayed.
         """
-        self.mainWindow.toggleConsole()
+        self.mainWindow._toggleSidebar()
+
+    def _toggleConsoleCallback(self):
+        """Toggles whether python console is displayed.
+        """
+        self.mainWindow._toggleConsole()
 
     def _toggleCrosshairCallback(self):
         """Toggles whether crosshairs are displayed in all SpectrumDisplays.
@@ -1172,9 +1182,10 @@ class MenuNode(Tree):
     def __init__(self, parent, name, nodeType,
                        isDynamic=False, callback=None, options={}):
 
+        # Make node initially as stand-alone,
+        # to be added after all init's are completed
         Tree.__init__(self, parent=None)
 
-        # self.parent = parent
         self.name = name
         self.nodeType = nodeType
         self.callback = callback
@@ -1184,12 +1195,14 @@ class MenuNode(Tree):
         self.isDynamic = isDynamic
         self.dynamicCallback = None
 
-        # Action's can be check for needing enabling
+        # Action's can be checked for needing enabling
         self.checkEnable = False
         self.checkEnableCallback = None
 
+        # The widget associated with this node
         self.widget = None
 
+        # Add to tree, if parent is not None, i.e. this node is not the root
         if parent is not None:
             parent._addChild(self)
 
@@ -1234,7 +1247,7 @@ class MenuNode(Tree):
 
     def setDynamicNode(self, callback):
         """Make MenuNode a dynamically updated one, defining callback when it is about to show
-        param callback: a function with signature callback(node:MenuNode)
+        :param callback: a function with signature callback(node:MenuNode)
         """
         if not self.isMenu:
             raise RuntimeError(f'setDynamicNode: invalid for {self}')
@@ -1306,8 +1319,10 @@ class MenuNode(Tree):
     def addNodesFromList(self, theList) -> list:
         """(Recursively) Traverse theList with Menu definitions,
         adding items in theList as child-nodes.
+        The method effectively parses the menu-definitions list, as defined by the
+        MenuDefs class above
 
-        :param thelist: a list of Menu tuple definitions.
+        :param theList: a list of Menu tuple definitions (see also MenuDefs class)
 
         :return A list of nodes added
         """
@@ -1635,21 +1650,20 @@ class MenuManager(object):
         _visible = widget.isVisible()
         widget.setVisible(not _visible)
 
-    def _fillViewShowModulesCallback(self, node):
-        """Callback to fill View->Show Modules Menu
+    def _fillViewShowModulesCallback(self, node) -> bool:
+        """Callback to fill View->Show/hide Modules Menu
         """
-        # from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
-
-        _widgets = [('Sidebar', self.mainWindow._getSideBarWidget())] + \
-                   [(m.moduleName, m._widget) for m in self.mainWindow.modules]
+        from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
+        _widgets = [(m.moduleName, m._widget) for m in self.mainWindow.modules
+                    if m.className != PythonConsoleModule.className
+                   ]
 
         _defs = []
-        count = 0
+        count = 1
         for name, widget in _widgets:
-
-            # create a shortcut command/cntr 0-9 for first 10 modules (Sidebar will always be cmd-0)
-            if count <= 9:
-                shortcut = f'⌃{count}'  # Unicode U+2303, NOT the carrot on your keyboard.
+            # create a shortcut command/cntr 1-9,0 for first 10 modules
+            if count <= 10:
+                shortcut = f'⌃{count%10}'  # Unicode U+2303, NOT the carrot on your keyboard.
             else:
                 shortcut = None
 
@@ -1693,7 +1707,13 @@ class MenuManager(object):
                 [(f.basename, partial(self.application.runMacro, f)) for f in _files]
             )
 
-        self._updateDynamicNode(node=node, defs=_defs)
+        if len(_defs) > 0:
+            # update the node and set to active
+            self._updateDynamicNode(node=node, defs=_defs)
+            return True
+        else:
+            # nothing to show
+            return False
 
     def _fillUserPluginsCallback(self, node):
         """Callback to fill Plugins->User Plugins
@@ -1839,6 +1859,9 @@ def _getSaveLayoutPath(mainWindow):
     return newPath
 
 #-----------------------------------------------------------------------------------------
+# Various small helper functions for menu actions dynamic settings
+#-----------------------------------------------------------------------------------------
+
 def _projectCanBeSaved(node) -> bool:
     """callback to test if project can be saved; ie. not temporary and not readOnly
     """
@@ -1886,3 +1909,15 @@ def _hasActiveDisplay(node) -> bool:
     else:
         node.widget.setTitle('Select Strip in SpectrumDisplay')
         return False
+
+def _updatePythonConsole(node) -> bool:
+    """callback to check and update the Show/hide Python Console action
+    """
+    app = getApplication()
+    if (widget := app.ui.mainWindow._getPythonConsoleWidget()) is not None:
+        hidden = widget.isHidden()
+        checked = not hidden
+    else:
+        checked = False
+    node.widget.setChecked(checked)
+    return True

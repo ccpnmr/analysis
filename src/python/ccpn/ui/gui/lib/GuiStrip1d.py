@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-02-26 15:48:56 +0000 (Mon, February 26, 2024) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2024-02-29 15:15:10 +0000 (Thu, February 29, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -331,10 +331,10 @@ class GuiStrip1d(GuiStrip):
                     self._CcpnGLWidget.removeInfiniteLine(line)
         self._noiseThresholdLines.clear()
 
-    def _updateNoiseThresholdLines(self, spectrumViewChanged=True,  setAllVisible=False):
+    def _updateNoiseThresholdLines(self, spectrumViewChanged=True):
         """toggle/update the lines """
+        visibleSpectra = self.getVisibleSpectra()
         if spectrumViewChanged:
-            visibleSpectra =  self.getVisibleSpectra()
             for spectrumView in self.spectrumViews:
                 spectrum = spectrumView.spectrum
                 isVisibleSpectrum = spectrum in visibleSpectra
@@ -344,7 +344,10 @@ class GuiStrip1d(GuiStrip):
                 if len(lines) == 0:
                     continue
                 for line in lines:
-                    line.setVisible(isVisibleSpectrum)
+                    if self._noiseThresholdLinesActive:
+                        line.setVisible(isVisibleSpectrum)
+                    else:
+                        line.setVisible(False)
                 #we need to update the lines if the NoiseLevel changed.
                 if isVisibleSpectrum:
                     noiseLevelLine, negativeNoiseLevelLine = lines[0], lines[1]
@@ -354,18 +357,27 @@ class GuiStrip1d(GuiStrip):
                         for l, v in zip(lines, noiseLevelValues):
                             l.setValue(v if v else l.values, emitValuesChanged=False)
             return
-        else:
+
+        for spectrumView in self.spectrumViews:
+            spectrum = spectrumView.spectrum
+            isVisibleSpectrum = spectrum in visibleSpectra
+            if spectrum is None:
+                continue
             if len(self._noiseThresholdLines) == 0:
                 self._initNoiseThresholdLines()
                 return
-            for sp, lines in self._noiseThresholdLines.items():
-                for line in lines:
-                    line.setVisible(setAllVisible)
+            lines = self._noiseThresholdLines.get(spectrum.pid, [])
+            for line in lines:
+                if self._noiseThresholdLinesActive:
+                    line.setVisible(isVisibleSpectrum)
+                else:
+                    line.setVisible(False)
+
 
     def toggleNoiseThresholdLines(self, *args):
         value = self.sender().isChecked()
         self._noiseThresholdLinesActive = value
-        self._updateNoiseThresholdLines(spectrumViewChanged=False, setAllVisible=value)
+        self._updateNoiseThresholdLines(spectrumViewChanged=False)
 
 
     def _updateVisibility(self):
@@ -446,11 +458,11 @@ class GuiStrip1d(GuiStrip):
                 self._CcpnGLWidget.removeExternalRegion(region)
         self._pickingExclusionAreas.clear()
 
-    def _updatePeakPickingExclusionArea(self, spectrumViewChanged=True, setAllVisible=False):
-        """toggle/update the lines """
 
+    def _updatePeakPickingExclusionArea(self, spectrumViewChanged=True):
+        "" ""
+        visibleSpectra = self.getVisibleSpectra()
         if spectrumViewChanged:
-            visibleSpectra =  self.getVisibleSpectra()
             for spectrumView in self.spectrumViews:
                 spectrum = spectrumView.spectrum
                 isVisibleSpectrum = spectrum in visibleSpectra
@@ -459,25 +471,37 @@ class GuiStrip1d(GuiStrip):
                 region = self._pickingExclusionAreas.get(spectrum.pid)
                 if not region:
                     continue
-                region.setVisible(isVisibleSpectrum)
-                #we need to update the lines if the Level changed.
+                if self._pickingExclusionAreaActive:
+                    region.setVisible(isVisibleSpectrum)
+                else:
+                    region.setVisible(False)
+                #we need to update the lines if the NoiseLevel changed.
                 if isVisibleSpectrum:
                     contoursLevelValues = (spectrum.positiveContourBase, spectrum.negativeContourBase)
                     linesValues = region.values
                     if contoursLevelValues != linesValues:
                         region.setValue(contoursLevelValues, emitValuesChanged=False)
             return
-        else:
+
+        for spectrumView in self.spectrumViews:
+            spectrum = spectrumView.spectrum
+            isVisibleSpectrum = spectrum in visibleSpectra
+            if spectrum is None:
+                continue
             if len(self._pickingExclusionAreas) == 0:
                 self._initPickingExclusionArea()
                 return
-            for sp, region in self._pickingExclusionAreas.items():
-                region.setVisible(setAllVisible)
+            region = self._pickingExclusionAreas.get(spectrum.pid)
+            if region is not None:
+                if self._pickingExclusionAreaActive:
+                    region.setVisible(isVisibleSpectrum)
+                else:
+                    region.setVisible(False)
 
     def togglePickingExclusionArea(self, *args):
         value = self.sender().isChecked()
         self._pickingExclusionAreaActive = value
-        self._updatePeakPickingExclusionArea(spectrumViewChanged=False, setAllVisible=value)
+        self._updatePeakPickingExclusionArea(spectrumViewChanged=False)
 
 
     def _initPickingExclusionArea(self):

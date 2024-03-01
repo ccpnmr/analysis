@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-01-04 16:36:34 +0000 (Thu, January 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-01 13:14:38 +0000 (Fri, March 01, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -44,14 +44,20 @@ class VersionString(str):
     If the optional release is included it must be alphanumeric, and of the form [label][releaseNumber]
     If only the label is supplied, the releaseNumber defaults to 0.
 
+    NOTE: in order that the update script operates correctly, ALL fields (including .release if specified) must
+    be monotonically increasing in steps of 1. They don't necessarily have to start from 0.
+
     The majorVersion, minorVersion, microVersion and release fields are available as properties.
 
     A VersionString instance supports comparisons with either another VersionString instance or a suitable
     formatted string; e.g.
 
-      VersionString('3.1.0.alpha') > VersionString('3.0.4')    yields True
-      VersionString('3.1.0.alpha') < '3.0.2'                   yields False
+      VersionString('3.1.0.alpha') > VersionString('3.0.4')    returns True
+      VersionString('3.1.0.alpha') < '3.0.2'                   returns False
 
+    On a technical note: a hash is generated from the last bit of each of the fields, and a change in the hash is
+    recognised as an increase in version-numbering by the shell-script implementing the sequential update mechanism.
+    In particular, A step from 3.2.1.0 -> 3.2.1.2 will not be recognised and the update sequence will terminate early.
     """
 
     def __new__(cls, value=None, *args, **kwargs):
@@ -73,13 +79,14 @@ class VersionString(str):
             try:
                 int(val)
             except Exception:
-                raise ValueError('Invalid VersionString "{}"; expected integer for field "{}" ("{}")'.format(value, name, val)) from None
-
+                raise ValueError('Invalid VersionString "{}"; expected integer for field '
+                                 '"{}" ("{}")'.format(value, name, val)) from None
         if len(_fields) == 4:
             try:
                 cls._validateField(_fields[3])
             except Exception:
-                raise ValueError('Invalid VersionString "{}"; expected release ("{}") to be alphanumeric of the form [label][int]'.format(value, _fields[3])) from None
+                raise ValueError('Invalid VersionString "{}"; expected release ("{}") to be alphanumeric '
+                                 'of the form [label][int]'.format(value, _fields[3])) from None
 
         if _DEBUG:
             print('--> {} "{}" created'.format(cls.__name__, value))
@@ -303,9 +310,9 @@ def main():
     valid = []
     for ver in ['3.21.13',
                 '3.2.1.',
-                '3.20.15.12',
+                '3.20.15.13',
                 '3.2.1.alpha',
-                '3.2.1.alpha123',
+                '3.2.1.alpha1',
 
                 '3.2.1.123alpha',
                 '3.2.1.alp2ha',
@@ -323,10 +330,11 @@ def main():
                 '3.2.1.23.2',
                 ]:
         try:
-            VersionString(ver)._bitHash()
+            val = VersionString(ver)._bitHash()
+            print(f'--> bit_hash   {val}:{bin(val)}')
             valid.append(True)
         except Exception as es:
-            print('   --> {:<20} : {}'.format(ver, es))
+            print('assert fail: {:<20}  {}'.format(ver, es))
             valid.append(False)
 
     assert valid == [True, True, True, True, True,
@@ -365,11 +373,11 @@ def main():
     try:
         VersionString()
     except Exception as es:
-        print('   --> {:<20} : {}'.format('', es))
+        print('assert fail: {:<20}  {}'.format('', es))
     try:
         VersionString('4.3.2.1', '1.1.1.1')
     except Exception as es:
-        print('   --> {:<20} : {}'.format('', es))
+        print('assert fail: {:<20}  {}'.format('', es))
 
     from datetime import datetime, timezone
 
@@ -377,7 +385,8 @@ def main():
     timeoutput = '0000-00-00 00:00:00 +0000'
     now = datetime.now(timezone.utc)
 
-    then = datetime.strptime(__dateModified__[len('$dateModified: '): len('$dateModified: ') + len(timeoutput)], timeformat)
+    then = datetime.strptime(__dateModified__[len('$dateModified: '): len('$dateModified: ') + len(timeoutput)],
+                             timeformat)
 
     print(timeformat)
     print(now.strftime(timeformat), int(now.timestamp()))

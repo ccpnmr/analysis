@@ -115,7 +115,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-29 15:49:49 +0000 (Thu, February 29, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-01 08:57:07 +0000 (Fri, March 01, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -160,11 +160,15 @@ FILE_OPEN_RECENT = 'Open Recent'
 FILE_LAYOUT = 'Layout'
 FILE_LAYOUT_OPEN_PREDEFINED = 'Open pre-defined'
 
+EDIT_MENU = 'Edit'
+
 VIEW_MENU = 'View'
 VIEW_SHOW_MODULES = 'Show/hide Modules'
 
 SPECTRUM_MENU = 'Spectrum'
 SPECTRUM_LOAD_SPECTRA = 'Load Spectra...'
+
+MOLECULES_MENU = 'Molecules'
 
 MACRO_MENU = 'Macro'
 MACRO_RUN_CCPN = 'Run CCPN Macros'
@@ -242,13 +246,16 @@ class MenusDefs(list):
 
         (FILE_MENU, [
             ("New", self._newProjectCallback, [('shortcut', '⌃n')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+
             Separator(),
             ("Open...", self._openProjectCallback, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             (FILE_OPEN_RECENT, DYNAMIC_FILL),
             ("Load Data...", self._loadDataCallback, [('shortcut', 'ld')]),
+
             Separator(),
             ("Save", self._saveCallback, [('shortcut', '⌃s')], _projectCanBeSaved),  # Unicode U+2303, NOT the carrot on your keyboard.
             ("Save As...", self._saveAsCallback, [('shortcut', 'sa')]),
+
             Separator(),
             ("Import", [
                 ("NEF File", self._importNefCallback, [('shortcut', 'in')]),
@@ -259,13 +266,16 @@ class MenusDefs(list):
                 ("NEF File", self._exportNEFCallback, [('shortcut', 'ex')]),
                 ]
             ),
+
             Separator(),
             (FILE_LAYOUT, [
                 ("Save", self._saveLayoutCallback, {}, _projectCanBeSaved ),
                 ("Save as...", self._saveLayoutAsCallback, {}, _projectCanBeSaved ),
+
                 Separator(),
                 ("Restore last", self._restoreLastSavedLayoutCallback),
                 ("Restore from file...", self._restoreLayoutFromFileCallback),
+
                 Separator(),
                 (FILE_LAYOUT_OPEN_PREDEFINED, DYNAMIC_FILL),
                 ]
@@ -273,16 +283,19 @@ class MenusDefs(list):
             ("Summary", self._showProjectSummaryPopup),
             ('Archive', self._archiveProjectCallback, {}, _projectCanBeSaved),
             ('Restore From Archive...', self._restoreFromArchiveCallback, {}, _projectHasArchives),
+
             Separator(),
             ("Preferences...", self._showApplicationPreferences, [('shortcut', '⌃,')]),
+
             Separator(),
             ("Quit", self._quitCallback, [('shortcut', '⌃q')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ]
         ),
 
-        ('Edit', [
+        (EDIT_MENU, [
             ("Undo", self._undoCallback, [('shortcut', '⌃z')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ("Redo", self._redoCallback, [('shortcut', '⌃y')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+
             Separator(),
             ("Cut", self._nyi, [('shortcut', '⌃x'), ('enabled', False)]),
             ("Copy", self._nyi, [('shortcut', '⌃c'), ('enabled', False)]),
@@ -302,11 +315,13 @@ class MenusDefs(list):
             ("Restraint Table", partial(app.showRestraintTable, selectFirstItem=True), [('shortcut', 'rt')]),
             ("Violation Table", partial(app.showViolationTable, selectFirstItem=True), [('shortcut', 'vt')]),
             ("Structure Table", partial(app.showStructureTable, selectFirstItem=True), [('shortcut', 'st')]),
+
             Separator(),
             ("Restraint Analysis Inspector", partial(app.showRestraintAnalysisTable, selectFirstItem=True), [('shortcut', 'at')]),
             ("Chemical Shift Mapping (Beta)", app.showChemicalShiftMappingModule, [('shortcut', 'cm')]),
             ("Relaxation Analysis (Beta)", app.showRelaxationModule, [('shortcut', 'ra')]),
             ("Notes Editor", partial(app.showNotesEditor, selectFirstItem=True), [('shortcut', 'no')]),
+
             Separator(),
             ("In Active SpectrumDisplay", [
 
@@ -334,8 +349,9 @@ class MenusDefs(list):
 
              {}, _hasActiveDisplay
             ),
+
             Separator(),
-            (VIEW_SHOW_MODULES, DYNAMIC_FILL),
+            (VIEW_SHOW_MODULES, DYNAMIC_FILL, {}, _updateShowHideModules),
             ("Show/hide Sidebar", self._toggleSidebarCallback, {'shortcut':' s', 'checkable':True, 'checked':True}),
             ("Show/hide Python Console", self._toggleConsoleCallback,
                                         {'shortcut':'  ', 'checkable':True, 'checked':True}, _updatePythonConsole
@@ -350,6 +366,7 @@ class MenusDefs(list):
             ("Validate Paths...", self._validatePathsCallback, {'shortcut':'vp'}, _projectHasSpectra),
             ("Set Experiment Types...", self._experimentTypesCallback, {'shortcut':'et'}, _projectHasSpectra),
             ("Copy into Project...", self._copyToProjectCallback, {}, _projectHasSpectra),
+
             Separator(),
             ("Pick Peaks", [
                 ("Pick 1D Peaks...", self._peakPick1DCallback, {'shortcut':'p1'}, _projectHasSpectra),
@@ -362,23 +379,27 @@ class MenusDefs(list):
             ("Estimate Peak Volumes...", self._estimateVolumesCallback, {'shortcut':'ev'}, _projectHasPeaks),
             ("Estimate Current Peak Volumes", self._estimateCurrentVolumesCallback, {'shortcut':'ec'}, _projectHasPeaks),
             ("Reorder PeakList Axes...", self._reorderPeakListAxesCallback, {'shortcut':'rl'}, _projectHasSpectra),
+
             Separator(),
             ("Pseudo-Spectrum to SpectrumGroup...", self._pseudoSpectrumCallback, {}, _projectHasSpectra),
             ("Make Projection...", self._makeProjectionCallback, {'shortcut':'pj'}, _projectHasSpectra),
             ("Convert...", self._convertSpectrumCallback, {}, _projectHasSpectra),
+
             Separator(),
             ("Make Strip Plot...", app.makeStripPlot, {'shortcut':'sp'}, _projectHasSpectra),
             ("Print to File...", self._printToFileCallback, {'shortcut':'⌃p'}, _projectHasSpectra),
             ]
         ),
 
-        ('Molecules', [
+        (MOLECULES_MENU, [
             ("New Chain...", self._createChainCallback),
             ("New Chain from FASTA...", self._loadDataCallback),
+
             Separator(),
             ("Load ChemComp from Xml...", self._loadDataCallback),
             ("Edit Molecular Bonds...", self._editMolecularBondsCallback, ),
             # ("Inspect...", self.inspectMolecule, [('enabled', False)]),
+
             Separator(),
             ("Residue Information", app.showResidueInformation, [('shortcut', 'ri')]),
             ("Reference Chemical Shifts", app.showReferenceChemicalShifts, [('shortcut', 'rc')]),
@@ -387,13 +408,16 @@ class MenusDefs(list):
 
         (MACRO_MENU, [
             ("New Macro Editor", self._showMacroEditorCallback, [('shortcut', 'nm')]),
+
             Separator(),
             ("Open User Macro...", self._openMacroCallback, [('shortcut', 'om')]),
             ("Open CCPN Macro...", partial(self._openMacroCallback, directory=macroPath)),
+
             Separator(),
             ("Run...", app.runMacro, [('shortcut', 'rm')]),
             (MACRO_RUN_RECENT, DYNAMIC_FILL),
             (MACRO_RUN_CCPN, DYNAMIC_FILL),
+
             Separator(),
             ("Define Macro Shortcuts...", self._defineUserShortcutsCallback, [('shortcut', 'du')]),
             ]
@@ -402,6 +426,7 @@ class MenusDefs(list):
         (PLUGINS_MENU, [
             (CCPN_PLUGINS, DYNAMIC_FILL),
             (USER_PLUGINS, DYNAMIC_FILL),
+
             Separator(),
             ("Reload", app._reloadPlugins),
             ]
@@ -410,18 +435,22 @@ class MenusDefs(list):
         (HELP_MENU, [
             (HELP_TUTORIALS, DYNAMIC_FILL),
             (HELP_HOWTOS, DYNAMIC_FILL),
+
             Separator(),
             ("Tip of the Day", partial(app._displayTipOfTheDay, standalone=True)),
             ("Key Concepts", app._displayKeyConcepts),
             ("Show Shortcuts", self._showShortcuts),
+
             Separator(),
             ("CCPN Homepage", self._showAboutCcpn),
             ("CCPN V3 Forum", self._showForum),
             ("CcpNmr API Documentation", self._showVersion3Documentation),
+
             Separator(),
             # ("Inspect Code...", self.showCodeInspectionPopup, [('shortcut', 'gv'), ('enabled', False)]),
             # ("Show Issues...", self.showIssuesList),
             ("Check for Updates...", ui._checkForUpdates),
+
             Separator(),
             ("Register...", self._showRegisterPopup),
             ("Show License...", self._showCcpnLicense),
@@ -1706,14 +1735,8 @@ class MenuManager(object):
             _defs.extend(
                 [(f.basename, partial(self.application.runMacro, f)) for f in _files]
             )
-
-        if len(_defs) > 0:
-            # update the node and set to active
-            self._updateDynamicNode(node=node, defs=_defs)
-            return True
-        else:
-            # nothing to show
-            return False
+        # update the node
+        self._updateDynamicNode(node=node, defs=_defs)
 
     def _fillUserPluginsCallback(self, node):
         """Callback to fill Plugins->User Plugins
@@ -1921,3 +1944,15 @@ def _updatePythonConsole(node) -> bool:
         checked = False
     node.widget.setChecked(checked)
     return True
+
+def _updateShowHideModules(node) -> bool:
+    """callback to check and update the Show/hide Modules menu;
+    :return True if there are modules other then the PythonConsoleModule
+    """
+    from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
+
+    app = getApplication()
+    modules = [m for m in app.ui.mainWindow.modules
+                    if m.className != PythonConsoleModule.className
+              ]
+    return len(modules) > 0

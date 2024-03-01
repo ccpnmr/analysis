@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-14 12:12:33 +0000 (Wed, February 14, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-01 09:02:10 +0000 (Fri, March 01, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -211,7 +211,7 @@ class Pid(str):
     """
 
     _checkPidType = True  # flag to set Pid type-checking using coreClass dict;
-                          # (set to False during v3mimic development)
+                          # (set to False during ccpnv4 development)
 
     def __init__(self, string: str, **kwds):
         """First argument ('string' must be a valid pid string with at least one, non-initial PREFIXSEP

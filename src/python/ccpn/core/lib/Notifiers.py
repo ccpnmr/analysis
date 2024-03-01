@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-28 14:42:46 +0000 (Wed, February 28, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-01 09:02:10 +0000 (Fri, March 01, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -587,7 +587,7 @@ class NotifierBase(object):
                                 setterObject=self,
                                 **kwargs)
         else:
-            # GWV 15/12/23: This allows subclassing during v3mimic development
+            # GWV 15/12/23: This allows subclassing during ccpnv4 development
             result = theObject._newNotifier(
                                 triggers=triggers,
                                 targetName=targetName,

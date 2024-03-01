@@ -436,7 +436,8 @@ class NTdbDefs(dict):
             logger.error(f'Restoring NTdb definitions; invalid path "{path}"')
 
         logger.debug(f'Restoring NTdb definitions from "{path}" directory')
-        for p in path.glob('*.json'):
+        pattern = str(aPath('**') / '*.json')
+        for p in path.glob(pattern):
             rDef = ResidueDef()
             rDef.fromJson(str(p))
             self.addDef(rDef)

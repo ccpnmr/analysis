@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-29 15:15:10 +0000 (Thu, February 29, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-01 17:47:18 +0000 (Fri, March 01, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -333,6 +333,7 @@ class GuiStrip1d(GuiStrip):
 
     def _updateNoiseThresholdLines(self, spectrumViewChanged=True):
         """toggle/update the lines """
+
         visibleSpectra = self.getVisibleSpectra()
         if spectrumViewChanged:
             for spectrumView in self.spectrumViews:
@@ -349,7 +350,7 @@ class GuiStrip1d(GuiStrip):
                     else:
                         line.setVisible(False)
                 #we need to update the lines if the NoiseLevel changed.
-                if isVisibleSpectrum:
+                if isVisibleSpectrum and len(lines)==2:
                     noiseLevelLine, negativeNoiseLevelLine = lines[0], lines[1]
                     noiseLevelValues = (spectrum.noiseLevel, spectrum.negativeNoiseLevel)
                     linesValues = (noiseLevelLine.values, negativeNoiseLevelLine.values)

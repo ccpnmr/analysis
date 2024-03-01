@@ -1,0 +1,2444 @@
+{
+    "atomDefs": [
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": false,
+            "hetatm": false,
+            "isPseudoAtom": false,
+            "name": "N",
+            "nameDict": {
+                "AQUA": "N",
+                "BMRBd": "N",
+                "CCPN": "N",
+                "CYANA": "N",
+                "CYANA2": "N",
+                "INTERNAL_0": "N",
+                "INTERNAL_1": "N",
+                "IUPAC": "N",
+                "PDB": "N",
+                "XPLOR": "N",
+                "NEF": "N"
+            },
+            "properties": [
+                "N",
+                "ARGx",
+                "R",
+                "15N",
+                "isNotProton",
+                "notproton",
+                "isNotCarbon",
+                "notcarbon",
+                "isNitrogen",
+                "nitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isBackbone",
+                "backbone",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isNotPseudoAtom",
+                "notpseudoatom",
+                "hasNoPseudoAtom",
+                "hasnopseudoatom",
+                "isNotMethylene",
+                "notmethylene",
+                "isNotMethyleneProton",
+                "notmethyleneproton"
+            ],
+            "pseudoAtom": null,
+            "realAtoms": [],
+            "shift": {
+                "average": 120.72,
+                "sd": 4.01
+            },
+            "spinType": "15N",
+            "topology": [
+                [
+                    -1,
+                    "C"
+                ],
+                [
+                    0,
+                    "H"
+                ],
+                [
+                    0,
+                    "CA"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [
+                "HN",
+                "H"
+            ],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": false,
+            "hetatm": false,
+            "isPseudoAtom": false,
+            "name": "H",
+            "nameDict": {
+                "AQUA": "H",
+                "BMRBd": "H",
+                "CCPN": "H",
+                "CYANA": "HN",
+                "CYANA2": "H",
+                "INTERNAL_0": "HN",
+                "INTERNAL_1": "H",
+                "IUPAC": "H",
+                "PDB": "H",
+                "XPLOR": "HN",
+                "NEF": "H"
+            },
+            "properties": [
+                "H",
+                "ARGx",
+                "R",
+                "1H",
+                "isProton",
+                "proton",
+                "isNotCarbon",
+                "notcarbon",
+                "isNotNitrogen",
+                "notnitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isBackbone",
+                "backbone",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isNotPseudoAtom",
+                "notpseudoatom",
+                "hasNoPseudoAtom",
+                "hasnopseudoatom",
+                "isNotMethylene",
+                "notmethylene",
+                "isNotMethyleneProton",
+                "notmethyleneproton"
+            ],
+            "pseudoAtom": null,
+            "realAtoms": [],
+            "shift": {
+                "average": 8.24,
+                "sd": 0.61
+            },
+            "spinType": "1H",
+            "topology": [
+                [
+                    0,
+                    "N"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": false,
+            "hetatm": false,
+            "isPseudoAtom": false,
+            "name": "CA",
+            "nameDict": {
+                "AQUA": "CA",
+                "BMRBd": "CA",
+                "CCPN": "CA",
+                "CYANA": "CA",
+                "CYANA2": "CA",
+                "INTERNAL_0": "CA",
+                "INTERNAL_1": "CA",
+                "IUPAC": "CA",
+                "PDB": "CA",
+                "XPLOR": "CA",
+                "NEF": "CA"
+            },
+            "properties": [
+                "CA",
+                "ARGx",
+                "R",
+                "13C",
+                "isNotProton",
+                "notproton",
+                "isCarbon",
+                "carbon",
+                "isNotNitrogen",
+                "notnitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isBackbone",
+                "backbone",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isNotPseudoAtom",
+                "notpseudoatom",
+                "hasNoPseudoAtom",
+                "hasnopseudoatom",
+                "isNotMethylene",
+                "notmethylene",
+                "isNotMethyleneProton",
+                "notmethyleneproton"
+            ],
+            "pseudoAtom": null,
+            "realAtoms": [],
+            "shift": {
+                "average": 56.84,
+                "sd": 2.52
+            },
+            "spinType": "13C",
+            "topology": [
+                [
+                    0,
+                    "N"
+                ],
+                [
+                    0,
+                    "HA"
+                ],
+                [
+                    0,
+                    "CB"
+                ],
+                [
+                    0,
+                    "C"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": false,
+            "hetatm": false,
+            "isPseudoAtom": false,
+            "name": "HA",
+            "nameDict": {
+                "AQUA": "HA",
+                "BMRBd": "HA",
+                "CCPN": "HA",
+                "CYANA": "HA",
+                "CYANA2": "HA",
+                "INTERNAL_0": "HA",
+                "INTERNAL_1": "HA",
+                "IUPAC": "HA",
+                "PDB": "HA",
+                "XPLOR": "HA",
+                "NEF": "HA"
+            },
+            "properties": [
+                "HA",
+                "ARGx",
+                "R",
+                "1H",
+                "isProton",
+                "proton",
+                "isNotCarbon",
+                "notcarbon",
+                "isNotNitrogen",
+                "notnitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isBackbone",
+                "backbone",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isNotPseudoAtom",
+                "notpseudoatom",
+                "hasNoPseudoAtom",
+                "hasnopseudoatom",
+                "isNotMethylene",
+                "notmethylene",
+                "isNotMethyleneProton",
+                "notmethyleneproton"
+            ],
+            "pseudoAtom": null,
+            "realAtoms": [],
+            "shift": {
+                "average": 4.29,
+                "sd": 0.48
+            },
+            "spinType": "1H",
+            "topology": [
+                [
+                    0,
+                    "CA"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": false,
+            "hetatm": false,
+            "isPseudoAtom": false,
+            "name": "CB",
+            "nameDict": {
+                "AQUA": "CB",
+                "BMRBd": "CB",
+                "CCPN": "CB",
+                "CYANA": "CB",
+                "CYANA2": "CB",
+                "INTERNAL_0": "CB",
+                "INTERNAL_1": "CB",
+                "IUPAC": "CB",
+                "PDB": "CB",
+                "XPLOR": "CB",
+                "NEF": "CB"
+            },
+            "properties": [
+                "CB",
+                "ARGx",
+                "R",
+                "13C",
+                "isNotProton",
+                "notproton",
+                "isCarbon",
+                "carbon",
+                "isNotNitrogen",
+                "notnitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isSidechain",
+                "sidechain",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isNotPseudoAtom",
+                "notpseudoatom",
+                "hasNoPseudoAtom",
+                "hasnopseudoatom",
+                "isMethylene",
+                "methylene",
+                "isNotMethyleneProton",
+                "notmethyleneproton"
+            ],
+            "pseudoAtom": null,
+            "realAtoms": [],
+            "shift": {
+                "average": 30.71,
+                "sd": 2.6
+            },
+            "spinType": "13C",
+            "topology": [
+                [
+                    0,
+                    "CA"
+                ],
+                [
+                    0,
+                    "HB2"
+                ],
+                [
+                    0,
+                    "HB3"
+                ],
+                [
+                    0,
+                    "CG"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": true,
+            "hetatm": false,
+            "isPseudoAtom": false,
+            "name": "HB2",
+            "nameDict": {
+                "AQUA": "HB2",
+                "BMRBd": "HB2",
+                "CCPN": "HB2",
+                "CYANA": "HB2",
+                "CYANA2": "HB2",
+                "INTERNAL_0": "HB2",
+                "INTERNAL_1": "HB2",
+                "IUPAC": "HB2",
+                "PDB": "1HB",
+                "XPLOR": "HB2",
+                "NEF": "HB2"
+            },
+            "properties": [
+                "HB2",
+                "ARGx",
+                "R",
+                "1H",
+                "isProton",
+                "proton",
+                "isNotCarbon",
+                "notcarbon",
+                "isNotNitrogen",
+                "notnitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isSidechain",
+                "sidechain",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isNotPseudoAtom",
+                "notpseudoatom",
+                "hasPseudoAtom",
+                "haspseudoatom",
+                "isMethylene",
+                "methylene",
+                "isMethyleneProton",
+                "methyleneproton"
+            ],
+            "pseudoAtom": "QB",
+            "realAtoms": [],
+            "shift": {
+                "average": 1.8,
+                "sd": 0.3
+            },
+            "spinType": "1H",
+            "topology": [
+                [
+                    0,
+                    "CB"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": true,
+            "hetatm": false,
+            "isPseudoAtom": false,
+            "name": "HB3",
+            "nameDict": {
+                "AQUA": "HB3",
+                "BMRBd": "HB3",
+                "CCPN": "HB3",
+                "CYANA": "HB3",
+                "CYANA2": "HB3",
+                "INTERNAL_0": "HB3",
+                "INTERNAL_1": "HB3",
+                "IUPAC": "HB3",
+                "PDB": "2HB",
+                "XPLOR": "HB1",
+                "NEF": "HB3"
+            },
+            "properties": [
+                "HB3",
+                "ARGx",
+                "R",
+                "1H",
+                "isProton",
+                "proton",
+                "isNotCarbon",
+                "notcarbon",
+                "isNotNitrogen",
+                "notnitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isSidechain",
+                "sidechain",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isNotPseudoAtom",
+                "notpseudoatom",
+                "hasPseudoAtom",
+                "haspseudoatom",
+                "isMethylene",
+                "methylene",
+                "isMethyleneProton",
+                "methyleneproton"
+            ],
+            "pseudoAtom": "QB",
+            "realAtoms": [],
+            "shift": {
+                "average": 1.78,
+                "sd": 0.29
+            },
+            "spinType": "1H",
+            "topology": [
+                [
+                    0,
+                    "CB"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": false,
+            "hetatm": false,
+            "isPseudoAtom": true,
+            "name": "QB",
+            "nameDict": {
+                "AQUA": "QB",
+                "BMRBd": null,
+                "CCPN": "HB*",
+                "CYANA": "QB",
+                "CYANA2": "QB",
+                "INTERNAL_0": "QB",
+                "INTERNAL_1": "QB",
+                "IUPAC": "QB",
+                "PDB": null,
+                "XPLOR": "HB*,HB#,HB%,HB+",
+                "NEF": "HB%"
+            },
+            "properties": [
+                "QB",
+                "ARGx",
+                "R",
+                "1H",
+                "isProton",
+                "proton",
+                "isNotCarbon",
+                "notcarbon",
+                "isNotNitrogen",
+                "notnitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isSidechain",
+                "sidechain",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isPseudoAtom",
+                "pseudoatom",
+                "hasNoPseudoAtom",
+                "hasnopseudoatom",
+                "isMethylene",
+                "methylene",
+                "isMethyleneProton",
+                "methyleneproton"
+            ],
+            "pseudoAtom": null,
+            "realAtoms": [
+                "HB2",
+                "HB3"
+            ],
+            "shift": {
+                "average": 1.79,
+                "sd": 0.295
+            },
+            "spinType": "1H",
+            "topology": [
+                [
+                    0,
+                    "CB"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": false,
+            "hetatm": false,
+            "isPseudoAtom": false,
+            "name": "CG",
+            "nameDict": {
+                "AQUA": "CG",
+                "BMRBd": "CG",
+                "CCPN": "CG",
+                "CYANA": "CG",
+                "CYANA2": "CG",
+                "INTERNAL_0": "CG",
+                "INTERNAL_1": "CG",
+                "IUPAC": "CG",
+                "PDB": "CG",
+                "XPLOR": "CG",
+                "NEF": "CG"
+            },
+            "properties": [
+                "CG",
+                "ARGx",
+                "R",
+                "13C",
+                "isNotProton",
+                "notproton",
+                "isCarbon",
+                "carbon",
+                "isNotNitrogen",
+                "notnitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isSidechain",
+                "sidechain",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isNotPseudoAtom",
+                "notpseudoatom",
+                "hasNoPseudoAtom",
+                "hasnopseudoatom",
+                "isMethylene",
+                "methylene",
+                "isNotMethyleneProton",
+                "notmethyleneproton"
+            ],
+            "pseudoAtom": null,
+            "realAtoms": [],
+            "shift": {
+                "average": 27.38,
+                "sd": 2.59
+            },
+            "spinType": "13C",
+            "topology": [
+                [
+                    0,
+                    "CB"
+                ],
+                [
+                    0,
+                    "HG2"
+                ],
+                [
+                    0,
+                    "HG3"
+                ],
+                [
+                    0,
+                    "CD"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": true,
+            "hetatm": false,
+            "isPseudoAtom": false,
+            "name": "HG2",
+            "nameDict": {
+                "AQUA": "HG2",
+                "BMRBd": "HG2",
+                "CCPN": "HG2",
+                "CYANA": "HG2",
+                "CYANA2": "HG2",
+                "INTERNAL_0": "HG2",
+                "INTERNAL_1": "HG2",
+                "IUPAC": "HG2",
+                "PDB": "1HG",
+                "XPLOR": "HG2",
+                "NEF": "HG2"
+            },
+            "properties": [
+                "HG2",
+                "ARGx",
+                "R",
+                "1H",
+                "isProton",
+                "proton",
+                "isNotCarbon",
+                "notcarbon",
+                "isNotNitrogen",
+                "notnitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isSidechain",
+                "sidechain",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isNotPseudoAtom",
+                "notpseudoatom",
+                "hasPseudoAtom",
+                "haspseudoatom",
+                "isMethylene",
+                "methylene",
+                "isMethyleneProton",
+                "methyleneproton"
+            ],
+            "pseudoAtom": "QG",
+            "realAtoms": [],
+            "shift": {
+                "average": 1.58,
+                "sd": 0.28
+            },
+            "spinType": "1H",
+            "topology": [
+                [
+                    0,
+                    "CG"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": true,
+            "hetatm": false,
+            "isPseudoAtom": false,
+            "name": "HG3",
+            "nameDict": {
+                "AQUA": "HG3",
+                "BMRBd": "HG3",
+                "CCPN": "HG3",
+                "CYANA": "HG3",
+                "CYANA2": "HG3",
+                "INTERNAL_0": "HG3",
+                "INTERNAL_1": "HG3",
+                "IUPAC": "HG3",
+                "PDB": "2HG",
+                "XPLOR": "HG1",
+                "NEF": "HG3"
+            },
+            "properties": [
+                "HG3",
+                "ARGx",
+                "R",
+                "1H",
+                "isProton",
+                "proton",
+                "isNotCarbon",
+                "notcarbon",
+                "isNotNitrogen",
+                "notnitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isSidechain",
+                "sidechain",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isNotPseudoAtom",
+                "notpseudoatom",
+                "hasPseudoAtom",
+                "haspseudoatom",
+                "isMethylene",
+                "methylene",
+                "isMethyleneProton",
+                "methyleneproton"
+            ],
+            "pseudoAtom": "QG",
+            "realAtoms": [],
+            "shift": {
+                "average": 1.56,
+                "sd": 0.3
+            },
+            "spinType": "1H",
+            "topology": [
+                [
+                    0,
+                    "CG"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": false,
+            "hetatm": false,
+            "isPseudoAtom": true,
+            "name": "QG",
+            "nameDict": {
+                "AQUA": "QG",
+                "BMRBd": null,
+                "CCPN": "HG*",
+                "CYANA": "QG",
+                "CYANA2": "QG",
+                "INTERNAL_0": "QG",
+                "INTERNAL_1": "QG",
+                "IUPAC": "QG",
+                "PDB": null,
+                "XPLOR": "HG*,HG#,HG%,HG+",
+                "NEF": "HG%"
+            },
+            "properties": [
+                "QG",
+                "ARGx",
+                "R",
+                "1H",
+                "isProton",
+                "proton",
+                "isNotCarbon",
+                "notcarbon",
+                "isNotNitrogen",
+                "notnitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isSidechain",
+                "sidechain",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isPseudoAtom",
+                "pseudoatom",
+                "hasNoPseudoAtom",
+                "hasnopseudoatom",
+                "isMethylene",
+                "methylene",
+                "isMethyleneProton",
+                "methyleneproton"
+            ],
+            "pseudoAtom": null,
+            "realAtoms": [
+                "HG2",
+                "HG3"
+            ],
+            "shift": {
+                "average": 1.57,
+                "sd": 0.29000000000000004
+            },
+            "spinType": "1H",
+            "topology": [
+                [
+                    0,
+                    "CG"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": false,
+            "hetatm": false,
+            "isPseudoAtom": false,
+            "name": "CD",
+            "nameDict": {
+                "AQUA": "CD",
+                "BMRBd": "CD",
+                "CCPN": "CD",
+                "CYANA": "CD",
+                "CYANA2": "CD",
+                "INTERNAL_0": "CD",
+                "INTERNAL_1": "CD",
+                "IUPAC": "CD",
+                "PDB": "CD",
+                "XPLOR": "CD",
+                "NEF": "CD"
+            },
+            "properties": [
+                "CD",
+                "ARGx",
+                "R",
+                "13C",
+                "isNotProton",
+                "notproton",
+                "isCarbon",
+                "carbon",
+                "isNotNitrogen",
+                "notnitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isSidechain",
+                "sidechain",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isNotPseudoAtom",
+                "notpseudoatom",
+                "hasNoPseudoAtom",
+                "hasnopseudoatom",
+                "isMethylene",
+                "methylene",
+                "isNotMethyleneProton",
+                "notmethyleneproton"
+            ],
+            "pseudoAtom": null,
+            "realAtoms": [],
+            "shift": {
+                "average": 43.21,
+                "sd": 2.27
+            },
+            "spinType": "13C",
+            "topology": [
+                [
+                    0,
+                    "CG"
+                ],
+                [
+                    0,
+                    "HD2"
+                ],
+                [
+                    0,
+                    "HD3"
+                ],
+                [
+                    0,
+                    "NE"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": true,
+            "hetatm": false,
+            "isPseudoAtom": false,
+            "name": "HD2",
+            "nameDict": {
+                "AQUA": "HD2",
+                "BMRBd": "HD2",
+                "CCPN": "HD2",
+                "CYANA": "HD2",
+                "CYANA2": "HD2",
+                "INTERNAL_0": "HD2",
+                "INTERNAL_1": "HD2",
+                "IUPAC": "HD2",
+                "PDB": "1HD",
+                "XPLOR": "HD2",
+                "NEF": "HD2"
+            },
+            "properties": [
+                "HD2",
+                "ARGx",
+                "R",
+                "1H",
+                "isProton",
+                "proton",
+                "isNotCarbon",
+                "notcarbon",
+                "isNotNitrogen",
+                "notnitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isSidechain",
+                "sidechain",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isNotPseudoAtom",
+                "notpseudoatom",
+                "hasPseudoAtom",
+                "haspseudoatom",
+                "isMethylene",
+                "methylene",
+                "isMethyleneProton",
+                "methyleneproton"
+            ],
+            "pseudoAtom": "QD",
+            "realAtoms": [],
+            "shift": {
+                "average": 3.12,
+                "sd": 0.3
+            },
+            "spinType": "1H",
+            "topology": [
+                [
+                    0,
+                    "CD"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": true,
+            "hetatm": false,
+            "isPseudoAtom": false,
+            "name": "HD3",
+            "nameDict": {
+                "AQUA": "HD3",
+                "BMRBd": "HD3",
+                "CCPN": "HD3",
+                "CYANA": "HD3",
+                "CYANA2": "HD3",
+                "INTERNAL_0": "HD3",
+                "INTERNAL_1": "HD3",
+                "IUPAC": "HD3",
+                "PDB": "2HD",
+                "XPLOR": "HD1",
+                "NEF": "HD3"
+            },
+            "properties": [
+                "HD3",
+                "ARGx",
+                "R",
+                "1H",
+                "isProton",
+                "proton",
+                "isNotCarbon",
+                "notcarbon",
+                "isNotNitrogen",
+                "notnitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isSidechain",
+                "sidechain",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isNotPseudoAtom",
+                "notpseudoatom",
+                "hasPseudoAtom",
+                "haspseudoatom",
+                "isMethylene",
+                "methylene",
+                "isMethyleneProton",
+                "methyleneproton"
+            ],
+            "pseudoAtom": "QD",
+            "realAtoms": [],
+            "shift": {
+                "average": 3.11,
+                "sd": 0.28
+            },
+            "spinType": "1H",
+            "topology": [
+                [
+                    0,
+                    "CD"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": false,
+            "hetatm": false,
+            "isPseudoAtom": true,
+            "name": "QD",
+            "nameDict": {
+                "AQUA": "QD",
+                "BMRBd": null,
+                "CCPN": "HD*",
+                "CYANA": "QD",
+                "CYANA2": "QD",
+                "INTERNAL_0": "QD",
+                "INTERNAL_1": "QD",
+                "IUPAC": "QD",
+                "PDB": null,
+                "XPLOR": "HD*,HD#,HD%,HD+",
+                "NEF": "HD%"
+            },
+            "properties": [
+                "QD",
+                "ARGx",
+                "R",
+                "1H",
+                "isProton",
+                "proton",
+                "isNotCarbon",
+                "notcarbon",
+                "isNotNitrogen",
+                "notnitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isSidechain",
+                "sidechain",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isPseudoAtom",
+                "pseudoatom",
+                "hasNoPseudoAtom",
+                "hasnopseudoatom",
+                "isMethylene",
+                "methylene",
+                "isMethyleneProton",
+                "methyleneproton"
+            ],
+            "pseudoAtom": null,
+            "realAtoms": [
+                "HD2",
+                "HD3"
+            ],
+            "shift": {
+                "average": 3.115,
+                "sd": 0.29000000000000004
+            },
+            "spinType": "1H",
+            "topology": [
+                [
+                    0,
+                    "CD"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": false,
+            "hetatm": false,
+            "isPseudoAtom": false,
+            "name": "NE",
+            "nameDict": {
+                "AQUA": "NE",
+                "BMRBd": "NE",
+                "CCPN": "NE",
+                "CYANA": "NE",
+                "CYANA2": "NE",
+                "INTERNAL_0": "NE",
+                "INTERNAL_1": "NE",
+                "IUPAC": "NE",
+                "PDB": "NE",
+                "XPLOR": "NE",
+                "NEF": "NE"
+            },
+            "properties": [
+                "NE",
+                "ARGx",
+                "R",
+                "15N",
+                "isNotProton",
+                "notproton",
+                "isNotCarbon",
+                "notcarbon",
+                "isNitrogen",
+                "nitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isSidechain",
+                "sidechain",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isNotPseudoAtom",
+                "notpseudoatom",
+                "hasNoPseudoAtom",
+                "hasnopseudoatom",
+                "isNotMethylene",
+                "notmethylene",
+                "isNotMethyleneProton",
+                "notmethyleneproton"
+            ],
+            "pseudoAtom": null,
+            "realAtoms": [],
+            "shift": {
+                "average": 93.79,
+                "sd": 15.46
+            },
+            "spinType": "15N",
+            "topology": [
+                [
+                    0,
+                    "CD"
+                ],
+                [
+                    0,
+                    "HE"
+                ],
+                [
+                    0,
+                    "CZ"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": false,
+            "hetatm": false,
+            "isPseudoAtom": false,
+            "name": "HE",
+            "nameDict": {
+                "AQUA": "HE",
+                "BMRBd": "HE",
+                "CCPN": "HE",
+                "CYANA": "HE",
+                "CYANA2": "HE",
+                "INTERNAL_0": "HE",
+                "INTERNAL_1": "HE",
+                "IUPAC": "HE",
+                "PDB": "HE",
+                "XPLOR": "HE",
+                "NEF": "HE"
+            },
+            "properties": [
+                "HE",
+                "ARGx",
+                "R",
+                "1H",
+                "isProton",
+                "proton",
+                "isNotCarbon",
+                "notcarbon",
+                "isNotNitrogen",
+                "notnitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isSidechain",
+                "sidechain",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isNotPseudoAtom",
+                "notpseudoatom",
+                "hasNoPseudoAtom",
+                "hasnopseudoatom",
+                "isNotMethylene",
+                "notmethylene",
+                "isNotMethyleneProton",
+                "notmethyleneproton"
+            ],
+            "pseudoAtom": null,
+            "realAtoms": [],
+            "shift": {
+                "average": 7.33,
+                "sd": 0.64
+            },
+            "spinType": "1H",
+            "topology": [
+                [
+                    0,
+                    "NE"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": false,
+            "hetatm": false,
+            "isPseudoAtom": false,
+            "name": "CZ",
+            "nameDict": {
+                "AQUA": "CZ",
+                "BMRBd": "CZ",
+                "CCPN": "CZ",
+                "CYANA": "CZ",
+                "CYANA2": "CZ",
+                "INTERNAL_0": "CZ",
+                "INTERNAL_1": "CZ",
+                "IUPAC": "CZ",
+                "PDB": "CZ",
+                "XPLOR": "CZ",
+                "NEF": "CZ"
+            },
+            "properties": [
+                "CZ",
+                "ARGx",
+                "R",
+                "13C",
+                "isNotProton",
+                "notproton",
+                "isCarbon",
+                "carbon",
+                "isNotNitrogen",
+                "notnitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isSidechain",
+                "sidechain",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isNotPseudoAtom",
+                "notpseudoatom",
+                "hasNoPseudoAtom",
+                "hasnopseudoatom",
+                "isNotMethylene",
+                "notmethylene",
+                "isNotMethyleneProton",
+                "notmethyleneproton"
+            ],
+            "pseudoAtom": null,
+            "realAtoms": [],
+            "shift": {
+                "average": 159.16,
+                "sd": 1.0
+            },
+            "spinType": "13C",
+            "topology": [
+                [
+                    0,
+                    "NE"
+                ],
+                [
+                    0,
+                    "NH1"
+                ],
+                [
+                    0,
+                    "NH2"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": false,
+            "hetatm": false,
+            "isPseudoAtom": false,
+            "name": "NH1",
+            "nameDict": {
+                "AQUA": "NH1",
+                "BMRBd": "NH1",
+                "CCPN": "NH1",
+                "CYANA": "NH1",
+                "CYANA2": "NH1",
+                "INTERNAL_0": "NH1",
+                "INTERNAL_1": "NH1",
+                "IUPAC": "NH1",
+                "PDB": "NH1",
+                "XPLOR": "NH1",
+                "NEF": "NH1"
+            },
+            "properties": [
+                "NH1",
+                "ARGx",
+                "R",
+                "15N",
+                "isNotProton",
+                "notproton",
+                "isNotCarbon",
+                "notcarbon",
+                "isNitrogen",
+                "nitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isSidechain",
+                "sidechain",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isNotPseudoAtom",
+                "notpseudoatom",
+                "hasNoPseudoAtom",
+                "hasnopseudoatom",
+                "isNotMethylene",
+                "notmethylene",
+                "isNotMethyleneProton",
+                "notmethyleneproton"
+            ],
+            "pseudoAtom": null,
+            "realAtoms": [],
+            "shift": {
+                "average": 74.22,
+                "sd": 7.7
+            },
+            "spinType": "15N",
+            "topology": [
+                [
+                    0,
+                    "CZ"
+                ],
+                [
+                    0,
+                    "HH1"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": false,
+            "hetatm": false,
+            "isPseudoAtom": false,
+            "name": "HH1",
+            "nameDict": {
+                "AQUA": "HH1",
+                "BMRBd": "HH1",
+                "CCPN": "HH11",
+                "CYANA": "HH1",
+                "CYANA2": "HH1",
+                "INTERNAL_0": "HH1",
+                "INTERNAL_1": "HH1",
+                "IUPAC": "HH1",
+                "PDB": "HH1",
+                "XPLOR": "HH1",
+                "NEF": "HH11"
+            },
+            "properties": [
+                "HH1",
+                "ARGx",
+                "R",
+                "1H",
+                "isProton",
+                "proton",
+                "isNotCarbon",
+                "notcarbon",
+                "isNotNitrogen",
+                "notnitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isSidechain",
+                "sidechain",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isNotPseudoAtom",
+                "notpseudoatom",
+                "hasNoPseudoAtom",
+                "hasnopseudoatom",
+                "isNotMethylene",
+                "notmethylene",
+                "isNotMethyleneProton",
+                "notmethyleneproton",
+                "isGuanidine",
+                "guanidine"
+            ],
+            "pseudoAtom": null,
+            "realAtoms": [],
+            "shift": {
+                "average": 6.85,
+                "sd": 0.51
+            },
+            "spinType": "1H",
+            "topology": [
+                [
+                    0,
+                    "NH1"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": false,
+            "hetatm": false,
+            "isPseudoAtom": false,
+            "name": "NH2",
+            "nameDict": {
+                "AQUA": "NH2",
+                "BMRBd": "NH2",
+                "CCPN": "NH2",
+                "CYANA": "NH2",
+                "CYANA2": "NH2",
+                "INTERNAL_0": "NH2",
+                "INTERNAL_1": "NH2",
+                "IUPAC": "NH2",
+                "PDB": "NH2",
+                "XPLOR": "NH2",
+                "NEF": "NH2"
+            },
+            "properties": [
+                "NH2",
+                "ARGx",
+                "R",
+                "15N",
+                "isNotProton",
+                "notproton",
+                "isNotCarbon",
+                "notcarbon",
+                "isNitrogen",
+                "nitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isSidechain",
+                "sidechain",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isNotPseudoAtom",
+                "notpseudoatom",
+                "hasNoPseudoAtom",
+                "hasnopseudoatom",
+                "isNotMethylene",
+                "notmethylene",
+                "isNotMethyleneProton",
+                "notmethyleneproton"
+            ],
+            "pseudoAtom": null,
+            "realAtoms": [],
+            "shift": {
+                "average": 75.18,
+                "sd": 10.68
+            },
+            "spinType": "15N",
+            "topology": [
+                [
+                    0,
+                    "CZ"
+                ],
+                [
+                    0,
+                    "HH21"
+                ],
+                [
+                    0,
+                    "HH22"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": true,
+            "hetatm": false,
+            "isPseudoAtom": false,
+            "name": "HH21",
+            "nameDict": {
+                "AQUA": "HH21",
+                "BMRBd": "HH21",
+                "CCPN": "HH21",
+                "CYANA": "HH21",
+                "CYANA2": "HH21",
+                "INTERNAL_0": "HH21",
+                "INTERNAL_1": "HH21",
+                "IUPAC": "HH21",
+                "PDB": "1HH2",
+                "XPLOR": "HH21",
+                "NEF": "HH21"
+            },
+            "properties": [
+                "HH21",
+                "ARGx",
+                "R",
+                "1H",
+                "isProton",
+                "proton",
+                "isNotCarbon",
+                "notcarbon",
+                "isNotNitrogen",
+                "notnitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isSidechain",
+                "sidechain",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isNotPseudoAtom",
+                "notpseudoatom",
+                "hasPseudoAtom",
+                "haspseudoatom",
+                "isNotMethylene",
+                "notmethylene",
+                "isNotMethyleneProton",
+                "notmethyleneproton",
+                "isGuanidine",
+                "guanidine"
+            ],
+            "pseudoAtom": "QH2",
+            "realAtoms": [],
+            "shift": {
+                "average": 6.79,
+                "sd": 0.47
+            },
+            "spinType": "1H",
+            "topology": [
+                [
+                    0,
+                    "NH2"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": true,
+            "hetatm": false,
+            "isPseudoAtom": false,
+            "name": "HH22",
+            "nameDict": {
+                "AQUA": "HH22",
+                "BMRBd": "HH22",
+                "CCPN": "HH22",
+                "CYANA": "HH22",
+                "CYANA2": "HH22",
+                "INTERNAL_0": "HH22",
+                "INTERNAL_1": "HH22",
+                "IUPAC": "HH22",
+                "PDB": "2HH2",
+                "XPLOR": "HH22",
+                "NEF": "HH22"
+            },
+            "properties": [
+                "HH22",
+                "ARGx",
+                "R",
+                "1H",
+                "isProton",
+                "proton",
+                "isNotCarbon",
+                "notcarbon",
+                "isNotNitrogen",
+                "notnitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isSidechain",
+                "sidechain",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isNotPseudoAtom",
+                "notpseudoatom",
+                "hasPseudoAtom",
+                "haspseudoatom",
+                "isNotMethylene",
+                "notmethylene",
+                "isNotMethyleneProton",
+                "notmethyleneproton",
+                "isGuanidine",
+                "guanidine"
+            ],
+            "pseudoAtom": "QH2",
+            "realAtoms": [],
+            "shift": {
+                "average": 6.77,
+                "sd": 0.5
+            },
+            "spinType": "1H",
+            "topology": [
+                [
+                    0,
+                    "NH2"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": false,
+            "hetatm": false,
+            "isPseudoAtom": true,
+            "name": "QH2",
+            "nameDict": {
+                "AQUA": "QH2",
+                "BMRBd": null,
+                "CCPN": "HH2*",
+                "CYANA": "QH2",
+                "CYANA2": "QH2",
+                "INTERNAL_0": "QH2",
+                "INTERNAL_1": "QH2",
+                "IUPAC": "QH2",
+                "PDB": null,
+                "XPLOR": "HH2*,HH2#,HH2%,HH2+",
+                "NEF": "HH2%"
+            },
+            "properties": [
+                "QH2",
+                "ARGx",
+                "R",
+                "1H",
+                "isProton",
+                "proton",
+                "isNotCarbon",
+                "notcarbon",
+                "isNotNitrogen",
+                "notnitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isSidechain",
+                "sidechain",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isPseudoAtom",
+                "pseudoatom",
+                "hasNoPseudoAtom",
+                "hasnopseudoatom",
+                "isNotMethylene",
+                "notmethylene",
+                "isNotMethyleneProton",
+                "notmethyleneproton",
+                "isGuanidine",
+                "guanidine"
+            ],
+            "pseudoAtom": null,
+            "realAtoms": [
+                "HH21",
+                "HH22"
+            ],
+            "shift": {
+                "average": 6.779999999999999,
+                "sd": 0.485
+            },
+            "spinType": "1H",
+            "topology": [
+                [
+                    0,
+                    "NH2"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [
+                "C",
+                "CO"
+            ],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": false,
+            "hetatm": false,
+            "isPseudoAtom": false,
+            "name": "C",
+            "nameDict": {
+                "AQUA": "C",
+                "BMRBd": "C",
+                "CCPN": "C",
+                "CYANA": "C",
+                "CYANA2": "C",
+                "INTERNAL_0": "C",
+                "INTERNAL_1": "C",
+                "IUPAC": "C",
+                "PDB": "C",
+                "XPLOR": "C",
+                "NEF": "C"
+            },
+            "properties": [
+                "C",
+                "ARGx",
+                "R",
+                "13C",
+                "isNotProton",
+                "notproton",
+                "isCarbon",
+                "carbon",
+                "isNotNitrogen",
+                "notnitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isBackbone",
+                "backbone",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isNotPseudoAtom",
+                "notpseudoatom",
+                "hasNoPseudoAtom",
+                "hasnopseudoatom",
+                "isNotMethylene",
+                "notmethylene",
+                "isNotMethyleneProton",
+                "notmethyleneproton"
+            ],
+            "pseudoAtom": null,
+            "realAtoms": [],
+            "shift": {
+                "average": 176.43,
+                "sd": 4.3
+            },
+            "spinType": "13C",
+            "topology": [
+                [
+                    0,
+                    "CA"
+                ],
+                [
+                    0,
+                    "O"
+                ],
+                [
+                    1,
+                    "N"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [
+                "O",
+                "O'"
+            ],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": false,
+            "hetatm": false,
+            "isPseudoAtom": false,
+            "name": "O",
+            "nameDict": {
+                "AQUA": "O",
+                "BMRBd": "O",
+                "CCPN": "O",
+                "CYANA": "O",
+                "CYANA2": "O",
+                "INTERNAL_0": "O",
+                "INTERNAL_1": "O",
+                "IUPAC": "O",
+                "PDB": "O",
+                "XPLOR": "O,OT1",
+                "NEF": "O"
+            },
+            "properties": [
+                "O",
+                "ARGx",
+                "R",
+                "16O",
+                "isNotProton",
+                "notproton",
+                "isNotCarbon",
+                "notcarbon",
+                "isNotNitrogen",
+                "notnitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isBackbone",
+                "backbone",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isNotPseudoAtom",
+                "notpseudoatom",
+                "hasNoPseudoAtom",
+                "hasnopseudoatom",
+                "isSidechain",
+                "sidechain",
+                "isNotMethylene",
+                "notmethylene",
+                "isNotMethyleneProton",
+                "notmethyleneproton"
+            ],
+            "pseudoAtom": null,
+            "realAtoms": [],
+            "shift": null,
+            "spinType": "16O",
+            "topology": [
+                [
+                    0,
+                    "C"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": false,
+            "hetatm": false,
+            "isPseudoAtom": false,
+            "name": "H1",
+            "nameDict": {
+                "CCPN": "H1",
+                "INTERNAL_0": "H1",
+                "INTERNAL_1": "H1",
+                "IUPAC": "H1",
+                "XPLOR": "HT1",
+                "NEF": "H1"
+            },
+            "properties": [
+                "H1",
+                "ARGx",
+                "R",
+                "1H",
+                "isProton",
+                "proton",
+                "isNotCarbon",
+                "notcarbon",
+                "isNotNitrogen",
+                "notnitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isBackbone",
+                "backbone",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isNotPseudoAtom",
+                "notpseudoatom",
+                "hasNoPseudoAtom",
+                "hasnopseudoatom",
+                "isNotMethylene",
+                "notmethylene",
+                "isNotMethyleneProton",
+                "notmethyleneproton"
+            ],
+            "pseudoAtom": null,
+            "realAtoms": [],
+            "shift": {
+                "average": 8.24,
+                "sd": 0.61
+            },
+            "spinType": "1H",
+            "topology": [
+                [
+                    0,
+                    "N"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": false,
+            "hetatm": false,
+            "isPseudoAtom": false,
+            "name": "H2",
+            "nameDict": {
+                "CCPN": "H2",
+                "INTERNAL_0": "H2",
+                "INTERNAL_1": "H2",
+                "IUPAC": "H2",
+                "XPLOR": "HT2",
+                "NEF": "H2"
+            },
+            "properties": [
+                "H2",
+                "ARGx",
+                "R",
+                "1H",
+                "isProton",
+                "proton",
+                "isNotCarbon",
+                "notcarbon",
+                "isNotNitrogen",
+                "notnitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isBackbone",
+                "backbone",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isNotPseudoAtom",
+                "notpseudoatom",
+                "hasNoPseudoAtom",
+                "hasnopseudoatom",
+                "isNotMethylene",
+                "notmethylene",
+                "isNotMethyleneProton",
+                "notmethyleneproton"
+            ],
+            "pseudoAtom": null,
+            "realAtoms": [],
+            "shift": {
+                "average": 8.24,
+                "sd": 0.61
+            },
+            "spinType": "1H",
+            "topology": [
+                [
+                    0,
+                    "N"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": false,
+            "hetatm": false,
+            "isPseudoAtom": false,
+            "name": "H3",
+            "nameDict": {
+                "CCPN": "H3",
+                "INTERNAL_0": "H3",
+                "INTERNAL_1": "H3",
+                "IUPAC": "H3",
+                "XPLOR": "HT3",
+                "NEF": "H3"
+            },
+            "properties": [
+                "H3",
+                "ARGx",
+                "R",
+                "1H",
+                "isProton",
+                "proton",
+                "isNotCarbon",
+                "notcarbon",
+                "isNotNitrogen",
+                "notnitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isBackbone",
+                "backbone",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isNotPseudoAtom",
+                "notpseudoatom",
+                "hasNoPseudoAtom",
+                "hasnopseudoatom",
+                "isNotMethylene",
+                "notmethylene",
+                "isNotMethyleneProton",
+                "notmethyleneproton"
+            ],
+            "pseudoAtom": null,
+            "realAtoms": [],
+            "shift": {
+                "average": 8.24,
+                "sd": 0.61
+            },
+            "spinType": "1H",
+            "topology": [
+                [
+                    0,
+                    "N"
+                ]
+            ]
+        },
+        {
+            "CterminalTopology": [],
+            "NterminalTopology": [],
+            "aliases": [
+                "OXT",
+                "O''"
+            ],
+            "canBeModified": true,
+            "convention": "INTERNAL_1",
+            "hasPseudoAtom": false,
+            "hetatm": false,
+            "isPseudoAtom": false,
+            "name": "OXT",
+            "nameDict": {
+                "CCPN": "O''",
+                "INTERNAL_0": "OXT",
+                "INTERNAL_1": "OXT",
+                "IUPAC": "OXT,O''",
+                "XPLOR": "OT2",
+                "NEF": "O''"
+            },
+            "properties": [
+                "OXT",
+                "ARGx",
+                "R",
+                "16O",
+                "isNotProton",
+                "notproton",
+                "isNotCarbon",
+                "notcarbon",
+                "isNotNitrogen",
+                "notnitrogen",
+                "isNotSulfur",
+                "isNotSulphur",
+                "notsulfur",
+                "notsulphur",
+                "isBackbone",
+                "backbone",
+                "isNotAromatic",
+                "notaromatic",
+                "isNotMethyl",
+                "notmethyl",
+                "isNotMethylProton",
+                "notmethylproton",
+                "isNotPseudoAtom",
+                "notpseudoatom",
+                "hasNoPseudoAtom",
+                "hasnopseudoatom",
+                "isSidechain",
+                "sidechain",
+                "isNotMethylene",
+                "notmethylene",
+                "isNotMethyleneProton",
+                "notmethyleneproton"
+            ],
+            "pseudoAtom": null,
+            "realAtoms": [],
+            "shift": null,
+            "spinType": "16O",
+            "topology": [
+                [
+                    0,
+                    "C"
+                ]
+            ]
+        }
+    ],
+    "canBeModified": true,
+    "cingDefinition": true,
+    "comment": "non-protonated (neutral) ARG (uncommon)",
+    "commonName": "ARGx",
+    "convention": "INTERNAL_1",
+    "dihedralDefs": [
+        {
+            "aliases": [],
+            "atoms": [
+                [
+                    -1,
+                    "C"
+                ],
+                [
+                    0,
+                    "N"
+                ],
+                [
+                    0,
+                    "CA"
+                ],
+                [
+                    0,
+                    "C"
+                ]
+            ],
+            "convention": "INTERNAL_1",
+            "karplus": null,
+            "name": "PHI"
+        },
+        {
+            "aliases": [],
+            "atoms": [
+                [
+                    0,
+                    "N"
+                ],
+                [
+                    0,
+                    "CA"
+                ],
+                [
+                    0,
+                    "C"
+                ],
+                [
+                    1,
+                    "N"
+                ]
+            ],
+            "convention": "INTERNAL_1",
+            "karplus": null,
+            "name": "PSI"
+        },
+        {
+            "aliases": [],
+            "atoms": [
+                [
+                    0,
+                    "N"
+                ],
+                [
+                    0,
+                    "CA"
+                ],
+                [
+                    0,
+                    "CB"
+                ],
+                [
+                    0,
+                    "CG"
+                ]
+            ],
+            "convention": "INTERNAL_1",
+            "karplus": null,
+            "name": "CHI1"
+        },
+        {
+            "aliases": [],
+            "atoms": [
+                [
+                    0,
+                    "CA"
+                ],
+                [
+                    0,
+                    "CB"
+                ],
+                [
+                    0,
+                    "CG"
+                ],
+                [
+                    0,
+                    "CD"
+                ]
+            ],
+            "convention": "INTERNAL_1",
+            "karplus": null,
+            "name": "CHI2"
+        },
+        {
+            "aliases": [],
+            "atoms": [
+                [
+                    0,
+                    "CB"
+                ],
+                [
+                    0,
+                    "CG"
+                ],
+                [
+                    0,
+                    "CD"
+                ],
+                [
+                    0,
+                    "NE"
+                ]
+            ],
+            "convention": "INTERNAL_1",
+            "karplus": null,
+            "name": "CHI3"
+        },
+        {
+            "aliases": [],
+            "atoms": [
+                [
+                    0,
+                    "CG"
+                ],
+                [
+                    0,
+                    "CD"
+                ],
+                [
+                    0,
+                    "NE"
+                ],
+                [
+                    0,
+                    "CZ"
+                ]
+            ],
+            "convention": "INTERNAL_1",
+            "karplus": null,
+            "name": "CHI4"
+        },
+        {
+            "aliases": [],
+            "atoms": [
+                [
+                    -1,
+                    "CA"
+                ],
+                [
+                    -1,
+                    "C"
+                ],
+                [
+                    0,
+                    "N"
+                ],
+                [
+                    0,
+                    "CA"
+                ]
+            ],
+            "convention": "INTERNAL_1",
+            "karplus": null,
+            "name": "OMEGA"
+        }
+    ],
+    "name": "ARGx",
+    "nameDict": {
+        "AQUA": "ARG",
+        "BMRBd": null,
+        "CCPN": "protein Arg deprot:HH12",
+        "CYANA": "ARG",
+        "CYANA2": null,
+        "INTERNAL_0": "ARGx",
+        "INTERNAL_1": "ARGx",
+        "IUPAC": "ARG",
+        "PDB": null,
+        "XPLOR": "ARG"
+    },
+    "properties": [
+        "ARGx",
+        "R",
+        "protein",
+        "aliphatic",
+        "large",
+        "charged",
+        "isArginine"
+    ],
+    "shortName": "R",
+    "shouldBeSaved": false
+}

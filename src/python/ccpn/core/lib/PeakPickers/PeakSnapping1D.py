@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-29 09:39:21 +0000 (Thu, February 29, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-01 16:17:35 +0000 (Fri, March 01, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -43,6 +43,12 @@ from ccpn.core.lib.PeakPickers.PeakPicker1D import _find1DMaxima, _find1DPositiv
 from ccpn.core.lib.SpectrumLib import _1DRawDataDict
 from ccpn.util.DataEnum import DataEnum
 
+
+_SNAPPED = 'Snapped'
+_UNSNAPPED = 'Unsnapped'
+_CANDIDATES = 'candidates nearby'
+_SEP = '.'
+
 class _SnapFlag(DataEnum):
     """
     A set of flags set to (internal) peak after a snapping reflecting the snap outcome.
@@ -51,14 +57,70 @@ class _SnapFlag(DataEnum):
         - a negative value will suggest a failure.
         This format ensure conditions can be checked: eg. if peakA._snapFlag > 0 ...
     """
+
+
     ## Successful snaps
-    NEW_POS_HEIGHT = 1, 'New position and maximum above S/N thresholds'
-    NEW_POS_HEIGHT_ALIGN = 2, 'New position and maximum above S/N thresholds after an "on-the-fly" local re-referencing'
+    NEW_POS_HEIGHT                      = 1,    [f'{_SNAPPED}' 'New position and maximum above S/N thresholds']
+    NEW_POS_HEIGHT_ALIGN         = 2,     [f'{_SNAPPED}{_SEP} Applied re-referencing', 'New position and maximum above S/N thresholds after an "on-the-fly" local re-referencing']
 
     ## Unsuccessful snaps
-    CLOSEST_HEIGHT_AT_POS = -10, 'Closest maximum at the same position'
-    CLOSEST_HEIGHT_AT_POS_BUT_CANDIDATES = -20, 'Closest maximum at the same position but maxima candidates above S/N thresholds near snapping boundaries'
-    FAILED = -30, 'Failed. Position and height are unchanged. No maxima found nearby'
+    CLOSEST_HEIGHT_AT_POS        = -10, [ _UNSNAPPED, 'Closest maximum at the same position']
+    UNSNAPPED_BUT_CANDIDATES = -20, [f'{_UNSNAPPED}{_SEP} {_CANDIDATES}', 'Closest maximum at the same position but maxima candidates above S/N thresholds near snapping boundaries']
+    FAILED                                           = -30, [ f'{_UNSNAPPED}{_SEP} failed', 'Position and height are unchanged. No maxima found nearby']
+
+    @property
+    def shortDescription(self):
+        return self.description[0]
+
+    @property
+    def longDescription(self):
+        return self.description[1]
+    
+    @staticmethod
+    def _mergeShortDescriptions(shortDescriptions):
+        """
+        Processes a list of labels to generate a summarised result.
+
+        :param shortDescriptions:  A list of strings representing labels.
+        :return:  str: A summarised result based on the input labels.
+
+        It splits each item by '.', merges duplicates, and re-adds the words after the '.'.
+        If duplicates are found, it prepends "Multiple" to the duplicated item.
+
+        Example:
+            labels0 = ['Unsnapped', 'Unsnapped. Candidates nearby']
+            result0 = process_labels(labels0)
+            # Output: 'Multiple Unsnapped. Candidates nearby'
+
+        """
+        cls = _SnapFlag
+        parts = []
+
+        # Split each label by '.', strip, and add to parts list
+        for label in shortDescriptions:
+            labelParts = [part.strip() for part in label.split(_SEP)]
+            parts.extend(labelParts)
+
+        # Merge duplicate words
+        uniqueParts = []
+        duplicates = set()
+        for part in parts:
+            if part in uniqueParts:
+                duplicates.add(part)
+            else:
+                uniqueParts.append(part)
+
+        # Create final result
+        resultParts = []
+        for part in uniqueParts:
+            if part in duplicates:
+                resultParts.append(f"Multiple {part}.")
+            else:
+                resultParts.append(part)
+        result = ' '.join(resultParts)
+        return result.rstrip('.')
+
+
 
 
 def snap1DPeaks(peaks, **kwargs):
@@ -115,7 +177,7 @@ def _snap(peak, x,y, maxima, minimalHeightThreshold,  defaultLimitPpm=0.5, maxLi
         seenPos = None
         for h, pickingThreshold in enumerate(pickingThresholds):
             # mainWindow.newMark(colour=brush, positions=[pickingThreshold], axisCodes=['intensity'], style='simple', units=(), labels=(f'{h}'), strips=None)
-            xPos4Region, yPos4Region =  _1DregionsFromLimits(positions, heights, limits)
+            xPos4Region, yPos4Region = _1DregionsFromLimits(positions, heights, limits)
             regionMaximaIndexes = np.argsort([yPos4Region > pickingThreshold]).flatten()
             pos = None
             for index in regionMaximaIndexes:
@@ -136,7 +198,9 @@ def _snap(peak, x,y, maxima, minimalHeightThreshold,  defaultLimitPpm=0.5, maxLi
         # Don't break here the search. Let it explore all limits until the end.
 
     df = pd.DataFrame(dd)
-    df = df[df['minimalHeightThresholdRatio'] > 1.3] ## Experimentally selected. Value decided after inspecting thousands of signals. this is a sort of S/N ratio.
+    df = df[df['minimalHeightThresholdRatio'] > 1.3] ## Internal threshold. Hardcoded because experimentally selected.
+                                                                                ## Value decided after inspecting thousands of signals.
+                                                                                ## This is NOT the NMR S/N ratio for a peak. And do NOT use that.
                                                                                 ## if too low the found maximum is obviously noise, too high will miss good peaks.
     if len(df)>0:
         # We have a good snap
@@ -214,7 +278,7 @@ def _find1DCoordsForPeaks(peaks,
                       figOfMeritLimit=figOfMeritLimit,
                       defaultLimitPpm=ppmLimit,
                       deltaFactor=deltaFactor)
-                if peak._snapFlag <0:
+                if peak._snapFlag < 0:
                     unsnapped.append(peak)
                 else:
                     snapped.append(peak)
@@ -237,16 +301,18 @@ def _countCloseValuesForB(A, B, tolerance):
 
     return counts
 
-def _countNearUnpickedMaxima(peaks, tolerancePpm = 1):
+def _countNearUnpickedMaxima(peaks, tolerancePpm = 0.5, snrThreshold=3.5):
     """
     """
     spectrum = peaks[0].spectrum
     x, y = np.array(spectrum.positions), np.array(spectrum.intensities)
+    _noiseSD = spectrum._noiseSD
     minimalHeightThreshold = spectrum._noiseSD * 2
     mm, mx = _find1DPositiveMaxima(y, x, minimalHeightThreshold)
     positions = np.array(mm).T[0]  # allMaximaPositions
-    # heights = np.array(mm).T[1]
-    A = positions
+    heights = np.array(mm).T[1]
+    indAboveSNR = np.argwhere((heights/_noiseSD) > snrThreshold).flatten()
+    A = positions[indAboveSNR]
     B = np.array([pk.position[0] for pk in peaks])
     # Check if any element of A is close to any element of B within the tolerance
     close_to_b = np.any(np.isclose(A[:, None], B, atol=1.e-2), axis=1)

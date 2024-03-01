@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-29 17:38:10 +0000 (Thu, February 29, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-01 16:17:35 +0000 (Fri, March 01, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -101,7 +101,7 @@ class Pipeline(object):
     @staticmethod
     def _updateTheNoiseSDBase(spectra, rawDataDict):
         for spectrum in spectra:
-            if spectrum is None:
+            if spectrum is None or spectrum.dimensionCount > 1:
                 continue
             if spectrum not in rawDataDict:
                 x, y = np.array(spectrum.positions), np.array(spectrum.intensities)

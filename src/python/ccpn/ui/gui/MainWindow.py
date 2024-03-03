@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-29 15:49:49 +0000 (Thu, February 29, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-03 21:44:12 +0000 (Sun, March 03, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -2365,6 +2365,14 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
     #             return menuAction
     #
     #     return None
+
+    def _toggleModule(self, module):
+        """Method for forward Version-4 compatibility;
+        Toggle the visibility of module; Used in Menus
+        """
+        if module is not None:
+            flag = not module._showState
+            module.setVisible(flag)
 
     def _toggleConsole(self):
         """

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-28 14:42:46 +0000 (Wed, February 28, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-03 21:44:12 +0000 (Sun, March 03, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -184,6 +184,8 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     _allowRename = False
     _defaultName = MODULENAME  # used only when renaming is allowed, so that its original name is stored in the lastSeen widgetsState.
     _helpFilePath = None
+
+    _isPythonConsoleModule = False # Conveniance; only overridden in PythonConsoleModule
 
     # After closing a renamed module, any new instance will be named as default.
 
@@ -460,6 +462,13 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         Top Widget for the CcpnModule object; for Version-3 equals to self
         """
         return self
+
+    @property
+    def _showState(self):
+        """Property for forward Version-4 compatibility;
+        visibility of CcpnModule object; for Version-3 equals to self.isVisible()
+        """
+        return self.isVisible()
 
     def _getModulePidFields(self):
         """

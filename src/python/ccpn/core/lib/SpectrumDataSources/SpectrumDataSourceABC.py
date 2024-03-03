@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-19 17:44:46 +0000 (Mon, February 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-03 21:44:11 +0000 (Sun, March 03, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -683,7 +683,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         :param path: optional, path of the (binary) spectral data
         :param spectrum: associate instance with spectrum and import spectrum's parameters
         :param dimensionCount: limit instance to dimensionCount dimensions
-        :param checkValid: flag to do validity check (default=False)
+        :param checkValid: flag to do validity check (default=True); requires path
 
         """
         if self.dataFormat is None:
@@ -717,7 +717,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         # if not self.hasBlockCached:
         #     self.disableCache()
 
-        if checkValid:
+        if path is not None and checkValid:
             self.checkValid()
 
     def setDefaultParameters(self, nDim=MAXDIM):
@@ -1439,12 +1439,15 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         # checking opening file and reading parameters
         try:
-            with self.openExistingFile():  # This will also read the parameters
-                if not self.isValid:
-                    return self._returnFalse(self.errorString)
+            # This will also read the parameters and do any checks
+            with self.openExistingFile():
+                pass
         except RuntimeError as es:
             txt = f'{_iniTxt}: Reading parameters failed with error: "{es}"'
             return self._returnFalse(txt)
+        # Check if reading parameters yielded any errors
+        if not self.isValid:
+            return self._returnFalse(self.errorString)
 
         # Check dimensionality; should be > 0
         if self.dimensionCount == 0:
@@ -1486,7 +1489,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         :return: None or instance of the class
 
-        depricated: initate an instance and use the isValid attribute
+        depricated: initiate an instance and use the isValid attribute
         """
         instance = cls(path=path)
         if not instance.isValid:
@@ -1570,7 +1573,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         if mode is None:
             mode = self.defaultOpenReadMode
 
-        self.closeFile()  # Wil close if open, do nothing otherwise
+        self.closeFile()  # Will close if open, do nothing otherwise
         self.openFile(mode=mode)
         self.readParameters()
         try:

@@ -25,7 +25,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-19 17:38:14 +0000 (Mon, February 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-03 21:44:11 +0000 (Sun, March 03, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -274,8 +274,8 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
             self.writeParameters()
 
-        getLogger().debug2('openFile: %s; %s blocks with size %s; chunks=%s' %
-                          (self, self._totalBlocks, self._totalBlockSize, tuple(self.blockSizes)))
+        # getLogger().debug2('openFile: %s; %s blocks with size %s; chunks=%s' %
+        #                   (self, self._totalBlocks, self._totalBlockSize, tuple(self.blockSizes)))
 
         return self.fp
 

@@ -4,9 +4,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-10 18:05:05 +0000 (Fri, November 10, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-03-03 21:44:12 +0000 (Sun, March 03, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -75,7 +75,7 @@ class ButtonListMixin:
         else:
             getLogger().warning('Button %s not found in the list' % buttonName)
 
-    def _insertSpacer(self, index):
+    def _insertSpacer(self, index, width=25, height=5):
         from ccpn.ui.gui.widgets.Spacer import Spacer
 
         if not (0 <= index < len(self.buttons)):
@@ -89,7 +89,7 @@ class ButtonListMixin:
             else:
                 grid = (pos, 0)
 
-            self.getLayout().addWidget(self.buttons[i], *grid)
+            self.getLayout().addWidget(self.buttons[i], grid[0], grid[1], 1, 1)
 
         if 'h' in self.direction:
             spacerGrid = (0, index)
@@ -100,7 +100,7 @@ class ButtonListMixin:
             xExpand = QtWidgets.QSizePolicy.Fixed
             yExpand = QtWidgets.QSizePolicy.Expanding
 
-        Spacer(self, 25, 5, xExpand, yExpand, grid=spacerGrid)
+        Spacer(self, width, height, xExpand, yExpand, grid=spacerGrid)
 
 
 # GST This uses the builtin Qt ButtonBox to make buttons for dialogs behave nicely
@@ -176,8 +176,17 @@ class ButtonBoxList(QtWidgets.QDialogButtonBox, Base, ButtonListMixin):
         j = len(self.buttons)
 
         for i, text in enumerate(texts):
+            if 'h' in self.direction:
+                grid = (0, i)
+            else:
+                grid = (i, 0)
+            # self.getLayout().addWidget(button, *grid)
+
             button = Button(self, text, callbacks[i], icons[i],
-                            tipText=tipTexts[i])
+                            tipText=tipTexts[i],
+                            grid=grid
+                            )
+
 
             extraWidth = button.fontMetrics().boundingRect('W' * 2).width()
             width = button.fontMetrics().boundingRect(text).width()
@@ -270,22 +279,55 @@ class ButtonList(Widget, ButtonListMixin):
         j = len(self.buttons)
 
         for i, text in enumerate(texts):
-            if 'h' in self.direction:
-                grid = (0, i + j)
-            else:
-                grid = (i + j, 0)
+            # if 'h' in self.direction:
+            #     grid = (0, i + j)
+            # else:
+            #     grid = (i + j, 0)
 
-            button = Button(self, text, callbacks[i], icons[i],
-                            tipText=tipTexts[i], grid=grid,
-                            enableFocusBorder=self._enableFocusBorder)
+            # button = Button(self, text, callbacks[i], icons[i],
+            #                 tipText=tipTexts[i], grid=grid,
+            #                 enableFocusBorder=self._enableFocusBorder)
+            #
+            # width = button.fontMetrics().boundingRect(text).width() + 7
+            # if setMinimumWidth:
+            #     button.setMinimumWidth(int(width * 1.5))
+            _button = self._addButton(text, callbacks[i],
+                                            icons[i],
+                                            tipText=tipTexts[i],
+                                            setMinimumWidth=setMinimumWidth,
+                                      )
+            # # GWV: Why not a proper dict??
+            # self.buttons.append(_button)
+            # self.buttonNames[text] = i + j
 
-            width = button.fontMetrics().boundingRect(text).width() + 7
-            if setMinimumWidth:
-                button.setMinimumWidth(int(width * 1.5))
+    def _addButton(self, text, callback, icon, tipText, setMinimumWidth, **kwds):
+        """Add a button
 
-            self.buttons.append(button)
-            self.buttonNames[text] = i + j
+        :return The Button instance
+        """
+        _nButtons = len(self.buttons)
 
+        if 'h' in self.direction:
+            grid = (0, _nButtons)
+        else:
+            grid = (_nButtons, 0)
+
+        _button = Button(self, text, callback, icon,
+                              tipText=tipText,
+                              grid=grid,
+                              enableFocusBorder=self._enableFocusBorder,
+                              **kwds
+                        )
+
+        if setMinimumWidth:
+            width = _button.fontMetrics().boundingRect(text).width() + 7
+            _button.setMinimumWidth(int(width * 1.5))
+
+        # GWV: Why not a proper dict??
+        self.buttons.append(_button)
+        self.buttonNames[text] = _nButtons
+
+        return _button
 
 # class UtilityButtonList(ButtonList):
 #

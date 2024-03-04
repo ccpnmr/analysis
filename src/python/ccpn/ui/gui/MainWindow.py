@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-03 21:44:12 +0000 (Sun, March 03, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-04 21:28:11 +0000 (Mon, March 04, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -40,7 +40,7 @@ from ccpn.core.Project import Project
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
 
-from ccpn.framework.Preferences import getPreferences, RECENT_MACROS
+from ccpn.framework.Preferences import getPreferences, RECENT_MACROS, USE_NATIVE_MENUS
 
 ## MainWindow class
 from ccpn.ui._implementation.Window import Window as _CoreClassMainWindow
@@ -576,9 +576,10 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         passed at startup.
         """
         from ccpn.ui.gui.Menus import MenuManager
+
+        _useNativeMenus = getPreferences().get(USE_NATIVE_MENUS)
         self._menuManager = MenuManager(mainWindow=self, menuDefs=self.ui._menuDefs)
-        self._menuManager.makeMenus()
-        return
+        self._menuManager.makeMenus(useNativeMenus=_useNativeMenus)
 
     #     # self._menuBar = self.menuBar()
     #     # for m in self.ui._menuDefs:

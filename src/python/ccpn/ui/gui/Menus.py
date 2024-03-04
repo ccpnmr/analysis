@@ -115,7 +115,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-04 18:09:43 +0000 (Mon, March 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-04 21:28:11 +0000 (Mon, March 04, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1473,20 +1473,17 @@ class MenuManager(object):
     Works of a MenuNode Tree structure
     """
 
-    def __init__(self, mainWindow, menuDefs, useNative=False):
+    def __init__(self, mainWindow, menuDefs):
 
         self.mainWindow = mainWindow
         self.menuBar = mainWindow._getMenuBarWidget()
-        self.menuBar.setNativeMenuBar(useNative)
-        self.useNative = useNative
+        self.useNativeMenus = False
 
         # define self.application; project, current and ui are derived via properties
         self.application = mainWindow.application
 
         # define the MenuNode's tree
         self.menuNodes = MenuNode.newFromList(menuDefs)
-        # MenuNode root's widget is the MenuBar instance
-        self.menuNodes.widget = self.menuBar
 
         #-------------------------------------------------------------------------------------
         # define dynamic nodes
@@ -1548,17 +1545,21 @@ class MenuManager(object):
 
     #-----------------------------------------------------------------------------------------
 
-    def makeMenus(self, node:MenuNode = None):
+    def makeMenus(self, node:MenuNode = None, useNativeMenus=False):
         """Use node to make its menu's; i.e. adding Menu/Action to parent of node
         Recursively decent into its children
         :param node: a MenuNode starting point; default to self.menuNodes
+        :param useNativeMenus: flag to use native menu's
         """
         if node is None:
             node = self.menuNodes
 
         if node.isRoot:
-            # root; i.e. mainWindow.menuBar
-            pass
+            # MenuNode root's widget is the MenuBar instance
+            self.menuBar.clear()
+            self.menuBar.setNativeMenuBar(useNativeMenus)
+            self.useNativeMenus = useNativeMenus
+            node.widget = self.menuBar
 
         else:
             # We are not root, so should have a parent with a widget

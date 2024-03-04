@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-18 13:06:47 +0000 (Sun, February 18, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-04 21:28:11 +0000 (Mon, March 04, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -53,6 +53,8 @@ USER_MACRO_PATH = 'general.userMacroPath'
 USER_PLUGIN_PATH = 'general.userPluginPath'
 USER_PIPES_PATH = 'general.userPipesPath'
 USER_LAYOUTS_PATH = 'general.userLayoutsPath'
+
+USE_NATIVE_MENUS = 'general.useNativeMenus'
 
 RECENT_MACROS = 'recentMacros'
 

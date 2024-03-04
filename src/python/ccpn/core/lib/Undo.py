@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-14 12:12:33 +0000 (Wed, February 14, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-04 21:28:10 +0000 (Mon, March 04, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -325,12 +325,18 @@ class Undo(deque):
     def _newItem(self, undoPartial=None, redoPartial=None):
         """Add predefined partial(*) item to the undo stack.
         """
+        from ccpn.util.Common import reduceText
+
         if self._blocked or self._undoItemBlockingLevel:
             return
 
         if self._debug:
+            _undoPartial = str(undoPartial)
             getLogger().debug2(
-        f'undo._newItem: itemBlockingLevel={self.undoItemBlockingLevel} undo={undoPartial} redo={redoPartial}')
+                    f'undo._newItem: itemBlockingLevel={self.undoItemBlockingLevel}; '\
+                    f'undo={reduceText(str(undoPartial), 100)}; '\
+                    f'redo={reduceText(str(redoPartial), 100)}'
+            )
 
 
         # clear out redos that are no longer going to be doable

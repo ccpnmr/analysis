@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-01-05 15:02:25 +0000 (Fri, January 05, 2024) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-03-04 21:28:11 +0000 (Mon, March 04, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -770,7 +770,7 @@ def handleDialogApply(self):
 
     from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 
-    undo = self.project._undo
+    undo = self.project.application._getUndo()
 
 
     # simple class to export variables from the generator function

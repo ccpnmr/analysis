@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-20 08:39:28 +0000 (Tue, February 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-04 21:28:10 +0000 (Mon, March 04, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -51,9 +51,10 @@ from ccpn.ui.gui.guiSettings import _styleMagenta
 def _debugUndo(undo, text, enter):
     """debug info for entering/exiting undo blocks
     """
+    from ccpn.util.Common import reduceText
     indent = '-'*(undo._waypointBlockingLevel)
     arrow = f'|{indent}>' if enter else f'<{indent}|'
-    getLogger().debug2(_styleMagenta(f'{arrow:7} {text}'))
+    getLogger().debug2(_styleMagenta(f'{arrow:7} {reduceText(text)}'))
 
 #--------------------------------------------------------------------------------------------
 

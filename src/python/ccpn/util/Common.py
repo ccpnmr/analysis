@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-14 12:12:37 +0000 (Wed, February 14, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-04 21:28:11 +0000 (Mon, March 04, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -542,6 +542,18 @@ def _truncateText(text, splitter=' , ', maxWords=4):
         return splitter.join(words[:maxWords]) + ' ...'
     else:
         return text
+
+
+def reduceText(text, length=120):
+    """reduce the text to length chars; yielding start and end separated by dots
+    """
+    _len = len(text)
+    if _len <= length:
+        return text
+
+    ii = length//2 - 4
+    _text = f'{text[0:ii]}  ....  {text[_len-ii:]}'
+    return _text
 
 
 def _traverse(obj, tree_types=(list, tuple)):

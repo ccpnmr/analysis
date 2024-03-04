@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
 __dateModified__ = "$Date: 2021-04-26 12:13:48 +0100 (Mon, April 26, 2021) $"
-__dateModified__ = "$dateModified: 2024-02-21 14:41:29 +0000 (Wed, February 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-04 15:01:16 +0000 (Mon, March 04, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -154,8 +154,7 @@ def runPymolWithScript(application, pymolScriptPath):
         if ok:
             from ccpn.ui.gui.popups.PreferencesPopup import PreferencesPopup
 
-            pp = PreferencesPopup(parent=mainWindow, mainWindow=mainWindow,
-                                  preferences=application.preferences)
+            pp = PreferencesPopup(parent=mainWindow, mainWindow=mainWindow)
             pp.tabWidget.setCurrentIndex(pp.tabWidget.count() - 1)
             pp.exec_()
             return

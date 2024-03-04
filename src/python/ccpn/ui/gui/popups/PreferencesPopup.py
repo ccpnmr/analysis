@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-27 10:50:09 +0000 (Tue, February 27, 2024) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-03-04 15:01:17 +0000 (Mon, March 04, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -32,6 +32,9 @@ import pandas as pd
 from PyQt5 import QtWidgets, QtCore, QtGui, Qt
 from functools import partial
 from copy import deepcopy, copy
+from ccpn.core.PeakList import GAUSSIANMETHOD, PARABOLICMETHOD, LORENTZIANMETHOD
+from ccpn.core.MultipletList import MULTIPLETAVERAGINGTYPES
+from ccpn.core.lib.ContextManagers import queueStateChange, undoStackBlocking
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.Button import Button
@@ -43,9 +46,6 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Slider import Slider
-from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER, setColourScheme, FONTLIST, ZPlaneNavigationModes
-from ccpn.framework.Translation import languages
-from ccpn.ui.gui.popups.Dialog import handleDialogApply, _verifyPopupApply
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.ui.gui.widgets.HLine import HLine, LabeledHLine
@@ -54,25 +54,26 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Font import DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR, \
     getFontHeight, getSystemFonts, getFont, getSystemFont, TABLEFONT, updateSystemFonts
 from ccpn.ui.gui.widgets.CompoundWidgets import ButtonCompoundWidget
+from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
+from ccpn.ui.gui.widgets.FileDialog import SpectrumFileDialog, ProjectFileDialog, AuxiliaryFileDialog, \
+    LayoutsFileDialog, MacrosFileDialog, PluginsFileDialog, PipelineFileDialog, ExecutablesFileDialog, \
+    ProjectSaveFileDialog
+from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
+from ccpn.ui.gui.popups.Dialog import handleDialogApply, _verifyPopupApply
+# from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForPreferences
+from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER, setColourScheme, FONTLIST, ZPlaneNavigationModes
+from ccpn.ui.gui.lib.GuiPath import PathEdit, VALIDFILE
+from ccpn.ui.gui.lib.ChangeStateHandler import changeState
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLFONT_DEFAULTSIZE, _OLDGLFONT_SIZES
 from ccpn.util.Logging import getLogger
 from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, colourNameNoSpace, _setColourPulldown
-from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
-from ccpn.core.PeakList import GAUSSIANMETHOD, PARABOLICMETHOD, LORENTZIANMETHOD
-from ccpn.core.MultipletList import MULTIPLETAVERAGINGTYPES
 from ccpn.util.UserPreferences import UserPreferences
 # from ccpn.util.Common import camelCaseToString
 from ccpn.util.Path import aPath
 from ccpn.util.Constants import AXISUNITS
-from ccpn.ui.gui.lib.GuiPath import PathEdit, VALIDFILE
-# from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForPreferences
-from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
-from ccpn.core.lib.ContextManagers import queueStateChange, undoStackBlocking
-from ccpn.ui.gui.widgets.FileDialog import SpectrumFileDialog, ProjectFileDialog, AuxiliaryFileDialog, \
-    LayoutsFileDialog, MacrosFileDialog, PluginsFileDialog, PipelineFileDialog, ExecutablesFileDialog, \
-    ProjectSaveFileDialog
+from ccpn.framework.Translation import languages
 from ccpn.framework.lib.pipeline.PipesLoader import _fetchUserPipesPath
-from ccpn.ui.gui.lib.ChangeStateHandler import changeState
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLFONT_DEFAULTSIZE, _OLDGLFONT_SIZES
+from ccpn.framework.Preferences import getPreferences
 
 
 PEAKFITTINGDEFAULTS = [PARABOLICMETHOD, GAUSSIANMETHOD, LORENTZIANMETHOD]
@@ -183,7 +184,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
     FIXEDHEIGHT = False
     FIXEDWIDTH = False
 
-    def __init__(self, parent=None, mainWindow=None, preferences=None, title='Preferences', **kwds):
+    def __init__(self, parent=None, mainWindow=None, title='Preferences', **kwds):
         super().__init__(parent, setLayout=True, windowTitle=title, size=None, **kwds)
 
         self.mainWindow = mainWindow
@@ -198,9 +199,14 @@ class PreferencesPopup(CcpnDialogMainWidget):
             MessageDialog.showWarning(title, 'No project loaded')
             self.close()
             return
+        # get the current preferences from application
+        if not (_preferences := getPreferences()):
+            MessageDialog.showWarning(title, 'Preferences cannot be found')
+            self.close()
+            return
 
         # copy the current preferences
-        self.preferences = deepcopy(preferences)
+        self.preferences = deepcopy(_preferences)
 
         # grab the class with the preferences methods
         self._userPreferences = UserPreferences(readPreferences=False)

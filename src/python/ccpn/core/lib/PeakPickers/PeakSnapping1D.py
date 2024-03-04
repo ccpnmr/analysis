@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-03-01 16:17:35 +0000 (Fri, March 01, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-04 10:02:53 +0000 (Mon, March 04, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -308,9 +308,11 @@ def _countNearUnpickedMaxima(peaks, tolerancePpm = 0.5, snrThreshold=3.5):
     x, y = np.array(spectrum.positions), np.array(spectrum.intensities)
     _noiseSD = spectrum._noiseSD
     minimalHeightThreshold = spectrum._noiseSD * 2
-    mm, mx = _find1DPositiveMaxima(y, x, minimalHeightThreshold)
-    positions = np.array(mm).T[0]  # allMaximaPositions
-    heights = np.array(mm).T[1]
+    maxtab, mintab = _find1DPositiveMaxima(y, x, minimalHeightThreshold)
+    if len(maxtab) == 0:
+        return 0
+    positions = np.array(maxtab).T[0]  # allMaximaPositions
+    heights = np.array(maxtab).T[1]
     indAboveSNR = np.argwhere((heights/_noiseSD) > snrThreshold).flatten()
     A = positions[indAboveSNR]
     B = np.array([pk.position[0] for pk in peaks])

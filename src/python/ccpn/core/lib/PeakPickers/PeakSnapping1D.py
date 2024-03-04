@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-03-04 10:02:53 +0000 (Mon, March 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-04 12:06:44 +0000 (Mon, March 04, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -310,17 +310,23 @@ def _countNearUnpickedMaxima(peaks, tolerancePpm = 0.5, snrThreshold=3.5):
     minimalHeightThreshold = spectrum._noiseSD * 2
     maxtab, mintab = _find1DPositiveMaxima(y, x, minimalHeightThreshold)
     if len(maxtab) == 0:
-        return 0
-    positions = np.array(maxtab).T[0]  # allMaximaPositions
-    heights = np.array(maxtab).T[1]
-    indAboveSNR = np.argwhere((heights/_noiseSD) > snrThreshold).flatten()
-    A = positions[indAboveSNR]
-    B = np.array([pk.position[0] for pk in peaks])
-    # Check if any element of A is close to any element of B within the tolerance
-    close_to_b = np.any(np.isclose(A[:, None], B, atol=1.e-2), axis=1)
-    C = A[~close_to_b]  # C are the maxima available on the spectrum which haven't been picked
-    counts = np.sum(np.isclose(C[:, None], B, atol=tolerancePpm), axis=0)
-    ##  for each element in B find how many maxima are closeby in C
+        positions = np.array([]) # allMaximaPositions
+        heights = np.array([])
+    else:
+        positions = np.array(maxtab).T[0]  # allMaximaPositions
+        heights = np.array(maxtab).T[1]
+    try:
+        indAboveSNR = np.argwhere((heights/_noiseSD) > snrThreshold).flatten()
+        A = positions[indAboveSNR]
+        B = np.array([pk.position[0] for pk in peaks])
+        # Check if any element of A is close to any element of B within the tolerance
+        close_to_b = np.any(np.isclose(A[:, None], B, atol=1.e-2), axis=1)
+        C = A[~close_to_b]  # C are the maxima available on the spectrum which haven't been picked
+        counts = np.sum(np.isclose(C[:, None], B, atol=tolerancePpm), axis=0)
+        ##  for each element in B find how many maxima are closeby in C
+    except Exception as err:
+        getLogger().warning(f'Cannot find any unpicked near given peaks for {spectrum.pid}. Error: {err}')
+        return [0]*len(peaks)
     return counts
 
 

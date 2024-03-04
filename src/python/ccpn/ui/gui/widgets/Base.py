@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-03 21:44:12 +0000 (Sun, March 03, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-04 18:09:43 +0000 (Mon, March 04, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -353,8 +353,10 @@ class Base(DropBase, SignalBlocking):
 
         setWidgetFont(self, )
 
-        if len([_v for _v in (minimumHeight, maximumHeight, fixedHeight) if _v is not None]) > 1:
-            raise ValueError(f'only one of (minimumHeight, maximumHeight, fixedHeight) can be defined')
+        if len([_v for _v in (minimumHeight, fixedHeight) if _v is not None]) > 1:
+            raise ValueError(f'only one of (minimumHeight, fixedHeight) can be defined')
+        if len([_v for _v in (maximumHeight, fixedHeight) if _v is not None]) > 1:
+            raise ValueError(f'only one of (maximumHeight, fixedHeight) can be defined')
         if maximumHeight:
             self.setMaximumHeight(maximumHeight)
         if minimumHeight:
@@ -362,8 +364,10 @@ class Base(DropBase, SignalBlocking):
         if fixedHeight:
             self.setFixedHeight(fixedHeight)
 
-        if len([_v for _v in (minimumWidth, maximumWidth, fixedWidth) if _v is not None]) > 1:
-            raise ValueError(f'only one of (minimumWidth, maximumWidth, fixedWidth) can be defined')
+        if len([_v for _v in (minimumWidth, fixedWidth) if _v is not None]) > 1:
+            raise ValueError(f'only one of (minimumWidth, fixedWidth) can be defined')
+        if len([_v for _v in (maximumWidth, fixedWidth) if _v is not None]) > 1:
+            raise ValueError(f'only one of (maximumWidth, fixedWidth) can be defined')
         if maximumWidth:
             self.setMaximumWidth(maximumWidth)
         if minimumWidth:

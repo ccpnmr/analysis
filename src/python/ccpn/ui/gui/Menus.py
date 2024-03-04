@@ -115,7 +115,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-03 21:44:12 +0000 (Sun, March 03, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-04 18:09:43 +0000 (Mon, March 04, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1675,34 +1675,10 @@ class MenuManager(object):
                 ]
         self._updateDynamicNode(node=node, defs=_defs)
 
-    # def _toggleWidget(self, widget):
-    #     _visible = widget.isVisible()
-    #     widget.setVisible(not _visible)
-
     def _fillViewShowModulesCallback(self, node) -> bool:
         """Callback to fill View->Show/hide Modules Menu
         """
-        # _widgets = [(m.moduleName, m._widget) for m in self.mainWindow.modules
-        #             if not m._isPythonConsoleModule
-        #            ]
-        #
-        # _defs = []
-        # count = 1
-        # for name, widget in _widgets:
-        #     # create a shortcut command/cntr 1-9,0 for first 10 modules
-        #     if count <= 10:
-        #         shortcut = f'⌃{count%10}'  # Unicode U+2303, NOT the carrot on your keyboard.
-        #     else:
-        #         shortcut = None
-        #
-        #     _defs.append(
-        #         (name, partial(self._toggleWidget, widget),
-        #          dict(checkable=True, checked=widget.isVisible(), shortcut=shortcut)
-        #         )
-        #     )
-        #     count += 1
         _modules = [m for m in self.mainWindow.modules if not m._isPythonConsoleModule]
-
         _defs = []
         count = 1
         for module in _modules:

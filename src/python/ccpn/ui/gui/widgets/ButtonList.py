@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-03 21:44:12 +0000 (Sun, March 03, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-04 18:09:43 +0000 (Mon, March 04, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -279,28 +279,13 @@ class ButtonList(Widget, ButtonListMixin):
         j = len(self.buttons)
 
         for i, text in enumerate(texts):
-            # if 'h' in self.direction:
-            #     grid = (0, i + j)
-            # else:
-            #     grid = (i + j, 0)
-
-            # button = Button(self, text, callbacks[i], icons[i],
-            #                 tipText=tipTexts[i], grid=grid,
-            #                 enableFocusBorder=self._enableFocusBorder)
-            #
-            # width = button.fontMetrics().boundingRect(text).width() + 7
-            # if setMinimumWidth:
-            #     button.setMinimumWidth(int(width * 1.5))
             _button = self._addButton(text, callbacks[i],
                                             icons[i],
                                             tipText=tipTexts[i],
                                             setMinimumWidth=setMinimumWidth,
                                       )
-            # # GWV: Why not a proper dict??
-            # self.buttons.append(_button)
-            # self.buttonNames[text] = i + j
 
-    def _addButton(self, text, callback, icon, tipText, setMinimumWidth, **kwds):
+    def _addButton(self, text, callback, icon, tipText, setMinimumWidth=False, **kwds):
         """Add a button
 
         :return The Button instance
@@ -323,11 +308,23 @@ class ButtonList(Widget, ButtonListMixin):
             width = _button.fontMetrics().boundingRect(text).width() + 7
             _button.setMinimumWidth(int(width * 1.5))
 
-        # GWV: Why not a proper dict??
+        # GWV: Why not a proper (text, button) dict rather than (text, index)??
         self.buttons.append(_button)
         self.buttonNames[text] = _nButtons
 
         return _button
+
+    def _deleteButton(self, button):
+        """delete a button from the widget; removing the references
+        from .buttons and .buttonNames
+        """
+        idx = self.buttons.index(button)
+        self.buttons.pop(idx)
+        _text = button.getText()
+        if _text in self.buttonNames:
+            del(self.buttonNames[_text])
+        button.deleteLater()
+
 
 # class UtilityButtonList(ButtonList):
 #

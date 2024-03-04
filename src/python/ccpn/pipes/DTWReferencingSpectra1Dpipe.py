@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-16 17:48:56 +0000 (Tue, January 16, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-04 13:06:31 +0000 (Mon, March 04, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -205,7 +205,7 @@ class DTWReferencingSpectra(SpectraPipe):
                     if len(peaksPoints) == 0:
                         x1f, y1f = xOrigin, yOrigin
                         x2f, y2f = xDestination, yDestination
-                        print('Something odd for originPeakList', originPeakList)
+                        # print('Something odd for originPeakList', originPeakList)
                     else:
                         minPeak = np.nanmin(peaksPoints)
                         maxPeak = np.nanmax(peaksPoints)

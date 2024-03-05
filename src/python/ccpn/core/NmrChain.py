@@ -3,9 +3,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-22 12:08:08 +0000 (Wed, November 22, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-03-05 14:26:54 +0000 (Tue, March 05, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -316,6 +316,16 @@ class NmrChain(AbstractWrapperObject):
             if len(changedNmrResidues) != stop + 1 - start:
                 self._project._logger.warning("Only %s nmrResidues found in range %s to %s"
                                               % (len(changedNmrResidues), start, stop))
+
+    @logCommand(get='self')
+    def setupNmrResiduesFromPeaks(self, peakList, keepAssignments=True):
+        """Create a NmrResidue from each peak of peakList, using the peak dimensions to
+        generate the NmrAtoms
+        :param peakList: A PeakList instance
+        :param keepAssignments: flag to keep or not-keep existing assignments
+        """
+        from ccpn.core.lib.AssignmentLib import _fetchNewPeakAssignments
+        _fetchNewPeakAssignments(peakList=peakList, nmrChain=self, keepAssignments=keepAssignments)
 
     def _connectNmrResidues(self):
         updatingNmrChain = None

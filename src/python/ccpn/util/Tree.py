@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-02-14 12:12:37 +0000 (Wed, February 14, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-05 21:05:48 +0000 (Tue, March 05, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -124,7 +124,7 @@ class Tree(object):
             return -1
         if klass is None:
             klass = self.__class__
-        _children = self._getChildrenByClass(klass=klass)
+        _children = self._parent._getChildrenByClass(klass=klass)
         return _children.index(self)
 
     def _nextIndex(self, klass=None) -> int:

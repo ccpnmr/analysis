@@ -115,7 +115,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-04 21:28:11 +0000 (Mon, March 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-06 17:25:43 +0000 (Wed, March 06, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1546,7 +1546,7 @@ class MenuManager(object):
     #-----------------------------------------------------------------------------------------
 
     def makeMenus(self, node:MenuNode = None, useNativeMenus=False):
-        """Use node to make its menu's; i.e. adding Menu/Action to parent of node
+        """Use node to make its menu's; i.e. adding Menu/Action to node
         Recursively decent into its children
         :param node: a MenuNode starting point; default to self.menuNodes
         :param useNativeMenus: flag to use native menu's

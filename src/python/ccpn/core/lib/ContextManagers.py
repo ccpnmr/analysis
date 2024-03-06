@@ -4,9 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-12 16:15:39 +0100 (Wed, April 12, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-03-06 17:48:09 +0000 (Wed, March 06, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -33,14 +33,30 @@ import traceback
 import signal
 import pandas as pd
 from functools import partial
+
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QPainter
+
 from contextlib import contextmanager, nullcontext, suppress
 from collections.abc import Iterable
+
 from ccpn.core.lib import Util as coreUtil
 from ccpn.util.Logging import getLogger
 from ccpn.framework.Application import getApplication
 
+from ccpn.ui.gui.guiSettings import _styleMagenta
+
+#--------------------------------------------------------------------------------------------
+
+def _debugUndo(undo, text, enter):
+    """debug info for entering/exiting undo blocks
+    """
+    from ccpn.util.Common import reduceText
+    indent = '-'*(undo._waypointBlockingLevel)
+    arrow = f'|{indent}>' if enter else f'<{indent}|'
+    getLogger().debug2(_styleMagenta(f'{arrow:7} {reduceText(text)}'))
+
+#--------------------------------------------------------------------------------------------
 
 @contextmanager
 def echoCommand(obj, funcName, *params, values=None, defaults=None,
@@ -106,7 +122,7 @@ def _resumeNotification(application):
 
 
 @contextmanager
-def undoBlockWithSideBar(application=None):
+def undoBlockWithSideBar(application=None, debugText=''):
     """Wrap all the contained operations into a single undo/redo event.
     """
 
@@ -116,14 +132,14 @@ def undoBlockWithSideBar(application=None):
     if application is None:
         raise RuntimeError('Error getting application')
 
-    getLogger().debug2('_enterUndoBlock')
-
     # get the undo stack
-    undo = application._getUndo()
+    if (undo := application._getUndo()) is None:
+        raise RuntimeError(f'Unable to get the undo stack')
 
-    if undo is not None:
-        undo.newWaypoint()  # DO NOT CHANGE
-        undo.increaseWaypointBlocking()
+    _debugUndo(undo, f'UndoBlockWithSideBar: {debugText}', enter=True)
+
+    undo.newWaypoint()  # DO NOT CHANGE
+    undo.increaseWaypointBlocking()
 
     if application.ui and application.ui.mainWindow:
         sidebar = application.ui.mainWindow.sideBar
@@ -145,11 +161,11 @@ def undoBlockWithSideBar(application=None):
         if undo is not None:
             undo.decreaseWaypointBlocking()
 
-        getLogger().debug2(f'_exitUndoBlock: echoBlocking={application._echoBlocking}')
+        _debugUndo(undo, f'UndoBlockWithSideBar: {debugText}', enter=False)
 
 
 @contextmanager
-def undoBlockWithoutSideBar(application=None):
+def undoBlockWithoutSideBar(application=None, debugText=''):
     """Wrap all the contained operations into a single undo/redo event. To be deprecated. Use just undoBlock
     """
 
@@ -159,13 +175,14 @@ def undoBlockWithoutSideBar(application=None):
     if application is None:
         raise RuntimeError('Error getting application')
 
-    getLogger().debug2('_enterUndoBlockWithoutSideBar')
-
     # get the undo stack
-    undo = application._getUndo()
-    if undo is not None:
-        undo.newWaypoint()  # DO NOT CHANGE
-        undo.increaseWaypointBlocking()
+    if (undo := application._getUndo()) is None:
+        raise RuntimeError(f'Unable to get the undo stack')
+
+    _debugUndo(undo, f'UndoBlockWithoutSideBar: {debugText}', enter=True)
+
+    undo.newWaypoint()  # DO NOT CHANGE
+    undo.increaseWaypointBlocking()
 
     if application.ui and application.ui.mainWindow:
         sidebar = application.ui.mainWindow.sideBar
@@ -187,7 +204,7 @@ def undoBlockWithoutSideBar(application=None):
         if undo is not None:
             undo.decreaseWaypointBlocking()
 
-        getLogger().debug2(f'_enterUndoBlockWithoutSideBar: echoBlocking={application._echoBlocking}')
+        _debugUndo(undo, f'UndoBlockWithoutSideBar: {debugText}', enter=False)
 
 
 undoBlock = undoBlockWithSideBar
@@ -426,7 +443,7 @@ def logCommandManager(prefix, funcName, *args, **kwds):
 
 
 @contextmanager
-def inactivity(application=None, project=None):
+def inactivity(application=None, project=None, debugText='Inactivity'):
     """
     Block all notifiers, apiNotifiers, undo and echo-ing
     re-enable at the end of the function block.
@@ -450,7 +467,7 @@ def inactivity(application=None, project=None):
     project._apiNotificationBlanking += 1
 
     try:
-        with undoStackBlocking(project=project):
+        with undoStackBlocking(project=project, debugText=debugText):
             # transfer control to the calling function
             yield
 
@@ -547,7 +564,7 @@ def undoStackRevert(application=None):
 
 
 @contextmanager
-def undoStackBlocking(application=None, project=None):
+def undoStackBlocking(application=None, project=None, debugText=''):
     """
     Block addition of items to the undo stack, re-enable at the end of the function block.
     New user items can be added to the undo stack after blocking is re-enabled.
@@ -591,6 +608,8 @@ def undoStackBlocking(application=None, project=None):
         # store the new undo/redo items for later addition to the stack
         _undoStack.append((undo, redo))
 
+    _debugUndo(undo, f'UndoStackBlocking: {debugText}', enter=True)
+
     undo.newWaypoint()  # DO NOT CHANGE
     undo.increaseWaypointBlocking()
     undo.increaseBlocking()
@@ -610,6 +629,9 @@ def undoStackBlocking(application=None, project=None):
         # add all undo items (collected via the addUndoItem function) to the application's undo stack
         for item in _undoStack:
             undo._newItem(undoPartial=item[0], redoPartial=item[1])
+
+        _debugUndo(undo, f'UndoStackBlocking: {debugText}', enter=False)
+
 
 
 @contextmanager
@@ -771,7 +793,7 @@ def newObject(klass):
         application = getApplication()  # pass it in to reduce overhead
 
         with notificationBlanking(application=application):
-            with undoStackBlocking(application=application) as addUndoItem:
+            with undoStackBlocking(application=application, debugText=f'newObject: {func}') as addUndoItem:
                 result = func(*args, **kwds)
                 if result is None:
                     return None
@@ -1297,9 +1319,9 @@ def ccpNmrV3CoreUndoBlock(action='change', **actionKwds):
         application = getApplication()  # pass it in to reduce overhead
 
         with notificationBlanking(application=application):
-            with undoBlock():
+            with undoBlock(debugText=f'ccpNmrV3CoreUndoBlock: {func}'):
                 # must be done like this as the undo functions are not known
-                with undoStackBlocking(application=application) as addUndoItem:
+                with undoStackBlocking(application=application, debugText=f'-> ccpNmrV3CoreUndoBlock, before try') as addUndoItem:
                     # incorporate the change notifier to simulate the decorator
                     addUndoItem(undo=partial(self._finaliseAction, action, **actionKwds))
                     addUndoItem(undo=application.project.unblankNotification,
@@ -1312,7 +1334,7 @@ def ccpNmrV3CoreUndoBlock(action='change', **actionKwds):
                     raise
 
                 finally:
-                    with undoStackBlocking(application=application) as addUndoItem:
+                    with undoStackBlocking(application=application, debugText=f'-> ccpNmrV3CoreUndoBlock, finally') as addUndoItem:
                         # incorporate the change notifier to simulate the decorator
                         addUndoItem(undo=application.project.blankNotification,
                                     redo=application.project.unblankNotification)

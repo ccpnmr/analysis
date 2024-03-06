@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-27 10:50:08 +0000 (Tue, February 27, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-03-06 17:48:09 +0000 (Wed, March 06, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -36,6 +36,9 @@ from lmfit.models import LorentzianModel, GaussianModel
 from ccpn.util.UnitConverters import  _getSpUnitConversionArguments, _pnt2hz
 from scipy.integrate import quad
 from ccpn.util.Logging import getLogger
+from scipy import spatial, signal
+from ccpn.framework.Application import getApplication
+
 
 # @jit(nopython=True, nogil=True)
 def _find1DMaxima(y, x, positiveThreshold, negativeThreshold=None, findNegative=False):
@@ -172,7 +175,7 @@ class PeakPicker1D(PeakPickerABC):
     def __init__(self, spectrum):
         super().__init__(spectrum=spectrum)
         self.noise = None
-        application = spectrum.project.application
+        application = getApplication()
         self._doNegativePeaks = application.preferences.general.negativePeakPick1D
 
 

@@ -4,9 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-19 12:24:29 +0100 (Thu, October 19, 2023) $"
-__version__ = "$Revision: 3.2.0.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-03-06 17:48:13 +0000 (Wed, March 06, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -40,6 +40,20 @@ from ccpn.util.Logging import getLogger
 class Action(Base, QtWidgets.QAction):
     def __init__(self, parent, text, callback=None, shortcut=None, checked=True, checkable=False,
                  icon=None, translate=True, enabled=True, toolTip=None, **kwds):
+        """
+        Define a Menu action
+        :param parent: parent widget
+        :param text: name/text of the action
+        :param callback: callback for the action;
+        :param shortcut: optional two letter shortcut
+        :param checked: optional checked flag (if checkable, default: True)
+        :param checkable: optional checkable flag (default: False)
+        :param icon: optional icon
+        :param translate: optional flag to translate (default: True)
+        :param enabled: optional enable flag (default: True)
+        :param toolTip: optional tooltip
+        :param kwds: keyword arguments passed to Base
+        """
         # tr = getTranslator('Dutch')
         # title = tr(title)
         if translate:

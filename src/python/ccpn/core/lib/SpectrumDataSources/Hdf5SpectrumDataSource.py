@@ -14,9 +14,9 @@ See SpectrumDataSourceABC for a description of the methods
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -25,8 +25,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:39 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-03-06 17:48:10 +0000 (Wed, March 06, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -82,6 +82,8 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
     #=========================================================================================
 
     dataFormat = 'Hdf5'
+    # Conveniances; subclassed in the respective classes
+    isHdf5Spectrum = True
 
     isBlocked = False  # hdf5 format is inherently blocked, but we do not use the implemented
     # routines in the ABC, but rather have hdf5 do the slicing
@@ -113,16 +115,18 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
     #=========================================================================================
 
-    def __init__(self, path=None, spectrum=None, dimensionCount=None):
+    def __init__(self, path=None, spectrum=None, dimensionCount=None, checkValid=True):
         """initialise instance; optionally set path or associate with and import from
         a Spectrum instance or set dimensionCount
 
         :param path: optional, path of the (binary) spectral data
         :param spectrum: associate instance with spectrum and import spectrum's parameters
         :param dimensionCount: limit instance to dimensionCount dimensions
+        :param checkValid:flag to do validity check (default=False)
+
         """
         self._hdf5Metadata = Hdf5Metadata()
-        super().__init__(path=path, spectrum=spectrum, dimensionCount=dimensionCount)
+        super().__init__(path=path, spectrum=spectrum, dimensionCount=dimensionCount, checkValid=checkValid)
 
     @property
     def spectrumData(self):
@@ -270,8 +274,8 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
             self.writeParameters()
 
-        getLogger().debug2('openFile: %s; %s blocks with size %s; chunks=%s' %
-                          (self, self._totalBlocks, self._totalBlockSize, tuple(self.blockSizes)))
+        # getLogger().debug2('openFile: %s; %s blocks with size %s; chunks=%s' %
+        #                   (self, self._totalBlocks, self._totalBlockSize, tuple(self.blockSizes)))
 
         return self.fp
 

@@ -9,9 +9,9 @@ from __future__ import annotations
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -19,9 +19,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-30 16:30:59 +0000 (Mon, October 30, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-03-06 17:48:14 +0000 (Wed, March 06, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -40,32 +40,12 @@ import shutil
 import glob
 import datetime
 import re
-from functools import reduce
-from operator import add
-
-
-dirsep = '/'
-# note, cannot just use os.sep below because can have window file names cropping up on unix machines
-winsep = '\\'
-
-# This does not belong here and should go to PathsAndUrls;
-# However, the 'Api.py' and Implementation relies on this, so it should stay
-# DO NOT USE!
-CCPN_API_DIRECTORY = 'ccpnv3'
-CCPN_DIRECTORY_SUFFIX = '.ccpn'
-CCPN_BACKUP_SUFFIX = '_backup'
-CCPN_ARCHIVES_DIRECTORY = 'archives'
-CCPN_SUMMARIES_DIRECTORY = 'summaries'
-CCPN_LOGS_DIRECTORY = 'logs'
-CCPN_PYTHON = 'miniconda/bin/python'
-
-# Can't do because of circular imports:
-# from ccpn.framework.PathsAndUrls import CCPN_API_DIRECTORY, CCPN_DIRECTORY_SUFFIX, \
-#       CCPN_BACKUP_SUFFIX, CCPN_ARCHIVES_DIRECTORY, CCPN_LOGS_DIRECTORY,  CCPN_SUMMARIES_DIRECTORY
+from contextlib import contextmanager
 
 from pathlib import Path as _Path_
 from pathlib import _windows_flavour, _posix_flavour
-
+from functools import reduce
+from operator import add
 
 #=========================================================================================
 # Path
@@ -331,6 +311,85 @@ class Path(_Path_):
                 raise FileNotFoundError('Error opening file "%s"' % self)
         return fp
 
+    _tempSuffix = '~temp'
+
+    @contextmanager
+    def saveWriteToFile(self, mode:str = 'w', overwrite:bool = False, keepOnError:bool  = True, validator=None):
+        """Initiate a save write to file:
+        Write to temporary file first; catch any errors on writing. Generate result as atomic
+        operation by moving temporary file as self.
+
+        Use in a with statement; ie.:
+
+        with myFile.saveWriteToFile as fp:
+            sys.write(fp, 'text')
+
+        :param mode: usual string defining write (w) or append (a) access, text or binary (b)
+        :param overwrite: flag to indicate overwriting of existing file
+        :param keepOnError: flag to keep the intermediate file on error
+        :param validator: A function to validate the result prior to moving, returning True for a valid file,
+                          False in case of error. Can raise any error which will be caught and passed as RuntimeError
+                          signature: validator(path:Path) -> bool
+
+        :raise RunTimeError upon catching any error during open, write, close, ..
+        """
+
+        _tempFile = aPath(self + self._tempSuffix).uniqueVersion()
+
+        error = False
+        validatorError = False
+        errorString = ''
+        fp = None
+
+        try:
+            # Some checks first
+            if self.exists() and self.is_dir():
+                raise RuntimeError(f'{self} exists and is a directory')
+
+            if self.exists() and not overwrite:
+                raise FileExistsError(f'{self} exists and overwrite is False')
+
+            if not self.parent.exists():
+                raise FileNotFoundError('{self.parent} does not exists: unable to write to {self.basename}')
+
+            # check for append; if so copy self as tempFile first
+            if self.exists() and 'a' in mode:
+                self.copyFile(destination=_tempFile, overwrite=True)
+
+            fp = _tempFile.open(mode=mode)
+            yield fp
+            error = False
+
+        except Exception as es:
+            error = True
+            errorString = str(es)
+
+        finally:
+            if fp:
+                fp.close()
+
+            # Once we have closed the file and there is no error:
+            # Optionally call the validator to check _tempFile before moving
+            if not error and validator is not None:
+                error = not validator(_tempFile)
+                if error:
+                    errorString = 'Validation failed'
+
+            if error:
+                # An error occurred
+                if _tempFile.exists() and not keepOnError:
+                    _tempFile.remove()
+                raise RuntimeError(f'While writing to {self} an error occured: {errorString}')
+
+            else:
+                # We have successfully written (and optionally validated) the file to a temporary file.
+                # We already have checked if we can overwrite the file, so now just remove
+                # it and rename the temporary file
+                if self.exists():
+                    self.remove()
+                # use the os.rename call to cut out any intermediary
+                os.rename(_tempFile.asString(), aPath(self).asString())
+
     def globList(self, pattern='*') -> list:
         """Return a list rather than a generator
         """
@@ -340,7 +399,7 @@ class Path(_Path_):
         """Recursively remove content of self and subdirectories
         """
         if not self.is_dir():
-            raise ValueError('%s is not a directory' % self)
+            raise ValueError(f'{self!r} is not a directory')
         _rmdirs(str(self))
 
     def fetchDir(self, *dirNames) -> Path:
@@ -348,7 +407,7 @@ class Path(_Path_):
         :return: Path instance of self / dirName[0] / dirName[1] ...
         """
         if not self.is_dir():
-            raise ValueError('%s is not a directory' % self)
+            raise ValueError(f'{self!r} is not a directory')
 
         result = self
         for dirName in dirNames:
@@ -365,14 +424,14 @@ class Path(_Path_):
         import shutil
 
         if not self.exists():
-            raise FileNotFoundError(f'"{self}" does not exist')
+            raise FileNotFoundError(f'Path.copyDir: {self!r} does not exist')
         if not self.is_dir():
-            raise RuntimeError(f'"{self}" is not a directory')
+            raise RuntimeError(f'Path.copyDir: {self!r} is not a directory')
 
         _dest = aPath(destination)
         if _dest.exists():
             if not overwrite:
-                raise FileExistsError(f'"{destination}" already exists and overwrite=False')
+                raise FileExistsError(f'Path.copyDir: {destination!r} already exists and overwrite=False')
             _dest.remove()
 
         _result = shutil.copytree(self, dst=_dest, symlinks=True)
@@ -382,7 +441,7 @@ class Path(_Path_):
         """Remove file represented by self.
         """
         if self.is_dir():
-            raise RuntimeError('%s is a directory' % self)
+            raise RuntimeError(f'{self!r} is a directory')
         self.unlink()
 
     def copyFile(self, destination, overwrite) -> Path:
@@ -521,6 +580,36 @@ class Path(_Path_):
         path = self.asString()
         return path.startswith(prefix)
 
+    def getSize(self) -> int:
+        """the size of self in bytes if a file or all files (recursively) in case of a directory.
+        Does not include sym-links.
+        :return: The size of self in bytes
+        """
+        if self.is_dir():
+            _size = sum(file.stat().st_size for file in self.rglob('*') if not file.is_symlink())
+        else:
+            _size = self.stat().st_size
+
+        return _size
+
+    def isReadable(self) -> bool:
+        """
+        :return: True if self exists and is readable
+        """
+        return self.exists() and os.access(self.asString(), os.R_OK)
+
+    def isWriteable(self) -> bool:
+        """
+        :return: True if self exists and is writable
+        """
+        return self.exists() and os.access(self.asString(), os.W_OK)
+
+    def isExecutable(self) -> bool:
+        """
+        :return: True if self exists and is executable
+        """
+        return self.exists() and os.access(self.asString(), os.X_OK)
+
     def __len__(self):
         return len(self.asString())
 
@@ -559,9 +648,41 @@ def _rmdirs(path):
     path.rmdir()
 
 
-def aPath(path):
-    """Return a ~-expanded, left/right spaces-stripped, normalised Path instance"""
+def aPath(path) -> Path:
+    """:return a ~-expanded, left/right spaces-stripped, normalised Path instance
+    """
     return Path(str(path).strip()).expanduser().normalise()
+
+
+def home() -> Path:
+    """
+    :return absolute path to user home directory as a Path instance
+    """
+    return aPath('~')
+
+
+#=========================================================================================
+# do not use: reminents from V2 code base
+#=========================================================================================
+
+dirsep = '/'
+# note, cannot just use os.sep below because can have window file names cropping up on unix machines
+winsep = '\\'
+
+# This does not belong here and should go to PathsAndUrls;
+# However, the 'Api.py' and Implementation relies on this, so it should stay
+# Can't do because of circular imports:
+# from ccpn.framework.PathsAndUrls import CCPN_API_DIRECTORY, CCPN_DIRECTORY_SUFFIX, \
+#       CCPN_BACKUP_SUFFIX, CCPN_ARCHIVES_DIRECTORY, CCPN_LOGS_DIRECTORY,  CCPN_SUMMARIES_DIRECTORY
+
+# DO NOT USE!
+CCPN_API_DIRECTORY = 'ccpnv3'
+CCPN_DIRECTORY_SUFFIX = '.ccpn'
+CCPN_BACKUP_SUFFIX = '_backup'
+CCPN_ARCHIVES_DIRECTORY = 'archives'
+CCPN_SUMMARIES_DIRECTORY = 'summaries'
+CCPN_LOGS_DIRECTORY = 'logs'
+CCPN_PYTHON = 'miniconda/bin/python'
 
 
 def normalisePath(path, makeAbsolute=None):

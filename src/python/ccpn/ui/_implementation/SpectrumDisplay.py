@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-02-16 11:40:24 +0000 (Fri, February 16, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-03-06 17:48:11 +0000 (Wed, March 06, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -143,6 +143,7 @@ class SpectrumDisplay(AbstractWrapperObject):
     def _postRestore(self):
         """Handle post-initialising children after all children have been restored
         """
+
         # debug
         _strips = self.strips
 
@@ -708,7 +709,10 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
         if spectrum.dimensionTypes[0] == specLib.DIMENSION_FREQUENCY:
             apiSpectrumDisplay.newFrequencyAxis(code=axisCodes[0], stripSerial=1, unit=AXISUNIT_PPM)
         elif spectrum.dimensionTypes[0] == specLib.DIMENSION_TIME:
-            apiSpectrumDisplay.newFidAxis('time', stripSerial=1, unit=AXISUNIT_POINT)
+            # Cannot do newFidAxis; all falls apart
+            # apiSpectrumDisplay.newFidAxis('time', stripSerial=1, unit=AXISUNIT_POINT)
+            apiAxis = apiSpectrumDisplay.newFrequencyAxis(code='Time', stripSerial=1, unit=AXISUNIT_POINT)
+            _unit = apiAxis.unit
 
         # SpectrumDisplay Y; i.e. Intensity
         apiSpectrumDisplay.newIntensityAxis(code=SpectrumDisplay.INTENSITY, stripSerial=1, unit=AXISUNIT_NUMBER)

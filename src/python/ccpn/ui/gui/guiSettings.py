@@ -5,9 +5,9 @@ Settings used in gui modules, widgets and popups
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-26 18:58:09 +0100 (Mon, June 26, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-03-06 17:48:12 +0000 (Wed, March 06, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -420,14 +420,14 @@ colourSchemes[DARK][MARKS_COLOURS] = MARK_LINE_COLOUR_DICT_DARK
 def getColourScheme():
     """Get the current colourScheme
 
-    :return: colourScheme
+    :return: colourScheme setting maintained by Gui or DEFAULT if ill-defined
     """
 
     application = getApplication()
-    if application:
-        colourScheme = application._colourScheme
+    if application.hasGui:
+        colourScheme = application.ui._colourScheme
         if colourScheme not in COLOUR_SCHEMES:
-            getLogger().warning('Undefined colour scheme')
+            getLogger().warning('getColourScheme: Undefined colour scheme')
             return DEFAULT
         return colourScheme
 
@@ -440,15 +440,23 @@ def setColourScheme(colourScheme):
     """
 
     application = getApplication()
-    if application:
+    if application and application.hasGui:
         if colourScheme not in COLOUR_SCHEMES:
             raise RuntimeError('Undefined colour scheme')
 
-        application._colourScheme = colourScheme
+        application.ui._colourScheme = colourScheme
         ColourDict(colourScheme).setColourScheme(colourScheme)
 
     else:
-        getLogger().warning('Application not defined; colourScheme not set')
+        getLogger().warning('Gui interface of application not defined; colourScheme not set')
+
+
+def setDefaultColourScheme():
+    """Conveniance to set default colour scheme
+    :return the Default colour scheme
+    """
+    setColourScheme(DEFAULT)
+    return DEFAULT
 
 
 @singleton
@@ -498,8 +506,8 @@ class consoleStyle():
     """Colors class:reset all colors with colors.reset; two
     subclasses fg for foreground
     and bg for background; use as colors.subclass.colorname.
-    i.e. colors.fg.red or colors.bg.greenalso, the generic bold, disable,
-    underline, reverse, strike through,
+    i.e. colors.fg.red or colors.bg.green
+         also, the generic bold, disable, underline, reverse, strike through,
     and invisible work with the main class i.e. colors.bold
     """
     reset = '\033[0m'
@@ -549,3 +557,21 @@ class consoleStyle():
         magenta = '\033[105m'
         cyan = '\033[106m'
         white = '\033[107m'
+
+def _style(colour, text:str) -> str:
+    """:return text with colour
+    """
+    _col = getattr(consoleStyle.fg, colour, consoleStyle.fg.default)
+    return f'{_col}{text}{consoleStyle.reset}'
+
+def _styleRed(text:str) -> str:
+    """Get red text"""
+    return f'{consoleStyle.fg.red}{text}{consoleStyle.reset}'
+
+def _styleBlue(text:str) -> str:
+    """Get blue text"""
+    return f'{consoleStyle.fg.darkblue}{text}{consoleStyle.reset}'
+
+def _styleMagenta(text:str) -> str:
+    """Get magenta text"""
+    return f'{consoleStyle.fg.magenta}{text}{consoleStyle.reset}'

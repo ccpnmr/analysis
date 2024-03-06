@@ -18,9 +18,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-01-03 13:01:00 +0000 (Wed, January 03, 2024) $"
-__version__ = "$Revision: 3.3.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-03-06 17:48:10 +0000 (Wed, March 06, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -83,6 +83,8 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
     - Bruker processed data file, e.g. 1r, 2rr, etc
     """
     dataFormat = 'Bruker'
+    # Conveniances; subclassed in the respective classes
+    isBrukerSpectrum = True
 
     isBlocked = True
     wordSize = 4
@@ -138,6 +140,14 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 'EXP'        : 'experiment performed',
                 'FCUCHAN'    : 'routing between logical frequency channels and FCU s',
                 'FnMODE'     : 'Acquisition mode of the indirect dimensions (2D and 3D)',
+                                # Bruker FnMODE definitions
+                                # Bruker uses a number code for the FnMODE used. The numbers are coded in the 'acqu#' files, where the # is the channel number (blank, 2 or 3). The code is as follows:
+                                # 1 = QF
+                                # 2 = QSEQ
+                                # 3 = TPPI
+                                # 4 = States
+                                # 5 = States-TPPI
+                                # 6 = Echo-Antiecho
                 'FW'         : 'analog filter width',
                 'FIDRES'     : 'FID resolution',
                 'FQ1LIST'    : 'irradiation frequency lists',
@@ -379,6 +389,7 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         else:
             _path = Path(path)
             self._path = _path
+            self._isDirectory = _path.is_dir()
 
             if _path.is_file() and _path.stem in self._processedDataFiles:
                 # Bruker binary processed data file
@@ -448,8 +459,8 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         :return: True if ok, False otherwise
         """
 
-        self.isValid = False
-        self.errorString = 'Checking validity'
+        self.isValid = True
+        self.errorString = ''
 
         # if self._path is None or not self._path.exists():
         #     errorMsg = f'Path "{self._path}" does not exist'
@@ -494,8 +505,6 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         if not self._checkValidExtra():
             return False
 
-        self.isValid = True
-        self.errorString = ''
         return super(BrukerSpectrumDataSource, self).checkValid()
 
     def readParameters(self):
@@ -531,6 +540,9 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 self.dataScale = 1.0
 
             self.temperature = self.acqus[0]['TE']
+            if self.temperature == 0.0:
+                self.temperature = None
+                getLogger().warning(f'Acqus defined temperature was 0.0; changed to undefined (None) instead')
 
             # Dimensional parameters
             for dimIndx in range(self.dimensionCount):

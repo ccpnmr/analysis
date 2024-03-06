@@ -3,9 +3,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-01 19:39:56 +0100 (Thu, June 01, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-03-06 17:48:09 +0000 (Wed, March 06, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -128,16 +128,26 @@ class PeakList(PMIListABC):
                     fitMethod: str = GAUSSIANMETHOD, excludedRegions=None,
                     excludedDiagonalDims=None, excludedDiagonalTransform=None,
                     minDropFactor: float = 0.1):
+        """Deprecated method. Use Spectrum.pickPeaks instead.
+        """
         getLogger().warning('Deprecated method. Use spectrum.pickPeaks instead')
-        from ccpn.core.lib.PeakListLib import _pickPeaksNd
 
-        return _pickPeaksNd(self, regionToPick=regionToPick,
-                            doPos=doPos, doNeg=doNeg,
-                            fitMethod=fitMethod,
-                            excludedRegions=excludedRegions,
-                            excludedDiagonalDims=excludedDiagonalDims,
-                            excludedDiagonalTransform=excludedDiagonalTransform,
-                            minDropFactor=minDropFactor)
+        spectrum = self.spectrum
+        posThreshold = spectrum.positiveContourBase if doPos else None
+        negThreshold = spectrum.negativeContourBase if doNeg else None
+
+        # ??GWV:region to pick was in points? (1-based??)
+        ppmDict = {}
+        for axisCode, points in zip(spectrum.axisCodes, regionToPick):
+            ppm0 = spectrum.point2ppm(points[0], axisCode=axisCode)
+            ppm1 = spectrum.point2ppm(points[1], axisCode=axisCode)
+            ppmDict[axisCode] = tuple(sorted( (ppm0,ppm1) ))
+
+        return spectrum.pickPeaks(peakList=self,
+                                  positiveThreshold=posThreshold,
+                                  negativeThreshold=negThreshold,
+                                  **ppmDict
+                                  )
 
     @logCommand(get='self')
     def estimateVolumes(self, peaks: Union[None, list, tuple] = None, volumeIntegralLimit=2.0, noWarning=False):

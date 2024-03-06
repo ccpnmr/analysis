@@ -4,9 +4,9 @@ The top-level Gui class for all user interactions
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-03 12:00:10 +0000 (Fri, November 03, 2023) $"
-__version__ = "$Revision: 3.2.0.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-03-06 17:48:11 +0000 (Wed, March 06, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,20 +27,27 @@ __date__ = "$Date: 2017-03-16 18:20:01 +0000 (Thu, March 16, 2017) $"
 #=========================================================================================
 
 import sys
+import os
 import typing
 import re
+import platform
+
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 from ccpn.core.Project import Project
 
 from ccpn.framework.Application import getApplication
-from ccpn.framework.PathsAndUrls import CCPN_EXTENSION
+from ccpn.framework.PathsAndUrls import CCPN_DIRECTORY_SUFFIX, CCPN_SAVEAS_SUB_DIRECTORIES
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import _checkPathForDataLoader
 
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking, catchExceptions, \
     logCommandManager, undoStackBlocking
 
 from ccpn.ui.Ui import Ui
+from ccpn.ui.gui import Layout
+from ccpn.ui.gui.guiSettings import LIGHT, DARK
+from ccpn.ui.gui.Menus import getMenuDefs
+
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup, NewTermsConditionsPopup
 from ccpn.ui.gui.widgets.Application import Application
 from ccpn.ui.gui.widgets import MessageDialog
@@ -60,6 +67,8 @@ from ccpn.util.Path import aPath, Path
 from ccpn.util.decorators import logCommand
 
 from ccpnmodel.ccpncore.memops.ApiError import ApiError
+
+from ._Gui import _Gui
 
 
 #-----------------------------------------------------------------------------------------
@@ -147,19 +156,38 @@ class _MyAppProxyStyle(QtWidgets.QProxyStyle):
 # Gui
 #=========================================================================================
 
-class Gui(Ui):
+
+def getFontSettings():
+    """:return the font settings object, intialised by Gui or None if non-gui
+    """
+    app = getApplication()
+    if app.hasGui:
+        return app.ui._fontSettings
+    else:
+        return None
+
+
+
+class Gui(Ui,_Gui):
     """Top class for the GUI interface
     """
+
+    _hasGui = True
 
     def __init__(self, application):
 
         # sets self.mainWindow (None), self.application and self.pluginModules
         Ui.__init__(self, application)
 
-        # GWV: this is not ideal and needs to move into the Gui class
-        application._fontSettings = FontSettings(application.preferences)
-        application._setColourSchemeAndStyleSheet()
-        application._setupMenus()
+        self._fontSettings = FontSettings(application.preferences)
+
+        # defined by _setColourSchemeAndStyleSheet()
+        self._styleSheet = None
+        self._colourScheme = None
+        self._setColourSchemeAndStyleSheet(application.args, application.preferences)
+
+        # Get menu definitions; subclassed by various application-specific Gui's
+        self._menuDefs = self._getMenuDefs()
 
         self._initQtApp()
 
@@ -192,29 +220,244 @@ class Gui(Ui):
         # read the current system-fonts
         getSystemFonts()
 
-        # # original - no patch for icon sizes
-        # styles = QtWidgets.QStyleFactory()
-        # self.qtApp.setStyle(styles.create('fusion'))
+    def _getMenuDefs(self):
+        """:return the MenuDefs instance
+        Subclassed for modification in various AnalysisAssign, AnalysisScreen, ... programmes
+        """
+        from ccpn.ui.gui.Menus import getMenuDefs
+        return getMenuDefs()
 
-    def initialize(self, mainWindow):
+    def _setColourSchemeAndStyleSheet(self, args, preferences):
+        """Set the colourScheme and stylesheet as determined by arguments --dark, --light or preferences
+        """
+        from ccpn.framework.PathsAndUrls import widgetsPath
+
+        if args.darkColourScheme:
+            colourScheme = DARK
+        elif args.lightColourScheme:
+            colourScheme = LIGHT
+        else:
+            colourScheme = preferences.general.colourScheme
+
+        if colourScheme is None:
+            raise RuntimeError('invalid colourScheme')
+        self._colourScheme = colourScheme
+
+        _qssPath = widgetsPath / ('%sStyleSheet.qss' % colourScheme.capitalize())
+        with _qssPath.open(mode='r') as fp:
+            styleSheet = fp.read()
+
+        if platform.system() == 'Linux':
+            _qssPath = widgetsPath / ('%sAdditionsLinux.qss' % colourScheme.capitalize())
+            with _qssPath.open(mode='r') as fp:
+                additions = fp.read()
+            styleSheet += additions
+
+        self._styleSheet = styleSheet
+
+    def initialize(self, mainWindow, project):
         """UI operations done after every project load/create
         """
         if mainWindow is None:
-            raise ValueError('Gui.initialize: Undefined mainWindow')
+            raise ValueError('Gui.initialize(): Undefined mainWindow')
+
+        super().initialize(mainWindow=mainWindow, project=project)
 
         with notificationEchoBlocking():
-            with undoStackBlocking():
+            with undoStackBlocking(debugText='Gui.initialize'):
                 # Set up mainWindow
-                self.mainWindow = self._setupMainWindow(mainWindow)
-                self.application._initGraphics()
-                self.mainWindow._updateRestoreArchiveMenu()
-                self.application._updateCheckableMenuItems()
+                self._setupMainWindow()
+                self._restoreSpectrumDisplayModules()
+                # self.application._updateCheckableMenuItems()
+                # self._updateCheckableMenuItems()
+                self._makeActiveWindow()
+
+    def _restoreSpectrumDisplayModules(self):
+        """Code from Framework/Project, restoring spectrumDisplay's
+        """
+        from ccpn.ui.gui.lib import GuiStrip
+
+        project = self.project
+        mainWindow = self.mainWindow
+        current = self.application.current
+        preferences = self.application.preferences
+
+        # 20191113:ED Initial insertion of spectrumDisplays into the moduleArea
+        try:
+            insertPoint = mainWindow.moduleArea
+            for spectrumDisplay in mainWindow.spectrumDisplays:
+                mainWindow.moduleArea.addModule(spectrumDisplay,
+                                                position='right',
+                                                relativeTo=insertPoint)
+                insertPoint = spectrumDisplay
+
+        except Exception:
+            getLogger().warning('Impossible to restore SpectrumDisplays')
+
+        try:
+            if preferences.general.restoreLayoutOnOpening and \
+                    mainWindow.moduleLayouts:
+                Layout.restoreLayout(mainWindow, mainWindow.moduleLayouts, restoreSpectrumDisplay=False)
+        except Exception as e:
+            getLogger().warning(f'Impossible to restore Layout {e}')
+
+        # New LayoutManager implementation; awaiting completion
+        # try:
+        #     from ccpn.framework.LayoutManager import LayoutManager
+        #     layout = LayoutManager(mainWindow)
+        #     path = self.statePath / 'Layout.json'
+        #     layout.restoreState(path)
+        #     layout.saveState()
+        #
+        # except Exception as es:
+        #     getLogger().warning('Error restoring layout: %s' % es)
+
+        # check that the top moduleArea is correctly formed - strange special case when all modules have
+        #   been moved to tempAreas
+        mArea = mainWindow.moduleArea
+        if mArea.topContainer is not None and mArea.topContainer._container is None:
+            getLogger().debug('Correcting empty topContainer')
+            mArea.topContainer = None
+
+        try:
+            # Initialise colours
+
+            # initialise any colour changes before generating gui strips
+            self.application._correctColours()
+
+        except Exception as es:
+            getLogger().warning(f'Impossible to restore colours - {es}')
+
+        # Initialise Strips
+        for spectrumDisplay in mainWindow.spectrumDisplays:
+            try:
+                _badStrip = False
+                for si, strip in enumerate(spectrumDisplay.orderedStrips):
+
+                    # temporary to catch bad strips from ordering bug
+                    if not strip:
+                        continue
+
+                    # GWV 15/2/24: Adapted from Code in Project._restoreObject
+                    if not strip.axes:
+                        # set the border to red
+                        spectrumDisplay.mainWidget.setStyleSheet('Frame { border: 3px solid #FF1234; }')
+                        spectrumDisplay.mainWidget.setEnabled(False)
+                        spectrumDisplay.setEnabled(False)
+
+                        getLogger().error(
+                            f'Strip {strip} contains bad axes - please close SpectrumDisplay {spectrumDisplay} outlined in red.'
+                        )
+                        _badStrip = True
+                        break
+
+
+                    # get the new tilePosition of the strip - tilePosition is always (x, y) relative to screen stripArrangement
+                    #                                       changing screen arrangement does NOT require flipping tilePositions
+                    #                                       i.e. Y = (across, down); X = (down, across)
+                    #                                       - check delete/undo/redo strips
+                    tilePosition = strip.tilePosition
+
+                    # move to the correct place in the widget - check stripDirection to display as row or column
+                    if spectrumDisplay.stripArrangement == 'Y':
+                        if True:  # tilePosition is None:
+                            spectrumDisplay.stripFrame.layout().addWidget(strip, 0, si)  #stripIndex)
+                            strip.tilePosition = (0, si)
+                        # else:
+                        #     spectrumDisplay.stripFrame.layout().addWidget(strip, tilePosition[0], tilePosition[1])
+
+                    elif spectrumDisplay.stripArrangement == 'X':
+                        if True:  #tilePosition is None:
+                            spectrumDisplay.stripFrame.layout().addWidget(strip, si, 0)  #stripIndex)
+                            strip.tilePosition = (0, si)
+                        # else:
+                        #     spectrumDisplay.stripFrame.layout().addWidget(strip, tilePosition[1], tilePosition[0])
+
+                    elif spectrumDisplay.stripArrangement == 'T':
+                        # NOTE:ED - Tiled plots not fully implemented yet
+                        getLogger().warning(f'Tiled plots not implemented for spectrumDisplay: {str(spectrumDisplay)}')
+                    else:
+                        getLogger().warning(f'Strip direction is not defined for spectrumDisplay: {str(spectrumDisplay)}')
+
+                    if not spectrumDisplay.is1D:
+                        for _strip in spectrumDisplay.strips:
+                            _strip._updatePlaneAxes()
+
+                if spectrumDisplay.isGrouped:
+                    # set up the spectrumGroup toolbar
+
+                    spectrumDisplay.spectrumToolBar.hide()
+                    spectrumDisplay.spectrumGroupToolBar.show()
+
+                    _spectrumGroups = [project.getByPid(pid) for pid in spectrumDisplay._getSpectrumGroups()]
+
+                    for group in _spectrumGroups:
+                        spectrumDisplay.spectrumGroupToolBar._forceAddAction(group)
+
+                else:
+                    # set up the spectrum toolbar
+
+                    spectrumDisplay.spectrumToolBar.show()
+                    spectrumDisplay.spectrumGroupToolBar.hide()
+                    spectrumDisplay.setToolbarButtons()
+
+                # some strips may not be instantiated at this point
+                # resize the stripFrame to the spectrumDisplay - ready for first resize event
+                # spectrumDisplay.stripFrame.resize(spectrumDisplay.width() - 2, spectrumDisplay.stripFrame.height())
+                spectrumDisplay.showAxes(stretchValue=True, widths=True,
+                                         minimumWidth=GuiStrip.STRIP_MINIMUMWIDTH)
+
+            except Exception as e:
+                getLogger().warning(f'Impossible to restore spectrumDisplay(s) {e}')
+
+        try:
+            if current.strip is None and len(mainWindow.strips) > 0:
+                current.strip = mainWindow.strips[0]
+        except Exception as e:
+            getLogger().warning(f'Error restoring current.strip: {e}')
+
+    # GWV 12/2/24; replaced by other implementation
+    # def _updateCheckableMenuItems(self):
+    #     # This has to be kept in sync with menu items below which are checkable,
+    #     # and also with MODULE_DICT keys
+    #     # The code is terrible because Qt has no easy way to get hold of menus / actions
+    #
+    #     mainWindow = self.mainWindow
+    #     if mainWindow is None:
+    #         # We have a UI with no mainWindow - nothing to do.
+    #         return
+    #
+    #     menuChildren = mainWindow.menuBar().findChildren(QtWidgets.QMenu)
+    #     if not menuChildren:
+    #         return
+    #
+    #     topActionDict = {}
+    #     for topMenu in menuChildren:
+    #         mainActionDict = {mainAction.text(): mainAction for mainAction in topMenu.actions()}
+    #
+    #         topActionDict[topMenu.title()] = mainActionDict
+    #
+    #     openModuleKeys = set(mainWindow.moduleArea.modules.keys())
+    #     for key, topActionText, mainActionText in (('SEQUENCE', 'Molecules', 'Show Sequence'),
+    #                                                ('PYTHON CONSOLE', 'View', 'Python Console')):
+    #         if key in openModuleKeys:
+    #             if mainActionDict := topActionDict.get(topActionText):
+    #                 if mainAction := mainActionDict.get(mainActionText):
+    #                     mainAction.setChecked(True)
+
+    def _makeActiveWindow(self):
+        """Show and et self.mainWindow as the active window
+        """
+        # The next two lines are essential to have the QT main event loop associated
+        # with the new mainWindow; without these, the program just terminates
+        self.mainWindow.show()
+        QtWidgets.QApplication.setActiveWindow(self.mainWindow)
 
     def startUi(self):
         """Start the UI
         """
-        self.mainWindow.show()
-        QtWidgets.QApplication.setActiveWindow(self.mainWindow)
+        self._makeActiveWindow()
+        self.application._initTipOfTheDay()
 
         # check whether to skip the execution loop for testing with mainWindow
         import builtins
@@ -242,15 +485,12 @@ class Gui(Ui):
             popup.exec_()
             self.qtApp.processEvents()
 
-    def _setupMainWindow(self, mainWindow):
-        # Set up mainWindow
-
-        project = self.application.project
-        mainWindow.sideBar.buildTree(project, clear=True)
-
-        # mainWindow.raise_()  # whaaaaaat? causes the menu-bar to be unresponsive
-        mainWindow.namespace['current'] = self.application.current
-        return mainWindow
+    def _setupMainWindow(self):
+        """Set up mainWindow
+        """
+        self.mainWindow.sideBar.buildTree(self.project, clear=True)
+        # self.mainWindow._updateRestoreArchiveMenu()
+        self.mainWindow.namespace['current'] = self.application.current
 
     def echoCommands(self, commands: typing.List[str]):
         """Echo commands strings, one by one, to logger
@@ -284,7 +524,22 @@ class Gui(Ui):
     def _execUpdates(self):
         """Use the Update popup to execute any updates
         """
-        return self.application._showUpdatePopup()
+        from ccpn.framework.update.UpdatePopup import UpdatePopup
+        from ccpn.util import Url
+
+        # check valid internet connection first
+        if Url.checkInternetConnection():
+            updatePopup = UpdatePopup(parent=self.mainWindow, mainWindow=self.mainWindow)
+            updatePopup.exec_()
+
+            # if updates have been installed then popup the quit dialog with no cancel button
+            if updatePopup._updatesInstalled:
+                self.mainWindow._closeWindowFromUpdate(disableCancel=True)
+
+        else:
+            MessageDialog.showWarning('Check For Updates',
+                                      'Could not connect to the update server, please check your internet connection.')
+
 
     #-----------------------------------------------------------------------------------------
     # Helper methods
@@ -318,7 +573,7 @@ class Gui(Ui):
 
         return (dataLoader, createNewProject, ignore)
 
-    def _getDataLoader(self, path, formatFilter=None):
+    def _getDataLoader(self, path, formatFilter=None, droppedOnSideBar=False):
         """Get dataLoader for path (or None if not present), optionally only testing for
         dataFormats defined in filter.
         Allows for reporting or checking through popups.
@@ -326,6 +581,7 @@ class Gui(Ui):
 
         :param path: the path to get a dataLoader for
         :param formatFilter: a list/tuple of optional dataFormat strings; filter optional dataLoaders for this
+        :param: droppedOnSideBar: flag to indicate path dropped on the sidebar
         :returns a tuple (dataLoader, createNewProject, ignore)
 
         :raises RuntimeError in case of failure to define a proper dataLoader
@@ -337,6 +593,7 @@ class Gui(Ui):
         from ccpn.framework.lib.DataLoaders.SparkyDataLoader import SparkyDataLoader
         from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
         from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
+        from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import NmrPipeSpectrumLoader
 
         _path = aPath(path)
         if not _path.exists():
@@ -382,18 +639,17 @@ class Gui(Ui):
             dataLoader.createNewProject = True
             ok = MessageDialog.showYesNoWarning('Load Project',
                                                 f'Project "{path.name}" was created with version-2 Analysis.\n'
-                                                '\n'
-                                                'CAUTION:\n'
-                                                'The project will be converted to a version-3 project and saved as a new directory with .ccpn extension.\n'
-                                                '\n'
-                                                'Do you want to continue loading?')
+                                                f'The project will be converted to a version-3 project in a temporary directory,\n'
+                                                f'after which you can decide to save it.\n'
+                                                 '\n'
+                                                 'Do you want to continue loading? (Conversion may take a bit of time)')
 
             if not ok:
                 # skip loading so that user can back-up/copy project
                 getLogger().info(f'==> Cancelled loading ccpn project "{path}"')
                 ignore = True
 
-        elif dataLoader.dataFormat == CcpNmrV3ProjectDataLoader.dataFormat and Project._needsUpgrading(path):
+        elif dataLoader.dataFormat == CcpNmrV3ProjectDataLoader.dataFormat and dataLoader.projectNeedsUpgrade:
             createNewProject = True
             dataLoader.createNewProject = True
 
@@ -402,13 +658,14 @@ class Gui(Ui):
             MAKE_ARCHIVE = 'Make a backup archive (.tgz) of the project'
 
             dataLoader.makeArchive = False
-            ok = MessageDialog.showMulti('Load Project',
-                                         f'You are opening an older project (version 3.0.x) - {path.name}\n'
-                                         '\n'
-                                         'When you save, it will be upgraded and will not be readable by version 3.0.4\n',
-                                         texts=[DONT_OPEN, CONTINUE],
-                                         checkbox=MAKE_ARCHIVE, checked=False,
-                                         )
+            ok = MessageDialog.showMulti(
+                    'Load Project',
+                     f'You are opening an older project (version {dataLoader.lastSavedVersion}) - {path.name}\n'
+                     '\n'
+                     f'When you save, it will be upgraded and will no longer be readable by program versions < {Project._LOWEST_COMPATIBLE_VERSION}\n',
+                     texts=[DONT_OPEN, CONTINUE],
+                     checkbox=MAKE_ARCHIVE, checked=False,
+            )
 
             if all(ss not in ok for ss in [DONT_OPEN, MAKE_ARCHIVE, CONTINUE]):
                 # there was an error from the dialog
@@ -441,16 +698,39 @@ class Gui(Ui):
                                                 f'"{dataLoader.path}"\n'
                                                 f'already exists in the project\n'
                                                 '\n'
-                                                'do you want to load?'
+                                                'Do you want to load?'
                                                 )
-            if not ok:
-                ignore = True
+
+        elif dataLoader.dataFormat == NmrPipeSpectrumLoader.dataFormat:
+            # NmrPipe file; check if it is large 3D/4D
+            _ds = dataLoader.dataSource
+            dims = _ds.dimensionCount
+            expectedSize = _ds.expectedFileSizeInBytes / (1024*1024)
+            if dims > 2 and expectedSize >= _ds.WARNING_FILE_SIZE and not _ds.bufferIsFilled:
+
+                if droppedOnSideBar:
+                    _txt1 = f'Loading Spectrum "{dataLoader.path}"'
+                    _txt2 = f'The {dims}D NmrPipe file ({expectedSize:.1f} MB) will be automatically buffered when first displayed\n' \
+                            f'Consider converting to Hdf5 format (Menu: Spectrum --> Convert to Hdf5)\n'
+                    ok = MessageDialog.showOkCancel(_txt1, _txt2)
+                    if not ok:
+                        ignore = True
+
+                else:
+                    _txt1 = f'Displaying Spectrum "{dataLoader.path}"'
+                    _txt2 = f'The {dims}D NmrPipe file ({expectedSize:.1f} MB) will be automatically buffered\n' \
+                            f'Consider loading first and converting to Hdf5 format (Menu: Spectrum --> Convert to Hdf5)\n' \
+                            '\n' \
+                            'Do you want to display now? (the buffering may take a -little- while)'
+                    ok = MessageDialog.showYesNoWarning(_txt1, _txt2)
+                    if not ok:
+                        ignore = True
 
         elif dataLoader.dataFormat == StarDataLoader.dataFormat and dataLoader:
             (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)
             if dataLoader and not ignore:
                 title = 'New project from NmrStar' if createNewProject else \
-                    'Import from NmrStar'
+                        'Import from NmrStar'
                 dataLoader.getDataBlock()  # this will read and parse the file
                 popup = StarImporterPopup(dataLoader=dataLoader,
                                           parent=self.mainWindow,
@@ -486,11 +766,10 @@ class Gui(Ui):
 
         oldMainWindowPos = self.mainWindow.pos()
         # if not self.project.isTemporary:
-        if self.project and (self.project._undo is None or self.project._undo.isDirty()):
-            message = f"Do you really want to create a new project (current project will be closed {' and any changes will be lost' if self.project.isModified else ''})?"
+        message = f"Do you really want to create a new project (current project will be closed {' and any changes will be lost' if self.project.isModified else ''})?"
 
-            if not (_ok := MessageDialog.showYesNo('New Project', message, parent=self.mainWindow)):
-                return
+        if not (_ok := MessageDialog.showYesNo('New Project', message, parent=self.mainWindow)):
+            return
 
         if (_name := checkProjectName(name, correctName=True)) != name:
             MessageDialog.showInfo('New Project', f'Project name changed from "{name}" to "{_name}"\nSee console/log for details', parent=self)
@@ -501,8 +780,7 @@ class Gui(Ui):
             newProject = self.application._newProject(name=_name)
             if newProject is None:
                 raise RuntimeError('Unable to create new project')
-            newProject._mainWindow.show()
-            QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
+
             self.mainWindow.move(oldMainWindowPos)
 
             return newProject
@@ -526,6 +804,7 @@ class Gui(Ui):
         oldProjectLoader = None
         oldProjectIsTemporary = True
         oldMainWindowPos = self.mainWindow and self.mainWindow.pos()
+
         if self.project:
             # if not self.project.isTemporary:
             if self.project._undo is None or self.project._undo.isDirty():
@@ -539,6 +818,7 @@ class Gui(Ui):
             oldProjectLoader = CcpNmrV3ProjectDataLoader(self.project.path)
             oldProjectIsTemporary = self.project.isTemporary
 
+        error = False
         try:
             if self.project:
                 # NOTE:ED - getting a strange QT bug disabling the menu-bar from here
@@ -555,37 +835,31 @@ class Gui(Ui):
 
             newProject = _loaded[0]
 
-            # # Note that the newProject has its own MainWindow; i.e. it is not self
-            # newProject._mainWindow.sideBar.buildTree(newProject)
-            # The next two lines are essential to have the QT main event loop associated
-            # with the new window; without these, the programs just terminates
-            newProject._mainWindow.show()
-            QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
-
             # if the new project contains invalid spectra then open the popup to see them
             self.mainWindow._checkForBadSpectra(newProject)
             if oldMainWindowPos:
                 self.mainWindow.move(oldMainWindowPos)
 
+            error = False
+
         except (RuntimeError, ValueError, ApiError) as es:
             MessageDialog.showError('Error loading Project:', f'{es}', parent=self.mainWindow)
-            return None
+            error = True
 
         except NotImplementedError as es:
             MessageDialog.showError('Error loading Project:', f'{es}', parent=self.mainWindow)
+            error = True
 
-            # Try to restore the state
-            newProject = None
-            if oldProjectIsTemporary:
-                newProject = self.application._newProject()
-            elif oldProjectLoader:
-                newProject = oldProjectLoader.load()[0]  # dataLoaders return a list
-
-            if newProject:
-                # The next two lines are essential to have the QT main event loop associated
-                # with the new window; without these, the programs just terminates
-                newProject._mainWindow.show()
-                QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
+        finally:
+            if error:
+                # Try to restore the state
+                # reload existing or create a new temporary one (as the original temporary
+                # get deleted by the closing)
+                newProject = None
+                if oldProjectIsTemporary:
+                    newProject = self.application._newProject()
+                elif oldProjectLoader:
+                    newProject = oldProjectLoader.load()[0]  # dataLoaders return a list
 
         return newProject
 
@@ -628,7 +902,7 @@ class Gui(Ui):
             self.mainWindow.sideBar.clearSideBar()
             self.mainWindow.sideBar.deleteLater()
             self.mainWindow.deleteLater()
-            self.mainWindow = None
+            self._mainWindow = None
 
     @logCommand('application.')
     def saveProjectAs(self, newPath=None, overwrite: bool = False) -> bool:
@@ -640,37 +914,69 @@ class Gui(Ui):
         """
         from ccpn.core.lib.ProjectLib import checkProjectName
 
-        oldPath = self.project.path
-        if newPath is None:
-            if (newPath := _getSaveDirectory(self.mainWindow)) is None:
-                return False
-
-        newPath = aPath(newPath).assureSuffix(CCPN_EXTENSION)
         title = 'Project SaveAs'
+        oldPath = Path(self.project.path)
 
-        if (not overwrite and
-                newPath.exists() and
-                (newPath.is_file() or (newPath.is_dir() and len(newPath.listdir(excludeDotFiles=False)) > 0))
-        ):
-            # should not really need to check the second and third condition above, only
-            # the Qt dialog stupidly insists a directory exists before you can select it
-            # so if it exists but is empty then don't bother asking the question
+        if newPath is None:
+            # try to create a new path from the old one
+            if self.project.isTemporary:
+                _newName = self.project.name
+                _newPath = (aPath('~') / _newName).assureSuffix(CCPN_DIRECTORY_SUFFIX)
+            else:
+                _newName = f'{self.project.name}_new'
+                _newPath = oldPath.with_name(_newName).assureSuffix(CCPN_DIRECTORY_SUFFIX)
+            # query for this path
+            dialog = FileDialog.ProjectSaveFileDialog(parent=self.mainWindow,
+                                                      directory=_newPath.parent.asString(),
+                                                      selectFile=_newPath.name,
+                                                      acceptMode='save')
+            dialog._show()
+            if (newPath := dialog.selectedFile()) is None:
+                return False
+        newPath = aPath(newPath).assureSuffix(CCPN_DIRECTORY_SUFFIX)
+
+        if  newPath.exists() and \
+           (newPath.is_file() or (newPath.is_dir() and len(newPath.listdir(excludeDotFiles=False)) > 0)) and \
+           not overwrite :
             msg = f'Path "{newPath}" already exists; overwrite?'
             if not MessageDialog.showYesNo(title, msg):
                 return False
 
-        # check the project name derived from path
+        # check the project name derived from path; not all is allowed
         newName = newPath.basename
-        if (_name := checkProjectName(newName, correctName=True)) != newName:
-            newPath = (newPath.parent / _name).assureSuffix(CCPN_EXTENSION)
-            MessageDialog.showInfo(title, f'Project name changed from "{newName}" to "{_name}"\nSee console/log for details',
+        if (_nameFromPath := checkProjectName(newName, correctName=True)) != newName:
+            MessageDialog.showInfo(title, f'Project name will be changed from "{newName}" to "{_nameFromPath}"\n'
+                                          f'See console/log for details',
                                    parent=self.mainWindow)
+            newPath = (newPath.parent / _nameFromPath).assureSuffix(CCPN_DIRECTORY_SUFFIX)
+            newName = _nameFromPath
+
+        # Checking copy subdirectories
+        _sizeDict = self.project._getSubdirectorySizes(CCPN_SAVEAS_SUB_DIRECTORIES, sizeInMB=True)
+        _totalSize = sum(_sizeDict.values())
+        _tmp = '%.1f' % _totalSize
+        msg = f'Also copy sub-directories (data, archives, scripts, ...) ({_tmp} MB)?\n'
+
+        # Check for any inside spectra
+        _insideSpectra = [sp for sp in self.project.spectra if sp._isInside]
+        _size = '%.1f' % (sum([sp.dataSource.expectedFileSizeInBytes for sp in _insideSpectra]) / (1024*1024))
+        if len(_insideSpectra) == 1:
+            msg += f'\nNote that the data of {_insideSpectra[0].pid} ({_size} MB) is in "{oldPath.name}/data/spectra"\n'
+        elif len(_insideSpectra) > 1:
+            msg += f'\nNote that the data of {len(_insideSpectra)} spectra ({_size} MB) are in "{oldPath.name}/data/spectra"\n'
+
+        if self.project.isTemporary:
+            copySubDirs = True
+        else:
+            if (copySubDirs :=  MessageDialog.showYesNoCancel(title, msg)) is None:
+                # pressed "cancel"
+                return False
 
         with catchExceptions(errorStringTemplate='Error saving project: %s'):
             with MessageDialog.progressManager(self.mainWindow, f'Saving project as {newPath} ... '):
                 try:
-                    if not self.application._saveProjectAs(newPath=newPath, overwrite=True):
-                        txt = f"Saving project to {newPath} aborted"
+                    if not self.application._saveProjectAs(newPath=newPath, overwrite=True, copySubDirectories=copySubDirs):
+                        txt = f"Saving project to {newPath} aborted; check log for details"
                         MessageDialog.showError("Project SaveAs", txt, parent=self.mainWindow)
                         return False
 
@@ -685,8 +991,9 @@ class Gui(Ui):
                     return False
 
         self.mainWindow._updateWindowTitle()
-        self.application._getRecentProjectFiles(oldPath=oldPath)  # this will also update the list
-        self.mainWindow._fillRecentProjectsMenu()  # Update the menu
+        # self.application._getRecentProjectFiles(oldPath=oldPath.asString())  # this will also update the list
+        # self.mainWindow._fillRecentProjectsMenu()  # Update the menu
+        self.mainWindow.sideBar.setProjectName(self.project)
 
         successMessage = f'Project successfully saved to "{self.project.path}"'
         # MessageDialog.showInfo("Project SaveAs", successMessage, parent=self.mainWindow)
@@ -847,27 +1154,3 @@ class Gui(Ui):
 
         return result
 
-
-#-----------------------------------------------------------------------------------------
-# Helper code
-#-----------------------------------------------------------------------------------------
-
-def _getSaveDirectory(mainWindow):
-    """Opens save Project as dialog box and gets directory specified in
-    the file dialog.
-    :return path instance or None
-    """
-
-    dialog = FileDialog.ProjectSaveFileDialog(parent=mainWindow, acceptMode='save')
-    dialog._show()
-    newPath = dialog.selectedFile()
-
-    # if not iterable then ignore - dialog may return string or tuple(<path>, <fileOptions>)
-    if isinstance(newPath, tuple) and len(newPath) > 0:
-        newPath = newPath[0]
-
-    # ignore if empty
-    if not newPath:
-        return None
-
-    return newPath

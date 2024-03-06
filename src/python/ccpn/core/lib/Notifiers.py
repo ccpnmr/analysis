@@ -19,9 +19,9 @@ April 2017: First design by Geerten Vuister
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -29,9 +29,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-31 16:38:53 +0100 (Mon, July 31, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-03-06 17:48:09 +0000 (Wed, March 06, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -54,6 +54,7 @@ import weakref
 DEBUG = False
 _debugIds = ()
 
+_STRICT = True  # Flag to enforce type checking; relaxed for testing v3memic code
 
 # _debugIds = (75, 84, 92, 94,95,96)  # for these _id's, debug will be True. This allows for selective debugging
 
@@ -71,6 +72,18 @@ class NotifierABC(object):
 
     # needs subclassing
     _triggerKeywords = ()
+
+    # callback dict keywords
+    NOTIFIER = 'notifier'
+    THEOBJECT = 'theObject'
+    TRIGGER = 'trigger'
+    OBJECT = 'object'
+    GETPID = 'pid'
+    OLDPID = 'oldPid'
+    VALUE = 'value'
+    PREVIOUSVALUE = 'previousValue'
+    TARGETNAME = 'targetName'
+    SPECIFIERS = 'specifiers'
 
     def __init__(self, theObject, triggers, targetName, callback, setterObject=None, debug=False, **kwargs):
 
@@ -94,6 +107,7 @@ class NotifierABC(object):
             if trigger not in self._triggerKeywords:
                 raise ValueError('Invalid trigger "%s" for <%s>' % (trigger, self.__class__.__name__))
         self._triggers = tuple(triggers)
+        self._trigger = triggers[0]  # Just a convenience for some implementation that only ever have one trigger
 
         self._targetName = targetName
         self._callback = callback
@@ -144,10 +158,26 @@ class NotifierABC(object):
         """:return True if notifier is still registered; i.e. active"""
         return self._isRegistered
 
+    def newCallbackDict(self, trigger, previousValue=None, value=None, obj=None,
+                        oldpid=None, pid=None, specifiers=None):
+        callbackDict = {
+                self.NOTIFIER     : self,
+                self.THEOBJECT    : self._theObject,
+                self.TRIGGER      : trigger,
+                self.TARGETNAME   : self._targetName,
+                self.PREVIOUSVALUE: previousValue,
+                self.VALUE        : value,
+                self.OBJECT       : obj,
+                self.OLDPID       : oldpid,
+                self.GETPID       : pid,
+                self.SPECIFIERS   : specifiers,
+                }
+        return callbackDict
+
     def __str__(self) -> str:
         if self.isRegistered():
             trigs = f'{[(t, self._targetName) for t in self._triggers]}'
-            return '<%s (%d): theObject:%s triggers:%s>' % \
+            return '<%s (%d): theObject:%s --> %s>' % \
                    (self.__class__.__name__,
                     self.id,
                     self._theObject,
@@ -158,7 +188,8 @@ class NotifierABC(object):
                 self.id
                 )
 
-    __repr__ = __str__
+    def __repr__(self) -> str:
+        return f'<{self.__class__.__name__} ({self.id})>'
 
 
 class Notifier(NotifierABC):
@@ -221,18 +252,6 @@ class Notifier(NotifierABC):
 
     ANY = '<Any>'
 
-    # callback dict keywords
-    NOTIFIER = 'notifier'
-    THEOBJECT = 'theObject'
-    TRIGGER = 'trigger'
-    OBJECT = 'object'
-    GETPID = 'pid'
-    OLDPID = 'oldPid'
-    VALUE = 'value'
-    PREVIOUSVALUE = 'previousValue'
-    TARGETNAME = 'targetName'
-    SPECIFIERS = 'specifiers'
-
     def __init__(self,
                  theObject: Any,
                  triggers: list,
@@ -258,8 +277,11 @@ class Notifier(NotifierABC):
         from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC  # local import to avoid cycles
         from ccpn.framework.Current import Current  # local import to avoid cycles
 
-        if theObject is None or not isinstance(theObject, (Current, AbstractWrapperObject, V3CoreObjectABC)):
-            raise RuntimeError('Notifier: invalid object %r' % theObject)
+        if theObject is None:
+            raise ValueError('Notifier: object is None')
+
+        if _STRICT and not isinstance(theObject, (Current, AbstractWrapperObject, V3CoreObjectABC)):
+            raise ValueError(f'Notifier: invalid object; expected Current, AbstractWrapper or V3CoreObject, got {type(theObject)}')
 
         super().__init__(theObject=theObject,
                          triggers=triggers,
@@ -338,7 +360,7 @@ class Notifier(NotifierABC):
                     self._previousValue = getattr(theObject, targetName)
 
                 notifier = (trigger, targetName)
-                func = self.project.registerNotifier(className=theObject.className,
+                func = self.project.registerNotifierregisterNotifier(className=theObject.className,
                                                      target=Notifier.CHANGE,
                                                      func=partial(self, notifier=notifier),
                                                      onceOnly=onceOnly)
@@ -421,17 +443,7 @@ class Notifier(NotifierABC):
                              )
 
         notifierFired = False
-        callbackDict = {self.NOTIFIER     : self,
-                        self.TRIGGER      : trigger,
-                        self.THEOBJECT    : self._theObject,
-                        self.OBJECT       : obj,
-                        self.TARGETNAME   : targetName,
-                        self.PREVIOUSVALUE: None,
-                        self.VALUE        : None,
-                        self.OLDPID       : None,
-                        self.GETPID       : None,
-                        self.SPECIFIERS   : actionKwds,
-                        }
+        callbackDict = self.newCallbackDict(trigger=trigger, obj=obj, specifiers=actionKwds)
 
         # CURRENT special case
         if trigger == Notifier.CURRENT:
@@ -525,9 +537,39 @@ class NotifierBase(object):
 
         return objNotifiers
 
+    def _addNotifier(self, notifier):
+        """Add notfier to notfiersDict;
+        Isolating for easier subclassing of setNotifier()
+        """
+        objNotifiers = self._getObjectNotifiersDict()
+        _id = notifier.id
+        # this should never happen; hence just a check
+        if _id in objNotifiers:
+            raise RuntimeError('%s: a notifier with id "%s" already exists (%s)' % (self, _id, objNotifiers[_id]))
+        # add the notifier
+        objNotifiers[_id] = notifier
+
+    def _newNotifier(self, triggers: list, targetName: str, callback: Callable[..., Optional[str]], setterObject=None, **kwargs) -> Notifier:
+        """Create a new Notifier instance for self
+
+        :param triggers: list of triggers to trigger callback
+        :param targetName: valid className, attributeName or None (See Notifier doc string for details)
+        :param callback: callback function with signature: callback(obj, parameter2 [, *args] [, **kwargs])
+        :param **kwargs: optional keyword,value arguments to call back
+        :return: a Notifier instance
+
+        """
+        _notifier = Notifier(theObject=self,
+                             triggers=triggers,
+                             targetName=targetName,
+                             callback=callback,
+                             setterObject=setterObject,
+                             **kwargs)
+        return _notifier
+
     def setNotifier(self, theObject: 'AbstractWrapperObject', triggers: list, targetName: str, callback: Callable[..., Optional[str]], **kwargs) -> Notifier:
         """
-        Set Notifier for Ccpn V3 object theObject
+        Set Notifier for Ccpn V3 object theObject; store in own CcpNmrNotifiersDict for management.
 
         :param theObject: V3 object to register a notifier with
         :param triggers: list of triggers to trigger callback
@@ -536,20 +578,32 @@ class NotifierBase(object):
         :param **kwargs: optional keyword,value arguments to call back
         :return: a Notifier instance
         """
-        objNotifiers = self._getObjectNotifiersDict()
-        notifier = Notifier(theObject=theObject,
-                            triggers=triggers,
-                            targetName=targetName,
-                            callback=callback,
-                            setterObject=self,
-                            **kwargs)
-        _id = notifier.id
-        # this should never happen; hence just a check
-        if _id in objNotifiers:
-            raise RuntimeError('%s: a notifier with id "%s" already exists (%s)' % (self, _id, objNotifiers[_id]))
-        # add the notifier
-        objNotifiers[_id] = notifier
-        return notifier
+        from ccpn.framework.Current import Current
+        if isinstance(theObject, Current):
+            result = Notifier(theObject=theObject,
+                                triggers=triggers,
+                                targetName=targetName,
+                                callback=callback,
+                                setterObject=self,
+                                **kwargs)
+        else:
+            # GWV 15/12/23: This allows subclassing during ccpnv4 development
+            result = theObject._newNotifier(
+                                triggers=triggers,
+                                targetName=targetName,
+                                callback=callback,
+                                setterObject=self,
+                                **kwargs
+            )
+        if isinstance(result, list):
+            for _notifier in result:
+                self._addNotifier(_notifier)
+        elif isinstance(result, Notifier):
+            self._addNotifier(result)
+        else:
+            raise RuntimeError(f'setNotifier: unexpected result; got {result}')
+
+        return result
 
     def setGuiNotifier(self, theObject: 'AbstractWrapperObject', triggers: list, targetName: str, callback: Callable[..., Optional[str]], **kwargs) -> Notifier:
         """
@@ -643,7 +697,8 @@ class NotifierBase(object):
         return foundNotifiers
 
     def deleteAllNotifiers(self):
-        """Unregister all the notifiers"""
+        """Unregister all the notifiers
+        """
         if not self.hasNotifier(None):
             # there are no notifiers
             return

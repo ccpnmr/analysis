@@ -16,9 +16,9 @@ SidebarClassTreeItems: A Tree with a number of dynamically added items of type V
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -26,9 +26,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-22 13:04:53 +0000 (Wed, November 22, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-03-06 17:48:14 +0000 (Wed, March 06, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -427,6 +427,7 @@ class SidebarABC(NotifierBase):
 
         newItem.setData(0, QtCore.Qt.DisplayRole, str(givenName))
         newItem.setData(1, QtCore.Qt.UserRole, self)
+
         newItem.setExpanded(not self.closed)
 
         return newItem if newItem else givenName
@@ -495,13 +496,17 @@ class SidebarABC(NotifierBase):
         """Resets the tree from self downward, deleting widget and
         optionally the notifiers; remove all children
         """
-        if (self.children):
+        # # GWV: just some code for setting a breakpoint
+        # if self._indx == 62:
+        #     pass
 
-            # recurse into the tree, otherwise just delete the notifiers
-            for itm in self.children:
-                itm.reset()
-
+        # recurse into the tree, otherwise just delete the notifiers
+        if deleteNotifiers:
             self.deleteAllNotifiers()
+
+        if (self.children):
+            for itm in self.children:
+                itm.reset(deleteNotifiers=deleteNotifiers)
 
         # remove the widgets associated with the sidebar items
         if self.widget and self.widget.parent():
@@ -509,6 +514,10 @@ class SidebarABC(NotifierBase):
             self.widget = None
 
         self._postBlockingAction = None
+
+        # # GWV: just some code for setting a breakpoint
+        # if self._indx == 62:
+        #     pass
 
     def _update(self, cDict):
         """Callback routine for updating the node
@@ -611,7 +620,11 @@ class SidebarTree(SidebarABC):
     def buildTree(self, parent, parentWidget, sidebar, obj, level=0):
         """Builds the tree from self downward
         """
+
         super().buildTree(parent=parent, parentWidget=parentWidget, sidebar=sidebar, obj=obj, level=level)  # this will do all the common things
+        # Just a debuging breakpoint and Project closed on reload fix
+        if level == 0:
+            self.closed = False
         # make the widget
         # self.widget = self.givenName
         self.widget = self.makeWidget(parentWidget, self.givenName)
@@ -620,6 +633,8 @@ class SidebarTree(SidebarABC):
         for itm in self.children:
             itm.buildTree(parent=self, parentWidget=self.widget, sidebar=self.sidebar, obj=self.obj, level=self.level + 1)
 
+        # if level == 0: # Just a debuging breakpoint
+        #     pass
 
 class SidebarItem(SidebarTree):
     """

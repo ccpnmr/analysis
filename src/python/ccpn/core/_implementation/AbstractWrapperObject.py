@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-01-03 13:01:00 +0000 (Wed, January 03, 2024) $"
-__version__ = "$Revision: 3.3.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-03-06 17:48:09 +0000 (Wed, March 06, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,6 +30,11 @@ import functools
 import traceback
 import typing
 import re
+import sys
+
+from contextlib import contextmanager
+
+
 from collections import OrderedDict
 from copy import deepcopy
 import pandas as pd
@@ -49,6 +54,16 @@ from ccpn.framework.Application import getApplication
 from ccpn.util import Common as commonUtil
 from ccpn.util.decorators import logCommand
 from ccpn.util.Logging import getLogger
+
+from ccpn.ui.gui.guiSettings import consoleStyle
+
+def _styleRed(text:str) -> str:
+    """Get red text"""
+    return f'{consoleStyle.fg.red}{text}{consoleStyle.reset}'
+
+def _styleBlue(text:str) -> str:
+    """Get blue text"""
+    return f'{consoleStyle.fg.darkblue}{text}{consoleStyle.reset}'
 
 
 _RENAME_SENTINEL = Pid.Pid('Dummy:_rename')
@@ -219,7 +234,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         className = self.className
         if parent is None:
             # This is the project
-            _id = self._wrappedData.name
+            _id = self.name
             sortKey = ('',)
         elif parent is project:
             _id = str(self._key)
@@ -709,6 +724,15 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
     #     for child in node._childClasses:
     #         self._printClassTree(child, tabs=tabs + 1)
 
+    def _getChild(self, klazz, name):
+        """Get the child of type klazz with name
+        :param klazz: class identifier: either className, shortClassName of a CoreClass
+        :param name: the name of the child object
+        :return the child or None
+        """
+        _pid = Pid.new(klazz, name)
+        return self.project.getByPid(_pid)
+
     def _getAllDecendants(self) -> list:
         """Get all objects descending from self; i.e. children, grandchildren, etc
         """
@@ -719,7 +743,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
     def _getChildrenByClass(self, klass) -> list:
         """GWV: Convenience: get the children of type klass of self.
-        klass is string (e.g. 'Peak') or V3 core class
+        klass is string (e.g. 'Peak') or V3 core class instance
         returns empty list if klass is not a child of self
         """
         klass = klass if isinstance(klass, str) else getattr(klass, 'className')
@@ -770,7 +794,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
             app = getApplication()
             if childClass._isGuiClass and app and not app.hasGui:
-                getLogger().debug(f'-->  _getApiChildren: skipping gui-class {childClass} for NoUi interface')
+                getLogger().debug2(f'-->  _getApiChildren(classes={classes}): skipping gui-class {childClass} for NoUi interface')
                 continue
 
             if ('all' in classes) or \
@@ -935,89 +959,125 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
             raise ValueError('Invalid updateMethod "%s"' % updateMethod)
         self._updater.update(updateMethod, obj=self)
 
+    # A class attribute to track depath of object restoring;
+    # root (i.e. Project would become level 0)
+    _objectRestoreLevel = -1
+
+    @contextmanager
+    def _doRestore(cls):
+        """Context manager for restoring
+        """
+        AbstractWrapperObject._objectRestoreLevel += 1
+        try:
+            yield
+        finally:
+            AbstractWrapperObject._objectRestoreLevel -= 1
+
+    @classmethod
+    def _indentedDebug2(cls, text, enter, dots=False):
+        """Create indented blue debug2(text) with enter or leave arrow
+        """
+        _indent = "-" * (cls._objectRestoreLevel) if dots else \
+                  "=" * (cls._objectRestoreLevel)
+        _arrow = f'|{_indent}>' if enter else f'<{_indent}|'
+        getLogger().debug2( _styleBlue(f'{_arrow:7} {text}'))
+
     @classmethod
     def _restoreObject(cls, project, apiObj):
-        """Restores object from apiObj; checks for _factoryFunction.
+        """Restores object from apiObj;
+        checks for _factoryFunction through _newInstanceFromApiData call
         Restores the children
 
         :return Restored object
 
-        CCPNINTERNAL: can be subclassed in special cases
+        CCPNINTERNAL: subclassed in nearly all cases
         """
         if apiObj is None:
             raise ValueError('_restoreObject: undefined apiObj')
 
-        # # call any pre-initialisation updates
-        # cls._updater.update(UPDATE_PRE_OBJECT_INITIALISATION, apiObj, cls)
+        with AbstractWrapperObject._doRestore(cls):
 
-        # if (factoryFunction := cls._factoryFunction) is None:
-        #     # obj = cls(project, apiObj)
-        #     obj = cls._newInstanceFromApiData(project=project, apiObj=apiObj)
-        # else:
-        #     obj = factoryFunction(project, apiObj)
+            # indented debugging just to be sure is running in the correct order
+            # Used with _postRestore debug output at the completion
+            cls._indentedDebug2(text=f'_restoreObject: from {apiObj}', enter=True)
 
-        obj = cls._newInstanceFromApiData(project=project, apiObj=apiObj)
-        if obj is None:
-            raise RuntimeError(f'Error restoring object encoded by {apiObj}')
+            # # call any pre-initialisation updates
+            # cls._updater.update(UPDATE_PRE_OBJECT_INITIALISATION, apiObj, cls)
 
-        # update _objectVersion from internal parameter store to model (if exists)
-        if obj._hasInternalParameter(obj._OBJECT_VERSION):
-            _version = obj._getInternalParameter(obj._OBJECT_VERSION)
-            obj._deleteInternalParameter(obj._OBJECT_VERSION)
-            obj._objectVersion = _version
+            obj = cls._newInstanceFromApiData(project=project, apiObj=apiObj)
+            if obj is None:
+                raise RuntimeError(f'_restoreObject: Error restoring object encoded by {apiObj}')
 
-        # indented debugging just to be sure is running in the correct order
-        _indent = getattr(AbstractWrapperObject, '__indent', 1)
-        getLogger().debug2(f'{"-" * _indent}>  _restoreObject  {apiObj}')
-        setattr(AbstractWrapperObject, '__indent', _indent + 4)
+            # update _objectVersion from internal parameter store to model (if exists)
+            if obj._hasInternalParameter(obj._OBJECT_VERSION):
+                _version = obj._getInternalParameter(obj._OBJECT_VERSION)
+                obj._deleteInternalParameter(obj._OBJECT_VERSION)
+                obj._objectVersion = _version
 
-        # restore the children
-        obj._restoreChildren()
-        obj._postRestore()
+            # restore the children
+            obj._restoreChildren()
 
-        # call any post-initialisation updates
-        cls._updater.update(UPDATE_POST_OBJECT_INITIALISATION, obj)
+            # Call post-restore routine
+            obj._postRestore()
+
+            # call any post-initialisation updates
+            cls._updater.update(UPDATE_POST_OBJECT_INITIALISATION, obj)
 
         return obj
 
     def _restoreChildren(self):
-        """Recursively restore children, using existing objects in data model
+        """Recursively restore children of self, using existing objects in data model
+        :return A list of objects created
         """
-
         project = self._project
         data2Obj = project._data2Obj
+        app = getApplication()
 
         for childClass in self._childClasses:
 
-            app = getApplication()
             if childClass._isGuiClass and app and not app.hasGui:
                 # if gui is disabled then skip all gui-core-classes
-                getLogger().debug(f'-->  _restoreChildren: skipping gui-class {childClass} for NoUi interface')
+                getLogger().debug2(
+                        _styleBlue(f'-->  _restoreChildren: skipping gui-class {childClass} for NoUi interface')
+                )
                 continue
 
             # recursively create children
+            self._indentedDebug2(f'getting apiData for {childClass.className}', enter=True, dots=True)
+
             apiObjs = childClass._getAllWrappedData(self)
             for apiObj in apiObjs:
                 obj = data2Obj.get(apiObj)
-
                 if obj is None:
-                    try:
-                        obj = childClass._restoreObject(project=project, apiObj=apiObj)
+                    # obj does not exist; restore it from apiObj
 
-                    except RuntimeError as es:
-                        _text = 'Error restoring api-child %r of %s (%s)' % (apiObj.qualifiedName, self, es)
-                        getLogger().warning(_text)
-                        if app and app._isInDebugMode:
-                            print(traceback.print_exc())
+                    # GWV 13 Feb 24: Catching this here at such a low level is a bad idea
+                    # as the project and it's window is in an undefined state. Better raise a hard
+                    # error
+
+                    # try:
+                    #     obj = childClass._restoreObject(project=project, apiObj=apiObj)
+                    #
+                    # except RuntimeError as es:
+                    #     _text = 'Error restoring api-child %r of %s (%s)' % (apiObj.qualifiedName, self, es)
+                    #     getLogger().warning(_text)
+                    #     if app and app._isInDebugMode:
+                    #         sys.stderr.write(f'{traceback.print_exc()}\n')
+
+                    obj = childClass._restoreObject(project=project, apiObj=apiObj)
+
+                # obj should exist now
+                if obj is None:
+                    raise RuntimeError(f'Error restoring api-child {apiObj.qualifiedName!r} of {self}')
 
     def _postRestore(self):
         """Handle post-initialising children after all children have been restored
-        CCPN-Internal - subclass and call this at the end
+        #CCPNNMR-Internal - subclass and call this at the end
         """
+
         # indented debugging just to be sure is running in the correct order
-        _indent = max(getattr(AbstractWrapperObject, '__indent', 5) - 4, 1)
-        setattr(AbstractWrapperObject, '__indent', _indent)
-        getLogger().debug2(f'<{"-" * _indent}  _postRestore  {self}')
+        # used in conjunction with _restoreObject at the start
+        self._indentedDebug2(text=f'_postRestore: restored {self}', enter=False)
 
     #  For restore 3.2 branch
 
@@ -1534,3 +1594,8 @@ def updateObject(fromVersion, toVersion, updateFunction):
         return cls
 
     return theDecorator
+
+
+def _styleBlue(text:str) -> str:
+    """Get blue text"""
+    return f'{consoleStyle.fg.darkblue}{text}{consoleStyle.reset}'

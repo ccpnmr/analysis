@@ -461,7 +461,7 @@ class TopObject(XmlLoaderABC):
         guid = xmlPath.basename.split(KEY_SEPARATOR)[-1]
         return guid
 
-    def _validateXml(self, path) -> bool:
+    def _validateTopObjectXml(self, path) -> bool:
         """Validate the xml-file path defining topObject self
         :param path, a path instance to the xml-file
         :return True if the file is valid
@@ -469,31 +469,31 @@ class TopObject(XmlLoaderABC):
         """
         from xml.etree import ElementTree
 
-        getLogger().debug2(f'_validateXml: xml-file {path}')
+        getLogger().debug2(f'_validateTopObjectXml(): xml-file {path}')
 
         if path is None:
-            raise RuntimeError(f'_validateXml: undefined path')
+            raise RuntimeError(f'_validateTopObjectXml(): undefined path')
 
         if isinstance(path, str):
             path = aPath(path)
 
         if not path.exists():
-            raise FileNotFoundError(f'_validateXml: path {path} does not exist')
+            raise FileNotFoundError(f'_validateTopObjectXml(): path {path} does not exist')
 
         xtree = ElementTree.parse(str(path))
         root = xtree.getroot()
         # print(root.items())
         if root.tag != '_StorageUnit':
-            raise RuntimeError(f'_validateXml: expected xml-root "_StorageUnit"')
+            raise RuntimeError(f'_validateTopObjectXml(): expected xml-root "_StorageUnit"')
 
         nodes = list(root)
         if len(nodes)!= 1:
-            raise RuntimeError(f'_validateXml: expected exactely one sub-node, got {len(nodes)}')
+            raise RuntimeError(f'_validateTopObjectXml(): expected exactely one sub-node, got {len(nodes)}')
 
         node = nodes[0]
         _guid = dict(node.items()).get('guid', None)
         if _guid != self.guid:
-            raise RuntimeError(f'_validateXml: expected guid "{self.guid}", found "{_guid}" in xml-file')
+            raise RuntimeError(f'_validateTopObjectXml(): expected guid "{self.guid}", found "{_guid}" in xml-file')
 
         # no problems found
         return True
@@ -519,7 +519,7 @@ class TopObject(XmlLoaderABC):
 
             # Validate the user xml's prior to loading
             if self.isUserData:
-                self._validateXml(self.path)
+                self._validateTopObjectXml(self.path)
 
             with self.path.open('r') as fp:
                 if self.apiTopObject is None:
@@ -586,7 +586,7 @@ class TopObject(XmlLoaderABC):
                 return
 
             with self.path.saveWriteToFile(mode='w', overwrite=True,
-                                           keepOnError=True, validator=self._validateXml) as fp:
+                                           keepOnError=True, validator=self._validateTopObjectXml) as fp:
                 saveToStream(fp, self.apiTopObject)
 
             if updateIsModified:
@@ -617,7 +617,7 @@ class TopObject(XmlLoaderABC):
                     path.parent.mkdir(parents=True, exist_ok=False)
 
                 with self.path.saveWriteToFile(mode='w', overwrite=True,
-                                               keepOnError=True, validator=self._validateXml) as fp:
+                                               keepOnError=True, validator=self._validateTopObjectXml) as fp:
                     saveToStream(fp, self.apiTopObject)
 
                 if updateIsModified:
@@ -1449,8 +1449,10 @@ class XmlLoader(XmlLoaderABC):
         if xmlProjectFile is None:
             xmlProjectFile = self._getXmlProjectFile()
 
-        if not xmlProjectFile.exists():
-            raise FileNotFoundError(f'Invalid xmlProjectFile "{xmlProjectFile}"')
+        # if not xmlProjectFile.exists():
+        #     raise FileNotFoundError(f'Invalid xmlProjectFile "{xmlProjectFile}"')
+
+        self._validateMemopsXml(xmlProjectFile)  # Will aslo check for presence
 
         # the memops name might differ from self.name, as the project
         # might have moved/renamed. Hence, derive it from the xml-file
@@ -1554,6 +1556,7 @@ class XmlLoader(XmlLoaderABC):
                 bPath = self.backupsPath / (CCPN_API_DIRECTORY + BACKUP_SUFFIX)
                 bPath = bPath.addTimeStamp()
                 self.v3Path.rename(bPath)
+
         except (PermissionError, FileNotFoundError):
             getLogger().debug('Saving user-data: folder may be read-only')
 
@@ -1566,6 +1569,38 @@ class XmlLoader(XmlLoaderABC):
             # save all topObject to xml files in v3Path
             for topObject in topObjects:
                 topObject.saveToXml(updateIsModified=updateIsModified)
+
+    def _validateMemopsXml(self, path) -> bool:
+        """Validate the xml-file path defining Memops
+        :param path, a path instance to the xml-file
+        :return True if the file is valid
+        :raise FileNotFoundError, RuntimeError on any errors found
+        """
+        from xml.etree import ElementTree
+
+        getLogger().debug2(f'_validateMemopsXml(): xml-file {path}')
+
+        if path is None:
+            raise RuntimeError(f'_validateMemopsXml(): undefined path')
+
+        if isinstance(path, str):
+            path = aPath(path)
+
+        if not path.exists():
+            raise FileNotFoundError(f'_validateMemopsXml(): path {path} does not exist')
+
+        xtree = ElementTree.parse(str(path))
+        root = xtree.getroot()
+        # print(root.items())
+        if root.tag != '_StorageUnit':
+            raise RuntimeError(f'_validateMemopsXml(): expected xml-root "_StorageUnit"')
+
+        # nodes = list(root)
+        # if len(nodes)!= 1:
+        #     raise RuntimeError(f'_validateTopObjectXml(): expected exactely one sub-node, got {len(nodes)}')
+
+        # no problems found
+        return True
 
     def _saveMemopsToXml(self, updateIsModified=True):
         """Saves memopsRoot to self.xmlProjectFile;
@@ -1583,7 +1618,10 @@ class XmlLoader(XmlLoaderABC):
         _xmlFile = self.xmlProjectFile
         try:
             _xmlFile.parent.mkdir(parents=True, exist_ok=True)
-            with _xmlFile.open('w') as fp:
+            # with _xmlFile.open('w') as fp:
+            with _xmlFile.saveWriteToFile(mode='w', overwrite=True,
+                                          keepOnError=True, validator=self._validateMemopsXml) as fp:
+
                 saveToStream(stream=fp, apiTopObject=self.memopsRoot)
 
             if updateIsModified:

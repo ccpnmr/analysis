@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-06 17:48:14 +0000 (Wed, March 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-07 09:45:34 +0000 (Thu, March 07, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -350,7 +350,7 @@ class Path(_Path_):
                 raise FileExistsError(f'{self} exists and overwrite is False')
 
             if not self.parent.exists():
-                raise FileNotFoundError('{self.parent} does not exists: unable to write to {self.basename}')
+                raise FileNotFoundError(f'{self.parent} does not exists: unable to write to {self.basename}')
 
             # check for append; if so copy self as tempFile first
             if self.exists() and 'a' in mode:

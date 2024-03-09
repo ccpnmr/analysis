@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-06 17:48:13 +0000 (Wed, March 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-09 17:07:01 +0000 (Sat, March 09, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -315,15 +315,39 @@ class Base(DropBase, SignalBlocking):
         if not ignoreStyleSheet:
             # Setup colour overrides (styles used primarily)
             ##3 depreciated
+            # from ccpn.util.Colour import allColours, hexToRgb
+            # if bgColor or fgColor:
+            #     color2hex =  dict( (v,k) for k,v in allColours.items() )
+
             if bgColor:
+                # See if we need conversion
+                # if isinstance(bgColor, str) and len(bgColor) > 0:
+                #     if bgColor[0] == '#':  #hex string
+                #         bgColor = hexToRgb(bgColor)
+                #     else:
+                #         _tmp = color2hex.get(bgColor)
+                #         if _tmp is None:
+                #             raise RuntimeError(f'Base: error converting bgColor {bgColor}')
+                #         bgColor = hexToRgb(bgColor)
+
                 self.setAutoFillBackground(True)
                 #rgb = QtGui.QColor(bgColor).getRgb()[:3]
                 self.setStyleSheet("background-color: rgb(%d, %d, %d);" % bgColor)
 
             if fgColor:
+                # GWV: See if we need conversion; WHY Stylesheets accepts strings and hex and rgb
+                # if isinstance(fgColor, str) and len(fgColor) > 0:
+                #     if fgColor[0] == '#':  #hex string
+                #         bgColor = hexToRgb(fgColor)
+                #     else:
+                #         _tmp = color2hex.get(fgColor)
+                #         if _tmp is None:
+                #             raise RuntimeError(f'Base: error converting fgColor {fgColor}')
+                #         fgColor = hexToRgb(_tmp)
+
                 self.setAutoFillBackground(True)
                 #rgb = QtGui.QColor(fgColor).getRgb()[:3]
-                self.setStyleSheet("foreground-color: rgb(%d, %d, %d);" % fgColor)
+                self.setStyleSheet("color: rgb(%d, %d, %d);" % fgColor)
 
             if setLayout:
                 self.setGridLayout(margins=margins, spacing=spacing)

@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-06 17:48:09 +0000 (Wed, March 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-10 15:48:53 +0000 (Sun, March 10, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -2515,6 +2515,7 @@ class Project(AbstractWrapperObject):
     #===========================================================================================
     # End data loaders
     #===========================================================================================
+
 
     def getObjectsByPartialId(self, className: str,
                               idStartsWith: str) -> typing.List[AbstractWrapperObject]:

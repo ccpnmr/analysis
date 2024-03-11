@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-07 09:45:34 +0000 (Thu, March 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-11 17:14:15 +0000 (Mon, March 11, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -61,7 +61,7 @@ class Path(_Path_):
 
     @property
     def basename(self):
-        """the name of self without any suffixes
+        """the name of self without any suffixes;
         """
         return self.name.split('.')[0]
 
@@ -554,7 +554,7 @@ class Path(_Path_):
             result = [Path(f) for f in self.glob(f'*{suffix}')]
 
         if excludeDotFiles:
-            result = [f for f in result if not f.basename.startswith('.')]
+            result = [f for f in result if not f.name.startswith('.')]
 
         if relative:
             result = [f.relative_to(self) for f in result]

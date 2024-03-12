@@ -512,24 +512,25 @@ class CreateChainPopup(AttributeEditorPopupABC):
                                           hAlign='right',   grid=(row, 1), gridSpan=(1, 3))
 
         row += 1
-        tipText6a = "E.g., for a VAL residue, the set of HG11, HG12, HG13 (NMR equivalent) atoms will create a new atom HG1%;\n" \
-                    "        also the set HG1%, HG2% will create a new atom HG%"
-        label6a = Label(self.mainWidget, 'Expand Atoms From AtomSets', tipText=tipText6a, grid=(row, 0))
+        tipText6a = "Adds atoms to represent NMR-equivalent groups, e.g. HB% for the alanine methyl atoms\n" \
+                     "HB1, HB2 and HB3 or HDx,HDy,HD%,CDx,CDy,CD% etc. for the Tyr aromatic ring atoms."
+        label6a = Label(self.mainWidget, 'Add NMR equivalent atoms', tipText=tipText6a, grid=(row, 0))
         self.expandAtomsFromAtomSetW = CheckBox(self.mainWidget, checked=DefaultAddAtomGroups,
                                                 tipText=tipText6a, grid=(row, 1), hAlign='left')
         row += 1
-        tipText7a = "Add new atoms for Non-stereo Specific Atoms (if any).\n" \
-                    "E.g., for a VAL residue, HGx%, HGy% will be added if atoms HG1% and HG2% are present.\n" \
-                    "This option is available only if 'Expand Atoms From AtomSets' is selected."
-        label7a = Label(self.mainWidget, 'Add Non-Stereo Specific Atoms', tipText=tipText7a, grid=(row, 0))
+        tipText7a = "Adds new atoms for non-stereospecific atoms (if any).\n" \
+                    "E.g., adds HBx and HBy in addition to HB2 and HB3 for a CH2 group,\n" \
+                    "or HGx% and HGy% in addition to Val HG1% and HG2%.\n" \
+                    "This option is available only if 'Add NMR equivalent Atoms' is selected."
+        label7a = Label(self.mainWidget, 'Add non-stereospecific atoms', tipText=tipText7a, grid=(row, 0))
         self.addNonstereoAtomsW = CheckBox(self.mainWidget, checked=DefaultAddNonstereoAtoms,
                                            tipText=tipText7a, grid=(row, 1), hAlign='left', minimumWidth=minimumWidth)
         row += 1
-        tipText8a = "E.g., for a VAL residue, the set of HG11, HG12, HG13 (NMR equivalent) atoms\n" \
-                    "        will create a new atom HG1% and an extra pseudo-atom MG1;\n" \
-                    "        also the set HG1%, HG2% will create a new atom HG% and an extra pseudo-atom QG.\n" \
-                    "This option is available only if 'Expand Atoms From AtomSets' is selected and proton groups."
-        label8a = Label(self.mainWidget, 'Add extra Pseudo-Atoms', tipText=tipText8a, grid=(row, 0))
+        tipText8a = "Adds IUPAC proton pseudo-atoms, e.g. for the NMR-equivalent Val HG11, HG12, HG13 atoms\n" \
+                    "a new atom HG1% and an extra pseudo-atom MG1 will be created;\n" \
+                    "also for the Val HG1% and HG2% atoms, HG% and pseudo-atom QG will be created.\n" \
+                    "This option is available only if 'Add NMR equivalent Atoms' is selected."
+        label8a = Label(self.mainWidget, 'Add extra pseudo-atoms', tipText=tipText8a, grid=(row, 0))
         self.addPseudoAtomsW = CheckBox(self.mainWidget, checked=DefaultAddPseudoAtoms,
                                         tipText=tipText8a, grid=(row, 1), hAlign='left', minimumWidth=minimumWidth)
         self._togglePseudoAtomOptions(self.expandAtomsFromAtomSetW.get())

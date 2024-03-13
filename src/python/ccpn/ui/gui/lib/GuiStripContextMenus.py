@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-01-24 13:50:33 +0000 (Wed, January 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-13 16:43:39 +0000 (Wed, March 13, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -306,8 +306,8 @@ def _makeStripPlot(strip):
 
 
 def _printItem(strip):
-    return _SCMitem(name='Print to File...',
-                    typeItem=ItemTypes.get(ITEM), icon='icons/print', toolTip='Print SpectrumDisplay to File',
+    return _SCMitem(name='Export to File...',
+                    typeItem=ItemTypes.get(ITEM), icon='icons/print', toolTip='Export SpectrumDisplay to File',
                     shortcut='⌃p', callback=strip.showExportDialog)
 
 

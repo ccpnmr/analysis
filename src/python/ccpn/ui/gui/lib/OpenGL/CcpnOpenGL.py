@@ -45,9 +45,9 @@ By Mouse button:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -55,9 +55,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-17 18:51:22 +0100 (Tue, October 17, 2023) $"
-__version__ = "$Revision: 3.2.0.1 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-03-13 16:41:00 +0000 (Wed, March 13, 2024) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -151,6 +151,8 @@ CURSOR_SOURCE_OTHER = 'other'
 
 SCROLL_DELTA_LIMIT = 12.0
 SCROLL_DELTA_SCALE = 12.0
+
+AXES_MARKER_MIN_PIXEL = 10
 
 
 class CcpnGLWidget(QOpenGLWidget):
@@ -5408,7 +5410,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                                    pp, d[1]))
 
                                     # append the new points to the end of nparray, ignoring narrow grids
-                                    if scaleBounds[ax] * (scaleOrder + 1) > 225:
+                                    if scaleBounds[ax] * (scaleOrder + 1) > AXES_MARKER_MIN_PIXEL:
                                         indexList += (index, index + 1)
                                         vertexList += (valueToRatio(p1[0], axisLimitL, axisLimitR),
                                                        valueToRatio(p1[1], axisLimitB, axisLimitT),

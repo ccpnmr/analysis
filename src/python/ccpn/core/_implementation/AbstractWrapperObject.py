@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-02-22 16:48:46 +0000 (Thu, February 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-13 16:42:21 +0000 (Wed, March 13, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -57,7 +57,7 @@ from ccpn.util.Logging import getLogger
 
 
 _RENAME_SENTINEL = Pid.Pid('Dummy:_rename')
-ILLEGAL_PATH_CHARS = r'<>:"/\|?*'
+ILLEGAL_PATH_CHARS = r'<>:"/\|?*&@'
 
 
 @functools.total_ordering

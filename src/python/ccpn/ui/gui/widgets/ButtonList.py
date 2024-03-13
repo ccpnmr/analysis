@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-06 17:48:13 +0000 (Wed, March 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-13 11:45:51 +0000 (Wed, March 13, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -276,7 +276,7 @@ class ButtonList(Widget, ButtonListMixin):
         while len(icons) < len(texts):
             icons.append(None)
 
-        j = len(self.buttons)
+        # j = len(self.buttons)
 
         for i, text in enumerate(texts):
             _button = self._addButton(text, callbacks[i],
@@ -297,11 +297,12 @@ class ButtonList(Widget, ButtonListMixin):
         else:
             grid = (_nButtons, 0)
 
-        _button = Button(self, text, callback, icon,
-                              tipText=tipText,
-                              grid=grid,
-                              enableFocusBorder=self._enableFocusBorder,
-                              **kwds
+        _button = Button(parent=self,
+                         text=text, callback=callback, icon=icon,
+                         tipText=tipText,
+                         grid=grid,
+                         enableFocusBorder=self._enableFocusBorder,
+                         **kwds
                         )
 
         if setMinimumWidth:
@@ -310,6 +311,8 @@ class ButtonList(Widget, ButtonListMixin):
 
         # GWV: Why not a proper (text, button) dict rather than (text, index)??
         self.buttons.append(_button)
+        if not text:
+            text = f'button_{_nButtons}'
         self.buttonNames[text] = _nButtons
 
         return _button
@@ -319,8 +322,10 @@ class ButtonList(Widget, ButtonListMixin):
         from .buttons and .buttonNames
         """
         idx = self.buttons.index(button)
-        self.buttons.pop(idx)
         _text = button.getText()
+        if not _text:
+            _text = f'button_{idx}'
+        self.buttons.pop(idx)
         if _text in self.buttonNames:
             del(self.buttonNames[_text])
         button.deleteLater()

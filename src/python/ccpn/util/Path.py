@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-11 17:14:15 +0000 (Mon, March 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-13 11:45:51 +0000 (Wed, March 13, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -46,6 +46,7 @@ from pathlib import Path as _Path_
 from pathlib import _windows_flavour, _posix_flavour
 from functools import reduce
 from operator import add
+
 
 #=========================================================================================
 # Path
@@ -591,6 +592,22 @@ class Path(_Path_):
             _size = self.stat().st_size
 
         return _size
+
+    def getCreateTime(self):
+        """:return the creation time (i.e. stat.st_ctime) of self as a Time object
+        do str(myTime) or myTime.date() or myTime.time() for a readable output
+        """
+        from ccpn.util.Time import Time
+        at = self.stat().st_ctime
+        return Time(at)
+
+    def getAccessTime(self):
+        """:return the last acsess time (i.e. stat.st_atime) of self as a Time object
+        do str(myTime) or myTime.date() or myTime.time() for a readable output
+        """
+        from ccpn.util.Time import Time
+        at = self.stat().st_atime
+        return Time(at)
 
     def isReadable(self) -> bool:
         """

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-06 17:48:13 +0000 (Wed, March 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-14 14:04:25 +0000 (Thu, March 14, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -93,6 +93,9 @@ _align1 = dict(vAlign='c', hAlign='l', textColour='black')  # Data Labels
 _align2 = dict(vAlign='c')  # Dimensional Pulldowns / LineEdits
 
 LIGHTGREY = QtGui.QColor('lightgrey')
+
+_overrideClassCheck = False
+
 
 def _updateGl(self, spectrumList):
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
@@ -622,7 +625,7 @@ class GeneralTab(Widget):
         self._changes = ChangeDict()
         self.atomCodes = ()
 
-        self.experimentTypes = spectrum._project._experimentTypeMap
+        self.experimentTypes = self.project._experimentTypeMap
 
         row = -1
 
@@ -739,13 +742,13 @@ class GeneralTab(Widget):
                 idx = self.spectrum.project.chemicalShiftLists.index(self.spectrum.chemicalShiftList)
             except Exception:
                 idx = 0
-            self.chemicalShiftListPulldown.setData([csList.pid for csList in self.spectrum.project.chemicalShiftLists] + ['<New>'])
+            self.chemicalShiftListPulldown.setData([csList.pid for csList in self.project.chemicalShiftLists] + ['<New>'])
             self.chemicalShiftListPulldown.setIndex(idx)
 
             self.samplesPulldownList.clear()
             # add a blank item
             self.samplesPulldownList.addItem('', None)
-            for sample in self.spectrum.project.samples:
+            for sample in self.project.samples:
                 self.samplesPulldownList.addItem(sample.name, sample)
             if self.spectrum.sample is not None:
                 self.samplesPulldownList.select(self.spectrum.sample.name)
@@ -1192,7 +1195,8 @@ class DimensionsTab(Widget):
     def _populatePreferredOrder(self):
         """Fill the pullDown with the currently available permutations of the axis codes
         """
-        specOrder = tuple(self.spectrum._preferredAxisOrdering) if self.spectrum._preferredAxisOrdering is not None else None
+        specOrder = tuple(self.spectrum._preferredAxisOrdering[:self.spectrum.dimensionCount]) \
+                    if self.spectrum._preferredAxisOrdering is not None else None
 
         axisCodeTexts = tuple([ss.text() for ss in self.axisCodeEdits])
         ll = ['<None>']
@@ -2121,7 +2125,7 @@ class ContoursTab(Widget):
         # check that the spectrum and the copyToSpectra list are correctly defined
         getByPid = self.application.project.getByPid
         self.spectrum = getByPid(spectrum) if isinstance(spectrum, str) else spectrum
-        if not isinstance(self.spectrum, (Spectrum, type(None))):
+        if not _overrideClassCheck and not isinstance(self.spectrum, (Spectrum, type(None))):
             raise TypeError('spectrum must be of type Spectrum or None')
 
         if not isinstance(copyToSpectra, (Iterable, type(None))):

@@ -4,9 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-28 12:50:21 +0000 (Tue, November 28, 2023) $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-03-14 14:16:08 +0000 (Thu, March 14, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -774,7 +774,7 @@ class _openItemChemicalShiftListTable(OpenItemABC):
         if self.openAction:
             contextMenu.addAction(self.contextMenuText, self.openAction)
         contextMenu.addSeparator()
-        contextMenu.addAction('Simulate Spectrum', partial(self._openSimulateSpectrumFromCSLPopup, objs))
+        contextMenu.addAction('Create Synthetic PeakList', partial(self._openCreateSyntheticPeakListFromCSLPopup, objs))
         contextMenu.addSeparator()
         contextMenu.addAction('Copy Pid to Clipboard', partial(self._copyPidsToClipboard, objs))
         self._addCollectionMenu(contextMenu, objs)
@@ -793,9 +793,9 @@ class _openItemChemicalShiftListTable(OpenItemABC):
             obj.duplicate()
 
     @staticmethod
-    def _openSimulateSpectrumFromCSLPopup(objs):
+    def _openCreateSyntheticPeakListFromCSLPopup(objs):
         if len(objs) > 1:
-            showWarning('Simulate Spectrum from ChemicalShift', 'Please select only one ChemicalShift list')
+            showWarning('Create Synthetic PeakList from ChemicalShift', 'Please select only one ChemicalShift list')
             # Might think of merging multiple lists ?
             return
         if len(objs) > 0:

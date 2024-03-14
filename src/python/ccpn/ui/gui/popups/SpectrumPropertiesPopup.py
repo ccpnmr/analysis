@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-14 14:04:25 +0000 (Thu, March 14, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-14 16:17:47 +0000 (Thu, March 14, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -188,9 +188,9 @@ class SpectrumPropertiesPopupABC(CcpnDialogMainWidget):
         """Revert button signal comes here
         Revert (roll-back) the state of the project to before the popup was opened
         """
-        if self.project and self.project._undo:
+        if (_undo := self.application._getUndo()) is not None:
             for undos in range(self._currentNumApplies):
-                self.project._undo.undo()
+                _undo.undo()
 
         self._populate()
         self._okButton.setEnabled(False)

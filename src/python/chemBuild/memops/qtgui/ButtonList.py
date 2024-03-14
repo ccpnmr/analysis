@@ -5,6 +5,10 @@ from .BasePopup import BasePopup
 from .Button import Button
 from .WebBrowser import WebBrowser
 
+
+HELP_PAGE='https://www.ccpn.ac.uk/documentation'
+
+
 class ButtonList(QtWidgets.QWidget, Base):
 
   def __init__(self, parent=None, texts=None, callbacks=None, icons=None,
@@ -139,9 +143,8 @@ class UtilityButtonList(ButtonList):
       self.webBrowser.open(self.helpUrl)
       
     elif self.popup:
-      from .WebView import WebViewPopup
-      WebViewPopup(self.helpMsg or 'http://www.ccpn.ac.uk/documentation')  
-  
+      WebBrowser(self).open(HELP_PAGE)
+
   def closePopup(self):
   
     if self.popup:

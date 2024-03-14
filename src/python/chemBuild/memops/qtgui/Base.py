@@ -38,33 +38,26 @@ class Base(object):
         layout = QtWidgets.QGridLayout(parent)
         layout.setSpacing(2)
         layout.setContentsMargins(2,2,2,2)
-        ###parent.setLayout( layout )
- 
-      #self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-      
+
       if isinstance(layout, QtWidgets.QGridLayout):
         rowSpan, colSpan = gridSpan
         row, col, align = self._getGriddingData(grid, sticky)
- 
         rowStr, colStr = stretch
         layout.setRowStretch(row, rowStr)
         layout.setColumnStretch(col, colStr)
         #layout.setColumnMinimumWidth(col, 30)
         #layout.setRowMinimumHeight(row, 30)
- 
         layout.addWidget(self, row, col, rowSpan, colSpan, align)
-                
+
     # Setup colour overrides (styles used primarily)
-     
     if bgColor:
-      self.setAutoFillBackground(True)
+      self.setAutoFillBackground(False)
       rgb = QtGui.QColor(bgColor).getRgb()[:3]
       self.setStyleSheet("background-color: rgb(%d, %d, %d);" %  rgb)
   
   def _getGriddingData(self, grid, sticky):
     
     layout = self.guiParent.layout()
-    
     sticky = sticky.lower()
     
     if grid:

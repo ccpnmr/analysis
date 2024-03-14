@@ -404,7 +404,6 @@ class ObjectTable(QtWidgets.QTableView, Base):
 
   def __init__(self, parent, columns, objects=None, callback=None,
                multiSelect=True, selectRows=True, numberRows=False, **kw):
-    
     QtWidgets.QTableView.__init__(self, parent)
     Base.__init__(self, parent, **kw)
     
@@ -469,12 +468,11 @@ class ObjectTable(QtWidgets.QTableView, Base):
     header.setMinimumSectionSize(int(rowHeight))
     header.setDefaultSectionSize(int(rowHeight))
     
+    header = ObjectHeaderView(Qt.Horizontal, self)
     if numberRows:
       header.setVisible(True)
     else:
       header.setVisible(False)
-  
-    header = ObjectHeaderView(Qt.Horizontal, self)
     # header.setMovable(True)
     ## for some reasons a SectionSize lower than 100 creates an annoying overlay box on the table and hides the first column.
     header.setMinimumSectionSize(100)
@@ -1179,7 +1177,7 @@ class ObjectTableFilter(BasePopup):
     callbacks = [self.unfilterTable, self.filterInclude,
                  self.filterExclude, self.close]
     icons = ['icons/edit-undo.png', None, None, 'icons/window-close.png']
-    buttons = ButtonList(self, texts, callbacks, icons, grid=(3,0), gridSpan=(1,4))    
+    ButtonList(self, texts, callbacks, icons, grid=(3,0), gridSpan=(1,4))
     
     self.setWindowFlags(QtCore.Qt.Tool)
     self.setSize(300,100)

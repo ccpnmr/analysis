@@ -4,9 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-18 18:49:18 +0100 (Thu, May 18, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-03-14 17:18:43 +0000 (Thu, March 14, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -117,12 +117,14 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
         self.labels = {}  # An (attributeName, Label-widget) dict
         self.edits = {}  # An (attributeName, LineEdit-widget) dict
 
+        _labelKwds = {'hAlign':'right'}
+
         for _label, getFunction, setFunction, kwds in self.attributes:
             attr = stringToCamelCase(_label)
             tipText = getAttributeTipText(self.klass, attr)
 
             editable = setFunction is not None
-            self.labels[attr] = Label(self.mainWidget, _label, grid=(row, 0))
+            self.labels[attr] = Label(self.mainWidget, _label, grid=(row, 0), **_labelKwds)
             self.edits[attr] = LineEdit(self.mainWidget, textAlignment='left', editable=editable,
                                         vAlign='t', grid=(row, 1), **kwds)
             self.edits[attr].textChanged.connect(partial(self._queueSetValue, attr, getFunction, setFunction, row))
@@ -132,15 +134,20 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
             row += 1
 
         # add first set of default colours as required
-        for colButton, enabled in zip(BUTTONOPTIONS1, (self._symbolColourOption, self._textColourOption, self._lineColourOption, self._arrowColourOption, self._meritColourOption)):
+        for colButton, enabled in zip(
+                 BUTTONOPTIONS1,
+                (self._symbolColourOption, self._textColourOption, self._lineColourOption, self._arrowColourOption, self._meritColourOption)
+        ):
+
             if colButton and enabled:
                 row += 1
-                self._addButtonOption(self._colourPulldowns, colButton, row)
+                self._addButtonOption(self._colourPulldowns, colButton, row, **_labelKwds)
 
         # add the meritOption buttons
         if self._meritOptions:
             row += 1
-            self.meritEnabledLabel = Label(self.mainWidget, text="Use Merit Threshold ", grid=(row, 0))
+            self.meritEnabledLabel = Label(self.mainWidget, text="Use Merit Threshold ",
+                                           grid=(row, 0), **_labelKwds)
             tipText = getAttributeTipText(self.klass, PMIListABC._MERITENABLED)
             if tipText:
                 self.meritEnabledLabel.setToolTip(tipText)
@@ -148,7 +155,8 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
             self.meritEnabledBox.toggled.connect(self._queueSetMeritEnabled)
 
             row += 1
-            self.meritThresholdLabel = Label(self.mainWidget, text=camelCaseToString(PMIListABC._MERITTHRESHOLD), grid=(row, 0))
+            self.meritThresholdLabel = Label(self.mainWidget, text=camelCaseToString(PMIListABC._MERITTHRESHOLD),
+                                             grid=(row, 0), **_labelKwds)
             tipText = getAttributeTipText(self.klass, PMIListABC._MERITTHRESHOLD)
             if tipText:
                 self.meritThresholdLabel.setToolTip(tipText)
@@ -160,7 +168,7 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
             for colButton, enabled in zip(BUTTONOPTIONS2, (self._symbolColourOption, self._textColourOption, self._lineColourOption, self._arrowColourOption, self._meritColourOption)):
                 if colButton and enabled:
                     row += 1
-                    self._addButtonOption(self._colourPulldowns, colButton, row)
+                    self._addButtonOption(self._colourPulldowns, colButton, row, **_labelKwds)
 
         # set the next available row for inserting new items from subclass
         self._rowForNewItems = row + 1
@@ -218,11 +226,11 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
 
         return changeState(self, allChanges, applyState, revertState, self._okButton, None, self._revertButton, self._currentNumApplies)
 
-    def _addButtonOption(self, pulldowns, attrib, row):
+    def _addButtonOption(self, pulldowns, attrib, row, **_labelKwds):
         """Add a labelled pulldown list for the selected attribute
         """
         _label = camelCaseToString(attrib)
-        _colourLabel = Label(self.mainWidget, _label, grid=(row, 0))
+        _colourLabel = Label(self.mainWidget, _label, grid=(row, 0), **_labelKwds)
 
         _tipText = getAttributeTipText(self.klass, attrib)
         if _tipText:

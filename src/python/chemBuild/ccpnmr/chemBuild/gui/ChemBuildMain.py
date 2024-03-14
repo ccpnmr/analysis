@@ -11,10 +11,8 @@ from functools import partial
 from memops.qtgui.CheckButton import CheckButton
 from memops.qtgui.Button import Button
 from memops.qtgui.CategoryMenu import CategoryMenu
-from memops.qtgui.Entry import Entry
-from memops.qtgui.Base import Icon
 from memops.qtgui.Label import Label
-from memops.qtgui.WebView import WebViewPopup
+from memops.qtgui.WebBrowser import WebBrowser
 from memops.qtgui.FileSelect import DirectoryDialog, selectDirectory, FileType
 from memops.qtgui.Menu import Menu
 from memops.qtgui.PulldownList import PulldownList
@@ -52,7 +50,8 @@ ICON_DIR =  path.join(path.dirname(path.dirname(__file__)), 'icons')
 EXPANDING = QtWidgets.QSizePolicy.Expanding
 PREFERRED = QtWidgets.QSizePolicy.Preferred
 MINIMUM = QtWidgets.QSizePolicy.Minimum
-DeafultCcpCode = 'Ccp'
+DefaultCcpCode = 'Ccp'
+DOCS_PAGE='https://www.ccpn.ac.uk/api-documentation/v3/html/'
 
 ABOUT_TEXT = """
 CcpNmr ChemBuild version 1.0
@@ -658,16 +657,12 @@ class ChemBuildMain(QtWidgets.QMainWindow):
       self.updateAll()
   
   def showDoc(self):
-    
-    popup = WebViewPopup()
-    popup.setUrl('http://www.ccpn.ac.uk/v3-software/documentation/')
-    
-    x = self.x()
-    y = self.y()
-    popup.setGeometry(x, y, 800, 600)
-    popup.show()
-    
-  
+
+    try:
+      WebBrowser(self).open(DOCS_PAGE)
+    except Exception:
+      print('Cannot open web-page')
+
   def addToHistory(self):
     
     if self.compound:
@@ -1244,19 +1239,19 @@ class ChemBuildMain(QtWidgets.QMainWindow):
       
     return True    
         
-  def importCcpnProj(self):
-    
-    if not self._checkCcpnInstallation():
-      return
-
-    dirsOnly = QtWidgets.QFileDialog.ShowDirsOnly
-    dirDialog = QtWidgets.QFileDialog.getExistingDirectory
-    msg = 'Select CCPN project folder'
-    projectDirectory = dirDialog(self, msg, options=dirsOnly)
-    
-    rootProject = loadProject(str(projectDirectory))
-    
-    convertCcpnProject(rootProject)
+  # def importCcpnProj(self):
+  #
+  #   if not self._checkCcpnInstallation():
+  #     return
+  #
+  #   dirsOnly = QtWidgets.QFileDialog.ShowDirsOnly
+  #   dirDialog = QtWidgets.QFileDialog.getExistingDirectory
+  #   msg = 'Select CCPN project folder'
+  #   projectDirectory = dirDialog(self, msg, options=dirsOnly)
+  #
+  #   rootProject = loadProject(str(projectDirectory))
+  #
+  #   convertCcpnProject(rootProject)
     
     
     

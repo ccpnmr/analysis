@@ -1,6 +1,5 @@
 import webbrowser as wb
 from .PulldownList import PulldownList
-from .WebView import WebViewPopup
 
 browserNames = ['firefox','netscape','mozilla','konqueror','kfm','mosaic',
                 'grail','w3m','windows-default','internet-config']
@@ -26,8 +25,8 @@ class WebBrowser:
       browser.open(url)
       
     except:
-      WebViewPopup(url)
-  
+      print('Cannot open web-page')
+
 class WebBrowserPulldown(PulldownList):
 
   def __init__(self, parent, browser=None, **kw):

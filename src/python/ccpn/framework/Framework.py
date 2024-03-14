@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-02-20 14:03:51 +0000 (Tue, February 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-14 10:37:34 +0000 (Thu, March 14, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -198,7 +198,7 @@ class Framework(NotifierBase, GuiBase):
         #     self.preferences._getUserPreferences()
         if self.args.skipUserPreferences:
             sys.stderr.write('==> Getting default preferences\n')
-            self.preferences = Preferences(application=self, userPrefrences=False)
+            self.preferences = Preferences(application=self, userPreferences=False)
         else:
             sys.stderr.write('==> Getting user preferences\n')
             self.preferences = Preferences(application=self)

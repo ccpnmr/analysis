@@ -95,7 +95,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-06 17:48:14 +0000 (Wed, March 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-14 13:04:35 +0000 (Thu, March 14, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -408,7 +408,7 @@ class CEnum(Enum):
             self._mapping = mapping
         elif isinstance(mapping, (list, tuple)):
             self._mapping = dict(enumerate(mapping))
-        elif isinstance(mapping, DataEnum):
+        elif isinstance(mapping, DataEnum) or issubclass(mapping, DataEnum):
             self._mapping = dict(zip(mapping.values(), mapping.names()))
         else:
             raise ValueError(f'CEnum.__init__(): invalid mapping {mapping}')
@@ -420,6 +420,10 @@ class CEnum(Enum):
         """
         if value is None and self.allow_none:
             return value
+
+        # Special provision for Enum types derived from DataEnum's
+        if isinstance(value, DataEnum) or issubclass(value.__class__, DataEnum):
+            value = value.value
 
         if value in self._mapping.values():
             # first check if value is already ok before attempting a mapping
@@ -574,9 +578,9 @@ class _TypedList(list):
         try:
             value = self._itemTrait.validate(self._obj, value)
         except (TraitError, ValueError):
-            raise ValueError(f'{self._fullName}[{item}]: invalid value {repr(value)}, expected {self._itemTrait.info()}')
+            raise ValueError(f'{self._fullName}[{item}]: invalid value {repr(value)}, expected {self._itemTrait.info()}; got value "{value}"')
         except TypeError:
-            raise ValueError(f'{self._fullName}[{item}]: invalid type, expected {self._itemTrait.info()} got {_classType(value)}')
+            raise ValueError(f'{self._fullName}[{item}]: invalid type, expected {self._itemTrait.info()}; got {_classType(value)} with value "{value}"')
 
         return value
 

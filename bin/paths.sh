@@ -38,22 +38,28 @@ if [[ $(uname) == Darwin* ]]; then
         if [[ ! ${build_type} ]]; then
             rosetta=$(sysctl -in sysctl.proc_translated)
             if [[ ${rosetta} != *1* ]]; then
-                echo "You have an M-series cpu, but cannot determine python-type."
-                echo "If you are experiencing issues you may not have Rosetta enabled."
+                echo "You are using an Apple-Silicon processor (M-series)."
+                echo "Your version of CcpnmrAnalysis predates the download for version 3.2.2 and"
+                echo "will be an Intel distribution."
+                echo "If you are experiencing issues you may not have Rosetta installed or"
+                echo "you should download an Apple-Silicon distribution."
                 echo "Please see the website https://www.ccpn.ac.uk for more details."
+                echo "Information on Rosetta can be found at https://support.apple.com/en-us/102527."
             fi
         elif [[ ${build_type} != "arm64"  ]]; then
-            echo "This build is for Apple Intel cpus and you have an M-series cpu."
-            echo "If you are experiencing issues you may not have Rosetta enabled."
+            echo "You are using an Apple-Silicon processor (M-series) and this is an Intel distribution."
+            echo "If you are experiencing issues you may not have Rosetta installed or"
+            echo "you should download an Apple-Silicon distribution."
             echo "Please see the website https://www.ccpn.ac.uk for more details."
+            echo "Information on Rosetta can be found at https://support.apple.com/en-us/102527."
         fi
     else
         if [[ ! ${build_type} ]]; then
-            echo "You have an Intel cpu, but cannot determine python-type."
+            echo "You are using an Intel processor."
             echo "If you are experiencing issues, see the website https://www.ccpn.ac.uk for more details."
         elif [[ ${build_type} == "arm64"  ]]; then
-            echo "This build is for the Apple M-series and you have an Intel cpu."
-            echo "Please download the compatible version from the website https://www.ccpn.ac.uk"
+            echo "You are using an Intel processor and this is an Apple-Silicon (M-series) distribution."
+            echo "Please download an Intel distribution from the website https://www.ccpn.ac.uk."
         fi
     fi
 fi

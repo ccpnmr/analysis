@@ -9,7 +9,7 @@ from __future__ import unicode_literals
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
                "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -20,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-12 16:05:28 +0000 (Tue, December 12, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2024-03-15 12:53:36 +0000 (Fri, March 15, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -246,7 +246,7 @@ def isUbuntuVersion(value: str = ''):
     return False
 
 
-def isRHEL(value: str = '8.'):
+def isRHEL(version: int | None = '8'):
     import csv
     import pathlib
 
@@ -259,10 +259,10 @@ def isRHEL(value: str = '8.'):
             reader = csv.reader(fp, delimiter="=")
             os_release = dict(reader)
 
-        if (os_release.get('ID', '') == 'rhel' or
-            'rhel' in os_release.get('ID_LIKE', '')) and \
-                (version_id := os_release.get('VERSION_ID', '')) and \
-                version_id.startswith(value):
+        if (os_release.get('ID', '') == 'rhel' or 'rhel' in os_release.get('ID_LIKE', '')) and \
+                (not version or
+                 ((version_id := os_release.get('VERSION_ID', '')) and
+                  version_id.startswith(str(version) + '.'))):
             return True
     except Exception:
         return False

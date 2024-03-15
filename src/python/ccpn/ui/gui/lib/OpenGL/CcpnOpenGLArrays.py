@@ -4,9 +4,9 @@ GL routines used to draw vertex buffer objects (VBOs)
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-23 12:20:23 +0100 (Mon, October 23, 2023) $"
-__version__ = "$Revision: 3.2.0.1 $"
+__dateModified__ = "$dateModified: 2024-03-15 11:49:20 +0000 (Fri, March 15, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,7 +26,7 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 # Start of code
 #=========================================================================================
 
-import contextlib
+import ctypes
 import numpy as np
 from ccpn.ui.gui.lib.OpenGL import GL
 from ccpn.ui.gui.lib.OpenGL import VBO
@@ -49,6 +49,8 @@ INDEX_PTR = 2
 ATTRIB_PTR = 3
 TEXT_PTR = 4
 _USAGE = GL.GL_DYNAMIC_DRAW
+_VOIDPTR0 = ctypes.c_void_p(0)
+_VOIDPTR16 = ctypes.c_void_p(16)
 
 _DEBUG = False
 
@@ -553,7 +555,6 @@ class _VBOGLVertexArray:
         GL.glDrawArrays(self.drawMode, 0, self.numVertices)
 
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
-
         GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
         GL.glDisableClientState(GL.GL_COLOR_ARRAY)
 
@@ -995,11 +996,11 @@ class _GLVertexArray:
         GL.glEnableClientState(GL.GL_COLOR_ARRAY)
 
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self._vertexVBO[0])
-        GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, None)
+        GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, _VOIDPTR0)
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self._colorVBO[0])
-        GL.glColorPointer(4, GL.GL_FLOAT, 0, None)
+        GL.glColorPointer(4, GL.GL_FLOAT, 0, _VOIDPTR0)
         GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, self._indexVBO[0])
-        GL.glDrawElements(self.drawMode, self.indices.size, GL.GL_UNSIGNED_INT, None)
+        GL.glDrawElements(self.drawMode, self.indices.size, GL.GL_UNSIGNED_INT, _VOIDPTR0)
 
         GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
@@ -1136,13 +1137,13 @@ class _GLVertexArray:
         GL.glEnableVertexAttribArray(1)
 
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self._vertexVBO[0])
-        GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, None)
+        GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, _VOIDPTR0)
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self._colorVBO[0])
-        GL.glColorPointer(4, GL.GL_FLOAT, 0, None)
+        GL.glColorPointer(4, GL.GL_FLOAT, 0, _VOIDPTR0)
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self._attribVBO[0])
-        GL.glVertexAttribPointer(1, 1, GL.GL_FLOAT, GL.GL_FALSE, 0, None)
+        GL.glVertexAttribPointer(1, 1, GL.GL_FLOAT, GL.GL_FALSE, 0, _VOIDPTR0)
         GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, self._indexVBO[0])
-        GL.glDrawElements(self.drawMode, self.indices.size, GL.GL_UNSIGNED_INT, None)
+        GL.glDrawElements(self.drawMode, self.indices.size, GL.GL_UNSIGNED_INT, _VOIDPTR0)
 
         GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
@@ -1270,13 +1271,12 @@ class _GLVertexArray:
         GL.glEnableClientState(GL.GL_COLOR_ARRAY)
 
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self._vertexVBO[0])
-        GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, None)
+        GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, _VOIDPTR0)
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self._colorVBO[0])
-        GL.glColorPointer(4, GL.GL_FLOAT, 0, None)
+        GL.glColorPointer(4, GL.GL_FLOAT, 0, _VOIDPTR0)
         GL.glDrawArrays(self.drawMode, 0, self.numVertices)
 
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
-
         GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
         GL.glDisableClientState(GL.GL_COLOR_ARRAY)
 
@@ -1467,15 +1467,15 @@ class _GLVertexArray:
             GL.glEnableVertexAttribArray(_attribArrayIndex)
 
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self._vertexVBO[0])
-        GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, None)
+        GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, _VOIDPTR0)
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self._colorVBO[0])
-        GL.glColorPointer(4, GL.GL_FLOAT, 0, None)
+        GL.glColorPointer(4, GL.GL_FLOAT, 0, _VOIDPTR0)
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self._textureVBO[0])
-        GL.glTexCoordPointer(2, GL.GL_FLOAT, 0, None)
+        GL.glTexCoordPointer(2, GL.GL_FLOAT, 0, _VOIDPTR0)
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self._attribVBO[0])
-        GL.glVertexAttribPointer(_attribArrayIndex, 3, GL.GL_FLOAT, GL.GL_FALSE, 0, None)
+        GL.glVertexAttribPointer(_attribArrayIndex, 3, GL.GL_FLOAT, GL.GL_FALSE, 0, _VOIDPTR0)
         GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, self._indexVBO[0])
-        GL.glDrawElements(self.drawMode, self.indices.size, GL.GL_UNSIGNED_INT, None)
+        GL.glDrawElements(self.drawMode, self.indices.size, GL.GL_UNSIGNED_INT, _VOIDPTR0)
 
         GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)

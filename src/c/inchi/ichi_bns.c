@@ -5701,7 +5701,7 @@ int bRestoreBnsAfterCheckAltPath( BN_STRUCT *pBNS, ALT_PATH_CHANGES *apc, int bC
                     pBNS->num_edges --;
                 }
                 /* clear the new vertex */
-                memset( pNewVert, 0, sizeof( pNewVert ) );
+                memset( pNewVert, 0, sizeof( BNS_VERTEX ) );
                 /* and decrement the total number of vertices (new vertice ids are contiguous */
                 pBNS->num_vertices --;
                 ret ++;
@@ -5754,7 +5754,7 @@ int bRestoreBnsAfterCheckAltPath( BN_STRUCT *pBNS, ALT_PATH_CHANGES *apc, int bC
                     pBNS->num_edges --;
                 }
                 /* clear the new vertex */
-                memset( pNewVert, 0, sizeof( pNewVert ) );
+                memset( pNewVert, 0, sizeof( BNS_VERTEX ) );
                 /* and decrement the total number of vertices (new vertice ids are contiguous */
                 pBNS->num_vertices --;
                 ret ++;

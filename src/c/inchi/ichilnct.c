@@ -62,7 +62,7 @@ EXPIMP_TEMPLATE INCHI_API int INCHI_DECL Get_std_inchi_Input_FromAuxInfo
                                         pInchiInp );
 }
 
-EXPIMP_TEMPLATE INCHI_API INCHI_DECL Get_inchi_Input_FromAuxInfo(char *szInchiAuxInfo, 
+EXPIMP_TEMPLATE INCHI_API int INCHI_DECL Get_inchi_Input_FromAuxInfo(char *szInchiAuxInfo,
 												  int bDoNotAddH, int bDiffUnkUndfStereo,
 												  InchiInpData *pInchiInp )
 {

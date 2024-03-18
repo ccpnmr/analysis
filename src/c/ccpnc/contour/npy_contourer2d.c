@@ -64,7 +64,7 @@ Development of a Software Pipeline. Proteins 59, 687 - 696.
 */
 
 // define a global object(cheating for the minute)
-static PyObject *glObject;
+static PyObject *gl_object_list;
 static int numIndices = 0;
 static int numVertices = 0;
 static int numColours = 0;
@@ -692,6 +692,7 @@ static CcpnStatus update_bounds(PyArrayObject *data0, PyArrayObject *data1) {
     //            PyArray_SETITEM(data0, PyArray_GETPTR2(data0, ii, jj), PyFloat_FromDouble(MAX(v0max, v1max) + MIN(v0min,
     //            v1min)));
     //        }
+    return CCPN_OK;
 }
 
 static CcpnStatus find_vertices(Contour_vertices contour_vertices, float level, PyArrayObject *data, CcpnBool more_levels) {
@@ -862,22 +863,21 @@ static CcpnStatus process_chains(PyObject *contours, Contour_vertices contour_ve
     return CCPN_OK;
 }
 
-static fillContours(PyArrayObject *contours, PyArrayObject *lineColour) {
+static void fillContours(PyArrayObject *contours, PyArrayObject *lineColour) {
     int i, col, z, k, l, contCount = PyList_GET_SIZE(contours);
     int lineCount, fromSize, endIndex, contourCount;
-    PyObject *thisContour, *thisLine;
+    PyObject *this_contour_list;
+    PyArrayObject *thisLine;
     float32 *fromArray;
     float32 *fromColour = PyArray_DATA(lineColour);
 
     for (l = 0; l < contCount; l++) {
-        thisContour = (PyObject *)PyList_GET_ITEM(contours, l);
-
-        contourCount = PyList_GET_SIZE(thisContour);
+        this_contour_list = PyList_GET_ITEM(contours, l);
+        contourCount = PyList_GET_SIZE(this_contour_list);
 
         for (k = 0; k < contourCount; k++) {
-            thisLine = (PyObject *)PyList_GET_ITEM(thisContour, k);
-            lineCount = (unsigned int *)PyArray_Size(thisLine);
-
+            thisLine = (PyArrayObject *)PyList_GET_ITEM(this_contour_list, k);
+            lineCount = PyArray_SIZE(thisLine);
             // point to the first element in this contour line
             fromArray = (float32 *)PyArray_DATA(thisLine);
 
@@ -907,7 +907,7 @@ static PyObject *calculate_contours(PyArrayObject *data, PyArrayObject *levels) 
     int l, nlevels = PyArray_DIM(levels, 0), npoints1 = PyArray_DIM(data, 0);
     float level, prev_level;
     CcpnBool more_levels, are_levels_increasing;
-    PyObject *contours_list, *contours;
+    PyObject *contours_list, *contourlevel_list;
     Contour_vertices contour_vertices;
 
     if (nlevels > 1) {
@@ -938,19 +938,19 @@ static PyObject *calculate_contours(PyArrayObject *data, PyArrayObject *levels) 
     }
 
     for (l = 0; l < nlevels; l++) {
-        contours = PyList_New(0);
-        if (!contours) {
+        contourlevel_list = PyList_New(0);
+        if (!contourlevel_list) {
             Py_DECREF(contours_list);
             delete_contour_vertices(contour_vertices, nlevels, npoints1);
-            RETURN_OBJ_ERROR("allocating contours memory");
+            RETURN_OBJ_ERROR("allocating contourlevel_list memory");
         }
 
-        if (PyList_Append(contours_list, contours) != 0) {
+        if (PyList_Append(contours_list, contourlevel_list) != 0) {
             Py_DECREF(contours_list);
             delete_contour_vertices(contour_vertices, nlevels, npoints1);
-            RETURN_OBJ_ERROR("appending contours to contours_list");
+            RETURN_OBJ_ERROR("appending contourlevel_list to contours_list");
         }
-        Py_DECREF(contours);
+        Py_DECREF(contourlevel_list);
 
         more_levels = (l < nlevels - 1);
         level = *((float32 *)PyArray_GETPTR1(levels, l));
@@ -964,10 +964,10 @@ static PyObject *calculate_contours(PyArrayObject *data, PyArrayObject *levels) 
 
         if (contour_vertices->nvertices == 0) break;
 
-        if (process_chains(contours, contour_vertices) == CCPN_ERROR) {
+        if (process_chains(contourlevel_list, contour_vertices) == CCPN_ERROR) {
             Py_DECREF(contours_list);
             delete_contour_vertices(contour_vertices, nlevels, npoints1);
-            RETURN_OBJ_ERROR("processing contours");
+            RETURN_OBJ_ERROR("processing contourlevel_list");
         }
 
         if (more_levels) swap_old_new(contour_vertices);
@@ -999,41 +999,42 @@ static PyObject *contourer(PyObject *self, PyObject *args) {
 }
 
 static PyObject *newList(size) {
-    PyObject *list;
-    list = PyList_New(size);
+    PyObject *list = PyList_New(size);
     if (!list) {
         RETURN_OBJ_ERROR("allocating list memory");
     }
     return list;
 }
 
+/* not used
 static PyArrayObject *newArrayList(size) {
-    PyArrayObject *list;
+    PyListObject *list;
     list = PyList_New(size);
     if (!list) {
         RETURN_OBJ_ERROR("allocating list memory");
     }
     return list;
-}
+}*/
 
-static appendFloatList(PyObject *list, double value) {
+static PyObject *appendFloatList(PyObject *list, double value) {
     if (PyList_Append(list, PyFloat_FromDouble((double)value)) != 0) {
         RETURN_OBJ_ERROR("appending item to list");
     }
+    return NULL;
 }
 
 static PyObject *contourerGLList(PyObject *self, PyObject *args) {
     PyObject *dataArrays;
     PyArrayObject *dataArray, *posLevels, *posColour;
     PyArrayObject *negLevels, *negColour;
-    PyObject *contours;
-    //    PyObject *posContours, *negContours;
+    PyObject *contours_list;
+    //    PyObject *pos_cont_list, *neg_cont_list;
     int arr, flatten = 0;
 
     //    PyArrayObject *colours;
 
     // define an empty array to pass out
-    contours = newList(1);
+    contours_list = newList(1);
 
     // assumes that the parameters are all numpy arrays
     if (!PyArg_ParseTuple(args, "O!O!O!O!O!|i", &PyTuple_Type, &dataArrays, &PyArray_Type, &posLevels, &PyArray_Type,
@@ -1081,12 +1082,12 @@ static PyObject *contourerGLList(PyObject *self, PyObject *args) {
     colourCount = 0;
 
     int numArrays = PyTuple_GET_SIZE(dataArrays);
-    // PyObject *posContours[numArrays], *negContours[numArrays];
+    // PyObject *pos_cont_list[numArrays], *neg_cont_list[numArrays];
 
-    PyObject *posContours, *negContours;
+    PyObject *pos_cont_list, *neg_cont_list;
     PyArrayObject *posCont, *negCont;
-    posContours = newList(0);
-    negContours = newList(0);
+    pos_cont_list = newList(0);
+    neg_cont_list = newList(0);
 
     if ((numArrays > 1) && (flatten)) {
         for (int ii = 1; ii < numArrays; ii++)
@@ -1097,25 +1098,25 @@ static PyObject *contourerGLList(PyObject *self, PyObject *args) {
     for (arr = 0; arr < numArrays; arr++) {
         dataArray = (PyArrayObject *)PyTuple_GET_ITEM(dataArrays, arr);
 
-        // get the positive contours
-        // posContours[arr] = calculate_contours(dataArray, posLevels);
-        // negContours[arr] = calculate_contours(dataArray, negLevels);
+        // get the positive contours_list
+        // pos_cont_list[arr] = calculate_contours(dataArray, posLevels);
+        // neg_cont_list[arr] = calculate_contours(dataArray, negLevels);
 
-        PyList_Append(posContours, calculate_contours(dataArray, posLevels));
-        PyList_Append(negContours, calculate_contours(dataArray, negLevels));
+        PyList_Append(pos_cont_list, calculate_contours(dataArray, posLevels));
+        PyList_Append(neg_cont_list, calculate_contours(dataArray, negLevels));
     }
 
     npy_intp dims[1] = {numIndices};
     indexing = (PyArrayObject *)PyArray_SimpleNew(1, dims, NPY_UINT32);
-    if (!indexing) return CCPN_ERROR;
+    if (!indexing) RETURN_OBJ_ERROR("Cannot create index array");
 
     dims[0] = 2 * numVertices;
     vertices = (PyArrayObject *)PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-    if (!vertices) return CCPN_ERROR;
+    if (!vertices) RETURN_OBJ_ERROR("Cannot create vertex array");
 
     dims[0] = 4 * numVertices;
     colours = (PyArrayObject *)PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-    if (!colours) return CCPN_ERROR;
+    if (!colours) RETURN_OBJ_ERROR("Cannot create colour array");
 
     indexPTR = PyArray_GETPTR1(indexing, 0);
     vertexPTR = PyArray_GETPTR1(vertices, 0);
@@ -1125,11 +1126,11 @@ static PyObject *contourerGLList(PyObject *self, PyObject *args) {
 
     for (arr = 0; arr < numArrays; arr++) {
         // fill the new arrays
-        // fillContours(posContours[arr], posColour);
-        // fillContours(negContours[arr], negColour);
+        // fillContours(pos_cont_list[arr], posColour);
+        // fillContours(neg_cont_list[arr], negColour);
 
-        posCont = (PyArrayObject *)PyList_GET_ITEM(posContours, arr);
-        negCont = (PyArrayObject *)PyList_GET_ITEM(negContours, arr);
+        posCont = (PyArrayObject *)PyList_GET_ITEM(pos_cont_list, arr);
+        negCont = (PyArrayObject *)PyList_GET_ITEM(neg_cont_list, arr);
 
         fillContours(posCont, posColour);
         fillContours(negCont, negColour);
@@ -1138,14 +1139,14 @@ static PyObject *contourerGLList(PyObject *self, PyObject *args) {
     PyObject *ind = PyLong_FromDouble(numIndices);
     PyObject *vect = PyLong_FromDouble(numVertices);
 
-    glObject = newList(5);
-    PyList_SET_ITEM(glObject, 0, ind);
-    PyList_SET_ITEM(glObject, 1, vect);
-    PyList_SET_ITEM(glObject, 2, indexing);
-    PyList_SET_ITEM(glObject, 3, vertices);
-    PyList_SET_ITEM(glObject, 4, colours);
+    gl_object_list = newList(5);
+    PyList_SET_ITEM(gl_object_list, 0, ind);
+    PyList_SET_ITEM(gl_object_list, 1, vect);
+    PyList_SET_ITEM(gl_object_list, 2, (PyObject *)indexing);
+    PyList_SET_ITEM(gl_object_list, 3, (PyObject *)vertices);
+    PyList_SET_ITEM(gl_object_list, 4, (PyObject *)colours);
 
-    return glObject;
+    return gl_object_list;
 
     //    // get the start/size of the numpy array
     //    float32 *levelPTR = PyArray_GETPTR1(colours,0);
@@ -1163,9 +1164,9 @@ static PyObject *contourerGLList(PyObject *self, PyObject *args) {
     //        levelPTR[i] = i+15.765;
     //    }
     //
-    //    PyList_SET_ITEM(contours, 0, colours);
+    //    PyList_SET_ITEM(contours_list, 0, colours);
     //
-    //    return contours;
+    //    return contours_list;
 }
 
 static char contourer_doc[] = "Create 2D contours for spectral data";

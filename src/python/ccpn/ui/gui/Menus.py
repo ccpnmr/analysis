@@ -115,7 +115,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-06 17:48:12 +0000 (Wed, March 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-18 18:36:50 +0000 (Mon, March 18, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -244,219 +244,221 @@ class MenusDefs(list):
         self.clear()
         self.extend([
 
-        (FILE_MENU, [
-            ("New", self._newProjectCallback, [('shortcut', '⌃n')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+(FILE_MENU, [
+    ("New", self._newProjectCallback, [('shortcut', '⌃n')]),  # Unicode U+2303, NOT the carrot on your keyboard.
 
-            Separator(),
-            ("Open...", self._openProjectCallback, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the carrot on your keyboard.
-            (FILE_OPEN_RECENT, DYNAMIC_FILL),
-            ("Load Data...", self._loadDataCallback, [('shortcut', 'ld')]),
+    Separator(),
+    ("Open...", self._openProjectCallback, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+    (FILE_OPEN_RECENT, DYNAMIC_FILL),
+    ("Load Data...", self._loadDataCallback, [('shortcut', 'ld')]),
 
-            Separator(),
-            ("Save", self._saveCallback, [('shortcut', '⌃s')], _projectCanBeSaved),  # Unicode U+2303, NOT the carrot on your keyboard.
-            ("Save As...", self._saveAsCallback, [('shortcut', 'sa')]),
+    Separator(),
+    ("Save", self._saveCallback, [('shortcut', '⌃s')], _projectCanBeSaved),  # Unicode U+2303, NOT the carrot on your keyboard.
+    ("Save As...", self._saveAsCallback, [('shortcut', 'sa')]),
 
-            Separator(),
-            ("Import", [
-                ("NEF File", self._importNefCallback, [('shortcut', 'in')]),
-                ("NmrStar File", self._loadNMRStarFileCallback, [('shortcut', 'bi')]),
-                ]
-            ),
-            ("Export", [
-                ("NEF File", self._exportNEFCallback, [('shortcut', 'ex')]),
-                ]
-            ),
+    Separator(),
+    ("Import", [
+        ("NEF File", self._importNefCallback, [('shortcut', 'in')]),
+        ("NmrStar File", self._loadNMRStarFileCallback, [('shortcut', 'bi')]),
+        ]
+    ),
+    ("Export", [
+        ("NEF File", self._exportNEFCallback, [('shortcut', 'ex')]),
+        ]
+    ),
 
-            Separator(),
-            (FILE_LAYOUT, [
-                ("Save", self._saveLayoutCallback, {}, _projectCanBeSaved ),
-                ("Save as...", self._saveLayoutAsCallback, {}, _projectCanBeSaved ),
+    Separator(),
+    (FILE_LAYOUT, [
+        ("Save", self._saveLayoutCallback, {}, _projectCanBeSaved ),
+        ("Save as...", self._saveLayoutAsCallback, {}, _projectCanBeSaved ),
 
-                Separator(),
-                ("Restore last", self._restoreLastSavedLayoutCallback),
-                ("Restore from file...", self._restoreLayoutFromFileCallback),
+        Separator(),
+        ("Restore last", self._restoreLastSavedLayoutCallback),
+        ("Restore from file...", self._restoreLayoutFromFileCallback),
 
-                Separator(),
-                (FILE_LAYOUT_OPEN_PREDEFINED, DYNAMIC_FILL),
-                ]
-            ),
-            ("Summary", self._showProjectSummaryPopup),
-            ('Archive', self._archiveProjectCallback, {}, _projectCanBeSaved),
-            ('Restore From Archive...', self._restoreFromArchiveCallback, {}, _projectHasArchives),
+        Separator(),
+        (FILE_LAYOUT_OPEN_PREDEFINED, DYNAMIC_FILL),
+        ]
+    ),
+    ("Summary", self._showProjectSummaryPopup),
 
-            Separator(),
-            ("Preferences...", self._showApplicationPreferences, [('shortcut', '⌃,')]),
+    Separator(),
+    ('Archive', self._archiveProjectCallback, {}, _projectCanBeSaved),
+    ('Restore From Archive...', self._restoreFromArchiveCallback, {}, _projectHasArchives),
 
-            Separator(),
-            ("Quit", self._quitCallback, [('shortcut', '⌃q')]),  # Unicode U+2303, NOT the carrot on your keyboard.
-            ]
-        ),
+    Separator(),
+    ("Preferences...", self._showApplicationPreferences, [('shortcut', '⌃,')]),
 
-        (EDIT_MENU, [
-            ("Undo", self._undoCallback, [('shortcut', '⌃z')]),  # Unicode U+2303, NOT the carrot on your keyboard.
-            ("Redo", self._redoCallback, [('shortcut', '⌃y')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+    Separator(),
+    ("Quit", self._quitCallback, [('shortcut', '⌃q')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+    ]
+),
 
-            Separator(),
-            ("Cut", self._nyi, [('shortcut', '⌃x'), ('enabled', False)]),
-            ("Copy", self._nyi, [('shortcut', '⌃c'), ('enabled', False)]),
-            ("Paste", self._nyi, [('shortcut', '⌃v'), ('enabled', False)]),
-            ("Select all", self._nyi, [('shortcut', '⌃a'), ('enabled', False)]),
-            ]
-        ),
+(EDIT_MENU, [
+    ("Undo", self._undoCallback, [('shortcut', '⌃z')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+    ("Redo", self._redoCallback, [('shortcut', '⌃y')]),  # Unicode U+2303, NOT the carrot on your keyboard.
 
-        (VIEW_MENU, [
-            ("Chemical Shift Table", partial(app.showChemicalShiftTable, selectFirstItem=True), [('shortcut', 'ct')]),
-            ("NmrResidue Table", partial(app.showNmrResidueTable, selectFirstItem=True), [('shortcut', 'nt')]),
-            ("Residue Table", partial(app.showResidueTable, selectFirstItem=True)),
-            ("Peak Table", partial(app.showPeakTable, selectFirstItem=True), [('shortcut', 'pt')]),
-            ("Integral Table", partial(app.showIntegralTable, selectFirstItem=True), [('shortcut', 'it')]),
-            ("Multiplet Table", partial(app.showMultipletTable, selectFirstItem=True), [('shortcut', 'mt')]),
-            ("Data Table", partial(app.showDataTable, selectFirstItem=True), [('shortcut', 'dt')]),
-            ("Restraint Table", partial(app.showRestraintTable, selectFirstItem=True), [('shortcut', 'rt')]),
-            ("Violation Table", partial(app.showViolationTable, selectFirstItem=True), [('shortcut', 'vt')]),
-            ("Structure Table", partial(app.showStructureTable, selectFirstItem=True), [('shortcut', 'st')]),
+    Separator(),
+    ("Cut", self._nyi, [('shortcut', '⌃x'), ('enabled', False)]),
+    ("Copy", self._nyi, [('shortcut', '⌃c'), ('enabled', False)]),
+    ("Paste", self._nyi, [('shortcut', '⌃v'), ('enabled', False)]),
+    ("Select all", self._nyi, [('shortcut', '⌃a'), ('enabled', False)]),
+    ]
+),
 
-            Separator(),
-            ("Restraint Analysis Inspector", partial(app.showRestraintAnalysisTable, selectFirstItem=True), [('shortcut', 'at')]),
-            ("Chemical Shift Mapping (Beta)", app.showChemicalShiftMappingModule, [('shortcut', 'cm')]),
-            ("Relaxation Analysis (Beta)", app.showRelaxationModule, [('shortcut', 'ra')]),
-            ("Notes Editor", partial(app.showNotesEditor, selectFirstItem=True), [('shortcut', 'no')]),
+(VIEW_MENU, [
+    ("Chemical Shift Table", partial(app.showChemicalShiftTable, selectFirstItem=True), [('shortcut', 'ct')]),
+    ("NmrResidue Table", partial(app.showNmrResidueTable, selectFirstItem=True), [('shortcut', 'nt')]),
+    ("Residue Table", partial(app.showResidueTable, selectFirstItem=True)),
+    ("Peak Table", partial(app.showPeakTable, selectFirstItem=True), [('shortcut', 'pt')]),
+    ("Integral Table", partial(app.showIntegralTable, selectFirstItem=True), [('shortcut', 'it')]),
+    ("Multiplet Table", partial(app.showMultipletTable, selectFirstItem=True), [('shortcut', 'mt')]),
+    ("Data Table", partial(app.showDataTable, selectFirstItem=True), [('shortcut', 'dt')]),
+    ("Restraint Table", partial(app.showRestraintTable, selectFirstItem=True), [('shortcut', 'rt')]),
+    ("Violation Table", partial(app.showViolationTable, selectFirstItem=True), [('shortcut', 'vt')]),
+    ("Structure Table", partial(app.showStructureTable, selectFirstItem=True), [('shortcut', 'st')]),
 
-            Separator(),
-            ("In Active SpectrumDisplay", [
+    Separator(),
+    ("Restraint Analysis Inspector", partial(app.showRestraintAnalysisTable, selectFirstItem=True), [('shortcut', 'at')]),
+    ("Chemical Shift Mapping (Beta)", app.showChemicalShiftMappingModule, [('shortcut', 'cm')]),
+    ("Relaxation Analysis (Beta)", app.showRelaxationModule, [('shortcut', 'ra')]),
+    ("Notes Editor", partial(app.showNotesEditor, selectFirstItem=True), [('shortcut', 'no')]),
 
-                Section("Show/Hide"),
-                ("Toolbar", self._toggleToolbarCallback, [('shortcut', 'tb')]),
-                ("Spectrum Toolbar", self._toggleSpectrumToolbarCallback, [('shortcut', 'sb')]),
-                ("Phasing Console", self._togglePhaseConsoleCallback, [('shortcut', 'pc')]),
-                ("Crosshairs", self._toggleCrosshairCallback, [('shortcut', 'ch')]),
+    Separator(),
+    ("In Active SpectrumDisplay", [
 
-                Section("Zoom"),
-                ("Set Zoom...", self._setZoomCallback, [('shortcut', 'sz')]),
-                ("Reset", self._resetZoomCallback, [('shortcut', 'rz')]),
+        Section("Show/Hide"),
+        ("Toolbar", self._toggleToolbarCallback, [('shortcut', 'tb')]),
+        ("Spectrum Toolbar", self._toggleSpectrumToolbarCallback, [('shortcut', 'sb')]),
+        ("Phasing Console", self._togglePhaseConsoleCallback, [('shortcut', 'pc')]),
+        ("Crosshairs", self._toggleCrosshairCallback, [('shortcut', 'ch')]),
 
-                Section("New SpectrumDisplay with"),
-                ("Same Axes", self._copyStripCallback, []),
-                ("X-Y Axes Flipped", self._flipXYAxisCallback, [('shortcut', 'xy')]),
-                ("X-Z Axes Flipped", self._flipXZAxisCallback, [('shortcut', 'xz')]),
-                ("Y-Z Axes Flipped", self._flipYZAxisCallback, [('shortcut', 'yz')]),
-                ("Axes Flipped...", self._flipArbitraryAxesCallback, [('shortcut', 'fa')]),
+        Section("Zoom"),
+        ("Set Zoom...", self._setZoomCallback, [('shortcut', 'sz')]),
+        ("Reset", self._resetZoomCallback, [('shortcut', 'rz')]),
 
-                Section("Labels"),
-                ("Auto-arrange", self._arrangeLabelsCallback, [('shortcut', 'av')]),
-                ("Reset", self._resetLabelsCallback, [('shortcut', 'rv')]),
-                ],  # end sub-menu
+        Section("New SpectrumDisplay with"),
+        ("Same Axes", self._copyStripCallback, []),
+        ("X-Y Axes Flipped", self._flipXYAxisCallback, [('shortcut', 'xy')]),
+        ("X-Z Axes Flipped", self._flipXZAxisCallback, [('shortcut', 'xz')]),
+        ("Y-Z Axes Flipped", self._flipYZAxisCallback, [('shortcut', 'yz')]),
+        ("Axes Flipped...", self._flipArbitraryAxesCallback, [('shortcut', 'fa')]),
 
-             {}, _hasActiveDisplay
-            ),
+        Section("Labels"),
+        ("Auto-arrange", self._arrangeLabelsCallback, [('shortcut', 'av')]),
+        ("Reset", self._resetLabelsCallback, [('shortcut', 'rv')]),
+        ],  # end sub-menu
 
-            Separator(),
-            (VIEW_SHOW_MODULES, DYNAMIC_FILL, {}, _updateShowHideModules),
-            ("Show/hide Sidebar", self._toggleSidebarCallback, {'shortcut':' s', 'checkable':True, 'checked':True}),
-            ("Show/hide Python Console", self._toggleConsoleCallback,
-                                        {'shortcut':'  ', 'checkable':True, 'checked':True}, _updatePythonConsole
-            ),
-            ]
-        ),
+     {}, _hasActiveDisplay
+    ),
 
-        (SPECTRUM_MENU, [
-            (SPECTRUM_LOAD_SPECTRA, self._loadSpectraCallback, {'shortcut':'ls'}),
-            # ("Spectrum Groups...", self._spectrumGroupsCallback, {'shortcut':'ss'}), # multiple edit temporarly disabled
-            # Separator(),
-            ("Validate Paths...", self._validatePathsCallback, {'shortcut':'vp'}, _projectHasSpectra),
-            ("Set Experiment Types...", self._experimentTypesCallback, {'shortcut':'et'}, _projectHasSpectra),
-            ("Copy into Project...", self._copyToProjectCallback, {}, _projectHasSpectra),
+    Separator(),
+    (VIEW_SHOW_MODULES, DYNAMIC_FILL, {}, _updateShowHideModules),
+    ("Show/hide Sidebar", self._toggleSidebarCallback, {'shortcut':' s', 'checkable':True, 'checked':True}),
+    ("Show/hide Python Console", self._toggleConsoleCallback,
+                                {'shortcut':'  ', 'checkable':True, 'checked':True}, _updatePythonConsole
+    ),
+    ]
+),
 
-            Separator(),
-            ("Pick Peaks", [
-                ("Pick 1D Peaks...", self._peakPick1DCallback, {'shortcut':'p1'}, _projectHasSpectra),
-                ("Pick nD Peaks...", self._peakPickNDCallback, {'shortcut':'pp'}, _projectHasSpectra),
-                ], {}, _projectHasSpectra
-            ),
-            ("Copy PeakList...", self._copyPeakListCallback, {'shortcut':'cl'}, _projectHasSpectra),
-            ("Copy Peaks...", self._copyPeaksCallback, {'shortcut':'cp'}, _projectHasPeaks),
-            ("Peak Collections...", self._peakCollectionsCallback, {'shortcut':'sc'}, _projectHasPeaks),
-            ("Estimate Peak Volumes...", self._estimateVolumesCallback, {'shortcut':'ev'}, _projectHasPeaks),
-            ("Estimate Current Peak Volumes", self._estimateCurrentVolumesCallback, {'shortcut':'ec'}, _projectHasPeaks),
-            ("Reorder PeakList Axes...", self._reorderPeakListAxesCallback, {'shortcut':'rl'}, _projectHasSpectra),
+(SPECTRUM_MENU, [
+    (SPECTRUM_LOAD_SPECTRA, self._loadSpectraCallback, {'shortcut':'ls'}),
+    # ("Spectrum Groups...", self._spectrumGroupsCallback, {'shortcut':'ss'}), # multiple edit temporarly disabled
+    # Separator(),
+    ("Validate Paths...", self._validatePathsCallback, {'shortcut':'vp'}, _projectHasSpectra),
+    ("Set Experiment Types...", self._experimentTypesCallback, {'shortcut':'et'}, _projectHasSpectra),
+    ("Copy into Project...", self._copyToProjectCallback, {}, _projectHasSpectra),
 
-            Separator(),
-            ("Pseudo-Spectrum to SpectrumGroup...", self._pseudoSpectrumCallback, {}, _projectHasSpectra),
-            ("Make Projection...", self._makeProjectionCallback, {'shortcut':'pj'}, _projectHasSpectra),
-            ("Convert...", self._convertSpectrumCallback, {}, _projectHasSpectra),
+    Separator(),
+    ("Pick Peaks", [
+        ("Pick 1D Peaks...", self._peakPick1DCallback, {'shortcut':'p1'}, _projectHasSpectra),
+        ("Pick nD Peaks...", self._peakPickNDCallback, {'shortcut':'pp'}, _projectHasSpectra),
+        ], {}, _projectHasSpectra
+    ),
+    ("Copy PeakList...", self._copyPeakListCallback, {'shortcut':'cl'}, _projectHasSpectra),
+    ("Copy Peaks...", self._copyPeaksCallback, {'shortcut':'cp'}, _projectHasPeaks),
+    ("Peak Collections...", self._peakCollectionsCallback, {'shortcut':'sc'}, _projectHasPeaks),
+    ("Estimate Peak Volumes...", self._estimateVolumesCallback, {'shortcut':'ev'}, _projectHasPeaks),
+    ("Estimate Current Peak Volumes", self._estimateCurrentVolumesCallback, {'shortcut':'ec'}, _projectHasPeaks),
+    ("Reorder PeakList Axes...", self._reorderPeakListAxesCallback, {'shortcut':'rl'}, _projectHasSpectra),
 
-            Separator(),
-            ("Make Strip Plot...", app.makeStripPlot, {'shortcut':'sp'}, _projectHasSpectra),
-            ("Print to File...", self._printToFileCallback, {'shortcut':'⌃p'}, _projectHasSpectra),
-            ]
-        ),
+    Separator(),
+    ("Pseudo-Spectrum to SpectrumGroup...", self._pseudoSpectrumCallback, {}, _projectHasSpectra),
+    ("Make Projection...", self._makeProjectionCallback, {'shortcut':'pj'}, _projectHasSpectra),
+    ("Convert...", self._convertSpectrumCallback, {}, _projectHasSpectra),
 
-        (MOLECULES_MENU, [
-            ("New Chain...", self._createChainCallback),
-            ("New Chain from FASTA...", self._loadDataCallback),
+    Separator(),
+    ("Make Strip Plot...", app.makeStripPlot, {'shortcut':'sp'}, _projectHasSpectra),
+    ("Print to File...", self._printToFileCallback, {'shortcut':'⌃p'}, _projectHasSpectra),
+    ]
+),
 
-            Separator(),
-            ("Load ChemComp from Xml...", self._loadDataCallback),
-            ("Edit Molecular Bonds...", self._editMolecularBondsCallback, ),
-            # ("Inspect...", self.inspectMolecule, [('enabled', False)]),
+(MOLECULES_MENU, [
+    ("New Chain...", self._createChainCallback),
+    ("New Chain from FASTA...", self._loadDataCallback),
 
-            Separator(),
-            ("Residue Information", app.showResidueInformation, [('shortcut', 'ri')]),
-            ("Reference Chemical Shifts", app.showReferenceChemicalShifts, [('shortcut', 'rc')]),
-            ]
-        ),
+    Separator(),
+    ("Load ChemComp from Xml...", self._loadDataCallback),
+    ("Edit Molecular Bonds...", self._editMolecularBondsCallback, ),
+    # ("Inspect...", self.inspectMolecule, [('enabled', False)]),
 
-        (MACRO_MENU, [
-            ("New Macro Editor", self._showMacroEditorCallback, [('shortcut', 'nm')]),
+    Separator(),
+    ("Residue Information", app.showResidueInformation, [('shortcut', 'ri')]),
+    ("Reference Chemical Shifts", app.showReferenceChemicalShifts, [('shortcut', 'rc')]),
+    ]
+),
 
-            Separator(),
-            ("Open User Macro...", self._openMacroCallback, [('shortcut', 'om')]),
-            ("Open CCPN Macro...", partial(self._openMacroCallback, directory=macroPath)),
+(MACRO_MENU, [
+    ("New Macro Editor", self._showMacroEditorCallback, [('shortcut', 'nm')]),
 
-            Separator(),
-            ("Run...", app.runMacro, [('shortcut', 'rm')]),
-            (MACRO_RUN_RECENT, DYNAMIC_FILL),
-            (MACRO_RUN_CCPN, DYNAMIC_FILL),
+    Separator(),
+    ("Open User Macro...", self._openMacroCallback, [('shortcut', 'om')]),
+    ("Open CCPN Macro...", partial(self._openMacroCallback, directory=macroPath)),
 
-            Separator(),
-            ("Define Macro Shortcuts...", self._defineUserShortcutsCallback, [('shortcut', 'du')]),
-            ]
-        ),
+    Separator(),
+    ("Run...", app.runMacro, [('shortcut', 'rm')]),
+    (MACRO_RUN_RECENT, DYNAMIC_FILL),
+    (MACRO_RUN_CCPN, DYNAMIC_FILL),
 
-        (PLUGINS_MENU, [
-            (CCPN_PLUGINS, DYNAMIC_FILL),
-            (USER_PLUGINS, DYNAMIC_FILL),
+    Separator(),
+    ("Define Macro Shortcuts...", self._defineUserShortcutsCallback, [('shortcut', 'du')]),
+    ]
+),
 
-            Separator(),
-            ("Reload", app._reloadPlugins),
-            ]
-        ),
+(PLUGINS_MENU, [
+    (CCPN_PLUGINS, DYNAMIC_FILL),
+    (USER_PLUGINS, DYNAMIC_FILL),
 
-        (HELP_MENU, [
-            (HELP_TUTORIALS, DYNAMIC_FILL),
-            (HELP_HOWTOS, DYNAMIC_FILL),
+    Separator(),
+    ("Reload", app._reloadPlugins),
+    ]
+),
 
-            Separator(),
-            ("Tip of the Day", partial(app._displayTipOfTheDay, standalone=True)),
-            ("Key Concepts", app._displayKeyConcepts),
-            ("Show Shortcuts", self._showShortcuts),
+(HELP_MENU, [
+    (HELP_TUTORIALS, DYNAMIC_FILL),
+    (HELP_HOWTOS, DYNAMIC_FILL),
 
-            Separator(),
-            ("CCPN Homepage", self._showAboutCcpn),
-            ("CCPN V3 Forum", self._showForum),
-            ("CcpNmr API Documentation", self._showVersion3Documentation),
+    Separator(),
+    ("Tip of the Day", partial(app._displayTipOfTheDay, standalone=True)),
+    ("Key Concepts", app._displayKeyConcepts),
+    ("Show Shortcuts", self._showShortcuts),
 
-            Separator(),
-            # ("Inspect Code...", self.showCodeInspectionPopup, [('shortcut', 'gv'), ('enabled', False)]),
-            # ("Show Issues...", self.showIssuesList),
-            ("Check for Updates...", ui._checkForUpdates),
+    Separator(),
+    ("CCPN Homepage", self._showAboutCcpn),
+    ("CCPN V3 Forum", self._showForum),
+    ("CcpNmr API Documentation", self._showVersion3Documentation),
 
-            Separator(),
-            ("Register...", self._showRegisterPopup),
-            ("Show License...", self._showCcpnLicense),
-            ("About CcpNmr V3...", self._showAboutPopup),
-            ]
-        ),
+    Separator(),
+    # ("Inspect Code...", self.showCodeInspectionPopup, [('shortcut', 'gv'), ('enabled', False)]),
+    # ("Show Issues...", self.showIssuesList),
+    ("Check for Updates...", ui._checkForUpdates),
+
+    Separator(),
+    ("Register...", self._showRegisterPopup),
+    ("Show License...", self._showCcpnLicense),
+    ("About CcpNmr V3...", self._showAboutPopup),
+    ]
+),
 
         ])  # end extend
 

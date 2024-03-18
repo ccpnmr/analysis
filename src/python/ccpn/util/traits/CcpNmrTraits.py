@@ -95,7 +95,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-14 13:04:35 +0000 (Thu, March 14, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-18 18:36:50 +0000 (Mon, March 18, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -381,7 +381,6 @@ class Enum(_Enum, _CcpNmrTrait):
             raise ValueError(f'setting {self.name} for {obj}: "{value}" is invalid; should be one of {tuple(self.values)}')
 
         return value
-
 
     def info(self):
         """:return info string
@@ -710,6 +709,15 @@ class _TypedList(list):
         if not self._blanking:
             change.new = self
             self._obj.notify_change(change)
+
+    def remove(self, value): # real signature unknown
+        """
+        Remove first occurrence of value.
+        :raises ValueError if the value is not present.
+        """
+        # test for presence using index(); raises ValueError if not present
+        idx = self.index(value)
+        del self[idx]  # should also trigger notifier via __delitem__
 
     def copy(self):
         return _TypedList(obj=self._obj, trait=self._trait, values=self[:])

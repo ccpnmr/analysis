@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-06 17:48:14 +0000 (Wed, March 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-18 18:36:50 +0000 (Mon, March 18, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -77,7 +77,7 @@ class Tree(object):
         child._parent = self
         # child and its children inherit _root from self
         child._setRoot(self._root)
-        self._children.append (child)
+        self._children.append(child)
 
     def _removeChild(self, child):
         """Remove child from self, child becomes root;
@@ -88,7 +88,7 @@ class Tree(object):
         """
         if child not in self._children:
             raise RuntimeError (f'removeChild(): {child} is not a child of {self}')
-        self._children.remove (child)
+        self._children.remove(child)
         # child becomes root of its tree
         child._parent = None
         child._setRoot(child)

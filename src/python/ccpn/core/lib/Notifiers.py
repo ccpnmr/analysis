@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-06 17:48:09 +0000 (Wed, March 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-18 18:37:42 +0000 (Mon, March 18, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -54,7 +54,7 @@ import weakref
 DEBUG = False
 _debugIds = ()
 
-_STRICT = True  # Flag to enforce type checking; relaxed for testing v3memic code
+_STRICT = True  # Flag to enforce type checking; relaxed for testing ccpnv4 code
 
 # _debugIds = (75, 84, 92, 94,95,96)  # for these _id's, debug will be True. This allows for selective debugging
 
@@ -66,7 +66,7 @@ def skip(*args, **kwargs):
 
 class NotifierABC(object):
     """
-    Abstract base class for Notifier and GuiNotifier classes
+    Abstract base class for Notifier, GuiNotifier and TraitNotifier classes
     """
     _currentIndex = 0
 
@@ -74,15 +74,20 @@ class NotifierABC(object):
     _triggerKeywords = ()
 
     # callback dict keywords
-    NOTIFIER = 'notifier'
-    THEOBJECT = 'theObject'
-    TRIGGER = 'trigger'
-    OBJECT = 'object'
-    GETPID = 'pid'
-    OLDPID = 'oldPid'
-    VALUE = 'value'
-    PREVIOUSVALUE = 'previousValue'
-    TARGETNAME = 'targetName'
+    NOTIFIER = 'notifier'       # The Notifier instance
+
+    # the following can also be obtained from the Notifier instance
+    THEOBJECT = 'theObject'     # The object for which a notifier was set
+    TRIGGER = 'trigger'         # The trigger (see below)
+    TARGETNAME = 'targetName'   # The traget name for trigger (see below)
+
+    # The actual callback values/object
+    OBJECT = 'object'           # the object created or deleted (trigger CREATE or DELETE)
+    GETPID = 'pid'              # the pid of the object (trigger RENAME)
+    OLDPID = 'oldPid'           # the old or previous pid of the object (trigger RENAME)
+    VALUE = 'value'             # the (new) value (trigger CHANGE)
+    PREVIOUSVALUE = 'previousValue'  # the old or previous value (trigger CHANGE)
+
     SPECIFIERS = 'specifiers'
 
     def __init__(self, theObject, triggers, targetName, callback, setterObject=None, debug=False, **kwargs):
@@ -213,13 +218,13 @@ class Notifier(NotifierABC):
 
      Notifier.RENAME    className             theObject, object         targetName: valid child className of theObject
                                               targetName, oldPid,       (any for project instances)
-                                              trigger
-
-     Notifier.CHANGE    className             theObject, object         targetName: valid child className of theObject
-                                              targetName,               (any for project instances)
                                               trigger, notifier
 
-     Notifier.OBSERVE   attributeName         theObject,targetName      targetName: valid attribute name of theObject
+     # Notifier.CHANGE    className             theObject, object         targetName: valid child className of theObject
+     #                                          targetName,               (any for project instances)
+     #                                          trigger, notifier
+
+     Notifier.CHANGE   attributeName         theObject,targetName      targetName: valid attribute name of theObject
                         or ANY                value, previousValue,     NB: should only be used in isolation; i.e. not
                                               trigger, notifier         combined with other triggers
 
@@ -246,9 +251,10 @@ class Notifier(NotifierABC):
     DELETE = 'delete'
     RENAME = 'rename'
     CHANGE = 'change'
-    OBSERVE = 'observe'
+    # OBSERVE = 'observe'
     CURRENT = 'current'
-    _triggerKeywords = (CREATE, DELETE, RENAME, CHANGE, OBSERVE, CURRENT)
+    # _triggerKeywords = (CREATE, DELETE, RENAME, CHANGE, OBSERVE, CURRENT)
+    _triggerKeywords = (CREATE, DELETE, RENAME, CHANGE, CURRENT)
 
     ANY = '<Any>'
 
@@ -317,9 +323,9 @@ class Notifier(NotifierABC):
 
         self._unregister = []  # list of tuples needed for unregistering
 
-        # some sanity checks
-        if len(triggers) > 1 and Notifier.OBSERVE in triggers:
-            raise RuntimeError('Notifier: trigger "%s" only to be used in isolation' % Notifier.OBSERVE)
+        # # some sanity checks
+        # if len(triggers) > 1 and Notifier.OBSERVE in triggers:
+        #     raise RuntimeError('Notifier: trigger "%s" only to be used in isolation' % Notifier.OBSERVE)
         if len(triggers) > 1 and Notifier.CURRENT in triggers:
             raise RuntimeError('Notifier.__init__: trigger "%s" only to be used in isolation' % Notifier.CURRENT)
         if triggers[0] == Notifier.CURRENT and not self._isCurrent:
@@ -360,7 +366,7 @@ class Notifier(NotifierABC):
                     self._previousValue = getattr(theObject, targetName)
 
                 notifier = (trigger, targetName)
-                func = self.project.registerNotifierregisterNotifier(className=theObject.className,
+                func = self.project.registerNotifier(className=theObject.className,
                                                      target=Notifier.CHANGE,
                                                      func=partial(self, notifier=notifier),
                                                      onceOnly=onceOnly)
@@ -456,15 +462,15 @@ class Notifier(NotifierABC):
                 notifierFired = True
                 self._previousValue = value
 
-        # OBSERVE ANY special case
-        elif trigger == Notifier.OBSERVE and targetName == self.ANY:
+        # CHANGE ANY special case
+        elif trigger == Notifier.CHANGE and targetName == self.ANY:
             if obj.pid == self._theObject.pid:
                 callbackDict[self.OBJECT] = self._theObject
                 self._callback(callbackDict, **self._kwargs)
                 notifierFired = True
 
-        # OBSERVE targetName special case
-        elif trigger == Notifier.OBSERVE and targetName != self.ANY:
+        # CHANGE targetName special case
+        elif trigger == Notifier.CHANGE and targetName != self.ANY:
             # The check below catches all changes to obj that do not involve targetName, as only
             # when it has changed its value will we trigger the callback
             value = getattr(self._theObject, targetName)

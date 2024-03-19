@@ -38,7 +38,7 @@ from ccpnmr.chemBuild.exchange.Mol2 import makeMol2, importMol2
 from ccpnmr.chemBuild.exchange.MolFile import makeMolFileV2000, importMolFileV2000
 from ccpnmr.chemBuild.exchange.Pdb  import makePdb,  importPdb
 from ccpnmr.chemBuild.exchange.Smiles import importSmiles
-from ccpnmr.chemBuild.exchange.Inchi import makeInchi, importInchi
+# from ccpnmr.chemBuild.exchange.Inchi import makeInchi, importInchi
 
 Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
@@ -103,13 +103,13 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     importMenu.addItem('MDL Molfile (v2000)', self.importMolFileV2000)
     importMenu.addItem('Mol2 (SYBYL2) file', self.importMol2)
     importMenu.addItem('PDB file', self.importPdb)
-    importMenu.addItem('InChI file', self.importInchi)
+    # importMenu.addItem('InChI file', self.importInchi)
     
     exportMenu.addItem('CCPN ChemComp XML file', self.exportChemComp)
     exportMenu.addItem('MDL Molfile (v2000)', self.exportMolfile)
     exportMenu.addItem('Mol2 (SYBYL2) file', self.exportMol2)
     exportMenu.addItem('PDB file', self.exportPdb)
-    exportMenu.addItem('InChI file', self.exportInchi)
+    # exportMenu.addItem('InChI file', self.exportInchi)
     
     formats = QtGui.QImageReader.supportedImageFormats()
 
@@ -304,8 +304,8 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     
     Button(box, 'Add SMILES string', callback=self.addSmiles,
            tipText='Add the above SMILES string fragment to the current compound')
-    Button(box, 'Add InChI string', callback=self.addInchi,
-           tipText='Add the above InChI string fragment to the current compound')
+    # Button(box, 'Add InChI string', callback=self.addInchi,
+    #        tipText='Add the above InChI string fragment to the current compound')
 
     layout.addWidget(box)
         
@@ -627,34 +627,34 @@ class ChemBuildMain(QtWidgets.QMainWindow):
       self.autoNameAtoms()
       self.updateAll()
 
-  def addInchi(self):
-  
-    prompt = 'Enter InChI string to add:'
-    inchiString = askString('User input', prompt, parent=self)
-    
-    if inchiString:
-      self.addToHistory()
-      inchiString = ''.join(inchiString.split())
-      # Discard non-InChI data
-      inchiString = inchiString.split('AuxInfo')[0]
-      # Auto chirality must be disabled until the atoms are properly placed otherwise the chirality will be erased.
-      autoChirality = self.compoundView.autoChirality
-      self.compoundView.autoChirality = False
-      compound = importInchi(inchiString) # Hydrogens are also added when loading InChI
-      if compound == None:
-        return
-      #self.setCompound(compound, replace = False)
-      self.compoundView.autoChirality = autoChirality
-
-      variant = list(compound.variants)[0]
-      
-      x, y = self.getAddPoint()
-            
-      variant.snapAtomsToGrid(ignoreHydrogens=False)
-        
-      self.compound.copyVarAtoms(variant.varAtoms, (x,y))
-      self.compoundView.centerView()
-      self.updateAll()
+  # def addInchi(self):
+  #
+  #   prompt = 'Enter InChI string to add:'
+  #   inchiString = askString('User input', prompt, parent=self)
+  #
+  #   if inchiString:
+  #     self.addToHistory()
+  #     inchiString = ''.join(inchiString.split())
+  #     # Discard non-InChI data
+  #     inchiString = inchiString.split('AuxInfo')[0]
+  #     # Auto chirality must be disabled until the atoms are properly placed otherwise the chirality will be erased.
+  #     autoChirality = self.compoundView.autoChirality
+  #     self.compoundView.autoChirality = False
+  #     compound = importInchi(inchiString) # Hydrogens are also added when loading InChI
+  #     if compound == None:
+  #       return
+  #     #self.setCompound(compound, replace = False)
+  #     self.compoundView.autoChirality = autoChirality
+  #
+  #     variant = list(compound.variants)[0]
+  #
+  #     x, y = self.getAddPoint()
+  #
+  #     variant.snapAtomsToGrid(ignoreHydrogens=False)
+  #
+  #     self.compound.copyVarAtoms(variant.varAtoms, (x,y))
+  #     self.compoundView.centerView()
+  #     self.updateAll()
   
   def showDoc(self):
 
@@ -968,44 +968,44 @@ class ChemBuildMain(QtWidgets.QMainWindow):
       
       return compound
 
-  def importInchi(self, filePath=None, replace=True):
-    
-    if not filePath:
-      
-      if not self.askSave('Importing compound: '):
-        return
-
-      fType = 'InChI (*.inchi)'
-      dialog = QtWidgets.QFileDialog
-      msg = 'Select or enter InChi file name'
-      filePath, filtr = dialog.getOpenFileName(self, msg, directory=self.userDir, filter=fType)
-      # filePath = dialog.getOpenFileName(self, msg, directory=self.userDir, filter=fType)
-
-    if filePath:
-      
-      dirName, fileName = path.split(filePath)
-      self.userDir = dirName
-      fileObj = open(filePath, 'r')
-      inchi = fileObj.read()
-      inchi = ''.join(inchi.split())
-      # Discard non-InChI data
-      inchi = inchi.split('AuxInfo')[0]
-      fileObj.close()
-    
-
-      # Auto chirality must be disabled until the atoms are properly placed otherwise the chirality will be erased.
-      autoChirality = self.compoundView.autoChirality
-      self.compoundView.autoChirality = False
-      compound = importInchi(inchi) # Hydrogens are also added when loading InChI
-      self.setCompound(compound, replace)
-      self.compoundView.autoChirality = autoChirality
-
-      variant = list(compound.variants)[0]
-      
-      variant.snapAtomsToGrid(ignoreHydrogens=False)
-      self.updateAll()
-      
-      return compound
+  # def importInchi(self, filePath=None, replace=True):
+  #
+  #   if not filePath:
+  #
+  #     if not self.askSave('Importing compound: '):
+  #       return
+  #
+  #     fType = 'InChI (*.inchi)'
+  #     dialog = QtWidgets.QFileDialog
+  #     msg = 'Select or enter InChi file name'
+  #     filePath, filtr = dialog.getOpenFileName(self, msg, directory=self.userDir, filter=fType)
+  #     # filePath = dialog.getOpenFileName(self, msg, directory=self.userDir, filter=fType)
+  #
+  #   if filePath:
+  #
+  #     dirName, fileName = path.split(filePath)
+  #     self.userDir = dirName
+  #     fileObj = open(filePath, 'r')
+  #     inchi = fileObj.read()
+  #     inchi = ''.join(inchi.split())
+  #     # Discard non-InChI data
+  #     inchi = inchi.split('AuxInfo')[0]
+  #     fileObj.close()
+  #
+  #
+  #     # Auto chirality must be disabled until the atoms are properly placed otherwise the chirality will be erased.
+  #     autoChirality = self.compoundView.autoChirality
+  #     self.compoundView.autoChirality = False
+  #     compound = importInchi(inchi) # Hydrogens are also added when loading InChI
+  #     self.setCompound(compound, replace)
+  #     self.compoundView.autoChirality = autoChirality
+  #
+  #     variant = list(compound.variants)[0]
+  #
+  #     variant.snapAtomsToGrid(ignoreHydrogens=False)
+  #     self.updateAll()
+  #
+  #     return compound
       
   def importMolFileV2000(self, filePath=None, replace=True):
  
@@ -1094,26 +1094,26 @@ class ChemBuildMain(QtWidgets.QMainWindow):
           fileObj.write(lines)
           fileObj.close()
           
-  def exportInchi(self):
-    
-    if self.variant:
-      inchi = makeInchi(self.variant)
-      
-      if inchi:
-        fType = 'InChI (*.inchi)'
-        dialog = QtWidgets.QFileDialog
-        msg = 'Select or enter Inchi file name'
-        filePath, filtr = dialog.getSaveFileName(self, msg, directory=self.userDir, filter=fType)
-        # filePath = dialog.getSaveFileName(self,msg, directory=self.userDir, filter=fType)
-    
-        if filePath:
-          dirName, fileName = path.split(filePath)
-          self.userDir = dirName
-          fileObj = open(filePath, 'w')
-          fileObj.write(inchi)
-          fileObj.close()
-      else:
-        showError('Save', "Conversion to inchi failed (unknown reason)", self)
+  # def exportInchi(self):
+  #
+  #   if self.variant:
+  #     inchi = makeInchi(self.variant)
+  #
+  #     if inchi:
+  #       fType = 'InChI (*.inchi)'
+  #       dialog = QtWidgets.QFileDialog
+  #       msg = 'Select or enter Inchi file name'
+  #       filePath, filtr = dialog.getSaveFileName(self, msg, directory=self.userDir, filter=fType)
+  #       # filePath = dialog.getSaveFileName(self,msg, directory=self.userDir, filter=fType)
+  #
+  #       if filePath:
+  #         dirName, fileName = path.split(filePath)
+  #         self.userDir = dirName
+  #         fileObj = open(filePath, 'w')
+  #         fileObj.write(inchi)
+  #         fileObj.close()
+  #     else:
+  #       showError('Save', "Conversion to inchi failed (unknown reason)", self)
 
   def exportChemComp(self):
     

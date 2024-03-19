@@ -253,9 +253,13 @@ class CreateNmrChainPopup(CcpnDialogMainWidget):
                             # need to check whether the mainResidue exists before creating the +/- residues
                             if nmrResidue.relativeOffset:
                                 mainSequence = nmrResidue.mainNmrResidue.sequenceCode
-                                newNmrResidue = newNmrChain.newNmrResidue(sequenceCode=mainSequence,
+                                newNmrResidue = newNmrChain.fetchNmrResidue(sequenceCode=mainSequence,
                                                                           residueType=nmrResidue.residueType)
-                            newNmrResidue = newNmrChain.newNmrResidue(sequenceCode=nmrResidue.sequenceCode, residueType=nmrResidue.residueType)
+                            newNmrResidue = newNmrChain.fetchNmrResidue(sequenceCode=nmrResidue.sequenceCode)
+                            if nmrResidue.residueType != newNmrResidue.residueType:
+                                newNmrResidue.moveToNmrChain(newNmrChain=newNmrResidue.nmrChain,
+                                                         sequenceCode=newNmrResidue.sequenceCode,
+                                                         residueType=nmrResidue.residueType)
                             for nmrAtom in nmrResidue.nmrAtoms:
                                 newNmrResidue.fetchNmrAtom(nmrAtom.name, isotopeCode=nmrAtom.isotopeCode)
 

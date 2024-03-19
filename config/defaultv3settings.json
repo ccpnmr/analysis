@@ -271,5 +271,10 @@
         "_openItemNmrAtomItem": {
             "dontShowPopup": false
         }
+    },
+    "modules": {
+        "profileByReference" : {
+            "databasePath" : ""
+        }
     }
 }

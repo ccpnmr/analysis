@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-20 13:39:46 +0000 (Wed, March 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-20 16:54:18 +0000 (Wed, March 20, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -34,7 +34,7 @@ from time import time_ns
 from types import SimpleNamespace
 
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, catchExceptions
-from ccpn.core.lib.Notifiers import Notifier, CurrentNotifier
+from ccpn.core.lib.Notifiers import Notifier, CurrentNotifier, _makeNotifiers
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.table._TableCommon import INDEX_ROLE
@@ -479,39 +479,46 @@ class _MIProjectTableABC(MITableABC, Base):
         self._initialiseTableNotifiers()
 
         if self.tableClass:
-            self._tableNotifier = Notifier(self.project,
-                                           [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
-                                           self.tableClass.__name__,
-                                           partial(self._queueGeneralNotifier, self._updateTableCallback),
-                                           onceOnly=True)
+            self._tableNotifier = _makeNotifiers(self.project,
+                                                 triggers=[Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
+                                                 targetName=self.tableClass.__name__,
+                                                 callback=partial(self._queueGeneralNotifier, self._updateTableCallback),
+                                                 onceOnly=True,
+                                                 setterObject=self
+                                                 )
 
         if self.rowClass:
             # 'i-1' residue spawns rename but the 'i' residue only fires a change
-            self._rowNotifier = Notifier(self.project,
-                                         [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE],
-                                         self.rowClass.__name__,
-                                         partial(self._queueGeneralNotifier, self._updateRowCallback),
-                                         onceOnly=True)  # should be True, but doesn't work
+            self._rowNotifier = _makeNotifiers(self.project,
+                                               triggers=[Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE],
+                                               targetName=self.rowClass.__name__,
+                                               callback=partial(self._queueGeneralNotifier, self._updateRowCallback),
+                                               onceOnly=True,  # should be True, but doesn't work
+                                               setterObject=self)
 
         if self.cellClassNames:
             for cellClass, attr in self.cellClassNames.items():
-                self._cellNotifiers.append(Notifier(self.project,
-                                                    [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
-                                                    cellClass.__name__,
-                                                    partial(self._queueGeneralNotifier, self._updateCellCallback),
-                                                    onceOnly=True))
+                for _trigger in [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]:
+                    self._cellNotifiers.append(Notifier(self.project,
+                                                        _trigger,
+                                                        targetName=cellClass.__name__,
+                                                        callback=partial(self._queueGeneralNotifier, self._updateCellCallback),
+                                                        onceOnly=True,
+                                                        setterObject=self)
+                                               )
 
         if self.selectCurrent:
             self._selectCurrentNotifier = CurrentNotifier(
                                                    targetName=self.callBackClass._pluralLinkName,
                                                    callback=self._selectCurrentCallBack,  # strange behaviour if deferred
-                                                   # partial(self._queueGeneralNotifier, self._selectCurrentCallBack),
+                                                   setterObject=self
                                                    )
 
         if self.search:
             self._searchNotifier = CurrentNotifier(
                                             targetName=self.search._pluralLinkName,
-                                            callback=self._searchCallBack
+                                            callback=self._searchCallBack,
+                                            setterObject=self
                                             )
 
         # add a cleaner id to the opened guiTable list

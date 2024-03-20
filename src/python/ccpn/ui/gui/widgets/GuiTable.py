@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-20 13:39:46 +0000 (Wed, March 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-20 16:54:17 +0000 (Wed, March 20, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -44,7 +44,7 @@ from pyqtgraph import TableWidget
 from pyqtgraph.widgets.TableWidget import _defersort
 
 from ccpn.core.lib.CallBack import CallBack
-from ccpn.core.lib.Notifiers import Notifier, CurrentNotifier
+from ccpn.core.lib.Notifiers import Notifier, CurrentNotifier, _makeNotifiers
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 from ccpn.core.lib.Util import getParentObjectFromPid
 from ccpn.core.lib.ContextManagers import catchExceptions
@@ -2467,34 +2467,36 @@ class GuiTable(TableWidget, Base):
         self._initialiseTableNotifiers()
 
         if tableClass:
-            self._tableNotifier = Notifier(self.project,
-                                           [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
-                                           tableClass.__name__,
-                                           self._updateTableCallback,
-                                           onceOnly=True)
+            self._tableNotifier = _makeNotifiers(self.project,
+                                           triggers=[Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
+                                           targetName=tableClass.__name__,
+                                           callback=self._updateTableCallback,
+                                           onceOnly=True,
+                                           setterObject=self)
 
         if rowClass:
             # 'i-1' residue spawns a rename but the 'i' residue only fires a change
-            self._rowNotifier = Notifier(self.project,
-                                         [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE],
-                                         rowClass.__name__,
-                                         self._updateRowCallback,
-                                         onceOnly=True)  # should be True, but doesn't work
+            self._rowNotifier = _makeNotifiers(self.project,
+                                               triggers=[Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE],
+                                               targetName=rowClass.__name__,
+                                               callback=self._updateRowCallback,
+                                               onceOnly=True, # should be True, but doesn't work
+                                               setterObject=self)
 
+        _cellNames = []
         if isinstance(cellClassNames, list):
-            for cellClass in cellClassNames:
+            _cellNames = cellClassNames
+        elif cellClassNames is not None:
+            _cellNames = [cellClassNames]
+
+        for cellClass in _cellNames:
+            for _trigger in [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]:
                 self._cellNotifiers.append(Notifier(self.project,
-                                                    [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
-                                                    cellClass[OBJECT_CLASS].__name__,
-                                                    partial(self._updateCellCallback, cellClass[OBJECT_PARENT]),
-                                                    onceOnly=True))
-        else:
-            if cellClassNames:
-                self._cellNotifiers.append(Notifier(self.project,
-                                                    [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
-                                                    cellClassNames[OBJECT_CLASS].__name__,
-                                                    partial(self._updateCellCallback, cellClassNames[OBJECT_PARENT]),
-                                                    onceOnly=True))
+                                                    _trigger,
+                                                    targetName=cellClass[OBJECT_CLASS].__name__,
+                                                    callback=partial(self._updateCellCallback, cellClass[OBJECT_PARENT]),
+                                                    onceOnly=True)
+                                           )
 
         if selectCurrentCallBack:
             self._selectCurrentNotifier = CurrentNotifier(

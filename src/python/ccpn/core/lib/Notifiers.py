@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-20 13:39:45 +0000 (Wed, March 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-20 16:54:17 +0000 (Wed, March 20, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -301,6 +301,13 @@ class Notifier(NotifierABC):
         if _STRICT and not isinstance(theObject, (AbstractWrapperObject, V3CoreObjectABC)):
             raise ValueError(f'Notifier: invalid object; expected AbstractWrapper or V3CoreObject, got {type(theObject)}')
 
+        # TMP while refactoring: convert to list if str
+        if isinstance(triggers, str):
+            triggers = [triggers]
+
+        if len(triggers) != 1 or triggers[0] not in self._triggerKeywords:
+            raise ValueError(f'Invalid triggers: {triggers}; should be one of {self._triggerKeywords}')
+
         if targetName is None:
             raise ValueError(f'Invalid targetName {targetName}')
 
@@ -312,7 +319,6 @@ class Notifier(NotifierABC):
                          callback=callback, **kwargs
                          )
 
-
         if (_project := getProject()) is None:
             # This should not happen
             raise RuntimeError(f'Undefined project: cannot register notifier for {theObject}')
@@ -320,9 +326,9 @@ class Notifier(NotifierABC):
         self._isProject = (theObject == _project)  # theObject is the toplevel Project instance
 
         self._previousValue = None  # used to store the value of attribute to observe for change
-        self._unregister = []  # list of tuples needed for unregistering
+        self._unregister = []  # The info needed for unregistering
 
-        # register the callbacks
+        # register the callback
         for trigger in self._triggers:
 
             # CHANGE special case, as the current underpinning implementation does not allow this directly
@@ -377,19 +383,15 @@ class Notifier(NotifierABC):
         """
         unregister the notifiers
         """
-
         # >>>>>>
-        if self.id in _debugIds:
+        if self._debug:
             sys.stderr.write('>>> un-registering %s\n' % self)
 
         if not self.isRegistered():
             return
 
         for targetName, trigger, func in self._unregister:
-            if trigger == Notifier.CURRENT:
-                self._theObject.unRegisterNotify(func, targetName)
-            else:
-                self.project.unRegisterNotifier(targetName, trigger, func)
+            self.project.unRegisterNotifier(targetName, trigger, func)
 
         super().unRegister()  # the end as it clears all attributes
 
@@ -492,11 +494,10 @@ class CurrentNotifier(NotifierABC):
         """
         Create CurrentNotifier object;
         :param targetName: valid Current attributeName or ANY
-        :param callback: callback function with signature: callback(callbackDict, **kwargs])
+        :param callback: callback function with signature: callback(callbackDict)
         :param setterObject: Object that was setting the Notifier
         :param debug: set debug for this notifier
         """
-        from ccpn.framework.Current import Current  # local import to avoid cycles
 
         if (_current := getCurrent()) is None:
             raise RuntimeError(f'CurrentNotifier(): unable to get Current instance')
@@ -526,14 +527,14 @@ class CurrentNotifier(NotifierABC):
         self._isRegistered = True
 
         if self._debug:
-            sys.stderr.write('>>> registered %s\n' % self)
+            sys.stderr.write(f'>>> registered {self}\n')
 
     def unRegister(self):
         """
         unregister the notifier
         """
         if self._debug:
-            sys.stderr.write('>>> un-registering %s\n' % self)
+            sys.stderr.write(f'>>> un-registering {self}\n')
 
         if not self.isRegistered():
             return
@@ -574,6 +575,23 @@ class CurrentNotifier(NotifierABC):
             sys.stderr.write('%-9s func:%s\n' % (_tmp, self._callback))
 
         return
+# end class
+
+
+class _NotifierList(list):
+    """A class for backward compatibilty with the old Notifier implementation.
+    The latterallowed for multiple triggers for a single Notifier.
+    The NotifierList class has a unregister() method, to mimic the behavior of the earlier
+    implementation, which returned Notifier instances.
+    """
+
+    def unRegister(self):
+        """Un-register all notifiers of self
+        """
+        for notifier in self:
+            if not isinstance(notifier, NotifierABC):
+                raise RuntimeError(f'unRegister(): Invalid notifier {notifier}')
+            notifier.unRegister()
 # end class
 
 
@@ -618,7 +636,7 @@ class NotifierBase(object):
         # add the notifier
         objNotifiers[_id] = notifier
 
-    def _newNotifier(self, triggers: list, targetName: str, callback: Callable[..., Optional[str]], setterObject=None, **kwargs) -> Notifier:
+    def _newNotifier(self, triggers: list, targetName: str, callback: Callable[..., Optional[str]], setterObject=None, **kwargs) -> _NotifierList:
         """Create a new Notifier instance for self
 
         :param triggers: list of triggers to trigger callback
@@ -628,15 +646,19 @@ class NotifierBase(object):
         :return: a Notifier instance
 
         """
-        _notifier = Notifier(theObject=self,
-                             triggers=triggers,
-                             targetName=targetName,
-                             callback=callback,
-                             setterObject=setterObject,
-                             **kwargs)
-        return _notifier
+        result = _NotifierList()
+        for _trigger in triggers:
+            _notifier = Notifier(theObject=self,
+                                 triggers=_trigger,
+                                 targetName=targetName,
+                                 callback=callback,
+                                 setterObject=setterObject,
+                                 **kwargs)
+            result.append(_notifier)
 
-    def setNotifier(self, theObject: 'AbstractWrapperObject', triggers: list, targetName: str, callback: Callable[..., Optional[str]], **kwargs) -> Notifier:
+        return result
+
+    def setNotifier(self, theObject, triggers: list|tuple, targetName: str, callback: Callable, **kwargs) -> _NotifierList | CurrentNotifier:
         """
         Set Notifier for Ccpn V3 object theObject; store in own CcpNmrNotifiersDict for management.
 
@@ -645,7 +667,7 @@ class NotifierBase(object):
         :param targetName: valid className, attributeName or None (See Notifier doc string for details)
         :param callback: callback function with signature: callback(obj, parameter2 [, *args] [, **kwargs])
         :param **kwargs: optional keyword,value arguments to call back
-        :return: a Notifier instance
+        :return: a _NotifierList or CurrentNotifier instance
         """
         from ccpn.framework.Current import Current
         if theObject is None:
@@ -658,18 +680,27 @@ class NotifierBase(object):
                                      **kwargs)
         else:
             # GWV 15/12/23: This allows subclassing during ccpnv4 development
-            result = theObject._newNotifier(
-                                triggers=triggers,
-                                targetName=targetName,
-                                callback=callback,
-                                setterObject=self,
-                                **kwargs
-            )
-        if isinstance(result, list):
+            # result = theObject._newNotifier(
+            #                     triggers=triggers,
+            #                     targetName=targetName,
+            #                     callback=callback,
+            #                     setterObject=self,
+            #                     **kwargs
+            # )
+            result = _makeNotifiers(theObject=theObject,
+                                    triggers=triggers,
+                                    targetName=targetName,
+                                    callback=callback,
+                                    setterObject=self
+                                    )
+
+        if isinstance(result, (list,_NotifierList)):
             for _notifier in result:
                 self._addNotifier(_notifier)
+
         elif isinstance(result, (Notifier, CurrentNotifier)):
             self._addNotifier(result)
+
         else:
             raise RuntimeError(f'setNotifier: unexpected result; got {result}')
 
@@ -849,3 +880,36 @@ def _removeDuplicatedNotifiers(notifierQueue):
             executeQueue.append((func, data))
 
     return list(reversed(executeQueue))
+
+
+def _makeNotifiers(theObject,
+                   triggers: list|tuple,
+                   targetName: str,
+                   callback: Callable,
+                   setterObject=None,
+                   onceOnly=False) -> _NotifierList:
+    """Backward compatibility to make a NotifierList from multiple triggers
+
+    :param theObject: the object to set the Notifier for
+    :param triggers: list of triggers to trigger callback
+    :param targetName: valid className, attributeName or None (See Notifier doc string for details)
+    :param callback: callback function with signature: callback(callBackDict)
+    :param setterObject: reference to the object setting the notifier
+    :param onceOnly: If True, only one of multiple copies is executed (from underpinning V3-notifiers mechanism)
+    :return: a _NotifierList instance
+
+    """
+    if not isinstance(triggers, (list,tuple)) or len(triggers) == 0:
+        raise ValueError(f'Invalid triggers {triggers}; expected list, tuple with at least one item')
+
+    result = _NotifierList()
+    for _trigger in triggers:
+        _notifier = Notifier(theObject=theObject,
+                             triggers=_trigger,
+                             targetName=targetName,
+                             callback=callback,
+                             setterObject=setterObject,
+                             )
+        result.append(_notifier)
+
+    return result

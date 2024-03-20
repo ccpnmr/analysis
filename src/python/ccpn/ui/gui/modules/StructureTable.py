@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-20 13:39:46 +0000 (Wed, March 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-20 16:54:17 +0000 (Wed, March 20, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -436,8 +436,7 @@ class StructureTableFrame(_CoreTableFrameABC):
         change calls on any other attribute.
         """
         # there is no CHANGE notifier on tableClass yet
-        self._ensembleNotifier = Notifier(self.project,
-                                          [Notifier.CHANGE],
+        self._ensembleNotifier = Notifier(self.project,[Notifier.CHANGE],
                                           KlassTable.__name__,
                                           self._updateEnsembleCallback,
                                           onceOnly=True)

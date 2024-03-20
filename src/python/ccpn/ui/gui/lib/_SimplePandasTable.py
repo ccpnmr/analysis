@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-20 13:39:45 +0000 (Wed, March 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-20 16:54:17 +0000 (Wed, March 20, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -40,7 +40,7 @@ import typing
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, catchExceptions
-from ccpn.core.lib.Notifiers import Notifier, CurrentNotifier
+from ccpn.core.lib.Notifiers import Notifier, CurrentNotifier, _makeNotifiers
 from ccpn.ui.gui.guiSettings import getColours, GUITABLE_ITEM_FOREGROUND
 from ccpn.ui.gui.widgets.Font import setWidgetFont, TABLEFONT, getFontHeight
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame
@@ -1948,27 +1948,28 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         self._initialiseTableNotifiers()
 
         if self.tableClass:
-            self._tableNotifier = Notifier(self.project,
-                                           [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
-                                           self.tableClass.__name__,
-                                           partial(self._queueGeneralNotifier, self._updateTableCallback),
+            self._tableNotifier = _makeNotifiers(self.project,
+                                           triggers=[Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
+                                           targetName=self.tableClass.__name__,
+                                           callback=partial(self._queueGeneralNotifier, self._updateTableCallback),
                                            onceOnly=True)
 
         if self.rowClass:
             # 'i-1' residue spawns rename but the 'i' residue only fires a change
-            self._rowNotifier = Notifier(self.project,
-                                         [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE],
-                                         self.rowClass.__name__,
-                                         partial(self._queueGeneralNotifier, self._updateRowCallback),
+            self._rowNotifier = _makeNotifiers(self.project,
+                                         triggers=[Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE],
+                                         targetName=self.rowClass.__name__,
+                                         callback=partial(self._queueGeneralNotifier, self._updateRowCallback),
                                          onceOnly=True)  # should be True, but doesn't work
 
         if self.cellClassNames:
             for cellClass, attr in self.cellClassNames.items():
-                self._cellNotifiers.append(Notifier(self.project,
-                                                    [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
-                                                    cellClass.__name__,
-                                                    partial(self._queueGeneralNotifier, self._updateCellCallback),
-                                                    onceOnly=True))
+                for _trigger in [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]:
+                    self._cellNotifiers.append(Notifier(self.project,
+                                                        _trigger,
+                                                        targetName=cellClass.__name__,
+                                                        callback=partial(self._queueGeneralNotifier, self._updateCellCallback),
+                                                        onceOnly=True))
 
         if self.selectCurrent:
             self._selectCurrentNotifier = CurrentNotifier(

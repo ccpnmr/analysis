@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-20 13:39:46 +0000 (Wed, March 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-20 16:54:17 +0000 (Wed, March 20, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -165,8 +165,10 @@ class _PulldownABC(PulldownListCompoundWidget):
             if self._followCurrent:
                 self.addNotifier(CurrentNotifier(
                                           targetName=self._currentAttributeName,
-                                          callback=self._updateFromCurrent
-                                          ))
+                                          callback=self._updateFromCurrent,
+                                          setterObject=self
+                                          )
+                                )
 
     @property
     def textList(self):

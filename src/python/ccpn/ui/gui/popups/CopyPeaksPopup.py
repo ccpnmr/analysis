@@ -1,9 +1,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -11,9 +11,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-04 15:38:57 +0100 (Fri, August 04, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-03-20 16:54:17 +0000 (Wed, March 20, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,7 +27,7 @@ from PyQt5 import QtCore
 from functools import partial
 from ccpn.util.Logging import getLogger
 from ccpn.core.Spectrum import Spectrum
-from ccpn.core.lib.Notifiers import Notifier, _removeDuplicatedNotifiers
+from ccpn.core.lib.Notifiers import Notifier, _removeDuplicatedNotifiers, _makeNotifiers
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
@@ -262,11 +262,17 @@ class CopyPeaks(CcpnDialog):
 
     def _registerNotifiers(self):
 
-        self._peakNotifier = Notifier(self.project, [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME], 'Peak',
-                                      partial(self._queueGeneralNotifier, self._refreshInputPeaksWidget),
+        self._peakNotifier = _makeNotifiers(self.project,
+                                      triggers=[Notifier.DELETE, Notifier.CREATE, Notifier.RENAME],
+                                      targetName='Peak',
+                                      callback=partial(self._queueGeneralNotifier, self._refreshInputPeaksWidget),
+                                      setterObject=self
                                       )
-        self._peakListNotifier = Notifier(self.project, [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME], 'PeakList',
-                                          partial(self._queueGeneralNotifier, self._refreshInputPeaksListWidget),
+        self._peakListNotifier = _makeNotifiers(self.project,
+                                          triggers=[Notifier.DELETE, Notifier.CREATE, Notifier.RENAME],
+                                          targetName='PeakList',
+                                          callback=partial(self._queueGeneralNotifier, self._refreshInputPeaksListWidget),
+                                          setterObject=self
                                           )
 
     def _deregisterNotifiers(self):

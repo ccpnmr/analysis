@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-29 09:39:21 +0000 (Thu, February 29, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-03-20 19:06:25 +0000 (Wed, March 20, 2024) $"
+__version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -514,7 +514,7 @@ class Peak(AbstractWrapperObject):
            )
 
         Assignments as a list of individual combinations is given in 'assignedNmrAtoms'.
-        Note that by setting dimensionAssignments you tel the program that all combinations are
+        Note that by setting dimensionAssignments you tell the program that all combinations are
         possible - in the example that all four protons could be bound to either of the carbons
 
         To (re)set the assignment for a single dimension, use the Peak.assignDimension method."""
@@ -873,8 +873,7 @@ class Peak(AbstractWrapperObject):
                     getLogger().debug2(f'Impossible to set isotopeCode to {na}. {err}')
 
     @logCommand(get='self')
-    def assignDimensions(self, axisCodes: list,
-                         values: List[Union[Union[str, 'NmrAtom'], Sequence[Union[str, 'NmrAtom']]]] = None):
+    def assignDimensions(self, axisCodes: list, values:  list[str | NmrAtom | Sequence[str | NmrAtom]] | None = None):
         """Assign dimensions with axisCode to values (NmrAtom, or Pid or sequence of either, or None).
         """
         specAxisCodes = self.spectrum.axisCodes
@@ -1072,6 +1071,11 @@ class Peak(AbstractWrapperObject):
         assigned = tuple(() for _ in range(self.peakList.spectrum.dimensionCount))
 
         with undoBlockWithoutSideBar():
+            # remove from any associated multiplets
+            if mp := self.multiplets:
+                for m in mp:
+                    m.removePeaks([self])
+
             self.dimensionNmrAtoms = assigned
             self._delete()
 

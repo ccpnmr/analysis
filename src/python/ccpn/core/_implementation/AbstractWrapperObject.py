@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-01-03 13:01:00 +0000 (Wed, January 03, 2024) $"
-__version__ = "$Revision: 3.3.0 $"
+__dateModified__ = "$dateModified: 2024-03-20 19:06:25 +0000 (Wed, March 20, 2024) $"
+__version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,6 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import functools
+import string
 import traceback
 import typing
 import re
@@ -52,6 +53,7 @@ from ccpn.util.Logging import getLogger
 
 
 _RENAME_SENTINEL = Pid.Pid('Dummy:_rename')
+ILLEGAL_PATH_CHARS = r'<>:"/\|?*&@'
 
 
 @functools.total_ordering
@@ -411,34 +413,52 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
     def _validateStringValue(cls, attribName: str, value: str,
                              allowWhitespace: bool = False,
                              allowEmpty: bool = False,
-                             allowNone: bool = False):
+                             allowNone: bool = False,
+                             limitChars: bool = False,
+                             filePathChars: bool = False):
         """Validate the value of any string
 
         :param attribName: used for reporting
         :param value: value to be validated
+        :param allowWhitespace: When True whitespace is allowed.
+        :param allowEmpty: When True empty strings are allowed
+        :param allowNone: When True values equaling None are allowed.
+        :param limitChars: When True values containing non alphanumerics are disallowed.
+
 
         CCPNINTERNAL: used in many rename() and newXYZ method of core classes
+
+        Raises an error if a string is not conforming to the allowed and limit rules.
+        Validation Rules:
+            - Whitespace: space, tab, linefeed, return, formfeed, and vertical tab
+            - Empty: '' or ""
+            - None: None
+            - Limited Chars: Allowable characters are abcdefghijklmnopqrstuvwxyz upper or lower,
+              0123456789, @, %, + and, -
         """
         if value is None and not allowNone:
-            raise ValueError('%s: None not allowed for %r' %
-                             (cls.__name__, attribName))
+            raise ValueError(f'{cls.__name__}: None not allowed for {attribName!r}')
 
         if value is not None:
             if not isinstance(value, str):
-                raise ValueError('%s: %r must be a string' %
-                                 (cls.__name__, attribName))
+                raise ValueError(f'{cls.__name__}: {attribName!r} must be a string')
 
             if len(value) == 0 and not allowEmpty:
-                raise ValueError('%s: %r must be set' %
-                                 (cls.__name__, attribName))
+                raise ValueError(f'{cls.__name__}: {attribName!r} must be set')
 
             if Pid.altCharacter in value:
-                raise ValueError('%s: Character %r not allowed in %r; got %r' %
-                                 (cls.__name__, Pid.altCharacter, attribName, value))
+                raise ValueError(
+                    f'{cls.__name__}: Character {Pid.altCharacter!r} not allowed in {attribName!r}; got {value!r}')
 
             if not allowWhitespace and commonUtil.contains_whitespace(value):
-                raise ValueError('%s: Whitespace not allowed in %r; got %r' %
-                                 (cls.__name__, attribName, value))
+                raise ValueError(f'{cls.__name__}: Whitespace not allowed in {attribName!r}; got {value!r}')
+
+            if limitChars and not set(value).issubset(set(string.ascii_letters) | set(string.digits) | set('@%-+')):
+                raise ValueError(f'{cls.__name__}: {attribName} should only contain alphanumeric characters and'
+                                 f' @, %, + or -')
+
+            if filePathChars and not set(value).isdisjoint(ILLEGAL_PATH_CHARS):
+                raise ValueError(f'{cls.__name__}: {attribName} should not include {ILLEGAL_PATH_CHARS}')
 
     # @staticmethod
     # def _nextAvailableName(cls, project):

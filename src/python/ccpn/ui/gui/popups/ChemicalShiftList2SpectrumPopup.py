@@ -1,9 +1,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -11,9 +11,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: VickyAH $"
-__dateModified__ = "$dateModified: 2023-03-20 21:01:51 +0000 (Mon, March 20, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-03-20 19:06:27 +0000 (Wed, March 20, 2024) $"
+__version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -53,10 +53,11 @@ class MapperRowWidgetLabels(Widget):
 
         col = 0
         self.isotopeCodeLabel = Label(self, 'Isotope', grid=(0,col),
-                                      tipText='IsotopeCode. Used to simulate the new Spectrum')
+                                      tipText='IsotopeCode. Used to create the new synthetic PeakList')
         col += 1
         self.axisCodeEntryLabel = Label(self, 'AxisCode', grid=(0,col),
-                                      tipText='AxisCode. Used to simulate the new Spectrum and assign the NmrAtom')
+                                      tipText='AxisCode. Used to create the new synthetic PeakList '
+                                              'and assign the NmrAtom')
         col += 1
         self.mmrAtomEntryLabel = Label(self, 'NmrAtom Name', grid=(0,col),
                                      tipText='NmrAtom Name. Used to assign the NmrAtom to newly created peaks')
@@ -76,10 +77,12 @@ class MapperRowWidget(Widget):
         col = 0
 
         self.isotopeCodeLabel = Label(self, 'IsotopeCode', grid=(0,col),
-                                      tipText='IsotopeCode. Used to simulate the new Spectrum')
+                                      tipText='IsotopeCode. Used to create the new Synthetic PeakList'
+                                              )
         col += 1
         self.axisCodeEntry = LineEdit(self, backgroundText='AxisCode. E.g.: Hn', grid=(0,col),
-                                      tipText='AxisCode. Used to simulate the new Spectrum and assign the NmrAtom')
+                                      tipText='AxisCode. Used to create the new Synthetic PeakList '
+                                              'and assign the NmrAtom')
         self.axisCodeEntry.setEnabled(False)
 
         col += 1
@@ -118,7 +121,7 @@ class ChemicalShiftList2SpectrumPopup(CcpnDialogMainWidget):
     FIXEDWIDTH = False
     FIXEDHEIGHT = False
 
-    title = 'Simulate Spectrum and PeakList from ChemicalShiftList (Alpha)'
+    title = 'Create Synthetic PeakList from ChemicalShiftList (Alpha)'
     def __init__(self, parent=None, chemicalShiftList=None, title=title, **kwds):
         super().__init__(parent, setLayout=True, windowTitle=title,
                          size=(500, 300), minimumSize=None, **kwds)
@@ -127,7 +130,7 @@ class ChemicalShiftList2SpectrumPopup(CcpnDialogMainWidget):
         self.application = getApplication()
         self.current = getCurrent()
         self.chemicalShiftList = chemicalShiftList
-        self.spectrumSimulatorClass = None
+        self.spectrumSynthesizerClass = None
         self._mapperWidgets = defaultdict(list)
         self._createWidgets()
 
@@ -145,7 +148,7 @@ class ChemicalShiftList2SpectrumPopup(CcpnDialogMainWidget):
 
         row = 0
         spectrumName = self.chemicalShiftList.name if self.chemicalShiftList else ''
-        self.spectrumNameLabel = Label(self.mainWidget, 'New Spectrum Name', grid=(row, 0),)
+        self.spectrumNameLabel = Label(self.mainWidget, 'New Synthetic PeakList Name', grid=(row, 0),)
         self.spectrumNameEntry = LineEdit(self.mainWidget, text=spectrumName, grid=(row, 1))
         row  += 1
         self.experimentTypelabel = Label(self.mainWidget, 'Experiment Type', grid=(row, 0), )
@@ -169,16 +172,16 @@ class ChemicalShiftList2SpectrumPopup(CcpnDialogMainWidget):
     def _setWidgetsByExperimentType(self, *args):
         pulldown = self.experimentTypePulldown
         selected = pulldown.get()
-        self.spectrumSimulatorClass = CSL2SPECTRUM_DICT.get(selected, None)
+        self.spectrumSynthesizerClass = CSL2SPECTRUM_DICT.get(selected, None)
 
         _GREY = '#888888'
-        if self.spectrumSimulatorClass:
+        if self.spectrumSynthesizerClass:
             self._clearMapperWidgets(self.mappersFrame.getLayout())
             self._mapperWidgets = defaultdict(list)
             row = 0
 
             labelsWidget = None
-            peakAtomNameMappers = self.spectrumSimulatorClass.getPeakAtomNameMappers(self.spectrumSimulatorClass)
+            peakAtomNameMappers = self.spectrumSynthesizerClass.getPeakAtomNameMappers(self.spectrumSynthesizerClass)
             for i, mappers in enumerate(peakAtomNameMappers):
                 # loop through mappers to get the required atoms names  etc
                 LabeledHLine(self.mappersFrame, text=f'Peak Group {i + 1} ', grid=(row, 0), style='DashLine', colour=_GREY)
@@ -214,11 +217,11 @@ class ChemicalShiftList2SpectrumPopup(CcpnDialogMainWidget):
 
     def _okCallback(self):
         if self.project and self.chemicalShiftList:
-            if self.spectrumSimulatorClass:
-                spectrumSim = self.spectrumSimulatorClass(self.chemicalShiftList, {'name':self.spectrumNameEntry.get()})
-                self._updateMappersFromWidgets(spectrumSim)
+            if self.spectrumSynthesizerClass:
+                synthSpectrum = self.spectrumSynthesizerClass(self.chemicalShiftList, {'name':self.spectrumNameEntry.get()})
+                self._updateMappersFromWidgets(synthSpectrum)
                 # try:
-                spectrumSim.simulatePeakList()
+                synthSpectrum.simulatePeakList()
                 # except Exception as err:
                 # msg = f'Failed to simulate PeakList for {spectrumSim.spectrum} from {self.chemicalShiftList}.\n{err}'
                 # getLogger().warning(msg)

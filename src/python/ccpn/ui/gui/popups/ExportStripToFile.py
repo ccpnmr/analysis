@@ -4,9 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-01 19:39:58 +0100 (Thu, June 01, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-03-20 19:06:27 +0000 (Wed, March 20, 2024) $"
+__version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1625,10 +1625,10 @@ class ExportStripToFilePopup(ExportDialogABC):
                     pngExport.writePSFile()
 
     def actionButtons(self):
-        self.setOkButton(callback=self._saveAndCloseDialog, text='Save and Close',
+        self.setOkButton(callback=self._saveAndCloseDialog, text='Export and Close',
                          tipText='Export the strip and close the dialog\nAll changes to the print settings are saved')
         self.setCancelButton(callback=self._closeDialog, text='Close', tipText='Close the dialog\nAll changes to the print settings are saved')
-        self.setCloseButton(callback=self._saveDialog, text='Save', tipText='Export the strip')
+        self.setCloseButton(callback=self._saveDialog, text='Export', tipText='Export the strip')
         self.setHelpButton(callback=self._helpClicked, tipText='Help', enabled=False)
         self.setRevertButton(callback=self._revertClicked, tipText='Revert print settings to the state when the dialog was opened', enabled=False)
         self.setUserButton(callback=self._rejectDialog, text='Cancel',
@@ -1660,6 +1660,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         self.setSaveTextWidget(lastPath)
         self.exitFilename = lastPath
 
+        # NOTE:DT Change when 'Do not prompt again' is more prevalent to check if exists ever
         if self.pathEdited is False:
             # user has not changed the path so we can accept()
             self._exportToFile()
@@ -1813,6 +1814,7 @@ class ExportStripToFilePopup(ExportDialogABC):
     @queueStateChange(_verifyPopupApply)
     def _queuePrintTypeCallback(self):
         value = self.printType.get()
+        self._fileNamePrintType(value)
         if value != self.printSettings.printType:
             return partial(self._setPrintType, value)
 
@@ -1820,6 +1822,25 @@ class ExportStripToFilePopup(ExportDialogABC):
         """Set the print type: pdf, ps, svg, etc.
         """
         self.printSettings.printType = value
+
+    def _fileNamePrintType(self, value):
+        """Change print file extensions
+            Intented to be used by radio buttons
+        :param value: The new print type.
+        """
+        if value not in EXPORTTYPES:
+            raise TypeError('bad export type')
+
+        # filename changes
+        path = self.getSaveTextWidget()
+        newPath = path.with_suffix(EXPORTTYPES[value][EXPORTEXT])
+        self.updateFilename(newPath)
+
+        # popup changes
+        self._dialogFilter = EXPORTTYPES[value][EXPORTFILTER]
+        self.updateDialog()
+        self._updateButtonText()
+
 
     def _changeColourButton(self):
         """Popup a dialog and set the colour in the pulldowns

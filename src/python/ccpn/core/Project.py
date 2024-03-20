@@ -16,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-22 15:58:35 +0000 (Thu, February 22, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-03-20 19:06:25 +0000 (Wed, March 20, 2024) $"
+__version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -2524,7 +2524,7 @@ class Project(AbstractWrapperObject):
         return _newNmrChain(self, shortName=shortName, isConnected=isConnected,
                             label=label, comment=comment)
 
-    @logCommand('project')
+    @logCommand('project.')
     def fetchNmrChain(self, shortName: str = None):
         """Fetch chain with given shortName; If none exists call newNmrChain to make one first
 

@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-04 15:01:17 +0000 (Mon, March 04, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__dateModified__ = "$dateModified: 2024-03-20 19:06:27 +0000 (Wed, March 20, 2024) $"
+__version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 #=========================================================================================
 
 import os
-
+from collections import OrderedDict
 import pandas as pd
 from PyQt5 import QtWidgets, QtCore, QtGui, Qt
 from functools import partial
@@ -93,6 +93,30 @@ FONTLABELFORMAT = '_fontLabel{}'
 FONTDATAFORMAT = '_fontData{}'
 FONTSTRING = '_fontString'
 FONTPREFS = 'font{}'
+
+PROFILING_SORTINGS = OrderedDict([  # (arg to go on script, tipText)
+    ('time', 'internal time'),
+    ('calls', 'call count'),
+    ('cumulative', 'cumulative time'),
+    ('file', 'file name'),
+    ('module', 'file name'),
+    ('pcalls', 'primitive call count'),
+    ('line', 'line number'),
+    ('name', 'function name'),
+    ('nfl', 'name/file/line'),
+    ('stdname', 'standard name'),
+    ])
+
+
+DefaultProfileLines = .2  # % of tot lines to be printed when profiling
+DefaultProfileMaxNoLines = 10  # Max number of lines to be printed when profiling
+
+ShowMaxLines = OrderedDict([
+    ('Minimal', DefaultProfileMaxNoLines),
+    ('Top', DefaultProfileLines),
+    ('Half', 0.5),
+    ('All', 1.0)
+    ])
 
 
 def _updateSettings(self, newPrefs, updateColourScheme, updateSpectrumDisplays, userWorkingPath=None):
@@ -454,6 +478,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                    (self._setPeaksTabWidgets, 'Peaks'),
                                    (self._setExternalProgramsTabWidgets, 'External Programs'),
                                    (self._setAppearanceTabWidgets, 'Appearance'),
+                                   (self._setMacroEditorTabWidgets, 'Macro Editor')
                                    ):
             fr = ScrollableFrame(self.mainWidget, setLayout=True, spacing=DEFAULTSPACING,
                                  scrollBarPolicies=('never', 'asNeeded'), margins=TABMARGINS)
@@ -773,6 +798,52 @@ class PreferencesPopup(CcpnDialogMainWidget):
         row += 1
         parent.addSpacer(15, 2, expandX=True, expandY=True, grid=(row, 2), gridSpan=(1, 1))
 
+    def _setMacroEditorTabWidgets(self, parent):
+        row = 0
+        #==== Saving ====#
+        row += 1
+        _makeLine(parent, grid=(row, 0), text="Macro Saving")
+        row += 1
+        self.macroAutoSaveBox = _makeCheckBox(parent, text="Autosave Macros", row=row,
+                                         callback=partial(self._queueToggleGeneralOptions, 'macroAutosave'))
+
+        #==== Default Profiler Settings ====#
+        row += 1
+        _makeLine(parent, grid=(row, 0), text="Default Profiler Settings")
+        row += 1
+        self.safeProfileFileCheckBox = _makeCheckBox(parent, text="Save Profiler to disk", row=row,
+                                                     callback=partial(self._queueToggleGeneralOptions, 'macroSaveProfile'))
+        row += 1
+        self.sortProfileFilePulldownLabel = _makeLabel(parent, text="Profiler output sorting", grid=(row, 0))
+        self.sortProfileFilePulldown = PulldownList(parent, grid=(row, 1), hAlign='l')
+        self.sortProfileFilePulldown.setMinimumWidth(LineEditsMinimumWidth)
+        self.sortProfileFilePulldown.currentIndexChanged.connect(self._queueChangeSortProfile)
+        row += 1
+        self.showLinesPulldownLabel = _makeLabel(parent, text="Profiler output limits", grid=(row, 0))
+        self.showLinesPulldown = PulldownList(parent, grid=(row, 1), hAlign='l')
+        self.showLinesPulldown.setMinimumWidth(LineEditsMinimumWidth)
+        self.showLinesPulldown.currentIndexChanged.connect(self._queueChangeShowLines)
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueChangeSortProfile(self, value):
+        modes = list(PROFILING_SORTINGS.keys())
+        value = modes[value]
+        if value != self.preferences.general.macroSortProfile:
+            return partial(self._changeSortProfile, value)
+
+    def _changeSortProfile(self, value):
+        self.preferences.general.macroSortProfile = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueChangeShowLines(self, value):
+        lines = list(ShowMaxLines.keys())
+        value = lines[value]
+        if value != self.preferences.general.macroShowLines:
+            return partial(self._changeShowLines, value)
+
+    def _changeShowLines(self, value):
+        self.preferences.general.macroShowLines = value
+
     @queueStateChange(_verifyPopupApply)
     def _queueShowAllDialogs(self):
         self._setShowAllDialogs()
@@ -890,6 +961,20 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.closeSpectrumDisplayOnLastSpectrum.setChecked(prefApp.closeSpectrumDisplayOnLastSpectrum)
         # self.closeSpectrumDisplayOnLastStrip.setChecked(prefApp.closeSpectrumDisplayOnLastStrip)
 
+    def _populateMacroEditorTab(self):
+
+        prefGen = self.preferences.general
+        self.macroAutoSaveBox.setChecked(prefGen.macroAutosave)
+        self.safeProfileFileCheckBox.setChecked(prefGen.macroSaveProfile)
+
+        self.sortProfileFilePulldown.addItems(PROFILING_SORTINGS.keys())
+        index = self.sortProfileFilePulldown.findText(prefGen.macroSortProfile)
+        self.sortProfileFilePulldown.setCurrentIndex(index)
+
+        self.showLinesPulldown.addItems(ShowMaxLines.keys())
+        self.showLinesPulldown.setCurrentIndex(self.showLinesPulldown.findText(prefGen.macroShowLines))
+
+
     def _populate(self):
         """Populate the widgets in the tabs
         """
@@ -903,6 +988,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             self._populatePeaksTab()
             self._populateExternalProgramsTab()
             self._populateAppearanceTab()
+            self._populateMacroEditorTab()
 
     def setFontText(self, widget, fontString):
         """Set the contents of the widget the details of the font

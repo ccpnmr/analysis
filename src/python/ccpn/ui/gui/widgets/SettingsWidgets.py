@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
                "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-07 16:19:53 +0000 (Thu, December 07, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2024-03-20 19:06:28 +0000 (Wed, March 20, 2024) $"
+__version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -60,6 +60,7 @@ from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.ui.gui.widgets.Base import SignalBlocking
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.Chain import Chain
+from ccpn.core.PeakList import PeakList
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrAtom import NmrAtom
@@ -1789,6 +1790,10 @@ class SpectrumGroupSelectionWidget(ObjectSelectionWidget):
 
 class NmrChainSelectionWidget(ObjectSelectionWidget):
     KLASS = NmrChain
+
+
+class PeakListSelectionWidget(ObjectSelectionWidget):
+    KLASS = PeakList
 
 
 class UniqueNmrAtomNamesSelectionWidget(ObjectSelectionWidget):

@@ -3,9 +3,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,13 +14,16 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-13 16:56:35 +0100 (Thu, July 13, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-03-20 19:06:25 +0000 (Wed, March 20, 2024) $"
+__version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: Ed Brooksbank $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
+
+from itertools import chain
+
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -42,7 +45,8 @@ from ccpn.util.Constants import SCALETOLERANCE
 
 
 MULTIPLET_TYPES = ['singlet', 'doublet', 'triplet', 'quartet', 'quintet', 'sextet', 'septet', 'octet', 'nonet',
-                   'doublet of doublets', 'doublet of triplets', 'triplet of doublets', 'doublet of doublet of doublets']
+                   'doublet of doublets', 'doublet of triplets', 'triplet of doublets',
+                   'doublet of doublet of doublets']
 
 
 def _calculateCenterOfMass(multiplet):
@@ -690,6 +694,10 @@ class Multiplet(AbstractWrapperObject):
             for pk in pks:
                 self._wrappedData.removePeak(pk._wrappedData)
 
+            # leaves single component multiplet (however makes GUI interaction impossible)
+            if self.numPeaks < 1:
+                self.delete()
+
     def _propagateAction(self, data):
         from ccpn.core.lib.Notifiers import Notifier
 
@@ -699,26 +707,75 @@ class Multiplet(AbstractWrapperObject):
         if trigger in ['change']:
             self._finaliseAction(trigger)
 
+    @logCommand(get='self')
+    def mergeOnlyMultiplets(self, multiplets: list['Multiplet']):
+        """Merge a list of multiplets and their peaks into this multiplet
+
+        Note: All multiplets other than this one is deleted after merging
+        all the peaks.
+
+        :param multiplets: a list of peaks to be merged into the multiplet.
+        """
+        with undoBlock():
+            for mp in multiplets:
+                if mp is not self:
+                    pkAdd = mp.peaks
+                    mp.removePeaks(mp.peaks)  # empty multiplet should be deleted here.
+                    self.addPeaks(pkAdd)
+
+    @logCommand(get='self')
+    def mergeMultiplets(self, peaks : list[Peak], multiplets : list['Multiplet']):
+        """Merge any combination of multiplet and peak objects together.
+
+        Note: if a peak is currently in another multiplet it will not merge unless
+        that multiplet is also selected.
+
+        :param peaks: a list of peaks to be merged into the multiplet
+        :param multiplets: a lift of multiplets to merged into the current multiplet
+        """
+        alonePeaks = [pk for pk in peaks if not pk.multiplets]
+
+        with undoBlock():
+            self.mergeOnlyMultiplets(multiplets)
+            self.addPeaks(alonePeaks)
+            self._unifyAssignments()
+
     #===========================================================================================
     # new<Object> and other methods
     # Call appropriate routines in their respective locations
     #===========================================================================================
 
+    def _unifyAssignments(self):
+        """Force all peaks in the multiplet to share assignments"""
+        axisCodes = self.axisCodes
+        assignments = [[] for _ in axisCodes]
+        for pk in self.peaks:
+            dimensionMapping = pk.spectrum.getByAxisCodes('dimensions', axisCodes, exactMatch=False)
+            if pk.assignedNmrAtoms:
+                [a] = pk.getByDimensions('assignedNmrAtoms', dimensionMapping)
+                for dim, assign in enumerate(assignments):
+                    if a[dim] not in assign and a[dim is not None]:
+                        assign.append(a[dim])
+
+        for pk in self.peaks:
+            pk.assignDimensions(axisCodes, assignments)
 
 #=========================================================================================
 # Connections to parents
 #=========================================================================================
 
 @newObject(Multiplet)
-def _newMultiplet(self: MultipletList,
-                  height: float = 0.0, heightError: float = 0.0,
-                  volume: float = 0.0, volumeError: float = 0.0,
-                  offset: float = 0.0, constraintWeight: float = 0.0,
-                  figureOfMerit: float = 1.0, annotation: str = None, comment: str = None,
-                  limits: Sequence[Tuple[float, float]] = (), slopes: List[float] = (),
-                  pointLimits: Sequence[Tuple[float, float]] = (),
-                  peaks: Sequence[Union['Peak', str]] = ()) -> Multiplet:
-    """Create a new Multiplet within a multipletList
+def _newAPIMultiplet(self: MultipletList,
+                     height: float = 0.0, heightError: float = 0.0,
+                     volume: float = 0.0, volumeError: float = 0.0,
+                     offset: float = 0.0, constraintWeight: float = 0.0,
+                     figureOfMerit: float = 1.0, annotation: str = None, comment: str = None,
+                     limits: Sequence[Tuple[float, float]] = (), slopes: List[float] = (),
+                     pointLimits: Sequence[Tuple[float, float]] = (),
+                     peaks: Sequence[Union['Peak', str]] = ()) -> Multiplet:
+    """Create a new api Multiplet within a multipletList
+    Note: does not do assignments for peaks (see _newMultiplet)
+    mostly exists to allow proper undo blocking for _newMultiplet
 
     See the Multiplet class for details.
 
@@ -772,6 +829,70 @@ def _newMultiplet(self: MultipletList,
         raise RuntimeError('Unable to generate new Multiplet item')
 
     return result
+
+# changed after multiplet discussion feb 2 2024
+# def _assignNewMultipletPeaks(self, peaks):
+#     peakList = makeIterableList(peaks)
+#     pks = [self.project.getByPid(peak) if isinstance(peak, str) else peak
+#            for peak in peakList]
+#
+#     for pp in pks:
+#         if not isinstance(pp, Peak):
+#             raise TypeError(f'newMultiplet: {pp} is not of type Peak')
+#
+#     assignment = []
+#     doAssign = False
+#     for pk in pks:
+#         tempAssign = pk.assignedNmrAtoms
+#         if not assignment:  # nothing assigned yet
+#             assignment = tempAssign
+#             assignPeak = pk
+#             doAssign = True
+#             # assignPeak = {'peak': pk, 'assigns': pk.assignedNmrAtoms}
+#         elif assignment != tempAssign and len(tempAssign) != 0:  # if non matching assigned that isnt empty
+#             doAssign = False
+#             break
+#
+#     if doAssign:
+#         for pk in pks:
+#             assignPeak.copyAssignmentTo(pk)
+
+
+def _newMultiplet(self: MultipletList,
+                  height: float = 0.0, heightError: float = 0.0,
+                  volume: float = 0.0, volumeError: float = 0.0,
+                  offset: float = 0.0, constraintWeight: float = 0.0,
+                  figureOfMerit: float = 1.0, annotation: str = None, comment: str = None,
+                  limits: Sequence[Tuple[float, float]] = (), slopes: List[float] = (),
+                  pointLimits: Sequence[Tuple[float, float]] = (),
+                  peaks: Sequence[Union['Peak', str]] = ()) -> Multiplet:
+    """
+    Create a new Multiplet within a multiplet list
+
+    Note: If there is only one assigned peak or if multiple assigned peaks
+    have the same assignment, then copy that assignment to any other non-assigned
+    constituent peaks.
+
+    :param self:
+    :param height:
+    :param heightError:
+    :param volume:
+    :param volumeError:
+    :param offset:
+    :param constraintWeight:
+    :param figureOfMerit:
+    :param annotation:
+    :param comment:
+    :param limits:
+    :param slopes:
+    :param pointLimits:
+    :param peaks:
+    :return:
+    """
+    with undoBlock():
+        result = _newAPIMultiplet(**locals())
+        result._unifyAssignments()
+        return result
 
 
 # EJB 20181127: removed

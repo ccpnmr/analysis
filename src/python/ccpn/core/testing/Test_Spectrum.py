@@ -4,19 +4,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 11:22:10 +0000 (Fri, January 21, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2024-03-20 19:06:26 +0000 (Wed, March 20, 2024) $"
+__version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,6 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+from numpy import ones
 from ccpn.core.testing.WrapperTesting import WrapperTesting, fixCheckAllValid
 from ccpn.util import Path, Constants
 from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
@@ -35,79 +36,101 @@ class SimpleSpectrumTest(WrapperTesting):
     # Path of project to load (None for new project)
     projectPath = 'V3ProjectForTests.ccpn'
 
-    def test_have_spectrum(self):
+    def test_get_spectrum(self):
         self.assertTrue(self.project.getSpectrum('hsqc_115') is not None)
 
     def test_id_is_spectrum(self):
         self.assertEqual(self.project.getSpectrum('hsqc_115').name, 'hsqc_115')
-        # Undo and redo all operations
-        self.undo.undo()
-        self.undo.redo()
 
 
 class SpectrumTest(WrapperTesting):
     # Path of project to load (None for new project)
     projectPath = 'V3ProjectForTests.ccpn'
 
+    def setUp(self):
+        with self.initialSetup():
+            self.spectrum = self.project.getSpectrum('hsqc_115')
+            # Undo and redo all operations (?)
+            # self.undo.undo()
+            # self.undo.redo()
+
     def test_dimensionCount(self):
-        spectrum = self.project.getSpectrum('hsqc_115')
-        # Undo and redo all operations
-        self.undo.undo()
-        self.undo.redo()
-        self.assertEqual(spectrum.dimensionCount, spectrum._apiDataSource.numDim)
+        self.assertEqual(self.spectrum.dimensionCount, self.spectrum._apiDataSource.numDim)
 
     def test_pointCount(self):
-        spectrum = self.project.getSpectrum('hsqc_115')
-        numPoints = [dataDim.numPoints for dataDim in spectrum._apiDataSource.sortedDataDims()]
-
-        # Undo and redo all operations
-        self.undo.undo()
-        self.undo.redo()
-        self.assertEqual(spectrum.pointCounts, numPoints)
+        numPoints = [dataDim.numPoints for dataDim in self.spectrum._apiDataSource.sortedDataDims()]
+        self.assertEqual(self.spectrum.pointCounts, numPoints)
 
     def test_filePath(self):
-        spectrum = self.project.getSpectrum('hsqc_115')
-        # Undo and redo all operations
-        self.undo.undo()
-        self.undo.redo()
-        self.assertTrue(spectrum.filePath.startswith('$ALONGSIDE'))
-        self.assertTrue(spectrum.dataSource.dataFile.startswith(Path.getTopDirectory()))
+        self.assertTrue(self.spectrum.filePath.startswith('$ALONGSIDE'))
+        self.assertTrue(self.spectrum.dataSource.dataFile.startswith(Path.getTopDirectory()))
 
     def test_rename(self):
-        spectrum = self.project.getSpectrum('hsqc_115')
-        peakList = spectrum.peakLists[0]
-        spectrum.rename('NEWNAME')
-        # Undo and redo all operations
+        peakList = self.spectrum.peakLists[0]
+        initial_name = self.spectrum.name
+        self.spectrum.rename('NEWNAME')
+
+        def name_tester(name):
+            self.assertEqual(self.spectrum.pid, f'SP:{name}')
+            self.assertEqual(peakList.pid, f'PL:{name}.1')
+            self.assertEqual(peakList.peaks[0].pid, f'PK:{name}.1.1')
+
+        name_tester('NEWNAME')
+
         self.undo.undo()
+        name_tester(initial_name)
         self.undo.redo()
-        self.assertEqual(spectrum.pid, 'SP:NEWNAME')
-        self.assertEqual(peakList.pid, 'PL:NEWNAME.1')
-        self.assertEqual(peakList.peaks[0].pid, 'PK:NEWNAME.1.1')
+        name_tester('NEWNAME')
+        self.spectrum.rename(initial_name)
+
 
 
 class SpectrumIntensitiesTest(WrapperTesting):
     # Path of project to load (None for new project)
     projectPath = 'V3ProjectForTests.ccpn'
 
-    def test_intensities_get(self):
+    def setUp(self):
+        with self.initialSetup():
+            self.spectrum = self.project.getSpectrum('1H_1D')
+            self.intensities = self.spectrum.intensities
 
+    def tearDown(self):
+        self.intensities = self.spectrum.intensities
+
+    def test_intensities_get(self):
         # fix the bad structure for the test
         # new pdb loader does not load the into the data model so there are no atoms defined
         # the corresponding dataMatrices therefore have dimension set to zero which causes a crash :|
-        fixCheckAllValid(self.project)
-
-        self.project._wrappedData.root.checkAllValid(complete=True)
-        spectrum = self.project.getSpectrum('1H_1D')
-        intensities = spectrum.intensities
-        self.assertIs(intensities, spectrum.intensities)
+        # ==================================== REMOVED ========================================= #
+        # fixCheckAllValid(self.project)
+        # self.project._wrappedData.root.checkAllValid(complete=True)
+        # ====================================================================================== #
+        self.assertIs(self.intensities, self.spectrum.intensities)
 
     def test_intensities_set(self):
-        spectrum = self.project.getSpectrum('1H_1D')
-        intensities = spectrum.intensities
-        intensities[0] = 19.23
-        constant1 = intensities[0]  # have to do as separate step o/w constant1 has type float instead of numpy.float32
-        constant2 = spectrum.intensities[0]
+        self.intensities[0] = 19.23
+        # have to do as separate step o/w constant1 has type float instead of numpy.float32
+        constant1 = self.intensities[0]
+        constant2 = self.spectrum.intensities[0]
         self.assertEqual(constant1, constant2)
+
+    def test_intensitiesNone_set_get(self):
+        self.spectrum.intensities = ones(32768)
+        spect_ones = self.spectrum.intensities[0]
+        self.spectrum.intensities = None
+        spect_none = self.spectrum.intensities[0]
+        self.assertNotEqual(spect_ones, spect_none)
+        self.assertEqual(self.spectrum.getSliceData()[0], spect_none)
+
+        # Undo and redo all operations
+        self.undo.undo()
+        self.assertEqual(self.spectrum.intensities[0], spect_ones)
+        self.undo.undo()
+        self.assertEqual(self.spectrum.intensities[0], spect_none)
+        self.undo.redo()
+        self.assertEqual(self.spectrum.intensities[0], spect_ones)
+        self.undo.redo()
+        self.assertEqual(self.spectrum.intensities[0], spect_none)
 
 
 class DummySpectrumTest(WrapperTesting):

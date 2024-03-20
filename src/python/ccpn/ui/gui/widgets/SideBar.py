@@ -16,9 +16,9 @@ SidebarClassTreeItems: A Tree with a number of dynamically added items of type V
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -27,8 +27,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-22 13:04:53 +0000 (Wed, November 22, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2024-03-20 19:06:28 +0000 (Wed, March 20, 2024) $"
+__version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -71,6 +71,7 @@ from ccpn.core.ViolationTable import ViolationTable
 from ccpn.core._implementation.CollectionList import CollectionList
 from ccpn.core.Collection import Collection
 
+
 from ccpn.core.lib.Pid import Pid
 # from ccpn.ui.gui.guiSettings import sidebarFont
 from ccpn.ui.gui.widgets.Base import Base
@@ -82,6 +83,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Spacer import Spacer as CCPNSpacer
 from ccpn.util.Constants import ccpnmrJsonData
+from ccpn.util.Common import copyToClipboard
 from ccpn.core.lib.Notifiers import Notifier, NotifierBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.lib.mouseEvents import makeDragEvent
@@ -1308,6 +1310,9 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         if event.button() == QtCore.Qt.RightButton:
             self._raiseContextMenu(event)
             event.accept()
+        elif event.button() == QtCore.Qt.MiddleButton:
+            self._copyHoverPID()
+            event.accept()
         else:
             super().mouseReleaseEvent(event)
 
@@ -1468,6 +1473,16 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
                 menuAction(self.mainWindow, dataPid, sideBarObject,
                            QtCore.QPoint(event.globalPos().x(), event.globalPos().y() + 10),
                            objs)
+
+    def _copyHoverPID(self):
+        """Copies the PID object an object to the clipboard
+        """
+        for item in self.selectedItems():
+            if item is not None:
+                dataPid = item.data(0, QtCore.Qt.DisplayRole)
+                if objFromPid := self.project.getByPid(dataPid):
+                    copyToClipboard([objFromPid])
+
 
     # def _deleteItemObject(self, objs):
     #     """Removes the specified item from the sidebar and deletes it from the project.

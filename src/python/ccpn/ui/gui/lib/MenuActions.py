@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-05 17:32:46 +0000 (Mon, February 05, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-03-20 19:06:26 +0000 (Wed, March 20, 2024) $"
+__version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -774,7 +774,7 @@ class _openItemChemicalShiftListTable(OpenItemABC):
         if self.openAction:
             contextMenu.addAction(self.contextMenuText, self.openAction)
         contextMenu.addSeparator()
-        contextMenu.addAction('Simulate Spectrum', partial(self._openSimulateSpectrumFromCSLPopup, objs))
+        contextMenu.addAction('Create Synthetic PeakList', partial(self._openCreateSyntheticPeakListFromCSLPopup, objs))
         contextMenu.addSeparator()
         contextMenu.addAction('Copy Pid to Clipboard', partial(self._copyPidsToClipboard, objs))
         self._addCollectionMenu(contextMenu, objs)
@@ -793,9 +793,9 @@ class _openItemChemicalShiftListTable(OpenItemABC):
             obj.duplicate()
 
     @staticmethod
-    def _openSimulateSpectrumFromCSLPopup(objs):
+    def _openCreateSyntheticPeakListFromCSLPopup(objs):
         if len(objs) > 1:
-            showWarning('Simulate Spectrum from ChemicalShift', 'Please select only one ChemicalShift list')
+            showWarning('Create Synthetic PeakList from ChemicalShift', 'Please select only one ChemicalShift list')
             # Might think of merging multiple lists ?
             return
         if len(objs) > 0:

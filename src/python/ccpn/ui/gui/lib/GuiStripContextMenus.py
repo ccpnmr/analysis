@@ -19,8 +19,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-02-26 15:48:56 +0000 (Mon, February 26, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__dateModified__ = "$dateModified: 2024-03-20 19:06:26 +0000 (Wed, March 20, 2024) $"
+__version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -312,8 +312,8 @@ def _makeStripPlot(strip):
 
 
 def _printItem(strip):
-    return _SCMitem(name='Print to File...',
-                    typeItem=ItemTypes.get(ITEM), icon='icons/print', toolTip='Print SpectrumDisplay to File',
+    return _SCMitem(name='Export to File...',
+                    typeItem=ItemTypes.get(ITEM), icon='icons/print', toolTip='Export SpectrumDisplay to File',
                     shortcut='⌃p', callback=strip.showExportDialog)
 
 
@@ -376,6 +376,12 @@ def _deleteMultipletItem(strip):
     return _SCMitem(name='Delete Multiplet(s)',
                     typeItem=ItemTypes.get(ITEM), toolTip='Delete Multiplet(s) from project', callback=strip.mainWindow.deleteSelectedItems)
 
+
+def _mergeMultipletItem(strip):
+    return _SCMitem(name='Merge Multiplet(s)',
+                    typeItem=ItemTypes.get(ITEM),
+                    toolTip='Merge Multiplet(s) and Peak(s) into a single Multiplet', shortcut='XM',
+                    callback=strip.mainWindow.mergeCurrentMultiplet)
 
 ##############################  Common Peak menu items ##############################
 ## These items are used to create both 1D and Nd Peak menus
@@ -1033,6 +1039,8 @@ def _get1dMultipletMenu(guiStrip1d) -> Menu:
         _deleteMultipletItem(guiStrip1d),
         _separator(),
         _markMultipletsItem(),
+        _separator(),
+        _mergeMultipletItem(guiStrip1d),
         ]
     items = [itm for itm in items if itm is not None]
     return _createMenu(guiStrip1d, items)
@@ -1230,6 +1238,8 @@ def _getNdMultipletMenu(guiStripNd) -> Menu:
         _deleteMultipletItem(guiStripNd),
         _separator(),
         _markMultipletsItem(),
+        _separator(),
+        _mergeMultipletItem(guiStripNd),
         ]
     items = [itm for itm in items if itm is not None]
     return _createMenu(guiStripNd, items)

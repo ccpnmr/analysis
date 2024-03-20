@@ -56,8 +56,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-02-23 10:46:28 +0000 (Fri, February 23, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__dateModified__ = "$dateModified: 2024-03-20 19:06:26 +0000 (Wed, March 20, 2024) $"
+__version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -151,6 +151,8 @@ CURSOR_SOURCE_OTHER = 'other'
 
 SCROLL_DELTA_LIMIT = 12.0
 SCROLL_DELTA_SCALE = 12.0
+
+AXES_MARKER_MIN_PIXEL = 10
 
 
 class CcpnGLWidget(QOpenGLWidget):
@@ -5411,7 +5413,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                                    pp, d[1]))
 
                                     # append the new points to the end of nparray, ignoring narrow grids
-                                    if scaleBounds[ax] * (scaleOrder + 1) > 225:
+                                    if scaleBounds[ax] * (scaleOrder + 1) > AXES_MARKER_MIN_PIXEL:
                                         indexList += (index, index + 1)
                                         vertexList += (valueToRatio(p1[0], axisLimitL, axisLimitR),
                                                        valueToRatio(p1[1], axisLimitB, axisLimitT),

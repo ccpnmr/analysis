@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-22 15:58:35 +0000 (Thu, February 22, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-03-20 19:06:25 +0000 (Wed, March 20, 2024) $"
+__version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -126,6 +126,25 @@ class NmrResidue(AbstractWrapperObject):
         are reserved and cannot be set. They are obtained by the deassign command."""
         return self._wrappedData.sequenceCode
 
+    @sequenceCode.setter
+    @logCommand(get='self', isProperty=True)
+    def sequenceCode(self, value: str | None):
+        """Sequence Code Setter.
+
+            Note: This heavily relies on the rename function, changes to that function will
+            need to be reflected here and in NmrResiduePopup.py
+        """
+        if self.residue:
+            raise RuntimeError('Cannot change the sequenceCode of an assigned NmrResidue.')
+
+        if self.sequenceCode != value:
+            try:
+                self.rename(sequenceCode=value, residueType=self.residueType)
+            except ValueError as es:
+                raise ValueError(es)
+            except Exception as es:
+                raise RuntimeError(f'Error changing the sequenceCode to {value}') from es
+
     @property
     def serial(self) -> int:
         """NmrResidue serial number - set at creation and unchangeable"""
@@ -226,20 +245,23 @@ class NmrResidue(AbstractWrapperObject):
         return self._wrappedData.residueType or ''
 
     @residueType.setter
+    @logCommand(get='self', isProperty=True)
     def residueType(self, value: typing.Optional[str]):
-        if not isinstance(value, (str, type(None))):
-            raise TypeError(f'residueType {repr(value)} must be a string or None')
-        if isinstance(value, str) and not value:
-            raise TypeError(f'residueType {repr(value)} must be a non-empty string')
+        """residueType setter.
 
+            Note: This heavily relies on the rename function, changes to that function will
+            need to be reflected here and in NmrResiduePopup.py
+        """
         if self.residue:
             raise RuntimeError('Cannot change the residueType of an assigned NmrResidue.')
 
         if self.residueType != value:
             try:
                 self.rename(sequenceCode=self.sequenceCode, residueType=value)
+            except ValueError as es:
+                raise ValueError(es)
             except Exception as es:
-                raise RuntimeError(f'Error changing the residueType to {value}') from es
+                raise RuntimeError(f'Error changing the sequenceCode to {value}') from es
 
     @property
     def relativeOffset(self) -> typing.Optional[int]:

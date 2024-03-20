@@ -4,9 +4,9 @@ Module documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-11-17 11:11:49 +0000 (Fri, November 17, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-03-20 19:06:25 +0000 (Wed, March 20, 2024) $"
+__version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -118,6 +118,7 @@ class Integral(AbstractWrapperObject):
 
     @value.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def value(self, value: Union[float, int, None]):
         if not isinstance(value, (float, int, type(None))):
             raise TypeError('value must be a float, integer or None')
@@ -150,6 +151,7 @@ class Integral(AbstractWrapperObject):
 
     @valueError.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def valueError(self, value: Union[float, int, None]):
         if not isinstance(value, (float, int, type(None))):
             raise TypeError('valueError must be a float, integer or None')
@@ -179,6 +181,7 @@ class Integral(AbstractWrapperObject):
 
     @bias.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def bias(self, value: Union[float, int]):
         if not isinstance(value, (float, int)):
             raise TypeError('bias must be a float or integer')
@@ -201,6 +204,7 @@ class Integral(AbstractWrapperObject):
 
     @figureOfMerit.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def figureOfMerit(self, value: float):
         self._wrappedData.figOfMerit = value
 
@@ -216,6 +220,7 @@ class Integral(AbstractWrapperObject):
 
     @offset.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def offset(self, value: Union[float, int]):
         if not isinstance(value, (float, int)):
             raise TypeError('offset must be a float or integer')
@@ -247,6 +252,7 @@ class Integral(AbstractWrapperObject):
 
     @baseline.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def baseline(self, value: Union[float, int]):
         if not isinstance(value, (float, int)):
             raise TypeError('baseline must be a float or integer')
@@ -269,6 +275,7 @@ class Integral(AbstractWrapperObject):
 
     @constraintWeight.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def constraintWeight(self, value: float):
         self._wrappedData.constraintWeight = value
 
@@ -323,6 +330,7 @@ class Integral(AbstractWrapperObject):
 
     @annotation.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def annotation(self, value: str):
         self._wrappedData.annotation = value
 

@@ -4,9 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-28 12:49:06 +0000 (Tue, November 28, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-03-20 13:39:46 +0000 (Wed, March 20, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -34,7 +34,7 @@ from time import time_ns
 from types import SimpleNamespace
 
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, catchExceptions
-from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.lib.Notifiers import Notifier, CurrentNotifier
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.table._TableCommon import INDEX_ROLE
@@ -502,18 +502,16 @@ class _MIProjectTableABC(MITableABC, Base):
                                                     onceOnly=True))
 
         if self.selectCurrent:
-            self._selectCurrentNotifier = Notifier(self.current,
-                                                   [Notifier.CURRENT],
-                                                   self.callBackClass._pluralLinkName,
-                                                   self._selectCurrentCallBack,  # strange behaviour if deferred
+            self._selectCurrentNotifier = CurrentNotifier(
+                                                   targetName=self.callBackClass._pluralLinkName,
+                                                   callback=self._selectCurrentCallBack,  # strange behaviour if deferred
                                                    # partial(self._queueGeneralNotifier, self._selectCurrentCallBack),
                                                    )
 
         if self.search:
-            self._searchNotifier = Notifier(self.current,
-                                            [Notifier.CURRENT],
-                                            self.search._pluralLinkName,
-                                            self._searchCallBack
+            self._searchNotifier = CurrentNotifier(
+                                            targetName=self.search._pluralLinkName,
+                                            callback=self._searchCallBack
                                             )
 
         # add a cleaner id to the opened guiTable list

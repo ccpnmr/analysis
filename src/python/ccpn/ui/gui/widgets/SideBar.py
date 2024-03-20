@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-06 17:48:14 +0000 (Wed, March 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-20 13:39:46 +0000 (Wed, March 20, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -868,7 +868,8 @@ class SideBarStructure(object):
 
                 SidebarClassTreeItems(klass=SpectrumGroup, callback=_raiseSpectrumGroupEditorPopup(),
                                       menuAction=_openItemSpectrumGroupDisplay(position='right', relativeTo=None),
-                                      triggers=ALL_NOTIFIERS, isDraggable=True, children=[
+                                      # triggers=ALL_NOTIFIERS,
+                                      isDraggable=True, children=[
                         SidebarClassSpectrumTreeItems(klass=Spectrum, callback=_raiseSpectrumPopup(),
                                                       menuAction=_openItemSpectrumInGroupDisplay(position='right', relativeTo=None), isDraggable=True),
                         ]),
@@ -954,7 +955,8 @@ class SideBarStructure(object):
                 SidebarClassTreeItems(klass=Complex, rebuildOnRename='Complex-ClassTreeItems',
                                       callback=_raiseComplexEditorPopup(),
                                       menuAction=_openItemComplexTable(position='bottom', relativeTo=None),
-                                      triggers=ALL_NOTIFIERS, isDraggable=True),
+                                      # triggers=ALL_NOTIFIERS,
+                                      isDraggable=True),
                 ]),
 
             #------ StructureEnsembles ------

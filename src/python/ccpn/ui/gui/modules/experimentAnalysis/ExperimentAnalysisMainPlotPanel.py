@@ -1,9 +1,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -11,9 +11,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-18 16:07:32 +0100 (Wed, October 18, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-03-20 13:39:46 +0000 (Wed, March 20, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -23,28 +23,31 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 # Start of code
 #=========================================================================================
 
-import pyqtgraph as pg
-from PyQt5 import QtCore
-from ccpn.util.Logging import getLogger
-from ccpn.core.lib.Notifiers import Notifier
-import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
-from ccpn.util.Colour import colorSchemeTable, hexToRgb, rgbaRatioToHex, colourNameToHexDict
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBars import MainPlotToolBar
-from ccpn.ui.gui.widgets.BarGraphWidget import BarGraphWidget, TICKOPTIONS, AllTicks, MinimalTicks
-from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND, GUISTRIP_PIVOT, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_LABELLING
-from ccpn.ui.gui.guiSettings import getColours, DIVIDER
-from ccpn.ui.gui.widgets.Font import getFont
-from ccpn.ui.gui.widgets.Label import Label
-from pyqtgraph import functions as fn
 import numpy as np
-import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as seriesVariables
-from ccpn.ui.gui.widgets.MessageDialog import showMessage
 import pandas as pd
 from functools import partial
-from ccpn.util.Colour import hexToRgb, splitDataByColours
+
+import pyqtgraph as pg
+from pyqtgraph import functions as fn
+from PyQt5 import QtCore
+
+from ccpn.core.lib.Notifiers import Notifier, CurrentNotifier
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as seriesVariables
+
+import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBars import MainPlotToolBar
 from ccpn.ui.gui.modules.experimentAnalysis.MainPlotWidgetBC import MainPlotWidget, PlotType
+from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND, GUISTRIP_PIVOT, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_LABELLING
+from ccpn.ui.gui.guiSettings import getColours, DIVIDER
+from ccpn.ui.gui.widgets.BarGraphWidget import BarGraphWidget, TICKOPTIONS, AllTicks, MinimalTicks
+from ccpn.ui.gui.widgets.Font import getFont
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.MessageDialog import showMessage
+
+from ccpn.util.Colour import colorSchemeTable, hexToRgb, rgbaRatioToHex, colourNameToHexDict, splitDataByColours
+from ccpn.util.Logging import getLogger
 
 
 class MainPlotPanel(GuiPanel):
@@ -77,8 +80,8 @@ class MainPlotPanel(GuiPanel):
             self._hThresholdValue = _thresholdValueW.getValue()
 
         #     current
-        self._selectCurrentCONotifier = Notifier(self.current, [Notifier.CURRENT], targetName='collections',
-                                                 callback=self._currentCollectionCallback, onceOnly=True)
+        self._selectCurrentCONotifier = CurrentNotifier(targetName='collections',
+                                                        callback=self._currentCollectionCallback)
 
         self.guiModule.mainTableChanged.connect(partial(self._mainTableChanged, False))
         self.guiModule.mainTableSortingChanged.connect(partial(self._mainTableChanged, False))

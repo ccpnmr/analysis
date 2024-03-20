@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-06 17:48:12 +0000 (Wed, March 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-20 13:39:45 +0000 (Wed, March 20, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -324,17 +324,22 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         """Setup notifiers connecting gui to current and project
         """
         # Marks
-        self.setNotifier(self.application.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
-                         'Mark', GuiStrip._updateDisplayedMarks)
+        # self.setNotifier(self.application.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
+        #                  'Mark', GuiStrip._updateDisplayedMarks)
+        # GWV 18/3/24: updated notifier implementation
+        self.setNotifier(self.application.project, [Notifier.CREATE, Notifier.DELETE],
+                                                   'Mark', GuiStrip._updateDisplayedMarks)
+
         # current notifiers
         self.setNotifier(self.application.current, [Notifier.CURRENT], 'strip', self._highlightCurrentStrip)
         self.setNotifier(self.application.current, [Notifier.CURRENT], 'peaks', GuiStrip._updateSelectedPeaks)
         self.setNotifier(self.application.current, [Notifier.CURRENT], 'integrals', GuiStrip._updateSelectedIntegrals)
         self.setNotifier(self.application.current, [Notifier.CURRENT], 'multiplets', GuiStrip._updateSelectedMultiplets)
-        self.setNotifier(self.application.project, [Notifier.CHANGE], 'SpectrumDisplay', self._spectrumDisplayChanged)
-        self.setNotifier(self.application.project, [Notifier.CHANGE], 'Strip', self._stripPinnedChanged)
 
-        self.setNotifier(self.application.project, [Notifier.CHANGE], 'Project', self._projectNotifierCallback)
+        # GWV 18/3/24: updated notifier implementation
+        # self.setNotifier(self.application.project, [Notifier.CHANGE], 'SpectrumDisplay', self._spectrumDisplayChanged)
+        # self.setNotifier(self.application.project, [Notifier.CHANGE], 'Strip', self._stripPinnedChanged)
+        # self.setNotifier(self.application.project, [Notifier.CHANGE], 'Project', self._projectNotifierCallback)
 
     # def _activatedkeySequence(self, ev):
     #     key = ev.key()

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-06 17:48:12 +0000 (Wed, March 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-20 13:39:45 +0000 (Wed, March 20, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import numpy as np
 from functools import partial
+from collections import defaultdict
+
 import pyqtgraph as pg
 
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND, MEDIUM_BLUE, GUISTRIP_PIVOT, \
@@ -49,8 +51,7 @@ from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
-from ccpn.core.lib.Notifiers import Notifier
-from collections import defaultdict
+from ccpn.core.lib.Notifiers import Notifier, CurrentNotifier
 from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRandomColours
 from ccpn.AnalysisAssign.modules.NmrAtomAssigner import BACKBONEATOMS
 from ccpn.util.isotopes import name2IsotopeCode
@@ -301,8 +302,7 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         self.viewBox.setMenuEnabled(enableMenu=False)
 
         # GL crossHair notifier
-        self.mousePosNotifier = Notifier(self.current,
-                                         [Notifier.CURRENT],
+        self.mousePosNotifier = CurrentNotifier(
                                          targetName='cursorPositions',
                                          callback=self.mousePosNotifierCallback,
                                          onceOnly=True)

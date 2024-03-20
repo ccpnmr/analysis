@@ -4,9 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 19:17:56 +0100 (Wed, June 28, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-03-20 13:39:46 +0000 (Wed, March 20, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,22 +26,34 @@ __date__ = "$Date: 2018-12-20 15:44:35 +0000 (Thu, December 20, 2018) $"
 # Start of code
 #=========================================================================================
 
+import os
 import random
+import math
 import time
+
+import pandas as pd
+from time import time_ns
+from functools import partial
+from collections import OrderedDict, defaultdict
+from types import SimpleNamespace
+from contextlib import contextmanager
 
 from PyQt5 import QtGui, QtCore, QtWidgets
 from PyQt5.QtWidgets import QAbstractItemView
-import pandas as pd
-import os
-from time import time_ns
 from pyqtgraph import TableWidget
 from pyqtgraph.widgets.TableWidget import _defersort
+
 from ccpn.core.lib.CallBack import CallBack
+from ccpn.core.lib.Notifiers import Notifier, CurrentNotifier
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
+from ccpn.core.lib.Util import getParentObjectFromPid
+from ccpn.core.lib.ContextManagers import catchExceptions
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib.DataFrameObject import DataFrameObject, DATAFRAME_OBJECT, \
     DATAFRAME_INDEX, DATAFRAME_PID, DATAFRAME_ISDELETED
 
+from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, GREEN1, GUITABLE_DROP_BORDER
 from ccpn.ui.gui.widgets.Menu import Menu
-from ccpn.ui.gui.guiSettings import getColours
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
@@ -50,27 +62,17 @@ from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.ColumnViewSettings import ColumnViewSettingsPopup
 from ccpn.ui.gui.widgets.SearchWidget import attachSearchWidget
 from ccpn.ui.gui.widgets.TableSorting import CcpnTableWidgetItem
-from ccpn.core.lib.Notifiers import Notifier
-from ccpn.util.Common import makeIterableList
-from functools import partial
-from ccpn.util.OrderedSet import OrderedSet
-from collections import OrderedDict, defaultdict
-from ccpn.util.Logging import getLogger
-from types import SimpleNamespace
-from contextlib import contextmanager
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
-from ccpn.core.lib.Util import getParentObjectFromPid
-from ccpn.core.lib.ContextManagers import catchExceptions
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight, TABLEFONT
-from ccpn.util.AttrDict import AttrDict
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.RowExpander import RowExpander
-from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, GREEN1, GUITABLE_DROP_BORDER
 from ccpn.ui.gui.widgets.SideBar import SideBar
 from ccpn.ui.gui.widgets.DropBase import DropBase
-import math
+
+from ccpn.util.Common import makeIterableList
+from ccpn.util.OrderedSet import OrderedSet
+from ccpn.util.Logging import getLogger
+from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Path import aPath
 
 OBJECT_CLASS = 0
@@ -2495,16 +2497,14 @@ class GuiTable(TableWidget, Base):
                                                     onceOnly=True))
 
         if selectCurrentCallBack:
-            self._selectCurrentNotifier = Notifier(self.current,
-                                                   [Notifier.CURRENT],
-                                                   callBackClass._pluralLinkName,
-                                                   self._selectCurrentCallBack)
+            self._selectCurrentNotifier = CurrentNotifier(
+                                                   targetName=callBackClass._pluralLinkName,
+                                                   callback=self._selectCurrentCallBack)
 
         if searchCallBack:
-            self._searchNotifier = Notifier(self.current,
-                                            [Notifier.CURRENT],
-                                            searchCallBack._pluralLinkName,
-                                            self._searchCallBack)
+            self._searchNotifier = CurrentNotifier(
+                                            targetName=searchCallBack._pluralLinkName,
+                                            callback=self._searchCallBack)
 
         self._tableData = {'updateFunc'           : updateFunc,
                            'changeFunc'           : changeFunc,

@@ -68,8 +68,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-04 15:01:16 +0000 (Mon, March 04, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-03-20 13:39:45 +0000 (Wed, March 20, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -89,6 +89,7 @@ import pandas as pd
 import warnings
 from functools import partial
 from PyQt5 import QtCore, QtWidgets, QtGui
+
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.BarGraph import BarGraph
 from ccpn.ui.gui.widgets.Button import Button
@@ -128,7 +129,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import concentrationUnits
 from ccpn.util.Common import splitDataFrameWithinRange, _fillListToLenght
 from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRandomColours
-from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.lib.Notifiers import Notifier, CurrentNotifier
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.peakUtils import getNmrResidueDeltas, _getKd, oneSiteBindingCurve, _fit1SiteBindCurve, _fitExpDecayCurve, \
     MODES, LINEWIDTHS, HEIGHT, POSITIONS, VOLUME, DefaultAtomWeights, H, N, OTHER, C, DISPLAYDATA, \
@@ -301,7 +302,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
         self._initMainWidgets()
         self._initSettingsWidgets()
-        self._selectCurrentNRNotifier = Notifier(self.current, [Notifier.CURRENT], targetName='nmrResidues',
+        self._selectCurrentNRNotifier = CurrentNotifier(targetName='nmrResidues',
                                                  callback=self._selectCurrentNmrResiduesNotifierCallback, onceOnly=True)
         self._peakDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'Peak', self._peakDeletedCallBack)
         self._nrChangedNotifier = Notifier(self.project, [Notifier.CHANGE], 'NmrResidue', self._nmrObjectChanged)

@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-06 17:48:14 +0000 (Wed, March 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-20 13:39:46 +0000 (Wed, March 20, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -31,7 +31,7 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 
 import sys
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
-from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.lib.Notifiers import Notifier, CurrentNotifier
 from ccpn.util.Logging import getLogger
 
 SELECT = '> Select <'
@@ -163,8 +163,7 @@ class _PulldownABC(PulldownListCompoundWidget):
                                       callback = self._updatePulldownList)
             self.addNotifier(_notifier)
             if self._followCurrent:
-                self.addNotifier(Notifier(self.current,
-                                          [Notifier.CURRENT],
+                self.addNotifier(CurrentNotifier(
                                           targetName=self._currentAttributeName,
                                           callback=self._updateFromCurrent
                                           ))

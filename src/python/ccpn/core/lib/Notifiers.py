@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-20 11:34:52 +0000 (Wed, March 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-20 13:39:45 +0000 (Wed, March 20, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -50,7 +50,7 @@ from itertools import permutations
 import weakref
 
 from ccpn.util.Logging import getLogger
-from ccpn.framework.Application import getCurrent
+from ccpn.framework.Application import getCurrent, getProject
 
 DEBUG = False
 _debugIds = ()
@@ -135,13 +135,6 @@ class NotifierABC(object):
     @property
     def id(self):
         return self._id
-
-    @property
-    def project(self):
-        """Return the project
-        """
-        # implemented as a weak reference
-        return self._project()
 
     def setDebug(self, flag: bool):
         """Set debug output on/off"""
@@ -245,11 +238,6 @@ class Notifier(NotifierABC):
                         or ANY                value, previousValue,     NB: should only be used in isolation; i.e. not
                                               trigger, notifier         combined with other triggers
 
-     Notifier.CURRENT   attributeName         theObject,targetName      theObject should be current object
-                                              value, previousValue,     targetName: valid attribute name of current
-                                              trigger, notifier         NB: should only be used in isolation; i.e. not
-                                                                        combined with other triggers
-
     Implemention:
 
       Uses current notifier system from Project and Current;filters for child objects of type targetName in theObject.
@@ -272,10 +260,10 @@ class Notifier(NotifierABC):
     #
     # ANY = '<Any>'
 
-    CURRENT = 'current'
-    # _triggerKeywords = (CREATE, DELETE, RENAME, CHANGE, OBSERVE, CURRENT)
-    _triggerKeywords = (NotifierABC.CREATE, NotifierABC.DELETE, NotifierABC.RENAME, NotifierABC.CHANGE, CURRENT)
+    _triggerKeywords = (NotifierABC.CREATE, NotifierABC.DELETE, NotifierABC.RENAME, NotifierABC.CHANGE)
 
+    # For backwards compatibility
+    CURRENT = 'current'
 
     def __init__(self,
                  theObject: Any,
@@ -295,6 +283,7 @@ class Notifier(NotifierABC):
         :param targetName: valid className, attributeName or ANY
         :param callback: callback function with signature: callback(callbackDict, **kwargs])
         :param setterObject: Object that was setting the Notifier
+        :param onceOnly: If True, only one of multiple copies is executed (from underpinning V3-notifiers mechanism)
         :param debug: set debug
         :param **kwargs: optional keyword,value arguments to callback
         """
@@ -305,8 +294,15 @@ class Notifier(NotifierABC):
         if theObject is None:
             raise ValueError('Notifier: object is None')
 
-        if _STRICT and not isinstance(theObject, (Current, AbstractWrapperObject, V3CoreObjectABC)):
-            raise ValueError(f'Notifier: invalid object; expected Current, AbstractWrapper or V3CoreObject, got {type(theObject)}')
+        # GWV 20/3/24: No longer able to set notifier on Current; use CurrentNotifier class
+        if isinstance(theObject, Current) or self.CURRENT in triggers:
+            raise ValueError(f'Implementation has changed: use CurrentNotifier for current object')
+
+        if _STRICT and not isinstance(theObject, (AbstractWrapperObject, V3CoreObjectABC)):
+            raise ValueError(f'Notifier: invalid object; expected AbstractWrapper or V3CoreObject, got {type(theObject)}')
+
+        if targetName is None:
+            raise ValueError(f'Invalid targetName {targetName}')
 
         super().__init__(theObject=theObject,
                          triggers=triggers,
@@ -316,63 +312,22 @@ class Notifier(NotifierABC):
                          callback=callback, **kwargs
                          )
 
-        # bit of a clutch for now
-        _project = None
-        if isinstance(theObject, Current):
-            # assume we have current
-            _project = None
-            _current = theObject
-            self._project = None
-            self._isProject = False
-            self._isCurrent = True
-        elif isinstance(theObject, AbstractWrapperObject):
-            _project = theObject.project
-            _current = None
-            self._project = weakref.ref(_project)  # toplevel Project instance for theObject
-            self._isProject = (theObject == _project)  # theObject is the toplevel Project instance
-            self._isCurrent = False
-        else:
-            raise RuntimeError('Invalid object (%s)', theObject)
+
+        if (_project := getProject()) is None:
+            # This should not happen
+            raise RuntimeError(f'Undefined project: cannot register notifier for {theObject}')
+        self._project = weakref.ref(_project)  # toplevel Project instance for theObject
+        self._isProject = (theObject == _project)  # theObject is the toplevel Project instance
 
         self._previousValue = None  # used to store the value of attribute to observe for change
-
         self._unregister = []  # list of tuples needed for unregistering
-
-        # # some sanity checks
-        # if len(triggers) > 1 and Notifier.OBSERVE in triggers:
-        #     raise RuntimeError('Notifier: trigger "%s" only to be used in isolation' % Notifier.OBSERVE)
-        if len(triggers) > 1 and Notifier.CURRENT in triggers:
-            raise RuntimeError('Notifier.__init__: trigger "%s" only to be used in isolation' % Notifier.CURRENT)
-        if triggers[0] == Notifier.CURRENT and not self._isCurrent:
-            raise RuntimeError('Notifier.__init__: invalid object "%s" for trigger "%s"' % (theObject, triggers[0]))
-
-        if targetName is None:
-            raise ValueError('Invalid None targetName')
 
         # register the callbacks
         for trigger in self._triggers:
 
-            # CURRENT special case; has its own callback mechanism
-            if trigger == Notifier.CURRENT:
-
-                if not hasattr(theObject, targetName):
-                    raise RuntimeWarning(
-                            'Notifier.__init__: invalid targetName "%s" for class "%s"' % (targetName, theObject))
-
-                self._previousValue = getattr(theObject, targetName)
-                notifier = (trigger, targetName)
-                # current has its own notifier system
-
-                #TODO:change this and remove this hack
-                # to register strip, the keywords is strips!
-                tName = targetName + 's' if targetName == 'strip' else targetName
-                func = _current.registerNotify(partial(self, notifier=notifier), tName)
-                self._unregister.append((tName, Notifier.CURRENT, func))
-                self._isRegistered = True
-
             # CHANGE special case, as the current underpinning implementation does not allow this directly
             # Hence, we track all changes to the object class, filtering those that apply
-            # elif trigger == Notifier.CHANGE:
+            # if trigger == Notifier.CHANGE:
             #     if targetName != self.ANY and not hasattr(theObject, targetName):
             #         raise RuntimeWarning(
             #                 'Notifier.__init__: invalid targetName "%s" for class "%s"' % (targetName, theObject.className))
@@ -389,16 +344,14 @@ class Notifier(NotifierABC):
             #     self._isRegistered = True
 
             # All other triggers;
-            else:
+            # else:
                 # Projects allow all registering of all classes
                 # allowedClassNames = [c.className for c in theObject._getChildClasses(recursion=self._isProject)]
                 # if targetName not in allowedClassNames:
                 #     raise RuntimeWarning('Notifier.__init__: invalid targetName "%s" for class "%s"' % (targetName, theObject.className))
 
                 notifier = (trigger, targetName)
-                if _project is None:
-                    # This should not happen
-                    raise RuntimeError(f'Undefined project: cannot register notifier for {theObject}')
+
                 func = _project.registerNotifier(className=targetName,
                                                  target=trigger,
                                                  func=partial(self, notifier=notifier),
@@ -412,6 +365,13 @@ class Notifier(NotifierABC):
 
         if self._debug:
             sys.stderr.write('>>> registered %s\n' % self)
+
+    @property
+    def project(self):
+        """Return the project
+        """
+        # implemented as a weak reference
+        return self._project()
 
     def unRegister(self):
         """
@@ -449,11 +409,6 @@ class Notifier(NotifierABC):
             #
             raise RuntimeError('Notifier.__call__: obj is None')
 
-        # if not self._isCurrent and obj.isDeleted:
-        #     # It is a V3 core object notifier; check if obj is still around
-        #     # hack for now (20181127) until a better implementation
-        #     return
-
         trigger, targetName = notifier
 
         if self._debug:
@@ -465,17 +420,6 @@ class Notifier(NotifierABC):
 
         notifierFired = False
         callbackDict = self.newCallbackDict(trigger=trigger, obj=obj, specifiers=actionKwds)
-
-        # CURRENT special case
-        if trigger == Notifier.CURRENT:
-            value = getattr(self._theObject, targetName)
-            if not self._isEqual(value, self._previousValue):
-                callbackDict[self.OBJECT] = self._theObject
-                callbackDict[self.PREVIOUSVALUE] = self._previousValue
-                callbackDict[self.VALUE] = value
-                self._callback(callbackDict, **self._kwargs)
-                notifierFired = True
-                self._previousValue = value
 
         # # OBSERVE ANY special case
         # elif trigger == Notifier.OBSERVE and targetName == self.ANY:
@@ -498,7 +442,7 @@ class Notifier(NotifierABC):
         #         self._previousValue = value
 
         # check if the trigger applies for all other cases
-        elif self._isProject or obj._parent.pid == self._theObject.pid:
+        if self._isProject or obj._parent.pid == self._theObject.pid:
             if trigger == self.RENAME and parameter2 is not None:
                 callbackDict[self.OLDPID] = parameter2
             self._callback(callbackDict, **self._kwargs)
@@ -509,15 +453,6 @@ class Notifier(NotifierABC):
             sys.stderr.write('%-9s func:%s\n' % (_tmp, self._callback))
 
         return
-
-    # @staticmethod
-    # def _isEqual(value1, value2):
-    #     """Return true if values are equal, accounting for tuple/list conversion"""
-    #     if isinstance(value1, tuple):
-    #         value1 = list(value1)
-    #     if isinstance(value2, tuple):
-    #         value1 = list(value2)
-    #     return value1 == value2
 
 
 class CurrentNotifier(NotifierABC):
@@ -552,16 +487,14 @@ class CurrentNotifier(NotifierABC):
                  targetName: str,
                  callback: Callable[..., Optional[str]],
                  setterObject=None,
-                 onceOnly=False,
                  debug=False,
-                 **kwargs):
+                 ):
         """
         Create CurrentNotifier object;
         :param targetName: valid Current attributeName or ANY
         :param callback: callback function with signature: callback(callbackDict, **kwargs])
         :param setterObject: Object that was setting the Notifier
-        :param debug: set debug
-        :param **kwargs: optional keyword,value arguments to callback
+        :param debug: set debug for this notifier
         """
         from ccpn.framework.Current import Current  # local import to avoid cycles
 
@@ -574,7 +507,6 @@ class CurrentNotifier(NotifierABC):
                          setterObject=setterObject,
                          debug=debug,
                          callback=callback,
-                         **kwargs
                          )
 
         # # some sanity checks
@@ -623,7 +555,6 @@ class CurrentNotifier(NotifierABC):
             return
 
         notifierFired = False
-
         value = getattr(self._theObject, self._targetName)
         # Fire the notifier is there has been a change
         if not self._isEqual(value, self._previousValue):
@@ -634,7 +565,7 @@ class CurrentNotifier(NotifierABC):
                     previousValue=self._previousValue,
             )
 
-            self._callback(callbackDict, **self._kwargs)
+            self._callback(callbackDict)
             notifierFired = True
             self._previousValue = value
 
@@ -643,6 +574,7 @@ class CurrentNotifier(NotifierABC):
             sys.stderr.write('%-9s func:%s\n' % (_tmp, self._callback))
 
         return
+# end class
 
 
 class _NotifiersDict(OrderedDict):

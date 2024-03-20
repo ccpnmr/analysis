@@ -67,16 +67,18 @@ static PyObject *newList() {
     return list;
 }
 
-static appendFloatList(PyObject *list, double value) {
+static void *appendFloatList(PyObject *list, double value) {
     if (PyList_Append(list, PyFloat_FromDouble((double)value)) != 0) {
         RETURN_OBJ_ERROR("appending item to list");
     }
+    return NULL;
 }
 
-static appendFloatLong(PyObject *list, long value) {
+static void *appendFloatLong(PyObject *list, long value) {
     if (PyList_Append(list, PyLong_FromLong(value)) != 0) {
         RETURN_OBJ_ERROR("appending item to list");
     }
+    return NULL;
 }
 
 struct Node {
@@ -172,7 +174,7 @@ struct Node *insertConnectedNode(struct Node **headRef, PyObject *offsetItem, lo
     PyObject *seqCode;
     PyObject *serial;
     PyObject *seqString;
-    PyDictObject *apiDict = PyObject_GetAttrString(offsetItem, "__dict__");
+    PyObject *apiDict = PyObject_GetAttrString(offsetItem, "__dict__");
 
     temp->isConnected = isConnected;
     if (isConnected == CCPN_TRUE) {
@@ -306,22 +308,23 @@ static CcpnBool _flaggedForDelete(PyObject *projectDict, PyObject *apiRes) {
 
 static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args) {
     PyObject *apiNmrChain;
-    PyTupleObject *apiNmrResidues;
+    PyTupleObject *apiNmrResiduesTuple;
     PyObject *nmrResidue;
     PyObject *returnValue;
     char error_msg[1000];
     long index = -1, numOffsets = 0, found = -1, rgSize;
     long ii, jj;
-    PyObject *listRes;
+    PyObject *listRes, *mainRes;
     PyObject *apiNmrResidue;
     PyListObject *offsetList;
     PyObject *offsetRes;
-    PyListObject *resonanceGroups;
-    PyDictObject *apiNmrProjectDict;
-    PyDictObject *resonanceGroupDict;
-    PyObject *apiNmrProject, *mainRes;
+    PyObject *resonanceGroupsList;
+    PyObject *apiNmrProjectDict;
+    PyObject *resonanceGroupDict;
+    PyObject *apiNmrProject;
     CcpnBool isConnected;
-    PyObject *project, *projectDict;
+    PyObject *project;
+    PyDictObject *projectDict;
 
     //    data2Obj = project._data2Obj
     //    data2Obj[wrappedData] = self
@@ -331,7 +334,7 @@ static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args) {
     if (!PyArg_ParseTuple(args, "O", &nmrResidue)) RETURN_OBJ_ERROR("need arguments: nmrResidue");
 
     // get the apiResonanceGroup
-    apiNmrResidue = (PyObject *)PyObject_GetAttrString(nmrResidue, "_wrappedData");
+    apiNmrResidue = PyObject_GetAttrString(nmrResidue, "_wrappedData");
     if (!apiNmrResidue) RETURN_OBJ_ERROR("error getting _wrappedData");
 
     // get the apiNmrChain containing the resonanceGroup
@@ -339,15 +342,15 @@ static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args) {
     if (!apiNmrChain) RETURN_OBJ_ERROR("error getting apiNmrChain");
 
     // get isConnected and serial for the apiNmrChain
-    PyDictObject *apiNmrChainDict = PyObject_GetAttrString(apiNmrChain, "__dict__");
+    PyObject *apiNmrChainDict = PyObject_GetAttrString(apiNmrChain, "__dict__");
     PyObject *isConnectedObj = PyDict_GetItemString(apiNmrChainDict, "isConnected");
     PyObject *apiNmrChainSerialObj = PyDict_GetItemString(apiNmrChainDict, "serial");
 
     // get all the resonanceGroups in the local apiNmrChain
-    apiNmrResidues = (PyListObject *)PyObject_GetAttrString(apiNmrChain, "mainResonanceGroups");
+    apiNmrResiduesTuple = (PyTupleObject *)PyObject_GetAttrString(apiNmrChain, "mainResonanceGroups");
 
     // error checking
-    if (!apiNmrResidues) RETURN_OBJ_ERROR("error getting apiNmrResidues");
+    if (!apiNmrResiduesTuple) RETURN_OBJ_ERROR("error getting apiNmrResiduesTuple");
     if (!isConnectedObj) RETURN_OBJ_ERROR("error getting isConnected");
     if (!apiNmrChainSerialObj) RETURN_OBJ_ERROR("error getting serial");
 
@@ -357,28 +360,28 @@ static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args) {
         isConnected = CCPN_FALSE;
 
     // put the resonanceGroups into a list
-    long numRes = PyTuple_GET_SIZE(apiNmrResidues);
+    long numRes = PyTuple_GET_SIZE(apiNmrResiduesTuple);
     // PyObject *mainResGroups[numRes];
     PyObject **mainResGroups;
     MALLOC_NEW(mainResGroups, PyObject *, numRes);
     for (ii = 0; ii < numRes; ii++) {
-        mainResGroups[ii] = (PyObject *)PyTuple_GET_ITEM(apiNmrResidues, ii);
+        mainResGroups[ii] = (PyObject *)PyTuple_GET_ITEM(apiNmrResiduesTuple, ii);
     }
 
     // get the list of all resonanceGroups in the apiNmrProject
-    apiNmrProject = (PyObject *)PyObject_GetAttrString(apiNmrResidue, "nmrProject");
-    apiNmrProjectDict = (PyDictObject *)PyObject_GetAttrString(apiNmrProject, "__dict__");
-    resonanceGroupDict = (PyDictObject *)PyDict_GetItemString(apiNmrProjectDict, "resonanceGroups");
-    resonanceGroups = (PyListObject *)PyDict_Values(resonanceGroupDict);
+    apiNmrProject = PyObject_GetAttrString(apiNmrResidue, "nmrProject");
+    apiNmrProjectDict = PyObject_GetAttrString(apiNmrProject, "__dict__");
+    resonanceGroupDict = PyDict_GetItemString(apiNmrProjectDict, "resonanceGroups");
+    resonanceGroupsList = PyDict_Values(resonanceGroupDict);
 
     // error checking
     if (!apiNmrProject) RETURN_OBJ_ERROR("error getting apiNmrProject");
     if (!apiNmrProjectDict) RETURN_OBJ_ERROR("error getting apiNmrProjectDict");
     if (!resonanceGroupDict) RETURN_OBJ_ERROR("error getting resonanceGroupDict");
-    if (!resonanceGroups) RETURN_OBJ_ERROR("error getting resonanceGroups");
+    if (!resonanceGroupsList) RETURN_OBJ_ERROR("error getting resonanceGroupsList");
 
     // get the V3project
-    project = (PyObject *)PyObject_GetAttrString(nmrResidue, "project");
+    project = PyObject_GetAttrString(nmrResidue, "project");
     projectDict = (PyDictObject *)PyObject_GetAttrString(project, "_data2Obj");
 
     // error checking
@@ -387,7 +390,7 @@ static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args) {
 
     // search all resonanceGroups in the project,
     // to find all attached offsetResonanceGroups
-    rgSize = PyList_GET_SIZE(resonanceGroups);
+    rgSize = PyList_GET_SIZE(resonanceGroupsList);
     //    PyObject *offsetResonanceGroups[rgSize];            //  just make it
     //    full size, but only need some of it PyObject
     //    *offSetMainResonances[rgSize];
@@ -398,8 +401,8 @@ static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args) {
     MALLOC_NEW(offSetMainResonances, PyObject *, rgSize);
 
     for (ii = 0; ii < rgSize; ii++) {
-        listRes = (PyObject *)PyList_GET_ITEM(resonanceGroups, ii);
-        mainRes = (PyObject *)PyObject_GetAttrString(listRes, "mainResonanceGroup");  //  not pointing to the right place?
+        listRes = PyList_GET_ITEM(resonanceGroupsList, ii);
+        mainRes = PyObject_GetAttrString(listRes, "mainResonanceGroup");  //  not pointing to the right place?
 
         for (jj = 0; jj < numRes; jj++)
             if ((mainRes == mainResGroups[jj]) && (mainRes != listRes)) {
@@ -416,7 +419,7 @@ static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args) {
 
     // insert all resonanceGroups into a linked list for ordering
     for (ii = 0; ii < numRes; ii++) {
-        mainRes = (PyObject *)PyTuple_GET_ITEM(apiNmrResidues, ii);
+        mainRes = PyTuple_GET_ITEM(apiNmrResiduesTuple, ii);
         thisNode = insertConnectedNode(&resonanceList, mainRes, ii, isConnected, CCPN_TRUE);
 
         // if an offsetResonance, then uses the index of the mainResonance

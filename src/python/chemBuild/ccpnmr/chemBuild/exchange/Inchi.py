@@ -242,287 +242,287 @@ from ccpnmr.chemBuild.model.Variant import Variant
 from ccpnmr.chemBuild.model.Bond import BOND_TYPE_VALENCES, BOND_STEREO_DICT
 from memops.qtgui.MessageDialog import showError, showWarning
   
-def makeInchi(variant):
-  
-  libDir = path.join(path.dirname(__file__), '..', '..', '..', '..', '..', 'c', 'inchi', '')
-  
-  opsys = sys.platform
-  if (opsys[:3]=='win'):
-    libname = 'libinchi.dll'
-  else:
-    libname = 'libinchi.so'
-
-  libinchi = cdll.LoadLibrary(libDir+libname)
-    
-  atoms = list(variant.varAtoms)
-  bonds = variant.bonds
-  nAtoms = len(atoms)
-  nBonds = len(bonds)
-
-  # Make array of inchi_Atom (storage space) anf resp. pointers
-
-  iatoms = (inchi_Atom * nAtoms) ()
-  piatoms = (POINTER(inchi_Atom) * nAtoms) ()
-
-  valences = []
-  
-  for ia, atom in enumerate(atoms):
-    
-    # Make inchi_Atom
-
-    elname = (c_byte * PYINCHI_ATOM_EL_LEN) (PYINCHI_ATOM_EL_LEN*0)
-    num_iso_H = (c_byte * (PYINCHI_NUM_H_ISOTOPES+1)) ((PYINCHI_NUM_H_ISOTOPES+1)*0)
-    neighbor = (c_short * PYINCHI_MAXVAL) (PYINCHI_MAXVAL*0)
-    bond_type = (c_byte * PYINCHI_MAXVAL) (PYINCHI_MAXVAL*0)
-    bond_stereo = (c_byte * PYINCHI_MAXVAL) (PYINCHI_MAXVAL*0)
-    
-    (x, y, z) = atom.coords
-    z = 0
-    y = -y
-    for count, e in enumerate(atom.element):
-      elname[count] = ord(e)
-    radical = 0
-    charge = atom.charge
-    isotopic_mass = 0
-    numBonds = keptBonds = len(atom.neighbours)
-    
-    count = 0
-    for atomNeighbour in atom.neighbours:
-      neighbourNr = atoms.index(atomNeighbour)
-      
-      # InChI does not like repetition of bonds.
-      if neighbourNr <= ia:
-        keptBonds -= 1
-        continue
-      
-      neighbor[count] = neighbourNr
-      bond = atom.getBondToAtom(atomNeighbour)
-      bond_type[count] = BOND_TYPE_VALENCES[bond.bondType]
-      if bond_type[count] == 1 and atom.isAromatic() and atomNeighbour.isAromatic():
-        bond_type[count] = 4
-        #print atom, atomNeighbour
-      if atom.stereo or atomNeighbour.stereo:
-        if atom.stereo:
-          for index, stereo in enumerate(atom.stereo):
-            if stereo == atomNeighbour:
-              break
-          multiplier = 1
-          stereoCnt = numBonds
-        else:
-          for index, stereo in enumerate(atomNeighbour.stereo):
-            if stereo == atom:
-              break
-          multiplier = -1
-          stereoCnt = len(atomNeighbour.neighbours)
-        
-        stereoDict = BOND_STEREO_DICT[stereoCnt]
-        direction = stereoDict[index]
-        if direction >= 1:
-          bond_stereo[count] = multiplier * 1
-        elif direction <= -1:
-          bond_stereo[count] = multiplier * 6
-        #print atom, atomNeighbour, direction, multiplier, bond_stereo[count]
-          
-      count += 1
-
-    iatoms[ia] = inchi_Atom(
-        x, y, z, 
-        neighbor,
-        bond_type,
-        bond_stereo,
-        elname, 
-        keptBonds,
-        num_iso_H,
-        isotopic_mass, 
-        radical, 
-        charge)
-
-    #piatoms[ia] = pointer(iatoms[ia])
-    
-  istereo0D = (inchi_Stereo0D * 1) ()
-  #pistereo0D = (POINTER(inchi_Stereo0D) * 1) ()
-
-  inchiInput = inchi_Input(
-      iatoms,   # inchi-style atoms
-      istereo0D,      # stereo0D (empty)
-      bytes("", 'utf-8'),    # command line switches
-      nAtoms,    # natoms
-      0   # num_stereo0D
-      )   
-
-  #szInChI  = create_string_buffer(1) # NB: will be reallocd by inchi dll
-  #szAuxInfo  = create_string_buffer(1) 
-  #szMessage = create_string_buffer(1) 
-  #szLog = create_string_buffer(1)
-  inchiOutput = inchi_Output()
-  #inchiOutput = inchi_Output( cast(szInChI, POINTER(c_char)),
-      #cast(szAuxInfo, POINTER(c_char)),
-      #cast(szMessage, POINTER(c_char)),
-      #cast(szLog, POINTER(c_char)) )
-
-
-  # Call DLL function(s)
-
-  result = libinchi.GetINCHI(byref(inchiInput), byref(inchiOutput))  # 0 = okay, 
-                # 1 => warning, 
-                # 2=>error, 
-                # 3=>fatal
-
-  if result >= 2:
-    showError('InChI creation error:', make_pystring(inchiOutput.szLog), parent=None)
-    return None
-  elif result == 1:
-    showWarning('InChI creation warning:', make_pystring(inchiOutput.szLog), parent=None)
-    print('InChI creation warning:')
-
-  # Process results
-
-  si = make_pystring(inchiOutput.szInChI)
-  
-  libinchi.FreeINCHI(byref(inchiOutput))
-  
-  return si
-
-def importInchi(inchiString):
-   
-  compound = Compound('Unnamed')
-  var = Variant(compound)
-  compound.defaultVars.add(var)
-  
-  libDir = path.join(path.dirname(__file__), '..', '..', '..', '..', '..', 'c', 'inchi', '')
-  
-  opsys = sys.platform
-  if (opsys[:3]=='win'):
-    libname = 'libinchi.dll'
-  else:
-    libname = 'libinchi.so'
-    
-  libinchi = cdll.LoadLibrary(libDir+libname)
-  
-  inchiString = inchiString.strip()
-  
-  inchiBytes = bytes(inchiString, 'utf-8')
-
-  #inchiInput = inchi_InputINCHI(inchiString, "")
-  inchiInput = inchi_InputINCHI(inchiBytes, bytes("", 'utf-8'))
-  
-  inchiOutput = inchi_OutputStruct()
-  
-  result = libinchi.GetStructFromINCHI(byref(inchiInput), byref(inchiOutput))
-  
-  if result >= 2:
-    showError('InChI reading error:', make_pystring(inchiOutput.szLog), parent=None)
-    return None
-  elif result == 1:
-    showWarning('InChI reading warning:', make_pystring(inchiOutput.szLog), parent=None)
-
-  inchiAtoms = inchiOutput.atom
-  nAtoms = inchiOutput.num_atoms
-  
-  if nAtoms == 0:
-    showError('Could not create compound from InChI.', 'No InChI error reported', parent=None)
-    return None
-  
-  mapping = []
-  
-  for i in range(nAtoms):
-    iAtom = inchiAtoms[i]
-    element = ""
-    for eln in iAtom.elname:
-      element = element + chr(eln)
-    element = make_pystring(element)
-    charge = iAtom.charge
-    
-    a = Atom(compound, element, None)
-    va = VarAtom(var, a, charge = charge)
-    
-    mapping.append(va)
-    
-  for i in range(nAtoms):
-    iAtom = inchiAtoms[i]
-    va = mapping[i]
-    
-    for b in range(iAtom.num_bonds):
-      neighbor = iAtom.neighbor[b]
-      bt = iAtom.bond_type[b]
-      
-      if bt == 2:
-        bondType = 'double'
-      elif bt == 3:
-        bondType = 'triple'
-      else:
-        bondType = 'single'
-        
-      
-      nva = mapping[neighbor]
-      
-      bond = Bond([va, nva], bondType)
-
-    # Add hydrogens.
-    newAtoms = []
-    for val in va.freeValences:
-      masterAtom = Atom(compound, 'H', None)
-      VarAtom(None, masterAtom) # All vars
-
-      hydrogen = var.atomDict[masterAtom]
-      newAtoms.append(hydrogen)
-  
-    for newAtom in newAtoms:
-      Bond((va, newAtom), autoVar=True)
-      
-  stereo0D = inchiOutput.stereo0D
-      
-  for i in range(inchiOutput.num_stereo0D):
-      
-    stereo = stereo0D[i]
-    
-    if stereo.type == 1:
-      stereoAtom1 = mapping[stereo.neighbor[1]]
-      stereoAtom2 = mapping[stereo.neighbor[2]]
-      if stereo.parity == 1:
-        stereoAtom1.chirality = 'Z'
-        stereoAtom2.chirality = 'Z'
-      elif stereo.parity == 2:
-        stereoAtom1.chirality = 'E'
-        stereoAtom2.chirality = 'E'
-        
-    elif stereo.type == 2:
-      stereoAtom = mapping[stereo.central_atom]
-      prio = stereoAtom.getPriorities()
-
-      branches = stereoAtom.getBranchesSortedByLength()
-      if len(branches) == 4:
-        stereoAtom.stereo = [branches[3], branches[0], branches[2], branches[1]]
-      elif len(branches) >= 4:
-        stereoAtom.stereo = [branches[3], branches[0], branches[2], branches[1], branches[4:]]
-      
-      n0 = mapping[stereo.neighbor[0]]
-      n1 = mapping[stereo.neighbor[1]]
-      n2 = mapping[stereo.neighbor[2]]
-      n3 = mapping[stereo.neighbor[3]]
-      n0Prio = prio.index(n0)
-      n1Prio = prio.index(n1)
-      n2Prio = prio.index(n2)
-      n3Prio = prio.index(n3)
-      
-      # If the InChI atom order is not the same as ChemBuild priorities the chirality needs to be flipped.
-      if n0Prio != 3 or n1Prio != 2 or n2Prio !=1 or n3Prio !=0:
-        flip = True
-      else:
-        flip = False
-        
-      if stereo.parity == 1:
-        if flip:
-          stereoAtom.chirality = 'R'
-        else:
-          stereoAtom.chirality = 'S'
-      elif stereo.parity == 2:
-        if flip:
-          stereoAtom.chirality = 'S'
-        else:
-          stereoAtom.chirality = 'R'
-  
-  libinchi.FreeStructFromINCHI(byref(inchiOutput))
-  
-  return compound
+# def makeInchi(variant):
+#
+#   libDir = path.join(path.dirname(__file__), '..', '..', '..', '..', '..', 'c', 'inchi', '')
+#
+#   opsys = sys.platform
+#   if (opsys[:3]=='win'):
+#     libname = 'libinchi.dll'
+#   else:
+#     libname = 'libinchi.so'
+#
+#   libinchi = cdll.LoadLibrary(libDir+libname)
+#
+#   atoms = list(variant.varAtoms)
+#   bonds = variant.bonds
+#   nAtoms = len(atoms)
+#   nBonds = len(bonds)
+#
+#   # Make array of inchi_Atom (storage space) anf resp. pointers
+#
+#   iatoms = (inchi_Atom * nAtoms) ()
+#   piatoms = (POINTER(inchi_Atom) * nAtoms) ()
+#
+#   valences = []
+#
+#   for ia, atom in enumerate(atoms):
+#
+#     # Make inchi_Atom
+#
+#     elname = (c_byte * PYINCHI_ATOM_EL_LEN) (PYINCHI_ATOM_EL_LEN*0)
+#     num_iso_H = (c_byte * (PYINCHI_NUM_H_ISOTOPES+1)) ((PYINCHI_NUM_H_ISOTOPES+1)*0)
+#     neighbor = (c_short * PYINCHI_MAXVAL) (PYINCHI_MAXVAL*0)
+#     bond_type = (c_byte * PYINCHI_MAXVAL) (PYINCHI_MAXVAL*0)
+#     bond_stereo = (c_byte * PYINCHI_MAXVAL) (PYINCHI_MAXVAL*0)
+#
+#     (x, y, z) = atom.coords
+#     z = 0
+#     y = -y
+#     for count, e in enumerate(atom.element):
+#       elname[count] = ord(e)
+#     radical = 0
+#     charge = atom.charge
+#     isotopic_mass = 0
+#     numBonds = keptBonds = len(atom.neighbours)
+#
+#     count = 0
+#     for atomNeighbour in atom.neighbours:
+#       neighbourNr = atoms.index(atomNeighbour)
+#
+#       # InChI does not like repetition of bonds.
+#       if neighbourNr <= ia:
+#         keptBonds -= 1
+#         continue
+#
+#       neighbor[count] = neighbourNr
+#       bond = atom.getBondToAtom(atomNeighbour)
+#       bond_type[count] = BOND_TYPE_VALENCES[bond.bondType]
+#       if bond_type[count] == 1 and atom.isAromatic() and atomNeighbour.isAromatic():
+#         bond_type[count] = 4
+#         #print atom, atomNeighbour
+#       if atom.stereo or atomNeighbour.stereo:
+#         if atom.stereo:
+#           for index, stereo in enumerate(atom.stereo):
+#             if stereo == atomNeighbour:
+#               break
+#           multiplier = 1
+#           stereoCnt = numBonds
+#         else:
+#           for index, stereo in enumerate(atomNeighbour.stereo):
+#             if stereo == atom:
+#               break
+#           multiplier = -1
+#           stereoCnt = len(atomNeighbour.neighbours)
+#
+#         stereoDict = BOND_STEREO_DICT[stereoCnt]
+#         direction = stereoDict[index]
+#         if direction >= 1:
+#           bond_stereo[count] = multiplier * 1
+#         elif direction <= -1:
+#           bond_stereo[count] = multiplier * 6
+#         #print atom, atomNeighbour, direction, multiplier, bond_stereo[count]
+#
+#       count += 1
+#
+#     iatoms[ia] = inchi_Atom(
+#         x, y, z,
+#         neighbor,
+#         bond_type,
+#         bond_stereo,
+#         elname,
+#         keptBonds,
+#         num_iso_H,
+#         isotopic_mass,
+#         radical,
+#         charge)
+#
+#     #piatoms[ia] = pointer(iatoms[ia])
+#
+#   istereo0D = (inchi_Stereo0D * 1) ()
+#   #pistereo0D = (POINTER(inchi_Stereo0D) * 1) ()
+#
+#   inchiInput = inchi_Input(
+#       iatoms,   # inchi-style atoms
+#       istereo0D,      # stereo0D (empty)
+#       bytes("", 'utf-8'),    # command line switches
+#       nAtoms,    # natoms
+#       0   # num_stereo0D
+#       )
+#
+#   #szInChI  = create_string_buffer(1) # NB: will be reallocd by inchi dll
+#   #szAuxInfo  = create_string_buffer(1)
+#   #szMessage = create_string_buffer(1)
+#   #szLog = create_string_buffer(1)
+#   inchiOutput = inchi_Output()
+#   #inchiOutput = inchi_Output( cast(szInChI, POINTER(c_char)),
+#       #cast(szAuxInfo, POINTER(c_char)),
+#       #cast(szMessage, POINTER(c_char)),
+#       #cast(szLog, POINTER(c_char)) )
+#
+#
+#   # Call DLL function(s)
+#
+#   result = libinchi.GetINCHI(byref(inchiInput), byref(inchiOutput))  # 0 = okay,
+#                 # 1 => warning,
+#                 # 2=>error,
+#                 # 3=>fatal
+#
+#   if result >= 2:
+#     showError('InChI creation error:', make_pystring(inchiOutput.szLog), parent=None)
+#     return None
+#   elif result == 1:
+#     showWarning('InChI creation warning:', make_pystring(inchiOutput.szLog), parent=None)
+#     print('InChI creation warning:')
+#
+#   # Process results
+#
+#   si = make_pystring(inchiOutput.szInChI)
+#
+#   libinchi.FreeINCHI(byref(inchiOutput))
+#
+#   return si
+#
+# def importInchi(inchiString):
+#
+#   compound = Compound('Unnamed')
+#   var = Variant(compound)
+#   compound.defaultVars.add(var)
+#
+#   libDir = path.join(path.dirname(__file__), '..', '..', '..', '..', '..', 'c', 'inchi', '')
+#
+#   opsys = sys.platform
+#   if (opsys[:3]=='win'):
+#     libname = 'libinchi.dll'
+#   else:
+#     libname = 'libinchi.so'
+#
+#   libinchi = cdll.LoadLibrary(libDir+libname)
+#
+#   inchiString = inchiString.strip()
+#
+#   inchiBytes = bytes(inchiString, 'utf-8')
+#
+#   #inchiInput = inchi_InputINCHI(inchiString, "")
+#   inchiInput = inchi_InputINCHI(inchiBytes, bytes("", 'utf-8'))
+#
+#   inchiOutput = inchi_OutputStruct()
+#
+#   result = libinchi.GetStructFromINCHI(byref(inchiInput), byref(inchiOutput))
+#
+#   if result >= 2:
+#     showError('InChI reading error:', make_pystring(inchiOutput.szLog), parent=None)
+#     return None
+#   elif result == 1:
+#     showWarning('InChI reading warning:', make_pystring(inchiOutput.szLog), parent=None)
+#
+#   inchiAtoms = inchiOutput.atom
+#   nAtoms = inchiOutput.num_atoms
+#
+#   if nAtoms == 0:
+#     showError('Could not create compound from InChI.', 'No InChI error reported', parent=None)
+#     return None
+#
+#   mapping = []
+#
+#   for i in range(nAtoms):
+#     iAtom = inchiAtoms[i]
+#     element = ""
+#     for eln in iAtom.elname:
+#       element = element + chr(eln)
+#     element = make_pystring(element)
+#     charge = iAtom.charge
+#
+#     a = Atom(compound, element, None)
+#     va = VarAtom(var, a, charge = charge)
+#
+#     mapping.append(va)
+#
+#   for i in range(nAtoms):
+#     iAtom = inchiAtoms[i]
+#     va = mapping[i]
+#
+#     for b in range(iAtom.num_bonds):
+#       neighbor = iAtom.neighbor[b]
+#       bt = iAtom.bond_type[b]
+#
+#       if bt == 2:
+#         bondType = 'double'
+#       elif bt == 3:
+#         bondType = 'triple'
+#       else:
+#         bondType = 'single'
+#
+#
+#       nva = mapping[neighbor]
+#
+#       bond = Bond([va, nva], bondType)
+#
+#     # Add hydrogens.
+#     newAtoms = []
+#     for val in va.freeValences:
+#       masterAtom = Atom(compound, 'H', None)
+#       VarAtom(None, masterAtom) # All vars
+#
+#       hydrogen = var.atomDict[masterAtom]
+#       newAtoms.append(hydrogen)
+#
+#     for newAtom in newAtoms:
+#       Bond((va, newAtom), autoVar=True)
+#
+#   stereo0D = inchiOutput.stereo0D
+#
+#   for i in range(inchiOutput.num_stereo0D):
+#
+#     stereo = stereo0D[i]
+#
+#     if stereo.type == 1:
+#       stereoAtom1 = mapping[stereo.neighbor[1]]
+#       stereoAtom2 = mapping[stereo.neighbor[2]]
+#       if stereo.parity == 1:
+#         stereoAtom1.chirality = 'Z'
+#         stereoAtom2.chirality = 'Z'
+#       elif stereo.parity == 2:
+#         stereoAtom1.chirality = 'E'
+#         stereoAtom2.chirality = 'E'
+#
+#     elif stereo.type == 2:
+#       stereoAtom = mapping[stereo.central_atom]
+#       prio = stereoAtom.getPriorities()
+#
+#       branches = stereoAtom.getBranchesSortedByLength()
+#       if len(branches) == 4:
+#         stereoAtom.stereo = [branches[3], branches[0], branches[2], branches[1]]
+#       elif len(branches) >= 4:
+#         stereoAtom.stereo = [branches[3], branches[0], branches[2], branches[1], branches[4:]]
+#
+#       n0 = mapping[stereo.neighbor[0]]
+#       n1 = mapping[stereo.neighbor[1]]
+#       n2 = mapping[stereo.neighbor[2]]
+#       n3 = mapping[stereo.neighbor[3]]
+#       n0Prio = prio.index(n0)
+#       n1Prio = prio.index(n1)
+#       n2Prio = prio.index(n2)
+#       n3Prio = prio.index(n3)
+#
+#       # If the InChI atom order is not the same as ChemBuild priorities the chirality needs to be flipped.
+#       if n0Prio != 3 or n1Prio != 2 or n2Prio !=1 or n3Prio !=0:
+#         flip = True
+#       else:
+#         flip = False
+#
+#       if stereo.parity == 1:
+#         if flip:
+#           stereoAtom.chirality = 'R'
+#         else:
+#           stereoAtom.chirality = 'S'
+#       elif stereo.parity == 2:
+#         if flip:
+#           stereoAtom.chirality = 'S'
+#         else:
+#           stereoAtom.chirality = 'R'
+#
+#   libinchi.FreeStructFromINCHI(byref(inchiOutput))
+#
+#   return compound
   

@@ -3,19 +3,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-09 13:49:14 +0100 (Tue, August 09, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2024-03-20 14:28:21 +0000 (Wed, March 20, 2024) $"
+__version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -37,21 +37,11 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
     import certifi
     import urllib
     from urllib.request import getproxies
-    import urllib3.contrib.pyopenssl
-    from urllib.parse import urlencode, quote
+    import urllib3
 
     context = ssl.create_default_context()
     context.check_hostname = False
     context.verify_mode = ssl.CERT_NONE
-
-    # if not headers:
-    #     headers = {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'}
-    # try:
-    #     body = urlencode(data or {}, quote_via=quote).encode('utf-8')
-    # except Exception as err:
-    #     body = urlencode({}, quote_via=quote).encode('utf-8')
-
-    urllib3.contrib.pyopenssl.inject_into_urllib3()
 
     # create the options list for creating an http connection
     options = {

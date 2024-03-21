@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-21 08:08:46 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 16:21:10 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -3017,15 +3017,15 @@ class CcpnGLWidget(QOpenGLWidget):
     def glBlocking(self):
         try:
             # stop notifiers and logging interfering with paint event
-            self.project.blankNotification()
-            self.application._increaseNotificationBlocking()
+            self.project._increaseNotificationBlanking()
+            self.application._increaseEchoBlocking()
 
             yield
 
         finally:
             # re-enable notifiers
-            self.application._decreaseNotificationBlocking()
-            self.project.unblankNotification()
+            self.application._decreaseEchoBlocking()
+            self.project._decreaseNotificationBlanking()
 
     def _buildGL(self):
         """Separate the building of the display from the paint event; not sure that this is required

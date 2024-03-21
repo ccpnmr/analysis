@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-10 15:48:53 +0000 (Sun, March 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 16:21:09 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1958,14 +1958,11 @@ class Project(AbstractWrapperObject):
             Notifiers.unregisterNotify(*tt)
 
     #===========================================================================================
-    #  Notifiers system
-    #
-    # New notifier system (Free for use in application code):
-    #
+    #  V3 Notifiers system
     #===========================================================================================
 
-    def registerNotifier(self, className: str, target: str, func: typing.Callable[..., None],
-                         parameterDict: dict = {}, onceOnly: bool = False) -> typing.Callable[..., None]:
+    def _registerV3Notifier(self, className: str, target: str, func: typing.Callable[..., None],
+                            parameterDict: dict = {}, onceOnly: bool = False) -> typing.Callable[..., None]:
         """
         Register notifiers to be triggered when data change
 
@@ -2034,7 +2031,7 @@ class Project(AbstractWrapperObject):
         #
         return notifier
 
-    def unRegisterNotifier(self, className: str, target: str, notifier: typing.Callable[..., None]):
+    def _unRegisterV3Notifier(self, className: str, target: str, notifier: typing.Callable[..., None]):
         """Unregister the notifier from this className, and target"""
         if target in self._notifierActions:
             tt = (className, target)
@@ -2049,7 +2046,7 @@ class Project(AbstractWrapperObject):
         except KeyError:
             self._logger.warning("Attempt to unregister unknown notifier %s for %s" % (notifier, (className, target)))
 
-    def removeNotifier(self, notifier: typing.Callable[..., None]):
+    def _removeV3Notifier(self, notifier: typing.Callable[..., None]):
         """Unregister the notifier from all places where it appears."""
         found = False
         for od in self._context2Notifiers.values():
@@ -2059,15 +2056,16 @@ class Project(AbstractWrapperObject):
         if not found:
             self._logger.warning("Attempt to remove unknown notifier: %s" % notifier)
 
-    def blankNotification(self):
+    def _increaseNotificationBlanking(self):
         """Disable notifiers temporarily
         e.g. to disable 'object modified' notifiers during object creation
-
-        Caller is responsible to make sure necessary notifiers are called, and to unblank after use"""
+        Caller is responsible to make sure necessary notifiers are called, and to decrease after use
+        """
         self._notificationBlanking += 1
 
-    def unblankNotification(self):
-        """Resume notifier execution after blanking"""
+    def _decreaseNotificationBlanking(self):
+        """Decrease notification blanking; Resume notifier execution if resulting value == 0
+        """
         self._notificationBlanking -= 1
         if self._notificationBlanking < 0:
             raise TypeError("Code Error: _notificationBlanking below zero!")
@@ -2079,7 +2077,6 @@ class Project(AbstractWrapperObject):
         self._progressSuspension += 1
 
         return
-        # # TODO suspension temporarily disabled
         # self._notificationSuspension += 1
 
     def resumeNotification(self):

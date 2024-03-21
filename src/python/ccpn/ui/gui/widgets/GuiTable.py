@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-21 11:51:40 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 16:21:11 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -521,7 +521,7 @@ class GuiTable(TableWidget, Base):
 
             if blanking and self.project:
                 if self.project:
-                    self.project.blankNotification()
+                    self.project._increaseNotificationBlanking()
 
         self._tableBlockingLevel += 1
 
@@ -535,7 +535,7 @@ class GuiTable(TableWidget, Base):
             if self._tableBlockingLevel == 0:
                 if blanking and self.project:
                     if self.project:
-                        self.project.unblankNotification()
+                        self.project._decreaseNotificationBlanking()
 
                 _widgetState.modelBlocker = None
                 _widgetState.rootBlocker = None
@@ -1585,7 +1585,7 @@ class GuiTable(TableWidget, Base):
 
         :param rowObjects: list of objects to set each row
         """
-        self.project.blankNotification()
+        self.project._increaseNotificationBlanking()
 
         # if nothing passed in then keep the current highlighted objects
         objs = selectedObjects if selectedObjects is not None else self.getSelectedObjects()
@@ -1604,7 +1604,7 @@ class GuiTable(TableWidget, Base):
 
         finally:
             self._highLightObjs(objs)
-            self.project.unblankNotification()
+            self.project._decreaseNotificationBlanking()
 
     def setTableFromDataFrameObject(self, dataFrameObject, columnDefs=None):
         """Populate the table from a Pandas dataFrame

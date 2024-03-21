@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-21 15:28:09 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 16:21:09 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -336,10 +336,10 @@ class Notifier(NotifierABC):
             #     self._isRegistered = True
 
 
-        func = _project.registerNotifier(className=targetName,
-                                         target=self._trigger,
-                                         func=self,
-                                         onceOnly=onceOnly)
+        func = _project._registerV3Notifier(className=targetName,
+                                            target=self._trigger,
+                                            func=self,
+                                            onceOnly=onceOnly)
         # The info needed for unregistering
         self._unregister= (targetName, self._trigger, func)
         self._isRegistered = True
@@ -366,7 +366,7 @@ class Notifier(NotifierABC):
             return
 
         targetName, trigger, func = self._unregister
-        self.project.unRegisterNotifier(targetName, trigger, func)
+        self.project._unRegisterV3Notifier(targetName, trigger, func)
 
         super().unRegister()  # the end as it clears all attributes
 

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-06 17:48:11 +0000 (Wed, March 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 16:21:10 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -206,7 +206,7 @@ class Framework(NotifierBase):
         # Logging: TODO: clean up these definitions and options
         # Optionally increase blocking level for command echo and logging
         if getattr(self.args, 'noDebugLogging', False):
-            self._increaseNotificationBlocking()
+            self._increaseEchoBlocking()
         self._enableLoggingToConsole = True
         self._useFileLogger = True
         if getattr(self.args, 'noLogging', False):
@@ -1267,7 +1267,7 @@ class Framework(NotifierBase):
         if _echoBlocking:
             getLogger().info('Loading %d objects, while suppressing command-logging' %
                              len(dataLoaders))
-            self._increaseNotificationBlocking()
+            self._increaseEchoBlocking()
 
         # Check if there is a dataLoader that creates a new project: in that case, we only want one
         _createNew = [dl for dl in dataLoaders if dl.createNewProject]
@@ -1328,7 +1328,7 @@ class Framework(NotifierBase):
                     objs.extend(result)
 
         if _echoBlocking:
-            self._decreaseNotificationBlocking()
+            self._decreaseEchoBlocking()
 
         getLogger().debug(f'Loaded objects: {objs}')
 
@@ -1599,14 +1599,14 @@ class Framework(NotifierBase):
         else:
             raise RuntimeError('Error: undefined project')
 
-    def _increaseNotificationBlocking(self):
+    def _increaseEchoBlocking(self):
         self._echoBlocking += 1
 
-    def _decreaseNotificationBlocking(self):
+    def _decreaseEchoBlocking(self):
         if self._echoBlocking > 0:
             self._echoBlocking -= 1
         else:
-            raise RuntimeError('Error: decreaseNotificationBlocking, already at 0')
+            raise RuntimeError('Error: decreaseEchoBlocking, already at 0')
 
     #-----------------------------------------------------------------------------------------
     # Archive code

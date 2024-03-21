@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-06 17:48:09 +0000 (Wed, March 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 16:21:09 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -348,7 +348,7 @@ def notificationBlanking(application=None):
     if application is None:
         raise RuntimeError('Error getting application')
 
-    application.project.blankNotification()
+    application.project._increaseNotificationBlanking()
     try:
         # transfer control to the calling function
         yield
@@ -358,7 +358,7 @@ def notificationBlanking(application=None):
 
     finally:
         # clean up after blocking notifications
-        application.project.unblankNotification()
+        application.project._decreaseNotificationBlanking()
 
 
 @contextmanager
@@ -398,7 +398,7 @@ def notificationEchoBlocking(application=None):
     if application is None:
         raise RuntimeError('Error getting application')
 
-    application._increaseNotificationBlocking()
+    application._increaseEchoBlocking()
     try:
         # transfer control to the calling function
         yield
@@ -408,7 +408,7 @@ def notificationEchoBlocking(application=None):
 
     finally:
         # clean up after disabling echo blocking
-        application._decreaseNotificationBlocking()
+        application._decreaseEchoBlocking()
 
 
 @contextmanager
@@ -462,8 +462,8 @@ def inactivity(application=None, project=None, debugText='Inactivity'):
     if project is None:
         raise RuntimeError('Error getting project')
 
-    project.blankNotification()
-    application._increaseNotificationBlocking()
+    project._increaseNotificationBlanking()
+    application._increaseEchoBlocking()
     project._apiNotificationBlanking += 1
 
     try:
@@ -476,8 +476,8 @@ def inactivity(application=None, project=None, debugText='Inactivity'):
 
     finally:
         # clean up after blocking notifications
-        project.unblankNotification()
-        application._decreaseNotificationBlocking()
+        project._decreaseNotificationBlanking()
+        application._decreaseEchoBlocking()
         project._apiNotificationBlanking -= 1
 
 
@@ -491,7 +491,7 @@ def inactivity(application=None, project=None, debugText='Inactivity'):
 #     # get the current application
 #     application = getApplication()
 #
-#     application.project.unblankNotification()
+#     application.project._decreaseNotificationBlanking()
 #     try:
 #         # transfer control to the calling function
 #         yield
@@ -501,7 +501,7 @@ def inactivity(application=None, project=None, debugText='Inactivity'):
 #
 #     finally:
 #         # clean up after blocking notifications
-#         application.project.blankNotification()
+#         application.project._increaseNotificationBlanking()
 
 
 @contextmanager
@@ -943,16 +943,16 @@ def deleteWrapperWithoutSideBar():
                     addUndoItem(undo=partial(self._finaliseAction, 'create'),
                                 redo=partial(self._finaliseAction, 'delete')
                                 )
-                    addUndoItem(undo=application.project.unblankNotification,
-                                redo=application.project.blankNotification)
+                    addUndoItem(undo=application.project._decreaseNotificationBlanking,
+                                redo=application.project._increaseNotificationBlanking)
 
                 # call the wrapped function
                 result = func(*args, **kwds)
 
                 with undoStackBlocking(application=application) as addUndoItem:
                     # incorporate the change notifier to simulate the decorator
-                    addUndoItem(undo=application.project.blankNotification,
-                                redo=application.project.unblankNotification)
+                    addUndoItem(undo=application.project._increaseNotificationBlanking,
+                                redo=application.project._decreaseNotificationBlanking)
 
         return result
 
@@ -976,8 +976,8 @@ def newV3Object():
                 # must be done like this as the undo functions are not known
                 with undoStackBlocking(application=application) as addUndoItem:
                     # incorporate the change notifier to simulate the decorator
-                    addUndoItem(undo=application.project.unblankNotification,
-                                redo=application.project.blankNotification)
+                    addUndoItem(undo=application.project._decreaseNotificationBlanking,
+                                redo=application.project._increaseNotificationBlanking)
 
                 # call the wrapped function
                 result = func(*args, **kwds)
@@ -987,8 +987,8 @@ def newV3Object():
                     # incorporate the change notifier to simulate the decorator
                     # addUndoItem(undo=partial(application.project._finalisePid2Obj, result, 'delete'),
                     #             redo=partial(application.project._finalisePid2Obj, result, 'create'))
-                    addUndoItem(undo=application.project.blankNotification,
-                                redo=application.project.unblankNotification)
+                    addUndoItem(undo=application.project._increaseNotificationBlanking,
+                                redo=application.project._decreaseNotificationBlanking)
                     addUndoItem(undo=partial(result._finaliseAction, 'delete'),
                                 redo=partial(result._finaliseAction, 'create'))
 
@@ -1023,8 +1023,8 @@ def deleteV3Object():
                     # incorporate the change notifier to simulate the decorator
                     addUndoItem(undo=partial(self._finaliseAction, 'create'),
                                 redo=partial(self._finaliseAction, 'delete'))
-                    addUndoItem(undo=application.project.unblankNotification,
-                                redo=application.project.blankNotification)
+                    addUndoItem(undo=application.project._decreaseNotificationBlanking,
+                                redo=application.project._increaseNotificationBlanking)
                     # addUndoItem(undo=partial(application.project._finalisePid2Obj, self, 'create'),
                     #             redo=partial(application.project._finalisePid2Obj, self, 'delete'))
 
@@ -1034,8 +1034,8 @@ def deleteV3Object():
 
                 with undoStackBlocking(application=application) as addUndoItem:
                     # incorporate the change notifier to simulate the decorator
-                    addUndoItem(undo=application.project.blankNotification,
-                                redo=application.project.unblankNotification)
+                    addUndoItem(undo=application.project._increaseNotificationBlanking,
+                                redo=application.project._decreaseNotificationBlanking)
 
         return result
 
@@ -1324,8 +1324,8 @@ def ccpNmrV3CoreUndoBlock(action='change', **actionKwds):
                 with undoStackBlocking(application=application, debugText=f'-> ccpNmrV3CoreUndoBlock, before try') as addUndoItem:
                     # incorporate the change notifier to simulate the decorator
                     addUndoItem(undo=partial(self._finaliseAction, action, **actionKwds))
-                    addUndoItem(undo=application.project.unblankNotification,
-                                redo=application.project.blankNotification)
+                    addUndoItem(undo=application.project._decreaseNotificationBlanking,
+                                redo=application.project._increaseNotificationBlanking)
 
                 try:
                     # call the wrapped function
@@ -1336,8 +1336,8 @@ def ccpNmrV3CoreUndoBlock(action='change', **actionKwds):
                 finally:
                     with undoStackBlocking(application=application, debugText=f'-> ccpNmrV3CoreUndoBlock, finally') as addUndoItem:
                         # incorporate the change notifier to simulate the decorator
-                        addUndoItem(undo=application.project.blankNotification,
-                                    redo=application.project.unblankNotification)
+                        addUndoItem(undo=application.project._increaseNotificationBlanking,
+                                    redo=application.project._decreaseNotificationBlanking)
                         addUndoItem(redo=partial(self._finaliseAction, action, **actionKwds))
 
         self._finaliseAction(action, **actionKwds)

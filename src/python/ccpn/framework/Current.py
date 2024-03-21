@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-21 11:51:39 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 16:21:10 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,7 @@ import operator
 import os
 import sys
 from collections import OrderedDict
+
 from ccpn.core.Chain import Chain
 from ccpn.core.Residue import Residue
 from ccpn.core.Atom import Atom
@@ -55,6 +56,8 @@ from ccpn.core.Collection import Collection
 from ccpn.core._implementation._OldChemicalShift import _OldChemicalShift
 from ccpn.core._implementation._PeakCluster import _PeakCluster
 from ccpn.ui._implementation.Strip import Strip
+from ccpn.core.lib.Notifiers import NotifierBase
+
 from ccpn.util.Logging import getLogger
 from ccpn.util.Path import aPath
 
@@ -116,7 +119,7 @@ def noCap(string):
     return string[0].lower() + string[1:]
 
 
-class Current:
+class Current(NotifierBase):
     # create the doc-string dynamically from definitions above;
     # cannot do newlines as Python console falls over when querying using the current? syntax (too many newlines?)
 

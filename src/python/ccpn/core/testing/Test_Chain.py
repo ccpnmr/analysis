@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-06 17:48:10 +0000 (Wed, March 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 16:21:09 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -261,12 +261,12 @@ class ChainTest(WrapperTesting):
         project._wrappedData.checkAllValid(complete=True)
 
         ll = []
-        not1 = project.registerNotifier('Chain', 'create', self.notifyfunc,
-                                        parameterDict={'value': 'chain', 'll': ll}, onceOnly=True)
-        not2 = project.registerNotifier('Residue', 'create', self.notifyfunc,
-                                        parameterDict={'value': 'residue', 'll': ll}, onceOnly=True)
-        not3 = project.registerNotifier('Atom', 'create', self.notifyfunc,
-                                        parameterDict={'value': 'atom', 'll': ll}, onceOnly=True)
+        not1 = project._registerV3Notifier('Chain', 'create', self.notifyfunc,
+                                           parameterDict={'value': 'chain', 'll': ll}, onceOnly=True)
+        not2 = project._registerV3Notifier('Residue', 'create', self.notifyfunc,
+                                           parameterDict={'value': 'residue', 'll': ll}, onceOnly=True)
+        not3 = project._registerV3Notifier('Atom', 'create', self.notifyfunc,
+                                           parameterDict={'value': 'atom', 'll': ll}, onceOnly=True)
 
         chaina = project.createChain('CDL', compoundName='cdl', molType='protein')
         chainb = project.createChain('FPC', compoundName='fpc', molType='protein')

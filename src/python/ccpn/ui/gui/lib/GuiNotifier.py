@@ -28,7 +28,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-21 11:51:39 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 15:28:09 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -114,6 +114,7 @@ class GuiNotifier(NotifierABC):
         if isinstance(targetName, (list, tuple)):
             raise ValueError(f'Invalid targetName {targetName}; remove list or tuple')
 
+        # super() will also check for trigger against self._triggerKeywords
         super().__init__(theObject=theObject, trigger=trigger, targetName=targetName,
                          callback=callback, setterObject=setterObject,
                          debug=debug, **kwds
@@ -129,19 +130,15 @@ class GuiNotifier(NotifierABC):
                 if targetName not in DropBase._dropTargets:
                     raise RuntimeError(f'GuiNotifier.__init__(): invalid dropTarget "{targetName}"')
 
-            notifier = (trigger, targetName)
-            self._theObject.setDropEventCallback(partial(self, notifier=notifier))
-            self._isRegistered = True
+            self._theObject.setDropEventCallback(self)
 
         elif trigger == GuiNotifier.ENTEREVENT:
-            notifier = (trigger, targetName)
-            self._theObject.setDragEnterEventCallback(partial(self, notifier=notifier))
-            self._isRegistered = True
+            self._theObject.setDragEnterEventCallback(self)
 
         elif trigger == GuiNotifier.DRAGMOVEEVENT:
-            notifier = (trigger, targetName)
-            self._theObject.setDragMoveEventCallback(partial(self, notifier=notifier))
-            self._isRegistered = True
+            self._theObject.setDragMoveEventCallback(self)
+
+        self._isRegistered = True
 
         if self._debug:
             sys.stderr.write('>>> registered %s\n' % self)
@@ -150,55 +147,43 @@ class GuiNotifier(NotifierABC):
         """
         unregister the notifiers
         """
-        if not self.isRegistered():
+        if not self.isRegistered:
             return
 
         if self._trigger == GuiNotifier.DROPEVENT:
             self._theObject.setDropEventCallback(None)
+
         elif self._trigger == GuiNotifier.ENTEREVENT:
             self._theObject.setDragEnterEventCallback(None)
+
         elif self._trigger == GuiNotifier.DRAGMOVEEVENT:
             self._theObject.setDragMoveEventCallback(None)
 
         super().unRegister()  # the end as it clears all attributes
 
-    def __call__(self, data: dict, notifier: tuple = None):
+    def __call__(self, data: dict):
         """
         wrapper, accommodating the different triggers before firing the callback
         """
-        if not self.isRegistered():
+        if not self.isRegistered:
             getLogger().warning('Triggering unregistered guiNotifier %s' % self)
             return
 
         if self._isBlanked:
             return
 
-        trigger, targetName = notifier
-
         if self._debug:
-            sys.stderr.write('>>> Notifier.__call__: %s \n--> notifier=%s data=%s\n' % \
-                             (self, notifier, data)
-                             )
+            sys.stderr.write(f'>>> {self}.__call__(): {data = }\n' )
 
         # DROPEVENT
-        if trigger == GuiNotifier.DROPEVENT:
+        if self._trigger == GuiNotifier.DROPEVENT:
             # optionally filter for targetName
             skip = False
-            if targetName is not None:
-                skip = True
-                for target in targetName:
-                    if target in data.keys():
-                        skip = False
-                        break
+            if self._targetName is not None:
+                skip = not self._targetName in data
             if skip: return
 
-        # callbackDict = dict(
-        #         notifier=self,
-        #         trigger=trigger,
-        #         theObject=self._theObject,
-        #         targetName=targetName,
-        #         )
-        callbackDict = self.newCallbackDict(trigger=trigger)
+        callbackDict = self.newCallbackDict(trigger=self._trigger)
         callbackDict.update(data)
         self._callback(callbackDict, **self._kwds)
         return

@@ -103,7 +103,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-21 16:21:10 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 21:22:10 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -177,7 +177,7 @@ class NotificationTest(WrapperTesting):
         self.assertEqual(ll, ['createx', 'createx', 'deletex', 'deletex', 'createx', 'createx',
                               'changex', 'changex', 'changex', 'changex', 'changex', 'changex'])
 
-        project._removeV3Notifier(not1)
+        project._unRegisterV3Notifier('Note', 'create', not1)
         project._unRegisterV3Notifier('Note', 'change', not3)
         project._unRegisterV3Notifier('Note', 'delete', not2)
         self.assertEqual(registered.get(('Note', 'create')), {})
@@ -224,7 +224,7 @@ class NotificationTest(WrapperTesting):
         #                       'createx', 'createx', 'createx', 'createx', 'createx', 'createx'])
         self.assertEqual(ll, ['createx', 'createx', 'deletex', 'deletex', 'createx', 'createx'])
 
-        project._removeV3Notifier(not1)
+        project._unRegisterV3Notifier('Note', 'create', not1)
         self.assertEqual(registered.get(('Note', 'create')), {})
         self.assertEqual(registered.get(('Note', 'delete')), {not2: True})
         self.assertEqual(registered.get(('Note', 'change')), {})
@@ -265,7 +265,7 @@ class NotificationTest(WrapperTesting):
         project.resumeNotification()
         self.assertEqual(ll, ['deletex', 'createx', 'createx'])
 
-        project._removeV3Notifier(not1)
+        project._unRegisterV3Notifier('Note', 'create', not1)
         project._unRegisterV3Notifier('Note', 'delete', not2)
         self.assertEqual(registered.get(('Note', 'create')), {})
         self.assertEqual(registered.get(('Note', 'delete')), {})

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-21 16:47:38 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 21:22:10 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -982,6 +982,16 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         _arrow = f'|{_indent}>' if enter else f'<{_indent}|'
         getLogger().debug2( _styleBlue(f'{_arrow:7} {text}'))
 
+    @staticmethod
+    def _apiObjectString(apiObj) -> str:
+        """:return A str representation for apiObj, as str(apiObj) is rubbish
+        """
+        _key = apiObj.getExpandedKey()
+        # Some silly objects, e.g. ccpnmr.gui.Task.StripPeakListView, have nested keys
+        if isinstance(_key[-1], list):
+            _key = _key[-1]
+        return f'<{apiObj.qualifiedName} _ID={apiObj._ID}, key={_key}>'
+
     @classmethod
     def _restoreObject(cls, project, apiObj):
         """Restores object from apiObj;
@@ -999,7 +1009,9 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
             # indented debugging just to be sure is running in the correct order
             # Used with _postRestore debug output at the completion
-            cls._indentedDebug2(text=f'_restoreObject: from {apiObj}', enter=True)
+            cls._indentedDebug2(text=f'_restoreObject: {cls.className} from ' \
+                                     f'{cls._apiObjectString(apiObj)}',
+                                enter=True)
 
             # # call any pre-initialisation updates
             # cls._updater.update(UPDATE_PRE_OBJECT_INITIALISATION, apiObj, cls)
@@ -1021,11 +1033,12 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
             obj._postRestore()
 
             # call any post-initialisation updates
+            obj._indentedDebug2(f'calling _update(UPDATE_POST_OBJECT_INITIALISATION) on {obj}', enter=False, dots=True)
             cls._updater.update(UPDATE_POST_OBJECT_INITIALISATION, obj)
 
         return obj
 
-    def _restoreChildren(self):
+    def _restoreChildren(self) -> list:
         """Recursively restore children of self, using existing objects in data model
         :return A list of objects created
         """
@@ -1033,6 +1046,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         data2Obj = project._data2Obj
         app = getApplication()
 
+        result = []
         for childClass in self._childClasses:
 
             if childClass._isGuiClass and app and not app.hasGui:
@@ -1042,33 +1056,29 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
                 )
                 continue
 
-            # recursively create children
-            self._indentedDebug2(f'getting apiData for {childClass.className}', enter=True, dots=True)
+            # self._indentedDebug2(f'getting apiData for {childClass.className}', enter=True, dots=True)
 
+            # recursively create children
             apiObjs = childClass._getAllWrappedData(self)
             for apiObj in apiObjs:
                 obj = data2Obj.get(apiObj)
                 if obj is None:
                     # obj does not exist; restore it from apiObj
 
-                    # GWV 13 Feb 24: Catching this here at such a low level is a bad idea
+                    # GWV 13 Feb 24:
+                    # Catching  errors on _restoreObject() here at such a low level is a bad idea
                     # as the project and it's window is in an undefined state. Better raise a hard
                     # error
-
-                    # try:
-                    #     obj = childClass._restoreObject(project=project, apiObj=apiObj)
-                    #
-                    # except RuntimeError as es:
-                    #     _text = 'Error restoring api-child %r of %s (%s)' % (apiObj.qualifiedName, self, es)
-                    #     getLogger().warning(_text)
-                    #     if app and app._isInDebugMode:
-                    #         sys.stderr.write(f'{traceback.print_exc()}\n')
 
                     obj = childClass._restoreObject(project=project, apiObj=apiObj)
 
                 # obj should exist now
                 if obj is None:
-                    raise RuntimeError(f'Error restoring api-child {apiObj.qualifiedName!r} of {self}')
+                    raise RuntimeError(f'Error restoring api-child {self._apiObjectString(apiObj)} of {self}')
+
+                result.append(obj)
+
+        return result
 
     def _postRestore(self):
         """Handle post-initialising children after all children have been restored
@@ -1077,7 +1087,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
         # indented debugging just to be sure is running in the correct order
         # used in conjunction with _restoreObject at the start
-        self._indentedDebug2(text=f'_postRestore: restored {self}', enter=False)
+        self._indentedDebug2(text=f'_postRestore:   Restored {self.className} {self}', enter=False)
 
     #  For restore 3.2 branch
 

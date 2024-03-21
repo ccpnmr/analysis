@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-21 16:47:39 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 21:22:10 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -821,6 +821,29 @@ class NotifierBase(object):
         objNotifiers = self._getObjectNotifiersDict()
         for notifier in list(objNotifiers.allNotifiers.values()):
             notifier.setBlanking(flag)
+
+
+    # api 'change' notification blanking level -
+    # To be used with the apiNotificationBlanking context manager; e.g.
+    # with apiNotificationBlanking():
+    #   do something
+    #
+    _apiNotificationBlanking = 0
+
+    def _increaseApiNotificationBlanking(self):
+        """Increase api-notification blanking;
+        The will disable api-notifiers until _decreaseApiNotifcationBlanking() has reset the situation.
+        """
+        NotifierBase._apiNotificationBlanking += 1
+
+    def _decreaseApiNotificationBlanking(self):
+        """Decrease api-notification blanking;
+        Api-notifier execution is resumed if resulting value == 0
+        """
+        NotifierBase._apiNotificationBlanking -= 1
+        if NotifierBase._apiNotificationBlanking < 0:
+            raise RuntimeError("_decreaseApiNotificationBlanking(): _apiNotificationBlanking below zero!")
+
 
 
 def _removeDuplicatedNotifiers(notifierQueue):

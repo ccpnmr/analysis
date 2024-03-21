@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-21 16:47:38 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 21:22:10 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -120,8 +120,9 @@ class Project(AbstractWrapperObject):
     # RESTRICTED. Direct access in core classes ONLY
     _apiNotifiers = []
 
-    # Actions you can notify
-    _notifierActions = ('create', 'delete', 'rename', 'change')
+    # GWV 21/3/24 moved to V3notifier section
+    # # Actions you can notify
+    # _notifierActions = ('create', 'delete', 'rename', 'change')
 
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiNmrProject._metaclass.qualifiedName()
@@ -993,13 +994,13 @@ class Project(AbstractWrapperObject):
         # Notification blanking level - to allow for nested notification disabling
         # self._notificationBlanking = 0
 
-        # api 'change' notification blanking level - to allow for api 'change' call to be
-        # disabled in the _modifiedApiObject method.
-        # To be used with the apiNotificationBlanking context manager; e.g.
-        # with apiNotificationBlanking():
-        #   do something
-        #
-        self._apiNotificationBlanking = 0
+        # # api 'change' notification blanking level - to allow for api 'change' call to be
+        # # disabled in the _modifiedApiObject method.
+        # # To be used with the apiNotificationBlanking context manager; e.g.
+        # # with apiNotificationBlanking():
+        # #   do something
+        # #
+        # self._apiNotificationBlanking = 0
 
         # Wrapper level notifier tracking.  APPLICATION ONLY
         # {(className,action):OrderedDict(notifier:onceOnly)}
@@ -1961,6 +1962,9 @@ class Project(AbstractWrapperObject):
     #  V3 Notifiers system
     #===========================================================================================
 
+    # Actions you can notify
+    _v3NotifierActions = ('create', 'delete', 'rename', 'change')
+
     def _registerV3Notifier(self, className: str, target: str, func: typing.Callable[..., None],
                             parameterDict: dict = {}, onceOnly: bool = False) -> typing.Callable[..., None]:
         """
@@ -2011,7 +2015,7 @@ class Project(AbstractWrapperObject):
 
         """
 
-        if target in self._notifierActions:
+        if target in self._v3NotifierActions:
             tt = (className, target)
         else:
             # This is right, it just looks strange. But if target is not an action it is
@@ -2023,6 +2027,7 @@ class Project(AbstractWrapperObject):
             notifier = functools.partial(func, **parameterDict)
         else:
             notifier = func
+
         if od.get(notifier) is None:
             od[notifier] = onceOnly
         else:
@@ -2033,28 +2038,29 @@ class Project(AbstractWrapperObject):
 
     def _unRegisterV3Notifier(self, className: str, target: str, notifier: typing.Callable[..., None]):
         """Unregister the notifier from this className, and target"""
-        if target in self._notifierActions:
+        if target in self._v3NotifierActions:
             tt = (className, target)
         else:
             # This is right, it just looks strange. But if target is not an action it is
             # another className, and if so the names must be sorted.
             tt = tuple(sorted([className, target]))
+
         try:
-            if hasattr(self, '_context2Notifiers'):
-                od = self._context2Notifiers.get((tt), {})
-                del od[notifier]
+            od = self._context2Notifiers.get((tt), {})
+            del od[notifier]
         except KeyError:
             self._logger.warning("Attempt to unregister unknown notifier %s for %s" % (notifier, (className, target)))
 
-    def _removeV3Notifier(self, notifier: typing.Callable[..., None]):
-        """Unregister the notifier from all places where it appears."""
-        found = False
-        for od in self._context2Notifiers.values():
-            if notifier in od:
-                del od[notifier]
-                found = True
-        if not found:
-            self._logger.warning("Attempt to remove unknown notifier: %s" % notifier)
+    # GWV 21/3/24: not used
+    # def _removeV3Notifier(self, notifier: typing.Callable[..., None]):
+    #     """Unregister the notifier from all places where it appears."""
+    #     found = False
+    #     for od in self._context2Notifiers.values():
+    #         if notifier in od:
+    #             del od[notifier]
+    #             found = True
+    #     if not found:
+    #         self._logger.warning("Attempt to remove unknown notifier: %s" % notifier)
 
     # GWV 21/3/24: to NotifierBase
     # def _increaseNotificationBlanking(self):
@@ -2193,7 +2199,8 @@ class Project(AbstractWrapperObject):
     def _modifiedApiObject(self, wrappedData):
         """ call object-has-changed notifiers
         """
-        if self._apiNotificationBlanking == 0:
+        from ccpn.core.lib.Notifiers import NotifierBase
+        if NotifierBase._apiNotificationBlanking == 0:
             obj = self._data2Obj.get(wrappedData)
             if not obj:
                 # NOTE:GWV - it shouldn't get here but occasionally it does; e.g. when
@@ -2259,7 +2266,8 @@ class Project(AbstractWrapperObject):
         pathToObject is a navigation path (may contain dots) and must yield an API object
         or an iterable of API objects"""
 
-        if self._apiNotificationBlanking == 0:
+        from ccpn.core.lib.Notifiers import NotifierBase
+        if NotifierBase._apiNotificationBlanking == 0:
 
             target = operator.attrgetter(pathToObject)(wrappedData)
 
@@ -2370,7 +2378,7 @@ class Project(AbstractWrapperObject):
         """Call the _updateObject(UPDATE_POST_PROJECT_INITIALISATION) method on
         all objects, including self
         """
-        self._indentedDebug2(f'{self}._update() : calling _updateObject() on self and all descendants', enter=True, dots=True)
+        self._indentedDebug2(f'Project._update(): calling _updateObject(UPDATE_POST_PROJECT_INITIALISATION) on self and all descendants', enter=True, dots=True)
 
         self._updateObject(UPDATE_POST_PROJECT_INITIALISATION)
         objs = self._getAllDecendants()

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-21 16:21:09 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 21:22:10 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -373,7 +373,7 @@ def apiNotificationBlanking(application=None):
     if application is None:
         raise RuntimeError('Error getting application')
 
-    application.project._apiNotificationBlanking += 1
+    application.project._increaseApiNotificationBlanking()
     try:
         # transfer control to the calling function
         yield
@@ -383,7 +383,7 @@ def apiNotificationBlanking(application=None):
 
     finally:
         # clean up after blocking notifications
-        application.project._apiNotificationBlanking -= 1
+        application.project._decreaseApiNotificationBlanking()
 
 
 @contextmanager
@@ -462,9 +462,9 @@ def inactivity(application=None, project=None, debugText='Inactivity'):
     if project is None:
         raise RuntimeError('Error getting project')
 
-    project._increaseNotificationBlanking()
     application._increaseEchoBlocking()
-    project._apiNotificationBlanking += 1
+    project._increaseNotificationBlanking()
+    project._increaseApiNotificationBlanking()
 
     try:
         with undoStackBlocking(project=project, debugText=debugText):
@@ -477,8 +477,8 @@ def inactivity(application=None, project=None, debugText='Inactivity'):
     finally:
         # clean up after blocking notifications
         project._decreaseNotificationBlanking()
+        project._decreaseApiNotificationBlanking()
         application._decreaseEchoBlocking()
-        project._apiNotificationBlanking -= 1
 
 
 # @contextmanager

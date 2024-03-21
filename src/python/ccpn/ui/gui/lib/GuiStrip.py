@@ -4,9 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-11-15 11:58:49 +0000 (Wed, November 15, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-03-21 16:29:25 +0000 (Thu, March 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -808,31 +808,43 @@ class GuiStrip(Frame):
     def _updateSpectrumLabels(self, data):
         """Callback when spectra have changed
         """
+        if self.isDeleted:
+            return
         self._CcpnGLWidget._processSpectrumNotifier(data)
 
     def _updateDisplayedPeaks(self, data):
         """Callback when peaks have changed
         """
+        if self.isDeleted:
+            return
         self._CcpnGLWidget._processPeakNotifier(data)
 
     def _updateDisplayedPeakLists(self, data):
         """Callback when peakLists are created/deleted
         """
+        if self.isDeleted:
+            return
         self._CcpnGLWidget._processPeakListNotifier(data)
 
     def _updateDisplayedNmrAtoms(self, data):
         """Callback when nmrAtoms have changed
         """
+        if self.isDeleted:
+            return
         self._CcpnGLWidget._processNmrAtomNotifier(data)
 
     def _updateDisplayedMultiplets(self, data):
         """Callback when multiplets have changed
         """
+        if self.isDeleted:
+            return
         self._CcpnGLWidget._processMultipletNotifier(data)
 
     def _updateDisplayedMultipletLists(self, data):
         """Callback when multipletLists are created/deleted
         """
+        if self.isDeleted:
+            return
         self._CcpnGLWidget._processMultipletListNotifier(data)
 
     def refreshDevicePixelRatio(self):
@@ -3452,12 +3464,17 @@ class GuiStrip(Frame):
             executeQueue = _removeDuplicatedNotifiers(self._queueActive)
             for itm in executeQueue:
                 # process item if different from previous
-                try:
+                if self.application and self.application._disableQueueException:
                     func, data = itm
-                    # data must be a non-empty dict or None
                     func(data) if data else func()
-                except Exception as es:
-                    getLogger().debug(f'Error in {self.__class__.__name__} update - {es}')
+
+                else:
+                    try:
+                        func, data = itm
+                        # data must be a non-empty dict or None
+                        func(data) if data else func()
+                    except Exception as es:
+                        getLogger().debug(f'Error in {self.__class__.__name__} update - {es}')
 
         if self._logQueue:
             getLogger().debug(f'elapsed time {(time_ns() - _startTime) / 1e9}')

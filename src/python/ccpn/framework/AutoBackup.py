@@ -4,9 +4,9 @@ This file contains AutoBackup class
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-18 16:08:03 +0100 (Tue, April 18, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-03-21 16:29:25 +0000 (Thu, March 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -39,7 +39,7 @@ from ccpn.util.Logging import getLogger
 CEND = consoleStyle.reset
 
 
-class AutoBackupHandler():
+class AutoBackupHandler:
     """Class to handle backups
 
     Has 2 timers:
@@ -68,8 +68,10 @@ class AutoBackupHandler():
         # initialise the timers
         self._createTimers()
         self._time = perf_counter()
+        self._backupModifiedTime = perf_counter()
 
         self._logger(f'event thread created {time()}{CEND}')
+        self._lock = QtCore.QMutex()
 
     def _createTimers(self):
         """Create timers
@@ -169,13 +171,19 @@ class AutoBackupHandler():
         self._logger(f'{consoleStyle.fg.lightgrey} --> update idle {delta}  {self._checkIdleQueue.queue}{CEND}')
 
         if self._isIdle:
-            # check if the app is busy, and ignore until next time
-            self._logger(f'{consoleStyle.fg.yellow} --> calling event {CEND}')
+            with QtCore.QMutexLocker(self._lock):
+                # lock the backup thread to protect the save-operation
 
-            self._eventFunction()
+                t0 = perf_counter()
+                # check if the app is busy, and ignore until next time
+                self._logger(f'{consoleStyle.fg.yellow} --> calling event {self._eventFunction}{CEND}')
 
-            self._resetQueue()
-            self._start(self._eventInterval)
+                self._eventFunction()
+                self._resetQueue()
+
+                self._start(self._eventInterval)
+
+                self._logger(f'{consoleStyle.fg.lightgrey} --> elasped time {round(perf_counter() - t0, 3)}{CEND}')
 
         else:
             # restart when gui is idle, check every second until event is performed

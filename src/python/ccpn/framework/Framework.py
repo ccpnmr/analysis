@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:26 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-03-21 16:29:25 +0000 (Thu, March 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -33,6 +33,8 @@ import tempfile
 import faulthandler
 import contextlib
 from datetime import datetime
+import time
+
 from ccpn.util.decorators import deprecated
 
 
@@ -508,6 +510,8 @@ class Framework(NotifierBase, GuiBase):
             return
 
         if self._autoBackupThread is None:
+            self._setBackupModifiedTime()
+            self._setLastBackupTime()
             self._autoBackupThread = AutoBackupHandler(eventFunction=self._backupProject,
                                                        eventInterval=self.preferences.general.autoBackupFrequency * 60
                                                        )
@@ -545,15 +549,37 @@ class Framework(NotifierBase, GuiBase):
         finally:
             self._updateAutoBackup()
 
+    def _getBackupModifiedTime(self):
+        return self._backupModifiedTime
+
+    def _setBackupModifiedTime(self):
+        """Set the last time that a core-object was modified.
+        """
+        self._backupModifiedTime = time.perf_counter()
+
+    def _getLastBackupTime(self):
+        return self._lastBackupTime
+
+    def _setLastBackupTime(self):
+        """Set the last time that a backup was performed.
+        """
+        self._lastBackupTime = time.perf_counter()
+
     def _backupProject(self):
         try:
             if self.project.readOnly:
                 # skip if the project is read-only
                 getLogger().debug('Backup skipped: Project is read-only')
                 return
+            if (self._getBackupModifiedTime() < self._getLastBackupTime()):
+                # ignore if there were no modifications since the last backup, even if project is modified
+                getLogger().debug('Backup skipped: Not modified since last backup')
+                return
 
             # NOTE:ED - check with Geerten whether it needs to do anything else here
-            self.project._backup()
+            if self.project._backup():
+                # log the time that a backup was completed
+                self._setLastBackupTime()
 
             # from ccpnmodel.ccpncore.lib.Io import Api as apiIo
             #
@@ -1498,17 +1524,31 @@ class Framework(NotifierBase, GuiBase):
 
     @logCommand('application.')
     def undo(self):
+        from ccpn.core.lib.ContextManagers import busyHandler
+
         if self.project._undo.canUndo():
-            with MessageDialog.progressManager(self.ui.mainWindow, 'performing undo'):
-                self.project._undo.undo()
+            if not self.project._undo.locked:
+                with busyHandler(title='Busy', text='Undo...', autoClose=False, closeDelay=1000,
+                                 raiseErrors=True) as progress:
+                    # set extra progress-dialog settings here
+                    progress.checkCancelled()  # will raise ProgressCancelled exception if pressed
+                    progress.setValue(0)  # update the progress-bar if matches step-size
+                    self.project._undo.undo()
         else:
             getLogger().warning('nothing to undo')
 
     @logCommand('application.')
     def redo(self):
+        from ccpn.core.lib.ContextManagers import busyHandler
+
         if self.project._undo.canRedo():
-            with MessageDialog.progressManager(self.ui.mainWindow, 'performing redo'):
-                self.project._undo.redo()
+            if not self.project._undo.locked:
+                with busyHandler(title='Busy', text='Redo...', autoClose=False, closeDelay=1000,
+                                 raiseErrors=True) as progress:
+                    # set extra progress-dialog settings here
+                    progress.checkCancelled()  # will raise ProgressCancelled exception if pressed
+                    progress.setValue(0)  # update the progress-bar if matches step-size
+                    self.project._undo.redo()
         else:
             getLogger().warning('nothing to redo.')
 

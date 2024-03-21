@@ -6,9 +6,9 @@ from __future__ import annotations
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -2292,6 +2292,168 @@ class Project(AbstractWrapperObject):
             # create a new ensemble-average in a dataTable
             dTable = self.newDataTable(name=f'{name}-average', data=averageStructure(ensemble))
             dTable.setMetadata('structureEnsemble', se.pid)
+
+        return [se]
+
+    def _loadMmcifFile(self, path: (str, Path)) -> list:
+        """Load data from mmcif file path into new StructureEnsemble object(s)
+        CCPNINTERNAL: called from mmcif dataLoader
+        """
+
+        from ccpn.util.StructureData import EnsembleData, averageStructure
+
+        with logCommandManager('application.', 'loadData', path):
+            path = aPath(path)
+            name = path.basename
+
+            ensemble = EnsembleData.from_mmcif(str(path))
+            se = self.newStructureEnsemble(name=name, data=ensemble)
+
+            # create a new ensemble-average in a dataTable
+            dTable = self.newDataTable(name=f'{name}-average', data=averageStructure(ensemble))
+            dTable.setMetadata('structureEnsemble', se.pid)
+
+            def getLoopNames( filename):
+                print(filename)
+                loopNames = []
+                loop_ = False
+                with open(filename) as f:
+                    for l in f:
+                        l = l.strip()
+                        if len(l) == 0:
+                            continue  # Ignore blank lines
+                        if l.startswith('#'):
+                            loop_ = False
+                            continue
+                        if l.startswith('loop_'):
+                            loop_ = True
+                            continue
+                        if (loop_ == True) and (l.startswith('_')):
+                            loopNames.append(l.split('.')[0])
+
+                return list(set(loopNames))
+
+            loopNames = getLoopNames(path)
+
+            def getLoopData(filename, loopName) -> pd.DataFrame:
+                """
+                Create a Pandas DataFrame from an mmCIF file.
+                """
+                columns = []
+                atomData = []
+                loop_ = False
+                _atom_siteLoop = False
+                with open(filename) as f:
+                    for l in f:
+                        l = l.strip()
+                        if len(l) == 0:
+                            continue  # Ignore blank lines
+                        if l.startswith('#'):
+                            loop_ = False
+                            _atom_siteLoop = False
+                            continue
+                        if l.startswith('loop_'):
+                            loop_ = True
+                            _atom_siteLoop = False
+                            continue
+                        if loop_ and l.startswith(loopName + '.'):
+                            _atom_siteLoop = True
+                            columns.append(l.replace(loopName + '.', "").strip())
+                        if _atom_siteLoop and l.startswith('#'):
+                            loop_ = False
+                            _atom_siteLoop = False
+                        if _atom_siteLoop and not l.startswith(loopName + '.'):
+                            split_data = re.findall(r"'[^']*'|\S+", l)
+                            split_data = [item.strip("'") for item in split_data]
+                            atomData.append(split_data)
+
+                df = pd.DataFrame(atomData, columns=columns)
+                # df = df.infer_objects()  # This method returns the DataFrame with inferred data types
+                df['idx'] = numpy.arange(1, df.shape[0] + 1)  # Create an 'idx' column
+                df.set_index('idx', inplace=True)  # Set 'idx' as the index
+
+                return df
+
+            try:
+                if len(self.chains == 1):
+                    chain in self.chains[0]
+                else:
+                    print(self.chains)
+                    return
+            except:
+                print(self.chains)
+                return
+
+            if (("_struct_conf" in loopNames) or ("_struct_sheet_range" in loopNames)):
+                # generates a Datatable containing secondary structure information from the mmcif file.
+
+                # get chain information
+                _struct_confDict = {}
+
+                for residue in chain.residues:
+                    _struct_confDict[int(residue.sequenceCode)] = {}
+                    _struct_confDict[int(residue.sequenceCode)]['sequenceCode'] = residue.sequenceCode
+                    _struct_confDict[int(residue.sequenceCode)]['residueType'] = residue.residueType
+                    _struct_confDict[int(residue.sequenceCode)]['residuePID'] = residue.pid
+                    _struct_confDict[int(residue.sequenceCode)]['conf_type_id'] = "COIL"
+
+                # try to get secondary structure data from mmcif
+                try:
+                    dfHelix = getLoopData(path, "_struct_conf")
+                except:
+                    dfHelix = None
+
+                try:
+                    dfSheet = getLoopData(path, "_struct_sheet_range")
+                except:
+                    dfSheet = None
+
+                # priocees the helix data - if there is some
+                if dfHelix is not None:
+                    # Iterate over rows in the DataFrame
+                    print("dfHelix\n", dfHelix.tail())
+                    for index, row in dfHelix.iterrows():
+                        # Get the relevant values from the row
+                        conf_type_id = row['conf_type_id']
+                        startID = row['beg_label_seq_id']
+                        endID = row['end_label_seq_id']
+                        print(conf_type_id, startID, endID)
+                        # Iterate over the range between startID and endID
+                        for id in range(int(startID), int(endID) + 1):
+                            # Set dictionary values for each 'id'
+                            try:
+                                _struct_confDict[id]['conf_type_id'] = conf_type_id
+                            except:
+                                print("Not found error. Likely mismatch between Chain and mmcif sequence")
+
+
+                # process the sheet data if there is some
+                if dfSheet is not None:
+                    # Iterate over rows in the DataFrame
+                    for index, row in dfSheet.iterrows():
+                        # Get the relevant values from the row
+                        conf_type_id = 'STRN'  # set sheet info to PDB type for Beta Strand
+                        startID = row['beg_label_seq_id']
+                        endID = row['end_label_seq_id']
+
+                        # Iterate over the range between startID and endID
+                        for id in range(int(startID), int(endID) + 1):
+                            # Set dictionary values for each 'id'
+                            try:
+                                _struct_confDict[id]['conf_type_id'] = conf_type_id
+                            except:
+                                print("Not found error. Likely mismatch between Chain and mmcif sequence")
+
+                # Convert the nested dictionary to a Pandas DataFrame
+                df1 = pd.DataFrame.from_dict(_struct_confDict, orient='index')
+
+                # reset the index to have a separate column for the index values
+                df1.reset_index(inplace=True)
+                df1.rename(columns={'index': 'id'}, inplace=True)
+
+                # save the secondary structure dataframe
+                self.newDataTable(name="SecondaryStructure", data=df1,
+                                          comment='Secondary Structure Data from MMCIF')
 
         return [se]
 

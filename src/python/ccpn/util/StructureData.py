@@ -5,8 +5,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 19:17:57 +0100 (Wed, June 28, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: eliza $"
+__dateModified__ = "$dateModified: 2023-12-15 12:43:32 +0000 (Fri, December 15, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -400,6 +400,46 @@ class EnsembleData(DataFrameABC):
 
         return cls(ensemble)
 
+    @classmethod
+    def from_mmcif(cls, filename: str) -> pd.DataFrame:
+        """
+        Create an EnsembleData from a mmcif file.
+        """
+        dfs = mmcif2df(filename)
+
+        print(dfs.head())
+        print(dfs.dtypes)
+
+        ensemble = cls()
+
+        ensemble['index'] = list(range(1, dfs.shape[0] + 1))
+        ensemble['modelNumber'] = dfs['pdbx_PDB_model_num'].astype(int)
+        ensemble['chainCode'] = dfs['label_asym_id'].astype(str)
+        ensemble['sequenceId'] = dfs['label_seq_id'].astype(int)
+        ensemble['insertionCode'] = dfs['pdbx_PDB_ins_code'].astype(str)
+        ensemble['residueName'] = dfs['label_comp_id'].astype(str)
+        ensemble['atomName'] = dfs['label_atom_id'].astype(str)
+        ensemble['altLocationCode'] = dfs['label_alt_id'].astype(str)
+        ensemble['element'] = dfs['type_symbol'].astype(str)
+        ensemble['x'] = dfs['Cartn_x'].astype(float)
+        ensemble['y'] = dfs['Cartn_y'].astype(float)
+        ensemble['z'] = dfs['Cartn_z'].astype(float)
+        ensemble['occupancy'] = dfs['occupancy'].astype(float)
+        ensemble['bFactor'] = dfs['B_iso_or_equiv'].astype(float)
+        ensemble['nmrChainCode'] = None
+        ensemble['nmrSequenceCode'] = None
+        ensemble['nmrResidueName'] = None
+        ensemble['nmrAtomName'] = None
+        ensemble['comment'] = None
+
+        print(ensemble.head())
+        print(ensemble.dtypes)
+
+
+        return cls(ensemble)
+
+
+
     #=========================================================================================
     # Pandas compatibility methods
     #=========================================================================================
@@ -529,6 +569,44 @@ def pdb2df(filename: str) -> pd.DataFrame:
     dfs['idx'] = numpy.arange(dfs.shape[0]) + 1
     dfs.set_index('idx', inplace=True)
     return dfs
+
+def mmcif2df(filename: str) -> pd.DataFrame:
+    """
+    Create a Pandas DataFrame from an mmCIF file.
+    """
+    columns = []
+    atomData = []
+    loop_ = False
+    _atom_siteLoop = False
+    print(filename)
+    with open(filename) as f:
+        for l in f:
+            l = l.strip()
+            if len(l) == 0:
+                continue  # Ignore blank lines
+            if l.startswith('#') :
+                loop_ = False
+                continue
+            if l.startswith('loop_'):
+                loop_ = True
+                _atom_siteLoop = False
+                continue
+            if loop_ and l.startswith("_atom_site."):
+                _atom_siteLoop = True
+                columns.append(l.replace("_atom_site.", "").strip())
+            elif _atom_siteLoop and l.startswith("ATOM"):
+                atomData.append(l.split())
+
+    df = pd.DataFrame(atomData, columns=columns)
+    #df = df.infer_objects()  # This method returns the DataFrame with inferred data types
+    df['idx'] = numpy.arange(1, df.shape[0] + 1)  # Create an 'idx' column
+    df.set_index('idx', inplace=True)  # Set 'idx' as the index
+
+
+    return df
+
+
+
 
 
 def _pdbStringToDf(modelLines: list, modelNumber=1):

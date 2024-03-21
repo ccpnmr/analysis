@@ -3,9 +3,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-16 14:45:44 +0100 (Mon, October 16, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-03-21 16:17:10 +0000 (Thu, March 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,19 +25,13 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from typing import List, Tuple
-import numpy as np
-from scipy import signal
+from typing import List
 
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import IntegralList as ApiIntegralList
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core._implementation.PMIListABC import PMIListABC
 from ccpn.core.lib.ContextManagers import newObject
 from ccpn.util.decorators import logCommand
-from ccpn.util.Logging import getLogger
-
-
-########################################################################################################################################
 
 
 class IntegralList(PMIListABC):
@@ -80,11 +74,36 @@ class IntegralList(PMIListABC):
         self._primaryChildClass = klass
 
     #=========================================================================================
-    # Implementation functions
+    # property STUBS: hot-fixed later
+    #=========================================================================================
+
+    @property
+    def integrals(self) -> list['Integral']:
+        """STUB: hot-fixed later
+        :return: a list of integrals in the IntegralList
+        """
+        return []
+
+    #=========================================================================================
+    # getter STUBS: hot-fixed later
+    #=========================================================================================
+
+    def getIntegral(self, relativeId: str) -> 'Integral | None':
+        """STUB: hot-fixed later
+        :return: an instance of Integral, or None
+        """
+        return None
+
+    #=========================================================================================
+    # Core methods
+    #=========================================================================================
+
+    #=========================================================================================
+    # Implementation methods
     #=========================================================================================
 
     @classmethod
-    def _getAllWrappedData(cls, parent: Spectrum) -> Tuple[ApiIntegralList, ...]:
+    def _getAllWrappedData(cls, parent: Spectrum) -> list[ApiIntegralList]:
         """get wrappedData (PeakLists) for all IntegralList children of parent Spectrum"""
         return parent._wrappedData.sortedIntegralLists()
 
@@ -100,7 +119,6 @@ class IntegralList(PMIListABC):
                     ilv._finaliseAction(action)
         except Exception as es:
             raise RuntimeError('Error _finalising integralListViews: %s' % str(es))
-
 
     #===========================================================================================
     # new<Object> and other methods

@@ -3,9 +3,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-22 18:27:04 +0000 (Wed, November 22, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2024-03-21 16:17:10 +0000 (Thu, March 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -39,7 +39,7 @@ from ccpn.core.Spectrum import Spectrum
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.lib.Pid import Pid, remapSeparators
 from ccpn.core.lib.ContextManagers import newObject, newV3Object, renameObject, \
-    undoBlockWithoutSideBar, undoStackBlocking, undoBlock, ccpNmrV3CoreSetter
+    undoStackBlocking, undoBlock, ccpNmrV3CoreSetter
 from ccpn.util.decorators import logCommand
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.DataEnum import DataEnum
@@ -359,12 +359,6 @@ class ChemicalShiftList(AbstractWrapperObject):
         return _oldNmr
 
     @property
-    def _oldChemicalShifts(self):
-        """STUB: hot-fixed later
-        """
-        return ()
-
-    @property
     def chemicalShifts(self):
         """Return the shifts belonging to ChemicalShiftList
         """
@@ -432,7 +426,34 @@ class ChemicalShiftList(AbstractWrapperObject):
                 # raise ValueError(f'{self.className}.getChemicalShift: shift not found')
 
     #=========================================================================================
-    # Implementation functions
+    # property STUBS: hot-fixed later
+    #=========================================================================================
+
+    @property
+    def _oldChemicalShifts(self) -> list['_oldChemicalShift']:
+        """STUB: hot-fixed later
+        :return: a list of _oldChemicalShifts in the ChemicalShiftList
+        """
+        return []
+
+    #=========================================================================================
+    # getter STUBS: hot-fixed later
+    #=========================================================================================
+
+    def _getOldChemicalShift(self, relativeId: str) -> '_OldChemicalShift | None':
+        """STUB: hot-fixed later
+        :return: an instance of _OldChemicalShift, or None
+        """
+        return None
+
+    # def get_OldChemicalShift(self, relativeId: str) -> '_OldChemicalShift | None':
+    #     """STUB: hot-fixed later
+    #     :return: an instance of _OldChemicalShift, or None
+    #     """
+    #     return None
+
+    #=========================================================================================
+    # Core methods
     #=========================================================================================
 
     @logCommand(get='self')
@@ -502,7 +523,8 @@ class ChemicalShiftList(AbstractWrapperObject):
         try:
             return self._data.loc[uniqueId]
         except Exception as es:
-            raise ValueError(f'{self.className}._getByUniqueId: error getting row, uniqueId {uniqueId} in {self}  -  {es}') from None
+            raise ValueError(
+                f'{self.className}._getByUniqueId: error getting row, uniqueId {uniqueId} in {self}  -  {es}') from None
 
     def _getAttribute(self, uniqueId, name, attribType):
         """Get the named attribute from the chemicalShift with supplied uniqueId
@@ -514,7 +536,8 @@ class ChemicalShiftList(AbstractWrapperObject):
             _val = self._data.at[uniqueId, name]
             return None if (_val is None or (_val != _val)) else attribType(_val)
         except Exception as es:
-            raise ValueError(f'{self.className}._getAttribute: error getting attribute {name} in {self}  -  {es}') from None
+            raise ValueError(
+                f'{self.className}._getAttribute: error getting attribute {name} in {self}  -  {es}') from None
 
     def _setAttribute(self, uniqueId, name, value):
         """Set the attribute of the chemicalShift with the supplied uniqueId
@@ -522,7 +545,8 @@ class ChemicalShiftList(AbstractWrapperObject):
         try:
             self._data.at[uniqueId, name] = value
         except Exception as es:
-            raise ValueError(f'{self.className}._setAttribute: error setting attribute {name} in {self}  -  {es}') from None
+            raise ValueError(
+                f'{self.className}._setAttribute: error setting attribute {name} in {self}  -  {es}') from None
 
     def _getAttributes(self, uniqueId, startName, endName, attribTypes):
         """Get the named attributes from the chemicalShift with supplied uniqueId
@@ -532,10 +556,12 @@ class ChemicalShiftList(AbstractWrapperObject):
         """
         try:
             _val = self._data.loc[uniqueId, startName:endName]
-            return tuple(None if (val is None or (val != val)) else attribType(val) for val, attribType in zip(_val, attribTypes))
+            return tuple(None if (val is None or (val != val)) else attribType(val) for val, attribType in
+                         zip(_val, attribTypes))
 
         except Exception as es:
-            raise ValueError(f'{self.className}._getAttributes: error getting attributes {startName}|{endName} in {self}  -  {es}') from None
+            raise ValueError(
+                f'{self.className}._getAttributes: error getting attributes {startName}|{endName} in {self}  -  {es}') from None
 
     def _setAttributes(self, uniqueId, startName, endName, value):
         """Set the attributes of the chemicalShift with the supplied uniqueId
@@ -543,7 +569,8 @@ class ChemicalShiftList(AbstractWrapperObject):
         try:
             self._data.loc[uniqueId, startName:endName] = value
         except Exception as es:
-            raise ValueError(f'{self.className}._setAttributes: error setting attributes {startName}|{endName} in {self}  -  {es}') from None
+            raise ValueError(
+                f'{self.className}._setAttributes: error setting attributes {startName}|{endName} in {self}  -  {es}') from None
 
     def _undoRedoShifts(self, shifts):
         """update the shifts after undo/redo
@@ -751,7 +778,8 @@ class ChemicalShiftList(AbstractWrapperObject):
                                             value=value, valueError=valueError, figureOfMerit=figureOfMerit,
                                             static=static,
                                             nmrAtom=nmrAtom,
-                                            chainCode=chainCode, sequenceCode=sequenceCode, residueType=residueType, atomName=atomName,
+                                            chainCode=chainCode, sequenceCode=sequenceCode, residueType=residueType,
+                                            atomName=atomName,
                                             comment=comment)
 
     @newV3Object()
@@ -797,7 +825,6 @@ class ChemicalShiftList(AbstractWrapperObject):
         self._shifts.append(shift)
         _newShifts = self._shifts[:]
 
-        # with undoBlockWithoutSideBar():
         # add an undo/redo item to recover shifts
         with undoStackBlocking() as addUndoItem:
             addUndoItem(undo=partial(self._undoRedoShifts, _oldShifts),
@@ -850,7 +877,8 @@ class ChemicalShiftList(AbstractWrapperObject):
             # raise an error if there are any assigned peaks
             _val = _shs[0]
             if _val.assignedPeaks:
-                raise ValueError(f'{self.className}.deleteChemicalShift: cannot delete chemicalShift with assigned peaks')
+                raise ValueError(
+                    f'{self.className}.deleteChemicalShift: cannot delete chemicalShift with assigned peaks')
 
             self._deleteChemicalShiftObject(rows)
 

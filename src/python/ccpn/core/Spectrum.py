@@ -54,8 +54,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:25 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-03-21 16:17:11 +0000 (Thu, March 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -169,23 +169,8 @@ class Spectrum(AbstractWrapperObject):
     _NEGATIVENOISELEVEL = 'negativeNoiseLevel'
 
     #-----------------------------------------------------------------------------------------
-    # Attributes of the data structure (incomplete?)
+    # Attributes of the data structure
     #-----------------------------------------------------------------------------------------
-
-    @property
-    def peakLists(self) -> list:
-        """STUB: hot-fixed later"""
-        return []
-
-    @property
-    def multipletLists(self) -> list:
-        """STUB: hot-fixed later"""
-        return []
-
-    @property
-    def integralLists(self) -> list:
-        """STUB: hot-fixed later"""
-        return []
 
     @property
     def spectrumViews(self) -> tuple:
@@ -197,15 +182,10 @@ class Spectrum(AbstractWrapperObject):
 
     @property
     def chemicalShiftList(self):
-        """STUB: hot-fixed later"""
-        return None
-
-    @property
-    def spectrumReferences(self) -> list:
-        """list of spectrumReferences objects
-        STUB: hot-fixed later
+        """STUB: hot-fixed later
+        :return: an instance of ChemicalShiftList, or None
         """
-        return []
+        return None
 
     @property
     def spectrumDimensions(self) -> tuple:
@@ -226,13 +206,10 @@ class Spectrum(AbstractWrapperObject):
         return tuple(self._spectrumDimensions)
 
     @property
-    def spectrumHits(self) -> list:
-        """STUB: hot-fixed later"""
-        return []
-
-    @property
     def sample(self):
-        """STUB: hot-fixed later"""
+        """STUB: hot-fixed later
+        :return: an instance of Sample, or None
+        """
         return None
 
     # Inherited from AbstractWrapperObject
@@ -245,6 +222,131 @@ class Spectrum(AbstractWrapperObject):
     def _parent(self) -> Project:
         """Parent (containing) object."""
         return self._project
+
+    #-----------------------------------------------------------------------------------------
+    # property STUBS: hot-fixed later
+    #-----------------------------------------------------------------------------------------
+
+    @property
+    def integralLists(self) -> list['IntegralList']:
+        """STUB: hot-fixed later
+        :return: a list of integralLists in the Spectrum
+        """
+        return []
+
+    @property
+    def integrals(self) -> list['Integral']:
+        """STUB: hot-fixed later
+        :return: a list of integrals in the Spectrum
+        """
+        return []
+
+    @property
+    def multipletLists(self) -> list['MultipletList']:
+        """STUB: hot-fixed later
+        :return: a list of multipletLists in the Spectrum
+        """
+        return []
+
+    @property
+    def multiplets(self) -> list['Multiplet']:
+        """STUB: hot-fixed later
+        :return: a list of multiplets in the Spectrum
+        """
+        return []
+
+    @property
+    def peakLists(self) -> list['PeakList']:
+        """STUB: hot-fixed later
+        :return: a list of peakLists in the Spectrum
+        """
+        return []
+
+    @property
+    def peaks(self) -> list['Peak']:
+        """STUB: hot-fixed later
+        :return: a list of peaks in the Spectrum
+        """
+        return []
+
+    @property
+    def pseudoDimensions(self) -> list['PseudoDimension']:
+        """STUB: hot-fixed later
+        :return: a list of pseudoDimensions in the Spectrum
+        """
+        return []
+
+    @property
+    def spectrumHits(self) -> list['SpectrumHit']:
+        """STUB: hot-fixed later
+        :return: a list of spectrumHits in the Spectrum
+        """
+        return []
+
+    @property
+    def spectrumReferences(self) -> list['SpectrumReference']:
+        """STUB: hot-fixed later
+        :return: a list of spectrumReferences in the Spectrum
+        """
+        return []
+
+    #-----------------------------------------------------------------------------------------
+    # getter STUBS: hot-fixed later
+    #-----------------------------------------------------------------------------------------
+
+    def getIntegral(self, relativeId: str) -> 'Integral | None':
+        """STUB: hot-fixed later
+        :return: an instance of Integral, or None
+        """
+        return None
+
+    def getIntegralList(self, relativeId: str) -> 'IntegralList | None':
+        """STUB: hot-fixed later
+        :return: an instance of IntegralList, or None
+        """
+        return None
+
+    def getMultiplet(self, relativeId: str) -> 'Multiplet | None':
+        """STUB: hot-fixed later
+        :return: an instance of Multiplet, or None
+        """
+        return None
+
+    def getMultipletList(self, relativeId: str) -> 'MultipletList | None':
+        """STUB: hot-fixed later
+        :return: an instance of MultipletList, or None
+        """
+        return None
+
+    def getPeak(self, relativeId: str) -> 'Peak | None':
+        """STUB: hot-fixed later
+        :return: an instance of Peak, or None
+        """
+        return None
+
+    def getPeakList(self, relativeId: str) -> 'PeakList | None':
+        """STUB: hot-fixed later
+        :return: an instance of PeakList, or None
+        """
+        return None
+
+    def getPseudoDimension(self, relativeId: str) -> 'PseudoDimension | None':
+        """STUB: hot-fixed later
+        :return: an instance of PseudoDimension, or None
+        """
+        return None
+
+    def getSpectrumHit(self, relativeId: str) -> 'SpectrumHit | None':
+        """STUB: hot-fixed later
+        :return: an instance of SpectrumHit, or None
+        """
+        return None
+
+    def getSpectrumReference(self, relativeId: str) -> 'SpectrumReference | None':
+        """STUB: hot-fixed later
+        :return: an instance of SpectrumReference, or None
+        """
+        return None
 
     #-----------------------------------------------------------------------------------------
 
@@ -2249,6 +2351,7 @@ class Spectrum(AbstractWrapperObject):
         """
         if self.dataSource is not None:
             from ccpn.core.lib.SpectrumLib import getNoiseEstimate
+
             noiseObj = getNoiseEstimate(self)
             noise = noiseObj.noiseLevel
         else:
@@ -2267,9 +2370,9 @@ class Spectrum(AbstractWrapperObject):
         if result is None and self.noiseLevel:
             # We have the noiseLevel, we can backcalculate the noise sd
             from ccpn.core.lib.SpectrumLib import  _estimateNoiseSDforSpectrumNoiseLevel
+
             result = _estimateNoiseSDforSpectrumNoiseLevel(self)
             self._setInternalParameter(self._NOISESD, result) #ensure we don't go out of sync with the NoiseLevel.
-
         return result
 
     @_noiseSD.setter

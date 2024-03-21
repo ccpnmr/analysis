@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-22 15:58:35 +0000 (Thu, February 22, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-03-21 16:17:11 +0000 (Thu, March 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,15 +27,14 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import typing
 from functools import partial
-from ccpn.util import Common as commonUtil
-from ccpn.core.Project import Project
+from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Residue as ApiResidue
 from ccpn.core.Chain import Chain
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
-from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Residue as ApiResidue
-from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import deleteObject, undoStackBlocking, renameObject, undoBlock, \
+from ccpn.core.lib.ContextManagers import undoStackBlocking, renameObject, undoBlock, \
     undoBlockWithoutSideBar, notificationEchoBlocking
+from ccpn.util import Common as commonUtil
+from ccpn.util.decorators import logCommand
 
 
 class Residue(AbstractWrapperObject):
@@ -65,7 +64,10 @@ class Residue(AbstractWrapperObject):
     # Number of fields that comprise the object's pid; Used to get parent id's
     _numberOfIdFields = 2
 
+    #=========================================================================================
     # CCPN properties
+    #=========================================================================================
+
     @property
     def _apiResidue(self) -> ApiResidue:
         """ API residue matching Residue"""
@@ -230,7 +232,28 @@ class Residue(AbstractWrapperObject):
             raise ValueError("%s configuration must be one of %s" % (self, allowedValues))
 
     #=========================================================================================
-    # CCPN functions
+    # property STUBS: hot-fixed later
+    #=========================================================================================
+
+    @property
+    def atoms(self) -> list['Atom']:
+        """STUB: hot-fixed later
+        :return: a list of atoms in the Residue
+        """
+        return []
+
+    #=========================================================================================
+    # getter STUBS: hot-fixed later
+    #=========================================================================================
+
+    def getAtom(self, relativeId: str) -> 'Atom | None':
+        """STUB: hot-fixed later
+        :return: an instance of Atom, or None
+        """
+        return None
+
+    #=========================================================================================
+    # Core methods
     #=========================================================================================
 
     @property
@@ -321,7 +344,7 @@ class Residue(AbstractWrapperObject):
             return None
 
     @property
-    def allNmrResidues(self) -> typing.Tuple['NmrResidue']:
+    def allNmrResidues(self) -> tuple['NmrResidue']:
         """AllNmrResidues corresponding to Residue - E.g. (for MR:A.87)
         NmrResidues NR:A.87, NR:A.87+0, NR:A.88-1, NR:A.82+5, etc.
         """
@@ -362,7 +385,7 @@ class Residue(AbstractWrapperObject):
         return any([a.isAssigned for a in self.atoms])
 
     #=========================================================================================
-    # Implementation functions
+    # Implementation methods
     #=========================================================================================
 
     @classmethod

@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:25 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-03-21 16:17:10 +0000 (Thu, March 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,19 +29,17 @@ from itertools import chain
 #=========================================================================================
 
 import numpy as np
+from typing import Optional, Tuple, Any, Union, Sequence, List
 
+from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Multiplet as ApiMultiplet
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
 from ccpn.core.MultipletList import MultipletList
-from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Multiplet as apiMultiplet
-from typing import Optional, Tuple, Any, Union, Sequence, List
+from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, undoBlock
 from ccpn.util.Common import makeIterableList
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, undoBlock
-from ccpn.util.Logging import getLogger
-from ccpn.util.Constants import SCALETOLERANCE
 
 
 MULTIPLET_TYPES = ['singlet', 'doublet', 'triplet', 'quartet', 'quintet', 'sextet', 'septet', 'octet', 'nonet',
@@ -146,14 +144,14 @@ class Multiplet(AbstractWrapperObject):
     _childClasses = []
 
     # Qualified name of matching API class
-    _apiClassQualifiedName = apiMultiplet._metaclass.qualifiedName()
+    _apiClassQualifiedName = ApiMultiplet._metaclass.qualifiedName()
 
     # the attribute name used by current
     _currentAttributeName = 'multiplets'
 
     # CCPN properties
     @property
-    def _apiMultiplet(self) -> apiMultiplet:
+    def _apiMultiplet(self) -> ApiMultiplet:
         """API multiplets matching Multiplet."""
         return self._wrappedData
 
@@ -550,7 +548,7 @@ class Multiplet(AbstractWrapperObject):
     #                  onceOnly=True, debug=True)
 
     @classmethod
-    def _getAllWrappedData(cls, parent: MultipletList) -> Tuple[apiMultiplet, ...]:
+    def _getAllWrappedData(cls, parent: MultipletList) -> list[ApiMultiplet]:
         """get wrappedData (Multiplets) for all Multiplet children of parent MultipletList"""
         return parent._wrappedData.sortedMultiplets()
 

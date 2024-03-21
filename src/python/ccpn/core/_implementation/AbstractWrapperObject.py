@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:25 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-03-21 16:17:11 +0000 (Thu, March 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -54,6 +54,9 @@ from ccpn.util.Logging import getLogger
 
 _RENAME_SENTINEL = Pid.Pid('Dummy:_rename')
 ILLEGAL_PATH_CHARS = r'<>:"/\|?*&@'
+_DISCARD_METHODS = {'get_OldChemicalShift', 'get_OldChemicalShift', '_oldChemicalShifts', 'get_PeakCluster',
+                    '_peakClusters'}
+_DEBUG = False
 
 
 @functools.total_ordering
@@ -1181,6 +1184,12 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
                         return cls._getDescendant(self, relativeId)
 
                     func.__doc__ = "Get contained %s object by relative ID" % classFullName
+                    if not hasattr(ancestor, funcName):
+                        if _DEBUG:
+                            # getLogger is not initialised yet
+                            print(f'--> missing getter stub {ancestor}:{funcName}')
+                        if funcName in _DISCARD_METHODS:
+                            continue
                     setattr(ancestor, funcName, func)
                     _allGetters.setdefault(ancestor.__name__, []).append((1, funcName))
 
@@ -1232,6 +1241,11 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
                     #         'SpectrumDisplay.strips Strip.spectrumViews'.split():
                     #     continue
 
+                    if not hasattr(ancestor, linkName):
+                        if _DEBUG:
+                            print(f'--> missing property stub {ancestor}:{linkName}')
+                        if linkName in _DISCARD_METHODS:
+                            continue
                     setattr(ancestor, linkName, prop)
                     _allGetters.setdefault(ancestor.__name__, []).append((0, linkName))
 

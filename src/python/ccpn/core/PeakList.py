@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:25 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-03-21 16:17:10 +0000 (Thu, March 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -86,41 +86,42 @@ class PeakList(PMIListABC):
         self._primaryChildClass = klass
 
     @property
-    def chemicalShiftList(self):
-        """STUB: hot-fixed later"""
+    def chemicalShiftList(self) -> 'ChemicalShiftList | None':
+        """STUB: hot-fixed later
+        :return: an instance of ChemicalShiftList, or None
+        """
+        return None
+
+    @property
+    def peakListViews(self) -> list['PeakListView']:
+        """STUB: hot-fixed later
+        :return: a list of peaks in the PeakList
+        """
+        return []
+
+    #=========================================================================================
+    # property STUBS: hot-fixed later
+    #=========================================================================================
+
+    @property
+    def peaks(self) -> list['Peak']:
+        """STUB: hot-fixed later
+        :return: a list of peaks in the PeakList
+        """
+        return []
+
+    #=========================================================================================
+    # getter STUBS: hot-fixed later
+    #=========================================================================================
+
+    def getPeak(self, relativeId: str) -> 'Peak | None':
+        """STUB: hot-fixed later
+        :return: an instance of Peak, or None
+        """
         return None
 
     #=========================================================================================
-    # Implementation functions
-    #=========================================================================================
-
-    @classmethod
-    def _getAllWrappedData(cls, parent: Spectrum) -> list:
-        """get wrappedData (PeakLists) for all PeakList children of parent Spectrum"""
-        return [x for x in parent._wrappedData.sortedPeakLists() if x.dataType == 'Peak']
-
-    def _finaliseAction(self, action: str):
-        """Subclassed to notify changes to associated peakListViews
-        """
-        if not super()._finaliseAction(action):
-            return
-
-        # this is a can-of-worms for undelete at the minute
-        try:
-            if action in {'change'}:
-                for plv in self.peakListViews:
-                    plv._finaliseAction(action)
-        except Exception as es:
-            raise RuntimeError(f'Error _finalising peakListViews: {str(es)}') from es
-
-    def delete(self):
-        """Delete peakList
-        """
-        # call the delete method from the parent class
-        self._parent._deletePeakList(self)
-
-    #=========================================================================================
-    # CCPN functions
+    # Core methods
     #=========================================================================================
 
     def pickPeaksNd(self, regionToPick: Sequence[float] = None,
@@ -217,7 +218,8 @@ class PeakList(PMIListABC):
                              % (self, self.spectrum.axisCodes, targetSpectrum.axisCodes))
 
         if targetPeakList:
-            targetPeakList = self.project.getByPid(targetPeakList) if isinstance(targetPeakList, str) else targetPeakList
+            targetPeakList = self.project.getByPid(targetPeakList) if isinstance(targetPeakList,
+                                                                                 str) else targetPeakList
             if not isinstance(targetPeakList, PeakList):
                 raise TypeError('targetPeakList is not of type PeakList')
             if targetPeakList not in targetSpectrum.peakLists:
@@ -360,7 +362,8 @@ class PeakList(PMIListABC):
                                      minLinewidth=minLinewidth, exclusionBuffer=exclusionBuffer,
                                      minDropFactor=minDropFactor, checkAllAdjacent=checkAllAdjacent,
                                      fitMethod=fitMethod, excludedRegions=excludedRegions,
-                                     excludedDiagonalDims=excludedDiagonalDims, excludedDiagonalTransform=excludedDiagonalTransform,
+                                     excludedDiagonalDims=excludedDiagonalDims,
+                                     excludedDiagonalTransform=excludedDiagonalTransform,
                                      estimateLineWidths=estimateLineWidths)
         return peaks
 
@@ -452,6 +455,35 @@ class PeakList(PMIListABC):
                 for ii in newAxisOrder:
                     newPos.append(pos[ii])
                 peak.position = newPos
+
+    def delete(self):
+        """Delete peakList
+        """
+        # call the delete method from the parent class
+        self._parent._deletePeakList(self)
+
+    #=========================================================================================
+    # Implementation methods
+    #=========================================================================================
+
+    @classmethod
+    def _getAllWrappedData(cls, parent: Spectrum) -> list:
+        """get wrappedData (PeakLists) for all PeakList children of parent Spectrum"""
+        return [x for x in parent._wrappedData.sortedPeakLists() if x.dataType == 'Peak']
+
+    def _finaliseAction(self, action: str, **actionKwds):
+        """Subclassed to notify changes to associated peakListViews
+        """
+        if not super()._finaliseAction(action):
+            return
+
+        # this is a can-of-worms for undelete at the minute
+        try:
+            if action in {'change'}:
+                for plv in self.peakListViews:
+                    plv._finaliseAction(action)
+        except Exception as es:
+            raise RuntimeError(f'Error _finalising peakListViews: {str(es)}') from es
 
     #===========================================================================================
     # new<Object> and other methods

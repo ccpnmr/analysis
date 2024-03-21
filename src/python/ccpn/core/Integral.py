@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:25 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-03-21 16:17:10 +0000 (Thu, March 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,17 +26,18 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import numpy as np
+from typing import Optional, Tuple, Sequence, List, Union
+from scipy.integrate import trapz
+
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Integral as ApiIntegral
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakDim as ApiPeakDim
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.Peak import Peak
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Integral as ApiIntegral
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakDim as ApiPeakDim
-from typing import Optional, Tuple, Sequence, List, Union
-import numpy as np
-from scipy.integrate import trapz
-from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter
+from ccpn.util.decorators import logCommand
 from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import SCALETOLERANCE
 
@@ -416,7 +417,7 @@ class Integral(AbstractWrapperObject):
     #=========================================================================================
 
     @classmethod
-    def _getAllWrappedData(cls, parent: IntegralList) -> Tuple[ApiIntegral, ...]:
+    def _getAllWrappedData(cls, parent: IntegralList) -> list[ApiIntegral]:
         """get wrappedData (Integrals) for all Integral children of parent IntegralList"""
         return parent._wrappedData.sortedIntegrals()
 

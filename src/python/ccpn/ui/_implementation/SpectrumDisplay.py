@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-02-16 11:40:24 +0000 (Fri, February 16, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__dateModified__ = "$dateModified: 2024-03-21 16:17:11 +0000 (Thu, March 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -86,20 +86,135 @@ class SpectrumDisplay(AbstractWrapperObject):
     #-----------------------------------------------------------------------------------------
 
     @property
-    def strips(self) -> list:
-        """STUB: hot-fixed later"""
-        return []
-
-    @property
     def orderedStrips(self):
         """Return the ccpn.Strips in displayed order"""
         ff = self._project._data2Obj.get
         return tuple(ff(x) for x in self._wrappedData.orderedStrips)
 
+    #-----------------------------------------------------------------------------------------
+    # property STUBS: hot-fixed later
+    #-----------------------------------------------------------------------------------------
+
     @property
-    def spectrumViews(self) -> list:
-        """STUB: hot-fixed later"""
+    def axes(self) -> list['Axis']:
+        """STUB: hot-fixed later
+        :return: a list of axes in the SpectrumDisplay
+        """
         return []
+
+    @property
+    def integralListViews(self) -> list['IntegralListView']:
+        """STUB: hot-fixed later
+        :return: a list of integralListViews in the SpectrumDisplay
+        """
+        return []
+
+    @property
+    def integralViews(self) -> list['IntegralView']:
+        """STUB: hot-fixed later
+        :return: a list of integralViews in the SpectrumDisplay
+        """
+        return []
+
+    @property
+    def multipletListViews(self) -> list['MultipletListView']:
+        """STUB: hot-fixed later
+        :return: a list of multipletListViews in the SpectrumDisplay
+        """
+        return []
+
+    @property
+    def multipletViews(self) -> list['MultipletView']:
+        """STUB: hot-fixed later
+        :return: a list of multipletViews in the SpectrumDisplay
+        """
+        return []
+
+    @property
+    def peakListViews(self) -> list['PeakListView']:
+        """STUB: hot-fixed later
+        :return: a list of peakListViews in the SpectrumDisplay
+        """
+        return []
+
+    @property
+    def peakViews(self) -> list['PeakView']:
+        """STUB: hot-fixed later
+        :return: a list of peakViews in the SpectrumDisplay
+        """
+        return []
+
+    @property
+    def spectrumViews(self) -> list['SpectrumView']:
+        """STUB: hot-fixed later
+        :return: a list of spectrumViews in the SpectrumDisplay
+        """
+        return []
+
+    @property
+    def strips(self) -> list['Strip']:
+        """STUB: hot-fixed later
+        :return: a list of strips in the SpectrumDisplay
+        """
+        return []
+
+    #-----------------------------------------------------------------------------------------
+    # getter STUBS: hot-fixed later
+    #-----------------------------------------------------------------------------------------
+
+    def getAxis(self, relativeId: str) -> 'Axis | None':
+        """STUB: hot-fixed later
+        :return: an instance of Axis, or None
+        """
+        return None
+
+    def getIntegralListView(self, relativeId: str) -> 'IntegralListView | None':
+        """STUB: hot-fixed later
+        :return: an instance of IntegralListView, or None
+        """
+        return None
+
+    def getIntegralView(self, relativeId: str) -> 'IntegralView | None':
+        """STUB: hot-fixed later
+        :return: an instance of IntegralView, or None
+        """
+        return None
+
+    def getMultipletListView(self, relativeId: str) -> 'MultipletListView | None':
+        """STUB: hot-fixed later
+        :return: an instance of MultipletListView, or None
+        """
+        return None
+
+    def getMultipletView(self, relativeId: str) -> 'MultipletView | None':
+        """STUB: hot-fixed later
+        :return: an instance of MultipletView, or None
+        """
+        return None
+
+    def getPeakListView(self, relativeId: str) -> 'PeakListView | None':
+        """STUB: hot-fixed later
+        :return: an instance of PeakListView, or None
+        """
+        return None
+
+    def getPeakView(self, relativeId: str) -> 'PeakView | None':
+        """STUB: hot-fixed later
+        :return: an instance of PeakView, or None
+        """
+        return None
+
+    def getSpectrumView(self, relativeId: str) -> 'SpectrumView | None':
+        """STUB: hot-fixed later
+        :return: an instance of SpectrumView, or None
+        """
+        return None
+
+    def getStrip(self, relativeId: str) -> 'Strip | None':
+        """STUB: hot-fixed later
+        :return: an instance of Strip, or None
+        """
+        return None
 
     #-----------------------------------------------------------------------------------------
 

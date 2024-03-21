@@ -6,9 +6,9 @@ from __future__ import annotations
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:25 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-03-21 16:17:10 +0000 (Thu, March 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -34,7 +34,6 @@ import typing
 import operator
 from typing import Sequence, Union, Optional, List, Any
 from collections import OrderedDict
-# from time import time
 from datetime import datetime
 from collections.abc import Iterable
 import pandas as pd
@@ -45,7 +44,7 @@ from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
 
 from ccpn.core.lib import Pid
 from ccpn.core.lib import Undo
-from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory, fetchProjectSaveHistory, newProjectSaveHistory
+from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory, newProjectSaveHistory
 from ccpn.core.lib.ProjectLib import createLogger
 from ccpn.core.lib.ContextManagers import notificationBlanking, undoBlock, undoBlockWithoutSideBar, \
     inactivity, logCommandManager, ccpNmrV3CoreUndoBlock
@@ -66,19 +65,14 @@ from ccpn.framework.PathsAndUrls import \
     CCPN_SCRIPTS_DIRECTORY, \
     CCPN_SUB_DIRECTORIES, \
     CCPN_LOGS_DIRECTORY, \
-    CCPN_BACKUPS_DIRECTORY, \
     CCPN_DIRECTORY_SUFFIX, \
     CCPN_PLOTS_DIRECTORY
 
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
 from ccpnmodel.ccpncore.memops import Notifiers
 from ccpnmodel.ccpncore.memops.ApiError import ApiError
-from ccpnmodel.ccpncore.lib.molecule import MoleculeQuery
 from ccpnmodel.ccpncore.lib.spectrum import NmrExpPrototype
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrExpPrototype import RefExperiment
-# from ccpnmodel.ccpncore.lib import Constants
-from ccpnmodel.ccpncore.lib.Io import Api as apiIo
-# from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
 
 
@@ -192,6 +186,30 @@ class Project(AbstractWrapperObject):
         """Get the bonds of a specific bondType.
         """
         return tuple(bnd for bnd in self.bonds if bnd.bondType == bondType)
+
+    @property
+    def _chemCompsData(self):
+        """
+        _internal. ChemComps/molecules to be handled in Resources
+        Return a Pandas DataFrame with the loaded ChemComps definitions.
+        Columns:  'molType', 'ccpCode', 'code3Letter', 'code1Letter', 'obj'.
+        """
+        from ccpn.core.lib.ChainLib import CODE3LETTER, CODE1LETTER, CCPCODE, MOLTYPE, ISSTANDARD, OBJ
+
+        df = pd.DataFrame()
+        attrs = [MOLTYPE, ISSTANDARD, CODE1LETTER, CODE3LETTER, CCPCODE]
+        for i, chemComp in enumerate(self._wrappedData.root.chemComps):
+            for attr in attrs:
+                df.loc[i, attr] = getattr(chemComp, attr, None)
+            isStandard = chemComp.stdChemComp == chemComp
+            df.loc[i, ISSTANDARD] = isStandard
+            df.loc[i, OBJ] = chemComp
+
+        return df
+
+    #=========================================================================================
+    # property STUBS: hot-fixed later
+    #=========================================================================================
 
     # @property
     # def _oldChemicalShifts(self) -> list['_oldChemicalShift']:
@@ -383,25 +401,6 @@ class Project(AbstractWrapperObject):
         return []
 
     @property
-    def _chemCompsData(self):
-        """
-        _internal. ChemComps/molecules to be handled in Resources
-        Return a Pandas DataFrame with the loaded ChemComps definitions.
-        Columns:  'molType', 'ccpCode', 'code3Letter', 'code1Letter', 'obj'.
-        """
-        from ccpn.core.lib.ChainLib import CODE3LETTER, CODE1LETTER, CCPCODE, MOLTYPE, ISSTANDARD, OBJ
-        df = pd.DataFrame()
-        attrs = [MOLTYPE, ISSTANDARD, CODE1LETTER, CODE3LETTER, CCPCODE]
-        for i, chemComp in enumerate(self._wrappedData.root.chemComps):
-            for attr in attrs:
-                df.loc[i, attr] = getattr(chemComp, attr, None)
-            isStandard = chemComp.stdChemComp == chemComp
-            df.loc[i, ISSTANDARD] = isStandard
-            df.loc[i, OBJ] = chemComp
-
-        return df
-
-    @property
     def peakViews(self) -> list['PeakView']:
         """STUB: hot-fixed later
         :return: a list of peakViews in the Project
@@ -550,295 +549,298 @@ class Project(AbstractWrapperObject):
 
     #-----------------------------------------------------------------------------------------
     # Attribute getters of the data structure
+    # getter STUBS: hot-fixed later
     #-----------------------------------------------------------------------------------------
 
-    def getAtom(self) -> 'Atom | None':
+    def getAtom(self, relativeId: str) -> 'Atom | None':
         """STUB: hot-fixed later
         :return: an instance of Atom, or None
         """
-        return []
+        return None
 
-    def getAxis(self) -> 'Axis | None':
+    def getAxis(self, relativeId: str) -> 'Axis | None':
         """STUB: hot-fixed later
         :return: an instance of Axis, or None
         """
-        return []
+        return None
 
-    def getBond(self) -> 'Bond | None':
+    def getBond(self, relativeId: str) -> 'Bond | None':
         """STUB: hot-fixed later
         :return: an instance of Bond, or None
         """
-        return []
+        return None
 
-    def getCalculationStep(self) -> 'CalculationStep | None':
+    def getCalculationStep(self, relativeId: str) -> 'CalculationStep | None':
         """STUB: hot-fixed later
         :return: an instance of CalculationStep, or None
         """
-        return []
+        return None
 
-    def getChain(self) -> 'Chain | None':
+    def getChain(self, relativeId: str) -> 'Chain | None':
         """STUB: hot-fixed later
         :return: an instance of Chain, or None
         """
-        return []
+        return None
 
-    def getChemicalShiftList(self) -> 'ChemicalShiftList | None':
-        """STUB: hot-fixed later
-        :return: an instance of ChemicalShiftList, or None
-        """
-        return []
+    # replaced below
+    # def getChemicalShiftList(self, relativeId: str) -> 'ChemicalShiftList | None':
+    #     """STUB: hot-fixed later
+    #     :return: an instance of ChemicalShiftList, or None
+    #     """
+    #     return None
 
-    def getComplex(self) -> 'Complex | None':
+    def getComplex(self, relativeId: str) -> 'Complex | None':
         """STUB: hot-fixed later
         :return: an instance of Complex, or None
         """
-        return []
+        return None
 
-    def getData(self) -> 'Data | None':
+    def getData(self, relativeId: str) -> 'Data | None':
         """STUB: hot-fixed later
         :return: an instance of Data, or None
         """
-        return []
+        return None
 
-    def getDataTable(self) -> 'DataTable | None':
+    def getDataTable(self, relativeId: str) -> 'DataTable | None':
         """STUB: hot-fixed later
         :return: an instance of DataTable, or None
         """
-        return []
+        return None
 
-    def getIntegral(self) -> 'Integral | None':
+    def getIntegral(self, relativeId: str) -> 'Integral | None':
         """STUB: hot-fixed later
         :return: an instance of Integral, or None
         """
-        return []
+        return None
 
-    def getIntegralList(self) -> 'IntegralList | None':
+    def getIntegralList(self, relativeId: str) -> 'IntegralList | None':
         """STUB: hot-fixed later
         :return: an instance of IntegralList, or None
         """
-        return []
+        return None
 
-    def getIntegralListView(self) -> 'IntegralListView | None':
+    def getIntegralListView(self, relativeId: str) -> 'IntegralListView | None':
         """STUB: hot-fixed later
         :return: an instance of IntegralListView, or None
         """
-        return []
+        return None
 
-    def getIntegralView(self) -> 'IntegralView | None':
+    def getIntegralView(self, relativeId: str) -> 'IntegralView | None':
         """STUB: hot-fixed later
         :return: an instance of IntegralView, or None
         """
-        return []
+        return None
 
-    def getMark(self) -> 'Mark | None':
+    def getMark(self, relativeId: str) -> 'Mark | None':
         """STUB: hot-fixed later
         :return: an instance of Mark, or None
         """
-        return []
+        return None
 
-    def getModel(self) -> 'Model | None':
+    def getModel(self, relativeId: str) -> 'Model | None':
         """STUB: hot-fixed later
         :return: an instance of Model, or None
         """
-        return []
+        return None
 
-    def getMultiplet(self) -> 'Multiplet | None':
+    def getMultiplet(self, relativeId: str) -> 'Multiplet | None':
         """STUB: hot-fixed later
         :return: an instance of Multiplet, or None
         """
-        return []
+        return None
 
-    def getMultipletList(self) -> 'MultipletList | None':
+    def getMultipletList(self, relativeId: str) -> 'MultipletList | None':
         """STUB: hot-fixed later
         :return: an instance of MultipletList, or None
         """
-        return []
+        return None
 
-    def getMultipletListView(self) -> 'MultipletListView | None':
+    def getMultipletListView(self, relativeId: str) -> 'MultipletListView | None':
         """STUB: hot-fixed later
         :return: an instance of MultipletListView, or None
         """
-        return []
+        return None
 
-    def getMultipletView(self) -> 'MultipletView | None':
+    def getMultipletView(self, relativeId: str) -> 'MultipletView | None':
         """STUB: hot-fixed later
         :return: an instance of MultipletView, or None
         """
-        return []
+        return None
 
-    def getNmrAtom(self) -> 'NmrAtom | None':
+    def getNmrAtom(self, relativeId: str) -> 'NmrAtom | None':
         """STUB: hot-fixed later
         :return: an instance of NmrAtom, or None
         """
-        return []
+        return None
 
-    def getNmrChain(self) -> 'NmrChain | None':
+    def getNmrChain(self, relativeId: str) -> 'NmrChain | None':
         """STUB: hot-fixed later
         :return: an instance of NmrChain, or None
         """
-        return []
+        return None
 
-    def getNmrResidue(self) -> 'NmrResidue | None':
+    def getNmrResidue(self, relativeId: str) -> 'NmrResidue | None':
         """STUB: hot-fixed later
         :return: an instance of NmrResidue, or None
         """
-        return []
+        return None
 
-    def getNote(self) -> 'Note | None':
+    def getNote(self, relativeId: str) -> 'Note | None':
         """STUB: hot-fixed later
         :return: an instance of Note, or None
         """
-        return []
+        return None
 
-    def getPeak(self) -> 'Peak | None':
+    def getPeak(self, relativeId: str) -> 'Peak | None':
         """STUB: hot-fixed later
         :return: an instance of Peak, or None
         """
-        return []
+        return None
 
-    def getPeakList(self) -> 'PeakList | None':
+    def getPeakList(self, relativeId: str) -> 'PeakList | None':
         """STUB: hot-fixed later
         :return: an instance of PeakList, or None
         """
-        return []
+        return None
 
-    def getPeakListView(self) -> 'PeakListView | None':
+    def getPeakListView(self, relativeId: str) -> 'PeakListView | None':
         """STUB: hot-fixed later
         :return: an instance of PeakListView, or None
         """
-        return []
+        return None
 
-    def getPeakView(self) -> 'PeakView | None':
+    def getPeakView(self, relativeId: str) -> 'PeakView | None':
         """STUB: hot-fixed later
         :return: an instance of PeakView, or None
         """
-        return []
+        return None
 
-    def getPseudoDimension(self) -> 'PseudoDimension | None':
+    def getPseudoDimension(self, relativeId: str) -> 'PseudoDimension | None':
         """STUB: hot-fixed later
         :return: an instance of PseudoDimension, or None
         """
-        return []
+        return None
 
-    def getResidue(self) -> 'Residue | None':
+    def getResidue(self, relativeId: str) -> 'Residue | None':
         """STUB: hot-fixed later
         :return: an instance of Residue, or None
         """
-        return []
+        return None
 
-    def getRestraint(self) -> 'Restraint | None':
+    def getRestraint(self, relativeId: str) -> 'Restraint | None':
         """STUB: hot-fixed later
         :return: an instance of Restraint, or None
         """
-        return []
+        return None
 
-    def getRestraintContribution(self) -> 'RestraintContribution | None':
+    def getRestraintContribution(self, relativeId: str) -> 'RestraintContribution | None':
         """STUB: hot-fixed later
         :return: an instance of RestraintContribution, or None
         """
-        return []
+        return None
 
-    def getRestraintTable(self) -> 'RestraintTable | None':
+    def getRestraintTable(self, relativeId: str) -> 'RestraintTable | None':
         """STUB: hot-fixed later
         :return: an instance of RestraintTable, or None
         """
-        return []
+        return None
 
-    def getSample(self) -> 'Sample | None':
+    def getSample(self, relativeId: str) -> 'Sample | None':
         """STUB: hot-fixed later
         :return: an instance of Sample, or None
         """
-        return []
+        return None
 
-    def getSampleComponent(self) -> 'SampleComponent | None':
+    def getSampleComponent(self, relativeId: str) -> 'SampleComponent | None':
         """STUB: hot-fixed later
         :return: an instance of SampleComponent, or None
         """
-        return []
+        return None
 
-    def getSpectrum(self) -> 'Spectrum | None':
+    def getSpectrum(self, relativeId: str) -> 'Spectrum | None':
         """STUB: hot-fixed later
         :return: an instance of Spectrum, or None
         """
-        return []
+        return None
 
-    def getSpectrumDisplay(self) -> 'SpectrumDisplay | None':
+    def getSpectrumDisplay(self, relativeId: str) -> 'SpectrumDisplay | None':
         """STUB: hot-fixed later
         :return: an instance of SpectrumDisplay, or None
         """
-        return []
+        return None
 
-    def getSpectrumGroup(self) -> 'SpectrumGroup | None':
+    def getSpectrumGroup(self, relativeId: str) -> 'SpectrumGroup | None':
         """STUB: hot-fixed later
         :return: an instance of SpectrumGroup, or None
         """
-        return []
+        return None
 
-    def getSpectrumHit(self) -> 'SpectrumHit | None':
+    def getSpectrumHit(self, relativeId: str) -> 'SpectrumHit | None':
         """STUB: hot-fixed later
         :return: an instance of SpectrumHit, or None
         """
-        return []
+        return None
 
-    def getSpectrumReference(self) -> 'SpectrumReference | None':
+    def getSpectrumReference(self, relativeId: str) -> 'SpectrumReference | None':
         """STUB: hot-fixed later
         :return: an instance of SpectrumReference, or None
         """
-        return []
+        return None
 
-    def getSpectrumView(self) -> 'SpectrumView | None':
+    def getSpectrumView(self, relativeId: str) -> 'SpectrumView | None':
         """STUB: hot-fixed later
         :return: an instance of SpectrumView, or None
         """
-        return []
+        return None
 
-    def getStrip(self) -> 'Strip | None':
+    def getStrip(self, relativeId: str) -> 'Strip | None':
         """STUB: hot-fixed later
         :return: an instance of Strip, or None
         """
-        return []
+        return None
 
-    def getStructureData(self) -> 'StructureData | None':
+    def getStructureData(self, relativeId: str) -> 'StructureData | None':
         """STUB: hot-fixed later
         :return: an instance of StructureData, or None
         """
-        return []
+        return None
 
-    def getStructureEnsemble(self) -> 'StructureEnsemble | None':
+    def getStructureEnsemble(self, relativeId: str) -> 'StructureEnsemble | None':
         """STUB: hot-fixed later
         :return: an instance of StructureEnsemble, or None
         """
-        return []
+        return None
 
-    def getSubstance(self) -> 'Substance | None':
+    def getSubstance(self, relativeId: str) -> 'Substance | None':
         """STUB: hot-fixed later
         :return: an instance of Substance, or None
         """
-        return []
+        return None
 
-    def getViolationTable(self) -> 'ViolationTable | None':
+    def getViolationTable(self, relativeId: str) -> 'ViolationTable | None':
         """STUB: hot-fixed later
         :return: an instance of ViolationTable, or None
         """
-        return []
+        return None
 
-    def getWindow(self) -> 'Window | None':
+    def getWindow(self, relativeId: str) -> 'Window | None':
         """STUB: hot-fixed later
         :return: an instance of Window, or None
         """
-        return []
+        return None
 
-    # def get_OldChemicalShift(self) -> '_OldChemicalShift | None':
+    # kept for clarity
+    # def _getOldChemicalShift(self, relativeId: str) -> '_OldChemicalShift | None':
     #     """STUB: hot-fixed later
     #     :return: an instance of _OldChemicalShift, or None
     #     """
-    #     return []
+    #     return None
     #
-    # def get_PeakCluster(self) -> '_PeakCluster | None':
+    # def _getPeakCluster(self, relativeId: str) -> '_PeakCluster | None':
     #     """STUB: hot-fixed later
     #     :return: an instance of _PeakCluster, or None
     #     """
-    #     return []
+    #     return None
 
     #-----------------------------------------------------------------------------------------
     # (Sub-)directories of the project
@@ -1031,7 +1033,6 @@ class Project(AbstractWrapperObject):
     def path(self) -> str:
         """return absolute path to directory containing Project
         """
-        # return apiIo.getRepositoryPath(self._wrappedData.root, 'userData')
         return self._path
 
     @property
@@ -1185,18 +1186,20 @@ class Project(AbstractWrapperObject):
 
         # check that strips have been recovered correctly
         try:
-            for sd in project.application.mainWindow.spectrumDisplays:
-                for strp in sd.strips:
-                    if not strp.axes:
-                        # set the border to red
-                        sd.mainWidget.setStyleSheet('Frame { border: 3px solid #FF1234; }')
-                        sd.mainWidget.setEnabled(False)
-                        strp.setEnabled(False)
+            if project.application.hasGui:
+                for sd in project.application.mainWindow.spectrumDisplays:
+                    for strp in sd.strips:
+                        if not strp.axes:
+                            # set the border to red
+                            sd.mainWidget.setStyleSheet('Frame { border: 3px solid #FF1234; }')
+                            sd.mainWidget.setEnabled(False)
+                            strp.setEnabled(False)
 
-                        getLogger().error(f'Strip {strp} contains bad axes - please close SpectrumDisplay {sd} outlined in red.')
+                            getLogger().error(
+                                    f'Strip {strp} contains bad axes - please close SpectrumDisplay {sd} outlined in red.')
 
-        except Exception:
-            getLogger().warning('There was an issue checking the spectrumDisplays')
+        except Exception as es:
+            getLogger().warning(f'There was an issue checking the spectrumDisplays {es}')
 
         # don't need to call super here
         return project
@@ -1290,7 +1293,8 @@ class Project(AbstractWrapperObject):
                         root.override = True
 
                         with progressHandler(title='busy', maximum=len(df) + 1,
-                                             text='Cleaning-up Project', autoClose=True, hideCancelButton=True) as progress:
+                                             text='Cleaning-up Project', autoClose=True,
+                                             hideCancelButton=True) as progress:
 
                             retries = []
                             for cc, (ii, ob) in enumerate(df.iterrows()):
@@ -1413,7 +1417,8 @@ class Project(AbstractWrapperObject):
                     # run save and apiStatus again. Ensure nothing else has been compromised on the deleting process
                     # else:
                     errorMsg = '\n '.join(apiStatus.invalidObjectsErrors)
-                    getLogger().critical(f'Found compromised items. Project might be left in an invalid state. {errorMsg}')
+                    getLogger().critical(
+                            f'Found compromised items. Project might be left in an invalid state. {errorMsg}')
                     raise RuntimeError(errorMsg)
 
             except Exception as es:
@@ -1455,7 +1460,8 @@ class Project(AbstractWrapperObject):
                     # run save and apiStatus again. Ensure nothing else has been compromised on the deleting process
                     # else:
                     errorMsg = '\n '.join(apiStatus.invalidObjectsErrors)
-                    getLogger().critical(f'Backup found compromised items. Project might be left in an invalid state. {errorMsg}')
+                    getLogger().critical(
+                            f'Backup found compromised items. Project might be left in an invalid state. {errorMsg}')
                     raise RuntimeError(errorMsg)
 
             except Exception as es:
@@ -2010,7 +2016,8 @@ class Project(AbstractWrapperObject):
         #         result = factoryFunction(self, wrappedData)
         #
         if (result := self._data2Obj.get(wrappedData)) is not None:
-            raise RuntimeError(f'Project._newApiObject: {result} already exists; Cannot create again and this should not happen!')
+            raise RuntimeError(
+                    f'Project._newApiObject: {result} already exists; Cannot create again and this should not happen!')
 
         if not cls._ignoreNewApiObjectCallback:
             result = cls._newInstanceFromApiData(project=self, apiObj=wrappedData)
@@ -2492,6 +2499,7 @@ class Project(AbstractWrapperObject):
         Load a Xml file containing a ChemComp.
         """
         from ccpn.core.Chain import _fetchChemCompFromFile
+
         with logCommandManager('application.', 'loadData', path):
             with undoBlockWithoutSideBar():
                 chemcomp = _fetchChemCompFromFile(project=self, filePath=str(path))
@@ -2543,11 +2551,14 @@ class Project(AbstractWrapperObject):
         if not isinstance(pids, Iterable):
             raise ValueError(f'{self.__class__.__name__}.getObjectsByPids: pids argument must be an iterable')
         if not isinstance(objectTypes, (type, type(None))) and \
-                not (isinstance(objectTypes, tuple) and all(isinstance(obj, (type, type(None))) for obj in objectTypes)):
-            raise ValueError(f'{self.__class__.__name__}.getObjectsByPids: objectTypes must be a type, tuple of types, or None')
+                not (isinstance(objectTypes, tuple) and all(
+                        isinstance(obj, (type, type(None))) for obj in objectTypes)):
+            raise ValueError(
+                    f'{self.__class__.__name__}.getObjectsByPids: objectTypes must be a type, tuple of types, or None')
 
         if objectTypes:
-            return list(filter(lambda obj: isinstance(obj, objectTypes), map(lambda x: self.getByPid(x) if isinstance(x, str) else x, pids)))
+            return list(filter(lambda obj: isinstance(obj, objectTypes),
+                               map(lambda x: self.getByPid(x) if isinstance(x, str) else x, pids)))
         else:
             return list(filter(None, map(lambda x: self.getByPid(x) if isinstance(x, str) else x, pids)))
 
@@ -2783,7 +2794,8 @@ class Project(AbstractWrapperObject):
         """
         from ccpn.core.DataTable import _newDataTable
 
-        getLogger().info(f'project.newDataTable(name={name})')  # don't log the full dataFrame. is not needed! Add exclusions on Decorator logCommand
+        getLogger().info(
+                f'project.newDataTable(name={name})')  # don't log the full dataFrame. is not needed! Add exclusions on Decorator logCommand
         return _newDataTable(self, name=name, data=data, comment=comment, **kwds)
 
     @logCommand('project.')
@@ -3016,7 +3028,8 @@ class Project(AbstractWrapperObject):
                              userCode=userCode, smiles=smiles, inChi=inChi, casNumber=casNumber,
                              empiricalFormula=empiricalFormula, molecularMass=molecularMass, comment=comment,
                              synonyms=synonyms, atomCount=atomCount, bondCount=bondCount,
-                             ringCount=ringCount, hBondDonorCount=hBondDonorCount, hBondAcceptorCount=hBondAcceptorCount,
+                             ringCount=ringCount, hBondDonorCount=hBondDonorCount,
+                             hBondAcceptorCount=hBondAcceptorCount,
                              polarSurfaceArea=polarSurfaceArea, logPartitionCoefficient=logPartitionCoefficient, **kwds)
 
     @logCommand('project.')
@@ -3264,7 +3277,6 @@ def _loadProject(application, path: str) -> Project:
     project._application = application  # bit of a hack, isn't set until initialise
     project._updateReadOnlyState()
 
-    # project._saveHistory = fetchProjectSaveHistory(project.path, project.readOnly)
     project._saveHistory = getProjectSaveHistory(project.path)
 
     # If path pointed to a V2 project, call the updates, and save the data

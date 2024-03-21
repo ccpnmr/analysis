@@ -28,7 +28,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-21 08:08:46 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 11:51:39 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -47,25 +47,17 @@ from typing import Callable, Any, Optional
 
 from PyQt5 import QtGui, QtWidgets
 
-from ccpn.core.lib.Notifiers import NotifierABC
+from ccpn.core.lib.Notifiers import NotifierABC, _NotifierList
 from ccpn.ui.gui.widgets.DropBase import DropBase
 
 from ccpn.util.Logging import getLogger
-
-
-logger = getLogger()
-
-
-def skip(*args, **kwargs):
-    "Do nothing"
-    pass
 
 
 class GuiNotifier(NotifierABC):
     """
      GuiNotifier class:
 
-    triggers callback function with signature:  callback(callbackDict [, *args] [, **kwargs])
+    triggers callback function with signature:  callback(callbackDict)
 
     ____________________________________________________________________________________________________________________
 
@@ -85,10 +77,9 @@ class GuiNotifier(NotifierABC):
 
     dropTargets: keywords defining type of dropped objects: currently implemented: 'urls', 'text', 'pids' (see DropBase)
 
-    Implemention:
+    Implementation:
 
-      The callback provides a dict with several key, value pairs and optional arguments and/or keyword
-      arguments if defined in the instantiation of the Notifier object. (idea following the Traitlets concept).
+      The callback provides a dict with several key, value pairs (idea following the Traitlets concept).
       Note that this dict also contains a reference to the GuiNotifier object itself; this way it can be used
       to pass-on additional implementation specfic information to the callback function.
 
@@ -103,61 +94,55 @@ class GuiNotifier(NotifierABC):
     DRAGMOVEEVENT = 'dragMoveEvent'
     _triggerKeywords = (DROPEVENT, ENTEREVENT, DRAGMOVEEVENT)
 
-    def __init__(self, theObject: Any, triggers: list, targetName: list,
-                 callback: Callable, debug=False, **kwargs):
+    def __init__(self, theObject: Any, trigger, targetName,
+                 callback: Callable, setterObject=None, debug=False, **kwds):
         """
         Create GuiNotifier object;
 
         :param theObject: Widget to watch
-        :param triggers: list of trigger keywords callback; i.e. (DROPEVENT, ENTEREVENT, DRAGMOVEEVENT)
-        :param targetName: optional list of dropTargets (URLS, TEXT, PIDS, IDS) or None
+        :param trigger: one of trigger keywords; i.e. (DROPEVENT, ENTEREVENT, DRAGMOVEEVENT)
+        :param targetName: optional dropTargets (URLS, TEXT, PIDS, IDS) or None
         :param callback: callback function with signature: callback(callbackDict [, *args] [, **kwargs])
+        :param setterObject: Object that was setting the Notifier
         :param debug: set debug
-        :param **kwargs: optional keyword,value arguments to callback
+        :param **kwds: optional keywords arguments passed to callback
         """
-        super().__init__(theObject=theObject, triggers=triggers, targetName=targetName, debug=debug,
-                         callback=callback, **kwargs
-                         )
-
         # some sanity checks
         if not isinstance(theObject, QtWidgets.QWidget):
-            raise RuntimeError('Invalid object (%r), expected object of type QWidget' % theObject)
+            raise ValueError('Invalid object (%r), expected object of type QWidget' % theObject)
 
-        self._unregister = []  # list of tuples needed for unregistering
+        if isinstance(targetName, (list, tuple)):
+            raise ValueError(f'Invalid targetName {targetName}; remove list or tuple')
 
-        # register the callbacks
-        for trigger in self._triggers:
+        super().__init__(theObject=theObject, trigger=trigger, targetName=targetName,
+                         callback=callback, setterObject=setterObject,
+                         debug=debug, **kwds
+                         )
 
-            if trigger == GuiNotifier.DROPEVENT:
+        # register the callback
+        if trigger == GuiNotifier.DROPEVENT:
 
-                # if not self._theObject.acceptDrops():
-                #     raise RuntimeError('GuiNotifier.__init__: Widget "%s" does not accept drops' % self._theObject)
+            # if not self._theObject.acceptDrops():
+            #     raise RuntimeError('GuiNotifier.__init__: Widget "%s" does not accept drops' % self._theObject)
 
-                if targetName is not None:
-                    for target in targetName:
-                        if target not in DropBase._dropTargets:
-                            raise RuntimeError('GuiNotifier.__init__: invalid dropTarget "%s"' % (target))
+            if targetName is not None:
+                if targetName not in DropBase._dropTargets:
+                    raise RuntimeError(f'GuiNotifier.__init__(): invalid dropTarget "{targetName}"')
 
-                notifier = (trigger, targetName)
-                self._theObject.setDropEventCallback(partial(self, notifier=notifier))
-                self._unregister.append((trigger, targetName))
-                self._isRegistered = True
+            notifier = (trigger, targetName)
+            self._theObject.setDropEventCallback(partial(self, notifier=notifier))
+            self._isRegistered = True
 
-            elif trigger == GuiNotifier.ENTEREVENT:
-                notifier = (trigger, targetName)
-                self._theObject.setDragEnterEventCallback(partial(self, notifier=notifier))
-                self._unregister.append((trigger, targetName))
-                self._isRegistered = True
+        elif trigger == GuiNotifier.ENTEREVENT:
+            notifier = (trigger, targetName)
+            self._theObject.setDragEnterEventCallback(partial(self, notifier=notifier))
+            self._isRegistered = True
 
-            elif trigger == GuiNotifier.DRAGMOVEEVENT:
-                notifier = (trigger, targetName)
-                self._theObject.setDragMoveEventCallback(partial(self, notifier=notifier))
-                self._unregister.append((trigger, targetName))
-                self._isRegistered = True
+        elif trigger == GuiNotifier.DRAGMOVEEVENT:
+            notifier = (trigger, targetName)
+            self._theObject.setDragMoveEventCallback(partial(self, notifier=notifier))
+            self._isRegistered = True
 
-        if not self.isRegistered():
-            raise RuntimeWarning('GuiNotifier.__init__: no notifiers intialised for theObject=%s, targetName=%r, triggers=%s ' % \
-                                 (theObject, targetName, triggers))
         if self._debug:
             sys.stderr.write('>>> registered %s\n' % self)
 
@@ -168,13 +153,12 @@ class GuiNotifier(NotifierABC):
         if not self.isRegistered():
             return
 
-        for trigger, targetName in self._unregister:
-            if trigger == GuiNotifier.DROPEVENT:
-                self._theObject.setDropEventCallback(None)
-            elif trigger == GuiNotifier.ENTEREVENT:
-                self._theObject.setDragEnterEventCallback(None)
-            elif trigger == GuiNotifier.DRAGMOVEEVENT:
-                self._theObject.setDragMoveEventCallback(None)
+        if self._trigger == GuiNotifier.DROPEVENT:
+            self._theObject.setDropEventCallback(None)
+        elif self._trigger == GuiNotifier.ENTEREVENT:
+            self._theObject.setDragEnterEventCallback(None)
+        elif self._trigger == GuiNotifier.DRAGMOVEEVENT:
+            self._theObject.setDragMoveEventCallback(None)
 
         super().unRegister()  # the end as it clears all attributes
 
@@ -183,7 +167,7 @@ class GuiNotifier(NotifierABC):
         wrapper, accommodating the different triggers before firing the callback
         """
         if not self.isRegistered():
-            logger.warning('Triggering unregistered guiNotifier %s' % self)
+            getLogger().warning('Triggering unregistered guiNotifier %s' % self)
             return
 
         if self._isBlanked:
@@ -216,8 +200,45 @@ class GuiNotifier(NotifierABC):
         #         )
         callbackDict = self.newCallbackDict(trigger=trigger)
         callbackDict.update(data)
-        self._callback(callbackDict, **self._kwargs)
+        self._callback(callbackDict, **self._kwds)
         return
+
+def _makeGuiNotifiers(theObject,
+                      triggers: list|tuple,
+                      targetNames: list|tuple,
+                      callback: Callable,
+                      setterObject=None,
+                      ) -> _NotifierList:
+    """Backward compatibility to make a NotifierList from multiple triggers
+
+    :param theObject: the object to set the Notifier for
+    :param triggers: a list of trigger keywords; i.e. (DROPEVENT, ENTEREVENT, DRAGMOVEEVENT)
+    :param targetNames: list of dropTargets (URLS, TEXT, PIDS, IDS) or None
+    :param callback: callback function with signature: callback(callBackDict)
+    :param setterObject: reference to the object setting the notifier
+
+    :return: a _NotifierList instance
+
+    """
+    if not isinstance(triggers, (list,tuple)) or len(triggers) == 0:
+        raise ValueError(f'Invalid triggers {triggers}; expected list, tuple with at least one item')
+
+    result = _NotifierList()
+    for _trigger in triggers:
+        for _target in targetNames:
+            _notifier = GuiNotifier(theObject=theObject,
+                                    trigger=_trigger,
+                                    targetName=_target,
+                                    callback=callback,
+                                    setterObject=setterObject,
+                                    )
+            result.append(_notifier)
+
+            # bit of a hack to set the linkage to setterObject
+            if setterObject is not None and hasattr(setterObject, '_addNotifier'):
+                setterObject._addNotifier(_notifier)
+
+    return result
 
 
 if __name__ == '__main__':

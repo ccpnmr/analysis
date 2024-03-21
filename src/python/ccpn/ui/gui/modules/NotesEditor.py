@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-21 08:08:46 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 11:51:40 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -216,8 +216,7 @@ class NotesEditorModule(CcpnModule):
         self._noteNotifier = self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
                                               Note.className,
                                               self._updateCallback)
-        self._droppedNotifier = self.setGuiNotifier(self.mainWidget,
-                                                   [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+        self._droppedNotifier = self.setGuiNotifier(self.mainWidget, [GuiNotifier.DROPEVENT], [DropBase.PIDS],
                                                    self._processDroppedItems)
 
     def _applyNote(self):

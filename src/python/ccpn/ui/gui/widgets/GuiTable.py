@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-20 16:54:17 +0000 (Wed, March 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 11:51:40 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -491,8 +491,10 @@ class GuiTable(TableWidget, Base):
             self.moduleParent.mainWidget._dropEventCallback = self._processDroppedItems
 
         self._droppedNotifier = GuiNotifier(self,
-                                           [GuiNotifier.DROPEVENT], [DropBase.PIDS],
-                                           self._processDroppedItems)
+                                            GuiNotifier.DROPEVENT, DropBase.PIDS,
+                                            callback=self._processDroppedItems,
+                                            setterObject=self
+                                            )
 
         # add a widget handler to give a clean corner widget for the scroll area
         self._cornerDisplay = ScrollBarVisibilityWatcher(self)
@@ -2491,11 +2493,11 @@ class GuiTable(TableWidget, Base):
 
         for cellClass in _cellNames:
             for _trigger in [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]:
-                self._cellNotifiers.append(Notifier(self.project,
-                                                    _trigger,
+                self._cellNotifiers.append(Notifier(self.project, _trigger,
                                                     targetName=cellClass[OBJECT_CLASS].__name__,
                                                     callback=partial(self._updateCellCallback, cellClass[OBJECT_PARENT]),
-                                                    onceOnly=True)
+                                                    onceOnly=True,
+                                                    setterObject=self)
                                            )
 
         if selectCurrentCallBack:

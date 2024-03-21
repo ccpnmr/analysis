@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-20 16:54:18 +0000 (Wed, March 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 11:51:40 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1677,13 +1677,15 @@ class ObjectSelectionWidget(ListCompoundWidget):
 
         # Notifiers
         if self.project:
-            self._notifierRename = Notifier(theObject=self.project, triggers=[Notifier.RENAME],
+            self._notifierRename = Notifier(theObject=self.project, trigger=Notifier.RENAME,
                                             targetName=self.KLASS.className,
-                                            callback=self._objRenamedCallback)
+                                            callback=self._objRenamedCallback,
+                                            setterObject=self)
 
-            self._notifierDelete = Notifier(theObject=self.project, triggers=[Notifier.DELETE],
+            self._notifierDelete = Notifier(theObject=self.project, trigger=Notifier.DELETE,
                                             targetName=self.KLASS.className,
-                                            callback=self._objDeletedCallback)
+                                            callback=self._objDeletedCallback,
+                                            setterObject=self)
 
         else:
             self._notifierRename = self._notifierDelete = None

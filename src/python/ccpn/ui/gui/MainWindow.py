@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-20 13:39:45 +0000 (Wed, March 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 11:51:39 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -331,15 +331,14 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                                                    'Mark', GuiStrip._updateDisplayedMarks)
 
         # current notifiers
-        self.setNotifier(self.application.current, [Notifier.CURRENT], 'strip', self._highlightCurrentStrip)
-        self.setNotifier(self.application.current, [Notifier.CURRENT], 'peaks', GuiStrip._updateSelectedPeaks)
-        self.setNotifier(self.application.current, [Notifier.CURRENT], 'integrals', GuiStrip._updateSelectedIntegrals)
-        self.setNotifier(self.application.current, [Notifier.CURRENT], 'multiplets', GuiStrip._updateSelectedMultiplets)
+        self.setCurrentNotifier('strip', self._highlightCurrentStrip)
+        self.setCurrentNotifier('peaks', GuiStrip._updateSelectedPeaks)
+        self.setCurrentNotifier('integrals', GuiStrip._updateSelectedIntegrals)
+        self.setCurrentNotifier('multiplets', GuiStrip._updateSelectedMultiplets)
 
-        # GWV 18/3/24: updated notifier implementation
-        # self.setNotifier(self.application.project, [Notifier.CHANGE], 'SpectrumDisplay', self._spectrumDisplayChanged)
-        # self.setNotifier(self.application.project, [Notifier.CHANGE], 'Strip', self._stripPinnedChanged)
-        # self.setNotifier(self.application.project, [Notifier.CHANGE], 'Project', self._projectNotifierCallback)
+        self.setNotifier(self.application.project, [Notifier.CHANGE], 'SpectrumDisplay', self._spectrumDisplayChanged)
+        self.setNotifier(self.application.project, [Notifier.CHANGE], 'Strip', self._stripPinnedChanged)
+        self.setNotifier(self.application.project, [Notifier.CHANGE], 'Project', self._projectNotifierCallback)
 
     # def _activatedkeySequence(self, ev):
     #     key = ev.key()

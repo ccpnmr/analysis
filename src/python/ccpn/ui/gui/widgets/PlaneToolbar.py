@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-20 16:54:17 +0000 (Wed, March 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 11:51:40 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1042,14 +1042,16 @@ class StripHeaderWidget(_OpenGLFrameABC):
         # add gui notifiers here instead of in backboneAssignment
         # NOTE:ED could replace this with buttons instead
         GuiNotifier(self._nmrChainLeft,
-                    [GuiNotifier.DROPEVENT], [DropBase.TEXT],
-                    self._processDroppedLabel,
+                    GuiNotifier.DROPEVENT, DropBase.TEXT,
+                    callback=self._processDroppedLabel,
+                    setterObject=self,
                     toLabel=self._stripDirection,
                     plusChain=False)
 
         GuiNotifier(self._nmrChainRight,
-                    [GuiNotifier.DROPEVENT], [DropBase.TEXT],
-                    self._processDroppedLabel,
+                    GuiNotifier.DROPEVENT, DropBase.TEXT,
+                    callback=self._processDroppedLabel,
+                    setterObject=self,
                     toLabel=self._stripDirection,
                     plusChain=True)
 
@@ -1119,10 +1121,11 @@ class StripHeaderWidget(_OpenGLFrameABC):
         self._resize()
 
         # Notifier for change of stripLabel
-        self._nmrResidueNotifier = Notifier(self.project, [Notifier.RENAME],
+        self._nmrResidueNotifier = Notifier(self.project, Notifier.RENAME,
                                             'NmrResidue',
                                             self._processNotifier,
-                                            onceOnly=True)
+                                            onceOnly=True,
+                                            setterObject=self)
 
     def setEnabledLeftDrop(self, value):
 

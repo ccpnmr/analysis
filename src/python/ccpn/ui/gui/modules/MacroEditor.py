@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-06 17:48:12 +0000 (Wed, March 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 11:51:40 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -173,8 +173,10 @@ class MacroEditor(CcpnModule):
         self._setToolBar()
         self._createWidgetSettings()
         self._droppedNotifier = GuiNotifier(self.textEditor,
-                                           [GuiNotifier.DROPEVENT], [DropBase.URLS],
-                                           self._processDroppedItems)
+                                            GuiNotifier.DROPEVENT, DropBase.URLS,
+                                            callback=self._processDroppedItems,
+                                            setterObject=self
+                                            )
 
     def _setupWidgets(self):
         """Set up the main widgets

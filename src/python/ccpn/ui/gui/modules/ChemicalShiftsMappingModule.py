@@ -69,7 +69,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-20 13:39:45 +0000 (Wed, March 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 11:51:39 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -303,12 +303,18 @@ class ChemicalShiftsMapping(CcpnModule):
         self._initMainWidgets()
         self._initSettingsWidgets()
         self._selectCurrentNRNotifier = CurrentNotifier(targetName='nmrResidues',
-                                                 callback=self._selectCurrentNmrResiduesNotifierCallback, onceOnly=True)
-        self._peakDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'Peak', self._peakDeletedCallBack)
-        self._nrChangedNotifier = Notifier(self.project, [Notifier.CHANGE], 'NmrResidue', self._nmrObjectChanged)
-        self._nrDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'NmrResidue', self._nmrResidueDeleted)
-        self._sgNotifier = Notifier(self.project, [Notifier.CREATE], 'SpectrumGroup', self._onSGcreation)
-        self._sgDeleteNotifier = Notifier(self.project, [Notifier.DELETE], 'SpectrumGroup', self._onSGdeletion)
+                                                        callback=self._selectCurrentNmrResiduesNotifierCallback,
+                                                        setterObject=self)
+        self._peakDeletedNotifier = Notifier(self.project, Notifier.DELETE, 'Peak',
+                                             callback=self._peakDeletedCallBack, setterObject=self)
+        self._nrChangedNotifier = Notifier(self.project, Notifier.CHANGE, 'NmrResidue',
+                                           callback=self._nmrObjectChanged, setterObject=self)
+        self._nrDeletedNotifier = Notifier(self.project, Notifier.DELETE, 'NmrResidue',
+                                           callback=self._nmrResidueDeleted, setterObject=self)
+        self._sgNotifier = Notifier(self.project, Notifier.CREATE, 'SpectrumGroup',
+                                    callback=self._onSGcreation, setterObject=self)
+        self._sgDeleteNotifier = Notifier(self.project, Notifier.DELETE, 'SpectrumGroup',
+                                          callback=self._onSGdeletion, setterObject=self)
 
         # self._addSettingsWAttr(self.nmrAtomsCheckBoxes)
         # self._selectCurrentNmrResiduesNotifierCallback()

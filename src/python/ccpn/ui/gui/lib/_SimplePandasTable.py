@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-20 16:54:17 +0000 (Wed, March 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 11:51:39 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -228,8 +228,10 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
             self.moduleParent.mainWidget._dropEventCallback = self._processDroppedItems
 
         self._droppedNotifier = GuiNotifier(self,
-                                            [GuiNotifier.DROPEVENT], [DropBase.PIDS],
-                                            self._processDroppedItems)
+                                            GuiNotifier.DROPEVENT, DropBase.PIDS,
+                                            callback=self._processDroppedItems,
+                                            setterObject=self,
+                                            )
 
         # add a widget handler to give a clean corner widget for the scroll area
         self._cornerDisplay = ScrollBarVisibilityWatcher(self)
@@ -1965,11 +1967,12 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         if self.cellClassNames:
             for cellClass, attr in self.cellClassNames.items():
                 for _trigger in [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]:
-                    self._cellNotifiers.append(Notifier(self.project,
-                                                        _trigger,
+                    self._cellNotifiers.append(Notifier(self.project, _trigger,
                                                         targetName=cellClass.__name__,
                                                         callback=partial(self._queueGeneralNotifier, self._updateCellCallback),
-                                                        onceOnly=True))
+                                                        onceOnly=True,
+                                                        setterObject=self)
+                                               )
 
         if self.selectCurrent:
             self._selectCurrentNotifier = CurrentNotifier(

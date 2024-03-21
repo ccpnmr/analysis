@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-20 16:54:17 +0000 (Wed, March 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 11:51:40 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -451,15 +451,17 @@ class SequenceWidget():
                                                targetName='Residue',
                                                callback=self._refreshChainLabels,  # testing
                                                onceOnly=True)
-        self._residueDeleteNotifier = Notifier(self.project,[Notifier.DELETE],
+        self._residueDeleteNotifier = Notifier(self.project, Notifier.DELETE,
                                                'Residue',
                                                # self._deleteChainResidueCallback,
                                                self._refreshChainLabels,
-                                               onceOnly=True)
-        self._nmrResidueNotifier = Notifier(self.project, [Notifier.CHANGE],
+                                               onceOnly=True,
+                                               setterObject=self)
+        self._nmrResidueNotifier = Notifier(self.project, Notifier.CHANGE,
                                             'NmrResidue',
                                             self._refreshChainLabels,
-                                            onceOnly=True)
+                                            onceOnly=True,
+                                            setterObject=self)
 
     def _unRegisterNotifiers(self):
         """unregister notifiers

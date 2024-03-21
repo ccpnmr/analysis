@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-20 16:54:17 +0000 (Wed, March 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 11:51:39 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -59,19 +59,25 @@ class MultipletTest_setUp(WrapperTesting):
             self.spectrum2 = self.project.newEmptySpectrum(isotopeCodes=('13C', '1H', '15N'))
             self.multipletList2 = self.spectrum2.newMultipletList()
 
-            self._multipletNotifier1 = Notifier(self.project, [Notifier.CREATE],
-                                               'Multiplet',
-                                               self._multipletChange,
-                                               onceOnly=True)
-            self._multipletNotifier2 = Notifier(self.project, [Notifier.CHANGE],
-                                               'Multiplet',
-                                               self._multipletChange,
-                                               onceOnly=True)
+            self._multipletNotifier1 = Notifier(self.project, Notifier.CREATE,
+                                                'Multiplet',
+                                                self._multipletChange,
+                                                onceOnly=True,
+                                                setterObject=self,
+                                                )
+            self._multipletNotifier2 = Notifier(self.project, Notifier.CHANGE,
+                                                'Multiplet',
+                                                self._multipletChange,
+                                                onceOnly=True,
+                                                setterObject=self,
+                                                )
 
-            self._multipletNotifier3 = Notifier(self.project, [Notifier.DELETE],
-                                               'Multiplet',
-                                               self._multipletChange,
-                                               onceOnly=True)
+            self._multipletNotifier3 = Notifier(self.project, Notifier.DELETE,
+                                                'Multiplet',
+                                                self._multipletChange,
+                                                onceOnly=True,
+                                                setterObject=self,
+                                                )
             # GWV 20/3/24: use only one trigger per Notifier instantiation; use _makeNotifiers
             # self._peakNotifier = Notifier(self.project,[Notifier.CREATE, Notifier.CHANGE, Notifier.DELETE],
             #                                   'Peak',

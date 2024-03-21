@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>With a CCPN macro you can quickly put all the Spectra in a SpectrumGroup into a new Chemical Shift List (e.g. for a new construct) or into separate Chemical Shifts Lists (e.g. for a titration). Go to the <span style=%(purple)s>Macro</span> menu, <span style=%(purple)s>Run CCPN Macros</span> and <span style=%(purple)s>moveSGSpectraIntoNewCLs</span>.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 1,
+  "contents": [
+    "./graphics/SGSpectraIntoNewCls.png"
+  ]
+}

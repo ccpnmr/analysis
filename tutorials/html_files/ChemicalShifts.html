@@ -13,8 +13,17 @@
 <div class="headerBar">Chemical Shifts</div>
 <div class="tutorial">
 
+
+<div class="videoContainer">
+  <div class="videoWrapper">
+    <iframe src="https://www.youtube.com/embed/z8fJwC9f__w" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  </div>
+</div>
+
+
     <h2>Chemical Shifts</h2>
     <h4>Note that this is new for Version 3.1 - in Version 3.0 the Chemical Shifts are handled slightly differently</h4>
+    <h4>You may find it helpful to both read the information and watch the video as they describe things in slightly different ways.</h4>
     <p>Each project always has to contain at least one Chemical Shift List. New projects are given one called <span class="action">default</span>.</p>
     <h3>The link between Spectra and Chemical Shift Lists</h3>
     <p>Each spectrum has to be associated with one Chemical Shift List. When you open a new spectrum, it will by default be associated with the first Chemical Shift List in your project (usually the <span class="action">default</span> list). If you <span class="action">double-click</span> on a spectrum in the sidebar to bring up the <span class="action">Spectrum Properties</span> dialog box, you can see in the <span class="action">General</span> tab which <span class="action">Chemical Shift List</span> the Spectrum is associated with. You can also change which Chemical Shift List this is (including creating a new Chemical Shift List) using the drop-down menu.</p>
@@ -44,7 +53,7 @@
     <p>This diagram shows the relationships between the various objects in the program.</p>
     <img src="graphics/ChemShiftsDiagram.png">
     <p>From this you can infer certain behaviours. For example, this is what will happen if you delete any of these objects:
-<br><span class="action">ChemicalShiftList:</span> All the ChemicalShifts in a ChemicalShiftList will also be deleted. Any spectra associated with the ChemicalShiftList have to become associated with a new ChemicalShiftList (by default the top or next available Chemical Shift List). The final ChemicalShiftList in a project cannot be deleted.
+<br><span class="action">ChemicalShiftList:</span> All the ChemicalShifts in a ChemicalShiftList will also be deleted. You cannot delete a ChemicalShiftList which has Spectra associated with it (to avoid any ambiguity about which alternative ChemicalShiftList these Spectra would then become associated with). Before deleting a ChemicalShiftList, move its Spectra into a different ChemicalShiftList. The final ChemicalShiftList in a project cannot be deleted.
 <br><span class="action">NmrAtom:</span> Any associated ChemicalShifts are also deleted. Any assigned Peaks are deassigned.
 <br><span class="action">Peak:</span> No other objects are deleted. NmrAtoms may become unused and their ChemicalShifts may become orphaned, but that doesn't matter.
 <br><span class="action">PeakList:</span> All the Peaks in the PeakList are also deleted (which can again lead to NmrAtoms becoming unused or ChemicalShifts becoming orphaned). If the PeakList is the only PeakList of a Spectrum, a new empty one is created in its place.

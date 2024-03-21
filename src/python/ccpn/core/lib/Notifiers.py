@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-21 16:21:09 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 16:47:39 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -795,8 +795,26 @@ class NotifierBase(object):
             notifier.unRegister()
             del(notifier)
 
+    # Notification blanking level - to allow for nested notification disabling
+    _notificationBlanking = 0
+
+    def _increaseNotificationBlanking(self):
+        """Increase notification blanking for all notifiers;
+        The will disable notifiers until _decreaseNotifcationBlanking() has reset the situation.
+        Caller is responsible to make sure necessary notifiers are called, and to decrease after use
+        """
+        NotifierBase._notificationBlanking += 1
+
+    def _decreaseNotificationBlanking(self):
+        """Decrease notification blanking for all notifiers;
+        Notifier execution is resumed if resulting value == 0
+        """
+        NotifierBase._notificationBlanking -= 1
+        if NotifierBase._notificationBlanking < 0:
+            raise RuntimeError("_decreaseNotificationBlanking(): _notificationBlanking below zero!")
+
     def setBlankingAllNotifiers(self, flag):
-        """Set blanking of all the notifiers of theObject to flag
+        """Set blanking of all the notifiers of self to flag
         """
         if not self.hasNotifier(None):
             return

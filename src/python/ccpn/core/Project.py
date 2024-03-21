@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-21 16:21:09 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 16:47:38 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -991,7 +991,7 @@ class Project(AbstractWrapperObject):
         self._progressSuspension = 0
 
         # Notification blanking level - to allow for nested notification disabling
-        self._notificationBlanking = 0
+        # self._notificationBlanking = 0
 
         # api 'change' notification blanking level - to allow for api 'change' call to be
         # disabled in the _modifiedApiObject method.
@@ -2056,19 +2056,20 @@ class Project(AbstractWrapperObject):
         if not found:
             self._logger.warning("Attempt to remove unknown notifier: %s" % notifier)
 
-    def _increaseNotificationBlanking(self):
-        """Disable notifiers temporarily
-        e.g. to disable 'object modified' notifiers during object creation
-        Caller is responsible to make sure necessary notifiers are called, and to decrease after use
-        """
-        self._notificationBlanking += 1
-
-    def _decreaseNotificationBlanking(self):
-        """Decrease notification blanking; Resume notifier execution if resulting value == 0
-        """
-        self._notificationBlanking -= 1
-        if self._notificationBlanking < 0:
-            raise TypeError("Code Error: _notificationBlanking below zero!")
+    # GWV 21/3/24: to NotifierBase
+    # def _increaseNotificationBlanking(self):
+    #     """Disable notifiers temporarily
+    #     e.g. to disable 'object modified' notifiers during object creation
+    #     Caller is responsible to make sure necessary notifiers are called, and to decrease after use
+    #     """
+    #     self._notificationBlanking += 1
+    #
+    # def _decreaseNotificationBlanking(self):
+    #     """Decrease notification blanking; Resume notifier execution if resulting value == 0
+    #     """
+    #     self._notificationBlanking -= 1
+    #     if self._notificationBlanking < 0:
+    #         raise TypeError("Code Error: _notificationBlanking below zero!")
 
     def suspendNotification(self):
         """Suspend notifier execution and accumulate notifiers for later execution"""

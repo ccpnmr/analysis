@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-06 17:48:12 +0000 (Wed, March 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 08:08:46 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -668,8 +668,7 @@ class GuiSpectrumDisplay(CcpnModule):
                         self.removeSpectrum(specView.spectrum)
 
     def _registerNotifiers(self):
-        self._spectrumChangeNotifier = self.setNotifier(self.project,
-                                                        [Notifier.CHANGE, Notifier.RENAME, Notifier.DELETE],
+        self._spectrumChangeNotifier = self.setNotifier(self.project, [Notifier.CHANGE, Notifier.RENAME, Notifier.DELETE],
                                                         Spectrum.className,
                                                         self._spectrumChanged)
 
@@ -697,14 +696,12 @@ class GuiSpectrumDisplay(CcpnModule):
                                                            self._listViewChanged,
                                                            onceOnly=True)
 
-        self._spectrumGroupNotifier = self.setNotifier(self.project,
-                                                       [Notifier.CHANGE, Notifier.RENAME],
+        self._spectrumGroupNotifier = self.setNotifier(self.project, [Notifier.CHANGE, Notifier.RENAME],
                                                        SpectrumGroup.className,
                                                        self._spectrumGroupChanged,
                                                        onceOnly=True)
 
-        self._spectrumDisplayNotifier = self.setNotifier(self.project,
-                                                         [Notifier.RENAME],
+        self._spectrumDisplayNotifier = self.setNotifier(self.project, [Notifier.RENAME],
                                                          SpectrumDisplay.className,
                                                          self._spectrumDisplayChanged,
                                                          onceOnly=True)

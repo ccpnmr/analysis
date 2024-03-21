@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-20 13:39:46 +0000 (Wed, March 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 08:08:46 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -336,7 +336,7 @@ class SpectrumToolBar(ToolBar):
         spectrum = data[Notifier.OBJECT]
         trigger = data[Notifier.TRIGGER]
 
-        if spectrum and trigger in [Notifier.RENAME]:
+        if spectrum and trigger == Notifier.RENAME:
             oldPid = Pid.Pid(data[Notifier.OLDPID])
             oldId = oldPid.id
 

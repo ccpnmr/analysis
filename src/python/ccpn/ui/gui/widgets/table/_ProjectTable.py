@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-20 16:54:18 +0000 (Wed, March 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 08:08:46 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -486,23 +486,27 @@ class _ProjectTableABC(TableABC, Base):
 
         if self.cellClassNames:
             for cellClass, attr in self.cellClassNames.items():
-                self._cellNotifiers.append(Notifier(self.project,
-                                                    [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
-                                                    cellClass.__name__,
-                                                    partial(self._queueGeneralNotifier, self._updateCellCallback),
-                                                    onceOnly=True))
+                for _trigger in [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]:
+                    self._cellNotifiers.append(Notifier(self.project, _trigger,
+                                                        targetName=cellClass.__name__,
+                                                        callback=partial(self._queueGeneralNotifier, self._updateCellCallback),
+                                                        onceOnly=True,
+                                                        setterObject=self)
+
+                                               )
 
         if self.selectCurrent:
             self._selectCurrentNotifier = CurrentNotifier(
                                                    targetName=self.callBackClass._pluralLinkName,
                                                    callback=self._selectCurrentCallBack,  # strange behaviour if deferred
-                                                   # partial(self._queueGeneralNotifier, self._selectCurrentCallBack),
+                                                   setterObject=self
                                                    )
 
         if self.search:
             self._searchNotifier = CurrentNotifier(
                                             targetName=self.search._pluralLinkName,
-                                            callback=self._searchCallBack
+                                            callback=self._searchCallBack,
+                                            setterObject=self
                                             )
 
         # add a cleaner id to the opened guiTable list

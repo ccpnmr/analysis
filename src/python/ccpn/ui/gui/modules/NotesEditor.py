@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-06 17:48:12 +0000 (Wed, March 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 08:08:46 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -213,8 +213,7 @@ class NotesEditorModule(CcpnModule):
         rename calls on name
         change calls on any other attribute
         """
-        self._noteNotifier = self.setNotifier(self.project,
-                                              [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
+        self._noteNotifier = self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
                                               Note.className,
                                               self._updateCallback)
         self._droppedNotifier = self.setGuiNotifier(self.mainWidget,

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-20 16:54:18 +0000 (Wed, March 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-21 08:08:46 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -499,8 +499,7 @@ class _MIProjectTableABC(MITableABC, Base):
         if self.cellClassNames:
             for cellClass, attr in self.cellClassNames.items():
                 for _trigger in [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]:
-                    self._cellNotifiers.append(Notifier(self.project,
-                                                        _trigger,
+                    self._cellNotifiers.append(Notifier(self.project, _trigger,
                                                         targetName=cellClass.__name__,
                                                         callback=partial(self._queueGeneralNotifier, self._updateCellCallback),
                                                         onceOnly=True,

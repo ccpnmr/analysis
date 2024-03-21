@@ -55,8 +55,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-02-23 10:46:28 +0000 (Fri, February 23, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-03-21 08:08:46 +0000 (Thu, March 21, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -2929,7 +2929,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def _processSpectrumNotifier(self, data):
         trigger = data[Notifier.TRIGGER]
 
-        if trigger in [Notifier.RENAME]:
+        if trigger == Notifier.RENAME:
             obj = data[Notifier.OBJECT]
             self._spectrumLabelling.renameString(obj)
 
@@ -2978,7 +2978,7 @@ class CcpnGLWidget(QOpenGLWidget):
         """
         trigger = data[Notifier.TRIGGER]
 
-        if trigger in [Notifier.RENAME]:
+        if trigger == Notifier.RENAME:
             nmrAtom = data[Notifier.OBJECT]
             oldPid = Pid.Pid(data[Notifier.OLDPID])
             oldId = oldPid.id

@@ -1,9 +1,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -11,9 +11,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-29 10:46:29 +0100 (Mon, May 29, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-03-21 08:08:46 +0000 (Thu, March 21, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -67,64 +67,52 @@ class CoreNotifiersHandler(ExperimentAnalysisHandlerABC):
 
         CoreNotifiersHandler._notifiers.update({
 
-            'onChangeSpectrum'      : Notifier(gm.project,
-                                               [Notifier.CHANGE],
+            'onChangeSpectrum'      : Notifier(gm.project, [Notifier.CHANGE],
                                                targetName=Spectrum.className,
                                                callback=partial(CoreNotifiersHandler._spectrumChanged, gm),
                                                onceOnly=True),
-            'onChangeSpectrumGroup' : Notifier(gm.project,
-                                               [Notifier.CHANGE],
+            'onChangeSpectrumGroup' : Notifier(gm.project, [Notifier.CHANGE],
                                                targetName=SpectrumGroup.className,
                                                callback=partial(CoreNotifiersHandler._spectrumGroupChanged, gm),
                                                onceOnly=True),
-            'onDeletePeak'          : Notifier(gm.project,
-                                               [Notifier.DELETE],
+            'onDeletePeak'          : Notifier(gm.project, [Notifier.DELETE],
                                                targetName=Peak.className,
                                                callback=partial(CoreNotifiersHandler._peakDeleted, gm),
                                                onceOnly=True),
-            'onChangePeak'          : Notifier(gm.project,
-                                               [Notifier.CHANGE],
+            'onChangePeak'          : Notifier(gm.project, [Notifier.CHANGE],
                                                targetName=Peak.className,
                                                callback=partial(CoreNotifiersHandler._peakChanged, gm),
                                                onceOnly=True),
-            'onDeleteCollection'    : Notifier(gm.project,
-                                               [Notifier.DELETE],
+            'onDeleteCollection'    : Notifier(gm.project, [Notifier.DELETE],
                                                targetName=Collection.className,
                                                callback=partial(CoreNotifiersHandler._collectionDeleted, gm),
                                                onceOnly=True),
-            'onChangeCollection'    : Notifier(gm.project,
-                                               [Notifier.CHANGE],
+            'onChangeCollection'    : Notifier(gm.project, [Notifier.CHANGE],
                                                targetName=Collection.className,
                                                callback=partial(CoreNotifiersHandler._collectionChanged, gm),
                                                onceOnly=True),
-            'onRenameCollection': Notifier(gm.project,
-                                                [Notifier.RENAME],
+            'onRenameCollection': Notifier(gm.project, [Notifier.RENAME],
                                                 targetName=Collection.className,
                                                 callback=partial(CoreNotifiersHandler._collectionRenamed, gm),
                                                 onceOnly=True),
-            'onDeleteNmrResidue': Notifier(gm.project,
-                                                [Notifier.DELETE],
+            'onDeleteNmrResidue': Notifier(gm.project, [Notifier.DELETE],
                                                 targetName=NmrResidue.className,
                                                 callback=partial(CoreNotifiersHandler._nmrResidueDeleted, gm),
                                                 onceOnly=True),
 
-            'onRenameNmrResidue': Notifier(gm.project,
-                                               [Notifier.RENAME],
+            'onRenameNmrResidue': Notifier(gm.project, [Notifier.RENAME],
                                                targetName=NmrResidue.className,
                                                callback=partial(CoreNotifiersHandler._nmrResidueRenamed, gm),
                                                onceOnly=True),
-            'onCreateDataTable'     : Notifier(gm.project,
-                                               [Notifier.CREATE],
+            'onCreateDataTable'     : Notifier(gm.project, [Notifier.CREATE],
                                                targetName=DataTable.className,
                                                callback=partial(CoreNotifiersHandler._dataTableCreated, gm),
                                                onceOnly=True),
-            'onRenameDataTable'     : Notifier(gm.project,
-                                               [Notifier.RENAME],
+            'onRenameDataTable'     : Notifier(gm.project, [Notifier.RENAME],
                                                targetName=DataTable.className,
                                                callback=partial(CoreNotifiersHandler._dataTableRenamed, gm),
                                                onceOnly=True),
-            'onDeleteDataTable'     : Notifier(gm.project,
-                                               [Notifier.DELETE],
+            'onDeleteDataTable'     : Notifier(gm.project, [Notifier.DELETE],
                                                targetName=DataTable.className,
                                                callback=partial(CoreNotifiersHandler._dataTableDeleted, gm),
                                                )

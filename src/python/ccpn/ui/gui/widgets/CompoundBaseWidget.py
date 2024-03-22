@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-20 16:54:17 +0000 (Wed, March 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-22 16:10:21 +0000 (Fri, March 22, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -128,7 +128,7 @@ class CompoundBaseWidget(Frame, SignalBlocking):
         """Delete all notifiers associated with the widget"""
         while len(self._notifiers) > 0:
             if notifier := self._notifiers.pop():
-                notifier.unRegister()
+                notifier.unRegisterNotifier()
                 del (notifier)
 
     def __del__(self):

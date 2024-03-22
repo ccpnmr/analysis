@@ -69,7 +69,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-21 11:51:39 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-22 16:10:20 +0000 (Fri, March 22, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1631,17 +1631,17 @@ class ChemicalShiftsMapping(CcpnModule):
         """
         try:
             if self._selectCurrentNRNotifier:
-                self._selectCurrentNRNotifier.unRegister()
+                self._selectCurrentNRNotifier.unRegisterNotifier()
             if self._sgNotifier:
-                self._sgNotifier.unRegister()
+                self._sgNotifier.unRegisterNotifier()
             if self._sgDeleteNotifier:
-                self._sgDeleteNotifier.unRegister()
+                self._sgDeleteNotifier.unRegisterNotifier()
             if self._peakDeletedNotifier:
-                self._peakDeletedNotifier.unRegister()
+                self._peakDeletedNotifier.unRegisterNotifier()
             if self._nrChangedNotifier:
-                self._nrChangedNotifier.unRegister()
+                self._nrChangedNotifier.unRegisterNotifier()
             if self._nrDeletedNotifier:
-                self._nrDeletedNotifier.unRegister()
+                self._nrDeletedNotifier.unRegisterNotifier()
             if self.nmrResidueFrame:
                 self.nmrResidueFrame._cleanupWidget()
 

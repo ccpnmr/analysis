@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-06 17:48:11 +0000 (Wed, March 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-22 16:10:20 +0000 (Fri, March 22, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -67,8 +67,8 @@ class Window(AbstractWrapperObject):
 
     #=========================================================================================
 
-    def __init__(self, project, wrappedData):
-        super().__init__(project=project, wrappedData=wrappedData)
+    # def __init__(self, project, wrappedData):
+    #     super().__init__(project=project, wrappedData=wrappedData)
 
     #=========================================================================================
 

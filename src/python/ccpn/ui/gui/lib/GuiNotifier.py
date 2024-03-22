@@ -28,7 +28,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-21 15:28:09 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-22 16:10:20 +0000 (Fri, March 22, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -138,12 +138,12 @@ class GuiNotifier(NotifierABC):
         elif trigger == GuiNotifier.DRAGMOVEEVENT:
             self._theObject.setDragMoveEventCallback(self)
 
-        self._isRegistered = True
+        self.registerNotifier()
 
         if self._debug:
             sys.stderr.write('>>> registered %s\n' % self)
 
-    def unRegister(self):
+    def unRegisterNotifier(self):
         """
         unregister the notifiers
         """
@@ -159,7 +159,7 @@ class GuiNotifier(NotifierABC):
         elif self._trigger == GuiNotifier.DRAGMOVEEVENT:
             self._theObject.setDragMoveEventCallback(None)
 
-        super().unRegister()  # the end as it clears all attributes
+        super().unRegisterNotifier()  # the end as it clears all attributes
 
     def __call__(self, data: dict):
         """

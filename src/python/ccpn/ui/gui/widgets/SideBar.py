@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-21 08:08:46 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-22 16:10:21 +0000 (Fri, March 22, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -152,7 +152,8 @@ class SidebarABC(NotifierBase):
 
     def __init__(self, name=None, usePidForName=False, klass=None, addNotifier=False, closed=True, add2NodesUp=False,
                  rebuildOnRename=None, callback=None, menuAction=None, children=[], isDraggable=False, **kwds):
-        super().__init__()
+
+        NotifierBase.__init__(self)
 
         self._indx = SidebarABC._nextIndx
         SidebarABC._nextIndx += 1
@@ -1169,6 +1170,7 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
 
         super().__init__(parent)
         Base._init(self, acceptDrops=True, **kwds)
+        NotifierBase.__init__(self)
         SideBarStructure._init(self)
 
         self.multiSelect = multiSelect

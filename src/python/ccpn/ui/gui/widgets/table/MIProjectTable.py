@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-21 16:21:11 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-22 16:10:21 +0000 (Fri, March 22, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -534,25 +534,25 @@ class _MIProjectTableABC(MITableABC, Base):
         getLogger().debug(f'Clearing table notifiers {self}')
 
         if self._tableNotifier is not None:
-            self._tableNotifier.unRegister()
+            self._tableNotifier.unRegisterNotifier()
             self._tableNotifier = None
 
         if self._rowNotifier is not None:
-            self._rowNotifier.unRegister()
+            self._rowNotifier.unRegisterNotifier()
             self._rowNotifier = None
 
         if self._cellNotifiers:
             for cell in self._cellNotifiers:
                 if cell is not None:
-                    cell.unRegister()
+                    cell.unRegisterNotifier()
             self._cellNotifiers = []
 
         if self._selectCurrentNotifier is not None:
-            self._selectCurrentNotifier.unRegister()
+            self._selectCurrentNotifier.unRegisterNotifier()
             self._selectCurrentNotifier = None
 
         if self._searchNotifier is not None:
-            self._searchNotifier.unRegister()
+            self._searchNotifier.unRegisterNotifier()
             self._searchNotifier = None
 
     def _close(self):
@@ -564,7 +564,7 @@ class _MIProjectTableABC(MITableABC, Base):
         """
         self.selectCurrent = False
         if self._selectCurrentNotifier is not None:
-            self._selectCurrentNotifier.unRegister()
+            self._selectCurrentNotifier.unRegisterNotifier()
             self._selectCurrentNotifier = None
 
     #=========================================================================================

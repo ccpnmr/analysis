@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-21 11:51:40 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-22 16:10:20 +0000 (Fri, March 22, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -140,7 +140,7 @@ class StructureTableModule(CcpnModule):
         """
         if self.activePulldownClass:
             if self._setCurrentPulldown:
-                self._setCurrentPulldown.unRegister()
+                self._setCurrentPulldown.unRegisterNotifier()
             if self._settings:
                 self._settings._cleanupWidget()
         self.tableFrame._cleanupWidget()
@@ -534,7 +534,7 @@ class StructureTableFrame(_CoreTableFrameABC):
 
     def _cleanupWidget(self):
         if self._ensembleNotifier:
-            self._ensembleNotifier.unRegister()
+            self._ensembleNotifier.unRegisterNotifier()
 
         super()._cleanupWidget()
 

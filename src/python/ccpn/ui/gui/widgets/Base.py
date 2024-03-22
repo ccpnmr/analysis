@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-09 17:07:01 +0000 (Sat, March 09, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-22 16:10:21 +0000 (Fri, March 22, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -398,6 +398,10 @@ class Base(DropBase, SignalBlocking):
             self.setMinimumWidth(minimumWidth)
         if fixedWidth:
             self.setFixedWidth(fixedWidth)
+
+        # Allow (Gui-)Notifiers to be registered with this widget
+        from ccpn.core.lib.Notifiers import NotifierBase, _NotifiersDict
+        setattr(self, NotifierBase.REGISTERED_NOTIFIERS_DICT, _NotifiersDict())
 
         # connect destruction of widget to onDestroyed method,
         # which subsequently can be subclassed

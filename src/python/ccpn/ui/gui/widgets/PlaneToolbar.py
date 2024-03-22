@@ -3,10 +3,6 @@ This module defines a specific Toolbar class for the strip display
 The NmrResidueLabel allows drag and drop of the ids displayed in them
 
 """
-
-import contextlib
-
-
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -21,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-21 11:51:40 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-22 16:10:21 +0000 (Fri, March 22, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -31,6 +27,9 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
+import contextlib
+
 
 from functools import partial
 from PyQt5.QtCore import pyqtSlot
@@ -1041,19 +1040,15 @@ class StripHeaderWidget(_OpenGLFrameABC):
 
         # add gui notifiers here instead of in backboneAssignment
         # NOTE:ED could replace this with buttons instead
-        GuiNotifier(self._nmrChainLeft,
-                    GuiNotifier.DROPEVENT, DropBase.TEXT,
-                    callback=self._processDroppedLabel,
-                    setterObject=self,
-                    toLabel=self._stripDirection,
-                    plusChain=False)
+        strip.setGuiNotifier(self._nmrChainLeft, [GuiNotifier.DROPEVENT], [DropBase.TEXT],
+                             callback=partial(self._processDroppedLabel,
+                                              toLabel=self._stripDirection, plusChain=False)
+                             )
 
-        GuiNotifier(self._nmrChainRight,
-                    GuiNotifier.DROPEVENT, DropBase.TEXT,
-                    callback=self._processDroppedLabel,
-                    setterObject=self,
-                    toLabel=self._stripDirection,
-                    plusChain=True)
+        strip.setGuiNotifier(self._nmrChainRight, [GuiNotifier.DROPEVENT], [DropBase.TEXT],
+                             callback=partial(self._processDroppedLabel,
+                                              toLabel=self._stripDirection, plusChain=True)
+                             )
 
         self._resize()
 

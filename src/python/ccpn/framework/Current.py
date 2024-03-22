@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-21 16:21:10 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-22 16:10:20 +0000 (Fri, March 22, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,7 @@ import operator
 import os
 import sys
 from collections import OrderedDict
+from functools import partial
 
 from ccpn.core.Chain import Chain
 from ccpn.core.Residue import Residue
@@ -164,6 +165,9 @@ class Current(NotifierBase):
     )
 
     def __init__(self, project):
+
+        NotifierBase.__init__(self)
+
         # initialise non-=auto fields
         self._project = project
         self._pid = f'{self.shortClassName}:current'
@@ -477,9 +481,9 @@ class Current(NotifierBase):
         for cls in _currentClasses:
             fieldName = f'_{cls._pluralLinkName}'
             ntf = Notifier(self.project, trigger=Notifier.DELETE, targetName=cls.className,
-                           callback=self._cleanUp, debug=False,
+                           callback=partial(self._cleanUp, fieldName=fieldName), debug=False,
                            setterObject=self,
-                           fieldName=fieldName)  # fieldName is passed on to the callback function
+                           )  # fieldName is passed on to the callback function
             self._notifiers.append(ntf)
 
     def _unregisterNotifiers(self):
@@ -490,7 +494,7 @@ class Current(NotifierBase):
             sys.stderr.write('>>> _unregisterNotifiers\n')
 
         for ntf in self._notifiers:
-            ntf.unRegister()
+            ntf.unRegisterNotifier()
 
     def _dumpStateToFile(self, statePath):
         if self.project.readOnly:

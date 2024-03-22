@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-21 11:51:40 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-22 16:10:21 +0000 (Fri, March 22, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -133,7 +133,7 @@ class CoreNotifiersHandler(ExperimentAnalysisHandlerABC):
     def _unRegisterNotifiers():
         for k,v in CoreNotifiersHandler._notifiers.items():
             if v is not None:
-                v.unRegister()
+                v.unRegisterNotifier()
 
     #### PEAKS ####
 

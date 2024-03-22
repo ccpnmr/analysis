@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-21 11:51:40 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-22 16:10:21 +0000 (Fri, March 22, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -467,19 +467,19 @@ class SequenceWidget():
         """unregister notifiers
         """
         if self._chainNotifier:
-            self._chainNotifier.unRegister()
+            self._chainNotifier.unRegisterNotifier()
             self._chainNotifier = None
         if self._residueNotifier:
-            self._residueNotifier.unRegister()
+            self._residueNotifier.unRegisterNotifier()
             self._residueNotifier = None
         if self._residueDeleteNotifier:
-            self._residueDeleteNotifier.unRegister()
+            self._residueDeleteNotifier.unRegisterNotifier()
             self._residueDeleteNotifier = None
         if self._chainDeleteNotifier:
-            self._chainDeleteNotifier.unRegister()
+            self._chainDeleteNotifier.unRegisterNotifier()
             self._chainDeleteNotifier = None
         if self._nmrResidueNotifier:
-            self._nmrResidueNotifier.unRegister()
+            self._nmrResidueNotifier.unRegisterNotifier()
             self._nmrResidueNotifier = None
 
     def _closeModule(self):

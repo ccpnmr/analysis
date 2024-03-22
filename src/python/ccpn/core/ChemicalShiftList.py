@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-06 17:48:08 +0000 (Wed, March 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-22 18:25:12 +0000 (Fri, March 22, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -141,6 +141,10 @@ class ChemicalShiftList(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = Nmr.ShiftList._metaclass.qualifiedName()
+
+    _ignoreNewApiObjectCallback = True
+
+    #=========================================================================================
 
     def __init__(self, project: Project, wrappedData: Nmr.ShiftList):
         self._wrappedData = wrappedData
@@ -939,7 +943,7 @@ del chemicalShiftList
 @newObject(ChemicalShiftList)
 def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', autoUpdate: bool = True,
                           isSimulated: bool = False, comment: str = None,
-                          spectra=()) -> ChemicalShiftList:
+                          ) -> ChemicalShiftList:
     """Create new ChemicalShiftList.
 
     See the ChemicalShiftList class for details.
@@ -949,6 +953,7 @@ def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
     :param autoUpdate: True/False - automatically update chemicalShifts when assignments change
     :param isSimulated: True/False
     :param comment: optional user comment
+
     :return: a new ChemicalShiftList instance.
     """
 
@@ -959,9 +964,9 @@ def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
           'details': comment}
 
     apiChemicalShiftList = self._wrappedData.newShiftList(**dd)
-    result = self._data2Obj.get(apiChemicalShiftList)
-    if result is None:
-        raise RuntimeError('Unable to generate new ChemicalShiftList item')
+    # _ignoreNewApiObjectCallback is True, so we explicitly create the V3 object
+    if (result := ChemicalShiftList._newInstanceFromApiData(apiChemicalShiftList, project=self)) is None:
+        raise RuntimeError('Unable to generate new ChemicalShiftList')
 
     # instantiate a new empty dataframe
     df = pd.DataFrame(columns=CS_COLUMNS)
@@ -970,44 +975,35 @@ def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
     # set as the new subclassed DataFrameABC
     apiChemicalShiftList.data = df  # _ChemicalShiftListFrame(df)
 
-    # if spectra:
-    #     # add the spectra to the new chemicalShiftList - moved outside newObject for now
-    #     getByPid = self._project.getByPid
-    #     if (spectra := list(filter(lambda sp: isinstance(sp, Spectrum),
-    #                                map(lambda sp: getByPid(sp) if isinstance(sp, str) else sp, spectra)))):
-    #         # add/transfer the spectra
-    #         result.spectra = spectra
-    #         # dd.update({'experiments': OrderedSet([spec._wrappedData.experiment for spec in spectra])})
-
     return result
 
 
-def _getChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', autoUpdate: bool = True,
-                          isSimulated: bool = False, comment: str = None,
-                          spectra=()) -> ChemicalShiftList:
-    """Create new ChemicalShiftList.
-
-    See the ChemicalShiftList class for details.
-
-    :param name:
-    :param unit:
-    :param autoUpdate:
-    :param isSimulated:
-    :param comment:
-    :return: a new ChemicalShiftList instance.
-    """
-
-    if spectra:
-        getByPid = self._project.getByPid
-        spectra = [getByPid(x) if isinstance(x, str) else x for x in spectra]
-
-    dd = {'name'   : name, 'unit': unit, 'autoUpdate': autoUpdate, 'isSimulated': isSimulated,
-          'details': comment}
-    if spectra:
-        dd['experiments'] = OrderedSet([spec._wrappedData.experiment for spec in spectra])
-
-    apiChemicalShiftList = self._wrappedData.getShiftList(**dd)
-    return self._data2Obj.get(apiChemicalShiftList)
+# def _getChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', autoUpdate: bool = True,
+#                           isSimulated: bool = False, comment: str = None,
+#                           spectra=()) -> ChemicalShiftList:
+#     """Create new ChemicalShiftList.
+#
+#     See the ChemicalShiftList class for details.
+#
+#     :param name:
+#     :param unit:
+#     :param autoUpdate:
+#     :param isSimulated:
+#     :param comment:
+#     :return: a ChemicalShiftList instance.
+#     """
+#
+#     if spectra:
+#         getByPid = self._project.getByPid
+#         spectra = [getByPid(x) if isinstance(x, str) else x for x in spectra]
+#
+#     dd = {'name'   : name, 'unit': unit, 'autoUpdate': autoUpdate, 'isSimulated': isSimulated,
+#           'details': comment}
+#     if spectra:
+#         dd['experiments'] = OrderedSet([spec._wrappedData.experiment for spec in spectra])
+#
+#     apiChemicalShiftList = self._wrappedData.getShiftList(**dd)
+#     return self._data2Obj.get(apiChemicalShiftList)
 
 
 # Notifiers
@@ -1015,8 +1011,7 @@ className = Nmr.ShiftList._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
         (  # ('_finaliseApiRename', {}, className, 'setName'),
             ('_modifiedLink', {'classNames': ('ChemicalShiftList', 'Spectrum')}, className, 'addExperiment'),
-            ('_modifiedLink', {'classNames': ('ChemicalShiftList', 'Spectrum')}, className,
-             'removeExperiment'),
+            ('_modifiedLink', {'classNames': ('ChemicalShiftList', 'Spectrum')}, className, 'removeExperiment'),
             ('_modifiedLink', {'classNames': ('ChemicalShiftList', 'Spectrum')}, className, 'setExperiments'),
             ('_modifiedLink', {'classNames': ('ChemicalShiftList', 'PeakList')}, className, 'addPeakList'),
             ('_modifiedLink', {'classNames': ('ChemicalShiftList', 'PeakList')}, className, 'removePeakList'),

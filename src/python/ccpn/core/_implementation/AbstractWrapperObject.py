@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-22 16:10:19 +0000 (Fri, March 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-22 18:25:12 +0000 (Fri, March 22, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -156,7 +156,8 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
     # Peak, Integral) so that API level notifiers are only registered once.
     _registerClassNotifiers = True
 
-    # flag to ignore _newApiObject callback function; GWV: used to gradually remove this aspect
+    # flag to ignore Project._newApiObject callback function as defined in _linkWrapperClasses
+    # GWV: used to gradually remove this aspect
     _ignoreNewApiObjectCallback = False
 
     # Function to generate custom subclass instances -= overridden in some subclasses
@@ -1016,7 +1017,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
             # # call any pre-initialisation updates
             # cls._updater.update(UPDATE_PRE_OBJECT_INITIALISATION, apiObj, cls)
 
-            obj = cls._newInstanceFromApiData(project=project, apiObj=apiObj)
+            obj = cls._newInstanceFromApiData(apiObj=apiObj, project=project)
             if obj is None:
                 raise RuntimeError(f'_restoreObject: Error restoring object encoded by {apiObj}')
 
@@ -1119,9 +1120,14 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
     #             newInstance._restoreChildren(classes=classes)
     #
     @classmethod
-    def _newInstanceFromApiData(cls, project, apiObj):
+    def _newInstanceFromApiData(cls, apiObj, project=None):
         """Return a new instance of cls, initialised with data from apiObj
         """
+        from ccpn.framework.Application import getProject
+
+        if project is None:
+            project = getProject()
+
         if apiObj in project._data2Obj:
             # This happens with Window, as it get initialised by the Windowstore and then once
             # more as child of Project

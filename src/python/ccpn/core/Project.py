@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-21 21:22:10 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-22 18:25:12 +0000 (Fri, March 22, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -2171,30 +2171,15 @@ class Project(AbstractWrapperObject):
         and call creation notifiers.
         This method is called from the api upon creation of a corresponding api object
         """
-        # See AbstractWrapperObject:1145
+        # See AbstractWrapperObject._linkWrapperClasses where the apiNotifier is set for this
 
-        # factoryFunction = cls._factoryFunction
-        # if factoryFunction is None:
-        #     result = cls(self, wrappedData)
-        # else:
-        #     # Necessary for classes where you need to instantiate a subclass instead
-        #
-        #     result = self._data2Obj.get(wrappedData)
-        #     # There are cases where _newApiObject is registered twice,
-        #     # when two wrapper classes share the same API class
-        #     # (Peak,Integral; PeakList, IntegralList)
-        #     # In those cases only the notifiers are done the second time
-        #     if result is None:
-        #         result = factoryFunction(self, wrappedData)
-        #
         if (result := self._data2Obj.get(wrappedData)) is not None:
             raise RuntimeError(f'Project._newApiObject: {result} already exists; Cannot create again and this should not happen!')
 
-        if not cls._ignoreNewApiObjectCallback:
-            result = cls._newInstanceFromApiData(project=self, apiObj=wrappedData)
+        if cls._ignoreNewApiObjectCallback:
+            return
 
-        # GWV: duplicate; done by newObject decorator
-        # result._finaliseAction('create')
+        cls._newInstanceFromApiData(project=self, apiObj=wrappedData)
 
     def _modifiedApiObject(self, wrappedData):
         """ call object-has-changed notifiers
@@ -3166,9 +3151,8 @@ class Project(AbstractWrapperObject):
         :param name:
         :return: a new ChemicalShiftList instance.
         """
-        from ccpn.core.ChemicalShiftList import _getChemicalShiftList
-
-        return _getChemicalShiftList(self, name=name, **kwds)
+        # STUB
+        pass
 
     def getCollection(self, name: str) -> Optional['Collection']:
         """Return the collection from the supplied name

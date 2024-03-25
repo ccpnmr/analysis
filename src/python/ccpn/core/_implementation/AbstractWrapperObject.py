@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-22 18:25:12 +0000 (Fri, March 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-25 13:55:46 +0000 (Mon, March 25, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1121,7 +1121,8 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
     #
     @classmethod
     def _newInstanceFromApiData(cls, apiObj, project=None):
-        """Return a new instance of cls, initialised with data from apiObj
+        """Return a new instance of cls, initialised with data from apiObj.
+        Checks for existence, and potential factory function.
         """
         from ccpn.framework.Application import getProject
 
@@ -1144,12 +1145,6 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
         return newInstance
 
-    # def _newInstance(self, *kwds):
-    #     """Instantiate a new instance, including the wrappedData
-    # future v3.2
-    #     Should be subclassed
-    #     """
-    #     pass
 
     #=========================================================================================
     # CCPN functions
@@ -1159,9 +1154,6 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
     def delete(self):
         """Delete object, with all contained objects and underlying data.
         """
-
-        # NBNB clean-up of wrapper structure is done via notifiers.
-        # NBNB some child classes must override this function
         self.deleteAllNotifiers()
         self._wrappedData.delete()
 
@@ -1176,6 +1168,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         """Delete self
         """
         # cannot call delete above or the decorator will fail
+        # The decorator has already called _finaliseAction('delete')
         self.deleteAllNotifiers()
         self._wrappedData.delete()
 
@@ -1295,7 +1288,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
                 if cls._registerClassNotifiers:
                     className = cls._apiClassQualifiedName
                     Project._apiNotifiers[:0] = [
-                        ('_newApiObject', {'cls': cls}, className, '__init__'),
+                        ('_newApiObjectCallback', {'cls': cls}, className, '__init__'),
                         ('_startDeleteCommandBlock', {}, className, 'startDeleteBlock'),
                         ('_finaliseApiDelete', {}, className, 'delete'),
                         ('_endDeleteCommandBlock', {}, className, 'endDeleteBlock'),

@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-22 15:58:35 +0000 (Thu, February 22, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-03-25 13:55:46 +0000 (Mon, March 25, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -34,7 +34,7 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Residue as ApiResidue
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import deleteObject, undoStackBlocking, renameObject, undoBlock, \
+from ccpn.core.lib.ContextManagers import undoStackBlocking, renameObject, undoBlock, \
     undoBlockWithoutSideBar, notificationEchoBlocking
 
 

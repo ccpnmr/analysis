@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-22 18:25:12 +0000 (Fri, March 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-25 13:55:46 +0000 (Mon, March 25, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -2166,12 +2166,11 @@ class Project(AbstractWrapperObject):
             # self.resumeNotification()
             undo.decreaseWaypointBlocking()
 
-    def _newApiObject(self, wrappedData, cls: AbstractWrapperObject):
-        """Create new wrapper object of class cls, associated with wrappedData.
-        and call creation notifiers.
-        This method is called from the api upon creation of a corresponding api object
+    def _newApiObjectCallback(self, wrappedData, cls: AbstractWrapperObject):
         """
-        # See AbstractWrapperObject._linkWrapperClasses where the apiNotifier is set for this
+        This method is called from the api upon creation of a corresponding api object
+        See AbstractWrapperObject._linkWrapperClasses where the apiNotifier is set for this callback
+        """
 
         if (result := self._data2Obj.get(wrappedData)) is not None:
             raise RuntimeError(f'Project._newApiObject: {result} already exists; Cannot create again and this should not happen!')

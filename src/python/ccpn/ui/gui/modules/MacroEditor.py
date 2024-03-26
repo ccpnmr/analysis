@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-02-13 15:43:58 +0000 (Tue, February 13, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-26 11:45:52 +0000 (Tue, March 26, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -107,6 +107,10 @@ class MacroEditor(CcpnModule):
     _includeInLastSeen = True
 
     def __init__(self, mainWindow=None, name='MacroEditor', filePath=None):
+        paths = [aPath(path) for path in mainWindow.current.macroFiles]
+        if filePath in paths:
+            raise TypeError('This Macro is already opened in the project')
+
         CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
         self.mainWindow = mainWindow

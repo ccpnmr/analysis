@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-22 16:10:20 +0000 (Fri, March 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-28 16:42:06 +0000 (Thu, March 28, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -313,17 +313,18 @@ class Window(AbstractWrapperObject):
     # 'new' methods
     #=========================================================================================
 
-    @logCommand('mainWindow.')
-    def newMacroEditor(self, path=None, position='top', relativeTo=None):
-        """Open a new Module to edit macros
-        """
-        # local to prevent circular import
-        from ccpn.ui.gui.modules.MacroEditor import MacroEditor
-
-        path = str(path) if path is not None else None
-        macroEditor = MacroEditor(mainWindow=self, filePath=path)
-        self.moduleArea.addModule(macroEditor, position=position, relativeTo=relativeTo)
-        return macroEditor
+    # GWV 28/3/24: to Gui
+    # @logCommand('mainWindow.')
+    # def newMacroEditor(self, path=None, position='top', relativeTo=None):
+    #     """Open a new Module to edit macros
+    #     """
+    #     # local to prevent circular import
+    #     from ccpn.ui.gui.modules.MacroEditor import MacroEditor
+    #
+    #     path = str(path) if path is not None else None
+    #     macroEditor = MacroEditor(mainWindow=self, filePath=path)
+    #     self._addModule(macroEditor, position=position, relativeTo=relativeTo)
+    #     return macroEditor
 
     # @logCommand('mainWindow.')
     # def newHtmlModule(self, urlPath, position='top', relativeTo=None):
@@ -413,7 +414,7 @@ class Window(AbstractWrapperObject):
                                               )
 
                 # add the new module to mainWindow at the required position
-                self.moduleArea.addModule(display, position=position, relativeTo=relativeTo)
+                self._addModule(display, position=position, relativeTo=relativeTo)
                 display._insertPosition = (position, relativeTo)
 
                 with undoStackBlocking() as addUndoItem:

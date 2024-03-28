@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-20 16:54:17 +0000 (Wed, March 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-28 16:42:07 +0000 (Thu, March 28, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -157,11 +157,12 @@ class _PulldownABC(PulldownListCompoundWidget):
             #                           self._className,
             #                           self._updatePulldownList))
             # GWV 15/12/23: implementation change while working on mimics
-            _notifier = self.project.setNotifier(self.project,
+            _notifiers = self.project.setNotifier(self.project,
                                       triggers = [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
                                       targetName = self._className,
                                       callback = self._updatePulldownList)
-            self.addNotifier(_notifier)
+            for _n in _notifiers:
+                self.addNotifier(_n)
             if self._followCurrent:
                 self.addNotifier(CurrentNotifier(
                                           targetName=self._currentAttributeName,

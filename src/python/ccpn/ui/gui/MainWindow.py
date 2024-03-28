@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-21 11:51:39 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-28 16:42:06 +0000 (Thu, March 28, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1164,7 +1164,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         plugin.ui = pluginModule
         if not pluginModule.aborted:
             self.application.ui.pluginModules.append(pluginModule)
-            self.moduleArea.addModule(pluginModule)
+            self._addModule(pluginModule)
         # TODO: open as pop-out, not as part of MainWindow
         # self.moduleArea.moveModule(pluginModule, position='above', neighbor=None)
 
@@ -1186,6 +1186,13 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
     #
     # def clearLogFile(self):
     #     pass
+
+    def _addModule(self, module, position, relativeTo=None):
+        """Add module to the moduleArea
+        """
+        if relativeTo is None:
+            relativeTo = self.moduleArea
+        self.moduleArea.addModule(module, position=position, relativeTo=relativeTo)
 
     def _closeMainWindowModules(self):
         """Close modules in main window;

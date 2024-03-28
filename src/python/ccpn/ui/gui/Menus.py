@@ -115,7 +115,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-18 18:36:50 +0000 (Mon, March 18, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-28 16:42:06 +0000 (Thu, March 28, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -307,7 +307,7 @@ class MenusDefs(list):
 ),
 
 (VIEW_MENU, [
-    ("Chemical Shift Table", partial(app.showChemicalShiftTable, selectFirstItem=True), [('shortcut', 'ct')]),
+    ("Show Chemical Shift Table", partial(ui.showChemicalShiftTable, selectFirstItem=True), [('shortcut', 'ct')]),
     ("NmrResidue Table", partial(app.showNmrResidueTable, selectFirstItem=True), [('shortcut', 'nt')]),
     ("Residue Table", partial(app.showResidueTable, selectFirstItem=True)),
     ("Peak Table", partial(app.showPeakTable, selectFirstItem=True), [('shortcut', 'pt')]),
@@ -388,7 +388,7 @@ class MenusDefs(list):
     ("Convert...", self._convertSpectrumCallback, {}, _projectHasSpectra),
 
     Separator(),
-    ("Make Strip Plot...", app.makeStripPlot, {'shortcut':'sp'}, _projectHasSpectra),
+    ("Make Strip Plot...", ui.makeStripPlot, {'shortcut':'sp'}, _projectHasSpectra),
     ("Print to File...", self._printToFileCallback, {'shortcut':'⌃p'}, _projectHasSpectra),
     ]
 ),
@@ -403,8 +403,8 @@ class MenusDefs(list):
     # ("Inspect...", self.inspectMolecule, [('enabled', False)]),
 
     Separator(),
-    ("Residue Information", app.showResidueInformation, [('shortcut', 'ri')]),
-    ("Reference Chemical Shifts", app.showReferenceChemicalShifts, [('shortcut', 'rc')]),
+    ("Show Residue Information", ui.showResidueInformation, [('shortcut', 'ri')]),
+    ("Show Reference Chemical Shifts", ui.showReferenceChemicalShifts, [('shortcut', 'rc')]),
     ]
 ),
 
@@ -842,7 +842,7 @@ class MenusDefs(list):
             MessageDialog.showWarning('Project contains no spectra.', 'Make Projection Popup cannot be displayed')
         else:
             from ccpn.ui.gui.popups.SpectrumProjectionPopup import SpectrumProjectionPopup
-            popup = SpectrumProjectionPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+            popup = SpectrumProjectionPopup(parent=self.mainWindow._widget, mainWindow=self.mainWindow)
             popup.exec_()
 
     def _printToFileCallback(self):
@@ -850,11 +850,11 @@ class MenusDefs(list):
         """
         from ccpn.ui.gui.popups.ExportStripToFile import ExportStripToFilePopup
 
-        if len(self.project.spectrumDisplays) == 0:
+        if len(self.mainWindow.spectrumDisplays) == 0:
             MessageDialog.showWarning('', 'No SpectrumDisplay found')
         else:
-            exportDialog = ExportStripToFilePopup(parent=self.ui.mainWindow,
-                                                  mainWindow=self.ui.mainWindow,
+            exportDialog = ExportStripToFilePopup(parent=self.mainWindow._widget,
+                                                  mainWindow=self.mainWindow,
                                                   strips=self.project.strips,
                                                   selectedStrip=self.current.strip
                                                   )
@@ -1002,9 +1002,9 @@ class MenusDefs(list):
     #-----------------------------------------------------------------------------------------
 
     def _showMacroEditorCallback(self):
-        """Displays macro editor. Just handing down to MainWindow for now
+        """Displays macro editor. Just handing down to ui for now
         """
-        self.mainWindow.newMacroEditor()
+        self.ui.newMacroEditor()
 
     def _openMacroCallback(self, directory=None):
         """ Select macro file and on MacroEditor.
@@ -1043,7 +1043,7 @@ class MenusDefs(list):
 
     def _showShortcuts(self):
         from ccpn.framework.PathsAndUrls import shortcutsPath
-        self.application._systemOpen(shortcutsPath)
+        self.ui._systemOpen(shortcutsPath)
 
     def _showAboutPopup(self):
         from ccpn.ui.gui.popups.AboutPopup import AboutPopup
@@ -1191,6 +1191,7 @@ class MenusDefs(list):
     __repr__ = __str__
 
 # end class #-----------------------------------------------------------------------------
+
 
 from ccpn.util.DataEnum import DataEnum
 class NodeType(DataEnum):
@@ -1915,6 +1916,12 @@ def _projectHasSpectra(node) -> bool:
     """
     project = getProject()
     return bool(project and project.spectra)
+
+def _hasSpectrumDisplays(node) -> bool:
+    """callback to test if MainWindow has SpectrumDisplays
+    """
+    app = getApplication()
+    return len(app.mainWindow.spectrumDisplays) > 0
 
 def _hasActiveDisplay(node) -> bool:
     """callback to test if project has spectra

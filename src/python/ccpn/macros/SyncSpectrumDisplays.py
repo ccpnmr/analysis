@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-21 11:51:39 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-28 16:42:06 +0000 (Thu, March 28, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1187,4 +1187,4 @@ if len(currentModules) > 0:
     raise RuntimeError('already opened')
 else:
     module = SpectrumDisplaysSyncEditorModule(mainWindow=mainWindow.moduleArea.mainWindow)
-    mainWindow.moduleArea.addModule(module)
+    mainWindow._addModule(module)

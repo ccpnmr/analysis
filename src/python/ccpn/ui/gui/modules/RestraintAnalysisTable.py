@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-22 16:10:20 +0000 (Fri, March 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-28 16:42:07 +0000 (Thu, March 28, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -968,9 +968,9 @@ class RestraintAnalysisTableModule(CcpnModule):
         rss = self.resources
 
         if rss._collectionPulldown:
-            rss._collectionPulldown.unRegisterNotifier()
+            rss._collectionPulldown.deleteNotifiers()
         if self._collectionNotifier:
-            self._collectionNotifier.unRegister()
+            self._collectionNotifier.unRegisterNotifier()
 
     def updateRestraintTables(self, restraintTables):
         """Update the selected restraint lists from the parent module
@@ -1451,7 +1451,7 @@ def main():
 
     # add the module to mainWindow
     _module = RestraintAnalysisTableModule(mainWindow=mainWindow)
-    mainWindow.moduleArea.addModule(_module)
+    mainWindow._addModule(_module)
 
     # show the mainWindow
     app.start()

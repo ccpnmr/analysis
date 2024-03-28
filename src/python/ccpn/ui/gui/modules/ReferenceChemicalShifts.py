@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-22 16:10:20 +0000 (Fri, March 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-28 16:42:07 +0000 (Thu, March 28, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -302,10 +302,8 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         self.viewBox.setMenuEnabled(enableMenu=False)
 
         # GL crossHair notifier
-        self.mousePosNotifier = CurrentNotifier(
-                                         targetName='cursorPositions',
-                                         callback=self.mousePosNotifierCallback,
-                                         onceOnly=True)
+        self.mousePosNotifier = CurrentNotifier(targetName='cursorPositions',
+                                                callback=self.mousePosNotifierCallback)
         self.GLSignals = GLNotifier(parent=self, strip=None)
         with progressManager(self, f'Loading all available reference spectra. Please wait...'):
             self._updateModule()
@@ -610,5 +608,6 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         """
         if self.mousePosNotifier:
             self.mousePosNotifier.unRegisterNotifier()
+            del(self.mousePosNotifier)
 
         super()._closeModule()

@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-22 16:10:19 +0000 (Fri, March 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-28 16:42:06 +0000 (Thu, March 28, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -582,8 +582,9 @@ class _NotifierList(list):
     subclassed instances.
     """
 
-    def unRegister(self):
+    def unRegisterNotifier(self):
         """Un-register all notifiers of self
+        For backward compatibility
         """
         for notifier in self:
             if not isinstance(notifier, NotifierABC):
@@ -595,6 +596,7 @@ class _NotifierList(list):
 class _NotifiersDict(dict):
     """A class to retain all notifiers of an object
     Dict comprised of {trigger : {id:notifier}} (i.e. a dict of dicts)
+    {id:notifier} dict optionally a WeakReferenceDict
     """
 
     def __init__(self, useWeakRef=False):

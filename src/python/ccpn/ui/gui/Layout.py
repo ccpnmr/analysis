@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-06 17:48:12 +0000 (Wed, March 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-28 16:42:06 +0000 (Thu, March 28, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -294,7 +294,7 @@ def _openCcpnModule(mainWindow, ccpnModules, className, moduleName=None):
                     newCcpnModule._restored = True
                     # newCcpnModule.rename(newCcpnModule.name().split('.')[0])
 
-                    mainWindow.moduleArea.addModule(newCcpnModule)
+                    mainWindow._addModule(newCcpnModule)
 
                 except Exception as e:
                     getLogger().debug("Layout restore failed: %s" % e)

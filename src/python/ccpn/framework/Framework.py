@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-21 16:21:10 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-28 16:42:06 +0000 (Thu, March 28, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1934,27 +1934,28 @@ class Framework(NotifierBase):
     #         getLogger().warning('Estimate Current Volumes: no current.peaks')
     #         MessageDialog.showWarning('Estimate Current Volumes', 'no current.peaks')
     #
-    @logCommand('application.')
-    def makeStripPlot(self, includePeakLists=True, includeNmrChains=True, includeNmrChainPullSelection=True):
-        """Make a strip plot from peaks or nmrChains
-        """
-        if not self.project.peaks and not self.project.nmrResidues and not self.project.nmrChains:
-            getLogger().warning('Cannot make strip plot, nothing to display')
-            MessageDialog.showWarning('Cannot make strip plot,', 'nothing to display')
-            return
-
-        if self.current.strip is None or self.current.strip.isDeleted:
-            MessageDialog.showWarning('Make Strip Plot', 'No selected spectrumDisplay')
-            return
-
-        from ccpn.ui.gui.popups.StripPlotPopup import StripPlotPopup
-        popup = StripPlotPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
-                               spectrumDisplay=self.current.strip.spectrumDisplay,
-                               includePeakLists=includePeakLists,
-                               includeNmrChains=includeNmrChains,
-                               includeNmrChainPullSelection=includeNmrChainPullSelection,
-                               includeSpectrumTable=False)
-        popup.exec_()
+    # GWV 27/324: copied to _Gui
+    # @logCommand('application.')
+    # def makeStripPlot(self, includePeakLists=True, includeNmrChains=True, includeNmrChainPullSelection=True):
+    #     """Make a strip plot from peaks or nmrChains
+    #     """
+    #     if not self.project.peaks and not self.project.nmrResidues and not self.project.nmrChains:
+    #         getLogger().warning('Cannot make strip plot, nothing to display')
+    #         MessageDialog.showWarning('Cannot make strip plot,', 'nothing to display')
+    #         return
+    #
+    #     if self.current.strip is None or self.current.strip.isDeleted:
+    #         MessageDialog.showWarning('Make Strip Plot', 'No selected spectrumDisplay')
+    #         return
+    #
+    #     from ccpn.ui.gui.popups.StripPlotPopup import StripPlotPopup
+    #     popup = StripPlotPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
+    #                            spectrumDisplay=self.current.strip.spectrumDisplay,
+    #                            includePeakLists=includePeakLists,
+    #                            includeNmrChains=includeNmrChains,
+    #                            includeNmrChainPullSelection=includeNmrChainPullSelection,
+    #                            includeSpectrumTable=False)
+    #     popup.exec_()
 
     ################################################################################################
     ## MENU callbacks:  Molecule
@@ -2009,36 +2010,38 @@ class Framework(NotifierBase):
     # def inspectMolecule(self):
     #     pass
 
-    @logCommand('application.')
-    def showResidueInformation(self, position: str = 'bottom', relativeTo: CcpnModule = None):
-        """Displays Residue Information module.
-        """
-        from ccpn.ui.gui.modules.ResidueInformation import ResidueInformation
-
-        if not self.project.residues:
-            getLogger().warning('No Residues in project. Residue Information Module requires Residues in the project to launch.')
-            MessageDialog.showWarning('No Residues in project.',
-                                      'Residue Information Module requires Residues in the project to launch.')
-            return
-
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea  # ejb
-        residueModule = ResidueInformation(mainWindow=mainWindow)
-        mainWindow.moduleArea.addModule(residueModule, position=position, relativeTo=relativeTo)
-        return residueModule
-
-    @logCommand('application.')
-    def showReferenceChemicalShifts(self, position='left', relativeTo=None):
-        """Displays Reference Chemical Shifts module."""
-        from ccpn.ui.gui.modules.ReferenceChemicalShifts import ReferenceChemicalShifts
-
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-        refChemShifts = ReferenceChemicalShifts(mainWindow=mainWindow)
-        mainWindow.moduleArea.addModule(refChemShifts, position=position, relativeTo=relativeTo)
-        return refChemShifts
+    # GWV 27/3/24 to Gui.py
+    # @logCommand('application.')
+    # def showResidueInformation(self, position: str = 'bottom', relativeTo: CcpnModule = None):
+    #     """Displays Residue Information module.
+    #     """
+    #     from ccpn.ui.gui.modules.ResidueInformation import ResidueInformation
+    #
+    #     if not self.project.residues:
+    #         getLogger().warning('No Residues in project. Residue Information Module requires Residues in the project to launch.')
+    #         MessageDialog.showWarning('No Residues in project.',
+    #                                   'Residue Information Module requires Residues in the project to launch.')
+    #         return
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea  # ejb
+    #     residueModule = ResidueInformation(mainWindow=mainWindow)
+    #     mainWindow.moduleArea.addModule(residueModule, position=position, relativeTo=relativeTo)
+    #     return residueModule
+    #
+    # GWV 27/3/24 to Gui.py
+    # @logCommand('application.')
+    # def showReferenceChemicalShifts(self, position='left', relativeTo=None):
+    #     """Displays Reference Chemical Shifts module."""
+    #     from ccpn.ui.gui.modules.ReferenceChemicalShifts import ReferenceChemicalShifts
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea
+    #     refChemShifts = ReferenceChemicalShifts(mainWindow=mainWindow)
+    #     mainWindow.moduleArea.addModule(refChemShifts, position=position, relativeTo=relativeTo)
+    #     return refChemShifts
     #
     # @logCommand('gui.')
     # def showMolecularBondsPopup(self):
@@ -2468,34 +2471,35 @@ class Framework(NotifierBase):
 
     #################################################################################################
 
-    def _systemOpen(self, path):
-        """Open path to pdf file on system
-        """
-        if isWindowsOS():
-            os.startfile(path)
-        elif isMacOS():
-            subprocess.run(['open', path], check=True)
-        else:
-            linuxCommand = self.preferences.externalPrograms.PDFViewer
-            # assume a linux and use the choice given in the preferences
-            if linuxCommand and aPath(linuxCommand).is_file():
-                from ccpn.framework.PathsAndUrls import ccpnRunTerminal
-
-                try:
-                    # NOTE:ED - this could be quite nasty, but can't think of another way to get Linux to open a pdf
-                    subprocess.run([linuxCommand, path])
-
-                except Exception as es:
-                    getLogger().warning(f'Error opening PDFViewer. {es}')
-                    MessageDialog.showWarning('Open File',
-                                              f'Error opening PDFViewer. {es}\n'
-                                              f'Check settings in Preferences->External Programs'
-                                              )
-
-            else:
-                # raise TypeError('PDFViewer not defined for linux')
-                MessageDialog.showWarning('Open File',
-                                          'Please select PDFViewer in Preferences->External Programs')
+    # GWV 28/3 to _Gui.py
+    # def _systemOpen(self, path):
+    #     """Open path to pdf file on system
+    #     """
+    #     if isWindowsOS():
+    #         os.startfile(path)
+    #     elif isMacOS():
+    #         subprocess.run(['open', path], check=True)
+    #     else:
+    #         linuxCommand = self.preferences.externalPrograms.PDFViewer
+    #         # assume a linux and use the choice given in the preferences
+    #         if linuxCommand and aPath(linuxCommand).is_file():
+    #             from ccpn.framework.PathsAndUrls import ccpnRunTerminal
+    #
+    #             try:
+    #                 # NOTE:ED - this could be quite nasty, but can't think of another way to get Linux to open a pdf
+    #                 subprocess.run([linuxCommand, path])
+    #
+    #             except Exception as es:
+    #                 getLogger().warning(f'Error opening PDFViewer. {es}')
+    #                 MessageDialog.showWarning('Open File',
+    #                                           f'Error opening PDFViewer. {es}\n'
+    #                                           f'Check settings in Preferences->External Programs'
+    #                                           )
+    #
+    #         else:
+    #             # raise TypeError('PDFViewer not defined for linux')
+    #             MessageDialog.showWarning('Open File',
+    #                                       'Please select PDFViewer in Preferences->External Programs')
 
     def __str__(self):
         return '<%s version:%s>' % (self.applicationName, self.applicationVersion)

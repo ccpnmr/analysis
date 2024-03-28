@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-06 17:48:11 +0000 (Wed, March 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-28 16:42:06 +0000 (Thu, March 28, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -286,9 +286,7 @@ class Gui(Ui,_Gui):
         try:
             insertPoint = mainWindow.moduleArea
             for spectrumDisplay in mainWindow.spectrumDisplays:
-                mainWindow.moduleArea.addModule(spectrumDisplay,
-                                                position='right',
-                                                relativeTo=insertPoint)
+                mainWindow.moduleArea.addModule(spectrumDisplay, position='right', relativeTo=insertPoint)
                 insertPoint = spectrumDisplay
 
         except Exception:
@@ -1154,3 +1152,61 @@ class Gui(Ui,_Gui):
 
         return result
 
+    #-----------------------------------------------------------------------------------------
+    # View
+    #-----------------------------------------------------------------------------------------
+
+    @logCommand('application.')
+    def showChemicalShiftTable(self, position: str = 'bottom',
+                               chemicalShiftList=None, selectFirstItem=False):
+        """Displays Chemical Shift table.
+        """
+        from ccpn.ui.gui.modules.ChemicalShiftTable import ChemicalShiftTableModule
+
+        _module = ChemicalShiftTableModule(mainWindow=self.mainWindow, selectFirstItem=selectFirstItem)
+        self.mainWindow._addModule(_module, position=position)
+        if chemicalShiftList:
+            _module.selectTable(chemicalShiftList)
+        return _module
+
+    #-----------------------------------------------------------------------------------------
+    # Molecules
+    #-----------------------------------------------------------------------------------------
+
+    @logCommand('ui.')
+    def showResidueInformation(self, position='bottom'):
+        """Displays Residue Information module.
+        """
+        from ccpn.ui.gui.modules.ResidueInformation import ResidueInformation
+
+        if not self.project.residues:
+            getLogger().warning('No Residues in project. Residue Information Module requires Residues in the project to launch.')
+            MessageDialog.showWarning('No Residues in project.',
+                                      'Residue Information Module requires Residues in the project to launch.')
+            return
+
+        _module = ResidueInformation(mainWindow=self.mainWindow)
+        self.mainWindow._addModule(_module, position=position)
+        return _module
+
+    @logCommand('ui.')
+    def showReferenceChemicalShifts(self, position='left'):
+        """Displays Reference Chemical Shifts module.
+        """
+        from ccpn.ui.gui.modules.ReferenceChemicalShifts import ReferenceChemicalShifts
+
+        _module = ReferenceChemicalShifts(mainWindow=self.mainWindow)
+        self.mainWindow._addModule(_module, position=position)
+        return _module
+
+    @logCommand('ui.')
+    def newMacroEditor(self, path=None, position='top'):
+        """Open a new Module to edit macros
+        """
+        # local to prevent circular import
+        from ccpn.ui.gui.modules.MacroEditor import MacroEditor
+
+        path = str(path) if path is not None else None
+        macroEditor = MacroEditor(mainWindow=self.mainWindow, filePath=path)
+        self.mainWindow._addModule(macroEditor, position=position)
+        return macroEditor

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-06 17:48:12 +0000 (Wed, March 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-28 16:42:07 +0000 (Thu, March 28, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1107,7 +1107,7 @@ class _openItemSampleDisplay(OpenItemABC):
             mainWindow = self.mainWindow
 
             spectrumDisplay = mainWindow.newSpectrumDisplay(sample.spectra[0])
-            mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
+            mainWindow._addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
             self._openSampleSpectraOnDisplay(sample, spectrumDisplay, autoRange=True)
             mainWindow.application.current.strip = spectrumDisplay.strips[0]
 

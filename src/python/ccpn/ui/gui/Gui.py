@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-28 16:42:06 +0000 (Thu, March 28, 2024) $"
+__dateModified__ = "$dateModified: 2024-03-29 13:46:16 +0000 (Fri, March 29, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -318,11 +318,8 @@ class Gui(Ui,_Gui):
             mArea.topContainer = None
 
         try:
-            # Initialise colours
-
             # initialise any colour changes before generating gui strips
             self.application._correctColours()
-
         except Exception as es:
             getLogger().warning(f'Impossible to restore colours - {es}')
 

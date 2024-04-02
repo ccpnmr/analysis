@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-29 13:46:16 +0000 (Fri, March 29, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-02 09:20:25 +0100 (Tue, April 02, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -464,7 +464,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         """
         from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
         self.pythonConsoleModule = PythonConsoleModule(mainWindow=self)
-        self.moduleArea.addModule(self.pythonConsoleModule, 'bottom')
+        self._addModule(module=self.pythonConsoleModule, position='bottom')
 
     def _setupWindow(self):
         """
@@ -1187,11 +1187,11 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
     # def clearLogFile(self):
     #     pass
 
-    def _addModule(self, module, position, relativeTo=None):
+    def _addModule(self, module, position='top', relativeTo=None):
         """Add module to the moduleArea
         """
-        if relativeTo is None:
-            relativeTo = self.moduleArea
+        # if relativeTo is None:
+        #     relativeTo = self.moduleArea
         self.moduleArea.addModule(module, position=position, relativeTo=relativeTo)
 
     def _closeMainWindowModules(self):

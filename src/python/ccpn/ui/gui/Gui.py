@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-29 13:46:16 +0000 (Fri, March 29, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-02 09:20:25 +0100 (Tue, April 02, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -286,7 +286,8 @@ class Gui(Ui,_Gui):
         try:
             insertPoint = mainWindow.moduleArea
             for spectrumDisplay in mainWindow.spectrumDisplays:
-                mainWindow.moduleArea.addModule(spectrumDisplay, position='right', relativeTo=insertPoint)
+                # mainWindow.moduleArea.addModule(spectrumDisplay, position='right', relativeTo=insertPoint)
+                mainWindow._addModule(module=spectrumDisplay, position='right', relativeTo=insertPoint)
                 insertPoint = spectrumDisplay
 
         except Exception:

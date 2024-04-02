@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-20 13:39:46 +0000 (Wed, March 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-02 13:22:19 +0100 (Tue, April 02, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -103,8 +103,7 @@ class _ExperimentalAnalysisTableABC(Table):
         self._navigateTrigger = _NavigateTrigger.SINGLECLICK # Default Behaviour
         navigateTriggerName = self.guiModule.getSettings(grouped=False).get(guiNameSpaces.WidgetVarName_NavigateToOpt)
         self.setNavigateToPeakTrigger(navigateTriggerName)
-        self._selectCurrentCONotifier = CurrentNotifier(targetName='collections',
-                                                        callback=self._currentCollectionCallback, onceOnly=True)
+        self._selectCurrentCONotifier = CurrentNotifier(targetName='collections', callback=self._currentCollectionCallback)
 
         self.sortingChanged.connect(self._tableSortingChangedCallback)
         self.tableChanged.connect(self._tableChangedCallback)

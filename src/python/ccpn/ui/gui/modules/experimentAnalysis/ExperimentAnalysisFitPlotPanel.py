@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-22 16:10:20 +0000 (Fri, March 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-02 13:22:19 +0100 (Tue, April 02, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -103,7 +103,7 @@ class FitPlotPanel(GuiPanel):
         self.backgroundColour = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
         self._setExtraWidgets()
         self._selectCurrentCONotifier = CurrentNotifier(targetName='collections',
-                                                        callback=self._currentCollectionCallback, onceOnly=True)
+                                                        callback=self._currentCollectionCallback)
         self._setXLabel(label='X')
         self._setYLabel(label='Y')
         self.labels = []

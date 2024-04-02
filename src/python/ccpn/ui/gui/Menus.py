@@ -115,7 +115,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-28 16:42:06 +0000 (Thu, March 28, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-02 13:22:19 +0100 (Tue, April 02, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -320,7 +320,7 @@ class MenusDefs(list):
 
     Separator(),
     ("Restraint Analysis Inspector", partial(app.showRestraintAnalysisTable, selectFirstItem=True), [('shortcut', 'at')]),
-    ("Chemical Shift Mapping (Beta)", app.showChemicalShiftMappingModule, [('shortcut', 'cm')]),
+    ("Show Chemical Shift Mapping (Beta)", ui.showChemicalShiftMapping, [('shortcut', 'cm')]),
     ("Relaxation Analysis (Beta)", app.showRelaxationModule, [('shortcut', 'ra')]),
     ("Notes Editor", partial(app.showNotesEditor, selectFirstItem=True), [('shortcut', 'no')]),
 

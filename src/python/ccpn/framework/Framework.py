@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-28 16:42:06 +0000 (Thu, March 28, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-02 13:22:19 +0100 (Tue, April 02, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -2395,19 +2395,20 @@ class Framework(NotifierBase):
     #     """
     #     self.ui.mainWindow.toggleConsole()
 
-    @deprecated('Use showChemicalShiftMappingModule to access the latest implementation')
+    @deprecated('Use ui.showChemicalShiftMapping to access the latest implementation')
     def showChemicalShiftMapping(self, position: str = 'top', relativeTo: CcpnModule = None):
-        return self.showChemicalShiftMappingModule(position=position, relativeTo=relativeTo)
+        return self.ui.showChemicalShiftMapping(position=position)
 
-    def showChemicalShiftMappingModule(self, position: str = 'top', relativeTo: CcpnModule = None):
-        from ccpn.ui.gui.modules.experimentAnalysis.ChemicalShiftMappingGuiModule import ChemicalShiftMappingGuiModule
-
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-        cs = ChemicalShiftMappingGuiModule(mainWindow=mainWindow)
-        mainWindow.moduleArea.addModule(cs, position=position, relativeTo=relativeTo)
-        return cs
+    # GWV 02/04/24: to ui
+    # def showChemicalShiftMappingModule(self, position: str = 'top', relativeTo: CcpnModule = None):
+    #     from ccpn.ui.gui.modules.experimentAnalysis.ChemicalShiftMappingGuiModule import ChemicalShiftMappingGuiModule
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea
+    #     cs = ChemicalShiftMappingGuiModule(mainWindow=mainWindow)
+    #     mainWindow.moduleArea.addModule(cs, position=position, relativeTo=relativeTo)
+    #     return cs
 
     def showRelaxationModule(self, position: str = 'top', relativeTo: CcpnModule = None):
         from ccpn.ui.gui.modules.experimentAnalysis.RelaxationGuiModule import RelaxationGuiModule

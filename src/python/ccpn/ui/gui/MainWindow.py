@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-04-02 09:20:25 +0100 (Tue, April 02, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-02 13:51:28 +0100 (Tue, April 02, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -126,7 +126,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
 
         # GuiWindow.__init__(self, application)
         self.application = application
-        self.current = application.current
+        # self.current : defined as a property derived from self.application
         # self._project set by model; and there is a property self.project
 
         # Module area
@@ -159,6 +159,10 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         self._setShortcuts(mainWindow=self)
         self._setUserShortcuts(preferences=self.application.preferences, mainWindow=self)
         self._setMouseMode(SELECT)
+
+        # can't init PythonConsoleModule, as restore from layout fails then
+        # self._initPythonConsoleModule()
+
         # Notifiers
         self._setupNotifiers()
 
@@ -274,6 +278,12 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         """The current project"""
         #NB this linkage is set by the model (for now)
         return self._project
+
+    @property
+    def current(self):
+        """:return the Current instance
+        """
+        return self.application.current
 
     def makeDisabledFileIcon(self, icon):
         return icon

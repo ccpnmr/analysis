@@ -115,7 +115,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-04-02 13:22:19 +0100 (Tue, April 02, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-03 11:08:31 +0100 (Wed, April 03, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -206,7 +206,7 @@ def getMenuDefs():
 @singleton
 class MenusDefs(list):
     """A class (list) to implement the menu definitions and callback routines
-    Used by MainWindow to initialiase the menuBar
+    Used by MainWindow to initialise the menuBar
     """
 
     def __init__(self, application):
@@ -319,7 +319,7 @@ class MenusDefs(list):
     ("Structure Table", partial(app.showStructureTable, selectFirstItem=True), [('shortcut', 'st')]),
 
     Separator(),
-    ("Restraint Analysis Inspector", partial(app.showRestraintAnalysisTable, selectFirstItem=True), [('shortcut', 'at')]),
+    ("Show Restraint Analysis Inspector", ui.showRestraintAnalysisInspector, [('shortcut', 'at')]),
     ("Show Chemical Shift Mapping (Beta)", ui.showChemicalShiftMapping, [('shortcut', 'cm')]),
     ("Relaxation Analysis (Beta)", app.showRelaxationModule, [('shortcut', 'ra')]),
     ("Notes Editor", partial(app.showNotesEditor, selectFirstItem=True), [('shortcut', 'no')]),
@@ -354,7 +354,8 @@ class MenusDefs(list):
 
     Separator(),
     (VIEW_SHOW_MODULES, DYNAMIC_FILL, {}, _updateShowHideModules),
-    ("Show/hide Sidebar", self._toggleSidebarCallback, {'shortcut':' s', 'checkable':True, 'checked':True}),
+    ("Show/hide Sidebar", self._toggleSidebarCallback,
+                                {'shortcut':' s', 'checkable':True, 'checked':True}),
     ("Show/hide Python Console", self._toggleConsoleCallback,
                                 {'shortcut':'  ', 'checkable':True, 'checked':True}, _updatePythonConsole
     ),
@@ -462,14 +463,14 @@ class MenusDefs(list):
 
         ])  # end extend
 
-        developmentMenu = \
-        (DEVELOPMENT_MENU, [
-                    (DEVELOPMENT_DEBUG, DYNAMIC_FILL),
-                    ]
-        )
         # optionally add development menu before Help menu
         if app._isInDebugMode:
-            self.insertBefore([HELP_MENU], menuDef=developmentMenu)
+            _menu = \
+                (DEVELOPMENT_MENU, [
+                    (DEVELOPMENT_DEBUG, DYNAMIC_FILL),
+                    ]
+                )
+            self.insertBefore([HELP_MENU], menuDef=_menu)
 
     #-----------------------------------------------------------------------------------------
     # callback methods

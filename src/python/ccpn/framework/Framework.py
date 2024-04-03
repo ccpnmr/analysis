@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-04-02 13:22:19 +0100 (Tue, April 02, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-03 11:08:31 +0100 (Wed, April 03, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -2246,23 +2246,23 @@ class Framework(NotifierBase):
             notesEditorModule.selectNote(note)
         return notesEditorModule
 
-    @logCommand('application.')
-    def showRestraintAnalysisTable(self,
-                                   position: str = 'bottom',
-                                   relativeTo: CcpnModule = None,
-                                   peakList=None, selectFirstItem=False):
-        """Displays restraint analysis Inspector.
-        """
-        from ccpn.ui.gui.modules.RestraintAnalysisTable import RestraintAnalysisTableModule
-
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-        restraintAnalysisTableModule = RestraintAnalysisTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
-        mainWindow.moduleArea.addModule(restraintAnalysisTableModule, position=position, relativeTo=relativeTo)
-        if peakList:
-            restraintAnalysisTableModule.selectPeakList(peakList)
-        return restraintAnalysisTableModule
+    # @logCommand('application.')
+    # def showRestraintAnalysisTable(self,
+    #                                position: str = 'bottom',
+    #                                relativeTo: CcpnModule = None,
+    #                                peakList=None, selectFirstItem=False):
+    #     """Displays restraint analysis Inspector.
+    #     """
+    #     from ccpn.ui.gui.modules.RestraintAnalysisTable import RestraintAnalysisTableModule
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea
+    #     restraintAnalysisTableModule = RestraintAnalysisTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
+    #     mainWindow.moduleArea.addModule(restraintAnalysisTableModule, position=position, relativeTo=relativeTo)
+    #     if peakList:
+    #         restraintAnalysisTableModule.selectPeakList(peakList)
+    #     return restraintAnalysisTableModule
 
     # def showPrintSpectrumDisplayPopup(self):
     #     """Show the print spectrumDisplay dialog

@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-01-05 15:02:25 +0000 (Fri, January 05, 2024) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2024-04-04 15:19:22 +0100 (Thu, April 04, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,14 +29,14 @@ __date__ = "$Date: 2017-07-04 15:21:16 +0000 (Tue, July 04, 2017) $"
 from PyQt5 import QtWidgets, QtCore, QtGui
 from contextlib import contextmanager, suppress
 from dataclasses import dataclass
+
 from ccpn.ui.gui.widgets.Base import Base
-from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.DialogButtonBox import DialogButtonBox
-from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.guiSettings import getColours
 from ccpn.ui.gui.lib.ChangeStateHandler import ChangeDict
+from ccpn.util.Logging import getLogger
 
 
 def _updateGl(self, spectrumList):
@@ -61,8 +61,24 @@ _DONTSHOWMESSAGE = "Don't show this again"
 _DONTSHOWPOPUP = 'dontShowPopup'
 _POPUPS = 'popups'
 
+_DEBUG = False
 
-class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
+
+class _DialogHook(type(QtWidgets.QDialog), type(Base)):
+    """Metaclass implementing a post-initialise hook, ALWAYS called after __init__ has finished
+    """
+
+    def __call__(self, *args, **kwargs):
+        if _DEBUG: getLogger().debug2(f'--> pre-create dialog {self}')
+        instance = super().__call__(*args, **kwargs)
+        # call the post-__init__ hook
+        instance._postInit()
+        if _DEBUG: getLogger().debug2(f'--> post-create dialog {self}')
+
+        return instance
+
+
+class CcpnDialogMainWidget(QtWidgets.QDialog, Base, metaclass=_DialogHook):
     """
     Class to handle popup dialogs
     """
@@ -103,6 +119,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
 
     def __init__(self, parent=None, windowTitle='', setLayout=False,
                  orientation=HORIZONTAL, size=None, minimumSize=None, **kwds):
+        if _DEBUG: getLogger().debug2(f'--> pre __init__ {self}')
 
         # error-flag to disable exec_ if there is an error during initialising
         self.errorFlag = False
@@ -186,11 +203,14 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         ## and there is no access to the object after deleting it,
         ## otherwise will raise threading issues
         # self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
+        if _DEBUG: getLogger().debug2(f'--> post __init__ {self}')
 
     def _postInit(self):
         """post-initialise functions
         CCPN-Internal to be called at the end of __init__
         """
+        if _DEBUG: getLogger().debug2(f'--> pre _postInit {self}')
+
         # set the desired buttons, and size of dialog
         self._setButtons()
         self._setDialogSize()
@@ -205,6 +225,8 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
 
         # restore the state of any required widgets
         self.restoreWidgetState()
+
+        if _DEBUG: getLogger().debug2(f'--> post _postInit {self}')
 
     def _setDialogSize(self):
         """Set the fixed/free dialog size from size or sizeHint
@@ -383,12 +405,14 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         self.dialogButtons.setContentsMargins(0, 18, 0, 0)
 
     def _setDontShow(self):
+        from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget  # circular import :|
+
         # put a Don't Show checkbox at the bottom of the dialog if needed
         if not self.DONTSHOWENABLED:
             return
 
         grid = (2, 0)
-        gridSpan = (1, 1) if self._orientation.startswith('h') else (1, 1)
+        gridSpan = (1, 1) if self._orientation.startswith('h') else (1, 1)  # reserved
         try:
             from ccpn.framework.Application import getApplication
 
@@ -421,7 +445,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         """
         return self.dialogButtons.button(buttonName)
 
-    def fixedSize(self):
+    def _fixedSize(self):
         self._sPolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         self._sPolicy.setHorizontalStretch(0)
         self._sPolicy.setVerticalStretch(0)
@@ -711,7 +735,7 @@ class CcpnDialog(QtWidgets.QDialog, Base):
         self.setWindowFilePath('')
         self.setWindowIcon(QtGui.QIcon())
 
-    def fixedSize(self):
+    def _fixedSize(self):
         self._sPolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         self._sPolicy.setHorizontalStretch(0)
         self._sPolicy.setVerticalStretch(0)

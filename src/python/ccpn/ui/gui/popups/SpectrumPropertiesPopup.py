@@ -4,9 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 19:17:56 +0100 (Wed, June 28, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-04-04 15:19:24 +0100 (Thu, April 04, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -384,9 +384,6 @@ class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
 
             self.tabWidget.setCurrentIndex(2)
 
-        # don't forget to call postInit to finish initialise
-        self._postInit()
-
     def _fillPullDowns(self):
         if self.spectrum.dimensionCount == 1:
             self._generalTab._fillPullDowns()
@@ -459,9 +456,6 @@ class SpectrumDisplayPropertiesPopupNd(SpectrumPropertiesPopupABC):
             contoursTab.setContentsMargins(*TABMARGINS)
 
         self.tabWidget.setTabClickCallback(self._tabClicked)
-
-        # don't forget to call postInit to finish initialise
-        self._postInit()
 
     def _fillPullDowns(self):
         for aTab in self.tabs:
@@ -536,9 +530,6 @@ class SpectrumDisplayPropertiesPopup1d(SpectrumPropertiesPopupABC):
             colourTab.setContentsMargins(*TABMARGINS)
 
         self.tabWidget.setTabClickCallback(self._tabClicked)
-
-        # don't forget to call postInit to finish initialise
-        self._postInit()
 
     def _fillPullDowns(self):
         for aTab in self.tabs:
@@ -645,10 +636,11 @@ class GeneralTab(Widget):
         row += 1
 
         from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
+
         _dataFormats = list(getDataFormats().keys())
         Label(self, text="DataFormat ", grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'Format of the binary data defined by path'))
         self.dataFormatWidget = PulldownList(parent=self, vAlign='t', grid=(row, 1), editable=False, texts=_dataFormats,
-                                           )
+                                             )
         self.dataFormatWidget.select(self.spectrum.dataFormat)
         self.dataFormatWidget.disable()
         row += 1
@@ -1060,7 +1052,7 @@ class DimensionsTab(Widget):
             _magTransferLabel.setVisible(False)
 
         row += 1
-        hLine = HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 1), colour=getColours()[DIVIDER], height=15, divisor=2)
+        hLine = HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 2), colour=getColours()[DIVIDER], height=15)
         hLine.setContentsMargins(5, 0, 0, 0)
 
         row += 1
@@ -1091,7 +1083,7 @@ class DimensionsTab(Widget):
         Label(self, text="Second Cursor Offset (Hz) ", grid=(row, 0), hAlign='l', tipText=getAttributeTipText(Spectrum, 'doubleCrosshairOffsets'))
 
         row += 1
-        hLine = HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 1), colour=getColours()[DIVIDER], height=15, divisor=2)
+        hLine = HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 2), colour=getColours()[DIVIDER], height=15)
         hLine.setContentsMargins(5, 0, 0, 0)
 
         row += 1
@@ -1263,7 +1255,7 @@ class DimensionsTab(Widget):
         # add preferred order widgets for Nd and
         if spectrum.dimensionCount > 1:
             row += 1
-            hLine = HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 1), colour=getColours()[DIVIDER], height=15, divisor=2)
+            hLine = HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 2), colour=getColours()[DIVIDER], height=15)
             hLine.setContentsMargins(5, 0, 0, 0)
 
             row += 1

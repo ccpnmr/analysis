@@ -4,9 +4,9 @@ This module implements the Button class
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-10 18:05:05 +0000 (Fri, November 10, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2024-04-04 15:19:24 +0100 (Thu, April 04, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -59,13 +59,15 @@ class Button(QtWidgets.QPushButton, Base):
             # slightly narrower padding for nicer fit of the icon
             if enableFocusBorder:
                 self.setStyleSheet('Button { padding: 0px 1px 0px 1px; }'
-                                   'Button:focus { padding: 0px 0px 0px 0px; border: 1px solid %(BORDER_FOCUS)s; }' % getColours())
+                                   'Button:focus { padding: 0px 0px 0px 0px; '
+                                   'border: 1px solid %(BORDER_FOCUS)s; border-radius: 2px; }' % getColours())
             else:
                 self.setStyleSheet('Button { padding: 0px 1px 0px 1px; }')
         else:
             if enableFocusBorder:
                 self.setStyleSheet('Button { padding: 2px 3px 2px 3px; }'
-                                   'Button:focus { padding: 0px 0px 0px 0px; border: 1px solid %(BORDER_FOCUS)s; }' % getColours())
+                                   'Button:focus { padding: 0px 0px 0px 0px; '
+                                   'border: 1px solid %(BORDER_FOCUS)s; border-radius: 2px; }' % getColours())
             else:
                 self.setStyleSheet('Button { padding: 2px 3px 2px 3px; }')
 

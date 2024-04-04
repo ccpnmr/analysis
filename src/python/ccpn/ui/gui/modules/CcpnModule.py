@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-25 10:11:30 +0000 (Thu, January 25, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-04-04 15:19:21 +0100 (Thu, April 04, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -40,84 +40,23 @@ from pyqtgraph.dockarea.Dock import DockLabel, Dock
 from pyqtgraph.dockarea.DockArea import DockArea
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.ui.gui.widgets.DropBase import DropBase
-from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.guiSettings import CCPNMODULELABEL_BACKGROUND, CCPNMODULELABEL_FOREGROUND, \
-    CCPNMODULELABEL_BACKGROUND_ACTIVE, CCPNMODULELABEL_FOREGROUND_ACTIVE, CCPNMODULELABEL_BORDER, CCPNMODULELABEL_BORDER_ACTIVE, \
-    BORDERNOFOCUS_COLOUR
-from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
+    CCPNMODULELABEL_BACKGROUND_ACTIVE, CCPNMODULELABEL_FOREGROUND_ACTIVE, \
+    CCPNMODULELABEL_BORDER, CCPNMODULELABEL_BORDER_ACTIVE, BORDERNOFOCUS_COLOUR
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.RadioButton import RadioButton
-from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
-from ccpn.ui.gui.widgets.Slider import Slider
-from ccpn.ui.gui.widgets.Spinbox import Spinbox
-from ccpn.ui.gui.widgets.TextEditor import TextEditor
-from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
-from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS
 from ccpn.ui.gui.widgets.SideBar import SideBar, SideBarSearchListView
 from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
-from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget, CheckBoxCompoundWidget, \
-    DoubleSpinBoxCompoundWidget, SelectorWidget, InputPulldown, \
-    ColourSelectionWidget, LineEditPopup, ListCompoundWidget
 from ccpn.core.lib.Notifiers import NotifierBase
-from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, TextEditorCompoundWidget, \
-    RadioButtonsCompoundWidget, ScientificSpinBoxCompoundWidget, SpinBoxCompoundWidget, EntryPathCompoundWidget
-from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight, getFont, DEFAULTFONT
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.core.lib.Pid import Pid, createPid
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.util.Path import aPath
 
-
-CommonWidgetsEdits = {
-    CheckBox.__name__                       : (CheckBox.get, CheckBox.setChecked, None),
-    ColourDialog.__name__                   : (ColourDialog.getColor, ColourDialog.setColour, None),
-    DoubleSpinbox.__name__                  : (DoubleSpinbox.value, DoubleSpinbox.setValue, None),
-    ScientificDoubleSpinBox.__name__        : (ScientificDoubleSpinBox.value, ScientificDoubleSpinBox.setValue, None),
-
-    LineEdit.__name__                       : (LineEdit.get, LineEdit.setText, None),
-    LineEditButtonDialog.__name__           : (LineEditButtonDialog.get, LineEditButtonDialog.setText, None),
-    PulldownList.__name__                   : (PulldownList.currentText, PulldownList.set, None),
-    RadioButtons.__name__                   : (RadioButtons.get, RadioButtons.set, None),
-    RadioButton.__name__                    : (RadioButton.isChecked, RadioButton.setChecked, None),
-
-    Slider.__name__                         : (Slider.get, Slider.setValue, None),
-    Spinbox.__name__                        : (Spinbox.value, Spinbox.set, None),
-    TextEditor.__name__                     : (TextEditor.get, TextEditor.setText, None),
-    GLTargetButtonSpinBoxes.__name__        : (GLTargetButtonSpinBoxes.get, GLTargetButtonSpinBoxes.setValues, None),
-
-    PulldownListCompoundWidget.__name__     : (PulldownListCompoundWidget.getText, PulldownListCompoundWidget.select,
-                                               ('pulldownList.activated', 'pulldownList.pulldownTextEdited')),
-
-    ListCompoundWidget.__name__             : (ListCompoundWidget.getTexts, ListCompoundWidget.setTexts, None),
-    CheckBoxCompoundWidget.__name__         : (CheckBoxCompoundWidget.get, CheckBoxCompoundWidget.set, None),
-    DoubleSpinBoxCompoundWidget.__name__    : (DoubleSpinBoxCompoundWidget.getValue, DoubleSpinBoxCompoundWidget.setValue,
-                                               ('doubleSpinBox.valueChanged')),
-    ScientificSpinBoxCompoundWidget.__name__: (ScientificSpinBoxCompoundWidget.getValue, ScientificSpinBoxCompoundWidget.setValue,
-                                               ('scientificSpinBox.valueChanged')),
-    SpinBoxCompoundWidget.__name__          : (SpinBoxCompoundWidget.getValue, SpinBoxCompoundWidget.setValue,
-                                               ('spinBox.valueChanged')),
-
-    SelectorWidget.__name__                 : (SelectorWidget.getText, SelectorWidget.select, None),
-    InputPulldown.__name__                  : (InputPulldown.currentText, InputPulldown.set, None),
-    ColourSelectionWidget.__name__          : (ColourSelectionWidget.currentText, ColourSelectionWidget.setColour, None),
-    LineEditPopup.__name__                  : (LineEditPopup.get, LineEditPopup.set, None),
-
-    EntryCompoundWidget.__name__            : (EntryCompoundWidget.getText, EntryCompoundWidget.setText, 'entry.textEdited'),
-    TextEditorCompoundWidget.__name__       : (TextEditorCompoundWidget.getText, TextEditorCompoundWidget.setText, 'textEditor.textChanged'),
-    NmrChainPulldown.__name__               : (NmrChainPulldown.getText, NmrChainPulldown.select, 'pulldownList.activated'),
-    RadioButtonsCompoundWidget.__name__     : (RadioButtonsCompoundWidget.getIndex, RadioButtonsCompoundWidget.setIndex,
-                                               'radioButtons.buttonGroup.buttonClicked'),
-    EntryPathCompoundWidget.__name__        : (EntryPathCompoundWidget.getText, EntryPathCompoundWidget.setText, 'entry.lineEdit.textChanged'),
-    # ADD TABLES
-    # ADD Others
-    }
 
 settingsWidgetPositions = {
     'top'   : {'settings': (0, 0), 'widget': (1, 0)},

@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can synchronise any x and y axes across different SpectrumDisplays with a CCPN macro. Go to the <span style=%(purple)s>Macro</span> menu, <span style=%(purple)s>Run CCPN Macros</span> and <span style=%(purple)s>SyncSpectrumDisplays</span>. Get more details from our video tutorials.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 1,
+  "contents": [
+    "./graphics/SynchroniseAxes.png"
+  ]
+}

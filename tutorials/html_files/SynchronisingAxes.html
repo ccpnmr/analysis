@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Synchronising Axes</title>
+    <link rel="stylesheet" href="CcpnVideoTutorials.css">
+</head>
+<body>
+<div class="header"><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a
+        href="index.html" class="button">Video<br> Tutorials<br> & Manual</a><a href="https://forums.ccpn.ac.uk"><img
+        src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 15px"></a></div>
+<br>
+<div class="headerBar">Synchronising Axes</div>
+<div class="tutorial">
+
+    <div class="videoContainer">
+        <div class="videoWrapper">
+            <iframe src="https://www.youtube.com/embed/He7ma0VHPGw" frameborder="0"
+                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <h2>Synchronising Axes</h2>
+    <p><b>This feature is still somewhat experimental and might result in unexpected behaviours. These could require closing the compromised spectrumDisplay(s) or restarting the project. If you encounter any problems, please let us know (via the <a href="https://forum.ccpn.ac.uk">CCPN Forum</a> or by emailing support@ccpn.ac.uk), so that we can fix them!</b></p>
+
+    <p>Go to <span class="action">Macro / Run CCPN Macros / SyncSpectrumDisplays</span> which will bring up the <span class="action">SpectrumDisplay Sync Editor</span>. Here you can add axis pairs which are linked with one another. Use the <span class="action">+</span> button (or <span class="action">right-click / New Sync</span>) to add a new synchronisation. Then <span class="action">double-click</span> to select a SpectrumDisplay and AxisCode as your <span class="action">Source</span> and another SpectrumDisplay and AxisCode as your <span class="action">Target</span>. Add further synchronisations if you wish. Finally, click on the yellow/red Chain button to activate the synchronisation of the axes (the button will turn green). To stop the synchronisation click on the Crossed Out Link button at the bottom. You can remove synchronisations from the table with <span class="action">right-click / Remove Selected</span> or <span class="action">Remove All</span>.</p>
+    <p>The <span class="action">All X/Y</span>, <span class="action">All X</span> and <span class="action">All Y</span> buttons will automatically add rows to link all X and Y axes. Sometimes it might be quicker to do this and then remove unwanted rows rather than setting up several rows by hand.</p>
+    <p>Note that in practice, it doesn't matter which way round your <span class="action">Source</span> and <span class="action">Target</span> axes are: if two axes are linked then moving or scaling one will automatically move or scale the other. Similarly, if axis <span class="action">A</span> is linked to axis <span class="action">B</span> and to axis <span class="action">C</span>, then axes <span class="action">B</span> and <span class="action">C</span> will also be linked.</p>
+    <p>At the moment only X and Y axes can be synchronised, not Z-axes.</p>
+    <p>Note that you can only link axes that belong to the same isotope type. If you link axes of different isotope types in the table, you will simply find that nothing happens.</p>
+    <p>Note that synchronisations are not currently saved as part of the project. You will have to set them up again when you reopen your project.</p>
+
+</div>
+</body>
+</html>

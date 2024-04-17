@@ -27,8 +27,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:28 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-04-17 16:53:15 +0100 (Wed, April 17, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -68,7 +68,7 @@ from ccpn.core.Restraint import RestraintTable
 from ccpn.core.Note import Note
 from ccpn.core.DataTable import DataTable
 from ccpn.core.ViolationTable import ViolationTable
-from ccpn.core._implementation.CollectionList import CollectionList
+# from ccpn.core._implementation.CollectionList import CollectionList
 from ccpn.core.Collection import Collection
 
 
@@ -135,6 +135,10 @@ class _sidebarWidgetItem(QtWidgets.QTreeWidgetItem):
         self._parent = treeWidgetItem
         self.sidebarItem = sidebarItem
 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# SidebarABC
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class SidebarABC(NotifierBase):
     """
@@ -630,6 +634,10 @@ class SidebarItem(SidebarTree):
     """
     itemType = 'Item'
 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# SidebarClassABC
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class SidebarClassABC(SidebarABC):
     """
@@ -1225,6 +1233,25 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
 
         self._searchSelection = []
         self._searchNotifiers = []
+        self._setStyle()
+
+    def _setStyle(self):
+        """Set the focus/noFocus colours for the widget
+        """
+        _style = """QTreeWidget {
+                        border-color: palette(mid);
+                        border-width: 1px;
+                        border-radius: 2px;
+                        border-style: solid;
+                    }
+                    QTreeWidget:focus {
+                        border-width: 1px;
+                        border-radius: 2px;
+                        border-style: solid;
+                    }
+                    """
+        # set stylesheet - this seems to miss the first paint event
+        self.setStyleSheet(_style)
 
     def _resultsListMenuRequested(self, position):
 

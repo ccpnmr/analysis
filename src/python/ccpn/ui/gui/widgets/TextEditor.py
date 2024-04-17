@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-17 12:03:19 +0100 (Wed, April 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-17 16:53:15 +0100 (Wed, April 17, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -100,6 +100,14 @@ class TextEditor(QtWidgets.QTextEdit, Base):
             self._setWrapIcon(wordWrap)
             self._label.setToolTip('Enable/disable Word-wrap')
 
+        _style = """QTextEdit {
+                        border-radius: 2px;
+                    }
+                    QTextEdit:focus {
+                        border-radius: 2px;
+                    }
+                    """
+        self.setStyleSheet(_style)
         if addGrip:
             _gripIcon = Icon('icons/grip')
 

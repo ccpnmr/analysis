@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-17 12:03:17 +0100 (Wed, April 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-17 16:53:15 +0100 (Wed, April 17, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -229,8 +229,12 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                             color: %(TOOLTIP_FOREGROUND)s;
                         }
                         
+                        QPushButton:focus {
+                            border-color: %(BORDER_FOCUS)s;
+                        }
+                        /*
                         QPushButton {
-                            padding: 2px 8px 2px 8px;
+                            padding: 2px 6px 2px 6px;
                         }
                         QPushButton:focus {
                             padding: 0px 0px 0px 0px;
@@ -243,6 +247,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                             color: #808080;
                             background-color: palette(midlight);
                         }
+                        */
                         QGraphicsView {
                             border: 1px solid palette(mid);
                             border-radius: 2px;
@@ -286,7 +291,15 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                         QGraphicsTextItem {
                             background-color: orange;
                         }
-                        
+                        QTextEdit {
+                            border: 1px solid palette(mid);
+                            border-radius: 2px;
+                        }
+                        QTextEdit:focus {
+                            border: 1px solid %(BORDER_FOCUS)s;
+                            border-radius: 2px;
+                        }
+
                         /*
                         QTableView {
                             border-color: palette(mid);
@@ -354,7 +367,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
 
         if self.application.preferences.general.colourScheme == DEFAULT:
             # print(f'--> change theme  {base}')
-            # NOTE:ED - should really just jire a signal for the spectrum-displays/strips to respond to
+            # NOTE:ED - should really just fire a signal for the spectrum-displays/strips to respond to
             setColourScheme(DARK if base < 127 else LIGHT)
             self.application._correctColours()
             for display in self.project.spectrumDisplays:

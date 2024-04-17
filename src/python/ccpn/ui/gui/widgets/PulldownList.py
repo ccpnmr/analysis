@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-04 15:19:25 +0100 (Thu, April 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-17 12:03:19 +0100 (Wed, April 17, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -61,6 +61,10 @@ class _ListView(QtWidgets.QListView):
 
         super().keyReleaseEvent(event)
 
+    def enterEvent(self, a0: QtCore.QEvent) -> None:
+        # grab the focus when the mouse moves over again, otherwise can sometimes remain gray
+        self.setFocus()
+
 
 class PulldownList(QtWidgets.QComboBox, Base):
     popupAboutToBeShown = QtCore.pyqtSignal()
@@ -68,6 +72,9 @@ class PulldownList(QtWidgets.QComboBox, Base):
     pulldownTextReady = QtCore.pyqtSignal(str)
 
     _list = None
+    _userActivated = False
+    highlightColour = None
+    highlightColourSelect = None
 
     def __init__(self, parent, texts=None, objects=None,
                  icons=None, callback=None,
@@ -132,16 +139,24 @@ class PulldownList(QtWidgets.QComboBox, Base):
             self.popupAboutToBeShown.connect(self.clickToShowCallback)
 
         # weird behaviour here - the padding needs to be large on the right and background colour needs to be specified
-        self.setStyleSheet('PulldownList { padding: 2px 8px 2px 3px; combobox-popup: 0; background-color: white; color: black; }'
-                           # 'PulldownList:focus { border: 1px solid %(BORDER_FOCUS)s; }'  # overwrites other properties :|
-                           'PulldownList:!enabled { background-color: whitesmoke; color: darkgrey; }'
-                           '' % getColours())
+        # self.setStyleSheet('PulldownList { padding: 2px 8px 2px 3px; combobox-popup: 0; background-color: white; color: black; }'
+        #                    # 'PulldownList:focus { border: 1px solid %(BORDER_FOCUS)s; }'  # overwrites other properties :|
+        #                    'PulldownList:disabled { background-color: whitesmoke; color: darkgrey; }'
+        #                    '' % getColours())
+
+        # self.setStyleSheet('PulldownList { '
+        #                    'padding: 2px 8px 2px 3px; '
+        #                    'combobox-popup: 0; '
+        #                    '}'
+        #                    '' % getColours())
         # this (or similar) can now be added to the stylesheet if needed
         # 'QListView::item { padding: 12px; }')
 
         self.setMaxVisibleItems(maxVisibleItems)
         self._editedText = None
 
+        # index-change signals
+        self.activated.connect(self._callbackSetUserFlag)
         self.currentIndexChanged.connect(self._callback)
 
         if editable:
@@ -166,6 +181,38 @@ class PulldownList(QtWidgets.QComboBox, Base):
         # possibly for later if gray 'Select' preferred
         # self.currentIndexChanged.connect(self._highlightCurrentText)
         # self.currentTextChanged.connect(self._highlightCurrentText)
+        self._setStyle()
+
+    def _setStyle(self):
+        self._checkPalette(self.palette())
+        QtWidgets.QApplication.instance().paletteChanged.connect(self._checkPalette)
+
+    def _checkPalette(self, pal: QtGui.QPalette):
+        # print the colours from the updated palette - only 'highlight' seems to be effective
+        # QT modifies this to give different selection shades depending on the widget
+        #   see highlight colour in paintEvent
+        base = pal.base().color().lightness()
+        highlight = pal.highlight().color()
+        self.highlightColour = QtGui.QColor.fromHslF(highlight.hueF(),
+                                       # tweak the highlight colour depending on the theme
+                                       #    needs to go in the correct place
+                                       0.8 if base > 127 else 0.75,
+                                       0.5 if base > 127 else 0.45
+                                       )
+        # weird behaviour here
+        #   - the padding needs to be large on the right
+        #   - background colour needs to be specified?
+        _style = """QComboBox {
+                    padding: 2px 8px 2px 3px;
+                    combobox-popup: 0;
+                }
+                QComboBox:focus { border-color: %(BORDER_FOCUS)s; }
+                QComboBox:disabled {
+                    color: #808080;
+                    background-color: palette(midlight);
+                }
+                """ % {'BORDER_FOCUS': self.highlightColour.name()}
+        self.setStyleSheet(_style)
 
     def setEditable(self, editable: bool) -> None:
         super(PulldownList, self).setEditable(editable)
@@ -252,15 +299,17 @@ class PulldownList(QtWidgets.QComboBox, Base):
         """Set the colour of the selected pulldown-text
         """
         try:
+            palette = self.palette()
             if (model := self.model()):
-                palette = self.palette()
                 if (item := model.item(self.currentIndex())) is not None and item.text():
                     # use the palette to change the colour of the selection text - may not match for other themes
                     palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Text, item.foreground().color())
                 else:
                     palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Text, QtGui.QColor('black'))
-
-                self.setPalette(palette)
+                if self.highlightColour:
+                    # change the highlight colour in response to theme change
+                    palette.setColor(QtGui.QPalette.Highlight, self.highlightColour)
+            self.setPalette(palette)
         except Exception:
             pass
 
@@ -446,6 +495,11 @@ class PulldownList(QtWidgets.QComboBox, Base):
                 if item := self.model().item(self.getItemIndex(text)):
                     item.setToolTip(toolTip)
 
+    def _callbackSetUserFlag(self):
+        """Set a flag if the callback has been called by a user-interaction.
+        """
+        self._userActivated = True
+
     def _callback(self, *args):
         """
         index is an argument of the args. Don't use it. There is a bug when a separator is inserted between items, so that index is out of range to the objects/texts.
@@ -467,6 +521,8 @@ class PulldownList(QtWidgets.QComboBox, Base):
                 self.callback(self.objects[index])
             elif self.texts:
                 self.callback(self.texts[index])
+
+        self._userActivated = False
 
     def setMaxVisibleItems(self, maxItems: int = 16):
         """Set the maximum height of the combobox when opened

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-04 15:19:23 +0100 (Thu, April 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-17 12:03:18 +0100 (Wed, April 17, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -59,6 +59,7 @@ class PseudoToSpectrumGroupPopup(CcpnDialogMainWidget):
         self.validSpectra = None
         self.spectrum = None
         self.pseudoDimension = None
+        self.actionButtons()
 
         if self.project:
             # Only select 3D's for now
@@ -74,12 +75,11 @@ class PseudoToSpectrumGroupPopup(CcpnDialogMainWidget):
         # for CcpnDialogMainWidget:
         self.initialise(self.mainWidget)
         self.populate(self.mainWidget)
-        self.actionButtons()
 
     def actionButtons(self):
         self.setOkButton(callback=self.makeSpectrumGroup, text='Make SpectrumGroup', tipText='Extract spectra along pseudo dimensions and close dialog')
         self.setCloseButton(callback=self._rejectDialog, text='Close', tipText='Close')
-        self.setDefaultButton(ExportDialogABC.CLOSEBUTTON)
+        self.setDefaultButton(self.CLOSEBUTTON)
 
     def _rejectDialog(self):
         # NOTE:ED - not required for exportDialogABC

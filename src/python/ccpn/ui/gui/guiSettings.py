@@ -5,9 +5,9 @@ Settings used in gui modules, widgets and popups
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -16,13 +16,14 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-26 18:58:09 +0100 (Mon, June 26, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-04-17 12:03:17 +0100 (Wed, April 17, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: geertenv $"
 __date__ = "$Date: 2016-11-15 21:37:50 +0000 (Tue, 15 Nov 2016) $"
+
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -119,37 +120,38 @@ DEFAULT = 'default'
 MARKS_COLOURS = 'marksColours'
 COLOUR_SCHEMES = (LIGHT, DARK, DEFAULT)
 
+DEFAULT_COLOR = 'default'
 SPECTRUM_HEXCOLOURS = 'spectrumHexColours'
 SPECTRUM_HEXDEFAULTCOLOURS = 'spectrumHexDefaultColours'
 SPECTRUM_HEXMEDIUMCOLOURS = 'spectrumHexMediumColours'
 SPECTRUMCOLOURS = 'spectrumColours'
 
 MARK_LINE_COLOUR_DICT = {
-    'CA'   : '#0080FF',  # aqua
-    'CB'   : '#6666FF',  # orchid
-    'CG'   : '#0048FF',
-    'CD'   : '#006DFF',
-    'CE'   : '#0091FF',
-    'CZ'   : '#00B6FF',
-    'CH'   : '#00DAFF',
-    'C'    : '#00FFFF',
-    'Cn'   : '#00FFFF',
-    'HA'   : '#FF0000',
-    'HB'   : '#FF0024',
-    'HG'   : '#FF0048',
-    'HD'   : '#FF006D',
-    'HE'   : '#FF0091',
-    'HZ'   : '#FF00B6',
-    'HH'   : '#FF00DA',
-    'H'    : '#FF00FF',
-    'Hn'   : '#FF00FF',
-    'N'    : '#00FF00',
-    'Nh'   : '#00FF00',
-    'ND'   : '#3FFF00',
-    'NE'   : '#7FFF00',
-    'NZ'   : '#BFFF00',
-    'NH'   : '#FFFF00',
-    DEFAULT: '#e0e0e0'
+    'CA'         : '#0080FF',  # aqua
+    'CB'         : '#6666FF',  # orchid
+    'CG'         : '#0048FF',
+    'CD'         : '#006DFF',
+    'CE'         : '#0091FF',
+    'CZ'         : '#00B6FF',
+    'CH'         : '#00DAFF',
+    'C'          : '#00FFFF',
+    'Cn'         : '#00FFFF',
+    'HA'         : '#FF0000',
+    'HB'         : '#FF0024',
+    'HG'         : '#FF0048',
+    'HD'         : '#FF006D',
+    'HE'         : '#FF0091',
+    'HZ'         : '#FF00B6',
+    'HH'         : '#FF00DA',
+    'H'          : '#FF00FF',
+    'Hn'         : '#FF00FF',
+    'N'          : '#00FF00',
+    'Nh'         : '#00FF00',
+    'ND'         : '#3FFF00',
+    'NE'         : '#7FFF00',
+    'NZ'         : '#BFFF00',
+    'NH'         : '#FFFF00',
+    DEFAULT_COLOR: '#e0e0e0'
     }
 
 # Widget definitions
@@ -210,6 +212,9 @@ LABEL_SELECTEDBACKGROUND = 'LABEL_SELECTEDBACKGROUND'
 LABEL_SELECTEDFOREGROUND = 'LABEL_SELECTEDFOREGROUND'
 LABEL_HIGHLIGHT = 'LABEL_HIGHLIGHT'
 LABEL_WARNINGFOREGROUND = 'LABEL_WARNINGFOREGROUND'
+LABEL_DISABLED = 'LABEL_DISABLED'
+
+TABLE_FOREGROUND = 'TABLE_FOREGROUND'
 
 DIVIDER = 'DIVIDER'
 SOFTDIVIDER = 'SOFTDIVIDER'
@@ -241,6 +246,11 @@ BORDERNOFOCUS = 'BORDER_NOFOCUS'
 BORDERFOCUS = 'BORDER_FOCUS'
 TOOLTIP_BACKGROUND = 'TOOLTIP_BACKGROUND'
 TOOLTIP_FOREGROUND = 'TOOLTIP_FOREGROUND'
+HIGHLIGHT = 'HIGHLIGHT'
+HIGHLIGHT_SOLID = 'HIGHLIGHT_SOLID'
+HIGHLIGHT_BORDER = 'HIGHLIGHT_BORDER'
+HIGHLIGHT_VIVID = 'HIGHLIGHT_VIVID'
+HIGHLIGHT_FEINT = 'HIGHLIGHT_FEINT'
 
 #----------------------------------------------------------------------------------------------
 # Colours
@@ -254,7 +264,7 @@ COLOUR_BLIND_MEDIUM = QtGui.QColor('#E6E1BC')
 COLOUR_BLIND_ORANGE = QtGui.QColor('#EDA247')
 COLOUR_BLIND_RED = QtGui.QColor('#DB4325')
 
-TEXT_COLOUR = '#555D85'
+TEXT_COLOUR = '#22284E'
 TEXT_COLOUR_WARNING = '#E06523'
 SOFT_DIVIDER_COLOUR = '#888DA5'
 LIGHT_GREY = 'rgb(245,245,245)'
@@ -333,15 +343,16 @@ colourSchemes = {
 
         DRAG_FOREGROUND                   : 'white',
         DRAG_BACKGROUND                   : HIGHLIGHT_COLOUR,
-        LABEL_FOREGROUND                  : TEXT_COLOUR,
+        LABEL_FOREGROUND                  : '#282828',  #TEXT_COLOUR,
         LABEL_WARNINGFOREGROUND           : TEXT_COLOUR_WARNING,
         DIVIDER                           : '#a9a9a9',  # could be could CCPN_WIDGET_BORDER_COLOUR, was TEXT_COLOUR
         SOFTDIVIDER                       : SOFT_DIVIDER_COLOUR,
         LABEL_SELECTEDBACKGROUND          : 'mediumseagreen',
         LABEL_SELECTEDFOREGROUND          : 'black',
         LABEL_HIGHLIGHT                   : 'palegreen',
+        LABEL_DISABLED                    : 'whitesmoke',
 
-        SEQUENCEGRAPHMODULE_LINE          : 'darkgray',
+        SEQUENCEGRAPHMODULE_LINE          : '#808080',
         SEQUENCEGRAPHMODULE_TEXT          : TEXT_COLOUR,
 
         SEQUENCEMODULE_DRAGMOVE           : MEDIUM_BLUE,
@@ -370,6 +381,12 @@ colourSchemes = {
         SPECTRUM_HEXCOLOURS               : spectrumHexDarkColours,
         SPECTRUM_HEXMEDIUMCOLOURS         : spectrumHexMediumColours,
         SPECTRUM_HEXDEFAULTCOLOURS        : spectrumHexDefaultDarkColours,
+
+        HIGHLIGHT                         : HIGHLIGHT_COLOUR,  # this will be updated as the theme changes
+        HIGHLIGHT_BORDER                  : HIGHLIGHT_COLOUR,
+        HIGHLIGHT_SOLID                   : HIGHLIGHT_COLOUR,
+        HIGHLIGHT_FEINT                   : HIGHLIGHT_COLOUR,
+        HIGHLIGHT_VIVID                   : HIGHLIGHT_COLOUR,
         },
 
     # Overridden for dark colour scheme
@@ -395,9 +412,15 @@ colourSchemes = {
         SPECTRUM_HEXMEDIUMCOLOURS     : spectrumHexMediumColours,
         SPECTRUM_HEXDEFAULTCOLOURS    : spectrumHexDefaultLightColours,
 
+        LABEL_FOREGROUND              : '#e0e0e0',  #'#d8dddd',
         LABEL_SELECTEDBACKGROUND      : 'mediumseagreen',
         LABEL_SELECTEDFOREGROUND      : 'black',
         LABEL_HIGHLIGHT               : 'palegreen',
+        LABEL_DISABLED                : '#2e2e2e',
+
+        GUITABLE_ITEM_FOREGROUND      : '#d0d8dd',
+        GUITABLE_SELECTED_FOREGROUND  : '#efefef',
+        GUITABLE_SELECTED_BACKGROUND  : '#5D5900',
         },
 
     # Overridden for light colour scheme
@@ -407,20 +430,35 @@ colourSchemes = {
     }
 
 # adjust the default marks for the light/dark colour schemes
-MARK_LINE_COLOUR_DICT_LIGHT = dict([(k, autoCorrectHexColour(v, colourSchemes[DEFAULT][CCPNGLWIDGET_HEXBACKGROUND],
-                                                             addNewColour=False)) for k, v in MARK_LINE_COLOUR_DICT.items()])
+MARK_LINE_COLOUR_DICT_LIGHT = dict(
+        [(k, autoCorrectHexColour(v, colourSchemes[DEFAULT][CCPNGLWIDGET_HEXBACKGROUND],
+                                  addNewColour=False)) for k, v in MARK_LINE_COLOUR_DICT.items()])
 MARK_LINE_COLOUR_DICT_DARK = dict([(k, autoCorrectHexColour(v, colourSchemes[DARK][CCPNGLWIDGET_HEXBACKGROUND],
-                                                            addNewColour=False)) for k, v in MARK_LINE_COLOUR_DICT.items()])
+                                                            addNewColour=False)) for k, v in
+                                   MARK_LINE_COLOUR_DICT.items()])
 
 # insert the marks colours into colourScheme
 colourSchemes[LIGHT][MARKS_COLOURS] = MARK_LINE_COLOUR_DICT_LIGHT
 colourSchemes[DARK][MARKS_COLOURS] = MARK_LINE_COLOUR_DICT_DARK
 
+highlight = QtGui.QColor(HIGHLIGHT_COLOUR)
+colourSchemes[DEFAULT][HIGHLIGHT_SOLID] = \
+    colourSchemes[DARK][HIGHLIGHT_SOLID] = highlight.fromHslF(highlight.hueF(), 0.95, 0.95)
+colourSchemes[DEFAULT][HIGHLIGHT_BORDER] = highlight.fromHslF(highlight.hueF(), 0.95, highlight.lightnessF()**3.0)
+colourSchemes[DARK][HIGHLIGHT_BORDER] = highlight.fromHslF(highlight.hueF(), 0.95, highlight.lightnessF()**0.333)
+colourSchemes[DEFAULT][HIGHLIGHT_VIVID] = \
+    colourSchemes[DARK][HIGHLIGHT_FEINT] = highlight.fromHslF(highlight.hueF(), 0.65, 0.25)
+colourSchemes[DEFAULT][HIGHLIGHT_FEINT] = \
+    colourSchemes[DARK][HIGHLIGHT_VIVID] = highlight.fromHslF(highlight.hueF(), 0.55, 0.80)
+
 
 def getColourScheme():
     """Get the current colourScheme
+    Currently, colourScheme is defined as light, dark, default.
+    Deafult should return the colourScheme asociated with the current OS-theme.
+    This is deftermined at run-time by the lightness of palette.base()
 
-    :return: colourScheme
+    :return str: colourScheme
     """
 
     application = getApplication()
@@ -445,14 +483,14 @@ def setColourScheme(colourScheme):
             raise RuntimeError('Undefined colour scheme')
 
         application._colourScheme = colourScheme
-        ColourDict(colourScheme).setColourScheme(colourScheme)
+        _ColourDict(colourScheme).setColourScheme(colourScheme)
 
     else:
         getLogger().warning('Application not defined; colourScheme not set')
 
 
 @singleton
-class ColourDict(dict):
+class _ColourDict(dict):
     """
     Singleton Class to store colours;
     """
@@ -475,6 +513,13 @@ class ColourDict(dict):
             getLogger().warning('undefined colourScheme "%s", retained "%s"' % (colourScheme, self.colourScheme))
 
 
+class _ColourDictDark(_ColourDict):
+    ...
+
+
+class _ColourDictLight(_ColourDict):
+    ...
+
 #end class
 
 
@@ -484,7 +529,7 @@ def getColours():
     :return: colourDict
     """
     colourScheme = getColourScheme()
-    colourDict = ColourDict(colourScheme)
+    colourDict = _ColourDict(colourScheme)
     return colourDict
 
 

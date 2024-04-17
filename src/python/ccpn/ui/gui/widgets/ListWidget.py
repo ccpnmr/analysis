@@ -5,9 +5,9 @@ List widget
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-23 15:27:39 +0100 (Tue, May 23, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-04-17 12:03:19 +0100 (Wed, April 17, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -46,17 +46,6 @@ from ccpn.ui.gui.widgets.Widget import Widget
 # object e.g objects with text() methods and which have items associated with them
 # maybe needs a refactoring or a rename (or both)... or of course I maybe reading this wrong...
 class ListWidget(QtWidgets.QListWidget, Base):
-    # # To be done more rigeriously later
-    # _styleSheet = """
-    # QListWidget {background-color: #f7ffff;
-    #              color: #122043;
-    #              font-weight: normal;
-    #              margin: 0px 0px 0px 0px;
-    #              padding: 3px 3px 3px 3px;
-    #              border: 1px solid #182548;
-    #              }
-    # """
-
     dropped = pyqtSignal(list)
     cleared = pyqtSignal()
     changed = pyqtSignal()
@@ -121,17 +110,10 @@ class ListWidget(QtWidgets.QListWidget, Base):
     def _setFocusColour(self, focusColour=None, noFocusColour=None):
         """Set the focus/noFocus colours for the widget
         """
-        focusColour = getColours()[BORDERFOCUS]
-        noFocusColour = getColours()[BORDERNOFOCUS]
-        styleSheet = "ListWidget { " \
-                     "border: 1px solid;" \
-                     "border-radius: 1px;" \
-                     "border-color: %s;" \
-                     "} " \
-                     "ListWidget:focus { " \
-                     "border: 1px solid %s; " \
-                     "border-radius: 1px; " \
-                     "}" % (noFocusColour, focusColour)
+        styleSheet = """QListWidget {
+                            border-width: 1px;
+                            border-radius: 2px;
+                        }"""
         self.setStyleSheet(styleSheet)
 
     def _setChangedConnections(self):

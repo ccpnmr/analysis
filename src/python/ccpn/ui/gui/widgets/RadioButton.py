@@ -4,19 +4,19 @@ This module implements the Button class
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-18 18:40:28 +0100 (Wed, May 18, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-04-17 12:03:19 +0100 (Wed, April 17, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -36,6 +36,8 @@ from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 
 class RadioButton(QtWidgets.QRadioButton, Base):
 
+    highlightColour = None
+
     def __init__(self, parent, text='', textColor=None, textSize=None, squared=False, callback=None, **kwds):
 
         super().__init__(parent)
@@ -44,17 +46,17 @@ class RadioButton(QtWidgets.QRadioButton, Base):
         text = translator.translate(text)
         self.setText(text)
 
-        if textColor:
-            self.setStyleSheet('QRadioButton {color: {}; font-size: 12pt;}'.format(textColor))
-        if textSize:
-            self.setStyleSheet('QRadioButton {font-size: {};}'.format(textSize))
+        # if textColor:
+        #     self.setStyleSheet('QRadioButton {color: {}; font-size: 12pt;}'.format(textColor))
+        # if textSize:
+        #     self.setStyleSheet('QRadioButton {font-size: {};}'.format(textSize))
         if callback:
             self.setCallback(callback)
         if not self.objectName():
             self.setObjectName(text)
 
-        self.setStyleSheet('QRadioButton::disabled { color: #7f88ac; }')
-        if squared:
+        # self.setStyleSheet('QRadioButton::disabled { color: #7f88ac; }')
+        if False: #squared:
             self.setStyleSheet('''
                     QRadioButton::indicator {{
                         border: {border}px solid black; 
@@ -74,6 +76,33 @@ class RadioButton(QtWidgets.QRadioButton, Base):
                         color: #7f88ac
                     }}
                 '''.format(size=10, border=1, radius=0.1))
+
+        self._setStyle()
+
+    def _setStyle(self):
+        self._checkPalette(self.palette())
+        QtWidgets.QApplication.instance().paletteChanged.connect(self._checkPalette)
+
+    def _checkPalette(self, pal: QtGui.QPalette):
+        # print the colours from the updated palette - only 'highlight' seems to be effective
+        # QT modifies this to give different selection shades depending on the widget
+        base = pal.base().color().lightness()
+        highlight = pal.highlight().color()
+        self.highlightColour = QtGui.QColor.fromHslF(highlight.hueF(),
+                                                     # tweak the highlight colour depending on the theme
+                                                     #    needs to go in the correct place
+                                                     0.8 if base > 127 else 0.75,
+                                                     0.5 if base > 127 else 0.45
+                                                     )
+
+    def paintEvent(self, ev: QtGui.QPaintEvent) -> None:
+        if self.highlightColour:
+            # change the highlight colour in response to theme change
+            thisPal = self.palette()
+            thisPal.setColor(QtGui.QPalette.Highlight, self.highlightColour)
+            self.setPalette(thisPal)
+
+        super().paintEvent(ev)
 
     def get(self):
         return self.text()

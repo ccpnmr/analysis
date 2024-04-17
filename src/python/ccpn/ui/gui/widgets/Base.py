@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-04 15:19:24 +0100 (Thu, April 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-17 12:03:18 +0100 (Wed, April 17, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -315,12 +315,12 @@ class Base(DropBase, SignalBlocking):
             if bgColor:
                 self.setAutoFillBackground(True)
                 #rgb = QtGui.QColor(bgColor).getRgb()[:3]
-                self.setStyleSheet("background-color: rgb(%d, %d, %d);" % bgColor)
+                # self.setStyleSheet("background-color: rgb(%d, %d, %d);" % bgColor)
 
             if fgColor:
                 self.setAutoFillBackground(True)
                 #rgb = QtGui.QColor(fgColor).getRgb()[:3]
-                self.setStyleSheet("foreground-color: rgb(%d, %d, %d);" % fgColor)
+                # self.setStyleSheet("foreground-color: rgb(%d, %d, %d);" % fgColor)
 
             if setLayout:
                 self.setGridLayout(margins=margins, spacing=spacing)

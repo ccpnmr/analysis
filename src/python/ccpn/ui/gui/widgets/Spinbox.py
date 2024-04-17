@@ -4,18 +4,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-27 09:43:03 +0000 (Tue, October 27, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2024-04-17 12:03:19 +0100 (Wed, April 17, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -35,6 +36,7 @@ class Spinbox(QtWidgets.QSpinBox, Base):
 
     returnPressed = pyqtSignal(int)
     wheelChanged = pyqtSignal(int)
+    highlightColour = None
 
     def __init__(self, parent, prefix=None, value=None, step=None, min=None, max=None,
                  showButtons=True, callback=None, editable=True, **kwds):
@@ -66,8 +68,39 @@ class Spinbox(QtWidgets.QSpinBox, Base):
 
         # change focusPolicy so that spinboxes don't grab focus unless selected
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
-        self.setStyleSheet('Spinbox { padding: 3px 3px 3px 3px; }'
-                           'Spinbox:disabled { background-color: white; }')
+        self._setStyle()
+
+    def _setStyle(self):
+        _style = """QSpinBox {
+                        padding: 3px 3px 3px 3px;
+                        background-color: palette(base);
+                    }
+                    QSpinBox:disabled { background-color: palette(midlight); }
+                    """
+        self.setStyleSheet(_style)
+        self._checkPalette(self.palette())
+        QtWidgets.QApplication.instance().paletteChanged.connect(self._checkPalette)
+
+    def _checkPalette(self, pal: QtGui.QPalette):
+        # print the colours from the updated palette - only 'highlight' seems to be effective
+        # QT modifies this to give different selection shades depending on the widget
+        base = pal.base().color().lightness()
+        highlight = pal.highlight().color()
+        self.highlightColour = QtGui.QColor.fromHslF(highlight.hueF(),
+                                                     # tweak the highlight colour depending on the theme
+                                                     #    needs to go in the correct place
+                                                     0.8 if base > 127 else 0.75,
+                                                     0.5 if base > 127 else 0.45
+                                                     )
+
+    def paintEvent(self, ev: QtGui.QPaintEvent) -> None:
+        if self.highlightColour:
+            # change the highlight colour in response to theme change
+            thisPal = self.palette()
+            thisPal.setColor(QtGui.QPalette.Highlight, self.highlightColour)
+            self.setPalette(thisPal)
+
+        super().paintEvent(ev)
 
     def wheelEvent(self, event: QtGui.QWheelEvent) -> None:
         """Process the wheelEvent for the spinBox

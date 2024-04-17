@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-04 15:19:24 +0100 (Thu, April 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-17 12:03:18 +0100 (Wed, April 17, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -217,17 +217,11 @@ class _ListWidget(ListWidget):
     def _setFocusColour(self, focusColour=None, noFocusColour=None):
         """Set the focus/noFocus colours for the widget
         """
-        focusColour = getColours()[BORDERFOCUS]
-        noFocusColour = getColours()[BORDERNOFOCUS]
-        styleSheet = "ListWidget { " \
-                     "border: 1px solid;" \
-                     "border-radius: 1px;" \
-                     "border-color: %s;" \
-                     "} " \
-                     "ListWidget:focus { " \
-                     "border: 1px solid %s; " \
-                     "border-radius: 1px; " \
-                     "}" % (noFocusColour, focusColour)
+        styleSheet = """QListWidget {
+                            border-width: 1px;
+                            border-radius: 2px;
+                        }
+                    """
         self.setStyleSheet(styleSheet)
 
     def startDrag(self, *args, **kwargs):

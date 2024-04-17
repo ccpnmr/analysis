@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-04 15:19:25 +0100 (Thu, April 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-17 12:03:19 +0100 (Wed, April 17, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -109,7 +109,7 @@ class Label(QtWidgets.QLabel, Base):
             self.setFont(_font)
 
         colours = guiSettings.getColours()
-        self._colour = textColour or colours[guiSettings.LABEL_FOREGROUND]
+        self._colour = textColour or None #colours[guiSettings.LABEL_FOREGROUND]
         self._setStyleSheet()
 
         if isinstance(icon, Icon):
@@ -131,7 +131,7 @@ class Label(QtWidgets.QLabel, Base):
     def _setStyleSheet(self):
         self.setStyleSheet(self._styleSheet % (  #self._textSize,
             # self._bold,
-            self._colour,
+            self._colour or 'palette(windowText)',
             self._margins[0],
             self._margins[1],
             self._margins[2],
@@ -249,7 +249,7 @@ class VerticalLabel(pyqtVerticalLabel, Base):
             self.setFont(_font)
 
         colours = guiSettings.getColours()
-        self._colour = textColour or colours[guiSettings.LABEL_FOREGROUND]
+        self._colour = textColour or None #colours[guiSettings.LABEL_FOREGROUND]
         self._setStyleSheet()
 
         if isinstance(icon, Icon):

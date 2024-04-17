@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-04 15:19:24 +0100 (Thu, April 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-17 12:03:18 +0100 (Wed, April 17, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -146,8 +146,8 @@ class ListCompoundWidget(CompoundBaseWidget):
                 self.addPulldownItem(dft)
         self._addWidget(self.listWidget)
 
-        styleSheet = '.ListWidget {border: %ipx solid %s; border-radius: 3px}'
-        styleSheet %= (self.LIST_BORDER_WIDTH, self.LIST_BORDER_COLOR)
+        styleSheet = '.ListWidget {border-width: %ipx; border-radius: 3px }'
+        styleSheet %= (self.LIST_BORDER_WIDTH, )  #self.LIST_BORDER_COLOR)
         self.listWidget.setStyleSheet(styleSheet)
 
         if minimumWidths is not None:

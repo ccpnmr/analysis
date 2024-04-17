@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:28 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-04-17 12:03:20 +0100 (Wed, April 17, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -214,8 +214,8 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
         self._parent = parent
 
         # set the colours
-        self._focusPen = QtGui.QPen(QtGui.QColor(getColours()[BORDERFOCUS]))
-        self._noFocusPen = QtGui.QPen(QtGui.QColor(getColours()[BORDERNOFOCUS]))
+        self._focusPen = QtGui.QPen(QtGui.QColor(getColours()[BORDERFOCUS]), 2)
+        self._noFocusPen = QtGui.QPen(QtGui.QColor(getColours()[BORDERNOFOCUS]), 2)
 
         # double the line-widths accounts for the device-pixel-ratio
         self._focusBorderWidth = focusBorderWidth
@@ -268,7 +268,7 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
         # Remove dotted border on cell focus.  https://stackoverflow.com/a/55252650/3620725
         #   or put 'outline: 0px;' into the QTableView stylesheet
         focus = (option.state & QtWidgets.QStyle.State_HasFocus)
-        option.state = option.state & ~QtWidgets.QStyle.State_HasFocus
+        # option.state = option.state & ~QtWidgets.QStyle.State_HasFocus
 
         if option.state & QtWidgets.QStyle.State_Selected:
             # fade the background and paint over the top of selected cell

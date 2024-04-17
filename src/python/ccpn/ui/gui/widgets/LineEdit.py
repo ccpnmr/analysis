@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-04 15:19:25 +0100 (Thu, April 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-17 12:03:19 +0100 (Wed, April 17, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -50,6 +50,8 @@ TextAlignment = {
 
 class LineEdit(QtWidgets.QLineEdit, Base):
 
+    highlightColour = None
+
     def __init__(self, parent, text='', textAlignment='c', backgroundText=None,
                  textColor=None, editable=True, **kwds):
         """
@@ -69,8 +71,8 @@ class LineEdit(QtWidgets.QLineEdit, Base):
 
         self.setText(text)
 
-        if textColor:
-            self.setStyleSheet('QLabel {color: %s;}' % textColor)
+        # if textColor:
+        #     self.setStyleSheet('QLabel {color: %s;}' % textColor)
 
         self.backgroundText = backgroundText
         if self.backgroundText:
@@ -81,13 +83,43 @@ class LineEdit(QtWidgets.QLineEdit, Base):
         # if 'minimumWidth' in kwds:
         #     self.setMinimumWidth(kwds['minimumWidth'])
 
-        self.setStyleSheet('LineEdit { padding: 3px 3px 3px 3px; }'
-                           'LineEdit:focus { padding: 0px 0px 0px 0px; '
-                           'border: 1px solid %(BORDER_FOCUS)s; border-radius: 2px; }' % getColours())
-
         if not editable:
             self.setReadOnly(True)
             self.setEnabled(False)
+
+        self._setStyle()
+
+    def _setStyle(self):
+        self._checkPalette(self.palette())
+        QtWidgets.QApplication.instance().paletteChanged.connect(self._checkPalette)
+
+    def _checkPalette(self, pal: QtGui.QPalette):
+        # print the colours from the updated palette - only 'highlight' seems to be effective
+        # QT modifies this to give different selection shades depending on the widget
+        base = pal.base().color().lightness()
+        highlight = pal.highlight().color()
+        self.highlightColour = QtGui.QColor.fromHslF(highlight.hueF(),
+                                       # tweak the highlight colour depending on the theme
+                                       #    needs to go in the correct place
+                                       0.8 if base > 127 else 0.75,
+                                       0.5 if base > 127 else 0.45
+                                       )
+        _style = """QLineEdit {
+                    padding: 3px 3px 3px 3px;
+                    border-color: palette(mid);
+                    border-width: 1px;
+                    border-radius: 2px;
+                    border-style: solid;
+                }
+                QLineEdit:focus {
+                    border-color: %(_BORDER_FOCUS)s;
+                }
+                QLineEdit:disabled {
+                    color: #808080;
+                    background-color: palette(midlight);
+                }
+                """ % {'_BORDER_FOCUS': self.highlightColour.name()}
+        self.setStyleSheet(_style)
 
     def get(self):
         return self.text()

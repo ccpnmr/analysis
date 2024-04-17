@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:27 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-04-17 12:03:19 +0100 (Wed, April 17, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -42,7 +42,8 @@ from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_BACKGROUND, \
     CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR, CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, \
     CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_PHASETRACE, CCPNGLWIDGET_ZOOMAREA, CCPNGLWIDGET_PICKAREA, \
-    CCPNGLWIDGET_SELECTAREA, CCPNGLWIDGET_ZOOMLINE, CCPNGLWIDGET_MOUSEMOVELINE, CCPNGLWIDGET_HARDSHADE
+    CCPNGLWIDGET_SELECTAREA, CCPNGLWIDGET_ZOOMLINE, CCPNGLWIDGET_MOUSEMOVELINE, CCPNGLWIDGET_HARDSHADE, \
+    colourSchemes, getColourScheme
 from ccpn.ui.gui.lib.GuiStrip import STRIP_MINIMUMHEIGHT, STRIP_MINIMUMWIDTH, AxisMenu
 from ccpn.ui.gui.lib.OpenGL import CcpnOpenGLDefs as GLDefs
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import ZOOMHISTORYSTORE, CURSOR_SOURCE_NONE, CURSOR_SOURCE_OTHER, ZOOMTIMERDELAY, CURSOR_SOURCE_SELF
@@ -210,6 +211,22 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         # create an overlay for drag-drop/highlight operations
         self._overlayArea = _AxisOverlay(self)
         self._overlayArea.raise_()
+
+        self._setStyle()
+
+    def _setStyle(self):
+        self._checkPalette(self.palette())
+        QtWidgets.QApplication.instance().paletteChanged.connect(self._checkPalette)
+
+    def _checkPalette(self, pal: QtGui.QPalette):
+        # print the colours from the updated palette - only 'highlight' seems to be effective
+        # QT modifies this to give different selection shades depending on the widget
+        #   see highlight colour in paintEvent
+        # print(f'--> {self.__class__.__name__} ')
+        self._setColourScheme(pal)
+        # set the flag to update the background in the paint event
+        self._updateBackgroundColour = True
+        self.update()
 
     @property
     def tilePosition(self) -> Tuple[int, int]:
@@ -1143,9 +1160,27 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self._menuActive = False
         self._disableCursorUpdate = False
 
-    def _setColourScheme(self):
+    def _setColourScheme(self, pal: QtGui.QPalette = None):
         """Update colours from colourScheme
         """
+        # colourScheme = getColourScheme()
+        #
+        # pal = pal or self.palette()
+        # base = pal.base().color().lightness()
+        # highlight = pal.highlight().color()
+        # self.highlightColour = QtGui.QColor.fromHslF(highlight.hueF(),
+        #                                # tweak the highlight colour depending on the theme
+        #                                #    needs to go in the correct place
+        #                                0.9 if base > 127 else 0.9,
+        #                                0.4 if base > 127 else 0.6
+        #                                ).getRgbF()
+        # if colourScheme == 'default':
+        #     if base < 127:
+        #         colourScheme = 'dark'
+        #     else:
+        #         colourScheme = 'light'
+        # self.colours = colourSchemes['default'].copy() | colourSchemes[colourScheme]
+
         self.colours = getColours()
         self.hexBackground = self.colours[CCPNGLWIDGET_HEXBACKGROUND]
         self.background = self.colours[CCPNGLWIDGET_BACKGROUND]

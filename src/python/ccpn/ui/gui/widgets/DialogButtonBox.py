@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-04 15:19:25 +0100 (Thu, April 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-17 12:03:18 +0100 (Wed, April 17, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -26,7 +26,7 @@ __date__ = "$Date: 2020-05-26 14:50:42 +0000 (Tue, May 26, 2020) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Icon import Icon
 from operator import or_
@@ -82,14 +82,15 @@ class DialogButtonBox(QtWidgets.QDialogButtonBox, Base):
         visibleStates = (list(visibleStates) + N * [None])[:N]
 
         if defaultButton is not None and defaultButton not in buttons:
-            raise TypeError("Error, defaultButton not in buttons")
+            raise TypeError(f"Error, defaultButton not in buttons")
 
         if not isinstance(orientation, str):
             raise TypeError("Error, orientation must be str: 'h' or 'v'")
 
-        self.setStyleSheet('QPushButton { padding: 1px 8px 1px 8px; }'
-                           'QPushButton:focus { padding: 0px 0px 0px 0px; '
-                           'border: 1px solid %(BORDER_FOCUS)s; border-radius: 2px; }' % getColours())
+        # self.setStyleSheet('QPushButton { padding: 1px 8px 1px 8px; }'
+        #                    'QPushButton:focus { padding: 0px 0px 0px 0px; '
+        #                    'border-width: 1px; '  # solid %(BORDER_FOCUS)s; '
+        #                    'border-radius: 2px; }' % getColours())
 
         if 'h' in orientation.lower():
             self.setOrientation(QtCore.Qt.Horizontal)
@@ -117,11 +118,12 @@ class DialogButtonBox(QtWidgets.QDialogButtonBox, Base):
                             thisButton.clicked.connect(callback)
                         if text is not None:
                             thisButton.setText(text)
-                            if not text:
-                                # reduce the padding to give a better shape
-                                thisButton.setStyleSheet('QPushButton { padding: 1px 8px 1px 8px; }'
-                                                         'QPushButton:focus { padding: 0px 0px 0px 0px; '
-                                                         'border: 1px solid %(BORDER_FOCUS)s; border-radius: 2px; }' % getColours())
+                            # if not text:
+                            #     # reduce the padding to give a better shape
+                            #     thisButton.setStyleSheet('QPushButton { padding: 1px 8px 1px 8px; }'
+                            #                              'QPushButton:focus { padding: 0px 0px 0px 0px; '
+                            #                              'border-width: 1px;'  # solid %(BORDER_FOCUS)s; '
+                            #                              'border-radius: 2px; }' % getColours())
 
                         if tipText is not None:
                             thisButton.setToolTip(tipText)
@@ -141,6 +143,44 @@ class DialogButtonBox(QtWidgets.QDialogButtonBox, Base):
 
             if defaultButton is not None:
                 self._parent.setDefaultButton(self.button(defaultButton))
+
+        self._setStyle()
+
+    def _setStyle(self):
+        self._checkPalette(self.palette())
+        QtWidgets.QApplication.instance().paletteChanged.connect(self._checkPalette)
+
+    def _checkPalette(self, pal: QtGui.QPalette):
+        # print the colours from the updated palette - only 'highlight' seems to be effective
+        # QT modifies this to give different selection shades depending on the widget
+        # print(f'--> setting {self.__class__.__name__} styleSheet')
+        base = pal.base().color().lightness()
+        highlight = pal.highlight().color()
+        self.highlightColour = QtGui.QColor.fromHslF(highlight.hueF(),
+                                       # tweak the highlight colour depending on the theme
+                                       #    needs to go in the correct place
+                                       0.8 if base > 127 else 0.75,
+                                       0.5 if base > 127 else 0.45
+                                       )
+        _style = """QPushButton { padding: 2px 8px 2px 8px; }
+                QPushButton:focus {
+                    padding: 0px 0px 0px 0px;
+                    border-color: %(BORDER_FOCUS)s;
+                    border-style: solid;
+                    border-width: 1px;
+                    border-radius: 2px;
+                }
+                QPushButton:disabled {
+                    color: #808080;
+                    background-color: palette(midlight);
+                }
+                """ % {'BORDER_FOCUS': self.highlightColour.name()}
+        self.setStyleSheet(_style)
+        for button in self.buttons():
+            button.setStyleSheet(_style)  # styleSheet before the palette
+            pal = button.palette()
+            pal.setColor(QtGui.QPalette.Highlight, self.highlightColour)
+            button.setPalette(pal)
 
     def button(self, which: 'QtWidgets.QDialogButtonBox.StandardButton') -> QtWidgets.QPushButton:
         # subclass 'button' to allow searching for user buttons in _userButtonDict before standardButtons

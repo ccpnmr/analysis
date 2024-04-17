@@ -9,9 +9,9 @@ GWV: 22/4/2018: New handling of colours
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -20,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:08 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2024-04-17 12:03:19 +0100 (Wed, April 17, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -220,17 +220,10 @@ class SequenceWidget():
     def _setFocusColour(self, focusColour=None, noFocusColour=None):
         """Set the focus/noFocus colours for the widget
         """
-        focusColour = getColours()[BORDERFOCUS]
-        noFocusColour = getColours()[BORDERNOFOCUS]
-        styleSheet = "QGraphicsView { " \
-                     "border: 1px solid;" \
-                     "border-radius: 1px;" \
-                     "border-color: %s;" \
-                     "} " \
-                     "QGraphicsView:focus { " \
-                     "border: 1px solid %s; " \
-                     "border-radius: 1px; " \
-                     "}" % (noFocusColour, focusColour)
+        styleSheet = """QGraphicsView {
+                            border-width: 1px;
+                            border-radius: 2px;
+                        }"""
         self.scrollArea.setStyleSheet(styleSheet)
 
     def _getGuiItem(self, scene):
@@ -514,7 +507,7 @@ class SequenceWidget():
                     self._addChainLabel(chain, tryToUseSequenceCodes=True)
 
         self._highlight = QtWidgets.QGraphicsTextItem()
-        self._highlight.setDefaultTextColor(QtGui.QColor(self.colours[SEQUENCEMODULE_TEXT]))
+        # self._highlight.setDefaultTextColor(QtGui.QColor(self.colours[SEQUENCEMODULE_TEXT]))
 
         setWidgetFont(self._highlight, size='LARGE')
         self._highlight.setPlainText('')
@@ -551,7 +544,7 @@ class GuiChainLabel(QtWidgets.QGraphicsTextItem):
         self.items = [self]  # keeps track of items specific to this chainLabel
 
         self.colours = getColours()
-        self.setDefaultTextColor(QtGui.QColor(self.colours[GUICHAINLABEL_TEXT]))
+        # self.setDefaultTextColor(QtGui.QColor(self.colours[GUICHAINLABEL_TEXT]))
 
         # self.setFont(self.mainWindow.application._fontSettings.fixedWidthLargeFont)
         setWidgetFont(self, size='LARGE')
@@ -588,13 +581,27 @@ class GuiChainLabel(QtWidgets.QGraphicsTextItem):
             for idx, residue in enumerate(chain.residues):
                 self._addResidue(idx, residue)
 
+        QtWidgets.QApplication.instance().paletteChanged.connect(self._checkPalette)
+
+    def _checkPalette(self, pal: QtGui.QPalette):
+        # print the colours from the updated palette - only 'highlight' seems to be effective
+        # QT modifies this to give different selection shades depending on the widget
+        base = pal.base().color().lightness()
+        _highlightColour = QtGui.QColor.fromHslF(0.625, #highlight.hueF(),
+                                                 # tweak the highlight colour depending on the theme
+                                                 #    needs to go in the correct place
+                                                 0.8 if base > 127 else 0.75,
+                                                 0.5 if base > 127 else 0.65
+                                                 )
+        self.setDefaultTextColor(_highlightColour)
+
     def _addResidue(self, idx, residue):
         """
         Add residue and optional sequenceCode for
         """
         if idx % 10 == 9:  # print out every 10
             numberItem = QtWidgets.QGraphicsTextItem(residue.sequenceCode)
-            numberItem.setDefaultTextColor(QtGui.QColor(self.colours[GUICHAINLABEL_TEXT]))
+            # numberItem.setDefaultTextColor(QtGui.QColor(self.colours[GUICHAINLABEL_TEXT]))
 
             # numberItem.setFont(self.mainWindow.application._fontSettings.helvetica8)
             setWidgetFont(numberItem, size='SMALL')
@@ -604,6 +611,8 @@ class GuiChainLabel(QtWidgets.QGraphicsTextItem):
             xPosition = self.labelPosition + (_spacing * self.currentIndex)
 
             numberItem.setPos(QtCore.QPointF(xPosition, self.yPosition))
+            numberItem.setDefaultTextColor(QtGui.QColor('#808080'))
+
             self.scene.addItem(numberItem)
             self.items.append(numberItem)
             self.currentIndex += 1
@@ -659,6 +668,7 @@ def _interpretEvent(event):
 
 class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
     fontSize = 20
+    assignedState = 0
 
     def __init__(self, guiChainLabel, mainWindow, residue, scene, labelPosition, index, yPosition):
 
@@ -675,7 +685,7 @@ class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
         _spacing = getFontHeight(size='LARGE')
 
         self.colours = getColours()
-        self.setDefaultTextColor(QtGui.QColor(self.colours[GUICHAINRESIDUE_UNASSIGNED]))
+        # self.setDefaultTextColor(QtGui.QColor(self.colours[GUICHAINRESIDUE_UNASSIGNED]))
 
         self.setPlainText(residue.shortName)
         # position = labelPosition + (self.mainWindow.application._fontSettings.textFontHugeSpacing * index)
@@ -687,6 +697,12 @@ class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
         self.setFlags(QtWidgets.QGraphicsItem.ItemIsSelectable | self.flags())
         self._styleResidue()
 
+        QtWidgets.QApplication.instance().paletteChanged.connect(self._checkPalette)
+
+    def _checkPalette(self, pal: QtGui.QPalette):
+        if not self.assignedState:
+            self.setDefaultTextColor(pal.text().color())
+
     def _styleResidue(self):
         """
         A convenience function for applying the correct styling to GuiChainResidues depending on their state.
@@ -697,22 +713,25 @@ class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
             else:
                 self._setStyleUnAssigned()
         except:
-            # self.setHtml('<div style="color: %s; "text-align: center;">' % self.colours[GUICHAINRESIDUE_UNASSIGNED] + '</div')
             getLogger().warning('GuiChainResidue has been deleted')
 
+    def _setStyleUnAssigned(self):
+        self.assignedState = 0
+        self.setPlainText(self.residue.shortName)
+        # GUICHAINRESIDUE_UNASSIGNED
+
     def _setStyleAssigned(self):
+        self.assignedState = 1
         self.setHtml('<div style="color: %s; text-align: center;"><strong>' % self.colours[GUICHAINRESIDUE_ASSIGNED] +
                      self.residue.shortName + '</strong></div>')
 
-    def _setStyleUnAssigned(self):
-        self.setHtml('<div style="color: %s; "text-align: center;">' % self.colours[GUICHAINRESIDUE_UNASSIGNED] +
-                     self.residue.shortName + '</div')
-
     def _setStylePossibleAssigned(self):
+        self.assignedState = 2
         self.setHtml('<div style="color: %s; "text-align: center;">' % self.colours[GUICHAINRESIDUE_POSSIBLE] +
                      self.residue.shortName + '</div')
 
     def _setStyleWarningAssigned(self):
+        self.assignedState = 3
         self.setHtml('<div style="color: %s; "text-align: center;">' % self.colours[GUICHAINRESIDUE_WARNING] +
                      self.residue.shortName + '</div')
 

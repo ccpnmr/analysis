@@ -4,19 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: varioustoxins $"
-__dateModified__ = "$dateModified: 2022-03-06 11:05:17 +0000 (Sun, March 06, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-04-17 12:03:19 +0100 (Wed, April 17, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -35,11 +35,13 @@ from operator import itemgetter
 import random
 from typing import Optional, List
 
-from PyQt5 import QtGui
+from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtCore import pyqtSignal, Qt, QRectF, QPointF
 from PyQt5.QtGui import QPixmap, QBrush, QColor, QPainter
 from PyQt5.QtWidgets import QApplication, QWizard, QWizardPage, QCheckBox, QPushButton, QLabel, QGridLayout, \
     QSizePolicy, QFrame, QTextBrowser, QGraphicsScene, QGraphicsView
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from ccpn.ui.gui.widgets.Button import Button
 
 from ccpn.framework.PathsAndUrls import tipOfTheDayConfig
 
@@ -343,8 +345,8 @@ class TipOfTheDayWindow(QWizard):
         self.setWizardStyle(QWizard.ModernStyle)
 
         if not standalone:
-            self._dont_show_tips_button = QCheckBox(PLACE_HOLDER)
-        self._random_tip_button = QPushButton(PLACE_HOLDER)
+            self._dont_show_tips_button = CheckBox(PLACE_HOLDER)
+        self._random_tip_button = Button(PLACE_HOLDER)
 
         self.setOption(HAVE_RANDOM_TIP_BUTTON, True)
         self.setOption(HAVE_DONT_SHOW_TIPS_BUTTON, not standalone)
@@ -388,6 +390,47 @@ class TipOfTheDayWindow(QWizard):
         random.seed(1)
 
         self._centre_window()
+
+        self._setStyle()
+
+    def _setStyle(self):
+        self._checkPalette(self.palette())
+        QtWidgets.QApplication.instance().paletteChanged.connect(self._checkPalette)
+
+    def _checkPalette(self, pal: QtGui.QPalette):
+        # print the colours from the updated palette - only 'highlight' seems to be effective
+        # QT modifies this to give different selection shades depending on the widget
+        # print(f'--> setting {self.__class__.__name__} styleSheet')
+        base = pal.base().color().lightness()
+        highlight = pal.highlight().color()
+        self.highlightColour = QtGui.QColor.fromHslF(highlight.hueF(),
+                                                     # tweak the highlight colour depending on the theme
+                                                     #    needs to go in the correct place
+                                                     0.8 if base > 127 else 0.75,
+                                                     0.5 if base > 127 else 0.45
+                                                     )
+        _style = """QPushButton { padding: 2px 8px 2px 8px; }
+                    QPushButton:focus {
+                        padding: 0px 0px 0px 0px;
+                        border-color: %(BORDER_FOCUS)s;
+                        border-style: solid;
+                        border-width: 1px;
+                        border-radius: 2px;
+                    }
+                    QPushButton:disabled {
+                        color: #808080;
+                        background-color: palette(midlight);
+                    }
+                    """ % {'BORDER_FOCUS': self.highlightColour.name()}
+        self.setStyleSheet(_style)
+        for button in TIPS_SETUP[self._mode][BUTTONS]:
+            button = BUTTON_IDS[button]
+            try:
+                pal = self.button(button).palette()
+                pal.setColor(QtGui.QPalette.Highlight, self.highlightColour)
+                self.button(button).setPalette(pal)
+            except Exception as es:
+                print(es)
 
     def isStandalone(self):
         return self._standalone

@@ -1,9 +1,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -11,9 +11,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-12 16:56:58 +0100 (Thu, October 12, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-04-17 12:03:17 +0100 (Wed, April 17, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -331,6 +331,36 @@ class _FittingPlot(pg.PlotItem):
         self.buttonsHidden = True
         self.autoBtn.hide()
         self.crossHair = CrossHair(plotWidget=self)
+
+        self._setStyle()
+
+    def _setStyle(self):
+        # self._checkPalette(self.palette())
+        QtWidgets.QApplication.instance().paletteChanged.connect(self._checkPalette)
+
+    def _checkPalette(self, pal: QtGui.QPalette):
+        # print the colours from the updated palette - only 'highlight' seems to be effective
+        # QT modifies this to give different selection shades depending on the widget
+        # print(f'--> setting {self.__class__.__name__} styleSheet')
+        base = pal.base().color().lightness()
+        highlight = pal.highlight().color()
+        self.highlightColour = QtGui.QColor.fromHslF(highlight.hueF(),
+                                       # tweak the highlight colour depending on the theme
+                                       #    needs to go in the correct place
+                                       0.8 if base > 127 else 0.75,
+                                       0.5 if base > 127 else 0.45
+                                       )
+        self.penColour = pal.windowText().color().name()
+        self.backgroundColour = pal.base().color().name()
+        self.gridPen = pg.functions.mkPen(self.penColour, width=1, style=QtCore.Qt.SolidLine)
+        # self.gridFont = getFont()
+        # self.originAxesPen = pg.functions.mkPen(hexToRgb(getColours()[GUISTRIP_PIVOT]), width=1, style=QtCore.Qt.DashLine)
+        # self.scatterPen = pg.functions.mkPen(self.penColour, width=0.5, style=QtCore.Qt.SolidLine)
+        # self.selectedPointPen = pg.functions.mkPen(self.highlightColour.name(), width=4)
+        # self.selectedLabelPen = pg.functions.mkBrush(self.highlightColour.name(), width=4)
+        # self.setBackgroundColour(self.backgroundColour)
+        self.getAxis('bottom').setPen(self.gridPen)
+        self.getAxis('left').setPen(self.gridPen)
 
     def clear(self):
         """

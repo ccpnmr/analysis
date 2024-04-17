@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:28 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-04-17 12:03:19 +0100 (Wed, April 17, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -189,12 +189,12 @@ def main():
     frame.setLayout(layout)
 
     table = TableABC(None, df=df, focusBorderWidth=1, cellPadding=11,
-                     showGrid=True, gridColour='white',
+                     showGrid=True, gridColour=None,
                      setWidthToColumns=False, setHeightToRows=False, _resize=True)
 
     for row in range(table.rowCount()):
-        for col in range(table.columnCount()):
-            table.setBackground(row, col, QtGui.QColor(random.randint(0, 256**3) & 0x3f3f3f | 0x404040))
+        for col in range(table.columnCount() // 2):
+            # table.setBackground(row, col, QtGui.QColor(random.randint(0, 256**3) & 0x3f3f3f | 0x404040))
             table.setForeground(row, col, QtGui.QColor(random.randint(0, 256**3) & 0x3f3f3f | 0x808080))
 
     # set some background colours

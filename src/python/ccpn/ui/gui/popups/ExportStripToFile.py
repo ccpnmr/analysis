@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:27 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-04-17 12:03:18 +0100 (Wed, April 17, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1639,9 +1639,9 @@ class ExportStripToFilePopup(ExportDialogABC):
         """post-initialise functions
         CCPN-Internal to be called at the end of __init__
         """
-        super()._postInit()
-
-        # self._populate()
+        with self._changes.blockChanges():
+            # stop the popup from firing events
+            super()._postInit()
         self._revertButton = self.getButton(self.RESETBUTTON)
 
     def _closeDialog(self):

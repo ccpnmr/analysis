@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-04 15:19:24 +0100 (Thu, April 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-17 12:03:18 +0100 (Wed, April 17, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -57,31 +57,83 @@ class Button(QtWidgets.QPushButton, Base):
             fontHeight = (getFontHeight() or 12) + 4
             self.setIconSize(QtCore.QSize(fontHeight, fontHeight))
             # slightly narrower padding for nicer fit of the icon
-            if enableFocusBorder:
-                self.setStyleSheet('Button { padding: 0px 1px 0px 1px; }'
-                                   'Button:focus { padding: 0px 0px 0px 0px; '
-                                   'border: 1px solid %(BORDER_FOCUS)s; border-radius: 2px; }' % getColours())
-            else:
-                self.setStyleSheet('Button { padding: 0px 1px 0px 1px; }')
-        else:
-            if enableFocusBorder:
-                self.setStyleSheet('Button { padding: 2px 3px 2px 3px; }'
-                                   'Button:focus { padding: 0px 0px 0px 0px; '
-                                   'border: 1px solid %(BORDER_FOCUS)s; border-radius: 2px; }' % getColours())
-            else:
-                self.setStyleSheet('Button { padding: 2px 3px 2px 3px; }')
+            # if enableFocusBorder:
+            #     self.setStyleSheet('Button { padding: 0px 1px 0px 1px; }'
+            #                        'Button:focus { padding: 0px 0px 0px 0px; '
+            #                        'border-width: 1px; '
+            #                        'border-radius: 2px; }' % getColours())
+            # else:
+            #     self.setStyleSheet('Button { padding: 0px 1px 0px 1px; }')
+        # else:
+        #     if enableFocusBorder:
+        #         self.setStyleSheet('Button { padding: 2px 3px 2px 3px; }'
+        #                            'Button:focus { padding: 0px 0px 0px 0px; '
+        #                            'border-width: 1px; '
+        #                            'border-radius: 2px; }' % getColours())
+        #     else:
+        #         self.setStyleSheet('Button { padding: 2px 3px 2px 3px; }')
 
         self.toggle = toggle
         if toggle is not None:
             self.setCheckable(True)
             self.setSelected(toggle)
-            self.setStyleSheet('Button::checked {background-color: blue }')
+            # self.setStyleSheet('Button::checked {background-color: palette(highlight) }')
 
         self._callback = None
         self.setCallback(callback)
 
         # set the initial enabled state of the button
         self.setEnabled(enabled)
+
+        self._setStyle()
+
+    def _setStyle(self):
+        self._checkPalette(self.palette())
+        QtWidgets.QApplication.instance().paletteChanged.connect(self._checkPalette)
+
+    def _checkPalette(self, pal: QtGui.QPalette):
+        # print the colours from the updated palette - only 'highlight' seems to be effective
+        # QT modifies this to give different selection shades depending on the widget
+        # print(f'--> setting {self.__class__.__name__} styleSheet')
+        base = pal.base().color().lightness()
+        highlight = pal.highlight().color()
+        self.highlightColour = QtGui.QColor.fromHslF(highlight.hueF(),
+                                       # tweak the highlight colour depending on the theme
+                                       #    needs to go in the correct place
+                                       0.8 if base > 127 else 0.75,
+                                       0.5 if base > 127 else 0.45
+                                       )
+        if self.icon:
+            _style = """QPushButton { padding: 0px 1px 0px 1px; }
+                    """
+        else:
+            _style = """QPushButton { padding: 2px 3px 2px 3px; }
+                    """
+        if self._enableFocusBorder:
+            _style += """QPushButton:focus {
+                        padding: 0px 0px 0px 0px;
+                        border-color: %(_BORDER_FOCUS)s;
+                        border-style: solid;
+                        border-width: 1px;
+                        border-radius: 2px;
+                    }
+                    """
+        else:
+            _style += """QPushButton:focus {
+                        padding: 0px 1px 0px 1px;
+                    }
+                    """
+        _style += """QPushButton:disabled {
+                    color: #808080;
+                    background-color: palette(midlight);
+                }
+                """
+        if self.toggle is not None:
+            _style += """Button:checked { background-color: palette(highlight) }
+                    """
+        self.setStyleSheet(_style % {'_BORDER_FOCUS': self.highlightColour.name()})
+        pal.setColor(QtGui.QPalette.Highlight, self.highlightColour)
+        self.setPalette(pal)
 
     def keyReleaseEvent(self, event: QtGui.QKeyEvent):
         if event.key() in [QtCore.Qt.Key_Space]:

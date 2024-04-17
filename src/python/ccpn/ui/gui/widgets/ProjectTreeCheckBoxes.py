@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:27 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-04-17 12:03:19 +0100 (Wed, April 17, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -252,17 +252,10 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
     def _setFocusColour(self, focusColour=None, noFocusColour=None):
         """Set the focus/noFocus colours for the widget
         """
-        focusColour = getColours()[BORDERFOCUS]
-        noFocusColour = getColours()[BORDERNOFOCUS]
-        styleSheet = "QTreeWidget { " \
-                     "border: 1px solid;" \
-                     "border-radius: 1px;" \
-                     "border-color: %s;" \
-                     "} " \
-                     "QTreeWidget:focus { " \
-                     "border: 1px solid %s; " \
-                     "border-radius: 1px; " \
-                     "}" % (noFocusColour, focusColour)
+        styleSheet = """QTreeWidget {
+                            border-radius: 2px;
+                            border-width: 1px;
+                        }"""
         self.setStyleSheet(styleSheet)
 
     def getObjects(self, includeRoot=False):

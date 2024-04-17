@@ -47,9 +47,9 @@ ScrollableFrame(parent=None, showBorder=False, fShape=None, fShadow=None,
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -58,8 +58,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 19:17:56 +0100 (Wed, June 28, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-04-17 12:03:19 +0100 (Wed, April 17, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -119,9 +119,9 @@ class Frame(QtWidgets.QFrame, Base):
             styleSheet += "foreground-color: rgb(%d, %d, %d); " % kwds["fgColor"]
             del (kwds['fgColor'])
         if showBorder:
-            styleSheet += "border: 1px solid %s; " % BORDERNOFOCUS_COLOUR
+            styleSheet += "border-width: 1px"  # solid %s; " % BORDERNOFOCUS_COLOUR
         else:
-            styleSheet += "border: 0px; "
+            styleSheet += "border-width: 0px; "
         if len(styleSheet) > 0:
             #print('>>', styleSheet)
             self.setStyleSheet('QFrame {' + styleSheet + '}')
@@ -188,7 +188,7 @@ class ScrollableFrame(Frame):
                                       )
         self._scrollArea.setWidget(self)
         self._scrollArea.setWidgetResizable(True)
-        self._scrollArea.setStyleSheet('ScrollArea { border: 0px; background: transparent; }')
+        self._scrollArea.setStyleSheet('ScrollArea { border-width: 0px; background: transparent; }')
 
         # configure the scroll area to allow all available space without margins
         self.setContentsMargins(*margins)
@@ -288,7 +288,7 @@ class OpenGLOverlayFrame(Frame):
                              'margin: 0px 0px 0px 0px;'
                              'color: %s;'
                              'background-color: %s;'
-                             'border: 0 px;'
+                             'border-width: 0px;'
                              'font-family: %s;'
                              'font-size: %dpx;'
                              'qproperty-alignment: AlignLeft;'
@@ -301,7 +301,7 @@ class OpenGLOverlayFrame(Frame):
                              'padding: 0; '
                              'margin: 0px 0px 0px 0px;'
                              'color: %s;'
-                             'border: 0 px;'
+                             'border-width: 0px;'
                              'font-family: %s;'
                              'font-size: %dpx;'
                              'qproperty-alignment: AlignLeft;'
@@ -325,7 +325,7 @@ class OpenGLOverlayFrame(Frame):
                          'margin: 0px 0px 0px 0px;'
                          'color: %s;'
                          'background-color: %s;'
-                         'border: 0 px;'
+                         'border-width: 0px;'
                          'font-family: %s;'
                          'font-size: %dpx;'
                          'qproperty-alignment: AlignLeft;'
@@ -333,7 +333,6 @@ class OpenGLOverlayFrame(Frame):
                                 getColours()[backgroundColour],
                                 textFontLarge.fontName,
                                 textFontLarge.pointSize()))
-
         sl.update()
 
     def resetColourTheme(self):

@@ -4,9 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-28 12:49:06 +0000 (Tue, November 28, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2024-04-17 12:03:19 +0100 (Wed, April 17, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,7 +27,7 @@ __date__ = "$Date: 2022-09-08 17:13:11 +0100 (Thu, September 08, 2022) $"
 #=========================================================================================
 
 import pandas as pd
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from collections import defaultdict
 from functools import partial
 from time import time_ns
@@ -161,13 +161,15 @@ class _ProjectTableABC(TableABC, Base):
         super().__init__(parent, df=df,
                          multiSelect=multiSelect, selectRows=selectRows,
                          showHorizontalHeader=showHorizontalHeader, showVerticalHeader=showVerticalHeader,
-                         borderWidth=borderWidth, cellPadding=cellPadding, focusBorderWidth=focusBorderWidth, gridColour=gridColour,
+                         borderWidth=borderWidth, cellPadding=cellPadding, focusBorderWidth=focusBorderWidth,
+                         gridColour=gridColour,
                          _resize=_resize, setWidthToColumns=setWidthToColumns, setHeightToRows=setHeightToRows,
                          setOnHeaderOnly=setOnHeaderOnly, showGrid=showGrid, wordWrap=wordWrap,
                          alternatingRows=alternatingRows,
                          selectionCallback=selectionCallback, selectionCallbackEnabled=selectionCallbackEnabled,
                          actionCallback=actionCallback, actionCallbackEnabled=actionCallbackEnabled,
-                         enableExport=enableExport, enableDelete=enableDelete, enableSearch=enableSearch, enableCopyCell=enableCopyCell,
+                         enableExport=enableExport, enableDelete=enableDelete, enableSearch=enableSearch,
+                         enableCopyCell=enableCopyCell,
                          tableMenuEnabled=tableMenuEnabled, toolTipsEnabled=toolTipsEnabled,
                          )
         # Base messes up styleSheets defined in superclass
@@ -180,6 +182,8 @@ class _ProjectTableABC(TableABC, Base):
             self.application = mainWindow.application
             self.project = mainWindow.application.project
             self.current = mainWindow.application.current
+            # excellent - this can work here :)
+            # self.application.ui.qtApp.paletteChanged.connect(self._printPalette)
 
         self.moduleParent = moduleParent
         self._table = None
@@ -215,6 +219,37 @@ class _ProjectTableABC(TableABC, Base):
             # set the delegate for editing
             delegate = _TableDelegate(self, objectColumn=self.OBJECTCOLUMN)
             self.setItemDelegate(delegate)
+
+    @staticmethod
+    def _printPalette(pal: QtGui.QPalette):
+        # print the colours from the updated palette - only 'highlight' seems to be effective
+        # QT modifies this to give different selection shades depending on the widget
+        print('Palette ~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+        colNames = ['windowText',  # 0
+                    'button',  # 1
+                    'light',  # 2
+                    'midlight',  # 3
+                    'dark',  # 4
+                    'mid',  # 5
+                    'text',  # 6
+                    'brightText',  # 7
+                    'buttonText',  # 8
+                    'base',  # 9
+                    'window',  # 10
+                    'shadow',  # 11
+                    'highlight',  # 12
+                    'highlightedText',  # 13
+                    'link',  # 14
+                    'linkVisited',  # 15
+                    'alternateBase',  # 16
+                    'noRole',  # 17
+                    'toolTipBase',  # 18
+                    'toolTipText',  # 19
+                    'placeholderText',  # 20
+                    ]
+        for colnum, colname in enumerate(colNames):
+            color = pal.color(QtGui.QPalette.Active, QtGui.QPalette.ColorRole(colnum)).name()
+            print(f"  Role: {colname:20}  {color}")
 
     def setModel(self, model: QtCore.QAbstractItemModel) -> None:
         """Set the model for the view
@@ -342,7 +377,8 @@ class _ProjectTableABC(TableABC, Base):
             pulldown.select(selectableObjects[0].pid)
 
         elif othersClassNames := list({obj.className for obj in others if hasattr(obj, 'className')}):
-            title, msg = ('Dropped wrong item.', f"Do you want to open the {''.join(othersClassNames)} in a new module?") \
+            title, msg = ('Dropped wrong item.',
+                          f"Do you want to open the {''.join(othersClassNames)} in a new module?") \
                 if len(othersClassNames) == 1 else ('Dropped wrong items.', 'Do you want to open items in new modules?')
 
             if MessageDialog.showYesNo(title, msg):
@@ -484,7 +520,8 @@ class _ProjectTableABC(TableABC, Base):
         if self.cellClassNames:
             for cellClass, attr in self.cellClassNames.items():
                 self._cellNotifiers.append(Notifier(self.project,
-                                                    [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
+                                                    [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE,
+                                                     Notifier.RENAME],
                                                     cellClass.__name__,
                                                     partial(self._queueGeneralNotifier, self._updateCellCallback),
                                                     onceOnly=True))

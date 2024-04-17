@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-04 15:19:22 +0100 (Thu, April 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-17 12:03:18 +0100 (Wed, April 17, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -826,7 +826,6 @@ def handleDialogApply(self):
         if error.cleanUndo:
             # clean-up with warning popup
             dialogErrorReport(self, undo, None)
-
 
 def _verifyPopupApply(self, attributeName, value, last, *postArgs, **postKwds):
     """Change the state of the apply button based on the changes in the tabs

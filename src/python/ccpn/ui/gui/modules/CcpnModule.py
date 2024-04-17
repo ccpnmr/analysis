@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-04 15:19:21 +0100 (Thu, April 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-17 12:03:17 +0100 (Wed, April 17, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1455,8 +1455,12 @@ class DropAreaSelectedOverlay(QtWidgets.QWidget):
         p = QtGui.QPainter(self)
         rgn = self.rect()
 
-        p.setBrush(QtGui.QBrush(QtGui.QColor(100, 100, 255, 50)))
-        p.setPen(QtGui.QPen(QtGui.QColor(50, 50, 150), 3))
+        color = self.palette().highlight().color()
+        color.setAlpha(100)
+        p.setBrush(color)
+        p.setPen(QtGui.QPen(color, 3))
+        # p.setBrush(QtGui.QBrush(QtGui.QColor(100, 100, 255, 50)))
+        # p.setPen(QtGui.QPen(QtGui.QColor(50, 50, 150), 3))
         p.drawRect(rgn)
         p.end()
 
@@ -1513,6 +1517,7 @@ class BorderOverlay(QtWidgets.QWidget):
                      )
 
         # draw the new rectangle around the module
-        p.setPen(QtGui.QPen(self._borderColour, 1))
+        # p.setPen(QtGui.QPen(self._borderColour, 1))
+        p.setPen(QtGui.QPen(self.palette().mid(), 1))
         p.drawRoundedRect(rgn, 2, 2)
         p.end()

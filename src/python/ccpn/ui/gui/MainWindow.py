@@ -15,13 +15,14 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:26 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-04-17 12:03:17 +0100 (Wed, April 17, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: gvuister $"
 __date__ = "$Date: 2023-01-24 10:28:48 +0000 (Tue, January 24, 2023) $"
+
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -50,7 +51,9 @@ from ccpn.ui.gui.lib.mouseEvents import SELECT, PICK, MouseModes, \
     setCurrentMouseMode, getCurrentMouseMode
 from ccpn.ui.gui.lib import GuiStrip
 from ccpn.ui.gui.lib.Shortcuts import Shortcuts
-from ccpn.ui.gui.guiSettings import getColours
+from ccpn.ui.gui.guiSettings import getColours, LIGHT, DARK, DEFAULT, \
+    colourSchemes, BORDERFOCUS, BORDERNOFOCUS, GUITABLE_SELECTED_BACKGROUND, \
+    CCPNGLWIDGET_HEXHIGHLIGHT, setColourScheme
 
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 
@@ -96,7 +99,7 @@ _MULTIPLET_PEAKS = 16
 READONLYCHANGED = 'readOnlyChanged'
 
 
-class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
+class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
     # inherits NotifierBase from _Implementation.Window
 
     WindowMaximiseMinimise = QtCore.pyqtSignal(bool)
@@ -104,9 +107,9 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
     def __init__(self, application=None):
 
         # Shortcuts only inserts methods
-        super(QtWidgets.QMainWindow, self).__init__()
+        super().__init__()
 
-        # format = QtGui.QSurfaceFormat()
+        # format = QtGui.QSurfaceFormat()  # I think these can be removed now
         # format.setSwapInterval(0)
         # QtGui.QSurfaceFormat.setDefaultFormat(format)
 
@@ -177,11 +180,197 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         self.hide()
 
     def show(self):
-        super().show()
-
         # install handler to resize when moving between displays
         #   cannot be done in __init__ as crashes on linux/windows :O
         self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
+        self._checkPalette(self.palette())
+        QtWidgets.QApplication.instance().paletteChanged.connect(self._checkPalette)
+        super().show()
+
+    def _checkPalette(self, pal: QtGui.QPalette):
+        # print the colours from the updated palette - only 'highlight' seems to be effective
+        # QT modifies this to give different selection shades depending on the widget
+        # this seems to clean the stylesheets
+
+        colNames = [
+            'windowText',  # 0
+            'button',  # 1
+            'light',  # 2
+            'midlight',  # 3
+            'dark',  # 4
+            'mid',  # 5
+            'text',  # 6
+            'brightText',  # 7
+            'buttonText',  # 8
+            'base',  # 9
+            'window',  # 10
+            'shadow',  # 11
+            'highlight',  # 12
+            'highlightedText',  # 13
+            'link',  # 14
+            'linkVisited',  # 15
+            'alternateBase',  # 16
+            'noRole',  # 17
+            'toolTipBase',  # 18
+            'toolTipText',  # 19
+            'placeholderText',  # 20
+            ]
+        for colnum, colname in enumerate(colNames):
+            color = pal.color(QtGui.QPalette.Active, QtGui.QPalette.ColorRole(colnum)).name()
+            # print(f"  Role: {colname:20}  {color}")
+        #
+        # test the stylesheet of the QTableView
+        styleSheet = """
+                        QWidget {
+                            color: palette(text);
+                        }
+                        QToolTip {
+                            background-color: %(TOOLTIP_BACKGROUND)s;
+                            color: %(TOOLTIP_FOREGROUND)s;
+                        }
+                        
+                        QPushButton {
+                            padding: 2px 8px 2px 8px;
+                        }
+                        QPushButton:focus {
+                            padding: 0px 0px 0px 0px;
+                            border-color: %(BORDER_FOCUS)s;
+                            border-style: solid;
+                            border-width: 1px;
+                            border-radius: 2px;
+                        }
+                        QPushButton:disabled {
+                            color: #808080;
+                            background-color: palette(midlight);
+                        }
+                        QGraphicsView {
+                            border: 1px solid palette(mid);
+                            border-radius: 2px;
+                        }
+                        QGraphicsView:focus {
+                            border: 1px solid %(BORDER_FOCUS)s;
+                        }
+
+                        QListView {
+                            border: 1px solid palette(mid);
+                            border-radius: 2px;
+                        }
+                        QListView:focus {
+                            border: 1px solid %(BORDER_FOCUS)s;
+                            border-radius: 2px;
+                        }
+                        QListWidget {
+                            border: 1px solid palette(mid);
+                            border-radius: 2px;
+                        }
+                        QListWidget:focus {
+                            border: 1px solid %(BORDER_FOCUS)s;
+                            border-radius: 2px;
+                        }
+                        QTreeWidget {
+                            border: 1px solid palette(mid);
+                            border-radius: 2px;
+                        }
+                        QTreeWidget:focus {
+                            border: 1px solid %(BORDER_FOCUS)s;
+                            border-radius: 2px;
+                        }
+                        QTreeView {
+                            border: 1px solid palette(mid);
+                            border-radius: 2px;
+                        }
+                        QTreeView:focus {
+                            border: 1px solid %(BORDER_FOCUS)s;
+                            border-radius: 2px;
+                        }
+                        QGraphicsTextItem {
+                            background-color: orange;
+                        }
+                        
+                        /*
+                        QTableView {
+                            border-color: palette(mid);
+                            border-width: %(_BORDER_WIDTH)spx;
+                            border-style: solid;
+                            border-radius: 2px;
+                            selection-background-color: %(GUITABLE_SELECTED_BACKGROUND)s;
+                            selection-color: %(GUITABLE_ITEM_FOREGROUND)s;
+                            color: %(GUITABLE_ITEM_FOREGROUND)s;
+                        }
+                        QTableView:focus {
+                            border-color: %(BORDER_FOCUS)s;
+                        }
+
+                        QComboBox {
+                            padding: 2px 8px 2px 3px;
+                            combobox-popup: 0;
+                        }
+                        QComboBox:focus { border-color: %(BORDER_FOCUS)s; }
+                        QComboBox:disabled {
+                            color: #808080;
+                            background-color: palette(midlight);
+                        }
+
+                        QDoubleSpinBox {
+                            padding: 3px 3px 3px 3px;
+                            background-color: palette(base);
+                        }
+                        QDoubleSpinBox:disabled { background-color: palette(midlight); }
+                        QSpinBox {
+                            padding: 3px 3px 3px 3px;
+                            background-color: palette(base);
+                        }
+                        QSpinBox:disabled { background-color: palette(midlight); }
+
+                        QLineEdit {
+                            padding: 3px 3px 3px 3px;
+                            border-color: palette(mid);
+                            border-width: 1px;
+                            border-radius: 3px;
+                            border-style: solid;
+                        }
+                        QLineEdit:focus {
+                            border-color: %(BORDER_FOCUS)s;
+                        }
+                        QLineEdit:disabled {
+                            color: #808080;
+                            background-color: palette(midlight);
+                        }*/
+                        """
+        # set stylesheet
+        base = pal.base().color().lightness()  # use as a guide for light/dark theme
+        colours = colourSchemes[DEFAULT].copy() | colourSchemes[DARK if base < 127 else LIGHT].copy()
+        highlight = pal.highlight().color()
+        newCol = highlight.fromHslF(highlight.hueF(), 0.95, highlight.lightnessF()**(0.333 if base < 127 else 3.0))
+        colours[BORDERFOCUS] = newCol.name()
+        colours[BORDERNOFOCUS] = pal.mid().color().name()
+        colours[GUITABLE_SELECTED_BACKGROUND] = highlight.fromHslF(highlight.hueF(),
+                                                                   0.55 if base > 127 else 0.65,
+                                                                   0.80 if base > 127 else 0.35,
+                                                                   ).name()
+        # colours[CCPNGLWIDGET_HEXHIGHLIGHT] = newCol.getRgbF()
+        colours['_BORDER_WIDTH'] = 2  # need to grab from the table-instance :|
+        self.setStyleSheet(styleSheet % colours)
+
+        if self.application.preferences.general.colourScheme == DEFAULT:
+            # print(f'--> change theme  {base}')
+            # NOTE:ED - should really just jire a signal for the spectrum-displays/strips to respond to
+            setColourScheme(DARK if base < 127 else LIGHT)
+            self.application._correctColours()
+            for display in self.project.spectrumDisplays:
+                for strip in display.strips:
+                    strip._frameGuide.resetColourTheme()
+            # update the chemical-shift mapping plotWidgets
+
+            # colour theme has changed - flag displays to update
+            # prompt the GLwidgets to update
+            from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+
+            GLSignals = GLNotifier(parent=self)
+            GLSignals.emitEvent(triggers=[GLNotifier.GLALLCONTOURS,
+                                          GLNotifier.GLALLPEAKS,
+                                          GLNotifier.GLALLMULTIPLETS,
+                                          GLNotifier.GLPREFERENCES])
 
     def _initReadOnlyIcon(self):
         """Add icon to the statusBar that reflects the read-only state of the current project
@@ -453,10 +642,10 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                           'current'                 : self.application.current,
                           'preferences'             : self.application.preferences,
                           'redo'                    : self.application.redo,
-                          'undo'                  : self.application.undo,
+                          'undo'                    : self.application.undo,
                           'get'                     : self.application.get,
-                          'getByPid'            :  self.application.get,
-                          'getByGid'            : self.application.ui.getByGid,
+                          'getByPid'                : self.application.get,
+                          'getByGid'                : self.application.ui.getByGid,
                           'ui'                      : self.application.ui,
                           'mainWindow'              : self,
                           'project'                 : self.application.project,
@@ -485,7 +674,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         self._sideBarFrame.getLayout().addWidget(self._sidebarSplitter, 0, 0)  # must be inserted this way
 
         # create 2 more containers for the search bar and the results
-        self.searchWidgetContainer = Frame(self._sideBarFrame, setLayout=True, grid=(1, 0))  # in this frame is inserted the search widget
+        self.searchWidgetContainer = Frame(self._sideBarFrame, setLayout=True,
+                                           grid=(1, 0))  # in this frame is inserted the search widget
         self.searchResultsContainer = Frame(self, setLayout=True)  # in this frame is inserted the search widget
         self.searchResultsContainer.setMinimumHeight(100)
 
@@ -596,8 +786,9 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                 self._shortcutsDict[twoLetters] = thecallable
             else:
                 alreadyUsed = self._shortcutsDict.get(twoLetters)
-                getLogger().warning(" Ambiguous shortcut overload: %s. \n Assigning to: %s. \nAlready in use for: \n %s." %
-                                    (twoLetters, thecallable, alreadyUsed))
+                getLogger().warning(
+                        " Ambiguous shortcut overload: %s. \n Assigning to: %s. \nAlready in use for: \n %s." %
+                        (twoLetters, thecallable, alreadyUsed))
 
     def _storeMainMenuShortcuts(self, actions):
         for action in actions:
@@ -1071,7 +1262,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         pluginUserPath = self.application.preferences.general.userPluginPath
         import importlib.util
 
-        filePaths = [(aPath(r) / file) for r, d, f in os.walk(aPath(pluginUserPath)) for file in f if os.path.splitext(file)[1] == '.py']
+        filePaths = [(aPath(r) / file) for r, d, f in os.walk(aPath(pluginUserPath)) for file in f if
+                     os.path.splitext(file)[1] == '.py']
 
         for filePath in filePaths:
             # iterate and load the .py files in the plugins directory
@@ -1220,7 +1412,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             if undos.isDirty():
                 # reply = MessageDialog.showMulti(MESSAGE, DETAIL, [QUIT, CANCEL], checkbox=SAVE_DATA, okText=QUIT,
                 #                                 checked=True)
-                reply = MessageDialog.showMulti(MESSAGE, DETAIL, texts=[SAVE, DONT_SAVE, CANCEL], parent=self, okText=SAVE)
+                reply = MessageDialog.showMulti(MESSAGE, DETAIL, texts=[SAVE, DONT_SAVE, CANCEL], parent=self,
+                                                okText=SAVE)
             else:
                 # reply = QUIT_WITHOUT_SAVING
                 reply = DONT_SAVE
@@ -1397,12 +1590,14 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             # We dropped multiple items
             if len(errorUrls) == len(allUrlsToLoad):
                 # We only found errors; nothing to load
-                MessageDialog.showError('Load Data', 'No dropped items were recognised\nCheck console/log for details', parent=self)
+                MessageDialog.showError('Load Data', 'No dropped items were recognised\nCheck console/log for details',
+                                        parent=self)
                 return []
 
             elif len(errorUrls) >= 1:
                 # We found 1 or more errors
-                MessageDialog.showError('Load Data', '%d dropped items were not recognised\nCheck console/log for details' % \
+                MessageDialog.showError('Load Data',
+                                        '%d dropped items were not recognised\nCheck console/log for details' % \
                                         len(errorUrls), parent=self)
 
         if len(newProjectUrls) > 1:
@@ -1594,7 +1789,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                                     spectrumView.spectrum.newIntegralList()
 
                                 # stupid bug! mixing views and lists
-                                validIntegralLists = [ilv.integralList for ilv in spectrumView.integralListViews if ilv.isDisplayed]
+                                validIntegralLists = [ilv.integralList for ilv in spectrumView.integralListViews if
+                                                      ilv.isDisplayed]
 
                                 for integralList in validIntegralLists:
 
@@ -1987,7 +2183,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                             _prefsGeneral = self.application.preferences.general
                             defaultColour = _prefsGeneral.defaultMarksColour
                             if not defaultColour.startswith('#'):
-                                colourList = colorSchemeTable[defaultColour] if defaultColour in colorSchemeTable else ['#FF0000']
+                                colourList = colorSchemeTable[defaultColour] if defaultColour in colorSchemeTable else [
+                                    '#FF0000']
                                 _prefsGeneral._defaultMarksCount = _prefsGeneral._defaultMarksCount % len(colourList)
                                 defaultColour = colourList[_prefsGeneral._defaultMarksCount]
                                 _prefsGeneral._defaultMarksCount += 1
@@ -2018,7 +2215,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                     _prefsGeneral = self.application.preferences.general
                     defaultColour = _prefsGeneral.defaultMarksColour
                     if not defaultColour.startswith('#'):
-                        colourList = colorSchemeTable[defaultColour] if defaultColour in colorSchemeTable else ['#FF0000']
+                        colourList = colorSchemeTable[defaultColour] if defaultColour in colorSchemeTable else [
+                            '#FF0000']
                         _prefsGeneral._defaultMarksCount = _prefsGeneral._defaultMarksCount % len(colourList)
                         defaultColour = colourList[_prefsGeneral._defaultMarksCount]
                         _prefsGeneral._defaultMarksCount += 1
@@ -2126,7 +2324,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                 try:
                     peak = peaks[0]
                     peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4,
-                                        minDropFactor=minDropFactor, searchBoxMode=searchBoxMode, searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
+                                        minDropFactor=minDropFactor, searchBoxMode=searchBoxMode,
+                                        searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
                     if peak.spectrum.dimensionCount == 1 and peak.figureOfMerit < 1:
                         showWarning(f'Cannot snap peak', f'Figure of merit below the snapping threshold of 1.')
                 except Exception as es:
@@ -2136,24 +2335,27 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                 with progressManager(self, 'Snapping peaks to extrema'):
 
                     # try:
-                        _is1Ds = [p.spectrum.dimensionCount == 1 for p in peaks]
-                        if all(_is1Ds):
-                            from ccpn.core.lib.PeakPickers.PeakSnapping1D import snap1DPeaks
+                    _is1Ds = [p.spectrum.dimensionCount == 1 for p in peaks]
+                    if all(_is1Ds):
+                        from ccpn.core.lib.PeakPickers.PeakSnapping1D import snap1DPeaks
 
-                            snap1DPeaks(peaks)
-                            nonSnappingPeaks = [pk for pk in peaks if pk.figureOfMerit < 1]
+                        snap1DPeaks(peaks)
+                        nonSnappingPeaks = [pk for pk in peaks if pk.figureOfMerit < 1]
 
-                            msg = 'one of the selected peak' if len(nonSnappingPeaks) == 1 else 'some of the selected peaks'
-                            if len(nonSnappingPeaks) > 0:
-                                showWarning(f'Cannot snap {msg}', f'Figure of merit below the snapping threshold of 1 for {nonSnappingPeaks}')
-                        else:
-                            peaks.sort(key=lambda x: x.position[0] if x.position and None not in x.position else 0, reverse=False)  # reorder peaks by position
-                            for peak in peaks:
-                                peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4,
-                                                    minDropFactor=minDropFactor, searchBoxMode=searchBoxMode, searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
+                        msg = 'one of the selected peak' if len(nonSnappingPeaks) == 1 else 'some of the selected peaks'
+                        if len(nonSnappingPeaks) > 0:
+                            showWarning(f'Cannot snap {msg}',
+                                        f'Figure of merit below the snapping threshold of 1 for {nonSnappingPeaks}')
+                    else:
+                        peaks.sort(key=lambda x: x.position[0] if x.position and None not in x.position else 0,
+                                   reverse=False)  # reorder peaks by position
+                        for peak in peaks:
+                            peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4,
+                                                minDropFactor=minDropFactor, searchBoxMode=searchBoxMode,
+                                                searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
 
-                    # except Exception as es:
-                    #     showWarning('Snap to Extremum', str(es))
+                # except Exception as es:
+                #     showWarning('Snap to Extremum', str(es))
 
             else:
                 getLogger().warning('No selected peak/s. Select a peak first.')
@@ -2378,7 +2580,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             from ccpn.ui.gui.popups.StripPlotPopup import StripPlotPopup
 
             popup = StripPlotPopup(parent=self, mainWindow=self, spectrumDisplay=self.current.strip.spectrumDisplay,
-                                   includePeakLists=includePeakLists, includeNmrChains=includeNmrChains, includeSpectrumTable=includeSpectrumTable)
+                                   includePeakLists=includePeakLists, includeNmrChains=includeNmrChains,
+                                   includeSpectrumTable=includeSpectrumTable)
             popup.exec_()
         else:
             showWarning('Make Strip Plot', 'No selected spectrumDisplay')

@@ -182,10 +182,10 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
     def show(self):
         # install handler to resize when moving between displays
         #   cannot be done in __init__ as crashes on linux/windows :O
-        self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
         self._checkPalette(self.palette())
         QtWidgets.QApplication.instance().paletteChanged.connect(self._checkPalette)
         super().show()
+        self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
 
     def _checkPalette(self, pal: QtGui.QPalette):
         # print the colours from the updated palette - only 'highlight' seems to be effective

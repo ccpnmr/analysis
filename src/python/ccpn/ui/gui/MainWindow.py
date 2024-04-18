@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-17 16:53:15 +0100 (Wed, April 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-18 12:28:56 +0100 (Thu, April 18, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -57,6 +57,7 @@ from ccpn.ui.gui.guiSettings import getColours, LIGHT, DARK, DEFAULT, \
 
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 
+from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.PlotterWidget import plotter
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets import MessageDialog
@@ -348,7 +349,13 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                         QLineEdit:disabled {
                             color: #808080;
                             background-color: palette(midlight);
-                        }*/
+                        }
+                        
+                        QLineEdit {
+                            padding: 3px 3px 3px 3px;
+                            background-color: palette(norole);
+                        }
+                        */
                         """
         # set stylesheet
         base = pal.base().color().lightness()  # use as a guide for light/dark theme
@@ -364,6 +371,18 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         # colours[CCPNGLWIDGET_HEXHIGHLIGHT] = newCol.getRgbF()
         colours['_BORDER_WIDTH'] = 2  # need to grab from the table-instance :|
         self.setStyleSheet(styleSheet % colours)
+
+        # store the colours in the baseclass
+        Base._highlight = highlight
+        Base._highlightVivid = QtGui.QColor.fromHslF(highlight.hueF(),
+                                                  0.8 if base > 127 else 0.75,
+                                                  0.5 if base > 127 else 0.45
+                                                  )
+        Base._highlightFeint = QtGui.QColor.fromHslF(highlight.hueF(),
+                                                  0.55 if base > 127 else 0.65,
+                                                  0.80 if base > 127 else 0.35,
+                                                  )
+        Base._basePalette = pal
 
         if self.application.preferences.general.colourScheme == DEFAULT:
             # print(f'--> change theme  {base}')

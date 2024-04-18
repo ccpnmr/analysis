@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-17 12:03:18 +0100 (Wed, April 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-18 12:28:56 +0100 (Thu, April 18, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -87,6 +87,10 @@ class _WidgetState:
     widgetUpdatesEnabled = None
     signalBlockers = None
 
+
+#=========================================================================================
+# SignalBlocking
+#=========================================================================================
 
 class SignalBlocking():
     """
@@ -230,7 +234,16 @@ class SignalBlocking():
                 widget.setMinimumSize(hint)
 
 
+#=========================================================================================
+# Base
+#=========================================================================================
+
 class Base(DropBase, SignalBlocking):
+
+    _highlight = None
+    _highlightVivid = None
+    _highlightFeint = None
+    _basePalette = None
 
     # Base._init(**kwds) should be called from every widget
     # We don't use __init__ as it messes up the super() methods resolution and the

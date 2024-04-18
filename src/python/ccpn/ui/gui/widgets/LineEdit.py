@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-17 12:03:19 +0100 (Wed, April 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-18 12:28:56 +0100 (Thu, April 18, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -30,26 +30,24 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.ValidatorBase import ValidatorBase
-from ccpn.ui.gui.guiSettings import getColours
 
-from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
+
 # from ccpn.ui.gui.guiSettings import helveticaItalic12
 # from ccpn.framework.Translation import translator
 
 
 TextAlignment = {
-    'c': QtCore.Qt.AlignHCenter,
-    'l': QtCore.Qt.AlignLeft,
-    'r': QtCore.Qt.AlignRight,
+    'c'     : QtCore.Qt.AlignHCenter,
+    'l'     : QtCore.Qt.AlignLeft,
+    'r'     : QtCore.Qt.AlignRight,
     'center': QtCore.Qt.AlignHCenter,
     'centre': QtCore.Qt.AlignHCenter,
-    'left': QtCore.Qt.AlignLeft,
-    'right': QtCore.Qt.AlignRight
+    'left'  : QtCore.Qt.AlignLeft,
+    'right' : QtCore.Qt.AlignRight
     }
 
 
 class LineEdit(QtWidgets.QLineEdit, Base):
-
     highlightColour = None
 
     def __init__(self, parent, text='', textAlignment='c', backgroundText=None,
@@ -90,36 +88,41 @@ class LineEdit(QtWidgets.QLineEdit, Base):
         self._setStyle()
 
     def _setStyle(self):
-        self._checkPalette(self.palette())
-        QtWidgets.QApplication.instance().paletteChanged.connect(self._checkPalette)
-
-    def _checkPalette(self, pal: QtGui.QPalette):
-        # print the colours from the updated palette - only 'highlight' seems to be effective
-        # QT modifies this to give different selection shades depending on the widget
-        base = pal.base().color().lightness()
-        highlight = pal.highlight().color()
-        self.highlightColour = QtGui.QColor.fromHslF(highlight.hueF(),
-                                       # tweak the highlight colour depending on the theme
-                                       #    needs to go in the correct place
-                                       0.8 if base > 127 else 0.75,
-                                       0.5 if base > 127 else 0.45
-                                       )
         _style = """QLineEdit {
                     padding: 3px 3px 3px 3px;
-                    border-color: palette(mid);
-                    border-width: 1px;
-                    border-radius: 2px;
-                    border-style: solid;
-                }
-                QLineEdit:focus {
-                    border-color: %(_BORDER_FOCUS)s;
+                    background-color: palette(norole);
                 }
                 QLineEdit:disabled {
                     color: #808080;
                     background-color: palette(midlight);
                 }
-                """ % {'_BORDER_FOCUS': self.highlightColour.name()}
+                """
         self.setStyleSheet(_style)
+        # check for Windows and Linux
+        QtWidgets.QApplication.instance().paletteChanged.connect(self._revalidate)
+
+    def _revalidate(self, palette):
+        if val := self.validator():
+            if hasattr(val, 'baseColour'):
+                val.baseColour = palette.base().color()
+            val.validate(self.text(), 0)
+
+    def paintEvent(self, ev: QtGui.QPaintEvent) -> None:
+        super().paintEvent(ev)
+        if self.hasFocus():
+            p = QtGui.QPainter(self)
+            p.translate(0.5, 0.5)
+            p.setRenderHint(QtGui.QPainter.Antialiasing, True)
+            col = Base._highlightVivid
+            col.setAlpha(255)
+            pen = QtGui.QPen(col)
+            p.setPen(pen)
+            p.drawRoundedRect(self.rect().adjusted(0, 0, -1, -1), 2, 2)
+            col.setAlpha(40)
+            p.setPen(col)
+            p.drawRoundedRect(self.rect().adjusted(1, 1, -2, -2), 1.7, 1.7)
+
+            p.end()
 
     def get(self):
         return self.text()
@@ -140,7 +143,6 @@ class LineEdit(QtWidgets.QLineEdit, Base):
         Internal. Called for saving/restoring the widget state.
         """
         return self.set(value)
-
 
     # def paintEvent(self, ev):
     #     #p.setBrush(QtGui.QBrush(QtGui.QColor(100, 100, 200)))
@@ -185,6 +187,7 @@ class LineEdit(QtWidgets.QLineEdit, Base):
     #             return QtCore.QSize(self.hint.width(), self.hint.height())
     #         else:
     #             return QtCore.QSize(50, 19)
+
 
 class FloatLineEdit(LineEdit):
 
@@ -232,6 +235,7 @@ class ValidatedLineEdit(LineEdit, ValidatorBase):
 class PasswordEdit(LineEdit):
     """Subclass of LineEdit to handle passwords to be shown as **
     """
+
     def __init__(self, parent, text='', textAlignment='c', backgroundText=None,
                  minimumWidth=100, textColor=None, editable=True, **kwds):
         """

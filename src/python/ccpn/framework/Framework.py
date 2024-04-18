@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-04-03 11:08:31 +0100 (Wed, April 03, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-18 08:10:13 +0100 (Thu, April 18, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -2246,6 +2246,7 @@ class Framework(NotifierBase):
             notesEditorModule.selectNote(note)
         return notesEditorModule
 
+    # GWV 3/4/24 : moved to Gui.py
     # @logCommand('application.')
     # def showRestraintAnalysisTable(self,
     #                                position: str = 'bottom',

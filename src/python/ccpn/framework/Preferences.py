@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:49 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-04-18 16:45:11 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -141,8 +141,7 @@ class Preferences(AttrDict):
                 for key, value in tab.items():
                     # set to new value if not default
                     if value != _defPrefs[dd][key]:
-                        if dd not in diffDict.keys():
-                            diffDict[dd] = dict()
+                        diffDict.setdefault(dd, {})
                         diffDict[dd][key] = value
 
             if isinstance(ll := self[dd], list) and ll:
@@ -291,7 +290,6 @@ class Preferences(AttrDict):
             return
 
         pr.useOnlineDocumentation = False
-
         # if the fonts have not been defined, copy from the OS-specific settings
         if isMacOS():
             fontPrefix = 'MacOS'
@@ -299,12 +297,10 @@ class Preferences(AttrDict):
             fontPrefix = 'Linux'
         else:
             fontPrefix = 'MS'
-
         # iterate through the current fonts
         for fontNum, fontName in enumerate(FONTLIST):
             prefFont = f'font{fontNum}'
             frmFont = f'{fontPrefix}{prefFont}'
-
             # set from the default for the OS-specific
             if not pr.get(prefFont):
-                pr[prefFont] = pr[frmFont]
+                pr[prefFont] = pr.get(frmFont, '')

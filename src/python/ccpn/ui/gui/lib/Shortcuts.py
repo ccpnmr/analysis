@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:27 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:51 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -60,8 +60,8 @@ class Shortcuts( object ):
         # addShortCut("c, h", self, self.toggleCrosshairAll, context=context)
         addShortCut("e, n", self, mainWindow.showEstimateNoisePopup, context=context)
         addShortCut("g, s", self, mainWindow.toggleGridAll, context=context)
-        addShortCut("Del", self, partial(mainWindow.deleteSelectedItems), context=context)
-        addShortCut("Backspace", self, partial(mainWindow.deleteSelectedItems), context=context)
+        addShortCut("Del", self, partial(mainWindow._deleteSelectedItems), context=context)
+        addShortCut("Backspace", self, partial(mainWindow._deleteSelectedItems), context=context)
         addShortCut("m, k", self, mainWindow.createMark, context=context)
         addShortCut("m, c", self, mainWindow.clearMarks, context=context)
         addShortCut("m, x", self, partial(mainWindow.createMark, 0), context=context)
@@ -195,7 +195,7 @@ def addShortCut(keys=None, obj=None, func=None, context=None):
     :param func - function to attach:
     :param context - context; e.g., WidgetShortcut|ApplicationShortcut:
     """
-    from ccpn.ui.gui.lib.GuiMainWindow import GuiMainWindow
+    from ccpn.ui.gui.MainWindow import MainWindow
     if isinstance(keys, str):
         # print(keys, func)
         keys = QtGui.QKeySequence(keys)
@@ -203,7 +203,7 @@ def addShortCut(keys=None, obj=None, func=None, context=None):
     shortcut = QtWidgets.QShortcut(keys, obj, func, context=context)
     storeShortcut(keys, obj, func, context, shortcut)
     tl =  keys.toString()
-    if isinstance(obj, GuiMainWindow):
+    if isinstance(obj, MainWindow):
         obj._storeShortcut(tl,func)
     return shortcut
 

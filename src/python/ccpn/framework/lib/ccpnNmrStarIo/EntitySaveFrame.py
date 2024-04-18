@@ -16,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-08 15:21:38 +0000 (Thu, February 08, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:49 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -86,6 +86,9 @@ class EntitySaveFrame(SaveFrameABC):
         chainCode = self.parent.chainCode if self.parent.chainCode else \
                     self.entryName
         comment = f'Chain {chainCode} ({self.name}) from {self.entryName}'
+
+        if len(self.residues) == 0:
+            raise RuntimeError(f'Failed to extract any residues from saveFrame of type "{self._sf_category}" named "{self.name}", scanning loop "{self._LOOP_KEY}"')
 
         sequence = [res[self._RESIDUE_TYPE_TAG] for res in self.residues]
         startNumber = 1

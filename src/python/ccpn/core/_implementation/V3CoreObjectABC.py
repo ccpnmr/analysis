@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-21 16:29:25 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:47 +0100 (Thu, April 18, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
@@ -393,7 +393,7 @@ class V3CoreObjectABC(CoreModel, NotifierBase):
 
         # log the time the state of the core-object changed
         project.application._setBackupModifiedTime()
-        if project._notificationBlanking:
+        if NotifierBase._notificationBlanking:
             # do not call external notifiers
             # structures should be in a valid state at this point
             return

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-21 16:17:11 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:46 +0100 (Thu, April 18, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
@@ -61,8 +61,8 @@ class StructureData(AbstractWrapperObject):
     _apiClassQualifiedName = ApiNmrConstraintStore._metaclass.qualifiedName()
 
     # Internal NameSpace
-    _MoleculeFilePath = '_MoleculeFilePath'
-    _MOLECULEFILEPATH = 'moleculeFilePath'
+    _MoleculeFilePath = '_MoleculeFilePath'  # old
+    _MOLECULEFILEPATH = 'moleculeFilePath'  # current
 
     #=========================================================================================
     # CCPN properties
@@ -174,7 +174,6 @@ class StructureData(AbstractWrapperObject):
         E.g., PDB file path for displaying molecules in a molecular viewer
         """
         path = self._getInternalParameter(self._MOLECULEFILEPATH)
-
         return path
 
     @moleculeFilePath.setter
@@ -353,14 +352,21 @@ class StructureData(AbstractWrapperObject):
     def _restoreObject(cls, project, apiObj):
         """Subclassed to allow for initialisations on restore
         """
-        resList = super()._restoreObject(project, apiObj)
+        obj = super()._restoreObject(project, apiObj)
 
-        # update the list of substances
-        if resList._MoleculeFilePath in resList._ccpnInternalData:
-            value = resList._ccpnInternalData.get(resList._MoleculeFilePath)
+        # move moleculeFilePath into the internal parameter space
+        if obj._MoleculeFilePath in obj._ccpnInternalData:
+            value = obj._ccpnInternalData.get(obj._MoleculeFilePath)
             if value:
-                resList._setInternalParameter(resList._MOLECULEFILEPATH, value)
-            del resList._ccpnInternalData[resList._MoleculeFilePath]
+                obj._setInternalParameter(obj._MOLECULEFILEPATH, value)
+            del obj._ccpnInternalData[obj._MoleculeFilePath]
+
+        return obj
+
+    # def _postRestore(self):
+    #     """Handle post-initialising children after all children have been restored
+    #     """
+    #     super()._postRestore()
 
     # @classmethod
     # def _restoreObject(cls, project, apiObj):

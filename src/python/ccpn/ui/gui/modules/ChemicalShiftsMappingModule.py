@@ -69,8 +69,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-04 15:01:16 +0000 (Mon, March 04, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:51 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -89,6 +89,7 @@ import pandas as pd
 import warnings
 from functools import partial
 from PyQt5 import QtCore, QtWidgets, QtGui
+
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.BarGraph import BarGraph
 from ccpn.ui.gui.widgets.Button import Button
@@ -128,7 +129,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import concentrationUnits
 from ccpn.util.Common import splitDataFrameWithinRange, _fillListToLenght
 from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRandomColours
-from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.lib.Notifiers import Notifier, CurrentNotifier
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.peakUtils import getNmrResidueDeltas, _getKd, oneSiteBindingCurve, _fit1SiteBindCurve, _fitExpDecayCurve, \
     MODES, LINEWIDTHS, HEIGHT, POSITIONS, VOLUME, DefaultAtomWeights, H, N, OTHER, C, DISPLAYDATA, \
@@ -301,13 +302,19 @@ class ChemicalShiftsMapping(CcpnModule):
 
         self._initMainWidgets()
         self._initSettingsWidgets()
-        self._selectCurrentNRNotifier = Notifier(self.current, [Notifier.CURRENT], targetName='nmrResidues',
-                                                 callback=self._selectCurrentNmrResiduesNotifierCallback, onceOnly=True)
-        self._peakDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'Peak', self._peakDeletedCallBack)
-        self._nrChangedNotifier = Notifier(self.project, [Notifier.CHANGE], 'NmrResidue', self._nmrObjectChanged)
-        self._nrDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'NmrResidue', self._nmrResidueDeleted)
-        self._sgNotifier = Notifier(self.project, [Notifier.CREATE], 'SpectrumGroup', self._onSGcreation)
-        self._sgDeleteNotifier = Notifier(self.project, [Notifier.DELETE], 'SpectrumGroup', self._onSGdeletion)
+        self._selectCurrentNRNotifier = CurrentNotifier(targetName='nmrResidues',
+                                                        callback=self._selectCurrentNmrResiduesNotifierCallback,
+                                                        setterObject=self)
+        self._peakDeletedNotifier = Notifier(self.project, Notifier.DELETE, 'Peak',
+                                             callback=self._peakDeletedCallBack, setterObject=self)
+        self._nrChangedNotifier = Notifier(self.project, Notifier.CHANGE, 'NmrResidue',
+                                           callback=self._nmrObjectChanged, setterObject=self)
+        self._nrDeletedNotifier = Notifier(self.project, Notifier.DELETE, 'NmrResidue',
+                                           callback=self._nmrResidueDeleted, setterObject=self)
+        self._sgNotifier = Notifier(self.project, Notifier.CREATE, 'SpectrumGroup',
+                                    callback=self._onSGcreation, setterObject=self)
+        self._sgDeleteNotifier = Notifier(self.project, Notifier.DELETE, 'SpectrumGroup',
+                                          callback=self._onSGdeletion, setterObject=self)
 
         # self._addSettingsWAttr(self.nmrAtomsCheckBoxes)
         # self._selectCurrentNmrResiduesNotifierCallback()
@@ -1624,17 +1631,17 @@ class ChemicalShiftsMapping(CcpnModule):
         """
         try:
             if self._selectCurrentNRNotifier:
-                self._selectCurrentNRNotifier.unRegister()
+                self._selectCurrentNRNotifier.unRegisterNotifier()
             if self._sgNotifier:
-                self._sgNotifier.unRegister()
+                self._sgNotifier.unRegisterNotifier()
             if self._sgDeleteNotifier:
-                self._sgDeleteNotifier.unRegister()
+                self._sgDeleteNotifier.unRegisterNotifier()
             if self._peakDeletedNotifier:
-                self._peakDeletedNotifier.unRegister()
+                self._peakDeletedNotifier.unRegisterNotifier()
             if self._nrChangedNotifier:
-                self._nrChangedNotifier.unRegister()
+                self._nrChangedNotifier.unRegisterNotifier()
             if self._nrDeletedNotifier:
-                self._nrDeletedNotifier.unRegister()
+                self._nrDeletedNotifier.unRegisterNotifier()
             if self.nmrResidueFrame:
                 self.nmrResidueFrame._cleanupWidget()
 

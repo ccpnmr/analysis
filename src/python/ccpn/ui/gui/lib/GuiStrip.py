@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-21 16:29:25 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:50 +0100 (Thu, April 18, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
@@ -491,10 +491,6 @@ class GuiStrip(Frame):
     def setStripNotifiers(self):
         """Set the notifiers for the strip.
         """
-        # GWV 20181127: moved to GuiMainWindow
-        # GWV 20181127: moved to GuiMainWindow
-        # notifier for highlighting the strip
-        # self._stripNotifier = Notifier(self.current, [Notifier.CURRENT], 'strip', self._highlightCurrentStrip)
 
         # Notifier for updating the peaks
         self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE], 'Peak',

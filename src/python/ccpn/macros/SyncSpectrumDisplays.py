@@ -8,9 +8,9 @@ Requirements:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -18,9 +18,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-02 16:59:25 +0100 (Wed, August 02, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:49 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1055,7 +1055,8 @@ class SpectrumDisplaysSyncEditorModule(CcpnModule):
         self.settingsWidget.setContentsMargins(5, 5, 5, 5)
         ## Add core notifiers
         if self.project:
-            self._spectrumDisplayNotifier = Notifier(self.project, [Notifier.DELETE], 'SpectrumDisplay', self._onSpectrumDisplayDeleted)
+            self._spectrumDisplayNotifier = Notifier(self.project, Notifier.DELETE, 'SpectrumDisplay',
+                                                     callback=self._onSpectrumDisplayDeleted, setterObject=self)
 
         self.setGuiNotifier(self.mainWidget, [GuiNotifier.DROPEVENT], [DropBase.PIDS],
                             callback=self._handleDrops)
@@ -1186,4 +1187,4 @@ if len(currentModules) > 0:
     raise RuntimeError('already opened')
 else:
     module = SpectrumDisplaysSyncEditorModule(mainWindow=mainWindow.moduleArea.mainWindow)
-    mainWindow.moduleArea.addModule(module)
+    mainWindow._addModule(module)

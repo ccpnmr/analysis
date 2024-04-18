@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:26 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:49 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,8 +30,8 @@ import json
 
 from ccpn.ui.gui.guiSettings import FONTLIST
 from ccpn.util.AttrDict import AttrDict
-from ccpn.util.decorators import singleton
-from ccpn.util.Path import aPath
+from ccpn.util.decorators import singleton, logCommand
+from ccpn.util.Path import aPath, Path
 from ccpn.util.Common import uniquify, isMacOS, isLinux
 
 from ccpn.framework.PathsAndUrls import \
@@ -54,8 +54,12 @@ USER_PLUGIN_PATH = 'general.userPluginPath'
 USER_PIPES_PATH = 'general.userPipesPath'
 USER_LAYOUTS_PATH = 'general.userLayoutsPath'
 
+RECENT_MACROS = 'recentMacros'
+RECENT_PROJECTS = RECENT_FILES = 'recentFiles'
+
 PRINT_OPTIONS = 'printSettings.printOptions'
 USE_PROJECT_PATH = 'general.useProjectPath'
+USE_NATIVE_MENUS = 'general.useNativeMenus'
 APPEARANCE = 'appearance'
 
 
@@ -101,8 +105,7 @@ class Preferences(AttrDict):
             _prefs = json.load(fp, object_hook=AttrDict)
 
         self._lastPath = str(path)
-
-        # self._overrideDefaults(_prefs)
+        self._overrideDefaults(_prefs)
 
         return _prefs
 
@@ -119,7 +122,7 @@ class Preferences(AttrDict):
         if _prefs := self._readPreferencesFile(userPreferencesPath):
             self._recursiveUpdate(theDict=self, updateDict=_prefs)
         # just some patches to the data
-        self.recentMacros = uniquify(self.recentMacros)
+        self._cleanRecentMacros()
         return _prefs
 
     def _saveUserPreferences(self):
@@ -210,11 +213,69 @@ class Preferences(AttrDict):
         else:
             raise KeyError(f'invalid key {repr(key)}; unable to decode')
 
+    @logCommand('application.preferences.')
     def print(self):
         """Print items of self
         """
         print(self.dashes, self, self.dashes)
         self._recursivePrint(self)
+
+    _maxRecentMacros = 10
+    @logCommand('application.preferences.')
+    def clearRecentMacros(self):
+        """Clear the recentMacros settings
+        """
+        self[RECENT_MACROS] = []
+
+    def _addRecentMacro(self, macroFile):
+        """Add a macroFile to the list, assuring uniqueness and limiting to
+        maxRecentMacros (currently 10)
+        #CCPNINTERNAL: called from Framework.runMacro
+        """
+        if macroFile is None or not isinstance(macroFile, (str, Path)):
+            raise ValueError(f'Preferences._addRecentMacro: {macroFile} is invalid')
+        _recentMacros = self.get(RECENT_MACROS, [])
+        _recentMacros.append(str(macroFile))
+        self._cleanRecentMacros()
+
+    def _cleanRecentMacros(self):
+        """Clean the recentMacros, assuring uniqueness and limiting to
+        maxRecentMacros (currently 10)
+        """
+        _recentMacros = self.get(RECENT_MACROS, [])
+        _recentMacros = uniquify(_recentMacros)
+        _len = len(_recentMacros)
+        if _len > self._maxRecentMacros:
+            _recentMacros = _recentMacros[_len-self._maxRecentMacros:]
+            self[RECENT_MACROS] = _recentMacros
+
+    @logCommand('application.preferences.')
+    def clearRecentFiles(self):
+        """Clear the recentFiles settings
+        """
+        self[RECENT_FILES] = []
+
+    _maxRecentFiles = 10
+    def _addRecentFiles(self, recentFile):
+        """Add a recentFile to the list, assuring uniqueness and limiting to
+        maxRecentFiles (currently 10)
+        """
+        if recentFile is None or not isinstance(recentFile, (str, Path)):
+            raise ValueError(f'Preferences._addRecentFile: {recentFile} is invalid')
+        _recentFiles = self.get(RECENT_FILES, [])
+        _recentFiles.append(str(recentFile))
+        self._cleanRecentFiles()
+
+    def _cleanRecentFiles(self):
+        """Clean the recentFiles, assuring uniqueness and limiting to
+        maxRecentFiles (currently 10)
+        """
+        _recentFiles = self.get(RECENT_FILES, [])
+        _recentFiles = uniquify(_recentFiles)
+        _len = len(_recentFiles)
+        if _len > self._maxRecentFiles:
+            _recentMacros = _recentFiles[_len-self._maxRecentMacros:]
+            self[RECENT_MACROS] = _recentMacros
 
     def __str__(self):
         return f'<Preferences: {repr(self._lastPath)}>'

@@ -92,9 +92,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-03-01 19:55:16 +0000 (Fri, March 01, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:48 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -119,14 +119,16 @@ from ccpn.core._implementation.SpectrumData import SliceData, PlaneData, RegionD
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking
 from ccpn.core.lib.Cache import cached, Cache
 
+from ccpn.framework.Application import getApplication
+
 from ccpn.util.Common import isIterable
 from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import singleton
 
 from ccpn.util.isotopes import findNucleiFromSpectrometerFrequencies, Nucleus
-from ccpn.util.traits.CcpNmrTraits import CFloat, CInt, CBool, Bool, List, \
-    CString, CList, CPath
+from ccpn.util.traits.CcpNmrTraits import CFloat, Int, CInt, CBool, Bool, List, TList, CList, \
+    CString, CPath, Any, CEnum, Enum, observe, All
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson
 
 from ccpn.framework.constants import CCPNMR_PREFIX, NO_SUFFIX, ANY_SUFFIX
@@ -154,6 +156,7 @@ def getDataFormats() -> OrderedDict:
     from ccpn.core.lib.SpectrumDataSources.NmrViewSpectrumDataSource import NmrViewSpectrumDataSource
     from ccpn.core.lib.SpectrumDataSources.JcampSpectrumDataSource import JcampSpectrumDataSource
     from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
+    from ccpn.core.lib.SpectrumDataSources.JeolSpectrumDataSource import JeolSpectrumDataSource
 
     return SpectrumDataSourceABC._spectrumDataFormats
 
@@ -225,7 +228,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     ABC for NMR spectral data sources reading/writing
     """
 
-    classVersion = 1.0  # For json saving
+    classVersion = '1.0.0'  # For json saving
     saveAllTraitsToJson = True
     keysInOrder = True  # maintain the definition order
 
@@ -237,6 +240,12 @@ class SpectrumDataSourceABC(CcpNmrJson):
     #=========================================================================================
     dataFormat = None  # string defining format type
     alternateDataFormatNames = []  # list with optional alternate names; e.g. for NmrView->NMRView
+
+    # Conveniances; subclassed in the respective classes
+    isNmrPipeSpectrum = False
+    isBrukerSpectrum = False
+    isEmptySpectrum = False
+    isHdf5Spectrum = False
 
     isBlocked = False  # flag defining if data are blocked
     hasBlockCached = True  # Flag indicating if block data are cached
@@ -293,227 +302,272 @@ class SpectrumDataSourceABC(CcpNmrJson):
     # doCopy: bool: copy parameter to/from spectra and between dataSource instances
     # spectrumAttribute: name of corresponding attribute in Spectrum class
     # hasSetterInSpectrumClass: bool: corresponding attribute in Spectrum class can be set
-    date = CString(allow_none=True, default_value=None).tag(isDimensional=False,
-                                                            doCopy=True,
-                                                            spectrumAttribute=None,
-                                                            hasSetterInSpectrumClass=False
-                                                            )
-    comment = CString(allow_none=True, default_value=None).tag(isDimensional=False,
-                                                               doCopy=True,
-                                                               spectrumAttribute='comment',
-                                                               hasSetterInSpectrumClass=True
-                                                               )
-    pulseProgram = CString(allow_none=True, default_value=None).tag(isDimensional=False,
-                                                                    doCopy=True,
-                                                                    spectrumAttribute=None,
-                                                                    hasSetterInSpectrumClass=False
-                                                                    )
-    temperature = CFloat(allow_none=True, default_value=None).tag(isDimensional=False,
-                                                                  doCopy=True,
-                                                                  spectrumAttribute='temperature',
-                                                                  hasSetterInSpectrumClass=True
-                                                                  )
-    noiseLevel = CFloat(allow_none=True, default_value=None).tag(isDimensional=False,
-                                                                 doCopy=True,
-                                                                 spectrumAttribute='noiseLevel',
-                                                                 hasSetterInSpectrumClass=True
-                                                                 )
+    date = CString(default_value=None).tag(isDimensional=False,
+                                           doCopy=True,
+                                           spectrumAttribute=None,
+                                           hasSetterInSpectrumClass=False
+                                           )
+    user = CString(default_value=None).tag(isDimensional=False,
+                                           doCopy=True,
+                                           spectrumAttribute=None,
+                                           hasSetterInSpectrumClass=False
+                                           )
+    comment = CString(default_value=None).tag(isDimensional=False,
+                                           doCopy=True,
+                                           spectrumAttribute='comment',
+                                           hasSetterInSpectrumClass=True
+                                           )
+    pulseProgram = CString(default_value=None).tag(isDimensional=False,
+                                           doCopy=True,
+                                           spectrumAttribute=None,
+                                           hasSetterInSpectrumClass=False
+                                           )
+    temperature = CFloat(default_value=None, min=0.0).tag(isDimensional=False,
+                                           doCopy=True,
+                                           spectrumAttribute='temperature',
+                                           hasSetterInSpectrumClass=True
+                                           )
+    noiseLevel = CFloat(default_value=None, min=0.0).tag(isDimensional=False,
+                                            doCopy=True,
+                                            spectrumAttribute='noiseLevel',
+                                            hasSetterInSpectrumClass=True
+                                            )
     isBigEndian = Bool(default_value=_bigEndian).tag(isDimensional=False,
-                                                     doCopy=True,
-                                                     spectrumAttribute=None,
-                                                     hasSetterInSpectrumClass=False
-                                                     )
+                                            doCopy=True,
+                                            spectrumAttribute=None,
+                                            hasSetterInSpectrumClass=False
+                                            )
     # internal data scale (e.g. as used by Bruker)
     dataScale = CFloat(default_value=1.0).tag(isDimensional=False,
-                                              doCopy=True,
-                                              spectrumAttribute=None,
-                                              hasSetterInSpectrumClass=False
-                                              )
+                                            doCopy=True,
+                                            spectrumAttribute=None,
+                                            hasSetterInSpectrumClass=False
+                                            )
     sampledValues = List(default_value=[None for dim in range(0, MAXDIM)]).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute=None,
-            hasSetterInSpectrumClass=False
-            )
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute=None,
+                                            hasSetterInSpectrumClass=False
+                                            )
     sampledSigmas = List(default_value=[None for dim in range(0, MAXDIM)]).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute=None,
-            hasSetterInSpectrumClass=False
-            )
-    dimensionCount = CInt(default_value=0).tag(isDimensional=False,
-                                               doCopy=True,
-                                               spectrumAttribute='dimensionCount',
-                                               hasSetterInSpectrumClass=False
-                                               )
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute=None,
+                                            hasSetterInSpectrumClass=False
+                                            )
+    dimensionCount = CInt(default_value=0, min=0, max=MAXDIM).tag(
+                                            isDimensional=False,
+                                            doCopy=True,
+                                            spectrumAttribute='dimensionCount',
+                                            hasSetterInSpectrumClass=False
+                                            )
 
     # dimension order mappings e.g. used by NmrPipe, Xeasy
-    dimensionOrder = CList(trait=CInt(), default_value=[dim for dim in range(0, MAXDIM)], maxlen=MAXDIM).tag(
-            info='A (optional) mapping index into the dimensional data',
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute=None,
-            hasSetterInSpectrumClass=False
-            )
-    pointCounts = CList(trait=CInt(allow_none=False), default_value=[0] * MAXDIM, maxlen=MAXDIM).tag(
-            info='Total number of data points along each dimension',
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='pointCounts',
-            hasSetterInSpectrumClass=True
-            )
-    blockSizes = CList(trait=CInt(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
-            info='Sub-matrix number of points along each dimension',
-            isDimensional=True,
-            doCopy=False,
-            spectrumAttribute=None,
-            hasSetterInSpectrumClass=False
-            )
-    dimensionTypes = CList(trait=CString(allow_none=True), default_value=[specLib.DIMENSION_FREQUENCY] * MAXDIM, maxlen=MAXDIM).tag(
-            info='Dimension type (Frequency or Time) identifier along each dimension',
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='dimensionTypes',
-            hasSetterInSpectrumClass=True
-            )
-    dataTypes = CList(trait=CString(), default_value=[specLib.DATA_TYPE_REAL] * MAXDIM, maxlen=MAXDIM).tag(
-            info='Data type identifier (nR, (nR)(nI), n(RI), n(PN)) along each dimension',
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute=None,
-            hasSetterInSpectrumClass=False
-            )
-    isComplex = CList(trait=CBool(), default_value=[False] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='isComplex',
-            hasSetterInSpectrumClass=True
-            )
-    _tmp = [False] * MAXDIM;
-    _tmp[0] = True
-    isAcquisition = CList(trait=CBool(), default_value=_tmp, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='isAcquisition',
-            hasSetterInSpectrumClass=True
-            )
-    isotopeCodes = CList(trait=CString(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='isotopeCodes',
-            hasSetterInSpectrumClass=True
-            )
-    axisCodes = CList(trait=CString(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='axisCodes',
-            hasSetterInSpectrumClass=True
-            )
-    axisLabels = CList(trait=CString(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute=None,
-            hasSetterInSpectrumClass=False,
-            info='per dimension: labels, as e.g. present in Felix or NmrPipe',
-            )
-    measurementTypes = CList(trait=CString(allow_none=True), default_value=['Shift'] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='measurementTypes',
-            hasSetterInSpectrumClass=True,
-            )
-    foldingModes = CList(trait=CString(allow_none=True), default_value=[specLib.FOLDING_MODE_CIRCULAR] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='foldingModes',
-            hasSetterInSpectrumClass=True,
-            )
-    spectrometerFrequencies = CList(trait=CFloat(allow_none=False), default_value=[1.0] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='spectrometerFrequencies',
-            hasSetterInSpectrumClass=True,
-            )
-    spectralWidthsHz = CList(trait=CFloat(allow_none=False), default_value=[1.0] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='spectralWidthsHz',
-            hasSetterInSpectrumClass=True,
-            )
-    referencePoints = CList(trait=CFloat(allow_none=False), default_value=[1.0] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='referencePoints',
-            hasSetterInSpectrumClass=True,
-            )
-    referenceValues = CList(trait=CFloat(allow_none=False), default_value=[1.0] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='referenceValues',
-            hasSetterInSpectrumClass=True,
-            )
-    phases0 = CList(trait=CFloat(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='phases0',
-            hasSetterInSpectrumClass=True,
-            )
-    phases1 = CList(trait=CFloat(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='phases1',
-            hasSetterInSpectrumClass=True,
-            )
-    windowFunctions = CList(trait=CString(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='windowFunctions',
-            hasSetterInSpectrumClass=True,
-            info='per dimension: Window function name (or None) - e.g. "EM", "GM", "SINE", "QSINE"'
-            )
-    lorentzianBroadenings = CList(trait=CFloat(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='lorentzianBroadenings',
-            hasSetterInSpectrumClass=True,
-            info='per dimension: Lorenzian broadening in Hz'
-            )
-    gaussianBroadenings = CList(trait=CFloat(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='gaussianBroadenings',
-            hasSetterInSpectrumClass=True,
-            info='per dimension: Gaussian broadening in Hz'
-            )
-    assignmentTolerances = CList(trait=CFloat(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute='assignmentTolerances',
-            hasSetterInSpectrumClass=True,
-            info='per dimension: Assignment tolerance in ppm'
-            )
+    dimensionOrder = TList(itemTrait=CInt(min=0, max=MAXDIM), default_value=[dim for dim in range(0, MAXDIM)], maxlen=MAXDIM).tag(
+                                            info='A (optional) mapping index into the dimensional data',
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute=None,
+                                            hasSetterInSpectrumClass=False
+                                            )
+    pointCounts = TList(itemTrait=CInt(allow_none=False, min=0), default_value=[0] * MAXDIM, maxlen=MAXDIM).tag(
+                                            info='Total number of data points along each dimension',
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='pointCounts',
+                                            hasSetterInSpectrumClass=True
+                                            )
+    blockSizes = TList(itemTrait=CInt(allow_none=True, min=0), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+                                            info='Sub-matrix number of points along each dimension',
+                                            isDimensional=True,
+                                            doCopy=False,
+                                            spectrumAttribute=None,
+                                            hasSetterInSpectrumClass=False
+                                            )
+    dimensionTypes = TList(itemTrait=CEnum(specLib.DIMENSIONTYPES, allow_none=True), default_value=[specLib.DIMENSION_FREQUENCY] * MAXDIM, maxlen=MAXDIM).tag(
+                                            info='Dimension type (Frequency or Time) identifier along each dimension',
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='dimensionTypes',
+                                            hasSetterInSpectrumClass=True
+                                            )
+    dataTypes = TList(itemTrait=CEnum(specLib.DATA_TYPES), default_value=[specLib.DATA_TYPE_REAL] * MAXDIM, maxlen=MAXDIM, eventful=True).tag(
+                                            info=f'Data type identifier, i.e. {specLib.DATA_TYPES}, along each dimension',
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute=None,
+                                            hasSetterInSpectrumClass=False
+                                            )
+    isComplex = TList(itemTrait=CBool(), default_value=[False] * MAXDIM, maxlen=MAXDIM).tag(
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='isComplex',
+                                            hasSetterInSpectrumClass=True
+                                            )
+    # GWV: this appears not to be working
+    # @observe('dataTypes', type=All)
+    # def _dataTypesChanged(self, changes):
+    #     """Adjust isComplex if dataTypes is changed
+    #     """
+    #     for change in changes:
+    #         idx = change['index']
+    #         newValue = change['new']
+    #         if not (0 <= idx < self.dimensionCount):
+    #             raise IndexError(f'dataTypes: Invalid index ({idx}; cannot change isComplex')
+    #         self.isComplex[idx] = specLib.isComplexDataType(newValue)
+
+    _tmp = [False] * MAXDIM; _tmp[0] = True
+    isAcquisition = TList(itemTrait=CBool(), default_value=_tmp, maxlen=MAXDIM).tag(
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='isAcquisition',
+                                            hasSetterInSpectrumClass=True
+                                            )
+    isotopeCodes = TList(itemTrait=CString(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='isotopeCodes',
+                                            hasSetterInSpectrumClass=True
+                                            )
+    axisCodes = TList(itemTrait=CString(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='axisCodes',
+                                            hasSetterInSpectrumClass=True
+                                            )
+    axisLabels = TList(itemTrait=CString(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute=None,
+                                            hasSetterInSpectrumClass=False,
+                                            info='per dimension: labels, as e.g. present in Felix or NmrPipe',
+                                            )
+    measurementTypes = TList(itemTrait=CEnum(specLib.MEASUREMENT_TYPES, allow_none=True), default_value=[specLib.MEASUREMENT_TYPE_SHIFT] * MAXDIM, maxlen=MAXDIM).tag(
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='measurementTypes',
+                                            hasSetterInSpectrumClass=True,
+                                            )
+    foldingModes = TList(itemTrait=CEnum(specLib.FOLDING_MODES, allow_none=True), default_value=[specLib.FOLDING_MODE_CIRCULAR] * MAXDIM, maxlen=MAXDIM).tag(
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='foldingModes',
+                                            hasSetterInSpectrumClass=True,
+                                            )
+    spectrometerFrequencies = TList(itemTrait=CFloat(allow_none=False, min=0.0), default_value=[1.0] * MAXDIM, maxlen=MAXDIM).tag(
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='spectrometerFrequencies',
+                                            hasSetterInSpectrumClass=True,
+                                            )
+    spectralWidthsHz = TList(itemTrait=CFloat(allow_none=False, min=0.0), default_value=[1.0] * MAXDIM, maxlen=MAXDIM).tag(
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='spectralWidthsHz',
+                                            hasSetterInSpectrumClass=True,
+                                            )
+    referencePoints = TList(itemTrait=CFloat(allow_none=False), default_value=[1.0] * MAXDIM, maxlen=MAXDIM).tag(
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='referencePoints',
+                                            hasSetterInSpectrumClass=True,
+                                            )
+    referenceValues = TList(itemTrait=CFloat(allow_none=False), default_value=[1.0] * MAXDIM, maxlen=MAXDIM).tag(
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='referenceValues',
+                                            hasSetterInSpectrumClass=True,
+                                            )
+    phases0 = TList(itemTrait=CFloat(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='phases0',
+                                            hasSetterInSpectrumClass=True,
+                                            )
+    phases1 = TList(itemTrait=CFloat(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='phases1',
+                                            hasSetterInSpectrumClass=True,
+                                            )
+    windowFunctions = TList(itemTrait=CEnum(specLib.WINDOW_FUNCTIONS, allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='windowFunctions',
+                                            hasSetterInSpectrumClass=True,
+                                            info='per dimension: Window function name (or None) - e.g. "EM", "GM", "SINE", "QSINE"'
+                                            )
+    lorentzianBroadenings = TList(itemTrait=CFloat(allow_none=True, min=0.0), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='lorentzianBroadenings',
+                                            hasSetterInSpectrumClass=True,
+                                            info='per dimension: Lorenzian broadening in Hz'
+                                            )
+    gaussianBroadenings = TList(itemTrait=CFloat(allow_none=True, min=0.0), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='gaussianBroadenings',
+                                            hasSetterInSpectrumClass=True,
+                                            info='per dimension: Gaussian broadening in Hz'
+                                            )
+    assignmentTolerances = TList(itemTrait=CFloat(allow_none=True, min=0.0), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+                                            isDimensional=True,
+                                            doCopy=True,
+                                            spectrumAttribute='assignmentTolerances',
+                                            hasSetterInSpectrumClass=True,
+                                            info='per dimension: Assignment tolerance in ppm'
+                                            )
 
     #=========================================================================================
     # new implementation, using newFromPath method and validity testing later on
     #=========================================================================================
-    isValid = Bool(default_value=False).tag(info='flag to indicate if path denotes a valid dataType')
+    isValid = Bool(default_value=True).tag(info='flag to indicate if path denotes a valid dataType')
     shouldBeValid = Bool(default_value=False).tag(info='flag to indicate that path should denotes a valid dataType, but some elements are missing')
     errorString = CString(default_value='').tag(info='error description for validity testing')
 
     #=========================================================================================
     # Attributes for more complicated dataFormats that have separate binaries and parameter
-    # files; e.g. Azara, Bruker, Xeasy
+    # files; e.g. Azara, Bruker, Xeasy, NmrPipe
     #=========================================================================================
-    _parameterFile = CPath(default_value=None, allow_none=True).tag(info=
-                                                                    'an attribute to store the (parsed) path to a parameter file'
+    _parameterFile = CPath(default_value=None).tag(info =
+                                        'an attribute to store the (parsed) path to a parameter file'
                                                                     )
-    _binaryFile = CPath(default_value=None, allow_none=True).tag(info=
-                                                                 'an attribute to store the path to a binary file; used during parsing'
+    _binaryFile = CPath(default_value=None).tag(info =
+                                        'an attribute to store the path to a binary file; used during parsing'
                                                                  )
-    _path = CPath(default_value=None, allow_none=True).tag(info=
-                                                           'an attribute to store the initial path used to define binary/parameter files; used during parsing'
+    _path = CPath(default_value=None).tag(info =
+                                        'an attribute to store the initial path used to define binary/parameter files; used during parsing'
                                                            )
+    _isDirectory = Bool(default_value=False).tag(
+                                        info='Initiating path was a directory',
+                                        )
+    #=========================================================================================
+    # hdf5Buffer related attributes; not saved to json
+    #=========================================================================================
+    _isBuffered = Bool(default_value=False).tag(info =
+                                                'Flag to indicate the spectrumDataSource object to have buffered read/writes',
+                                                saveToJson = False
+                                                )
+    _bufferFilled = Bool(default_value=False).tag(info =
+                                                'Flag to indicate if the buffer is filled',
+                                                saveToJson = False
+                                                )
+    _bufferIsTemporary = Bool(default_value=False).tag(info =
+                                                'Flag to indicate if the buffer is temporary',
+                                                saveToJson = False
+                                                )
 
+    _bufferPath = CPath(default_value=None).tag(info =
+                                                'an attribute to store the path of the buffer file',
+                                                saveToJson = False
+                                                )
+    # Can't use DataSourceTrait defined below because of the circular nature of the definitions
+    hdf5buffer = Any(default_value=None, allow_none=True).tag(info =
+                                                'The Hdf-buffer instance',
+                                                saveToJson = False
+
+    )
     #=========================================================================================
     # some default data
     #=========================================================================================
@@ -622,13 +676,15 @@ class SpectrumDataSourceABC(CcpNmrJson):
     # start of methods
     #=========================================================================================
 
-    def __init__(self, path=None, spectrum=None, dimensionCount=None):
+    def __init__(self, path=None, spectrum=None, dimensionCount=None, checkValid=True):
         """initialise instance; optionally set path or associate with and import from
         a Spectrum instance or set dimensionCount
 
         :param path: optional, path of the (binary) spectral data
         :param spectrum: associate instance with spectrum and import spectrum's parameters
         :param dimensionCount: limit instance to dimensionCount dimensions
+        :param checkValid: flag to do validity check (default=True); requires path
+
         """
         if self.dataFormat is None:
             raise RuntimeError('Subclassed attribute "dataFormat" of class "%s" needs to be defined' % self.__class__.__name__)
@@ -644,22 +700,15 @@ class SpectrumDataSourceABC(CcpNmrJson):
         self.dataFile = None  # Absolute path of the binary data; set by setPath method
         self.fp = None  # File pointer; None indicates closed
         self.mode = None  # Open mode
-
-        # hdf5Buffer related attributes
-        self._isBuffered = False  # Flag to indicate the spectrumDataSource object to have buffered read/writes;
-        self.hdf5buffer = None  # Hdf5SpectrumBuffer instance; None indicates no Hdf5 buffer used
-        self._bufferFilled = False
-        self._bufferIsTemporary = True
-        self._bufferPath = None
-
-        self.spectrum = None  # Spectrum instance
-
+        self.spectrum = None  # Spectrum instance; optionally initialised below
+        # hdf5Buffer related attributes defaults set by traits
         self.setDefaultParameters()
 
         if path is not None:
             self.setPath(path)
         if spectrum is not None:
             self.importFromSpectrum(spectrum, includePath=False)
+            self.spectrum = spectrum
         if dimensionCount is not None:
             self.setDimensionCount(dimensionCount)
 
@@ -668,7 +717,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
         # if not self.hasBlockCached:
         #     self.disableCache()
 
-        self.checkValid()
+        if path is not None and checkValid:
+            self.checkValid()
 
     def setDefaultParameters(self, nDim=MAXDIM):
         """Set default values for all parameters
@@ -723,6 +773,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """
         if path is None:
             self.dataFile = None  # A reset essentially
+            self._binaryFile = None
             return self
 
         _p = aPath(path)
@@ -1085,14 +1136,19 @@ class SpectrumDataSourceABC(CcpNmrJson):
         nBlocks = [1 + (self.pointCounts[dim] - 1) // self.blockSizes[dim] for dim in range(self.dimensionCount)]
         return nBlocks
 
-    def _pointsToBlocksPerDimension(self, zPoints):
-        """returns list of (block-index, block-offset) tuples (zero-based) corresponding to zPoints (zero-based)"""
+    def _pointsToBlocksPerDimension(self, points) -> list[tuple]:
+        """
+        :param points: an n-dimensional points vector (zero-based)
+        :returns list of (block-index, block-offset) tuples (zero-based) corresponding to points (zero-based)
+        """
         return [(p // self.blockSizes[i],
                  p % self.blockSizes[i]
-                 ) for i, p in enumerate(zPoints)]
+                 ) for i, p in enumerate(points)]
 
     def _pointsToAbsoluteBlockIndex(self, points):
-        """Returns absolute block index corresponding to points (zero-based)
+        """
+        :param points: an n-dimensional points vector (zero-based)
+        :returns absolute block index corresponding to points (zero-based)
 
             absIndex =   Ia * Nz * Ny * Nx  +  Iz * Ny * Nx  +  Iy * Nx  +  Ix
                      = ((Ia * Nz + Iz) * Ny + Iy) * Nx + Ix
@@ -1101,14 +1157,14 @@ class SpectrumDataSourceABC(CcpNmrJson):
             Nx,y,z,a is number of blocks along x, y, z, a
 
         """
-        blockIndex = [idx for idx, _t in self._pointsToBlocksPerDimension(points)]
+        blockIndices = [idx for idx, _t in self._pointsToBlocksPerDimension(points)]
         numBlocks = self._numBlocksPerDimension
         # start at the highest dimension
         dim = self.dimensionCount - 1
-        absIndex = blockIndex[dim]
+        absIndex = blockIndices[dim]
         dim -= 1
         while dim >= 0:
-            absIndex = absIndex * numBlocks[dim] + blockIndex[dim]
+            absIndex = absIndex * numBlocks[dim] + blockIndices[dim]
             dim -= 1
         return absIndex
 
@@ -1124,15 +1180,24 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """return the numpy dtype string based on settings"""
         return '%s%s%s' % (self.isBigEndian and '>' or '<', self.isFloatData and 'f' or 'i', self.wordSize)
 
-    @cached(_BLOCK_CACHE, debug=False, doSignatureExpansion=False)
-    def _readBlockFromFile(self, absoluteBlockIndex):
-        """Read block at absoluteBlockIndex; separate routine for caching reasons
-        Return NumPy array
+    def _getBlockOffset(self, absoluteBlockIndex):
+        """Calculate the block offset
+        :param absoluteBlockIndex: absolute index of the block to calculate the offset
+        :return offset in Bytes
         """
         offset = (self.headerSize +
                   self._totalBlockSize * absoluteBlockIndex
                   ) * self.wordSize  # offset in bytes
-        self.fp.seek(offset, 0)
+        return offset
+
+    @cached(_BLOCK_CACHE, debug=False, doSignatureExpansion=False)
+    def _readBlockFromFile(self, absoluteBlockIndex):
+        """Read block at absoluteBlockIndex;
+        separate routine for caching reasons
+        :param absoluteBlockIndex: absolute index of the block to read
+        :return NumPy array
+        """
+        self.fp.seek(self._getBlockOffset(absoluteBlockIndex), 0)
         # dtype = '%s%s%s' % (self.isBigEndian and '>' or '<', self.isFloatData and 'f' or 'i', self.wordSize)
         blockdata = numpy.fromfile(file=self.fp, dtype=self.dtype, count=self._totalBlockSize)
         return self._convertBlockData(blockdata)
@@ -1233,11 +1298,6 @@ class SpectrumDataSourceABC(CcpNmrJson):
         yDim -= 1
         points = [p - 1 for p in position]
 
-        # # create the array with zeros
-        # pointCounts = (self.pointCounts[yDim], self.pointCounts[xDim])  # y,x ordering
-        # # data = numpy.zeros(pointCounts, dtype=self.dataType)
-        # data = PlaneData(dataSource=self, dimensions=dimensions, position=position)
-
         # we are reading nD blocks; need to slice across these with depth of 1 in non-plane dims and a
         # size of blockSizes[xDim], blockSizes[yDim] along the xDim,yDim (set dynamically during the looping)
         blockOffsets = [offset for _tmp, offset in self._pointsToBlocksPerDimension(points)]
@@ -1282,11 +1342,12 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     def _returnFalse(self, errMsg) -> False:
         """
-        Helper function to set self.errorString, write to debug2 and return False
+        Helper function to set self.isValid, self.errorString, write to debug2 and return False
         :param errMsg:
         :return: False
         """
         getLogger().debug2(errMsg)
+        self.isValid = False
         self.errorString = errMsg
         return False
 
@@ -1295,13 +1356,17 @@ class SpectrumDataSourceABC(CcpNmrJson):
         check the extra attributes _path, _binaryFile, and_parameterFile.
         Used for Azara, Bruker, Xeasy
         """
-        self.isValid = False
-        self.errorString = 'Checking validity'
+        self.isValid = True
+        self.errorString = ''
 
         _iniTxt = f'{self.dataFormat} spectrum, path "{self._path}"'
         # checking original path and its suffix
-        if self._path is None or not self._path.exists():
-            errorMsg = f'{_iniTxt}: does not exist'
+        if self._path is None:
+            errorMsg = f'{self.dataFormat} spectrum, undefined path'
+            return self._returnFalse(errorMsg)
+
+        if not self._path.exists():
+            errorMsg = f'{_iniTxt}: not found'
             return self._returnFalse(errorMsg)
 
         if not self.checkSuffix(self._path):
@@ -1310,35 +1375,32 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         # checking parameter file
         if self._parameterFile is None:
-            errorMsg = f'{_iniTxt}: parameter file is undefined'
+            errorMsg = f'{_iniTxt}: matching parameter file not found'
             return self._returnFalse(errorMsg)
 
         if not self._parameterFile.exists():
-            errorMsg = f'{_iniTxt}: parameter file does not exist'
+            errorMsg = f'{_iniTxt}: parameter file  "{self._parameterFile.name}" not found'
             return self._returnFalse(errorMsg)
 
         if not self._parameterFile.is_file():
-            errorMsg = f'{_iniTxt}: parameter file is not a file'
+            errorMsg = f'{_iniTxt}: parameter file "{self._parameterFile.name}" is not a file'
             return self._returnFalse(errorMsg)
 
         if self._binaryFile is None:
-            errorMsg = f'{_iniTxt}: binary file is undefined'
+            errorMsg = f'{_iniTxt}: matching binary file not found'
             return self._returnFalse(errorMsg)
 
         if not self._binaryFile.exists():
-            errorMsg = f'{_iniTxt}: binary file does not exist'
+            errorMsg = f'{_iniTxt}: binary file "{self._binaryFile.name}" not found'
             return self._returnFalse(errorMsg)
 
         if not self._binaryFile.is_file():
-            errorMsg = f'{_iniTxt}: binary file is not a file'
+            errorMsg = f'{_iniTxt}: binary file  "{self._binaryFile.name}" is not a file'
             return self._returnFalse(errorMsg)
 
         # if not self.shouldBeValid:
         #     errorMsg = f'{_iniTxt}: should have defined a valid {self.dataFormat} file, but did not'
         #     return self._returnFalse(errorMsg)
-
-        self.isValid = True
-        self.errorString = ''
 
         return True
 
@@ -1349,17 +1411,20 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         :return: True if ok, False otherwise
         """
-        self.isValid = False
-        self.errorString = 'Checking validity'
+        if not self.isValid:
+            # An earlier error occured
+            return False
+
+        self.isValid = True
+        self.errorString = ''
 
         # checking path
         _p = self.path
-        _iniTxt = f'{self.dataFormat} spectrum, path "{_p}"'
-
         if _p is None:
-            txt = f'{_iniTxt}: undefined'
+            txt = f'{self.dataFormat} spectrum path is undefined'
             return self._returnFalse(txt)
 
+        _iniTxt = f'{self.dataFormat} spectrum path "{_p}"'
         if not self.checkSuffix(_p):
             txt = f'{_iniTxt}: invalid suffix'
             return self._returnFalse(txt)
@@ -1374,20 +1439,21 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         # checking opening file and reading parameters
         try:
-            with self.openExistingFile():  # This will also read the parameters
+            # This will also read the parameters and do any checks
+            with self.openExistingFile():
                 pass
-                # self.readParameters()
         except RuntimeError as es:
             txt = f'{_iniTxt}: Reading parameters failed with error: "{es}"'
             return self._returnFalse(txt)
+        # Check if reading parameters yielded any errors
+        if not self.isValid:
+            return self._returnFalse(self.errorString)
 
         # Check dimensionality; should be > 0
         if self.dimensionCount == 0:
             txt = f'{_iniTxt}: dimensionCount = 0'
             return self._returnFalse(txt)
 
-        self.isValid = True
-        self.errorString = ''
         return True
 
     def checkParameters(self, spectrum) -> bool:
@@ -1423,7 +1489,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         :return: None or instance of the class
 
-        depricated: initate an instance and use the isValid attribute
+        depricated: initiate an instance and use the isValid attribute
         """
         instance = cls(path=path)
         if not instance.isValid:
@@ -1472,7 +1538,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         try:
             self._checkFilePath(newFile, mode)
-            self.fp = self.openMethod(str(self.path), mode, **kwds)
+            _p = self.path.asString()
+            self.fp = self.openMethod(_p, mode, **kwds)
             self.mode = mode
 
         except Exception as es:
@@ -1506,7 +1573,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         if mode is None:
             mode = self.defaultOpenReadMode
 
-        self.closeFile()  # Wil close if open, do nothing otherwise
+        self.closeFile()  # Will close if open, do nothing otherwise
         self.openFile(mode=mode)
         self.readParameters()
         try:
@@ -1668,11 +1735,13 @@ class SpectrumDataSourceABC(CcpNmrJson):
         return position
 
     def getPlaneData(self, position: Sequence = None, xDim: int = 1, yDim: int = 2) -> PlaneData:
-        """Get plane defined by xDim, yDim and position (all 1-based)
+        """Get plane defined by xDim, yDim and position
         Check for hdf5buffer first, then blocked format
-        Optionally to be subclassed
 
-        :return PlaneData (i.e. numpy.ndarray) object.
+        :param position: position vector (1-based)
+        :param xDim: first dimension of the plane (1-based)
+        :param yDim: second dimension of the plane (1-based)
+        :return PlaneData instance (i.e. numpy.ndarray).
         """
 
         if self.isBuffered:
@@ -1721,9 +1790,10 @@ class SpectrumDataSourceABC(CcpNmrJson):
     def getSliceData(self, position: Sequence = None, sliceDim: int = 1) -> SliceData:
         """Get slice defined by sliceDim and position (all 1-based)
         Check for hdf5buffer first, then blocked format
-        Optionally to be subclassed
 
-        :return SliceData object (i.e. a numpy.ndarray) object
+        :param position: position vector (1-based)
+        :param sliceDim: dimension to take the slice (1-based)
+        :return: SliceData instance
         """
         if self.isBuffered:
             self._checkBuffer()
@@ -2019,7 +2089,6 @@ class SpectrumDataSourceABC(CcpNmrJson):
         return positiveContourBase
 
 
-
     #=========================================================================================
     # Iterators
     #=========================================================================================
@@ -2115,23 +2184,43 @@ class SpectrumDataSourceABC(CcpNmrJson):
     #=========================================================================================
 
     @property
-    def isBuffered(self):
-        """ReturnTrue if file is buffered"""
+    def isBuffered(self) -> bool:
+        """Return True if file is buffered
+        """
         return self._isBuffered
 
-    def setBuffering(self, isBuffered: bool, bufferIsTemporary: bool = True, bufferPath=None):
+    @property
+    def bufferIsFilled(self) -> bool:
+        """Return True if file is buffers and buffer is filled
+        """
+        return self.isBuffered and self._bufferFilled
+
+    def setBuffering(self, isBuffered:bool, bufferIsTemporary:bool=True, bufferPath=None):
         """Define the SpectrumDataSource buffering status
         :param isBuffered (True, False): set the buffering status
         :param bufferIsTemporary (True, False): define buffer as temporary (i.e. disgarded on close)
         :param bufferPath: optional path to store the buffer file
         """
+        from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumDataSource
+
         if self.isBuffered:
             self.closeHdf5Buffer()
 
         self._isBuffered = isBuffered
         self._bufferFilled = False
         self._bufferIsTemporary = bufferIsTemporary
-        self._bufferPath = bufferPath
+
+        self._bufferPath = None
+        if isBuffered:
+            if bufferIsTemporary:
+                # Construct a path for temporary buffer using the tempfile methods in _getTemporaryPath
+                prefix = 'hdf5buffer_%s_' % self.nameFromPath()
+                bufferPath = getApplication()._getTemporaryPath(prefix=prefix, suffix=Hdf5SpectrumDataSource.suffixes[0])
+
+            elif bufferPath is None:
+                # construct bufferPath from self.path if None
+                bufferPath = self.path.withSuffix(Hdf5SpectrumDataSource.suffixes[0]).uniqueVersion()
+            self._bufferPath = bufferPath
 
         # close the current file as all will go from the buffer (once filled)
         if self.hasOpenFile():
@@ -2156,22 +2245,13 @@ class SpectrumDataSourceABC(CcpNmrJson):
         if not self.isBuffered:
             raise RuntimeError('initialiseHdf5Buffer: buffering not active, use setBuffering() method first')
 
+        if self._bufferPath is None:
+            raise RuntimeError('initialiseHdf5Buffer: bufferPath not set, use setBuffering() method first')
+
         self.closeHdf5Buffer()
 
-        if self._bufferIsTemporary:
-            # Construct a path for temporary buffer using the tempfile methods in _getTemporaryPath
-            prefix = 'hdf5buffer_%s_' % self.nameFromPath()
-            path = getApplication()._getTemporaryPath(prefix=prefix, suffix=Hdf5SpectrumDataSource.suffixes[0])
-
-        else:
-            # take path as defined in _bufferPath, or construct from self.path if None
-            path = self._bufferPath
-            if self._bufferPath is None:
-                path = self.path.withSuffix(Hdf5SpectrumDataSource.suffixes[0]).uniqueVersion()
-            # tFile = None
-
         # create a hdf5 buffer file instance
-        hdf5buffer = Hdf5SpectrumDataSource(path=path)
+        hdf5buffer = Hdf5SpectrumDataSource(path=self._bufferPath, checkValid=False)
         hdf5buffer.copyParametersFrom(self)
         # do not use openNewFile as it has to remain open to allow for filling the buffer
         hdf5buffer.openFile(mode=Hdf5SpectrumDataSource.defaultOpenWriteMode)
@@ -2205,6 +2285,22 @@ class SpectrumDataSourceABC(CcpNmrJson):
             self.fp = None
             self.mode = None
 
+    def openHdf5Buffer(self, bufferIsTemporary:bool=True, bufferPath=None):
+        """Open and activate the SpectrumDataSource buffering.
+        Coveniance: closes any open buffer, sets new buffering and initialises
+
+        :param bufferIsTemporary flag (True, False): define buffer as temporary (i.e. disgarded on close)
+        :param bufferPath: optional path to store the buffer file
+        :return the Hdf5SpectrumDataSource buffer instance
+        """
+        if self.isBuffered:
+            self.closeHdf5Buffer()
+        self.setBuffering(isBuffered=True, bufferIsTemporary=bufferIsTemporary,
+                          bufferPath=bufferPath
+                          )
+        _bufferDs = self.initialiseHdf5Buffer()
+        return _bufferDs
+
     def closeHdf5Buffer(self):
         """Close the hdf5Buffer"""
         if not self.isBuffered:
@@ -2217,6 +2313,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
                 self.hdf5buffer.path.removeFile()
 
         self.hdf5buffer = None
+        self._isBuffered = False
         self._bufferFilled = False
 
     def duplicateDataToHdf5(self, path=None):
@@ -2252,10 +2349,52 @@ class SpectrumDataSourceABC(CcpNmrJson):
                     path.write('%15s ' % val)
             path.write('\n')
 
+    @property
+    def _fileInfoString1(self) -> str:
+        """A convenience method to generate an info string about the file
+        in the form: '3D - NMRpipe (96 MB)'
+        CCPNMRINTERNAL: throughout
+        :return info string
+        """
+        txt = f'{self.dimensionCount}D - {self.dataFormat} ({self.expectedFileSizeInBytes/(1024*1024):.1f} MB)'
+        return txt
+
+    @property
+    def _fileInfoString2(self) -> str:
+        """A convenience method to generate an info string about the file
+        in the form: '3D - 1H (562) x 13C (128)'
+        CCPNMRINTERNAL: throughout
+        :return info string
+        """
+        # The routine is also used to report while initialisation is not yet
+        # complete; hence some explicit slicing
+        _ndims = self.dimensionCount
+        if _ndims == 0:
+            raise RuntimeError('Cannot make inforString: Number of dimensions = 0')
+        _dims = " x ".join(["%s (%s)" % (c, p) for p,c in zip(self.pointCounts[0:_ndims], self.axisCodes[0:_ndims])])
+        txt = f'{self.dimensionCount}D - {_dims}'
+        return txt
+
+    @property
+    def _fileInfoString3(self) -> str:
+        """A convenience method to generate an info string about the file
+        in the form: '3D - 562 (nR) x 128 (nR)'
+        CCPNMRINTERNAL: throughout
+        :return info string
+        """
+        # The routine is also used to report while initialisation is not yet
+        # complete; hence some explicit slicing
+        _ndims = self.dimensionCount
+        if _ndims == 0:
+            raise RuntimeError('Cannot make infoString: Number of dimensions = 0')
+        _dims = " x ".join(["%s (%s)" % (p, c) for p,c in zip(self.pointCounts[0:_ndims], self.dataTypes[0:_ndims])])
+        txt = f'{self.dimensionCount}D - {_dims}'
+        return txt
+
     def __str__(self):
         if self.dimensionCount == 0:
             fName = self.path.name if self.path is not None else str(None)
-            return '<%s: _D (), %s>' % (self.__class__.__name__, fName)
+            return '<%s: _D, %s>' % (self.__class__.__name__, fName)
         else:
             if self.isBuffered:
                 fpStatus = '%r' % 'buffered'
@@ -2271,14 +2410,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
                     fpStatus = '%r' % 'closed'
                     pathName = self.path.name
 
-            return '<%s: %dD (%s), (%s,%r)>' % (self.__class__.__name__,
-                                                self.dimensionCount,
-                                                'x'.join([str(p) for p in self.pointCounts]),
-                                                fpStatus,
-                                                pathName
-                                                )
-
-
+            return f'<{self.__class__.__name__}: {self._fileInfoString3}, ({fpStatus},{pathName!r})>'
 #end class
 
 
@@ -2365,24 +2497,18 @@ def _fillSlice(sliceData, start, stop, aliasing, resultSlice=None):
     return resultSlice
 
 
-from ccpn.util.traits.CcpNmrTraits import Instance
-from ccpn.util.traits.TraitJsonHandlerBase import CcpNmrJsonClassHandlerABC
-
-
-class DataSourceTrait(Instance):
-    """Specific trait for a Datasource instance encoding access to the (binary) spectrum data.
-    None indicates no spectrumDataSource has been defined
-    """
-    klass = SpectrumDataSourceABC
-
-    def __init__(self, **kwds):
-        Instance.__init__(self, klass=self.klass, allow_none=True, **kwds)
-
-
-    class jsonHandler(CcpNmrJsonClassHandlerABC):
-        # klass = SpectrumDataSourceABC
-        pass
-
+# GWV: moved to ccpn.core.lib.CoreTrait
+# from ccpn.util.traits.CcpNmrTraits import OWTraits
+# from ccpn.util.traits.TraitJsonHandlerBase import CcpNmrJsonClassHandlerABC
+#
+# class DataSourceTrait(OWTraits):
+#     """Specific trait for a Datasource instance encoding access to the (binary) spectrum data.
+#     None indicates no spectrumDataSource has been defined
+#     """
+#     klass = SpectrumDataSourceABC
+#     # def __init__(self, **kwds):
+#     #     Instance.__init__(self, klass=self.klass, allow_none=True, **kwds)
+#
 
 def testMain():
     testSlice = numpy.arange(4, dtype=numpy.int32) + 1

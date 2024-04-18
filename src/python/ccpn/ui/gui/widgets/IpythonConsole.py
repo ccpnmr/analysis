@@ -5,9 +5,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-08-18 09:55:51 +0100 (Fri, August 18, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:54 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -88,10 +88,10 @@ class IpythonConsole(Widget):
     focusedIn = QtCore.pyqtSignal(QtGui.QFocusEvent)
     mouseMoved = QtCore.pyqtSignal(QtGui.QMouseEvent)
 
-    def __init__(self, mainWindow, namespace=None, **kwds):
+    def __init__(self, mainWindow, namespace, **kwds):
 
         if namespace is None:
-            namespace = mainWindow.namespace
+            raise ValueError(f'IpythonConsole: undefined namespace')
 
         super().__init__(parent=mainWindow, setLayout=True, **kwds)
         # Base._init(self, setLayout=True, **kwds)
@@ -167,11 +167,6 @@ class IpythonConsole(Widget):
         if macroFile:
             extraCommands = ' '.join(extraCommands or [])
             self.ipythonWidget.execute(f'%run -i "{macroFile}" {extraCommands}')
-
-        try:
-            self.mainWindow._fillRecentMacrosMenu()
-        except Exception as e:
-            getLogger().debug('Impossible to fill the menus with recent macros %s' % e)
 
     def _runMacroProfiler(self, macroFile: str, extraCommands):
         """

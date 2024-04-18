@@ -27,8 +27,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:28 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:55 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -154,7 +154,8 @@ class SidebarABC(NotifierBase):
 
     def __init__(self, name=None, usePidForName=False, klass=None, addNotifier=False, closed=True, add2NodesUp=False,
                  rebuildOnRename=None, callback=None, menuAction=None, children=[], isDraggable=False, **kwds):
-        super().__init__()
+
+        NotifierBase.__init__(self)
 
         self._indx = SidebarABC._nextIndx
         SidebarABC._nextIndx += 1
@@ -429,6 +430,7 @@ class SidebarABC(NotifierBase):
 
         newItem.setData(0, QtCore.Qt.DisplayRole, str(givenName))
         newItem.setData(1, QtCore.Qt.UserRole, self)
+
         newItem.setExpanded(not self.closed)
 
         return newItem if newItem else givenName
@@ -497,13 +499,17 @@ class SidebarABC(NotifierBase):
         """Resets the tree from self downward, deleting widget and
         optionally the notifiers; remove all children
         """
-        if (self.children):
+        # # GWV: just some code for setting a breakpoint
+        # if self._indx == 62:
+        #     pass
 
-            # recurse into the tree, otherwise just delete the notifiers
-            for itm in self.children:
-                itm.reset()
-
+        # recurse into the tree, otherwise just delete the notifiers
+        if deleteNotifiers:
             self.deleteAllNotifiers()
+
+        if (self.children):
+            for itm in self.children:
+                itm.reset(deleteNotifiers=deleteNotifiers)
 
         # remove the widgets associated with the sidebar items
         if self.widget and self.widget.parent():
@@ -511,6 +517,10 @@ class SidebarABC(NotifierBase):
             self.widget = None
 
         self._postBlockingAction = None
+
+        # # GWV: just some code for setting a breakpoint
+        # if self._indx == 62:
+        #     pass
 
     def _update(self, cDict):
         """Callback routine for updating the node
@@ -613,7 +623,11 @@ class SidebarTree(SidebarABC):
     def buildTree(self, parent, parentWidget, sidebar, obj, level=0):
         """Builds the tree from self downward
         """
+
         super().buildTree(parent=parent, parentWidget=parentWidget, sidebar=sidebar, obj=obj, level=level)  # this will do all the common things
+        # Just a debuging breakpoint and Project closed on reload fix
+        if level == 0:
+            self.closed = False
         # make the widget
         # self.widget = self.givenName
         self.widget = self.makeWidget(parentWidget, self.givenName)
@@ -622,6 +636,8 @@ class SidebarTree(SidebarABC):
         for itm in self.children:
             itm.buildTree(parent=self, parentWidget=self.widget, sidebar=self.sidebar, obj=self.obj, level=self.level + 1)
 
+        # if level == 0: # Just a debuging breakpoint
+        #     pass
 
 class SidebarItem(SidebarTree):
     """
@@ -855,7 +871,8 @@ class SideBarStructure(object):
 
                 SidebarClassTreeItems(klass=SpectrumGroup, callback=_raiseSpectrumGroupEditorPopup(),
                                       menuAction=_openItemSpectrumGroupDisplay(position='right', relativeTo=None),
-                                      triggers=ALL_NOTIFIERS, isDraggable=True, children=[
+                                      triggers=ALL_NOTIFIERS,
+                                      isDraggable=True, children=[
                         SidebarClassSpectrumTreeItems(klass=Spectrum, callback=_raiseSpectrumPopup(),
                                                       menuAction=_openItemSpectrumInGroupDisplay(position='right', relativeTo=None), isDraggable=True),
                         ]),
@@ -941,7 +958,8 @@ class SideBarStructure(object):
                 SidebarClassTreeItems(klass=Complex, rebuildOnRename='Complex-ClassTreeItems',
                                       callback=_raiseComplexEditorPopup(),
                                       menuAction=_openItemComplexTable(position='bottom', relativeTo=None),
-                                      triggers=ALL_NOTIFIERS, isDraggable=True),
+                                      triggers=ALL_NOTIFIERS,
+                                      isDraggable=True),
                 ]),
 
             #------ StructureEnsembles ------
@@ -1154,6 +1172,7 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
 
         super().__init__(parent)
         Base._init(self, acceptDrops=True, **kwds)
+        NotifierBase.__init__(self)
         SideBarStructure._init(self)
 
         self.multiSelect = multiSelect

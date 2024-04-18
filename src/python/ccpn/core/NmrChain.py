@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-21 16:17:10 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:46 +0100 (Thu, April 18, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
@@ -345,6 +345,16 @@ class NmrChain(AbstractWrapperObject):
             if len(changedNmrResidues) != stop + 1 - start:
                 self._project._logger.warning("Only %s nmrResidues found in range %s to %s"
                                               % (len(changedNmrResidues), start, stop))
+
+    @logCommand(get='self')
+    def setupNmrResiduesFromPeaks(self, peakList, keepAssignments=True):
+        """Create a NmrResidue from each peak of peakList, using the peak dimensions to
+        generate the NmrAtoms
+        :param peakList: A PeakList instance
+        :param keepAssignments: flag to keep or not-keep existing assignments
+        """
+        from ccpn.core.lib.AssignmentLib import _fetchNewPeakAssignments
+        _fetchNewPeakAssignments(peakList=peakList, nmrChain=self, keepAssignments=keepAssignments)
 
     @renameObject(blockSidebar=True)
     @logCommand(get='self')

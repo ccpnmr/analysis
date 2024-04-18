@@ -1,9 +1,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-28 16:36:55 +0100 (Fri, July 28, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:55 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -34,7 +34,7 @@ class MyModule(CcpnModule):
     """
     includeSettingsWidget = True
     maxSettingsState = 2
-    settingsPosition = 'top'
+    settingsPosition = 'left'
 
     className = 'MyModule'
 
@@ -45,8 +45,11 @@ class MyModule(CcpnModule):
         self.aLabel = Label(parent=self.mainWidget, text='Testing my module', grid=(0, 0))
 
         # settingsWidget
-        self.testingLabel = Label(parent=self.settingsWidget, text='Testing my settings space', grid=(0, 0), hAlign='c')
-
+        row = 0
+        self.testingLabel = Label(parent=self.settingsWidget, text='Testing my settings space', grid=(row, 0), hAlign='c')
+        row += 1
+        cb = EditableCheckBox(self.settingsWidget, text='HELLO', checked=False, grid=(row, 0))
+        cb.setChecked(True)
 
 '''
 To test a ccpn Module graphic :
@@ -71,9 +74,8 @@ def main():
     module = MyModule(mainWindow=None, name='My Module')
     module.cb = cb = CheckBox(module.settingsWidget, text='HELLO', checked=False, grid=(0, 0), objectName='CHECKCHECK')
 
-    state = module.widgetsState
-    cb.setChecked(True)
-    module.restoreWidgetsState(**state)
+    # state = module.widgetsState
+    # module.restoreWidgetsState(**state)
 
     moduleArea.addModule(module)
 

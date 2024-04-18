@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-21 16:17:10 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:46 +0100 (Thu, April 18, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
@@ -1363,6 +1363,9 @@ class NmrResidue(AbstractWrapperObject):
     def _delete(self):
         """Delete object, with all contained objects and underlying data.
         """
+        # The decorator has already called _finaliseAction('delete')
+        self.deleteAllNotifiers()
+
         atHeadOfChain = False
         apiNmrChain = self._wrappedData.directNmrChain
         if apiNmrChain and apiNmrChain.isConnected:

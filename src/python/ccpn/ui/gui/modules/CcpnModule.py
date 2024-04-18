@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-25 10:11:30 +0000 (Thu, January 25, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:51 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -185,6 +185,8 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     _defaultName = MODULENAME  # used only when renaming is allowed, so that its original name is stored in the lastSeen widgetsState.
     _helpFilePath = None
 
+    _isPythonConsoleModule = False # Conveniance; only overridden in PythonConsoleModule
+
     # After closing a renamed module, any new instance will be named as default.
 
     # _instances = set()
@@ -205,6 +207,8 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                          autoOrientation=False,
                          closable=closable)
         DropBase._init(self, acceptDrops=True)
+
+        NotifierBase.__init__(self)
 
         self.hStyle = """
                   Dock > QWidget {
@@ -238,7 +242,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self._borderOverlay = BorderOverlay(self)
         self._borderOverlay.raise_()
 
-        Logging.getLogger().debug(f'CcpnModule>>> {type(self)} {mainWindow}')
+        Logging.getLogger().debug(f'Opening CcpnModule {self}')
 
         # Logging.getLogger().debug('module:"%s"' % (name,))
         self.closeFunc = closeFunc
@@ -453,6 +457,20 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     #=========================================================================================
     # Widget Methods
     #=========================================================================================
+
+    @property
+    def _widget(self):
+        """Property for forward Version-4 compatibility;
+        Top Widget for the CcpnModule object; for Version-3 equals to self
+        """
+        return self
+
+    @property
+    def _showState(self):
+        """Property for forward Version-4 compatibility;
+        visibility of CcpnModule object; for Version-3 equals to self.isVisible()
+        """
+        return self.isVisible()
 
     def _getModulePidFields(self):
         """
@@ -1011,7 +1029,6 @@ class CcpnModuleLabel(DockLabel):
     TOP_LEFT = 'TOP_LEFT'
     TOP_RIGHT = 'TOP_RIGHT'
 
-    # TODO:GEERTEN check colours handling
     # defined here, as the updateStyle routine is called from the
     # DockLabel instantiation; changed later on
 
@@ -1188,7 +1205,7 @@ class CcpnModuleLabel(DockLabel):
         contextMenu.addSeparator()
 
         gidAction = contextMenu.addAction('Copy Gid to clipboard', self._copyPidToClipboard)
-        gidAction.setToolTip('Usage, On Python Console type: ui.getByGid(Pasted_Gid) to get this module as an object')
+        gidAction.setToolTip('Usage, On Python Console type: get(<pasted-pid>) to get this module as an object')
 
         renameAction.setEnabled(self.module._allowRename)
         # numDocks = len(self.module.getDocksInParentArea())

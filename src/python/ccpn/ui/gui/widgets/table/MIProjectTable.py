@@ -4,9 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-28 12:49:06 +0000 (Tue, November 28, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:55 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -34,7 +34,7 @@ from time import time_ns
 from types import SimpleNamespace
 
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, catchExceptions
-from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.lib.Notifiers import Notifier, CurrentNotifier, _makeNotifiers
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.table._TableCommon import INDEX_ROLE
@@ -373,7 +373,7 @@ class _MIProjectTableABC(MITableABC, Base):
 
         :param rowObjects: list of objects to set each row
         """
-        self.project.blankNotification()
+        self.project._increaseNotificationBlanking()
 
         # if nothing passed in then keep the current highlighted objects
         objs = selectedObjects if selectedObjects is not None else self.getSelectedObjects()
@@ -429,7 +429,7 @@ class _MIProjectTableABC(MITableABC, Base):
                 raise
 
         finally:
-            self.project.unblankNotification()
+            self.project._decreaseNotificationBlanking()
 
     def populateEmptyTable(self):
         """Populate with an empty dataFrame containing the correct column headers.
@@ -479,41 +479,45 @@ class _MIProjectTableABC(MITableABC, Base):
         self._initialiseTableNotifiers()
 
         if self.tableClass:
-            self._tableNotifier = Notifier(self.project,
-                                           [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
-                                           self.tableClass.__name__,
-                                           partial(self._queueGeneralNotifier, self._updateTableCallback),
-                                           onceOnly=True)
+            self._tableNotifier = _makeNotifiers(self.project,
+                                                 triggers=[Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
+                                                 targetName=self.tableClass.__name__,
+                                                 callback=partial(self._queueGeneralNotifier, self._updateTableCallback),
+                                                 onceOnly=True,
+                                                 setterObject=self
+                                                 )
 
         if self.rowClass:
             # 'i-1' residue spawns rename but the 'i' residue only fires a change
-            self._rowNotifier = Notifier(self.project,
-                                         [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE],
-                                         self.rowClass.__name__,
-                                         partial(self._queueGeneralNotifier, self._updateRowCallback),
-                                         onceOnly=True)  # should be True, but doesn't work
+            self._rowNotifier = _makeNotifiers(self.project,
+                                               triggers=[Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE],
+                                               targetName=self.rowClass.__name__,
+                                               callback=partial(self._queueGeneralNotifier, self._updateRowCallback),
+                                               onceOnly=True,  # should be True, but doesn't work
+                                               setterObject=self)
 
         if self.cellClassNames:
             for cellClass, attr in self.cellClassNames.items():
-                self._cellNotifiers.append(Notifier(self.project,
-                                                    [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
-                                                    cellClass.__name__,
-                                                    partial(self._queueGeneralNotifier, self._updateCellCallback),
-                                                    onceOnly=True))
+                for _trigger in [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]:
+                    self._cellNotifiers.append(Notifier(self.project, _trigger,
+                                                        targetName=cellClass.__name__,
+                                                        callback=partial(self._queueGeneralNotifier, self._updateCellCallback),
+                                                        onceOnly=True,
+                                                        setterObject=self)
+                                               )
 
         if self.selectCurrent:
-            self._selectCurrentNotifier = Notifier(self.current,
-                                                   [Notifier.CURRENT],
-                                                   self.callBackClass._pluralLinkName,
-                                                   self._selectCurrentCallBack,  # strange behaviour if deferred
-                                                   # partial(self._queueGeneralNotifier, self._selectCurrentCallBack),
+            self._selectCurrentNotifier = CurrentNotifier(
+                                                   targetName=self.callBackClass._pluralLinkName,
+                                                   callback=self._selectCurrentCallBack,  # strange behaviour if deferred
+                                                   setterObject=self
                                                    )
 
         if self.search:
-            self._searchNotifier = Notifier(self.current,
-                                            [Notifier.CURRENT],
-                                            self.search._pluralLinkName,
-                                            self._searchCallBack
+            self._searchNotifier = CurrentNotifier(
+                                            targetName=self.search._pluralLinkName,
+                                            callback=self._searchCallBack,
+                                            setterObject=self
                                             )
 
         # add a cleaner id to the opened guiTable list
@@ -530,25 +534,25 @@ class _MIProjectTableABC(MITableABC, Base):
         getLogger().debug(f'Clearing table notifiers {self}')
 
         if self._tableNotifier is not None:
-            self._tableNotifier.unRegister()
+            self._tableNotifier.unRegisterNotifier()
             self._tableNotifier = None
 
         if self._rowNotifier is not None:
-            self._rowNotifier.unRegister()
+            self._rowNotifier.unRegisterNotifier()
             self._rowNotifier = None
 
         if self._cellNotifiers:
             for cell in self._cellNotifiers:
                 if cell is not None:
-                    cell.unRegister()
+                    cell.unRegisterNotifier()
             self._cellNotifiers = []
 
         if self._selectCurrentNotifier is not None:
-            self._selectCurrentNotifier.unRegister()
+            self._selectCurrentNotifier.unRegisterNotifier()
             self._selectCurrentNotifier = None
 
         if self._searchNotifier is not None:
-            self._searchNotifier.unRegister()
+            self._searchNotifier.unRegisterNotifier()
             self._searchNotifier = None
 
     def _close(self):
@@ -560,7 +564,7 @@ class _MIProjectTableABC(MITableABC, Base):
         """
         self.selectCurrent = False
         if self._selectCurrentNotifier is not None:
-            self._selectCurrentNotifier.unRegister()
+            self._selectCurrentNotifier.unRegisterNotifier()
             self._selectCurrentNotifier = None
 
     #=========================================================================================

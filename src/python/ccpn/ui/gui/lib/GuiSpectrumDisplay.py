@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:26 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:50 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -668,8 +668,7 @@ class GuiSpectrumDisplay(CcpnModule):
                         self.removeSpectrum(specView.spectrum)
 
     def _registerNotifiers(self):
-        self._spectrumChangeNotifier = self.setNotifier(self.project,
-                                                        [Notifier.CHANGE, Notifier.RENAME, Notifier.DELETE],
+        self._spectrumChangeNotifier = self.setNotifier(self.project, [Notifier.CHANGE, Notifier.RENAME, Notifier.DELETE],
                                                         Spectrum.className,
                                                         self._spectrumChanged)
 
@@ -697,14 +696,12 @@ class GuiSpectrumDisplay(CcpnModule):
                                                            self._listViewChanged,
                                                            onceOnly=True)
 
-        self._spectrumGroupNotifier = self.setNotifier(self.project,
-                                                       [Notifier.CHANGE, Notifier.RENAME],
+        self._spectrumGroupNotifier = self.setNotifier(self.project, [Notifier.CHANGE, Notifier.RENAME],
                                                        SpectrumGroup.className,
                                                        self._spectrumGroupChanged,
                                                        onceOnly=True)
 
-        self._spectrumDisplayNotifier = self.setNotifier(self.project,
-                                                         [Notifier.RENAME],
+        self._spectrumDisplayNotifier = self.setNotifier(self.project, [Notifier.RENAME],
                                                          SpectrumDisplay.className,
                                                          self._spectrumDisplayChanged,
                                                          onceOnly=True)
@@ -2674,8 +2671,8 @@ class GuiSpectrumDisplay(CcpnModule):
                             raise RuntimeError('Cannot display %s on %s; incompatible dimensionTypes' % (spectrum, self))
                         # For now: no multiple spectra with time/sampled axes (current implementation limit)
                         if dt2 == DIMENSION_SAMPLED or dt2 == DIMENSION_TIME:
-                            raise RuntimeError('Currently cannot display %s with "%s" axis on %s; SpectrumDisplay already contains other spectra with time/sampled axes' %
-                                               (spectrum, dt2, self))
+                            raise RuntimeError(f'It is currently not possible to open two spectra with a time/sampled domain in the same SpectrumDisplay.\n'
+                                               f'Please open {spectrum.pid} in a separate SpectrumDisplay.')
 
                     # check the isotopeCodes exist and check compatibility
                     for ic1, ic2 in zip(self.isotopeCodes or [], spectrum.getByDimensions('isotopeCodes', dims)):

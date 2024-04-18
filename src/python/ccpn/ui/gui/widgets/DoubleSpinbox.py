@@ -5,9 +5,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-26 16:08:35 +0100 (Wed, April 26, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:54 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -149,12 +149,13 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
         self.isSelected = False
         self._internalWheelEvent = True
 
+        if decimals is None:
+            decimals = self.DEFAULTDECIMALS
+        self._decimals = decimals  # keep a local copy as setDecimals calls textFromValue which need decimals
+        self.setDecimals(decimals)
+
         if step is not None:
             self.setSingleStep(step)
-        if decimals is not None:
-            self.setDecimals(decimals)
-        else:
-            self.setDecimals(self.DEFAULTDECIMALS)
 
         if showButtons is False:
             self.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
@@ -266,15 +267,19 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
             self.valueChanged.connect(callback)
         self._callback = callback
 
-    def textFromValue(self, v: typing.Union[float, int]) -> str:
-        """Subclass to remove extra zeroes
-        """
-        if isinstance(v, int):
-            return super(DoubleSpinbox, self).textFromValue(v)
+    # GWV 26/7/2023: disabled: we are setting the decimals, should not strip the zero's
 
-        string = self._qLocale.toString(round(v, self.decimals()), 'g', QtCore.QLocale.FloatingPointShortest).replace("e+", "e")
-        string = re.sub("e(-?)0*(\d+)", r"e\1\2", string)
-        return string
+    # def textFromValue(self, v: typing.Union[float, int]) -> str:
+    #     """Subclass to remove extra zeroes
+    #     """
+    #     if isinstance(v, int):
+    #         return super(DoubleSpinbox, self).textFromValue(v)
+    #
+    #     string = self._qLocale.toString(round(v, self._decimals), 'g', QtCore.QLocale.FloatingPointShortest).replace("e+", "e")
+    #
+    #
+    #     # string = re.sub("e(-?)0*(\d+)", r"e\1\2", string)
+    #     return string
 
     def validate(self, text: str, pos: int) -> typing.Tuple[QtGui.QValidator.State, str, int]:
         """Validate the spinbox contents

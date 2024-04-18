@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-17 13:57:11 +0100 (Wed, April 17, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:51 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -180,8 +180,10 @@ class MacroEditor(CcpnModule):
         self._setToolBar()
         self._createWidgetSettings()
         self._droppedNotifier = GuiNotifier(self.textEditor,
-                                           [GuiNotifier.DROPEVENT], [DropBase.URLS],
-                                           self._processDroppedItems)
+                                            GuiNotifier.DROPEVENT, DropBase.URLS,
+                                            callback=self._processDroppedItems,
+                                            setterObject=self
+                                            )
 
     def _setupWidgets(self):
         """Set up the main widgets
@@ -618,10 +620,11 @@ class MacroEditor(CcpnModule):
         console.show()
 
     def _openPythonConsoleModule(self):
-        from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
+        # from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
 
         if self.mainWindow.pythonConsoleModule is None:  # No pythonConsole module detected, so create one.
-            self.mainWindow.moduleArea.addModule(PythonConsoleModule(self.mainWindow), 'bottom')
+            # self.mainWindow.moduleArea.addModule(PythonConsoleModule(self.mainWindow), 'bottom')
+            self.mainWindow._initPythonConsoleModule()
 
     def _deleteTempMacro(self, filePath):
         if os.path.exists(filePath):
@@ -729,7 +732,7 @@ class MacroEditor(CcpnModule):
                     widget._setSavedState(value)
 
             except Exception as e:
-                getLogger().debug('Impossible to restore %s value for %s. %s' % (variableName, self.name(), e))
+                getLogger().debug('Exception raised: Impossible to restore %s value for %s: %s' % (variableName, self.name(), e))
 
     def _closeModule(self):
         """Re-implementation of closeModule"""

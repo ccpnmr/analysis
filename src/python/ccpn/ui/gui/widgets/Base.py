@@ -8,9 +8,9 @@ widget.getLayout().addWidget(row, col, [rowspan, [colspan])
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -18,9 +18,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-30 14:03:32 +0100 (Fri, June 30, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:53 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -33,8 +33,11 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from dataclasses import dataclass
 from functools import partial
 from contextlib import contextmanager
+
 from PyQt5 import QtWidgets, QtCore
 from pyqtgraph.dockarea import Dock
+from PyQt5.QtWidgets import QWIDGETSIZE_MAX
+
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.Font import setWidgetFont
@@ -234,7 +237,8 @@ class Base(DropBase, SignalBlocking):
     # Base._init(**kwds) should be called from every widget
     # We don't use __init__ as it messes up the super() methods resolution and the
     # destroy signal when closing the windows
-    def _init(self, isFloatWidget=False,
+    def _init(self,
+              isFloatWidget=False,
               tipText=None,
               bgColor=None, fgColor=None,
               enabled=None,
@@ -242,7 +246,8 @@ class Base(DropBase, SignalBlocking):
               # keywords related to optional layout
               setLayout=False,
               hPolicy=None, vPolicy=None,
-              margins=(0, 0, 0, 0), spacing=(2, 2),
+              margins=(0,0,0,0),
+              spacing=(2, 2),
 
               minimumHeight=None,
               maximumHeight=None,
@@ -292,7 +297,6 @@ class Base(DropBase, SignalBlocking):
         # print('DEBUG Base %r: acceptDrops=%s, setLayout=%s' % (self, acceptDrops, setLayout))
 
         # define the 'droppable' methods
-        # DropBase._init(self, acceptDrops=acceptDrops)
         DropBase._init(self, acceptDrops=acceptDrops)
         # super().__init__(acceptDrops=acceptDrops)
 
@@ -311,15 +315,39 @@ class Base(DropBase, SignalBlocking):
         if not ignoreStyleSheet:
             # Setup colour overrides (styles used primarily)
             ##3 depreciated
+            # from ccpn.util.Colour import allColours, hexToRgb
+            # if bgColor or fgColor:
+            #     color2hex =  dict( (v,k) for k,v in allColours.items() )
+
             if bgColor:
+                # See if we need conversion
+                # if isinstance(bgColor, str) and len(bgColor) > 0:
+                #     if bgColor[0] == '#':  #hex string
+                #         bgColor = hexToRgb(bgColor)
+                #     else:
+                #         _tmp = color2hex.get(bgColor)
+                #         if _tmp is None:
+                #             raise RuntimeError(f'Base: error converting bgColor {bgColor}')
+                #         bgColor = hexToRgb(bgColor)
+
                 self.setAutoFillBackground(True)
                 #rgb = QtGui.QColor(bgColor).getRgb()[:3]
                 self.setStyleSheet("background-color: rgb(%d, %d, %d);" % bgColor)
 
             if fgColor:
+                # GWV: See if we need conversion; WHY Stylesheets accepts strings and hex and rgb
+                # if isinstance(fgColor, str) and len(fgColor) > 0:
+                #     if fgColor[0] == '#':  #hex string
+                #         bgColor = hexToRgb(fgColor)
+                #     else:
+                #         _tmp = color2hex.get(fgColor)
+                #         if _tmp is None:
+                #             raise RuntimeError(f'Base: error converting fgColor {fgColor}')
+                #         fgColor = hexToRgb(_tmp)
+
                 self.setAutoFillBackground(True)
                 #rgb = QtGui.QColor(fgColor).getRgb()[:3]
-                self.setStyleSheet("foreground-color: rgb(%d, %d, %d);" % fgColor)
+                self.setStyleSheet("color: rgb(%d, %d, %d);" % fgColor)
 
             if setLayout:
                 self.setGridLayout(margins=margins, spacing=spacing)
@@ -330,8 +358,9 @@ class Base(DropBase, SignalBlocking):
 
         # add the widget to parent if it is not a float widget and either grid[0] (horizontal)
         # or grid[1] (vertical) are defined
-        self._col = grid[0]
-        self._row = grid[1]
+        # GWV 3/324: fixed row/col error
+        self._col = grid[1]
+        self._row = grid[0]
         self._grid = grid
         self.__hidden = hidden
         if not isFloatWidget and (grid[0] is not None or grid[1] is not None):
@@ -348,8 +377,10 @@ class Base(DropBase, SignalBlocking):
 
         setWidgetFont(self, )
 
-        if len([_v for _v in (minimumHeight, maximumHeight, fixedHeight) if _v is not None]) > 1:
-            raise ValueError(f'only one of (minimumHeight, maximumHeight, fixedHeight) can be defined')
+        if len([_v for _v in (minimumHeight, fixedHeight) if _v is not None]) > 1:
+            raise ValueError(f'only one of (minimumHeight, fixedHeight) can be defined')
+        if len([_v for _v in (maximumHeight, fixedHeight) if _v is not None]) > 1:
+            raise ValueError(f'only one of (maximumHeight, fixedHeight) can be defined')
         if maximumHeight:
             self.setMaximumHeight(maximumHeight)
         if minimumHeight:
@@ -357,14 +388,20 @@ class Base(DropBase, SignalBlocking):
         if fixedHeight:
             self.setFixedHeight(fixedHeight)
 
-        if len([_v for _v in (minimumWidth, maximumWidth, fixedWidth) if _v is not None]) > 1:
-            raise ValueError(f'only one of (minimumWidth, maximumWidth, fixedWidth) can be defined')
+        if len([_v for _v in (minimumWidth, fixedWidth) if _v is not None]) > 1:
+            raise ValueError(f'only one of (minimumWidth, fixedWidth) can be defined')
+        if len([_v for _v in (maximumWidth, fixedWidth) if _v is not None]) > 1:
+            raise ValueError(f'only one of (maximumWidth, fixedWidth) can be defined')
         if maximumWidth:
             self.setMaximumWidth(maximumWidth)
         if minimumWidth:
             self.setMinimumWidth(minimumWidth)
         if fixedWidth:
             self.setFixedWidth(fixedWidth)
+
+        # Allow (Gui-)Notifiers to be registered with this widget
+        from ccpn.core.lib.Notifiers import NotifierBase, _NotifiersDict
+        setattr(self, NotifierBase.REGISTERED_NOTIFIERS_DICT, _NotifiersDict())
 
         # connect destruction of widget to onDestroyed method,
         # which subsequently can be subclassed
@@ -375,7 +412,7 @@ class Base(DropBase, SignalBlocking):
         # print("DEBUG on destroyed:", widget)
         pass
 
-    def setGridLayout(self, margins=(0, 0, 0, 0), spacing=(0, 0)):
+    def setGridLayout(self, margins=(0,0,0,0), spacing=(0, 0)):
         """Add a QGridlayout to self
         """
         layout = self._getLayout(self)  # use _getLayout as we do not want any message; if there is no
@@ -461,6 +498,33 @@ class Base(DropBase, SignalBlocking):
         """A method to return the parent of a widget
         """
         return self.parent()
+
+    def getSize(self) -> (int,int):
+        """:return the (width, height) tuple of self
+        """
+        return (self.size().width(), self.size().height())
+
+    # GWV 1/3/24: can't make the setSize stick; setFixedWidth cause the PyQt layout manager
+    # to make the widget that size, but it reverts as soon as the maximum size is set again.
+
+    # def setSize(self, width=None, height=None):
+    #     """Set widget size to width, height;  main current value if None.
+    #     :param width: width in pixels
+    #     """
+    #     _currentWidth, _currentHeight = self.getSize()
+    #
+    #     if width is None:
+    #         width = _currentWidth
+    #     if height is None:
+    #         height = _currentHeight
+    #
+    #     # Set the widget to width, height
+    #     # sel.setFixedSize(width, height)
+    #     self.resize(width, height)
+    #     # # # and release it again
+    #     # self.setSizePolicy(POLICY_DICT['minimumExpanding'], POLICY_DICT['minimumExpanding'])
+    #     # self.setMinimumSize(0,0)
+    #     # self.setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX)
 
     def addSpacer(self, width, height, grid, gridSpan=(1, 1), expandX=False, expandY=False, parent=None):
         """Convenience to insert spacer

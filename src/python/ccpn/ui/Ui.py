@@ -4,9 +4,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-08-30 19:22:14 +0100 (Wed, August 30, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:49 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -45,24 +45,53 @@ from ccpn.util.decorators import logCommand
 
 
 class Ui(NotifierBase):
-    """Superclass for all user interface classes"""
+    """Superclass for all user interface classes
+    """
 
-    # Factory functions for UI-specific instantiation of wrapped graphics classes
-    _factoryFunctions = {}
+    # Can be subclassed
+    _hasGui = False
+
+    # GWV 26/2/24: Not used
+    # # Factory functions for UI-specific instantiation of wrapped graphics classes
+    # _factoryFunctions = {}
 
     def __init__(self, application):
 
-        self.application = application
-        self.mainWindow = None
+        # set the forward/backlink with application already here, because subsequent initialisations
+        # do require this to be present
+        self._application = application
+        application._ui = self
+        # set by initialise
+        self._mainWindow = None
+        # plugin Modules list
         self.pluginModules = []
+
+    @property
+    def application(self):
+        """:return the Application instance
+        """
+        return self._application
+
+    @property
+    def mainWindow(self):
+        """:return the MainWindow instance
+        """
+        return self._mainWindow
 
     @property
     def project(self):
         return self.application.project
 
-    def initialize(self, mainWindow):
-        """UI operations done after every project load/create"""
-        pass
+    @property
+    def current(self):
+        """:return the Current instance
+        """
+        return self.application.current
+
+    def initialize(self, mainWindow, project):
+        """UI operations done after every project load/create
+        """
+        self._mainWindow = mainWindow
 
     def startUi(self):
         """Start the ui execution
@@ -189,10 +218,12 @@ class Ui(NotifierBase):
         _app = getApplication()
 
         if dataLoader is None and path is not None:
-            dataLoader = checkPathForDataLoader(path)
+            if (dataLoader := checkPathForDataLoader(path)) is None:
+                getLogger().error(f'Loading project: No suitable dataLoader found for {path}')
+                return None
 
         if dataLoader is None:
-            getLogger().error('No suitable dataLoader found')
+            getLogger().error('Loading project: No suitable dataLoader')
             return None
 
         if not dataLoader.createNewProject:
@@ -632,7 +663,7 @@ class NoUi(Ui):
                 getLogger().debug(f'Folder {newPath} may be read-only')
                 return False
 
-        self.application._getRecentProjectFiles(oldPath=oldPath)  # this will also update the list
+        # self.application._getRecentProjectFiles(oldPath=oldPath)  # this will also update the list
 
         getLogger().info(f'Project successfully saved to "{self.project.path}"')
 

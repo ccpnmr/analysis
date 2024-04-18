@@ -4,9 +4,9 @@ This file contains the top-level SpectrumDisplay module code
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-28 16:36:55 +0100 (Fri, July 28, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:52 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -88,19 +88,17 @@ class SpectrumDisplay1d(SpectrumDisplay, GuiSpectrumDisplay):
         """Init for SpectrumDisplay1d;
         Handles CoreClass SpectrumDisplay and GuiSpectrumDisplay
         """
-        getLogger().debug(f'SpectrumDisplay1d>> project: {project}, project.application: {project.application}')
-        # _CoreClassSpectrumDisplay.__init__(self, project, wrappedData)
+        getLogger().debug(f'SpectrumDisplay1d>> project: {project}, project._mainWindow: {project._mainWindow}')
         SpectrumDisplay.__init__(self, project, wrappedData)
-
-        # hack for now
-        self.application = project.application
-        self.mainWindow = self.application.ui.mainWindow
-        GuiSpectrumDisplay.__init__(self, mainWindow=self.mainWindow, useScrollArea=True)
+        # project (on restore) or ui (on newSpectrumDisplay) has _mainWindow
+        _mainWindow = project._mainWindow or project.application.ui.mainWindow
+        GuiSpectrumDisplay.__init__(self, mainWindow=_mainWindow, useScrollArea=True)
 
 
 class SpectrumDisplayNd(SpectrumDisplay, GuiSpectrumDisplay):
     """nD SpectrumDisplay
     """
+
     # NB: inherits from AbstractWrapper (and more):
     # shortClassName = 'GD'
     # className = 'SpectrumDisplay'
@@ -138,14 +136,11 @@ class SpectrumDisplayNd(SpectrumDisplay, GuiSpectrumDisplay):
         """Init for SpectrumDisplayNd;
         Handles CoreClass SpectrumDisplay and GuiSpectrumDisplay
         """
-        getLogger().debug(f'SpectrumDisplayNd>> project: {project}, project.application: {project.application}')
-        # _CoreClassSpectrumDisplay.__init__(self, project, wrappedData)
+        getLogger().debug(f'SpectrumDisplayNd>> project: {project}, project._mainWindow: {project._mainWindow}')
         SpectrumDisplay.__init__(self, project, wrappedData)
-
-        # hack for now;
-        self.application = project.application
-        self.mainWindow = self.application.ui.mainWindow
-        GuiSpectrumDisplay.__init__(self, mainWindow=self.mainWindow, useScrollArea=True)
+        # project (on restore) or ui (on newSpectrumDisplay) has _mainWindow
+        _mainWindow = project._mainWindow or project.application.ui.mainWindow
+        GuiSpectrumDisplay.__init__(self, mainWindow=_mainWindow, useScrollArea=True)
 
     # Expose some methods for the nD case
 

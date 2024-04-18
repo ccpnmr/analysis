@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-01-05 15:02:25 +0000 (Fri, January 05, 2024) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:53 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -743,7 +743,7 @@ def dialogErrorReport(self, undo, es):
     # get the name of the class propagating the error
     errorName = str(self.__class__.__name__)
 
-    if undo.newItemsAdded:
+    if undo and undo.newItemsAdded:
         # undo any valid items and clear the stack above the current undo point
         undo.undo()
         undo.clearRedoItems()
@@ -769,8 +769,10 @@ def handleDialogApply(self):
     """
 
     from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
+    from ccpn.framework.Application import getApplication
 
-    undo = self.project._undo
+    _app = getApplication()
+    undo = _app._getUndo()
 
 
     # simple class to export variables from the generator function
@@ -795,7 +797,7 @@ def handleDialogApply(self):
         error.errorValue = es
 
         # re-raise the error if in debug mode
-        if self.application._isInDebugMode:
+        if _app._isInDebugMode:
             raise es
 
     else:

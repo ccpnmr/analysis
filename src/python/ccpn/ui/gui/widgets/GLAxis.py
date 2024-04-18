@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:27 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:54 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -55,6 +55,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import GLViewports
 from ccpn.ui.gui.lib.mouseEvents import rightMouse
 
 AXES_MARKER_MIN_PIXEL = 10
+
 
 class _AxisOverlay(QtWidgets.QWidget):
     """Overlay widget that draws highlight over the current strip during a drag-drop/highlight operation
@@ -334,15 +335,15 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
     def glBlocking(self):
         try:
             # stop notifiers and logging interfering with paint event
-            self.project.blankNotification()
-            self.application._increaseNotificationBlocking()
+            self.project._increaseNotificationBlanking()
+            self.application._increaseEchoBlocking()
 
             yield
 
         finally:
             # re-enable notifiers
-            self.application._decreaseNotificationBlocking()
-            self.project.unblankNotification()
+            self.application._decreaseEchoBlocking()
+            self.project._decreaseNotificationBlanking()
 
     @staticmethod
     def _round_sig(x, sig=6, small_value=1.0e-9):

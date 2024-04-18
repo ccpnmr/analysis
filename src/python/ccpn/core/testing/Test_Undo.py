@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-22 14:57:07 +0000 (Mon, January 22, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:48 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -64,25 +64,25 @@ class ComplexUndoTest(WrapperTesting):
         project = self.project._wrappedData.root
         project._undo = Undo()
         self.project.newUndoPoint()
-        self.project.blankNotification()
+        self.project._increaseNotificationBlanking()
         try:
             chainB = self.project.createChain(sequence='VICKYHIGMAN', compoundName='MyProtein', molType='protein')
             project._undo.undo()
         finally:
-            self.project.unblankNotification()
+            self.project._decreaseNotificationBlanking()
         project.checkAllValid()
 
     def test_make_chain_undo_redo(self):
         project = self.project._wrappedData.root
         project._undo = Undo()
         self.project.newUndoPoint()
-        self.project.blankNotification()
+        self.project._increaseNotificationBlanking()
         try:
             chainB = self.project.createChain(sequence='VICKYHIGMAN', compoundName='MyProtein', molType='protein')
             project._undo.undo()
             project._undo.redo()
         finally:
-            self.project.unblankNotification()
+            self.project._decreaseNotificationBlanking()
         project.checkAllValid()
 
 

@@ -4,9 +4,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 19:17:57 +0100 (Wed, June 28, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:55 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,30 +26,36 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from contextlib import contextmanager
-from PyQt5 import QtCore, QtGui, QtWidgets
-from ccpn.ui.gui.widgets.Menu import Menu
-from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from functools import partial
-from ccpn.core.lib.Notifiers import Notifier
+from contextlib import contextmanager
 from collections import OrderedDict
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
-from ccpn.ui._implementation.PeakListView import PeakListView
-from ccpn.ui._implementation.IntegralListView import IntegralListView
-from ccpn.ui._implementation.MultipletListView import MultipletListView
+
+from PyQt5 import QtCore, QtGui, QtWidgets
+
+from ccpn.core.lib.Notifiers import Notifier, CurrentNotifier
+from ccpn.core.lib import Pid
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.MultipletList import MultipletList
-from ccpn.ui.gui.lib.GuiSpectrumView import _spectrumViewHasChanged
-from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
-from ccpn.core.lib import Pid
-from ccpn.ui.gui.lib.GuiStripContextMenus import _SCMitem, ItemTypes, ITEM, _addMenuItems, _createMenu, _separator
-from ccpn.util import Colour
+
 from ccpn.framework.Application import getApplication, getCurrent, getProject
+
+from ccpn.ui._implementation.PeakListView import PeakListView
+from ccpn.ui._implementation.IntegralListView import IntegralListView
+from ccpn.ui._implementation.MultipletListView import MultipletListView
+
+from ccpn.ui.gui.widgets.Menu import Menu
+from ccpn.ui.gui.widgets.ToolBar import ToolBar
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
+from ccpn.ui.gui.lib.GuiSpectrumView import _spectrumViewHasChanged
+from ccpn.ui.gui.lib.GuiStripContextMenus import _SCMitem, ItemTypes, ITEM, _addMenuItems, _createMenu, _separator
+from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXFOREGROUND, CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_HEXHIGHLIGHT, \
     getColours, BORDERNOFOCUS_COLOUR
+
+from ccpn.util import Colour
 
 
 
@@ -67,11 +73,10 @@ class SpectrumToolBar(ToolBar):
         self.project = getProject()
         self.current = getCurrent()
         self._firstButton = 0
-        self._currentSpectrumNotifier = Notifier(self.current,
-                                  [Notifier.CURRENT],
+        self._currentSpectrumNotifier = CurrentNotifier(
                                   targetName=Spectrum._pluralLinkName,
                                   callback=self._onCurrentSpectrumNotifier,
-                                  onceOnly=True),
+                                  ),
 
         self.actionCurrentSpectrumStyleSheet = ("\
                                     QToolButton {   \
@@ -331,7 +336,7 @@ class SpectrumToolBar(ToolBar):
         spectrum = data[Notifier.OBJECT]
         trigger = data[Notifier.TRIGGER]
 
-        if spectrum and trigger in [Notifier.RENAME]:
+        if spectrum and trigger == Notifier.RENAME:
             oldPid = Pid.Pid(data[Notifier.OLDPID])
             oldId = oldPid.id
 

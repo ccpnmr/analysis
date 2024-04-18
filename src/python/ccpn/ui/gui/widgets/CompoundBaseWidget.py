@@ -4,9 +4,9 @@ Base class for compound widgets
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-16 12:51:36 +0000 (Thu, November 16, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:54 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,8 +28,9 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 
 import contextlib
 from PyQt5 import QtCore
+
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.lib.Notifiers import Notifier, _makeNotifiers
 from ccpn.ui.gui.widgets.Base import SignalBlocking
 
 
@@ -101,21 +102,23 @@ class CompoundBaseWidget(Frame, SignalBlocking):
             if height is not None:
                 self._widgets[i].setFixedHeight(height)
 
-    def addObjectNotifier(self, theObject, triggers, targetName, func, *args, **kwds):
-        """
-        Add and store a notifier with widget;
-
-        :param theObject: A valid V3 core or current object
-        :param triggers: any of the triggers, as defined in Notifier class
-        :param targetName: a valid target for theObject, as defined in the Notifier class
-        :param func: callback function on triggering
-        :param args: optional arguments to func
-        :param kwds: optional keyword arguments to func
-        :return: Notifier instance
-        """
-        notifier = Notifier(theObject, triggers, targetName, func, *args, **kwds)
-        self.addNotifier(notifier)
-        return notifier
+    # GWV 20/3/24: No usage found
+    # def addObjectNotifier(self, theObject, triggers, targetName, func, *args, **kwds):
+    #     """
+    #     Add and store a notifier with widget;
+    #
+    #     :param theObject: A valid V3 core or current object
+    #     :param triggers: any of the triggers, as defined in Notifier class
+    #     :param targetName: a valid target for theObject, as defined in the Notifier class
+    #     :param func: callback function on triggering
+    #     :param args: optional arguments to func
+    #     :param kwds: optional keyword arguments to func
+    #     :return: Notifier instance
+    #     """
+    #     result = _makeNotifiers(theObject, triggers=triggers, targetName=targetName, callback=func)
+    #     for notifier in result:
+    #         self.addNotifier(notifier)
+    #     return result
 
     def addNotifier(self, notifier):
         """add a notifier to the widget"""
@@ -125,7 +128,7 @@ class CompoundBaseWidget(Frame, SignalBlocking):
         """Delete all notifiers associated with the widget"""
         while len(self._notifiers) > 0:
             if notifier := self._notifiers.pop():
-                notifier.unRegister()
+                notifier.unRegisterNotifier()
                 del (notifier)
 
     def __del__(self):

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-21 16:17:11 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:49 +0100 (Thu, April 18, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
@@ -171,7 +171,8 @@ Project._apiNotifiers.append(
 
 def _peakListAddPeakListViews(project: Project, apiPeakList: Nmr.PeakList):
     """Add ApiPeakListView when ApiPeakList is created"""
-    if project._apiNotificationBlanking == 0:
+    from ccpn.core.lib.Notifiers import NotifierBase
+    if NotifierBase._apiNotificationBlanking == 0:
         # create new apiObjects if not blocked
         for apiSpectrumView in apiPeakList.dataSource.spectrumViews:
             apiSpectrumView.newPeakListView(peakListSerial=apiPeakList.serial, peakList=apiPeakList)

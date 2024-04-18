@@ -56,8 +56,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:26 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:51 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -2931,7 +2931,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def _processSpectrumNotifier(self, data):
         trigger = data[Notifier.TRIGGER]
 
-        if trigger in [Notifier.RENAME]:
+        if trigger == Notifier.RENAME:
             obj = data[Notifier.OBJECT]
             self._spectrumLabelling.renameString(obj)
 
@@ -2980,7 +2980,7 @@ class CcpnGLWidget(QOpenGLWidget):
         """
         trigger = data[Notifier.TRIGGER]
 
-        if trigger in [Notifier.RENAME]:
+        if trigger == Notifier.RENAME:
             nmrAtom = data[Notifier.OBJECT]
             oldPid = Pid.Pid(data[Notifier.OLDPID])
             oldId = oldPid.id
@@ -3019,15 +3019,15 @@ class CcpnGLWidget(QOpenGLWidget):
     def glBlocking(self):
         try:
             # stop notifiers and logging interfering with paint event
-            self.project.blankNotification()
-            self.application._increaseNotificationBlocking()
+            self.project._increaseNotificationBlanking()
+            self.application._increaseEchoBlocking()
 
             yield
 
         finally:
             # re-enable notifiers
-            self.application._decreaseNotificationBlocking()
-            self.project.unblankNotification()
+            self.application._decreaseEchoBlocking()
+            self.project._decreaseNotificationBlanking()
 
     def _buildGL(self):
         """Separate the building of the display from the paint event; not sure that this is required

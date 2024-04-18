@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:28 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:55 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1330,8 +1330,8 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
         """Notifiers for responding to spectrumViews
         """
         # # can't use setNotifier as not guaranteed a parent abstractWrapperObject
-        # self._spectrumViewNotifier = Notifier(self.project,
-        #                                       [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],  # DELETE not registering
+        # GWV 20/3/24: use only one trigger per Notifier instantiation; use _makeNotifiers
+        # self._spectrumViewNotifier = Notifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],  # DELETE not registering
         #                                       SpectrumView.className,
         #                                       self._spectrumViewChanged,
         #                                       onceOnly=True)
@@ -1678,25 +1678,25 @@ class ObjectSelectionWidget(ListCompoundWidget):
 
         # Notifiers
         if self.project:
-            self._notifierRename = Notifier(theObject=self.project,
-                                            triggers=[Notifier.RENAME],
+            self._notifierRename = Notifier(theObject=self.project, trigger=Notifier.RENAME,
                                             targetName=self.KLASS.className,
-                                            callback=self._objRenamedCallback)
+                                            callback=self._objRenamedCallback,
+                                            setterObject=self)
 
-            self._notifierDelete = Notifier(theObject=self.project,
-                                            triggers=[Notifier.DELETE],
+            self._notifierDelete = Notifier(theObject=self.project, trigger=Notifier.DELETE,
                                             targetName=self.KLASS.className,
-                                            callback=self._objDeletedCallback)
+                                            callback=self._objDeletedCallback,
+                                            setterObject=self)
 
         else:
             self._notifierRename = self._notifierDelete = None
 
     def _close(self):
         if self._notifierRename:
-            self._notifierRename.unRegister()
+            self._notifierRename.unRegisterNotifier()
             self._notifierRename = None
         if self._notifierDelete:
-            self._notifierDelete.unRegister()
+            self._notifierDelete.unRegisterNotifier()
             self._notifierDelete = None
 
     def select(self, item, blockSignals=False):

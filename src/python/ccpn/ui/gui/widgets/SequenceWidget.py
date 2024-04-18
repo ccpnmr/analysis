@@ -9,9 +9,9 @@ GWV: 22/4/2018: New handling of colours
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -20,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:08 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:55 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -40,7 +40,7 @@ from ccpn.core.Chain import Chain
 from ccpn.core.Residue import Residue
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrChain import NmrChain
-from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.lib.Notifiers import Notifier,_makeNotifiers
 
 from ccpn.ui.gui.guiSettings import getColours
 from ccpn.ui.gui.guiSettings import GUICHAINLABEL_TEXT, \
@@ -446,41 +446,40 @@ class SequenceWidget():
     def _registerNotifiers(self):
         """register notifiers
         """
-        self._residueNotifier = Notifier(self.project,
-                                         [Notifier.CREATE, Notifier.CHANGE],
-                                         'Residue',
-                                         # self._addChainResidueCallback,
-                                         self._refreshChainLabels,  # testing
-                                         onceOnly=True)
-        self._residueDeleteNotifier = Notifier(self.project,
-                                               [Notifier.DELETE],
+        self._residueNotifier = _makeNotifiers(self.project,
+                                               triggers=[Notifier.CREATE, Notifier.CHANGE],
+                                               targetName='Residue',
+                                               callback=self._refreshChainLabels,  # testing
+                                               onceOnly=True)
+        self._residueDeleteNotifier = Notifier(self.project, Notifier.DELETE,
                                                'Residue',
                                                # self._deleteChainResidueCallback,
                                                self._refreshChainLabels,
-                                               onceOnly=True)
-        self._nmrResidueNotifier = Notifier(self.project,
-                                            [Notifier.CHANGE],
+                                               onceOnly=True,
+                                               setterObject=self)
+        self._nmrResidueNotifier = Notifier(self.project, Notifier.CHANGE,
                                             'NmrResidue',
                                             self._refreshChainLabels,
-                                            onceOnly=True)
+                                            onceOnly=True,
+                                            setterObject=self)
 
     def _unRegisterNotifiers(self):
         """unregister notifiers
         """
         if self._chainNotifier:
-            self._chainNotifier.unRegister()
+            self._chainNotifier.unRegisterNotifier()
             self._chainNotifier = None
         if self._residueNotifier:
-            self._residueNotifier.unRegister()
+            self._residueNotifier.unRegisterNotifier()
             self._residueNotifier = None
         if self._residueDeleteNotifier:
-            self._residueDeleteNotifier.unRegister()
+            self._residueDeleteNotifier.unRegisterNotifier()
             self._residueDeleteNotifier = None
         if self._chainDeleteNotifier:
-            self._chainDeleteNotifier.unRegister()
+            self._chainDeleteNotifier.unRegisterNotifier()
             self._chainDeleteNotifier = None
         if self._nmrResidueNotifier:
-            self._nmrResidueNotifier.unRegister()
+            self._nmrResidueNotifier.unRegisterNotifier()
             self._nmrResidueNotifier = None
 
     def _closeModule(self):

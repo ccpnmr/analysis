@@ -7,9 +7,9 @@ set callback's on creation, deletion and rename
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -17,9 +17,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-28 19:23:06 +0100 (Wed, June 28, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:54 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,7 +31,7 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 
 import sys
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
-from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.lib.Notifiers import Notifier, CurrentNotifier
 from ccpn.util.Logging import getLogger
 
 SELECT = '> Select <'
@@ -152,16 +152,24 @@ class _PulldownABC(PulldownListCompoundWidget):
 
         # add a notifier to update the pulldown list
         if self.project:
-            self.addNotifier(Notifier(self.project,
-                                      [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
-                                      self._className,
-                                      self._updatePulldownList))
+            # self.addNotifier(Notifier(self.project,
+            #                           [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
+            #                           self._className,
+            #                           self._updatePulldownList))
+            # GWV 15/12/23: implementation change while working on mimics
+            _notifiers = self.project.setNotifier(self.project,
+                                      triggers = [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
+                                      targetName = self._className,
+                                      callback = self._updatePulldownList)
+            for _n in _notifiers:
+                self.addNotifier(_n)
             if self._followCurrent:
-                self.addNotifier(Notifier(self.current,
-                                          [Notifier.CURRENT],
+                self.addNotifier(CurrentNotifier(
                                           targetName=self._currentAttributeName,
-                                          callback=self._updateFromCurrent
-                                          ))
+                                          callback=self._updateFromCurrent,
+                                          setterObject=self
+                                          )
+                                )
 
     @property
     def textList(self):

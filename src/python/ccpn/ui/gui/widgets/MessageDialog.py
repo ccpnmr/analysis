@@ -4,9 +4,9 @@ This file contains the routines for message dialogues
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-28 12:50:21 +0000 (Tue, November 28, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:54 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -141,7 +141,7 @@ class MessageDialog(QtWidgets.QMessageBox):
 
     def __init__(self, title, basicText, message, icon=Information, iconPath=None, parent=None, scrollableMessage=False,
                  dontShowEnabled=False, defaultResponse=None, popupId=None):
-        super().__init__(parent)
+        super().__init__(parent=parent)
 
         # set modality to take control
         self.setWindowModality(QtCore.Qt.ApplicationModal)
@@ -457,6 +457,15 @@ def showRetryIgnoreCancel(title, message, parent=None, iconPath=None):
 
 
 def showSaveDiscardCancel(title, message, parent=None, iconPath=None):
+    """Save, Discard, Cancel query box.
+
+    :param title: title of the widget
+    :param message: message to be displayed
+    :param parent: parent widget
+    :param iconPath: optional icon to display
+    :return: True for Save, False for Discard or None for Cancel
+    """
+
     dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
 
     dialog.setStandardButtons(Save | Discard | Cancel)
@@ -474,6 +483,31 @@ def showSaveDiscardCancel(title, message, parent=None, iconPath=None):
     else:
         return None
 
+def showYesNoCancel(title, message, parent=None, iconPath=None):
+    """Yes, No, Cancel query box.
+
+    :param title: title of the widget
+    :param message: message to be displayed
+    :param parent: parent widget
+    :param iconPath: optional icon to display
+    :return: True for Yes, False for No or None for Cancel
+    """
+    dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
+
+    dialog.setStandardButtons(Yes | No | Cancel)
+    dialog.setDefaultButton(Yes)
+
+    dialog.raise_()
+    result = dialog.exec_()
+
+    if result == Yes:
+        return True
+
+    elif result == No:
+        return False
+
+    else:
+        return None
 
 def showWarning(title, message, parent=None, iconPath=None, scrollableMessage=False):
     dialog = MessageDialog(title='Warning', basicText=title, message=message, icon=Warning, iconPath=iconPath, parent=parent,
@@ -856,7 +890,7 @@ if __name__ == '__main__':
         # print(showInfo('My info window', 'test info'))
         # print(showMulti('Test', 'Multi Choice', ['Apples', 'Bananas', 'Pears']))
         # print(showError('Test', 'This is a test error message'))
-        # print(showYesNo('Test', 'Yes or No message'))
+        print(showYesNo('Test', 'Yes or No message'))
         # # print(showOkCancel('Test', 'Ok or Cancel message'))
         # # print(showRetryIgnoreCancel('Test', 'Some message'))
         # # print(showWarning('Test', 'Warning message'))
@@ -864,16 +898,16 @@ if __name__ == '__main__':
         #     'Test for a basic popup with a long line of text as the basic text and a path: /Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt',
         #     'Warning message'))
 
-        print(showWarning('Another Warning',
-                          'Test for a basic popup with a long line of text as the basic text and a path:\n/Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt'))
-
-        print(showWarning('Another Warning and Test for a basic popup with a long line of text as the basic text',
-                          'Test for a basic popup with a long line of text as the basic text and a path\n/Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt '
-                          'and text with no spaces qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789'))
-
-        print(showWarning('Another Warning and Test qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789\n for a basic popup with a long line of text as the basic text',
-                          'Test for a basic popup with a long line of text as the basic text and a path\n/Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt '
-                          'and text with no spaces qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789 something\n else'))
+        # print(showWarning('Another Warning',
+        #                   'Test for a basic popup with a long line of text as the basic text and a path:\n/Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt'))
+        #
+        # print(showWarning('Another Warning and Test for a basic popup with a long line of text as the basic text',
+        #                   'Test for a basic popup with a long line of text as the basic text and a path\n/Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt '
+        #                   'and text with no spaces qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789'))
+        #
+        # print(showWarning('Another Warning and Test qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789\n for a basic popup with a long line of text as the basic text',
+        #                   'Test for a basic popup with a long line of text as the basic text and a path\n/Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt '
+        #                   'and text with no spaces qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789 something\n else'))
 
 
     # app = TestApplication()

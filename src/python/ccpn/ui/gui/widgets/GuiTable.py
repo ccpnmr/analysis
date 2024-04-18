@@ -4,9 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 19:17:56 +0100 (Wed, June 28, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:54 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,22 +26,34 @@ __date__ = "$Date: 2018-12-20 15:44:35 +0000 (Thu, December 20, 2018) $"
 # Start of code
 #=========================================================================================
 
+import os
 import random
+import math
 import time
+
+import pandas as pd
+from time import time_ns
+from functools import partial
+from collections import OrderedDict, defaultdict
+from types import SimpleNamespace
+from contextlib import contextmanager
 
 from PyQt5 import QtGui, QtCore, QtWidgets
 from PyQt5.QtWidgets import QAbstractItemView
-import pandas as pd
-import os
-from time import time_ns
 from pyqtgraph import TableWidget
 from pyqtgraph.widgets.TableWidget import _defersort
+
 from ccpn.core.lib.CallBack import CallBack
+from ccpn.core.lib.Notifiers import Notifier, CurrentNotifier, _makeNotifiers
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
+from ccpn.core.lib.Util import getParentObjectFromPid
+from ccpn.core.lib.ContextManagers import catchExceptions
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib.DataFrameObject import DataFrameObject, DATAFRAME_OBJECT, \
     DATAFRAME_INDEX, DATAFRAME_PID, DATAFRAME_ISDELETED
 
+from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, GREEN1, GUITABLE_DROP_BORDER
 from ccpn.ui.gui.widgets.Menu import Menu
-from ccpn.ui.gui.guiSettings import getColours
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
@@ -50,27 +62,17 @@ from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.ColumnViewSettings import ColumnViewSettingsPopup
 from ccpn.ui.gui.widgets.SearchWidget import attachSearchWidget
 from ccpn.ui.gui.widgets.TableSorting import CcpnTableWidgetItem
-from ccpn.core.lib.Notifiers import Notifier
-from ccpn.util.Common import makeIterableList
-from functools import partial
-from ccpn.util.OrderedSet import OrderedSet
-from collections import OrderedDict, defaultdict
-from ccpn.util.Logging import getLogger
-from types import SimpleNamespace
-from contextlib import contextmanager
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
-from ccpn.core.lib.Util import getParentObjectFromPid
-from ccpn.core.lib.ContextManagers import catchExceptions
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight, TABLEFONT
-from ccpn.util.AttrDict import AttrDict
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.RowExpander import RowExpander
-from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, GREEN1, GUITABLE_DROP_BORDER
 from ccpn.ui.gui.widgets.SideBar import SideBar
 from ccpn.ui.gui.widgets.DropBase import DropBase
-import math
+
+from ccpn.util.Common import makeIterableList
+from ccpn.util.OrderedSet import OrderedSet
+from ccpn.util.Logging import getLogger
+from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Path import aPath
 
 OBJECT_CLASS = 0
@@ -489,8 +491,10 @@ class GuiTable(TableWidget, Base):
             self.moduleParent.mainWidget._dropEventCallback = self._processDroppedItems
 
         self._droppedNotifier = GuiNotifier(self,
-                                           [GuiNotifier.DROPEVENT], [DropBase.PIDS],
-                                           self._processDroppedItems)
+                                            GuiNotifier.DROPEVENT, DropBase.PIDS,
+                                            callback=self._processDroppedItems,
+                                            setterObject=self
+                                            )
 
         # add a widget handler to give a clean corner widget for the scroll area
         self._cornerDisplay = ScrollBarVisibilityWatcher(self)
@@ -517,7 +521,7 @@ class GuiTable(TableWidget, Base):
 
             if blanking and self.project:
                 if self.project:
-                    self.project.blankNotification()
+                    self.project._increaseNotificationBlanking()
 
         self._tableBlockingLevel += 1
 
@@ -531,7 +535,7 @@ class GuiTable(TableWidget, Base):
             if self._tableBlockingLevel == 0:
                 if blanking and self.project:
                     if self.project:
-                        self.project.unblankNotification()
+                        self.project._decreaseNotificationBlanking()
 
                 _widgetState.modelBlocker = None
                 _widgetState.rootBlocker = None
@@ -1581,7 +1585,7 @@ class GuiTable(TableWidget, Base):
 
         :param rowObjects: list of objects to set each row
         """
-        self.project.blankNotification()
+        self.project._increaseNotificationBlanking()
 
         # if nothing passed in then keep the current highlighted objects
         objs = selectedObjects if selectedObjects is not None else self.getSelectedObjects()
@@ -1600,7 +1604,7 @@ class GuiTable(TableWidget, Base):
 
         finally:
             self._highLightObjs(objs)
-            self.project.unblankNotification()
+            self.project._decreaseNotificationBlanking()
 
     def setTableFromDataFrameObject(self, dataFrameObject, columnDefs=None):
         """Populate the table from a Pandas dataFrame
@@ -2465,46 +2469,46 @@ class GuiTable(TableWidget, Base):
         self._initialiseTableNotifiers()
 
         if tableClass:
-            self._tableNotifier = Notifier(self.project,
-                                           [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
-                                           tableClass.__name__,
-                                           self._updateTableCallback,
-                                           onceOnly=True)
+            self._tableNotifier = _makeNotifiers(self.project,
+                                           triggers=[Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
+                                           targetName=tableClass.__name__,
+                                           callback=self._updateTableCallback,
+                                           onceOnly=True,
+                                           setterObject=self)
 
         if rowClass:
             # 'i-1' residue spawns a rename but the 'i' residue only fires a change
-            self._rowNotifier = Notifier(self.project,
-                                         [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE],
-                                         rowClass.__name__,
-                                         self._updateRowCallback,
-                                         onceOnly=True)  # should be True, but doesn't work
+            self._rowNotifier = _makeNotifiers(self.project,
+                                               triggers=[Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE],
+                                               targetName=rowClass.__name__,
+                                               callback=self._updateRowCallback,
+                                               onceOnly=True, # should be True, but doesn't work
+                                               setterObject=self)
 
+        _cellNames = []
         if isinstance(cellClassNames, list):
-            for cellClass in cellClassNames:
-                self._cellNotifiers.append(Notifier(self.project,
-                                                    [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
-                                                    cellClass[OBJECT_CLASS].__name__,
-                                                    partial(self._updateCellCallback, cellClass[OBJECT_PARENT]),
-                                                    onceOnly=True))
-        else:
-            if cellClassNames:
-                self._cellNotifiers.append(Notifier(self.project,
-                                                    [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
-                                                    cellClassNames[OBJECT_CLASS].__name__,
-                                                    partial(self._updateCellCallback, cellClassNames[OBJECT_PARENT]),
-                                                    onceOnly=True))
+            _cellNames = cellClassNames
+        elif cellClassNames is not None:
+            _cellNames = [cellClassNames]
+
+        for cellClass in _cellNames:
+            for _trigger in [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]:
+                self._cellNotifiers.append(Notifier(self.project, _trigger,
+                                                    targetName=cellClass[OBJECT_CLASS].__name__,
+                                                    callback=partial(self._updateCellCallback, cellClass[OBJECT_PARENT]),
+                                                    onceOnly=True,
+                                                    setterObject=self)
+                                           )
 
         if selectCurrentCallBack:
-            self._selectCurrentNotifier = Notifier(self.current,
-                                                   [Notifier.CURRENT],
-                                                   callBackClass._pluralLinkName,
-                                                   self._selectCurrentCallBack)
+            self._selectCurrentNotifier = CurrentNotifier(
+                                                   targetName=callBackClass._pluralLinkName,
+                                                   callback=self._selectCurrentCallBack)
 
         if searchCallBack:
-            self._searchNotifier = Notifier(self.current,
-                                            [Notifier.CURRENT],
-                                            searchCallBack._pluralLinkName,
-                                            self._searchCallBack)
+            self._searchNotifier = CurrentNotifier(
+                                            targetName=searchCallBack._pluralLinkName,
+                                            callback=self._searchCallBack)
 
         self._tableData = {'updateFunc'           : updateFunc,
                            'changeFunc'           : changeFunc,
@@ -2570,29 +2574,29 @@ class GuiTable(TableWidget, Base):
         """Clean up the notifiers
         """
         if self._tableNotifier is not None:
-            self._tableNotifier.unRegister()
+            self._tableNotifier.unRegisterNotifier()
             self._tableNotifier = None
 
         if self._rowNotifier is not None:
-            self._rowNotifier.unRegister()
+            self._rowNotifier.unRegisterNotifier()
             self._rowNotifier = None
 
         if self._cellNotifiers:
             for cell in self._cellNotifiers:
                 if cell is not None:
-                    cell.unRegister()
+                    cell.unRegisterNotifier()
             self._cellNotifiers = []
 
         if self._selectCurrentNotifier is not None:
-            self._selectCurrentNotifier.unRegister()
+            self._selectCurrentNotifier.unRegisterNotifier()
             self._selectCurrentNotifier = None
 
         if self._droppedNotifier is not None:
-            self._droppedNotifier.unRegister()
+            self._droppedNotifier.unRegisterNotifier()
             self._droppedNotifier = None
 
         if self._searchNotifier is not None:
-            self._searchNotifier.unRegister()
+            self._searchNotifier.unRegisterNotifier()
             self._searchNotifier = None
 
     def setRowBackgroundColour(self, row, colour, columnList=None):

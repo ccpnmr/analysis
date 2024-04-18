@@ -7,9 +7,9 @@ from __future__ import annotations  # pycharm still highlights as errors
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-23 15:26:51 +0100 (Tue, May 23, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:47 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -210,10 +210,8 @@ class Pid(str):
     -> False    # all pid elements are strings
     """
 
-    # # name mapping dictionary
-    # nameMap = dict(
-    #         MO='Molecule'
-    # )
+    _checkPidType = True  # flag to set Pid type-checking using coreClass dict;
+                          # (set to False during ccpnv4 development)
 
     def __init__(self, string: str, **kwds):
         """First argument ('string' must be a valid pid string with at least one, non-initial PREFIXSEP
@@ -263,25 +261,52 @@ class Pid(str):
             result.extend(parts[1].split(IDSEP))
         return result
 
-    @staticmethod
-    def new(*args: object) -> Pid:
+    @classmethod
+    def new(cls, *args: object) -> Pid:
         """
-        Return Pid object from arguments; args[0] can be a CoreClass object (e.g. Spectrum, Peak, etc)
-        Apply str() on all arguments
+        Create a new Pid instance;
         Have to use this as intermediate as str baseclass of Pid only accepts one argument
+
+        :param *args: the pid-type and ids; args[0] can be a CoreClass object (e.g. Spectrum,
+                      Peak, etc) or a string.
+        :return Pid object from arguments
         """
-        if len(args) == 0:
-            raise ValueError('Pid.new: Undefined arguments')
-
-        args = [str(x) for x in args]
-        if len(args) < 2 or len(args[0]) == 0 or len(args[1]) == 0:
-            raise ValueError('Pid.new: need at least a type and id argument (%s)' % args)
-
         from ccpn.core._implementation.CoreModel import CoreModel
-        if args[0] not in CoreModel._coreClassShortNameDict:
-            raise ValueError('Pid.new: invalid Pid type (%s)' % args[0])
+        from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+        from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
 
-        return Pid(Pid._join(*args))
+        if len(args) < 2:
+            raise ValueError(f'Pid.new: need at least a type and id argument ({args})')
+        _pidType = args[0]
+        _ids = [str(_id) for _id in args[1:]]
+
+        # check if a class was passed in as the first argument
+        if not isinstance(_pidType, str):
+            try:
+                if issubclass(_pidType, (AbstractWrapperObject, V3CoreObjectABC)):
+                    _pidType = _pidType.shortClassName
+            except TypeError:
+                raise ValueError(f'Invalid type argument {_pidType}')
+
+        if len(_pidType) == 0:
+            raise ValueError(f'Pid.new: need type argument')
+
+        # check if the type was given als className, rather than shortClassName
+        if (klazz := CoreModel._coreClassDict.get(_pidType, None)) is not None:
+            _pidType = klazz.shortClassName
+
+        # check if type exists
+        if cls._checkPidType and _pidType not in CoreModel._coreClassShortNameDict:
+            raise ValueError('Pid.new: invalid Pid type (%s)' % _pidType)
+
+        # check ids arguments
+        for _id in _ids:
+            if len(_id) == 0:
+                raise ValueError(f'Pid.new: zero-length id argument')
+
+        _tmp = [_pidType] + _ids
+        _pid = cls._join(*_tmp)
+        return cls(_pid )
 
     @staticmethod
     def _join(*args: str) -> str:

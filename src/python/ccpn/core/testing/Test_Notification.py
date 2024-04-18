@@ -92,9 +92,9 @@ In that way you need only refresh your peak table once, even when you pick 500 p
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -103,8 +103,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-06 11:14:30 +0000 (Fri, January 06, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:48 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -141,12 +141,12 @@ class NotificationTest(WrapperTesting):
     def test_notifiers_1(self):
         project = self.project
         ll = []
-        not1 = project.registerNotifier('Note', 'create', notifyfunc,
-                                        parameterDict={'value': 'createx', 'll': ll})
-        not2 = project.registerNotifier('Note', 'delete', notifyfunc,
-                                        parameterDict={'value': 'deletex', 'll': ll})
-        not3 = project.registerNotifier('Note', 'change', notifyfunc,
-                                        parameterDict={'value': 'changex', 'll': ll})
+        not1 = project._registerV3Notifier('Note', 'create', notifyfunc,
+                                           parameterDict={'value': 'createx', 'll': ll})
+        not2 = project._registerV3Notifier('Note', 'delete', notifyfunc,
+                                           parameterDict={'value': 'deletex', 'll': ll})
+        not3 = project._registerV3Notifier('Note', 'change', notifyfunc,
+                                           parameterDict={'value': 'changex', 'll': ll})
 
         registered = project._context2Notifiers
         self.assertEqual(registered.get(('Note', 'create')), {not1: False})
@@ -177,9 +177,9 @@ class NotificationTest(WrapperTesting):
         self.assertEqual(ll, ['createx', 'createx', 'deletex', 'deletex', 'createx', 'createx',
                               'changex', 'changex', 'changex', 'changex', 'changex', 'changex'])
 
-        project.removeNotifier(not1)
-        project.unRegisterNotifier('Note', 'change', not3)
-        project.unRegisterNotifier('Note', 'delete', not2)
+        project._unRegisterV3Notifier('Note', 'create', not1)
+        project._unRegisterV3Notifier('Note', 'change', not3)
+        project._unRegisterV3Notifier('Note', 'delete', not2)
         self.assertEqual(registered.get(('Note', 'create')), {})
         self.assertEqual(registered.get(('Note', 'delete')), {})
         self.assertEqual(registered.get(('Note', 'change')), {})
@@ -188,10 +188,10 @@ class NotificationTest(WrapperTesting):
     def test_notifiers_multiple(self):
         project = self.project
         ll = []
-        not1 = project.registerNotifier('Note', 'create', notifyfunc,
-                                        parameterDict={'value': 'createx', 'll': ll}, onceOnly=True)
-        not2 = project.registerNotifier('Note', 'delete', notifyfunc,
-                                        parameterDict={'value': 'deletex', 'll': ll}, onceOnly=True)
+        not1 = project._registerV3Notifier('Note', 'create', notifyfunc,
+                                           parameterDict={'value': 'createx', 'll': ll}, onceOnly=True)
+        not2 = project._registerV3Notifier('Note', 'delete', notifyfunc,
+                                           parameterDict={'value': 'deletex', 'll': ll}, onceOnly=True)
 
         registered = project._context2Notifiers
         self.assertEqual(registered.get(('Note', 'create')), {not1: True})
@@ -224,11 +224,11 @@ class NotificationTest(WrapperTesting):
         #                       'createx', 'createx', 'createx', 'createx', 'createx', 'createx'])
         self.assertEqual(ll, ['createx', 'createx', 'deletex', 'deletex', 'createx', 'createx'])
 
-        project.removeNotifier(not1)
+        project._unRegisterV3Notifier('Note', 'create', not1)
         self.assertEqual(registered.get(('Note', 'create')), {})
         self.assertEqual(registered.get(('Note', 'delete')), {not2: True})
         self.assertEqual(registered.get(('Note', 'change')), {})
-        project.unRegisterNotifier('Note', 'delete', not2)
+        project._unRegisterV3Notifier('Note', 'delete', not2)
         self.assertEqual(registered.get(('Note', 'create')), {})
         self.assertEqual(registered.get(('Note', 'delete')), {})
         self.assertEqual(registered.get(('Note', 'change')), {})
@@ -240,10 +240,10 @@ class NotificationTest(WrapperTesting):
     def test_notifiers_suspend(self):
         project = self.project
         ll = []
-        not1 = project.registerNotifier('Note', 'create', notifyfunc,
-                                        parameterDict={'value': 'createx', 'll': ll}, onceOnly=True)
-        not2 = project.registerNotifier('Note', 'delete', notifyfunc,
-                                        parameterDict={'value': 'deletex', 'll': ll}, onceOnly=True)
+        not1 = project._registerV3Notifier('Note', 'create', notifyfunc,
+                                           parameterDict={'value': 'createx', 'll': ll}, onceOnly=True)
+        not2 = project._registerV3Notifier('Note', 'delete', notifyfunc,
+                                           parameterDict={'value': 'deletex', 'll': ll}, onceOnly=True)
         registered = project._context2Notifiers
         project.suspendNotification()
         project.newUndoPoint()
@@ -265,8 +265,8 @@ class NotificationTest(WrapperTesting):
         project.resumeNotification()
         self.assertEqual(ll, ['deletex', 'createx', 'createx'])
 
-        project.removeNotifier(not1)
-        project.unRegisterNotifier('Note', 'delete', not2)
+        project._unRegisterV3Notifier('Note', 'create', not1)
+        project._unRegisterV3Notifier('Note', 'delete', not2)
         self.assertEqual(registered.get(('Note', 'create')), {})
         self.assertEqual(registered.get(('Note', 'delete')), {})
 
@@ -275,32 +275,32 @@ class NotificationTest(WrapperTesting):
         project = self.project
         ll = []
 
-        not1 = project.registerNotifier('Spectrum', 'create', notifyfunc,
-                                        parameterDict={'value': 'newSpectrum', 'll': ll})
-        not2 = project.registerNotifier('Spectrum', 'delete', notifyfunc,
-                                        parameterDict={'value': 'delSpectrum', 'll': ll})
-        not3 = project.registerNotifier('Spectrum', 'change', notifyfunc,
-                                        parameterDict={'value': 'modSpectrum', 'll': ll})
-        not4 = project.registerNotifier('PeakList', 'create', notifyfunc,
-                                        parameterDict={'value': 'newPeakList', 'll': ll})
-        not5 = project.registerNotifier('PeakList', 'delete', notifyfunc,
-                                        parameterDict={'value': 'delPeakList', 'll': ll})
-        not6 = project.registerNotifier('PeakList', 'change', notifyfunc,
-                                        parameterDict={'value': 'modPeakList', 'll': ll})
-        not7 = project.registerNotifier('Peak', 'create', notifyfunc,
-                                        parameterDict={'value': 'newPeak', 'll': ll})
-        not8 = project.registerNotifier('Peak', 'delete', notifyfunc,
-                                        parameterDict={'value': 'delPeak', 'll': ll})
-        not9 = project.registerNotifier('Peak', 'change', notifyfunc,
-                                        parameterDict={'value': 'modPeak', 'll': ll})
-        not10 = project.registerNotifier('Spectrum', 'rename', notifyrenamefunc,
-                                         parameterDict={'value': 'renameSpectrum', 'll': ll})
-        not11 = project.registerNotifier('PeakList', 'rename', notifyrenamefunc,
-                                         parameterDict={'value': 'renamePeakList', 'll': ll})
-        not12 = project.registerNotifier('Peak', 'rename', notifyrenamefunc,
-                                         parameterDict={'value': 'renamePeak', 'll': ll})
-        not1 = project.registerNotifier('Spectrum', 'create', notifyfunc,
-                                        parameterDict={'value': 'newSpectrum2', 'll': ll})
+        not1 = project._registerV3Notifier('Spectrum', 'create', notifyfunc,
+                                           parameterDict={'value': 'newSpectrum', 'll': ll})
+        not2 = project._registerV3Notifier('Spectrum', 'delete', notifyfunc,
+                                           parameterDict={'value': 'delSpectrum', 'll': ll})
+        not3 = project._registerV3Notifier('Spectrum', 'change', notifyfunc,
+                                           parameterDict={'value': 'modSpectrum', 'll': ll})
+        not4 = project._registerV3Notifier('PeakList', 'create', notifyfunc,
+                                           parameterDict={'value': 'newPeakList', 'll': ll})
+        not5 = project._registerV3Notifier('PeakList', 'delete', notifyfunc,
+                                           parameterDict={'value': 'delPeakList', 'll': ll})
+        not6 = project._registerV3Notifier('PeakList', 'change', notifyfunc,
+                                           parameterDict={'value': 'modPeakList', 'll': ll})
+        not7 = project._registerV3Notifier('Peak', 'create', notifyfunc,
+                                           parameterDict={'value': 'newPeak', 'll': ll})
+        not8 = project._registerV3Notifier('Peak', 'delete', notifyfunc,
+                                           parameterDict={'value': 'delPeak', 'll': ll})
+        not9 = project._registerV3Notifier('Peak', 'change', notifyfunc,
+                                           parameterDict={'value': 'modPeak', 'll': ll})
+        not10 = project._registerV3Notifier('Spectrum', 'rename', notifyrenamefunc,
+                                            parameterDict={'value': 'renameSpectrum', 'll': ll})
+        not11 = project._registerV3Notifier('PeakList', 'rename', notifyrenamefunc,
+                                            parameterDict={'value': 'renamePeakList', 'll': ll})
+        not12 = project._registerV3Notifier('Peak', 'rename', notifyrenamefunc,
+                                            parameterDict={'value': 'renamePeak', 'll': ll})
+        not1 = project._registerV3Notifier('Spectrum', 'create', notifyfunc,
+                                           parameterDict={'value': 'newSpectrum2', 'll': ll})
 
         spectrum = self.project.newEmptySpectrum(isotopeCodes=('19F', '15N'), name='HF-hsqc')
 
@@ -350,16 +350,16 @@ class NotificationTest(WrapperTesting):
         project = self.project
         ll = []
 
-        not1 = project.registerNotifier('Spectrum', 'change', notifyfunc,
-                                        parameterDict={'value': 'modSpectrum', 'll': ll})
-        not2 = project.registerNotifier('SpectrumGroup', 'change', notifyfunc,
-                                        parameterDict={'value': 'modSpectrumGroup', 'll': ll})
-        not3 = project.registerNotifier('Spectrum', 'rename', notifyrenamefunc,
-                                        parameterDict={'value': 'renameSpectrum', 'll': ll})
-        not4 = project.registerNotifier('SpectrumGroup', 'rename', notifyrenamefunc,
-                                        parameterDict={'value': 'renameSpectrumGroup', 'll': ll})
-        not5 = project.registerNotifier('SpectrumGroup', 'Spectrum', notifyfunc,
-                                        parameterDict={'value': 'modLink', 'll': ll})
+        not1 = project._registerV3Notifier('Spectrum', 'change', notifyfunc,
+                                           parameterDict={'value': 'modSpectrum', 'll': ll})
+        not2 = project._registerV3Notifier('SpectrumGroup', 'change', notifyfunc,
+                                           parameterDict={'value': 'modSpectrumGroup', 'll': ll})
+        not3 = project._registerV3Notifier('Spectrum', 'rename', notifyrenamefunc,
+                                           parameterDict={'value': 'renameSpectrum', 'll': ll})
+        not4 = project._registerV3Notifier('SpectrumGroup', 'rename', notifyrenamefunc,
+                                           parameterDict={'value': 'renameSpectrumGroup', 'll': ll})
+        not5 = project._registerV3Notifier('SpectrumGroup', 'Spectrum', notifyfunc,
+                                           parameterDict={'value': 'modLink', 'll': ll})
         spectrum = self.project.newEmptySpectrum(isotopeCodes=('19F', '15N'), name='FN-hsqc')
         spectrum2 = self.project.newEmptySpectrum(isotopeCodes=('19F', '13C'), name='FC-hsqc')
         spectrumGroup = project.newSpectrumGroup(name='Groupie')

@@ -8,9 +8,9 @@ from __future__ import annotations  # pycharm still highlights as errors
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -19,8 +19,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 18:59:24 +0100 (Tue, March 28, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:47 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -161,3 +161,34 @@ class CoreModel(object):
         print(s)
         for child in node._childClasses:
             cls._printClassTree(child, tabs=tabs + 1)
+
+
+def _isV3coreClassInstance(obj) -> bool:
+    """
+    Check if obj is a V3 core class instance
+    :param obj: object to check
+    :return: True if obj is a V3 core class instance
+
+    CCPNINTERNAL: several places to make more readable code
+    """
+    return isinstance(obj, CoreModel)
+
+def _isV3coreClass(obj) -> bool:
+    """
+    Check if obj is a V3 core class
+    :param obj: object to check
+    :return: True if obj defines a core class
+
+    CCPNINTERNAL: several places to make more readable code
+    """
+    return obj in CoreModel._coreClassDict.values()
+
+def _getV3coreClass(className):
+    """
+    V3 core class name
+    :param className: name of the class
+    :return: class if className defines a core class else None
+
+    CCPNINTERNAL: several places to make more readable code
+    """
+    return CoreModel._coreClassDict.get(className, None)

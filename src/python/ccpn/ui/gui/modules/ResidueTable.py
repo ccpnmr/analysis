@@ -5,9 +5,9 @@ This file contains ResidueTableModule and ResidueTable classes
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:05 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:52 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -33,7 +33,7 @@ from ccpn.core.Chain import Chain
 from ccpn.core.Residue import Residue
 from ccpn.core.Atom import Atom
 from ccpn.core.lib import CcpnSorting
-from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.lib.Notifiers import Notifier, CurrentNotifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import ChainPulldown
 from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot, ModuleSettingsWidget
@@ -41,8 +41,6 @@ from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.lib._CoreTableFrame import _CoreTableWidgetABC, _CoreTableFrameABC
 from ccpn.util.Logging import getLogger
 
-
-logger = getLogger()
 
 ALL = '<all>'
 LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
@@ -119,8 +117,7 @@ class ResidueTableModule(CcpnModule):
         """Set the active callbacks for the module
         """
         if self.activePulldownClass:
-            self._setCurrentPulldown = Notifier(self.current,
-                                                [Notifier.CURRENT],
+            self._setCurrentPulldown = CurrentNotifier(
                                                 targetName=self.activePulldownClass._pluralLinkName,
                                                 callback=self._mainFrame._selectCurrentPulldownClass)
 
@@ -139,7 +136,7 @@ class ResidueTableModule(CcpnModule):
     def _closeModule(self):
         self._mainFrame._cleanupWidget()
         if self.activePulldownClass and self._setCurrentPulldown:
-            self._setCurrentPulldown.unRegister()
+            self._setCurrentPulldown.unRegisterNotifier()
         super()._closeModule()
 
 

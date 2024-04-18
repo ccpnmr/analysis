@@ -1,9 +1,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                )
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:19 +0000 (Thu, December 23, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:56 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -49,8 +49,7 @@ class DataFrameTrait(Instance):
         """Serialise DataFrame instance to be json compatible.
         Needs some complicated encoding/decoding as result of int64 rows encoding
         """
-        def encode(self, obj, trait):
-            df = getattr(obj, trait)
+        def encode(self, df):
             value = dict(
                 columns=list(df.columns),
                 nrows=int(df.shape[0]),
@@ -59,7 +58,7 @@ class DataFrameTrait(Instance):
             )
             return value
 
-        def decode(self, obj, trait, value):
+        def decode(self, value):
             # restore the DataFrame; if nrows=0 create one with the known columns.  This assures
             # the columns of an empty table (i.e. no rows, but columns defined) to be restored
             # Otherwise, create from the data tuples using Pandas from_dict() method
@@ -71,7 +70,7 @@ class DataFrameTrait(Instance):
                 df = pd.DataFrame(columns=columns)
             else:
                 df = pd.DataFrame.from_dict(dict(data), orient='index')
-            setattr(obj, trait, df)
+            return df
     # end class
 # end class
 
@@ -82,7 +81,7 @@ class CcpNmrDataFrame(CcpNmrJson):
     """Class for json serialisable and easy Pandas DataFrame
     """
 
-    classVersion = 3.0
+    classVersion = '3.0.0'
 
     # --------------------------------------------------------------------------------------------
 

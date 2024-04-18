@@ -3,9 +3,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:47 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:54 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -34,14 +34,15 @@ from ccpn.framework.Translation import translator
 from ccpn.ui.gui.widgets.Font import setWidgetFont
 
 
-SHOWMODULESMENU = 'Show/hide Modules'
-MACROSMENU = 'User Macros'
-CCPNMACROSMENU = 'Run CCPN Macros'
-USERMACROSMENU = 'Run User Macros'
-TUTORIALSMENU = 'Tutorials'
-HOWTOSMENU = 'How-Tos'
-PLUGINSMENU = 'User Plugins'
-CCPNPLUGINSMENU = 'CCPN Plugins'
+# GWV 9/2/24: now in gui.Menus
+# VIEW_SHOW_MODULES = 'Show/hide Modules'
+# MACROS_MENU = 'User Macros'
+# MACRO_RUN_CCPN = 'Run CCPN Macros'
+# MACRO_RUN_USER = 'Run User Macros'
+# HELP_TUTORIALS = 'Tutorials'
+# HELP_HOWTOS = 'How-Tos'
+# USER_PLUGINS = 'User Plugins'
+# CCPN_PLUGINS = 'CCPN Plugins'
 
 
 class Menu(QtWidgets.QMenu, Base):

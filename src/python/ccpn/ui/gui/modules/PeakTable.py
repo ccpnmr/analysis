@@ -4,9 +4,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-22 18:27:05 +0000 (Wed, November 22, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:51 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,7 +32,7 @@ from ccpn.core.PeakList import PeakList
 from ccpn.core.Peak import Peak
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.lib.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth
-from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.lib.Notifiers import Notifier, CurrentNotifier
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
@@ -127,8 +127,7 @@ class PeakTableModule(CcpnModule):
         """Set the active callbacks for the module
         """
         if self.activePulldownClass:
-            self._setCurrentPulldown = Notifier(self.current,
-                                                [Notifier.CURRENT],
+            self._setCurrentPulldown = CurrentNotifier(
                                                 targetName=self.activePulldownClass._pluralLinkName,
                                                 callback=self._mainFrame._selectCurrentPulldownClass)
 
@@ -155,7 +154,7 @@ class PeakTableModule(CcpnModule):
         """
         if self.activePulldownClass:
             if self._setCurrentPulldown:
-                self._setCurrentPulldown.unRegister()
+                self._setCurrentPulldown.unRegisterNotifier()
             if self._settings:
                 self._settings._cleanupWidget()
         if self.tableFrame:

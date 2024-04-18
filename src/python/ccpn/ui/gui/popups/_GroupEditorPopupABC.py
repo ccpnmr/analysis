@@ -5,9 +5,9 @@ TODO More decision making on functionalities and subsequent code cleaning
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:47 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:53 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -54,10 +54,14 @@ DEFAULTSPACING = (3, 3)
 TABMARGINS = (1, 10, 10, 1)  # l, t, r, b
 ZEROMARGINS = (0, 0, 0, 0)  # l, t, r, b
 
+ITEM_PIDS = 'itemPids'
+COMMENT = 'comment'
+
 
 def camelCaseSplit(identifier):
     matches = finditer('.+?(?:(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|$)', identifier)
     return ' '.join([m.group(0) for m in matches])
+
 
 
 class FeedbackFrame(Frame):
@@ -477,7 +481,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
     def __init__(self, parent=None, mainWindow=None, editMode=True, obj=None, defaultItems=None, size=(800, 500), **kwds):
         """
-        Initialise the widget, note defaultItems is only used for create
+        Initialise the widget, note defaultItems is only used for create i.e. editMode = False)
         """
         title = f'Edit {self._class.className}' if editMode else f'New {self._class.className}'
 
@@ -521,7 +525,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
         self._connectLists()
 
-        self._allItems = self.getItems()
+        self._allItems = self.getItems()  # A list of all possible items that are part of the group
         self._populateLists()
 
         self._revertButton.setEnabled(False)
@@ -547,12 +551,12 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         """Get the items that can be included in the group
         :return A list of items
 
-        NB Likely to be subclassed
+        Note: Can be subclassed
         """
         if hasattr(self.project, self._projectItemAttribute):
             return getattr(self.project, self._projectItemAttribute)
         else:
-            raise RuntimeError(f'Project.{self._projectItemAttribute} does not exists')
+            raise RuntimeError(f'getItems(): unable to get "{self._projectItemAttribute}" from {self.project}')
 
     def newObject(self, name, comment=None):
         """Create a new object
@@ -641,25 +645,47 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         # changes not required here, just need to define which buttons to disable after revert
         return changeState(self, False, False, False, self._applyButton, None, self._revertButton, 0)
 
-    def _getPreviousState(self):
-        #TODO remove dependence on _pid2Obj
+    def _getPreviousState(self) -> dict:
+        """Create a dict with (key, value) = (id, dict) pairs refelcting the current state of object "id"
+        key: id (GWV: why not pid?)
+        value: dict with the COMMENT and ITEM_PIDS keys,
+                i.e. the pids of the current items associated with the "group" "id"
+                e.g. the pids of the spectra belonging to a spectrum group
+        """
+
+        # GWV refactored and anotated 10/3/24
+
+        # result = {}
+        # beforeKeys = self.project._pid2Obj.get(self._class.shortClassName)
+        # if beforeKeys is not None:
+        #     for key in beforeKeys:
+        #         #GST do I need to filter object in an undo-state, if so could we add some interface for this...
+        #         obj = self.project._pid2Obj.get(self._class.shortClassName)[key]
+        #         items = [elem.pid for elem in self.getObjectItems()]
+        #         comment = obj.comment or None
+        #         result[key] = {ITEM_PIDS: items,
+        #                        COMMENT: comment}
+
         result = {}
-        beforeKeys = self.project._pid2Obj.get(self._class.shortClassName)
-        if beforeKeys is not None:
-            for key in beforeKeys:
-                #GST do I need to filter object in an undo-state, if so could we add some interface for this...
-                obj = self.project._pid2Obj.get(self._class.shortClassName)[key]
-                items = [elem.pid for elem in self.getObjectItems()]
-                comment = obj.comment or None
-                result[key] = {'spectra': items,
-                               'comment': comment}
+        _attrName = self._class._pluralLinkName
+        # get all objects defined by class
+        if (_objects := getattr( self.project, _attrName, None)) is None:
+            raise RuntimeError(f'_getPreviousState(): unable to get "{_attrName}" from {self.project}')
+
+        for obj in _objects:
+            items = [elem.pid for elem in self.getObjectItems()]
+            comment = obj.comment or None
+            result[obj.id] = {ITEM_PIDS: items,
+                              COMMENT: comment
+                             }
         return result
 
     def _setTargetWidgets(self):
 
         # self.leftTopLabel = Label(self._dialogWidget, '', bold=True, grid=(0, 0), gridSpan=(1, 3))
 
-        labelName = f'{self._singularGroupName} Name' if self.EDITMODE else f'New {self._singularGroupName} Name'
+        # labelName = f'{self._singularGroupName} Name' if self.EDITMODE else f'New {self._singularGroupName} Name'
+        labelName = f'Name' if self.EDITMODE else f'New name'
 
         optionTexts = [labelName, 'Comment', self._singularGroupName, 'Selection']
         _, maxDim = getTextDimensionsFromFont(textList=optionTexts)
@@ -762,7 +788,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         self._searchWidgetContainer = Frame(self._dialogWidget, setLayout=True, showBorder=False, grid=(row, 1), gridSpan=(1, 1))
 
         Label(self._searchWidgetContainer, self._buttonFilter, hAlign='l', grid=(0, 0))
-        txt = 'Filter for Pid/String e.g Sp:H*qC'
+        txt = 'Filter for Pid/String e.g. SP:H*qC'
         self._searchWidget = LineEdit(self._searchWidgetContainer, backgroundText=txt, grid=(0, 1))
         self._searchWidget.textChanged.connect(self._searchWidgetCallback)
 
@@ -836,7 +862,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         if obj is None:
             return None
         state = self._updatedState[obj.name]
-        return state.get('spectra')
+        return state.get(ITEM_PIDS)
 
     @property
     def _editedObjectComment(self) -> [str, None]:
@@ -847,7 +873,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         if obj is None:
             return None
         state = self._updatedState[obj.name]
-        return state.get('comment')
+        return state.get(COMMENT)
 
     def _setAcceptButtonState(self):
         if self.EDITMODE and self._dirty:
@@ -862,7 +888,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         comment = self.commentEdit.text() or None
         items = self._groupedObjects
 
-        return {key: {'spectra': items, 'comment': comment}} if len(key) > 0 else {}
+        return {key: {ITEM_PIDS: items, COMMENT: comment}} if len(key) > 0 else {}
 
     def _updateNameOnEdit(self):
         if self.EDITMODE and self._editedObject is not None:
@@ -1208,8 +1234,8 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
             previousState = self._previousState[key]
             if state == previousState:
                 continue
-            result[key] = {'spectra': [self.project.getByPid(pid) for pid in (state.get('spectra') or [])],
-                           'comment': state.get('comment')}
+            result[key] = {ITEM_PIDS: [self.project.getByPid(pid) for pid in (state.get(ITEM_PIDS) or [])],
+                           COMMENT: state.get(COMMENT)}
         return result
 
     def _getRenames(self):
@@ -1236,9 +1262,9 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
                         raise RuntimeError(f'Undefined object in edit mode')
 
                     for name, state in updateList.items():
-                        items = state.get('spectra')
+                        items = state.get(ITEM_PIDS)
                         self.setObjectItems(items)
-                        self.obj.comment = state.get('comment')
+                        self.obj.comment = state.get(COMMENT)
 
                     for name in renameList:
                         newName = renameList[name]
@@ -1254,8 +1280,8 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
                     if newState:
                         name = list(newState.keys())[0]
                         state = list(newState.values())[0]
-                        items = state.get('spectra')
-                        comment = state.get('comment')
+                        items = state.get(ITEM_PIDS)
+                        comment = state.get(COMMENT)
 
                         # func = getattr(self.project, self._projectNewMethod)
                         # self.obj = func(name, items, comment=comment)

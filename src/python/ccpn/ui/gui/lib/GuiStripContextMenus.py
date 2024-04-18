@@ -19,8 +19,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:26 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:50 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -266,12 +266,12 @@ def _phasingConsoleItem(strip):
 def _mouseModeItem(strip):
     from ccpn.framework.Application import getApplication
 
-    _app = getApplication()
+    # _app = getApplication()
     return _SCMitem(name='Peak-Picking Mouse Mode',
                     typeItem=ItemTypes.get(ITEM), toolTip='Mouse mode for peak-picking using single mouse-click',
                     checkable=True, checked=(getCurrentMouseMode() == PICK),
                     stripMethodName='mouseModeAction',
-                    shortcut='MM', callback=_app.mainWindow.switchMouseMode)
+                    shortcut='MM', callback=strip.mainWindow.switchMouseMode)
 
 
 def _marksItem(strip):
@@ -358,7 +358,7 @@ def _newStripPlotFAItem(strip):
     return _SCMitem(name='New Spectrum Display with Axes flipped...',
                     typeItem=ItemTypes.get(ITEM), toolTip='Create new Spectrum Display from the current strip',
                     shortcut='fa',
-                    callback=partial(app.showFlipArbitraryAxisPopup, usePosition=True))
+                    callback=partial(app.ui._flipArbitraryAxes, usePosition=True))
 
 
 ##############################  Common Integral menu items ##############################
@@ -366,7 +366,7 @@ def _newStripPlotFAItem(strip):
 
 def _deleteIntegralItem(strip):
     return _SCMitem(name='Delete Integral(s)',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Delete Integral(s) from project', callback=strip.mainWindow.deleteSelectedItems)
+                    typeItem=ItemTypes.get(ITEM), toolTip='Delete Integral(s) from project', callback=strip.mainWindow._deleteSelectedItems)
 
 
 ##############################  Common Multiplet menu items ##############################
@@ -374,7 +374,7 @@ def _deleteIntegralItem(strip):
 
 def _deleteMultipletItem(strip):
     return _SCMitem(name='Delete Multiplet(s)',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Delete Multiplet(s) from project', callback=strip.mainWindow.deleteSelectedItems)
+                    typeItem=ItemTypes.get(ITEM), toolTip='Delete Multiplet(s) from project', callback=strip.mainWindow._deleteSelectedItems)
 
 
 def _mergeMultipletItem(strip):
@@ -402,7 +402,7 @@ def _deletePeakItem():
     _app = getApplication()
     return _SCMitem(name='Delete Peak(s)',
                     typeItem=ItemTypes.get(ITEM), toolTip='Delete Peak(s) from project',
-                    callback=_app.mainWindow.deleteSelectedItems)
+                    callback=_app.mainWindow._deleteSelectedItems)
 
 
 def _editPeakAssignmentItem():
@@ -424,7 +424,7 @@ def _deassignPeaksItem():
     _app = getApplication()
     return _SCMitem(name='Deassign Peak(s)',
                     typeItem=ItemTypes.get(ITEM), toolTip='Deassign Peaks',
-                    callback=_app.mainWindow.deassignPeaks)
+                    callback=_app.mainWindow._deassignPeaks)
 
 
 def _setPeakAliasingItem():
@@ -433,7 +433,7 @@ def _setPeakAliasingItem():
     _app = getApplication()
     return _SCMitem(name='Set Aliasing...',
                     typeItem=ItemTypes.get(ITEM), toolTip='Set aliasing for current peak(s)',
-                    callback=_app.mainWindow.setPeakAliasing)
+                    callback=_app.mainWindow._setPeakAliasing)
 
 
 def _centreOnSelectedPeak():
@@ -479,7 +479,7 @@ def _estimateVolumesItem(menuId):
     return _SCMitem(name='Estimate Peak Volumes...',
                     typeItem=ItemTypes.get(ITEM), toolTip='Estimate peak volume(s)', shortcut='EV',
                     stripMethodName=f'_estimateVolumesItem{menuId}',
-                    callback=_app.showEstimateVolumesPopup)
+                    callback=_app.mainWindow._showEstimateVolumesPopup)
 
 
 def _estimateCurrentVolumesItem():
@@ -488,7 +488,7 @@ def _estimateCurrentVolumesItem():
     _app = getApplication()
     return _SCMitem(name='Estimate Current Peak Volume(s)',
                     typeItem=ItemTypes.get(ITEM), toolTip='Estimate peak volumes for the currently selected peaks', shortcut='EC',
-                    callback=_app.showEstimateCurrentVolumesPopup)
+                    callback=_app.mainWindow._showEstimateCurrentVolumesPopup)
 
 
 def _recalculatePeakHeightsItem():

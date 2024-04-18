@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-21 16:29:25 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:48 +0100 (Thu, April 18, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
@@ -86,7 +86,8 @@ from ccpn.framework.credits import printCreditsText
 from ccpn.framework.Current import Current
 from ccpn.framework.Translation import defaultLanguage
 from ccpn.framework.Translation import translator
-from ccpn.framework.Preferences import Preferences
+from ccpn.framework.Preferences import Preferences, \
+    RECENT_MACROS, RECENT_FILES, USER_PLUGIN_PATH
 from ccpn.framework.PathsAndUrls import \
     userCcpnMacroPath, \
     tipOfTheDayConfig, \
@@ -94,7 +95,7 @@ from ccpn.framework.PathsAndUrls import \
     CCPN_DIRECTORY_SUFFIX
 from ccpn.framework.lib.resources.Resources import Resources
 from ccpn.ui.gui.Gui import Gui
-from ccpn.ui.gui.GuiBase import GuiBase
+# from ccpn.ui.gui.GuiBase import GuiBase
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
@@ -104,10 +105,10 @@ from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
 from ccpn.ui.gui import Layout
 
 from ccpn.util import Logging
+from ccpn.util.Logging import getLogger
 from ccpn.util.Path import Path, aPath, fetchDir
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Common import uniquify, isWindowsOS, isMacOS, isIterable, getProcess
-from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
 
 
@@ -131,7 +132,7 @@ MAXITEMLOGGING = 4
 # Framework
 #=========================================================================================
 
-class Framework(NotifierBase, GuiBase):
+class Framework(NotifierBase):
     """
     The Framework class is the base class for all applications.
     """
@@ -145,7 +146,7 @@ class Framework(NotifierBase, GuiBase):
     def __init__(self, args=Arguments()):
 
         NotifierBase.__init__(self)
-        GuiBase.__init__(self)
+        # GuiBase.__init__(self)
 
         printCreditsText(sys.stderr, self.applicationName, self.applicationVersion)
 
@@ -162,6 +163,7 @@ class Framework(NotifierBase, GuiBase):
         #-----------------------------------------------------------------------------------------
         # Necessary as attribute is queried during initialisation:
         self._mainWindow = None
+        self._ui = None
 
         # This is needed to make project available in NoUi (if nothing else)
         self._project = None
@@ -170,34 +172,50 @@ class Framework(NotifierBase, GuiBase):
         self._plugins = []  # Hack for now, how should we store these?
         # used in GuiMainWindow by startPlugin()
 
-        # set to True to override the read-only status of a project
-        #   required to use save/saveAs but keep the project.readOnly status until the next load
-        self._saveOverrideState = False
+        # _echoBlocking context manager
+        self._echoBlocking = 0
 
         #-----------------------------------------------------------------------------------------
         # Initialisations
         #-----------------------------------------------------------------------------------------
 
-        self._created = datetime.now().strftime("%H%M")  # adds the app creation time to the end of the logger filename
-
         self.args = args
+
+        # set to True to override the read-only status of a project
+        #   required to use save/saveAs but keep the project.readOnly status until the next load
+        self._saveOverrideState = False
+
+        self._created = datetime.now().strftime("%H%M")  # adds the app creation time to the end of the logger filename
 
         # NOTE:ED - what is revision for? there are no uses and causes a new error for sphinx documentation unless a string
         # self.revision = Version.revision
 
-        self.useFileLogger = not getattr(self.args, 'noLogging', False)
+        # Process info
+        self._process = getProcess()
 
-        # map to 0-3, with 0 no debug
+        # Create a temporary directory; Need to hold on to the original temp-file object, as otherwise
+        # gets garbage collected. Access path name by using the "name" attribute.
+        self._temporaryDirectory = tempfile.TemporaryDirectory(prefix='CcpNmr_')
+
+        # Debugging: map to 0-3, with 0 no debug
+        self._debugLevel = 0
         _level = ([self.args.debug,
                    self.args.debug2,
                    self.args.debug3 or self.args.debug3_backup_thread,
                    True].index(True) + 1) % 4
         self.setDebug(_level)
 
-        # self.preferences = Preferences(application=self)
-        # if not self.args.skipUserPreferences:
-        #     sys.stderr.write('==> Getting user preferences\n')
-        #     self.preferences._getUserPreferences()
+        # Logging: TODO: clean up these definitions and options
+        # Optionally increase blocking level for command echo and logging
+        if getattr(self.args, 'noDebugLogging', False):
+            self._increaseEchoBlocking()
+        self._enableLoggingToConsole = True
+        self._useFileLogger = True
+        if getattr(self.args, 'noLogging', False):
+            self._useFileLogger = False
+        logger.disabled = getattr(self.args, 'noEchoLogging', False)  # overrides noDebugLogging
+        self._ccpnLogging = getattr(self.args, 'ccpnLogging', False)
+
         if self.args.skipUserPreferences:
             sys.stderr.write('==> Getting default preferences\n')
             self.preferences = Preferences(application=self, userPreferences=False)
@@ -205,64 +223,63 @@ class Framework(NotifierBase, GuiBase):
             sys.stderr.write('==> Getting user preferences\n')
             self.preferences = Preferences(application=self)
 
+        # language; (requires self.args and self.preferences)
+        self._language = self._setLanguage()
+
         self.layout = None  # initialised by self._getUserLayout
 
-        # GWV these attributes should move to the GUI class (in 3.2x ??)
-        # For now, they are set in GuiBase and initialised by calls in Gui.__init_
-        # self._styleSheet = None
-        # self._colourScheme = None
-        # self._fontSettings = None
-        # self._menuSpec = None
-
-        # Blocking level for command echo and logging
-        self._echoBlocking = int(getattr(self.args, 'noDebugLogging', False))
-        self._enableLoggingToConsole = True
-        logger.disabled = getattr(self.args, 'noEchoLogging', False)  # overrides noDebugLogging
-
-        # Process info
-        self._process = getProcess()
-
+        # set by _updateAutoBackup(), called from  _startApplication()
         self._autoBackupThread = None
 
         self._tip_of_the_day = None
         self._initial_show_timer = None
         self._key_concepts = None
 
+        # initialised in _startApplication
         self._registrationDict = {}
 
-        self._setLanguage()
-
-        self._experimentClassifications = None  # initialised in _startApplication once a project has loaded
+        # initialised in _startApplication once a project has loaded
+        self._experimentClassifications = None
 
         self._disableUndoException = getattr(self.args, 'disableUndoException', False)
         self._disableModuleException = getattr(self.args, 'disableModuleException', False)
         self._disableQueueException = getattr(self.args, 'disableQueueException', False)
-        self._readOnly = getattr(self.args, 'readOnly', False)
-        self._ccpnLogging = getattr(self.args, 'ccpnLogging', False)
 
-        # Create a temporary directory; Need to hold on to the original temp-file object, as otherwise
-        # gets garbage collected. Access path name by using the "name" attribute.
-        self._temporaryDirectory = tempfile.TemporaryDirectory(prefix='CcpNmr_')
+        self._readOnly = getattr(self.args, 'readOnly', False)
 
         # register dataLoaders for the first and only time
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders
-
         self._dataLoaders = getDataLoaders()
 
         # register SpectrumDataSource formats for the first and only time
         from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
-
         self._spectrumDataSourceFormats = getDataFormats()
 
         # Resources
-        self.resources = Resources(self)
+        sys.stderr.write('==> Loading resources... ')
+        self.resources = None
+        # self.resources = Resources(self)
+        sys.stderr.write('Done!\n')
 
         # get a user interface; nb. ui.start() is called by the application
-        self.ui = self._getUI()
+        self._ui = self._getUI()
 
     #-----------------------------------------------------------------------------------------
     # properties of Framework
     #-----------------------------------------------------------------------------------------
+
+    @property
+    def application(self):
+        """:return application; i.e. self
+        To retain consistency across top-level objects having access to application, project, current and mainWindow
+        """
+        return self
+
+    @property
+    def ui(self):
+        """:return the user interface (Ui) instance
+        """
+        return self._ui
 
     @property
     def project(self) -> Project:
@@ -273,7 +290,7 @@ class Framework(NotifierBase, GuiBase):
     @property
     def current(self) -> Current:
         """Current contains selected peaks, selected restraints, cursor position, etc.
-        see Current.py for detailed descriptiom
+        see Current.py for detailed description
         :return the Current object
         """
         return self._current
@@ -283,13 +300,15 @@ class Framework(NotifierBase, GuiBase):
         """:returns: MainWindow instance if application has a Gui or None otherwise
         """
         if self.hasGui:
-            return self.ui.mainWindow
+            # During setup, project has hold of mainWindow
+            return (self.ui.mainWindow or self.project._mainWindow)
         return None
 
     @property
     def hasGui(self) -> bool:
-        """:return True if application has a gui"""
-        return isinstance(self.ui, Gui)
+        """:return True if application has a gui user interface
+        """
+        return self.ui and self.ui._hasGui
 
     @property
     def _saveOverride(self):
@@ -309,24 +328,25 @@ class Framework(NotifierBase, GuiBase):
             if self.mainWindow:
                 self.mainWindow._setReadOnlyIcon()
 
-    @property
-    def defaultReadOnly(self):
-        """Return the deafult read-only state for all projects.
-        Overrides project.readOnly except for using save/saveAs as necessary
-        """
-        return self._readOnly
-
-    @defaultReadOnly.setter
-    def defaultReadOnly(self, value):
-        if not isinstance(value, bool):
-            raise TypeError(f'{self.__class__.__name__}.defaultReadOnly must be a bool')
-
-        self._readOnly = value
-        if self.project:
-            self.project._updateReadOnlyState()
-            self.project._updateLoggerState()
-            if self.mainWindow:
-                self.mainWindow._setReadOnlyIcon()
+    # GWV 29/2/2024: Not used (!?)
+    # @property
+    # def defaultReadOnly(self):
+    #     """Return the deafult read-only state for all projects.
+    #     Overrides project.readOnly except for using save/saveAs as necessary
+    #     """
+    #     return self._readOnly
+    #
+    # @defaultReadOnly.setter
+    # def defaultReadOnly(self, value):
+    #     if not isinstance(value, bool):
+    #         raise TypeError(f'{self.__class__.__name__}.defaultReadOnly must be a bool')
+    #
+    #     self._readOnly = value
+    #     if self.project:
+    #         self.project._updateReadOnlyState()
+    #         self.project._updateLoggerState()
+    #         if self.mainWindow:
+    #             self.mainWindow._setReadOnlyIcon()
 
     #-----------------------------------------------------------------------------------------
     # Useful (?) directories as Path instances
@@ -444,15 +464,14 @@ class Framework(NotifierBase, GuiBase):
     def _getUI(self):
         """Get the user interface
         :return a Ui instance
+        Subclassed in various Analysis versions
         """
         if self.args.interface == 'Gui':
             from ccpn.ui.gui.Gui import Gui
-
             ui = Gui(application=self)
 
         else:
             from ccpn.ui.Ui import NoUi
-
             ui = NoUi(application=self)
 
         return ui
@@ -485,18 +504,24 @@ class Framework(NotifierBase, GuiBase):
         if not self.ui._checkRegistration():
             return
 
-        self._experimentClassifications = project._getExperimentClassifications()
+        # We have a project needed to read experiment classification (to be refactored to be standalone)
+        self._experimentClassifications = self._getExperimentClassifications()
+
+        # Starting autobackup
         self._updateAutoBackup()
 
         sys.stderr.write('==> Done, %s is starting\n' % self.applicationName)
         self.ui.startUi()
         # self._cleanup()
 
-    def _cleanup(self):
-        """Cleanup at the end of program execution; i.e. once the command loop
-        has stopped
-        """
-        self._updateAutoBackup(kill=True)
+    # GWV 18/2/24: nevr called/used!
+    # def _cleanup(self):
+    #     """Cleanup at the end of program execution; i.e. once the command loop
+    #     has stopped
+    #     """
+    #     self._updateAutoBackup(kill=True)
+    #     self.preferences._saveUserPreferences()
+
 
     #-----------------------------------------------------------------------------------------
     # Backup (TODO: need refactoring in AutoBackupManager)
@@ -581,21 +606,6 @@ class Framework(NotifierBase, GuiBase):
                 # log the time that a backup was completed
                 self._setLastBackupTime()
 
-            # from ccpnmodel.ccpncore.lib.Io import Api as apiIo
-            #
-            # apiIo.backupProject(self.project._wrappedData.parent)
-            # backupPath = self.project.backupPath
-            #
-            # backupStatePath = fetchDir(backupPath, Layout.StateDirName)
-            #
-            # copy_tree(self.statePath, backupStatePath)
-            # layoutFile = os.path.join(backupStatePath, Layout.DefaultLayoutFileName)
-            # Layout.saveLayoutToJson(self.ui.mainWindow, layoutFile)
-            # self.current._dumpStateToFile(backupStatePath)
-
-            # Spectra should not be copied over. Dangerous for disk space
-            # backupDataPath = fetchDir(backupPath, DataDirName)
-
         except (PermissionError, FileNotFoundError):
             getLogger().info('Backup failed: Folder may be read-only')
 
@@ -606,79 +616,84 @@ class Framework(NotifierBase, GuiBase):
 
     def _initialiseProject(self, newProject: Project):
         """Initialise a project and set up links and objects that involve it
+        Previous project should have been closed by _closeProject()
         """
+        if self._project is not None:
+            raise RuntimeError(f'Cannot initialise {newProject} withoout closing {self._project} first')
 
-        # # Linkages; need to be here as downstream code depends on it
+        # Linkages; need to be here as downstream code depends on it
         self._project = newProject
         newProject._application = self
 
-        newProject._resetUndo(debug=self._debugLevel <= Logging.DEBUG2,
-                              application=self)
-
-        # Logging
-        logger = getLogger()
-        Logging.setLevel(logger, self._debugLevel)
-        logger.debug('Framework._initialiseProject>>>')
-
-        # Set up current; we need it when restoring project graphics data below
+        # Set up current before project; we need it when restoring project graphics data below
         self._current = Current(project=newProject)
 
-        # This wraps the underlying data, including the wrapped graphics data
-        newProject._initialiseProject()
-
-        # NOTE:ED - testing here, project seems to be modified after loading
-        newProject._xmlLoader.setUnmodified()
-
-        # GWV: this really should not be here; moved to the_update_v2 method
-        #      that already existed and gets called
-        # if newProject._isUpgradedFromV2:
-        #     getLogger().debug('initialising v2 noise and contour levels')
-        #     with inactivity(application=self):
-        #         for spectrum in newProject.spectra:
-        #             # calculate the new noise level
-        #             spectrum.noiseLevel = spectrum.estimateNoise()
-        #
-        #             # Check  contourLevels, contourColours
-        #             spectrum._setDefaultContourValues()
-        #
-        #             # set the initial contour colours
-        #             (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
-        #             spectrum.sliceColour = spectrum.positiveContourColour
-        #
-        #             # set the initial axis ordering
-        #             _getDefaultOrdering(spectrum)
-
-        # the project is now ready to use
-
-        # Now that all objects, including the graphics are there, restore current
-        self.current._restoreStateFromFile(self.statePath)
-        # Load project specific resources.
-        self.resources._initProjectResources()
+        # newProject._initialise() wraps the underlying data, including the wrapped graphics data;
+        # i.e. it obtains a new MainWindow instance and returns this for further initialisations
+        self._project, _mainWindow = newProject._initialise(application=self, debugLevel=self._debugLevel)
 
         if self.hasGui:
-            self.ui.initialize(self._mainWindow)
-            # Get the mainWindow out of the application top level once it's been transferred to ui
-            del self._mainWindow
+            self.ui.initialize(mainWindow=_mainWindow, project=newProject)
         else:
             # The NoUi version has no mainWindow
-            self.ui.initialize(None)
+            self.ui.initialize(mainWindow=None, project=newProject)
+
+        # GWV 24/2/24: moved to Project._initialise()
+        # newProject._resetUndo(debug=self._debugLevel <= Logging.DEBUG2,
+        #                       application=self)
+
+        # GWV 24/2/24: moved to Project._initialise()
+        # # Logging
+        # logger = getLogger()
+        # Logging.setLevel(logger, self._debugLevel)
+
+        # GWV 24/2/24: moved to Project._initialise()
+        # # NOTE:ED - testing here, project seems to be modified after loading
+        # newProject._xmlLoader.setUnmodified()
+        # # the project is now ready to use
+
+        # Now that all objects, including the graphics, are there restore current
+        # for non-temporary projects
+        if not self.project.isTemporary:
+            self.current._restoreStateFromFile(self.statePath)
+
+        # Load project specific resources.
+        if self.resources:
+            self.resources._initProjectResources()
 
     #-----------------------------------------------------------------------------------------
     # Utilities
     #-----------------------------------------------------------------------------------------
 
+    @property
+    def _loggingLevel(self) -> int:
+        """Convert the project _debugLevel (0, 1-3)
+        :return the Logging defined level
+        """
+        _conversion = {
+            3 : Logging.DEBUG3,
+            2 : Logging.DEBUG2,
+            1 : Logging.DEBUG,
+            0 : Logging.INFO,
+        }
+        return _conversion.get(self._debugLevel, Logging.INFO)
+
+    @property
+    def debugLevel(self) -> int:
+        """:return the current debug level; 0: off, 1-3: debug level 1-3
+        """
+        return self._debugLevel
+
+    @logCommand('application.')
     def setDebug(self, level: int):
         """Set the debugging level
         :param level: 0: off, 1-3: debug level 1-3
         """
-        if level == 3:
-            self._debugLevel = Logging.DEBUG3
-        elif level == 2:
-            self._debugLevel = Logging.DEBUG2
-        elif level == 1:
-            self._debugLevel = Logging.DEBUG
-        elif level == 0:
-            self._debugLevel = Logging.INFO
+        if 0 <= level <= 3:
+            self._debugLevel = level
+            # update the logger
+            logger = getLogger()
+            Logging.setLevel(logger, level=self._loggingLevel)
         else:
             raise ValueError(f'Invalid debug level ({level}); should be 0-3')
 
@@ -687,11 +702,7 @@ class Framework(NotifierBase, GuiBase):
         """:return True if either of the debug flags has been set
         CCPNINTERNAL: used throughout to check
         """
-        if self._debugLevel == Logging.DEBUG1 or \
-                self._debugLevel == Logging.DEBUG2 or \
-                self._debugLevel == Logging.DEBUG3:
-            return True
-        return False
+        return self._debugLevel > 0
 
     def _savePreferences(self):
         """Save the user preferences to file
@@ -700,17 +711,22 @@ class Framework(NotifierBase, GuiBase):
         self.preferences._saveUserPreferences()
 
     def _setLanguage(self):
-        # Language, check for command line override, or use preferences
+        """
+        Set and return language, check for command line override, or use preferences
+        :return: language
+        """
         if self.args.language:
             language = self.args.language
         elif self.preferences.general.language:
             language = self.preferences.general.language
         else:
             language = defaultLanguage
-        if not translator.setLanguage(language):
-            self.preferences.general.language = language
+
+        translator.setLanguage(language)
         # translator.setDebug(True)
-        sys.stderr.write('==> Language set to "%s"\n' % translator._language)
+
+        sys.stderr.write('==> Language set to "%s"\n' % language)
+        return language
 
     @staticmethod
     def _cleanGarbageCollector():
@@ -719,6 +735,27 @@ class Framework(NotifierBase, GuiBase):
         import gc
 
         gc.collect()
+
+    def _reloadPlugins(self):
+        """Reload CCPN and user plugins
+        """
+        from ccpn import plugins
+        from importlib import reload
+        import importlib.util
+
+        reload(plugins)
+
+        # Finding user plugins
+        pluginUserPath = aPath(self.preferences.get(USER_PLUGIN_PATH))
+        # filePaths = [(aPath(r) / file) for r, d, f in os.walk(aPath(pluginUserPath))
+        #              for file in f if os.path.splitext(file)[1] == '.py']
+        filePaths = pluginUserPath.globList('*.py')
+
+        for filePath in filePaths:
+            # iterate and load the .py files in the plugins directory
+            spec = importlib.util.spec_from_file_location(".", filePath)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
 
     #-----------------------------------------------------------------------------------------
 
@@ -769,143 +806,145 @@ class Framework(NotifierBase, GuiBase):
                 mark.colour = autoCorrectHexColour(mark.colour,
                                                    getColours()[CCPNGLWIDGET_HEXBACKGROUND])
 
-    def _initGraphics(self):
-        """Set up graphics system after loading
-        """
-        from ccpn.ui.gui.lib import GuiStrip
-
-        project = self.project
-        mainWindow = self.ui.mainWindow
-
-        # 20191113:ED Initial insertion of spectrumDisplays into the moduleArea
-        try:
-            insertPoint = mainWindow.moduleArea
-            for spectrumDisplay in mainWindow.spectrumDisplays:
-                mainWindow.moduleArea.addModule(spectrumDisplay,
-                                                position='right',
-                                                relativeTo=insertPoint)
-                insertPoint = spectrumDisplay
-
-        except Exception:
-            getLogger().warning('Impossible to restore SpectrumDisplays')
-
-        try:
-            if self.preferences.general.restoreLayoutOnOpening and \
-                    mainWindow.moduleLayouts:
-                Layout.restoreLayout(mainWindow, mainWindow.moduleLayouts, restoreSpectrumDisplay=False)
-        except Exception as e:
-            getLogger().warning(f'Impossible to restore Layout {e}')
-
-        # New LayoutManager implementation; awaiting completion
-        # try:
-        #     from ccpn.framework.LayoutManager import LayoutManager
-        #     layout = LayoutManager(mainWindow)
-        #     path = self.statePath / 'Layout.json'
-        #     layout.restoreState(path)
-        #     layout.saveState()
+    # GWV 24/1/24: moved to Gui
+    # def _initGraphics(self):
+    #     """Set up graphics system after loading
+    #     """
+    #     # from ccpn.ui.gui.lib import GuiStrip
         #
+        # project = self.project
+        # mainWindow = self.ui.mainWindow
+        #
+        # # 20191113:ED Initial insertion of spectrumDisplays into the moduleArea
+        # try:
+        #     insertPoint = mainWindow.moduleArea
+        #     for spectrumDisplay in mainWindow.spectrumDisplays:
+        #         mainWindow.moduleArea.addModule(spectrumDisplay,
+        #                                         position='right',
+        #                                         relativeTo=insertPoint)
+        #         insertPoint = spectrumDisplay
+        #
+        # except Exception:
+        #     getLogger().warning('Impossible to restore SpectrumDisplays')
+        #
+        # try:
+        #     if self.preferences.general.restoreLayoutOnOpening and \
+        #             mainWindow.moduleLayouts:
+        #         Layout.restoreLayout(mainWindow, mainWindow.moduleLayouts, restoreSpectrumDisplay=False)
+        # except Exception as e:
+        #     getLogger().warning(f'Impossible to restore Layout {e}')
+        #
+        # # New LayoutManager implementation; awaiting completion
+        # # try:
+        # #     from ccpn.framework.LayoutManager import LayoutManager
+        # #     layout = LayoutManager(mainWindow)
+        # #     path = self.statePath / 'Layout.json'
+        # #     layout.restoreState(path)
+        # #     layout.saveState()
+        # #
+        # # except Exception as es:
+        # #     getLogger().warning('Error restoring layout: %s' % es)
+        #
+        # # check that the top moduleArea is correctly formed - strange special case when all modules have
+        # #   been moved to tempAreas
+        # mArea = self.ui.mainWindow.moduleArea
+        # if mArea.topContainer is not None and mArea.topContainer._container is None:
+        #     getLogger().debug('Correcting empty topContainer')
+        #     mArea.topContainer = None
+        #
+        # try:
+        #     # Initialise colours
+        #     # # for spectrumDisplay in project.windows[0].spectrumDisplays:  # there is exactly one window
+        #     #
+        #     # for spectrumDisplay in mainWindow.spectrumDisplays:  # there is exactly one window
+        #     #     pass  # GWV: poor solution; removed the routine spectrumDisplay._resetRemoveStripAction()
+        #
+        #     # initialise any colour changes before generating gui strips
+        #     self._correctColours()
         # except Exception as es:
-        #     getLogger().warning('Error restoring layout: %s' % es)
+        #     getLogger().warning(f'Impossible to restore colours - {es}')
+        #
+        # # Initialise Strips
+        # for spectrumDisplay in mainWindow.spectrumDisplays:
+        #     try:
+        #         for si, strip in enumerate(spectrumDisplay.orderedStrips):
+        #
+        #             # temporary to catch bad strips from ordering bug
+        #             if not strip:
+        #                 continue
+        #
+        #             # get the new tilePosition of the strip - tilePosition is always (x, y) relative to screen stripArrangement
+        #             #                                       changing screen arrangement does NOT require flipping tilePositions
+        #             #                                       i.e. Y = (across, down); X = (down, across)
+        #             #                                       - check delete/undo/redo strips
+        #             tilePosition = strip.tilePosition
+        #
+        #             # move to the correct place in the widget - check stripDirection to display as row or column
+        #             if spectrumDisplay.stripArrangement == 'Y':
+        #                 if True:  # tilePosition is None:
+        #                     spectrumDisplay.stripFrame.layout().addWidget(strip, 0, si)  #stripIndex)
+        #                     strip.tilePosition = (0, si)
+        #                 # else:
+        #                 #     spectrumDisplay.stripFrame.layout().addWidget(strip, tilePosition[0], tilePosition[1])
+        #
+        #             elif spectrumDisplay.stripArrangement == 'X':
+        #                 if True:  #tilePosition is None:
+        #                     spectrumDisplay.stripFrame.layout().addWidget(strip, si, 0)  #stripIndex)
+        #                     strip.tilePosition = (0, si)
+        #                 # else:
+        #                 #     spectrumDisplay.stripFrame.layout().addWidget(strip, tilePosition[1], tilePosition[0])
+        #
+        #             elif spectrumDisplay.stripArrangement == 'T':
+        #                 # NOTE:ED - Tiled plots not fully implemented yet
+        #                 getLogger().warning(f'Tiled plots not implemented for spectrumDisplay: {str(spectrumDisplay)}')
+        #             else:
+        #                 getLogger().warning(f'Strip direction is not defined for spectrumDisplay: {str(spectrumDisplay)}')
+        #
+        #             if not spectrumDisplay.is1D:
+        #                 for _strip in spectrumDisplay.strips:
+        #                     _strip._updatePlaneAxes()
+        #
+        #         if spectrumDisplay.isGrouped:
+        #             # set up the spectrumGroup toolbar
+        #
+        #             spectrumDisplay.spectrumToolBar.hide()
+        #             spectrumDisplay.spectrumGroupToolBar.show()
+        #
+        #             _spectrumGroups = [project.getByPid(pid) for pid in spectrumDisplay._getSpectrumGroups()]
+        #
+        #             for group in _spectrumGroups:
+        #                 spectrumDisplay.spectrumGroupToolBar._forceAddAction(group)
+        #
+        #         else:
+        #             # set up the spectrum toolbar
+        #
+        #             spectrumDisplay.spectrumToolBar.show()
+        #             spectrumDisplay.spectrumGroupToolBar.hide()
+        #             spectrumDisplay.setToolbarButtons()
+        #
+        #         # some strips may not be instantiated at this point
+        #         # resize the stripFrame to the spectrumDisplay - ready for first resize event
+        #         # spectrumDisplay.stripFrame.resize(spectrumDisplay.width() - 2, spectrumDisplay.stripFrame.height())
+        #         spectrumDisplay.showAxes(stretchValue=True, widths=True,
+        #                                  minimumWidth=GuiStrip.STRIP_MINIMUMWIDTH)
+        #
+        #     except Exception as e:
+        #         getLogger().warning(f'Impossible to restore spectrumDisplay(s) {e}')
+        #
+        # try:
+        #     if self.current.strip is None and len(mainWindow.strips) > 0:
+        #         self.current.strip = mainWindow.strips[0]
+        # except Exception as e:
+        #     getLogger().warning(f'Error restoring current.strip: {e}')
 
-        # check that the top moduleArea is correctly formed - strange special case when all modules have
-        #   been moved to tempAreas
-        mArea = self.ui.mainWindow.moduleArea
-        if mArea.topContainer is not None and mArea.topContainer._container is None:
-            getLogger().debug('Correcting empty topContainer')
-            mArea.topContainer = None
+    #-----------------------------------------------------------------------------------------
 
-        try:
-            # Initialise colours
-            # # for spectrumDisplay in project.windows[0].spectrumDisplays:  # there is exactly one window
-            #
-            # for spectrumDisplay in mainWindow.spectrumDisplays:  # there is exactly one window
-            #     pass  # GWV: poor solution; removed the routine spectrumDisplay._resetRemoveStripAction()
-
-            # initialise any colour changes before generating gui strips
-            self._correctColours()
-        except Exception as es:
-            getLogger().warning(f'Impossible to restore colours - {es}')
-
-        # Initialise Strips
-        for spectrumDisplay in mainWindow.spectrumDisplays:
-            try:
-                for si, strip in enumerate(spectrumDisplay.orderedStrips):
-
-                    # temporary to catch bad strips from ordering bug
-                    if not strip:
-                        continue
-
-                    # get the new tilePosition of the strip - tilePosition is always (x, y) relative to screen stripArrangement
-                    #                                       changing screen arrangement does NOT require flipping tilePositions
-                    #                                       i.e. Y = (across, down); X = (down, across)
-                    #                                       - check delete/undo/redo strips
-                    tilePosition = strip.tilePosition
-
-                    # move to the correct place in the widget - check stripDirection to display as row or column
-                    if spectrumDisplay.stripArrangement == 'Y':
-                        if True:  # tilePosition is None:
-                            spectrumDisplay.stripFrame.layout().addWidget(strip, 0, si)  #stripIndex)
-                            strip.tilePosition = (0, si)
-                        # else:
-                        #     spectrumDisplay.stripFrame.layout().addWidget(strip, tilePosition[0], tilePosition[1])
-
-                    elif spectrumDisplay.stripArrangement == 'X':
-                        if True:  #tilePosition is None:
-                            spectrumDisplay.stripFrame.layout().addWidget(strip, si, 0)  #stripIndex)
-                            strip.tilePosition = (0, si)
-                        # else:
-                        #     spectrumDisplay.stripFrame.layout().addWidget(strip, tilePosition[1], tilePosition[0])
-
-                    elif spectrumDisplay.stripArrangement == 'T':
-                        # NOTE:ED - Tiled plots not fully implemented yet
-                        getLogger().warning(f'Tiled plots not implemented for spectrumDisplay: {str(spectrumDisplay)}')
-                    else:
-                        getLogger().warning(f'Strip direction is not defined for spectrumDisplay: {str(spectrumDisplay)}')
-
-                    if not spectrumDisplay.is1D:
-                        for _strip in spectrumDisplay.strips:
-                            _strip._updatePlaneAxes()
-
-                if spectrumDisplay.isGrouped:
-                    # set up the spectrumGroup toolbar
-
-                    spectrumDisplay.spectrumToolBar.hide()
-                    spectrumDisplay.spectrumGroupToolBar.show()
-
-                    _spectrumGroups = [project.getByPid(pid) for pid in spectrumDisplay._getSpectrumGroups()]
-
-                    for group in _spectrumGroups:
-                        spectrumDisplay.spectrumGroupToolBar._forceAddAction(group)
-
-                else:
-                    # set up the spectrum toolbar
-
-                    spectrumDisplay.spectrumToolBar.show()
-                    spectrumDisplay.spectrumGroupToolBar.hide()
-                    spectrumDisplay.setToolbarButtons()
-
-                # some strips may not be instantiated at this point
-                # resize the stripFrame to the spectrumDisplay - ready for first resize event
-                # spectrumDisplay.stripFrame.resize(spectrumDisplay.width() - 2, spectrumDisplay.stripFrame.height())
-                spectrumDisplay.showAxes(stretchValue=True, widths=True,
-                                         minimumWidth=GuiStrip.STRIP_MINIMUMWIDTH)
-
-            except Exception as e:
-                getLogger().warning(f'Impossible to restore spectrumDisplay(s) {e}')
-
-        try:
-            if self.current.strip is None and len(mainWindow.strips) > 0:
-                self.current.strip = mainWindow.strips[0]
-        except Exception as e:
-            getLogger().warning(f'Error restoring current.strip: {e}')
-
+    def _initTipOfTheDay(self):
         # GST slightly complicated as we have to wait for any license or other
         # startup dialogs to close before we display tip of the day
         loadTipsSetup(tipOfTheDayConfig, [ccpnCodePath])
         self._tip_of_the_day_wait_dialogs = (RegisterPopup,)
         self._startupShowTipofTheDay()
-
-    #-----------------------------------------------------------------------------------------
 
     def _startupShowTipofTheDay(self):
         if self._shouldDisplayTipOfTheDay():
@@ -1020,10 +1059,12 @@ class Framework(NotifierBase, GuiBase):
         return Path(path)
 
     def _cleanTemporaryDirectory(self):
-        """Remove all files in the temporary path.
+        """Remove all files in the temporary directory.
         the cleanup() method of the _temporaryDirectory instance seems not to do the job
         """
-        for _path in [Path(p) for p in Path(self._temporaryDirectory.name).glob('*')]:
+        _paths = [Path(p) for p in Path(self._temporaryDirectory.name).glob('*')]
+
+        for _path in _paths:
             try:
                 # causes crash in Windows with temporary folder
                 if _path.is_dir():
@@ -1033,9 +1074,9 @@ class Framework(NotifierBase, GuiBase):
             except (PermissionError, FileNotFoundError):
                 getLogger().debug('Folder may be read-only')
 
-    def _newProject(self, name: str = 'default') -> Project:
+    def _newProject(self, name:str = 'newProject', isTemporary=True) -> Project:
         """Create new, empty project with name
-        All new projects are created as temporary, to be saved later at another location
+        All new projects are created as temporary if isTemporary=True, to be saved later at another location
         :return a Project instance
         """
         # local import to avoid cycles
@@ -1047,15 +1088,19 @@ class Framework(NotifierBase, GuiBase):
         if checkProjectName(name, correctName=False) is None:
             raise ValueError(f'Invalid project name "{name}"; check log/console for details')
 
-        # Get a path in the temporary directory
-        path = self._getTemporaryPath(prefix=f'{name}_', suffix=CCPN_DIRECTORY_SUFFIX)
+        if isTemporary:
+            # Get a path in the temporary directory
+            path = self._getTemporaryPath(prefix=f'{name}_', suffix=CCPN_DIRECTORY_SUFFIX)
+        else:
+            path = aPath(f'./{name}').withSuffix(CCPN_DIRECTORY_SUFFIX)
 
         # NB _closeProject includes a gui cleanup call
         self._closeProject()
-        result = _newProject(self, name=name, path=path, isTemporary=True)
-        self._initialiseProject(result)  # This also set the linkages
+        self._setSaveOverride(True)
+        _project = _newProject(self, name=name, path=path, isTemporary=True)
+        self._initialiseProject(_project)  # This also set the linkages
 
-        getLogger().debug(f'Opened project "{name}" at {result.path}')
+        getLogger().debug(f'Opened project "{name}" at {_project.path}')
 
         # update the logger read-only state
         self.project._updateReadOnlyState()
@@ -1063,7 +1108,7 @@ class Framework(NotifierBase, GuiBase):
         if self.mainWindow:
             self.mainWindow._setReadOnlyIcon()
 
-        return result
+        return _project
 
     # @logCommand('application.')  # decorated in ui class
     def newProject(self, name: str = 'default') -> Project:
@@ -1079,36 +1124,47 @@ class Framework(NotifierBase, GuiBase):
         """Load project defined by path
         :return a Project instance
         """
+        getLogger().debug(f'--> Loading Project {path}')
         result = self.ui.loadProject(path)
-        getLogger().debug('--> LOADED PROJECT')
 
         return result
 
-    def _saveProjectAs(self, newPath=None, overwrite=False) -> bool:
+    def _saveProjectAs(self, newPath=None, overwrite=False, copySubDirectories: bool = True) -> bool:
         """Save project to newPath (optionally overwrite)
+
+        :param newPath: new path for storing project files
+        :param overwrite: flag to overwrite if path exists
+        :param copySubDirectories: flag to set the copying of the project's subdirectories
         :return True if successful
         """
-        if self.preferences.general.keepSpectraInsideProject:
-            self.project.copySpectraToProject()
+        # GWV 27/7/2023: disabled
+        # if self.preferences.general.keepSpectraInsideProject:
+        #     self.project.copySpectraToProject()
+
+
 
         try:
-            self.project.saveAs(newPath=newPath, overwrite=overwrite)
+            self.project.saveAs(newPath=newPath, overwrite=overwrite, copySubDirectories=copySubDirectories)
             Layout.saveLayoutToJson(self.ui.mainWindow)
             self.current._dumpStateToFile(self.statePath)
             self._getUndo().markSave()
+            self.preferences._addRecentFiles(self.project.path)
 
-        except (PermissionError, FileNotFoundError):
+        except (PermissionError, FileNotFoundError) as es:
+            getLogger().debug(f'_saveProjectAs() caught: {es}')
             failMessage = f'Folder {newPath} may be read-only'
             getLogger().warning(failMessage)
-            raise
+            raise es
 
         except RuntimeWarning as es:
+            getLogger().debug(f'_saveProjectAs() caught: {es}')
             failMessage = f'saveAs: unable to save {es}'
             getLogger().warning(failMessage)
-            raise
+            raise es
 
         except Exception as es:
-            failMessage = f'saveAs: unable to save {es}'
+            getLogger().debug(f'_saveProjectAs() caught: {es}')
+            failMessage = f'saveAs: {es}'
             getLogger().warning(failMessage)
             return False
 
@@ -1137,8 +1193,9 @@ class Framework(NotifierBase, GuiBase):
                 getLogger().warning('Project is read-only')
                 return True
 
-            if self.preferences.general.keepSpectraInsideProject:
-                self.project.copySpectraToProject()
+            # GWV 27/7/2023: disabled
+            # if self.preferences.general.keepSpectraInsideProject:
+            #     self.project.copySpectraToProject()
 
             try:
                 self.project.save()
@@ -1149,7 +1206,7 @@ class Framework(NotifierBase, GuiBase):
             except (PermissionError, FileNotFoundError):
                 failMessage = 'Folder may be read-only'
                 getLogger().info(failMessage)
-                raise
+                raise RuntimeError(failMessage)
 
             except Exception as es:
                 failMessage = f'save: unable to save {es}'
@@ -1165,8 +1222,6 @@ class Framework(NotifierBase, GuiBase):
         :param overwrite: flag to indicate overwriting of existing path
         :return True if successful
         """
-        # self._saveOverride = False
-
         with self._setSaveOverride(True):
             # override read-only for a save to a new folder
             #   project can still be read-only for next load
@@ -1193,16 +1248,32 @@ class Framework(NotifierBase, GuiBase):
             self.current._unregisterNotifiers()
             self._current = None
 
+        if self.resources:
+            self.resources._deregisterProjectResources()
+
         if self.project is not None:
             # Cleans up wrapper project, including graphics data objects (Window, Strip, etc.)
             _project = self.project
+            if not _project.isTemporary:
+                # Not a temporary project; add to recentFiles list
+                self.preferences._addRecentFiles(self.project.path)
+
             _project._close()
+            if _project.isTemporary:
+                # Temporary project; close it
+                _project.projectPath.removeDir()
+
             self._project = None
             del (_project)
 
-        self.resources._deregisterProjectResources()
-        self._cleanTemporaryDirectory()
         self._cleanGarbageCollector()
+
+    def _getExperimentClassifications(self) -> dict:
+        """Get a dictionary of dictionaries of dimensionCount:sortedNuclei:ExperimentClassification named tuples.
+        For now: ask project; to be refactored in the future
+        """
+        getLogger().debug(f'Reading experiment prototypes')
+        return self.project._getExperimentClassifications()
 
     #-----------------------------------------------------------------------------------------
     # Data loaders
@@ -1223,7 +1294,7 @@ class Framework(NotifierBase, GuiBase):
         if _echoBlocking:
             getLogger().info('Loading %d objects, while suppressing command-logging' %
                              len(dataLoaders))
-            self._increaseNotificationBlocking()
+            self._increaseEchoBlocking()
 
         # Check if there is a dataLoader that creates a new project: in that case, we only want one
         _createNew = [dl for dl in dataLoaders if dl.createNewProject]
@@ -1275,7 +1346,7 @@ class Framework(NotifierBase, GuiBase):
 
         with self.pauseAutoBackups(delay=True):
             # Now do the remaining ones; put in one undo block
-            with undoBlockWithSideBar():
+            with undoBlockWithSideBar(debugText=f'_loadData: {len(dataLoaders)} dataLoaders'):
                 for dataLoader in dataLoaders:
                     with logCommandManager('application.', 'loadData', dataLoader.path):
                         result = self.ui._loadData(dataLoader=dataLoader)
@@ -1284,7 +1355,7 @@ class Framework(NotifierBase, GuiBase):
                     objs.extend(result)
 
         if _echoBlocking:
-            self._decreaseNotificationBlocking()
+            self._decreaseEchoBlocking()
 
         getLogger().debug(f'Loaded objects: {objs}')
 
@@ -1317,42 +1388,51 @@ class Framework(NotifierBase, GuiBase):
 
     def _loadV2Project(self, path) -> List[Project]:
         """Actual V2 project loader
+        :return list with project (for compatibility with loader mechanism) or empty list
+
         CCPNINTERNAL: called from CcpNmrV2ProjectDataLoader
         """
-        from ccpn.core.Project import _loadProject
+        from ccpn.core.Project import _loadV2Project
 
-        # always close first
+        # close old project; also cleans directory
         self._closeProject()
-        project = _loadProject(application=self, path=str(path))
-        self._initialiseProject(project)  # This also sets the linkages
 
-        # Now that all has been restored and updated: save the result
+        result = []
         try:
-            project.save()
-            getLogger().info(f'==> Saved {project} as {project.path!r}')
-        except Exception as es:
-            getLogger().warning(f'Failed saving {project} ({str(es)})')
-
-        return [project]
-
-    def _loadV3Project(self, path) -> List[Project]:
-        """Actual V3 project loader
-        CCPNINTERNAL: called from CcpNmrV3ProjectDataLoader
-        """
-        from ccpn.core.Project import _loadProject
-
-        # always close first
-        # self._closeProject()
-        try:
-            project = _loadProject(application=self, path=path)
+            project = _loadV2Project(application=self, path=path)
 
         except (ValueError, RuntimeError) as es:
             getLogger().warning(f'Error loading "{path}": {es}')
 
         else:
-            self._closeProject()  # close old project
             self._initialiseProject(project)  # This also set the linkages
-            return [project]
+            result = [project]
+
+        return result
+
+    def _loadV3Project(self, path) -> List[Project]:
+        """Actual V3 project loader
+        :return list with project (for compatibility with loader mechanism) or empty list
+
+        CCPNINTERNAL: called from CcpNmrV3ProjectDataLoader
+        """
+        from ccpn.core.Project import _loadV3Project
+
+        # close old project, also cleans directory
+        self._closeProject()
+
+        result = []
+        try:
+            project = _loadV3Project(application=self, path=path)
+
+        except (ValueError, RuntimeError) as es:
+            getLogger().warning(f'Error loading "{path}": {es}')
+
+        else:
+            self._initialiseProject(project)  # This also set the linkages
+            result = [project]
+
+        return result
 
     def _loadSparkyFile(self, path: str, createNewProject=True) -> Project:
         """Load Project from Sparky file at path, and do necessary setup
@@ -1372,8 +1452,9 @@ class Framework(NotifierBase, GuiBase):
         else:
             project = self.project
 
-        with self.pauseAutoBackups(delay=True):
-            sparkyReader.importSparkyProject(project, dataBlock)
+        with rebuildSidebar(application=self):
+            with self.pauseAutoBackups(delay=True):
+                sparkyReader.importSparkyProject(project, dataBlock)
 
         return project
 
@@ -1410,12 +1491,8 @@ class Framework(NotifierBase, GuiBase):
         """Load html file path into a HtmlModule
         CCPNINTERNAL: called from HtmlDataLoader
         """
-        # mainWindow = self.mainWindow
-        # path = aPath(path)
-        # mainWindow.newHtmlModule(urlPath=str(path), position='top', relativeTo=mainWindow.moduleArea)
-
         # non-native webview is currently disabled
-        self._showHtmlFile('', str(path))
+        self.ui._showHtmlFile('', str(path))
         return []
 
     #-----------------------------------------------------------------------------------------
@@ -1428,7 +1505,7 @@ class Framework(NotifierBase, GuiBase):
         :return Project instance (either newly created or the existing)
         CCPNINTERNAL: called from NefDataLoader.load()
         """
-        from ccpn.core.Project import DEFAULT_CHEMICALSHIFTLIST
+        from ccpn.core.ChemicalShiftList import ChemicalShiftList, DEFAULT_CHEMICALSHIFTLIST
         from ccpn.core.lib.ProjectLib import checkProjectName
 
         TOBEDELETED = '_toBeDeleted'
@@ -1441,7 +1518,8 @@ class Framework(NotifierBase, GuiBase):
 
         # TODO: find a different solution for this
         with rebuildSidebar(application=self):
-            if _newProject and (ch := project.getChemicalShiftList(DEFAULT_CHEMICALSHIFTLIST)):
+            if _newProject and \
+                (ch := project._getChild(ChemicalShiftList, DEFAULT_CHEMICALSHIFTLIST)):
                 # rename the existing chemical-shift-list, hopefully an unused name
                 ch.rename(TOBEDELETED)
 
@@ -1458,65 +1536,67 @@ class Framework(NotifierBase, GuiBase):
 
         return project
 
-    def _exportNEF(self):
-        """
-        Export the current project as a Nef file
-        Temporary routine because I don't know how else to do it yet
-        """
-        from ccpn.ui.gui.popups.ExportNefPopup import ExportNefPopup
-        from ccpn.framework.lib.ccpnNef.CcpnNefIo import NEFEXTENSION
+    # GWV 5/2/24: moved To GuiBase
+    # def _exportNEF(self):
+    #     """
+    #     Export the current project as a Nef file
+    #     Temporary routine because I don't know how else to do it yet
+    #     """
+    #     from ccpn.ui.gui.popups.ExportNefPopup import ExportNefPopup
+    #     from ccpn.framework.lib.ccpnNef.CcpnNefIo import NEFEXTENSION
+    #
+    #     _path = aPath(self.preferences.general.userWorkingPath or '~').filepath / (self.project.name + NEFEXTENSION)
+    #     dialog = ExportNefPopup(self.ui.mainWindow,
+    #                             mainWindow=self.ui.mainWindow,
+    #                             selectFile=_path,
+    #                             fileFilter='*.nef',
+    #                             minimumSize=(400, 550))
+    #
+    #     # an exclusion dict comes out of the dialog as it
+    #     result = dialog.exec_()
+    #
+    #     if not result:
+    #         return
+    #
+    #     nefPath = result['filename']
+    #     flags = result['flags']
+    #     pidList = result['pidList']
+    #
+    #     # flags are skipPrefixes, expandSelection
+    #     skipPrefixes = flags['skipPrefixes']
+    #     expandSelection = flags['expandSelection']
+    #     includeOrphans = flags['includeOrphans']
+    #
+    #     self.project.exportNef(nefPath,
+    #                            overwriteExisting=True,
+    #                            skipPrefixes=skipPrefixes,
+    #                            expandSelection=expandSelection,
+    #                            includeOrphans=includeOrphans,
+    #                            pidList=pidList)
 
-        _path = aPath(self.preferences.general.userWorkingPath or '~').filepath / (self.project.name + NEFEXTENSION)
-        dialog = ExportNefPopup(self.ui.mainWindow,
-                                mainWindow=self.ui.mainWindow,
-                                selectFile=_path,
-                                fileFilter='*.nef',
-                                minimumSize=(400, 550))
-
-        # an exclusion dict comes out of the dialog as it
-        result = dialog.exec_()
-
-        if not result:
-            return
-
-        nefPath = result['filename']
-        flags = result['flags']
-        pidList = result['pidList']
-
-        # flags are skipPrefixes, expandSelection
-        skipPrefixes = flags['skipPrefixes']
-        expandSelection = flags['expandSelection']
-        includeOrphans = flags['includeOrphans']
-
-        self.project.exportNef(nefPath,
-                               overwriteExisting=True,
-                               skipPrefixes=skipPrefixes,
-                               expandSelection=expandSelection,
-                               includeOrphans=includeOrphans,
-                               pidList=pidList)
-
-    def _getRecentProjectFiles(self, oldPath=None) -> list:
-        """Get and return a list of recent project files, setting reference to
-           self as first element, unless it is a temp project
-           update the preferences with the new list
-
-           CCPNINTERNAL: called by MainWindow
-        """
-        project = self.project
-        path = project.path
-        recentFiles = self.preferences.recentFiles
-
-        if not project.isTemporary:
-            if path in recentFiles:
-                recentFiles.remove(path)
-            elif oldPath in recentFiles:
-                recentFiles.remove(oldPath)
-            elif len(recentFiles) >= 10:
-                recentFiles.pop()
-            recentFiles.insert(0, path)
-        recentFiles = uniquify(recentFiles)
-        self.preferences.recentFiles = recentFiles
-        return recentFiles
+    # GWV 18/2/24: replaced by Preferences._addRecentFiles, Preferences.clearRecentFiles methods
+    # def _getRecentProjectFiles(self, oldPath=None) -> list:
+    #     """Get and return a list of recent project files, setting reference to
+    #        self as first element, unless it is a temp project
+    #        update the preferences with the new list
+    #
+    #        CCPNINTERNAL: called by MainWindow
+    #     """
+    #     project = self.project
+    #     path = project.path
+    #     recentFiles = self.preferences.recentFiles
+    #
+    #     if not project.isTemporary:
+    #         if path in recentFiles:
+    #             recentFiles.remove(path)
+    #         elif oldPath in recentFiles:
+    #             recentFiles.remove(oldPath)
+    #         elif len(recentFiles) >= 10:
+    #             recentFiles.pop()
+    #         recentFiles.insert(0, path)
+    #     recentFiles = uniquify(recentFiles)
+    #     self.preferences.recentFiles = recentFiles
+    #     return recentFiles
 
     #-----------------------------------------------------------------------------------------
     # undo/redo
@@ -1560,14 +1640,14 @@ class Framework(NotifierBase, GuiBase):
         else:
             raise RuntimeError('Error: undefined project')
 
-    def _increaseNotificationBlocking(self):
+    def _increaseEchoBlocking(self):
         self._echoBlocking += 1
 
-    def _decreaseNotificationBlocking(self):
+    def _decreaseEchoBlocking(self):
         if self._echoBlocking > 0:
             self._echoBlocking -= 1
         else:
-            raise RuntimeError('Error: decreaseNotificationBlocking, already at 0')
+            raise RuntimeError('Error: decreaseEchoBlocking, already at 0')
 
     #-----------------------------------------------------------------------------------------
     # Archive code
@@ -1719,208 +1799,219 @@ class Framework(NotifierBase, GuiBase):
     ## MENU callbacks:  Spectrum
     ###################################################################################################################
 
-    def showSpectrumGroupsPopup(self):
-        if not self.project.spectra:
-            getLogger().warning('Project has no Spectra. Spectrum groups cannot be displayed')
-            MessageDialog.showWarning('Project contains no spectra.', 'Spectrum groups cannot be displayed')
-        else:
-            from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
+    # GWV 6/2/24: to GuiBase
+    # def showSpectrumGroupsPopup(self):
+    #     if not self.project.spectra:
+    #         getLogger().warning('Project has no Spectra. Spectrum groups cannot be displayed')
+    #         MessageDialog.showWarning('Project contains no spectra.', 'Spectrum groups cannot be displayed')
+    #     else:
+    #         from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
+    #
+    #         if not self.project.spectrumGroups:
+    #             #GST This seems to have problems MessageDialog wraps it which looks bad...
+    #             # MessageDialog.showWarning('Project has no Spectrum Groups.',
+    #             #                           'Create them using:\nSidebar → SpectrumGroups → <New SpectrumGroup>\n ')
+    #             SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editMode=False).exec_()
+    #
+    #         else:
+    #             SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editMode=True, obj=self.project.spectrumGroups[0]).exec_()
+    # #
+    # # def showPeakCollectionsPopup(self):
+    # #     if not self.project.spectra:
+    # #         getLogger().warning('Project has no Spectra. Spectrum groups cannot be displayed')
+    # #         MessageDialog.showWarning('Project contains no spectra.', 'Spectrum groups cannot be displayed')
+    # #     else:
+    # #         from ccpn.ui.gui.popups.SeriesPeakCollectionPopup import SeriesPeakCollectionPopup
+    # #
+    # #         popup = SeriesPeakCollectionPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+    # #         popup.exec_()
+    # #         return popup
+    #
+    # def showPseudoSpectrumPopup(self):
+    #     if not self.project.spectra:
+    #         getLogger().warning('Project has no Spectra. Pseudo Spectrum to SpectrumGroup Popup cannot be displayed')
+    #         MessageDialog.showWarning('Project contains no spectra.', 'Pseudo Spectrum to SpectrumGroup Popup cannot be displayed')
+    #     else:
+    #         from ccpn.ui.gui.popups.PseudoToSpectrumGroupPopup import PseudoToSpectrumGroupPopup
+    #
+    #         popup = PseudoToSpectrumGroupPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+    #         popup.exec_()
+    #
+    # def showProjectionPopup(self):
+    #     if not self.project.spectra:
+    #         getLogger().warning('Project has no Spectra. Make Projection Popup cannot be displayed')
+    #         MessageDialog.showWarning('Project contains no spectra.', 'Make Projection Popup cannot be displayed')
+    #     else:
+    #         from ccpn.ui.gui.popups.SpectrumProjectionPopup import SpectrumProjectionPopup
+    #
+    #         popup = SpectrumProjectionPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+    #         popup.exec_()
 
-            if not self.project.spectrumGroups:
-                #GST This seems to have problems MessageDialog wraps it which looks bad...
-                # MessageDialog.showWarning('Project has no Spectrum Groups.',
-                #                           'Create them using:\nSidebar → SpectrumGroups → <New SpectrumGroup>\n ')
-                SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editMode=False).exec_()
-
-            else:
-                SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editMode=True, obj=self.project.spectrumGroups[0]).exec_()
-
-    def showPeakCollectionsPopup(self):
-        if not self.project.spectra:
-            getLogger().warning('Project has no Spectra. Spectrum groups cannot be displayed')
-            MessageDialog.showWarning('Project contains no spectra.', 'Spectrum groups cannot be displayed')
-        else:
-            from ccpn.ui.gui.popups.SeriesPeakCollectionPopup import SeriesPeakCollectionPopup
-
-            popup = SeriesPeakCollectionPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-            popup.exec_()
-            return popup
-
-    def showPseudoSpectrumPopup(self):
-        if not self.project.spectra:
-            getLogger().warning('Project has no Spectra. Pseudo Spectrum to SpectrumGroup Popup cannot be displayed')
-            MessageDialog.showWarning('Project contains no spectra.', 'Pseudo Spectrum to SpectrumGroup Popup cannot be displayed')
-        else:
-            from ccpn.ui.gui.popups.PseudoToSpectrumGroupPopup import PseudoToSpectrumGroupPopup
-
-            popup = PseudoToSpectrumGroupPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-            popup.exec_()
-
-    def showProjectionPopup(self):
-        if not self.project.spectra:
-            getLogger().warning('Project has no Spectra. Make Projection Popup cannot be displayed')
-            MessageDialog.showWarning('Project contains no spectra.', 'Make Projection Popup cannot be displayed')
-        else:
-            from ccpn.ui.gui.popups.SpectrumProjectionPopup import SpectrumProjectionPopup
-
-            popup = SpectrumProjectionPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-            popup.exec_()
-
-    def showExperimentTypePopup(self):
-        """
-        Displays experiment type popup.
-        """
-        if not self.project.spectra:
-            getLogger().warning('Experiment Type Selection: Project has no Spectra.')
-            MessageDialog.showWarning('Experiment Type Selection', 'Project has no Spectra.')
-        else:
-            from ccpn.ui.gui.popups.ExperimentTypePopup import ExperimentTypePopup
-
-            popup = ExperimentTypePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-            popup.exec_()
-
-    def showValidateSpectraPopup(self, spectra=None, defaultSelected=None):
-        """
-        Displays validate spectra popup.
-        """
-        if not self.project.spectra:
-            getLogger().warning('Validate Spectrum Paths Selection: Project has no Spectra.')
-            MessageDialog.showWarning('Validate Spectrum Paths Selection', 'Project has no Spectra.')
-        else:
-            from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraPopup
-
-            popup = ValidateSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra, defaultSelected=defaultSelected)
-            popup.exec_()
-
-    def showPeakPick1DPopup(self):
-        """
-        Displays Peak Picking 1D Popup.
-        """
-        if not self.project.peakLists:
-            getLogger().warning('Peak Picking: Project has no peakLists.')
-            MessageDialog.showWarning('Peak Picking', 'Project has no peakLists.')
-        else:
-            spectra = [spec for spec in self.project.spectra if spec.dimensionCount == 1]
-            if spectra:
-                from ccpn.ui.gui.popups.PickPeaks1DPopup import PickPeak1DPopup
-
-                popup = PickPeak1DPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-                popup.exec_()
-            else:
-                getLogger().warning('Peak Picking: Project has no 1d Spectra.')
-                MessageDialog.showWarning('Peak Picking', 'Project has no 1d Spectra.')
-
-    def showPeakPickNDPopup(self):
-        """
-        Displays Peak Picking ND Popup.
-        """
-        if not self.project.peakLists:
-            getLogger().warning('Peak Picking: Project has no peakLists.')
-            MessageDialog.showWarning('Peak Picking', 'Project has no peakLists.')
-        else:
-            spectra = [spec for spec in self.project.spectra if spec.dimensionCount > 1]
-            if spectra:
-                from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
-
-                popup = PeakFindPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-                popup.exec_()
-            else:
-                getLogger().warning('Peak Picking: Project has no Nd Spectra.')
-                MessageDialog.showWarning('Peak Picking', 'Project has no Nd Spectra.')
-
-    def showCopyPeakListPopup(self):
-        if not self.project.peakLists:
-            txt = 'Project has no PeakList\'s. Peak Lists cannot be copied'
-            getLogger().warning(txt)
-            MessageDialog.showWarning('Cannot perform a copy', txt)
-            return
-        else:
-            from ccpn.ui.gui.popups.CopyPeakListPopup import CopyPeakListPopup
-
-            popup = CopyPeakListPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-            popup.exec_()
-
-    def showCopyPeaks(self):
-        if not self.project.peakLists:
-            getLogger().warning('Project has no Peak Lists. Peak Lists cannot be copied')
-            MessageDialog.showWarning('Project has no Peak Lists.', 'Peak Lists cannot be copied')
-            return
-        else:
-            from ccpn.ui.gui.popups.CopyPeaksPopup import CopyPeaks
-
-            popup = CopyPeaks(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-            peaks = self.current.peaks
-            popup._selectPeaks(peaks)
-            popup.exec()
-            popup.raise_()
-
-    def showEstimateVolumesPopup(self):
-        """
-        Displays Estimate Volumes Popup.
-        """
-        if not self.project.peakLists:
-            getLogger().warning('Estimate Volumes: Project has no peakLists.')
-            MessageDialog.showWarning('Estimate Volumes', 'Project has no peakLists.')
-        else:
-            from ccpn.ui.gui.popups.EstimateVolumes import EstimatePeakListVolumes
-
-            if self.current.strip and not self.current.strip.isDeleted:
-                spectra = [specView.spectrum for specView in self.current.strip.spectrumDisplay.spectrumViews]
-            else:
-                spectra = self.project.spectra
-
-            if spectra:
-                popup = EstimatePeakListVolumes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra)
-                popup.exec_()
-            else:
-                getLogger().warning('Estimate Volumes: no specta selected.')
-                MessageDialog.showWarning('Estimate Volumes', 'no specta selected.')
-
-    def showEstimateCurrentVolumesPopup(self):
-        """
-        Calculate volumes for the currently selected peaks
-        """
-        # self.mainWindow.estimateVolumes()
-
-        from ccpn.ui.gui.popups.EstimateVolumes import EstimateCurrentVolumes
-
-        if self.current.peaks:
-            popup = EstimateCurrentVolumes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-            popup.exec_()
-        else:
-            getLogger().warning('Estimate Current Volumes: no current.peaks')
-            MessageDialog.showWarning('Estimate Current Volumes', 'no current.peaks')
-
-    def makeStripPlotPopup(self, includePeakLists=True, includeNmrChains=True, includeNmrChainPullSelection=True):
-        if not self.project.peaks and not self.project.nmrResidues and not self.project.nmrChains:
-            getLogger().warning('Cannot make strip plot, nothing to display')
-            MessageDialog.showWarning('Cannot make strip plot,', 'nothing to display')
-            return
-        else:
-            if self.current.strip and not self.current.strip.isDeleted:
-                from ccpn.ui.gui.popups.StripPlotPopup import StripPlotPopup
-
-                popup = StripPlotPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
-                                       spectrumDisplay=self.current.strip.spectrumDisplay,
-                                       includePeakLists=includePeakLists, includeNmrChains=includeNmrChains,
-                                       includeNmrChainPullSelection=includeNmrChainPullSelection, includeSpectrumTable=False)
-                popup.exec_()
-            else:
-                MessageDialog.showWarning('Make Strip Plot', 'No selected spectrumDisplay')
+    # GWV 6/2/24: moved to GuiBase
+    # def showExperimentTypePopup(self):
+    #     """
+    #     Displays experiment type popup.
+    #     """
+    #     if not self.project.spectra:
+    #         getLogger().warning('Experiment Type Selection: Project has no Spectra.')
+    #         MessageDialog.showWarning('Experiment Type Selection', 'Project has no Spectra.')
+    #     else:
+    #         from ccpn.ui.gui.popups.ExperimentTypePopup import ExperimentTypePopup
+    #
+    #         popup = ExperimentTypePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+    #         popup.exec_()
+    #
+    # def showValidateSpectraPopup(self, spectra=None, defaultSelected=None):
+    #     """
+    #     Displays validate spectra popup.
+    #     """
+    #     if not self.project.spectra:
+    #         getLogger().warning('Validate Spectrum Paths Selection: Project has no Spectra.')
+    #         MessageDialog.showWarning('Validate Spectrum Paths Selection', 'Project has no Spectra.')
+    #     else:
+    #         from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraPopup
+    #
+    #         popup = ValidateSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra, defaultSelected=defaultSelected)
+    #         popup.exec_()
+    #
+    # def showPeakPick1DPopup(self):
+    #     """
+    #     Displays Peak Picking 1D Popup.
+    #     """
+    #     if not self.project.peakLists:
+    #         getLogger().warning('Peak Picking: Project has no peakLists.')
+    #         MessageDialog.showWarning('Peak Picking', 'Project has no peakLists.')
+    #     else:
+    #         spectra = [spec for spec in self.project.spectra if spec.dimensionCount == 1]
+    #         if spectra:
+    #             from ccpn.ui.gui.popups.PickPeaks1DPopup import PickPeak1DPopup
+    #
+    #             popup = PickPeak1DPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+    #             popup.exec_()
+    #         else:
+    #             getLogger().warning('Peak Picking: Project has no 1d Spectra.')
+    #             MessageDialog.showWarning('Peak Picking', 'Project has no 1d Spectra.')
+    #
+    # def showPeakPickNDPopup(self):
+    #     """
+    #     Displays Peak Picking ND Popup.
+    #     """
+    #     if not self.project.peakLists:
+    #         getLogger().warning('Peak Picking: Project has no peakLists.')
+    #         MessageDialog.showWarning('Peak Picking', 'Project has no peakLists.')
+    #     else:
+    #         spectra = [spec for spec in self.project.spectra if spec.dimensionCount > 1]
+    #         if spectra:
+    #             from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
+    #
+    #             popup = PeakFindPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+    #             popup.exec_()
+    #         else:
+    #             getLogger().warning('Peak Picking: Project has no Nd Spectra.')
+    #             MessageDialog.showWarning('Peak Picking', 'Project has no Nd Spectra.')
+    #
+    # def showCopyPeakListPopup(self):
+    #     if not self.project.peakLists:
+    #         txt = 'Project has no PeakList\'s. Peak Lists cannot be copied'
+    #         getLogger().warning(txt)
+    #         MessageDialog.showWarning('Cannot perform a copy', txt)
+    #         return
+    #     else:
+    #         from ccpn.ui.gui.popups.CopyPeakListPopup import CopyPeakListPopup
+    #
+    #         popup = CopyPeakListPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+    #         popup.exec_()
+    #
+    # def showCopyPeaks(self):
+    #     if not self.project.peakLists:
+    #         getLogger().warning('Project has no Peak Lists. Peak Lists cannot be copied')
+    #         MessageDialog.showWarning('Project has no Peak Lists.', 'Peak Lists cannot be copied')
+    #         return
+    #     else:
+    #         from ccpn.ui.gui.popups.CopyPeaksPopup import CopyPeaks
+    #
+    #         popup = CopyPeaks(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+    #         peaks = self.current.peaks
+    #         popup._selectPeaks(peaks)
+    #         popup.exec()
+    #         popup.raise_()
+    #
+    # GWV 6/2/24: to MainWindow
+    # def showEstimateVolumesPopup(self):
+    #     """
+    #     Displays Estimate Volumes Popup.
+    #     """
+    #     if not self.project.peakLists:
+    #         getLogger().warning('Estimate Volumes: Project has no peakLists.')
+    #         MessageDialog.showWarning('Estimate Volumes', 'Project has no peakLists.')
+    #     else:
+    #         from ccpn.ui.gui.popups.EstimateVolumes import EstimatePeakListVolumes
+    #
+    #         if self.current.strip and not self.current.strip.isDeleted:
+    #             spectra = [specView.spectrum for specView in self.current.strip.spectrumDisplay.spectrumViews]
+    #         else:
+    #             spectra = self.project.spectra
+    #
+    #         if spectra:
+    #             popup = EstimatePeakListVolumes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra)
+    #             popup.exec_()
+    #         else:
+    #             getLogger().warning('Estimate Volumes: no specta selected.')
+    #             MessageDialog.showWarning('Estimate Volumes', 'no specta selected.')
+    #
+    # GWV 6/2/24: to MainWindow
+    # def showEstimateCurrentVolumesPopup(self):
+    #     """
+    #     Calculate volumes for the currently selected peaks
+    #     """
+    #     # self.mainWindow.estimateVolumes()
+    #
+    #     from ccpn.ui.gui.popups.EstimateVolumes import EstimateCurrentVolumes
+    #
+    #     if self.current.peaks:
+    #         popup = EstimateCurrentVolumes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+    #         popup.exec_()
+    #     else:
+    #         getLogger().warning('Estimate Current Volumes: no current.peaks')
+    #         MessageDialog.showWarning('Estimate Current Volumes', 'no current.peaks')
+    #
+    # GWV 27/324: copied to _Gui
+    # @logCommand('application.')
+    # def makeStripPlot(self, includePeakLists=True, includeNmrChains=True, includeNmrChainPullSelection=True):
+    #     """Make a strip plot from peaks or nmrChains
+    #     """
+    #     if not self.project.peaks and not self.project.nmrResidues and not self.project.nmrChains:
+    #         getLogger().warning('Cannot make strip plot, nothing to display')
+    #         MessageDialog.showWarning('Cannot make strip plot,', 'nothing to display')
+    #         return
+    #
+    #     if self.current.strip is None or self.current.strip.isDeleted:
+    #         MessageDialog.showWarning('Make Strip Plot', 'No selected spectrumDisplay')
+    #         return
+    #
+    #     from ccpn.ui.gui.popups.StripPlotPopup import StripPlotPopup
+    #     popup = StripPlotPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
+    #                            spectrumDisplay=self.current.strip.spectrumDisplay,
+    #                            includePeakLists=includePeakLists,
+    #                            includeNmrChains=includeNmrChains,
+    #                            includeNmrChainPullSelection=includeNmrChainPullSelection,
+    #                            includeSpectrumTable=False)
+    #     popup.exec_()
 
     ################################################################################################
     ## MENU callbacks:  Molecule
     ################################################################################################
 
-    @logCommand('application.')
-    def showCreateChainPopup(self):
-        """
-        Displays sequence creation popup.
-        """
-        from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
-
-        popup = CreateChainPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-        popup.exec_()
+    # GWV 6/2/24: to GuiBase
+    # @logCommand('application.')
+    # def showCreateChainPopup(self):
+    #     """
+    #     Displays sequence creation popup.
+    #     """
+    #     from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
+    #
+    #     popup = CreateChainPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+    #     popup.exec_()
 
     # @logCommand('application.')
     # def toggleSequenceModule(self):
@@ -1957,48 +2048,50 @@ class Framework(NotifierBase, GuiBase):
     #         self.sequenceModule.close()
     #         delattr(self, 'sequenceModule')
 
-    def inspectMolecule(self):
-        pass
+    # def inspectMolecule(self):
+    #     pass
 
-    @logCommand('application.')
-    def showResidueInformation(self, position: str = 'bottom', relativeTo: CcpnModule = None):
-        """Displays Residue Information module.
-        """
-        from ccpn.ui.gui.modules.ResidueInformation import ResidueInformation
-
-        if not self.project.residues:
-            getLogger().warning('No Residues in project. Residue Information Module requires Residues in the project to launch.')
-            MessageDialog.showWarning('No Residues in project.',
-                                      'Residue Information Module requires Residues in the project to launch.')
-            return
-
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea  # ejb
-        residueModule = ResidueInformation(mainWindow=mainWindow)
-        mainWindow.moduleArea.addModule(residueModule, position=position, relativeTo=relativeTo)
-        return residueModule
-
-    @logCommand('application.')
-    def showReferenceChemicalShifts(self, position='left', relativeTo=None):
-        """Displays Reference Chemical Shifts module."""
-        from ccpn.ui.gui.modules.ReferenceChemicalShifts import ReferenceChemicalShifts
-
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-        refChemShifts = ReferenceChemicalShifts(mainWindow=mainWindow)
-        mainWindow.moduleArea.addModule(refChemShifts, position=position, relativeTo=relativeTo)
-        return refChemShifts
-
-    @logCommand('gui.')
-    def showMolecularBondsPopup(self):
-        """Displays the molecular-bonds popup.
-        """
-        from ccpn.ui.gui.popups.MolecularBondsPopup import MolecularBondsPopup
-
-        popup = MolecularBondsPopup(parent=self.mainWindow, mainWindow=self.mainWindow)
-        popup.exec_()
+    # GWV 27/3/24 to Gui.py
+    # @logCommand('application.')
+    # def showResidueInformation(self, position: str = 'bottom', relativeTo: CcpnModule = None):
+    #     """Displays Residue Information module.
+    #     """
+    #     from ccpn.ui.gui.modules.ResidueInformation import ResidueInformation
+    #
+    #     if not self.project.residues:
+    #         getLogger().warning('No Residues in project. Residue Information Module requires Residues in the project to launch.')
+    #         MessageDialog.showWarning('No Residues in project.',
+    #                                   'Residue Information Module requires Residues in the project to launch.')
+    #         return
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea  # ejb
+    #     residueModule = ResidueInformation(mainWindow=mainWindow)
+    #     mainWindow.moduleArea.addModule(residueModule, position=position, relativeTo=relativeTo)
+    #     return residueModule
+    #
+    # GWV 27/3/24 to Gui.py
+    # @logCommand('application.')
+    # def showReferenceChemicalShifts(self, position='left', relativeTo=None):
+    #     """Displays Reference Chemical Shifts module."""
+    #     from ccpn.ui.gui.modules.ReferenceChemicalShifts import ReferenceChemicalShifts
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea
+    #     refChemShifts = ReferenceChemicalShifts(mainWindow=mainWindow)
+    #     mainWindow.moduleArea.addModule(refChemShifts, position=position, relativeTo=relativeTo)
+    #     return refChemShifts
+    #
+    # @logCommand('gui.')
+    # def showMolecularBondsPopup(self):
+    #     """Displays the molecular-bonds popup.
+    #     """
+    #     from ccpn.ui.gui.popups.MolecularBondsPopup import MolecularBondsPopup
+    #
+    #     popup = MolecularBondsPopup(parent=self.mainWindow, mainWindow=self.mainWindow)
+    #     popup.exec_()
 
     ###################################################################################################################
     ## MENU callbacks:  VIEW
@@ -2194,166 +2287,170 @@ class Framework(NotifierBase, GuiBase):
             notesEditorModule.selectNote(note)
         return notesEditorModule
 
-    @logCommand('application.')
-    def showRestraintAnalysisTable(self,
-                                   position: str = 'bottom',
-                                   relativeTo: CcpnModule = None,
-                                   peakList=None, selectFirstItem=False):
-        """Displays restraint analysis Inspector.
-        """
-        from ccpn.ui.gui.modules.RestraintAnalysisTable import RestraintAnalysisTableModule
+    # GWV 3/4/24 : moved to Gui.py
+    # @logCommand('application.')
+    # def showRestraintAnalysisTable(self,
+    #                                position: str = 'bottom',
+    #                                relativeTo: CcpnModule = None,
+    #                                peakList=None, selectFirstItem=False):
+    #     """Displays restraint analysis Inspector.
+    #     """
+    #     from ccpn.ui.gui.modules.RestraintAnalysisTable import RestraintAnalysisTableModule
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea
+    #     restraintAnalysisTableModule = RestraintAnalysisTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
+    #     mainWindow.moduleArea.addModule(restraintAnalysisTableModule, position=position, relativeTo=relativeTo)
+    #     if peakList:
+    #         restraintAnalysisTableModule.selectPeakList(peakList)
+    #     return restraintAnalysisTableModule
 
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-        restraintAnalysisTableModule = RestraintAnalysisTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
-        mainWindow.moduleArea.addModule(restraintAnalysisTableModule, position=position, relativeTo=relativeTo)
-        if peakList:
-            restraintAnalysisTableModule.selectPeakList(peakList)
-        return restraintAnalysisTableModule
+    # def showPrintSpectrumDisplayPopup(self):
+    #     """Show the print spectrumDisplay dialog
+    #     """
+    #     from ccpn.ui.gui.popups.ExportStripToFile import ExportStripToFilePopup
+    #
+    #     if len(self.project.spectrumDisplays) == 0:
+    #         MessageDialog.showWarning('', 'No SpectrumDisplay found')
+    #     else:
+    #         exportDialog = ExportStripToFilePopup(parent=self.ui.mainWindow,
+    #                                               mainWindow=self.ui.mainWindow,
+    #                                               strips=self.project.strips,
+    #                                               selectedStrip=self.current.strip
+    #                                               )
+    #         exportDialog.exec_()
 
-    def showPrintSpectrumDisplayPopup(self):
-        """Show the print spectrumDisplay dialog
-        """
-        from ccpn.ui.gui.popups.ExportStripToFile import ExportStripToFilePopup
+    # GWV 5/2/24:to GuiBase
+    # def toggleToolbar(self):
+    #     if self.current.strip is not None:
+    #         self.current.strip.spectrumDisplay.toggleToolbar()
+    #     else:
+    #         getLogger().warning('No strip selected')
+    #
+    # def toggleSpectrumToolbar(self):
+    #     if self.current.strip is not None:
+    #         self.current.strip.spectrumDisplay.toggleSpectrumToolbar()
+    #     else:
+    #         getLogger().warning('No strip selected')
+    #
+    # def togglePhaseConsole(self):
+    #     if self.current.strip is not None:
+    #         self.current.strip.spectrumDisplay.togglePhaseConsole()
+    #     else:
+    #         getLogger().warning('No strip selected')
+    #
+    # def _setZoomPopup(self):
+    #     if self.current.strip is not None:
+    #         self.current.strip._setZoomPopup()
+    #     else:
+    #         getLogger().warning('No strip selected')
+    #
+    # def resetZoom(self):
+    #     if self.current.strip is not None:
+    #         self.current.strip.resetZoom()
+    #     else:
+    #         getLogger().warning('No strip selected')
+    #
+    # def copyStrip(self):
+    #     if self.current.strip is not None:
+    #         self.current.strip.copyStrip()
+    #     else:
+    #         getLogger().warning('No strip selected')
+    #
+    # def showFlipArbitraryAxisPopup(self, usePosition=False):
+    #     if (strp := self.current.strip) is None:
+    #         getLogger().warning('No strip selected')
+    #
+    #     elif self.current.strip.spectrumDisplay.is1D:
+    #         getLogger().warning('Function not permitted on 1D spectra')
+    #
+    #     else:
+    #         from ccpn.ui.gui.popups.CopyStripFlippedAxesPopup import CopyStripFlippedSpectraPopup
+    #
+    #         try:
+    #             mDict = usePosition and self.current.mouseMovedDict[1]
+    #             positions = [poss[0] if (poss := mDict.get(ax)) else None
+    #                          for ax in strp.axisCodes] if usePosition else None
+    #             popup = CopyStripFlippedSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
+    #                                                  strip=strp, label=strp.id,
+    #                                                  positions=positions)
+    #             popup.exec_()
+    #         except Exception as es:
+    #             getLogger().warning(f'Cannot show popup: {es}')
+    #
+    # def arrangeLabels(self):
+    #     """Auto-arrange the peak/multiplet labels to minimise any overlaps.
+    #     """
+    #     if (strp := self.current.strip) is None:
+    #         getLogger().warning('No strip selected')
+    #
+    #     else:
+    #         strp.spectrumDisplay.arrangeLabels()
+    #
+    # def resetLabels(self):
+    #     """Reset arrangement of peak/multiplet labels.
+    #     """
+    #     if (strp := self.current.strip) is None:
+    #         getLogger().warning('No strip selected')
+    #
+    #     else:
+    #         strp.spectrumDisplay.resetLabels()
+    #
+    # def showReorderPeakListAxesPopup(self):
+    #     """
+    #     Displays Reorder PeakList Axes Popup.
+    #     """
+    #     if not self.project.peakLists:
+    #         getLogger().warning('Reorder PeakList Axes: Project has no peakLists.')
+    #         MessageDialog.showWarning('Reorder PeakList Axes', 'Project has no peakLists.')
+    #     else:
+    #         from ccpn.ui.gui.popups.ReorderPeakListAxes import ReorderPeakListAxes
+    #
+    #         popup = ReorderPeakListAxes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+    #         popup.exec_()
 
-        if len(self.project.spectrumDisplays) == 0:
-            MessageDialog.showWarning('', 'No SpectrumDisplay found')
-        else:
-            exportDialog = ExportStripToFilePopup(parent=self.ui.mainWindow,
-                                                  mainWindow=self.ui.mainWindow,
-                                                  strips=self.project.strips,
-                                                  selectedStrip=self.current.strip
-                                                  )
-            exportDialog.exec_()
+    # GWV 5/2/24:to GuiBase
+    # def _flipXYAxisCallback(self):
+    #     """Callback to flip axes"""
+    #     if self.current.strip is not None:
+    #         self.current.strip.flipXYAxis()
+    #     else:
+    #         getLogger().warning('No strip selected')
+    #
+    # def _flipXZAxisCallback(self):
+    #     """Callback to flip axes"""
+    #     if self.current.strip is not None:
+    #         self.current.strip.flipXZAxis()
+    #     else:
+    #         getLogger().warning('No strip selected')
+    #
+    # def _flipYZAxisCallback(self):
+    #     """Callback to flip axes"""
+    #     if self.current.strip is not None:
+    #         self.current.strip.flipYZAxis()
+    #     else:
+    #         getLogger().warning('No strip selected')
+    #
+    # def _toggleConsoleCallback(self):
+    #     """Toggles whether python console is displayed at bottom of the main window.
+    #     """
+    #     self.ui.mainWindow.toggleConsole()
 
-    def toggleToolbar(self):
-        if self.current.strip is not None:
-            self.current.strip.spectrumDisplay.toggleToolbar()
-        else:
-            getLogger().warning('No strip selected')
-
-    def toggleSpectrumToolbar(self):
-        if self.current.strip is not None:
-            self.current.strip.spectrumDisplay.toggleSpectrumToolbar()
-        else:
-            getLogger().warning('No strip selected')
-
-    def togglePhaseConsole(self):
-        if self.current.strip is not None:
-            self.current.strip.spectrumDisplay.togglePhaseConsole()
-        else:
-            getLogger().warning('No strip selected')
-
-    def _setZoomPopup(self):
-        if self.current.strip is not None:
-            self.current.strip._setZoomPopup()
-        else:
-            getLogger().warning('No strip selected')
-
-    def resetZoom(self):
-        if self.current.strip is not None:
-            self.current.strip.resetZoom()
-        else:
-            getLogger().warning('No strip selected')
-
-    def copyStrip(self):
-        if self.current.strip is not None:
-            self.current.strip.copyStrip()
-        else:
-            getLogger().warning('No strip selected')
-
-    def showFlipArbitraryAxisPopup(self, usePosition=False):
-        if (strp := self.current.strip) is None:
-            getLogger().warning('No strip selected')
-
-        elif self.current.strip.spectrumDisplay.is1D:
-            getLogger().warning('Function not permitted on 1D spectra')
-
-        else:
-            from ccpn.ui.gui.popups.CopyStripFlippedAxesPopup import CopyStripFlippedSpectraPopup
-
-            try:
-                mDict = usePosition and self.current.mouseMovedDict[1]
-                positions = [poss[0] if (poss := mDict.get(ax)) else None
-                             for ax in strp.axisCodes] if usePosition else None
-                popup = CopyStripFlippedSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
-                                                     strip=strp, label=strp.id,
-                                                     positions=positions)
-                popup.exec_()
-            except Exception as es:
-                getLogger().warning(f'Cannot show popup: {es}')
-
-    def arrangeLabels(self):
-        """Auto-arrange the peak/multiplet labels to minimise any overlaps.
-        """
-        if (strp := self.current.strip) is None:
-            getLogger().warning('No strip selected')
-
-        else:
-            strp.spectrumDisplay.arrangeLabels()
-
-    def resetLabels(self):
-        """Reset arrangement of peak/multiplet labels.
-        """
-        if (strp := self.current.strip) is None:
-            getLogger().warning('No strip selected')
-
-        else:
-            strp.spectrumDisplay.resetLabels()
-
-    def showReorderPeakListAxesPopup(self):
-        """
-        Displays Reorder PeakList Axes Popup.
-        """
-        if not self.project.peakLists:
-            getLogger().warning('Reorder PeakList Axes: Project has no peakLists.')
-            MessageDialog.showWarning('Reorder PeakList Axes', 'Project has no peakLists.')
-        else:
-            from ccpn.ui.gui.popups.ReorderPeakListAxes import ReorderPeakListAxes
-
-            popup = ReorderPeakListAxes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-            popup.exec_()
-
-    def _flipXYAxisCallback(self):
-        """Callback to flip axes"""
-        if self.current.strip is not None:
-            self.current.strip.flipXYAxis()
-        else:
-            getLogger().warning('No strip selected')
-
-    def _flipXZAxisCallback(self):
-        """Callback to flip axes"""
-        if self.current.strip is not None:
-            self.current.strip.flipXZAxis()
-        else:
-            getLogger().warning('No strip selected')
-
-    def _flipYZAxisCallback(self):
-        """Callback to flip axes"""
-        if self.current.strip is not None:
-            self.current.strip.flipYZAxis()
-        else:
-            getLogger().warning('No strip selected')
-
-    def _toggleConsoleCallback(self):
-        """Toggles whether python console is displayed at bottom of the main window.
-        """
-        self.ui.mainWindow.toggleConsole()
-
-    @deprecated('Use showChemicalShiftMappingModule to access the latest implementation')
+    @deprecated('Use ui.showChemicalShiftMapping to access the latest implementation')
     def showChemicalShiftMapping(self, position: str = 'top', relativeTo: CcpnModule = None):
-        return self.showChemicalShiftMappingModule(position=position, relativeTo=relativeTo)
+        return self.ui.showChemicalShiftMapping(position=position)
 
-    def showChemicalShiftMappingModule(self, position: str = 'top', relativeTo: CcpnModule = None):
-        from ccpn.ui.gui.modules.experimentAnalysis.ChemicalShiftMappingGuiModule import ChemicalShiftMappingGuiModule
-
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-        cs = ChemicalShiftMappingGuiModule(mainWindow=mainWindow)
-        mainWindow.moduleArea.addModule(cs, position=position, relativeTo=relativeTo)
-        return cs
+    # GWV 02/04/24: to ui
+    # def showChemicalShiftMappingModule(self, position: str = 'top', relativeTo: CcpnModule = None):
+    #     from ccpn.ui.gui.modules.experimentAnalysis.ChemicalShiftMappingGuiModule import ChemicalShiftMappingGuiModule
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea
+    #     cs = ChemicalShiftMappingGuiModule(mainWindow=mainWindow)
+    #     mainWindow.moduleArea.addModule(cs, position=position, relativeTo=relativeTo)
+    #     return cs
 
     def showRelaxationModule(self, position: str = 'top', relativeTo: CcpnModule = None):
         from ccpn.ui.gui.modules.experimentAnalysis.RelaxationGuiModule import RelaxationGuiModule
@@ -2365,37 +2462,38 @@ class Framework(NotifierBase, GuiBase):
         mainWindow.moduleArea.addModule(relGuiModule, position=position, relativeTo=relativeTo)
         return relGuiModule
 
-    def toggleCrosshairAll(self):
-        """Toggles whether crosshairs are displayed in all windows.
-        """
-        for window in self.project.windows:
-            window.toggleCrosshair()
+    # GWV 5/2/24: to GuiBase
+    # def toggleCrosshairAll(self):
+    #     """Toggles whether crosshairs are displayed in all windows.
+    #     """
+    #     for window in self.project.windows:
+    #         window.toggleCrosshair()
 
     #################################################################################################
     ## MENU callbacks:  Macro
     #################################################################################################
 
-    @logCommand('application.')
-    def _showMacroEditorCallback(self):
-        """Displays macro editor. Just handing down to MainWindow for now
-        """
-        self.mainWindow.newMacroEditor()
-
-    def _openMacroCallback(self, directory=None):
-        """ Select macro file and on MacroEditor.
-        """
-        mainWindow = self.ui.mainWindow
-        dialog = MacrosFileDialog(parent=mainWindow, acceptMode='open', fileFilter='*.py', directory=directory)
-        dialog._show()
-        path = dialog.selectedFile()
-        if path is not None:
-            self.mainWindow.newMacroEditor(path=path)
-
-    def defineUserShortcuts(self):
-
-        from ccpn.ui.gui.popups.ShortcutsPopup import ShortcutsPopup
-
-        ShortcutsPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow).exec_()
+    # @logCommand('application.')
+    # def _showMacroEditorCallback(self):
+    #     """Displays macro editor. Just handing down to MainWindow for now
+    #     """
+    #     self.mainWindow.newMacroEditor()
+    #
+    # def _openMacroCallback(self, directory=None):
+    #     """ Select macro file and on MacroEditor.
+    #     """
+    #     mainWindow = self.ui.mainWindow
+    #     dialog = MacrosFileDialog(parent=mainWindow, acceptMode='open', fileFilter='*.py', directory=directory)
+    #     dialog._show()
+    #     path = dialog.selectedFile()
+    #     if path is not None:
+    #         self.mainWindow.newMacroEditor(path=path)
+    #
+    # def defineUserShortcuts(self):
+    #
+    #     from ccpn.ui.gui.popups.ShortcutsPopup import ShortcutsPopup
+    #
+    #     ShortcutsPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow).exec_()
 
     def runMacro(self, macroFile: str = None, extraCommands=None):
         """
@@ -2410,41 +2508,41 @@ class Framework(NotifierBase, GuiBase):
             if not macroFile:
                 return
 
-        if not macroFile in self.preferences.recentMacros:
-            if extraCommands is None:
-                self.preferences.recentMacros.append(macroFile)
+        if extraCommands is None:
+            self.preferences._addRecentMacro(macroFile)
         self.ui.mainWindow.pythonConsole._runMacro(macroFile, extraCommands=extraCommands)
 
     #################################################################################################
 
-    def _systemOpen(self, path):
-        """Open path to pdf file on system
-        """
-        if isWindowsOS():
-            os.startfile(path)
-        elif isMacOS():
-            subprocess.run(['open', path], check=True)
-        else:
-            linuxCommand = self.preferences.externalPrograms.PDFViewer
-            # assume a linux and use the choice given in the preferences
-            if linuxCommand and aPath(linuxCommand).is_file():
-                from ccpn.framework.PathsAndUrls import ccpnRunTerminal
-
-                try:
-                    # NOTE:ED - this could be quite nasty, but can't think of another way to get Linux to open a pdf
-                    subprocess.run([linuxCommand, path])
-
-                except Exception as es:
-                    getLogger().warning(f'Error opening PDFViewer. {es}')
-                    MessageDialog.showWarning('Open File',
-                                              f'Error opening PDFViewer. {es}\n'
-                                              f'Check settings in Preferences->External Programs'
-                                              )
-
-            else:
-                # raise TypeError('PDFViewer not defined for linux')
-                MessageDialog.showWarning('Open File',
-                                          'Please select PDFViewer in Preferences->External Programs')
+    # GWV 28/3 to _Gui.py
+    # def _systemOpen(self, path):
+    #     """Open path to pdf file on system
+    #     """
+    #     if isWindowsOS():
+    #         os.startfile(path)
+    #     elif isMacOS():
+    #         subprocess.run(['open', path], check=True)
+    #     else:
+    #         linuxCommand = self.preferences.externalPrograms.PDFViewer
+    #         # assume a linux and use the choice given in the preferences
+    #         if linuxCommand and aPath(linuxCommand).is_file():
+    #             from ccpn.framework.PathsAndUrls import ccpnRunTerminal
+    #
+    #             try:
+    #                 # NOTE:ED - this could be quite nasty, but can't think of another way to get Linux to open a pdf
+    #                 subprocess.run([linuxCommand, path])
+    #
+    #             except Exception as es:
+    #                 getLogger().warning(f'Error opening PDFViewer. {es}')
+    #                 MessageDialog.showWarning('Open File',
+    #                                           f'Error opening PDFViewer. {es}\n'
+    #                                           f'Check settings in Preferences->External Programs'
+    #                                           )
+    #
+    #         else:
+    #             # raise TypeError('PDFViewer not defined for linux')
+    #             MessageDialog.showWarning('Open File',
+    #                                       'Please select PDFViewer in Preferences->External Programs')
 
     def __str__(self):
         return '<%s version:%s>' % (self.applicationName, self.applicationVersion)
@@ -2510,7 +2608,6 @@ def main():
 
     container = ApplicationContainer()
     container.register(application)
-    application.useFileLogger = True
 
     # show the mainWindow
     application.start()

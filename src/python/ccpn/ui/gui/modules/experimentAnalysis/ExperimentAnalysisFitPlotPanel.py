@@ -1,9 +1,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -11,9 +11,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-12 16:56:58 +0100 (Thu, October 12, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-04-18 14:07:52 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -22,30 +22,33 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+import numpy as np
+from collections import OrderedDict as od
 
 import pyqtgraph as pg
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBars import ExperimentAnalysisPlotToolBar
-from ccpn.util.Logging import getLogger
 from pyqtgraph.graphicsItems.ROI import Handle
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
+
+from ccpn.core.Peak import Peak
+from ccpn.core.lib.Notifiers import Notifier, CurrentNotifier
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBars import ExperimentAnalysisPlotToolBar
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_LABELLING
 from ccpn.ui.gui.guiSettings import getColours
-from ccpn.util.Colour import hexToRgb, rgbaRatioToHex
 from ccpn.ui.gui.widgets.Font import getFont
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.core.Peak import Peak
 from ccpn.ui.gui.widgets.ViewBox import CrossHair
-from ccpn.core.lib.Notifiers import Notifier
-import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+
 from ccpn.util.Common import percentage
-import numpy as np
-from collections import OrderedDict as od
+from ccpn.util.Colour import hexToRgb, rgbaRatioToHex
+from ccpn.util.Logging import getLogger
+from ccpn.util.floatUtils import numZeros
+
 from ccpn.ui.gui.widgets.Icon import Icon
-from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
-from ccpn.util.floatUtils import numZeros
 
 
 class FittingPlotToolBar(ExperimentAnalysisPlotToolBar):
@@ -99,8 +102,8 @@ class FitPlotPanel(GuiPanel):
 
         self.backgroundColour = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
         self._setExtraWidgets()
-        self._selectCurrentCONotifier = Notifier(self.current, [Notifier.CURRENT], targetName='collections',
-                                                 callback=self._currentCollectionCallback, onceOnly=True)
+        self._selectCurrentCONotifier = CurrentNotifier(targetName='collections',
+                                                        callback=self._currentCollectionCallback)
         self._setXLabel(label='X')
         self._setYLabel(label='Y')
         self.labels = []
@@ -277,7 +280,7 @@ class FitPlotPanel(GuiPanel):
             self.fittedCurve.setVisible(setVisible)
 
     def close(self):
-        self._selectCurrentCONotifier.unRegister()
+        self._selectCurrentCONotifier.unRegisterNotifier()
 
 #### Implementation widgets
 

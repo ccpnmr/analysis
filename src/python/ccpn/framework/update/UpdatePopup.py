@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-01-17 14:42:21 +0000 (Wed, January 17, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__dateModified__ = "$dateModified: 2024-04-18 17:09:04 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -161,7 +161,7 @@ class UpdatePopup(CcpnDialogMainWidget):
         Label(self.mainWidget, 'Version:', grid=(row, 0), gridSpan=(1, 2))
         self.versionLabel = Label(self.mainWidget, text='TBD', grid=(row, 2))
         row += 1
-        Label(self.mainWidget, 'Number of updates:', grid=(row, 0), gridSpan=(1, 2))
+        Label(self.mainWidget, 'Updates available:', grid=(row, 0), gridSpan=(1, 2))
         self.updatesLabel = Label(self.mainWidget, text='TBD', grid=(row, 2))
         row += 1
         Label(self.mainWidget, 'Installing updates will require a restart of the program.', grid=(row, 0), gridSpan=(1, 3))
@@ -339,7 +339,7 @@ class UpdatePopup(CcpnDialogMainWidget):
                 version = VersionString(_countVer[1])
 
         self._updateCount = count
-        self.updatesLabel.set(f'{count}')
+        self.updatesLabel.set(f'{"yes" if count else "-"}')
         self.versionLabel.set(f'{version}')
 
         self._updatePopupAgent.resetFromServer()

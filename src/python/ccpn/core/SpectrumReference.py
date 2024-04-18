@@ -3,19 +3,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-16 10:40:30 +0100 (Mon, May 16, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-04-18 08:57:25 +0100 (Thu, April 18, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -63,6 +63,8 @@ class SpectrumReference(AbstractWrapperObject, SpectrumDimensionAttributes):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = Nmr.DataDimRef._metaclass.qualifiedName()
+
+    _ignoreNewApiObjectCallback = True
 
     #-----------------------------------------------------------------------------------------
 
@@ -255,7 +257,10 @@ def _newSpectrumReference(self: Spectrum, dimension: int, dataSource) -> Spectru
     ) is None:
         raise RuntimeError("Cannot create SpectrumReference for dimension: %s" % dimension)
 
-    if (result := self.project._data2Obj[apiDataDimRef]) is None:
+    # if (result := self.project._data2Obj[apiDataDimRef]) is None:
+    #     raise RuntimeError("Cannot create SpectrumReference for dimension: %s" % dimension)
+
+    if (result := SpectrumReference._newInstanceFromApiData(apiObj=apiDataDimRef)) is None:
         raise RuntimeError("Cannot create SpectrumReference for dimension: %s" % dimension)
 
     return result

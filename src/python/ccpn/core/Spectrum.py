@@ -54,7 +54,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-06 17:48:09 +0000 (Wed, March 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-18 08:57:25 +0100 (Thu, April 18, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -145,6 +145,8 @@ class Spectrum(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = Nmr.DataSource._metaclass.qualifiedName()
+
+    _ignoreNewApiObjectCallback = True
 
     #-----------------------------------------------------------------------------------------
     # 'local' definition of MAXDIM; defining defs in SpectrumLib to prevent circular imports
@@ -3966,15 +3968,8 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
                                                 dataType='processed'
                                                 )
     # Done with api generation; Create the Spectrum object
+    spectrum = Spectrum._newInstanceFromApiData(apiObj=apiDataSource, project=project)
 
-    # Agggh, cannot do
-    #   spectrum = Spectrum(self, apiDataSource)
-    # as the object was magically already created
-    # This was done by Project._newApiObject, called from Nmr.DataSource.__init__ through an api notifier.
-    # This notifier is set in the AbstractWrapper class and is part of the machinery generation; i.e.
-    # _linkWrapperClasses (needs overhaul!!)
-
-    spectrum = project._data2Obj.get(apiDataSource)
     if spectrum is None:
         raise RuntimeError("Something went wrong creating a new Spectrum instance!")
     spectrum._apiExperiment = apiExperiment

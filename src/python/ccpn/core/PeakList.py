@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-06 17:48:09 +0000 (Wed, March 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-19 18:50:55 +0100 (Fri, April 19, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -64,6 +64,8 @@ class PeakList(PMIListABC):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiPeakList._metaclass.qualifiedName()
+
+    _ignoreNewApiObjectCallback = False
 
     #=========================================================================================
     # CCPN properties
@@ -555,6 +557,7 @@ def _newPeakList(self: Spectrum, title: str = None, comment: str = None,
     apiDataSource = self._apiDataSource
     apiPeakList = apiDataSource.newPeakList(**dd)
     result = self._project._data2Obj.get(apiPeakList)
+    # result = PeakList._newInstanceFromApiData(apiObj=apiPeakList, project=self.project)
     if result is None:
         raise RuntimeError('Unable to generate new PeakList item')
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-25 13:55:46 +0000 (Mon, March 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-19 18:50:55 +0100 (Fri, April 19, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -558,6 +558,8 @@ def _newSpectrumView(display, spectrum, displayOrder) -> SpectrumView:
     :param displayOrder: A tuple/list of spectrum dimensions (1-based) or 0 (For intensity) in display order
     :returns: SpectrumView instance
     """
+    from ccpn.ui._implementation.PeakListView import _newPeakListView
+
     # # Set stripSerial
     # if 'Free' in apiStrip.className:
     #     # Independent strips
@@ -583,6 +585,10 @@ def _newSpectrumView(display, spectrum, displayOrder) -> SpectrumView:
 
     if newSpecView is None:
         raise RuntimeError('Failed to generate new SpectrumView instance')
+
+    # # create all PeakListViews
+    # for _pkl in spectrum.peakLists:
+    #     _newPeakListView(newSpecView, peakList=_pkl)
 
     # NOTE:ED - 2021oct25 - @GWV not sure why this is here as overrides the .getter logic
     #   replaced with method

@@ -3,9 +3,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:05 +0100 (Wed, October 12, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-04-19 18:50:55 +0100 (Fri, April 19, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -128,14 +128,16 @@ class _OldChemicalShift(AbstractWrapperObject):
     #=========================================================================================
 
     def copyTo(self, targetChemicalShiftList: ChemicalShiftList) -> '_OldChemicalShift':
-        """Make (and return) a copy of the ChemicalShiftList in targetChemicalShiftList."""
-        cs = _newChemicalShift(self=targetChemicalShiftList,
-                               value=self.value,
-                               nmrAtom=self.nmrAtom,
-                               valueError=self.valueError,
-                               figureOfMerit=self.figureOfMerit,
-                               comment=self.comment, )
-        return cs
+        """Make (and return) a copy of the ChemicalShiftList in targetChemicalShiftList.
+        """
+        raise RuntimeError('_OldChemicalShift.copyTo: This routine should not be used any longer')
+        # cs = _newChemicalShift(self=targetChemicalShiftList,
+        #                        value=self.value,
+        #                        nmrAtom=self.nmrAtom,
+        #                        valueError=self.valueError,
+        #                        figureOfMerit=self.figureOfMerit,
+        #                        comment=self.comment, )
+        # return cs
 
     @classmethod
     def _getAllWrappedData(cls, parent: ChemicalShiftList) -> list:
@@ -196,40 +198,41 @@ class _OldChemicalShift(AbstractWrapperObject):
 # Connections to parents:
 #=========================================================================================
 
-@newObject(_OldChemicalShift)
-def _newChemicalShift(self: ChemicalShiftList, value: float, nmrAtom: NmrAtom,
-                      valueError: float = 0.0, figureOfMerit: float = 1.0,
-                      comment: str = None) -> _OldChemicalShift:
-    """Create new ChemicalShift within ChemicalShiftList.
-
-    See the ChemicalShift class for details.
-
-    :param value:
-    :param nmrAtom:
-    :param valueError:
-    :param figureOfMerit:
-    :param comment:
-    :return: a new ChemicalShift instance.
-    """
-
-    nmrAtom = self.getByPid(nmrAtom) if isinstance(nmrAtom, str) else nmrAtom
-    if not nmrAtom:
-        try:
-            # if there is no nmrAtom, create a new one from the default chain
-            nmrChain = self.project.fetchNmrChain(shortName='@-')
-            nmrResidue = nmrChain.fetchNmrResidue()
-            nmrAtom = nmrResidue.fetchNmrAtom()
-        except Exception as es:
-            raise RuntimeError('chemicalShift: nmrAtom undefined - unable to create associated nmrAtom')
-
-    apiShift = self._wrappedData.newShift(value=value,
-                                          resonance=nmrAtom._wrappedData, error=valueError,
-                                          figOfMerit=figureOfMerit, details=comment)
-    result = self._project._data2Obj.get(apiShift)
-    if result is None:
-        raise RuntimeError('Unable to generate new ChemicalShift item')
-
-    return result
+# GWV 19/4/24: Not to be used any longer
+# @newObject(_OldChemicalShift)
+# def _newChemicalShift(self: ChemicalShiftList, value: float, nmrAtom: NmrAtom,
+#                       valueError: float = 0.0, figureOfMerit: float = 1.0,
+#                       comment: str = None) -> _OldChemicalShift:
+#     """Create new ChemicalShift within ChemicalShiftList.
+#
+#     See the ChemicalShift class for details.
+#
+#     :param value:
+#     :param nmrAtom:
+#     :param valueError:
+#     :param figureOfMerit:
+#     :param comment:
+#     :return: a new ChemicalShift instance.
+#     """
+#
+#     nmrAtom = self.getByPid(nmrAtom) if isinstance(nmrAtom, str) else nmrAtom
+#     if not nmrAtom:
+#         try:
+#             # if there is no nmrAtom, create a new one from the default chain
+#             nmrChain = self.project.fetchNmrChain(shortName='@-')
+#             nmrResidue = nmrChain.fetchNmrResidue()
+#             nmrAtom = nmrResidue.fetchNmrAtom()
+#         except Exception as es:
+#             raise RuntimeError('chemicalShift: nmrAtom undefined - unable to create associated nmrAtom')
+#
+#     apiShift = self._wrappedData.newShift(value=value,
+#                                           resonance=nmrAtom._wrappedData, error=valueError,
+#                                           figOfMerit=figureOfMerit, details=comment)
+#     result = self._project._data2Obj.get(apiShift)
+#     if result is None:
+#         raise RuntimeError('Unable to generate new ChemicalShift item')
+#
+#     return result
 
 #EJB 20181203: moved to ChemicalShiftList
 # ChemicalShiftList.newChemicalShift = _newChemicalShift

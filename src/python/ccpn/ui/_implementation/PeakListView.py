@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-21 21:22:10 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-19 18:50:55 +0100 (Fri, April 19, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -116,7 +116,24 @@ class PeakListView(PMIListViewABC):
 #========================================================================================
 
 
-# newPeakListView functions: None
+def _newPeakListView(spectrumView, peakList:PeakList) -> PeakListView:
+    """Create a new PeakListView object
+    :param spectrumView: the (parent) SpectrumView object
+    :param peakList: the corresponding PeakList object
+    :return PeakListView instance
+    """
+    apiSpectrumView = spectrumView._wrappedData
+    project = peakList.project
+
+    apiPeakListView = apiSpectrumView.newStripPeakListView(peakListSerial=peakList.serial, peakList=peakList._wrappedData)
+    result = project._data2Obj.get(apiPeakListView)
+    # result = PeakListView._newInstanceFromApiData(apiObj=apiPeakListView, project=project)
+
+    if result is None:
+        raise RuntimeError('Failed to generate new PeakListView instance')
+
+    return result
+
 
 # PeakList.peakListViews property
 def getter(peakList: PeakList) -> typing.Tuple[PeakListView, ...]:

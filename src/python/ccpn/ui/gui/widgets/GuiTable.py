@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-22 16:10:21 +0000 (Fri, March 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-19 18:48:59 +0100 (Fri, April 19, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -490,8 +490,7 @@ class GuiTable(TableWidget, Base):
             # set the dropEvent to the mainWidget of the module, otherwise the event gets stolen by Frames
             self.moduleParent.mainWidget._dropEventCallback = self._processDroppedItems
 
-        self._droppedNotifier = GuiNotifier(self,
-                                            GuiNotifier.DROPEVENT, DropBase.PIDS,
+        self._droppedNotifier = GuiNotifier(self, GuiNotifier.DROPEVENT, DropBase.PIDS,
                                             callback=self._processDroppedItems,
                                             setterObject=self
                                             )
@@ -1169,8 +1168,8 @@ class GuiTable(TableWidget, Base):
                     event.ignore()
 
         data.update(self._getDraggedDataDict(source))  #get the selectedObjects and update the datadict for emitting the callback
-        if self._enterEventCallback:
-            self._enterEventCallback(data)
+        # if self._enterEventCallback:
+        #     self._enterEventCallback(data)
 
         super(GuiTable, self).dragEnterEvent(event)
 

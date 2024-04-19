@@ -28,7 +28,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-22 16:10:20 +0000 (Fri, March 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-19 18:48:59 +0100 (Fri, April 19, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -48,8 +48,6 @@ from typing import Callable, Any, Optional
 from PyQt5 import QtGui, QtWidgets
 
 from ccpn.core.lib.Notifiers import NotifierABC, _NotifierList
-from ccpn.ui.gui.widgets.DropBase import DropBase
-
 from ccpn.util.Logging import getLogger
 
 
@@ -101,12 +99,15 @@ class GuiNotifier(NotifierABC):
 
         :param theObject: Widget to watch
         :param trigger: one of trigger keywords; i.e. (DROPEVENT, ENTEREVENT, DRAGMOVEEVENT)
-        :param targetName: optional dropTargets (URLS, TEXT, PIDS, IDS) or None
+        :param targetName: optional dropTarget; i.e. URLS, TEXT, PIDS, IDS
         :param callback: callback function with signature: callback(callbackDict [, *args] [, **kwargs])
         :param setterObject: Object that was setting the Notifier
         :param debug: set debug
         :param **kwds: optional keywords arguments passed to callback
         """
+        # local import to avoid cycles
+        from ccpn.ui.gui.widgets.DropBase import DropBase
+
         # some sanity checks
         if not isinstance(theObject, QtWidgets.QWidget):
             raise ValueError('Invalid object (%r), expected object of type QWidget' % theObject)
@@ -123,43 +124,38 @@ class GuiNotifier(NotifierABC):
         # register the callback
         if trigger == GuiNotifier.DROPEVENT:
 
-            # if not self._theObject.acceptDrops():
-            #     raise RuntimeError('GuiNotifier.__init__: Widget "%s" does not accept drops' % self._theObject)
+            # if not theObject.acceptDrops():
+            #     raise RuntimeError(f'GuiNotifier.__init__: Widget {theObject} does not accept drops')
 
             if targetName is not None:
                 if targetName not in DropBase._dropTargets:
                     raise RuntimeError(f'GuiNotifier.__init__(): invalid dropTarget "{targetName}"')
 
-            self._theObject.setDropEventCallback(self)
 
-        elif trigger == GuiNotifier.ENTEREVENT:
-            self._theObject.setDragEnterEventCallback(self)
-
-        elif trigger == GuiNotifier.DRAGMOVEEVENT:
-            self._theObject.setDragMoveEventCallback(self)
+        if trigger == GuiNotifier.DRAGMOVEEVENT:
+            raise RuntimeError(f'GuiNotifier for "{trigger}" currently not implemented')
 
         self.registerNotifier()
 
-        if self._debug:
-            sys.stderr.write('>>> registered %s\n' % self)
-
-    def unRegisterNotifier(self):
-        """
-        unregister the notifiers
-        """
-        if not self.isRegistered:
-            return
-
-        if self._trigger == GuiNotifier.DROPEVENT:
-            self._theObject.setDropEventCallback(None)
-
-        elif self._trigger == GuiNotifier.ENTEREVENT:
-            self._theObject.setDragEnterEventCallback(None)
-
-        elif self._trigger == GuiNotifier.DRAGMOVEEVENT:
-            self._theObject.setDragMoveEventCallback(None)
-
-        super().unRegisterNotifier()  # the end as it clears all attributes
+    # def unRegisterNotifier(self):
+    #     """
+    #     unregister the notifiers
+    #     """
+    #     if not self.isRegistered:
+    #         return
+    #
+    #     if self._trigger == GuiNotifier.DROPEVENT:
+    #         # self._theObject.setDropEventCallback(None)
+    #         pass
+    #
+    #     elif self._trigger == GuiNotifier.ENTEREVENT:
+    #         # self._theObject.setDragEnterEventCallback(None)
+    #         pass
+    #
+    #     elif self._trigger == GuiNotifier.DRAGMOVEEVENT:
+    #         self._theObject.setDragMoveEventCallback(None)
+    #
+    #     super().unRegisterNotifier()  # the end as it clears all attributes
 
     def __call__(self, data: dict):
         """
@@ -169,19 +165,17 @@ class GuiNotifier(NotifierABC):
             getLogger().warning('Triggering unregistered guiNotifier %s' % self)
             return
 
+        if self._debug:
+            sys.stderr.write(f'>>> {self}.__call__(): {data = } {self._isBlanked = }\n' )
+
         if self._isBlanked:
             return
 
-        if self._debug:
-            sys.stderr.write(f'>>> {self}.__call__(): {data = }\n' )
-
         # DROPEVENT
-        if self._trigger == GuiNotifier.DROPEVENT:
-            # optionally filter for targetName
-            skip = False
-            if self._targetName is not None:
-                skip = not self._targetName in data
-            if skip: return
+        if self._trigger == GuiNotifier.DROPEVENT and \
+           self._targetName is not None and \
+           self._targetName not in data:
+            return
 
         callbackDict = self.newCallbackDict(trigger=self._trigger)
         callbackDict.update(data)

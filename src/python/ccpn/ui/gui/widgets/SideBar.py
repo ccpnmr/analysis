@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-22 16:10:21 +0000 (Fri, March 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-19 18:48:59 +0100 (Fri, April 19, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -1197,7 +1197,7 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         self.setDragDropMode(self.DragDrop)
         self.setAcceptDrops(True)
 
-        self.setGuiNotifier(self, [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
+        self.setGuiNotifier(self, [GuiNotifier.DROPEVENT], [DropBase.URLS],
                             self.mainWindow._processDroppedItems)
 
         self.itemDoubleClicked.connect(self._raiseObjectProperties)

@@ -20,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:55 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-04-19 10:04:46 +0100 (Fri, April 19, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -264,7 +264,7 @@ class Path(_Path_):
         :param Optional[list] suffixes: optional list of allowed suffixes (including .)
         :return: True if valid.
         """
-        return self.isValidFilePath() and \
+        return self.isValidFilePath(allowOther='\@\,') and \
             self.isValidBasename(allowSpace=False, suffixes=suffixes if suffixes is not None else ['.ccpn', ])
 
     def addTimeStamp(self) -> Path:

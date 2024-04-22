@@ -15,21 +15,20 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 12:28:56 +0100 (Thu, April 18, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-22 13:20:12 +0100 (Mon, April 22, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: gvuister $"
 __date__ = "$Date: 2023-01-24 10:28:48 +0000 (Tue, January 24, 2023) $"
-
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
 import os
 import time
-from functools import partial
+from functools import partial, partialmethod
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtGui import QKeySequence
@@ -98,6 +97,34 @@ _INTEGRAL_PEAKS = 8
 _MULTIPLET_PEAKS = 16
 
 READONLYCHANGED = 'readOnlyChanged'
+_transparent = QtGui.QColor('orange')
+
+# def _paintEvent(widget: QtWidgets.QWidget, event: QtGui.QPaintEvent, func=None) -> None:
+#     result = func(widget, event)
+#     if widget.hasFocus():
+#         p = QtGui.QPainter(widget)
+#         p.translate(0.5, 0.5)  # move to pixel-centre
+#         p.setRenderHint(QtGui.QPainter.Antialiasing, True)
+#         col = QtGui.QColor('dodgerblue')  # Base._highlightVivid
+#         col.setAlpha(255)
+#         pen = QtGui.QPen(col)
+#         p.setPen(pen)
+#         p.drawRoundedRect(widget.rect().adjusted(0, 0, -1, -1), 2, 2)
+#         col.setAlpha(40)
+#         p.setPen(col)
+#         p.drawRoundedRect(widget.rect().adjusted(1, 1, -2, -2), 1.7, 1.7)
+#         p.end()
+#     return result
+#
+
+# _paintQLineEdit = QtWidgets.QLineEdit.paintEvent
+# QtWidgets.QLineEdit.paintEvent = partialmethod(_paintEvent, func=_paintQLineEdit)
+# _paintQSpinBox = QtWidgets.QSpinBox.paintEvent
+# QtWidgets.QSpinBox.paintEvent = partialmethod(_paintEvent, func=_paintQSpinBox)
+# _paintQDoubleSpinBox = QtWidgets.QDoubleSpinBox.paintEvent
+# QtWidgets.QDoubleSpinBox.paintEvent = partialmethod(_paintEvent, func=_paintQDoubleSpinBox)
+# _pp = QtWidgets.QToolButton.paintEvent
+# QtWidgets.QToolButton.paintEvent = partialmethod(_paintEvent, func=_pp)
 
 
 class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):

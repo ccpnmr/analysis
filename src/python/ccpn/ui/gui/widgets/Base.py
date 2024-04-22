@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 12:28:56 +0100 (Thu, April 18, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-22 13:20:13 +0100 (Mon, April 22, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -33,7 +33,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from dataclasses import dataclass
 from functools import partial
 from contextlib import contextmanager
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from pyqtgraph.dockarea import Dock
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.util.Logging import getLogger
@@ -518,3 +518,21 @@ class Base(DropBase, SignalBlocking):
         else:
             self.setDisabled(True)
             # self.setStyleSheet("background:#E8E8E8")  # some light gr
+
+    @classmethod
+    def setHighlightPalette(cls, palette: QtGui.QPalette):
+        """Set the highlight colours for border overlays based on the palette.
+        """
+        base = palette.base().color().lightness()  # use as a guide for light/dark theme
+        highlight = palette.highlight().color()
+        # store the colours in the baseclass
+        cls._highlight = highlight
+        cls._highlightVivid = QtGui.QColor.fromHslF(highlight.hueF(),
+                                                  0.8 if base > 127 else 0.75,
+                                                  0.5 if base > 127 else 0.45
+                                                  )
+        cls._highlightFeint = QtGui.QColor.fromHslF(highlight.hueF(),
+                                                  0.55 if base > 127 else 0.65,
+                                                  0.80 if base > 127 else 0.35,
+                                                  )
+        cls._basePalette = palette

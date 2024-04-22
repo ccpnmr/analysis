@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-17 12:03:18 +0100 (Wed, April 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-22 13:20:13 +0100 (Mon, April 22, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -171,29 +171,23 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
                 QDoubleSpinBox:disabled { background-color: palette(midlight); }
                 """
         self.setStyleSheet(_style)
-        self._checkPalette(self.palette())
-        QtWidgets.QApplication.instance().paletteChanged.connect(self._checkPalette)
-
-    def _checkPalette(self, pal: QtGui.QPalette):
-        # print the colours from the updated palette - only 'highlight' seems to be effective
-        # QT modifies this to give different selection shades depending on the widget
-        base = pal.base().color().lightness()
-        highlight = pal.highlight().color()
-        self.highlightColour = QtGui.QColor.fromHslF(highlight.hueF(),
-                                       # tweak the highlight colour depending on the theme
-                                       #    needs to go in the correct place
-                                       0.8 if base > 127 else 0.75,
-                                       0.5 if base > 127 else 0.45
-                                       )
 
     def paintEvent(self, ev: QtGui.QPaintEvent) -> None:
-        if self.highlightColour:
-            # change the highlight colour in response to theme change
-            thisPal = self.palette()
-            thisPal.setColor(QtGui.QPalette.Highlight, self.highlightColour)
-            self.setPalette(thisPal)
-
         super().paintEvent(ev)
+        if self.hasFocus():
+            # paint a new border
+            p = QtGui.QPainter(self)
+            p.translate(0.5, 0.5)  # move to pixel-centre
+            p.setRenderHint(QtGui.QPainter.Antialiasing, True)
+            col = Base._highlightVivid
+            col.setAlpha(255)
+            pen = QtGui.QPen(col)
+            p.setPen(pen)
+            p.drawRoundedRect(self.rect().adjusted(0, 1, -1, -2), 2, 2)
+            col.setAlpha(40)
+            p.setPen(col)
+            p.drawRoundedRect(self.rect().adjusted(1, 2, -2, -3), 1.7, 1.7)
+            p.end()
 
     def contextMenuEvent(self, event):
         # add an event to add extra items to the menu

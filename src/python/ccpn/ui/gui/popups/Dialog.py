@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-17 12:03:18 +0100 (Wed, April 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-22 13:20:12 +0100 (Mon, April 22, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -74,7 +74,6 @@ class _DialogHook(type(QtWidgets.QDialog), type(Base)):
         # call the post-__init__ hook
         instance._postInit()
         if _DEBUG: getLogger().debug2(f'--> post-create dialog {self}')
-
         return instance
 
 
@@ -109,6 +108,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base, metaclass=_DialogHook):
     DONTSHOWENABLED = False
     FORCEWIDTHTOTITLE = True
     _defaultResponse = None
+    _defaultButton = None
 
     EDITMODE = True
     DEFAULTMARGINS = (14, 14, 14, 14)
@@ -187,16 +187,16 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base, metaclass=_DialogHook):
         # clear the changes list
         self._changes = ChangeDict()
 
-        self.setDefaultButton()
+        # self.setDefaultButton()
 
         # GST stops a file icon being shown
         self.setWindowFilePath('')
         self.setWindowIcon(QtGui.QIcon())
 
         # set the background/fontSize for the tooltips, fraction slower but don't need to import the colour-names
-        self.setStyleSheet('QToolTip {{ background-color: {TOOLTIP_BACKGROUND}; '
-                           'color: {TOOLTIP_FOREGROUND}; '
-                           'font-size: {_size}pt ; }}'.format(_size=self.font().pointSize(), **getColours()))
+        # self.setStyleSheet('QToolTip {{ background-color: {TOOLTIP_BACKGROUND}; '
+        #                    'color: {TOOLTIP_FOREGROUND}; '
+        #                    'font-size: {_size}pt ; }}'.format(_size=self.font().pointSize(), **getColours()))
 
         ## WARNING ==> setAttribute WA_DeleteOnClose, True :
         ## This flag should be used after checking all popup are closed correctly
@@ -826,6 +826,7 @@ def handleDialogApply(self):
         if error.cleanUndo:
             # clean-up with warning popup
             dialogErrorReport(self, undo, None)
+
 
 def _verifyPopupApply(self, attributeName, value, last, *postArgs, **postKwds):
     """Change the state of the apply button based on the changes in the tabs

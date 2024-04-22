@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-17 12:03:19 +0100 (Wed, April 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-22 13:20:13 +0100 (Mon, April 22, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -184,8 +184,18 @@ class PulldownList(QtWidgets.QComboBox, Base):
         self._setStyle()
 
     def _setStyle(self):
-        self._checkPalette(self.palette())
-        QtWidgets.QApplication.instance().paletteChanged.connect(self._checkPalette)
+        _style = """QComboBox {
+                    padding: 2px 8px 2px 3px;
+                    combobox-popup: 0;
+                }
+                QComboBox:disabled {
+                    color: #808080;
+                    background-color: palette(midlight);
+                }
+                """
+        self.setStyleSheet(_style)
+        # self._checkPalette(self.palette())
+        # QtWidgets.QApplication.instance().paletteChanged.connect(self._checkPalette)
 
     def _checkPalette(self, pal: QtGui.QPalette):
         # print the colours from the updated palette - only 'highlight' seems to be effective
@@ -206,7 +216,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
                     padding: 2px 8px 2px 3px;
                     combobox-popup: 0;
                 }
-                QComboBox:focus { border-color: %(BORDER_FOCUS)s; }
+                /*QComboBox:focus { border-color: %(BORDER_FOCUS)s; }*/
                 QComboBox:disabled {
                     color: #808080;
                     background-color: palette(midlight);
@@ -305,16 +315,30 @@ class PulldownList(QtWidgets.QComboBox, Base):
                     # use the palette to change the colour of the selection text - may not match for other themes
                     palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Text, item.foreground().color())
                 else:
-                    palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Text, QtGui.QColor('black'))
-                if self.highlightColour:
-                    # change the highlight colour in response to theme change
-                    palette.setColor(QtGui.QPalette.Highlight, self.highlightColour)
+                    palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Text, palette.windowText())
+                # if self.highlightColour:
+                #     # change the highlight colour in response to theme change
+                #     palette.setColor(QtGui.QPalette.Highlight, self.highlightColour)
             self.setPalette(palette)
         except Exception:
             pass
 
         finally:
             super(PulldownList, self).paintEvent(e)
+            if self.hasFocus():
+                # paint a new border
+                p = QtGui.QPainter(self)
+                p.translate(0.5, 0.5)  # move to pixel-centre
+                p.setRenderHint(QtGui.QPainter.Antialiasing, True)
+                col = Base._highlightVivid
+                col.setAlpha(255)
+                pen = QtGui.QPen(col)
+                p.setPen(pen)
+                p.drawRoundedRect(self.rect().adjusted(0, 0, -1, -1), 2, 2)
+                col.setAlpha(40)
+                p.setPen(col)
+                p.drawRoundedRect(self.rect().adjusted(1, 1, -2, -2), 1.7, 1.7)
+                p.end()
 
     def set(self, item):
 

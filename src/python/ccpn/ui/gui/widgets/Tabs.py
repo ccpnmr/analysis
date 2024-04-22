@@ -33,20 +33,21 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-29 11:45:33 +0000 (Mon, January 29, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-04-22 13:20:13 +0100 (Mon, April 22, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: Luca Mureddu $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
+
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
 from ccpn.ui.gui.widgets.Base import Base
 
 
@@ -76,7 +77,7 @@ class Tabs(QtWidgets.QTabWidget, Base):
 
     @property
     def tabTexts(self):
-       return [self.tabText(i) for i in range(self.count())]
+        return [self.tabText(i) for i in range(self.count())]
 
     def getSelectedTabText(self):
         index = self.currentIndex()
@@ -93,23 +94,40 @@ class Tabs(QtWidgets.QTabWidget, Base):
             if tabText == text:
                 self.setCurrentIndex(index)
 
+    def paintEvent(self, ev: QtGui.QPaintEvent) -> None:
+        if Base._highlightVivid is not None:
+            # hack to change the fusion-theme highlight colour
+            palette = self.palette()
+            palette.setColor(QtGui.QPalette.HighlightedText, Base._highlightVivid)
+            palette.setColor(QtGui.QPalette.AlternateBase, Base._highlightVivid)
+            palette.setColor(QtGui.QPalette.Highlight, Base._highlightVivid)
+            palette.setColor(QtGui.QPalette.Window, Base._highlightVivid)
+            palette.setColor(QtGui.QPalette.WindowText, Base._highlightVivid)
+            palette.setColor(QtGui.QPalette.Shadow, Base._highlightVivid)
+            self.setPalette(palette)
+        super().paintEvent(ev)
+
 
 if __name__ == '__main__':
-    from ccpn import  core
+    from ccpn import core
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.widgets.Frame import Frame
     from ccpn.ui.gui.widgets.Label import Label
-    from ccpn.ui.gui.popups.Dialog import CcpnDialog
+    from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
+
 
     app = TestApplication()
-    popup = CcpnDialog()
+    # patch for icon sizes in menus, etc.
+    styles = QtWidgets.QStyleFactory()
+    app.setStyle(styles.create('fusion'))
+    popup = CcpnDialogMainWidget(setLayout=True, size=(200, 300))
 
-    tabWidget = Tabs(popup, grid=(0, 0), gridSpan=(1, 3))
-
+    Base.setHighlightPalette(app.palette())
+    print(app.palette().highlight().color().name())
+    tabWidget = Tabs(popup.mainWidget, grid=(1, 1), gridSpan=(1, 3))
     tab1Frame = Frame(popup, setLayout=True)
     for i in range(5):
         Label(tab1Frame, "Example tab 1", grid=(i, 0))
-
     tabWidget.addTab(tab1Frame, 'Tab1')
 
     tab2Frame = Frame(popup, setLayout=True)
@@ -119,7 +137,28 @@ if __name__ == '__main__':
 
     print('SEL', tabWidget.getSelectedTabText())
 
-    popup.show()
-    popup.raise_()
-
-    app.start()
+    # tabWidget.setStyleSheet(
+    #         "QTabBar::tab { border-radius: 5px; }"
+    #         # "QTabBar::tab { background: gray; color: white; padding: 10px; } "
+    #         # "QTabBar::tab:selected { background: lightgray; } "
+    #         # "QTabWidget::pane { border: 5px; } "
+    #         # "QWidget { background: lightgray; } "
+    #         )
+    # tabWidget.setStyleSheet("""QTabBar::tab {
+    #         background: rgb(100,110,235);
+    #         border-radius: 2px;
+    #         border-style: solid;
+    #         min-width: 64px;
+    #         padding: 4px;
+    #         border-top-left-radius: 10px;
+    #         border-top-right-radius: 10px;
+    #     }
+    #     QTabBar { background: transparent; }
+    #     /*QTabWidget::pane {
+    #     bord    er: 2px solid rgb(160, 170, 220);
+    #     }
+    #     QTabBar::tab:selected, QTabBar::tab:hover {
+    #         background: rgb(227,235,255)
+    #     }*/
+    #     """)
+    popup.exec_()

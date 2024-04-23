@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-17 12:03:19 +0100 (Wed, April 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-23 22:03:03 +0100 (Tue, April 23, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -92,7 +92,9 @@ class ListView(QtWidgets.QListView, Base):
         styleSheet = """QListView {
                             border-width: 1px;
                             border-radius: 2px;
-                        }"""
+                        }
+                        QListView:disabled { background-color: palette(midlight); }
+                        """
         self.setStyleSheet(styleSheet)
 
     def _minRows(self, rc):

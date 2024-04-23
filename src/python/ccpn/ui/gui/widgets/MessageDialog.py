@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-17 12:03:19 +0100 (Wed, April 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-23 22:03:04 +0100 (Tue, April 23, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -280,11 +280,11 @@ class MessageDialog(QtWidgets.QMessageBox):
                                        0.5 if base > 127 else 0.45
                                        )
         _style = """QPushButton {
-                    padding: 1px 8px 1px 8px;
+                    padding: 2px 8px 2px 8px;
                 }
                 QPushButton:focus {
-                    padding: 0px 0px 0px 0px;
-                    border-color: %(BORDER_FOCUS)s;
+                    padding: 0px 1px 0px 1px;
+                    border-color: palette(highlight);
                     border-style: solid;
                     border-width: 1px;
                     border-radius: 2px;

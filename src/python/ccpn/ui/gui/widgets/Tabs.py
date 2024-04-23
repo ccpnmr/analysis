@@ -34,7 +34,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-22 13:20:13 +0100 (Mon, April 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-23 22:03:04 +0100 (Tue, April 23, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -93,19 +93,6 @@ class Tabs(QtWidgets.QTabWidget, Base):
         for index, tabText in enumerate(self.tabTexts):
             if tabText == text:
                 self.setCurrentIndex(index)
-
-    def paintEvent(self, ev: QtGui.QPaintEvent) -> None:
-        if Base._highlightVivid is not None:
-            # hack to change the fusion-theme highlight colour
-            palette = self.palette()
-            palette.setColor(QtGui.QPalette.HighlightedText, Base._highlightVivid)
-            palette.setColor(QtGui.QPalette.AlternateBase, Base._highlightVivid)
-            palette.setColor(QtGui.QPalette.Highlight, Base._highlightVivid)
-            palette.setColor(QtGui.QPalette.Window, Base._highlightVivid)
-            palette.setColor(QtGui.QPalette.WindowText, Base._highlightVivid)
-            palette.setColor(QtGui.QPalette.Shadow, Base._highlightVivid)
-            self.setPalette(palette)
-        super().paintEvent(ev)
 
 
 if __name__ == '__main__':

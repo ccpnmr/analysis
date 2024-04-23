@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-17 12:03:19 +0100 (Wed, April 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-23 22:03:04 +0100 (Tue, April 23, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -92,33 +92,14 @@ class Slider(QtWidgets.QSlider, Base):
             else:
                 listener.connect(self.setValue)
 
-        self._setStyle()
-
-    def _setStyle(self):
-        self._checkPalette(self.palette())
-        QtWidgets.QApplication.instance().paletteChanged.connect(self._checkPalette)
-
-    def _checkPalette(self, pal: QtGui.QPalette):
-        # print the colours from the updated palette - only 'highlight' seems to be effective
-        # QT modifies this to give different selection shades depending on the widget
-        base = pal.base().color().lightness()
-        highlight = pal.highlight().color()
-        self.highlightColour = QtGui.QColor.fromHslF(highlight.hueF(),
-                                       # tweak the highlight colour depending on the theme
-                                       #    needs to go in the correct place
-                                       0.8 if base > 127 else 0.75,
-                                       0.5 if base > 127 else 0.45
-                                       )
-
-    def paintEvent(self, ev: QtGui.QPaintEvent) -> None:
-        if self.highlightColour:
-            # change the highlight colour in response to theme change
-            #   - bit of a hack as QT is doing something weird here
-            thisPal = self.palette()
-            thisPal.setColor(QtGui.QPalette.Highlight, self.highlightColour)
-            self.setPalette(thisPal)
-
-        super().paintEvent(ev)
+    # def paintEvent(self, ev: QtGui.QPaintEvent) -> None:
+    #     if Base._highlightVivid is not None:
+    #         # change the highlight colour in response to theme change
+    #         #   - bit of a hack as QT is doing something weird here
+    #         thisPal = self.palette()
+    #         thisPal.setColor(QtGui.QPalette.Highlight, Base._highlightVivid)
+    #         self.setPalette(thisPal)
+    #     super().paintEvent(ev)
 
     def setRange(self, startVal, endVal):
 

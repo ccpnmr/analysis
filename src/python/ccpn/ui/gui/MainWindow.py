@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-22 13:20:12 +0100 (Mon, April 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-23 22:03:03 +0100 (Tue, April 23, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -257,32 +257,15 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                             color: %(TOOLTIP_FOREGROUND)s;
                         }
                         
-                        QPushButton:focus {
-                            border-color: %(BORDER_FOCUS)s;
-                        }
-                        /*
-                        QPushButton {
-                            padding: 2px 6px 2px 6px;
-                        }
-                        QPushButton:focus {
-                            padding: 0px 0px 0px 0px;
-                            border-color: %(BORDER_FOCUS)s;
-                            border-style: solid;
-                            border-width: 1px;
-                            border-radius: 2px;
-                        }
-                        QPushButton:disabled {
-                            color: #808080;
-                            background-color: palette(midlight);
-                        }
-                        */
                         QGraphicsView {
                             border: 1px solid palette(mid);
                             border-radius: 2px;
                         }
                         QGraphicsView:focus {
                             border: 1px solid %(BORDER_FOCUS)s;
+                            border-radius: 2px;
                         }
+                        QGraphicsView:disabled { background-color: palette(midlight); }
 
                         QListView {
                             border: 1px solid palette(mid);
@@ -292,14 +275,16 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                             border: 1px solid %(BORDER_FOCUS)s;
                             border-radius: 2px;
                         }
+                        QListView:disabled { background-color: palette(midlight); }
                         QListWidget {
                             border: 1px solid palette(mid);
                             border-radius: 2px;
                         }
                         QListWidget:focus {
                             border: 1px solid %(BORDER_FOCUS)s;
-                            border-radius: 2px;
                         }
+                        QListWidget:disabled { background-color: palette(midlight); }
+                        
                         QTreeWidget {
                             border: 1px solid palette(mid);
                             border-radius: 2px;
@@ -316,9 +301,6 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                             border: 1px solid %(BORDER_FOCUS)s;
                             border-radius: 2px;
                         }
-                        QGraphicsTextItem {
-                            background-color: orange;
-                        }
                         QTextEdit {
                             border: 1px solid palette(mid);
                             border-radius: 2px;
@@ -329,6 +311,26 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                         }
 
                         /*
+                        QPushButton:focus {
+                            border-color: %(BORDER_FOCUS)s;
+                        }
+                        QPushButton {
+                            padding: 2px 6px 2px 6px;
+                        }
+                        QPushButton:focus {
+                            padding: 0px 1px 0px 1px;
+                            border-color: %(BORDER_FOCUS)s;
+                            border-style: solid;
+                            border-width: 0px;
+                            border-radius: 2px;
+                        }
+                        QPushButton:disabled {
+                            color: #808080;
+                            background-color: palette(midlight);
+                        }
+                        QGraphicsTextItem {
+                            background-color: orange;
+                        }
                         QTableView {
                             border-color: palette(mid);
                             border-width: %(_BORDER_WIDTH)spx;
@@ -405,11 +407,14 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                                                   0.8 if base > 127 else 0.75,
                                                   0.5 if base > 127 else 0.45
                                                   )
+        Base._highlightMid = QtGui.QColor.fromHslF(highlight.hueF(), 0.75, 0.65)
         Base._highlightFeint = QtGui.QColor.fromHslF(highlight.hueF(),
                                                   0.55 if base > 127 else 0.65,
                                                   0.80 if base > 127 else 0.35,
                                                   )
         Base._basePalette = pal
+        Base._transparent = highlight
+        Base._transparent.setAlpha(40)
 
         if self.application.preferences.general.colourScheme == DEFAULT:
             # print(f'--> change theme  {base}')
@@ -763,9 +768,9 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self._temporaryWidgetStore.hide()
 
         # set the background/fontSize for the tooltips
-        self.setStyleSheet('QToolTip {{ background-color: {TOOLTIP_BACKGROUND}; '
-                           'color: {TOOLTIP_FOREGROUND}; '
-                           'font-size: {_size}pt ; }}'.format(_size=self.font().pointSize(), **getColours()))
+        # self.setStyleSheet('QToolTip {{ background-color: {TOOLTIP_BACKGROUND}; '
+        #                    'color: {TOOLTIP_FOREGROUND}; '
+        #                    'font-size: {_size}pt ; }}'.format(_size=self.font().pointSize(), **getColours()))
 
     def _setupMenus(self):
         """

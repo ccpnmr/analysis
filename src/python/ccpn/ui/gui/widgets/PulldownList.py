@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-22 13:20:13 +0100 (Mon, April 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-23 22:03:04 +0100 (Tue, April 23, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -325,20 +325,6 @@ class PulldownList(QtWidgets.QComboBox, Base):
 
         finally:
             super(PulldownList, self).paintEvent(e)
-            if self.hasFocus():
-                # paint a new border
-                p = QtGui.QPainter(self)
-                p.translate(0.5, 0.5)  # move to pixel-centre
-                p.setRenderHint(QtGui.QPainter.Antialiasing, True)
-                col = Base._highlightVivid
-                col.setAlpha(255)
-                pen = QtGui.QPen(col)
-                p.setPen(pen)
-                p.drawRoundedRect(self.rect().adjusted(0, 0, -1, -1), 2, 2)
-                col.setAlpha(40)
-                p.setPen(col)
-                p.drawRoundedRect(self.rect().adjusted(1, 1, -2, -2), 1.7, 1.7)
-                p.end()
 
     def set(self, item):
 

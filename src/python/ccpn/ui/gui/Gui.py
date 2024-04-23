@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-17 12:03:17 +0100 (Wed, April 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-23 22:03:03 +0100 (Tue, April 23, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -43,9 +43,11 @@ from ccpn.core.lib.ContextManagers import notificationEchoBlocking, catchExcepti
 from ccpn.ui.Ui import Ui
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup, NewTermsConditionsPopup
 from ccpn.ui.gui.widgets.Application import Application
+from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets import FileDialog
 from ccpn.ui.gui.widgets.Font import getSystemFonts
+from ccpn.ui.gui.widgets.Frame import ScrollableFrame
 from ccpn.ui.gui.popups.ImportStarPopup import StarImporterPopup
 
 # This import initializes relative paths for QT style-sheets.  Do not remove! GWV ????
@@ -134,6 +136,87 @@ class _MyAppProxyStyle(QtWidgets.QProxyStyle):
     #         return getFontHeight(size='MAXIMUM') or 18
     #
     #     return super().pixelMetric(metric, option, widget)
+
+    def drawPrimitive(self, element: QtWidgets.QStyle.PrimitiveElement,
+                      option: QtWidgets.QStyleOption,
+                      painter: QtGui.QPainter,
+                      widget: typing.Optional[QtWidgets.QWidget] = ...) -> None:
+        focus = False
+        if element in {QtWidgets.QStyle.PE_FrameLineEdit,
+                       QtWidgets.QStyle.PE_FrameFocusRect,
+                       QtWidgets.QStyle.PE_PanelButtonCommand,
+                       }:
+            focus = option.state & QtWidgets.QStyle.State_HasFocus
+            option.state &= ~(QtWidgets.QStyle.State_HasFocus | QtWidgets.QStyle.State_Selected)
+            # Customise the highlight color for a soft background
+            if Base._highlightMid is not None:
+                option.palette.setColor(option.palette.Highlight, Base._highlightMid)
+        if element == QtWidgets.QStyle.PE_FrameFocusRect and isinstance(widget, QtWidgets.QPushButton):
+            # replace the QPushButton focus with just a border
+            if (efb := getattr(widget, '_enableFocusBorder', None)) is None or efb is True:
+                self._drawBorder(element, painter, widget, col=Base._highlightVivid)
+            return
+        super().drawPrimitive(element, option, painter, widget)
+        if focus and element in {QtWidgets.QStyle.PE_FrameLineEdit,
+                                 }:
+            # draw new focus-border
+            self._drawBorder(element, painter, widget, col=Base._highlightVivid)
+
+    def drawControl(self, element, option, painter, widget=None):
+        if element in {QtWidgets.QStyle.CE_TabBarTab,
+                       }:
+            # Customise the highlight color for the tab-widget
+            if Base._highlightVivid is not None:
+                option.palette.setColor(option.palette.Highlight, Base._highlightVivid)
+        super().drawControl(element, option, painter, widget)
+        # if element in {QtWidgets.QStyle.CE_ItemViewItem, } and (option.state & QtWidgets.QStyle.State_HasFocus):
+        #     # draw border inside the listWidget/listView/TreeView
+        #     #   - draws border inside pulldowns though, shame :(
+        #     self._drawBorder(element, painter, widget, col=Base._highlightVivid)
+
+    def drawComplexControl(self, control: QtWidgets.QStyle.ComplexControl,
+                           option: QtWidgets.QStyleOptionComplex,
+                           painter: QtGui.QPainter,
+                           widget: typing.Optional[QtWidgets.QWidget] = ...) -> None:
+        focus = None
+        if control in {QtWidgets.QStyle.CC_ComboBox,
+                       QtWidgets.QStyle.CC_SpinBox,
+                       }:
+            focus = option.state & QtWidgets.QStyle.State_HasFocus
+            option.state &= ~QtWidgets.QStyle.State_HasFocus
+        elif control in {QtWidgets.QStyle.CC_Slider,} and Base._highlightVivid is not None:
+            option.palette.setColor(option.palette.Highlight, Base._highlightVivid)
+        super().drawComplexControl(control, option, painter, widget)
+        if focus:
+            # draw new focus-border
+            self._drawBorder(control, painter, widget, col=Base._highlightVivid)
+
+    @staticmethod
+    def _drawBorder(control, p, widget, col=None):
+        p.save()
+        try:
+            wind = widget.rect()
+            if control == QtWidgets.QStyle.CC_SpinBox:
+                # not sure why the border is off slightly
+                wind = wind.adjusted(0, 1, 0, -1)  # x1, y1 - x2, y2
+            elif control == QtWidgets.QStyle.CE_ItemViewItem:
+                # border is off because the border-width is outside the widget :|
+                wind = wind.adjusted(-1, -1, -1, -1)
+            # paint the new border
+            p.translate(0.5, 0.5)  # move to pixel-centre
+            p.setRenderHint(QtGui.QPainter.Antialiasing, True)
+            col = col or QtGui.QColor('red')
+            col.setAlpha(40)  # feint must be done first so that QSlider draws correctly
+            p.setPen(col)
+            p.drawRoundedRect(wind.adjusted(1, 1, -2, -2), 1.7, 1.7)
+            col.setAlpha(255)
+            p.setPen(col)
+            p.drawRoundedRect(wind.adjusted(0, 0, -1, -1), 2, 2)
+        except Exception:
+            ...
+        finally:
+            p.translate(-0.5, -0.5)
+            p.restore()
 
     def standardIcon(self, standardIcon, option=None, widget=None) -> QtGui.QIcon:
         # change the close-button of the line-edit to a cleaner icon, set by setClearButtonEnabled
@@ -236,9 +319,11 @@ class Gui(Ui):
 
         else:
             if registered and not acceptedTerms:
-                popup = NewTermsConditionsPopup(self.mainWindow, trial=days, version=self.application.applicationVersion, modal=True)
+                popup = NewTermsConditionsPopup(self.mainWindow, trial=days,
+                                                version=self.application.applicationVersion, modal=True)
             else:
-                popup = RegisterPopup(self.mainWindow, trial=days, version=self.application.applicationVersion, modal=True)
+                popup = RegisterPopup(self.mainWindow, trial=days, version=self.application.applicationVersion,
+                                      modal=True)
 
             self.mainWindow.show()
             popup.exec_()
@@ -495,7 +580,9 @@ class Gui(Ui):
                 return
 
         if (_name := checkProjectName(name, correctName=True)) != name:
-            MessageDialog.showInfo('New Project', f'Project name changed from "{name}" to "{_name}"\nSee console/log for details', parent=self)
+            MessageDialog.showInfo('New Project',
+                                   f'Project name changed from "{name}" to "{_name}"\nSee console/log for details',
+                                   parent=self)
 
         with catchExceptions(errorStringTemplate='Error creating new project: %s'):
             if self.mainWindow:
@@ -665,7 +752,8 @@ class Gui(Ui):
         newName = newPath.basename
         if (_name := checkProjectName(newName, correctName=True)) != newName:
             newPath = (newPath.parent / _name).assureSuffix(CCPN_EXTENSION)
-            MessageDialog.showInfo(title, f'Project name changed from "{newName}" to "{_name}"\nSee console/log for details',
+            MessageDialog.showInfo(title,
+                                   f'Project name changed from "{newName}" to "{_name}"\nSee console/log for details',
                                    parent=self.mainWindow)
 
         with catchExceptions(errorStringTemplate='Error saving project: %s'):

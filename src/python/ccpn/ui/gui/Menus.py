@@ -115,8 +115,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:50 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-04-24 16:57:25 +0100 (Wed, April 24, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1526,8 +1526,10 @@ class MenuManager(object):
         _node.setDynamicNode(callback=self._fillHelpHowtosCallback)
 
         # Development->Debug
-        _node = self.menuNodes[DEVELOPMENT_MENU][DEVELOPMENT_DEBUG]
-        _node.setDynamicNode(callback=self._fillDevelopmentDebugCallback)
+        if self.application._isInDebugMode:
+            # optionally set development menu in debug mode
+            _node = self.menuNodes[DEVELOPMENT_MENU][DEVELOPMENT_DEBUG]
+            _node.setDynamicNode(callback=self._fillDevelopmentDebugCallback)
 
     @property
     def project(self):

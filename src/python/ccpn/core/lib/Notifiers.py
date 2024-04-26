@@ -30,8 +30,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:47 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-04-26 17:27:51 +0100 (Fri, April 26, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -155,15 +155,18 @@ class NotifierABC(object):
     def registerNotifier(self):
         """Register self with theObject
         """
-        if not hasattr(self._theObject, '_registeredNotifiersDict'):
+        if not hasattr(self._theObject, NotifierBase.REGISTERED_NOTIFIERS_DICT):
             # This is the case with widgets, that do get GuiNotifiers set
             # Hotfix; unelegant but....
-            # This code is also in widgets.Base._init
+            # This code is also in widgets.Base._init and used in DropBase to check
             getLogger().debug2(f'registerNotifier: {self._theObject} appears not to be a subclass of NotifierBase')
             setattr(self._theObject, NotifierBase.REGISTERED_NOTIFIERS_DICT, _NotifiersDict())
 
         self._theObject._registeredNotifiersDict.addNotifier(self)
         self._isRegistered = True
+
+        if self._debug:
+            sys.stderr.write('>>> registered %s\n' % self)
 
     def unRegisterNotifier(self):
         """Reset the attributes; unregisters from the _registeredNotifoersDict of theObject
@@ -364,9 +367,6 @@ class Notifier(NotifierABC):
         self._unregister= (targetName, self._trigger, func)
         self.registerNotifier()
 
-        if self._debug:
-            sys.stderr.write('>>> registered %s\n' % self)
-
     @property
     def project(self):
         """Return the project
@@ -517,9 +517,6 @@ class CurrentNotifier(NotifierABC):
         func = _current.registerNotify(self, tName)
         self._unregister = (tName, func)
         self.registerNotifier()
-
-        if self._debug:
-            sys.stderr.write(f'>>> registered {self}\n')
 
     def unRegisterNotifier(self):
         """
@@ -713,7 +710,7 @@ class NotifierBase(object):
 
         return result
 
-    def setGuiNotifier(self, theObject, triggers: list, targetNames: str, callback: Callable) -> _NotifierList:
+    def setGuiNotifier(self, theObject, triggers: list, targetNames: list, callback: Callable) -> _NotifierList:
         """
         Set GuiNotifier for Ccpn V3 object theObject
 
@@ -980,3 +977,24 @@ def _makeNotifiers(theObject,
             setterObject._addNotifier(_notifier)
 
     return result
+
+
+def _getRegisteredNotifiers(obj, target):
+    """Get the notifiers registered with obj for target
+    :return a list of the notifiers or None if none defined for obj,target
+    #CCPNMR_INTERNAL: used a various places to check and get the notifiers
+    """
+    if not hasattr(obj, NotifierBase.REGISTERED_NOTIFIERS_DICT):
+        return None
+
+    if (_nDict := getattr(obj, NotifierBase.REGISTERED_NOTIFIERS_DICT)) is None:
+        return None
+
+    if not isinstance(_nDict, _NotifiersDict):
+        raise RuntimeError(f'_getRegisteredNotifiers: retrieved an unexpected object {_nDict}')
+
+    _notifiers = _nDict.get(target, {})
+    if len(_notifiers) == 0:
+        return None
+
+    return list(_notifiers.values())

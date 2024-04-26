@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:52 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-04-26 17:27:52 +0100 (Fri, April 26, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -86,7 +86,7 @@ class _ComparisonTree(ProjectTreeCheckBoxes):
     def __init__(self, parent, *, resources=None, **kwds):
         project = getProject()
 
-        super().__init__(parent, project=project, **kwds)
+        super().__init__(parent, project=project, allowDrops=True, **kwds)
 
         self.resources = resources
         self._parent = parent
@@ -94,7 +94,7 @@ class _ComparisonTree(ProjectTreeCheckBoxes):
         self.comparisonItem = None
 
         # allow drops of items
-        self.setAcceptDrops(True)
+        # self.setAcceptDrops(True)
         self.setDropEventCallback(self._processDroppedItems)
         self.setSizeAdjustPolicy(QtWidgets.QTreeWidget.AdjustIgnored)
 

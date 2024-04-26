@@ -140,8 +140,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:56 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-04-26 17:27:53 +0100 (Fri, April 26, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -221,7 +221,7 @@ def register(overwrite=False):
     """A decorator to register the class
     """
     def theDecorator(cls):
-        cls.registerNotifier(overwrite=overwrite)
+        cls.register(overwrite=overwrite)
         return cls
     return theDecorator
 

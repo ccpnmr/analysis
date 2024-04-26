@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:50 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-04-26 17:27:52 +0100 (Fri, April 26, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -759,10 +759,12 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
     """
     # local import to avoid cycles
     from ccpn.util.Constants import AXISUNIT_NUMBER, AXISUNIT_POINT, AXISUNIT_PPM
+    from ccpn.framework.Application import getProject
 
     if window is None or not isinstance(window, Window):
         raise ValueError('Expected window argument; got %r' % window)
     apiWindow = window._wrappedData
+
     if not (apiTask := apiWindow.getGuiTask()):
         # fix for bad project with bad guiTasks
         #   - make sure there is a correctly attached guiTask to the window
@@ -772,7 +774,8 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
         if apiWindow not in apiTask.windows:
             getLogger().warning(f'--> repairing window/guiTask')
             apiTask.addWindow(apiWindow)
-    project = window.project
+
+    project = getProject()
 
     if (spectrum := project.getByPid(spectrum) if isinstance(spectrum, str) else spectrum) is None:
         raise ValueError('_newSpectrumDisplay: undefined spectrum')

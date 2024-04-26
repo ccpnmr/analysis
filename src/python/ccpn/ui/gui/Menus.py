@@ -115,7 +115,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-24 16:57:25 +0100 (Wed, April 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-26 17:27:52 +0100 (Fri, April 26, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -307,7 +307,7 @@ class MenusDefs(list):
 ),
 
 (VIEW_MENU, [
-    ("Show Chemical Shift Table", partial(ui.showChemicalShiftTable, selectFirstItem=True), [('shortcut', 'ct')]),
+    ("Show Chemical Shift Table", self._showChemicalShiftTableCallback, [('shortcut', 'ct')]),
     ("NmrResidue Table", partial(app.showNmrResidueTable, selectFirstItem=True), [('shortcut', 'nt')]),
     ("Residue Table", partial(app.showResidueTable, selectFirstItem=True)),
     ("Peak Table", partial(app.showPeakTable, selectFirstItem=True), [('shortcut', 'pt')]),
@@ -319,8 +319,8 @@ class MenusDefs(list):
     ("Structure Table", partial(app.showStructureTable, selectFirstItem=True), [('shortcut', 'st')]),
 
     Separator(),
-    ("Show Restraint Analysis Inspector", ui.showRestraintAnalysisInspector, [('shortcut', 'at')]),
-    ("Show Chemical Shift Mapping (Beta)", ui.showChemicalShiftMapping, [('shortcut', 'cm')]),
+    ("Show Restraint Analysis Inspector", self._showRestraintAnalysisInspectorCallback, [('shortcut', 'at')]),
+    ("Show Chemical Shift Mapping (Beta)", self._showChemicalShiftMappingCallback, [('shortcut', 'cm')]),
     ("Relaxation Analysis (Beta)", app.showRelaxationModule, [('shortcut', 'ra')]),
     ("Notes Editor", partial(app.showNotesEditor, selectFirstItem=True), [('shortcut', 'no')]),
 
@@ -404,8 +404,8 @@ class MenusDefs(list):
     # ("Inspect...", self.inspectMolecule, [('enabled', False)]),
 
     Separator(),
-    ("Show Residue Information", ui.showResidueInformation, [('shortcut', 'ri')]),
-    ("Show Reference Chemical Shifts", ui.showReferenceChemicalShifts, [('shortcut', 'rc')]),
+    ("Show Residue Information", self._showResidueInformationCallback, [('shortcut', 'ri')]),
+    ("Show Reference Chemical Shifts", self._showReferenceChemicalShiftsCallback, [('shortcut', 'rc')]),
     ]
 ),
 
@@ -976,6 +976,21 @@ class MenusDefs(list):
         """
         self.mainWindow.toggleCrosshair()
 
+    def _showChemicalShiftTableCallback(self):
+        """Callback for showing ChemicalShiftTable
+        """
+        self.ui.showChemicalShiftTable(selectFirstItem=True)
+
+    def _showRestraintAnalysisInspectorCallback(self):
+        """Callback for showing the RestrainAnalysis inspector
+        """
+        self.ui.showRestraintAnalysisInspector()
+
+    def _showChemicalShiftMappingCallback(self):
+        """Callback to show Chemical shift mapping module
+        """
+        self.ui.showChemicalShiftMapping()
+
     #-----------------------------------------------------------------------------------------
     # Molecules -->
     #-----------------------------------------------------------------------------------------
@@ -992,11 +1007,21 @@ class MenusDefs(list):
     #     pass
 
     def _editMolecularBondsCallback(self):
-        """Displays the molecular-bonds popup.
+        """Callback to display the molecular-bonds popup.
         """
         from ccpn.ui.gui.popups.MolecularBondsPopup import MolecularBondsPopup
         popup = MolecularBondsPopup(parent=self.mainWindow, mainWindow=self.mainWindow)
         popup.exec_()
+
+    def _showResidueInformationCallback(self):
+        """Callback for showing residue information Module
+        """
+        self.ui.showResidueInformation()
+
+    def _showReferenceChemicalShiftsCallback(self):
+        """Callback to show reference chemical shifts
+        """
+        self.ui.showReferenceChemicalShifts()
 
     #-----------------------------------------------------------------------------------------
     # Macro -->
@@ -1527,7 +1552,6 @@ class MenuManager(object):
 
         # Development->Debug
         if self.application._isInDebugMode:
-            # optionally set development menu in debug mode
             _node = self.menuNodes[DEVELOPMENT_MENU][DEVELOPMENT_DEBUG]
             _node.setDynamicNode(callback=self._fillDevelopmentDebugCallback)
 

@@ -2,7 +2,7 @@
 Define routines for a dropable widget
 This module is subclassed by widgets.Base and should not be used directly
 
-GWV April-2017: Drived from an earlier version of DropBase
+GWV April-2017: Derived from an earlier version of DropBase
 
 """
 
@@ -20,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:54 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-04-26 17:27:52 +0100 (Fri, April 26, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,11 +31,14 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import sys
 import contextlib
 import json
-from ccpn.util.Logging import getLogger
 from PyQt5 import QtGui, QtCore, QtWidgets
 
+from ccpn.util.Logging import getLogger
+from ccpn.core.lib.Notifiers import NotifierBase, _getRegisteredNotifiers
+from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
 # GST maybe this too high level but because of the way drag events are handled cooperatively
 # at the moment it needs to be here...
@@ -71,41 +74,44 @@ class DropBase:
 
     def _init(self, acceptDrops=False, **kwds):
 
-        # print('DEBUG DropBase %r: acceptDrops=%s' % (self, acceptDrops))
-
-        self._dropEventCallback = None
-        self._enterEventCallback = None
-        self._dragMoveEventCallback = None
         self.setAcceptDrops(acceptDrops)
         self.inDragToMaximisedModule = False
 
-    def setDropEventCallback(self, callback):
-        """Set the callback function for drop event."""
-        self._dropEventCallback = callback
+        # self._dropEventCallback = None
+        # self._enterEventCallback = None
+        # self._dragMoveEventCallback = None
+
+    # def setDropEventCallback(self, callback):
+    #     """Set the callback function for drop event."""
+    #     self._dropEventCallback = callback
 
     def dragEnterEvent(self, event):
 
         # self.checkForBadDragEvent(event)
 
         parentModule = self._findModule()
-
         if parentModule:
             if parentModule.isDragToMaximisedModule(event):
                 parentModule.handleDragToMaximisedModule(event)
                 return
 
-        dataDict = self.parseEvent(event)
-        if dataDict is not None and len(dataDict) > 1:
-            event.accept()
-            if self._dragMoveEventCallback is not None:
-                self._dragMoveEventCallback(dataDict)
         event.accept()
 
-    def setDragMoveEventCallback(self, callback):
-        self._dragMoveEventCallback = callback
+        # check and fire notifiers
+        dataDict = self.parseEvent(event)
+        if dataDict is not None and len(dataDict) > 1:
+            # GWV: clearly this must have been the incorrect callback
+            # if self._dragMoveEventCallback is not None:
+            #     self._dragMoveEventCallback(dataDict)
+            if (_notifiers := _getRegisteredNotifiers(self, GuiNotifier.ENTEREVENT)) is not None:
+                for _n in _notifiers:
+                    _n(dataDict)
 
-    def setDragEnterEventCallback(self, callback):
-        self._enterEventCallback = callback
+    # def setDragMoveEventCallback(self, callback):
+    #     self._dragMoveEventCallback = callback
+
+    # def setDragEnterEventCallback(self, callback):
+    #     self._enterEventCallback = callback
 
     # def dragMoveEvent(self, event):
     #   dataDict = self.parseEvent(event)
@@ -151,6 +157,7 @@ class DropBase:
         return result
 
     def handleDragToMaximisedModule(self, ev):
+
         class MyEventFilter(QtCore.QObject):
             def __init__(self, target, statusBar):
                 super().__init__()
@@ -170,12 +177,12 @@ class DropBase:
 
 
                 except Exception as e:
-                    print('exception during event filter cleanup, deleting myself', e)
+                    getLogger().warning(f'MyEventFilter: Encountred {e} during event filter cleanup')
                     self.deleteLater()
 
                 result = super().eventFilter(obj, event)
                 return result
-
+        #end class
 
         parentModule = self._findModule()
 
@@ -203,6 +210,7 @@ class DropBase:
         Catch dropEvent and dispatch to processing callback
         'Native' treatment of CcpnModule instances
         """
+        from ccpn.core.lib.Notifiers import NotifierBase
 
         if self.inDragToMaximisedModule:
             return
@@ -212,35 +220,35 @@ class DropBase:
             self._clearOverlays()
             return
 
-        if self.acceptDrops():
+        if not self.acceptDrops():
+            getLogger().debug(f'Widget {self} is not droppable')
+
+        else:
             dataDict = self.parseEvent(event)
             getLogger().debug(f'Accepted drop with data:{dataDict}')
-            getLogger().debug(f'DropBase-event>: {self} callback: {self._dropEventCallback} data: {dataDict}')
 
             if dataDict is not None and len(dataDict) > 1:
-                event.accept()
+                # test self and parents to find valid callbacks
+                _widget = self
+                while _widget:
+                    if (_notifiers := _getRegisteredNotifiers(_widget, target=GuiNotifier.DROPEVENT)) is None:
+                        _widget = _widget.parent()
 
-                # follow parents to find first valid callback, until top-level reached
-                widg = self
-                while widg:
-                    if (hasattr(widg, '_dropEventCallback') and widg._dropEventCallback is not None):
-                        widg._dropEventCallback(dataDict)
+                    else:
+                        for _n in _notifiers:
+                            _n(dataDict)
                         event.accept()
                         break
-                    widg = widg.parent()
 
                 else:
                     event.ignore()
-
-        else:
-            getLogger().debug('Widget not droppable')
 
         # call to clear the overlays
         self._clearOverlays()
 
     def parseEvent(self, event) -> dict:
         """
-        Interpret drop event; extract urls, text or JSONDATA dicts
+        Interprets drop event; extract urls, text or JSONDATA dicts
         convert PIDS to Pid object's
         return a dict with
           - event, source key,values pairs

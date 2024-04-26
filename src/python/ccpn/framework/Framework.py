@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:48 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-04-26 17:27:52 +0100 (Fri, April 26, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -258,7 +258,7 @@ class Framework(NotifierBase):
         # Resources
         sys.stderr.write('==> Loading resources... ')
         self.resources = None
-        # self.resources = Resources(self)
+        self.resources = Resources(self)
         sys.stderr.write('Done!\n')
 
         # get a user interface; nb. ui.start() is called by the application

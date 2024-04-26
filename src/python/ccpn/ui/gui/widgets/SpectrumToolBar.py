@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:55 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-04-26 17:27:53 +0100 (Fri, April 26, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -70,8 +70,9 @@ class SpectrumToolBar(ToolBar):
 
         self.setMouseTracking(True)
         self._spectrumToolBarBlockingLevel = 0
-        self.project = getProject()
-        self.current = getCurrent()
+        # GWV 19/4/24: properties now
+        # self.project = getProject()
+        # self.current = getCurrent()
         self._firstButton = 0
         self._currentSpectrumNotifier = CurrentNotifier(
                                   targetName=Spectrum._pluralLinkName,
@@ -102,6 +103,17 @@ class SpectrumToolBar(ToolBar):
                                     ")
         self._setButtonColourScheme()
 
+    @property
+    def project(self):
+        """:return Project instance
+        """
+        return getProject()
+
+    @property
+    def current(self):
+        """:return Current instance
+        """
+        return getCurrent()
 
     @property
     def isBlocked(self):

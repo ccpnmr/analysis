@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-03-26 11:45:52 +0000 (Tue, March 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-04-29 10:45:14 +0100 (Mon, April 29, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -108,7 +108,8 @@ class MacroEditor(CcpnModule):
 
     def __init__(self, mainWindow=None, name='MacroEditor', filePath=None):
         paths = [aPath(path) for path in mainWindow.current.macroFiles]
-        if filePath in paths:
+        if aPath(filePath) in paths:
+            MessageDialog.showMessage('Already Opened.', 'This file is already opened in the project')
             raise TypeError('This Macro is already opened in the project')
 
         CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
@@ -358,26 +359,26 @@ class MacroEditor(CcpnModule):
 
         if filePath:
             if filePath.endswith('.py'):
-                if self._isInCurrent(filePath):
-                    MessageDialog.showMessage('Already Opened.', 'This file is already opened in the project')
-                    return
-                else:
-                    with open(aPath(filePath), 'r') as f:
-                        self.textEditor.textChanged.disconnect()
-                        self.textEditor.setUndoRedoEnabled(False)
-                        self.textEditor.clear()
-                        # for line in f.readlines():  # changed to f.read() instead of line by line.
-                        #     self.textEditor.insertPlainText(line)
-                        self.textEditor.insertPlainText(f.read())
-                        self.textEditor.setUndoRedoEnabled(True)
-                        # self.macroFile = f
-                        self._removeMacroFromCurrent()
-                        self.filePath = filePath
-                        self._preEditorText = self.textEditor.get()
-                        self._lastTimestp = None
-                        self._setCurrentMacro()
-                        self._setFileName()
-                        self.textEditor.textChanged.connect(self._textedChanged)
+                # if self._isInCurrent(filePath):
+                #     MessageDialog.showMessage('Already Opened.', 'This file is already opened in the project')
+                #     return
+                # else:
+                with open(aPath(filePath), 'r') as f:
+                    self.textEditor.textChanged.disconnect()
+                    self.textEditor.setUndoRedoEnabled(False)
+                    self.textEditor.clear()
+                    # for line in f.readlines():  # changed to f.read() instead of line by line.
+                    #     self.textEditor.insertPlainText(line)
+                    self.textEditor.insertPlainText(f.read())
+                    self.textEditor.setUndoRedoEnabled(True)
+                    # self.macroFile = f
+                    self._removeMacroFromCurrent()
+                    self.filePath = filePath
+                    self._preEditorText = self.textEditor.get()
+                    self._lastTimestp = None
+                    self._setCurrentMacro()
+                    self._setFileName()
+                    self.textEditor.textChanged.connect(self._textedChanged)
             else:
                 MessageDialog.showMessage('Format Not Supported.', 'On MacroEditor you can only use a *.py file type')
 

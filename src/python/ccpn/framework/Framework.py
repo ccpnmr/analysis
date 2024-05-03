@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-26 17:27:52 +0100 (Fri, April 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-03 14:09:46 +0100 (Fri, May 03, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -141,6 +141,8 @@ class Framework(NotifierBase):
     applicationName = None
     applicationVersion = None
 
+    _applicationReadOnlyMode = None
+
     #-----------------------------------------------------------------------------------------
 
     def __init__(self, args=Arguments()):
@@ -181,9 +183,9 @@ class Framework(NotifierBase):
 
         self.args = args
 
-        # set to True to override the read-only status of a project
-        #   required to use save/saveAs but keep the project.readOnly status until the next load
-        self._saveOverrideState = False
+        # # set to True to override the read-only status of a project
+        # #   required to use save/saveAs but keep the project.readOnly status until the next load
+        # self._saveOverrideState = False
 
         self._created = datetime.now().strftime("%H%M")  # adds the app creation time to the end of the logger filename
 
@@ -245,14 +247,16 @@ class Framework(NotifierBase):
         self._disableModuleException = getattr(self.args, 'disableModuleException', False)
         self._disableQueueException = getattr(self.args, 'disableQueueException', False)
 
-        self._readOnly = getattr(self.args, 'readOnly', False)
+        self._applicationReadOnlyMode = getattr(self.args, 'readOnly', False)
 
         # register dataLoaders for the first and only time
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders
+
         self._dataLoaders = getDataLoaders()
 
         # register SpectrumDataSource formats for the first and only time
         from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
+
         self._spectrumDataSourceFormats = getDataFormats()
 
         # Resources
@@ -310,43 +314,28 @@ class Framework(NotifierBase):
         """
         return self.ui and self.ui._hasGui
 
+    # GWV 29/2/2024: Not used (!?)
     @property
-    def _saveOverride(self):
-        """Return the save-override state, this allows the saving of projects that are marked as read-only
+    def isApplicationReadOnly(self):
+        """Return the application readOnly state for all projects.
+        Set from the command-line switch --read-only
+        Overrides project.readOnly except for using save/saveAs as necessary
         """
-        return self._saveOverrideState
+        return self._applicationReadOnlyMode
 
-    @_saveOverride.setter
-    def _saveOverride(self, value):
+    def setApplicationReadOnly(self, value):
+        """Set the global application readOnly state.
+        """
         if not isinstance(value, bool):
-            raise TypeError(f'{self.__class__.__name__}._saveOverride must be a bool')
-
-        self._saveOverrideState = value
+            raise TypeError(f'{self.__class__.__name__}.setApplicationReadOnly must be a bool')
+        if value == self._applicationReadOnlyMode:
+            return
+        self._applicationReadOnlyMode = value
         if self.project:
             self.project._updateReadOnlyState()
             self.project._updateLoggerState()
             if self.mainWindow:
                 self.mainWindow._setReadOnlyIcon()
-
-    # GWV 29/2/2024: Not used (!?)
-    # @property
-    # def defaultReadOnly(self):
-    #     """Return the deafult read-only state for all projects.
-    #     Overrides project.readOnly except for using save/saveAs as necessary
-    #     """
-    #     return self._readOnly
-    #
-    # @defaultReadOnly.setter
-    # def defaultReadOnly(self, value):
-    #     if not isinstance(value, bool):
-    #         raise TypeError(f'{self.__class__.__name__}.defaultReadOnly must be a bool')
-    #
-    #     self._readOnly = value
-    #     if self.project:
-    #         self.project._updateReadOnlyState()
-    #         self.project._updateLoggerState()
-    #         if self.mainWindow:
-    #             self.mainWindow._setReadOnlyIcon()
 
     #-----------------------------------------------------------------------------------------
     # Useful (?) directories as Path instances
@@ -468,10 +457,12 @@ class Framework(NotifierBase):
         """
         if self.args.interface == 'Gui':
             from ccpn.ui.gui.Gui import Gui
+
             ui = Gui(application=self)
 
         else:
             from ccpn.ui.Ui import NoUi
+
             ui = NoUi(application=self)
 
         return ui
@@ -522,7 +513,6 @@ class Framework(NotifierBase):
     #     self._updateAutoBackup(kill=True)
     #     self.preferences._saveUserPreferences()
 
-
     #-----------------------------------------------------------------------------------------
     # Backup (TODO: need refactoring in AutoBackupManager)
     #-----------------------------------------------------------------------------------------
@@ -550,7 +540,8 @@ class Framework(NotifierBase):
 
         else:
             # start the thread
-            self._autoBackupThread.setInterval(self.preferences.general.autoBackupFrequency * 60)  # preferences is minutes
+            self._autoBackupThread.setInterval(
+                self.preferences.general.autoBackupFrequency * 60)  # preferences is minutes
             self._autoBackupThread.start()
 
     @contextlib.contextmanager
@@ -592,7 +583,7 @@ class Framework(NotifierBase):
 
     def _backupProject(self):
         try:
-            if self.project.readOnly:
+            if self.project.isReadOnly:
                 # skip if the project is read-only
                 getLogger().debug('Backup skipped: Project is read-only')
                 return
@@ -601,7 +592,6 @@ class Framework(NotifierBase):
                 getLogger().debug('Backup skipped: Not modified since last backup')
                 return
 
-            # NOTE:ED - check with Geerten whether it needs to do anything else here
             if self.project._backup():
                 # log the time that a backup was completed
                 self._setLastBackupTime()
@@ -671,11 +661,11 @@ class Framework(NotifierBase):
         :return the Logging defined level
         """
         _conversion = {
-            3 : Logging.DEBUG3,
-            2 : Logging.DEBUG2,
-            1 : Logging.DEBUG,
-            0 : Logging.INFO,
-        }
+            3: Logging.DEBUG3,
+            2: Logging.DEBUG2,
+            1: Logging.DEBUG,
+            0: Logging.INFO,
+            }
         return _conversion.get(self._debugLevel, Logging.INFO)
 
     @property
@@ -811,131 +801,131 @@ class Framework(NotifierBase):
     #     """Set up graphics system after loading
     #     """
     #     # from ccpn.ui.gui.lib import GuiStrip
-        #
-        # project = self.project
-        # mainWindow = self.ui.mainWindow
-        #
-        # # 20191113:ED Initial insertion of spectrumDisplays into the moduleArea
-        # try:
-        #     insertPoint = mainWindow.moduleArea
-        #     for spectrumDisplay in mainWindow.spectrumDisplays:
-        #         mainWindow.moduleArea.addModule(spectrumDisplay,
-        #                                         position='right',
-        #                                         relativeTo=insertPoint)
-        #         insertPoint = spectrumDisplay
-        #
-        # except Exception:
-        #     getLogger().warning('Impossible to restore SpectrumDisplays')
-        #
-        # try:
-        #     if self.preferences.general.restoreLayoutOnOpening and \
-        #             mainWindow.moduleLayouts:
-        #         Layout.restoreLayout(mainWindow, mainWindow.moduleLayouts, restoreSpectrumDisplay=False)
-        # except Exception as e:
-        #     getLogger().warning(f'Impossible to restore Layout {e}')
-        #
-        # # New LayoutManager implementation; awaiting completion
-        # # try:
-        # #     from ccpn.framework.LayoutManager import LayoutManager
-        # #     layout = LayoutManager(mainWindow)
-        # #     path = self.statePath / 'Layout.json'
-        # #     layout.restoreState(path)
-        # #     layout.saveState()
-        # #
-        # # except Exception as es:
-        # #     getLogger().warning('Error restoring layout: %s' % es)
-        #
-        # # check that the top moduleArea is correctly formed - strange special case when all modules have
-        # #   been moved to tempAreas
-        # mArea = self.ui.mainWindow.moduleArea
-        # if mArea.topContainer is not None and mArea.topContainer._container is None:
-        #     getLogger().debug('Correcting empty topContainer')
-        #     mArea.topContainer = None
-        #
-        # try:
-        #     # Initialise colours
-        #     # # for spectrumDisplay in project.windows[0].spectrumDisplays:  # there is exactly one window
-        #     #
-        #     # for spectrumDisplay in mainWindow.spectrumDisplays:  # there is exactly one window
-        #     #     pass  # GWV: poor solution; removed the routine spectrumDisplay._resetRemoveStripAction()
-        #
-        #     # initialise any colour changes before generating gui strips
-        #     self._correctColours()
-        # except Exception as es:
-        #     getLogger().warning(f'Impossible to restore colours - {es}')
-        #
-        # # Initialise Strips
-        # for spectrumDisplay in mainWindow.spectrumDisplays:
-        #     try:
-        #         for si, strip in enumerate(spectrumDisplay.orderedStrips):
-        #
-        #             # temporary to catch bad strips from ordering bug
-        #             if not strip:
-        #                 continue
-        #
-        #             # get the new tilePosition of the strip - tilePosition is always (x, y) relative to screen stripArrangement
-        #             #                                       changing screen arrangement does NOT require flipping tilePositions
-        #             #                                       i.e. Y = (across, down); X = (down, across)
-        #             #                                       - check delete/undo/redo strips
-        #             tilePosition = strip.tilePosition
-        #
-        #             # move to the correct place in the widget - check stripDirection to display as row or column
-        #             if spectrumDisplay.stripArrangement == 'Y':
-        #                 if True:  # tilePosition is None:
-        #                     spectrumDisplay.stripFrame.layout().addWidget(strip, 0, si)  #stripIndex)
-        #                     strip.tilePosition = (0, si)
-        #                 # else:
-        #                 #     spectrumDisplay.stripFrame.layout().addWidget(strip, tilePosition[0], tilePosition[1])
-        #
-        #             elif spectrumDisplay.stripArrangement == 'X':
-        #                 if True:  #tilePosition is None:
-        #                     spectrumDisplay.stripFrame.layout().addWidget(strip, si, 0)  #stripIndex)
-        #                     strip.tilePosition = (0, si)
-        #                 # else:
-        #                 #     spectrumDisplay.stripFrame.layout().addWidget(strip, tilePosition[1], tilePosition[0])
-        #
-        #             elif spectrumDisplay.stripArrangement == 'T':
-        #                 # NOTE:ED - Tiled plots not fully implemented yet
-        #                 getLogger().warning(f'Tiled plots not implemented for spectrumDisplay: {str(spectrumDisplay)}')
-        #             else:
-        #                 getLogger().warning(f'Strip direction is not defined for spectrumDisplay: {str(spectrumDisplay)}')
-        #
-        #             if not spectrumDisplay.is1D:
-        #                 for _strip in spectrumDisplay.strips:
-        #                     _strip._updatePlaneAxes()
-        #
-        #         if spectrumDisplay.isGrouped:
-        #             # set up the spectrumGroup toolbar
-        #
-        #             spectrumDisplay.spectrumToolBar.hide()
-        #             spectrumDisplay.spectrumGroupToolBar.show()
-        #
-        #             _spectrumGroups = [project.getByPid(pid) for pid in spectrumDisplay._getSpectrumGroups()]
-        #
-        #             for group in _spectrumGroups:
-        #                 spectrumDisplay.spectrumGroupToolBar._forceAddAction(group)
-        #
-        #         else:
-        #             # set up the spectrum toolbar
-        #
-        #             spectrumDisplay.spectrumToolBar.show()
-        #             spectrumDisplay.spectrumGroupToolBar.hide()
-        #             spectrumDisplay.setToolbarButtons()
-        #
-        #         # some strips may not be instantiated at this point
-        #         # resize the stripFrame to the spectrumDisplay - ready for first resize event
-        #         # spectrumDisplay.stripFrame.resize(spectrumDisplay.width() - 2, spectrumDisplay.stripFrame.height())
-        #         spectrumDisplay.showAxes(stretchValue=True, widths=True,
-        #                                  minimumWidth=GuiStrip.STRIP_MINIMUMWIDTH)
-        #
-        #     except Exception as e:
-        #         getLogger().warning(f'Impossible to restore spectrumDisplay(s) {e}')
-        #
-        # try:
-        #     if self.current.strip is None and len(mainWindow.strips) > 0:
-        #         self.current.strip = mainWindow.strips[0]
-        # except Exception as e:
-        #     getLogger().warning(f'Error restoring current.strip: {e}')
+    #
+    # project = self.project
+    # mainWindow = self.ui.mainWindow
+    #
+    # # 20191113:ED Initial insertion of spectrumDisplays into the moduleArea
+    # try:
+    #     insertPoint = mainWindow.moduleArea
+    #     for spectrumDisplay in mainWindow.spectrumDisplays:
+    #         mainWindow.moduleArea.addModule(spectrumDisplay,
+    #                                         position='right',
+    #                                         relativeTo=insertPoint)
+    #         insertPoint = spectrumDisplay
+    #
+    # except Exception:
+    #     getLogger().warning('Impossible to restore SpectrumDisplays')
+    #
+    # try:
+    #     if self.preferences.general.restoreLayoutOnOpening and \
+    #             mainWindow.moduleLayouts:
+    #         Layout.restoreLayout(mainWindow, mainWindow.moduleLayouts, restoreSpectrumDisplay=False)
+    # except Exception as e:
+    #     getLogger().warning(f'Impossible to restore Layout {e}')
+    #
+    # # New LayoutManager implementation; awaiting completion
+    # # try:
+    # #     from ccpn.framework.LayoutManager import LayoutManager
+    # #     layout = LayoutManager(mainWindow)
+    # #     path = self.statePath / 'Layout.json'
+    # #     layout.restoreState(path)
+    # #     layout.saveState()
+    # #
+    # # except Exception as es:
+    # #     getLogger().warning('Error restoring layout: %s' % es)
+    #
+    # # check that the top moduleArea is correctly formed - strange special case when all modules have
+    # #   been moved to tempAreas
+    # mArea = self.ui.mainWindow.moduleArea
+    # if mArea.topContainer is not None and mArea.topContainer._container is None:
+    #     getLogger().debug('Correcting empty topContainer')
+    #     mArea.topContainer = None
+    #
+    # try:
+    #     # Initialise colours
+    #     # # for spectrumDisplay in project.windows[0].spectrumDisplays:  # there is exactly one window
+    #     #
+    #     # for spectrumDisplay in mainWindow.spectrumDisplays:  # there is exactly one window
+    #     #     pass  # GWV: poor solution; removed the routine spectrumDisplay._resetRemoveStripAction()
+    #
+    #     # initialise any colour changes before generating gui strips
+    #     self._correctColours()
+    # except Exception as es:
+    #     getLogger().warning(f'Impossible to restore colours - {es}')
+    #
+    # # Initialise Strips
+    # for spectrumDisplay in mainWindow.spectrumDisplays:
+    #     try:
+    #         for si, strip in enumerate(spectrumDisplay.orderedStrips):
+    #
+    #             # temporary to catch bad strips from ordering bug
+    #             if not strip:
+    #                 continue
+    #
+    #             # get the new tilePosition of the strip - tilePosition is always (x, y) relative to screen stripArrangement
+    #             #                                       changing screen arrangement does NOT require flipping tilePositions
+    #             #                                       i.e. Y = (across, down); X = (down, across)
+    #             #                                       - check delete/undo/redo strips
+    #             tilePosition = strip.tilePosition
+    #
+    #             # move to the correct place in the widget - check stripDirection to display as row or column
+    #             if spectrumDisplay.stripArrangement == 'Y':
+    #                 if True:  # tilePosition is None:
+    #                     spectrumDisplay.stripFrame.layout().addWidget(strip, 0, si)  #stripIndex)
+    #                     strip.tilePosition = (0, si)
+    #                 # else:
+    #                 #     spectrumDisplay.stripFrame.layout().addWidget(strip, tilePosition[0], tilePosition[1])
+    #
+    #             elif spectrumDisplay.stripArrangement == 'X':
+    #                 if True:  #tilePosition is None:
+    #                     spectrumDisplay.stripFrame.layout().addWidget(strip, si, 0)  #stripIndex)
+    #                     strip.tilePosition = (0, si)
+    #                 # else:
+    #                 #     spectrumDisplay.stripFrame.layout().addWidget(strip, tilePosition[1], tilePosition[0])
+    #
+    #             elif spectrumDisplay.stripArrangement == 'T':
+    #                 # NOTE:ED - Tiled plots not fully implemented yet
+    #                 getLogger().warning(f'Tiled plots not implemented for spectrumDisplay: {str(spectrumDisplay)}')
+    #             else:
+    #                 getLogger().warning(f'Strip direction is not defined for spectrumDisplay: {str(spectrumDisplay)}')
+    #
+    #             if not spectrumDisplay.is1D:
+    #                 for _strip in spectrumDisplay.strips:
+    #                     _strip._updatePlaneAxes()
+    #
+    #         if spectrumDisplay.isGrouped:
+    #             # set up the spectrumGroup toolbar
+    #
+    #             spectrumDisplay.spectrumToolBar.hide()
+    #             spectrumDisplay.spectrumGroupToolBar.show()
+    #
+    #             _spectrumGroups = [project.getByPid(pid) for pid in spectrumDisplay._getSpectrumGroups()]
+    #
+    #             for group in _spectrumGroups:
+    #                 spectrumDisplay.spectrumGroupToolBar._forceAddAction(group)
+    #
+    #         else:
+    #             # set up the spectrum toolbar
+    #
+    #             spectrumDisplay.spectrumToolBar.show()
+    #             spectrumDisplay.spectrumGroupToolBar.hide()
+    #             spectrumDisplay.setToolbarButtons()
+    #
+    #         # some strips may not be instantiated at this point
+    #         # resize the stripFrame to the spectrumDisplay - ready for first resize event
+    #         # spectrumDisplay.stripFrame.resize(spectrumDisplay.width() - 2, spectrumDisplay.stripFrame.height())
+    #         spectrumDisplay.showAxes(stretchValue=True, widths=True,
+    #                                  minimumWidth=GuiStrip.STRIP_MINIMUMWIDTH)
+    #
+    #     except Exception as e:
+    #         getLogger().warning(f'Impossible to restore spectrumDisplay(s) {e}')
+    #
+    # try:
+    #     if self.current.strip is None and len(mainWindow.strips) > 0:
+    #         self.current.strip = mainWindow.strips[0]
+    # except Exception as e:
+    #     getLogger().warning(f'Error restoring current.strip: {e}')
 
     #-----------------------------------------------------------------------------------------
 
@@ -1053,8 +1043,8 @@ class Framework(NotifierBase):
         :param prefix: prefix appended to the name
         :param suffix: suffix of the name
         """
-        dir = self._temporaryDirectory.name
-        with tempfile.NamedTemporaryFile(prefix=prefix, suffix=suffix, dir=dir) as tFile:
+        _dir = self._temporaryDirectory.name
+        with tempfile.NamedTemporaryFile(prefix=prefix, suffix=suffix, dir=_dir) as tFile:
             path = tFile.name
         return Path(path)
 
@@ -1074,7 +1064,7 @@ class Framework(NotifierBase):
             except (PermissionError, FileNotFoundError):
                 getLogger().debug('Folder may be read-only')
 
-    def _newProject(self, name:str = 'newProject', isTemporary=True) -> Project:
+    def _newProject(self, name: str = 'newProject', isTemporary=True) -> Project:
         """Create new, empty project with name
         All new projects are created as temporary if isTemporary=True, to be saved later at another location
         :return a Project instance
@@ -1096,15 +1086,15 @@ class Framework(NotifierBase):
 
         # NB _closeProject includes a gui cleanup call
         self._closeProject()
-        self._setSaveOverride(True)
         _project = _newProject(self, name=name, path=path, isTemporary=True)
-        self._initialiseProject(_project)  # This also set the linkages
+        with _project._setSaveOverride():
+            self._initialiseProject(_project)  # This also set the linkages
 
         getLogger().debug(f'Opened project "{name}" at {_project.path}')
 
         # update the logger read-only state
-        self.project._updateReadOnlyState()
-        self.project._updateLoggerState(readOnly=False, flush=True)
+        _project._updateReadOnlyState()
+        _project._updateLoggerState(readOnly=_project.isReadOnly)
         if self.mainWindow:
             self.mainWindow._setReadOnlyIcon()
 
@@ -1141,8 +1131,6 @@ class Framework(NotifierBase):
         # if self.preferences.general.keepSpectraInsideProject:
         #     self.project.copySpectraToProject()
 
-
-
         try:
             self.project.saveAs(newPath=newPath, overwrite=overwrite, copySubDirectories=copySubDirectories)
             Layout.saveLayoutToJson(self.ui.mainWindow)
@@ -1170,26 +1158,15 @@ class Framework(NotifierBase):
 
         return True
 
-    @contextlib.contextmanager
-    def _setSaveOverride(self, state):
-        """Temporarily set the save-override state for save/saveAs
-        """
-        lastState = self._saveOverride
-        self._saveOverride = state
-        try:
-            yield
-
-        finally:
-            self._saveOverride = lastState
-
-    def _saveProject(self, force=False) -> bool:
+    def _saveProject(self) -> bool:
         """Save project to newPath and return True if successful
         """
-        # ensure override flag is clean
-        self._saveOverride = False
+        # ensure project override flag is clean
+        self.project._clearOverride()
 
-        with self._setSaveOverride(force):
-            if self.project.readOnly:
+        with self.project._setSaveOverride():
+            if self.project.isReadOnly:
+                # shouldn't get here?
                 getLogger().warning('Project is read-only')
                 return True
 
@@ -1222,7 +1199,7 @@ class Framework(NotifierBase):
         :param overwrite: flag to indicate overwriting of existing path
         :return True if successful
         """
-        with self._setSaveOverride(True):
+        with self.project._setSaveOverride():
             # override read-only for a save to a new folder
             #   project can still be read-only for next load
             return self.ui.saveProjectAs(newPath=newPath, overwrite=overwrite)
@@ -1309,7 +1286,7 @@ class Framework(NotifierBase):
 
                     # NOTE:ED - move inside ui._loadProject?
                     if self.project:
-                        if self.project.readOnly and dataLoader.makeArchive:
+                        if self.project.isReadOnly and dataLoader.makeArchive:
                             MessageDialog.showWarning('Archive Project', 'Project is read-only',
                                                       parent=self.ui.mainWindow
                                                       )
@@ -1332,7 +1309,7 @@ class Framework(NotifierBase):
                             # may be run from the command-line, so no project yet
                             # update the logger read-only state
                             self.project._updateReadOnlyState()
-                            self.project._updateLoggerState(flush=not self.project.readOnly)
+                            self.project._updateLoggerState(readOnly=self.project.isReadOnly)
                             if self.mainWindow:
                                 self.mainWindow._setReadOnlyIcon()
 
@@ -1361,7 +1338,7 @@ class Framework(NotifierBase):
 
         # update the logger read-only state
         self.project._updateReadOnlyState()
-        self.project._updateLoggerState(flush=not self.project.readOnly)
+        self.project._updateLoggerState(readOnly=self.project.isReadOnly)
         if self.mainWindow:
             self.mainWindow._setReadOnlyIcon()
 
@@ -1519,7 +1496,7 @@ class Framework(NotifierBase):
         # TODO: find a different solution for this
         with rebuildSidebar(application=self):
             if _newProject and \
-                (ch := project._getChild(ChemicalShiftList, DEFAULT_CHEMICALSHIFTLIST)):
+                    (ch := project._getChild(ChemicalShiftList, DEFAULT_CHEMICALSHIFTLIST)):
                 # rename the existing chemical-shift-list, hopefully an unused name
                 ch.rename(TOBEDELETED)
 
@@ -1746,7 +1723,7 @@ class Framework(NotifierBase):
                     self.layout = layout
 
             else:  # opens the default
-                if not self.project.readOnly:
+                if not self.project.isReadOnly:
                     Layout._createLayoutFile(self)
                     self._getUserLayout()
 

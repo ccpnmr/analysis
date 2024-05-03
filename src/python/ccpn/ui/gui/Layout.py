@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:50 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-05-03 14:09:46 +0100 (Fri, May 03, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -77,7 +77,7 @@ MODULES = 'modules'
 
 def _createLayoutFile(application):
     try:
-        if application.project.readOnly:
+        if application.project.isReadOnly:
             # project is read-only, don't create new file
             return
 
@@ -235,7 +235,7 @@ def saveLayoutToJson(mainWindow, jsonFilePath=None):
     :return: None
     """
     try:
-        if mainWindow.application.project.readOnly:
+        if mainWindow.application.project.isReadOnly:
             getLogger().debug('SaveLayout skipped: Project is read-only')
 
         updateSavedLayout(mainWindow)
@@ -345,7 +345,7 @@ def _getApplicationSpecificModules(mainWindow, applicationName) -> list:
 
 def _getAvailableModules(mainWindow, layout, neededModules):
     from ccpn.ui.gui import modules as gM
-    from ccpn.ui.gui.modules import experimentAnalysis  as ea
+    from ccpn.ui.gui.modules import experimentAnalysis as ea
 
     if General in layout:
         if ApplicationName in layout.general:
@@ -353,8 +353,9 @@ def _getAvailableModules(mainWindow, layout, neededModules):
             applicationName = layout.general.get(ApplicationName)  # getattr(layout.general, ApplicationName)
             modules = []
             if applicationName != mainWindow.application.applicationName:
-                getLogger().debug('The layout was saved in a different application. Some of the modules might not be loaded.'
-                                  'If this happens,  start a new project with %s' % applicationName)
+                getLogger().debug(
+                    'The layout was saved in a different application. Some of the modules might not be loaded.'
+                    'If this happens,  start a new project with %s' % applicationName)
             else:
                 modules = _getApplicationSpecificModules(mainWindow, applicationName)
             modules.append(gM)
@@ -430,7 +431,8 @@ def _openSpectrumDisplays(mainWindow, spectrumDisplaysState):
                             newStrip = sd.addStrip()
                             newStrip.restoreZoomFromState(stripState)
             else:
-                project.newSpectrumDisplay(axisCodes=fd.get('displayAxisCodes'), stripDirection=fd.get('stripDirection'))
+                project.newSpectrumDisplay(axisCodes=fd.get('displayAxisCodes'),
+                                           stripDirection=fd.get('stripDirection'))
 
 
 def restoreLayout(mainWindow, layout, restoreSpectrumDisplay=False):
@@ -537,6 +539,7 @@ def _getPredefinedLayouts(dirPath=None) -> list:
     :param dirPath: directory to use; defaults to PathsAndUrls.predefinedLayouts
     """
     from ccpn.framework.PathsAndUrls import predefinedLayouts
+
     if dirPath is None:
         dirPath = predefinedLayouts
     return _getLayouts(dirPath)

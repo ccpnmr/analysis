@@ -4,9 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -16,9 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$Author: Luca Mureddu $"
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$Date: 2021-07-02 17:16:25 +0100 (Fri, July 02, 2021) $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:42 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2024-05-03 14:09:45 +0100 (Fri, May 03, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,7 +31,7 @@ import uuid
 import pandas as pd
 from collections import OrderedDict as od
 from collections import defaultdict
-from ccpn.util.Logging import getLogger
+# from ccpn.util.Logging import getLogger
 from ccpn.core.lib.Cache import cached
 from ccpnmodel.ccpncore.api.memops.Implementation import ComplexDataType as ApiType
 
@@ -116,7 +115,8 @@ class APIStatus(object):
         'refSampleComponentStores',
         ]
 
-    def __init__(self, apiObj, build=True, onlyInvalids=True, completeScan=False, includeDefaultChildren=False, checkValidity=True):
+    def __init__(self, apiObj, build=True, onlyInvalids=True, completeScan=False, includeDefaultChildren=False,
+                 checkValidity=True):
         self._data = None
         self._addOnlyInvalidObjs = onlyInvalids
         self._includeAllChildren = includeDefaultChildren
@@ -130,7 +130,8 @@ class APIStatus(object):
     @property
     @cached(CACHEDATA, maxItems=20000, debug=False)
     def data(self):
-        "The dataframe that contains a list of all current API objects status"
+        """Return the dataframe that contains a list of all current API objects status.
+        """
         return self._data
 
     @data.getter
@@ -183,8 +184,6 @@ class APIStatus(object):
             methodNames : list, a list of method names to get the set of direct children.
                                 Automatically detected if not explicitly given. Only given in recursive mode for speed
                                 optimisation from the first instance of a loop.
-
-        Return: None
         """
         methodNames = methodNames or self._getChildrenMethodNames(obj)
         for childrenMethodName in methodNames:
@@ -243,7 +242,8 @@ class APIStatus(object):
             methodNames = [x for x in methodNames if x not in self._excludedChildren]
         return methodNames
 
-    def _getDFforValues(self, df, values, headerName):
+    @staticmethod
+    def _getDFforValues(df, values, headerName):
         return df[df[headerName].isin(values)]
 
 # if __name__ == '__main__':

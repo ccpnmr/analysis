@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:49 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-05-03 14:09:46 +0100 (Fri, May 03, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -677,13 +677,13 @@ class NoUi(Ui):
         if self.project.isTemporary:
             return self.saveProjectAs()
 
-        if self.project.readOnly:
+        if self.project.isReadOnly:
             getLogger().info('The project is marked as read-only.')
             return True
 
         with catchExceptions(errorStringTemplate='Error saving project: %s'):
             try:
-                if not self.application._saveProject(force=True):
+                if not self.application._saveProject():
                     return False
             except (PermissionError, FileNotFoundError):
                 getLogger().debug('Folder may be read-only')

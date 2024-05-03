@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:50 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-05-03 14:09:46 +0100 (Fri, May 03, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -95,6 +95,8 @@ _INTEGRAL_PEAKS = 8
 _MULTIPLET_PEAKS = 16
 
 READONLYCHANGED = 'readOnlyChanged'
+PROJECTSAVEAS = 'projectSaveAs'
+PROJECTSAVE = 'projectSave'
 
 
 class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
@@ -105,6 +107,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
     def __init__(self, application=None):
 
         # Shortcuts only inserts methods
+        super(Shortcuts, self).__init__()
         super(QtWidgets.QMainWindow, self).__init__()
 
         logger = getLogger()
@@ -121,7 +124,6 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             layout.setContentsMargins(0, 0, 0, 0)
             layout.setSpacing(0)
         # logger.debug2('GuiMainWindow: layout: %s' % layout)
-
 
         self.setGeometry(200, 40, 1100, 900)
 
@@ -204,50 +206,69 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         self._unlockedIcon = Icon('icons/unlocked')
         self._pixmapWidth = getFontHeight()
 
-        self._readOnlyState = ActiveLabel(self, mainWindow=self)
-        self._readOnlyState.setFixedSize(self._pixmapWidth + 4, self._pixmapWidth + 4)
-        self._readOnlyState.setPixmap(self._unlockedIcon.pixmap(self._pixmapWidth, self._pixmapWidth))
-        self._readOnlyState.setToolTip('The read-only status of the project')
-        self._readOnlyState.setEnabled(False)  # will enable with the state of the project once it has loaded
+        self._readOnlyWidget = ActiveLabel(self, mainWindow=self)
+        self._readOnlyWidget.setFixedSize(self._pixmapWidth + 4, self._pixmapWidth + 4)
+        self._readOnlyWidget.setPixmap(self._unlockedIcon.pixmap(self._pixmapWidth, self._pixmapWidth))
+        self._readOnlyWidget.setToolTip('The read-only status of the project')
+        self._readOnlyWidget.setEnabled(False)  # will enable with the state of the project once it has loaded
 
-        self.statusBar().addPermanentWidget(self._readOnlyState, 0)
+        self.statusBar().addPermanentWidget(self._readOnlyWidget, 0)
 
-        self._readOnlyState.setSelectionCallback(self._toggleReadOnlyState)
+        self._readOnlyWidget.setSelectionCallback(self._setReadOnly)
         # need notifier on changing the setting in the project
 
-    def _toggleReadOnlyState(self):
+    def _setReadOnly(self, readOnly=None):
         """Toggle the read-only status of the current project
         """
-        readOnly = not self.project.readOnly  # toggle the state
+        if self.application.isApplicationReadOnly:
+            showWarning('Set readOnly',
+                        'Cannot change the readOnly state of the project as application is in readOnly mode.\n'
+                        'This has probably been set with the --read-only flag at startup.')
+            return
+        if readOnly is None:
+            # toggle the state
+            readOnly = not self.project.isReadOnly  # includes the application state
         self.project.setReadOnly(readOnly)
         QtCore.QTimer.singleShot(0, self._setReadOnlyIcon)
 
     def _setReadOnlyIcon(self):
         """Set the read-only icon to locked/unlocked.
         """
-        readOnly = self.project.readOnly
+        readOnly = self.project.isReadOnly
         if readOnly:
-            self._readOnlyState.setPixmap(self._lockedIcon.pixmap(self._pixmapWidth, self._pixmapWidth))
-            self._readOnlyState.setToolTip('The project is marked as read-only.\n'
-                                           'Click here to unlock, or use the command:\n'
-                                           'project.setReadOnly(False)\n'
-                                           'from the python-console.')
+            self._readOnlyWidget.setPixmap(self._lockedIcon.pixmap(self._pixmapWidth, self._pixmapWidth))
+            self._readOnlyWidget.setToolTip('The project is marked as read-only.\n'
+                                            'Click here to unlock, or use the command:\n'
+                                            'project.setReadOnly(False)\n'
+                                            'from the python-console.')
         else:
-            self._readOnlyState.setPixmap(self._unlockedIcon.pixmap(self._pixmapWidth, self._pixmapWidth))
-            self._readOnlyState.setToolTip('The project is unlocked.\n'
-                                           'Click here to lock, or use the command:\n'
-                                           'project.setReadOnly(True)\n'
-                                           'from the python-console.')
+            self._readOnlyWidget.setPixmap(self._unlockedIcon.pixmap(self._pixmapWidth, self._pixmapWidth))
+            self._readOnlyWidget.setToolTip('The project is unlocked.\n'
+                                            'Click here to lock, or use the command:\n'
+                                            'project.setReadOnly(True)\n'
+                                            'from the python-console.')
 
-        self._readOnlyState.setEnabled(True)
-        self._readOnlyState.updateGeometry()
+        self._readOnlyWidget.setEnabled(True)
+        self._readOnlyWidget.updateGeometry()
+
+    def _projectSaveCallback(self):
+        """Update the gui state from a save/saveAs notification.
+        """
+        self._updateWindowTitle()
+        self.sideBar.setProjectName(self.project)
+        successMessage = f'Project successfully saved to "{self.project.path}"'
+        self.statusBar().showMessage(successMessage)
+        getLogger().info(successMessage)
 
     def _projectNotifierCallback(self, data):
         """Notifier responds to change in the read-only state of the current project,
         and updates the read-only icon.
         """
-        if (specifiers := data.get(Notifier.SPECIFIERS)) and specifiers.get(READONLYCHANGED) is not None:
-            QtCore.QTimer.singleShot(0, self._setReadOnlyIcon)
+        if (specifiers := data.get(Notifier.SPECIFIERS)):
+            if specifiers.get(READONLYCHANGED) is not None:
+                QtCore.QTimer.singleShot(0, self._setReadOnlyIcon)
+            elif specifiers.get(PROJECTSAVEAS) is not None or specifiers.get(PROJECTSAVE) is not None:
+                QtCore.QTimer.singleShot(0, self._projectSaveCallback)
 
     def _initKeyTimer(self):
         """
@@ -339,7 +360,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         #                  'Mark', GuiStrip._updateDisplayedMarks)
         # GWV 18/3/24: updated notifier implementation
         self.setNotifier(self.application.project, [Notifier.CREATE, Notifier.DELETE],
-                                                   'Mark', GuiStrip._updateDisplayedMarks)
+                         'Mark', GuiStrip._updateDisplayedMarks)
 
         # current notifiers
         self.setCurrentNotifier('strip', self._highlightCurrentStrip)
@@ -474,6 +495,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         """Initialise a PythonConsoleModule
         """
         from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
+
         self.pythonConsoleModule = PythonConsoleModule(mainWindow=self)
         self._addModule(module=self.pythonConsoleModule, position='bottom')
 
@@ -489,7 +511,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                           'redo'                    : self.application.redo,
                           'undo'                    : self.application.undo,
                           'get'                     : self.application.get,
-                          'getByPid'                :  self.application.get,
+                          'getByPid'                : self.application.get,
                           'getByGid'                : self.application.ui.getByGid,
                           'ui'                      : self.application.ui,
                           'mainWindow'              : self,
@@ -521,7 +543,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         self._sideBarFrame.getLayout().addWidget(self._sidebarSplitter, 0, 0)  # must be inserted this way
 
         # create 2 more containers for the search bar and the results
-        self.searchWidgetContainer = Frame(self._sideBarFrame, setLayout=True, grid=(1, 0))  # in this frame is inserted the search widget
+        self.searchWidgetContainer = Frame(self._sideBarFrame, setLayout=True,
+                                           grid=(1, 0))  # in this frame is inserted the search widget
         self.searchResultsContainer = Frame(self, setLayout=True)  # in this frame is inserted the search widget
         self.searchResultsContainer.setMinimumHeight(100)
 
@@ -664,8 +687,9 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                 self._shortcutsDict[twoLetters] = thecallable
             else:
                 alreadyUsed = self._shortcutsDict.get(twoLetters)
-                getLogger().warning(" Ambiguous shortcut overload: %s. \n Assigning to: %s. \nAlready in use for: \n %s." %
-                                    (twoLetters, thecallable, alreadyUsed))
+                getLogger().warning(
+                    " Ambiguous shortcut overload: %s. \n Assigning to: %s. \nAlready in use for: \n %s." %
+                    (twoLetters, thecallable, alreadyUsed))
 
     def _storeMainMenuShortcuts(self, actions):
         for action in actions:
@@ -1118,26 +1142,26 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
     #                                  callback=self._reloadCcpnPlugins))
     #
     # def _reloadCcpnPlugins(self):
-        # GWV 12/2/24: Core functionality as Framework._reloadPlugins
-        # from ccpn import plugins
-        # from importlib import reload
-        # from ccpn.util.Path import aPath
-        #
-        # reload(plugins)
-        #
-        # pluginUserPath = self.application.preferences.general.userPluginPath
-        # import importlib.util
-        #
-        # filePaths = [(aPath(r) / file) for r, d, f in os.walk(aPath(pluginUserPath)) for file in f if os.path.splitext(file)[1] == '.py']
-        #
-        # for filePath in filePaths:
-        #     # iterate and load the .py files in the plugins directory
-        #     spec = importlib.util.spec_from_file_location(".", filePath)
-        #     module = importlib.util.module_from_spec(spec)
-        #     spec.loader.exec_module(module)
-        # self.application._reloadPlugins()
-        # self._fillCcpnPluginsMenu()
-        # self._fillUserPluginsMenu()
+    # GWV 12/2/24: Core functionality as Framework._reloadPlugins
+    # from ccpn import plugins
+    # from importlib import reload
+    # from ccpn.util.Path import aPath
+    #
+    # reload(plugins)
+    #
+    # pluginUserPath = self.application.preferences.general.userPluginPath
+    # import importlib.util
+    #
+    # filePaths = [(aPath(r) / file) for r, d, f in os.walk(aPath(pluginUserPath)) for file in f if os.path.splitext(file)[1] == '.py']
+    #
+    # for filePath in filePaths:
+    #     # iterate and load the .py files in the plugins directory
+    #     spec = importlib.util.spec_from_file_location(".", filePath)
+    #     module = importlib.util.module_from_spec(spec)
+    #     spec.loader.exec_module(module)
+    # self.application._reloadPlugins()
+    # self._fillCcpnPluginsMenu()
+    # self._fillUserPluginsMenu()
     #
     # def _fillUserPluginsMenu(self):
     #
@@ -1286,7 +1310,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             if undos.isDirty():
                 # reply = MessageDialog.showMulti(MESSAGE, DETAIL, [QUIT, CANCEL], checkbox=SAVE_DATA, okText=QUIT,
                 #                                 checked=True)
-                reply = MessageDialog.showMulti(MESSAGE, DETAIL, texts=[SAVE, DONT_SAVE, CANCEL], parent=self, okText=SAVE)
+                reply = MessageDialog.showMulti(MESSAGE, DETAIL, texts=[SAVE, DONT_SAVE, CANCEL], parent=self,
+                                                okText=SAVE)
             else:
                 # reply = QUIT_WITHOUT_SAVING
                 reply = DONT_SAVE
@@ -1467,12 +1492,14 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             # We dropped multiple items
             if len(errorUrls) == len(allUrlsToLoad):
                 # We only found errors; nothing to load
-                MessageDialog.showError('Load Data', 'No dropped items were recognised\nCheck console/log for details', parent=self)
+                MessageDialog.showError('Load Data', 'No dropped items were recognised\nCheck console/log for details',
+                                        parent=self)
                 return []
 
             elif len(errorUrls) >= 1:
                 # We found 1 or more errors
-                MessageDialog.showError('Load Data', '%d dropped items were not recognised\nCheck console/log for details' % \
+                MessageDialog.showError('Load Data',
+                                        '%d dropped items were not recognised\nCheck console/log for details' % \
                                         len(errorUrls), parent=self)
 
         if len(newProjectUrls) > 1:
@@ -1664,7 +1691,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                                     spectrumView.spectrum.newIntegralList()
 
                                 # stupid bug! mixing views and lists
-                                validIntegralLists = [ilv.integralList for ilv in spectrumView.integralListViews if ilv.isDisplayed]
+                                validIntegralLists = [ilv.integralList for ilv in spectrumView.integralListViews if
+                                                      ilv.isDisplayed]
 
                                 for integralList in validIntegralLists:
 
@@ -1728,7 +1756,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                 spectra = self.project.spectra
 
             if spectra:
-                popup = EstimatePeakListVolumes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra)
+                popup = EstimatePeakListVolumes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
+                                                spectra=spectra)
                 popup.exec_()
             else:
                 getLogger().warning('Estimate Volumes: no specta selected.')
@@ -2092,7 +2121,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                             _prefsGeneral = self.application.preferences.general
                             defaultColour = _prefsGeneral.defaultMarksColour
                             if not defaultColour.startswith('#'):
-                                colourList = colorSchemeTable[defaultColour] if defaultColour in colorSchemeTable else ['#FF0000']
+                                colourList = colorSchemeTable[defaultColour] if defaultColour in colorSchemeTable else [
+                                    '#FF0000']
                                 _prefsGeneral._defaultMarksCount = _prefsGeneral._defaultMarksCount % len(colourList)
                                 defaultColour = colourList[_prefsGeneral._defaultMarksCount]
                                 _prefsGeneral._defaultMarksCount += 1
@@ -2123,7 +2153,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                     _prefsGeneral = self.application.preferences.general
                     defaultColour = _prefsGeneral.defaultMarksColour
                     if not defaultColour.startswith('#'):
-                        colourList = colorSchemeTable[defaultColour] if defaultColour in colorSchemeTable else ['#FF0000']
+                        colourList = colorSchemeTable[defaultColour] if defaultColour in colorSchemeTable else [
+                            '#FF0000']
                         _prefsGeneral._defaultMarksCount = _prefsGeneral._defaultMarksCount % len(colourList)
                         defaultColour = colourList[_prefsGeneral._defaultMarksCount]
                         _prefsGeneral._defaultMarksCount += 1
@@ -2231,7 +2262,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                 try:
                     peak = peaks[0]
                     peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4,
-                                        minDropFactor=minDropFactor, searchBoxMode=searchBoxMode, searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
+                                        minDropFactor=minDropFactor, searchBoxMode=searchBoxMode,
+                                        searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
                     if peak.spectrum.dimensionCount == 1 and peak.figureOfMerit < 1:
                         showWarning(f'Cannot snap peak', f'Figure of merit below the snapping threshold of 1.')
                 except Exception as es:
@@ -2241,24 +2273,27 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                 with progressManager(self, 'Snapping peaks to extrema'):
 
                     # try:
-                        _is1Ds = [p.spectrum.dimensionCount == 1 for p in peaks]
-                        if all(_is1Ds):
-                            from ccpn.core.lib.PeakPickers.PeakSnapping1D import snap1DPeaks
+                    _is1Ds = [p.spectrum.dimensionCount == 1 for p in peaks]
+                    if all(_is1Ds):
+                        from ccpn.core.lib.PeakPickers.PeakSnapping1D import snap1DPeaks
 
-                            snap1DPeaks(peaks)
-                            nonSnappingPeaks = [pk for pk in peaks if pk.figureOfMerit < 1]
+                        snap1DPeaks(peaks)
+                        nonSnappingPeaks = [pk for pk in peaks if pk.figureOfMerit < 1]
 
-                            msg = 'one of the selected peak' if len(nonSnappingPeaks) == 1 else 'some of the selected peaks'
-                            if len(nonSnappingPeaks) > 0:
-                                showWarning(f'Cannot snap {msg}', f'Figure of merit below the snapping threshold of 1 for {nonSnappingPeaks}')
-                        else:
-                            peaks.sort(key=lambda x: x.position[0] if x.position and None not in x.position else 0, reverse=False)  # reorder peaks by position
-                            for peak in peaks:
-                                peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4,
-                                                    minDropFactor=minDropFactor, searchBoxMode=searchBoxMode, searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
+                        msg = 'one of the selected peak' if len(nonSnappingPeaks) == 1 else 'some of the selected peaks'
+                        if len(nonSnappingPeaks) > 0:
+                            showWarning(f'Cannot snap {msg}',
+                                        f'Figure of merit below the snapping threshold of 1 for {nonSnappingPeaks}')
+                    else:
+                        peaks.sort(key=lambda x: x.position[0] if x.position and None not in x.position else 0,
+                                   reverse=False)  # reorder peaks by position
+                        for peak in peaks:
+                            peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4,
+                                                minDropFactor=minDropFactor, searchBoxMode=searchBoxMode,
+                                                searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
 
-                    # except Exception as es:
-                    #     showWarning('Snap to Extremum', str(es))
+                # except Exception as es:
+                #     showWarning('Snap to Extremum', str(es))
 
             else:
                 getLogger().warning('No selected peak/s. Select a peak first.')
@@ -2499,7 +2534,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             from ccpn.ui.gui.popups.StripPlotPopup import StripPlotPopup
 
             popup = StripPlotPopup(parent=self, mainWindow=self, spectrumDisplay=self.current.strip.spectrumDisplay,
-                                   includePeakLists=includePeakLists, includeNmrChains=includeNmrChains, includeSpectrumTable=includeSpectrumTable)
+                                   includePeakLists=includePeakLists, includeNmrChains=includeNmrChains,
+                                   includeSpectrumTable=includeSpectrumTable)
             popup.exec_()
         else:
             showWarning('Make Strip Plot', 'No selected spectrumDisplay')
@@ -2524,4 +2560,3 @@ class MainWindow(_CoreClassMainWindow, GuiMainWindow):
         # application.ui._mainWindow = self
 
         getLogger().debug(f'Initialised {self}')
-

@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:50 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-05-03 14:09:46 +0100 (Fri, May 03, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -91,8 +91,8 @@ def _ccpnExceptionhook(ccpnType, value, tback):
     #     text = str(value)
     #     MessageDialog.showError(title=title, message=text)
 
-    if application.project and not application.project.readOnly:
-        application.project._updateLoggerState(readOnly=False, flush=True)
+    if application.project and not application.project.isReadOnly:
+        application.project._updateLoggerState(readOnly=False)  #, flush=True)
 
     sys.__excepthook__(ccpnType, value, tback)
 
@@ -167,8 +167,7 @@ def getFontSettings():
         return None
 
 
-
-class Gui(Ui,_Gui):
+class Gui(Ui, _Gui):
     """Top class for the GUI interface
     """
 
@@ -225,6 +224,7 @@ class Gui(Ui,_Gui):
         Subclassed for modification in various AnalysisAssign, AnalysisScreen, ... programmes
         """
         from ccpn.ui.gui.Menus import getMenuDefs
+
         return getMenuDefs()
 
     def _setColourSchemeAndStyleSheet(self, args, preferences):
@@ -342,11 +342,10 @@ class Gui(Ui,_Gui):
                         spectrumDisplay.setEnabled(False)
 
                         getLogger().error(
-                            f'Strip {strip} contains bad axes - please close SpectrumDisplay {spectrumDisplay} outlined in red.'
-                        )
+                                f'Strip {strip} contains bad axes - please close SpectrumDisplay {spectrumDisplay} outlined in red.'
+                                )
                         _badStrip = True
                         break
-
 
                     # get the new tilePosition of the strip - tilePosition is always (x, y) relative to screen stripArrangement
                     #                                       changing screen arrangement does NOT require flipping tilePositions
@@ -373,7 +372,8 @@ class Gui(Ui,_Gui):
                         # NOTE:ED - Tiled plots not fully implemented yet
                         getLogger().warning(f'Tiled plots not implemented for spectrumDisplay: {str(spectrumDisplay)}')
                     else:
-                        getLogger().warning(f'Strip direction is not defined for spectrumDisplay: {str(spectrumDisplay)}')
+                        getLogger().warning(
+                            f'Strip direction is not defined for spectrumDisplay: {str(spectrumDisplay)}')
 
                     if not spectrumDisplay.is1D:
                         for _strip in spectrumDisplay.strips:
@@ -473,9 +473,11 @@ class Gui(Ui,_Gui):
 
         else:
             if registered and not acceptedTerms:
-                popup = NewTermsConditionsPopup(self.mainWindow, trial=days, version=self.application.applicationVersion, modal=True)
+                popup = NewTermsConditionsPopup(self.mainWindow, trial=days,
+                                                version=self.application.applicationVersion, modal=True)
             else:
-                popup = RegisterPopup(self.mainWindow, trial=days, version=self.application.applicationVersion, modal=True)
+                popup = RegisterPopup(self.mainWindow, trial=days, version=self.application.applicationVersion,
+                                      modal=True)
 
             self.mainWindow.show()
             popup.exec_()
@@ -535,7 +537,6 @@ class Gui(Ui,_Gui):
         else:
             MessageDialog.showWarning('Check For Updates',
                                       'Could not connect to the update server, please check your internet connection.')
-
 
     #-----------------------------------------------------------------------------------------
     # Helper methods
@@ -637,8 +638,8 @@ class Gui(Ui,_Gui):
                                                 f'Project "{path.name}" was created with version-2 Analysis.\n'
                                                 f'The project will be converted to a version-3 project in a temporary directory,\n'
                                                 f'after which you can decide to save it.\n'
-                                                 '\n'
-                                                 'Do you want to continue loading? (Conversion may take a bit of time)')
+                                                '\n'
+                                                'Do you want to continue loading? (Conversion may take a bit of time)')
 
             if not ok:
                 # skip loading so that user can back-up/copy project
@@ -656,12 +657,12 @@ class Gui(Ui,_Gui):
             dataLoader.makeArchive = False
             ok = MessageDialog.showMulti(
                     'Load Project',
-                     f'You are opening an older project (version {dataLoader.lastSavedVersion}) - {path.name}\n'
-                     '\n'
-                     f'When you save, it will be upgraded and will no longer be readable by program versions < {Project._LOWEST_COMPATIBLE_VERSION}\n',
-                     texts=[DONT_OPEN, CONTINUE],
-                     checkbox=MAKE_ARCHIVE, checked=False,
-            )
+                    f'You are opening an older project (version {dataLoader.lastSavedVersion}) - {path.name}\n'
+                    '\n'
+                    f'When you save, it will be upgraded and will no longer be readable by program versions < {Project._LOWEST_COMPATIBLE_VERSION}\n',
+                    texts=[DONT_OPEN, CONTINUE],
+                    checkbox=MAKE_ARCHIVE, checked=False,
+                    )
 
             if all(ss not in ok for ss in [DONT_OPEN, MAKE_ARCHIVE, CONTINUE]):
                 # there was an error from the dialog
@@ -701,7 +702,7 @@ class Gui(Ui,_Gui):
             # NmrPipe file; check if it is large 3D/4D
             _ds = dataLoader.dataSource
             dims = _ds.dimensionCount
-            expectedSize = _ds.expectedFileSizeInBytes / (1024*1024)
+            expectedSize = _ds.expectedFileSizeInBytes / (1024 * 1024)
             if dims > 2 and expectedSize >= _ds.WARNING_FILE_SIZE and not _ds.bufferIsFilled:
 
                 if droppedOnSideBar:
@@ -726,7 +727,7 @@ class Gui(Ui,_Gui):
             (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)
             if dataLoader and not ignore:
                 title = 'New project from NmrStar' if createNewProject else \
-                        'Import from NmrStar'
+                    'Import from NmrStar'
                 dataLoader.getDataBlock()  # this will read and parse the file
                 popup = StarImporterPopup(dataLoader=dataLoader,
                                           parent=self.mainWindow,
@@ -768,7 +769,9 @@ class Gui(Ui,_Gui):
             return
 
         if (_name := checkProjectName(name, correctName=True)) != name:
-            MessageDialog.showInfo('New Project', f'Project name changed from "{name}" to "{_name}"\nSee console/log for details', parent=self)
+            MessageDialog.showInfo('New Project',
+                                   f'Project name changed from "{name}" to "{_name}"\nSee console/log for details',
+                                   parent=self)
 
         with catchExceptions(errorStringTemplate='Error creating new project: %s'):
             if self.mainWindow:
@@ -931,9 +934,9 @@ class Gui(Ui,_Gui):
                 return False
         newPath = aPath(newPath).assureSuffix(CCPN_DIRECTORY_SUFFIX)
 
-        if  newPath.exists() and \
-           (newPath.is_file() or (newPath.is_dir() and len(newPath.listdir(excludeDotFiles=False)) > 0)) and \
-           not overwrite :
+        if newPath.exists() and \
+                (newPath.is_file() or (newPath.is_dir() and len(newPath.listdir(excludeDotFiles=False)) > 0)) and \
+                not overwrite:
             msg = f'Path "{newPath}" already exists; overwrite?'
             if not MessageDialog.showYesNo(title, msg):
                 return False
@@ -955,7 +958,7 @@ class Gui(Ui,_Gui):
 
         # Check for any inside spectra
         _insideSpectra = [sp for sp in self.project.spectra if sp._isInside]
-        _size = '%.1f' % (sum([sp.dataSource.expectedFileSizeInBytes for sp in _insideSpectra]) / (1024*1024))
+        _size = '%.1f' % (sum([sp.dataSource.expectedFileSizeInBytes for sp in _insideSpectra]) / (1024 * 1024))
         if len(_insideSpectra) == 1:
             msg += f'\nNote that the data of {_insideSpectra[0].pid} ({_size} MB) is in "{oldPath.name}/data/spectra"\n'
         elif len(_insideSpectra) > 1:
@@ -964,14 +967,15 @@ class Gui(Ui,_Gui):
         if self.project.isTemporary:
             copySubDirs = True
         else:
-            if (copySubDirs :=  MessageDialog.showYesNoCancel(title, msg)) is None:
+            if (copySubDirs := MessageDialog.showYesNoCancel(title, msg)) is None:
                 # pressed "cancel"
                 return False
 
         with catchExceptions(errorStringTemplate='Error saving project: %s'):
             with MessageDialog.progressManager(self.mainWindow, f'Saving project as {newPath} ... '):
                 try:
-                    if not self.application._saveProjectAs(newPath=newPath, overwrite=True, copySubDirectories=copySubDirs):
+                    if not self.application._saveProjectAs(newPath=newPath, overwrite=True,
+                                                           copySubDirectories=copySubDirs):
                         txt = f"Saving project to {newPath} aborted; check log for details"
                         MessageDialog.showError("Project SaveAs", txt, parent=self.mainWindow)
                         return False
@@ -986,16 +990,7 @@ class Gui(Ui,_Gui):
                     MessageDialog.showWarning('Save project', msg)
                     return False
 
-        self.mainWindow._updateWindowTitle()
-        # self.application._getRecentProjectFiles(oldPath=oldPath.asString())  # this will also update the list
-        # self.mainWindow._fillRecentProjectsMenu()  # Update the menu
-        self.mainWindow.sideBar.setProjectName(self.project)
-
-        successMessage = f'Project successfully saved to "{self.project.path}"'
-        # MessageDialog.showInfo("Project SaveAs", successMessage, parent=self.mainWindow)
-        self.mainWindow.statusBar().showMessage(successMessage)
-        getLogger().info(successMessage)
-
+        # ED: 2024/05/03 - logged from notifier
         return True
 
     @logCommand('application.')
@@ -1006,7 +1001,7 @@ class Gui(Ui,_Gui):
         if self.project.isTemporary:
             return self.saveProjectAs()
 
-        if self.project.readOnly and not MessageDialog.showYesNo(
+        if self.project.isReadOnly and not MessageDialog.showYesNo(
                 'Save Project',
                 'The project is marked as read-only.\n'
                 'This can be changed by clicking the lock-icon in the botton-right.\n\n'
@@ -1017,18 +1012,14 @@ class Gui(Ui,_Gui):
         with catchExceptions(errorStringTemplate='Error saving project: %s'):
             with MessageDialog.progressManager(self.mainWindow, 'Saving project ... '):
                 try:
-                    if not self.application._saveProject(force=True):
+                    if not self.application._saveProject():
                         return False
                 except (PermissionError, FileNotFoundError):
                     msg = 'Folder may be read-only'
                     MessageDialog.showWarning('Save project', msg)
                     return True
 
-        successMessage = f'Project successfully saved to {self.project.path!r}'
-        # MessageDialog.showInfo("Project Save", successMessage, parent=self.mainWindow) # This popup has been flagged as annoying by users
-        self.mainWindow.statusBar().showMessage(successMessage)
-        getLogger().info(successMessage)
-
+        # ED: 2024/05/03 - logged from notifier
         return True
 
     def _loadData(self, dataLoader) -> list:
@@ -1202,7 +1193,8 @@ class Gui(Ui,_Gui):
         from ccpn.ui.gui.modules.ResidueInformation import ResidueInformation
 
         if not self.project.residues:
-            getLogger().warning('No Residues in project. Residue Information Module requires Residues in the project to launch.')
+            getLogger().warning(
+                'No Residues in project. Residue Information Module requires Residues in the project to launch.')
             MessageDialog.showWarning('No Residues in project.',
                                       'Residue Information Module requires Residues in the project to launch.')
             return

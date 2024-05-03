@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:50 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-05-03 14:09:46 +0100 (Fri, May 03, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -408,9 +408,11 @@ colourSchemes = {
 
 # adjust the default marks for the light/dark colour schemes
 MARK_LINE_COLOUR_DICT_LIGHT = dict([(k, autoCorrectHexColour(v, colourSchemes[DEFAULT][CCPNGLWIDGET_HEXBACKGROUND],
-                                                             addNewColour=False)) for k, v in MARK_LINE_COLOUR_DICT.items()])
+                                                             addNewColour=False)) for k, v in
+                                    MARK_LINE_COLOUR_DICT.items()])
 MARK_LINE_COLOUR_DICT_DARK = dict([(k, autoCorrectHexColour(v, colourSchemes[DARK][CCPNGLWIDGET_HEXBACKGROUND],
-                                                            addNewColour=False)) for k, v in MARK_LINE_COLOUR_DICT.items()])
+                                                            addNewColour=False)) for k, v in
+                                   MARK_LINE_COLOUR_DICT.items()])
 
 # insert the marks colours into colourScheme
 colourSchemes[LIGHT][MARKS_COLOURS] = MARK_LINE_COLOUR_DICT_LIGHT
@@ -558,20 +560,29 @@ class consoleStyle():
         cyan = '\033[106m'
         white = '\033[107m'
 
-def _style(colour, text:str) -> str:
+
+def _style(colour, text: str) -> str:
     """:return text with colour
     """
     _col = getattr(consoleStyle.fg, colour, consoleStyle.fg.default)
     return f'{_col}{text}{consoleStyle.reset}'
 
-def _styleRed(text:str) -> str:
+
+def _styleRed(text: str) -> str:
     """Get red text"""
     return f'{consoleStyle.fg.red}{text}{consoleStyle.reset}'
 
-def _styleBlue(text:str) -> str:
+
+def _styleBlue(text: str) -> str:
     """Get blue text"""
     return f'{consoleStyle.fg.darkblue}{text}{consoleStyle.reset}'
 
-def _styleMagenta(text:str) -> str:
+
+def _styleMagenta(text: str) -> str:
     """Get magenta text"""
     return f'{consoleStyle.fg.magenta}{text}{consoleStyle.reset}'
+
+
+def _styleYellow(text: str) -> str:
+    """Get yellow text"""
+    return f'{consoleStyle.fg.yellow}{text}{consoleStyle.reset}'

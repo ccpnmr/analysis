@@ -115,13 +115,14 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-26 17:27:52 +0100 (Fri, April 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-03 14:09:46 +0100 (Fri, May 03, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: gvuister $"
 __date__ = "$Date: 2022-01-18 10:28:48 +0000 (Tue, January 18, 2022) $"
+
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -143,7 +144,6 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.Path import aPath
 from ccpn.util.decorators import singleton
 from ccpn.util.Tree import Tree
-
 
 import ccpn.ui.gui.Layout as Layout
 from ccpn.ui.gui.widgets import MessageDialog
@@ -187,9 +187,11 @@ DEVELOPMENT_DEBUG = 'Debug'
 
 DYNAMIC_FILL = []
 
+
 def Separator() -> tuple:
     """Conveniance; avoids tuple errors"""
     return ()
+
 
 def Section(name) -> tuple:
     """Conveniance; avoids tuple errors"""
@@ -244,224 +246,229 @@ class MenusDefs(list):
         self.clear()
         self.extend([
 
-(FILE_MENU, [
-    ("New", self._newProjectCallback, [('shortcut', '⌃n')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+            (FILE_MENU, [
+                ("New", self._newProjectCallback, [('shortcut', '⌃n')]),
+                # Unicode U+2303, NOT the carrot on your keyboard.
 
-    Separator(),
-    ("Open...", self._openProjectCallback, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the carrot on your keyboard.
-    (FILE_OPEN_RECENT, DYNAMIC_FILL),
-    ("Load Data...", self._loadDataCallback, [('shortcut', 'ld')]),
+                Separator(),
+                ("Open...", self._openProjectCallback, [('shortcut', '⌃o')]),
+                # Unicode U+2303, NOT the carrot on your keyboard.
+                (FILE_OPEN_RECENT, DYNAMIC_FILL),
+                ("Load Data...", self._loadDataCallback, [('shortcut', 'ld')]),
 
-    Separator(),
-    ("Save", self._saveCallback, [('shortcut', '⌃s')], _projectCanBeSaved),  # Unicode U+2303, NOT the carrot on your keyboard.
-    ("Save As...", self._saveAsCallback, [('shortcut', 'sa')]),
+                Separator(),
+                ("Save", self._saveCallback, [('shortcut', '⌃s')], _projectCanBeSaved),
+                # Unicode U+2303, NOT the carrot on your keyboard.
+                ("Save As...", self._saveAsCallback, [('shortcut', 'sa')]),
 
-    Separator(),
-    ("Import", [
-        ("NEF File", self._importNefCallback, [('shortcut', 'in')]),
-        ("NmrStar File", self._loadNMRStarFileCallback, [('shortcut', 'bi')]),
-        ]
-    ),
-    ("Export", [
-        ("NEF File", self._exportNEFCallback, [('shortcut', 'ex')]),
-        ]
-    ),
+                Separator(),
+                ("Import", [
+                    ("NEF File", self._importNefCallback, [('shortcut', 'in')]),
+                    ("NmrStar File", self._loadNMRStarFileCallback, [('shortcut', 'bi')]),
+                    ]
+                 ),
+                ("Export", [
+                    ("NEF File", self._exportNEFCallback, [('shortcut', 'ex')]),
+                    ]
+                 ),
 
-    Separator(),
-    (FILE_LAYOUT, [
-        ("Save", self._saveLayoutCallback, {}, _projectCanBeSaved ),
-        ("Save as...", self._saveLayoutAsCallback, {}, _projectCanBeSaved ),
+                Separator(),
+                (FILE_LAYOUT, [
+                    ("Save", self._saveLayoutCallback, {}, _projectCanBeSaved),
+                    ("Save as...", self._saveLayoutAsCallback, {}, _projectCanBeSaved),
 
-        Separator(),
-        ("Restore last", self._restoreLastSavedLayoutCallback),
-        ("Restore from file...", self._restoreLayoutFromFileCallback),
+                    Separator(),
+                    ("Restore last", self._restoreLastSavedLayoutCallback),
+                    ("Restore from file...", self._restoreLayoutFromFileCallback),
 
-        Separator(),
-        (FILE_LAYOUT_OPEN_PREDEFINED, DYNAMIC_FILL),
-        ]
-    ),
-    ("Summary", self._showProjectSummaryPopup),
+                    Separator(),
+                    (FILE_LAYOUT_OPEN_PREDEFINED, DYNAMIC_FILL),
+                    ]
+                 ),
+                ("Summary", self._showProjectSummaryPopup),
 
-    Separator(),
-    ('Archive', self._archiveProjectCallback, {}, _projectCanBeSaved),
-    ('Restore From Archive...', self._restoreFromArchiveCallback, {}, _projectHasArchives),
+                Separator(),
+                ('Archive', self._archiveProjectCallback, {}, _projectCanBeSaved),
+                ('Restore From Archive...', self._restoreFromArchiveCallback, {}, _projectHasArchives),
 
-    Separator(),
-    ("Preferences...", self._showApplicationPreferences, [('shortcut', '⌃,')]),
+                Separator(),
+                ("Preferences...", self._showApplicationPreferences, [('shortcut', '⌃,')]),
 
-    Separator(),
-    ("Quit", self._quitCallback, [('shortcut', '⌃q')]),  # Unicode U+2303, NOT the carrot on your keyboard.
-    ]
-),
+                Separator(),
+                ("Quit", self._quitCallback, [('shortcut', '⌃q')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+                ]
+             ),
 
-(EDIT_MENU, [
-    ("Undo", self._undoCallback, [('shortcut', '⌃z')]),  # Unicode U+2303, NOT the carrot on your keyboard.
-    ("Redo", self._redoCallback, [('shortcut', '⌃y')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+            (EDIT_MENU, [
+                ("Undo", self._undoCallback, [('shortcut', '⌃z')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+                ("Redo", self._redoCallback, [('shortcut', '⌃y')]),  # Unicode U+2303, NOT the carrot on your keyboard.
 
-    Separator(),
-    ("Cut", self._nyi, [('shortcut', '⌃x'), ('enabled', False)]),
-    ("Copy", self._nyi, [('shortcut', '⌃c'), ('enabled', False)]),
-    ("Paste", self._nyi, [('shortcut', '⌃v'), ('enabled', False)]),
-    ("Select all", self._nyi, [('shortcut', '⌃a'), ('enabled', False)]),
-    ]
-),
+                Separator(),
+                ("Cut", self._nyi, [('shortcut', '⌃x'), ('enabled', False)]),
+                ("Copy", self._nyi, [('shortcut', '⌃c'), ('enabled', False)]),
+                ("Paste", self._nyi, [('shortcut', '⌃v'), ('enabled', False)]),
+                ("Select all", self._nyi, [('shortcut', '⌃a'), ('enabled', False)]),
+                ]
+             ),
 
-(VIEW_MENU, [
-    ("Show Chemical Shift Table", self._showChemicalShiftTableCallback, [('shortcut', 'ct')]),
-    ("NmrResidue Table", partial(app.showNmrResidueTable, selectFirstItem=True), [('shortcut', 'nt')]),
-    ("Residue Table", partial(app.showResidueTable, selectFirstItem=True)),
-    ("Peak Table", partial(app.showPeakTable, selectFirstItem=True), [('shortcut', 'pt')]),
-    ("Integral Table", partial(app.showIntegralTable, selectFirstItem=True), [('shortcut', 'it')]),
-    ("Multiplet Table", partial(app.showMultipletTable, selectFirstItem=True), [('shortcut', 'mt')]),
-    ("Data Table", partial(app.showDataTable, selectFirstItem=True), [('shortcut', 'dt')]),
-    ("Restraint Table", partial(app.showRestraintTable, selectFirstItem=True), [('shortcut', 'rt')]),
-    ("Violation Table", partial(app.showViolationTable, selectFirstItem=True), [('shortcut', 'vt')]),
-    ("Structure Table", partial(app.showStructureTable, selectFirstItem=True), [('shortcut', 'st')]),
+            (VIEW_MENU, [
+                ("Show Chemical Shift Table", self._showChemicalShiftTableCallback, [('shortcut', 'ct')]),
+                ("NmrResidue Table", partial(app.showNmrResidueTable, selectFirstItem=True), [('shortcut', 'nt')]),
+                ("Residue Table", partial(app.showResidueTable, selectFirstItem=True)),
+                ("Peak Table", partial(app.showPeakTable, selectFirstItem=True), [('shortcut', 'pt')]),
+                ("Integral Table", partial(app.showIntegralTable, selectFirstItem=True), [('shortcut', 'it')]),
+                ("Multiplet Table", partial(app.showMultipletTable, selectFirstItem=True), [('shortcut', 'mt')]),
+                ("Data Table", partial(app.showDataTable, selectFirstItem=True), [('shortcut', 'dt')]),
+                ("Restraint Table", partial(app.showRestraintTable, selectFirstItem=True), [('shortcut', 'rt')]),
+                ("Violation Table", partial(app.showViolationTable, selectFirstItem=True), [('shortcut', 'vt')]),
+                ("Structure Table", partial(app.showStructureTable, selectFirstItem=True), [('shortcut', 'st')]),
 
-    Separator(),
-    ("Show Restraint Analysis Inspector", self._showRestraintAnalysisInspectorCallback, [('shortcut', 'at')]),
-    ("Show Chemical Shift Mapping (Beta)", self._showChemicalShiftMappingCallback, [('shortcut', 'cm')]),
-    ("Relaxation Analysis (Beta)", app.showRelaxationModule, [('shortcut', 'ra')]),
-    ("Notes Editor", partial(app.showNotesEditor, selectFirstItem=True), [('shortcut', 'no')]),
+                Separator(),
+                ("Show Restraint Analysis Inspector", self._showRestraintAnalysisInspectorCallback,
+                 [('shortcut', 'at')]),
+                ("Show Chemical Shift Mapping (Beta)", self._showChemicalShiftMappingCallback, [('shortcut', 'cm')]),
+                ("Relaxation Analysis (Beta)", app.showRelaxationModule, [('shortcut', 'ra')]),
+                ("Notes Editor", partial(app.showNotesEditor, selectFirstItem=True), [('shortcut', 'no')]),
 
-    Separator(),
-    ("In Active SpectrumDisplay", [
+                Separator(),
+                ("In Active SpectrumDisplay", [
 
-        Section("Show/Hide"),
-        ("Toolbar", self._toggleToolbarCallback, [('shortcut', 'tb')]),
-        ("Spectrum Toolbar", self._toggleSpectrumToolbarCallback, [('shortcut', 'sb')]),
-        ("Phasing Console", self._togglePhaseConsoleCallback, [('shortcut', 'pc')]),
-        ("Crosshairs", self._toggleCrosshairCallback, [('shortcut', 'ch')]),
+                    Section("Show/Hide"),
+                    ("Toolbar", self._toggleToolbarCallback, [('shortcut', 'tb')]),
+                    ("Spectrum Toolbar", self._toggleSpectrumToolbarCallback, [('shortcut', 'sb')]),
+                    ("Phasing Console", self._togglePhaseConsoleCallback, [('shortcut', 'pc')]),
+                    ("Crosshairs", self._toggleCrosshairCallback, [('shortcut', 'ch')]),
 
-        Section("Zoom"),
-        ("Set Zoom...", self._setZoomCallback, [('shortcut', 'sz')]),
-        ("Reset", self._resetZoomCallback, [('shortcut', 'rz')]),
+                    Section("Zoom"),
+                    ("Set Zoom...", self._setZoomCallback, [('shortcut', 'sz')]),
+                    ("Reset", self._resetZoomCallback, [('shortcut', 'rz')]),
 
-        Section("New SpectrumDisplay with"),
-        ("Same Axes", self._copyStripCallback, []),
-        ("X-Y Axes Flipped", self._flipXYAxisCallback, [('shortcut', 'xy')]),
-        ("X-Z Axes Flipped", self._flipXZAxisCallback, [('shortcut', 'xz')]),
-        ("Y-Z Axes Flipped", self._flipYZAxisCallback, [('shortcut', 'yz')]),
-        ("Axes Flipped...", self._flipArbitraryAxesCallback, [('shortcut', 'fa')]),
+                    Section("New SpectrumDisplay with"),
+                    ("Same Axes", self._copyStripCallback, []),
+                    ("X-Y Axes Flipped", self._flipXYAxisCallback, [('shortcut', 'xy')]),
+                    ("X-Z Axes Flipped", self._flipXZAxisCallback, [('shortcut', 'xz')]),
+                    ("Y-Z Axes Flipped", self._flipYZAxisCallback, [('shortcut', 'yz')]),
+                    ("Axes Flipped...", self._flipArbitraryAxesCallback, [('shortcut', 'fa')]),
 
-        Section("Labels"),
-        ("Auto-arrange", self._arrangeLabelsCallback, [('shortcut', 'av')]),
-        ("Reset", self._resetLabelsCallback, [('shortcut', 'rv')]),
-        ],  # end sub-menu
+                    Section("Labels"),
+                    ("Auto-arrange", self._arrangeLabelsCallback, [('shortcut', 'av')]),
+                    ("Reset", self._resetLabelsCallback, [('shortcut', 'rv')]),
+                    ],  # end sub-menu
 
-     {}, _hasActiveDisplay
-    ),
+                 {}, _hasActiveDisplay
+                 ),
 
-    Separator(),
-    (VIEW_SHOW_MODULES, DYNAMIC_FILL, {}, _updateShowHideModules),
-    ("Show/hide Sidebar", self._toggleSidebarCallback,
-                                {'shortcut':' s', 'checkable':True, 'checked':True}),
-    ("Show/hide Python Console", self._toggleConsoleCallback,
-                                {'shortcut':'  ', 'checkable':True, 'checked':True}, _updatePythonConsole
-    ),
-    ]
-),
+                Separator(),
+                (VIEW_SHOW_MODULES, DYNAMIC_FILL, {}, _updateShowHideModules),
+                ("Show/hide Sidebar", self._toggleSidebarCallback,
+                 {'shortcut': ' s', 'checkable': True, 'checked': True}),
+                ("Show/hide Python Console", self._toggleConsoleCallback,
+                 {'shortcut': '  ', 'checkable': True, 'checked': True}, _updatePythonConsole
+                 ),
+                ]
+             ),
 
-(SPECTRUM_MENU, [
-    (SPECTRUM_LOAD_SPECTRA, self._loadSpectraCallback, {'shortcut':'ls'}),
-    # ("Spectrum Groups...", self._spectrumGroupsCallback, {'shortcut':'ss'}), # multiple edit temporarly disabled
-    # Separator(),
-    ("Validate Paths...", self._validatePathsCallback, {'shortcut':'vp'}, _projectHasSpectra),
-    ("Set Experiment Types...", self._experimentTypesCallback, {'shortcut':'et'}, _projectHasSpectra),
-    ("Copy into Project...", self._copyToProjectCallback, {}, _projectHasSpectra),
+            (SPECTRUM_MENU, [
+                (SPECTRUM_LOAD_SPECTRA, self._loadSpectraCallback, {'shortcut': 'ls'}),
+                # ("Spectrum Groups...", self._spectrumGroupsCallback, {'shortcut':'ss'}), # multiple edit temporarly disabled
+                # Separator(),
+                ("Validate Paths...", self._validatePathsCallback, {'shortcut': 'vp'}, _projectHasSpectra),
+                ("Set Experiment Types...", self._experimentTypesCallback, {'shortcut': 'et'}, _projectHasSpectra),
+                ("Copy into Project...", self._copyToProjectCallback, {}, _projectHasSpectra),
 
-    Separator(),
-    ("Pick Peaks", [
-        ("Pick 1D Peaks...", self._peakPick1DCallback, {'shortcut':'p1'}, _projectHasSpectra),
-        ("Pick nD Peaks...", self._peakPickNDCallback, {'shortcut':'pp'}, _projectHasSpectra),
-        ], {}, _projectHasSpectra
-    ),
-    ("Copy PeakList...", self._copyPeakListCallback, {'shortcut':'cl'}, _projectHasSpectra),
-    ("Copy Peaks...", self._copyPeaksCallback, {'shortcut':'cp'}, _projectHasPeaks),
-    ("Peak Collections...", self._peakCollectionsCallback, {'shortcut':'sc'}, _projectHasPeaks),
-    ("Estimate Peak Volumes...", self._estimateVolumesCallback, {'shortcut':'ev'}, _projectHasPeaks),
-    ("Estimate Current Peak Volumes", self._estimateCurrentVolumesCallback, {'shortcut':'ec'}, _projectHasPeaks),
-    ("Reorder PeakList Axes...", self._reorderPeakListAxesCallback, {'shortcut':'rl'}, _projectHasSpectra),
+                Separator(),
+                ("Pick Peaks", [
+                    ("Pick 1D Peaks...", self._peakPick1DCallback, {'shortcut': 'p1'}, _projectHasSpectra),
+                    ("Pick nD Peaks...", self._peakPickNDCallback, {'shortcut': 'pp'}, _projectHasSpectra),
+                    ], {}, _projectHasSpectra
+                 ),
+                ("Copy PeakList...", self._copyPeakListCallback, {'shortcut': 'cl'}, _projectHasSpectra),
+                ("Copy Peaks...", self._copyPeaksCallback, {'shortcut': 'cp'}, _projectHasPeaks),
+                ("Peak Collections...", self._peakCollectionsCallback, {'shortcut': 'sc'}, _projectHasPeaks),
+                ("Estimate Peak Volumes...", self._estimateVolumesCallback, {'shortcut': 'ev'}, _projectHasPeaks),
+                ("Estimate Current Peak Volumes", self._estimateCurrentVolumesCallback, {'shortcut': 'ec'},
+                 _projectHasPeaks),
+                ("Reorder PeakList Axes...", self._reorderPeakListAxesCallback, {'shortcut': 'rl'}, _projectHasSpectra),
 
-    Separator(),
-    ("Pseudo-Spectrum to SpectrumGroup...", self._pseudoSpectrumCallback, {}, _projectHasSpectra),
-    ("Make Projection...", self._makeProjectionCallback, {'shortcut':'pj'}, _projectHasSpectra),
-    ("Convert...", self._convertSpectrumCallback, {}, _projectHasSpectra),
+                Separator(),
+                ("Pseudo-Spectrum to SpectrumGroup...", self._pseudoSpectrumCallback, {}, _projectHasSpectra),
+                ("Make Projection...", self._makeProjectionCallback, {'shortcut': 'pj'}, _projectHasSpectra),
+                ("Convert...", self._convertSpectrumCallback, {}, _projectHasSpectra),
 
-    Separator(),
-    ("Make Strip Plot...", ui.makeStripPlot, {'shortcut':'sp'}, _projectHasSpectra),
-    ("Print to File...", self._printToFileCallback, {'shortcut':'⌃p'}, _projectHasSpectra),
-    ]
-),
+                Separator(),
+                ("Make Strip Plot...", ui.makeStripPlot, {'shortcut': 'sp'}, _projectHasSpectra),
+                ("Print to File...", self._printToFileCallback, {'shortcut': '⌃p'}, _projectHasSpectra),
+                ]
+             ),
 
-(MOLECULES_MENU, [
-    ("New Chain...", self._createChainCallback),
-    ("New Chain from FASTA...", self._loadDataCallback),
+            (MOLECULES_MENU, [
+                ("New Chain...", self._createChainCallback),
+                ("New Chain from FASTA...", self._loadDataCallback),
 
-    Separator(),
-    ("Load ChemComp from Xml...", self._loadDataCallback),
-    ("Edit Molecular Bonds...", self._editMolecularBondsCallback, ),
-    # ("Inspect...", self.inspectMolecule, [('enabled', False)]),
+                Separator(),
+                ("Load ChemComp from Xml...", self._loadDataCallback),
+                ("Edit Molecular Bonds...", self._editMolecularBondsCallback,),
+                # ("Inspect...", self.inspectMolecule, [('enabled', False)]),
 
-    Separator(),
-    ("Show Residue Information", self._showResidueInformationCallback, [('shortcut', 'ri')]),
-    ("Show Reference Chemical Shifts", self._showReferenceChemicalShiftsCallback, [('shortcut', 'rc')]),
-    ]
-),
+                Separator(),
+                ("Show Residue Information", self._showResidueInformationCallback, [('shortcut', 'ri')]),
+                ("Show Reference Chemical Shifts", self._showReferenceChemicalShiftsCallback, [('shortcut', 'rc')]),
+                ]
+             ),
 
-(MACRO_MENU, [
-    ("New Macro Editor", self._showMacroEditorCallback, [('shortcut', 'nm')]),
+            (MACRO_MENU, [
+                ("New Macro Editor", self._showMacroEditorCallback, [('shortcut', 'nm')]),
 
-    Separator(),
-    ("Open User Macro...", self._openMacroCallback, [('shortcut', 'om')]),
-    ("Open CCPN Macro...", partial(self._openMacroCallback, directory=macroPath)),
+                Separator(),
+                ("Open User Macro...", self._openMacroCallback, [('shortcut', 'om')]),
+                ("Open CCPN Macro...", partial(self._openMacroCallback, directory=macroPath)),
 
-    Separator(),
-    ("Run...", app.runMacro, [('shortcut', 'rm')]),
-    (MACRO_RUN_RECENT, DYNAMIC_FILL),
-    (MACRO_RUN_CCPN, DYNAMIC_FILL),
+                Separator(),
+                ("Run...", app.runMacro, [('shortcut', 'rm')]),
+                (MACRO_RUN_RECENT, DYNAMIC_FILL),
+                (MACRO_RUN_CCPN, DYNAMIC_FILL),
 
-    Separator(),
-    ("Define Macro Shortcuts...", self._defineUserShortcutsCallback, [('shortcut', 'du')]),
-    ]
-),
+                Separator(),
+                ("Define Macro Shortcuts...", self._defineUserShortcutsCallback, [('shortcut', 'du')]),
+                ]
+             ),
 
-(PLUGINS_MENU, [
-    (CCPN_PLUGINS, DYNAMIC_FILL),
-    (USER_PLUGINS, DYNAMIC_FILL),
+            (PLUGINS_MENU, [
+                (CCPN_PLUGINS, DYNAMIC_FILL),
+                (USER_PLUGINS, DYNAMIC_FILL),
 
-    Separator(),
-    ("Reload", app._reloadPlugins),
-    ]
-),
+                Separator(),
+                ("Reload", app._reloadPlugins),
+                ]
+             ),
 
-(HELP_MENU, [
-    (HELP_TUTORIALS, DYNAMIC_FILL),
-    (HELP_HOWTOS, DYNAMIC_FILL),
+            (HELP_MENU, [
+                (HELP_TUTORIALS, DYNAMIC_FILL),
+                (HELP_HOWTOS, DYNAMIC_FILL),
 
-    Separator(),
-    ("Tip of the Day", partial(app._displayTipOfTheDay, standalone=True)),
-    ("Key Concepts", app._displayKeyConcepts),
-    ("Show Shortcuts", self._showShortcuts),
+                Separator(),
+                ("Tip of the Day", partial(app._displayTipOfTheDay, standalone=True)),
+                ("Key Concepts", app._displayKeyConcepts),
+                ("Show Shortcuts", self._showShortcuts),
 
-    Separator(),
-    ("CCPN Homepage", self._showAboutCcpn),
-    ("CCPN V3 Forum", self._showForum),
-    ("CcpNmr API Documentation", self._showVersion3Documentation),
+                Separator(),
+                ("CCPN Homepage", self._showAboutCcpn),
+                ("CCPN V3 Forum", self._showForum),
+                ("CcpNmr API Documentation", self._showVersion3Documentation),
 
-    Separator(),
-    # ("Inspect Code...", self.showCodeInspectionPopup, [('shortcut', 'gv'), ('enabled', False)]),
-    # ("Show Issues...", self.showIssuesList),
-    ("Check for Updates...", ui._checkForUpdates),
+                Separator(),
+                # ("Inspect Code...", self.showCodeInspectionPopup, [('shortcut', 'gv'), ('enabled', False)]),
+                # ("Show Issues...", self.showIssuesList),
+                ("Check for Updates...", ui._checkForUpdates),
 
-    Separator(),
-    ("Register...", self._showRegisterPopup),
-    ("Show License...", self._showCcpnLicense),
-    ("About CcpNmr V3...", self._showAboutPopup),
-    ]
-),
+                Separator(),
+                ("Register...", self._showRegisterPopup),
+                ("Show License...", self._showCcpnLicense),
+                ("About CcpNmr V3...", self._showAboutPopup),
+                ]
+             ),
 
-        ])  # end extend
+            ])  # end extend
 
         # optionally add development menu before Help menu
         if app._isInDebugMode:
@@ -469,7 +476,7 @@ class MenusDefs(list):
                 (DEVELOPMENT_MENU, [
                     (DEVELOPMENT_DEBUG, DYNAMIC_FILL),
                     ]
-                )
+                 )
             self.insertBefore([HELP_MENU], menuDef=_menu)
 
     #-----------------------------------------------------------------------------------------
@@ -504,6 +511,7 @@ class MenusDefs(list):
         """menu callback; use ui.loadData to do the lifting
         """
         from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
+
         self.ui.loadData(formatFilter=(NefDataLoader.dataFormat,))
 
     def _exportNEFCallback(self):
@@ -514,7 +522,8 @@ class MenusDefs(list):
         from ccpn.ui.gui.popups.ExportNefPopup import ExportNefPopup
         from ccpn.framework.lib.ccpnNef.CcpnNefIo import NEFEXTENSION
 
-        _path = aPath(self.application.preferences.general.userWorkingPath or '~').filepath / (self.project.name + NEFEXTENSION)
+        _path = aPath(self.application.preferences.general.userWorkingPath or '~').filepath / (
+                    self.project.name + NEFEXTENSION)
         dialog = ExportNefPopup(self.ui.mainWindow,
                                 mainWindow=self.ui.mainWindow,
                                 selectFile=_path,
@@ -547,6 +556,7 @@ class MenusDefs(list):
         """menu callback; use ui.loadData to do the lifting
         """
         from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
+
         self.ui.loadData(formatFilter=(StarDataLoader.dataFormat,))
 
     def _saveCallback(self):
@@ -617,6 +627,7 @@ class MenusDefs(list):
         """Show the Project summary popup.
         """
         from ccpn.ui.gui.popups.ProjectSummaryPopup import ProjectSummaryPopup
+
         popup = ProjectSummaryPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, modal=True)
         # popup.show()
         # popup.raise_()
@@ -627,7 +638,9 @@ class MenusDefs(list):
         Displays Application Preferences Popup.
         """
         from ccpn.ui.gui.popups.PreferencesPopup import PreferencesPopup
-        popup = PreferencesPopup(parent=self.ui.mainWindow._widget, mainWindow=self.ui.mainWindow, preferences=self.application.preferences)
+
+        popup = PreferencesPopup(parent=self.ui.mainWindow._widget, mainWindow=self.ui.mainWindow,
+                                 preferences=self.application.preferences)
         popup.exec_()
 
     def _quitCallback(self, event=None):
@@ -669,6 +682,7 @@ class MenusDefs(list):
             MessageDialog.showWarning('Experiment Type Selection', 'Project has no Spectra.')
         else:
             from ccpn.ui.gui.popups.ExperimentTypePopup import ExperimentTypePopup
+
             popup = ExperimentTypePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
             popup.exec_()
 
@@ -681,7 +695,9 @@ class MenusDefs(list):
             MessageDialog.showWarning('Validate Spectrum Paths Selection', 'Project has no Spectra.')
         else:
             from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraPopup
-            popup = ValidateSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra, defaultSelected=defaultSelected)
+
+            popup = ValidateSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra,
+                                         defaultSelected=defaultSelected)
             popup.exec_()
 
     def _convertSpectrumCallback(self):
@@ -692,6 +708,7 @@ class MenusDefs(list):
             MessageDialog.showWarning('Convert spectra', 'Project has no Spectra.')
         else:
             from ccpn.ui.gui.popups.ConvertToHdf5Popup import ConvertToHdf5Popup
+
             popup = ConvertToHdf5Popup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
             popup.exec_()
 
@@ -703,12 +720,13 @@ class MenusDefs(list):
             MessageDialog.showWarning(title, 'No spectra in project', parent=self.mainWindow)
             return
 
-        _spectra = [sp for sp in self.project.spectra if sp.hasValidPath() and not sp._isInside and not sp.isEmptySpectrum()]
+        _spectra = [sp for sp in self.project.spectra if
+                    sp.hasValidPath() and not sp._isInside and not sp.isEmptySpectrum()]
         if len(_spectra) == 0:
             MessageDialog.showWarning(title, 'There are no spectra to be copied', parent=self.mainWindow)
             return
 
-        _size = '%.1f' % (sum([sp.dataSource.expectedFileSizeInBytes for sp in _spectra]) / (1024*1024))
+        _size = '%.1f' % (sum([sp.dataSource.expectedFileSizeInBytes for sp in _spectra]) / (1024 * 1024))
         if len(_spectra) == 1:
             _msg = f'1 spectrum ({_size} MB) to be copied'
         else:
@@ -726,6 +744,7 @@ class MenusDefs(list):
             MessageDialog.showWarning('Reorder PeakList Axes', 'Project has no peakLists.')
         else:
             from ccpn.ui.gui.popups.ReorderPeakListAxes import ReorderPeakListAxes
+
             popup = ReorderPeakListAxes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
             popup.exec_()
 
@@ -740,6 +759,7 @@ class MenusDefs(list):
             spectra = [spec for spec in self.project.spectra if spec.dimensionCount == 1]
             if spectra:
                 from ccpn.ui.gui.popups.PickPeaks1DPopup import PickPeak1DPopup
+
                 popup = PickPeak1DPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
                 popup.exec_()
             else:
@@ -757,6 +777,7 @@ class MenusDefs(list):
             spectra = [spec for spec in self.project.spectra if spec.dimensionCount > 1]
             if spectra:
                 from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
+
                 popup = PeakFindPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
                 popup.exec_()
             else:
@@ -773,6 +794,7 @@ class MenusDefs(list):
             return
         else:
             from ccpn.ui.gui.popups.CopyPeakListPopup import CopyPeakListPopup
+
             popup = CopyPeakListPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
             popup.exec_()
 
@@ -785,6 +807,7 @@ class MenusDefs(list):
             return
         else:
             from ccpn.ui.gui.popups.CopyPeaksPopup import CopyPeaks
+
             popup = CopyPeaks(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
             peaks = self.current.peaks
             popup._selectPeaks(peaks)
@@ -796,6 +819,7 @@ class MenusDefs(list):
             MessageDialog.showWarning('Project contains no spectra.', 'Spectrum groups cannot be displayed')
         else:
             from ccpn.ui.gui.popups.SeriesPeakCollectionPopup import SeriesPeakCollectionPopup
+
             popup = SeriesPeakCollectionPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
             popup.exec_()
             # return popup
@@ -819,6 +843,7 @@ class MenusDefs(list):
 
         else:
             from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
+
             if not self.project.spectrumGroups:
                 #GST This seems to have problems MessageDialog wraps it which looks bad...
                 # MessageDialog.showWarning('Project has no Spectrum Groups.',
@@ -826,14 +851,17 @@ class MenusDefs(list):
                 SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editMode=False).exec_()
 
             else:
-                SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editMode=True, obj=self.project.spectrumGroups[0]).exec_()
+                SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editMode=True,
+                                    obj=self.project.spectrumGroups[0]).exec_()
 
     def _pseudoSpectrumCallback(self):
         if not self.project.spectra:
             getLogger().warning('Project has no Spectra. Pseudo Spectrum to SpectrumGroup Popup cannot be displayed')
-            MessageDialog.showWarning('Project contains no spectra.', 'Pseudo Spectrum to SpectrumGroup Popup cannot be displayed')
+            MessageDialog.showWarning('Project contains no spectra.',
+                                      'Pseudo Spectrum to SpectrumGroup Popup cannot be displayed')
         else:
             from ccpn.ui.gui.popups.PseudoToSpectrumGroupPopup import PseudoToSpectrumGroupPopup
+
             popup = PseudoToSpectrumGroupPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
             popup.exec_()
 
@@ -843,6 +871,7 @@ class MenusDefs(list):
             MessageDialog.showWarning('Project contains no spectra.', 'Make Projection Popup cannot be displayed')
         else:
             from ccpn.ui.gui.popups.SpectrumProjectionPopup import SpectrumProjectionPopup
+
             popup = SpectrumProjectionPopup(parent=self.mainWindow._widget, mainWindow=self.mainWindow)
             popup.exec_()
 
@@ -1000,6 +1029,7 @@ class MenusDefs(list):
         Displays sequence creation popup.
         """
         from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
+
         popup = CreateChainPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
         popup.exec_()
 
@@ -1010,6 +1040,7 @@ class MenusDefs(list):
         """Callback to display the molecular-bonds popup.
         """
         from ccpn.ui.gui.popups.MolecularBondsPopup import MolecularBondsPopup
+
         popup = MolecularBondsPopup(parent=self.mainWindow, mainWindow=self.mainWindow)
         popup.exec_()
 
@@ -1046,6 +1077,7 @@ class MenusDefs(list):
 
     def _defineUserShortcutsCallback(self):
         from ccpn.ui.gui.popups.ShortcutsPopup import ShortcutsPopup
+
         ShortcutsPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow).exec_()
 
     #-----------------------------------------------------------------------------------------
@@ -1056,6 +1088,7 @@ class MenusDefs(list):
         """Displays CCPN wrapper documentation in a module.
         """
         from ccpn.framework.PathsAndUrls import ccpnDocumentationUrl, documentationPath
+
         if self.application.preferences.appearance.useOnlineDocumentation:
             self.ui._showHtmlFile("Analysis Version-3 Documentation", ccpnDocumentationUrl)
         else:
@@ -1065,19 +1098,23 @@ class MenusDefs(list):
         """Displays Forum in a module.
         """
         from ccpn.framework.PathsAndUrls import ccpnForum
+
         self.ui._showHtmlFile("Analysis Version-3 Forum", ccpnForum)
 
     def _showShortcuts(self):
         from ccpn.framework.PathsAndUrls import shortcutsPath
+
         self.ui._systemOpen(shortcutsPath)
 
     def _showAboutPopup(self):
         from ccpn.ui.gui.popups.AboutPopup import AboutPopup
+
         popup = AboutPopup(parent=self.ui.mainWindow)
         popup.exec_()
 
     def _showAboutCcpn(self):
         from ccpn.framework.PathsAndUrls import ccpnUrl
+
         self.ui._showHtmlFile("About CCPN", ccpnUrl)
 
     def _showRegisterPopup(self):
@@ -1087,6 +1124,7 @@ class MenusDefs(list):
 
     def _showCcpnLicense(self):
         from ccpn.framework.PathsAndUrls import ccpnLicenceUrl
+
         self.ui._showHtmlFile("CCPN Licence", ccpnLicenceUrl)
 
     #-----------------------------------------------------------------------------------------
@@ -1095,10 +1133,12 @@ class MenusDefs(list):
 
     def _showIssuesList(self):
         from ccpn.framework.PathsAndUrls import ccpnIssuesUrl
+
         self.ui._showHtmlFile("CCPN Issues", ccpnIssuesUrl)
 
     def _showLicense(self):
         from ccpn.framework.PathsAndUrls import licensePath
+
         self.ui._showHtmlFile("CCPN Licence", licensePath)
 
     def _showSubmitMacroPopup(self):
@@ -1139,7 +1179,7 @@ class MenusDefs(list):
     # Implementation methods
     #-----------------------------------------------------------------------------------------
 
-    def insertAfter(self, menuKeys:list, menuDef:tuple):
+    def insertAfter(self, menuKeys: list, menuDef: tuple):
         """Insert menuDef after the menu/action/section defined by menuKeys, i.e. a list
         of names or indices that recursively define the menu;
         e.g. ['File', 'New']
@@ -1154,9 +1194,9 @@ class MenusDefs(list):
         if _indx < 0:
             # Correct the _indx to positive numbers, i.e. -1 is last item
             _indx += len(currentMenu)
-        currentMenu.insert(_indx+1, menuDef)
+        currentMenu.insert(_indx + 1, menuDef)
 
-    def insertBefore(self, menuKeys:list, menuDef:tuple):
+    def insertBefore(self, menuKeys: list, menuDef: tuple):
         """Insert menuDef before the menu/action/section defined by menuKeys, i.e. a list
         of names or indices that recursively define the menu;
         e.g. ['File', 'New']
@@ -1173,7 +1213,7 @@ class MenusDefs(list):
             _indx += len(currentMenu)
         currentMenu.insert(_indx, menuDef)
 
-    def _findMenu(self, menuKeys:list, currentMenu=None):
+    def _findMenu(self, menuKeys: list, currentMenu=None):
         """(Recursively) find menu/action/section defined by menuKeys, i.e. a list
         of names or indices that recursively define the menu;
         e.g. ['File', 'New']
@@ -1195,7 +1235,7 @@ class MenusDefs(list):
 
         key = menuKeys[0]
         if isinstance(key, str):
-            _keys = [t[0] if len(t)>0 else None for t in currentMenu]
+            _keys = [t[0] if len(t) > 0 else None for t in currentMenu]
             try:
                 _indx = _keys.index(key)
             except ValueError:
@@ -1216,17 +1256,19 @@ class MenusDefs(list):
 
     __repr__ = __str__
 
+
 # end class #-----------------------------------------------------------------------------
 
 
 from ccpn.util.DataEnum import DataEnum
-class NodeType(DataEnum):
 
+
+class NodeType(DataEnum):
     UNDEFINED = 0, 'Undefined'
     SEPARATOR = 1, 'Separator'
-    SECTION   = 2, 'Section'
-    MENU      = 3, 'Menu'
-    ACTION    = 4, 'Action'
+    SECTION = 2, 'Section'
+    MENU = 3, 'Menu'
+    ACTION = 4, 'Action'
 
 
 class MenuNode(Tree):
@@ -1237,8 +1279,9 @@ class MenuNode(Tree):
        myMenus['File']['New'] would yield the corresponding MenuNode for that Menu
 
     """
+
     def __init__(self, parent, name, nodeType,
-                       isDynamic=False, callback=None, options={}):
+                 isDynamic=False, callback=None, options={}):
 
         # Make node initially as stand-alone,
         # to be added after all init's are completed
@@ -1384,6 +1427,7 @@ class MenuNode(Tree):
 
         :return A list of nodes added
         """
+
         def _str120(val):
             """truncate str(val) to 120 chars
             """
@@ -1414,7 +1458,7 @@ class MenuNode(Tree):
                 node = self.addNode(name=name, nodeType=NodeType.SECTION)
                 result.append(node)
 
-            elif len(item) in (2,4) and isinstance(item[1], list):
+            elif len(item) in (2, 4) and isinstance(item[1], list):
                 # a (sub-)Menu
                 name = item[0]
                 val = item[1]
@@ -1426,10 +1470,10 @@ class MenuNode(Tree):
 
                 result.extend(node.allObjects())
 
-            elif len(item) in (2,3,4) and callable(item[1]):
+            elif len(item) in (2, 3, 4) and callable(item[1]):
                 # An action
                 name = item[0]
-                callback=item[1]
+                callback = item[1]
                 options = item[2] if len(item) >= 3 else {}
                 # Convert any list,tuple of key,value pairs to dict
                 if isinstance(options, (list, tuple)):
@@ -1445,7 +1489,8 @@ class MenuNode(Tree):
 
             else:
                 # this should not happen
-                raise RuntimeError(f'addNodesFromList to {self}: We should not be here! Invalid menu definition: \n>>> {_str120(item)}')
+                raise RuntimeError(
+                    f'addNodesFromList to {self}: We should not be here! Invalid menu definition: \n>>> {_str120(item)}')
 
         return result
 
@@ -1460,13 +1505,13 @@ class MenuNode(Tree):
         return dict([(child.name, child) for child in self._children])
 
     def keys(self) -> list:
-         return  list(self._childrenAsDict.keys())
+        return list(self._childrenAsDict.keys())
 
     def items(self) -> list:
-         return  list(self._childrenAsDict.items())
+        return list(self._childrenAsDict.items())
 
     def values(self) -> list:
-         return  list(self._childrenAsDict.values())
+        return list(self._childrenAsDict.values())
 
     def __getitem__(self, key):
         _vals = dict([(child.name, child) for child in self._children])
@@ -1482,10 +1527,11 @@ class MenuNode(Tree):
         """
         for node in self.allObjects():
             level = node.level
-            tabs = '\t'*(level-1) if level>1 else ''
+            tabs = '\t' * (level - 1) if level > 1 else ''
             if level == 1:
                 tabs = '\n' + tabs
-            print(f'{tabs}{node.name!r:25}  (level={node.level}, type={node.nodeType}, dynamic={node.isDynamic}) {node.options}')
+            print(
+                f'{tabs}{node.name!r:25}  (level={node.level}, type={node.nodeType}, dynamic={node.isDynamic}) {node.options}')
             if node.isMenu and node.isDynamic and len(node._children) == 0:
                 print(f'{tabs}\t>>> dynamically filled')
 
@@ -1493,6 +1539,7 @@ class MenuNode(Tree):
         return f'<MenuNode: {self.name!r} (level={self.level}, type={self.nodeType}, dynamic={self.isDynamic}, checked={self.checkEnable})>'
 
     __repr__ = __str__
+
 
 # end class #-----------------------------------------------------------------------------
 
@@ -1575,7 +1622,7 @@ class MenuManager(object):
 
     #-----------------------------------------------------------------------------------------
 
-    def makeMenus(self, node:MenuNode = None, useNativeMenus=False):
+    def makeMenus(self, node: MenuNode = None, useNativeMenus=False):
         """Use node to make its menu's; i.e. adding Menu/Action to node
         Recursively decent into its children
         :param node: a MenuNode starting point; default to self.menuNodes
@@ -1602,7 +1649,7 @@ class MenuManager(object):
             if node.isAction:
                 node.widget = Action(parent=_parent.widget, text=node.name,
                                      callback=node.callback, **node.options
-                                    )
+                                     )
                 _parent.widget.addAction(node.widget)
 
             elif node.isMenu:
@@ -1633,7 +1680,6 @@ class MenuManager(object):
             else:
                 raise RuntimeError(f'Invalid: {node} is ill-defined')
 
-
             # if node.checkEnable and node.checkEnableCallback is not None:
             #     # This node needs checking for enabling;
             #     # set callback on parent which will check all its children
@@ -1650,7 +1696,7 @@ class MenuManager(object):
     # Callback's from dynamic nodes
     #-----------------------------------------------------------------------------------------
 
-    def _updateMenuNodeCallback(self, node:MenuNode):
+    def _updateMenuNodeCallback(self, node: MenuNode):
         """Callback to update Menu node:
         - optionally adding dynamic nodes
         - checking self for checkEnable
@@ -1666,7 +1712,7 @@ class MenuManager(object):
             enabled = child.checkEnableCallback(child)
             child.setEnabled(enabled)
 
-    def _updateDynamicNode(self, node:MenuNode, defs:list):
+    def _updateDynamicNode(self, node: MenuNode, defs: list):
         """Update dynamic node using defs to generate child-nodes and corresponding
         Menu widgets.
         """
@@ -1681,18 +1727,19 @@ class MenuManager(object):
         for _child in node._children:
             self.makeMenus(_child)
 
-    def _fillFileOpenRecentCallback(self, node:MenuNode):
+    def _fillFileOpenRecentCallback(self, node: MenuNode):
         """callback to fill File->Open recent menu
         """
         from ccpn.framework.Preferences import RECENT_FILES
+
         _files = self.application.preferences.get(RECENT_FILES)
-        _defs = [ (f, partial(self.application.loadProject, f))
-                  for f in _files
-                ]
+        _defs = [(f, partial(self.application.loadProject, f))
+                 for f in _files
+                 ]
         _defs.extend([
             Separator(),
             ('Clear', self.application.preferences.clearRecentFiles)
-        ])
+            ])
         self._updateDynamicNode(node=node, defs=_defs)
 
     def _fillFilePredefinedLayoutsCallback(self, node):
@@ -1701,9 +1748,9 @@ class MenuManager(object):
         from ccpn.ui.gui import Layout
 
         _files = Layout._getPredefinedLayouts()
-        _defs = [ (f.basename, partial(self.application._restoreLayoutFromFile, f))
-                   for f in _files
-                ]
+        _defs = [(f.basename, partial(self.application._restoreLayoutFromFile, f))
+                 for f in _files
+                 ]
         self._updateDynamicNode(node=node, defs=_defs)
 
     def _fillViewShowModulesCallback(self, node) -> bool:
@@ -1715,15 +1762,15 @@ class MenuManager(object):
         for module in _modules:
             # create a shortcut command/cntr 1-9,0 for first 10 modules
             if count <= 10:
-                shortcut = f'⌃{count%10}'  # Unicode U+2303, NOT the carrot on your keyboard.
+                shortcut = f'⌃{count % 10}'  # Unicode U+2303, NOT the carrot on your keyboard.
             else:
                 shortcut = None
 
             _defs.append(
-                (module.moduleName, partial(self.mainWindow._toggleModule, module=module),
-                 dict(checkable=True, checked=module._showState, shortcut=shortcut)
-                )
-            )
+                    (module.moduleName, partial(self.mainWindow._toggleModule, module=module),
+                     dict(checkable=True, checked=module._showState, shortcut=shortcut)
+                     )
+                    )
             count += 1
 
         self._updateDynamicNode(node=node, defs=_defs)
@@ -1732,14 +1779,15 @@ class MenuManager(object):
         """Callback to fill Macro->Run Recent Menu
         """
         from ccpn.framework.Preferences import RECENT_MACROS
+
         _files = reversed(self.application.preferences.get(RECENT_MACROS))
-        _defs = [ (f, partial(self.application.runMacro, f))
-                  for f in _files
-                ]
+        _defs = [(f, partial(self.application.runMacro, f))
+                 for f in _files
+                 ]
         _defs.extend([
             Separator(),
             ('Clear', self.application.preferences.clearRecentMacros)
-        ])
+            ])
         self._updateDynamicNode(node=node, defs=_defs)
 
     def _fillMacroRunCCPNCallback(self, node):
@@ -1753,11 +1801,11 @@ class MenuManager(object):
         for path in macroPaths:
             _defs.append(
                     (path.basename,)
-            )
+                    )
             _files = sorted(f for f in path.glob('*.py') if not f.basename.startswith('_'))
             _defs.extend(
-                [(f.basename, partial(self.application.runMacro, f)) for f in _files]
-            )
+                    [(f.basename, partial(self.application.runMacro, f)) for f in _files]
+                    )
         # update the node
         self._updateDynamicNode(node=node, defs=_defs)
 
@@ -1771,7 +1819,7 @@ class MenuManager(object):
         _defs = []
         _defs.extend([
             (f.PLUGINNAME, partial(self.mainWindow.startPlugin, f)) for f in loadedUserPlugins
-        ])
+            ])
 
         self._updateDynamicNode(node=node, defs=_defs)
 
@@ -1785,7 +1833,7 @@ class MenuManager(object):
         _defs = []
         _defs.extend([
             (f.PLUGINNAME, partial(self.mainWindow.startPlugin, f)) for f in loadedPlugins
-        ])
+            ])
 
         self._updateDynamicNode(node=node, defs=_defs)
 
@@ -1799,12 +1847,12 @@ class MenuManager(object):
             ('Video Tutorials && Manual', self.ui._showCCPNVideos),
             ('Tutorial Data', self.ui._showTutorialData),
             Separator(),
-        ]
+            ]
 
         # Add the defined tutorials
         _defs.extend([
             (camelCaseToString(f.basename), partial(self.ui._showPath, f)) for f in definedTutorialPaths
-        ])
+            ])
         _defs.append(Separator())
 
         # loop over tutorialsPath for pdf's,
@@ -1812,10 +1860,10 @@ class MenuManager(object):
         for path in [tutorialsPath]:
             _files = sorted(f for f in path.glob('*.pdf')
                             if not f.basename.startswith('_') and f not in definedTutorialPaths
-                           )
+                            )
             _defs.extend([
                 (camelCaseToString(f.basename), partial(self.ui._showPath, f)) for f in _files
-            ])
+                ])
 
         self._updateDynamicNode(node=node, defs=_defs)
 
@@ -1832,10 +1880,10 @@ class MenuManager(object):
         for path in [howTosPath]:
             _files = sorted(f for f in path.glob('*.pdf')
                             if not f.basename.startswith('_')
-                           )
+                            )
             _defs.extend([
                 (camelCaseToString(f.basename), partial(self.ui._showPath, f)) for f in _files
-            ])
+                ])
 
         self._updateDynamicNode(node=node, defs=_defs)
 
@@ -1848,8 +1896,8 @@ class MenuManager(object):
             _defs.append(
                     (name, partial(self.application.setDebug, _level),
                      dict(checkable=True, checked=self.application.debugLevel == _level)
+                     )
                     )
-            )
 
         self._updateDynamicNode(node=node, defs=_defs)
 
@@ -1857,6 +1905,7 @@ class MenuManager(object):
 
     def __str__(self):
         return f'<MenuManager>'
+
 
 # end class #-----------------------------------------------------------------------------
 
@@ -1904,6 +1953,7 @@ def _getSaveLayoutPath(mainWindow):
     newPath.assureSuffix(jsonType)
     return newPath
 
+
 #-----------------------------------------------------------------------------------------
 # Various small helper functions for menu actions dynamic settings
 #-----------------------------------------------------------------------------------------
@@ -1912,7 +1962,8 @@ def _projectCanBeSaved(node) -> bool:
     """callback to test if project can be saved; ie. not temporary and not readOnly
     """
     project = getProject()
-    return project and not project.isTemporary and not project.readOnly
+    return project and not project.isTemporary and not project.isReadOnly
+
 
 def _projectIsNotTemporary(node) -> bool:
     """callback to test if project is temporary
@@ -1920,11 +1971,13 @@ def _projectIsNotTemporary(node) -> bool:
     project = getProject()
     return project and not project.isTemporary
 
+
 def _projectIsNotReadOnly(node) -> bool:
     """callback to test if project is temporary
     """
     project = getProject()
-    return project and not project.readOnly
+    return project and not project.isReadOnly
+
 
 def _projectHasArchives(node) -> bool:
     """callback to test if project has archives
@@ -1932,11 +1985,13 @@ def _projectHasArchives(node) -> bool:
     project = getProject()
     return bool(project and project._getArchivePaths())
 
+
 def _projectHasPeaks(node) -> bool:
     """callback to test if project has peaks
     """
     project = getProject()
     return bool(project and project.peaks)
+
 
 def _projectHasSpectra(node) -> bool:
     """callback to test if project has spectra
@@ -1944,11 +1999,13 @@ def _projectHasSpectra(node) -> bool:
     project = getProject()
     return bool(project and project.spectra)
 
+
 def _hasSpectrumDisplays(node) -> bool:
     """callback to test if MainWindow has SpectrumDisplays
     """
     app = getApplication()
     return len(app.mainWindow.spectrumDisplays) > 0
+
 
 def _hasActiveDisplay(node) -> bool:
     """callback to test if project has spectra
@@ -1962,6 +2019,7 @@ def _hasActiveDisplay(node) -> bool:
         node.widget.setTitle('Select Strip in SpectrumDisplay')
         return False
 
+
 def _updatePythonConsole(node) -> bool:
     """callback to check and update the Show/hide Python Console action
     """
@@ -1974,6 +2032,7 @@ def _updatePythonConsole(node) -> bool:
     node.widget.setChecked(checked)
     return True
 
+
 def _updateShowHideModules(node) -> bool:
     """callback to check and update the Show/hide Modules menu;
     :return True if there are modules other then the PythonConsoleModule
@@ -1981,5 +2040,5 @@ def _updateShowHideModules(node) -> bool:
     app = getApplication()
     modules = [m for m in app.ui.mainWindow.modules
                if not m._isPythonConsoleModule
-              ]
+               ]
     return len(modules) > 0

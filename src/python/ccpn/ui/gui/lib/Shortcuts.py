@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:51 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-05-03 14:09:46 +0100 (Fri, May 03, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -42,7 +42,7 @@ SHORTCUT_SHORTCUT = 'shortcut'
 _shortcutList = {}
 
 
-class Shortcuts( object ):
+class Shortcuts(object):
 
     def _setShortcuts(self, mainWindow):
         """
@@ -78,9 +78,13 @@ class Shortcuts( object ):
         addShortCut("u, y", self, partial(mainWindow.createMultipletAxisMarks, 1), context=context)
         addShortCut("u, z", self, partial(mainWindow.createMultipletAxisMarks, 2), context=context)
         addShortCut("u, w", self, partial(mainWindow.createMultipletAxisMarks, 3), context=context)
-        addShortCut("f, n", self, partial(SpectrumDisplayLib.navigateToCurrentNmrResiduePosition, mainWindow.application), context=context)
-        addShortCut("f, p", self, partial(SpectrumDisplayLib.navigateToCurrentPeakPosition, mainWindow.application), context=context)
-        addShortCut("c, a", self, partial(AssignmentLib.propagateAssignments, current=mainWindow.application.current), context=context)
+        addShortCut("f, n", self,
+                    partial(SpectrumDisplayLib.navigateToCurrentNmrResiduePosition, mainWindow.application),
+                    context=context)
+        addShortCut("f, p", self, partial(SpectrumDisplayLib.navigateToCurrentPeakPosition, mainWindow.application),
+                    context=context)
+        addShortCut("c, a", self, partial(AssignmentLib.propagateAssignments, current=mainWindow.application.current),
+                    context=context)
         addShortCut("c, z", self, mainWindow._clearCurrentPeaks, context=context)
         addShortCut("c, o", self, mainWindow.setContourLevels, context=context)
 
@@ -196,15 +200,16 @@ def addShortCut(keys=None, obj=None, func=None, context=None):
     :param context - context; e.g., WidgetShortcut|ApplicationShortcut:
     """
     from ccpn.ui.gui.MainWindow import MainWindow
+
     if isinstance(keys, str):
         # print(keys, func)
         keys = QtGui.QKeySequence(keys)
 
     shortcut = QtWidgets.QShortcut(keys, obj, func, context=context)
     storeShortcut(keys, obj, func, context, shortcut)
-    tl =  keys.toString()
+    tl = keys.toString()
     if isinstance(obj, MainWindow):
-        obj._storeShortcut(tl,func)
+        obj._storeShortcut(tl, func)
     return shortcut
 
 
@@ -231,7 +236,6 @@ def storeShortcut(keys=None, obj=None, func=None, context=None, shortcut=None):
                         SHORTCUT_CONTEXT  : context,
                         SHORTCUT_SHORTCUT : shortcut}
         _shortcutList[obj][keyString] = shortcutItem
-
 
 
 def clearShortcuts(widget=None):

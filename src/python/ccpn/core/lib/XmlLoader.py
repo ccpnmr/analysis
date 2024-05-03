@@ -186,7 +186,7 @@ ccpncore.lib.chemComp.Io  --> fetchChemComp  (and others) : uses XmlIo.LoadFromF
 =========================================================================================
 
 """
-from __future__ import annotations  # pycharm still highlights as errors
+from __future__ import annotations
 
 
 #=========================================================================================
@@ -215,21 +215,21 @@ __date__ = "$Date: 2018-05-14 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import re
-import sys
+# import sys
 from contextlib import contextmanager
 
 from ccpnmodel.ccpncore.api.memops import Implementation
 from ccpnmodel.ccpncore.memops.metamodel import Constants as metaConstants
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrProject
-from ccpnmodel.ccpncore.memops.format.xml import XmlIO
+# from ccpnmodel.ccpncore.memops.format.xml import XmlIO
 from ccpnmodel.v_3_0_2.upgrade import correctFinalResult
 
 # from ccpn.core.Project import Project
-from ccpn.core.lib.ProjectLib import checkProjectName, isV2project, isV3project
+from ccpn.core.lib.ProjectLib import checkProjectName, isV2project
 
 from ccpn.util.traits.TraitBase import TraitBase
 from ccpn.util.traits.CcpNmrTraits import Unicode, Bool, CPath, Any, Int, Dict, List, Tuple
-from ccpn.util.Common import getProcess
+# from ccpn.util.Common import getProcess
 
 from ccpn.util.Logging import getLogger
 from ccpn.util.Path import Path, aPath
@@ -243,7 +243,7 @@ from ccpn.framework.PathsAndUrls import \
     userCcpnDataPath, \
     CCPN_BACKUPS_DIRECTORY
 
-from ccpn.ui.gui.guiSettings import _styleRed, _styleBlue
+from ccpn.ui.gui.guiSettings import _styleRed, _styleBlue, _styleYellow
 
 
 #--------------------------------------------------------------------------------------------
@@ -291,6 +291,10 @@ REFDATA_PACKAGES = ['ccp.molecule.ChemCompCoord',
 SILENCE_GARBAGE_COLLECTION = False
 
 
+#=========================================================================================
+# XmlLoaderABC
+#=========================================================================================
+
 class XmlLoaderABC(TraitBase):
     """Base class for the data structure
     """
@@ -303,8 +307,7 @@ class XmlLoaderABC(TraitBase):
     def __init__(self, root, readOnly: bool = False):
         super().__init__()
         self.root = root
-
-        self._setReadOnly(readOnly)
+        self.setReadOnly(readOnly)
         self.logger = getLogger()
 
     @property
@@ -314,22 +317,21 @@ class XmlLoaderABC(TraitBase):
         return self._id
 
     @property
-    def readOnly(self):
+    def isReadOnly(self):
         """Return the read-only state
         """
-        return self._readOnly
+        # this should be consistent for the xmlLoader-tree
+        return self.root._readOnly
 
-    def _setReadOnly(self, value):
+    def setReadOnly(self, value):
         """Set the read-only state
         CCPNInternal - subclasses should only be initiated by the root of the loader tree
         """
-        self._readOnly = value
-
-    @property
-    def _readOnlyState(self) -> str:
-        """Return a quick reference read-only state of the object
-        """
-        return 'T' if self.readOnly else 'F'
+        if not isinstance(value, bool):
+            raise TypeError(f'{self.__class__.__name__}._setReadOnly must be a bool')
+        if self != self.root and value != self.root.isReadOnly:
+            raise RuntimeError(f'{self.__class__.__name__}._setReadOnly should only be set on the root')
+        self.root._readOnly = value
 
     def addToLookup(self):
         """Add self.id to the root lookup dict
@@ -356,6 +358,10 @@ class XmlLoaderABC(TraitBase):
         """
         return [topObj for topObj in self.getTopObjects() if topObj.isLoaded]
 
+
+#=========================================================================================
+# TopObject
+#=========================================================================================
 
 class TopObject(XmlLoaderABC):
     """
@@ -487,7 +493,7 @@ class TopObject(XmlLoaderABC):
             raise RuntimeError(f'_validateTopObjectXml(): expected xml-root "_StorageUnit"')
 
         nodes = list(root)
-        if len(nodes)!= 1:
+        if len(nodes) != 1:
             raise RuntimeError(f'_validateTopObjectXml(): expected exactely one sub-node, got {len(nodes)}')
 
         node = nodes[0]
@@ -562,22 +568,22 @@ class TopObject(XmlLoaderABC):
     def saveToXml(self, updateIsModified=True):
         """Save the apiTopObject to the xml file defined by self.path
         """
-        getLogger().debug2(f'saveToXml:    {self}, readOnly={self.readOnly}, blocking={self.root.writeBlockingLevel}')
+        getLogger().debug2(_styleYellow(f'saveToXml:    {self}, readOnly={self.isReadOnly}, '
+                                        f'blocking={self.root.writeBlockingLevel}'))
 
         if self.apiTopObject is None:
             getLogger().warning(_styleRed(f'Cannot save {self._path}: undefined apiTopObject'))
             return
-
         if self.apiTopObject.isDeleted:
             # ignore deleted objects
             self.logger.debug2(_styleRed(f'Ignoring deleted object {self.apiTopObject}'))
             return
 
-        if not self.readOnly and not self.root.writeBlockingLevel:
+        if not self.isReadOnly and not self.root.writeBlockingLevel:
+            # readOnly should always be False
             try:
                 if not self.package.path.exists():
                     self.package.path.mkdir(parents=True, exist_ok=False)
-
                 if not self.path.parent.isWriteable():
                     raise PermissionError(f'No write permission for {self.path.parent}')
 
@@ -601,16 +607,15 @@ class TopObject(XmlLoaderABC):
         if self.apiTopObject is None:
             getLogger().warning(_styleRed(f'Cannot save {self._path}: undefined apiTopObject'))
             return
-
         if self.apiTopObject.isDeleted:
             # ignore deleted objects
             self.logger.debug2(f'ignoring deleted object {self.apiTopObject}')
             return
-
         if not autoBackupPath:
             raise ValueError('Auto-backup path is not defined')
 
-        if not self.readOnly and not self.root.writeBlockingLevel:
+        if not self.isReadOnly and not self.root.writeBlockingLevel:
+            # readOnly should always be False
             try:
                 path = autoBackupPath / self.package.relativePath / self._path
                 if not path.parent.exists():
@@ -636,6 +641,10 @@ class TopObject(XmlLoaderABC):
 
     __repr__ = __str__
 
+
+#=========================================================================================
+# Package
+#=========================================================================================
 
 class Package(XmlLoaderABC):
     """
@@ -663,7 +672,7 @@ class Package(XmlLoaderABC):
         if self.path.exists() and not self.path.is_dir():
             raise FileExistsError(f'{self.path} exists but is not a directory')
 
-        if not self.path.exists() and createPath and not self.readOnly:
+        if not self.path.exists() and createPath and not self.isReadOnly:
             try:
                 self.path.mkdir(parents=True, exist_ok=False)
             except (PermissionError, FileNotFoundError):
@@ -747,7 +756,7 @@ class Package(XmlLoaderABC):
         """Add TopObject instance defined by path
         :return TopObject instance
         """
-        topObj = TopObject(package=self, path=path, readOnly=self.readOnly)
+        topObj = TopObject(package=self, path=path, readOnly=self.isReadOnly)
         self.topObjects.append(topObj)
         return topObj
 
@@ -765,7 +774,7 @@ class Package(XmlLoaderABC):
         self._name = newName
         self._path = Path().joinpath(*newName.split('.'))
         # make a symlink to the old package directory
-        if not self.readOnly:
+        if not self.isReadOnly:
             try:
                 if self.path.exists() and self.path.is_symlink():
                     self.path.unlink()
@@ -782,17 +791,6 @@ class Package(XmlLoaderABC):
             topObj._id = _id
             topObj.addToLookup()
 
-    def _setReadOnly(self, value):
-        super()._setReadOnly(value)
-        for topObj in self.topObjects:
-            topObj._setReadOnly(value)
-
-    @property
-    def _readOnlyState(self) -> str:
-        """Return a quick reference read-only state of the object and its XML children
-        """
-        return super()._readOnlyState + ''.join([obj._readOnlyState for obj in self.topObjects])
-
     def __str__(self):
         _defined = len(self.topObjects)
         _loaded = len(self.loadedTopObjects)
@@ -800,6 +798,10 @@ class Package(XmlLoaderABC):
 
     __repr__ = __str__
 
+
+#=========================================================================================
+# Repository
+#=========================================================================================
 
 class Repository(XmlLoaderABC):
     """
@@ -814,7 +816,8 @@ class Repository(XmlLoaderABC):
     # children
     packages = List()
 
-    def __init__(self, xmlLoader: XmlLoader, name: str, path: Path, useParent: bool, createPath: bool = False, readOnly: bool = False):
+    def __init__(self, xmlLoader: XmlLoader, name: str, path: Path, useParent: bool, createPath: bool = False,
+                 readOnly: bool = False):
         """Initialise the object, optionally create the path
         """
         if xmlLoader is None:
@@ -884,14 +887,13 @@ class Repository(XmlLoaderABC):
         """
         if name is None and path is None:
             raise ValueError('Neither name nor path are defined')
-
         if name is not None and path is not None:
             raise ValueError('Both name and path are defined')
 
         if name is not None:
             path = self.path.joinpath(*name.split('.'))
 
-        _pkg = Package(self, path=path, createPath=createPath, readOnly=self.readOnly)
+        _pkg = Package(self, path=path, createPath=createPath, readOnly=self.isReadOnly)
         if not _pkg.isMemops:
             self.packages.append(_pkg)
 
@@ -944,22 +946,15 @@ class Repository(XmlLoaderABC):
         _url = Implementation.Url(path=_path.asString())
         self.apiRepository.setUrl(_url)
 
-    def _setReadOnly(self, value):
-        super()._setReadOnly(value)
-        for package in self.packages:
-            package._setReadOnly(value)
-
-    @property
-    def _readOnlyState(self) -> str:
-        """Return a quick reference read-only state of the object and its XML children
-        """
-        return super()._readOnlyState + ''.join([obj._readOnlyState for obj in self.packages])
-
     def __str__(self):
         return f'<Repository "{self.name}": loaded:{len(self.loadedTopObjects)}>'
 
     __repr__ = __str__
 
+
+#=========================================================================================
+# XmlLoader
+#=========================================================================================
 
 class XmlLoader(XmlLoaderABC):
     """
@@ -1054,28 +1049,6 @@ class XmlLoader(XmlLoaderABC):
     #--------------------------------------------------------------------------------------------
 
     @property
-    def readOnly(self):
-        """Return the read-only state
-        """
-        return self._readOnly
-
-    def setReadOnly(self, value):
-        """Set the read-only state for all loaded xml objects
-        """
-        if not isinstance(value, bool):
-            raise TypeError(f'{self.__class__.__name__}.setReadOnly must be a bool')
-
-        super()._setReadOnly(value)
-        for rep in self.repositories:
-            rep._setReadOnly(value)
-
-    @property
-    def _readOnlyState(self) -> str:
-        """Return a quick reference read-only state of the object and its XML children
-        """
-        return super()._readOnlyState + ''.join([obj._readOnlyState for obj in self.repositories])
-
-    @property
     def v3Path(self) -> Path:
         """returns the path to the CcpNmr repository as Path object
         Takes account of the optional V2-status
@@ -1159,7 +1132,7 @@ class XmlLoader(XmlLoaderABC):
                            # USERDATA: no 'ccpnv3' as this gets added deep in the bowels of the api code
                            useParent=not self.isV2,
                            createPath=True,
-                           readOnly=self.readOnly
+                           readOnly=self.isReadOnly
                            )
         self.repositories.append(_repo)
 
@@ -1169,7 +1142,7 @@ class XmlLoader(XmlLoaderABC):
                            # REFDATA: no 'ccpnv3' as this gets added deep in the bowels of the api code
                            useParent=True,
                            createPath=False,
-                           readOnly=self.readOnly
+                           readOnly=self.isReadOnly
                            )
         self.repositories.append(_repo)
 
@@ -1216,9 +1189,8 @@ class XmlLoader(XmlLoaderABC):
         :return a (api) NmrProject instance
         :raises FileExistsError or RuntimeError
         """
-        if self.readOnly:
+        if self.isReadOnly:
             raise RuntimeError(f'Project "{self.name}" is read-only')
-
         if self.path.exists():
             if not overwrite:
                 raise FileExistsError(f'newProject: path "{self.path}" already exists')
@@ -1226,7 +1198,6 @@ class XmlLoader(XmlLoaderABC):
                 self.path.removeDir()
 
         self.path.mkdir(parents=True, exist_ok=False)
-
         self.isV2 = False
 
         self.memopsRoot = Implementation.MemopsRoot(name=self.name)
@@ -1340,7 +1311,7 @@ class XmlLoader(XmlLoaderABC):
     #--------------------------------------------------------------------------------------------
 
     # @debug1Enter()
-    def loadProject(self, initGraphics:bool) -> NmrProject:
+    def loadProject(self, initGraphics: bool) -> NmrProject:
         """Loads ccpn project as defined by self.path;
         :param initGraphics: flag to also initialise the graphics objects
         :return api NmrProject instance
@@ -1371,7 +1342,8 @@ class XmlLoader(XmlLoaderABC):
             if not self.isV2:
                 raise RuntimeError(f'XmlLoader.loadProject: {es}') from es
 
-            self.logger.debug(f'XmlLoader.loadProject: loading "{_projectXml}" failed on first try; retrying patial load')
+            self.logger.debug(
+                    f'XmlLoader.loadProject: loading "{_projectXml}" failed on first try; retrying patial load')
             self._loadMemopsFromXml(_projectXml, partialLoad=True)
 
         if self.memopsRoot is None:
@@ -1448,11 +1420,10 @@ class XmlLoader(XmlLoaderABC):
         """
         if xmlProjectFile is None:
             xmlProjectFile = self._getXmlProjectFile()
-
         # if not xmlProjectFile.exists():
         #     raise FileNotFoundError(f'Invalid xmlProjectFile "{xmlProjectFile}"')
 
-        self._validateMemopsXml(xmlProjectFile)  # Will aslo check for presence
+        self._validateMemopsXml(xmlProjectFile)  # Will also check for presence
 
         # the memops name might differ from self.name, as the project
         # might have moved/renamed. Hence, derive it from the xml-file
@@ -1484,7 +1455,7 @@ class XmlLoader(XmlLoaderABC):
         # update various things
         self._updateApiRepositoryPaths()
 
-        if not self.readOnly:
+        if not self.isReadOnly:
             if self.nameHasChanged:
                 try:
                     # the only one to rename should be the primary project xml
@@ -1492,15 +1463,6 @@ class XmlLoader(XmlLoaderABC):
                     self._rename(self.name)  # Check below if we save
                 except (PermissionError, FileNotFoundError):
                     self.logger.info('Folder may be read-only')
-
-            # if (self.pathHasChanged or self.nameHasChanged):
-            #     try:
-            #         print(f'{self.pathHasChanged}   {self.path}    {self.apiUserPath}   {self.userData.apiRepository.url.path}')
-            #         self._saveMemopsToXml()
-            #     except (PermissionError, FileNotFoundError):
-            #         self.logger.warning('Folder may be read-only')
-
-        # self._debugInfo('After loading memopsRoot:')
 
     #--------------------------------------------------------------------------------------------
     # Saving
@@ -1514,16 +1476,15 @@ class XmlLoader(XmlLoaderABC):
                                  which should not change the isModified status.
         :raises RuntimeError on error
         """
-        getLogger().debug2(f'saveUserData: keepFallBack={keepFallBack}, updateIsModified={updateIsModified}, autoBackup={autoBackup}')
+        getLogger().debug2(
+                f'saveUserData: keepFallBack={keepFallBack}, updateIsModified={updateIsModified}, autoBackup={autoBackup}')
 
         # NOTE:ED - quick hack for backup
         if autoBackup:
             self.backupUserData(updateIsModified=False)
             return
-
-        if self.readOnly:
+        if self.isReadOnly:
             raise RuntimeError(f'Project "{self.name}" is read-only')
-
         if self.writeBlockingLevel:
             getLogger().debug('blocking save of .xml files')
             return
@@ -1543,7 +1504,8 @@ class XmlLoader(XmlLoaderABC):
                 self.backupsPath.mkdir(exist_ok=True, parents=False)
 
                 # check existing save/auto-backups
-                _existing = [_p for _p in self.backupsPath.listdir(suffix=BACKUP_SUFFIX) if _p.basename.startswith(CCPN_API_DIRECTORY)]
+                _existing = [_p for _p in self.backupsPath.listdir(suffix=BACKUP_SUFFIX) if
+                             _p.basename.startswith(CCPN_API_DIRECTORY)]
                 if len(_existing) >= app.preferences.general.backupSaveCount:
                     # only remove the oldest backup, fileName contains date
                     #   if the count has been reduced, there may be more many backup here,
@@ -1607,10 +1569,9 @@ class XmlLoader(XmlLoaderABC):
         :param updateIsModified: flag to update isModified status
         """
         # shouldn't need all these error-checks, just being careful
-        if self.readOnly:
+        if self.isReadOnly:
             getLogger().debug(f'Project {self.name!r} is read-only')
             return
-
         if self.writeBlockingLevel:
             getLogger().debug(f'blocking save: {self.xmlProjectFile}')
             return
@@ -1640,9 +1601,8 @@ class XmlLoader(XmlLoaderABC):
                                  which should not change the isModified status.
         :raises RuntimeError on error
         """
-        if self.readOnly:
+        if self.isReadOnly:
             raise RuntimeError(f'Project "{self.name}" is read-only')
-
         if self.writeBlockingLevel:
             getLogger().debug('blocking save of .xml files')
             return
@@ -1659,7 +1619,8 @@ class XmlLoader(XmlLoaderABC):
             self.backupsPath.mkdir(exist_ok=True, parents=False)
 
             # check existing save/auto-backups
-            _existing = [_p for _p in self.backupsPath.listdir(suffix=AUTOBACKUP_SUFFIX) if _p.basename.startswith(CCPN_API_DIRECTORY)]
+            _existing = [_p for _p in self.backupsPath.listdir(suffix=AUTOBACKUP_SUFFIX) if
+                         _p.basename.startswith(CCPN_API_DIRECTORY)]
             if len(_existing) >= app.preferences.general.autoBackupCount:
                 # only remove the oldest backup, fileName contains date
                 #   if the count has been reduced, there may be more many backup here,
@@ -1691,14 +1652,12 @@ class XmlLoader(XmlLoaderABC):
         :param updateIsModified: flag to update isModified status
         """
         # shouldn't need all these error-checks, just being careful
-        if self.readOnly:
+        if self.isReadOnly:
             getLogger().debug(f'Project {self.name!r} is read-only')
             return
-
         if self.writeBlockingLevel:
             getLogger().debug(f'blocking save: {self.xmlProjectFile}')
             return
-
         if not autoBackupPath:
             raise ValueError('Auto-backup path is not defined')
 
@@ -1759,7 +1718,6 @@ class XmlLoader(XmlLoaderABC):
             count += 1
 
         getLogger().debug(f'Checked {count} TopObjects, created {newCount} new ones')
-
 
     # @debug3Enter()
     def _rename(self, newName: str):
@@ -1827,6 +1785,8 @@ class XmlLoader(XmlLoaderABC):
         return f'<XmlLoader: "{self.name}" ({version})>'
 
     __repr__ = __str__
+
+
 #end class
 
 #=========================================================================================
@@ -1847,6 +1807,7 @@ def saveToStream(stream, apiTopObject, mapping=None, comment=None, simplified=Tr
         gc.disable()
 
     try:
+        getLogger().debug3(_styleBlue(f'saveToStream: {stream}'))
         XmlImp.saveToStream(stream, apiTopObject,
                             mapping=mapping, comment=comment,
                             simplified=simplified, compact=compact,
@@ -1915,7 +1876,8 @@ def _getIdFromTopObject(topObj) -> tuple:
         raise RuntimeError(f'_getIdFromTopObject: No repository found for {topObj}')
 
     elif len(activeRepositories) > 1:
-        getLogger().debug2(_styleRed(f'_getIdFromTopObject: Several repositories found for {topObj}; using first one {activeRepositories[0]}'))
+        getLogger().debug2(_styleRed(
+                f'_getIdFromTopObject: Several repositories found for {topObj}; using first one {activeRepositories[0]}'))
 
     apiRepo = activeRepositories[0]
 

@@ -4,9 +4,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 18:46:14 +0100 (Tue, March 28, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-05-03 14:09:46 +0100 (Fri, May 03, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,7 +32,6 @@ import logging
 import os
 import time
 import inspect
-import contextlib
 import sys
 from ccpn.util.Path import aPath
 
@@ -60,10 +59,10 @@ defaultLogLevel = logging.INFO
 MAX_LOG_FILE_DAYS = 7
 LOG_FIELD_WIDTH = 90
 
-logger = None
+logger: logging.Logger | None = None
 
 #DEFAULT_LOGGER_NAME = 'defaultLogger'
-defaultLogger = logging.getLogger('defaultLogger')
+defaultLogger: logging.Logger | None = logging.getLogger('defaultLogger')
 defaultLogger.propagate = False
 
 
@@ -93,7 +92,7 @@ def getLogger():
 
         return defaultLogger
 
-    logger._loggingCommandBlock = 0
+    # logger._loggingCommandBlock = 0
 
     return logger
 
@@ -115,8 +114,9 @@ def _debugGLError(MESSAGE, logger, msg, *args, **kwargs):
     if args: fmsg.append(', '.join([str(arg) for arg in args]))
     if kwargs: fmsg.append(', '.join([str(ky) + '=' + str(kwargs[ky]) for ky in kwargs.keys()]))
     _msg = _logCaller(logger, fmsg)
-    # increase the stack level to account for the partial wrapper
-    logger.log(MESSAGE, _msg, stacklevel=2)
+    if not logger._loggingCommandBlock:
+        # increase the stack level to account for the partial wrapper
+        logger.log(MESSAGE, _msg, stacklevel=2)
 
 
 def _message(MESSAGE, logger, msg, includeInspection=True, *args, **kwargs):
@@ -124,8 +124,9 @@ def _message(MESSAGE, logger, msg, includeInspection=True, *args, **kwargs):
     if args: fmsg.append(', '.join([str(arg) for arg in args]))
     if kwargs: fmsg.append(', '.join([str(ky) + '=' + str(kwargs[ky]) for ky in kwargs.keys()]))
     _msg = _logCaller(logger, fmsg) if includeInspection else '; '.join(fmsg)
-    # increase the stack level to account for the partial wrapper
-    logger.log(MESSAGE, _msg, stacklevel=2)
+    if not logger._loggingCommandBlock:
+        # increase the stack level to account for the partial wrapper
+        logger.log(MESSAGE, _msg, stacklevel=2)
 
 
 def createLogger(loggerName,
@@ -156,7 +157,6 @@ def createLogger(loggerName,
 
     today = datetime.date.today()
     fileName = f'log_{loggerName}_{today.year:02d}{today.month:02d}{today.day:02d}_{now}.txt'
-
     logPath = _logDirectory / fileName
 
     # _removeOldLogFiles(logPath, removeOldLogsDays)
@@ -173,21 +173,12 @@ def createLogger(loggerName,
 
     logger.logPath = logPath  # just for convenience
     logger.shutdown = logging.shutdown  # just for convenience but tricky
-
     if level is None:
         level = defaultLogLevel
-
     logger.setLevel(level)
+    # create attributes to store the file/stream state when enabling/disabling loggers
     logger._streamHandler = None
     logger._fileHandler = None
-
-    # if not readOnly:
-    #     try:
-    #         handler = logging.FileHandler(logPath, mode=mode)
-    #         _setupHandler(handler, level)
-    #     except (PermissionError, FileNotFoundError):
-    #         sys.stderr.write('>>> Folder may be read-only\n')
-
     try:
         # store the file-handler for later
         handler = DeferredFileHandler(logPath, mode=mode, delay=True, readOnly=readOnly)
@@ -225,11 +216,10 @@ def createLogger(loggerName,
 
 def updateLogger(loggerName,
                  logDirectory,
+                 readOnly,
                  level=None,
-                 mode='a',
-                 readOnly=True,
-                 flush=False,
-                 now=''):
+                 now='',
+                 ):
     global logger
 
     if not logger:
@@ -245,7 +235,6 @@ def updateLogger(loggerName,
 
     today = datetime.date.today()
     fileName = f'log_{loggerName}_{today.year:02d}{today.month:02d}{today.day:02d}_{now}.txt'
-
     logPath = _logDirectory / fileName
 
     # there seems no way to close the logger itself
@@ -253,21 +242,12 @@ def updateLogger(loggerName,
     # (and certainly do not want to close stdout or stderr)
     for handler in tuple(logger.handlers):
         logger.removeHandler(handler)
-
-    # if not readOnly:
-    #     # re-insert the originals
-    #     try:
-    #         handler = logging.FileHandler(logPath, mode=mode)
-    #         _setupHandler(handler, level)
-    #     except (PermissionError, FileNotFoundError):
-    #         sys.stderr.write('>>> Folder may be read-only\n')
-
     if logger._fileHandler:
         try:
             logger._fileHandler._updateFilename(logPath)
             _setupHandler(logger._fileHandler, level)
             logger._fileHandler._readOnly = readOnly
-            if flush:
+            if not readOnly:
                 # flush the stream and write all, file is re-opened as required on next log emit
                 logger._fileHandler.close()
 
@@ -349,33 +329,35 @@ class DeferredFileHandler(logging.FileHandler):
         if self._readOnly:
             # append to the queue of records
             self._queued.append(record)
+            return
 
-        else:
-            try:
-                # emit all queued items first, then new item
-                for rcd in self._queued:
-                    super().emit(rcd)
-                self._queued = []
-
-                super().emit(record)
-
-            except (PermissionError, FileNotFoundError):
-                # any write-error, keep queue and add new item to the end
-                self._queued.append(record)
-
-    def close(self) -> None:
-        if not self._readOnly:
-            # emit all queued items to the stream
+        try:
+            # emit all queued items first, then new item
             for rcd in self._queued:
                 super().emit(rcd)
             self._queued = []
+            super().emit(record)
 
+        except (PermissionError, FileNotFoundError):
+            # any write-error, keep queue and add new item to the end
+            self._queued.append(record)
+
+    def close(self) -> None:
+        if not self._readOnly:
+            try:
+                # emit all queued items to the stream
+                for rcd in self._queued:
+                    super().emit(rcd)
+                self._queued = []
+            except (PermissionError, FileNotFoundError):
+                ...
         super().close()
 
     def _updateFilename(self, filename):
         """Update the filename to the new folder
         """
         filename = os.fspath(filename)
-        #keep the absolute path, otherwise derived classes which use this
-        #may come a cropper when the current directory changes
+        # keep the absolute path, otherwise derived classes which use this
+        # may come a cropper when the current directory changes
+        self.close()
         self.baseFilename = os.path.abspath(filename)

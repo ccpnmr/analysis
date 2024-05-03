@@ -54,7 +54,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-26 17:27:51 +0100 (Fri, April 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-03 14:09:45 +0100 (Fri, May 03, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -863,6 +863,7 @@ class Spectrum(AbstractWrapperObject):
         """Return True if the spectrum is already defined as Alongside
         """
         from ccpn.core.lib.DataStore import AlongsideRedirection
+
         return self._dataStore.redirectionIdentifier == AlongsideRedirection.identifier
 
     @property
@@ -870,6 +871,7 @@ class Spectrum(AbstractWrapperObject):
         """Return True if the spectrum is already defined as Inside
         """
         from ccpn.core.lib.DataStore import InsideRedirection
+
         return self._dataStore.redirectionIdentifier == InsideRedirection.identifier
 
     def _makeNewRelativePath(self, newPath) -> Path:
@@ -926,18 +928,17 @@ class Spectrum(AbstractWrapperObject):
         oldDataSource = self.dataSource
 
         with undoStackBlocking(self.project.application, self.project) as addUndo:
-
             self._close()
             newDataSource.spectrum = self
             self._spectrumTraits.dataSource = newDataSource
             newDataStore.spectrum = self
             self._spectrumTraits.dataStore = newDataStore
             self._saveObject()
-            addUndo(undo = partial(self._openFileHelper, oldDataStore, oldDataSource),
-                    redo = partial(self._openFileHelper, newDataStore, newDataSource)
-                   )
+            addUndo(undo=partial(self._openFileHelper, oldDataStore, oldDataSource),
+                    redo=partial(self._openFileHelper, newDataStore, newDataSource)
+                    )
 
-    def _openFile(self, path:str, dataFormat:str, checkParameters:bool = True, dataSource = None) -> bool:
+    def _openFile(self, path: str, dataFormat: str, checkParameters: bool = True, dataSource=None) -> bool:
         """Open the spectrum as defined by path and dataFormat, creating a dataSource object.
 
         :param path: a path to the spectrum; may contain redirections (e.g. $DATA)
@@ -2403,15 +2404,15 @@ class Spectrum(AbstractWrapperObject):
         This property must be cached as it is used by the peak.signalToNoiseRatio (if and only the spectrum.noiseLevel is set by the user)
         """
         if self.noiseLevel is None:
-            self._setInternalParameter(self._NOISESD, None) #ensure we don't go out of sync with the NoiseLevel.
+            self._setInternalParameter(self._NOISESD, None)  #ensure we don't go out of sync with the NoiseLevel.
 
         result = self._getInternalParameter(self._NOISESD)
         if result is None and self.noiseLevel:
-            # We have the noiseLevel, we can backcalculate the noise sd
-            from ccpn.core.lib.SpectrumLib import  _estimateNoiseSDforSpectrumNoiseLevel
+            # We have the noiseLevel, we can back-calculate the noise sd
+            from ccpn.core.lib.SpectrumLib import _estimateNoiseSDforSpectrumNoiseLevel
 
             result = _estimateNoiseSDforSpectrumNoiseLevel(self)
-            self._setInternalParameter(self._NOISESD, result) #ensure we don't go out of sync with the NoiseLevel.
+            self._setInternalParameter(self._NOISESD, result)  #ensure we don't go out of sync with the NoiseLevel.
         return result
 
     @_noiseSD.setter
@@ -3257,7 +3258,8 @@ class Spectrum(AbstractWrapperObject):
             raise ValueError(f'Invalid template "{pathTemplate}"; invalid format specifier')
 
         if spectrumGroup is not None and not isinstance(spectrumGroup, SpectrumGroup):
-            raise ValueError(f'Invalid spectrumGroup ({spectrumGroup}, type {type(spectrumGroup)}); expected SpectrumGroup instance')
+            raise ValueError(
+                f'Invalid spectrumGroup ({spectrumGroup}, type {type(spectrumGroup)}); expected SpectrumGroup instance')
 
         # we get the "Pseudo" dimension; there should only one:
         if (pseudoDimension := self._getPseudoDimension()) == 0:
@@ -3527,7 +3529,6 @@ class Spectrum(AbstractWrapperObject):
         """
 
         with inactivity(debugText=f'Spectrum {self} _postRestore'):
-
             # This will set all Spectrum traits, including dataStore, dataSource and peakPicker
             self._spectrumTraits._restoreFromSpectrum()
 
@@ -3595,7 +3596,7 @@ class Spectrum(AbstractWrapperObject):
         Create as required
         """
         tmpPath = self._metaDataPath
-        if not self.project.readOnly:
+        if not self.project.isReadOnly:
             try:
                 # create subdirectory
                 aPath(self.project.path).fetchDir(CCPN_STATE_DIRECTORY)
@@ -3621,7 +3622,7 @@ class Spectrum(AbstractWrapperObject):
 
         # Only save (and possibly overwrite) if we have valid data
         if self._dataStore is not None and \
-                self.dataSource is not None and not self.project.readOnly:
+                self.dataSource is not None and not self.project.isReadOnly:
             try:
                 self._spectrumTraits.save(_path)
             except (PermissionError, FileNotFoundError):
@@ -4061,7 +4062,7 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
         'x'.join([str(p) for p in dataSource.pointCounts]),
         dataStore
         )
-    )
+                      )
 
     apiProject = project._wrappedData
     apiExperiment = apiProject.newExperiment(name=name, numDim=dataSource.dimensionCount)

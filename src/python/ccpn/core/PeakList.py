@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-02-13 15:44:37 +0000 (Tue, February 13, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-03 10:46:35 +0100 (Fri, May 03, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -524,9 +524,9 @@ class PeakList(PMIListABC):
                 spec = self.spectrum
                 peaks = peaks if peaks is not None else self.peaks
                 mps = set()
+                tempML = spec.newMultipletList()
                 for peak in peaks:
                     if not peak.multiplets:
-                        tempML = spec.newMultipletList()
                         mps.add(tempML.newMultiplet(peak))
                     else:
                         mps.update(peak.multiplets)

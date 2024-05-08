@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:53 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-05-08 16:12:54 +0100 (Wed, May 08, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1146,7 +1146,13 @@ class DimensionsTab(Widget):
         self.referenceDimensionPullDowns = [PulldownList(self, grid=(row, i + 1), **_align2) for i in _dimIndices]
         for i in _dimIndices:
             self.referenceDimensionPullDowns[i].currentIndexChanged.connect(partial(self._queueSetReferenceDimensions, spectrum, ))  #self.referenceDimensionPullDowns[i].getText, i))
-        _copyButton = Button(self, icon='icons/update.png', grid=(row, 1+dimensions),
+        row += 1
+        # button to copy to axis Codes
+        _copyBox = Frame(self, setLayout=True, grid=(row, 1), gridSpan=(1, dimensions))
+        _copyButton = Button(_copyBox, text='Copy to Axis Codes' if dimensions > 1 else 'Copy to Axis Code',
+                             hAlign='r',
+                             # icon='icons/update.png',
+                             grid=(0, 0),
                              callback=self._copyReferenceExperiments,
                              tipText='Copy all non-empty reference experiment dimensions to axis codes')
 
@@ -1352,7 +1358,8 @@ class DimensionsTab(Widget):
             editable = False
 
         else:
-            magTransfers = self._magTransfers
+            magTransfers = self.spectrum.magnetisationTransfers
+            # self._magTransfers  # why?
             editable = True
 
         self.magnetisationTransferTable.populateTable(magTransfers, editable=editable)

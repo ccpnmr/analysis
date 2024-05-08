@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:55 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-05-08 12:15:33 +0100 (Wed, May 08, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -281,7 +281,8 @@ class TableABC(QtWidgets.QTableView):
                                  self.exportMenu,
                                  self.headerColumnMenu]
 
-    def updateDf(self, df, resize=True, setHeightToRows=False, setWidthToColumns=False, setOnHeaderOnly=False, newModel=False):
+    def updateDf(self, df, resize=True, setHeightToRows=False, setWidthToColumns=False, setOnHeaderOnly=False,
+                 newModel=False):
         """Initialise the dataFrame
         """
         if not isinstance(df, (type(None), pd.DataFrame)):
@@ -447,7 +448,8 @@ class TableABC(QtWidgets.QTableView):
                             newSel.merge(QtCore.QItemSelection(idx, idx), QtCore.QItemSelectionModel.Select)
 
                     # Select the cells in the data view - spawns single change event
-                    self.selectionModel().select(newSel, QtCore.QItemSelectionModel.Rows | QtCore.QItemSelectionModel.ClearAndSelect)
+                    self.selectionModel().select(newSel,
+                                                 QtCore.QItemSelectionModel.Rows | QtCore.QItemSelectionModel.ClearAndSelect)
 
                 finally:
                     # unblock to enable again
@@ -457,13 +459,14 @@ class TableABC(QtWidgets.QTableView):
             sortColumnName = None
             if model._sortColumn is not None:
                 sortColumnName = self.headerColumnMenu.columnTexts[model._sortColumn]
+            self.scrollToSelectedIndex()
             self.sortingChanged.emit({
-                                                    'sortColumnName': sortColumnName,
-                                                    'sortColumnIndex': model._sortColumn,
-                                                    'oldSort': model._oldSortIndex,
-                                                    'newSort': model._sortIndex,
-                                                    'order': model._sortOrder,
-                                                    })
+                'sortColumnName' : sortColumnName,
+                'sortColumnIndex': model._sortColumn,
+                'oldSort'        : model._oldSortIndex,
+                'newSort'        : model._sortIndex,
+                'order'          : model._sortOrder,
+                })
 
     def _close(self):
         """Clean up the notifiers
@@ -551,8 +554,10 @@ class TableABC(QtWidgets.QTableView):
         """
         if self._enableSelectionCallback and self._selectionCallback is not None:
             # get the unique df-rows from the selections
-            newRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for sel in selected for idx in sel.indexes())
-            oldRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for sel in deselected for idx in sel.indexes())
+            newRows = OrderedSet(
+                    (dd := idx.data(INDEX_ROLE)) is not None and dd[0] for sel in selected for idx in sel.indexes())
+            oldRows = OrderedSet(
+                    (dd := idx.data(INDEX_ROLE)) is not None and dd[0] for sel in deselected for idx in sel.indexes())
             sRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for idx in self.selectedIndexes())
 
             df = self._df
@@ -713,7 +718,8 @@ class TableABC(QtWidgets.QTableView):
     def _keyModifierPressed():
         """Is the user clicking while holding a modifier
         """
-        allKeyModifers = [QtCore.Qt.ShiftModifier, QtCore.Qt.ControlModifier, QtCore.Qt.AltModifier, QtCore.Qt.MetaModifier]
+        allKeyModifers = [QtCore.Qt.ShiftModifier, QtCore.Qt.ControlModifier, QtCore.Qt.AltModifier,
+                          QtCore.Qt.MetaModifier]
         keyMod = QtWidgets.QApplication.keyboardModifiers()
 
         return keyMod in allKeyModifers
@@ -742,7 +748,8 @@ class TableABC(QtWidgets.QTableView):
         # key = event.key()
         # cursors = [QtCore.Qt.Key_Up, QtCore.Qt.Key_Down, QtCore.Qt.Key_Left, QtCore.Qt.Key_Right]
         enter = [QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return]
-        allKeyModifers = [QtCore.Qt.ShiftModifier, QtCore.Qt.ControlModifier, QtCore.Qt.AltModifier, QtCore.Qt.MetaModifier]
+        allKeyModifers = [QtCore.Qt.ShiftModifier, QtCore.Qt.ControlModifier, QtCore.Qt.AltModifier,
+                          QtCore.Qt.MetaModifier]
 
         # for MacOS ControlModifier is 'cmd' and MetaModifier is 'ctrl'
         addSelectionMod = [QtCore.Qt.ControlModifier]
@@ -783,14 +790,14 @@ class TableABC(QtWidgets.QTableView):
         pass
 
     def scrollToSelectedIndex(self):
-        """Scroll table to show the nearest selected index
+        """Scroll table to show the first selected index
         """
         h = self.horizontalHeader()
-        for i in range(h.count()):
-            if not h.isSectionHidden(i) and h.sectionViewportPosition(i) >= 0:
-                if (selection := self.selectionModel().selectedIndexes()):
-                    self.scrollTo(selection[0], self.EnsureVisible)  # doesn't dance around so much
-                    return
+        if next((True for i in range(h.count())
+                 if not h.isSectionHidden(i) and h.sectionViewportPosition(i) >= 0), None) and \
+                (selection := self.selectionModel().selectedIndexes()):
+            srt = sorted(selection, key=lambda sel: sel.row())
+            self.scrollTo(srt[0], self.PositionAtCenter)
 
     #=========================================================================================
     # Block table signals
@@ -907,10 +914,12 @@ class TableABC(QtWidgets.QTableView):
         :return: tuple to tuples
         """
         if not isinstance(positions, typing.Iterable):
-            raise TypeError(f'{self.__class__.__name__}.mapToSource: positions must be an iterable of list|tuples of the form [row, col]')
+            raise TypeError(f'{self.__class__.__name__}.mapToSource: '
+                            f'positions must be an iterable of list|tuples of the form [row, col]')
         if not all(isinstance(pos, (list, tuple)) and
                    len(pos) == 2 and isinstance(pos[0], int) and isinstance(pos[1], int) for pos in positions):
-            raise TypeError(f'{self.__class__.__name__}.mapToSource: positions must be an iterable of list|tuples of the form [row, col]')
+            raise TypeError(f'{self.__class__.__name__}.mapToSource: '
+                            f'positions must be an iterable of list|tuples of the form [row, col]')
 
         sortIndex = self.model()._sortIndex
         df = self.model().df
@@ -1101,7 +1110,8 @@ class TableABC(QtWidgets.QTableView):
         if self._df is None or self._df.empty:
             return
 
-        pos = QtCore.QPoint(pos.x() + 5, pos.y())  # move the popup a bit down; otherwise can trigger an event if the pointer is just on top the first item
+        # move the popup a bit down; otherwise can trigger an event if the pointer is just on top the first item
+        pos = QtCore.QPoint(pos.x() + 5, pos.y())
 
         # call the class setup
         self.setHeaderMenuOptions(menu)

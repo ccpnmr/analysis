@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:27 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-05-08 17:48:37 +0100 (Wed, May 08, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,9 +26,9 @@ __date__ = "$Date: 2022-08-17 13:51:55 +0100 (Wed, August 17, 2022) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtGui
 import pandas as pd
-
+from itertools import product
 from ccpn.core.lib.SpectrumLib import MagnetisationTransferTypes, \
     MagnetisationTransferParameters, MagnetisationTransferTuple
 from ccpn.ui.gui.widgets.Column import ColumnClass
@@ -37,6 +37,10 @@ from ccpn.ui.gui.widgets.table._TableDelegates import _SmallPulldown, _SimplePul
 
 
 EDIT_ROLE = QtCore.Qt.EditRole
+_BADCOLOR = QtGui.QColor('#f04025')
+_BADCOLOR.setAlphaF(0.5)
+_DUPLICATECOLOR = QtGui.QColor('#f04025')
+_DUPLICATECOLOR.setAlphaF(0.3)
 
 
 #=========================================================================================
@@ -71,7 +75,6 @@ class MagnetisationTransferTable(TableABC):
                    (str, MagnetisationTransferTypes),
                    (bool, [True, False]),
                    )
-
         # create the column objects
         _cols = [
             (MagnetisationTransferTypes[ii], lambda row: True, None, None, None)
@@ -124,11 +127,14 @@ class MagnetisationTransferTable(TableABC):
 
         else:
             df = pd.DataFrame(columns=MagnetisationTransferParameters)
-
         self.updateDf(df, resize=True, setHeightToRows=True, setWidthToColumns=True, setOnHeaderOnly=True)
 
         self.setTableEnabled(editable)
         self.model().dataChanged.connect(self._dataChanged)
+        # colour the table for bad entries
+        self._verifyTable()
+        # clear the selection so that the table colours can be seen
+        self.clearSelection()
 
     def _dataChanged(self, *args):
         """Emit tableChanged signal if the table has been edited.
@@ -136,7 +142,12 @@ class MagnetisationTransferTable(TableABC):
         :param args: catch optional arguments from event.
         :return:
         """
+        self._magTransfers = self.getMagnetisationTransfers()
         self.tableChanged.emit()
+        # colour the table for bad entries
+        self._verifyTable()
+        # clear the selection so that the table colours can be seen
+        self.clearSelection()
 
     def setTableEnabled(self, value):
         """Enable/Disable the table.
@@ -150,6 +161,28 @@ class MagnetisationTransferTable(TableABC):
         for action in self._actions:
             action.setEnabled(value)
 
+    def _verifyTable(self):
+        df = self._df
+        if df is None or df.empty:
+            return
+        # clear the background
+        for rr, cc in product(range(df.shape[0]), range(df.shape[1])):
+            self.setBackground(rr, cc, None)
+
+        for ii in range(df.shape[0]):
+            rowii = df.iloc[ii]
+            for jj in range(ii + 1, df.shape[0]):
+                rowjj = df.iloc[jj]
+                if {rowii.dimension1, rowii.dimension2} == {rowjj.dimension1, rowjj.dimension2}:
+                    # colour the rows
+                    for col in range(df.shape[1]):
+                        self.setBackground(ii, col, _DUPLICATECOLOR)
+                        self.setBackground(jj, col, _DUPLICATECOLOR)
+            if rowii.dimension1 == rowii.dimension2:
+                # colour the rows
+                for col in range(df.shape[1]):
+                    self.setBackground(ii, col, _BADCOLOR)
+
     #=========================================================================================
     # Table context menu
     #=========================================================================================
@@ -158,12 +191,10 @@ class MagnetisationTransferTable(TableABC):
         """Add options to the right-mouse menu
         """
         menu = self._thisTableMenu
-
         # no options from the super-class are required
         self._actions = [menu.addAction('New', self._newTransfer),
                          menu.addAction('Remove selected', self._removeTransfer)
                          ]
-
         return menu
 
     def _newTransfer(self):
@@ -183,10 +214,8 @@ class MagnetisationTransferTable(TableABC):
             _sortIndex = self.model()._sortIndex
             for idx in selection:
                 row = _sortIndex[idx.row()]
-
                 mt = list(self._magTransfers)
                 del mt[row]
-
                 self._magTransfers = tuple(mt)
                 self.populateTable(self._magTransfers)
                 self._dataChanged()

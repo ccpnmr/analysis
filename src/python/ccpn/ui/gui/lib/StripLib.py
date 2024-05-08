@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:27 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-05-08 12:20:15 +0100 (Wed, May 08, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -37,7 +37,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.isotopes import name2IsotopeCode
 
 
-def _getCurrentZoomRatio(viewRange):
+def getZoomRatio(viewRange):
     xRange, yRange = viewRange
     xMin, xMax = xRange
     xRatio = (xMax - xMin)

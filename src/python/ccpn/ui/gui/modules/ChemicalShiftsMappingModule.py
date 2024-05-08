@@ -69,8 +69,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:51 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-05-08 12:20:15 +0100 (Wed, May 08, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -124,7 +124,7 @@ from ccpn.ui.gui.modules.NmrResidueTable import _CSMNmrResidueTableFrame, KD, De
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.modules.PyMolUtil import _CSMSelection2PyMolFile
-from ccpn.ui.gui.lib.StripLib import navigateToNmrAtomsInStrip, _getCurrentZoomRatio, navigateToNmrResidueInDisplay
+from ccpn.ui.gui.lib.StripLib import navigateToNmrAtomsInStrip, getZoomRatio, navigateToNmrResidueInDisplay
 from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import concentrationUnits
 from ccpn.util.Common import splitDataFrameWithinRange, _fillListToLenght
@@ -626,7 +626,7 @@ class ChemicalShiftsMapping(CcpnModule):
             xPos = int(nmrResidue.sequenceCode)
             yPos = nmrResidue._delta
             if xPos and yPos:
-                xr, yr = _getCurrentZoomRatio(self.barGraphWidget.customViewBox.viewRange())
+                xr, yr = getZoomRatio(self.barGraphWidget.customViewBox.viewRange())
                 self.barGraphWidget.customViewBox.setRange(xRange=[xPos - (xr / 2), xPos + (xr / 2)], yRange=[0, yPos + (yr / 2)], )
         self._navigateToNmrItems()
 
@@ -1126,11 +1126,11 @@ class ChemicalShiftsMapping(CcpnModule):
             popup.raise_()
 
     def _navigateToPeakPosition(self, peak):
-        from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, _getCurrentZoomRatio
+        from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, getZoomRatio
 
         if self.current is not None:
             if self.current.strip is not None:
-                widths = _getCurrentZoomRatio(self.current.strip.viewRange())
+                widths = getZoomRatio(self.current.strip.viewRange())
                 navigateToPositionInStrip(strip=self.current.strip, positions=peak.position, widths=widths)
 
     def _navigateToNmrItems(self, nmrResidue=None, *args):
@@ -1152,13 +1152,13 @@ class ChemicalShiftsMapping(CcpnModule):
                 if len(nmrAtoms) <= 1:
                     navigateToNmrResidueInDisplay(display=strip.spectrumDisplay,
                                                   nmrResidue=nmrResidue,
-                                                  widths=_getCurrentZoomRatio(strip.viewRange()),
+                                                  widths=getZoomRatio(strip.viewRange()),
                                                   markPositions=True
                                                   )
                 else:
                     navigateToNmrAtomsInStrip(strip,
                                               nmrAtoms=nmrAtoms,
-                                              widths=_getCurrentZoomRatio(strip.viewRange()),
+                                              widths=getZoomRatio(strip.viewRange()),
                                               markPositions=True
                                               )
         else:

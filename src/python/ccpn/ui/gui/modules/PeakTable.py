@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:51 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-05-08 12:20:15 +0100 (Wed, May 08, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -105,11 +105,11 @@ class PeakTableModule(CcpnModule):
                                                   grid=(0, 0))
 
         # add the frame containing the pulldown and table
-        self._mainFrame = PeakTableFrame(parent=mainWidget,
-                                         mainWindow=self.mainWindow,
-                                         moduleParent=self,
-                                         peakList=peakList, selectFirstItem=selectFirstItem,
-                                         grid=(0, 0))
+        self._mainFrame = _PeakTableFrame(parent=mainWidget,
+                                          mainWindow=self.mainWindow,
+                                          moduleParent=self,
+                                          peakList=peakList, selectFirstItem=selectFirstItem,
+                                          grid=(0, 0))
 
     @property
     def tableFrame(self):
@@ -135,8 +135,8 @@ class PeakTableModule(CcpnModule):
             self._mainFrame.setActivePulldownClass(coreClass=self.activePulldownClass,
                                                    checkBox=self._settings.checkBoxes[LINKTOPULLDOWNCLASS]['widget'])
 
-        # set the dropped callback through mainWidget
-        self.mainWidget._dropEventCallback = self._mainFrame._processDroppedItems
+        # # set the dropped callback through mainWidget
+        # self.mainWidget._dropEventCallback = self._mainFrame._processDroppedItems
 
     def selectTable(self, table):
         """Select the object in the table
@@ -229,7 +229,7 @@ class _PeakTableOptions(TableMenuABC):
 # _NewPeakTableWidget
 #=========================================================================================
 
-class _NewPeakTableWidget(_CoreTableWidgetABC):
+class _PeakTableWidget(_CoreTableWidgetABC):
     """Class to present a peakList Table
     """
     className = 'PeakTable'
@@ -370,7 +370,7 @@ class _NewPeakTableWidget(_CoreTableWidgetABC):
     def actionCallback(self, selection, lastItem):
         """If current strip contains the double-clicked peak will navigateToPositionInStrip
         """
-        from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, _getCurrentZoomRatio
+        from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, getZoomRatio
 
         try:
             if not (objs := list(lastItem[self._OBJECT])):
@@ -388,7 +388,7 @@ class _NewPeakTableWidget(_CoreTableWidgetABC):
                 widths = None
 
                 if peak.peakList.spectrum.dimensionCount <= 2:
-                    widths = _getCurrentZoomRatio(self.current.strip.viewRange())
+                    widths = getZoomRatio(self.current.strip.viewRange())
                 navigateToPositionInStrip(strip=self.current.strip,
                                           positions=peak.position,
                                           axisCodes=peak.axisCodes,
@@ -582,10 +582,10 @@ class _NewPeakTableWidget(_CoreTableWidgetABC):
 # PeakTableFrame
 #=========================================================================================
 
-class PeakTableFrame(_CoreTableFrameABC):
+class _PeakTableFrame(_CoreTableFrameABC):
     """Frame containing the pulldown and the table widget
     """
-    _TableKlass = _NewPeakTableWidget
+    _TableKlass = _PeakTableWidget
     _PulldownKlass = PeakListPulldown
 
     def __init__(self, parent, mainWindow=None, moduleParent=None,

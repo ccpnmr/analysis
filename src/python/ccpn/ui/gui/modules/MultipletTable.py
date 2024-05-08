@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:51 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-05-08 12:20:15 +0100 (Wed, May 08, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -179,7 +179,7 @@ class MultipletTableModule(CcpnModule):
                                                    checkBox=self._settings.checkBoxes[LINKTOPULLDOWNCLASS]['widget'])
 
         # set the dropped callback through mainWidget
-        self.mainWidget._dropEventCallback = self._mainFrame._processDroppedItems
+        # self.mainWidget._dropEventCallback = self._mainFrame._processDroppedItems
 
         # connect the signals for the cross-table linking
         self.tableWidget.updateLinkedTable.connect(self._updatePeakTable)
@@ -288,7 +288,7 @@ class _NewMultipletTableWidget(_CoreTableWidgetABC):
         If current strip contains the double-clicked multiplet will navigateToPositionInStrip
         """
         from ccpn.core.PeakList import PeakList
-        from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, _getCurrentZoomRatio
+        from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, getZoomRatio
 
         try:
             if not (objs := list(lastItem[self._OBJECT])):
@@ -314,7 +314,7 @@ class _NewMultipletTableWidget(_CoreTableWidgetABC):
                         widths = None
 
                         if peak.peakList.spectrum.dimensionCount <= 2:
-                            widths = _getCurrentZoomRatio(self.current.strip.viewRange())
+                            widths = getZoomRatio(self.current.strip.viewRange())
                         navigateToPositionInStrip(strip=self.current.strip, positions=multiplet.position, widths=widths)
             else:
                 logger.warning('Impossible to navigate to peak position. No peaks in multiplet')
@@ -461,13 +461,13 @@ class _NewMultipletTableWidget(_CoreTableWidgetABC):
     def _navigateToPosition(self):
         """If current strip contains the double-clicked peak will navigateToPositionInStrip
         """
-        from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, _getCurrentZoomRatio
+        from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, getZoomRatio
 
         multiplet = self.current.multiplet
         if self.current.strip is not None:
             # widths = None
             try:
-                widths = _getCurrentZoomRatio(self.current.strip.viewRange())
+                widths = getZoomRatio(self.current.strip.viewRange())
                 if len(multiplet.limits) == 1:
                     positions = multiplet.limits[0]
                     navigateToPositionInStrip(strip=self.current.strip, positions=positions, widths=widths)

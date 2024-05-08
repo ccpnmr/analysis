@@ -22,8 +22,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:51 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-05-08 12:20:15 +0100 (Wed, May 08, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -149,7 +149,7 @@ class NmrResidueTableModule(CcpnModule):
                                                    checkBox=getattr(self.nmrResidueTableSettings, LINKTOPULLDOWNCLASS, None))
 
         # set the dropped callback through mainWidget
-        self.mainWidget._dropEventCallback = self._mainFrame._processDroppedItems
+        # self.mainWidget._dropEventCallback = self._mainFrame._processDroppedItems
 
     def selectTable(self, table):
         """Select the object in the table
@@ -240,7 +240,7 @@ class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
     def actionCallback(self, selection, lastItem):
         """If current strip contains the double-clicked peak will navigateToPositionInStrip
         """
-        from ccpn.ui.gui.lib.StripLib import _getCurrentZoomRatio
+        from ccpn.ui.gui.lib.StripLib import getZoomRatio
 
         try:
             if not (objs := list(lastItem[self._OBJECT])):
@@ -254,7 +254,7 @@ class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
         if self.current.strip is not None:
             self.application.ui.mainWindow.clearMarks()
             strip = self.current.strip
-            newWidths = _getCurrentZoomRatio(strip.viewRange())
+            newWidths = getZoomRatio(strip.viewRange())
             navigateToNmrResidueInDisplay(nmrResidue, strip.spectrumDisplay, stripIndex=0,
                                           widths=None)
             # widths=['default'] * len(strip.axisCodes))

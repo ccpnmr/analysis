@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
                "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-24 11:42:12 +0000 (Fri, November 24, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2024-05-08 12:20:16 +0100 (Wed, May 08, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -381,7 +381,7 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
         getLogger().debug(f'{self.__class__.__name__}.actionCallback')
 
         # If current strip contains the double-clicked peak will navigateToPositionInStrip
-        from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, _getCurrentZoomRatio
+        from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, getZoomRatio
 
         # multi-selection table will return a list of objects
         if not (objs := list(selection[self._OBJECT])):
@@ -400,7 +400,7 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                         widths = None
 
                         if peak.spectrum.dimensionCount <= 2:
-                            widths = _getCurrentZoomRatio(strp.viewRange())
+                            widths = getZoomRatio(strp.viewRange())
                         navigateToPositionInStrip(strip=strp,
                                                   positions=peak.position,
                                                   axisCodes=peak.axisCodes,

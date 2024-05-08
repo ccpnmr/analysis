@@ -4,9 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-17 15:39:18 +0000 (Fri, February 17, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-05-08 12:20:16 +0100 (Wed, May 08, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -377,7 +377,7 @@ class GuiRestraintTable(GuiTable):
 
         from ccpn.ui.gui.widgets.MessageDialog import showWarning
         from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
-        from ccpn.ui.gui.lib.StripLib import _getCurrentZoomRatio, navigateToPositionInStrip
+        from ccpn.ui.gui.lib.StripLib import getZoomRatio, navigateToPositionInStrip
 
         if restraint and restraint.peaks:
             self.current.peaks = restraint.peaks
@@ -396,7 +396,7 @@ class GuiRestraintTable(GuiTable):
                     if display and len(display.strips) > 0 and display.strips[0].spectrumViews:
                         widths = None
                         if pk.peakList.spectrum.dimensionCount <= 2:
-                            widths = _getCurrentZoomRatio(display.strips[0].viewRange())
+                            widths = getZoomRatio(display.strips[0].viewRange())
                         navigateToPositionInStrip(strip=display.strips[0],
                                                   positions=pk.position,
                                                   axisCodes=pk.axisCodes,

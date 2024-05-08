@@ -115,7 +115,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-03 14:09:46 +0100 (Fri, May 03, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-08 12:38:21 +0100 (Wed, May 08, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -312,7 +312,7 @@ class MenusDefs(list):
              ),
 
             (VIEW_MENU, [
-                ("Show Chemical Shift Table", self._showChemicalShiftTableCallback, [('shortcut', 'ct')]),
+                ("Chemical Shift Table", partial(app.showChemicalShiftTable, selectFirstItem=True), [('shortcut', 'ct')]),
                 ("NmrResidue Table", partial(app.showNmrResidueTable, selectFirstItem=True), [('shortcut', 'nt')]),
                 ("Residue Table", partial(app.showResidueTable, selectFirstItem=True)),
                 ("Peak Table", partial(app.showPeakTable, selectFirstItem=True), [('shortcut', 'pt')]),
@@ -324,9 +324,9 @@ class MenusDefs(list):
                 ("Structure Table", partial(app.showStructureTable, selectFirstItem=True), [('shortcut', 'st')]),
 
                 Separator(),
-                ("Show Restraint Analysis Inspector", self._showRestraintAnalysisInspectorCallback,
+                ("Restraint Analysis Inspector", self._showRestraintAnalysisInspectorCallback,
                  [('shortcut', 'at')]),
-                ("Show Chemical Shift Mapping (Beta)", self._showChemicalShiftMappingCallback, [('shortcut', 'cm')]),
+                ("Chemical Shift Mapping (Beta)", self._showChemicalShiftMappingCallback, [('shortcut', 'cm')]),
                 ("Relaxation Analysis (Beta)", app.showRelaxationModule, [('shortcut', 'ra')]),
                 ("Notes Editor", partial(app.showNotesEditor, selectFirstItem=True), [('shortcut', 'no')]),
 

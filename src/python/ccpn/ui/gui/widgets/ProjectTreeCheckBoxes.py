@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:27 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-05-08 12:38:22 +0100 (Wed, May 08, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,7 +27,6 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 from PyQt5 import QtGui, QtWidgets, QtCore
 from functools import partial
 from typing import Optional
-from ccpn.ui.gui.widgets.Base import Base
 from ccpn.core.Chain import Chain
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.RestraintTable import RestraintTable
@@ -45,11 +44,13 @@ from ccpn.core.Note import Note
 from ccpn.core.Project import Project
 from ccpn.core.DataTable import DataTable
 from ccpn.core.Collection import Collection
+from ccpn.core.lib.Notifiers import NotifierBase
+from ccpn.framework.lib.ccpnNef.CcpnNefCommon import _traverse, nef2CcpnMap, _isALoop, nef2CcpnClassNames
+from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
+from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.util.nef import StarIo
 from ccpn.util.OrderedSet import OrderedSet
-from ccpn.framework.lib.ccpnNef.CcpnNefCommon import _traverse, nef2CcpnMap, _isALoop, nef2CcpnClassNames
-from ccpn.ui.gui.widgets.Menu import Menu
 
 
 # TODO These should maybe be consolidated with the same constants in CcpnNefIo
@@ -66,7 +67,7 @@ RENAMEACTION = 'rename'
 BADITEMACTION = 'badItem'
 
 
-class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
+class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base, NotifierBase):
     """Class to handle a tree view created from a project
     """
     checkStateChanged = QtCore.pyqtSignal(QtWidgets.QTreeWidgetItem, int)
@@ -123,6 +124,7 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         """
         super().__init__(parent)
         Base._init(self, setLayout=False, **kwds)
+        NotifierBase.__init__(self)
 
         # self.setMaximumSize(*maxSize)
         self.headerItem = self.invisibleRootItem()  # QtWidgets.QTreeWidgetItem()

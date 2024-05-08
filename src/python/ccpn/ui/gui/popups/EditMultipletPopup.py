@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:53 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-05-08 12:38:22 +0100 (Wed, May 08, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -274,9 +274,9 @@ class EditMultipletPopup(CcpnDialog):
     # def _deregisterNotifiers(self):
     #   if self.project:
     #     if self._multipletNotifier:
-    #       self._multipletNotifier.unRegister()
+    #       self._multipletNotifier.unRegisterNotifier()
     #     if self._multipletListNotifier:
-    #       self._multipletListNotifier.unRegister()
+    #       self._multipletListNotifier.unRegisterNotifier()
 
 
 if __name__ == '__main__':

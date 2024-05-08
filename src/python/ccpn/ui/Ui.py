@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-03 14:09:46 +0100 (Fri, May 03, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-08 12:38:21 +0100 (Wed, May 08, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -215,13 +215,10 @@ class Ui(NotifierBase):
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
         from ccpn.framework.Application import getApplication
 
-        _app = getApplication()
-
         if dataLoader is None and path is not None:
             if (dataLoader := checkPathForDataLoader(path)) is None:
                 getLogger().error(f'Loading project: No suitable dataLoader found for {path}')
                 return None
-
         if dataLoader is None:
             getLogger().error('Loading project: No suitable dataLoader')
             return None
@@ -237,6 +234,7 @@ class Ui(NotifierBase):
                               'Please rename the folder without spaces and try loading again.' % dataLoader.path)
             return None
 
+        _app = getApplication()
         if _app and _app.project:
             # Some error recovery; store info to re-open the current project (or a new default)
             oldProjectPath = _app.project.path
@@ -245,10 +243,8 @@ class Ui(NotifierBase):
             oldProjectPath = oldProjectIsTemporary = None
 
         try:
-            _loaded = dataLoader.load()
-            if not _loaded:
+            if not (_loaded := dataLoader.load()):
                 return
-
             newProject = _loaded[0]
 
             # if the new project contains invalid spectra then open the popup to see them

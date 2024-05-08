@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:51 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-05-08 12:38:21 +0100 (Wed, May 08, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -38,7 +38,6 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.ui.gui.guiSettings import BORDERNOFOCUS_COLOUR
 
 
 logger = getLogger()
@@ -81,7 +80,7 @@ class NotesEditorModule(CcpnModule):
             self.current = None
         self.note = None
 
-        # setup the widgets
+        # set up the widgets
         self._setupWidgets()
 
         self._noteNotifier = None
@@ -95,20 +94,21 @@ class NotesEditorModule(CcpnModule):
 
     def _setupWidgets(self):
         """
-        Setup the widgets in module
+        Set up the widgets in module
         """
-        self._widget = ScrollableFrame(self.mainWidget, setLayout=True, showBorder=False,
-                                       scrollBarPolicies=('never', 'never'), spacing=DEFAULTSPACING, margins=DEFAULTMARGINS,
-                                       grid=(2, 1))
-        self._widgetScrollArea = self._widget._scrollArea
+        self._widgetFrame = ScrollableFrame(self.mainWidget, setLayout=True, showBorder=False,
+                                            scrollBarPolicies=('never', 'never'), spacing=DEFAULTSPACING,
+                                            margins=DEFAULTMARGINS,
+                                            grid=(2, 1))
+        self._widgetFrameScrollArea = self._widgetFrame._scrollArea
 
         row = 0
-        self.spacer = Spacer(self._widget, 5, 5,
+        self.spacer = Spacer(self._widgetFrame, 5, 5,
                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
                              grid=(row, 0), gridSpan=(1, 1))
 
         row += 1
-        self.noWidget = NotePulldown(parent=self._widget,
+        self.noWidget = NotePulldown(parent=self._widgetFrame,
                                      mainWindow=self.mainWindow, default=None,
                                      grid=(row, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
                                      showSelectName=True,
@@ -116,24 +116,26 @@ class NotesEditorModule(CcpnModule):
                                      callback=self._selectionPulldownCallback)
 
         row += 1
-        self.spacer = Spacer(self._widget, 5, 5,
+        self.spacer = Spacer(self._widgetFrame, 5, 5,
                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
                              grid=(row, 0), gridSpan=(1, 1))
 
         #~~~~~~~~~~ define noteWidget box to contain main editing
 
         row += 1
-        self.noteWidget = Frame(self._widget, grid=(row, 0), gridSpan=(4, 5), setLayout=True)
+        self.noteWidget = Frame(self._widgetFrame, grid=(row, 0), gridSpan=(4, 5), setLayout=True)
         self.noteWidget.hide()
 
         nRow = 1
         self.label1 = Label(self.noteWidget, text='name', grid=(nRow, 0), vAlign='c', hAlign='r')
-        self.lineEdit1 = LineEdit(self.noteWidget, grid=(nRow, 1), gridSpan=(1, 2), vAlign='top', textAlignment='l', backgroundText='> Enter name <')
+        self.lineEdit1 = LineEdit(self.noteWidget, grid=(nRow, 1), gridSpan=(1, 2), vAlign='top', textAlignment='l',
+                                  backgroundText='> Enter name <')
         self.lineEdit1.editingFinished.connect(self._applyNote)  # *1
 
         nRow += 1
         self.labelComment = Label(self.noteWidget, text='comment', grid=(nRow, 0), vAlign='c', hAlign='r')
-        self.lineEditComment = LineEdit(self.noteWidget, grid=(nRow, 1), gridSpan=(1, 2), vAlign='top', textAlignment='l', backgroundText='> Optional <')
+        self.lineEditComment = LineEdit(self.noteWidget, grid=(nRow, 1), gridSpan=(1, 2), vAlign='top',
+                                        textAlignment='l', backgroundText='> Optional <')
         self.lineEditComment.editingFinished.connect(self._applyNote)  # *1
 
         nRow += 1
@@ -146,12 +148,12 @@ class NotesEditorModule(CcpnModule):
         self.textBox.editingFinished.connect(self._applyNote)  # *1
 
         # NOTE: *1 Automatically save the note when it loses the focus.
-        #       Otherwise is very dangerous of losing all the carefully written notes if you forget to press the button apply!
+        #       Otherwise, is very dangerous of losing all the carefully written notes if you forget to press the button apply!
         #~~~~~~~~~~ end of noteWidget box
 
         row += 1
         # this spacer is expanding, will fill the space when the textbox is invisible
-        self.spacer = Spacer(self._widget, 5, 5,
+        self.spacer = Spacer(self._widgetFrame, 5, 5,
                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
                              grid=(row, 4), gridSpan=(1, 1))
 
@@ -183,7 +185,8 @@ class NotesEditorModule(CcpnModule):
             othersClassNames = list(set([obj.className for obj in others]))
             if len(othersClassNames) > 0:
                 if len(othersClassNames) == 1:
-                    title, msg = 'Dropped wrong item.', 'Do you want to open the %s in a new module?' % ''.join(othersClassNames)
+                    title, msg = 'Dropped wrong item.', 'Do you want to open the %s in a new module?' % ''.join(
+                        othersClassNames)
                 else:
                     title, msg = 'Dropped wrong items.', 'Do you want to open items in new modules?'
                 openNew = showYesNo(title, msg)
@@ -217,7 +220,7 @@ class NotesEditorModule(CcpnModule):
                                               Note.className,
                                               self._updateCallback)
         self._droppedNotifier = self.setGuiNotifier(self.mainWidget, [GuiNotifier.DROPEVENT], [DropBase.PIDS],
-                                                   self._processDroppedItems)
+                                                    self._processDroppedItems)
 
     def _applyNote(self):
         """

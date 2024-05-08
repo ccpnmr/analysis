@@ -6,9 +6,9 @@ tertiary version by Ejb 9/5/17
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-22 18:27:05 +0000 (Wed, November 22, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2024-05-08 12:38:21 +0100 (Wed, May 08, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,7 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from functools import partial, reduce
 from types import SimpleNamespace
 from operator import or_
@@ -55,6 +55,8 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.MessageDialog import showYesNo, showWarning
 from ccpn.ui.gui.widgets.SettingsWidgets import ALL
 from ccpn.ui.gui.widgets.Column import COLUMN_COLDEFS, COLUMN_SETEDITVALUE, COLUMN_FORMAT
+from ccpn.ui.gui.widgets.DropBase import DropBase
+from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip
 from ccpn.ui.gui.widgets.table._ProjectTable import _ProjectTableABC
 from ccpn.util.Logging import getLogger
@@ -171,6 +173,53 @@ class ChemicalShiftTableModule(CcpnModule):
                                                    moduleParent=self,
                                                    grid=(row, 0), gridSpan=(1, 6),
                                                    hiddenColumns=_hidden)
+
+        self.setAcceptDrops(True)
+        self.setGuiNotifier(_topWidget, [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+                            callback=self._processDroppedItems)
+
+    #=========================================================================================
+    # Process dropped items
+    #=========================================================================================
+
+    # This is a bit of a hack as this is still the older style of table-classes
+    #   the new method of setGuiNotifier works very well though
+
+    def _processDroppedItems(self, data):
+        """CallBack for Drop events
+        """
+        point = self._tableWidget.mapFromGlobal(QtGui.QCursor.pos())
+        if not self._tableWidget.visibleRegion().contains(point):
+            # only allow drops onto the actual table-widget
+            return
+        if self._tableWidget and data:
+            pids = data.get('pids', [])
+            self._handleDroppedItems(pids, self._tableWidget.tableClass, self._modulePulldown)
+
+    def _handleDroppedItems(self, pids, objType, pulldown):
+        """handle dropping pids onto the table
+        :param pids: the selected objects pids
+        :param objType: the instance of the obj to handle, e.g. PeakList
+        :param pulldown: the pulldown of the module wich updates the table
+        :return: Actions: Select the dropped item on the table or/and open a new modules if multiple drops.
+        If multiple different obj instances, then asks first.
+        """
+        from ccpn.ui.gui.lib.MenuActions import _openItemObject
+        from ccpn.ui.gui.widgets.MessageDialog import showYesNo
+
+        objs = [self.project.getByPid(pid) for pid in pids]
+
+        selectableObjects = [obj for obj in objs if isinstance(obj, objType)]
+        others = [obj for obj in objs if not isinstance(obj, objType)]
+        if selectableObjects:
+            _openItemObject(self.mainWindow, selectableObjects[1:])
+            pulldown.select(selectableObjects[0].pid)
+
+        elif othersClassNames := list({obj.className for obj in others if hasattr(obj, 'className')}):
+            title, msg = ('Dropped wrong item.', f"Do you want to open the {''.join(othersClassNames)} in a new module?") if len(othersClassNames) == 1 else ('Dropped wrong items.', 'Do you want to open items in new modules?')
+
+            if showYesNo(title, msg):
+                _openItemObject(self.mainWindow, others)
 
     def selectTable(self, table=None):
         """Manually select a table from the pullDown

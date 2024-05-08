@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:51 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-05-08 12:38:21 +0100 (Wed, May 08, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,13 +28,15 @@ __date__ = "$Date: 2022-04-29 16:52:01 +0100 (Fri, April 29, 2022) $"
 
 import pandas as pd
 from collections import OrderedDict
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from ccpn.core.lib.DataFrameObject import DataFrameObject
-from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.lib.Notifiers import Notifier, NotifierBase
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.table._ProjectTable import _ProjectTableABC
 from ccpn.ui.gui.widgets.Font import getFontHeight
+from ccpn.ui.gui.widgets.DropBase import DropBase
+from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.util.Logging import getLogger
 
 
@@ -374,7 +376,7 @@ class _CoreTableWidgetABC(_ProjectTableABC):
 # _CoreTableFrameABC
 #=========================================================================================
 
-class _CoreTableFrameABC(Frame):
+class _CoreTableFrameABC(Frame, NotifierBase):
     """Frame containing the pulldown and the table widget
     """
     _TableKlass = _CoreTableWidgetABC
@@ -386,6 +388,7 @@ class _CoreTableFrameABC(Frame):
     def __init__(self, parent, mainWindow=None, moduleParent=None,
                  obj=None, selectFirstItem=False, **kwds):
         super().__init__(parent, setLayout=True, **kwds)
+        NotifierBase.__init__(self)
 
         # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow
@@ -407,6 +410,10 @@ class _CoreTableFrameABC(Frame):
             # self._modulePulldown.selectFirstItem()
             # ensures that the module and contained widgets are initialised before selecting the first item
             QtCore.QTimer.singleShot(0, self._modulePulldown.selectFirstItem)
+
+        self.setAcceptDrops(True)
+        self.setGuiNotifier(self, [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+                            callback=self._processDroppedItems)
 
     def _setWidgets(self, container=None):
         """Set up the widgets for the module
@@ -527,6 +534,10 @@ class _CoreTableFrameABC(Frame):
     def _processDroppedItems(self, data):
         """CallBack for Drop events
         """
+        point = self._tableWidget.mapFromGlobal(QtGui.QCursor.pos())
+        if not self._tableWidget.visibleRegion().contains(point):
+            # only allow drops onto the actual table-widget
+            return
         if self._tableWidget and data:
             pids = data.get('pids', [])
             self._handleDroppedItems(pids, self._tableWidget.tableClass, self._modulePulldown)
@@ -551,7 +562,10 @@ class _CoreTableFrameABC(Frame):
             pulldown.select(selectableObjects[0].pid)
 
         elif othersClassNames := list({obj.className for obj in others if hasattr(obj, 'className')}):
-            title, msg = ('Dropped wrong item.', f"Do you want to open the {''.join(othersClassNames)} in a new module?") if len(othersClassNames) == 1 else ('Dropped wrong items.', 'Do you want to open items in new modules?')
+            title, msg = ('Dropped wrong item.',
+                          f"Do you want to open the {''.join(othersClassNames)} in a new module?") \
+                if len(othersClassNames) == 1 else \
+                ('Dropped wrong items.', 'Do you want to open items in new modules?')
 
             if showYesNo(title, msg):
                 _openItemObject(self.mainWindow, others)

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-26 17:27:52 +0100 (Fri, April 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-08 12:38:22 +0100 (Wed, May 08, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -56,6 +56,8 @@ from ccpn.ui.gui.widgets.Frame import ScrollableFrame
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Splitter import Splitter
+from ccpn.ui.gui.widgets.DropBase import DropBase
+from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.lib.alignWidgets import alignWidgets
 from ccpn.util.Logging import getLogger
 from ccpn.util.Path import fetchDir
@@ -94,8 +96,11 @@ class _ComparisonTree(ProjectTreeCheckBoxes):
         self.comparisonItem = None
 
         # allow drops of items
-        # self.setAcceptDrops(True)
-        self.setDropEventCallback(self._processDroppedItems)
+        self.setAcceptDrops(True)
+        self.setGuiNotifier(self, [GuiNotifier.DROPEVENT],
+                            [DropBase.PIDS], callback=self._processDroppedItems)
+        # self.setDropEventCallback(self._processDroppedItems)
+
         self.setSizeAdjustPolicy(QtWidgets.QTreeWidget.AdjustIgnored)
 
         if self not in self.resources.comparisonSets:
@@ -794,7 +799,7 @@ class RestraintAnalysisTableModule(CcpnModule):
                                                    checkBox=self._settings.checkBoxes[LINKTOPULLDOWNCLASS]['widget'])
 
         # set the dropped callback through mainWidget
-        self.mainWidget._dropEventCallback = self._processDroppedItems
+        # self.mainWidget._dropEventCallback = self._processDroppedItems
 
         self.settingsWidget.setAcceptDrops(True)
         # self.settingsWidget._dropEventCallback = self._processDroppedItems

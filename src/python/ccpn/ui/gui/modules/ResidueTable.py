@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:52 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-05-08 12:38:22 +0100 (Wed, May 08, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -95,11 +95,11 @@ class ResidueTableModule(CcpnModule):
                                                   grid=(0, 0))
 
         # add the frame containing the pulldown and table
-        self._mainFrame = ResidueTableFrame(parent=mainWidget,
-                                            mainWindow=self.mainWindow,
-                                            moduleParent=self,
-                                            chain=chain, selectFirstItem=selectFirstItem,
-                                            grid=(0, 0))
+        self._mainFrame = _TableFrame(parent=mainWidget,
+                                      mainWindow=self.mainWindow,
+                                      moduleParent=self,
+                                      chain=chain, selectFirstItem=selectFirstItem,
+                                      grid=(0, 0))
 
     @property
     def tableFrame(self):
@@ -126,7 +126,7 @@ class ResidueTableModule(CcpnModule):
                                                    checkBox=self._settings.checkBoxes[LINKTOPULLDOWNCLASS]['widget'])
 
         # set the dropped callback through mainWidget
-        self.mainWidget._dropEventCallback = self._mainFrame._processDroppedItems
+        # self.mainWidget._dropEventCallback = self._mainFrame._processDroppedItems
 
     def selectTable(self, table):
         """Select the object in the table
@@ -144,7 +144,7 @@ class ResidueTableModule(CcpnModule):
 # _NewResidueTableWidget
 #=========================================================================================
 
-class _NewResidueTableWidget(_CoreTableWidgetABC):
+class _TableWidget(_CoreTableWidgetABC):
     """Class to present a residue Table
     """
     className = 'ResidueTable'
@@ -201,8 +201,13 @@ class _NewResidueTableWidget(_CoreTableWidgetABC):
             self.current.clearResidues()
 
     #=========================================================================================
-    # Action callbacks
+    # Selection/Action callbacks
     #=========================================================================================
+
+    def actionCallback(self, selection, lastItem):
+        """No double-click action implemented.
+        """
+        pass
 
     #=========================================================================================
     # Create table and row methods
@@ -278,10 +283,10 @@ class _NewResidueTableWidget(_CoreTableWidgetABC):
 # ResidueTableFrame
 #=========================================================================================
 
-class ResidueTableFrame(_CoreTableFrameABC):
+class _TableFrame(_CoreTableFrameABC):
     """Frame containing the pulldown and the table widget
     """
-    _TableKlass = _NewResidueTableWidget
+    _TableKlass = _TableWidget
     _PulldownKlass = ChainPulldown
 
     def __init__(self, parent, mainWindow=None, moduleParent=None,

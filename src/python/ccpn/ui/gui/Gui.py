@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-03 14:09:46 +0100 (Fri, May 03, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-08 12:38:21 +0100 (Wed, May 08, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -784,7 +784,7 @@ class Gui(Ui, _Gui):
 
             return newProject
 
-    def _loadProject(self, dataLoader) -> (Project, None):
+    def _loadProject(self, dataLoader=None, path=None) -> (Project, None):
         """Helper function, loading project from dataLoader instance
         check and query for closing current project
         build the project Gui elements
@@ -793,12 +793,16 @@ class Gui(Ui, _Gui):
         :returns project instance or None
         """
         from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
+        from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
+
+        if dataLoader is None and path is not None:
+            if (dataLoader := checkPathForDataLoader(path)) is None:
+                raise RuntimeError(f'Loading project: No suitable dataLoader found for {path}')
+        if dataLoader is None:
+            raise RuntimeError('Loading project: No suitable dataLoader')
 
         if not dataLoader.createNewProject:
             raise RuntimeError(f'DataLoader {dataLoader} does not create a new project')
-
-        # if self.project is None:
-        #     raise RuntimeError('No current project; this should never happen!')
 
         oldProjectLoader = None
         oldProjectIsTemporary = True
@@ -823,15 +827,12 @@ class Gui(Ui, _Gui):
                 # NOTE:ED - getting a strange QT bug disabling the menu-bar from here
                 #  I think because the main-window isn't visible on the first load :|
                 with MessageDialog.progressManager(self.mainWindow, f'Loading project {dataLoader.path} ... '):
-                    _loaded = dataLoader.load()
-                    if _loaded is None or len(_loaded) == 0:
+                    if not (_loaded := dataLoader.load()):
                         return None
             else:
                 # progress not required on the first load
-                _loaded = dataLoader.load()
-                if _loaded is None or len(_loaded) == 0:
+                if not (_loaded := dataLoader.load()):
                     return None
-
             newProject = _loaded[0]
 
             # if the new project contains invalid spectra then open the popup to see them

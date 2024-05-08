@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-03 14:09:46 +0100 (Fri, May 03, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-08 12:38:21 +0100 (Wed, May 08, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -541,7 +541,7 @@ class Framework(NotifierBase):
         else:
             # start the thread
             self._autoBackupThread.setInterval(
-                self.preferences.general.autoBackupFrequency * 60)  # preferences is minutes
+                    self.preferences.general.autoBackupFrequency * 60)  # preferences is minutes
             self._autoBackupThread.start()
 
     @contextlib.contextmanager
@@ -1402,7 +1402,7 @@ class Framework(NotifierBase):
         try:
             project = _loadV3Project(application=self, path=path)
 
-        except (ValueError, RuntimeError) as es:
+        except (ValueError, RuntimeError, FileNotFoundError) as es:
             getLogger().warning(f'Error loading "{path}": {es}')
 
         else:

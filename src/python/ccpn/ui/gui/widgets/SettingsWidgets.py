@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:55 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-05-08 12:38:22 +0100 (Wed, May 08, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1341,7 +1341,7 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
         """Unregister notifiers
         """
         # if self._spectrumViewNotifier:
-        #     self._spectrumViewNotifier.unRegister()
+        #     self._spectrumViewNotifier.unRegisterNotifier()
         if self.includeNmrChainPullSelection:
             self.ncWidget.unRegister()
         if self.includeSpectrumTable:

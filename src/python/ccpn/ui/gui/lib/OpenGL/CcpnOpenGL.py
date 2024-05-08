@@ -56,8 +56,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:51 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-05-08 12:38:21 +0100 (Wed, May 08, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -6340,6 +6340,8 @@ class CcpnGLWidget(QOpenGLWidget):
     def _raiseRightMouseMenu(self, position, menu, mouseInAxis, strip):
         if mouseInAxis == GLDefs.MAINVIEW:
 
+            # NOTE:ED - this should emit a signal for the strip to respond to
+            #   not the GL's responsibility to do this :|
             # strip should handle the selection of correct menu
             selectedDict = self.getObjectsUnderMouse()
             if PEAKSELECT in selectedDict:
@@ -6395,7 +6397,7 @@ class CcpnGLWidget(QOpenGLWidget):
             strip._addItemsToCopyAxisFromMenusMainView()
             if not self.is1D:
                 strip._addItemsToMatchAxisCodesFromMenusMainView()
-            strip._checkMenuItems()
+            # strip._checkMenuItems()
 
         elif mouseInAxis in [GLDefs.BOTTOMAXIS, GLDefs.RIGHTAXIS, GLDefs.AXISCORNER]:
             strip.contextMenuMode = AxisMenu

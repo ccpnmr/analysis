@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:52 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-05-08 12:38:22 +0100 (Wed, May 08, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -43,6 +43,8 @@ from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
 from ccpn.ui.gui.widgets.SettingsWidgets import ModuleSettingsWidget
 from ccpn.ui.gui.widgets.table.Table import Table
+from ccpn.ui.gui.widgets.DropBase import DropBase
+from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 # from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 from ccpn.core.lib.Notifiers import Notifier, CurrentNotifier
@@ -205,6 +207,10 @@ class ViolationTableModule(CcpnModule):
         self._mlFrame.setCallback(self._moreLessCallback)
         # assume all are initially closed
 
+        self.setAcceptDrops(True)
+        self.setGuiNotifier(self.mainWidget, [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+                            callback=self._processDroppedItems)
+
     def _setCallbacks(self):
         """Set the active callbacks for the module
         """
@@ -218,6 +224,49 @@ class ViolationTableModule(CcpnModule):
 
         self._violationNotifier = self.setNotifier(self.project, [Notifier.CHANGE, Notifier.DELETE],
                                                    KlassTable.__name__, self._updateViolationTable, onceOnly=True)
+
+    #=========================================================================================
+    # Process dropped items
+    #=========================================================================================
+
+    # This is a bit of a hack as this is still the older style of table-classes
+    #   the new method of setGuiNotifier works very well though
+
+    def _processDroppedItems(self, data):
+        """CallBack for Drop events
+        """
+        point = self._tableWidget.mapFromGlobal(QtGui.QCursor.pos())
+        if not self._tableWidget.visibleRegion().contains(point):
+            # only allow drops onto the actual table-widget
+            return
+        if self._tableWidget and data:
+            pids = data.get('pids', [])
+            self._handleDroppedItems(pids, KlassTable, self._modulePulldown)
+
+    def _handleDroppedItems(self, pids, objType, pulldown):
+        """handle dropping pids onto the table
+        :param pids: the selected objects pids
+        :param objType: the instance of the obj to handle, e.g. PeakList
+        :param pulldown: the pulldown of the module wich updates the table
+        :return: Actions: Select the dropped item on the table or/and open a new modules if multiple drops.
+        If multiple different obj instances, then asks first.
+        """
+        from ccpn.ui.gui.lib.MenuActions import _openItemObject
+        from ccpn.ui.gui.widgets.MessageDialog import showYesNo
+
+        objs = [self.project.getByPid(pid) for pid in pids]
+
+        selectableObjects = [obj for obj in objs if isinstance(obj, objType)]
+        others = [obj for obj in objs if not isinstance(obj, objType)]
+        if selectableObjects:
+            _openItemObject(self.mainWindow, selectableObjects[1:])
+            pulldown.select(selectableObjects[0].pid)
+
+        elif othersClassNames := list({obj.className for obj in others if hasattr(obj, 'className')}):
+            title, msg = ('Dropped wrong item.', f"Do you want to open the {''.join(othersClassNames)} in a new module?") if len(othersClassNames) == 1 else ('Dropped wrong items.', 'Do you want to open items in new modules?')
+
+            if showYesNo(title, msg):
+                _openItemObject(self.mainWindow, others)
 
     def _maximise(self):
         """
@@ -241,7 +290,7 @@ class ViolationTableModule(CcpnModule):
         if self.activePulldownClass and self._setCurrentPulldown:
             self._setCurrentPulldown.unRegisterNotifier()
         if self._violationNotifier:
-            self._violationNotifier.unRegister()
+            self._violationNotifier.unRegisterNotifier()
 
         super()._closeModule()
 

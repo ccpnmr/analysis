@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-03 14:09:45 +0100 (Fri, May 03, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-08 12:38:21 +0100 (Wed, May 08, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1262,7 +1262,7 @@ class Project(AbstractWrapperObject):
                              ]
             if len(_readOnlyDirs) > 0:
                 getLogger().warning(
-                    f'Project contains {len(_readOnlyDirs)} read-only directories:\n{tuple(_readOnlyDirs)}')
+                        f'Project contains {len(_readOnlyDirs)} read-only directories:\n{tuple(_readOnlyDirs)}')
                 self.setReadOnly(True)
             else:
                 self.setReadOnly(self.isReadOnly)
@@ -1783,6 +1783,8 @@ class Project(AbstractWrapperObject):
         without changing project/application save-states.
         """
         self._saveOverrideState += 1
+        self._updateReadOnlyState()
+        # self._updateLoggerState()  # these should always be together
         try:
             yield  # transfer control to the saving function
         finally:
@@ -1790,6 +1792,8 @@ class Project(AbstractWrapperObject):
             self._saveOverrideState -= 1
             if self._saveOverrideState < 0:
                 raise RuntimeError('_saveOverrideState already at 0')
+            self._updateReadOnlyState()
+            # self._updateLoggerState()  # these should always be together
 
     def _clearOverride(self):
         """Set the override-state to 0.
@@ -2418,9 +2422,9 @@ class Project(AbstractWrapperObject):
         """Call the _updateObject(UPDATE_POST_PROJECT_INITIALISATION) method on
         all objects, including self
         """
-        self._indentedDebug2(
-            f'Project._update(): calling _updateObject(UPDATE_POST_PROJECT_INITIALISATION) on self and all descendants',
-            enter=True, dots=True)
+        self._indentedDebug2(f'Project._update(): '
+                             f'calling _updateObject(UPDATE_POST_PROJECT_INITIALISATION) on self and all descendants',
+                enter=True, dots=True)
 
         self._updateObject(UPDATE_POST_PROJECT_INITIALISATION)
         objs = self._getAllDecendants()

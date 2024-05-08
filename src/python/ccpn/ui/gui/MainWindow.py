@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-03 14:09:46 +0100 (Fri, May 03, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-08 12:38:21 +0100 (Wed, May 08, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -223,7 +223,9 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         if self.application.isApplicationReadOnly:
             showWarning('Set readOnly',
                         'Cannot change the readOnly state of the project as application is in readOnly mode.\n'
-                        'This has probably been set with the --read-only flag at startup.')
+                        'This has probably been set with the --read-only flag at startup.\n'
+                        'To allow unlocking, enter the following command in the python-console:\n'
+                        '    application.setApplicationReadOnly(False)')
             return
         if readOnly is None:
             # toggle the state

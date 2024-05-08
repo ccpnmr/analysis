@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:52 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-05-08 12:38:21 +0100 (Wed, May 08, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -44,7 +44,7 @@ from ccpn.ui.gui.widgets.SequenceWidget import SequenceWidget
 from ccpn.core.Chain import Chain
 from ccpn.ui.gui.guiSettings import getColours
 from ccpn.ui.gui.guiSettings import LABEL_SELECTEDBACKGROUND, LABEL_SELECTEDFOREGROUND, LABEL_HIGHLIGHT
-from ccpn.ui.gui.lib.StripLib import navigateToNmrResidueInDisplay, navigateToNmrAtomsInStrip, _getCurrentZoomRatio
+from ccpn.ui.gui.lib.StripLib import navigateToNmrResidueInDisplay, navigateToNmrAtomsInStrip, getZoomRatio
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.Font import setWidgetFont
 
@@ -116,9 +116,9 @@ class ResidueInformation(CcpnModule):
         # add a scroll area to contain the residue table
         self._widgetScrollArea = ScrollArea(parent=self.mainWidget, grid=(0, 0), scrollBarPolicies=('asNeeded', 'asNeeded'), **kwds)
         self._widgetScrollArea.setWidgetResizable(True)
-        self._widget = Widget(parent=self._widgetScrollArea, setLayout=True)
-        self._widgetScrollArea.setWidget(self._widget)
-        self._widget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self._scrollWidget = Widget(parent=self._widgetScrollArea, setLayout=True)
+        self._widgetScrollArea.setWidget(self._scrollWidget)
+        self._scrollWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
         # insert into the mainWidget
         self.splitter.addWidget(self._widgetScrollArea)
@@ -127,7 +127,7 @@ class ResidueInformation(CcpnModule):
         self.splitter.setChildrenCollapsible(False)
 
         # make a frame to contain the pulldown widgets
-        self._pulldownFrame = Frame(self._widget, setLayout=True, showBorder=False, grid=(0, 0))
+        self._pulldownFrame = Frame(self._scrollWidget, setLayout=True, showBorder=False, grid=(0, 0))
 
         # # insert into pulldownFrame
         # self.chainLabel = Label(self._pulldownFrame, text='Chain', grid=(0, 0))
@@ -148,7 +148,7 @@ class ResidueInformation(CcpnModule):
         self.selectedChain = None  #self.project.getByPid(self.chainPulldown.currentText())
         self.residueLabel = Label(self._pulldownFrame, text='Residue', grid=(0, 3))
 
-        self.colourScheme = self.application._colourScheme
+        # self.colourScheme = self.application._colourScheme
         self.residuePulldown = PulldownList(self._pulldownFrame, callback=self._setCurrentResidue,
                                             grid=(0, 4))
 
@@ -163,15 +163,15 @@ class ResidueInformation(CcpnModule):
         # set the callback after populating
         self._residueWidthData.setCallback(self._setResidueWidth)
         # add under the pulldownFrame
-        self.residueWidget = Widget(self._widget, setLayout=True,
+        self.residueWidget = Widget(self._scrollWidget, setLayout=True,
                                     grid=(1, 0), gridSpan=(1, 2))
 
-        self.spacer = Spacer(self._widget, 5, 5,
+        self.spacer = Spacer(self._scrollWidget, 5, 5,
                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
                              grid=(2, 3), gridSpan=(1, 1))
 
         self._pulldownFrame.setContentsMargins(0, 5, 5, 5)
-        self._widget.setContentsMargins(5, 0, 5, 0)
+        self._scrollWidget.setContentsMargins(5, 0, 5, 0)
 
         if chain is not None:
             self._selectChain(chain)
@@ -241,7 +241,8 @@ class ResidueInformation(CcpnModule):
         self.selectedResidueType = value
         self._getResidues()
 
-    def _setWidgetColour(self, widget):
+    @staticmethod
+    def _setWidgetColour(widget):
         """Set the colour for the label
         """
         palette = widget.palette()
@@ -249,7 +250,8 @@ class ResidueInformation(CcpnModule):
         palette.setColor(QtGui.QPalette.Background, QtGui.QColor(LABEL_SELECTEDBACKGROUND))
         widget.setPalette(palette)
 
-    def _removeWidget(self, widget, removeTopWidget=False):
+    @staticmethod
+    def _removeWidget(widget, removeTopWidget=False):
         """Destroy a widget and all it's contents
         """
 
@@ -432,3 +434,10 @@ class ResidueInformation(CcpnModule):
                     if strip != self.current.strip and not strip.header.headerVisible:
                         strip.header.reset()
                         strip.header.headerVisible = True
+
+    def _closeModule(self):
+        """CCPN-INTERNAL: used to close the module
+        """
+        if self.chainPulldown:
+            self.chainPulldown.unRegister()
+        super()._closeModule()

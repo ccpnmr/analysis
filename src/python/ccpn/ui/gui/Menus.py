@@ -115,7 +115,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-08 12:38:21 +0100 (Wed, May 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-09 17:33:38 +0100 (Thu, May 09, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1073,7 +1073,7 @@ class MenusDefs(list):
         dialog._show()
         path = dialog.selectedFile()
         if path is not None:
-            mainWindow.newMacroEditor(path=path)
+            self.ui.newMacroEditor(path=path)
 
     def _defineUserShortcutsCallback(self):
         from ccpn.ui.gui.popups.ShortcutsPopup import ShortcutsPopup

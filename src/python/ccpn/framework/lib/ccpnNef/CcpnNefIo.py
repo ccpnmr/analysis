@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-09 19:26:42 +0100 (Thu, May 09, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-09 19:27:43 +0100 (Thu, May 09, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1167,7 +1167,8 @@ class CcpnNefWriter:
                         # Correct for atom names starting with the isotopeCode (e.g. 2HA, 111CD)
                         if name.startswith(isotopeCode):
                             plainName = name[len(str(isotope)):]
-                            if chemicalShiftList.getChemicalShift(nmrAtom.nmrResidue.pid + Pid.IDSEP + plainName) is None:
+                            if chemicalShiftList.getChemicalShift(
+                                    nmrAtom.nmrResidue.pid + Pid.IDSEP + plainName) is None:
                                 # There is no shift in this list that has the corresponding name without the
                                 # isotope number prefix. Remove the prefix for writing
                                 rowdata['atom_name'] = plainName
@@ -4280,7 +4281,8 @@ class CcpnNefReader(CcpnNefContent):
         frames = self._getSaveFramesInOrder(dataBlock)
         # frameCats = frames.get(category) or []
 
-        frameList = ['None']  #_saveFrameNameFromCategory(frame).framecode for frame in frameCats if _saveFrameNameFromCategory(frame).fr]
+        frameList = [
+            'None']  #_saveFrameNameFromCategory(frame).framecode for frame in frameCats if _saveFrameNameFromCategory(frame).fr]
         loopList = ('nef_sequence', 'nef_chemical_shift_list')
         replaceList = ('chain_code', 'complex_chain_code',
                        'chain_code_1', 'chain_code_2', 'chain_code_3', 'chain_code_4', 'chain_code_5',
@@ -4938,7 +4940,8 @@ class CcpnNefReader(CcpnNefContent):
         frames = self._getSaveFramesInOrder(dataBlock)
         frameCats = frames.get(category) or []
         # get all saveframes attached to this spectrum - for ccpn
-        frameList = ['None']  # [frame.name for frame in frameCats if _saveFrameNameFromCategory(frame).subname == _frameID.subname]
+        frameList = [
+            'None']  # [frame.name for frame in frameCats if _saveFrameNameFromCategory(frame).subname == _frameID.subname]
 
         # now need to update the serial number in the relevant saveFrames
 
@@ -5691,7 +5694,8 @@ class CcpnNefReader(CcpnNefContent):
     importers['ccpn_dihedral_restraint_violation'] = load_ccpn_restraint_violation
     importers['ccpn_rdc_restraint_violation'] = load_ccpn_restraint_violation
 
-    def verify_ccpn_restraint_violation(self, restraintTable: RestraintTable, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
+    def verify_ccpn_restraint_violation(self, restraintTable: RestraintTable, loop: StarIo.NmrLoop,
+                                        parentFrame: StarIo.NmrSaveFrame,
                                         name=None, itemLength: int = None):
         """Verify the contents of ccpn_<type>_restraint_violation loops"""
         result = []
@@ -5756,7 +5760,8 @@ class CcpnNefReader(CcpnNefContent):
             # get dimension parameters
             if (_loop := saveFrame.get('nef_spectrum_dimension')) is not None:
                 nefDimensionParameters = self._parametersFromSpectrumDimensionLoop(_loop,
-                                                                                   mapping=nef2CcpnMap.get('nef_spectrum_dimension')
+                                                                                   mapping=nef2CcpnMap.get(
+                                                                                       'nef_spectrum_dimension')
                                                                                    )
                 _params.update(nefDimensionParameters)
 
@@ -5766,7 +5771,8 @@ class CcpnNefReader(CcpnNefContent):
 
             if (_loop := saveFrame.get('ccpn_spectrum_dimension')) is not None:
                 ccpnDimensionParameters = self._parametersFromSpectrumDimensionLoop(_loop,
-                                                                                    mapping=nef2CcpnMap.get('ccpn_spectrum_dimension')
+                                                                                    mapping=nef2CcpnMap.get(
+                                                                                        'ccpn_spectrum_dimension')
                                                                                     )
                 _params.update(ccpnDimensionParameters)
 

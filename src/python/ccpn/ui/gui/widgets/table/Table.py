@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:28 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-05-09 17:09:47 +0100 (Thu, May 09, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,7 +27,6 @@ __date__ = "$Date: 2022-09-08 17:12:59 +0100 (Thu, September 08, 2022) $"
 #=========================================================================================
 
 from PyQt5 import QtCore
-
 import ccpn.core  # MUST be imported here for correct import-order
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.table.TableABC import TableABC
@@ -128,13 +127,15 @@ class Table(TableABC, Base):
         super().__init__(parent, df=df,
                          multiSelect=multiSelect, selectRows=selectRows,
                          showHorizontalHeader=showHorizontalHeader, showVerticalHeader=showVerticalHeader,
-                         borderWidth=borderWidth, cellPadding=cellPadding, focusBorderWidth=focusBorderWidth, gridColour=gridColour,
+                         borderWidth=borderWidth, cellPadding=cellPadding, focusBorderWidth=focusBorderWidth,
+                         gridColour=gridColour,
                          _resize=_resize, setWidthToColumns=setWidthToColumns, setHeightToRows=setHeightToRows,
                          setOnHeaderOnly=setOnHeaderOnly, showGrid=showGrid, wordWrap=wordWrap,
                          alternatingRows=alternatingRows,
                          selectionCallback=selectionCallback, selectionCallbackEnabled=selectionCallbackEnabled,
                          actionCallback=actionCallback, actionCallbackEnabled=actionCallbackEnabled,
-                         enableExport=enableExport, enableDelete=enableDelete, enableSearch=enableSearch, enableCopyCell=enableCopyCell,
+                         enableExport=enableExport, enableDelete=enableDelete, enableSearch=enableSearch,
+                         enableCopyCell=enableCopyCell,
                          tableMenuEnabled=tableMenuEnabled, toolTipsEnabled=toolTipsEnabled,
                          )
         baseKwds = {k: v for k, v in kwds.items() if k not in _TABLE_KWDS}
@@ -165,7 +166,7 @@ def main():
             ]
 
     # multiIndex columnHeaders
-    cols = ("No", "Toyota", "Ford", "Tesla", "Nio", "Other", "NO")
+    cols = ["No", "Toyota", "Ford", "Tesla", "Nio", "Other", "NO"]
     rowIndex = ["AAA", "BBB", "CCC", "DDD", "EEE"]  # duplicate index
 
     for ii in range(MAX_ROWS):
@@ -201,8 +202,10 @@ def main():
     cells = ((0, 0, '#80c0ff', '#ffe055'),
              (1, 1, '#fe83cc', '#90efab'), (1, 2, '#fe83cc', '#90efab'),
              (2, 3, '#83fbcc', '#a0a0cc'),
-             (3, 2, '#e0ff87', '#344546'), (3, 3, '#e0ff87', '#344546'), (3, 4, '#e0ff87', '#344546'), (3, 5, '#e0ff87', '#344546'),
-             (4, 2, '#e0f08a', '#030840'), (4, 3, '#e0f08a', '#401254'), (4, 4, '#e0f08a', '#401254'), (4, 5, '#e0f08a', '#401254'),
+             (3, 2, '#e0ff87', '#344546'), (3, 3, '#e0ff87', '#344546'), (3, 4, '#e0ff87', '#344546'),
+             (3, 5, '#e0ff87', '#344546'),
+             (4, 2, '#e0f08a', '#030840'), (4, 3, '#e0f08a', '#401254'), (4, 4, '#e0f08a', '#401254'),
+             (4, 5, '#e0f08a', '#401254'),
              (6, 2, '#70a04f', '#246482'), (6, 6, '#70a04f', '#246377'),
              (7, 1, '#eebb43', '#378773'), (7, 2, '#eebb43', '#822846'),
              (8, 4, '#7090ef', '#b84dc5'), (8, 5, '#7090ef', '#010135'),

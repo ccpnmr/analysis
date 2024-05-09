@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:47 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-05-09 19:24:53 +0100 (Thu, May 09, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,13 +28,9 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import functools
 import string
-import traceback
 import typing
 import re
-import sys
-
 from contextlib import contextmanager
-
 
 from collections import OrderedDict
 from copy import deepcopy
@@ -58,11 +54,13 @@ from ccpn.util.Logging import getLogger
 
 from ccpn.ui.gui.guiSettings import consoleStyle
 
-def _styleRed(text:str) -> str:
+
+def _styleRed(text: str) -> str:
     """Get red text"""
     return f'{consoleStyle.fg.red}{text}{consoleStyle.reset}'
 
-def _styleBlue(text:str) -> str:
+
+def _styleBlue(text: str) -> str:
     """Get blue text"""
     return f'{consoleStyle.fg.darkblue}{text}{consoleStyle.reset}'
 
@@ -466,8 +464,8 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
                 raise ValueError(f'{cls.__name__}: {attribName!r} must be set')
 
             if Pid.altCharacter in value:
-                raise ValueError(
-                    f'{cls.__name__}: Character {Pid.altCharacter!r} not allowed in {attribName!r}; got {value!r}')
+                raise ValueError(f'{cls.__name__}: Character {Pid.altCharacter!r} not allowed in '
+                                 f'{attribName!r}; got {value!r}')
 
             if not allowWhitespace and commonUtil.contains_whitespace(value):
                 raise ValueError(f'{cls.__name__}: Whitespace not allowed in {attribName!r}; got {value!r}')
@@ -564,12 +562,10 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
     def newPid(cls, *args) -> 'Pid':
         """Create a new pid instance from cls.shortClassName and args
         """
-        from ccpn.core.lib.Pid import Pid
-
         if len(args) < cls._numberOfIdFields:
-            raise ValueError('%s.newPid: to few id-fields to generate a valid Pid instance')
+            raise ValueError('%s.newPid: too few id-fields to generate a valid Pid instance')
         pidFields = [cls.shortClassName] + [str(x) for x in args]
-        return Pid.new(*pidFields)
+        return Pid.Pid.new(*pidFields)
 
     _CCPNMR_NAMESPACE = '_ccpNmrV3internal'
 
@@ -754,7 +750,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         :param name: the name of the child object
         :return the child or None
         """
-        _pid = Pid.new(klazz, name)
+        _pid = Pid.Pid.new(klazz, name)
         return self.project.getByPid(_pid)
 
     def _getAllDecendants(self) -> list:
@@ -818,7 +814,8 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
             app = getApplication()
             if childClass._isGuiClass and app and not app.hasGui:
-                getLogger().debug2(f'-->  _getApiChildren(classes={classes}): skipping gui-class {childClass} for NoUi interface')
+                getLogger().debug2(f'-->  _getApiChildren(classes={classes}): '
+                                   f'skipping gui-class {childClass} for NoUi interface')
                 continue
 
             if ('all' in classes) or \
@@ -1002,9 +999,9 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         """Create indented blue debug2(text) with enter or leave arrow
         """
         _indent = "-" * (cls._objectRestoreLevel) if dots else \
-                  "=" * (cls._objectRestoreLevel)
+            "=" * (cls._objectRestoreLevel)
         _arrow = f'|{_indent}>' if enter else f'<{_indent}|'
-        getLogger().debug2( _styleBlue(f'{_arrow:7} {text}'))
+        getLogger().debug2(_styleBlue(f'{_arrow:7} {text}'))
 
     @staticmethod
     def _apiObjectString(apiObj) -> str:
@@ -1077,7 +1074,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
                 # if gui is disabled then skip all gui-core-classes
                 getLogger().debug2(
                         _styleBlue(f'-->  _restoreChildren: skipping gui-class {childClass} for NoUi interface')
-                )
+                        )
                 continue
 
             # self._indentedDebug2(f'getting apiData for {childClass.className}', enter=True, dots=True)
@@ -1167,7 +1164,6 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
             raise RuntimeError(f'Error creating new instance of class "{cls.className}"')
 
         return newInstance
-
 
     #=========================================================================================
     # CCPN functions
@@ -1474,9 +1470,9 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
         wrappedData = self._wrappedData
         if not hasattr(wrappedData, keyTag):
-            raise ValueError(
-                    f"Cannot set unique {keyTag} for {self.className}: {wrappedData.__class__} object has no attribute {keyTag}"
-                    )
+            raise ValueError(f"Cannot set unique {keyTag} for {self.className}: "
+                             f"{wrappedData.__class__} object has no attribute {keyTag}"
+                             )
 
         undo = self._project._undo
         if undo is not None:
@@ -1609,8 +1605,8 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
                             od[i] = att
             except Exception as e:
                 getLogger().warning(
-                    'Potential error for the property %s in creating dictionary from object: %s . Error: %s' % (
-                    i, self, e))
+                        'Potential error for the property %s in creating dictionary from object: %s . Error: %s' % (
+                            i, self, e))
         return od
 
     def getAsDataFrame(self) -> pd.DataFrame:
@@ -1639,5 +1635,3 @@ def updateObject(fromVersion, toVersion, updateFunction):
         return cls
 
     return theDecorator
-
-

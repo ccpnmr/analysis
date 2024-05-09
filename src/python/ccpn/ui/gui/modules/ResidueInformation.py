@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-09 17:09:47 +0100 (Thu, May 09, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-09 17:18:23 +0100 (Thu, May 09, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -374,14 +374,6 @@ class ResidueInformation(CcpnModule):
         """
         if self.chainPulldown:
             self.chainPulldown.unRegister()
-        self.deleteAllNotifiers()
-        # if self._setCurrentPulldownNotifier:
-        #     self._setCurrentPulldownNotifier.unRegisterNotifier()
-        # while len(self._resNotifiers) > 0:
-        #     if notifier := self._resNotifiers.pop():
-        #         notifier.unRegisterNotifier()
-        #         del (notifier)
-
         super()._closeModule()
 
     #=========================================================================================

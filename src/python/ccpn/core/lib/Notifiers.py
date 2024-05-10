@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-26 17:27:51 +0100 (Fri, April 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-10 17:06:23 +0100 (Fri, May 10, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -707,10 +707,10 @@ class NotifierBase(object):
             )
             result.append(_notifier)
             self._addNotifier(_notifier)
-
         return result
 
-    def setGuiNotifier(self, theObject, triggers: list, targetNames: list, callback: Callable) -> _NotifierList:
+    def setGuiNotifier(self, theObject: 'AbstractWrapperObject', triggers: list, targetNames: list,
+                       callback: Callable) -> _NotifierList:
         """
         Set GuiNotifier for Ccpn V3 object theObject
 

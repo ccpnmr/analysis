@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-17 13:57:11 +0100 (Wed, April 17, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-05-10 16:24:09 +0100 (Fri, May 10, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -106,9 +106,10 @@ class MacroEditor(CcpnModule):
     className = 'MacroEditor'
     _includeInLastSeen = False
 
-    def __init__(self, mainWindow=None, name='MacroEditor', filePath=None):
+    def __init__(self, mainWindow=None, name='MacroEditor', filePath=None, restore=True):
         paths = [aPath(path) for path in mainWindow.current.macroFiles]
-        if filePath in paths:
+        if aPath(filePath) in paths:
+            MessageDialog.showMessage('Already Opened.', 'This file is already opened in the project')
             raise TypeError('This Macro is already opened in the project')
 
         CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
@@ -127,6 +128,7 @@ class MacroEditor(CcpnModule):
         self._lastSaved = None
         self.filePath = filePath  # working filePath. If None, it will be created
         self._tempFile = None  # a temp file holder, used when the filePath is not specified
+        self._restore = restore  # will not restore the widget state if opened from a menu.
         self.userMacroDirPath = None  # dir path containing user Macros. from preferences if defined otherwise from .ccpn/macros
 
         if self.mainWindow:  # is running in Analysis
@@ -179,9 +181,10 @@ class MacroEditor(CcpnModule):
         self._setFileName()
         self._setToolBar()
         self._createWidgetSettings()
-        self._droppedNotifier = GuiNotifier(self.textEditor,
-                                           [GuiNotifier.DROPEVENT], [DropBase.URLS],
-                                           self._processDroppedItems)
+        self.setGuiNotifier(self.textEditor,
+                            [GuiNotifier.DROPEVENT], [DropBase.URLS],
+                            callback=self._processDroppedItems,
+                            )
 
     def _setupWidgets(self):
         """Set up the main widgets
@@ -355,31 +358,25 @@ class MacroEditor(CcpnModule):
         self.textEditor.saveToPDF()
 
     def openPath(self, filePath):
+        if not filePath.endswith('.py'):
+            MessageDialog.showMessage('Format Not Supported.', 'On MacroEditor you can only use a *.py file type')
 
-        if filePath:
-            if filePath.endswith('.py'):
-                if self._isInCurrent(filePath):
-                    MessageDialog.showMessage('Already Opened.', 'This file is already opened in the project')
-                    return
-                else:
-                    with open(aPath(filePath), 'r') as f:
-                        self.textEditor.textChanged.disconnect()
-                        self.textEditor.setUndoRedoEnabled(False)
-                        self.textEditor.clear()
-                        # for line in f.readlines():  # changed to f.read() instead of line by line.
-                        #     self.textEditor.insertPlainText(line)
-                        self.textEditor.insertPlainText(f.read())
-                        self.textEditor.setUndoRedoEnabled(True)
-                        # self.macroFile = f
-                        self._removeMacroFromCurrent()
-                        self.filePath = filePath
-                        self._preEditorText = self.textEditor.get()
-                        self._lastTimestp = None
-                        self._setCurrentMacro()
-                        self._setFileName()
-                        self.textEditor.textChanged.connect(self._textedChanged)
-            else:
-                MessageDialog.showMessage('Format Not Supported.', 'On MacroEditor you can only use a *.py file type')
+        with open(aPath(filePath), 'r') as f:
+            self.textEditor.textChanged.disconnect()
+            self.textEditor.setUndoRedoEnabled(False)
+            self.textEditor.clear()
+            # for line in f.readlines():  # changed to f.read() instead of line by line.
+            #     self.textEditor.insertPlainText(line)
+            self.textEditor.insertPlainText(f.read())
+            self.textEditor.setUndoRedoEnabled(True)
+            # self.macroFile = f
+            self._removeMacroFromCurrent()
+            self.filePath = filePath
+            self._preEditorText = self.textEditor.get()
+            self._lastTimestp = None
+            self._setCurrentMacro()
+            self._setFileName()
+            self.textEditor.textChanged.connect(self._textedChanged)
 
     def revertChanges(self):
         # revert to initial text. If the initial state is empty. a pop-up will ask to confirm.
@@ -711,25 +708,25 @@ class MacroEditor(CcpnModule):
         #
         #     except Exception as e:
         #         getLogger().debug('Impossible to restore %s value for %s. %s' % (variableName, self.name(), e))
+        if self._restore:
+            wDict = self._setNestedWidgetsAttrToModule()
+            widgetsState = od(sorted(widgetsState.items()))
+            for variableName, value in widgetsState.items():
+                try:
+                    widget = wDict.get(str(variableName))
+                    if variableName and variableName.endswith(_filenameLineEdit):
+                        if isinstance(widget, LineEdit):
+                            if value is not None and value != '':
+                                if self.filePath != value:
+                                    self._removeMacroFromCurrent()
+                                    self._deleteTempFile()
+                                self.openPath(value)
+                            continue
+                    else:
+                        widget._setSavedState(value)
 
-        wDict = self._setNestedWidgetsAttrToModule()
-        widgetsState = od(sorted(widgetsState.items()))
-        for variableName, value in widgetsState.items():
-            try:
-                widget = wDict.get(str(variableName))
-                if variableName and variableName.endswith(_filenameLineEdit):
-                    if isinstance(widget, LineEdit):
-                        if value is not None and value != '':
-                            if self.filePath != value:
-                                self._removeMacroFromCurrent()
-                                self._deleteTempFile()
-                            self.openPath(value)
-                        continue
-                else:
-                    widget._setSavedState(value)
-
-            except Exception as e:
-                getLogger().debug('Impossible to restore %s value for %s. %s' % (variableName, self.name(), e))
+                except Exception as e:
+                    getLogger().debug('Impossible to restore %s value for %s. %s' % (variableName, self.name(), e))
 
     def _closeModule(self):
         """Re-implementation of closeModule"""

@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-21 16:29:25 +0000 (Thu, March 21, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-05-10 16:28:56 +0100 (Fri, May 10, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -2279,7 +2279,9 @@ class Project(AbstractWrapperObject):
             sequences = fastaIo.parseFastaFile(path)
             chains = []
             for sequence in sequences:
-                newChain = self.createChain(sequence=sequence[1], compoundName=sequence[0],
+                newChain = self.createChain(sequence=sequence[2],
+                                            comment=sequence[1],
+                                            compoundName=sequence[0],
                                             molType='protein')
                 chains.append(newChain)
 

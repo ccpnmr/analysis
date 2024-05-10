@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-09 19:27:43 +0100 (Thu, May 09, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-10 19:13:23 +0100 (Fri, May 10, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -7482,6 +7482,7 @@ class CcpnNefReader(CcpnNefContent):
 
                 # check adjacent items have same chain_code and matching sequence_code
                 # split should give [', '-...', ] if correct i-1 residue
+                # maxsplit required for special fix - sequence code is -1-1
                 residueTest = nmrResidueLoopData[-1]['sequence_code'].split(row['sequence_code'], maxsplit=1)
                 if row['chain_code'] == nmrResidueLoopData[-1]['chain_code'] \
                         and len(residueTest) > 1 \

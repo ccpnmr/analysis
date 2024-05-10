@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
                "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-12 16:05:28 +0000 (Tue, December 12, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2024-05-10 18:46:56 +0100 (Fri, May 10, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -7375,7 +7375,7 @@ class CcpnNefReader(CcpnNefContent):
 
                 # check adjacent items have same chain_code and matching sequence_code
                 # split should give [', '-...', ] if correct i-1 residue
-                residueTest = nmrResidueLoopData[-1]['sequence_code'].split(row['sequence_code'])
+                residueTest = nmrResidueLoopData[-1]['sequence_code'].split(row['sequence_code'], maxsplit=1)
                 if row['chain_code'] == nmrResidueLoopData[-1]['chain_code'] \
                         and len(residueTest) > 1 \
                         and residueTest[0] == '' \

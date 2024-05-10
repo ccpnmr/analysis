@@ -4,9 +4,9 @@ This file contains the routines for message dialogues
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-28 12:50:21 +0000 (Tue, November 28, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2024-05-10 16:04:40 +0100 (Fri, May 10, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,6 +29,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import textwrap
 import math
 import sys
+import re
 from contextlib import suppress
 from functools import partial
 from dataclasses import dataclass
@@ -67,7 +68,8 @@ if _isDarwin():
 
 LINELENGTH = 100
 WRAPBORDER = 5
-WRAPSCALE = 1.01
+WRAPSCALE = 1.05
+_STARTMAXWIDTH = 50
 
 _DONTSHOWMESSAGE = "Don't show this again"
 _DONTSHOWPOPUP = 'dontShowPopup'
@@ -79,11 +81,10 @@ def _wrapString(text, lineLength=LINELENGTH):
     Returns list of individual lines and the concatenated string for dialog
     """
     newWrapped = []
-
-    _text = text.split('\n')
+    splt = '<br>' if '<br>' in text else '\n'
+    _text = text.split(splt)
     for text in _text:
         wrapped = textwrap.wrap(text, width=lineLength, replace_whitespace=False, break_long_words=False)
-
         if not text:
             newWrapped.append('')
         for mm in wrapped:
@@ -92,38 +93,7 @@ def _wrapString(text, lineLength=LINELENGTH):
                     newWrapped.append(mm[chPos:chPos + lineLength])
             else:
                 newWrapped.append(mm)
-
-    return newWrapped, '\n'.join(newWrapped)
-
-    # # merge lines that have now been created by splitting longer lines (if no newlines in first line)
-    # newWrapped2 = []
-    # if len(newWrapped) > 1:
-    #     lineNum = 0
-    #     while lineNum < len(newWrapped):
-    #         l1 = newWrapped[lineNum]
-    #         if lineNum == len(newWrapped) - 1:
-    #             newWrapped2.append(l1)
-    #             break
-    #
-    #         l2 = newWrapped[lineNum + 1]
-    #         if not l2:
-    #             newWrapped2.append(l1)
-    #             newWrapped2.append(l2)
-    #             lineNum += 1
-    #         elif (len(l1) + len(l2) < LINELENGTH) and '\n' not in l1:
-    #             # not sure it will get here now
-    #             newWrapped2.append(l1 + ' ' + l2)
-    #             lineNum += 1
-    #         else:
-    #             newWrapped2.append(l1)
-    #             if lineNum == len(newWrapped) - 2:
-    #                 newWrapped2.append(l2)
-    #
-    #         lineNum += 1
-    # else:
-    #     newWrapped2 = newWrapped
-    #
-    # return newWrapped2, '\n'.join(newWrapped2)
+    return newWrapped, splt.join(newWrapped)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -135,7 +105,7 @@ class MessageDialog(QtWidgets.QMessageBox):
     Base class for all dialogues
     Using the 'multiline' to emulate the windowTitle, as on Mac the windows do not get their title
     """
-    DONTSHOWENABLED = False
+    _dontShowEnabled = False
     _defaultResponse = None
     _popupId = None
 
@@ -146,80 +116,84 @@ class MessageDialog(QtWidgets.QMessageBox):
         # set modality to take control
         self.setWindowModality(QtCore.Qt.ApplicationModal)
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowStaysOnTopHint)
-
+        self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
         self._parent = parent
         self.setWindowTitle(title)
-
-        basicTextWrap, basicText = _wrapString(basicText)
-        messageWrap, message = _wrapString(message)
-
-        self.setText(basicText)
-        self.setInformativeText(message)
-
+        self._setWrappedText(basicText, message, scrollableMessage)
+        self._setFonts()
+        self._setScrollWidget(scrollableMessage)
         self.setIcon(icon)
-        self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
-
-        # self.setFont(messageFont)  #GWV:  Does not seem to do anything
-        # self.setMinimumSize(QtCore.QSize(300, 100))  #GWV:  Does not seem to do anything
-        # self.resize(300, 100)  #GWV:  Does not seem to do anything
-        # Adapted from the best solution so far from: http://apocalyptech.com/linux/qt/qmessagebox/
-        layout = self.layout()
-
-        # set the fonts for the labels (pushButtons are set later)
-        for widgetLabel in self.findChildren((QtWidgets.QLabel, QtWidgets.QTextEdit)):
-            setWidgetFont(widgetLabel, )
-
-        maxTextWidth = 50
-        widgetBasic = None
-        if item := layout.itemAtPosition(0, 2):
-            widgetBasic = item.widget()
-            setWidgetFont(widgetBasic, bold=True)
-
-            # get the bounding rectangle for each line of basicText
-            for wrapLine in basicTextWrap:
-                tWidth = int((QtGui.QFontMetrics(widgetBasic.font()).boundingRect(wrapLine).width() + WRAPBORDER) * WRAPSCALE)
-                maxTextWidth = max(maxTextWidth, tWidth)
-
-        widgetMessage = None
-        if item := layout.itemAtPosition(1, 2):
-            widgetMessage = item.widget()
-
-            # get the bounding rectangle for each line of informativeText
-            for wrapLine in messageWrap:
-                tWidth = int((QtGui.QFontMetrics(widgetMessage.font()).boundingRect(wrapLine).width() + WRAPBORDER) * WRAPSCALE)
-                maxTextWidth = max(maxTextWidth, tWidth)
-
-        if widgetBasic:
-            widgetBasic.setFixedWidth(maxTextWidth)
-        if widgetMessage:
-            if scrollableMessage:  # insert the Label widgetMessage inside a scrollArea. Could be done automatically if len(text) > someValue...
-                scrollArea = QtWidgets.QScrollArea(self)
-                scrollArea.setWidgetResizable(True)
-                widgetMessage.setWordWrap(True)
-                scrollArea.setWidget(widgetMessage)
-                layout.addWidget(scrollArea, 1, 2)
-            else:
-                widgetMessage.setFixedWidth(maxTextWidth)
-
-        palette = QtGui.QPalette()
-        self.setPalette(palette)
-
         if iconPath:
             image = QtGui.QPixmap(iconPath)
             scaledImage = image.scaled(48, 48, QtCore.Qt.KeepAspectRatio)
             self.setIconPixmap(scaledImage)
-
         if dontShowEnabled:
-            self.DONTSHOWENABLED = dontShowEnabled
+            self._dontShowEnabled = dontShowEnabled
             self._defaultResponse = defaultResponse
             self._popupId = popupId
         self._setDontShow()
 
+    def _setFonts(self):
+        """Set the fonts for the message widgets.
+        """
+        # Adapted from the best solution so far from: http://apocalyptech.com/linux/qt/qmessagebox/
+        # set the fonts for the labels (pushButtons are set later)
+        widgets = self.findChildren((QtWidgets.QLabel, QtWidgets.QTextEdit))
+        for widg in widgets:
+            setWidgetFont(widg, )
+        layout = self.layout()
+        for (rr, cc) in ((0, 1), (0, 2)):
+            # not sure whether it is column 1 or 2, but it might change?
+            if (item := layout.itemAtPosition(rr, cc)) and (widg := item.widget()) and (widg in widgets):
+                # change the header to bold-font
+                setWidgetFont(widg, bold=True)
+
+    def _setWrappedText(self, basicText, message, scrollableMessage):
+        """Split the text by \n and fix the width of the widgets.
+        This does not currently work with richText.
+        """
+        basicTextWrap, basicText = _wrapString(basicText)
+        messageWrap, message = _wrapString(message)
+        self.setText(basicText)
+        self.setInformativeText(message)
+        layout = self.layout()
+        maxTextWidth = _STARTMAXWIDTH
+        widgetSet = set()
+        for (rr, cc) in ((0, 1), (0, 2)):
+            maxTextWidth = self._checkLineLength(cc, layout, maxTextWidth, basicTextWrap, rr, widgetSet)
+        for (rr, cc) in ((1, 1), (1, 2)):
+            maxTextWidth = self._checkLineLength(cc, layout, maxTextWidth, messageWrap, rr, widgetSet)
+        for widg in widgetSet:
+            widg.setFixedWidth(maxTextWidth)
+
+    def _checkLineLength(self, cc, layout, maxTextWidth, msg, rr, widgetSet):
+        if (item := layout.itemAtPosition(rr, cc)) and (widg := item.widget()):
+            widgetSet.add(widg)
+            # get the bounding rectangle for each line of basicText
+            for wrapLine in msg:
+                wrapLine = re.sub(r'^<a[^>]*>', '', wrapLine)  # remove the '<a..> tag
+                tWidth = int((QtGui.QFontMetrics(self.font()).boundingRect(
+                        wrapLine).width() + WRAPBORDER) * WRAPSCALE)
+                maxTextWidth = max(maxTextWidth, tWidth)
+        return maxTextWidth
+
+    def _setScrollWidget(self, scrollableMessage=False):
+        """Move main message into scroll-area as required.
+        """
+        layout = self.layout()
+        if scrollableMessage and ((item := layout.itemAtPosition(1, 2)) and (widg := item.widget())):
+            # insert the Label widgetMessage inside a scrollArea.
+            # Could be done automatically if len(text) > someValue...
+            scrollArea = QtWidgets.QScrollArea(self)
+            scrollArea.setWidgetResizable(True)
+            widg.setWordWrap(True)
+            scrollArea.setWidget(widg)
+            layout.addWidget(scrollArea, 1, 2)
+
     def _setDontShow(self):
         # put a Don't Show checkbox at the bottom of the dialog if needed
-        if not self.DONTSHOWENABLED:
+        if not self._dontShowEnabled:
             return
-
         try:
             from ccpn.framework.Application import getApplication
 
@@ -231,15 +205,12 @@ class MessageDialog(QtWidgets.QMessageBox):
             # any error should hide the checkbox
             self._dontShowCheckBox = None
             return
-
         layout = self.layout()
-
         # add a checkbox below the buttons - looks a little cleaner
         # - just use simple widgets for the minute to stop cyclic imports
         self._frame = _frame = Frame(self)
         innerLayout = QtWidgets.QHBoxLayout()
         _frame.setLayout(innerLayout)
-
         # set the background/fontSize for the tooltips, fraction slower but don't need to import the colour-names
         _frame.setStyleSheet('QToolTip {{ background-color: {TOOLTIP_BACKGROUND}; '
                              'color: {TOOLTIP_FOREGROUND}; '
@@ -265,7 +236,6 @@ class MessageDialog(QtWidgets.QMessageBox):
         """
         handler to make dialogs modal but at the sametime accept the correct keys for default actions
         """
-
         # accepted events apple-delete, apple-c apple-v, esc, return, spacebar, command period, apple-z apple-y,
         # apple-shift-z  apple-h, apple-option-h, control tab, tab, shift tab, arrow keys, contol arrow keys
         # control-shift-arrows, apple-a
@@ -311,7 +281,6 @@ class MessageDialog(QtWidgets.QMessageBox):
                 result = True
         else:
             result = super(MessageDialog, self).event(event)
-
         return result
 
     def resizeEvent(self, ev):
@@ -321,20 +290,19 @@ class MessageDialog(QtWidgets.QMessageBox):
         # set the font of the push buttons, must be here after __init__ has completed
         for child in self.findChildren(QtWidgets.QPushButton):
             setWidgetFont(child, )
-
         # must be the first event outside the __init__ otherwise frameGeometries are not valid
         super(MessageDialog, self).resizeEvent(ev)
-
         if activeWindow := QtWidgets.QApplication.activeWindow():
             point = activeWindow.rect().center()
             global_point = activeWindow.mapToGlobal(point)
             self.move(global_point
                       - self.frameGeometry().center()
                       + self.frameGeometry().topLeft())
-
-        if self.DONTSHOWENABLED:
-            self._frame.move(self.contentsMargins().left() // 2,
-                             self.geometry().height() - self._frame.height() - self.contentsMargins().bottom() // 2)
+        if self._dontShowEnabled:
+            with suppress(AttributeError):
+                # strange error on the first paint of the widget
+                self._frame.move(self.contentsMargins().left() // 2,
+                                 self.geometry().height() - self._frame.height() - self.contentsMargins().bottom() // 2)
 
     def runFunc(self, func):
         QtCore.QTimer().singleShot(0, partial(self._runFunc, func))
@@ -350,7 +318,7 @@ class MessageDialog(QtWidgets.QMessageBox):
     def dontShowPopup(self):
         """Check the exec state from the stored don't-show preferences
         """
-        if self.DONTSHOWENABLED:
+        if self._dontShowEnabled:
             try:
                 from ccpn.framework.Application import getApplication
 
@@ -360,16 +328,14 @@ class MessageDialog(QtWidgets.QMessageBox):
                 state = popup[_DONTSHOWPOPUP]
             except Exception:
                 state = False
-
             # what is the default response for this dialog?
             # needs to be defined/set in the subclass of __init__
             return state
-
         return False
 
     def _accept(self):
         # store the current state of the checkbox in preferences
-        if self.DONTSHOWENABLED:
+        if self._dontShowEnabled:
             with suppress(Exception):
                 from ccpn.framework.Application import getApplication
 
@@ -383,7 +349,7 @@ class MessageDialog(QtWidgets.QMessageBox):
 
     def _reject(self):
         # store False in preferences - popup still opens
-        if self.DONTSHOWENABLED:
+        if self._dontShowEnabled:
             with suppress(Exception):
                 from ccpn.framework.Application import getApplication
 
@@ -400,16 +366,17 @@ class MessageDialog(QtWidgets.QMessageBox):
 # MessageDialog subclasses
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def showInfo(title, message, parent=None, iconPath=None):
+def showInfo(title, message, parent=None, iconPath=None,
+             dontShowEnabled=False, defaultResponse=None, popupId=None):
     """Display an info message
     """
-    dialog = MessageDialog('Information', title, message, Information, iconPath, parent)
-    dialog.setStandardButtons(Ok)
-
-    #dialog = QtWidgets.QMessageBox.information(parent, title, message)
-    dialog.raise_()
-    dialog.exec_()
-    return
+    dialog = MessageDialog('Information', title, message, Information, iconPath, parent,
+                           dontShowEnabled=dontShowEnabled, defaultResponse=defaultResponse, popupId=popupId)
+    if dialog.dontShowPopup():
+        getLogger().debug(f'Popup {popupId!r} skipped with response={defaultResponse}')
+    else:
+        dialog.setStandardButtons(Ok)
+        dialog.exec_()
 
 
 def showNotImplementedMessage():
@@ -419,36 +386,25 @@ def showNotImplementedMessage():
 
 def showOkCancel(title, message, parent=None, iconPath=None):
     dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
-
     dialog.setStandardButtons(Ok | Cancel)
     dialog.setDefaultButton(Ok)
-
-    dialog.raise_()
     return dialog.exec_() == Ok
 
 
 def showYesNo(title, message, parent=None, iconPath=None):
     dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
-
     dialog.setStandardButtons(Yes | No)
     dialog.setDefaultButton(Yes)
-
-    dialog.raise_()
     return dialog.exec_() == Yes
 
 
 def showRetryIgnoreCancel(title, message, parent=None, iconPath=None):
     dialog = MessageDialog('Retry', title, message, Question, iconPath, parent)
-
     dialog.setStandardButtons(Retry | Ignore | Cancel)
     dialog.setDefaultButton(Retry)
-
-    dialog.raise_()
     result = dialog.exec_()
-
     if result == Retry:
         return True
-
     elif result == Cancel:
         return False
 
@@ -458,29 +414,21 @@ def showRetryIgnoreCancel(title, message, parent=None, iconPath=None):
 
 def showSaveDiscardCancel(title, message, parent=None, iconPath=None):
     dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
-
     dialog.setStandardButtons(Save | Discard | Cancel)
     dialog.setDefaultButton(Save)
-
-    dialog.raise_()
     result = dialog.exec_()
-
     if result == Save:
         return True
-
     elif result == Discard:
         return False
-
     else:
         return None
 
 
 def showWarning(title, message, parent=None, iconPath=None, scrollableMessage=False):
-    dialog = MessageDialog(title='Warning', basicText=title, message=message, icon=Warning, iconPath=iconPath, parent=parent,
-                           scrollableMessage=scrollableMessage)
-
+    dialog = MessageDialog(title='Warning', basicText=title, message=message, icon=Warning, iconPath=iconPath,
+                           parent=parent, scrollableMessage=scrollableMessage)
     dialog.setStandardButtons(Close)
-    dialog.raise_()
     dialog.exec_()
     return
 
@@ -489,20 +437,15 @@ def showNYI(parent=None):
     text = 'Not yet implemented'
     dialog = MessageDialog(title=text, basicText=text, message='Sorry!', icon=Warning, iconPath=None, parent=parent,
                            scrollableMessage=False)
-
     dialog.setStandardButtons(Close)
-    dialog.raise_()
     dialog.exec_()
     return
 
 
 def showOkCancelWarning(title, message, parent=None, iconPath=None):
     dialog = MessageDialog('Warning', title, message, Warning, iconPath, parent)
-
     dialog.setStandardButtons(Ok | Cancel)
     dialog.setDefaultButton(Cancel)
-
-    dialog.raise_()
     return dialog.exec_() == Ok
 
 
@@ -510,70 +453,55 @@ def showYesNoWarning(title, message, parent=None, iconPath=None,
                      dontShowEnabled=False, defaultResponse=None, popupId=None):
     dialog = MessageDialog('Warning', title, message, Warning, iconPath, parent,
                            dontShowEnabled=dontShowEnabled, defaultResponse=defaultResponse, popupId=popupId)
-
     if dialog.dontShowPopup():
-        getLogger().info(f'Popup {popupId!r} skipped with response={defaultResponse}')
+        getLogger().debug(f'Popup {popupId!r} skipped with response={defaultResponse}')
         return defaultResponse
-
     dialog.setStandardButtons(Yes | No)
     dialog.setDefaultButton(No)
-
     return dialog.exec_() == Yes
 
 
 def showYesNoCancelWarning(title, message, parent=None, iconPath=None):
     dialog = MessageDialog('Warning', title, message, Warning, iconPath, parent)
-
     dialog.setStandardButtons(Yes | No | Cancel)
     dialog.setDefaultButton(Cancel)
-
-    dialog.raise_()
     return dialog.exec_()
 
 
-def showMulti(title, message, texts, objects=None, parent=None, iconPath=None, okText='OK', cancelText='Cancel', destructive=(), checkbox=None, checked=True):
+def showMulti(title, message, texts, objects=None, parent=None, iconPath=None, okText='OK', cancelText='Cancel',
+              destructive=(), checkbox=None, checked=True):
     if objects:
         assert len(objects) == len(texts)
-
     dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
 
     _checkbox = None
-
     for text in texts:
         lower_text = text.strip().lower()
-
         if checkbox and (lower_text in checkbox or checkbox in lower_text):
             raise Exception('Checkboxes and buttons cannot have the same name!')
         else:
             role = QtWidgets.QMessageBox.ActionRole
-
             if lower_text == 'cancel' or lower_text == cancelText.strip().lower():
                 role = QtWidgets.QMessageBox.RejectRole
-
             if not isinstance(destructive, str):
                 destructive = [item.strip().lower() for item in destructive]
             else:
                 destructive = destructive.strip().lower()
             if lower_text in destructive:
                 role = QtWidgets.QMessageBox.DestructiveRole
-
             if lower_text == 'ok' or lower_text == okText.strip().lower():
                 role = QtWidgets.QMessageBox.AcceptRole
-
             button = dialog.addButton(text, role)
-
             if lower_text == 'ok' or lower_text == okText.strip().lower():
                 dialog.setDefaultButton(button)
 
         if checkbox is not None:
             _checkbox = CheckBox(parent=dialog, text=checkbox, checked=checked)
             dialog.setCheckBox(_checkbox)
-
     if _checkbox is not None:
         _checkbox.setFocus()
 
     index = dialog.exec_()
-
     result = ''
     if dialog.clickedButton() is not None:
         if objects:
@@ -581,7 +509,6 @@ def showMulti(title, message, texts, objects=None, parent=None, iconPath=None, o
 
         else:
             result = texts[index]
-
     if checkbox is not None and _checkbox.isChecked():
         result = ' %s %s ' % (result, checkbox)
 
@@ -590,18 +517,14 @@ def showMulti(title, message, texts, objects=None, parent=None, iconPath=None, o
 
 def showError(title, message, parent=None, iconPath=None):
     dialog = MessageDialog('Error', title, message, Critical, iconPath, parent)
-
     dialog.setStandardButtons(Close)
-    dialog.raise_()
     dialog.exec_()
     return
 
 
 def showMessage(title, message, parent=None, iconPath=None):
     dialog = MessageDialog('Message', title, message, Information, iconPath, parent)
-
     dialog.setStandardButtons(Close)
-    dialog.raise_()
     dialog.exec_()
     return
 
@@ -710,21 +633,17 @@ class _progressStore:
 @contextmanager
 def progressManager(parent, title=None, progressMax=100):
     thisProg = progressPopup(parent=parent, title=title, progressMax=progressMax)
-
     _prog = _progressStore()
     try:
         thisProg.progress_simulation()
         thisProg.update()
         QtWidgets.QApplication.processEvents()  # still doesn't catch all the paint events
         sleep(0.1)
-
         yield _prog  # yield control to the main process
-
     finally:
         thisProg.update()
         QtWidgets.QApplication.processEvents()  # hopefully it will redraw the popup
         thisProg.close()
-
         if win := (_prog.newWindow or parent):
             # return correct focus control to the parent
             QtWidgets.QApplication.setActiveWindow(win)
@@ -733,21 +652,17 @@ def progressManager(parent, title=None, progressMax=100):
 @contextmanager
 def busyDialog(parent, title=None, progressMax=100):
     thisProg = progressPopup(parent=parent, title=title, progressMax=progressMax)
-
     _prog = _progressStore()
     try:
         thisProg.progress_simulation()
         thisProg.update()
         QtWidgets.QApplication.processEvents()  # still doesn't catch all the paint events
         sleep(0.1)
-
         yield thisProg  # yield control to the main process
-
     finally:
         thisProg.update()
         QtWidgets.QApplication.processEvents()  # hopefully it will redraw the popup
         thisProg.close()
-
         if win := (_prog.newWindow or parent):
             # return correct focus control to the parent
             QtWidgets.QApplication.setActiveWindow(win)
@@ -763,8 +678,7 @@ def _stoppableProgressBar(data, title='Calculating...', buttonText='Cancel'):
     for use in a zip loop, wrap with 'list':
     eg for (cs, ts) in _stoppableProgressBar(list(zip(controlSpectra, targetSpectra)))
     """
-
-    widget = QtWidgets.QProgressDialog(title, buttonText, 0, len(data))  # starts = 0, ends = len(data)
+    widget = QtWidgets.QProgressDialog(title, buttonText, 0, len(data))
     widget.setAutoClose(True)
     widget.raise_()
     for c, v in enumerate(iter(data), start=1):
@@ -775,33 +689,32 @@ def _stoppableProgressBar(data, title='Calculating...', buttonText='Cancel'):
         yield (v)
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# busyOverlay
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 class busyOverlay(QtWidgets.QWidget):
     def __init__(self, parent=None):
-
         QtWidgets.QWidget.__init__(self, parent)
         palette = QtGui.QPalette(self.palette())
         palette.setColor(palette.Background, Qt.transparent)
         self.setPalette(palette)
 
     def paintEvent(self, event):
-
         painter = QtGui.QPainter()
         painter.begin(self)
         painter.setRenderHint(QtGui.QPainter.Antialiasing)
         painter.fillRect(event.rect(), QtGui.QBrush(QtGui.QColor(255, 255, 255, 127)))
         painter.setPen(QtGui.QPen(Qt.NoPen))
-
         for i in range(6):
             if (self.counter / 5) % 6 == i:
                 painter.setBrush(QtGui.QBrush(QtGui.QColor(127 + (self.counter % 5) * 32, 127, 127)))
             else:
                 painter.setBrush(QtGui.QBrush(QtGui.QColor(127, 127, 127)))
             painter.drawEllipse(
-                    self.width() / 2 + 30 * math.cos(2 * math.pi * i / 6.0) - 10,
-                    self.height() / 2 + 30 * math.sin(2 * math.pi * i / 6.0) - 10,
+                    int(self.width() / 2 + 30 * math.cos(2 * math.pi * i / 6.0) - 10),
+                    int(self.height() / 2 + 30 * math.sin(2 * math.pi * i / 6.0) - 10),
                     20, 20)
-
-            painter.end()
 
     def showEvent(self, event):
         self.timer = self.startTimer(50)
@@ -815,76 +728,20 @@ class busyOverlay(QtWidgets.QWidget):
             self.hide()
 
 
-# class MainWindow(QMainWindow):
-#
-#   def __init__(self, parent = None):
-#
-#        QMainWindow.__init__(self, parent)
-#
-#       widget = QWidget(self)
-#       self.editor = QTextEdit()
-#       self.editor.setPlainText("0123456789"*100)
-#       layout = QGridLayout(widget)
-#       layout.addWidget(self.editor, 0, 0, 1, 3)
-#       button = QPushButton("Wait")
-#       layout.addWidget(button, 1, 1, 1, 1)
-#
-#       self.setCentralWidget(widget)
-#       self.overlay = Overlay(self.centralWidget())
-#       self.overlay.hide()
-#       button.clicked.connect(self.overlay.show)
-#
-#   def resizeEvent(self, event):
-#
-#       self.overlay.resize(event.size())
-#       event.accept()
-
 if __name__ == '__main__':
-    from ccpn.ui.gui.widgets.Application import TestApplication
-    from ccpn.ui.gui.widgets.BasePopup import BasePopup
-    from ccpn.ui.gui.widgets.Button import Button
-    import time
-
-
     app = QtWidgets.QApplication(sys.argv)
 
 
-    # for i in _stoppableProgressBar([1]*10000):
-    #     time.sleep(0.2)
-
     def callback():
-        # print(showInfo('My info window', 'test info'))
-        # print(showMulti('Test', 'Multi Choice', ['Apples', 'Bananas', 'Pears']))
-        # print(showError('Test', 'This is a test error message'))
-        # print(showYesNo('Test', 'Yes or No message'))
-        # # print(showOkCancel('Test', 'Ok or Cancel message'))
-        # # print(showRetryIgnoreCancel('Test', 'Some message'))
-        # # print(showWarning('Test', 'Warning message'))
-        # print(showWarning(
-        #     'Test for a basic popup with a long line of text as the basic text and a path: /Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt',
-        #     'Warning message'))
-
         print(showWarning('Another Warning',
                           'Test for a basic popup with a long line of text as the basic text and a path:\n/Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt'))
-
         print(showWarning('Another Warning and Test for a basic popup with a long line of text as the basic text',
                           'Test for a basic popup with a long line of text as the basic text and a path\n/Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt '
                           'and text with no spaces qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789'))
+        print(showWarning(
+                'Another Warning and Test qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789\n for a basic popup with a long line of text as the basic text',
+                'Test for a basic popup with a long line of text as the basic text and a path\n/Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt '
+                'and text with no spaces qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789 something\n else'))
 
-        print(showWarning('Another Warning and Test qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789\n for a basic popup with a long line of text as the basic text',
-                          'Test for a basic popup with a long line of text as the basic text and a path\n/Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt '
-                          'and text with no spaces qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789 something\n else'))
 
-
-    # app = TestApplication()
-    # # popup = BasePopup(title='Test MessageReporter')
-    # #popup.setSize(200,30)
-    # # button = Button(popup, text='hit me', callback=callback)
-    #
-    # popup = progressPopup(busyFunc=callback)
-    #
-    # popup.show()
-    # popup.raise_()
-    #
-    # app.start()
     callback()

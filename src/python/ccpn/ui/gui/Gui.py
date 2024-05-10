@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-08 12:38:21 +0100 (Wed, May 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-10 17:11:57 +0100 (Fri, May 10, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1226,6 +1226,6 @@ class Gui(Ui, _Gui):
         from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 
         path = str(path) if path is not None else None
-        macroEditor = MacroEditor(mainWindow=self.mainWindow, filePath=path)
+        macroEditor = MacroEditor(mainWindow=self.mainWindow, filePath=path, restore=False)
         self.mainWindow._addModule(macroEditor, position=position)
         return macroEditor

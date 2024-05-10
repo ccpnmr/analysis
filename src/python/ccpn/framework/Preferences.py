@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 17:19:29 +0100 (Thu, April 18, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-10 19:01:38 +0100 (Fri, May 10, 2024) $"
 __version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
@@ -34,11 +34,9 @@ from ccpn.util.decorators import singleton
 from ccpn.util.Path import aPath
 from ccpn.util.Common import uniquify, isMacOS, isLinux
 
-from ccpn.framework.PathsAndUrls import \
-    userPreferencesPath, \
-    userPreferencesDirectory, \
-    defaultPreferencesPath
-
+from ccpn.framework.PathsAndUrls import (userPreferencesPath,
+                                         userPreferencesDirectory,
+                                         defaultPreferencesPath)
 from ccpn.framework.Application import getApplication
 
 

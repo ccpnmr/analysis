@@ -3,9 +3,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-09 19:41:07 +0100 (Mon, October 09, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-05-13 17:02:16 +0100 (Mon, May 13, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -94,6 +94,8 @@ class Substance(AbstractWrapperObject):
 
     _ReferenceSpectraPids = '_ReferenceSpectraPids'
     _REFERENCESPECTRA = 'referenceSpectra'
+
+    _ignoreNewApiObjectCallback = True
 
     # CCPN properties
     @property
@@ -909,9 +911,12 @@ def _newSubstance(self: Project, name: str = None, labelling: str = None, substa
     else:
         raise ValueError("Substance type %s not recognised" % substanceType)
 
-    result = self._data2Obj[apiResult]
-    if result is None:
+    if (result := Substance._newInstanceFromApiData(apiObj=apiResult, project=self)) is None:
         raise RuntimeError('Unable to generate new Substance item')
+
+    # result = self._data2Obj[apiResult]
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new Substance item')
 
     return result
 
@@ -940,11 +945,15 @@ def _fetchNefSubstance(self: Project, sequence: typing.Sequence[dict], name: str
 
     apiMolecule = MoleculeModify.createMoleculeFromNef(apiNmrProject.root, name, sequence)
 
-    result = self._data2Obj[
-        apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(apiMolecule)
-    ]
-    if result is None:
+    mol = apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(apiMolecule)
+    if (result := Substance._newInstanceFromApiData(apiObj=mol, project=self)) is None:
         raise RuntimeError('Unable to generate new Nef Substance item')
+
+    # result = self._data2Obj[
+    #     apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(apiMolecule)
+    # ]
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new Nef Substance item')
 
     return result
 
@@ -1028,10 +1037,13 @@ def _createPolymerSubstance(self: Project, sequence: typing.Sequence[str], name:
     apiMolecule.details = comment
 
     mol = apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(apiMolecule, labeling=apiLabeling)
-    result = self._data2Obj[mol]
-
-    if result is None:
+    # TODO test
+    if (result := Substance._newInstanceFromApiData(apiObj=mol, project=self)) is None:
         raise RuntimeError('Unable to generate new PolymerSubstance item')
+
+    # result = self._data2Obj[mol]
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new PolymerSubstance item')
 
     result.userCode = userCode
 

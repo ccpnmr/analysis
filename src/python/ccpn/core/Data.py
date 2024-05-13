@@ -3,9 +3,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-09 12:06:24 +0100 (Fri, June 09, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-05-13 17:02:14 +0100 (Mon, May 13, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -37,7 +37,7 @@ from ccpn.core.StructureData import StructureData
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, renameObject
 
-
+# TODO TEST new api object.
 class Data(AbstractWrapperObject):
     """Object storing links to the data structures (PeakLists, Spectra, StructureEnsembles etc.)
     connected to a given StructureData, and their associated calculation parameters."""
@@ -57,6 +57,8 @@ class Data(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiData._metaclass.qualifiedName()
+
+    _ignoreNewApiObjectCallback = True
 
     # CCPN properties
     @property
@@ -225,9 +227,13 @@ def _newData(self: StructureData, name: str, attachedObjectPid: str = None,
                     % (attachedObject, attachedObjectPid))
 
     apiData = self._wrappedData.newData(name=name, attachedObjectPid=attachedObjectPid)
-    result = project._data2Obj.get(apiData)
-    if result is None:
+
+    if (result := Data._newInstanceFromApiData(apiObj=apiData)) is None:
         raise RuntimeError('Unable to generate new Data item')
+
+    # result = project._data2Obj.get(apiData)
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new Data item')
 
     return result
 

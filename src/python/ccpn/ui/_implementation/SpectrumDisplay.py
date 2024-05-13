@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-04-19 11:47:50 +0100 (Fri, April 19, 2024) $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-05-13 17:02:16 +0100 (Mon, May 13, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -78,6 +78,8 @@ class SpectrumDisplay(AbstractWrapperObject):
     # Internal namespace
     _ISOTOPECODES_KEY = '_isotopeCodes'
     _DIMENSIONTYPES_KEY = '_dimensionTypes'
+
+    # _ignoreNewApiObjectCallback = True
 
     INTENSITY = 'intensity'  # used for 1D intensity (Y) axis
 
@@ -689,6 +691,11 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
 
     # Create Boundstrip/Nostrip display and first strip
     apiSpectrumDisplay = apiTask.newBoundDisplay(**displayPars)
+
+    # TODO DT: Crashes
+    # if (display := SpectrumDisplay._newInstanceFromApiData(apiObj=apiSpectrumDisplay, project=project)) is None:
+    #     raise RuntimeError('Unable to generate new SpectrumDisplay')
+
     if (display := project._data2Obj.get(apiSpectrumDisplay)) is None:
         raise RuntimeError('Unable to generate new SpectrumDisplay')
 

@@ -3,9 +3,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-16 14:45:44 +0100 (Mon, October 16, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-05-13 17:02:15 +0100 (Mon, May 13, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -59,6 +59,8 @@ class IntegralList(PMIListABC):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiIntegralList._metaclass.qualifiedName()
+
+    _ignoreNewApiObjectCallback = True
 
     #=========================================================================================
     # CCPN properties
@@ -157,9 +159,13 @@ def _newIntegralList(self: Spectrum, title: str = None, comment: str = None,
 
     apiDataSource = self._apiDataSource
     apiIntegralList = apiDataSource.newIntegralList(**dd)
-    result = self._project._data2Obj.get(apiIntegralList)
-    if result is None:
+
+    if (result := IntegralList._newInstanceFromApiData(apiObj=apiIntegralList)) is None:
         raise RuntimeError('Unable to generate new IntegralList item')
+
+    # result = self._project._data2Obj.get(apiIntegralList)
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new IntegralList item')
 
     # set non-api attributes
     if meritColour is not None:

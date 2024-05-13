@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-06 17:48:09 +0000 (Wed, March 06, 2024) $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-05-13 17:02:15 +0100 (Mon, May 13, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -79,6 +79,8 @@ class NmrChain(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiNmrChain._metaclass.qualifiedName()
+
+    _ignoreNewApiObjectCallback = True
 
     # CCPN properties
     @property
@@ -526,9 +528,13 @@ def _newNmrChain(self: Project, shortName: str = None, isConnected: bool = False
     dd = {'code': shortName, 'isConnected': isConnected, 'label': label, 'details': comment}
 
     newApiNmrChain = nmrProject.newNmrChain(**dd)
-    result = self._data2Obj.get(newApiNmrChain)
-    if result is None:
+
+    if (result := NmrChain._newInstanceFromApiData(apiObj=newApiNmrChain, project=self)) is None:
         raise RuntimeError('Unable to generate new NmrChain item')
+
+    # result = self._data2Obj.get(newApiNmrChain)
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new NmrChain item')
 
     if serial is not None:
         try:

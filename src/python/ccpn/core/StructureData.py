@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-06 17:48:09 +0000 (Wed, March 06, 2024) $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-05-13 17:02:16 +0100 (Mon, May 13, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -64,6 +64,8 @@ class StructureData(AbstractWrapperObject):
     # Internal NameSpace
     _MoleculeFilePath = '_MoleculeFilePath'  # old
     _MOLECULEFILEPATH = 'moleculeFilePath'  # current
+
+    _ignoreNewApiObjectCallback = True
 
     # CCPN properties
     @property
@@ -461,10 +463,14 @@ def _newStructureData(self: Project, name: str = None, title: str = None, progra
                                                                   creationDate=creationDate,
                                                                   uuid=uuid,
                                                                   details=comment)
-    result = self._data2Obj.get(apiNmrConstraintStore)
 
-    if result is None:
+    if (result := StructureData._newInstanceFromApiData(apiObj=apiNmrConstraintStore, project=self)) is None:
         raise RuntimeError('Unable to generate new StructureData item')
+
+    # result = self._data2Obj.get(apiNmrConstraintStore)
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new StructureData item')
+
     if moleculeFilePath:
         result.moleculeFilePath = moleculeFilePath
     return result

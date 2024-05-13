@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-22 15:58:35 +0000 (Thu, February 22, 2024) $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-05-13 17:02:14 +0100 (Mon, May 13, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -335,7 +335,8 @@ def _newApiChain(self: Project, apiMolecule, shortName, role, comment):
     newApiChain = apiMolSystem.newChain(molecule=apiMolecule, code=shortName, role=role,
                                         details=comment)
 
-    result = self._project._data2Obj[newApiChain]
+    # result = self._project._data2Obj[newApiChain]
+    result = Chain._newInstanceFromApiData(apiObj=newApiChain, project=self._project)
 
     return result
 
@@ -490,9 +491,12 @@ def _createChainFromSubstance(self: Substance, shortName: str = None, role: str 
     newApiChain = apiMolSystem.newChain(molecule=apiMolecule, code=shortName, role=role,
                                         details=comment)
 
-    result = self._project._data2Obj[newApiChain]
-    if result is None:
+    if (result := Chain._newInstanceFromApiData(apiObj=newApiChain)) is None:
         raise RuntimeError('Unable to generate new Chain item')
+
+    # result = self._project._data2Obj[newApiChain]
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new Chain item')
 
     for residue in result.residues:
         # Necessary as CCPN V2 default protonation states do not match the NEF / V3 standard
@@ -676,7 +680,8 @@ def _cloneChain(self: Chain, shortName: str = None):
             # put in an error trap but now doesn't seem to re-create the error
             raise ValueError('Error cloning chain - %s' % str(es)) from es
 
-        result = self._project._data2Obj.get(newApiChain)
+        # result = self._project._data2Obj.get(newApiChain)
+        result = Chain._newInstanceFromApiData(apiObj=newApiChain, project=self._project)
 
         # Add intra-chain generic bonds
         for apiGenericBond in apiMolSystem.genericBonds:

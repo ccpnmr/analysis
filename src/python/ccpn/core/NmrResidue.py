@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-25 13:55:46 +0000 (Mon, March 25, 2024) $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-05-13 17:02:15 +0100 (Mon, May 13, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -112,6 +112,8 @@ class NmrResidue(AbstractWrapperObject):
 
     # Number of fields that comprise the object's pid; Used to get parent id's
     _numberOfIdFields = 2
+
+    _ignoreNewApiObjectCallback = True
 
     # CCPN properties
     @property
@@ -1526,9 +1528,13 @@ def _newNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None, 
     # Create ResonanceGroup
     dd['sequenceCode'] = sequenceCode
     apiResonanceGroup = nmrProject.newResonanceGroup(**dd)
-    result = self._project._data2Obj.get(apiResonanceGroup)
-    if result is None:
+
+    if (result := NmrResidue._newInstanceFromApiData(apiObj=apiResonanceGroup)) is None:
         raise RuntimeError('Unable to generate new NmrResidue item')
+
+    # result = self._project._data2Obj.get(apiResonanceGroup)
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new NmrResidue item')
 
     if serial is not None:
         try:

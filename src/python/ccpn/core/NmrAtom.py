@@ -3,9 +3,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-22 12:08:08 +0000 (Wed, November 22, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-05-13 17:02:15 +0100 (Mon, May 13, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -75,6 +75,8 @@ class NmrAtom(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = Nmr.Resonance._metaclass.qualifiedName()
+
+    _ignoreNewApiObjectCallback = True
 
     # Internal NameSpace
     _AMBIGUITYCODE = '_ambiguityCode'
@@ -680,8 +682,11 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None, com
     dd = {'resonanceGroup': resonanceGroup, 'isotopeCode': UnknownIsotopeCode, 'name': _name}
     obj = apiNmrProject.newResonance(**dd)
 
-    if (result := self._project._data2Obj.get(obj)) is None:
+    if (result := NmrAtom._newInstanceFromApiData(apiObj=obj)) is None:
         raise RuntimeError('Unable to generate new NmrAtom item')
+
+    # if (result := self._project._data2Obj.get(obj)) is None:
+    #     raise RuntimeError('Unable to generate new NmrAtom item')
 
     # Check/set isotopeCode; it has to be set after the creation to avoid API errors.
     result._setIsotopeCode(isotopeCode)

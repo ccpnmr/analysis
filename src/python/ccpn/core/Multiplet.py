@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-06 17:48:09 +0000 (Wed, March 06, 2024) $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-05-13 17:02:15 +0100 (Mon, May 13, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -146,6 +146,8 @@ class Multiplet(AbstractWrapperObject):
 
     # the attribute name used by current
     _currentAttributeName = 'multiplets'
+
+    _ignoreNewApiObjectCallback = True
 
     # CCPN properties
     @property
@@ -767,9 +769,11 @@ def _newMultiplet(self: MultipletList,
 
     apiParent = self._apiMultipletList
     apiMultiplet = apiParent.newMultiplet(multipletType='multiplet', **dd)
-    result = self._project._data2Obj.get(apiMultiplet)
-    if result is None:
+    if (result := Multiplet._newInstanceFromApiData(apiObj=apiMultiplet)) is None:
         raise RuntimeError('Unable to generate new Multiplet item')
+    # result = self._project._data2Obj.get(apiMultiplet)
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new Multiplet item')
 
     return result
 

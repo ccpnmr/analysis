@@ -4,9 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-23 15:26:51 +0100 (Tue, May 23, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-05-13 17:02:14 +0100 (Mon, May 13, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -59,6 +59,8 @@ class Bond(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiBond._metaclass.qualifiedName()
+
+    _ignoreNewApiObjectCallback = True
 
     # CCPN properties
     @property
@@ -171,8 +173,11 @@ def _newBond(self: Project, atoms: Sequence[Union[Atom, str]], bondType: Optiona
         dd['bondType'] = bondType
 
     apiBond = self._wrappedData.molSystem.newGenericBond(**dd)
-    result = self._project._data2Obj[apiBond]
-    if result is None:
+    if (result := Bond._newInstanceFromApiData(apiBond, project=self)) is None:
         raise RuntimeError('Unable to generate new Bond item')
+
+    # result = self._project._data2Obj[apiBond]
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new Bond item')
 
     return result

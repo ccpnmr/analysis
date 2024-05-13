@@ -3,9 +3,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-10 17:49:14 +0100 (Tue, October 10, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-05-13 17:02:16 +0100 (Mon, May 13, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -86,6 +86,8 @@ class SpectrumGroup(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiSpectrumGroup._metaclass.qualifiedName()
+
+    _ignoreNewApiObjectCallback = True
 
     # internal namespace
     _COMMENT = 'comment'
@@ -632,9 +634,12 @@ def _newSpectrumGroup(self: Project, name: str, spectra=(), **kwds) -> SpectrumG
         spectra = [getByPid(x) if isinstance(x, str) else x for x in spectra]
 
     apiSpectrumGroup = self._wrappedData.newSpectrumGroup(name=name)
-    result = self._data2Obj.get(apiSpectrumGroup)
-    if result is None:
+    if (result := SpectrumGroup._newInstanceFromApiData(apiObj=apiSpectrumGroup, project=self)) is None:
         raise RuntimeError('Unable to generate new SpectrumGroup item')
+
+    # result = self._data2Obj.get(apiSpectrumGroup)
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new SpectrumGroup item')
 
     if spectra:
         result.spectra = spectra

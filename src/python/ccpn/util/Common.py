@@ -20,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:55 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-05-13 17:18:05 +0100 (Mon, May 13, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -325,13 +325,27 @@ def dictionaryProduct(dict1, dict2):
     return result
 
 
-def uniquify(sequence):
-    """Get list of unique elements in sequence, in order of first appearance
+def uniquify(sequence, maxLen=None, keepLast=False):
+    """Get list of unique elements in sequence, in order of first/last appearance.
+    If maxLen is positive, restrict the returned list to <maxLen> elements.
+    If keepLast is True, keep the last occurrence of repeated elements, and return the end of the list.
+    Otherwise, keep the first occurrence of repeated elements and the head of the list.
+    :param sequence: input list.
+    :param maxLen: maximum size of returned list.
+    :param keepLast: keep the first/last occurrence of repeats.
+    :return:
     """
-    seen = set()
-    seen_add = seen.add
-    return [x for x in sequence if x not in seen and not seen_add(x)]  # NB: not seen.add(x) is always True; i.e. this
-    # part just adds the element during the list comprehension
+    if keepLast:
+        # reversing always keeps the last occurrence of repeats when creating OrderedSet
+        values = list(reversed(OrderedSet(reversed(sequence))))
+        if maxLen and maxLen > 0:
+            return values[-maxLen:]
+    else:
+        # always keeps the first occurrence of repeats when creating OrderedSet
+        values = list(OrderedSet(sequence))
+        if maxLen and maxLen > 0:
+            return values[:maxLen]
+    return values
 
 
 def flatten(items):

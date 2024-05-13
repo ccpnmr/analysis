@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-10 19:13:23 +0100 (Fri, May 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-13 17:18:05 +0100 (Mon, May 13, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -260,7 +260,8 @@ class Preferences(AttrDict):
         if recentFile is None or not isinstance(recentFile, (str, Path)):
             raise ValueError(f'Preferences._addRecentFile: {recentFile} is invalid')
         _recentFiles = self.get(RECENT_FILES, [])
-        _recentFiles.append(str(recentFile))
+        # add new file to the head of the list
+        _recentFiles.insert(0, str(recentFile))
         self._cleanRecentFiles()
 
     def _cleanRecentFiles(self):
@@ -268,11 +269,8 @@ class Preferences(AttrDict):
         maxRecentFiles (currently 10)
         """
         _recentFiles = self.get(RECENT_FILES, [])
-        _recentFiles = uniquify(_recentFiles)
-        _len = len(_recentFiles)
-        if _len > self._maxRecentFiles:
-            _recentMacros = _recentFiles[_len-self._maxRecentMacros:]
-            self[RECENT_MACROS] = _recentMacros
+        _recentFiles = uniquify(_recentFiles, maxLen=self._maxRecentFiles)
+        self[RECENT_FILES] = _recentFiles
 
     def __str__(self):
         return f'<Preferences: {repr(self._lastPath)}>'

@@ -54,7 +54,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-03 14:09:45 +0100 (Fri, May 03, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-13 15:03:20 +0100 (Mon, May 13, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -998,8 +998,7 @@ class Spectrum(AbstractWrapperObject):
         :param path: a path to the spectrum; may contain redirections (e.g. $DATA)
                      defaults to self.filePath.
         """
-        if path is None:
-            path = self.filePath
+        path = path or self.filePath
 
         self._close()
         self._openFile(path=path, dataFormat=self.dataFormat, checkParameters=False)
@@ -3259,7 +3258,7 @@ class Spectrum(AbstractWrapperObject):
 
         if spectrumGroup is not None and not isinstance(spectrumGroup, SpectrumGroup):
             raise ValueError(
-                f'Invalid spectrumGroup ({spectrumGroup}, type {type(spectrumGroup)}); expected SpectrumGroup instance')
+                    f'Invalid spectrumGroup ({spectrumGroup}, type {type(spectrumGroup)}); expected SpectrumGroup instance')
 
         # we get the "Pseudo" dimension; there should only one:
         if (pseudoDimension := self._getPseudoDimension()) == 0:

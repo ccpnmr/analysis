@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:51 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-05-13 15:03:20 +0100 (Mon, May 13, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -488,7 +488,8 @@ class OpenItemABC():
 
         if spectra:
             contextMenu.addAction('Make SpectrumGroup From Selected',
-                                  partial(_raiseSpectrumGroupEditorPopup(useNone=True, editMode=False, defaultItems=spectra),
+                                  partial(_raiseSpectrumGroupEditorPopup(useNone=True, editMode=False,
+                                                                         defaultItems=spectra),
                                           self.mainWindow, self.getObj(), self.node))
         if any(any(sp.isTimeDomains) for sp in spectra):  # 3.1.0 alpha feature from macro.
             contextMenu.addAction('Split Planes to SpectrumGroup', partial(self._splitPlanesToSpectrumGroup, objs))
@@ -544,19 +545,15 @@ class OpenItemABC():
         copyToClipboard(objs)
 
     @staticmethod
-    def _reloadSpectra(objs:list):
+    def _reloadSpectra(objs: list):
         """Reload spectra
         :param objs: reload the specified objs (spectra)
         """
-        _spectra = [sp for sp in objs
-                    if isinstance(sp, Spectrum) and sp.hasValidPath() and not sp.isEmptySpectrum()]
-
-        if len(_spectra) == 0:
+        if not (_spectra := [sp for sp in objs if isinstance(sp, Spectrum) and not sp.isEmptySpectrum()]):
             return
-
         _sp = 'spectrum' if len(_spectra) == 1 else 'spectra'
-        if ok := showOkCancel(f'Reloading {len(_spectra)} {_sp}',
-                              f'\nThis will re-initialise the parameters from the (binary) data!'):
+        if showOkCancel(f'Reloading {len(_spectra)} {_sp}',
+                        f'This will re-initialise the parameters from the (binary) data!'):
             with undoBlockWithoutSideBar():
                 for spec in _spectra:
                     spec.reload()
@@ -565,7 +562,8 @@ class OpenItemABC():
         """Add a quick submenu containing a list of collections
         """
         # add item to a new collection
-        _action = menu.addItem(_NEW_COLLECTION, callback=partial(self._makeNewCollection, selectionWidget=menu, objs=objs))
+        _action = menu.addItem(_NEW_COLLECTION,
+                               callback=partial(self._makeNewCollection, selectionWidget=menu, objs=objs))
 
         # create subMenu for adding selected items to a single collection
         subMenu = menu.addMenu(_ADD_TO_COLLECTION)
@@ -623,7 +621,8 @@ class OpenItemABC():
 
         for obj in objs:
             if not any(obj.isTimeDomains):
-                showWarning('3.1.0 Alpha version', 'This functionality has been implemented for Time Domain spectra only.')
+                showWarning('3.1.0 Alpha version',
+                            'This functionality has been implemented for Time Domain spectra only.')
                 return
             splitPseudo3DSpectrumIntoPlanes(obj)
 
@@ -722,7 +721,8 @@ class OpenItemABC():
                 self._pulldownWidget.setData(texts=texts)
 
             def setPulldownCallback(self, callback):
-                self._pulldownWidget.activated.connect(partial(callback, self._pulldownWidget, self, selectionWidget=self._selectionWidget))
+                self._pulldownWidget.activated.connect(
+                        partial(callback, self._pulldownWidget, self, selectionWidget=self._selectionWidget))
 
             @property
             def centralWidgetSize(self):
@@ -903,7 +903,8 @@ class _openItemNmrClass(OpenItemABC):
                 title = 'Delete...'
             else:
                 title = f'Delete {self.objectClassName}{plural}'
-            ok = showYesNoWarning(title, msg, dontShowEnabled=True, defaultResponse=True, popupId=self.__class__.__name__)
+            ok = showYesNoWarning(title, msg, dontShowEnabled=True, defaultResponse=True,
+                                  popupId=self.__class__.__name__)
 
             if not ok:
                 return
@@ -930,8 +931,10 @@ class _openItemNmrResidueItem(_openItemNmrClass):
         contextMenu = super()._openContextMenu(parentWidget, position, thisObj, objs, deferExec=True)
 
         # add new actions to move the nmrResidue to the head/tail
-        actionToHead = contextMenu.addAction(moveToHeadIcon, 'Move NmrResidue to Front', partial(nmrResidue.mainNmrResidue.moveToEnd, MoveToEnd.HEAD))
-        actionToTail = contextMenu.addAction(moveToTailIcon, 'Move NmrResidue to End', partial(nmrResidue.mainNmrResidue.moveToEnd, MoveToEnd.TAIL))
+        actionToHead = contextMenu.addAction(moveToHeadIcon, 'Move NmrResidue to Front',
+                                             partial(nmrResidue.mainNmrResidue.moveToEnd, MoveToEnd.HEAD))
+        actionToTail = contextMenu.addAction(moveToTailIcon, 'Move NmrResidue to End',
+                                             partial(nmrResidue.mainNmrResidue.moveToEnd, MoveToEnd.TAIL))
 
         if (_actions := contextMenu.actions()) and len(_actions) > 2:
             _topMenuItem = _actions[0]
@@ -986,7 +989,6 @@ class _openItemChainTable(OpenItemABC):
     openItemMethod = 'showResidueTable'
     objectArgumentName = 'chain'
 
-
     def _openContextMenu(self, parentWidget, position, thisObj, objs, deferExec=False):
         """Open a context menu.
         """
@@ -997,8 +999,8 @@ class _openItemChainTable(OpenItemABC):
         contextMenu.exec()
 
     def _cloneObject(self, objs):
-        objs  = [obj for obj in objs if isinstance(obj, Chain)]
-        if len(objs)>1:
+        objs = [obj for obj in objs if isinstance(obj, Chain)]
+        if len(objs) > 1:
             showWarning('New Chain from selected', 'Creating a from is available for only a single selection')
             return
         if len(objs) == 1:
@@ -1011,8 +1013,8 @@ class _openItemChainTable(OpenItemABC):
 
     def _newFromSelected(self, objs):
         """Open a new popup prefilled from the current object"""
-        objs  = [obj for obj in objs if isinstance(obj, Chain)]
-        if len(objs)>1:
+        objs = [obj for obj in objs if isinstance(obj, Chain)]
+        if len(objs) > 1:
             showWarning('New Chain from selected', 'Creating a from is available for only a single selection')
             return
         if len(objs) == 1:
@@ -1027,6 +1029,7 @@ class _openItemChainTable(OpenItemABC):
             popup.obj.molType = obj.chainType
             popup._populate()
             popup.exec()
+
 
 class _openItemResidueTable(OpenItemABC):
     objectArgumentName = 'residue'
@@ -1168,7 +1171,8 @@ class _openItemSpectrumGroupDisplay(OpenItemABC):
             with undoStackBlocking() as _:  # Do not add to undo/redo stack
                 with notificationEchoBlocking():
 
-                    spectrumDisplay = mainWindow.newSpectrumDisplay(spectrumGroup, position=position, relativeTo=relativeTo)
+                    spectrumDisplay = mainWindow.newSpectrumDisplay(spectrumGroup, position=position,
+                                                                    relativeTo=relativeTo)
 
                     # set the spectrumView colours
                     # spectrumDisplay._colourChanged(spectrumGroup)
@@ -1200,7 +1204,8 @@ class _openItemSpectrumInGroupDisplay(_openItemSpectrumDisplay):
 
         if spectra := [obj for obj in objs if isinstance(obj, Spectrum)]:
             contextMenu.addAction('Make SpectrumGroup From Selected',
-                                  partial(_raiseSpectrumGroupEditorPopup(useNone=True, editMode=False, defaultItems=spectra),
+                                  partial(_raiseSpectrumGroupEditorPopup(useNone=True, editMode=False,
+                                                                         defaultItems=spectra),
                                           self.mainWindow, self.getObj(), self.node))
 
             contextMenu.addAction('Remove from SpectrumGroup', partial(self._removeSpectrumObject, objs))
@@ -1268,7 +1273,8 @@ class _openItemCollectionModule(OpenItemABC):
             actions[0].setEnabled(False)
 
         # find the 'remove' action
-        removeAction = actions[0] if (actions := [act for act in contextMenu.actions() if act.text() == _REMOVE_FROM_COLLECTION]) else None
+        removeAction = actions[0] if (
+            actions := [act for act in contextMenu.actions() if act.text() == _REMOVE_FROM_COLLECTION]) else None
 
         # create subMenu for listing items in the collection - temporary until a module can be designed
         itms = self.getObj().items
@@ -1276,7 +1282,8 @@ class _openItemCollectionModule(OpenItemABC):
             subMenu = contextMenu.addMenu(_ITEMS_COLLECTION)
 
             # find the inserted 'items' action
-            if (subMenuAction := actions[0] if (actions := [act for act in contextMenu.actions() if act.text() == _ITEMS_COLLECTION]) else None):
+            if (subMenuAction := actions[0] if (
+                    actions := [act for act in contextMenu.actions() if act.text() == _ITEMS_COLLECTION]) else None):
                 # add the items to the menu as disabled
                 for itm in itms:
                     _action = subMenu.addAction(itm.pid)

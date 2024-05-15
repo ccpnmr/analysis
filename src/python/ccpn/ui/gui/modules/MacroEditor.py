@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-04-30 14:39:27 +0100 (Tue, April 30, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-15 16:37:49 +0100 (Wed, May 15, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -266,12 +266,16 @@ class MacroEditor(CcpnModule):
             This method calls _run, and wraps it with notification and
             undo blocking.
         """
+        self.application.ui.echoCommands([f'macroEditor.run(\'{os.path.basename(self.filePath)}\')'])
         with undoBlock():
-            self.application.ui.echoCommands([f'macroEditor.run(\'{os.path.basename(self.filePath)}\')'])
             with notificationEchoBlocking():
-                self._run()
+                if self._isDirty():
+                    self._runAsTemp()
+                else:
+                    self._run(self.filePath)
+                    self.preferences.recentMacros.append(self.filePath)
 
-    def _run(self):
+    def _run(self, path):
         """Private method that runs the macro, called by run.
 
         .. warning::
@@ -282,12 +286,19 @@ class MacroEditor(CcpnModule):
         if self._pythonConsole is not None:
             if self.autoOpenPythonConsole:
                 self._openPythonConsoleModule()
-            if self.filePath:
-                self.preferences.recentMacros.append(self.filePath)
-                self._pythonConsole._runMacro(self.filePath)
+            self._pythonConsole._runMacro(path)
         else:
             # Used when running the editor outside of Analysis. Run from an external IpythonConsole
             self._runOnTempIPythonConsole()
+
+    def _runAsTemp(self):
+        """Method to run unsaved macros by creating temporary files."""
+        tempDir = tempfile.TemporaryDirectory(dir=ccpnMacroPath, prefix='TempMacro_')
+        with tempfile.NamedTemporaryFile(suffix='.py', dir=tempDir.name, delete=False) as trf:
+            trf.write(str.encode(self.textEditor.toPlainText()))
+            trf.close()
+            self._run(trf.name)
+        tempDir.cleanup()
 
     def _getProfilerArgs(self):
         """

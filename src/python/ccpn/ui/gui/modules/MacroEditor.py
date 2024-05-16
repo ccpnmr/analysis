@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-05-16 12:43:10 +0100 (Thu, May 16, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-16 12:47:13 +0100 (Thu, May 16, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -339,7 +339,6 @@ class MacroEditor(CcpnModule):
         Saves the text inside the textbox to a file, if a file path is not specified, a save file dialog
         appears for specification of the file path.
         """
-        print('saved!')
         if not self.filePath:
             self.saveMacroAs()
 

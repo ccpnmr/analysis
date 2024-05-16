@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-05-15 16:37:49 +0100 (Wed, May 15, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-16 12:43:10 +0100 (Thu, May 16, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -229,6 +229,7 @@ class MacroEditor(CcpnModule):
                                                        orientation='left', hAlign='left',
                                                        tipText='Code written in the macro editor will automatically save',
                                                        grid=(hGrid, 0), gridSpan=(1, 1))
+        self.autoSaveCheckBox.checkBox.stateChanged.connect(self.saveMacro)
         hGrid +=1
         sortingModes = PROFILING_SORTINGS.keys()
         sortingModesTt = [f'Sort by: {x}' for x in PROFILING_SORTINGS.values()]
@@ -338,6 +339,7 @@ class MacroEditor(CcpnModule):
         Saves the text inside the textbox to a file, if a file path is not specified, a save file dialog
         appears for specification of the file path.
         """
+        print('saved!')
         if not self.filePath:
             self.saveMacroAs()
 

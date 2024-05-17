@@ -275,6 +275,9 @@
         },
         "_openItemNmrAtomItem": {
             "dontShowPopup": false
+        },
+        "_reloadSpectra": {
+            "dontShowPopup": false
         }
     }
 }

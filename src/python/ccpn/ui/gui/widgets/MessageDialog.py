@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-10 17:06:23 +0100 (Fri, May 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-17 14:35:56 +0100 (Fri, May 17, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -384,8 +384,13 @@ def showNotImplementedMessage():
              'This function has not been implemented in the current version')
 
 
-def showOkCancel(title, message, parent=None, iconPath=None):
-    dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
+def showOkCancel(title, message, parent=None, iconPath=None,
+                 dontShowEnabled=False, defaultResponse=None, popupId=None):
+    dialog = MessageDialog('Query', title, message, Question, iconPath, parent,
+                           dontShowEnabled=dontShowEnabled, defaultResponse=defaultResponse, popupId=popupId)
+    if dialog.dontShowPopup():
+        getLogger().debug(f'Popup {popupId!r} skipped with response={defaultResponse}')
+        return defaultResponse
     dialog.setStandardButtons(Ok | Cancel)
     dialog.setDefaultButton(Ok)
     return dialog.exec_() == Ok

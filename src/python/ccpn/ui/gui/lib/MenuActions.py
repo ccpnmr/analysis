@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-17 13:47:45 +0100 (Fri, May 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-17 14:35:56 +0100 (Fri, May 17, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -553,10 +553,14 @@ class OpenItemABC:
             return
         _sp = 'spectrum' if len(_spectra) == 1 else 'spectra'
         if showOkCancel(f'Reloading {len(_spectra)} {_sp}',
-                        f'This will re-initialise the parameters from the (binary) data!'):
-            with undoBlockWithoutSideBar():
-                for spec in _spectra:
-                    spec.reload()
+                        f'This will re-initialise the parameters from the (binary) data!',
+                        dontShowEnabled=True, defaultResponse=True, popupId='_reloadSpectra'):
+            try:
+                with undoBlockWithoutSideBar():
+                    for spec in _spectra:
+                        spec.reload()
+            except Exception as es:
+                showWarning(f'Reloading {len(_spectra)} {_sp}', str(es))
 
     def _addCollectionMenu(self, menu, objs):
         """Add a quick submenu containing a list of collections

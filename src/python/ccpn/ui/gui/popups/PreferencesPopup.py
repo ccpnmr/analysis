@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-04 15:19:23 +0100 (Thu, April 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-17 13:37:45 +0100 (Fri, May 17, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -547,6 +547,10 @@ class PreferencesPopup(CcpnDialogMainWidget):
                'A backup is written to the backup folder every time a project is saved by the user.\n' \
                'If the number of backups exceeds this value, the oldest backup is removed.\n' \
                'If this value is changed, older backups may need to be manually deleted.'
+        self.backupSaveEnabledBox = _makeCheckBox(parent, row=row, text="Backup on Save",
+                                                  callback=partial(self._queueToggleGeneralOptions,
+                                                                   'backupSaveEnabled'))
+        row += 1
         self.backupSaveCountLabel = _makeLabel(parent, text="Number of backups on user-save", grid=(row, 0))
         self.backupSaveCountData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', min=1, decimals=0, step=1)
         self.backupSaveCountLabel.setToolTip(tTip)
@@ -1046,6 +1050,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.autoBackupEnabledBox.setChecked(self.preferences.general.autoBackupEnabled)
         self.autoBackupFrequencyData.setValue(self.preferences.general.autoBackupFrequency)
         self.autoBackupCountData.setValue(self.preferences.general.autoBackupCount)
+        self.backupSaveEnabledBox.setChecked(self.preferences.general.backupSaveEnabled)
         self.backupSaveCountData.setValue(self.preferences.general.backupSaveCount)
 
         self.userWorkingPathData.setText(self.preferences.general.userWorkingPath)

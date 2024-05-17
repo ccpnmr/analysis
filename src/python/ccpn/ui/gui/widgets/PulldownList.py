@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-23 22:03:04 +0100 (Tue, April 23, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-17 13:37:46 +0100 (Fri, May 17, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -28,8 +28,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import time
+from functools import partial
 from PyQt5 import QtCore, QtGui, QtWidgets
-
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
@@ -45,11 +45,15 @@ class _ListView(QtWidgets.QListView):
     """
     _lastKeyTime = 0
 
-    def keyPressEvent(self, event: QtGui.QKeyEvent):
-        if event.key() in [QtCore.Qt.Key_Exit, QtCore.Qt.Key_Escape] and \
-                (time.perf_counter() - self._lastKeyTime) * 1e3 < QtWidgets.QApplication.instance().doubleClickInterval():
-            return
+    def __init__(self, pulldown, *args, **kwds):
+        super().__init__(*args, **kwds)
+        self._pulldown = pulldown
 
+    def keyPressEvent(self, event: QtGui.QKeyEvent):
+        if (event.key() in [QtCore.Qt.Key_Exit, QtCore.Qt.Key_Escape] and
+                (time.perf_counter() - self._lastKeyTime) * 1e3 <
+                QtWidgets.QApplication.instance().doubleClickInterval()):
+            return
         super().keyPressEvent(event)
 
     def keyReleaseEvent(self, event: QtGui.QKeyEvent):
@@ -58,13 +62,16 @@ class _ListView(QtWidgets.QListView):
             escape = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Exit, QtCore.Qt.NoModifier)
             QtCore.QCoreApplication.sendEvent(self, escape)
             self._lastKeyTime = time.perf_counter()
-
         super().keyReleaseEvent(event)
 
     def enterEvent(self, a0: QtCore.QEvent) -> None:
         # grab the focus when the mouse moves over again, otherwise can sometimes remain gray
         self.setFocus()
 
+
+#=========================================================================================
+# PulldownList
+#=========================================================================================
 
 class PulldownList(QtWidgets.QComboBox, Base):
     popupAboutToBeShown = QtCore.pyqtSignal()
@@ -120,7 +127,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
         self.disableWheelEvent = disableWheelEvent
 
         # replace with a simple listView - fixes stylesheet hassle; default QComboBox listview can't be changed
-        self._list = _ListView()
+        self._list = _ListView(pulldown=self)
         self.setView(self._list)
         setWidgetFont(self._list, )
         # add a scrollBar for long lists
@@ -162,7 +169,6 @@ class PulldownList(QtWidgets.QComboBox, Base):
         if editable:
             self.currentIndexChanged.connect(self._textReady)
             self.lineEdit().editingFinished.connect(self._textReady)
-
         # doesn't work :|
         #     if alignment is not None:
         #         self.lineEdit().setAlignment(alignment)
@@ -260,7 +266,8 @@ class PulldownList(QtWidgets.QComboBox, Base):
         super(PulldownList, self).showPopup()
 
     def hidePopup(self):
-        if self._list and (time.perf_counter() - self._list._lastKeyTime) * 1e3 < QtWidgets.QApplication.instance().doubleClickInterval():
+        if self._list and (
+                time.perf_counter() - self._list._lastKeyTime) * 1e3 < QtWidgets.QApplication.instance().doubleClickInterval():
             # prevent the popup from hiding too quickly
             return
 
@@ -392,7 +399,8 @@ class PulldownList(QtWidgets.QComboBox, Base):
         headerItem = self.model().item(headerIndex)
         headerItem.setEnabled(headerEnabled)
 
-    def setData(self, texts=None, objects=None, index=None, icons=None, clear=True, headerText=None, headerEnabled=False, headerIcon=None):
+    def setData(self, texts=None, objects=None, index=None, icons=None, clear=True, headerText=None,
+                headerEnabled=False, headerIcon=None):
 
         texts = texts or []
         objects = objects or []
@@ -603,25 +611,23 @@ class ComboBoxDividerDelegate(QtWidgets.QStyledItemDelegate):
 
     def __init__(self, *args, **kwds):
         super().__init__(*args, *kwds)
-
         # set the parameters for the divider
-        self._DIVIDERCOLOR = QtGui.QColor(getColours()[DIVIDER])
         self._BORDER = getFontHeight() // 4
 
     def paint(self, painter, option, index) -> None:
         if not index.isValid():
             return
 
+        # if (not (index.flags() & QtCore.Qt.ItemIsEnabled) or
+        #         index.data(QtCore.Qt.AccessibleDescriptionRole) is not None):
         if index.data(QtCore.Qt.AccessibleDescriptionRole) is not None:
             # draw a dividing line across the pulldown list
             painter.save()
-            painter.setPen(QtGui.QPen(self._DIVIDERCOLOR, 2))
-
+            col = self._DIVIDERCOLOR or option.palette.color(QtGui.QPalette.Mid)
+            painter.setPen(QtGui.QPen(col, 2))
             painter.drawLine(option.rect.left() + self._BORDER, option.rect.center().y(),
                              option.rect.right() - self._BORDER, option.rect.center().y())
-
             painter.restore()
-
         return super().paint(painter, option, index)
 
 
@@ -634,10 +640,8 @@ def main():
     """
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
-    from functools import partial
 
     app = TestApplication()
-
     texts = ['Int', 'Float', 'String', '']
     objects = [int, float, str, 'Green']
     icons = [None, None, None, Icon(color='#008000')]
@@ -663,7 +667,8 @@ def main():
             )
 
     pulldownList = PulldownList(parent=popup, texts=texts, icons=icons,
-                                objects=objects, callback=callback, clickToShowCallback=callback21, grid=(0, 0), **policyDict
+                                objects=objects, callback=callback, clickToShowCallback=callback21, grid=(0, 0),
+                                **policyDict
                                 )
 
     pulldownList.popupAboutToBeShown.connect(partial(abts, pulldownList))

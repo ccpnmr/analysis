@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-10 16:28:56 +0100 (Fri, May 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-17 13:37:45 +0100 (Fri, May 17, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -230,6 +230,7 @@ class MacroEditor(CcpnModule):
                                                        orientation='left', hAlign='left',
                                                        tipText='Code written in the macro editor will automatically save',
                                                        grid=(hGrid, 0), gridSpan=(1, 1))
+        self.autoSaveCheckBox.checkBox.stateChanged.connect(self.saveMacro)
         hGrid +=1
         sortingModes = PROFILING_SORTINGS.keys()
         sortingModesTt = [f'Sort by: {x}' for x in PROFILING_SORTINGS.values()]
@@ -267,12 +268,16 @@ class MacroEditor(CcpnModule):
             This method calls _run, and wraps it with notification and
             undo blocking.
         """
+        self.application.ui.echoCommands([f'macroEditor.run(\'{os.path.basename(self.filePath)}\')'])
         with undoBlock():
-            self.application.ui.echoCommands([f'macroEditor.run(\'{os.path.basename(self.filePath)}\')'])
             with notificationEchoBlocking():
-                self._run()
+                if self._isDirty():
+                    self._runAsTemp()
+                else:
+                    self._run(self.filePath)
+                    self.preferences.recentMacros.append(self.filePath)
 
-    def _run(self):
+    def _run(self, path):
         """Private method that runs the macro, called by run.
 
         .. warning::
@@ -283,12 +288,19 @@ class MacroEditor(CcpnModule):
         if self._pythonConsole is not None:
             if self.autoOpenPythonConsole:
                 self._openPythonConsoleModule()
-            if self.filePath:
-                self.preferences.recentMacros.append(self.filePath)
-                self._pythonConsole._runMacro(self.filePath)
+            self._pythonConsole._runMacro(path)
         else:
             # Used when running the editor outside of Analysis. Run from an external IpythonConsole
             self._runOnTempIPythonConsole()
+
+    def _runAsTemp(self):
+        """Method to run unsaved macros by creating temporary files."""
+        tempDir = tempfile.TemporaryDirectory(dir=ccpnMacroPath, prefix='TempMacro_')
+        with tempfile.NamedTemporaryFile(suffix='.py', dir=tempDir.name, delete=False) as trf:
+            trf.write(str.encode(self.textEditor.toPlainText()))
+            trf.close()
+            self._run(trf.name)
+        tempDir.cleanup()
 
     def _getProfilerArgs(self):
         """

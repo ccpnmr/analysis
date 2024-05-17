@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-17 12:03:17 +0100 (Wed, April 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-17 13:37:45 +0100 (Fri, May 17, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -29,33 +29,34 @@ __date__ = "$Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $"
 
 import re
 import contextlib
-from ccpn.util import Logging
-from ccpn.util.Logging import getLogger
 import itertools
 import collections
 from functools import partial
+from PyQt5 import QtCore, QtGui, QtWidgets
 from pyqtgraph.dockarea.Container import Container
 from pyqtgraph.dockarea.DockDrop import DockDrop
 from pyqtgraph.dockarea.Dock import DockLabel, Dock
 from pyqtgraph.dockarea.DockArea import DockArea
-from PyQt5 import QtCore, QtGui, QtWidgets
+from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.DropBase import DropBase
-from ccpn.ui.gui.guiSettings import CCPNMODULELABEL_BACKGROUND, CCPNMODULELABEL_FOREGROUND, \
-    CCPNMODULELABEL_BACKGROUND_ACTIVE, CCPNMODULELABEL_FOREGROUND_ACTIVE, \
-    CCPNMODULELABEL_BORDER, CCPNMODULELABEL_BORDER_ACTIVE, BORDERNOFOCUS_COLOUR
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS
 from ccpn.ui.gui.widgets.SideBar import SideBar, SideBarSearchListView
 from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
-from ccpn.core.lib.Notifiers import NotifierBase
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight, getFont, DEFAULTFONT
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.ui.gui.guiSettings import (getColours, BORDERNOFOCUS, CCPNMODULELABEL_BACKGROUND, CCPNMODULELABEL_FOREGROUND,
+                                     CCPNMODULELABEL_BACKGROUND_ACTIVE, CCPNMODULELABEL_FOREGROUND_ACTIVE,
+                                     CCPNMODULELABEL_BORDER, CCPNMODULELABEL_BORDER_ACTIVE,
+                                     BORDERNOFOCUS_COLOUR)
+from ccpn.ui.gui.lib.ModuleLib import getBlockingDialogs
+from ccpn.core.lib.Notifiers import NotifierBase
 from ccpn.core.lib.Pid import Pid, createPid
-from ccpn.ui.gui.widgets.Base import Base
 from ccpn.util.Path import aPath
+from ccpn.util import Logging
+from ccpn.util.Logging import getLogger
 
 
 settingsWidgetPositions = {
@@ -128,7 +129,8 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
     # _instances = set()
 
-    def __init__(self, mainWindow, name, closable=True, closeFunc=None, settingsScrollBarPolicies=('asNeeded', 'asNeeded'), **kwds):
+    def __init__(self, mainWindow, name, closable=True, closeFunc=None,
+                 settingsScrollBarPolicies=('asNeeded', 'asNeeded'), **kwds):
 
         self.maximised = False
         self.maximiseRestoreState = None
@@ -227,7 +229,9 @@ class CcpnModule(Dock, DropBase, NotifierBase):
             self._settingsScrollArea.setStyleSheet('ScrollArea { border-left: 1px solid %s;'
                                                    'border-right: 1px solid %s;'
                                                    'border-bottom: 1px solid %s;'
-                                                   'background: transparent; }' % (BORDERNOFOCUS_COLOUR, BORDERNOFOCUS_COLOUR, BORDERNOFOCUS_COLOUR))
+                                                   'background: transparent; }' % (
+                                                       BORDERNOFOCUS_COLOUR, BORDERNOFOCUS_COLOUR,
+                                                       BORDERNOFOCUS_COLOUR))
             self.settingsWidget.insertCornerWidget()
 
             if self.settingsPosition in settingsWidgetPositions:
@@ -415,7 +419,8 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                 moduleName = self._nameSplitter.join(splits[:-1])
             except:
                 serialName = ''
-                moduleName = self._nameSplitter.join(splits)  # this is when there is a splitter but not a serial. eg 2D_HN
+                moduleName = self._nameSplitter.join(
+                        splits)  # this is when there is a splitter but not a serial. eg 2D_HN
 
         return (pidPrefix, moduleName, serialName)
 
@@ -493,7 +498,8 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                         self._container = i
 
         if self._includeInLastSeen and self.area:
-            self.area._seenModuleStates[self.className] = {MODULENAME: self._defaultName, WIDGETSTATE: self._getLastSeenWidgetsState()}
+            self.area._seenModuleStates[self.className] = {MODULENAME : self._defaultName,
+                                                           WIDGETSTATE: self._getLastSeenWidgetsState()}
 
         self.mainWindow.application._cleanGarbageCollector()
         try:
@@ -529,7 +535,9 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
         # order the groups, appending numbers if required, and remove any whitespaces
         _stateWidgets = collections.OrderedDict((re.sub(r"\s+", "", widg.objectName()) if widg.objectName() else
-                                                 (DoubleUnderscore + re.sub(r"\s+", "", widg.objectName()) + widg.__class__.__name__ + (str(count) if count > 0 else '')),
+                                                 (DoubleUnderscore + re.sub(r"\s+", "",
+                                                                            widg.objectName()) + widg.__class__.__name__ + (
+                                                      str(count) if count > 0 else '')),
                                                  widg)
                                                 for grp in grouped
                                                 for count, widg in enumerate(grp))
@@ -646,7 +654,8 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                 self._settingsScrollArea.hide()
                 self.mainWidget.hide()
         else:
-            RuntimeError('Settings widget inclusion is false, please set includeSettingsWidget boolean to True at class level ')
+            RuntimeError(
+                    'Settings widget inclusion is false, please set includeSettingsWidget boolean to True at class level ')
 
     def setExpandSettingsFlag(self, value):
         """Set the expand flag to the True/False
@@ -691,29 +700,25 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self._closeModule()
 
     def enterEvent(self, event):
-        if self.mainWindow:
+        super().enterEvent(event)
+        if not getBlockingDialogs('enter-event'):
             if self.mainWindow.application.preferences.general.focusFollowsMouse:
                 if self.area is not None:
                     if not self.area._isNameEditing():
                         self.setFocus()
                 self.label.setModuleHighlight(True)
-        super().enterEvent(event)
 
     def leaveEvent(self, event):
-        if (
-                self.mainWindow
-                and self.mainWindow.application.preferences.general.focusFollowsMouse
-        ):
-            self.label.setModuleHighlight(False)
-
-        super().enterEvent(event)
+        super().leaveEvent(event)
+        if not getBlockingDialogs('leave-event'):
+            if (self.mainWindow and self.mainWindow.application.preferences.general.focusFollowsMouse):
+                self.label.setModuleHighlight(False)
 
     def dragMoveEvent(self, *args):
         ev = args[0]
         if self.isDragToMaximisedModule(ev):
             self.handleDragToMaximisedModule(ev)
             return
-
         DockDrop.dragMoveEvent(self, *args)
 
     def dragLeaveEvent(self, *args):
@@ -961,7 +966,8 @@ class CcpnModuleLabel(DockLabel):
         iconSizes = [max((size.height(), size.width())) for size in icon.availableSizes()]
         return max(iconSizes)
 
-    def __init__(self, name, module, showCloseButton=True, closeCallback=None, enableSettingsButton=False, settingsCallback=None,
+    def __init__(self, name, module, showCloseButton=True, closeCallback=None, enableSettingsButton=False,
+                 settingsCallback=None,
                  helpButtonCallback=None, ):
 
         self.buttonBorderWidth = 1
@@ -1069,7 +1075,8 @@ class CcpnModuleLabel(DockLabel):
         #                          background-color: #ececec ;  """ % styleInfo)
         buttonSize = self.labelSize + 4
         # button.setMinimumSize(QtCore.QSize(buttonSize, buttonSize))
-        button.setMaximumSize(QtCore.QSize(buttonSize, buttonSize))  # just let the button expand a little to fit the label
+        button.setMaximumSize(
+                QtCore.QSize(buttonSize, buttonSize))  # just let the button expand a little to fit the label
         button.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
     def setModuleHighlight(self, hightlighted=False):
@@ -1450,17 +1457,13 @@ class DropAreaSelectedOverlay(QtWidgets.QWidget):
         """
         if self.dropArea is None:
             return
-
         # create a transparent rectangle and painter over the widget
         p = QtGui.QPainter(self)
         rgn = self.rect()
-
         color = self.palette().highlight().color()
         color.setAlpha(100)
         p.setBrush(color)
         p.setPen(QtGui.QPen(color, 3))
-        # p.setBrush(QtGui.QBrush(QtGui.QColor(100, 100, 255, 50)))
-        # p.setPen(QtGui.QPen(QtGui.QColor(50, 50, 150), 3))
         p.drawRect(rgn)
         p.end()
 
@@ -1481,7 +1484,6 @@ class BorderOverlay(QtWidgets.QWidget):
         self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents)
         c1 = self._borderColour = borderColour or QtGui.QColor(getColours()[BORDERNOFOCUS])
         c2 = self._backgroundColour = parent.palette().color(parent.backgroundRole())
-
         self._blendColour = QtGui.QColor((c1.red() + c2.red()) // 2,
                                          (c1.green() + c2.green()) // 2,
                                          (c1.blue() + c2.blue()) // 2,
@@ -1503,7 +1505,6 @@ class BorderOverlay(QtWidgets.QWidget):
         rgn = self.rect().adjusted(0, 0, -1, -1)
         w = rgn.width()
         h = rgn.height()
-
         # clear and smooth the bottom corners
         p.setPen(QtGui.QPen(self._backgroundColour, 1))
         p.drawPoints(QtCore.QPoint(0, h),
@@ -1515,9 +1516,7 @@ class BorderOverlay(QtWidgets.QWidget):
                      QtCore.QPoint(w, h - 1),
                      QtCore.QPoint(w - 1, h)
                      )
-
         # draw the new rectangle around the module
-        # p.setPen(QtGui.QPen(self._borderColour, 1))
         p.setPen(QtGui.QPen(self.palette().mid(), 1))
         p.drawRoundedRect(rgn, 2, 2)
         p.end()

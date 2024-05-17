@@ -56,79 +56,73 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-17 12:03:17 +0100 (Wed, April 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-17 13:37:45 +0100 (Fri, May 17, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: Ed Brooksbank $"
 __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
-
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
-import sys
 import math
 import re
 import time
 import numpy as np
 from functools import partial
-# from contextlib import contextmanager
+from typing import Tuple
+from pyqtgraph import functions as fn
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QPoint, QSize, Qt, pyqtSlot
+from PyQt5.QtCore import QPoint, Qt, pyqtSlot
 from PyQt5.QtWidgets import QApplication, QOpenGLWidget
 from PyQt5.QtGui import QSurfaceFormat
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import PaintModes
-from ccpn.util.Logging import getLogger
-from pyqtgraph import functions as fn
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Peak import Peak
 from ccpn.core.Integral import Integral
 from ccpn.core.Multiplet import Multiplet
 from ccpn.ui.gui.lib.mouseEvents import getCurrentMouseMode
-from ccpn.ui.gui.lib.GuiStrip import DefaultMenu, PeakMenu, IntegralMenu, \
-    MultipletMenu, PhasingMenu, AxisMenu
-from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR, \
-    CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_PHASETRACE, \
-    CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_ZOOMAREA, CCPNGLWIDGET_PICKAREA, \
-    CCPNGLWIDGET_SELECTAREA, CCPNGLWIDGET_ZOOMLINE, CCPNGLWIDGET_MOUSEMOVELINE, \
-    CCPNGLWIDGET_HARDSHADE, CCPNGLWIDGET_BADAREA, CCPNGLWIDGET_BUTTON_FOREGROUND, \
-    colourSchemes, getColourScheme, getColours
-import ccpn.util.Phasing as Phasing
-from ccpn.ui.gui.lib.mouseEvents import \
-    leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, controlShiftRightMouse, \
-    middleMouse, shiftMiddleMouse, rightMouse, shiftRightMouse, controlRightMouse, PICK, \
-    makeDragEvent
-
+from ccpn.ui.gui.lib.GuiStrip import (DefaultMenu, PeakMenu, IntegralMenu,
+                                      MultipletMenu, PhasingMenu, AxisMenu)
+from ccpn.ui.gui.guiSettings import (CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR,
+                                     CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_LABELLING,
+                                     CCPNGLWIDGET_PHASETRACE, getColours,
+                                     CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_ZOOMAREA, CCPNGLWIDGET_PICKAREA,
+                                     CCPNGLWIDGET_SELECTAREA, CCPNGLWIDGET_ZOOMLINE, CCPNGLWIDGET_MOUSEMOVELINE,
+                                     CCPNGLWIDGET_HARDSHADE, CCPNGLWIDGET_BADAREA, CCPNGLWIDGET_BUTTON_FOREGROUND)
+from ccpn.ui.gui.lib.mouseEvents import (leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse,
+                                         controlShiftRightMouse,
+                                         middleMouse, shiftMiddleMouse, rightMouse, shiftRightMouse, controlRightMouse,
+                                         PICK,
+                                         makeDragEvent)
 from ccpn.ui.gui.lib.OpenGL import GL
-# import OpenGL.arrays.vbo as VBO
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLGlobalData
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import GLString
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLSimpleLabels import GLSimpleStrings
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_DRAW, \
-    GLRENDERMODE_RESCALE, GLRENDERMODE_REBUILD, \
-    GLREFRESHMODE_REBUILD, GLVertexArray
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import (GLRENDERMODE_DRAW, GLRENDERMODE_RESCALE, GLRENDERMODE_REBUILD,
+                                                     GLREFRESHMODE_REBUILD, GLVertexArray)
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import GLViewports
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLExternalRegion, \
-    GLRegion, REGION_COLOURS, GLInfiniteLine
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import (GLExternalRegion, GLRegion, REGION_COLOURS, GLInfiniteLine)
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLMultiplet import GLmultipletNdLabelling, GLmultiplet1dLabelling
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLPeak import GLpeakNdLabelling, GLpeak1dLabelling
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLIntegral import GLintegralNdLabelling, GLintegral1dLabelling
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import GLExporter
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
-# from ccpn.util.Common import makeIterableList
-from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
-from typing import Tuple
-from ccpn.util.Constants import AXIS_FULLATOMNAME
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import PaintModes
+import ccpn.util.Phasing as Phasing
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
+from ccpn.ui.gui.lib.ModuleLib import getBlockingDialogs
+from ccpn.ui.gui.lib.GuiStripContextMenus import (_hidePeaksSingleActionItems, _setEnabledAllItems, _ARRANGELABELS,
+                                                  _RESETLABELS)
+from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking, undoStackBlocking
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib import Pid
-from ccpn.ui.gui.lib.GuiStripContextMenus import _hidePeaksSingleActionItems, _setEnabledAllItems, _ARRANGELABELS, \
-    _RESETLABELS
+from ccpn.util.Constants import AXIS_FULLATOMNAME
+from ccpn.util.Logging import getLogger
 
 
 UNITS_PPM = 'ppm'
@@ -2661,18 +2655,17 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def enterEvent(self, ev: QtCore.QEvent):
         self.GLSignals._mouseInGLWidget = True
-
-        if self.strip and not self.strip.isDeleted:
-            if self._preferences.currentStripFollowsMouse and self.current.strip != self.strip:
-                self.current.strip = self.strip
-                self.application._focusStrip = self.strip
-                self.setFocus()
-
-            elif self._preferences.focusFollowsMouse and not self.hasFocus():
-                if getattr(self.application, '_focusStrip', None) != self.strip:
+        super().enterEvent(ev)
+        if not getBlockingDialogs('GL enter-event'):
+            if self.strip and not self.strip.isDeleted:
+                if self._preferences.currentStripFollowsMouse and self.current.strip != self.strip:
+                    self.current.strip = self.strip
                     self.application._focusStrip = self.strip
                     self.setFocus()
-        super().enterEvent(ev)
+                elif self._preferences.focusFollowsMouse and not self.hasFocus():
+                    if getattr(self.application, '_focusStrip', None) != self.strip:
+                        self.application._focusStrip = self.strip
+                        self.setFocus()
         self._clearAndUpdate()
 
     def focusInEvent(self, ev: QtGui.QFocusEvent):
@@ -5235,9 +5228,6 @@ class CcpnGLWidget(QOpenGLWidget):
     #                 drawList.indices[ii * 6:ii * 6 + 6] = indices
     #                 ii += 1
     #         break
-
-    # def sizeHint(self):
-    #     return QSize(self.w, self.h)
 
     def set3DProjection(self):
         GL.glMatrixMode(GL.GL_PROJECTION)

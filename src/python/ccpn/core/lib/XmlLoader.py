@@ -1440,7 +1440,7 @@ class XmlLoader(XmlLoaderABC):
         app = getApplication()
         try:
             # check if we have to keep current ccpnv3 directory before removing it
-            if self.v3Path.exists() and keepFallBack:
+            if self.v3Path.exists() and keepFallBack and app.preferences.general.backupSaveEnabled:
 
                 self.backupsPath.mkdir(exist_ok=True, parents=False)
 

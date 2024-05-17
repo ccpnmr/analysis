@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-25 10:11:30 +0000 (Thu, January 25, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-05-17 13:15:08 +0100 (Fri, May 17, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,21 +29,17 @@ __date__ = "$Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $"
 
 import re
 import contextlib
-from ccpn.util import Logging
-from ccpn.util.Logging import getLogger
 import itertools
 import collections
 from functools import partial
+from PyQt5 import QtCore, QtGui, QtWidgets
 from pyqtgraph.dockarea.Container import Container
 from pyqtgraph.dockarea.DockDrop import DockDrop
 from pyqtgraph.dockarea.Dock import DockLabel, Dock
 from pyqtgraph.dockarea.DockArea import DockArea
-from PyQt5 import QtCore, QtGui, QtWidgets
+from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.guiSettings import CCPNMODULELABEL_BACKGROUND, CCPNMODULELABEL_FOREGROUND, \
-    CCPNMODULELABEL_BACKGROUND_ACTIVE, CCPNMODULELABEL_FOREGROUND_ACTIVE, CCPNMODULELABEL_BORDER, CCPNMODULELABEL_BORDER_ACTIVE, \
-    BORDERNOFOCUS_COLOUR
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
@@ -58,21 +54,27 @@ from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS
 from ccpn.ui.gui.widgets.SideBar import SideBar, SideBarSearchListView
 from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
-from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget, CheckBoxCompoundWidget, \
-    DoubleSpinBoxCompoundWidget, SelectorWidget, InputPulldown, \
-    ColourSelectionWidget, LineEditPopup, ListCompoundWidget
-from ccpn.core.lib.Notifiers import NotifierBase
-from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, TextEditorCompoundWidget, \
-    RadioButtonsCompoundWidget, ScientificSpinBoxCompoundWidget, SpinBoxCompoundWidget, EntryPathCompoundWidget
+from ccpn.ui.gui.widgets.CompoundWidgets import (PulldownListCompoundWidget, CheckBoxCompoundWidget,
+                                                 DoubleSpinBoxCompoundWidget, SelectorWidget, InputPulldown,
+                                                 ColourSelectionWidget, LineEditPopup, ListCompoundWidget,
+                                                 EntryCompoundWidget, TextEditorCompoundWidget,
+                                                 RadioButtonsCompoundWidget, ScientificSpinBoxCompoundWidget,
+                                                 SpinBoxCompoundWidget, EntryPathCompoundWidget)
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight, getFont, DEFAULTFONT
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.ui.gui.guiSettings import (getColours, BORDERNOFOCUS, CCPNMODULELABEL_BACKGROUND, CCPNMODULELABEL_FOREGROUND,
+                                     CCPNMODULELABEL_BACKGROUND_ACTIVE, CCPNMODULELABEL_FOREGROUND_ACTIVE,
+                                     CCPNMODULELABEL_BORDER, CCPNMODULELABEL_BORDER_ACTIVE,
+                                     BORDERNOFOCUS_COLOUR)
+from ccpn.ui.gui.lib.ModuleLib import getBlockingDialogs
+from ccpn.core.lib.Notifiers import NotifierBase
 from ccpn.core.lib.Pid import Pid, createPid
-from ccpn.ui.gui.widgets.Base import Base
 from ccpn.util.Path import aPath
+from ccpn.util import Logging
+from ccpn.util.Logging import getLogger
 
 
 CommonWidgetsEdits = {
@@ -97,24 +99,31 @@ CommonWidgetsEdits = {
 
     ListCompoundWidget.__name__             : (ListCompoundWidget.getTexts, ListCompoundWidget.setTexts, None),
     CheckBoxCompoundWidget.__name__         : (CheckBoxCompoundWidget.get, CheckBoxCompoundWidget.set, None),
-    DoubleSpinBoxCompoundWidget.__name__    : (DoubleSpinBoxCompoundWidget.getValue, DoubleSpinBoxCompoundWidget.setValue,
-                                               ('doubleSpinBox.valueChanged')),
-    ScientificSpinBoxCompoundWidget.__name__: (ScientificSpinBoxCompoundWidget.getValue, ScientificSpinBoxCompoundWidget.setValue,
-                                               ('scientificSpinBox.valueChanged')),
+    DoubleSpinBoxCompoundWidget.__name__    : (
+        DoubleSpinBoxCompoundWidget.getValue, DoubleSpinBoxCompoundWidget.setValue,
+        ('doubleSpinBox.valueChanged')),
+    ScientificSpinBoxCompoundWidget.__name__: (
+        ScientificSpinBoxCompoundWidget.getValue, ScientificSpinBoxCompoundWidget.setValue,
+        ('scientificSpinBox.valueChanged')),
     SpinBoxCompoundWidget.__name__          : (SpinBoxCompoundWidget.getValue, SpinBoxCompoundWidget.setValue,
                                                ('spinBox.valueChanged')),
 
     SelectorWidget.__name__                 : (SelectorWidget.getText, SelectorWidget.select, None),
     InputPulldown.__name__                  : (InputPulldown.currentText, InputPulldown.set, None),
-    ColourSelectionWidget.__name__          : (ColourSelectionWidget.currentText, ColourSelectionWidget.setColour, None),
+    ColourSelectionWidget.__name__          : (
+        ColourSelectionWidget.currentText, ColourSelectionWidget.setColour, None),
     LineEditPopup.__name__                  : (LineEditPopup.get, LineEditPopup.set, None),
 
-    EntryCompoundWidget.__name__            : (EntryCompoundWidget.getText, EntryCompoundWidget.setText, 'entry.textEdited'),
-    TextEditorCompoundWidget.__name__       : (TextEditorCompoundWidget.getText, TextEditorCompoundWidget.setText, 'textEditor.textChanged'),
-    NmrChainPulldown.__name__               : (NmrChainPulldown.getText, NmrChainPulldown.select, 'pulldownList.activated'),
+    EntryCompoundWidget.__name__            : (
+        EntryCompoundWidget.getText, EntryCompoundWidget.setText, 'entry.textEdited'),
+    TextEditorCompoundWidget.__name__       : (
+        TextEditorCompoundWidget.getText, TextEditorCompoundWidget.setText, 'textEditor.textChanged'),
+    NmrChainPulldown.__name__               : (
+        NmrChainPulldown.getText, NmrChainPulldown.select, 'pulldownList.activated'),
     RadioButtonsCompoundWidget.__name__     : (RadioButtonsCompoundWidget.getIndex, RadioButtonsCompoundWidget.setIndex,
                                                'radioButtons.buttonGroup.buttonClicked'),
-    EntryPathCompoundWidget.__name__        : (EntryPathCompoundWidget.getText, EntryPathCompoundWidget.setText, 'entry.lineEdit.textChanged'),
+    EntryPathCompoundWidget.__name__        : (
+        EntryPathCompoundWidget.getText, EntryPathCompoundWidget.setText, 'entry.lineEdit.textChanged'),
     # ADD TABLES
     # ADD Others
     }
@@ -189,7 +198,8 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
     # _instances = set()
 
-    def __init__(self, mainWindow, name, closable=True, closeFunc=None, settingsScrollBarPolicies=('asNeeded', 'asNeeded'), **kwds):
+    def __init__(self, mainWindow, name, closable=True, closeFunc=None,
+                 settingsScrollBarPolicies=('asNeeded', 'asNeeded'), **kwds):
 
         self.maximised = False
         self.maximiseRestoreState = None
@@ -288,7 +298,9 @@ class CcpnModule(Dock, DropBase, NotifierBase):
             self._settingsScrollArea.setStyleSheet('ScrollArea { border-left: 1px solid %s;'
                                                    'border-right: 1px solid %s;'
                                                    'border-bottom: 1px solid %s;'
-                                                   'background: transparent; }' % (BORDERNOFOCUS_COLOUR, BORDERNOFOCUS_COLOUR, BORDERNOFOCUS_COLOUR))
+                                                   'background: transparent; }' % (
+                                                       BORDERNOFOCUS_COLOUR, BORDERNOFOCUS_COLOUR,
+                                                       BORDERNOFOCUS_COLOUR))
             self.settingsWidget.insertCornerWidget()
 
             if self.settingsPosition in settingsWidgetPositions:
@@ -476,7 +488,8 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                 moduleName = self._nameSplitter.join(splits[:-1])
             except:
                 serialName = ''
-                moduleName = self._nameSplitter.join(splits)  # this is when there is a splitter but not a serial. eg 2D_HN
+                moduleName = self._nameSplitter.join(
+                        splits)  # this is when there is a splitter but not a serial. eg 2D_HN
 
         return (pidPrefix, moduleName, serialName)
 
@@ -554,7 +567,8 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                         self._container = i
 
         if self._includeInLastSeen and self.area:
-            self.area._seenModuleStates[self.className] = {MODULENAME: self._defaultName, WIDGETSTATE: self._getLastSeenWidgetsState()}
+            self.area._seenModuleStates[self.className] = {MODULENAME : self._defaultName,
+                                                           WIDGETSTATE: self._getLastSeenWidgetsState()}
 
         self.mainWindow.application._cleanGarbageCollector()
         try:
@@ -590,7 +604,9 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
         # order the groups, appending numbers if required, and remove any whitespaces
         _stateWidgets = collections.OrderedDict((re.sub(r"\s+", "", widg.objectName()) if widg.objectName() else
-                                                 (DoubleUnderscore + re.sub(r"\s+", "", widg.objectName()) + widg.__class__.__name__ + (str(count) if count > 0 else '')),
+                                                 (DoubleUnderscore + re.sub(r"\s+", "",
+                                                                            widg.objectName()) + widg.__class__.__name__ + (
+                                                      str(count) if count > 0 else '')),
                                                  widg)
                                                 for grp in grouped
                                                 for count, widg in enumerate(grp))
@@ -707,7 +723,8 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                 self._settingsScrollArea.hide()
                 self.mainWidget.hide()
         else:
-            RuntimeError('Settings widget inclusion is false, please set includeSettingsWidget boolean to True at class level ')
+            RuntimeError(
+                    'Settings widget inclusion is false, please set includeSettingsWidget boolean to True at class level ')
 
     def setExpandSettingsFlag(self, value):
         """Set the expand flag to the True/False
@@ -752,29 +769,25 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self._closeModule()
 
     def enterEvent(self, event):
-        if self.mainWindow:
+        super().enterEvent(event)
+        if not getBlockingDialogs('enter-event'):
             if self.mainWindow.application.preferences.general.focusFollowsMouse:
                 if self.area is not None:
                     if not self.area._isNameEditing():
                         self.setFocus()
                 self.label.setModuleHighlight(True)
-        super().enterEvent(event)
 
     def leaveEvent(self, event):
-        if (
-                self.mainWindow
-                and self.mainWindow.application.preferences.general.focusFollowsMouse
-        ):
-            self.label.setModuleHighlight(False)
-
-        super().enterEvent(event)
+        super().leaveEvent(event)
+        if not getBlockingDialogs('leave-event'):
+            if (self.mainWindow and self.mainWindow.application.preferences.general.focusFollowsMouse):
+                self.label.setModuleHighlight(False)
 
     def dragMoveEvent(self, *args):
         ev = args[0]
         if self.isDragToMaximisedModule(ev):
             self.handleDragToMaximisedModule(ev)
             return
-
         DockDrop.dragMoveEvent(self, *args)
 
     def dragLeaveEvent(self, *args):
@@ -1022,7 +1035,8 @@ class CcpnModuleLabel(DockLabel):
         iconSizes = [max((size.height(), size.width())) for size in icon.availableSizes()]
         return max(iconSizes)
 
-    def __init__(self, name, module, showCloseButton=True, closeCallback=None, enableSettingsButton=False, settingsCallback=None,
+    def __init__(self, name, module, showCloseButton=True, closeCallback=None, enableSettingsButton=False,
+                 settingsCallback=None,
                  helpButtonCallback=None, ):
 
         self.buttonBorderWidth = 1
@@ -1130,7 +1144,8 @@ class CcpnModuleLabel(DockLabel):
         #                          background-color: #ececec ;  """ % styleInfo)
         buttonSize = self.labelSize + 4
         # button.setMinimumSize(QtCore.QSize(buttonSize, buttonSize))
-        button.setMaximumSize(QtCore.QSize(buttonSize, buttonSize))  # just let the button expand a little to fit the label
+        button.setMaximumSize(
+                QtCore.QSize(buttonSize, buttonSize))  # just let the button expand a little to fit the label
         button.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
     def setModuleHighlight(self, hightlighted=False):

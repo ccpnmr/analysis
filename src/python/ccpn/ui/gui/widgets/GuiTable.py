@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-26 17:27:52 +0100 (Fri, April 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-17 13:47:45 +0100 (Fri, May 17, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -74,6 +74,8 @@ from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.Logging import getLogger
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Path import aPath
+from ccpn.ui.gui.lib.ModuleLib import getBlockingDialogs
+
 
 OBJECT_CLASS = 0
 OBJECT_PARENT = 1
@@ -1121,10 +1123,11 @@ class GuiTable(TableWidget, Base):
     def enterEvent(self, event):
         self.setStyleSheet(self._defaultStyleSheet)
         try:
-            # basic tables may not have preferences defined
-            if self.mainWindow:
-                if self.mainWindow.application.preferences.general.focusFollowsMouse:
-                    self.setFocus()
+            if not getBlockingDialogs('guiTable enter-event'):
+                # basic tables may not have preferences defined
+                if self.mainWindow:
+                    if self.mainWindow.application.preferences.general.focusFollowsMouse:
+                        self.setFocus()
         except:
             pass
 

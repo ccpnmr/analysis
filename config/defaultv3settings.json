@@ -24,6 +24,7 @@
         "autoBackupEnabled"                    : true,
         "autoBackupFrequency"                  : 30,
         "autoBackupCount"                      : 10,
+        "backupSaveEnabled"                    : false,
         "backupSaveCount"                      : 10,
         "stripRegionPadding"                   : 0.0,
         "peakDropFactor"                       : 0.1,

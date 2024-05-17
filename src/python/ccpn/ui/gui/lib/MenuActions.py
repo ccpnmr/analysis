@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-13 15:03:20 +0100 (Mon, May 13, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-17 13:47:45 +0100 (Fri, May 17, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -389,7 +389,7 @@ class _raiseCollectionPopup(RaisePopupABC):
     # objectArgumentName = 'obj'
 
 
-class OpenItemABC():
+class OpenItemABC:
     """
     An ABC to implement an abstract openItem in moduleArea class
     The __call__(self, dataPid, node) method acts as the callback function
@@ -663,7 +663,8 @@ class OpenItemABC():
         combo.setValidator(_validator)
         combo.lineEdit().setPlaceholderText(f'<{name} Name>')
 
-        combo.setToolTip('Select existing collection, or enter a name to create new collection.')
+        combo.setToolTip('Select existing collection, or enter a name to create new collection.\n'
+                         'Press <enter> to confirm, clicking outside the popup will cancel.')
         combo.setCompleter(None)
 
         return combo
@@ -721,8 +722,9 @@ class OpenItemABC():
                 self._pulldownWidget.setData(texts=texts)
 
             def setPulldownCallback(self, callback):
-                self._pulldownWidget.activated.connect(
-                        partial(callback, self._pulldownWidget, self, selectionWidget=self._selectionWidget))
+                self._pulldownWidget.activated.connect(partial(callback,
+                                                               pulldown=self._pulldownWidget,
+                                                               popup=self))
 
             @property
             def centralWidgetSize(self):
@@ -737,7 +739,7 @@ class OpenItemABC():
         colNames = OrderedSet(['', ] + [co.name for co in colData])
 
         # create a small editor
-        editPopup = EditCollection(parent=self, newPulldown=self._newPulldown,
+        editPopup = EditCollection(parent=None, newPulldown=self._newPulldown,
                                    selectionWidget=selectionWidget,
                                    on_top=True)
         editPopup.setPulldownData(list(colNames))

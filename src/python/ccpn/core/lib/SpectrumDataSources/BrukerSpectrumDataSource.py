@@ -18,9 +18,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-01-03 13:01:00 +0000 (Wed, January 03, 2024) $"
-__version__ = "$Revision: 3.3.0 $"
+__modifiedBy__ = "$modifiedBy: Vicky Higman $"
+__dateModified__ = "$dateModified: 2024-05-16 10:13:18 +0100 (Thu, May 16, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -272,7 +272,18 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
             if not _p.exists():
                 break
             dimensionality += 1
-        return dimensionality
+        # check that correct binary for expected dimensionality is there and if not, try adjusting dimensionality down
+        _dim = 0
+        for _d in range(dimensionality, 0, -1):
+            _rfile = self._pdataDir / str(_d)+_d*'r'
+            if _rfile.exists():
+                _dim = _d
+            else:
+                getLogger().warning(f'{_rfile}: Cannot find binary file, checking for lower dimensionality')
+        if _dim != 0:
+            return _dim
+        else:
+            return dimensionality
 
     def _findFirstPdataDir(self):
         """Find and return first pdata subdir with valid data, starting from Bruker topDir

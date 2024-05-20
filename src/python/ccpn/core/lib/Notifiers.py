@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-04-19 18:48:59 +0100 (Fri, April 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-20 17:59:27 +0100 (Mon, May 20, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -97,7 +97,7 @@ class NotifierABC(object):
     OLDPID = 'oldPid'           # the old or previous pid of the object (trigger RENAME)
     VALUE = 'value'             # the (new) value (trigger CHANGE)
     PREVIOUSVALUE = 'previousValue'  # the old or previous value (trigger CHANGE)
-
+    ITEMS_CHANGED = 'itemsChanged' # The items in list/dict that have changed (trigger CHANGE)
     SPECIFIERS = 'specifiers'
 
     def __init__(self, theObject, trigger, targetName, callback, setterObject=None, debug=False, **kwds):
@@ -189,14 +189,18 @@ class NotifierABC(object):
         """:return True if notifier is still registered; i.e. active"""
         return self._isRegistered
 
-    def newCallbackDict(self, trigger, previousValue=None, value=None, obj=None,
-                        oldpid=None, pid=None, specifiers=None):
+    def newCallbackDict(self, trigger,
+                        previousValue=None, value=None, obj=None,
+                        oldpid=None, pid=None, specifiers=None,
+                        itemsChanged=None
+                        ):
         callbackDict = {
                 self.NOTIFIER     : self,
                 self.THEOBJECT    : self._theObject,
                 self.TRIGGER      : trigger,
                 self.TARGETNAME   : self._targetName,
                 self.PREVIOUSVALUE: previousValue,
+                self.ITEMS_CHANGED: itemsChanged,
                 self.VALUE        : value,
                 self.OBJECT       : obj,
                 self.OLDPID       : oldpid,

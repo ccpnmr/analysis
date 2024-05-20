@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-13 11:45:51 +0000 (Wed, March 13, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-20 10:36:30 +0100 (Mon, May 20, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -78,7 +78,7 @@ class ButtonListMixin:
     def _insertSpacer(self, index, width=25, height=5):
         from ccpn.ui.gui.widgets.Spacer import Spacer
 
-        if not (0 <= index < len(self.buttons)):
+        if not (0 <= index < len(self.buttons)+1):
             raise ValueError('Insert position out of range')
 
         j = len(self.buttons)

@@ -29,8 +29,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-10 17:06:23 +0100 (Fri, May 10, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-05-21 17:02:03 +0100 (Tue, May 21, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -97,7 +97,7 @@ class NotifierABC(object):
     OLDPID = 'oldPid'           # the old or previous pid of the object (trigger RENAME)
     VALUE = 'value'             # the (new) value (trigger CHANGE)
     PREVIOUSVALUE = 'previousValue'  # the old or previous value (trigger CHANGE)
-
+    ITEMS_CHANGED = 'itemsChanged' # The items in list/dict that have changed (trigger CHANGE)
     SPECIFIERS = 'specifiers'
 
     def __init__(self, theObject, trigger, targetName, callback, setterObject=None, debug=False, **kwds):
@@ -189,14 +189,18 @@ class NotifierABC(object):
         """:return True if notifier is still registered; i.e. active"""
         return self._isRegistered
 
-    def newCallbackDict(self, trigger, previousValue=None, value=None, obj=None,
-                        oldpid=None, pid=None, specifiers=None):
+    def newCallbackDict(self, trigger,
+                        previousValue=None, value=None, obj=None,
+                        oldpid=None, pid=None, specifiers=None,
+                        itemsChanged=None
+                        ):
         callbackDict = {
                 self.NOTIFIER     : self,
                 self.THEOBJECT    : self._theObject,
                 self.TRIGGER      : trigger,
                 self.TARGETNAME   : self._targetName,
                 self.PREVIOUSVALUE: previousValue,
+                self.ITEMS_CHANGED: itemsChanged,
                 self.VALUE        : value,
                 self.OBJECT       : obj,
                 self.OLDPID       : oldpid,
@@ -603,9 +607,12 @@ class _NotifiersDict(dict):
         super().__init__()
         self.useWeakRef = useWeakRef
 
-    def addNotifier(self, notifier:NotifierABC):
+    def addNotifier(self, notifier: NotifierABC):
         """Add notifier to self, in a trigger dependent way
         """
+        if not isinstance(notifier, NotifierABC):
+            raise TypeError(f'addNotifier(): expected NotifierABC subclass instance, got {type(notifier)}')
+
         if self.useWeakRef:
             _dict = self.setdefault(notifier._trigger, weakref.WeakValueDictionary())
         else:
@@ -617,10 +624,13 @@ class _NotifiersDict(dict):
             raise RuntimeError(f'A notifier with id "{_id}" already exists; cannot add {notifier}')
         _dict[_id] = notifier
 
-    def deleteNotifier(self, notifier:NotifierABC):
+    def deleteNotifier(self, notifier: NotifierABC):
         """Delete notifier from self
         :raise ValueError if notifier is not part of self
         """
+        if not isinstance(notifier, NotifierABC):
+            raise TypeError(f'deleteNotifier(): expected NotifierABC subclass instance, got {type(notifier)}')
+
         if (_dict := self.get(notifier._trigger, None)) is None:
             raise ValueError(f'deleteNotifier(): {notifier} is not contained in self')
         if notifier.id not in _dict:
@@ -665,7 +675,26 @@ class NotifierBase(object):
         # response to changes to the object
         self._registeredNotifiersDict = _NotifiersDict()
 
-    def _addNotifier(self, notifier):
+    def _newNotifier(self, trigger: str, targetName: str, callback: Callable, setterObject, **kwds) -> Notifier:
+        """
+        Create a new NotifierABC subtype instance set on self.
+        The created notifier registered itself with _registeredNotifiersDict
+        To be subclassed for different implementations
+
+        :param triggers: list of triggers to trigger callback
+        :param targetName: valid className, attributeName or None (See Notifier doc string for details)
+        :param callback: callback function with signature: callback(callbackDict, **kwds])
+        :param setterObject: the object setting the notifier
+        :param **kwds: optional keyword,value arguments to callback
+
+        :return: a Notifier instance
+        """
+        _notifier = Notifier(theObject=self, trigger=trigger, targetName=targetName,
+                             callback=callback, setterObject=setterObject, **kwds
+                             )
+        return _notifier
+
+    def _addNotifier(self, notifier: NotifierABC):
         """Add notifier to notifiersDict;
         Isolating for easier subclassing of setNotifier()
         :param notifier: a Notifier|CurrentNotifier|GuiNotifier instance
@@ -686,27 +715,27 @@ class NotifierBase(object):
         """
         from ccpn.framework.Current import Current
 
+        if theObject is None:
+            raise ValueError(f'setNotifier(): undefined object')
+
         if not isinstance(triggers, (list,tuple)) or len(triggers) == 0:
             raise ValueError(f'setNotifier(): invalid triggers "{triggers}"; expected list or tuple with at least one of {Notifier._triggerKeywords}')
 
         if isinstance(theObject, Current) or triggers[0] == CurrentNotifier.CURRENT:
             raise ValueError(f'setNotifier(): Object or trigger refer to Current; use setCurrentNotifier() method instead')
 
-        if theObject is None:
-            raise ValueError(f'setNotifier(): undefined object')
-
         result = _NotifierList()
         for _trigger in triggers:
-            _notifier = Notifier(
-                    theObject=theObject,
-                    trigger=_trigger,
-                    targetName=targetName,
-                    callback=callback,
-                    setterObject=self,
-                    **kwds
+            _notifier = theObject._newNotifier(
+                                trigger=_trigger,
+                                targetName=targetName,
+                                callback=callback,
+                                setterObject=self,
+                                **kwds
             )
             result.append(_notifier)
             self._addNotifier(_notifier)
+
         return result
 
     def setGuiNotifier(self, theObject: 'AbstractWrapperObject', triggers: list, targetNames: list,
@@ -757,9 +786,9 @@ class NotifierBase(object):
         self._addNotifier(notifier)
         return result
 
-    def hasNotifier(self, notifier) -> bool:
+    def _hasNotifier(self, notifier) -> bool:
         """
-        return True if theObject has notifier
+        return True if self has notifier
 
         :param notifier: a Notifier|CurrentNotifier|GuiNotifier instance
         :return: True or False
@@ -799,10 +828,10 @@ class NotifierBase(object):
         return foundNotifiers
 
     def deleteNotifier(self, notifier):
-        """Unregister notifier; remove it from the list and delete it
+        """Remove notifier from the list, unregister it and delete it
         :param notifier: a Notifier|CurrentNotifier|GuiNotifier instance
         """
-        if not self.hasNotifier(notifier):
+        if not self._hasNotifier(notifier):
             raise ValueError(f'deleteNotifier(): {notifier} is not a (valid) notifier of {self}')
 
         self._objectNotifiersDict.deleteNotifier(notifier)
@@ -837,9 +866,9 @@ class NotifierBase(object):
         Notifier execution is resumed if resulting value == 0
         NB. classmethod allows for calling without an instance
         """
+        if NotifierBase._notificationBlanking == 0:
+            raise RuntimeError("_decreaseNotificationBlanking(): cannot set _notificationBlanking < 0")
         NotifierBase._notificationBlanking -= 1
-        if NotifierBase._notificationBlanking < 0:
-            raise RuntimeError("_decreaseNotificationBlanking(): _notificationBlanking below zero!")
 
     def setBlankingAllNotifiers(self, flag):
         """Set blanking of all the notifiers of self to flag
@@ -870,9 +899,9 @@ class NotifierBase(object):
         Api-notifier execution is resumed if resulting value == 0
         NB. classmethod allows for calling without an instance
         """
+        if NotifierBase._apiNotificationBlanking == 0:
+            raise RuntimeError("_decreaseApiNotificationBlanking(): cannot set _apiNotificationBlanking < 0")
         NotifierBase._apiNotificationBlanking -= 1
-        if NotifierBase._apiNotificationBlanking < 0:
-            raise RuntimeError("_decreaseApiNotificationBlanking(): _apiNotificationBlanking below zero!")
 
 
 

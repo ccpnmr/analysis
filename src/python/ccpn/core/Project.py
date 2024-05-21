@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-10 17:06:23 +0100 (Fri, May 10, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-05-21 17:02:03 +0100 (Tue, May 21, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1214,7 +1214,7 @@ class Project(AbstractWrapperObject):
         # Set up notifiers
         self._registerPresetApiNotifiers()
 
-        # undo
+        # undo; also adds the undo stack to _wrappedData._root._undo
         self._resetUndo(debug=debugLevel <= Logging.DEBUG2, application=application)
 
         self._mainWindow = None  # set by MainWindow.__init__()

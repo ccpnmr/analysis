@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-05-03 10:46:35 +0100 (Fri, May 03, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-21 15:00:35 +0100 (Tue, May 21, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -527,10 +527,10 @@ class PeakList(PMIListABC):
                 tempML = spec.newMultipletList()
                 for peak in peaks:
                     if not peak.multiplets:
-                        mps.add(tempML.newMultiplet(peak))
-                    else:
-                        mps.update(peak.multiplets)
-                mps = set(mps)
+                        tempML.newMultiplet(peak)
+                    mps.update(peak.multiplets)
+                if not tempML.multiplets:
+                    tempML.delete()
         return tuple(mps)
 
 #=========================================================================================

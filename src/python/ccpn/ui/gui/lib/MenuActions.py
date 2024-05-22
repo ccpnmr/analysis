@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-05-22 13:23:19 +0100 (Wed, May 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-22 21:11:28 +0100 (Wed, May 22, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -223,7 +223,7 @@ class RaisePopupABC():
         self.node = None
         self.dataPid = None
 
-    def __call__(self, mainWindow, dataPid, node):
+    def __call__(self, mainWindow, dataPid, node, parentWidget=None):
         self.node = node
         self.dataPid = dataPid
         obj = self.getObj()
@@ -232,12 +232,12 @@ class RaisePopupABC():
         else:
             self.kwds[self.objectArgumentName] = obj
 
-        # v3 behavior
         if hasattr(node, 'sidebar'):
-            self.kwds.setdefault('parent', node.sidebar)
+            # v3 behavior
+            popup = self.popupClass(node.sidebar, mainWindow=mainWindow, **self.kwds)
         else:
-            self.kwds.setdefault('parent', None)
-        popup = self.popupClass(mainWindow=mainWindow, **self.kwds)
+            popup = self.popupClass(parentWidget, mainWindow=mainWindow, **self.kwds)
+
         # popup.raise_()
         popup.exec_()
 
@@ -413,6 +413,9 @@ class OpenItemABC:
                           RestraintTable, Note, StructureEnsemble, DataTable, ViolationTable, Collection
                           )
 
+    # typeCheck: flag to enforce type checking
+    typeCheck = True
+
     # This can be subclassed
     def getObj(self):
         """returns obj from node or None
@@ -475,7 +478,10 @@ class OpenItemABC:
         """Initialise settings for the object.
         """
         self.application = self.mainWindow.application
-        openableObjs = [obj for obj in objs if isinstance(obj, self.validActionTargets)]
+        if self.typeCheck:
+            openableObjs = [obj for obj in objs if isinstance(obj, self.validActionTargets)]
+        else:
+            openableObjs = objs
 
         if self.hasOpenMethod and openableObjs:
             if self.useApplication:
@@ -495,18 +501,6 @@ class OpenItemABC:
         if self.openAction:
             contextMenu.addAction(self.contextMenuText, self.openAction)
 
-        spectra = [obj for obj in objs if isinstance(obj, Spectrum)]
-
-        if spectra:
-            contextMenu.addAction('Reload', partial(self._reloadSpectra, objs))
-
-        if spectra:
-            contextMenu.addAction('Make SpectrumGroup From Selected',
-                                  partial(_raiseSpectrumGroupEditorPopup(useNone=True, editMode=False,
-                                                                         defaultItems=spectra),
-                                          self.mainWindow, self.getObj(), self.node))
-        if any(any(sp.isTimeDomains) for sp in spectra):  # 3.1.0 alpha feature from macro.
-            contextMenu.addAction('Split Planes to SpectrumGroup', partial(self._splitPlanesToSpectrumGroup, objs))
         contextMenu.addAction('Copy Pid to Clipboard', partial(self._copyPidsToClipboard, objs))
         self._addCollectionMenu(contextMenu, objs)
         contextMenu.addAction('Delete', partial(self._deleteItemObject, thisObj, objs))
@@ -815,15 +809,19 @@ class _openItemChemicalShiftListTable(OpenItemABC):
         contextMenu = Menu('', parentWidget, isFloatWidget=True)
         if self.openAction:
             contextMenu.addAction(self.contextMenuText, self.openAction)
-        contextMenu.addSeparator()
+            # contextMenu.addSeparator()
+
         contextMenu.addAction('Create Synthetic PeakList', partial(self._openCreateSyntheticPeakListFromCSLPopup, objs))
+
         contextMenu.addSeparator()
+
         contextMenu.addAction('Copy Pid to Clipboard', partial(self._copyPidsToClipboard, objs))
         self._addCollectionMenu(contextMenu, objs)
         contextMenu.addAction('Duplicate', partial(self._duplicateAction, objs))
         contextMenu.addAction('Delete', partial(self._deleteItemObject, thisObj, objs))
 
         contextMenu.addSeparator()
+
         contextMenu.addAction('Edit Properties', partial(self.sideBar._raiseObjectProperties, self.node.widget))
 
         contextMenu.move(position)
@@ -1149,6 +1147,45 @@ class _openItemSpectrumDisplay(OpenItemABC):
     openItemMethod = None
     useApplication = False
     objectArgumentName = 'spectrum'
+
+    def _openContextMenu(self, parentWidget, position, thisObj, objs, deferExec=False):
+        """Open a context menu.
+        """
+        contextMenu = Menu('', parentWidget, isFloatWidget=True)
+        if self.openAction:
+            contextMenu.addAction(self.contextMenuText, self.openAction)
+
+        contextMenu.addAction('Reload', partial(self._reloadSpectra, objs))
+
+        if len(objs) > 0:
+            contextMenu.addAction('Make SpectrumGroup From Selected',
+                                  partial(_raiseSpectrumGroupEditorPopup(useNone=True, editMode=False, defaultItems=objs),
+                                          self.mainWindow, self.getObj(), self.node
+                                         )
+                                  )
+
+        if any(any(sp.isTimeDomains) for sp in objs):  # 3.1.0 alpha feature from macro.
+            contextMenu.addAction('Split Planes to SpectrumGroup', partial(self._splitPlanesToSpectrumGroup, objs))
+
+        contextMenu.addSeparator()
+
+        contextMenu.addAction('Copy Pid to Clipboard', partial(self._copyPidsToClipboard, objs))
+        self._addCollectionMenu(contextMenu, objs)
+        contextMenu.addAction('Delete', partial(self._deleteItemObject, thisObj, objs))
+        canBeCloned = all(hasattr(obj, 'clone') for obj in objs)
+        if canBeCloned:
+            contextMenu.addAction('Clone', partial(self._cloneObject, objs))
+
+        contextMenu.addSeparator()
+        contextMenu.addAction('Edit Properties', partial(self.sideBar._raiseObjectProperties, self.node.widget))
+
+        contextMenu.move(position)
+
+        if not deferExec:
+            # may want to defer the exec in a subclass
+            contextMenu.exec()
+
+        return contextMenu
 
     def _openSpectrumDisplay(self, spectrum=None, position=None, relativeTo=None):
         mainWindow = self.mainWindow

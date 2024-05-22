@@ -5,8 +5,9 @@ Module documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-21 16:17:10 +0000 (Thu, March 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-22 14:37:16 +0100 (Wed, May 22, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
@@ -1227,8 +1228,8 @@ class NmrResidue(AbstractWrapperObject):
     @logCommand(get='self')
     def mergeNmrResidues(self, nmrResidues: typing.Sequence['NmrResidue']):
         nmrResidues = makeIterableList(nmrResidues)
-        nmrResidues = [self.project.getByPid(nmrResidue) if isinstance(nmrResidue, str) else nmrResidue for nmrResidue
-                       in nmrResidues]
+        nmrResidues = [self.project.getByPid(nmrResidue) if isinstance(nmrResidue, str) else nmrResidue
+                       for nmrResidue in nmrResidues]
         if not all(isinstance(nmrResidue, NmrResidue) for nmrResidue in nmrResidues):
             raise TypeError('nmrResidues can only contain items of type NmrResidue')
         if self in nmrResidues:
@@ -1376,8 +1377,9 @@ class NmrResidue(AbstractWrapperObject):
 
             # remove all the mmrAtoms from their associated chemicalShifts
             # - clearing before the delete handles the notifiers nicely
-            _shs = {sh for nmrRes in (self,) + self.offsetNmrResidues for nmrAt in nmrRes.nmrAtoms for sh in
-                    nmrAt.chemicalShifts}
+            _shs = {sh for nmrRes in (self,) + self.offsetNmrResidues
+                    for nmrAt in nmrRes.nmrAtoms
+                    for sh in nmrAt.chemicalShifts}
             for sh in _shs:
                 sh.nmrAtom = None
             super().delete()
@@ -1675,7 +1677,10 @@ def _fetchNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None
 # NmrChain.fetchNmrResidue = _fetchNmrResidue
 
 def _renameNmrResidue(self: Project, apiResonanceGroup: ApiResonanceGroup):
-    """Reset pid for NmrResidue and all offset NmrResidues"""
+    """Reset pid for NmrResidue and all offset NmrResidues.
+    """
+    if self._apiNotificationBlanking != 0 or self._apiBlocking != 0:
+        return
     if (nmrResidue := self._data2Obj.get(apiResonanceGroup)) is None:
         # NOTE:GWV - it shouldn't get here but occasionally it does; e.g. when
         # upgrading a V2 project with correctFinalResult() routine

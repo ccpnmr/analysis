@@ -226,6 +226,7 @@ from ccpnmodel.v_3_0_2.upgrade import correctFinalResult
 
 # from ccpn.core.Project import Project
 from ccpn.core.lib.ProjectLib import checkProjectName, isV2project
+from ccpn.core.lib.ContextManagers import _apiBlocking
 
 from ccpn.util.traits.TraitBase import TraitBase
 from ccpn.util.traits.CcpNmrTraits import Unicode, Bool, CPath, Any, Int, Dict, List, Tuple
@@ -447,6 +448,9 @@ class TopObject(XmlLoaderABC):
         if self.apiTopObject is None:
             _apiTopObjects = forceGetattr(self.root.memopsRoot, 'topObjects')
             self.apiTopObject = _apiTopObjects.get(self.guid)
+            if not self.apiTopObject:
+                getLogger().debug2(f'{consoleStyle.fg.darkyellow}Undefined apiTopObject '
+                                   f'{self.guid}{consoleStyle.reset}')
 
         # some code to be able to examine the loading s
         _stack = self.root.loadingStack
@@ -1342,8 +1346,8 @@ class XmlLoader(XmlLoaderABC):
             if not self.isV2:
                 raise RuntimeError(f'XmlLoader.loadProject: {es}') from es
 
-            self.logger.debug(
-                    f'XmlLoader.loadProject: loading "{_projectXml}" failed on first try; retrying patial load')
+            self.logger.debug(f'XmlLoader.loadProject: loading "{_projectXml}" failed on first try; '
+                              f'retrying patial load')
             self._loadMemopsFromXml(_projectXml, partialLoad=True)
 
         if self.memopsRoot is None:
@@ -1373,19 +1377,23 @@ class XmlLoader(XmlLoaderABC):
             for newName, oldName in self.memopsRoot._movedPackageNames.items():
                 if (pkg := self.lookup((USERDATA, oldName))) is not None:
                     pkg._renamePackage(newName)
-
-            # upgrade api data
-            correctFinalResult(self.memopsRoot)
-
+            with _apiBlocking():
+                # upgrade api data
+                correctFinalResult(self.memopsRoot)
         # load all remaining userdata
         self.userData.load(reload=False)
-
         # init the V3 project data
         self._initApiData()
 
-        # Optionally init the Graphics data
+        app = getApplication()
         if initGraphics:
-            self._initApiGraphicsData()
+            if self.isV2:
+                with _apiBlocking():
+                    # init the Graphics data - no feedback to v3-project
+                    self._initApiGraphicsData()
+            else:
+                # init the Graphics data
+                self._initApiGraphicsData()
 
         self._updateTopObjects()
         self.setUnmodified()
@@ -1504,8 +1512,8 @@ class XmlLoader(XmlLoaderABC):
                 self.backupsPath.mkdir(exist_ok=True, parents=False)
 
                 # check existing save/auto-backups
-                _existing = [_p for _p in self.backupsPath.listdir(suffix=BACKUP_SUFFIX) if
-                             _p.basename.startswith(CCPN_API_DIRECTORY)]
+                _existing = [_p for _p in self.backupsPath.listdir(suffix=BACKUP_SUFFIX)
+                             if _p.basename.startswith(CCPN_API_DIRECTORY)]
                 if len(_existing) >= app.preferences.general.backupSaveCount:
                     # only remove the oldest backup, fileName contains date
                     #   if the count has been reduced, there may be more many backup here,
@@ -1619,8 +1627,8 @@ class XmlLoader(XmlLoaderABC):
             self.backupsPath.mkdir(exist_ok=True, parents=False)
 
             # check existing save/auto-backups
-            _existing = [_p for _p in self.backupsPath.listdir(suffix=AUTOBACKUP_SUFFIX) if
-                         _p.basename.startswith(CCPN_API_DIRECTORY)]
+            _existing = [_p for _p in self.backupsPath.listdir(suffix=AUTOBACKUP_SUFFIX)
+                         if _p.basename.startswith(CCPN_API_DIRECTORY)]
             if len(_existing) >= app.preferences.general.autoBackupCount:
                 # only remove the oldest backup, fileName contains date
                 #   if the count has been reduced, there may be more many backup here,
@@ -1716,7 +1724,6 @@ class XmlLoader(XmlLoaderABC):
 
             _topObj.apiTopObject = apiTopObj
             count += 1
-
         getLogger().debug(f'Checked {count} TopObjects, created {newCount} new ones')
 
     # @debug3Enter()

@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:25 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-05-22 14:11:14 +0100 (Wed, May 22, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -747,15 +747,20 @@ class Multiplet(AbstractWrapperObject):
 
     def _unifyAssignments(self):
         """Force all peaks in the multiplet to share assignments"""
+        # if 1 peak or less, then there is nothing to unify.
+        if len(self.peaks) <= 1:
+            return
+
         axisCodes = self.axisCodes
         assignments = [[] for _ in axisCodes]
         for pk in self.peaks:
             dimensionMapping = pk.spectrum.getByAxisCodes('dimensions', axisCodes, exactMatch=False)
             if pk.assignedNmrAtoms:
-                [a] = pk.getByDimensions('assignedNmrAtoms', dimensionMapping)
-                for dim, assign in enumerate(assignments):
-                    if a[dim] not in assign and a[dim is not None]:
-                        assign.append(a[dim])
+                a = pk.getByDimensions('assignedNmrAtoms', dimensionMapping)
+                for ll in a:
+                    for dim, assign in enumerate(assignments):
+                        if ll[dim] not in assign and ll[dim] is not None:
+                            assign.append(ll[dim])
 
         for pk in self.peaks:
             pk.assignDimensions(axisCodes, assignments)

@@ -4,8 +4,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-10 16:28:56 +0100 (Fri, May 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-22 14:42:25 +0100 (Wed, May 22, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -559,10 +560,10 @@ class PeakList(PMIListABC):
                 tempML = spec.newMultipletList()
                 for peak in peaks:
                     if not peak.multiplets:
-                        mps.add(tempML.newMultiplet(peak))
-                    else:
-                        mps.update(peak.multiplets)
-                mps = set(mps)
+                        tempML.newMultiplet(peak)
+                    mps.update(peak.multiplets)
+                if not tempML.multiplets:
+                    tempML.delete()
         return tuple(mps)
 
 #=========================================================================================

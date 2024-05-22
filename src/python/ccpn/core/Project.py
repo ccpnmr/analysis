@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-22 15:20:30 +0100 (Wed, May 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-22 17:22:13 +0100 (Wed, May 22, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -59,7 +59,7 @@ from ccpn.util.ExcelReader import ExcelReader
 from ccpn.util.Path import aPath, Path
 from ccpn.util.Logging import getLogger, updateLogger
 from ccpn.util.decorators import logCommand
-from ccpn.ui.gui.guiSettings import consoleStyle
+from ccpn.ui.gui.guiSettings import _styleRed
 
 from ccpn.framework.lib.pipeline.PipelineBase import Pipeline
 from ccpn.framework.PathsAndUrls import \
@@ -2232,7 +2232,7 @@ class Project(AbstractWrapperObject):
         See AbstractWrapperObject._linkWrapperClasses where the apiNotifier is set for this callback
         """
         if self._apiBlocking != 0:
-            getLogger().debug(f'{consoleStyle.fg.red}blocking _newApiObject {self} {wrappedData} {cls}{consoleStyle.reset}')
+            getLogger().debug(_styleRed(f'blocking _newApiObject {self} {wrappedData} {cls}'))
             return
         if (result := self._data2Obj.get(wrappedData)) is not None:
             raise RuntimeError(

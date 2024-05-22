@@ -244,7 +244,7 @@ from ccpn.framework.PathsAndUrls import \
     userCcpnDataPath, \
     CCPN_BACKUPS_DIRECTORY
 
-from ccpn.ui.gui.guiSettings import _styleRed, _styleBlue, _styleYellow
+from ccpn.ui.gui.guiSettings import _styleRed, _styleBlue, _styleYellow, _styleDarkYellow
 
 
 #--------------------------------------------------------------------------------------------
@@ -449,8 +449,7 @@ class TopObject(XmlLoaderABC):
             _apiTopObjects = forceGetattr(self.root.memopsRoot, 'topObjects')
             self.apiTopObject = _apiTopObjects.get(self.guid)
             if not self.apiTopObject:
-                getLogger().debug2(f'{consoleStyle.fg.darkyellow}Undefined apiTopObject '
-                                   f'{self.guid}{consoleStyle.reset}')
+                getLogger().debug2(_styleDarkYellow(f'Undefined apiTopObject {self.guid}'))
 
         # some code to be able to examine the loading s
         _stack = self.root.loadingStack
@@ -1380,12 +1379,11 @@ class XmlLoader(XmlLoaderABC):
             with _apiBlocking():
                 # upgrade api data
                 correctFinalResult(self.memopsRoot)
-        # load all remaining userdata
-        self.userData.load(reload=False)
+        # # load all remaining userdata
+        # self.userData.load(reload=False)  # 20240522: ED - this causes api crash 'failed to load'
         # init the V3 project data
         self._initApiData()
 
-        app = getApplication()
         if initGraphics:
             if self.isV2:
                 with _apiBlocking():

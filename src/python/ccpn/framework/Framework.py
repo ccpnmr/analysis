@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-22 15:20:30 +0100 (Wed, May 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-22 17:22:13 +0100 (Wed, May 22, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -541,8 +541,7 @@ class Framework(NotifierBase):
 
         else:
             # start the thread - preferences is minutes
-            self._autoBackupThread.setInterval(
-                    self.preferences.general.autoBackupFrequency * 60)
+            self._autoBackupThread.setInterval(self.preferences.general.autoBackupFrequency * 60)
             self._autoBackupThread.start()
 
     @contextlib.contextmanager
@@ -1128,7 +1127,7 @@ class Framework(NotifierBase):
         :param copySubDirectories: flag to set the copying of the project's subdirectories
         :return True if successful
         """
-        with self._setSaveOverride(True):
+        with self.project._setSaveOverride():
             try:
                 self.project.saveAs(newPath=newPath, overwrite=overwrite, copySubDirectories=copySubDirectories)
                 Layout.saveLayoutToJson(self.ui.mainWindow)
@@ -1416,7 +1415,7 @@ class Framework(NotifierBase):
         dTable.updateMetadata({'name': 'structureGenerations'})
         getLogger().debug(f'extracting dataTable structureGenerations')
 
-    def _loadV2Project(self, path) -> List[Project]:
+    def _loadV2Project(self, path) -> list[Project]:
         """Actual V2 project loader
         :return list with project (for compatibility with loader mechanism) or empty list
 
@@ -1425,9 +1424,9 @@ class Framework(NotifierBase):
         from ccpn.core.Project import _loadV2Project
 
         try:
-            project = _loadProject(application=self, path=path)
+            project = _loadV2Project(application=self, path=path)
         except (ValueError, RuntimeError) as es:
-            getLogger().warning(f'Error loading {path!r}: {es}')
+            getLogger().warning(f'Error loading {str(path)!r}: {es}')
         else:
             self._closeProject()  # always close old project AFTER valid load
             self._initialiseProject(project)  # This also sets the linkages
@@ -1435,7 +1434,7 @@ class Framework(NotifierBase):
             return [project]
         return []
 
-    def _loadV3Project(self, path) -> List[Project]:
+    def _loadV3Project(self, path) -> list[Project]:
         """Actual V3 project loader
         :return list with project (for compatibility with loader mechanism) or empty list
 
@@ -1446,7 +1445,7 @@ class Framework(NotifierBase):
         try:
             project = _loadV3Project(application=self, path=path)
         except (ValueError, RuntimeError, FileNotFoundError) as es:
-            getLogger().warning(f'Error loading {path!r}: {es}')
+            getLogger().warning(f'Error loading {str(path)!r}: {es}')
         else:
             self._closeProject()  # always close old project AFTER valid load
             self._initialiseProject(project)  # This also sets the linkages

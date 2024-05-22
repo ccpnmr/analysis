@@ -514,8 +514,8 @@ class Framework(NotifierBase, GuiBase):
             self._autoBackupThread.kill()
 
         else:
-            # start the thread
-            self._autoBackupThread.setInterval(self.preferences.general.autoBackupFrequency * 60)  # preferences is minutes
+            # start the thread - preferences is minutes
+            self._autoBackupThread.setInterval(self.preferences.general.autoBackupFrequency * 60)
             self._autoBackupThread.start()
 
     @contextlib.contextmanager
@@ -828,7 +828,8 @@ class Framework(NotifierBase, GuiBase):
                         # NOTE:ED - Tiled plots not fully implemented yet
                         getLogger().warning(f'Tiled plots not implemented for spectrumDisplay: {str(spectrumDisplay)}')
                     else:
-                        getLogger().warning(f'Strip direction is not defined for spectrumDisplay: {str(spectrumDisplay)}')
+                        getLogger().warning(
+                                f'Strip direction is not defined for spectrumDisplay: {str(spectrumDisplay)}')
 
                     if not spectrumDisplay.is1D:
                         for _strip in spectrumDisplay.strips:
@@ -1059,26 +1060,27 @@ class Framework(NotifierBase, GuiBase):
         if self.preferences.general.keepSpectraInsideProject:
             self.project.copySpectraToProject()
 
-        try:
-            self.project.saveAs(newPath=newPath, overwrite=overwrite)
-            Layout.saveLayoutToJson(self.ui.mainWindow)
-            self.current._dumpStateToFile(self.statePath)
-            self._getUndo().markSave()
+        with self._setSaveOverride(True):
+            try:
+                self.project.saveAs(newPath=newPath, overwrite=overwrite)
+                Layout.saveLayoutToJson(self.ui.mainWindow)
+                self.current._dumpStateToFile(self.statePath)
+                self._getUndo().markSave()
 
-        except (PermissionError, FileNotFoundError):
-            failMessage = f'Folder {newPath} may be read-only'
-            getLogger().warning(failMessage)
-            raise
+            except (PermissionError, FileNotFoundError):
+                failMessage = f'Folder {newPath} may be read-only'
+                getLogger().warning(failMessage)
+                raise
 
-        except RuntimeWarning as es:
-            failMessage = f'saveAs: unable to save {es}'
-            getLogger().warning(failMessage)
-            raise
+            except RuntimeWarning as es:
+                failMessage = f'saveAs: unable to save {es}'
+                getLogger().warning(failMessage)
+                raise
 
-        except Exception as es:
-            failMessage = f'saveAs: unable to save {es}'
-            getLogger().warning(failMessage)
-            return False
+            except Exception as es:
+                failMessage = f'saveAs: unable to save {es}'
+                getLogger().warning(failMessage)
+                return False
 
         return True
 
@@ -1133,12 +1135,7 @@ class Framework(NotifierBase, GuiBase):
         :param overwrite: flag to indicate overwriting of existing path
         :return True if successful
         """
-        # self._saveOverride = False
-
-        with self._setSaveOverride(True):
-            # override read-only for a save to a new folder
-            #   project can still be read-only for next load
-            return self.ui.saveProjectAs(newPath=newPath, overwrite=overwrite)
+        return self.ui.saveProjectAs(newPath=newPath, overwrite=overwrite)
 
     # @logCommand('application.')  # decorated in ui
     def saveProject(self) -> bool:
@@ -1169,7 +1166,7 @@ class Framework(NotifierBase, GuiBase):
             del (_project)
 
         self.resources._deregisterProjectResources()
-        self._cleanTemporaryDirectory()
+        # self._cleanTemporaryDirectory()
         self._cleanGarbageCollector()
 
     #-----------------------------------------------------------------------------------------
@@ -1232,7 +1229,10 @@ class Framework(NotifierBase, GuiBase):
                             self.project._updateLoggerState(flush=not self.project.readOnly)
                             if self.mainWindow:
                                 self.mainWindow._setReadOnlyIcon()
-
+                        MessageDialog.showWarning('Loading Project',
+                                                  f'There was a problem loading project {dataLoader.path}\n'
+                                                  f'Please check the log for more information.',
+                                                  parent=self.ui.mainWindow)
                         return []
 
                     getLogger().info(f"==> Loaded project {result}")
@@ -1283,25 +1283,86 @@ class Framework(NotifierBase, GuiBase):
         """
         return self.ui.loadSpectra(*paths)
 
+    @staticmethod
+    def _finaliseV2Upgrade(project):
+        """Final step of upgrading from v2 to v3 projects.
+        """
+        # Copy all the internal validationStores to v3-dataTables
+        import pandas as pd
+        from collections import OrderedDict
+        from xml.sax.saxutils import escape
+
+        getLogger().debug(f'Finalise upgrade v2-v3')
+        fields = ['_ID', 'className', 'createdBy', 'guid', 'name',
+                  'packageName', 'packageShortName',
+                  'qualifiedName', 'structureEnsemble']
+        columns = ['serial', 'context', 'keyword', 'keywordDefinition',
+                   'figOfMerit', 'textValue', 'intValue', 'floatValue',
+                   'booleanValue', 'details']
+        wrp = project._wrappedData
+        vStores = list(wrp.validationStores)
+        for vs in vStores:
+            out = []
+            for vr in vs.validationResults:
+                out.append([str(val) if not hasattr(val, '_ID') else val.name
+                            for col in columns
+                            for val in [getattr(vr, col, '')]])
+            df = pd.DataFrame(out, columns=columns)
+            dTable = project.newDataTable(name=vs.name, data=df)
+            # think that internally is using a dict and losing order :|
+            meta = [(k, str(val)) if not hasattr(val, '_ID') else (k, val.name)
+                    for k in fields
+                    for val in [getattr(vs, k, '')]]
+            if sft := getattr(vs, 'software', ''):
+                # try and convert the software information to something serializable
+                meta.append(('software',
+                             ':'.join(map(lambda _ss: escape(str(_ss)),
+                                          filter(None, [sft.name, sft.version, sft.details, sft.tasks,
+                                                        sft.vendorName, sft.vendorAddress,
+                                                        sft.vendorWebAddress])))))
+            dTable.updateMetadata(OrderedDict(meta))
+            getLogger().debug(f'extracting dataTable {vs.name} for {vs.className}')
+            vs.delete()
+
+        columns = ['serial', 'name',
+                   'generationType', 'nmrConstraintStore',
+                   'details']
+        out = []
+        for sg in wrp.structureGenerations:
+            out.append([str(val) if not hasattr(val, '_ID') else val.name
+                        for col in columns
+                        for val in [getattr(sg, col, '')]])
+            sg.delete()
+        df = pd.DataFrame(out, columns=columns)
+        dTable = project.newDataTable(name='structureGenerations', data=df)
+        dTable.updateMetadata({'name': 'structureGenerations'})
+        getLogger().debug(f'extracting dataTable structureGenerations')
+
     def _loadV2Project(self, path) -> List[Project]:
         """Actual V2 project loader
         CCPNINTERNAL: called from CcpNmrV2ProjectDataLoader
         """
         from ccpn.core.Project import _loadProject
 
-        # always close first
-        self._closeProject()
-        project = _loadProject(application=self, path=str(path))
-        self._initialiseProject(project)  # This also sets the linkages
-
-        # Now that all has been restored and updated: save the result
         try:
-            project.save()
-            getLogger().info(f'==> Saved {project} as {project.path!r}')
-        except Exception as es:
-            getLogger().warning(f'Failed saving {project} ({str(es)})')
+            project = _loadProject(application=self, path=str(path))
+        except (ValueError, RuntimeError) as es:
+            getLogger().warning(f'Error loading "{path}": {es}')
+        else:
+            self._closeProject()  # always close old project AFTER valid load
+            self._initialiseProject(project)  # This also sets the linkages
+            self._finaliseV2Upgrade(project)
 
-        return [project]
+            # Now that all has been restored and updated: save the result
+            try:
+                project.save()
+                getLogger().info(f'==> Saved {project} as {project.path!r}')
+            except (PermissionError, FileNotFoundError):
+                getLogger().info('Folder may be read-only')
+                raise
+            except Exception as es:
+                getLogger().warning(f'Failed saving {project} ({str(es)})')
+            return [project]
 
     def _loadV3Project(self, path) -> List[Project]:
         """Actual V3 project loader
@@ -1309,8 +1370,6 @@ class Framework(NotifierBase, GuiBase):
         """
         from ccpn.core.Project import _loadProject
 
-        # always close first
-        # self._closeProject()
         try:
             project = _loadProject(application=self, path=path)
 
@@ -1318,8 +1377,8 @@ class Framework(NotifierBase, GuiBase):
             getLogger().warning(f'Error loading "{path}": {es}')
 
         else:
-            self._closeProject()  # close old project
-            self._initialiseProject(project)  # This also set the linkages
+            self._closeProject()  # always close old project AFTER valid load
+            self._initialiseProject(project)  # This also sets the linkages
             return [project]
 
     def _loadSparkyFile(self, path: str, createNewProject=True) -> Project:
@@ -1687,7 +1746,8 @@ class Framework(NotifierBase, GuiBase):
                 SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editMode=False).exec_()
 
             else:
-                SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editMode=True, obj=self.project.spectrumGroups[0]).exec_()
+                SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editMode=True,
+                                    obj=self.project.spectrumGroups[0]).exec_()
 
     def showPeakCollectionsPopup(self):
         if not self.project.spectra:
@@ -1703,7 +1763,8 @@ class Framework(NotifierBase, GuiBase):
     def showPseudoSpectrumPopup(self):
         if not self.project.spectra:
             getLogger().warning('Project has no Spectra. Pseudo Spectrum to SpectrumGroup Popup cannot be displayed')
-            MessageDialog.showWarning('Project contains no spectra.', 'Pseudo Spectrum to SpectrumGroup Popup cannot be displayed')
+            MessageDialog.showWarning('Project contains no spectra.',
+                                      'Pseudo Spectrum to SpectrumGroup Popup cannot be displayed')
         else:
             from ccpn.ui.gui.popups.PseudoToSpectrumGroupPopup import PseudoToSpectrumGroupPopup
 
@@ -1743,7 +1804,8 @@ class Framework(NotifierBase, GuiBase):
         else:
             from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraPopup
 
-            popup = ValidateSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra, defaultSelected=defaultSelected)
+            popup = ValidateSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra,
+                                         defaultSelected=defaultSelected)
             popup.exec_()
 
     def showPeakPick1DPopup(self):
@@ -1824,7 +1886,8 @@ class Framework(NotifierBase, GuiBase):
                 spectra = self.project.spectra
 
             if spectra:
-                popup = EstimatePeakListVolumes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra)
+                popup = EstimatePeakListVolumes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
+                                                spectra=spectra)
                 popup.exec_()
             else:
                 getLogger().warning('Estimate Volumes: no specta selected.')
@@ -1857,7 +1920,8 @@ class Framework(NotifierBase, GuiBase):
                 popup = StripPlotPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
                                        spectrumDisplay=self.current.strip.spectrumDisplay,
                                        includePeakLists=includePeakLists, includeNmrChains=includeNmrChains,
-                                       includeNmrChainPullSelection=includeNmrChainPullSelection, includeSpectrumTable=False)
+                                       includeNmrChainPullSelection=includeNmrChainPullSelection,
+                                       includeSpectrumTable=False)
                 popup.exec_()
             else:
                 MessageDialog.showWarning('Make Strip Plot', 'No selected spectrumDisplay')
@@ -1921,7 +1985,8 @@ class Framework(NotifierBase, GuiBase):
         from ccpn.ui.gui.modules.ResidueInformation import ResidueInformation
 
         if not self.project.residues:
-            getLogger().warning('No Residues in project. Residue Information Module requires Residues in the project to launch.')
+            getLogger().warning(
+                    'No Residues in project. Residue Information Module requires Residues in the project to launch.')
             MessageDialog.showWarning('No Residues in project.',
                                       'Residue Information Module requires Residues in the project to launch.')
             return
@@ -2160,7 +2225,8 @@ class Framework(NotifierBase, GuiBase):
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
-        restraintAnalysisTableModule = RestraintAnalysisTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
+        restraintAnalysisTableModule = RestraintAnalysisTableModule(mainWindow=mainWindow,
+                                                                    selectFirstItem=selectFirstItem)
         mainWindow.moduleArea.addModule(restraintAnalysisTableModule, position=position, relativeTo=relativeTo)
         if peakList:
             restraintAnalysisTableModule.selectPeakList(peakList)

@@ -221,6 +221,7 @@ from ccpnmodel.v_3_0_2.upgrade import correctFinalResult
 
 # from ccpn.core.Project import Project
 from ccpn.core.lib.ProjectLib import checkProjectName, isV2project, isV3project
+from ccpn.core.lib.ContextManagers import _apiBlocking
 
 from ccpn.util.traits.TraitBase import TraitBase
 from ccpn.util.traits.CcpNmrTraits import Unicode, Bool, CPath, Any, Int, Dict, List, Tuple
@@ -420,7 +421,8 @@ class TopObject(XmlLoaderABC):
             _apiTopObjects = forceGetattr(self.root.memopsRoot, 'topObjects')
             self.apiTopObject = _apiTopObjects.get(self.guid)
             if not self.apiTopObject:
-                getLogger().debug2(f'{consoleStyle.fg.darkyellow}Undefined apiTopObject {self.guid}{consoleStyle.reset}')
+                getLogger().debug2(
+                    f'{consoleStyle.fg.darkyellow}Undefined apiTopObject {self.guid}{consoleStyle.reset}')
 
         _stack = self.root.loadingStack
         _stack.append(self)
@@ -490,7 +492,8 @@ class TopObject(XmlLoaderABC):
         """Save the apiTopObject to the xml file defined by self.path
         """
         if self.apiTopObject is None:
-            getLogger().warning(f'{consoleStyle.fg.red}Cannot save {self._path}: undefined apiTopObject{consoleStyle.reset}')
+            getLogger().warning(
+                f'{consoleStyle.fg.red}Cannot save {self._path}: undefined apiTopObject{consoleStyle.reset}')
             return
 
         if self.apiTopObject.isDeleted:
@@ -519,7 +522,8 @@ class TopObject(XmlLoaderABC):
         """Save the apiTopObject to the xml file defined by self.path / CCPN_BACKUPS_DIRECTORY
         """
         if self.apiTopObject is None:
-            getLogger().warning(f'{consoleStyle.fg.red}Cannot save {self._path}: undefined apiTopObject{consoleStyle.reset}')
+            getLogger().warning(
+                f'{consoleStyle.fg.red}Cannot save {self._path}: undefined apiTopObject{consoleStyle.reset}')
             return
 
         if self.apiTopObject.isDeleted:
@@ -732,7 +736,8 @@ class Repository(XmlLoaderABC):
     # children
     packages = List()
 
-    def __init__(self, xmlLoader: XmlLoader, name: str, path: Path, useParent: bool, createPath: bool = False, readOnly: bool = False):
+    def __init__(self, xmlLoader: XmlLoader, name: str, path: Path, useParent: bool, createPath: bool = False,
+                 readOnly: bool = False):
         """Initialise the object, optionally create the path
         """
         if xmlLoader is None:
@@ -1269,7 +1274,8 @@ class XmlLoader(XmlLoaderABC):
             if not self.isV2:
                 raise RuntimeError(f'XmlLoader.loadProject: {es}') from es
 
-            self.logger.debug(f'XmlLoader.loadProject: loading "{_projectXml}" failed on first try; retrying patial load')
+            self.logger.debug(
+                f'XmlLoader.loadProject: loading "{_projectXml}" failed on first try; retrying patial load')
             self._loadMemopsFromXml(_projectXml, partialLoad=True)
 
         if self.memopsRoot is None:
@@ -1300,26 +1306,22 @@ class XmlLoader(XmlLoaderABC):
             for newName, oldName in self.memopsRoot._movedPackageNames.items():
                 if (pkg := self.lookup((USERDATA, oldName))) is not None:
                     pkg._renamePackage(newName)
-
-            # upgrade api data
-            correctFinalResult(self.memopsRoot)
-
-            # # init the v3 objects
-            # with self.blockReading():
-            #     self._initApiData()
-            #     # And the Graphics data
-            #     self._initApiGraphicsData()
-
-            # This traverses all repositories/packages and loads and checks values
-            # self.memopsRoot.checkAllValid()
+            with _apiBlocking():
+                # upgrade api data
+                correctFinalResult(self.memopsRoot)
 
         # init the V3 project data
         self._initApiData()
 
         app = getApplication()
         if not app or app.hasGui:
-            # init the Graphics data
-            self._initApiGraphicsData()
+            if self.isV2:
+                with _apiBlocking():
+                    # init the Graphics data - no feedback to v3-project
+                    self._initApiGraphicsData()
+            else:
+                # init the Graphics data
+                self._initApiGraphicsData()
 
         self._updateTopObjects()
         self.setUnmodified()
@@ -1445,7 +1447,8 @@ class XmlLoader(XmlLoaderABC):
                 self.backupsPath.mkdir(exist_ok=True, parents=False)
 
                 # check existing save/auto-backups
-                _existing = [_p for _p in self.backupsPath.listdir(suffix=BACKUP_SUFFIX) if _p.basename.startswith(CCPN_API_DIRECTORY)]
+                _existing = [_p for _p in self.backupsPath.listdir(suffix=BACKUP_SUFFIX)
+                             if _p.basename.startswith(CCPN_API_DIRECTORY)]
                 if len(_existing) >= app.preferences.general.backupSaveCount:
                     # only remove the oldest backup, fileName contains date
                     #   if the count has been reduced, there may be more many backup here,
@@ -1525,7 +1528,8 @@ class XmlLoader(XmlLoaderABC):
             self.backupsPath.mkdir(exist_ok=True, parents=False)
 
             # check existing save/auto-backups
-            _existing = [_p for _p in self.backupsPath.listdir(suffix=AUTOBACKUP_SUFFIX) if _p.basename.startswith(CCPN_API_DIRECTORY)]
+            _existing = [_p for _p in self.backupsPath.listdir(suffix=AUTOBACKUP_SUFFIX)
+                         if _p.basename.startswith(CCPN_API_DIRECTORY)]
             if len(_existing) >= app.preferences.general.autoBackupCount:
                 # only remove the oldest backup, fileName contains date
                 #   if the count has been reduced, there may be more many backup here,
@@ -1622,7 +1626,6 @@ class XmlLoader(XmlLoaderABC):
             count += 1
 
         getLogger().debug(f'Updated {count} TopObjects')
-
 
     # @debug3Enter()
     def _rename(self, newName: str):

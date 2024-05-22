@@ -995,7 +995,8 @@ class NmrResidue(AbstractWrapperObject):
             self._wrappedData.moveDirectNmrChain(self.nmrChain._wrappedData, end.description)
 
     @logCommand(get='self')
-    def moveToNmrChain(self, newNmrChain: typing.Union['NmrChain', str] = 'NC:@-', sequenceCode: str = None, residueType: str = None):
+    def moveToNmrChain(self, newNmrChain: typing.Union['NmrChain', str] = 'NC:@-', sequenceCode: str = None,
+                       residueType: str = None):
         """Move residue to newNmrChain, breaking connected NmrChain if necessary.
         Optionally rename residue using sequenceCode and residueType
 
@@ -1176,7 +1177,8 @@ class NmrResidue(AbstractWrapperObject):
     @logCommand(get='self')
     def mergeNmrResidues(self, nmrResidues: typing.Sequence['NmrResidue']):
         nmrResidues = makeIterableList(nmrResidues)
-        nmrResidues = [self.project.getByPid(nmrResidue) if isinstance(nmrResidue, str) else nmrResidue for nmrResidue in nmrResidues]
+        nmrResidues = [self.project.getByPid(nmrResidue) if isinstance(nmrResidue, str) else nmrResidue
+                       for nmrResidue in nmrResidues]
         if not all(isinstance(nmrResidue, NmrResidue) for nmrResidue in nmrResidues):
             raise TypeError('nmrResidues can only contain items of type NmrResidue')
         if self in nmrResidues:
@@ -1276,7 +1278,9 @@ class NmrResidue(AbstractWrapperObject):
 
             # remove all the mmrAtoms from their associated chemicalShifts
             # - clearing before the delete handles the notifiers nicely
-            _shs = {sh for nmrRes in (self,) + self.offsetNmrResidues for nmrAt in nmrRes.nmrAtoms for sh in nmrAt.chemicalShifts}
+            _shs = {sh for nmrRes in (self,) + self.offsetNmrResidues
+                    for nmrAt in nmrRes.nmrAtoms
+                    for sh in nmrAt.chemicalShifts}
             for sh in _shs:
                 sh.nmrAtom = None
             super().delete()
@@ -1316,7 +1320,8 @@ class NmrResidue(AbstractWrapperObject):
             partialId = '%s.%s.' % (self._parent._id, sequenceCode.translate(Pid.remapSeparators))
             ll = self._project.getObjectsByPartialId(className=self.className, idStartsWith=partialId)
             if ll and ll != [self]:
-                raise ValueError(f'Cannot rename {self} to {self.nmrChain.id}.{sequenceCode}.{residueType or ""} - assignment already exists')
+                raise ValueError(
+                    f'Cannot rename {self} to {self.nmrChain.id}.{sequenceCode}.{residueType or ""} - assignment already exists')
 
         oldSequenceCode = apiResonanceGroup.sequenceCode
         oldResidueType = apiResonanceGroup.residueType
@@ -1625,7 +1630,10 @@ def _fetchNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None
 # NmrChain.fetchNmrResidue = _fetchNmrResidue
 
 def _renameNmrResidue(self: Project, apiResonanceGroup: ApiResonanceGroup):
-    """Reset pid for NmrResidue and all offset NmrResidues"""
+    """Reset pid for NmrResidue and all offset NmrResidues.
+    """
+    if self._apiNotificationBlanking != 0 or self._apiBlocking != 0:
+        return
     if (nmrResidue := self._data2Obj.get(apiResonanceGroup)) is None:
         # NOTE:GWV - it shouldn't get here but occasionally it does; e.g. when
         # upgrading a V2 project with correctFinalResult() routine

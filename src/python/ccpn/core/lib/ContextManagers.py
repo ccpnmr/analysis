@@ -4,9 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-12 16:15:39 +0100 (Wed, April 12, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-05-22 14:07:18 +0100 (Wed, May 22, 2024) $"
+__version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -346,27 +347,44 @@ def notificationBlanking(application=None):
 
 @contextmanager
 def apiNotificationBlanking(application=None):
+    """Block api new/create/change/delete notifiers, re-enable at the end of the function block.
     """
-    Block api 'change' notifier, re-enable at the end of the function block.
-    """
-
     # get the application
-    if not application:
-        application = getApplication()
-    if application is None:
+    if not application and not (application := getApplication()):
         raise RuntimeError('Error getting application')
-
     application.project._apiNotificationBlanking += 1
     try:
         # transfer control to the calling function
         yield
-
     except AttributeError as es:
         raise es
-
     finally:
         # clean up after blocking notifications
         application.project._apiNotificationBlanking -= 1
+        if application.project._apiNotificationBlanking < 0:
+            raise RuntimeError('*** Code Error: _apiNotificationBlanking below zero')
+
+
+@contextmanager
+def _apiBlocking(application=None):
+    """Block all api feedback to the current project, spoecifically for v2-upgrades.
+    Re-enable at the end of the function block.
+    CCPN Internal - use with care.
+    """
+    # get the application
+    if not application and not (application := getApplication()):
+        raise RuntimeError('Error getting application')
+    application.project._apiBlocking += 1
+    try:
+        # transfer control to the calling function
+        yield
+    except AttributeError as es:
+        raise es
+    finally:
+        # clean up after blocking notifications
+        application.project._apiBlocking -= 1
+        if application.project._apiBlocking < 0:
+            raise RuntimeError('*** Code Error: _apiBlocking below zero')
 
 
 @contextmanager
@@ -823,7 +841,8 @@ def newObjectList(klasses):
             with undoStackBlocking(application=application) as addUndoItem:
                 results = func(*args, **kwds)
                 if not results or results[0].__class__.__name__ != klasses[0]:
-                    raise RuntimeError(f'Expected an object of class {repr(klasses[0])}, obtained {results[0].__class__}')
+                    raise RuntimeError(
+                        f'Expected an object of class {repr(klasses[0])}, obtained {results[0].__class__}')
 
                 for result in results:
                     if result.__class__.__name__ not in klasses:

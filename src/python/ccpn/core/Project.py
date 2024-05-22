@@ -55,6 +55,7 @@ from ccpn.util.ExcelReader import ExcelReader
 from ccpn.util.Path import aPath, Path
 from ccpn.util.Logging import getLogger, updateLogger
 from ccpn.util.decorators import logCommand
+from ccpn.ui.gui.guiSettings import consoleStyle
 
 from ccpn.framework.lib.pipeline.PipelineBase import Pipeline
 from ccpn.framework.PathsAndUrls import \
@@ -995,6 +996,7 @@ class Project(AbstractWrapperObject):
         #   do something
         #
         self._apiNotificationBlanking = 0
+        self._apiBlocking = 0
 
         # Wrapper level notifier tracking.  APPLICATION ONLY
         # {(className,action):OrderedDict(notifier:onceOnly)}
@@ -1406,7 +1408,9 @@ class Project(AbstractWrapperObject):
                 spectrum._saveObject()
 
             try:
-                apiStatus = self._getAPIObjectsStatus()
+                with self._xmlLoader.blockReading():
+                    # only need to check what is already there
+                    apiStatus = self._getAPIObjectsStatus()
                 if apiStatus.invalidObjects:
                     # if deleteInvalidObjects:
                     # delete here ...
@@ -1993,8 +1997,11 @@ class Project(AbstractWrapperObject):
         and call creation notifiers.
         This method is called from the api upon creation of a corresponding api object
         """
-        # See AbstractWrapperObject:1145
+        if self._apiBlocking != 0:
+            getLogger().debug(f'{consoleStyle.fg.red}blocking _newApiObject {self} {wrappedData} {cls}{consoleStyle.reset}')
+            return
 
+        # See AbstractWrapperObject:1145
         # factoryFunction = cls._factoryFunction
         # if factoryFunction is None:
         #     result = cls(self, wrappedData)
@@ -2011,7 +2018,6 @@ class Project(AbstractWrapperObject):
         #
         if (result := self._data2Obj.get(wrappedData)) is not None:
             raise RuntimeError(f'Project._newApiObject: {result} already exists; Cannot create again and this should not happen!')
-
         if not cls._ignoreNewApiObjectCallback:
             result = cls._newInstanceFromApiData(project=self, apiObj=wrappedData)
 
@@ -2021,35 +2027,32 @@ class Project(AbstractWrapperObject):
     def _modifiedApiObject(self, wrappedData):
         """ call object-has-changed notifiers
         """
-        if self._apiNotificationBlanking == 0:
-            obj = self._data2Obj.get(wrappedData)
-            if not obj:
-                # NOTE:GWV - it shouldn't get here but occasionally it does; e.g. when
-                # upgrading a V2 project with correctFinalResult() routine
-                getLogger().debug(f'_modifiedApiObject: no V3 object for {wrappedData}')
-            else:
-                obj._finaliseAction('change')
+        if self._apiNotificationBlanking != 0 or self._apiBlocking != 0:
+            return
+        if not (obj := self._data2Obj.get(wrappedData)):
+            # NOTE:GWV - it shouldn't get here but occasionally it does; e.g. when
+            # upgrading a V2 project with correctFinalResult() routine
+            getLogger().debug(f'_modifiedApiObject: no V3 object for {wrappedData}')
+        else:
+            obj._finaliseAction('change')
 
     def _finaliseApiDelete(self, wrappedData):
         """Clean up after object deletion
         """
+        if self._apiBlocking != 0:
+            return
         if not wrappedData.isDeleted:
             raise ValueError(f"_finaliseApiDelete called before wrapped data are deleted: {wrappedData}")
-
         # get object
         if not (obj := self._data2Obj.get(wrappedData)):
-            # NOTE:ED - it shouldn't get here but occasionally it does :|
+            # NOTE:ED - it shouldn't get here but occasionally it does :| correctFinalResult() routine?
             getLogger().debug(f'_finaliseApiDelete: no V3 object for {wrappedData}')
-
         else:
             # obj._finaliseAction('delete')  # GWV: 20181127: now as notify('delete') decorator on delete method
-
             # remove from wrapped2Obj
             del self._data2Obj[wrappedData]
-
             # remove from pid2Obj
             del self._pid2Obj[obj.shortClassName][obj._id]
-
             # Mark the object as obviously deleted, and set up for un-deletion
             obj._id += '-Deleted'
             wrappedData._oldWrapperObject = obj
@@ -2057,11 +2060,12 @@ class Project(AbstractWrapperObject):
 
     def _finaliseApiUnDelete(self, wrappedData):
         """restore undeleted wrapper object, and call creation notifiers,
-        same as _newObject"""
-
+        same as _newObject.
+        """
+        if self._apiBlocking != 0:
+            return
         if wrappedData.isDeleted:
             raise ValueError(f"_finaliseApiUnDelete called before wrapped data are deleted: {wrappedData}")
-
         try:
             oldWrapperObject = wrappedData._oldWrapperObject
         except AttributeError:
@@ -2069,54 +2073,43 @@ class Project(AbstractWrapperObject):
 
         # put back in from wrapped2Obj
         self._data2Obj[wrappedData] = oldWrapperObject
-
         if oldWrapperObject._id.endswith('-Deleted'):
             oldWrapperObject._id = oldWrapperObject._id[:-8]
-
         # put back in pid2Obj
         self._pid2Obj[oldWrapperObject.shortClassName][oldWrapperObject._id] = oldWrapperObject
-
         # Restore object to pre-un-deletion state
         del wrappedData._oldWrapperObject
         oldWrapperObject._wrappedData = wrappedData
 
-        # oldWrapperObject._finaliseAction('create')  # EJB: 20211119: now as notify('delete') decorator on delete method
-
     def _notifyRelatedApiObject(self, wrappedData, pathToObject: str, action: str):
         """ call 'action' type notifiers for getattribute(pathToObject)(wrappedData)
         pathToObject is a navigation path (may contain dots) and must yield an API object
-        or an iterable of API objects"""
-
-        if self._apiNotificationBlanking == 0:
-
-            target = operator.attrgetter(pathToObject)(wrappedData)
-
-            targets = []
-            if not target:
-                return
-
-            elif hasattr(target, '_metaclass'):
-                # Hack. This is an API object - only if exists
-                targets = [target]
-
-            else:
-                # This must be an iterable
-                targets = target
-
-            for apiObj in targets:
-                if not apiObj.isDeleted:
-                    if (obj := self._data2Obj.get(apiObj)) is None:
-                        # NOTE:GWV - it shouldn't get here but occasionally it does; e.g. when
-                        # upgrading a V2 project with correctFinalResult() routine
-                        getLogger().debug(f'_notifyRelatedApiObject: no V3 object for {apiObj}')
-                    else:
-                        obj._finaliseAction(action)
+        or an iterable of API objects.
+        """
+        if self._apiNotificationBlanking != 0 or self._apiBlocking != 0:
+            return
+        if not (target := operator.attrgetter(pathToObject)(wrappedData)):
+            return
+        elif hasattr(target, '_metaclass'):
+            # Hack. This is an API object - only if exists
+            targets = [target]
+        else:
+            # This must be an iterable
+            targets = target
+        for apiObj in targets:
+            if not apiObj.isDeleted:
+                if (obj := self._data2Obj.get(apiObj)) is None:
+                    # NOTE:GWV - it shouldn't get here but occasionally it does; e.g. when
+                    # upgrading a V2 project with correctFinalResult() routine
+                    getLogger().debug(f'_notifyRelatedApiObject: no V3 object for {apiObj}')
+                else:
+                    obj._finaliseAction(action)
 
     # def _finaliseApiRename(self, wrappedData):
     #     """Reset Finalise rename - called from API object (for API notifiers)
     #     """
     #     # Should be handled by decorators
-    #     if self._apiNotificationBlanking == 0:
+    #     if self._apiNotificationBlanking == 0 and self._apiBlocking == 0:
     #         getLogger().debug2(f'***   SHOULD THIS BE CALLED? {self._data2Obj.get(wrappedData)}')
     #         # obj = self._data2Obj.get(wrappedData)
     #         # obj._finaliseAction('rename')
@@ -2126,7 +2119,6 @@ class Project(AbstractWrapperObject):
         """
         # update pid:object mapping dictionary
         dd = self._pid2Obj.setdefault(obj.className, self._pid2Obj.setdefault(obj.shortClassName, {}))
-
         # set/delete on action
         if action == 'create':
             dd[obj.id] = obj
@@ -2142,27 +2134,16 @@ class Project(AbstractWrapperObject):
         NB
         1) calls to this function must be set up explicitly in the wrapper for each crosslink
         2) This function is only called when the link is changed explicitly, not when
-        a linked object is created or deleted"""
-
+        a linked object is created or deleted.
+        """
         if self._notificationBlanking:
             return
-
         # get object
         className, target = tuple(sorted(classNames))
         # self._doNotification(classNames[0], classNames[1], self)
         # NB 'AbstractWrapperObject' not currently in use (Sep 2016), but kept for future needs
         iterator = (self._context2Notifiers.setdefault((name, target), OrderedDict())
                     for name in (className, 'AbstractWrapperObject'))
-        # Notification suspension postpones notifications (and removes duplicates)
-        # It is broken and has been disabled for a long time.
-        # There may be some accumulated bugs when (if)it is turned back on.
-        # if False and self._notificationSuspension:
-        #     ll = self._pendingNotifications
-        #     for dd in iterator:
-        #         for notifier, onceOnly in dd.items():
-        #             ll.append((notifier, onceOnly, self))
-        # else:
-
         for dd in iterator:
             for notifier in dd:
                 notifier(self)
@@ -3087,6 +3068,8 @@ def _loadProject(application, path: str) -> Project:
     # If path pointed to a V2 project, we need to do some manipulations
     if _isV2:
         _newPath = _path.withSuffix(CCPN_DIRECTORY_SUFFIX).uniqueVersion()
+        # Get a path in the temporary directory - safest for first-save
+        _newPath = application._getTemporaryPath(prefix=f'{_path.basename}_', suffix=CCPN_DIRECTORY_SUFFIX)
         _newXmlLoader = XmlLoader.newFromLoader(xmlLoader, path=_newPath, create=True)
         xmlLoader = _newXmlLoader
 
@@ -3116,9 +3099,9 @@ def _loadProject(application, path: str) -> Project:
             getLogger().warning(txt)
             raise RuntimeError(txt) from es
 
-        getLogger().debug(f'after update: Saving project to {xmlLoader.path}')
         # Save using the xmlLoader only as we do not have a complete and valid V3-Project yet
         if not project.readOnly:
+            getLogger().debug(f'after update: Saving project to {xmlLoader.path}')
             try:
                 # xmlLoader.saveUserData(keepFallBack=False)
                 project._saveHistory.addSaveRecord(version=project._objectVersion,

@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-17 14:35:56 +0100 (Fri, May 17, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-05-22 13:23:19 +0100 (Wed, May 22, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -193,7 +193,7 @@ class _createNewCollection(CreateNewObjectABC):
 class RaisePopupABC():
     """
     An ABC to implement an abstract popup class
-    The __call__(self, dataPid, node) method acts as the callback function
+    The __call__(self, mainWindow, dataPid, node) method acts as the callback function
     """
 
     # These should be subclassed
@@ -232,8 +232,12 @@ class RaisePopupABC():
         else:
             self.kwds[self.objectArgumentName] = obj
 
-        popup = self.popupClass(parent=node.sidebar, mainWindow=mainWindow,
-                                **self.kwds)
+        # v3 behavior
+        if hasattr(node, 'sidebar'):
+            self.kwds.setdefault('parent', node.sidebar)
+        else:
+            self.kwds.setdefault('parent', None)
+        popup = self.popupClass(mainWindow=mainWindow, **self.kwds)
         # popup.raise_()
         popup.exec_()
 
@@ -434,7 +438,15 @@ class OpenItemABC:
         self.mainWindow = None
         self.openAction = None
 
-    def __call__(self, mainWindow, dataPid, node, position, objs):
+    @property
+    def sideBar(self):
+        """:return the SideBar instance from mainWindow
+        """
+        if self.mainWindow is None:
+            raise RuntimeError(f'{self}: undefined MainWindow instance')
+        return self.mainWindow._getSideBar()
+
+    def __call__(self, mainWindow, dataPid, node, position, objs, parentWidget=None):
         """__Call__ acts is the execute entry point for the callback.
         """
         self.node = node
@@ -444,7 +456,9 @@ class OpenItemABC:
         self.mainWindow = mainWindow
 
         self._initialise(dataPid, objs)
-        self._openContextMenu(node.sidebar, position, thisObj, objs)
+        if parentWidget is None and hasattr(node, 'sidebar'):
+            parentWidget=node.sidebar
+        self._openContextMenu(parentWidget, position, thisObj, objs)
 
     def _execOpenItem(self, mainWindow, obj):
         """Acts as an entry point for opening items in ccpnModuleArea
@@ -501,7 +515,7 @@ class OpenItemABC:
             contextMenu.addAction('Clone', partial(self._cloneObject, objs))
 
         contextMenu.addSeparator()
-        contextMenu.addAction('Edit Properties', partial(parentWidget._raiseObjectProperties, self.node.widget))
+        contextMenu.addAction('Edit Properties', partial(self.sideBar._raiseObjectProperties, self.node.widget))
 
         contextMenu.move(position)
 
@@ -810,7 +824,7 @@ class _openItemChemicalShiftListTable(OpenItemABC):
         contextMenu.addAction('Delete', partial(self._deleteItemObject, thisObj, objs))
 
         contextMenu.addSeparator()
-        contextMenu.addAction('Edit Properties', partial(parentWidget._raiseObjectProperties, self.node.widget))
+        contextMenu.addAction('Edit Properties', partial(self.sideBar._raiseObjectProperties, self.node.widget))
 
         contextMenu.move(position)
         contextMenu.exec()
@@ -985,7 +999,7 @@ class _openItemAtomItem(OpenItemABC):
         self._addCollectionMenu(contextMenu, objs)
 
         contextMenu.addSeparator()
-        contextMenu.addAction('Edit Properties', partial(parentWidget._raiseObjectProperties, self.node.widget))
+        contextMenu.addAction('Edit Properties', partial(self.sideBar._raiseObjectProperties, self.node.widget))
 
         contextMenu.move(position)
         contextMenu.exec()
@@ -1051,7 +1065,7 @@ class _openItemResidueTable(OpenItemABC):
         self._addCollectionMenu(contextMenu, objs)
 
         contextMenu.addSeparator()
-        contextMenu.addAction('Edit Properties', partial(parentWidget._raiseObjectProperties, self.node.widget))
+        contextMenu.addAction('Edit Properties', partial(self.sideBar._raiseObjectProperties, self.node.widget))
 
         contextMenu.move(position)
         contextMenu.exec()
@@ -1224,7 +1238,7 @@ class _openItemSpectrumInGroupDisplay(_openItemSpectrumDisplay):
             contextMenu.addAction('Clone', partial(self._cloneObject, objs))
 
         contextMenu.addSeparator()
-        contextMenu.addAction('Edit Properties', partial(parentWidget._raiseObjectProperties, self.node.widget))
+        contextMenu.addAction('Edit Properties', partial(self.sideBar._raiseObjectProperties, self.node.widget))
 
         contextMenu.move(position)
         contextMenu.exec()

@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-08 12:38:21 +0100 (Wed, May 08, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-05-22 13:23:19 +0100 (Wed, May 22, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -594,6 +594,11 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         """Helper routine to get the menubar widget; different implementation between different version
         """
         return self.menuBar()
+
+    def _getSideBar(self):
+        """Helper routine to get the sidebar; different implementation between different version
+        """
+        return self.sideBar
 
     def _getSideBarWidget(self):
         """Helper routine to get the sidebar widget; different implementation between different version

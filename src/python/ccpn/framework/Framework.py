@@ -1,9 +1,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -11,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-09-06 14:28:31 +0100 (Wed, September 06, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-05-23 10:33:16 +0100 (Thu, May 23, 2024) $"
+__version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -138,6 +139,8 @@ class Framework(NotifierBase, GuiBase):
     applicationName = None
     applicationVersion = None
 
+    _applicationReadOnlyMode = None
+
     #-----------------------------------------------------------------------------------------
 
     def __init__(self, args=Arguments()):
@@ -229,7 +232,7 @@ class Framework(NotifierBase, GuiBase):
         self._disableUndoException = getattr(self.args, 'disableUndoException', False)
         self._disableModuleException = getattr(self.args, 'disableModuleException', False)
         self._disableQueueException = getattr(self.args, 'disableQueueException', False)
-        self._readOnly = getattr(self.args, 'readOnly', False)
+        self._applicationReadOnlyMode = getattr(self.args, 'readOnly', False)
         self._ccpnLogging = getattr(self.args, 'ccpnLogging', False)
 
         # Create a temporary directory; Need to hold on to the original temp-file object, as otherwise
@@ -302,18 +305,21 @@ class Framework(NotifierBase, GuiBase):
                 self.mainWindow._setReadOnlyIcon()
 
     @property
-    def defaultReadOnly(self):
-        """Return the deafult read-only state for all projects.
+    def isApplicationReadOnly(self):
+        """Return the application readOnly state for all projects.
+        Set from the command-line switch --read-only
         Overrides project.readOnly except for using save/saveAs as necessary
         """
-        return self._readOnly
+        return self._applicationReadOnlyMode
 
-    @defaultReadOnly.setter
-    def defaultReadOnly(self, value):
+    def setApplicationReadOnly(self, value):
+        """Set the global application readOnly state.
+        """
         if not isinstance(value, bool):
-            raise TypeError(f'{self.__class__.__name__}.defaultReadOnly must be a bool')
-
-        self._readOnly = value
+            raise TypeError(f'{self.__class__.__name__}.setApplicationReadOnly must be a bool')
+        if value == self._applicationReadOnlyMode:
+            return
+        self._applicationReadOnlyMode = value
         if self.project:
             self.project._updateReadOnlyState()
             self.project._updateLoggerState()

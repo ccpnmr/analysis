@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-05-22 21:11:28 +0100 (Wed, May 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-23 14:00:26 +0100 (Thu, May 23, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -551,24 +551,24 @@ class OpenItemABC:
         from ccpn.util.Common import copyToClipboard
 
         copyToClipboard(objs)
-
-    @staticmethod
-    def _reloadSpectra(objs: list):
-        """Reload spectra
-        :param objs: reload the specified objs (spectra)
-        """
-        if not (_spectra := [sp for sp in objs if isinstance(sp, Spectrum) and not sp.isEmptySpectrum()]):
-            return
-        _sp = 'spectrum' if len(_spectra) == 1 else 'spectra'
-        if showOkCancel(f'Reloading {len(_spectra)} {_sp}',
-                        f'This will re-initialise the parameters from the (binary) data!',
-                        dontShowEnabled=True, defaultResponse=True, popupId='_reloadSpectra'):
-            try:
-                with undoBlockWithoutSideBar():
-                    for spec in _spectra:
-                        spec.reload()
-            except Exception as es:
-                showWarning(f'Reloading {len(_spectra)} {_sp}', str(es))
+    #
+    # @staticmethod
+    # def _reloadSpectra(objs: list):
+    #     """Reload spectra
+    #     :param objs: reload the specified objs (spectra)
+    #     """
+    #     if not (_spectra := [sp for sp in objs if isinstance(sp, Spectrum) and not sp.isEmptySpectrum()]):
+    #         return
+    #     _sp = 'spectrum' if len(_spectra) == 1 else 'spectra'
+    #     if showOkCancel(f'Reloading {len(_spectra)} {_sp}',
+    #                     f'This will re-initialise the parameters from the (binary) data!',
+    #                     dontShowEnabled=True, defaultResponse=True, popupId='_reloadSpectra'):
+    #         try:
+    #             with undoBlockWithoutSideBar():
+    #                 for spec in _spectra:
+    #                     spec.reload()
+    #         except Exception as es:
+    #             showWarning(f'Reloading {len(_spectra)} {_sp}', str(es))
 
     def _addCollectionMenu(self, menu, objs):
         """Add a quick submenu containing a list of collections
@@ -1164,8 +1164,9 @@ class _openItemSpectrumDisplay(OpenItemABC):
                                          )
                                   )
 
-        if any(any(sp.isTimeDomains) for sp in objs):  # 3.1.0 alpha feature from macro.
-            contextMenu.addAction('Split Planes to SpectrumGroup', partial(self._splitPlanesToSpectrumGroup, objs))
+        _action = contextMenu.addAction('Split Planes to SpectrumGroup', partial(self._splitPlanesToSpectrumGroup, objs))
+        _enable = any(any(sp.isTimeDomains) for sp in objs)  # 3.1.0 alpha feature from macro.
+        _action.setDisabled(not _enable)
 
         contextMenu.addSeparator()
 
@@ -1186,6 +1187,25 @@ class _openItemSpectrumDisplay(OpenItemABC):
             contextMenu.exec()
 
         return contextMenu
+
+    @staticmethod
+    def _reloadSpectra(objs: list):
+        """Reload spectra
+        :param objs: reload the specified objs (spectra)
+        """
+        if not (_spectra := [sp for sp in objs if isinstance(sp, Spectrum) and not sp.isEmptySpectrum()]):
+            return
+        _sp = 'spectrum' if len(_spectra) == 1 else 'spectra'
+        if showOkCancel(f'Reloading {len(_spectra)} {_sp}',
+                        f'This will re-initialise the parameters from the (binary) data!',
+                        dontShowEnabled=True, defaultResponse=True, popupId='_reloadSpectra'):
+            try:
+                with undoBlockWithoutSideBar():
+                    for spec in _spectra:
+                        spec.reload()
+            except Exception as es:
+                showWarning(f'Reloading {len(_spectra)} {_sp}', str(es))
+
 
     def _openSpectrumDisplay(self, spectrum=None, position=None, relativeTo=None):
         mainWindow = self.mainWindow

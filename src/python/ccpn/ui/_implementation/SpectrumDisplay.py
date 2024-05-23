@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-05-13 17:02:16 +0100 (Mon, May 13, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-23 17:12:53 +0100 (Thu, May 23, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -692,12 +692,11 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
     # Create Boundstrip/Nostrip display and first strip
     apiSpectrumDisplay = apiTask.newBoundDisplay(**displayPars)
 
-    # TODO DT: Crashes
-    # if (display := SpectrumDisplay._newInstanceFromApiData(apiObj=apiSpectrumDisplay, project=project)) is None:
-    #     raise RuntimeError('Unable to generate new SpectrumDisplay')
-
-    if (display := project._data2Obj.get(apiSpectrumDisplay)) is None:
+    if (display := SpectrumDisplay._newInstanceFromApiData(apiObj=apiSpectrumDisplay, project=project)) is None:
         raise RuntimeError('Unable to generate new SpectrumDisplay')
+
+    # if (display := project._data2Obj.get(apiSpectrumDisplay)) is None:
+    #     raise RuntimeError('Unable to generate new SpectrumDisplay')
 
     # may need to set other values here, guarantees before strip generation
     display.stripArrangement = stripDirection

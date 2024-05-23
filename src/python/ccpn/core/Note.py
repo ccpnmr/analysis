@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-05-13 17:02:15 +0100 (Mon, May 13, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-23 17:12:53 +0100 (Thu, May 23, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -216,12 +216,12 @@ def _newNote(self: Project, name: str = None, text: str = None, comment: str = N
             raise TypeError("Note text must be a string")
 
     apiNote = self._wrappedData.newNote(text=text, name=name)
-    #
-    # if (result := Note._newInstanceFromApiData(apiObj=apiNote, project=self)) is None:
-    #     raise RuntimeError('Unable to generate new Note item')
-    result = self._data2Obj.get(apiNote)
-    if result is None:
+
+    if (result := Note._newInstanceFromApiData(apiObj=apiNote, project=self)) is None:
         raise RuntimeError('Unable to generate new Note item')
+    # result = self._data2Obj.get(apiNote)
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new Note item')
 
     result.comment = comment
 

@@ -455,10 +455,19 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self._readOnlyState.setSelectionCallback(self._toggleReadOnlyState)
         # need notifier on changing the setting in the project
 
-    def _toggleReadOnlyState(self):
+    def _toggleReadOnlyState(self, readOnly=None):
         """Toggle the read-only status of the current project
         """
-        readOnly = not self.project.readOnly  # toggle the state
+        if self.application.isApplicationReadOnly:
+            showWarning('Set readOnly',
+                        'Cannot change the readOnly state of the project as application is in readOnly mode.\n'
+                        'This has probably been set with the --read-only flag at startup.\n'
+                        'To allow unlocking, enter the following command in the python-console:\n'
+                        '    application.setApplicationReadOnly(False)')
+            return
+        if readOnly is None:
+            # toggle the state
+            readOnly = not self.project.readOnly  # includes the application state
         self.project.setReadOnly(readOnly)
         QtCore.QTimer.singleShot(0, self._setReadOnlyIcon)
 

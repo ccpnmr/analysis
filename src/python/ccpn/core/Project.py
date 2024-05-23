@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-22 14:13:01 +0100 (Wed, May 22, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-05-23 10:33:16 +0100 (Thu, May 23, 2024) $"
+__version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1532,7 +1532,7 @@ class Project(AbstractWrapperObject):
         """
         # _saveOverride allows the readOnly state to be temporarily set to False during save/saveAs
         # _readOnly sets all projects as read-only from the command-line switch --read-only
-        return ((self._getInternalParameter(self._READONLY) or False) or self.application._readOnly) and \
+        return ((self._getInternalParameter(self._READONLY) or False) or self.application._applicationReadOnlyMode) and \
             not self.application._saveOverride
 
     @logCommand('project.')

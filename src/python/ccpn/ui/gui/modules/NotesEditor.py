@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-03-21 11:51:40 +0000 (Thu, March 21, 2024) $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-05-23 17:10:38 +0100 (Thu, May 23, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -97,18 +97,18 @@ class NotesEditorModule(CcpnModule):
         """
         Setup the widgets in module
         """
-        self._widget = ScrollableFrame(self.mainWidget, setLayout=True, showBorder=False,
+        self._noteWidget = ScrollableFrame(self.mainWidget, setLayout=True, showBorder=False,
                                        scrollBarPolicies=('never', 'never'), spacing=DEFAULTSPACING, margins=DEFAULTMARGINS,
                                        grid=(2, 1))
-        self._widgetScrollArea = self._widget._scrollArea
+        self._noteWidgetScrollArea = self._noteWidget._scrollArea
 
         row = 0
-        self.spacer = Spacer(self._widget, 5, 5,
+        self.spacer = Spacer(self._noteWidget, 5, 5,
                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
                              grid=(row, 0), gridSpan=(1, 1))
 
         row += 1
-        self.noWidget = NotePulldown(parent=self._widget,
+        self.noWidget = NotePulldown(parent=self._noteWidget,
                                      mainWindow=self.mainWindow, default=None,
                                      grid=(row, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
                                      showSelectName=True,
@@ -116,14 +116,14 @@ class NotesEditorModule(CcpnModule):
                                      callback=self._selectionPulldownCallback)
 
         row += 1
-        self.spacer = Spacer(self._widget, 5, 5,
+        self.spacer = Spacer(self._noteWidget, 5, 5,
                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
                              grid=(row, 0), gridSpan=(1, 1))
 
         #~~~~~~~~~~ define noteWidget box to contain main editing
 
         row += 1
-        self.noteWidget = Frame(self._widget, grid=(row, 0), gridSpan=(4, 5), setLayout=True)
+        self.noteWidget = Frame(self._noteWidget, grid=(row, 0), gridSpan=(4, 5), setLayout=True)
         self.noteWidget.hide()
 
         nRow = 1
@@ -151,7 +151,7 @@ class NotesEditorModule(CcpnModule):
 
         row += 1
         # this spacer is expanding, will fill the space when the textbox is invisible
-        self.spacer = Spacer(self._widget, 5, 5,
+        self.spacer = Spacer(self._noteWidget, 5, 5,
                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
                              grid=(row, 4), gridSpan=(1, 1))
 

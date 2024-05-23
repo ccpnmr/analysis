@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-05-21 17:02:03 +0100 (Tue, May 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-23 17:45:17 +0100 (Thu, May 23, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -701,7 +701,7 @@ class NotifierBase(object):
         """
         self._objectNotifiersDict.addNotifier(notifier)
 
-    def setNotifier(self, theObject, triggers: list|tuple, targetName: str, callback: Callable, **kwds) -> _NotifierList:
+    def setNotifier(self, theObject, triggers: list|tuple, targetName: str|None, callback: Callable, **kwds) -> _NotifierList:
         """
         Set Notifier for Ccpn V3 object theObject; store in own _objectNotifiersDict for management.
 

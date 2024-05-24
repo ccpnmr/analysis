@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-05-23 17:45:17 +0100 (Thu, May 23, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-24 16:01:28 +0100 (Fri, May 24, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -73,6 +73,7 @@ class NotifierABC(object):
 
     CREATE = 'create'
     DELETE = 'delete'
+    POST_DELETE = 'postDelete'
     RENAME = 'rename'
     CHANGE = 'change'
     # For backwards compatibility
@@ -100,7 +101,8 @@ class NotifierABC(object):
     ITEMS_CHANGED = 'itemsChanged' # The items in list/dict that have changed (trigger CHANGE)
     SPECIFIERS = 'specifiers'
 
-    def __init__(self, theObject, trigger, targetName, callback, setterObject=None, debug=False, **kwds):
+    def __init__(self, theObject, trigger: str, targetName: str, callback: Callable, setterObject = None,
+                       debug: bool = False, **kwds):
 
         # Sanity checks
         if len(self._triggerKeywords) == 0:
@@ -110,31 +112,31 @@ class NotifierABC(object):
             raise RuntimeError('NotifierABC: theObject is None')
         self._theObject = theObject  # The object we are monitoring
 
-        # backward compatibility for previous list of triggers
+        # check for previous list of triggers
         if isinstance(trigger, (list, tuple)):
-            # if len(trigger) != 1:
-            #     raise RuntimeError(f'Invalid trigger "{trigger}"; should be one of {self._triggerKeywords}')
-            # trigger = trigger[0]
             raise ValueError(f'Invalid tuple or list trigger "{trigger}"')
 
         if trigger not in self._triggerKeywords:
-            raise ValueError('Invalid trigger "%s" for <%s>' % (trigger, self.__class__.__name__))
-        self._trigger = trigger
+            raise ValueError(f'Invalid trigger "{trigger}" for {type(self)}')
+        self._trigger: str = trigger
+
+        if targetName is None:
+            raise ValueError(f'Invalid targetName None for {type(self)}')
+        self._targetName: str = targetName
 
         # initialisations
-        self._id = NotifierABC._currentIndex
+        self._id: int = NotifierABC._currentIndex
         NotifierABC._currentIndex += 1
 
-        self._targetName = targetName
-        self._callback = callback
-        self._kwds = kwds
+        self._callback: Callable = callback
+        self._kwds: dict = kwds
         self._unregister = None
 
         self._setterObject = weakref.ref(setterObject) if setterObject is not None else None
 
-        self._debug = debug or DEBUG or self._id in _debugIds
-        self._isBlanked = False  # ability to blank notifier
-        self._isRegistered = False  # flag indicating if any Notifier was registered
+        self._debug: bool = debug or DEBUG or self._id in _debugIds
+        self._isBlanked: bool = False  # ability to blank notifier
+        self._isRegistered: bool = False  # flag indicating if any Notifier was registered
 
     @property
     def id(self):
@@ -169,7 +171,7 @@ class NotifierABC(object):
             sys.stderr.write('>>> registered %s\n' % self)
 
     def unRegisterNotifier(self):
-        """Reset the attributes; unregisters from the _registeredNotifoersDict of theObject
+        """Reset the attributes; unregisters from the _registeredNotifiersDict of theObject
         and deletes self
         """
         if self._debug:
@@ -230,9 +232,9 @@ class NotifierABC(object):
 
 class Notifier(NotifierABC):
     """
-    Notifier class:
+    Notifier Base class:
 
-    triggers callback function with signature:  callback(callbackDict [, *args] [, **kwargs])
+    triggers callback function with signature:  callback(callbackDict [, **kwargs])
 
     ____________________________________________________________________________________________________________________
 
@@ -842,6 +844,13 @@ class NotifierBase(object):
         """Unregister and delete all the notifiers associated with self
         """
         objNotifiers = self._objectNotifiersDict
+        # allNotifiers returns a list, as contents are being changed this is crucial
+        for notifier in objNotifiers.allNotifiers:
+            # objNotifiers.deleteNotifier(notifier)
+            notifier.unRegisterNotifier()
+            del(notifier)
+
+        objNotifiers = self._registeredNotifiersDict
         # allNotifiers returns a list, as contents are being changed this is crucial
         for notifier in objNotifiers.allNotifiers:
             # objNotifiers.deleteNotifier(notifier)

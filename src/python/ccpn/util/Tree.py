@@ -16,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:55 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-05-24 16:01:28 +0100 (Fri, May 24, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -102,6 +102,18 @@ class Tree(object):
         # remove the children; first make a "copy" into a list, otherwise
         for child in list(self._children):
             self._removeChild(child)
+
+    def _delete(self):
+        """Remove self from parent
+        :return self as new root object
+        """
+        if self.isRoot:
+            raise RuntimeError(f'{self} is root; cannot delete')
+
+        if self._parent is None:
+            raise RuntimeError(f'{self} has no parent; cannot delete')
+
+        return self._parent._removeChild(self)
 
     def _getChildrenByClass(self, klass) -> list:
         """Conveniance function to get all children, optionally filtered for klass

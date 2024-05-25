@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-05-24 16:01:28 +0100 (Fri, May 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-25 16:24:18 +0100 (Sat, May 25, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -137,6 +137,7 @@ class NotifierABC(object):
         self._debug: bool = debug or DEBUG or self._id in _debugIds
         self._isBlanked: bool = False  # ability to blank notifier
         self._isRegistered: bool = False  # flag indicating if any Notifier was registered
+        self._isExecuting: bool = False  # Flag to indicate notifier callback is executing
 
     @property
     def id(self):
@@ -183,6 +184,7 @@ class NotifierABC(object):
         self._unregister = None
         self._setterObject = None
         self._isRegistered = False
+        self._isExecuting = False
 
         del(self)
 
@@ -190,6 +192,12 @@ class NotifierABC(object):
     def isRegistered(self) -> bool:
         """:return True if notifier is still registered; i.e. active"""
         return self._isRegistered
+
+    @property
+    def isExecuting(self) -> bool:
+        """:return True is Notifier callback is executing
+        """
+        return self._isExecuting
 
     def newCallbackDict(self, trigger,
                         previousValue=None, value=None, obj=None,
@@ -222,10 +230,16 @@ class NotifierABC(object):
 
     def __str__(self) -> str:
         if self.isRegistered:
+            if self._isBlanked:
+                _exec = 'blanked'
+            elif self.isExecuting :
+                _exec = 'executing'
+            else:
+                _exec = 'silent'
             _pid = self._theObject.pid if hasattr(self._theObject, 'pid') else self._theObject.__class__.__name__
-            return f'<{self.__class__.__name__}: id={self.id}, obj={_pid!r}: {self._trigger!r}->{self._targetName!r}>'
+            return f'<{self.__class__.__name__} {self.id} ({_exec}): theObject={_pid!r}: {self._trigger!r}->{self._targetName!r}>'
         else:
-            return f'<{self.__class__.__name__}: id={self.id}, not-registered, obj=None: {self._trigger!r}->{self._targetName!r}>'
+            return f'<{self.__class__.__name__} {self.id} (unregistered): theObject=None: {self._trigger!r}->{self._targetName!r}>'
 
     __repr__ = __str__
 
@@ -616,9 +630,9 @@ class _NotifiersDict(dict):
             raise TypeError(f'addNotifier(): expected NotifierABC subclass instance, got {type(notifier)}')
 
         if self.useWeakRef:
-            _dict = self.setdefault(notifier._trigger, weakref.WeakValueDictionary())
+            _dict = self.setdefault((notifier._trigger, notifier._targetName), weakref.WeakValueDictionary())
         else:
-            _dict = self.setdefault(notifier._trigger, {})
+            _dict = self.setdefault((notifier._trigger, notifier._targetName), {})
 
         _id = notifier.id
         # this should never happen; hence just a check
@@ -633,7 +647,7 @@ class _NotifiersDict(dict):
         if not isinstance(notifier, NotifierABC):
             raise TypeError(f'deleteNotifier(): expected NotifierABC subclass instance, got {type(notifier)}')
 
-        if (_dict := self.get(notifier._trigger, None)) is None:
+        if (_dict := self.get((notifier._trigger, notifier._targetName), None)) is None:
             raise ValueError(f'deleteNotifier(): {notifier} is not contained in self')
         if notifier.id not in _dict:
             raise ValueError(f'deleteNotifier(): {notifier} is not contained in self')

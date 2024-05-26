@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-05-25 16:24:18 +0100 (Sat, May 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-26 12:43:23 +0100 (Sun, May 26, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -678,8 +678,10 @@ class NotifierBase(object):
     """
     A class confering notifier management routines
     """
+    #-----------------------------------------------------------------------------------------
     # name to keep in-sinc with NotifiersABC.registerNotifier() function (unfortunately)
     REGISTERED_NOTIFIERS_DICT = '_registeredNotifiersDict'
+    #-----------------------------------------------------------------------------------------
 
     def __init__(self):
 
@@ -694,7 +696,7 @@ class NotifierBase(object):
     def _newNotifier(self, trigger: str, targetName: str, callback: Callable, setterObject, **kwds) -> Notifier:
         """
         Create a new NotifierABC subtype instance set on self.
-        The created notifier registered itself with _registeredNotifiersDict
+        The created notifier registers itself with _registeredNotifiersDict
         To be subclassed for different implementations
 
         :param triggers: list of triggers to trigger callback
@@ -718,8 +720,9 @@ class NotifierBase(object):
         self._objectNotifiersDict.addNotifier(notifier)
 
     def setNotifier(self, theObject, triggers: list|tuple, targetName: str|None, callback: Callable, **kwds) -> _NotifierList:
-        """
-        Set Notifier for Ccpn V3 object theObject; store in own _objectNotifiersDict for management.
+        """Set Notifier for (V3) theObject;
+        Store for management; i.e. removal with deleteNotifier() or deleteAllNotifiers()
+        methods.
 
         :param theObject: V3 object to register a notifier with
         :param triggers: list of triggers to trigger callback
@@ -754,18 +757,19 @@ class NotifierBase(object):
 
         return result
 
-    def setGuiNotifier(self, theObject: 'AbstractWrapperObject', triggers: list, targetNames: list,
-                       callback: Callable) -> _NotifierList:
-        """
-        Set GuiNotifier for Ccpn V3 object theObject
+    def setGuiNotifier(self, theObject: 'AbstractWrapperObject',
+                             triggers: list, targetNames: list,
+                             callback: Callable) -> _NotifierList:
+        """Set GuiNotifier on (V3) theObject.
+        Store for management; i.e. removal with deleteNotifier() or deleteAllNotifiers()
+        methods.
 
-        :param theObject: V3 object to register a notifier with
+        :param theObject: The (V3) object to register a notifier with
         :param triggers: list of triggers to trigger callback
         :param targetNames: a list of dropTargets (URLS, TEXT, PIDS, IDS)
         :param callback: callback function with signature: callback(callbackDict)
 
         :return: a _NotifierList instance
-
         """
         from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier  # To avoid circular imports
 
@@ -783,14 +787,14 @@ class NotifierBase(object):
         return result
 
     def setCurrentNotifier(self, targetName: str, callback: Callable) -> _NotifierList:
-        """
-        Set CurrentNotifier for Ccpn V3 object theObject
+        """Set CurrentNotifier
+        Store for management; i.e. removal with deleteNotifier() or deleteAllNotifiers()
+        methods.
 
         :param targetName: a valid attribute of Current
         :param callback: callback function with signature: callback(callbackDict)
 
         :return: a _NotifierList instance
-
         """
 
         result = _NotifierList()
@@ -803,8 +807,7 @@ class NotifierBase(object):
         return result
 
     def _hasNotifier(self, notifier) -> bool:
-        """
-        return True if self has notifier
+        """Return True if self has notifier
 
         :param notifier: a Notifier|CurrentNotifier|GuiNotifier instance
         :return: True or False
@@ -817,7 +820,7 @@ class NotifierBase(object):
         if len(objNotifiers) == 0:
             return False
 
-        if (_dict := objNotifiers.get(notifier._trigger, None)) is None:
+        if (_dict := objNotifiers.get((notifier._trigger, notifier._targetName), None)) is None:
             return False
 
         return notifier.id in _dict
@@ -827,7 +830,7 @@ class NotifierBase(object):
         for objects.
         The triggers CREATE, DELETE, RENAME and CHANGE can be combined in the call signature
 
-        :param objects: valid V3 core or current ro widget or object which as notifier set
+        :param objects: valid V3 core or current or widget or object which has notifiers
         :param triggers: list of trigger keywords
         :param targetName: valid className, attributeName or ANY
 
@@ -844,8 +847,10 @@ class NotifierBase(object):
         return foundNotifiers
 
     def deleteNotifier(self, notifier):
-        """Remove notifier from the list, unregister it and delete it
-        :param notifier: a Notifier|CurrentNotifier|GuiNotifier instance
+        """Remove notifier associated self, unregister it and delete it
+
+        :param notifier: a Notifier instance previously set by
+                         setNotifier, setGuiNotifier or setCurrentNotifier.
         """
         if not self._hasNotifier(notifier):
             raise ValueError(f'deleteNotifier(): {notifier} is not a (valid) notifier of {self}')
@@ -864,13 +869,7 @@ class NotifierBase(object):
             notifier.unRegisterNotifier()
             del(notifier)
 
-        objNotifiers = self._registeredNotifiersDict
-        # allNotifiers returns a list, as contents are being changed this is crucial
-        for notifier in objNotifiers.allNotifiers:
-            # objNotifiers.deleteNotifier(notifier)
-            notifier.unRegisterNotifier()
-            del(notifier)
-
+    #-----------------------------------------------------------------------------------------
     # Notification blanking level - to allow for nested notification disabling
     _notificationBlanking = 0
 
@@ -900,7 +899,7 @@ class NotifierBase(object):
         for notifier in objNotifiers.allNotifiers:
             notifier.setBlanking(flag)
 
-
+    #-----------------------------------------------------------------------------------------
     # api 'change' notification blanking level -
     # To be used with the apiNotificationBlanking context manager; e.g.
     # with apiNotificationBlanking():
@@ -926,6 +925,7 @@ class NotifierBase(object):
             raise RuntimeError("_decreaseApiNotificationBlanking(): cannot set _apiNotificationBlanking < 0")
         NotifierBase._apiNotificationBlanking -= 1
 
+#end class -----------------------------------------------------------------------------------------
 
 
 def _removeDuplicatedNotifiers(notifierQueue):

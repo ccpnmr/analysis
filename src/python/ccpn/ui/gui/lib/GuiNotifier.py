@@ -27,8 +27,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-26 17:27:52 +0100 (Fri, April 26, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-05-27 17:08:51 +0100 (Mon, May 27, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -92,7 +92,7 @@ class GuiNotifier(NotifierABC):
     DRAGMOVEEVENT = 'dragMoveEvent'
     _triggerKeywords = (DROPEVENT, ENTEREVENT, DRAGMOVEEVENT)
 
-    def __init__(self, theObject: Any, trigger, targetName,
+    def __init__(self, theObject: QtWidgets.QWidget, trigger, targetName,
                  callback: Callable, setterObject=None, debug=False, **kwds):
         """
         Create GuiNotifier object;
@@ -100,7 +100,7 @@ class GuiNotifier(NotifierABC):
         :param theObject: Widget to watch
         :param trigger: one of trigger keywords; i.e. (DROPEVENT, ENTEREVENT, DRAGMOVEEVENT)
         :param targetName: optional dropTarget; i.e. URLS, TEXT, PIDS, IDS
-        :param callback: callback function with signature: callback(callbackDict [, *args] [, **kwargs])
+        :param callback: callback function with signature: callback(callbackDict[, **kwargs])
         :param setterObject: Object that was setting the Notifier
         :param debug: set debug
         :param **kwds: optional keywords arguments passed to callback
@@ -182,6 +182,7 @@ class GuiNotifier(NotifierABC):
         self._callback(callbackDict, **self._kwds)
         return
 
+
 def _makeGuiNotifiers(theObject,
                       triggers: list|tuple,
                       targetNames: list|tuple,
@@ -213,8 +214,13 @@ def _makeGuiNotifiers(theObject,
                                     )
             result.append(_notifier)
 
-            # bit of a hack to set the linkage to setterObject
-            if setterObject is not None and hasattr(setterObject, '_addNotifier'):
+            # bit of a hack to set add _notifier to setterObject if it is not there yet.
+            # This adds some backward compatibility to GuiNotifiers not initialised through the
+            # setNotifier() method of NotifierBase.
+            if setterObject is not None \
+                and hasattr(setterObject, '_addNotifier') \
+                and hasattr(setterObject, '_hasNotifier') \
+                and not setterObject._hasNotifier(_notifier):
                 setterObject._addNotifier(_notifier)
 
     return result

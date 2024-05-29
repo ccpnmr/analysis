@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-23 10:33:16 +0100 (Thu, May 23, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-05-29 13:58:42 +0100 (Wed, May 29, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -646,10 +646,12 @@ class Framework(NotifierBase):
         # for non-temporary projects
         if not self.project.isTemporary:
             self.current._restoreStateFromFile(self.statePath)
-
         # Load project specific resources.
         if self.resources:
             self.resources._initProjectResources()
+
+        self._setLastBackupTime()
+        self.project._setUnmodified()
 
     #-----------------------------------------------------------------------------------------
     # Utilities

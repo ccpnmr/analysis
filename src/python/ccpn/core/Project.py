@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-22 17:22:13 +0100 (Wed, May 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-29 13:58:42 +0100 (Wed, May 29, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1246,11 +1246,7 @@ class Project(AbstractWrapperObject):
 
                 # finalise restoration of project
                 self._postRestore()
-
             # end restoring objects
-
-            # NOTE:ED - testing here, project seems to be modified after loading
-            self._xmlLoader.setUnmodified()
 
             # we always have the default chemicalShift list
             if not self.chemicalShiftLists:
@@ -1269,6 +1265,7 @@ class Project(AbstractWrapperObject):
                 self.setReadOnly(True)
             else:
                 self.setReadOnly(self.isReadOnly)
+        self._setUnmodified()
 
         # remove mainWindow from Project instance, and to be returned+
         # to caller (i.e. Framework)
@@ -1278,6 +1275,11 @@ class Project(AbstractWrapperObject):
         # the project is now ready to use
         getLogger().debug(f'Project {self}: initialise() completed')
         return self, _mainWindow
+
+    def _setUnmodified(self):
+        """Set the status of API-topobject to unmodified.
+        """
+        self._xmlLoader.setUnmodified()
 
     def _makeCollections(self):
         """Create Collection objects from the panda's dataFrame

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-29 15:17:50 +0100 (Wed, May 29, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-29 15:35:15 +0100 (Wed, May 29, 2024) $"
 __version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
@@ -556,7 +556,6 @@ class Framework(NotifierBase, GuiBase):
         """Set the last time that a core-object was modified.
         """
         self._backupModifiedTime = time.perf_counter()
-        print(f'BACKUP _setBackupModifiedTime  {self._backupModifiedTime}')
 
     def _getLastBackupTime(self):
         return self._lastBackupTime

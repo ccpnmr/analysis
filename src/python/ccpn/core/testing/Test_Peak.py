@@ -6,8 +6,9 @@
 #=========================================================================================
 
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -16,14 +17,13 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:26 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-05-29 16:04:28 +0100 (Wed, May 29, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
-
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -33,18 +33,16 @@ import unittest
 import pandas as pd
 from collections.abc import Iterable
 from ccpn.core.lib.AxisCodeLib import axisCodeMatch
-from ccpn.core.testing.WrapperTesting import WrapperTesting, fixCheckAllValid, getProperties
+from ccpn.core.testing.WrapperTesting import WrapperTesting, fixCheckAllValid
 
 
 class PeakTest(WrapperTesting):
-    # Path of project to load (None for new project
+    # Path of project to load (None for new project)
     projectPath = 'V3ProjectForTests.ccpn'
 
     singleValueTags = ['height', 'volume', 'heightError', 'volumeError', 'figureOfMerit',
                        'annotation', 'comment']
     dimensionValueTags = ['ppmPositions', 'positionError', 'boxWidths', 'lineWidths', 'assignedNmrAtoms']
-
-    # NBNB TODO We still need a case where axisCodes are not in the same order (e.g. HNC<->HCN)
 
     def test_Peak_copy_exo_1(self):
         peakList1 = self.project.getPeakList('15NNoesy_182.1')
@@ -136,7 +134,7 @@ class PeakTest(WrapperTesting):
             if value is not None and isinstance(value, Iterable) and not isinstance(value, str):
                 for i, list_val in enumerate(value):
                     # separate out assignments
-                    if key is 'assignments':
+                    if key == 'assignments':
                         for a_i, a_val in enumerate(list_val):
                             if a_val is None:
                                 if verbose: print(f'Assign_F{a_i + 1}', '')

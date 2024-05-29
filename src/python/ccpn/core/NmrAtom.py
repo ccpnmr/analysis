@@ -3,9 +3,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-22 12:08:08 +0000 (Wed, November 22, 2023) $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-05-28 15:39:02 +0100 (Tue, May 28, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -664,16 +664,19 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None, com
     if not isinstance(comment, (str, type(None))):
         raise TypeError(f'Comment {comment} must be of type string (or None)')
 
-    if not name:
-        # generate (temporary) default name, to be changed later after we created the object
-        _name = NmrAtom._uniqueName(self.project)
+    # if not name:
+    #     # generate (temporary) default name, to be changed later after we created the object
+    #     _name = NmrAtom._uniqueName(self.project)
+    #
+    # else:
+    #     # Check for name clashes
+    #     _name = name
+    #     previous = self.getNmrAtom(_name.translate(Pid.remapSeparators))
+    #     if previous is not None:
+    #         raise ValueError(f'newNmrAtom: name {_name!r} clashes with {previous}')
 
-    else:
-        # Check for name clashes
-        _name = name
-        previous = self.getNmrAtom(_name.translate(Pid.remapSeparators))
-        if previous is not None:
-            raise ValueError(f'newNmrAtom: name {_name!r} clashes with {previous}')
+    # ensure uniqueName
+    _name = NmrAtom._uniqueName(self.project, name=name)
 
     # Create the api object
     # Always create first with unknown isotopeCode

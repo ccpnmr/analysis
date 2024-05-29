@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-23 10:33:16 +0100 (Thu, May 23, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-29 15:17:50 +0100 (Wed, May 29, 2024) $"
 __version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
@@ -1157,6 +1157,11 @@ class Project(AbstractWrapperObject):
             # finalise restoration of project
             self._postRestore()
 
+    def _setUnmodified(self):
+        """Set the status of API-topobject to unmodified.
+        """
+        self._xmlLoader.setUnmodified()
+
     @classmethod
     def _restoreObject(cls, project, apiObj):
         """Process data that must always be performed after updating all children
@@ -1467,6 +1472,8 @@ class Project(AbstractWrapperObject):
                 getLogger().warning(f'Error checking project status: {str(es)}')
 
             self._xmlLoader.backupUserData(updateIsModified=False)
+            # there was a valid save
+            return True
 
             # don't touch anything else for the minute
 

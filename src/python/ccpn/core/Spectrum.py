@@ -54,7 +54,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-02-22 16:49:08 +0000 (Thu, February 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-29 12:22:38 +0100 (Wed, May 29, 2024) $"
 __version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
@@ -3597,7 +3597,7 @@ class Spectrum(AbstractWrapperObject):
 
     @logCommand(get='self')
     def newPeakList(self, title: str = None, comment: str = None,
-                    isSimulated: bool = False,
+                    isSynthetic: bool = False,
                     symbolStyle: str = None, symbolColour: str = None,
                     textColour: str = None, arrowColour: str = None,
                     **kwds):
@@ -3609,7 +3609,7 @@ class Spectrum(AbstractWrapperObject):
 
         :param title:
         :param comment:
-        :param isSimulated:
+        :param isSynthetic:
         :param symbolStyle:
         :param symbolColour:
         :param textColour:
@@ -3617,7 +3617,7 @@ class Spectrum(AbstractWrapperObject):
         """
         from ccpn.core.PeakList import _newPeakList
 
-        return _newPeakList(self, title=title, comment=comment, isSimulated=isSimulated,
+        return _newPeakList(self, title=title, comment=comment, isSimulated=isSynthetic,
                             symbolStyle=symbolStyle, symbolColour=symbolColour,
                             textColour=textColour, arrowColour=arrowColour,
                             **kwds)

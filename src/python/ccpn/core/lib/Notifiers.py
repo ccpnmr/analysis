@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-05-29 15:00:50 +0100 (Wed, May 29, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-29 17:56:09 +0100 (Wed, May 29, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -85,20 +85,21 @@ class NotifierABC(object):
     _triggerKeywords = ()
 
     # callback dict keywords
-    NOTIFIER = 'notifier'       # The Notifier instance
+    NOTIFIER = 'notifier'               # The Notifier instance
 
     # the following can also be obtained from the Notifier instance
-    THEOBJECT = 'theObject'     # The object for which a notifier was set
-    TRIGGER = 'trigger'         # The trigger (see below)
-    TARGETNAME = 'targetName'   # The traget name for trigger (see below)
+    THEOBJECT = 'theObject'             # The object for which a notifier was set
+    TRIGGER = 'trigger'                 # The trigger (see below)
+    TARGETNAME = 'targetName'           # The traget name for trigger (see below)
 
     # The actual callback values/object
-    OBJECT = 'object'           # the object created or deleted (trigger CREATE or DELETE)
-    PID = 'pid'                 # the pid of the object (trigger RENAME)
-    OLDPID = 'oldPid'           # the old or previous pid of the object (trigger RENAME)
-    VALUE = 'value'             # the (new) value (trigger CHANGE)
-    PREVIOUSVALUE = 'previousValue'  # the old or previous value (trigger CHANGE)
-    ITEMS_CHANGED = 'itemsChanged' # The items in list/dict that have changed (trigger CHANGE)
+    OBJECT = 'object'                   # the object created or deleted (trigger CREATE or DELETE)
+    PID = 'pid'                         # the pid of the object (trigger RENAME)
+    OLDPID = 'oldPid'                   # the old or previous pid of the object (trigger RENAME)
+    VALUE = 'value'                     # the (new) value (trigger CHANGE)
+    PREVIOUSVALUE = 'previousValue'     # the old or previous value (trigger CHANGE)
+    ATTRIBUTE_NAME = 'attributeName'    # the name of the attribute that has changed
+    ITEMS_CHANGED = 'itemsChanged'      # The items in list/dict that have changed (trigger CHANGE)
     SPECIFIERS = 'specifiers'
 
     def __init__(self, theObject, trigger: str, targetName: str, callback: Callable, setterObject = None,
@@ -195,25 +196,33 @@ class NotifierABC(object):
         """
         return self._isExecuting
 
-    def newCallbackDict(self, trigger,
-                        previousValue=None, value=None, obj=None,
+    def newCallbackDict(self,
+                        trigger=None, targetName=None,
+                        previousValue=None, value=None, attributeName=None,
+                        obj=None,
                         oldpid=None, pid=None, specifiers=None,
                         itemsChanged=None
                         ) -> dict:
         """Create and return a dict with all the callback keys
         """
+        if trigger is None:
+            trigger = self._trigger
+        if targetName is None:
+            targetName = self._targetName
+
         callbackDict = {
-                self.NOTIFIER     : self,
-                self.THEOBJECT    : self._theObject,
-                self.TRIGGER      : trigger,
-                self.TARGETNAME   : self._targetName,
-                self.PREVIOUSVALUE: previousValue,
-                self.ITEMS_CHANGED: itemsChanged,
-                self.VALUE        : value,
-                self.OBJECT       : obj,
-                self.OLDPID       : oldpid,
-                self.PID          : pid,
-                self.SPECIFIERS   : specifiers,
+                self.NOTIFIER       : self,
+                self.THEOBJECT      : self._theObject,
+                self.TRIGGER        : trigger,
+                self.TARGETNAME     : targetName,
+                self.ATTRIBUTE_NAME : attributeName,
+                self.PREVIOUSVALUE  : previousValue,
+                self.VALUE          : value,
+                self.ITEMS_CHANGED  : itemsChanged,
+                self.OBJECT         : obj,
+                self.OLDPID         : oldpid,
+                self.PID            : pid,
+                self.SPECIFIERS     : specifiers,
                 }
         return callbackDict
 
@@ -462,8 +471,7 @@ class Notifier(NotifierABC):
         # check if the trigger applies:
         if self._isProject or obj._parent.pid == self._theObject.pid:
             kwds.update(self._kwds)
-            callbackDict = self.newCallbackDict(trigger=self._trigger,
-                                                obj=obj,
+            callbackDict = self.newCallbackDict(obj=obj,
                                                 oldpid=parameter2,
                                                 pid=obj.pid,
                                                 specifiers=kwds
@@ -584,7 +592,6 @@ class CurrentNotifier(NotifierABC):
         # Fire the notifier is there has been a change
         if not self._isEqual(value, self._previousValue):
             callbackDict = self.newCallbackDict(
-                    trigger=self._trigger,
                     obj=self._theObject,
                     value=value,
                     previousValue=self._previousValue,
@@ -793,7 +800,7 @@ class NotifierBase(object):
             raise ValueError(f'setNotifier(): undefined object')
 
         if not isinstance(triggers, (list,tuple)) or len(triggers) == 0:
-            raise ValueError(f'setNotifier(): invalid triggers "{triggers}"; expected list or tuple with at least one of {self._triggerKeywords}')
+            raise ValueError(f'setNotifier(): invalid triggers "{triggers}"')
 
         if isinstance(theObject, Current) or triggers[0] == CurrentNotifier.CURRENT:
             raise ValueError(f'setNotifier(): Object or trigger refer to Current; use setCurrentNotifier() method instead')

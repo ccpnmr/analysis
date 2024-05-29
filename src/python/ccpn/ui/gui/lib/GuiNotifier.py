@@ -28,7 +28,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-05-27 17:08:51 +0100 (Mon, May 27, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-29 17:56:10 +0100 (Wed, May 29, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -177,7 +177,7 @@ class GuiNotifier(NotifierABC):
            self._targetName not in data:
             return
 
-        callbackDict = self.newCallbackDict(trigger=self._trigger)
+        callbackDict = self.newCallbackDict()
         callbackDict.update(data)
         self._callback(callbackDict, **self._kwds)
         return

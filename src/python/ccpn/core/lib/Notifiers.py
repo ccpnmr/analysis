@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-05-29 17:56:09 +0100 (Wed, May 29, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-29 22:03:00 +0100 (Wed, May 29, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -102,7 +102,7 @@ class NotifierABC(object):
     ITEMS_CHANGED = 'itemsChanged'      # The items in list/dict that have changed (trigger CHANGE)
     SPECIFIERS = 'specifiers'
 
-    def __init__(self, theObject, trigger: str, targetName: str, callback: Callable, setterObject = None,
+    def __init__(self, theObject, trigger: str, targetName: str, callback: Callable = None, setterObject = None,
                        debug: bool = False, **kwds):
 
         # Sanity checks
@@ -125,11 +125,14 @@ class NotifierABC(object):
             raise ValueError(f'Invalid targetName None for {type(self)}')
         self._targetName: str = targetName
 
+        if callback is None:
+            raise ValueError(f'Invalid callback None for {type(self)}')
+        self._callback: Callable = callback
+
         # initialisations
         self._id: int = NotifierABC._currentIndex
         NotifierABC._currentIndex += 1
 
-        self._callback: Callable = callback
         self._kwds: dict = kwds
         self._unregister = None
 

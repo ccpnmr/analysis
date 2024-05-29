@@ -4,9 +4,10 @@ This file contains AutoBackup class
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-18 16:08:03 +0100 (Tue, April 18, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-05-29 15:17:50 +0100 (Wed, May 29, 2024) $"
+__version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -39,7 +40,7 @@ from ccpn.util.Logging import getLogger
 CEND = consoleStyle.reset
 
 
-class AutoBackupHandler():
+class AutoBackupHandler:
     """Class to handle backups
 
     Has 2 timers:
@@ -68,8 +69,10 @@ class AutoBackupHandler():
         # initialise the timers
         self._createTimers()
         self._time = perf_counter()
+        self._backupModifiedTime = perf_counter()
 
         self._logger(f'event thread created {time()}{CEND}')
+        self._lock = QtCore.QMutex()
 
     def _createTimers(self):
         """Create timers
@@ -95,7 +98,6 @@ class AutoBackupHandler():
         interval = self._eventInterval if self._qTimerInterval == -1 else self._qTimerInterval
         self._start(interval)
         self._qTimerInterval = -1
-
         self._logger(f'{consoleStyle.fg.green} --> starting {interval}{CEND}')
 
     def stop(self):
@@ -104,7 +106,6 @@ class AutoBackupHandler():
         self._qTimerInterval = self._qTimer.remainingTime()
         self._stop()
         self._resetQueue()
-
         self._logger(f'{consoleStyle.fg.cyan} --> clear - {self._qTimerInterval}{CEND}')
 
     def _stop(self):
@@ -120,7 +121,6 @@ class AutoBackupHandler():
         self._qTimerInterval = -1
         self._stop()
         self._resetQueue()
-
         self._logger(f'{consoleStyle.fg.darkred} --> kill - {self._qTimerInterval}{CEND}')
 
     def setInterval(self, interval):
@@ -131,7 +131,6 @@ class AutoBackupHandler():
         self._stop()
         self._resetQueue()
         self._eventInterval = int(interval * 1000)
-
         self._logger(f'{consoleStyle.fg.cyan} --> setinterval {interval}{CEND}')
 
     def _resetQueue(self):
@@ -147,7 +146,6 @@ class AutoBackupHandler():
         """
         # clean up timers
         self._stop()
-
         self._time = perf_counter()
         # restart the interval timer
         self._qTimer.start(interval)
@@ -163,20 +161,20 @@ class AutoBackupHandler():
         if self._checkIdleQueue.full():
             # make room for the next time
             self._checkIdleQueue.get()
-
         delta = round(perf_counter() - self._time, 3)
         self._checkIdleQueue.put(delta)
         self._logger(f'{consoleStyle.fg.lightgrey} --> update idle {delta}  {self._checkIdleQueue.queue}{CEND}')
 
         if self._isIdle:
-            # check if the app is busy, and ignore until next time
-            self._logger(f'{consoleStyle.fg.yellow} --> calling event {CEND}')
-
-            self._eventFunction()
-
-            self._resetQueue()
-            self._start(self._eventInterval)
-
+            with QtCore.QMutexLocker(self._lock):
+                # lock the backup thread to protect the save-operation
+                t0 = perf_counter()
+                # check if the app is busy, and ignore until next time
+                self._logger(f'{consoleStyle.fg.yellow} --> calling event {self._eventFunction}{CEND}')
+                self._eventFunction()
+                self._resetQueue()
+                self._start(self._eventInterval)
+                self._logger(f'{consoleStyle.fg.lightgrey} --> elasped time {round(perf_counter() - t0, 3)}{CEND}')
         else:
             # restart when gui is idle, check every second until event is performed
             self._logger(f'{consoleStyle.fg.darkyellow} --> thread is busy, waiting {CEND}')
@@ -189,8 +187,6 @@ class AutoBackupHandler():
         -> nothing has happened for a few seconds.
         """
         qq = list(self._checkIdleQueue.queue)
-        check = all(isclose(qVal, 1.0, abs_tol=1e-2) for qVal in qq)
-        if check:
+        if check := all(isclose(qVal, 1.0, abs_tol=1e-2) for qVal in qq):
             self._logger(f'{consoleStyle.fg.yellow} --> QUEUE {qq}  {check}  {CEND}')
-
         return check and self._checkIdleQueue.full()

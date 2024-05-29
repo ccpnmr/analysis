@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-23 10:33:16 +0100 (Thu, May 23, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-29 15:17:50 +0100 (Wed, May 29, 2024) $"
 __version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
@@ -34,6 +34,8 @@ import tempfile
 import faulthandler
 import contextlib
 from datetime import datetime
+import time
+
 from ccpn.util.decorators import deprecated
 
 
@@ -514,6 +516,8 @@ class Framework(NotifierBase, GuiBase):
             return
 
         if self._autoBackupThread is None:
+            self._setBackupModifiedTime()
+            self._setLastBackupTime()
             self._autoBackupThread = AutoBackupHandler(eventFunction=self._backupProject,
                                                        eventInterval=self.preferences.general.autoBackupFrequency * 60
                                                        )
@@ -551,30 +555,37 @@ class Framework(NotifierBase, GuiBase):
         finally:
             self._updateAutoBackup()
 
+    def _getBackupModifiedTime(self):
+        return self._backupModifiedTime
+
+    def _setBackupModifiedTime(self):
+        """Set the last time that a core-object was modified.
+        """
+        self._backupModifiedTime = time.perf_counter()
+        print(f'BACKUP _setBackupModifiedTime  {self._backupModifiedTime}')
+
+    def _getLastBackupTime(self):
+        return self._lastBackupTime
+
+    def _setLastBackupTime(self):
+        """Set the last time that a backup was performed.
+        """
+        self._lastBackupTime = time.perf_counter()
+
     def _backupProject(self):
         try:
             if self.project.readOnly:
                 # skip if the project is read-only
                 getLogger().debug('Backup skipped: Project is read-only')
                 return
+            if (self._getBackupModifiedTime() < self._getLastBackupTime()):
+                # ignore if there were no modifications since the last backup, even if project is modified
+                getLogger().debug('Backup skipped: Not modified since last backup')
+                return
 
-            # NOTE:ED - check with Geerten whether it needs to do anything else here
-            self.project._backup()
-
-            # from ccpnmodel.ccpncore.lib.Io import Api as apiIo
-            #
-            # apiIo.backupProject(self.project._wrappedData.parent)
-            # backupPath = self.project.backupPath
-            #
-            # backupStatePath = fetchDir(backupPath, Layout.StateDirName)
-            #
-            # copy_tree(self.statePath, backupStatePath)
-            # layoutFile = os.path.join(backupStatePath, Layout.DefaultLayoutFileName)
-            # Layout.saveLayoutToJson(self.ui.mainWindow, layoutFile)
-            # self.current._dumpStateToFile(backupStatePath)
-
-            # Spectra should not be copied over. Dangerous for disk space
-            # backupDataPath = fetchDir(backupPath, DataDirName)
+            if self.project._backup():
+                # log the time that a backup was completed
+                self._setLastBackupTime()
 
         except (PermissionError, FileNotFoundError):
             getLogger().info('Backup failed: Folder may be read-only')
@@ -605,9 +616,6 @@ class Framework(NotifierBase, GuiBase):
 
         # This wraps the underlying data, including the wrapped graphics data
         newProject._initialiseProject()
-
-        # NOTE:ED - testing here, project seems to be modified after loading
-        newProject._xmlLoader.setUnmodified()
 
         # GWV: this really should not be here; moved to the_update_v2 method
         #      that already existed and gets called
@@ -642,6 +650,9 @@ class Framework(NotifierBase, GuiBase):
         else:
             # The NoUi version has no mainWindow
             self.ui.initialize(None)
+
+        self._setLastBackupTime()
+        newProject._setUnmodified()
 
     #-----------------------------------------------------------------------------------------
     # Utilities
@@ -1247,6 +1258,8 @@ class Framework(NotifierBase, GuiBase):
                                                   parent=self.ui.mainWindow)
                         return []
 
+                    self._setLastBackupTime()
+                    result._setUnmodified()
                     getLogger().info(f"==> Loaded project {result}")
                     if not isIterable(result):
                         result = [result]

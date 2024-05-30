@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-21 16:29:25 +0000 (Thu, March 21, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-05-29 16:00:19 +0100 (Wed, May 29, 2024) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -386,7 +386,7 @@ class GuiStrip(Frame):
         self._vTraceActive = False
         self._newConsoleDirection = None
         self._noiseThresholdLinesActive = False
-        self._pickingExclusionAreaActive = False # used for 1D peak picking
+        self._pickingExclusionAreaActive = False  # used for 1D peak picking
         self._pickingInclusionAreaActive = False  # used for nD peak picking. NIY
 
         # create an overlay for drag-drop/highlight operations
@@ -759,8 +759,10 @@ class GuiStrip(Frame):
         if self.current.strip and not self.current.strip.isDeleted:
             from ccpn.ui.gui.popups.StripPlotPopup import StripPlotPopup
 
-            popup = StripPlotPopup(parent=self.mainWindow, mainWindow=self.mainWindow, spectrumDisplay=self.spectrumDisplay,
-                                   includePeakLists=includePeakLists, includeNmrChains=includeNmrChains, includeSpectrumTable=includeSpectrumTable)
+            popup = StripPlotPopup(parent=self.mainWindow, mainWindow=self.mainWindow,
+                                   spectrumDisplay=self.spectrumDisplay,
+                                   includePeakLists=includePeakLists, includeNmrChains=includeNmrChains,
+                                   includeSpectrumTable=includeSpectrumTable, includeNmrChainPullSelection=True,)
             popup.exec_()
         else:
             MessageDialog.showWarning('Make Strip Plot', 'No selected spectrumDisplay')

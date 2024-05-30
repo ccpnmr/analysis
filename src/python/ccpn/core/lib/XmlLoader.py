@@ -498,25 +498,23 @@ class TopObject(XmlLoaderABC):
 
         if self.apiTopObject.isDeleted:
             # ignore deleted objects
-            self.logger.debug2(f'ignoring deleted object {self.apiTopObject}')
+            self.logger.debug2(f'Ignoring deleted object {self.apiTopObject}')
             return
 
         if not self.readOnly and not self.root.writeBlockingLevel:
             try:
                 if not self.package.path.exists():
                     self.package.path.mkdir(parents=True, exist_ok=False)
-
                 with self.path.open('w') as fp:
                     saveToStream(fp, self.apiTopObject)
 
+            except (PermissionError, FileNotFoundError):
+                self.logger.info('Saving: folder may be read-only')
+            else:
                 if updateIsModified:
                     # make sure that isModified is not updated if the file is not saved
                     forceSetattr(self.apiTopObject, 'isModified', False)
-
-            except (PermissionError, FileNotFoundError):
-                self.logger.info('Saving: folder may be read-only')
-
-            self.isLoaded = True  # xml-file reflects contents
+                self.isLoaded = True  # xml-file reflects contents
 
     def saveBackup(self, updateIsModified=True, autoBackupPath=None):
         """Save the apiTopObject to the xml file defined by self.path / CCPN_BACKUPS_DIRECTORY
@@ -525,12 +523,10 @@ class TopObject(XmlLoaderABC):
             getLogger().warning(
                 f'{consoleStyle.fg.red}Cannot save {self._path}: undefined apiTopObject{consoleStyle.reset}')
             return
-
         if self.apiTopObject.isDeleted:
             # ignore deleted objects
             self.logger.debug2(f'ignoring deleted object {self.apiTopObject}')
             return
-
         if not autoBackupPath:
             raise ValueError('Auto-backup path is not defined')
 
@@ -539,18 +535,15 @@ class TopObject(XmlLoaderABC):
                 path = autoBackupPath / self.package.relativePath / self._path
                 if not path.parent.exists():
                     path.parent.mkdir(parents=True, exist_ok=False)
-
                 with path.open('w') as fp:
                     saveToStream(fp, self.apiTopObject)
 
+            except (PermissionError, FileNotFoundError):
+                self.logger.info('Backing up: folder may be read-only')
+            else:
                 if updateIsModified:
                     # make sure that isModified is not updated if the file is not saved
                     forceSetattr(self.apiTopObject, 'isModified', False)
-
-            except (PermissionError, FileNotFoundError):
-                self.logger.info('Backing up: folder may be read-only')
-
-            # self.isLoaded = True  # xml-file reflects contents
 
     def __str__(self):
         _loaded = 'loaded' if self.isLoaded else 'not-loaded'

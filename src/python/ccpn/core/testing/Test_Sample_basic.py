@@ -1,9 +1,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -12,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-05 15:28:42 +0000 (Thu, January 05, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-05-30 13:47:13 +0100 (Thu, May 30, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -49,6 +50,18 @@ class TestSample_No_setUp(WrapperTesting):
         newSample = self.project.newSample()
         self.assertEqual(newSample.name, 'mySample')
         self.assertEqual(len(self.project.samples), 1)
+
+    def test_newSample_sameName(self):
+        """
+        Test that creating a new Sample with no parameter creates a valid Sample.
+        Repeat and check that name is unique.
+        """
+        newSample = self.project.newSample()
+        self.assertEqual(newSample.name, 'mySample')
+        self.assertEqual(len(self.project.samples), 1)
+        newSample2 = self.project.newSample()
+        self.assertEqual(newSample2.name, 'mySample_1')
+        self.assertEqual(len(self.project.samples), 2)
 
     def test_newSample_None(self):
         """

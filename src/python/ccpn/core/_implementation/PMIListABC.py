@@ -4,9 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-18 18:49:15 +0100 (Thu, May 18, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-05-29 12:22:39 +0100 (Wed, May 29, 2024) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -176,14 +176,35 @@ class PMIListABC(AbstractWrapperObject):
         self._wrappedData.textColour = value
 
     @property
-    def isSimulated(self) -> bool:
+    def isSynthetic(self) -> bool:
         """True if this List is simulated."""
         return self._wrappedData.isSimulated
+
+    @isSynthetic.setter
+    @logCommand(get='self', isProperty=True)
+    def isSynthetic(self, value: bool):
+        self._wrappedData.isSimulated = value
+
+    @property
+    def isSimulated(self) -> bool:
+        """True if this List is simulated.
+        .. note:: This is a depreciated version of isSynthetic
+                  and only exists to allow old project saves to work"""
+        return self.isSynthetic
 
     @isSimulated.setter
     @logCommand(get='self', isProperty=True)
     def isSimulated(self, value: bool):
-        self._wrappedData.isSimulated = value
+        self._wrappedData.isSynthetic = value
+
+    # @property
+    # def isSimulated(self) -> bool:
+    #     return self._wrappedData.isSimulated
+    #
+    # @isSimulated.setter
+    # @logCommand(get='self', isProperty=True)
+    # def isSimulated(self, value: bool):
+    #     self._wrappedData.isSimulated = value
 
     @property
     def meritColour(self) -> Optional[str]:

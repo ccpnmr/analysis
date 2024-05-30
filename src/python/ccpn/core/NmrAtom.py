@@ -3,9 +3,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-22 12:08:08 +0000 (Wed, November 22, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2024-05-30 13:45:36 +0100 (Thu, May 30, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -450,12 +451,16 @@ class NmrAtom(AbstractWrapperObject):
         return '@'
 
     @classmethod
-    def _uniqueName(cls, project, name=None) -> str:
-        """Subclassed to get the '@' default name behavior"""
+    def _uniqueName(cls, parent: nmrResidue, name=None) -> str:
+        """Subclassed to get the '@' default name behavior.
+        :param parent: in this case, parent MUST be of type NmrResidue
+        :param name (str | None): target name (as required)
+        :return str: new unique name
+        """
         if name is None:
-            _id = project._queryNextUniqueIdValue(cls.className)
+            _id = parent.project._queryNextUniqueIdValue(cls.className)
             name = '%s_%d' % (cls._defaultName(), _id)
-        return super(NmrAtom, cls)._uniqueName(project=project, name=name)
+        return super(NmrAtom, cls)._uniqueName(parent=parent, name=name)
 
     def _finaliseAction(self, action: str, **actionKwds):
         """Subclassed to handle associated offsetNMrResidues
@@ -664,16 +669,19 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None, com
     if not isinstance(comment, (str, type(None))):
         raise TypeError(f'Comment {comment} must be of type string (or None)')
 
-    if not name:
-        # generate (temporary) default name, to be changed later after we created the object
-        _name = NmrAtom._uniqueName(self.project)
+    # if not name:
+    #     # generate (temporary) default name, to be changed later after we created the object
+    #     _name = NmrAtom._uniqueName(self.project)
+    #
+    # else:
+    #     # Check for name clashes
+    #     _name = name
+    #     previous = self.getNmrAtom(_name.translate(Pid.remapSeparators))
+    #     if previous is not None:
+    #         raise ValueError(f'newNmrAtom: name {_name!r} clashes with {previous}')
 
-    else:
-        # Check for name clashes
-        _name = name
-        previous = self.getNmrAtom(_name.translate(Pid.remapSeparators))
-        if previous is not None:
-            raise ValueError(f'newNmrAtom: name {_name!r} clashes with {previous}')
+    # ensure uniqueName
+    _name = NmrAtom._uniqueName(self, name=name)
 
     # Create the api object
     # Always create first with unknown isotopeCode

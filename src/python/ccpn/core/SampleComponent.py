@@ -3,9 +3,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-31 16:47:51 +0100 (Mon, July 31, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-05-30 13:46:45 +0100 (Thu, May 30, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -304,36 +305,23 @@ def _newSampleComponent(self: Sample, name: str = None, labelling: str = None, r
     """
 
     labelling = labelling if labelling is not None else DEFAULT_LABELLING
-
-    # if not name:
-    #     name = SampleComponent._nextAvailableName(SampleComponent, self)
-    # commonUtil._validateName(self, SampleComponent, name, checkExisting=False)
-    # commonUtil._validateName(self, SampleComponent, labelling, attribName='labelling',
-    #                          allowNone=True, checkExisting=False)
-
-    if not name:
+    if name is None:
+        # ensure that always has a name
         name = SampleComponent._uniqueName(self.project, name=name)
     SampleComponent._validateStringValue(attribName='name', value = name)
     SampleComponent._validateStringValue(attribName='labelling', value = labelling, allowNone=True, allowEmpty=True)
 
-    if not isinstance(name, str):
-        name = str(name)
-
     _apiNmrProject = self._project._apiNmrProject
     apiRefComponentStore = _apiNmrProject.sampleStore.refSampleComponentStore
-    # existing = [sC for sC in self._apiSample.sortedSampleComponents() if sC.name == name and sC.labeling == labelling]
-    if self._apiSample.findAllSampleComponents(name=name, labelling=labelling):
-        raise ValueError(f"{self._apiSample.name}.{name}.{labelling if labelling != DEFAULT_LABELLING else ''} already exists")
-
+    if self._apiSample.findAllSampleComponents(name=name, labeling=labelling):
+        # ensure that always has a name
+        name = SampleComponent._uniqueName(self.project, name=name)
     if concentrationUnit is not None and concentrationUnit not in Constants.concentrationUnits:
         self._project._logger.warning(f"Unsupported value {concentrationUnit} for SampleComponent.concentrationUnit")
-
         raise ValueError(f"SampleComponent.concentrationUnit must be in the list: {Constants.concentrationUnits}")
 
     apiSample = self._wrappedData
-
-    # existingSubstances = [substance for substance in self._project.substances if (substance.name == name and substance.labelling == labelling)]
-    apiExistingSubstances = apiRefComponentStore.findAllComponents(name=name, labelling=labelling)
+    apiExistingSubstances = apiRefComponentStore.findAllComponents(name=name, labeling=labelling)
     if len(apiExistingSubstances) > 1:
         # should only return one element
         raise RuntimeError('Too many identical substances')
@@ -345,7 +333,6 @@ def _newSampleComponent(self: Sample, name: str = None, labelling: str = None, r
         with undoBlockWithoutSideBar():
             with notificationEchoBlocking():
                 substance = _newSubstance(self.project, name=name, labelling=labelling)
-    # substance = existingSubstances[0] if existingSubstances else self._project.fetchSubstance(name=name, labelling=labelling)
 
     # NB - using substance._wrappedData.labelling because we need the API labelling value,
     # which is different for the default case

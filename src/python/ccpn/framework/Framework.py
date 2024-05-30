@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-23 10:33:16 +0100 (Thu, May 23, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-29 15:35:15 +0100 (Wed, May 29, 2024) $"
 __version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
@@ -582,29 +582,12 @@ class Framework(NotifierBase, GuiBase):
                 getLogger().debug('Backup skipped: Not modified since last backup')
                 return
 
-            # NOTE:ED - check with Geerten whether it needs to do anything else here
             if self.project._backup():
                 # log the time that a backup was completed
                 self._setLastBackupTime()
 
-            # from ccpnmodel.ccpncore.lib.Io import Api as apiIo
-            #
-            # apiIo.backupProject(self.project._wrappedData.parent)
-            # backupPath = self.project.backupPath
-            #
-            # backupStatePath = fetchDir(backupPath, Layout.StateDirName)
-            #
-            # copy_tree(self.statePath, backupStatePath)
-            # layoutFile = os.path.join(backupStatePath, Layout.DefaultLayoutFileName)
-            # Layout.saveLayoutToJson(self.ui.mainWindow, layoutFile)
-            # self.current._dumpStateToFile(backupStatePath)
-
-            # Spectra should not be copied over. Dangerous for disk space
-            # backupDataPath = fetchDir(backupPath, DataDirName)
-
         except (PermissionError, FileNotFoundError):
             getLogger().info('Backup failed: Folder may be read-only')
-
         except Exception as es:
             getLogger().warning(f'Project backup failed with error {es}')
 
@@ -631,9 +614,6 @@ class Framework(NotifierBase, GuiBase):
 
         # This wraps the underlying data, including the wrapped graphics data
         newProject._initialiseProject()
-
-        # NOTE:ED - testing here, project seems to be modified after loading
-        newProject._xmlLoader.setUnmodified()
 
         # GWV: this really should not be here; moved to the_update_v2 method
         #      that already existed and gets called
@@ -668,6 +648,9 @@ class Framework(NotifierBase, GuiBase):
         else:
             # The NoUi version has no mainWindow
             self.ui.initialize(None)
+
+        self._setLastBackupTime()
+        newProject._setUnmodified()
 
     #-----------------------------------------------------------------------------------------
     # Utilities
@@ -1273,6 +1256,8 @@ class Framework(NotifierBase, GuiBase):
                                                   parent=self.ui.mainWindow)
                         return []
 
+                    self._setLastBackupTime()
+                    result._setUnmodified()
                     getLogger().info(f"==> Loaded project {result}")
                     if not isIterable(result):
                         result = [result]

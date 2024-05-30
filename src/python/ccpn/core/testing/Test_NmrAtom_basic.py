@@ -2,8 +2,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -11,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-22 14:57:06 +0000 (Mon, January 22, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-05-30 13:47:13 +0100 (Thu, May 30, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,6 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import unittest
 
 from ccpn.core.testing.WrapperTesting import WrapperTesting
+from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.memops.ApiError import ApiError
 
 
@@ -79,9 +81,8 @@ class TestNmrAtomCreation(WrapperTesting):
         self.assertEqual(a.isotopeCode, None)
 
     def test_CreateNmrAtomWithArbitraryHattedName(self):
-        a = self.nmrResidue.newNmrAtom(name='Arbitrary^Name')
-        self.assertEqual(a.pid, 'NA:@2.@1..Arbitrary^Name')
-        self.assertEqual(a.isotopeCode, None)
+        with self.assertRaisesRegex(ValueError, r"Character \'\^\' not allowed"):
+            a = self.nmrResidue.newNmrAtom(name='Arbitrary^Name')
 
     def test_CreateNmrAtomWithArbitraryNameAndArbitraryIsotopeCode(self):
         with self.assertRaisesRegex(ValueError, 'Invalid isotopeCode'):
@@ -95,7 +96,8 @@ class TestNmrAtomCreation(WrapperTesting):
 
     def test_CreateTwoNmrAtomsWithSameName(self):
         self.nmrResidue.newNmrAtom(name='H')
-        self.assertRaises(ValueError, self.nmrResidue.newNmrAtom, name='H')
+        nmr_atom = self.nmrResidue.newNmrAtom(name='H')
+        self.assertEqual('H_1', nmr_atom.name)
 
     def test_CreateNmrAtomByFetchingFromResidue(self):
         self.assertEqual(self.nmrResidue.nmrAtoms, [])

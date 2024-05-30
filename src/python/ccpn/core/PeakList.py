@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-22 14:42:25 +0100 (Wed, May 22, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-05-29 12:22:38 +0100 (Wed, May 29, 2024) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -196,7 +196,7 @@ class PeakList(PMIListABC):
                                 Not used if it is given a targetPeakList
         """
 
-        singleValueTags = ['isSimulated', 'symbolColour', 'symbolStyle', 'textColour', 'textColour',
+        singleValueTags = ['isSynthetic', 'symbolColour', 'symbolStyle', 'textColour', 'textColour',
                            'title', 'comment', 'meritThreshold', 'meritEnabled', 'meritColour']
 
         targetSpectrum = self.project.getByPid(targetSpectrum) if isinstance(targetSpectrum, str) else targetSpectrum
@@ -577,21 +577,25 @@ def _newPeakList(self: Spectrum, title: str = None, comment: str = None,
                  meritColour: str = None, meritEnabled: bool = False, meritThreshold: float = None,
                  lineColour: str = None,
                  arrowColour: str = None,
-                 isSimulated: bool = False) -> PeakList:
+                 isSynthetic: bool = False,
+                 isSimulated: bool = None) -> PeakList:
     """Create new empty PeakList within Spectrum
 
     See the PeakList class for details.
 
     :param title:
     :param comment:
-    :param isSimulated:
+    :param isSynthetic:
     :param symbolStyle:
     :param symbolColour:
     :param textColour:
     :return: a new PeakList instance.
     """
+    if isSimulated is not None:
+        getLogger().debug('Changing isSimulated value to isSynthetic')
+        isSynthetic = isSimulated
 
-    dd = {'name': title, 'details': comment, 'isSimulated': isSimulated}
+    dd = {'name': title, 'details': comment, 'isSimulated': isSynthetic}
     if symbolColour:
         dd['symbolColour'] = symbolColour
     if symbolStyle:

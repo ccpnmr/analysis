@@ -4,9 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,14 +14,15 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-28 19:23:05 +0100 (Wed, June 28, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-05-29 15:59:29 +0100 (Wed, May 29, 2024) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
+
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -73,7 +74,7 @@ class TestApplication(Application):
         Application.__init__(self, 'testApplication', '1.0')
 
 
-def newTestApplication(projectPath=None, useTestProjects=False,
+def newTestApplication(projectPath=None, useTestProjects=False, skipUserPreferences=True,
                        noLogging=False, noDebugLogging=False, noEchoLogging=False,
                        interface='NoUi', debug=True,
                        noApplication=False):
@@ -124,6 +125,8 @@ def newTestApplication(projectPath=None, useTestProjects=False,
 
     if not isinstance(useTestProjects, bool):
         raise TypeError('useProjects must be a bool')
+    if not isinstance(skipUserPreferences, bool):
+        raise TypeError('skipUserPreferences must be a bool')
     if not isinstance(noLogging, bool):
         raise TypeError('noLogging must be a bool')
     if not isinstance(noDebugLogging, bool):
@@ -154,8 +157,10 @@ def newTestApplication(projectPath=None, useTestProjects=False,
         builtins._skipExecuteLoop = True
 
     # build new ccpn application/project
-    _framework = Framework.createFramework(projectPath=projectPath, noLogging=noLogging, noDebugLogging=noDebugLogging, noEchoLogging=noEchoLogging,
+    _framework = Framework.createFramework(projectPath=projectPath, noLogging=noLogging, noDebugLogging=noDebugLogging,
+                                           noEchoLogging=noEchoLogging,
                                            _skipUpdates=True,
+                                           skipUserPreferences=skipUserPreferences,
                                            interface=interface, debug=debug,
                                            lightColourScheme=True, darkColourScheme=False)
     _project = _framework.project

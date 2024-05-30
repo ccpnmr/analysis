@@ -44,8 +44,9 @@ from __future__ import annotations  # pycharm still highlights as errors
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -54,8 +55,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-21 16:17:11 +0000 (Thu, March 21, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-05-30 13:45:36 +0100 (Thu, May 30, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -3749,7 +3750,7 @@ class Spectrum(AbstractWrapperObject):
 
     @logCommand(get='self')
     def newPeakList(self, title: str = None, comment: str = None,
-                    isSimulated: bool = False,
+                    isSynthetic: bool = False,
                     symbolStyle: str = None, symbolColour: str = None,
                     textColour: str = None, arrowColour: str = None,
                     **kwds):
@@ -3761,7 +3762,7 @@ class Spectrum(AbstractWrapperObject):
 
         :param title:
         :param comment:
-        :param isSimulated:
+        :param isSynthetic:
         :param symbolStyle:
         :param symbolColour:
         :param textColour:
@@ -3769,7 +3770,7 @@ class Spectrum(AbstractWrapperObject):
         """
         from ccpn.core.PeakList import _newPeakList
 
-        return _newPeakList(self, title=title, comment=comment, isSimulated=isSimulated,
+        return _newPeakList(self, title=title, comment=comment, isSimulated=isSynthetic,
                             symbolStyle=symbolStyle, symbolColour=symbolColour,
                             textColour=textColour, arrowColour=arrowColour,
                             **kwds)
@@ -3956,7 +3957,7 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
     if name is None:
         name = dataSource.nameFromPath()
     # assure unique name
-    name = Spectrum._uniqueName(project=project, name=name)
+    name = Spectrum._uniqueName(parent=project, name=name)
 
     getLogger().debug('Creating Spectrum %r (%dD;%s); %s' % (
         name, dataSource.dimensionCount,

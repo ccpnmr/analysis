@@ -5,8 +5,9 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-21 16:29:25 +0000 (Thu, March 21, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-05-30 13:45:37 +0100 (Thu, May 30, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -304,8 +305,11 @@ class V3CoreObjectABC(CoreModel, NotifierBase):
         return f'my{cls.className}'
 
     @classmethod
-    def _uniqueName(cls, project, name=None) -> str:
+    def _uniqueName(cls, parent, name=None) -> str:
         """Return a unique name based on name (set to defaultName if None)
+        :param parent: container for self (usually of type Project)
+        :param name (str | None): target name (as required)
+        :return str: new unique name
         """
         from ccpn.util import Common as commonUtil
 
@@ -313,7 +317,7 @@ class V3CoreObjectABC(CoreModel, NotifierBase):
             name = cls._defaultName()
         cls._validateStringValue('name', name)
         name = name.strip()
-        names = [sib.name for sib in getattr(project, cls._pluralLinkName)]
+        names = [sib.name for sib in getattr(parent, cls._pluralLinkName)]
         while name in names:
             name = commonUtil.incrementName(name)
         return name

@@ -14,15 +14,14 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-17 12:03:17 +0100 (Wed, April 17, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-05-29 16:00:19 +0100 (Wed, May 29, 2024) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
-
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -770,7 +769,7 @@ class GuiStrip(Frame):
             popup = StripPlotPopup(parent=self.mainWindow, mainWindow=self.mainWindow,
                                    spectrumDisplay=self.spectrumDisplay,
                                    includePeakLists=includePeakLists, includeNmrChains=includeNmrChains,
-                                   includeSpectrumTable=includeSpectrumTable)
+                                   includeSpectrumTable=includeSpectrumTable, includeNmrChainPullSelection=True,)
             popup.exec_()
         else:
             MessageDialog.showWarning('Make Strip Plot', 'No selected spectrumDisplay')

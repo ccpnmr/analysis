@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:53 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-05-29 15:59:29 +0100 (Wed, May 29, 2024) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -73,7 +73,7 @@ class TestApplication(Application):
         Application.__init__(self, applicationName=applicationName, applicationVersion=applicationVersion)
 
 
-def newTestApplication(projectPath=None, useTestProjects=False,
+def newTestApplication(projectPath=None, useTestProjects=False, skipUserPreferences=True,
                        noLogging=False, noDebugLogging=False, noEchoLogging=False,
                        interface='NoUi', debug=True,
                        noApplication=False):
@@ -124,6 +124,8 @@ def newTestApplication(projectPath=None, useTestProjects=False,
 
     if not isinstance(useTestProjects, bool):
         raise TypeError('useProjects must be a bool')
+    if not isinstance(skipUserPreferences, bool):
+        raise TypeError('skipUserPreferences must be a bool')
     if not isinstance(noLogging, bool):
         raise TypeError('noLogging must be a bool')
     if not isinstance(noDebugLogging, bool):
@@ -154,8 +156,10 @@ def newTestApplication(projectPath=None, useTestProjects=False,
         builtins._skipExecuteLoop = True
 
     # build new ccpn application/project
-    _framework = Framework.createFramework(projectPath=projectPath, noLogging=noLogging, noDebugLogging=noDebugLogging, noEchoLogging=noEchoLogging,
+    _framework = Framework.createFramework(projectPath=projectPath, noLogging=noLogging, noDebugLogging=noDebugLogging,
+                                           noEchoLogging=noEchoLogging,
                                            _skipUpdates=True,
+                                           skipUserPreferences=skipUserPreferences,
                                            interface=interface, debug=debug,
                                            lightColourScheme=True, darkColourScheme=False)
     _project = _framework.project

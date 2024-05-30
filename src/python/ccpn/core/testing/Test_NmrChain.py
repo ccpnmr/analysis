@@ -5,8 +5,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:26 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-05-30 13:47:13 +0100 (Thu, May 30, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -115,7 +116,7 @@ class NmrChainTest(WrapperTesting):
         with self.assertRaises(ValueError) as cm:
             nmr_chain.assignSingleResidue(nmr_residue, 'ERROR')
         err = cm.exception
-        self.assertEqual(str(err), 'No object found matching Pid ALA')
+        self.assertEqual(str(err), 'No object found matching Pid ERROR')
 
     def test_assignSingleResidueAlreadyAssignError(self):
         nmr_chain = self.project.fetchNmrChain('AA')
@@ -132,17 +133,16 @@ class NmrChainTest(WrapperTesting):
         self.assertEqual(str(err), f'Cannot assign {nmr_residue.id}: Residue {residues[0].id} is already assigned')
 
     def test_deassign(self):
-        nmr_chain = self.project.fetchNmrChain('a')
+        nmr_chain = self.project.fetchNmrChain('A')
         nmr_residue = nmr_chain.fetchNmrResidue(residueType='GLN')
         self.chain = self.project.createChain(sequence='CDEFGHI', molType='protein',
                                               shortName='A')
         residues = self.chain.residues
+        nmr_chain.assignSingleResidue(nmr_residue, residues[4])
 
-        con_chain = self.project.newNmrChain(isConnected=True)
-
-        con_chain.assignSingleResidues(residues[4])
-
+        self.assertEqual([nmrres.residue.id for nmrres in nmr_chain.nmrResidues], [residues[4].id])
         nmr_chain.deassign()
+        self.assertEqual([nmrres.residue for nmrres in nmr_chain.nmrResidues], [None])
 
 
     def test_deassignAPIError(self):

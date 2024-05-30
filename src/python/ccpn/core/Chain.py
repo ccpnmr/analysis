@@ -4,8 +4,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-21 16:17:10 +0000 (Thu, March 21, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-05-30 13:45:35 +0100 (Thu, May 30, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -312,7 +313,7 @@ class Chain(AbstractWrapperObject):
                 name = self.name
                 if self.project.getByPid(f'{NmrChain.shortClassName}:{name}'):
                     getLogger().warn(f'NmrChain name {name} is already existing.')
-                    name = NmrChain._uniqueName(project=self.project, name=name)
+                    name = NmrChain._uniqueName(parent=self.project, name=name)
 
             with undoBlockWithoutSideBar():
                 nmrChain = self.project.newNmrChain(
@@ -350,7 +351,7 @@ class Chain(AbstractWrapperObject):
         if self.nmrChain:
             getLogger().warning(f'{self.__class__.__name__}.rename will lose or change the assigned nmrChain')
 
-        name = self._uniqueName(project=self.project, name=value)
+        name = self._uniqueName(parent=self.project, name=value)
 
         # rename functions from here
         oldName = self.shortName
@@ -426,12 +427,12 @@ def _createChain(self: Project, compoundName: str = None,
             errorsIndices = sequenceMap.get(ERRORS, [])
             errors = ', '.join(map(str, errorsIndices))
             msg = f'''The given sequence is not valid. Found errors at positions(s): {errors} '''
-            raise RuntimeError(msg)
+            raise ValueError(msg)
         ccpCodes = sequenceMap.get(CCPCODE)
 
     apiMolSystem = self._wrappedData.molSystem
     shortName = (
-        Chain._uniqueName(project=self, name=shortName)
+        Chain._uniqueName(parent=self, name=shortName)
         if shortName
         else apiMolSystem.nextChainCode()
     )
@@ -440,11 +441,13 @@ def _createChain(self: Project, compoundName: str = None,
         raise ValueError(f"'{previous.longPid}' already exists")
 
     apiRefComponentStore = self._apiNmrProject.sampleStore.refSampleComponentStore
-    if compoundName is None:
-        name = Substance._uniqueName(self.project)
+    # if compoundName is None:
+    #     name = Substance._uniqueName(self.project)
 
-    elif apiRefComponentStore.findFirstComponent(name=compoundName) is None:
-        name = Chain._uniqueName(project=self, name=compoundName)
+    compoundName = Substance._uniqueName(self.project, name=compoundName)
+
+    if apiRefComponentStore.findFirstComponent(name=compoundName) is None:
+        name = Chain._uniqueName(parent=self, name=compoundName)
 
     else:
         raise ValueError(

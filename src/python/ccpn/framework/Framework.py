@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-29 13:58:42 +0100 (Wed, May 29, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-05-29 15:35:15 +0100 (Wed, May 29, 2024) $"
+__version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -598,7 +598,6 @@ class Framework(NotifierBase):
 
         except (PermissionError, FileNotFoundError):
             getLogger().info('Backup failed: Folder may be read-only')
-
         except Exception as es:
             getLogger().warning(f'Project backup failed with error {es}')
 

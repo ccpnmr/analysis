@@ -1,19 +1,20 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-04 20:12:05 +0000 (Thu, November 04, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2024-05-30 13:45:37 +0100 (Thu, May 30, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -2143,13 +2144,13 @@ def _getRestraintsMapping(constraintSet, molSystem=None):
 
 def _newStructureData(project, name=None, **kwargs):
     name = name or 'my%s' % StructureData.className
-    name = StructureData._uniqueName(project=project, name=name)
+    name = StructureData._uniqueName(parent=project, name=name)
     ds = project.newStructureData(name=name, **kwargs)
     return ds
 
 def _newDistanceRestraintTable(project, dataset=None, name=None):
     name  = name or 'my%s' % RestraintTable.className
-    name = RestraintTable._uniqueName(project=project, name=name)
+    name = RestraintTable._uniqueName(parent=project, name=name)
     if not dataset:
         dataset = _newStructureData(project, name=name)
     return dataset.newRestraintTable(restraintType='Distance', name=name)

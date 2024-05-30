@@ -589,8 +589,8 @@ class TopObject(XmlLoaderABC):
                     self.package.path.mkdir(parents=True, exist_ok=False)
                 if not self.path.parent.isWriteable():
                     raise PermissionError(f'No write permission for {self.path.parent}')
-                with self.path.saveWriteToFile(mode='w', overwrite=True,
-                                               keepOnError=True, validator=self._validateTopObjectXml) as fp:
+                with self.path.saveWriteToFile(mode='w', overwrite=True, keepOnError=True,
+                                               validator=self._validateTopObjectXml) as fp:
                     saveToStream(fp, self.apiTopObject)
 
             except (PermissionError, FileNotFoundError) as es:
@@ -620,8 +620,8 @@ class TopObject(XmlLoaderABC):
                 path = autoBackupPath / self.package.relativePath / self._path
                 if not path.parent.exists():
                     path.parent.mkdir(parents=True, exist_ok=False)
-                with path.saveWriteToFile(mode='w', overwrite=True,
-                                               keepOnError=True, validator=self._validateTopObjectXml) as fp:
+                with path.saveWriteToFile(mode='w', overwrite=True, keepOnError=True,
+                                          validator=self._validateTopObjectXml) as fp:
                     saveToStream(fp, self.apiTopObject)
 
             except (PermissionError, FileNotFoundError):

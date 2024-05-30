@@ -2,8 +2,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -12,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:26 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-05-30 15:51:32 +0100 (Thu, May 30, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,7 +28,7 @@ from ccpn.core.lib.AxisCodeLib import axisCodeMatch
 from ccpn.core.testing.WrapperTesting import WrapperTesting
 
 
-def undo_redo_tester(obj, undo_obj):
+def _undo_redo_tester(obj, undo_obj):
     """tests undo redo functionality by testing for 'Deleted' string in object representations/PIDs"""
     obj.assertNotIn('Deleted', repr(undo_obj))
     obj.undo.undo()
@@ -49,7 +50,7 @@ class Test_makeNmrAtom(WrapperTesting):
         self.assertEqual(a.isotopeCode, '15N')
 
         # Test undo redo using PID
-        undo_redo_tester(self, a)
+        _undo_redo_tester(self, a)
 
     def test_createNmrAtom_withName(self):
         c = self.project.newNmrChain()
@@ -58,7 +59,7 @@ class Test_makeNmrAtom(WrapperTesting):
         self.assertEqual(a.name, 'CA')
 
         # Undo and redo all operations
-        undo_redo_tester(self, a)
+        _undo_redo_tester(self, a)
 
     def test_fetchNmrAtom(self):
         c = self.project.newNmrChain()
@@ -70,7 +71,7 @@ class Test_makeNmrAtom(WrapperTesting):
         self.assertEqual(fetched_a, created_a)
 
         # Undo and redo all operations
-        undo_redo_tester(self, fetched_a)
+        _undo_redo_tester(self, fetched_a)
 
 
 class Test_chemicalShift(WrapperTesting):
@@ -103,7 +104,7 @@ class Test_chemicalShift(WrapperTesting):
         self.assertIsNotNone(sl)
 
         # Undo and redo all operations
-        undo_redo_tester(self, sl)
+        _undo_redo_tester(self, sl)
 
     def test_assignDimensionPID(self):
         atom_pid = self.atom.pid
@@ -114,7 +115,7 @@ class Test_chemicalShift(WrapperTesting):
         self.assertIsNotNone(sl)
 
         # Undo and redo all operations
-        undo_redo_tester(self, sl)
+        _undo_redo_tester(self, sl)
 
     def test_assignDimensionNone(self):
         self.assertIsNone(self.shiftList.getChemicalShift(self.atom))

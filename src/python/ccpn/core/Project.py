@@ -19,8 +19,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-29 13:58:42 +0100 (Wed, May 29, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-05-29 15:17:50 +0100 (Wed, May 29, 2024) $"
+__version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1282,7 +1282,7 @@ class Project(AbstractWrapperObject):
         self._xmlLoader.setUnmodified()
 
     def _makeCollections(self):
-        """Create Collection objects from the panda's dataFrame
+        """Create Collection objects from the pandas dataFrame
         """
         from ccpn.core._implementation.CollectionList import CollectionList
 

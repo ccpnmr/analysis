@@ -4,19 +4,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-30 20:44:26 +0100 (Fri, July 30, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-05-29 12:23:22 +0100 (Wed, May 29, 2024) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,7 +26,9 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtGui, QtWidgets, QtCore
+from PyQt5.QtCore import QRegularExpression
+from PyQt5.QtWidgets import QStyle, QPushButton
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Label import Label
@@ -40,7 +42,7 @@ import re
 
 SPLIT_REG_EXP = re.compile(',?\s*')
 SEPARATOR = ', '
-MAXINT = 2 ** 31 - 1
+MAXINT = 2**31 - 1
 INFINITY = float('Inf')
 
 
@@ -48,7 +50,8 @@ class Entry(QtWidgets.QLineEdit, Base):
 
     def __init__(self, parent, text='', callback=None, maxLength=1000,
                  listener=None, stripEndWhitespace=True, editable=True,
-                 backgroundText='<default>', **kwds):
+                 backgroundText='<default>', allowFeedback=False,
+                 validator=None, **kwds):
 
         super().__init__(parent)
         Base._init(self, **kwds)
@@ -82,6 +85,67 @@ class Entry(QtWidgets.QLineEdit, Base):
             self.setReadOnly(True)
             self.setEnabled(False)
 
+        icon = self.style().standardIcon(getattr(QStyle, 'SP_MessageBoxCritical'))
+        self.feedbackAction = self.addAction(icon, self.TrailingPosition)
+        self.textEdited.connect(self.validate)
+
+        self.allowFeedback = allowFeedback
+        self.validator = validator
+        self.feedback = None
+
+    def setValidator(self, a0):
+        """Overrides the traditional Validator to allow
+        the user to write what they want, however if the input is not
+        allowed and feedback is enabled then a feedback icon will appear.
+
+        .. NOTE:: allowFeedback must be true for this to work.
+        """
+        if self.allowFeedback:
+            self.validator = a0
+            self.validate()
+        else:
+            super().setValidator(a0)
+
+    def validate(self):
+        """If there is a validator set add corresponding feedback for the box"""
+        # removes the feedback if box is empty
+        # or there is no validator set
+        if not self.text() or not self.validator:
+            self.feedback = False
+            return
+
+        validity = self.validator.validate(self.text(), 0)[0]
+        if validity != 2:
+            self.feedback = True
+        else:
+            self.feedback = False
+
+    @property
+    def feedback(self) -> bool:
+        return self._feedback
+
+    @feedback.setter
+    def feedback(self, value: bool | None):
+        """Sets current feedback response."""
+        if not self.allowFeedback or value is None:
+            self.feedbackAction.setVisible(False)
+            return
+
+        self.feedbackAction.setVisible(value)
+        self._feedback = value
+
+    @property
+    def allowFeedback(self) -> bool:
+        return self._allowFeedback
+
+    @allowFeedback.setter
+    def allowFeedback(self, value: bool | None):
+        self._allowFeedback = value
+
+        if value is None or value is False:
+            self.feedback = False
+            self.feedbackAction.setVisible(False)
+
     def _callback(self):
 
         if self.callback and self._isAltered:
@@ -89,15 +153,12 @@ class Entry(QtWidgets.QLineEdit, Base):
             self._isAltered = False
 
     def _changed(self):
-
         self._isAltered = True
 
     def convertText(self, text):
         # Overwritten in subclasses to make float, int etc
-
         if self._stripEndWhitespace:
             text = text.strip()
-
         return text or None
 
     def convertInput(self, value):
@@ -129,12 +190,11 @@ class IntEntry(Entry):
                  minValue=-MAXINT, maxValue=MAXINT, **kwds):
 
         Entry.__init__(self, parent, text, callback, **kwds)
-
         valid = QtGui.QIntValidator(minValue, maxValue, self)
         self.setValidator(valid)
+        self.allowFeedback = True
 
     def convertText(self, text):
-
         if not text:
             return None
         else:
@@ -164,7 +224,7 @@ class FloatEntry(Entry):
 
         self.decimals = decimals
         self.setText(self.convertInput(text))
-
+        self.allowFeedback = True
         valid = QtGui.QDoubleValidator(minValue, maxValue, decimals, self)
         self.setValidator(valid)
 
@@ -208,6 +268,7 @@ class ArrayEntry(Entry):
 
     def __init__(self, parent, text='', callback=None, **kwds):
         Entry.__init__(self, parent, text, callback, **kwds)
+        self.allowFeedback = False
 
     def convertText(self, text):
         # return re.split(SPLIT_REG_EXP, text) or []
@@ -221,6 +282,7 @@ class IntArrayEntry(IntEntry):
 
     def __init__(self, parent, text='', callback=None, **kwds):
         IntEntry.__init__(self, parent, text, callback, **kwds)
+        self.allowFeedback = False
 
     def convertText(self, text):
         # array = re.split(SPLIT_REG_EXP, text) or []
@@ -236,6 +298,7 @@ class FloatArrayEntry(FloatEntry):
 
     def __init__(self, parent, text='', callback=None, **kwds):
         FloatEntry.__init__(self, parent, text, callback, **kwds)
+        self.allowFeedback = False
 
     def convertText(self, text):
         # array = re.split(SPLIT_REG_EXP, text) or []
@@ -300,6 +363,7 @@ if __name__ == '__main__':
 
     window = QtWidgets.QWidget()
     frame = Frame(window, setLayout=True)
+    window.resize(250, 500)
 
 
     def callback(value):
@@ -308,22 +372,31 @@ if __name__ == '__main__':
 
     Entry(frame, 'Start Text', callback, grid=(0, 0))
 
-    ArrayEntry(frame, ['A', 'C', 'D', 'C'], callback, grid=(1, 0))
+    entry = Entry(frame, 'Fail Text', callback, backgroundText='Only Lowercase', grid=(1, 0), allowFeedback=True)
 
-    IntEntry(frame, 123, callback, grid=(2, 0))
+    # regex test that disallows any string that is not
+    # all lower case - allows underscores.
+    regexp = QtCore.QRegularExpression(r'^[a-z_]+([a-z_]+)*$', QtCore.QRegularExpression.UseUnicodePropertiesOption)
+    validator = QtGui.QRegularExpressionValidator(regexp)
+    entry.setValidator(validator)
 
-    IntArrayEntry(frame, [4, 5, 6, 7], callback, grid=(3, 0))
+    ArrayEntry(frame, ['A', 'C', 'D', 'C'], callback, grid=(2, 0))
 
-    FloatEntry(frame, 2.818, callback, grid=(4, 0))
+    IntEntry(frame, 123, callback, backgroundText='Int Entry', grid=(3, 0))
 
-    e = FloatArrayEntry(frame, [1, 2, 4], callback, decimals=2, grid=(5, 0))
+
+    IntArrayEntry(frame, [4, 5, 6, 7], callback, grid=(4, 0))
+
+    FloatEntry(frame, 2.818, callback, grid=(5, 0))
+
+    e = FloatArrayEntry(frame, [1, 2, 4], callback, decimals=2, grid=(6, 0))
     e.set([1e12, -0.7e-5, 9.75])
 
-    LabelledEntry(frame, 'Text:', 'Initial val', callback, setLayout=True, grid=(6, 0))
+    LabelledEntry(frame, 'Text:', 'Initial val', callback, setLayout=True, grid=(7, 0))
 
-    LabelledIntEntry(frame, 'Int:', 0, callback, setLayout=True, grid=(7, 0))
+    LabelledIntEntry(frame, 'Int:', 0, callback, setLayout=True, grid=(8, 0))
 
-    LabelledFloatEntry(frame, 'Float:', 0.7295, callback, decimals=8, setLayout=True, grid=(8, 0))
+    LabelledFloatEntry(frame, 'Float:', 0.7295, callback, decimals=8, setLayout=True, grid=(9, 0))
 
     window.show()
 

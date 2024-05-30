@@ -24,7 +24,7 @@ def makePairs(theList):
 
 with undoBlock():
     # create new peaklist for specified  spectrum
-    peakList = targetSpectrum.newPeakList(isSimulated=True)
+    peakList = targetSpectrum.newPeakList(isSynthetic=True)
     print('created:', peakList)
 
     # Loop through each NmrResidue in the NmrChain

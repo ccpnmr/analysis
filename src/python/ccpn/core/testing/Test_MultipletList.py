@@ -43,13 +43,12 @@ class MultipletListTest(WrapperTesting):
             self.multipletList = self.spectrum.newMultipletList()
 
     def test_newMultipletList(self):
-        self.assertEqual(len(self.spectrum.multipletLists), 0)
-
-        new_multipletList = self.spectrum.newMultipletList()
-
+        # first is created in the setup
         self.assertEqual(len(self.spectrum.multipletLists), 1)
+        new_multipletList = self.spectrum.newMultipletList()
+        self.assertEqual(len(self.spectrum.multipletLists), 2)
         self.assertEqual(new_multipletList.className, 'MultipletList')
-        self.assertIs(self.spectrum.multipletLists[0], new_multipletList)
+        self.assertIs(self.spectrum.multipletLists[1], new_multipletList)
 
     def test_multipletAveraging_set(self):
         self.multipletList.multipletAveraging='Weighted Average'

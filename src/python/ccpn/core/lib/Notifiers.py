@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-05-29 22:03:00 +0100 (Wed, May 29, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-30 10:29:33 +0100 (Thu, May 30, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -145,7 +145,38 @@ class NotifierABC(object):
 
     @property
     def id(self):
+        """:return the id of self
+        """
         return self._id
+
+    @property
+    def trigger(self):
+        """:return the trigger of self
+        """
+        return self._trigger
+
+    @property
+    def targetName(self):
+        """:return the targetName of self
+        """
+        return self._targetName
+
+    @property
+    def theObject(self):
+        """:return the theObject of self
+        """
+        return self._theObject
+
+    @property
+    def isRegistered(self) -> bool:
+        """:return True if notifier is still registered; i.e. active"""
+        return self._isRegistered
+
+    @property
+    def isExecuting(self) -> bool:
+        """:return True is Notifier callback is executing
+        """
+        return self._isExecuting
 
     def setDebug(self, flag: bool):
         """Set debug output on/off"""
@@ -188,41 +219,26 @@ class NotifierABC(object):
 
         del(self)
 
-    @property
-    def isRegistered(self) -> bool:
-        """:return True if notifier is still registered; i.e. active"""
-        return self._isRegistered
-
-    @property
-    def isExecuting(self) -> bool:
-        """:return True is Notifier callback is executing
-        """
-        return self._isExecuting
-
     def newCallbackDict(self,
-                        trigger=None, targetName=None,
                         previousValue=None, value=None, attributeName=None,
-                        obj=None,
-                        oldpid=None, pid=None, specifiers=None,
+                        obj=None, object=None,
+                        oldpid=None, pid=None,
+                        specifiers=None,
                         itemsChanged=None
                         ) -> dict:
-        """Create and return a dict with all the callback keys
+        """Create and return a dict with all the callback keys.
+        Both the obj en object arguments are mapped to the OBJECT key
         """
-        if trigger is None:
-            trigger = self._trigger
-        if targetName is None:
-            targetName = self._targetName
-
         callbackDict = {
                 self.NOTIFIER       : self,
                 self.THEOBJECT      : self._theObject,
-                self.TRIGGER        : trigger,
-                self.TARGETNAME     : targetName,
+                self.TRIGGER        : self._trigger,
+                self.TARGETNAME     : self._targetName,
                 self.ATTRIBUTE_NAME : attributeName,
                 self.PREVIOUSVALUE  : previousValue,
                 self.VALUE          : value,
                 self.ITEMS_CHANGED  : itemsChanged,
-                self.OBJECT         : obj,
+                self.OBJECT         : obj or object,
                 self.OLDPID         : oldpid,
                 self.PID            : pid,
                 self.SPECIFIERS     : specifiers,

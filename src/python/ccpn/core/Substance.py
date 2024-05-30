@@ -4,8 +4,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-05-28 15:39:02 +0100 (Tue, May 28, 2024) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-05-30 13:46:45 +0100 (Thu, May 30, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -710,8 +711,6 @@ class Substance(AbstractWrapperObject):
         oldName = self.name
         # self._oldPid = self.pid
         self._validateStringValue(attribName='name', value=name)
-        # name = self._uniqueName(project=self.project, name=name)
-
         oldLabelling = self.labelling
         apiLabeling = labelling = labelling or DEFAULT_LABELLING
         self._validateStringValue(attribName='labelling', value=labelling, allowNone=True)
@@ -729,13 +728,11 @@ class Substance(AbstractWrapperObject):
                                                        ('sampledDimension', spectrumHit.pseudoDimensionNumber),
                                                        ('sampledPoint', spectrumHit.pointNumber)))
                                           )
-                # renamedObjects.append(spectrumHit)
 
             # NB this must be done AFTER the spectrumHit loop to avoid breaking links
             coreUtil._resetParentLink(sampleComponent._wrappedData, 'sampleComponents',
                                       OrderedDict((('name', name), ('labeling', apiLabeling)))
                                       )
-            # renamedObjects.append(sampleComponent)
 
         # NB this must be done AFTER the sampleComponent loop to avoid breaking links
         coreUtil._resetParentLink(self._wrappedData, 'components',
@@ -750,17 +747,20 @@ class Substance(AbstractWrapperObject):
     #=========================================================================================
 
     @classmethod
-    def _uniqueName(cls, project, name=None) -> str:
+    def _uniqueName(cls, parent: Project, name=None) -> str:
         """Return a unique name based on name (set to defaultName if None)
+        :param parent: in this case, parent MUST be of type Project
+        :param name (str | None): target name (as required)
+        :return str: new unique name
         """
-        apiComponentStore = project._wrappedData.sampleStore.refSampleComponentStore
+        apiComponentStore = parent._wrappedData.sampleStore.refSampleComponentStore
         apiProject = apiComponentStore.root
 
         if name is None:
             name = cls._defaultName()
         cls._validateStringValue('name', name)
         name = name.strip()
-        names = [sib.name for sib in getattr(project, cls._pluralLinkName)]
+        names = [sib.name for sib in getattr(parent, cls._pluralLinkName)]
         while name in names or (apiProject.findFirstMolecule(name=name) or
                                 apiComponentStore.findFirstComponent(name=name)):
             name = commonUtil.incrementName(name)
@@ -858,20 +858,18 @@ def _newSubstance(self: Project, name: str = None, labelling: str = None, substa
 
     if isinstance(name, int):
         name = str(name)
-    # if not name:
-    name = Substance._uniqueName(project=self, name=name)
+    if not name:
+        # ensure that a name is specified
+        name = Substance._uniqueName(parent=self, name=name)
     self._validateStringValue(attribName='name', value=name, allowNone=True)
     self._validateStringValue(attribName='labelling', value=_labelling, allowNone=True)
 
     apiNmrProject = self._wrappedData
     apiComponentStore = apiNmrProject.sampleStore.refSampleComponentStore
     if apiComponentStore.findFirstComponent(name=name, labeling=apiLabeling) is not None:
-        # name = commonUtil._incrementObjectName(self.project, Substance._pluralLinkName, name)
-        # oldSubstance = apiComponentStore.findFirstComponent(name=name)
-        raise ValueError('{}.{} already exists'.format(name, _labelling if _labelling != DEFAULT_LABELLING else ''))
-
-    else:
-        oldSubstance = apiComponentStore.findFirstComponent(name=name)
+        # ensure unique name here onl if both match
+        name = Substance._uniqueName(parent=self, name=name)
+    oldSubstance = apiComponentStore.findFirstComponent(name=name)
 
     params = {
         'name'   : name, 'labeling': apiLabeling, 'userCode': userCode, 'synonyms': synonyms,
@@ -1005,16 +1003,17 @@ def _createPolymerSubstance(self: Project, sequence: typing.Sequence[str], name:
 
     if isinstance(name, int):
         name = str(name)
-    # if not name:
-    name = Substance._uniqueName(project=self, name=name)
+    if name is None:
+        # ensure that always has a name
+        name = Substance._uniqueName(parent=self, name=name)
     self._validateStringValue(attribName='name', value=name, allowNone=True)
     self._validateStringValue(attribName='labelling', value=labelling, allowNone=True)
 
     apiNmrProject = self._wrappedData
     if apiNmrProject.sampleStore.refSampleComponentStore.findFirstComponent(name=name, labeling=apiLabeling) is not None:
-        raise ValueError("%s.%s already exists" % (name, labelling if labelling != DEFAULT_LABELLING else ''))
-
-    elif apiNmrProject.root.findFirstMolecule(name=name) is not None:
+        # ensure that always has a name
+        name = Substance._uniqueName(parent=self, name=name)
+    if apiNmrProject.root.findFirstMolecule(name=name) is not None:
         raise ValueError("Molecule name %s is already in use for API Molecule" % name)
 
     # NOTE: ED I need to open the undoStack here so this adds to the list

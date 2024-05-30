@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-29 15:17:50 +0100 (Wed, May 29, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-05-30 13:45:37 +0100 (Thu, May 30, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -384,14 +384,17 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
     #     return name
 
     @classmethod
-    def _uniqueName(cls, project, name=None) -> str:
+    def _uniqueName(cls, parent, name=None) -> str:
         """Return a unique name based on name (set to defaultName if None)
+        :param parent: container for self (usually of type Project)
+        :param name (str | None): target name (as required)
+        :return str: new unique name
         """
         if name is None:
             name = cls._defaultName()
         cls._validateStringValue('name', name)
         name = name.strip()
-        names = [sib.name for sib in getattr(project, cls._pluralLinkName)]
+        names = [sib.name for sib in getattr(parent, cls._pluralLinkName)]
         while name in names:
             name = commonUtil.incrementName(name)
         return name
@@ -888,7 +891,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         of their rename method to minimises code duplication
         """
         # validate the name
-        name = self._uniqueName(project=self.project, name=value)
+        name = self._uniqueName(parent=self.project, name=value)
 
         # rename functions from here
         oldName = self.name

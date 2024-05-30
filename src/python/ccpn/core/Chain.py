@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-29 16:04:28 +0100 (Wed, May 29, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-30 13:45:35 +0100 (Thu, May 30, 2024) $"
 __version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
@@ -278,7 +278,7 @@ class Chain(AbstractWrapperObject):
                 name = self.name
                 if self.project.getByPid(f'{NmrChain.shortClassName}:{name}'):
                     getLogger().warn(f'NmrChain name {name} is already existing.')
-                    name = NmrChain._uniqueName(project=self.project, name=name)
+                    name = NmrChain._uniqueName(parent=self.project, name=name)
 
             with undoBlockWithoutSideBar():
                 nmrChain = self.project.newNmrChain(shortName=name, )  #  isConnected=True is not possible with a name different from #  (API errors)!
@@ -314,7 +314,7 @@ class Chain(AbstractWrapperObject):
         if self.nmrChain:
             getLogger().warning(f'{self.__class__.__name__}.rename will lose or change the assigned nmrChain')
 
-        name = self._uniqueName(project=self.project, name=value)
+        name = self._uniqueName(parent=self.project, name=value)
 
         # rename functions from here
         oldName = self.shortName
@@ -395,7 +395,7 @@ def _createChain(self: Project, compoundName: str = None,
 
     apiMolSystem = self._wrappedData.molSystem
     shortName = (
-        Chain._uniqueName(project=self, name=shortName)
+        Chain._uniqueName(parent=self, name=shortName)
         if shortName
         else apiMolSystem.nextChainCode()
     )
@@ -410,7 +410,7 @@ def _createChain(self: Project, compoundName: str = None,
     compoundName = Substance._uniqueName(self.project, name=compoundName)
 
     if apiRefComponentStore.findFirstComponent(name=compoundName) is None:
-        name = Chain._uniqueName(project=self, name=compoundName)
+        name = Chain._uniqueName(parent=self, name=compoundName)
 
     else:
         raise ValueError(

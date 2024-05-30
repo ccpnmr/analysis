@@ -2,8 +2,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -11,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-22 14:57:07 +0000 (Mon, January 22, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-05-30 13:47:13 +0100 (Thu, May 30, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -97,12 +98,28 @@ class TestSampleComponentCreation(WrapperTesting):
     def test_newSampleComponent(self):
         """
         Test that creating a new SampleComponent with no parameter gives the standard new name.
+        Check that second creation is given a unique name.
         """
         newSC = self.sample.newSampleComponent()
         self.assertEqual(newSC.pid, 'SC:ValidSample.mySampleComponent.')
         self.assertEqual(len(self.project.sampleComponents), 1)
         self.assertEqual(len(self.project.substances), 1)
         self.assertIs(self.project.sampleComponents[0], newSC)
+        newSC2 = self.sample.newSampleComponent()
+        self.assertEqual(newSC2.pid, 'SC:ValidSample.mySampleComponent_1.')
+        self.assertEqual(len(self.project.sampleComponents), 2)
+        self.assertEqual(len(self.project.substances), 2)
+        self.assertIs(self.project.sampleComponents[1], newSC2)
+        newSC3 = self.sample.newSampleComponent(name='test', labelling='label')
+        self.assertEqual(newSC3.pid, 'SC:ValidSample.test.label')
+        self.assertEqual(len(self.project.sampleComponents), 3)
+        self.assertEqual(len(self.project.substances), 3)
+        self.assertIs(self.project.sampleComponents[2], newSC3)
+        newSC4 = self.sample.newSampleComponent(name='test', labelling='label')
+        self.assertEqual(newSC4.pid, 'SC:ValidSample.test_1.label')
+        self.assertEqual(len(self.project.sampleComponents), 4)
+        self.assertEqual(len(self.project.substances), 4)
+        self.assertIs(self.project.sampleComponents[3], newSC4)
 
     def test_newSampleComponent_ES(self):
         """

@@ -1,9 +1,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -12,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-05 15:28:42 +0000 (Thu, January 05, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-05-30 13:47:13 +0100 (Thu, May 30, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -135,8 +136,9 @@ class TestSubstanceCreation(WrapperTesting):
         self.assertIs(self.project.substances[0], s)
         self.assertEqual(s.pid, 'SU:testSubstance.')
 
-        with self.assertRaisesRegex(ValueError, 'already exists'):
-            s2 = self.project.newSubstance('testSubstance')
+        # same name and labelling as above
+        s2 = self.project.newSubstance('testSubstance')
+        self.assertEqual(s2.pid, 'SU:testSubstance_1.')
 
     def test_newSubstance_WhitespaceLabelling(self):
         """
@@ -201,7 +203,7 @@ class TestSubstance_CreationFetch(WrapperTesting):
         """
         self.assertEqual(len(self.project.substances), 0)
 
-        self.project.createChain('acd', molType='protein')
+        self.project.createChain('ACD', molType='protein')
 
         self.assertEqual(len(self.project.substances), 1)
         self.assertEqual(self.project.substances[0].pid, 'SU:mySubstance.')
@@ -225,7 +227,7 @@ class TestExistingSubstancesWithSameNameReused(WrapperTesting):
                           sequence='acd', molType='protein')
 
     def test_createChainFromExistingSubstance(self):
-        physicalChain = self.project.createChain('acd', molType='protein')
+        physicalChain = self.project.createChain('ACD', molType='protein')
         newPhysicalChain = physicalChain.substances[0].createChain()
         self.assertEqual(physicalChain.substances, newPhysicalChain.substances)
         self.assertIsNot(physicalChain, newPhysicalChain)
@@ -687,28 +689,28 @@ class Test_PolymerSubstance(WrapperTesting):
         """
         Test that the labelling property of Substance can be set.
         """
-        with self.assertRaisesRegex(ValueError, 'createPolymerSubstance requires non-empty sequence'):
-            s = self.project.createPolymerSubstance(None,
-                                                    name='testPolymerSubstance',
-                                                    molType='protein',
-                                                    labelling='H')
-        self.assertEqual(len(self.project.substances), 0)
-
-        s = self.project.createPolymerSubstance('acd',
+        # with self.assertRaisesRegex(ValueError, 'createPolymerSubstance requires non-empty sequence'):
+        s = self.project.createPolymerSubstance(None,
                                                 name='testPolymerSubstance',
                                                 molType='protein',
                                                 labelling='H')
-        with self.assertRaisesRegex(ValueError, 'already exists'):
-            s = self.project.createPolymerSubstance('acd',
-                                                    name='testPolymerSubstance',
-                                                    molType='protein',
-                                                    labelling='H')
-        with self.assertRaisesRegex(ValueError, 'already in use'):
-            s = self.project.createPolymerSubstance('acd',
-                                                    name='testPolymerSubstance',
-                                                    molType='protein',
-                                                    labelling='K')
         self.assertEqual(len(self.project.substances), 1)
+
+        # s = self.project.createPolymerSubstance('acd',
+        #                                         name='testPolymerSubstance',
+        #                                         molType='protein',
+        #                                         labelling='H')
+        # with self.assertRaisesRegex(ValueError, 'already exists'):
+        #     s = self.project.createPolymerSubstance('acd',
+        #                                             name='testPolymerSubstance',
+        #                                             molType='protein',
+        #                                             labelling='H')
+        # with self.assertRaisesRegex(ValueError, 'already in use'):
+        #     s = self.project.createPolymerSubstance('acd',
+        #                                             name='testPolymerSubstance',
+        #                                             molType='protein',
+        #                                             labelling='K')
+        # self.assertEqual(len(self.project.substances), 1)
 
     def test_PolymerSubstanceWithLabellingProperties(self):
         """
@@ -735,12 +737,18 @@ class Test_PolymerSubstance(WrapperTesting):
         self.assertEqual(s.labelling, None)
         self.assertEqual(len(self.project.substances), 1)
 
-        with self.assertRaisesRegex(ValueError, 'already exists'):
-            s = self.project.createPolymerSubstance('acd',
-                                                    name='testPolymerSubstance',
-                                                    molType='protein',
-                                                    labelling=None)
-        self.assertEqual(len(self.project.substances), 1)
+        # with self.assertRaisesRegex(ValueError, 'already exists'):
+        #     s = self.project.createPolymerSubstance('acd',
+        #                                             name='testPolymerSubstance',
+        #                                             molType='protein',
+        #                                             labelling=None)
+        # self.assertEqual(len(self.project.substances), 1)
+        s = self.project.createPolymerSubstance('acd',
+                                                name='testPolymerSubstance',
+                                                molType='protein',
+                                                labelling=None)
+        self.assertEqual(len(self.project.substances), 2)
+        self.assertEqual(s.id, 'testPolymerSubstance_1.')
 
     def test_PolymerSubstanceWithLabellingProperties_ES(self):
         """

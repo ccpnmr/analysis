@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-05-30 10:29:33 +0100 (Thu, May 30, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-30 12:07:09 +0100 (Thu, May 30, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -50,6 +50,8 @@ from itertools import permutations
 import weakref
 
 from ccpn.util.Logging import getLogger
+from ccpn.util.AttributeDict import AttributeDict
+
 from ccpn.framework.Application import getCurrent, getProject
 
 DEBUG = False
@@ -229,20 +231,22 @@ class NotifierABC(object):
         """Create and return a dict with all the callback keys.
         Both the obj en object arguments are mapped to the OBJECT key
         """
-        callbackDict = {
-                self.NOTIFIER       : self,
-                self.THEOBJECT      : self._theObject,
-                self.TRIGGER        : self._trigger,
-                self.TARGETNAME     : self._targetName,
-                self.ATTRIBUTE_NAME : attributeName,
-                self.PREVIOUSVALUE  : previousValue,
-                self.VALUE          : value,
-                self.ITEMS_CHANGED  : itemsChanged,
-                self.OBJECT         : obj or object,
-                self.OLDPID         : oldpid,
-                self.PID            : pid,
-                self.SPECIFIERS     : specifiers,
-                }
+        callbackDict = AttributeDict()
+        callbackDict.update(
+        {
+            self.NOTIFIER       : self,
+            self.THEOBJECT      : self._theObject,
+            self.TRIGGER        : self._trigger,
+            self.TARGETNAME     : self._targetName,
+            self.ATTRIBUTE_NAME : attributeName,
+            self.PREVIOUSVALUE  : previousValue,
+            self.VALUE          : value,
+            self.ITEMS_CHANGED  : itemsChanged,
+            self.OBJECT         : obj or object,
+            self.OLDPID         : oldpid,
+            self.PID            : pid,
+            self.SPECIFIERS     : specifiers,
+        })
         return callbackDict
 
     @staticmethod
@@ -495,8 +499,9 @@ class Notifier(NotifierABC):
                                                 pid=obj.pid,
                                                 specifiers=kwds
                                                 )
-
+            self._isExecuting = True
             self._callback(callbackDict)
+            self._isExecuting = False
             notifierFired = True
 
         if self._debug:

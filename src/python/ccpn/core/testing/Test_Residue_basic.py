@@ -2,8 +2,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -11,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-22 14:57:07 +0000 (Mon, January 22, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-05-30 15:51:32 +0100 (Thu, May 30, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,22 +30,30 @@ from ccpn.core.testing.WrapperTesting import WrapperTesting
 class TestPhysicalResidueCreation(WrapperTesting):
 
     def test_MakeSingleResidueChain(self):
-        ch = self.project.createChain(sequence='a', molType='protein')
+        ch = self.project.createChain(sequence='A', molType='protein')
         self.assertEqual(len(ch.residues), 1)
 
     def test_MakeTwoResidueChain_Length(self):
-        ch = self.project.createChain(sequence='ga', molType='protein')
+        ch = self.project.createChain(sequence='GA', molType='protein')
         self.assertRaises(Exception, len, ch)
 
     def test_MakeTwoResidueChain_ResiduesLength(self):
-        ch = self.project.createChain(sequence='ga', molType='protein')
+        ch = self.project.createChain(sequence='GA', molType='protein')
         self.assertEqual(len(ch.residues), 2)
+
+    def test_MakeSingleChain_BadResidues(self):
+        with self.assertRaisesRegex(ValueError, 'The given sequence is not valid'):
+            ch = self.project.createChain(sequence='ga', molType='protein')
+
+    def test_MakeSingleChain_BadList(self):
+        with self.assertRaisesRegex(TypeError, 'Sequence must be a List'):
+            ch = self.project.createChain(('ALA', 'GLY'), molType='protein')
 
 
 class TestPhysicalResidueProperties(WrapperTesting):
     def setUp(self):
         with self.initialSetup():
-            self.physicalChain = self.project.createChain(sequence='acd', molType='protein')
+            self.physicalChain = self.project.createChain(sequence='ACD', molType='protein')
             self.r0, self.r1, self.r2 = self.physicalChain.residues
 
     def test_ResidueTypesOfMolecularResiduesInChain(self):

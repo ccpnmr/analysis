@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-05-31 13:35:06 +0100 (Fri, May 31, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-31 14:42:07 +0100 (Fri, May 31, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -736,7 +736,7 @@ class NotifierBase(object):
         self._registeredNotifiersDict = _NotifiersDict()
 
     #-----------------------------------------------------------------------------------------
-    # creating new notifier associated with self
+    # creating, registering and unregistering notifier set for self
     #-----------------------------------------------------------------------------------------
 
     @staticmethod
@@ -765,6 +765,9 @@ class NotifierBase(object):
     def _unRegisterNotifier(notifier: NotifierABC, theObject):
         """Un-register notifier from the theObject
         :param notifier: a Notifier|CurrentNotifier|GuiNotifier instance
+
+        staticmethod as not all objects that get notifiers registered (e.g. Widgets) inherit
+        from NotifierBase
         """
         if not isinstance(notifier, NotifierABC):
             raise TypeError(f'{notifier} is not a valid notifier instance')
@@ -777,7 +780,7 @@ class NotifierBase(object):
 
     def _newNotifier(self, trigger: str, targetName: str, callback: Callable, setterObject, **kwds) -> Notifier:
         """
-        Create a new NotifierABC subtype instance compatible and to be registered with self.
+        Create a new NotifierABC subtype instance to be registered with self.
         The created notifier registers itself with _registeredNotifiersDict
 
         To be subclassed for different implementations; e.g. GuiNotifierBase, TraitNotifierBase, ...
@@ -796,7 +799,8 @@ class NotifierBase(object):
         return _notifier
 
     #-----------------------------------------------------------------------------------------
-
+    # Functionalities for managing Notifiers set by self
+    #-----------------------------------------------------------------------------------------
     def _addNotifier(self, notifier: NotifierABC):
         """Add notifier to _objectNotifiersDict of self;
         :param notifier: a Notifier|CurrentNotifier|GuiNotifier instance
@@ -955,8 +959,22 @@ class NotifierBase(object):
             notifier.unRegisterNotifier()
             del(notifier)
 
+    def _testCallback(self, callbackDict:dict, **kwds):
+        """A method to test callbacks; print kwds, callbackDict
+        """
+        _ntf = callbackDict[NotifierABC.NOTIFIER]
+        print(f'\n>>> _testCallback() >>>\n')
+
+        key='kwds'
+        print(f'{key:20} : {kwds}')
+
+        for key, val in callbackDict.items():
+            print(f'{key:20} : {val!r}')
+
     #-----------------------------------------------------------------------------------------
-    # Notification blanking level - to allow for nested notification disabling
+    # Notifications
+    #-----------------------------------------------------------------------------------------
+    # blanking level - to allow for nested notification disabling
     _notificationBlanking = 0
 
     @classmethod

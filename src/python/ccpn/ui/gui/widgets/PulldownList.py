@@ -6,8 +6,9 @@ PulldownList widget
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -16,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-17 12:53:42 +0100 (Fri, May 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-31 18:51:38 +0100 (Fri, May 31, 2024) $"
 __version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
@@ -546,20 +547,20 @@ class ComboBoxDividerDelegate(QtWidgets.QStyledItemDelegate):
         self._BORDER = getFontHeight() // 4
 
     def paint(self, painter, option, index) -> None:
-        if not index.isValid():
-            return
-
         # if (not (index.flags() & QtCore.Qt.ItemIsEnabled) or
         #         index.data(QtCore.Qt.AccessibleDescriptionRole) is not None):
-        if index.data(QtCore.Qt.AccessibleDescriptionRole) is not None:
-            # draw a dividing line across the pulldown list
-            painter.save()
-            col = self._DIVIDERCOLOR or option.palette.color(QtGui.QPalette.Mid)
-            painter.setPen(QtGui.QPen(col, 2))
-            painter.drawLine(option.rect.left() + self._BORDER, option.rect.center().y(),
-                             option.rect.right() - self._BORDER, option.rect.center().y())
+        painter.save()
+        try:
+            if index.data(QtCore.Qt.AccessibleDescriptionRole) is not None:
+                # draw a dividing line across the pulldown list
+                col = self._DIVIDERCOLOR or option.palette.color(QtGui.QPalette.Mid)
+                painter.setPen(QtGui.QPen(col, 2))
+                painter.drawLine(option.rect.left() + self._BORDER, option.rect.center().y(),
+                                 option.rect.right() - self._BORDER, option.rect.center().y())
+            else:
+                super().paint(painter, option, index)
+        finally:
             painter.restore()
-        return super().paint(painter, option, index)
 
 
 #=========================================================================================

@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-05-30 12:07:09 +0100 (Thu, May 30, 2024) $"
+__dateModified__ = "$dateModified: 2024-05-31 13:35:06 +0100 (Fri, May 31, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -779,6 +779,7 @@ class NotifierBase(object):
         """
         Create a new NotifierABC subtype instance compatible and to be registered with self.
         The created notifier registers itself with _registeredNotifiersDict
+
         To be subclassed for different implementations; e.g. GuiNotifierBase, TraitNotifierBase, ...
 
         :param triggers: list of triggers to trigger callback
@@ -797,7 +798,7 @@ class NotifierBase(object):
     #-----------------------------------------------------------------------------------------
 
     def _addNotifier(self, notifier: NotifierABC):
-        """Add notifier to notifiersDict;
+        """Add notifier to _objectNotifiersDict of self;
         :param notifier: a Notifier|CurrentNotifier|GuiNotifier instance
         """
         if not isinstance(notifier, NotifierABC):
@@ -806,11 +807,11 @@ class NotifierBase(object):
         self._objectNotifiersDict.addNotifier(notifier)
 
     def setNotifier(self, theObject, triggers: list|tuple, targetName: str|None, callback: Callable, **kwds) -> _NotifierList:
-        """Set Notifier for (V3) theObject;
+        """Set Notifier for (V3/V4) theObject;
         Store for management; i.e. removal with deleteNotifier() or deleteAllNotifiers()
         methods.
 
-        :param theObject: V3 object to register a notifier with
+        :param theObject: (V3/V4) object to register a notifier with
         :param triggers: list of triggers to trigger callback
         :param targetName: valid className, attributeName or None (See Notifier doc string for details)
         :param callback: callback function with signature: callback(callbackDict, **kwds])
@@ -846,7 +847,7 @@ class NotifierBase(object):
     def setGuiNotifier(self, theObject: 'AbstractWrapperObject',
                              triggers: list, targetNames: list,
                              callback: Callable) -> _NotifierList:
-        """Set GuiNotifier on (V3) theObject.
+        """Set GuiNotifier on (V3/V4) theObject.
         Store for management; i.e. removal with deleteNotifier() or deleteAllNotifiers()
         methods.
 
@@ -895,7 +896,7 @@ class NotifierBase(object):
     def _hasNotifier(self, notifier) -> bool:
         """Return True if self has notifier
 
-        :param notifier: a Notifier|CurrentNotifier|GuiNotifier instance
+        :param notifier: a NotifierABC subclass instance
         :return: True or False
         """
         if not isinstance(notifier, NotifierABC):
@@ -911,7 +912,7 @@ class NotifierBase(object):
 
         return notifier.id in _dict
 
-    def searchNotifiers(self, objects=[], triggers=[], targetName=None) -> list:
+    def searchNotifiers(self, objects=(), triggers=(), targetName=None) -> list:
         """Search whether a notifier with the given parameters is already defined
         for objects.
         The triggers CREATE, DELETE, RENAME and CHANGE can be combined in the call signature
@@ -932,7 +933,7 @@ class NotifierBase(object):
 
         return foundNotifiers
 
-    def deleteNotifier(self, notifier):
+    def deleteNotifier(self, notifier: NotifierABC):
         """Remove notifier associated self, unregister it and delete it
 
         :param notifier: a Notifier instance previously set by
@@ -951,7 +952,6 @@ class NotifierBase(object):
         objNotifiers = self._objectNotifiersDict
         # allNotifiers returns a list, as contents are being changed this is crucial
         for notifier in objNotifiers.allNotifiers:
-            # objNotifiers.deleteNotifier(notifier)
             notifier.unRegisterNotifier()
             del(notifier)
 

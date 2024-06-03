@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-23 14:17:11 +0100 (Thu, May 23, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-05-31 18:51:37 +0100 (Fri, May 31, 2024) $"
+__version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -126,30 +126,19 @@ class _MyAppProxyStyle(QtWidgets.QProxyStyle):
     """Class to handle resizing icons in menus
     """
 
-    # def pixelMetric(self, metric, option=None, widget=None) -> int:
-    #     if metric == QtWidgets.QStyle.PM_SmallIconSize:
-    #         # change the size of the icons in menus - overrides checkBoxes in menus
-    #         return (getFontHeight(size='SMALL') or 15) + 3
-    #
-    #     elif metric in (QtWidgets.QStyle.PM_IndicatorHeight,
-    #                     QtWidgets.QStyle.PM_IndicatorWidth,
-    #                     QtWidgets.QStyle.PM_ExclusiveIndicatorWidth,
-    #                     QtWidgets.QStyle.PM_ExclusiveIndicatorHeight,
-    #                     ):
-    #         # change the size of checkBoxes and radioButtons
-    #         return (getFontHeight(size='SMALL') or 15) - 2
-    #
-    #     elif metric == QtWidgets.QStyle.PM_MessageBoxIconSize:
-    #         # change the icon size in messageDialog
-    #         return getFontHeight(size='MAXIMUM') or 18
-    #
-    #     return super().pixelMetric(metric, option, widget)
+    def drawControl(self, element, option, painter, widget=None):
+        if (element in {QtWidgets.QStyle.CE_MenuItem} and isinstance(option, QtWidgets.QStyleOptionMenuItem) and
+                (_actionGeometries := getattr(widget, '_actionGeometries', None)) and
+                (action := _actionGeometries.get(str(option.rect))) and
+                (colour := getattr(action, '_foregroundColour', None))):
+            # Customise the foreground colour for the menu-item from the QAction
+            option.palette.setColor(option.palette.Text, colour)
+        return super().drawControl(element, option, painter, widget)
 
     def standardIcon(self, standardIcon, option=None, widget=None) -> QtGui.QIcon:
         # change the close-button of the line-edit to a cleaner icon, set by setClearButtonEnabled
         if standardIcon == QtWidgets.QStyle.SP_LineEditClearButton:
             return Icon('icons/close-lineedit')
-
         return super().standardIcon(standardIcon, option, widget)
 
 
@@ -946,8 +935,9 @@ class Gui(Ui, _Gui):
         # check the project name derived from path; not all is allowed
         newName = newPath.basename
         if (_nameFromPath := checkProjectName(newName, correctName=True)) != newName:
-            MessageDialog.showInfo(title, f'Project name will be changed from "{newName}" to "{_nameFromPath}"\n'
-                                          f'See console/log for details',
+            MessageDialog.showInfo(title,
+                                   f'Project name will be changed from "{newName}" to "{_nameFromPath}"\n'
+                                   f'See console/log for details',
                                    parent=self.mainWindow)
             newPath = (newPath.parent / _nameFromPath).assureSuffix(CCPN_DIRECTORY_SUFFIX)
             newName = _nameFromPath

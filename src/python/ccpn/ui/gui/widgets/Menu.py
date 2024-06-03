@@ -3,9 +3,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:47 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2024-05-31 18:51:38 +0100 (Fri, May 31, 2024) $"
+__version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -45,6 +46,9 @@ CCPNPLUGINSMENU = 'CCPN Plugins'
 
 
 class Menu(QtWidgets.QMenu, Base):
+    _colourEnabled = False
+    _actionGeometries = None
+
     def __init__(self, title, parent, isFloatWidget=False, **kwds):
         super().__init__(parent)
         Base._init(self, isFloatWidget=isFloatWidget, **kwds)
@@ -52,16 +56,15 @@ class Menu(QtWidgets.QMenu, Base):
         title = translator.translate(title)
         self.setTitle(title)
         self.isFloatWidget = isFloatWidget
-
         self.setToolTipsVisible(True)
-        # self.setAttribute(QtCore.Qt.WA_DeleteOnClose, False)
 
-    def addItem(self, text, shortcut=None, callback=None, checked=True, checkable=False, icon=None, toolTip=None, **kwargs):
+    def addItem(self, text, shortcut=None, callback=None, checked=True, checkable=False, icon=None, toolTip=None,
+                **kwargs):
         action = Action(self.getParent(), text, callback=callback, shortcut=shortcut,
-                        checked=checked, checkable=checkable, icon=icon, toolTip=toolTip, isFloatWidget=self.isFloatWidget, **kwargs)
+                        checked=checked, checkable=checkable, icon=icon, toolTip=toolTip,
+                        isFloatWidget=self.isFloatWidget, **kwargs)
         self.addAction(action)
         return action
-        # print(shortcut)
 
     def _addSeparator(self, *args, **kwargs):
         separator = self.addSeparator()
@@ -73,7 +76,8 @@ class Menu(QtWidgets.QMenu, Base):
         return menu
 
     def _addQMenu(self, menu):
-        """ this adds a normal QMenu """
+        """This adds a normal QMenu.
+        """
         QtWidgets.QMenu.addMenu(self, menu)
         return menu
 
@@ -82,26 +86,39 @@ class Menu(QtWidgets.QMenu, Base):
         return dd
 
     def getActionByName(self, name):
-        """
-        Given a name return the menu action
+        """Return the named menu action.
         """
         return self.getItems().get(name, None)
 
     def moveActionBelowName(self, action, targetActionName):
-        """
-        Move a action below a pre-existing name
+        """Move an action below a pre-existing name.
         """
         targetAction = self.getActionByName(targetActionName)
         if targetAction:
             self.insertAction(action, targetAction)
 
     def moveActionAboveName(self, action, targetActionName):
-        """
-        Move a action above a pre-existing name
+        """Move an action above a pre-existing name.
         """
         targetAction = self.getActionByName(targetActionName)
         if targetAction:
             self.insertAction(targetAction, action)
+
+    def showEvent(self, event: QtGui.QShowEvent) -> None:
+        super().showEvent(event)
+        if self._colourEnabled:
+            # if _colourEnabled defined for this menu then build a dict of the actionGeometry's
+            # these can be used in the QProxyStyle to provide access the QAction
+            self._actionGeometries = {str(self.actionGeometry(action)): action
+                                      for action in self.actions()}
+
+    def setColourEnabled(self, value):
+        if not isinstance(value, bool):
+            raise TypeError(f'{self.__class__.__name__}.setColourEnabled: value is not a bool')
+        self._colourEnabled = value
+
+    def isColourEnabled(self) -> bool:
+        return self._colourEnabled
 
 
 class MenuBar(QtWidgets.QMenuBar):

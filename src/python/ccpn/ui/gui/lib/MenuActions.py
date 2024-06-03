@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-31 18:51:37 +0100 (Fri, May 31, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-03 09:50:26 +0100 (Mon, June 03, 2024) $"
 __version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
@@ -554,6 +554,9 @@ class OpenItemABC:
         subMenu = menu.addMenu(_ADD_TO_COLLECTION)
         subMenu.setColourEnabled(True)  # enable foreground-colours for this menu
         collections = self.mainWindow.application.project.collections
+        ttOk = 'Collection contains 1 or more of the selected objects;\nadd the remaining objects to the collection.'
+        ttGood = 'Add all objects to the collection.'
+        ttBad = 'All objects in selection are already contained in this collection.'
         _count = 0
         for col in collections:
             colSet, selSet = set(col.items), set(objs)
@@ -566,10 +569,15 @@ class OpenItemABC:
                 # flag that some of the selection may already be in this collection
                 # Needs cleaning-up, probably needs to be an attribute of subclassed action
                 _action._foregroundColour = QtGui.QColor('darkorange')
+                _action.setToolTip(ttOk)
+            elif _objs:
+                _action.setToolTip(ttGood)
+            else:
+                _action.setToolTip(ttBad)
             if not _objs:
                 # do these want to be disabled AND hidden?
                 _action.setEnabled(False)
-                _action.setVisible(False)
+                # _action.setVisible(False)
                 _count += 1
         if not len(subMenu.actions()) or _count == len(collections):
             # disable menu if empty
@@ -579,6 +587,10 @@ class OpenItemABC:
         subMenu = menu.addMenu(_REMOVE_FROM_COLLECTION)
         subMenu.setColourEnabled(True)  # enable foreground-colours for this menu
         collections = self.mainWindow.application.project.collections
+        ttOk = 'Collection contains 1 or more of the selected objects;\nremove the remaining objects from the ' \
+               'collection.'
+        ttGood = 'Remove all obects from the collection.'
+        ttBad = 'None of the selected objects are in this collection.'
         _count = 0
         for col in collections:
             colSet, selSet = set(col.items), set(objs)
@@ -587,14 +599,19 @@ class OpenItemABC:
             _objs = [obj for obj in objs if obj in col.items and obj != col]
             # add action to remove from the collection
             _action = subMenu.addAction(col.pid, partial(col.removeItems, _objs))
-            if not _objs:
-                # do these want to be disabled AND hidden?
-                _action.setEnabled(False)
-                _action.setVisible(False)
-                _count += 1
             if diff and diff != selSet:
                 # flag that some of the selection may already be in this collection
                 _action._foregroundColour = QtGui.QColor('darkorange')
+                _action.setToolTip(ttOk)
+            elif _objs:
+                _action.setToolTip(ttGood)
+            else:
+                _action.setToolTip(ttBad)
+            if not _objs:
+                # do these want to be disabled AND hidden?
+                _action.setEnabled(False)
+                # _action.setVisible(False)
+                _count += 1
         if not len(subMenu.actions()) or _count == len(collections):
             # disable menu if empty
             subMenu.setEnabled(False)

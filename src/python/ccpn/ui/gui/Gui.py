@@ -4,9 +4,10 @@ The top-level Gui class for all user interactions
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-03 12:00:10 +0000 (Fri, November 03, 2023) $"
-__version__ = "$Revision: 3.2.0.1 $"
+__dateModified__ = "$dateModified: 2024-05-31 18:51:37 +0100 (Fri, May 31, 2024) $"
+__version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -116,30 +117,19 @@ class _MyAppProxyStyle(QtWidgets.QProxyStyle):
     """Class to handle resizing icons in menus
     """
 
-    # def pixelMetric(self, metric, option=None, widget=None) -> int:
-    #     if metric == QtWidgets.QStyle.PM_SmallIconSize:
-    #         # change the size of the icons in menus - overrides checkBoxes in menus
-    #         return (getFontHeight(size='SMALL') or 15) + 3
-    #
-    #     elif metric in (QtWidgets.QStyle.PM_IndicatorHeight,
-    #                     QtWidgets.QStyle.PM_IndicatorWidth,
-    #                     QtWidgets.QStyle.PM_ExclusiveIndicatorWidth,
-    #                     QtWidgets.QStyle.PM_ExclusiveIndicatorHeight,
-    #                     ):
-    #         # change the size of checkBoxes and radioButtons
-    #         return (getFontHeight(size='SMALL') or 15) - 2
-    #
-    #     elif metric == QtWidgets.QStyle.PM_MessageBoxIconSize:
-    #         # change the icon size in messageDialog
-    #         return getFontHeight(size='MAXIMUM') or 18
-    #
-    #     return super().pixelMetric(metric, option, widget)
+    def drawControl(self, element, option, painter, widget=None):
+        if (element in {QtWidgets.QStyle.CE_MenuItem} and isinstance(option, QtWidgets.QStyleOptionMenuItem) and
+                (_actionGeometries := getattr(widget, '_actionGeometries', None)) and
+                (action := _actionGeometries.get(str(option.rect))) and
+                (colour := getattr(action, '_foregroundColour', None))):
+            # Customise the foreground colour for the menu-item from the QAction
+            option.palette.setColor(option.palette.Text, colour)
+        return super().drawControl(element, option, painter, widget)
 
     def standardIcon(self, standardIcon, option=None, widget=None) -> QtGui.QIcon:
         # change the close-button of the line-edit to a cleaner icon, set by setClearButtonEnabled
         if standardIcon == QtWidgets.QStyle.SP_LineEditClearButton:
             return Icon('icons/close-lineedit')
-
         return super().standardIcon(standardIcon, option, widget)
 
 
@@ -234,9 +224,11 @@ class Gui(Ui):
 
         else:
             if registered and not acceptedTerms:
-                popup = NewTermsConditionsPopup(self.mainWindow, trial=days, version=self.application.applicationVersion, modal=True)
+                popup = NewTermsConditionsPopup(self.mainWindow, trial=days,
+                                                version=self.application.applicationVersion, modal=True)
             else:
-                popup = RegisterPopup(self.mainWindow, trial=days, version=self.application.applicationVersion, modal=True)
+                popup = RegisterPopup(self.mainWindow, trial=days, version=self.application.applicationVersion,
+                                      modal=True)
 
             self.mainWindow.show()
             popup.exec_()
@@ -493,7 +485,9 @@ class Gui(Ui):
                 return
 
         if (_name := checkProjectName(name, correctName=True)) != name:
-            MessageDialog.showInfo('New Project', f'Project name changed from "{name}" to "{_name}"\nSee console/log for details', parent=self)
+            MessageDialog.showInfo('New Project',
+                                   f'Project name changed from "{name}" to "{_name}"\nSee console/log for details',
+                                   parent=self)
 
         with catchExceptions(errorStringTemplate='Error creating new project: %s'):
             if self.mainWindow:
@@ -663,7 +657,8 @@ class Gui(Ui):
         newName = newPath.basename
         if (_name := checkProjectName(newName, correctName=True)) != newName:
             newPath = (newPath.parent / _name).assureSuffix(CCPN_EXTENSION)
-            MessageDialog.showInfo(title, f'Project name changed from "{newName}" to "{_name}"\nSee console/log for details',
+            MessageDialog.showInfo(title,
+                                   f'Project name changed from "{newName}" to "{_name}"\nSee console/log for details',
                                    parent=self.mainWindow)
 
         with catchExceptions(errorStringTemplate='Error saving project: %s'):

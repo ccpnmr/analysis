@@ -20,6 +20,7 @@ export CCPNMR_TOP_DIR
 source "${CCPNMR_TOP_DIR}"/bin/paths.sh
 CONDA_PYTHON3="${CONDA}"/bin/python3
 
+"${CONDA_PYTHON3}" -m pip install --upgrade wheel setuptools
 "${CONDA_PYTHON3}" -m pip uninstall nef_pipelines
 "${CONDA_PYTHON3}" -m pip cache purge
 "${CONDA_PYTHON3}" -m pip install nef_pipelines

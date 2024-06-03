@@ -5,8 +5,9 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-17 13:09:59 +0100 (Fri, May 17, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-06-03 09:50:26 +0100 (Mon, June 03, 2024) $"
+__version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,6 +27,7 @@ __date__ = "$Date: 2020-06-15 10:06:31 +0000 (Mon, June 15, 2020) $"
 # Start of code
 #=========================================================================================
 
+from PyQt5 import QtGui, QtCore
 from functools import partial
 from collections import Counter
 from ccpn.core.MultipletList import MultipletList
@@ -53,7 +55,7 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.popups.ChainPopup import ChainPopup
 from ccpn.ui.gui.popups.ChemicalShiftListPopup import ChemicalShiftListEditor
 from ccpn.ui.gui.popups.ComplexEditorPopup import ComplexEditorPopup
-from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup, CCPCODESELECTION
+from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
 from ccpn.ui.gui.popups.CreateNmrChainPopup import CreateNmrChainPopup
 from ccpn.ui.gui.popups.StructureDataPopup import StructureDataPopup
 from ccpn.ui.gui.popups.IntegralListPropertiesPopup import IntegralListPropertiesPopup
@@ -78,6 +80,7 @@ from ccpn.core.lib.ContextManagers import notificationEchoBlocking, \
 from ccpn.ui.gui.guiSettings import getColours
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.Logging import getLogger
+from ccpn.framework.Application import getProject
 
 
 MAXITEMLOGGING = 2
@@ -549,15 +552,32 @@ class OpenItemABC:
 
         # create subMenu for adding selected items to a single collection
         subMenu = menu.addMenu(_ADD_TO_COLLECTION)
+        subMenu.setColourEnabled(True)  # enable foreground-colours for this menu
         collections = self.mainWindow.application.project.collections
+        ttOk = 'Collection contains 1 or more of the selected objects;\nadd the remaining objects to the collection.'
+        ttGood = 'Add all objects to the collection.'
+        ttBad = 'All objects in selection are already contained in this collection.'
         _count = 0
         for col in collections:
+            colSet, selSet = set(col.items), set(objs)
+            diff = selSet - colSet
             # only select items that are in the collection
             _objs = [obj for obj in objs if obj not in col.items and obj != col]
-            # add action to add to the collection
             _action = subMenu.addAction(col.pid, partial(col.addItems, _objs))
+            # add action to add to the collection
+            if diff and diff != selSet:
+                # flag that some of the selection may already be in this collection
+                # Needs cleaning-up, probably needs to be an attribute of subclassed action
+                _action._foregroundColour = QtGui.QColor('darkorange')
+                _action.setToolTip(ttOk)
+            elif _objs:
+                _action.setToolTip(ttGood)
+            else:
+                _action.setToolTip(ttBad)
             if not _objs:
+                # do these want to be disabled AND hidden?
                 _action.setEnabled(False)
+                # _action.setVisible(False)
                 _count += 1
         if not len(subMenu.actions()) or _count == len(collections):
             # disable menu if empty
@@ -565,15 +585,32 @@ class OpenItemABC:
 
         # create subMenu for removing selected items from a single collection - items are not deleted
         subMenu = menu.addMenu(_REMOVE_FROM_COLLECTION)
+        subMenu.setColourEnabled(True)  # enable foreground-colours for this menu
         collections = self.mainWindow.application.project.collections
+        ttOk = 'Collection contains 1 or more of the selected objects;\nremove the remaining objects from the ' \
+               'collection.'
+        ttGood = 'Remove all obects from the collection.'
+        ttBad = 'None of the selected objects are in this collection.'
         _count = 0
         for col in collections:
+            colSet, selSet = set(col.items), set(objs)
+            diff = selSet - colSet
             # only select items that are in the collection
             _objs = [obj for obj in objs if obj in col.items and obj != col]
             # add action to remove from the collection
             _action = subMenu.addAction(col.pid, partial(col.removeItems, _objs))
+            if diff and diff != selSet:
+                # flag that some of the selection may already be in this collection
+                _action._foregroundColour = QtGui.QColor('darkorange')
+                _action.setToolTip(ttOk)
+            elif _objs:
+                _action.setToolTip(ttGood)
+            else:
+                _action.setToolTip(ttBad)
             if not _objs:
+                # do these want to be disabled AND hidden?
                 _action.setEnabled(False)
+                # _action.setVisible(False)
                 _count += 1
         if not len(subMenu.actions()) or _count == len(collections):
             # disable menu if empty
@@ -611,9 +648,8 @@ class OpenItemABC:
     @staticmethod
     def _createNewCollection(pulldown, popup, items=None):
         """Create a new collection, or add to existing collection
-        and close the editPopup"""
-        from ccpn.framework.Application import getProject
-
+        and close the editPopup.
+        """
         collection = pulldown.getText()
         popup.hide()
         popup.deleteLater()
@@ -628,8 +664,11 @@ class OpenItemABC:
             coll[0].addItems(items)
 
         else:
-            # create a new collection
-            _project.newCollection(name=collection, items=items)
+            try:
+                # create a new collection
+                _project.newCollection(name=collection, items=items)
+            except (ValueError, TypeError) as es:
+                showWarning('Create New Collection', str(es))
 
     @staticmethod
     def _newPulldown(parent, allowEmpty=True, name=Collection.__name__, **kwds):
@@ -655,12 +694,14 @@ class OpenItemABC:
         """Make a small popup to enter a new collection name
         """
         from ccpn.util.OrderedSet import OrderedSet
-        from ccpn.framework.Application import getProject
+        from ccpn.ui.gui.widgets.ButtonList import Button
 
         # make a simple popup for editing collection
         class EditCollection(SpeechBalloon):
             """Balloon to hold the pulldown list for editing/selecting the collection name
             """
+            _blockEscapeFlag = None
+            _callback = None
 
             def __init__(self, parent, newPulldown, selectionWidget, *args, **kwds):
                 """Initialise the class
@@ -691,10 +732,15 @@ class OpenItemABC:
                 _frame = Frame(self, setLayout=True, margins=(10, 10, 10, 10))
                 title = 'New Collection/Add to Existing'
                 _label = Label(_frame, text=title, grid=(0, 0), gridSpan=(1, 2))
-                self._pulldownWidget = self._newPulldown(_frame, grid=(1, 0), gridSpan=(1, 2), )
+                self._pulldownWidget = self._newPulldown(_frame, grid=(1, 0), gridSpan=(1, 9), )
+                self._acceptButton = Button(_frame, grid=(2, 8), text='Accept', enabled=False)
 
                 # set to the class central widget
                 self.setCentralWidget(_frame)
+                self._pulldownWidget.view().setObjectName('_PULLDOWNVIEW')
+                self._pulldownWidget.view().installEventFilter(self)
+                self._pulldownWidget.setObjectName('_PULLDOWN')
+                self._pulldownWidget.installEventFilter(self)
 
             # add methods for setting pulldown options
             def setDefaultName(self, name):
@@ -704,15 +750,63 @@ class OpenItemABC:
                 self._pulldownWidget.setData(texts=texts)
 
             def setPulldownCallback(self, callback):
-                self._pulldownWidget.activated.connect(partial(callback,
-                                                               pulldown=self._pulldownWidget,
-                                                               popup=self))
+                self._callback = partial(callback,
+                                         pulldown=self._pulldownWidget,
+                                         popup=self)
+                self._acceptButton.setCallback(self._callback)
+                self._acceptButton.setEnabled(True)
 
             @property
             def centralWidgetSize(self):
                 """Return the sizeHint for the central widget
                 """
                 return self._central_widget_size()
+
+            def _filterCollections(self, selectedObjs):
+                if not (project := getProject()):
+                    return
+                color = QtGui.QColor('darkorange')
+                combo = self._pulldownWidget
+                for ind in range(len(self._pulldownWidget.texts)):
+                    itm = combo.model().item(ind)
+                    if collection := project.getByPid('CO:' + itm.text()):
+                        colSet, selSet = set(collection.items), set(selectedObjs)
+                        diff = selSet - colSet
+                        itm.setEnabled(bool(diff))
+                        if diff and diff != selSet:
+                            # flag that some of the selection may already be in this collection
+                            itm.setForeground(color)
+
+            def _resetPulldown(self):
+                # release the block on the pulldown
+                # so that enter-key works correctly on the lineEdit
+                self._pulldownWidget.lineEdit().setFocus()
+                self._blockEscapeFlag = None
+
+            def eventFilter(self, source: 'QObject', event: 'QEvent') -> bool:
+                if source.objectName() in {'_PULLDOWN'}:
+                    if event.type() == QtCore.QEvent.KeyPress and event.key() in {QtCore.Qt.Key_Escape}:
+                        QtCore.QTimer.singleShot(0, source.setFocus)
+                        if source.view().isVisible():
+                            source.hidePopup()
+                            return True
+                        if self._blockEscapeFlag:
+                            self._blockEscapeFlag = None
+                            return True
+                    elif event.type() == QtCore.QEvent.KeyPress and event.key() in {QtCore.Qt.Key_Return,
+                                                                                    QtCore.Qt.Key_Enter}:
+                        if self._blockEscapeFlag:
+                            self._blockEscapeFlag = None
+                        else:
+                            self._callback()
+                elif source.objectName() in {'_PULLDOWNVIEW'}:
+                    if event.type() in {QtCore.QEvent.Hide}:
+                        # temporary block to enter-key closing the whole speech-balloon
+                        self._blockEscapeFlag = True
+                        QtCore.QTimer.singleShot(0, self._resetPulldown)
+                    elif event.type() == QtCore.QEvent.KeyPress and event.key() in {QtCore.Qt.Key_Escape}:
+                        return True
+                return super().eventFilter(source, event)
 
 
         _project = getProject()
@@ -727,6 +821,7 @@ class OpenItemABC:
         editPopup.setPulldownData(list(colNames))
         editPopup.setPulldownCallback(partial(self._createNewCollection, items=objs))
         editPopup.setDefaultName(Collection._uniqueName(_project))
+        editPopup._filterCollections(objs)
 
         # get the desired position of the popup
         pos = QtGui.QCursor().pos()
@@ -740,7 +835,6 @@ class OpenItemABC:
 
 
 from ccpn.ui.gui.widgets.SpeechBalloon import SpeechBalloon, Side
-from PyQt5 import QtCore, QtGui
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Label import Label
 
@@ -1266,8 +1360,8 @@ class _openItemCollectionModule(OpenItemABC):
             subMenu = contextMenu.addMenu(_ITEMS_COLLECTION)
 
             # find the inserted 'items' action
-            if (subMenuAction := actions[0] if (
-            actions := [act for act in contextMenu.actions() if act.text() == _ITEMS_COLLECTION]) else None):
+            if (subMenuAction := actions[0] if (actions := [act for act in contextMenu.actions()
+                                                            if act.text() == _ITEMS_COLLECTION]) else None):
                 # add the items to the menu as disabled
                 for itm in itms:
                     _action = subMenu.addAction(itm.pid)

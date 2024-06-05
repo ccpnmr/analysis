@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-05-31 18:05:46 +0100 (Fri, May 31, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-05 18:34:26 +0200 (Wed, June 05, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -151,6 +151,8 @@ class NotifierABC(object):
         self._isBlanked: bool = False  # ability to blank notifier
         self._isRegistered: bool = False  # flag indicating if any Notifier was registered
         self._isExecuting: bool = False  # Flag to indicate notifier callback is executing
+        self._objectList: list = []  # A list of object that notifier will be firing on;
+                                     # assembled as part of the _doFireNotifiers context manager
 
     @property
     def id(self):

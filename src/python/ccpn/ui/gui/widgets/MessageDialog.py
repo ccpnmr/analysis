@@ -5,8 +5,9 @@ This file contains the routines for message dialogues
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-10 16:24:09 +0100 (Fri, May 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-06 21:20:49 +0100 (Thu, June 06, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
@@ -111,7 +112,7 @@ class MessageDialog(QtWidgets.QMessageBox):
 
     def __init__(self, title, basicText, message, icon=Information, iconPath=None, parent=None, scrollableMessage=False,
                  dontShowEnabled=False, defaultResponse=None, popupId=None):
-        super().__init__(parent)
+        super().__init__(parent=parent)
 
         # set modality to take control
         self.setWindowModality(QtCore.Qt.ApplicationModal)
@@ -128,6 +129,8 @@ class MessageDialog(QtWidgets.QMessageBox):
             scaledImage = image.scaled(48, 48, QtCore.Qt.KeepAspectRatio)
             self.setIconPixmap(scaledImage)
         if dontShowEnabled:
+            if not popupId:
+                raise RuntimeError(f'{self.__class__.__name__}.__init__: popupId is not specified')
             self._dontShowEnabled = dontShowEnabled
             self._defaultResponse = defaultResponse
             self._popupId = popupId
@@ -384,15 +387,25 @@ def showNotImplementedMessage():
              'This function has not been implemented in the current version')
 
 
-def showOkCancel(title, message, parent=None, iconPath=None):
-    dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
+def showOkCancel(title, message, parent=None, iconPath=None,
+                 dontShowEnabled=False, defaultResponse=None, popupId=None):
+    dialog = MessageDialog('Query', title, message, Question, iconPath, parent,
+                           dontShowEnabled=dontShowEnabled, defaultResponse=defaultResponse, popupId=popupId)
+    if dialog.dontShowPopup():
+        getLogger().debug(f'Popup {popupId!r} skipped with response={defaultResponse}')
+        return defaultResponse
     dialog.setStandardButtons(Ok | Cancel)
     dialog.setDefaultButton(Ok)
     return dialog.exec_() == Ok
 
 
-def showYesNo(title, message, parent=None, iconPath=None):
-    dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
+def showYesNo(title, message, parent=None, iconPath=None,
+              dontShowEnabled=False, defaultResponse=None, popupId=None):
+    dialog = MessageDialog('Query', title, message, Question, iconPath, parent,
+                           dontShowEnabled=dontShowEnabled, defaultResponse=defaultResponse, popupId=popupId)
+    if dialog.dontShowPopup():
+        getLogger().debug(f'Popup {popupId!r} skipped with response={defaultResponse}')
+        return defaultResponse
     dialog.setStandardButtons(Yes | No)
     dialog.setDefaultButton(Yes)
     return dialog.exec_() == Yes
@@ -413,6 +426,15 @@ def showRetryIgnoreCancel(title, message, parent=None, iconPath=None):
 
 
 def showSaveDiscardCancel(title, message, parent=None, iconPath=None):
+    """Save, Discard, Cancel query box.
+
+    :param title: title of the widget
+    :param message: message to be displayed
+    :param parent: parent widget
+    :param iconPath: optional icon to display
+    :return: True for Save, False for Discard or None for Cancel
+    """
+
     dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
     dialog.setStandardButtons(Save | Discard | Cancel)
     dialog.setDefaultButton(Save)
@@ -420,6 +442,27 @@ def showSaveDiscardCancel(title, message, parent=None, iconPath=None):
     if result == Save:
         return True
     elif result == Discard:
+        return False
+    else:
+        return None
+
+
+def showYesNoCancel(title, message, parent=None, iconPath=None):
+    """Yes, No, Cancel query box.
+
+    :param title: title of the widget
+    :param message: message to be displayed
+    :param parent: parent widget
+    :param iconPath: optional icon to display
+    :return: True for Yes, False for No or None for Cancel
+    """
+    dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
+    dialog.setStandardButtons(Yes | No | Cancel)
+    dialog.setDefaultButton(Yes)
+    result = dialog.exec_()
+    if result == Yes:
+        return True
+    elif result == No:
         return False
     else:
         return None
@@ -442,8 +485,13 @@ def showNYI(parent=None):
     return
 
 
-def showOkCancelWarning(title, message, parent=None, iconPath=None):
-    dialog = MessageDialog('Warning', title, message, Warning, iconPath, parent)
+def showOkCancelWarning(title, message, parent=None, iconPath=None,
+                        dontShowEnabled=False, defaultResponse=None, popupId=None):
+    dialog = MessageDialog('Warning', title, message, Warning, iconPath, parent,
+                           dontShowEnabled=dontShowEnabled, defaultResponse=defaultResponse, popupId=popupId)
+    if dialog.dontShowPopup():
+        getLogger().debug(f'Popup {popupId!r} skipped with response={defaultResponse}')
+        return defaultResponse
     dialog.setStandardButtons(Ok | Cancel)
     dialog.setDefaultButton(Cancel)
     return dialog.exec_() == Ok
@@ -469,10 +517,15 @@ def showYesNoCancelWarning(title, message, parent=None, iconPath=None):
 
 
 def showMulti(title, message, texts, objects=None, parent=None, iconPath=None, okText='OK', cancelText='Cancel',
-              destructive=(), checkbox=None, checked=True):
+              destructive=(), checkbox=None, checked=True,
+              dontShowEnabled=False, defaultResponse=None, popupId=None):
     if objects:
         assert len(objects) == len(texts)
-    dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
+    dialog = MessageDialog('Query', title, message, Question, iconPath, parent,
+                           dontShowEnabled=dontShowEnabled, defaultResponse=defaultResponse, popupId=popupId)
+    if dialog.dontShowPopup():
+        getLogger().debug(f'Popup {popupId!r} skipped with response={defaultResponse}')
+        return defaultResponse
 
     _checkbox = None
     for text in texts:

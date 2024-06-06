@@ -11,9 +11,10 @@ Geerten 1-7/12/2016; 11/04/2017
 # Licence, Reference and Credits
 #=========================================================================================
 
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -22,8 +23,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-10 17:35:45 +0100 (Tue, October 10, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-06-06 21:20:47 +0100 (Thu, June 06, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -147,7 +148,8 @@ class NmrResidueTableModule(CcpnModule):
 
             # set the active callback from the pulldown
             self._mainFrame.setActivePulldownClass(coreClass=self.activePulldownClass,
-                                                   checkBox=getattr(self.nmrResidueTableSettings, LINKTOPULLDOWNCLASS, None))
+                                                   checkBox=getattr(self.nmrResidueTableSettings, LINKTOPULLDOWNCLASS,
+                                                                    None))
 
         # set the dropped callback through mainWidget
         self.mainWidget._dropEventCallback = self._mainFrame._processDroppedItems
@@ -337,11 +339,14 @@ class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
         if data is not None and not data.empty and selection:
             currentNmrResidue = data.get(DATAFRAME_OBJECT)
             matching = [ch for ch in selection if ch and ch != currentNmrResidue]
-
             if len(matching):
-                yesNo = showYesNo('Merge NmrResidues', "Do you want to merge\n\n"
-                                                       "{}   into   {}".format('\n'.join([ss.id for ss in matching]),
-                                                                               currentNmrResidue.id))
+                yesNo = showYesNo('Merge NmrResidues',
+                                  "Do you want to merge\n"
+                                  "{}   into   {}".format('\n'.join([ss.id for ss in matching]),
+                                                          currentNmrResidue.id),
+                                  dontShowEnabled=True,
+                                  defaultResponse=True,
+                                  popupId=f'{self.__class__.__name__}Merge')
                 if yesNo:
                     currentNmrResidue.mergeNmrResidues(matching)
 
@@ -404,7 +409,8 @@ class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
             # ('NmrChain',   lambda nmrResidue: nmrResidue.nmrChain.id, 'NmrChain id', None, None),
             ('Pid', lambda nmrResidue: nmrResidue.pid, 'Pid of NmrResidue', None, None),
             ('_object', lambda nmrResidue: nmrResidue, 'Object', None, None),
-            ('NmrChain', lambda nmrResidue: nmrResidue.nmrChain.id, 'NmrChain containing the nmrResidue', None, None),  # just add the nmrChain for clarity
+            ('NmrChain', lambda nmrResidue: nmrResidue.nmrChain.id, 'NmrChain containing the nmrResidue', None, None),
+            # just add the nmrChain for clarity
             ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None, None),
             ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None, None),
             ('NmrAtoms', lambda nmrResidue: self._getNmrAtomNames(nmrResidue), 'NmrAtoms in NmrResidue', None, None),
@@ -464,7 +470,8 @@ class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
     def _getNmrResiduePeakCount(nmrResidue):
         """Returns peak list count
         """
-        l1 = [peak for atom in nmrResidue.nmrAtoms if not atom.isDeleted for peak in atom.assignedPeaks if not peak.isDeleted]
+        l1 = [peak for atom in nmrResidue.nmrAtoms if not atom.isDeleted for peak in atom.assignedPeaks if
+              not peak.isDeleted]
         return len(set(l1))
 
 
@@ -607,14 +614,18 @@ class _NewCSMNmrResidueTableWidget(_NewNmrResidueTableWidget):
             ('Index', lambda nmrResidue: self._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None, None),
             ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None, None),
             ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None, None),
-            ('Selected', lambda nmrResidue: self._getSelectedNmrAtomNames(nmrResidue), 'NmrAtoms selected in NmrResidue', None, None),
-            ('Spectra', lambda nmrResidue: self._getNmrResidueSpectraCount(nmrResidue)
-             , 'Number of spectra selected for calculating the deltas', None, None),
+            ('Selected', lambda nmrResidue: self._getSelectedNmrAtomNames(nmrResidue),
+             'NmrAtoms selected in NmrResidue', None, None),
+            ('Spectra', lambda nmrResidue: self._getNmrResidueSpectraCount(nmrResidue),
+             'Number of spectra selected for calculating the deltas', None, None),
             (Deltas, lambda nmrResidue: nmrResidue._delta, '', None, None),
             (KD, lambda nmrResidue: nmrResidue._estimatedKd, '', None, None),
-            ('Include', lambda nmrResidue: nmrResidue._includeInDeltaShift, 'Include this residue in the Mapping calculation', lambda nmr, value: self._setChecked(nmr, value), None),
+            ('Include', lambda nmrResidue: nmrResidue._includeInDeltaShift,
+             'Include this residue in the Mapping calculation',
+             lambda nmr, value: self._setChecked(nmr, value), None),
             # ('Flag', lambda nmrResidue: nmrResidue._flag,  '',  None, None),
-            ('Comment', lambda nmr: self._getCommentText(nmr), 'Notes', lambda nmr, value: self._setComment(nmr, value), None)
+            ('Comment', lambda nmr: self._getCommentText(nmr), 'Notes', lambda nmr, value: self._setComment(nmr, value),
+             None)
             ])  #[Column(colName, func, tipText=tipText, setEditValue=editValue, format=columnFormat)
 
         return cols

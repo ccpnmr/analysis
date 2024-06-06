@@ -275,6 +275,30 @@
         },
         "_openItemNmrAtomItem": {
             "dontShowPopup": false
+        },
+        "NmrChainPopup": {
+            "dontShowPopup": false
+        },
+        "NmrResidueEditPopupChange": {
+            "dontShowPopup": false
+        },
+        "NmrResidueEditPopupMerge": {
+            "dontShowPopup": false
+        },
+        "NmrAtomEditPopupMerge": {
+            "dontShowPopup": false
+        },
+        "AxisAssignmentObjectMerge": {
+            "dontShowPopup": false
+        },
+        "AxisAssignmentObjectMergeExist": {
+            "dontShowPopup": false
+        },
+        "_NewNmrResidueTableWidgetMerge": {
+            "dontShowPopup": false
+        },
+        "_NewChemicalShiftTableMerge": {
+            "dontShowPopup": false
         }
     }
 }

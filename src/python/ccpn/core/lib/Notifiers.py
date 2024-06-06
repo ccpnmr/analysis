@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-06-05 18:34:26 +0200 (Wed, June 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-06 15:34:52 +0200 (Thu, June 06, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -105,8 +105,11 @@ class NotifierABC(object):
     ITEMS_CHANGED = 'itemsChanged'      # The items in list/dict that have changed (trigger CHANGE)
     SPECIFIERS = 'specifiers'
 
-    def __init__(self, theObject: Any, trigger: str, targetName: str,
-                       callback: Callable = None, setterObject = None,
+    def __init__(self, theObject: Any,
+                       trigger: str,
+                       targetName: str,
+                       callback: Callable = None,
+                       setterObject = None,
                        debug: bool = False, **kwds):
 
         # Sanity checks
@@ -114,19 +117,19 @@ class NotifierABC(object):
             raise RuntimeError('Not trigger keywords defined; assure proper subclassing definitions')
 
         if theObject is None:
-            raise RuntimeError('NotifierABC: theObject is None')
+            raise RuntimeError(f'NotifierABC.__init__(): theObject is None')
         self._theObject = theObject  # The object we are monitoring
 
         # check for previous list of triggers
         if isinstance(trigger, (list, tuple)):
-            raise ValueError(f'Invalid tuple or list trigger "{trigger}"')
+            raise ValueError(f'NotifierABC.__init__(): invalid tuple or list trigger "{trigger}"')
 
         if trigger not in self._triggerKeywords:
-            raise ValueError(f'Invalid trigger "{trigger}" for {type(self)}')
+            raise ValueError(f'NotifierABC.__init__(): invalid trigger "{trigger}" for {type(self)}')
         self._trigger: str = trigger
 
         if targetName is None:
-            raise ValueError(f'Invalid targetName None for {type(self)}')
+            raise ValueError(f'NotifierABC.__init__(): invalid targetName None')
         self._targetName: str = targetName
 
         # if targetName == NotifierABC.CHANGE:
@@ -191,7 +194,7 @@ class NotifierABC(object):
 
     @property
     def isExecuting(self) -> bool:
-        """:return True is Notifier callback is executing
+        """:return True if notifier callback is executing
         """
         return self._isExecuting
 
@@ -202,6 +205,12 @@ class NotifierABC(object):
     def setBlanking(self, flag: bool):
         """Set blanking on/off"""
         self._isBlanked = flag
+
+    @property
+    def isBlanked(self) -> bool:
+        """:return True if notifier is blanked
+        """
+        return self._isBlanked
 
     def triggersOn(self, trigger) -> bool:
         """Return True if notifier triggers on trigger"""

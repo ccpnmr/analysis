@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-06-05 17:09:42 +0100 (Wed, June 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-06 18:27:50 +0100 (Thu, June 06, 2024) $"
 __version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
@@ -1655,7 +1655,8 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         # showInfo(title='Mark nmrResidue "%s"' % nmrResidue.pid, message='mark nmrResidue in strips')
 
-        from ccpn.AnalysisAssign.modules.BackboneAssignmentModule import nmrAtomsFromOffsets, markNmrAtoms
+        from ccpn.AnalysisAssign.modules.BackboneAssignmentModule import nmrAtomsFromOffsets
+        from ccpn.ui.gui.lib.StripLib import markNmrAtoms
 
         guiStrip = destStrip.strip
         nmrAtoms = nmrAtomsFromOffsets(nmrResidue)
@@ -1668,7 +1669,8 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         # showInfo(title='Mark nmrAtom "%s"' % nmrAtom.pid, message='mark nmrAtom in strips')
 
-        from ccpn.AnalysisAssign.modules.BackboneAssignmentModule import markNmrAtoms
+        from ccpn.ui.gui.lib.StripLib import markNmrAtoms
+
         guiStrip = destStrip.strip
         markNmrAtoms(self.mainWindow, [nmrAtom], guiStrip)
 

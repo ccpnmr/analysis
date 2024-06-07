@@ -9,8 +9,9 @@ To create a menu:
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -19,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:26 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-06-07 11:48:24 +0100 (Fri, June 07, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -378,9 +379,9 @@ def _deleteMultipletItem(strip):
 
 
 def _mergeMultipletItem(strip):
-    return _SCMitem(name='Merge Multiplet(s)',
+    return _SCMitem(name='Merge Multiplets',
                     typeItem=ItemTypes.get(ITEM),
-                    toolTip='Merge Multiplet(s) and Peak(s) into a single Multiplet', shortcut='XM',
+                    toolTip='Merge Multiplet(s) and Peak(s) into a single Multiplet',
                     callback=strip.mainWindow.mergeCurrentMultiplet)
 
 ##############################  Common Peak menu items ##############################
@@ -802,13 +803,27 @@ def _setEnabledAllItems(menu, state):
 
 
 def _hidePeaksSingleActionItems(menu):
-    """ Greys out items that should appear only if one single peak is selected"""
+    """Greys out items that should appear only if one single peak is selected.
+    """
     hideItems = [
         # _editPeakAssignmentItem(strip).name if _editPeakAssignmentItem(strip) else None,
         _integrate1DItem().name if _integrate1DItem() else None
         ]
     hideItems = [itm for itm in hideItems if itm is not None]
 
+    for action in menu.actions():
+        for item in hideItems:
+            if action.text() == item:
+                action.setEnabled(False)
+
+
+def _hideMultipletsSingleActionItems(menu, strip):
+    """Greys out items that should appear only if one single multiplet is selected.
+    """
+    hideItems = [
+        option.name if (option := _mergeMultipletItem(strip)) else None
+        ]
+    hideItems = [itm for itm in hideItems if itm is not None]
     for action in menu.actions():
         for item in hideItems:
             if action.text() == item:
@@ -1037,9 +1052,7 @@ def _get1dMultipletMenu(guiStrip1d) -> Menu:
     """
     items = [
         _deleteMultipletItem(guiStrip1d),
-        _separator(),
         _markMultipletsItem(),
-        _separator(),
         _mergeMultipletItem(guiStrip1d),
         ]
     items = [itm for itm in items if itm is not None]
@@ -1236,9 +1249,7 @@ def _getNdMultipletMenu(guiStripNd) -> Menu:
     """
     items = [
         _deleteMultipletItem(guiStripNd),
-        _separator(),
         _markMultipletsItem(),
-        _separator(),
         _mergeMultipletItem(guiStripNd),
         ]
     items = [itm for itm in items if itm is not None]

@@ -3,9 +3,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:05 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2024-06-07 19:27:13 +0100 (Fri, June 07, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -106,14 +107,15 @@ class MultipletTableModule(CcpnModule):
         self._settings = None
         if self.activePulldownClass:
             # add to settings widget - see sequenceGraph for more detailed example
-            settingsDict = OrderedDict(((LINKTOPULLDOWNCLASS, {'label'   : 'Link to current %s' % self.activePulldownClass.className,
-                                                               'tipText' : 'Set/update current %s when selecting from pulldown' % self.activePulldownClass.className,
-                                                               'callBack': None,
-                                                               'enabled' : True,
-                                                               'checked' : False,
-                                                               '_init'   : None,
-                                                               }),
-                                        ))
+            settingsDict = OrderedDict(
+                    ((LINKTOPULLDOWNCLASS, {'label'   : 'Link to current %s' % self.activePulldownClass.className,
+                                            'tipText' : 'Set/update current %s when selecting from pulldown' % self.activePulldownClass.className,
+                                            'callBack': None,
+                                            'enabled' : True,
+                                            'checked' : False,
+                                            '_init'   : None,
+                                            }),
+                     ))
             self._settings = ModuleSettingsWidget(parent=settingsWidget, mainWindow=self.mainWindow,
                                                   settingsDict=settingsDict,
                                                   grid=(0, 0))
@@ -251,6 +253,7 @@ class _NewMultipletTableWidget(_CoreTableWidgetABC):
     _maximumQueueLength = 25
 
     positionsUnit = UNITS[0]  # default
+    _lastPeaks = None
 
     #=========================================================================================
     # Properties
@@ -306,14 +309,11 @@ class _NewMultipletTableWidget(_CoreTableWidgetABC):
         if multiplet:
             if len(multiplet.peaks) > 0:
                 peak = multiplet.peaks[-1]
-
                 if self.current.strip is not None:
                     validPeakListViews = [pp.peakList for pp in self.current.strip.peakListViews if
                                           isinstance(pp.peakList, PeakList)]
-
                     if peak.peakList in validPeakListViews:
                         widths = None
-
                         if peak.peakList.spectrum.dimensionCount <= 2:
                             widths = _getCurrentZoomRatio(self.current.strip.viewRange())
                         navigateToPositionInStrip(strip=self.current.strip, positions=multiplet.position, widths=widths)
@@ -322,33 +322,37 @@ class _NewMultipletTableWidget(_CoreTableWidgetABC):
         else:
             logger.warning('Impossible to navigate to peak position. Set a current strip first')
 
-    def selectionCallback(self, selected, deselected, selection, lastItem):
-        """set as current the selected peaks on the table
-        """
-        super().selectionCallback(selected, deselected, selection, lastItem)
-
-        # update the multiplet-peak table
+    def _selectCurrentCallBack(self, data):
+        super()._selectCurrentCallBack(data)
+        # update the multiplet-peak table on internal selection
         self._updateMultipletPeaksOnTable()
 
     def _updateMultipletPeaksOnTable(self):
         """Populate the multiplet-peak-table with the multiplet-peaks
         """
+        # eed to validate whether the table as changed :|
+        selection = self.getSelectedObjects() or []
+        # select the peaks base on the current highlighted multiplets
+        peaks = tuple(OrderedSet(peak for mt in selection for peak in mt.peaks))
+        if peaks == self._lastPeaks:
+            return
+        # create a dummy structure to hold the list of peaks
         newTable = _PeakList()
-
-        if self.current.multiplets:
-            peaks = tuple(OrderedSet(peak for mt in self.current.multiplets for peak in mt.peaks))
-            if len(peaks) > 0:
-                # create a dummy structure to hold the list of peaks
-                newTable.peaks = peaks
-                newTable.spectrum = peaks[0].spectrum
-
+        newTable.peaks = peaks
+        self._lastPeaks = peaks  # cache for changes
+        newTable.spectrum = peaks[0].spectrum if peaks else None
         # signal the multiplet-peak table to update
         func = partial(self.updateLinkedTable.emit, newTable)
         if self._tableBlockingLevel == 0:
             # if not blocked then emit otherwise defer
             func()
         else:
-            self._deferredFuncs.append(partial(self.updateLinkedTable.emit, newTable))
+            self._deferredFuncs.append(func)
+
+    def _update(self):
+        super()._update()
+        # update the multiplet-peak table on changing the pulldown
+        self._updateMultipletPeaksOnTable()
 
     #=========================================================================================
     # Create table and row methods
@@ -368,7 +372,6 @@ class _NewMultipletTableWidget(_CoreTableWidgetABC):
         """Subclass guiTable to add new items to context menu
         """
         super()._setContextMenu()
-
         # add edit multiplet to the menu
         self._tableMenu.insertSeparator(self._tableMenu.actions()[0])
         a = self._tableMenu.addAction('Edit Multiplet...', self._editMultiplets)
@@ -400,8 +403,10 @@ class _NewMultipletTableWidget(_CoreTableWidgetABC):
         columnDefs = [('#', 'serial', 'Multiplet serial number', None, None),
                       ('Pid', lambda ml: ml.pid, 'Pid of the Multiplet', None, None),
                       ('_object', lambda ml: ml, 'Object', None, None),
-                      ('Spectrum', lambda multiplet: multiplet.multipletList.spectrum.id, 'Spectrum containing the Multiplet', None, None),
-                      ('MultipletList', lambda multiplet: multiplet.multipletList.serial, 'MultipletList containing the Multiplet', None, None),
+                      ('Spectrum', lambda multiplet: multiplet.multipletList.spectrum.id,
+                       'Spectrum containing the Multiplet', None, None),
+                      ('MultipletList', lambda multiplet: multiplet.multipletList.serial,
+                       'MultipletList containing the Multiplet', None, None),
                       # ('Id', lambda multiplet: multiplet.serial, 'Multiplet serial', None, None)
                       ]
 
@@ -424,9 +429,9 @@ class _NewMultipletTableWidget(_CoreTableWidgetABC):
             # line-width column
             for i in range(multipletList.spectrum.dimensionCount):
                 linewidthTipTexts = 'Multiplet line width %s' % str(i + 1)
-                columnDefs.append(
-                        ('LW F%s' % str(i + 1), lambda ml, dim=i: getPeakLinewidth(ml, dim), linewidthTipTexts, None, '%0.3f'))
-
+                columnDefs.append(('LW F%s' % str(i + 1),
+                                   lambda ml, dim=i: getPeakLinewidth(ml, dim),
+                                   linewidthTipTexts, None, '%0.3f'))
         # height column
         heightTipText = 'Magnitude of spectrum intensity at multiplet center (interpolated), unless user edited'
         columnDefs.append(('Height', lambda ml: ml.height, heightTipText, None, None))

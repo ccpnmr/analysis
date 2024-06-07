@@ -4,9 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-11 13:56:26 +0100 (Wed, October 11, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-06-07 19:27:14 +0100 (Fri, June 07, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -281,7 +282,8 @@ class TableABC(QtWidgets.QTableView):
                                  self.exportMenu,
                                  self.headerColumnMenu]
 
-    def updateDf(self, df, resize=True, setHeightToRows=False, setWidthToColumns=False, setOnHeaderOnly=False, newModel=False):
+    def updateDf(self, df, resize=True, setHeightToRows=False, setWidthToColumns=False, setOnHeaderOnly=False,
+                 newModel=False):
         """Initialise the dataFrame
         """
         if not isinstance(df, (type(None), pd.DataFrame)):
@@ -445,7 +447,8 @@ class TableABC(QtWidgets.QTableView):
                             newSel.merge(QtCore.QItemSelection(idx, idx), QtCore.QItemSelectionModel.Select)
 
                     # Select the cells in the data view - spawns single change event
-                    self.selectionModel().select(newSel, QtCore.QItemSelectionModel.Rows | QtCore.QItemSelectionModel.ClearAndSelect)
+                    self.selectionModel().select(newSel, (QtCore.QItemSelectionModel.Rows |
+                                                          QtCore.QItemSelectionModel.ClearAndSelect))
 
                 finally:
                     # unblock to enable again
@@ -456,12 +459,12 @@ class TableABC(QtWidgets.QTableView):
             if model._sortColumn is not None:
                 sortColumnName = self.headerColumnMenu.columnTexts[model._sortColumn]
             self.sortingChanged.emit({
-                                                    'sortColumnName': sortColumnName,
-                                                    'sortColumnIndex': model._sortColumn,
-                                                    'oldSort': model._oldSortIndex,
-                                                    'newSort': model._sortIndex,
-                                                    'order': model._sortOrder,
-                                                    })
+                'sortColumnName' : sortColumnName,
+                'sortColumnIndex': model._sortColumn,
+                'oldSort'        : model._oldSortIndex,
+                'newSort'        : model._sortIndex,
+                'order'          : model._sortOrder,
+                })
 
     def _close(self):
         """Clean up the notifiers
@@ -507,7 +510,6 @@ class TableABC(QtWidgets.QTableView):
         """
         if not isinstance(value, bool):
             raise ValueError(f'{self.__class__.__name__}.setEditable: value is not True|False')
-
         self._defaultEditable = value
         if self.model():
             # keep the model in-sync with the view
@@ -523,7 +525,6 @@ class TableABC(QtWidgets.QTableView):
         # update callbacks - overwrite method
         if not (selectionCallback is None or callable(selectionCallback)):
             raise ValueError(f'{self.__class__.__name__}.setSelectionCallback: selectionCallback is not None|callable')
-
         self._selectionCallback = selectionCallback
 
     def resetSelectionCallback(self):
@@ -541,18 +542,28 @@ class TableABC(QtWidgets.QTableView):
         """
         if not isinstance(value, bool):
             raise ValueError(f'{self.__class__.__name__}.setSelectionCallbackEnabled: value is not True|False')
-
         self._enableSelectionCallback = value
 
     def _selectionConnect(self, selected, deselected):
-        """Handle the callback for a selection
+        """Handle the callback for a selection.
+        _selectionCallback is the controlling attribute defined on the class
+        can be None, NOTHING or callable:
+            _selectionCallback is None       callback is disabled, removes the user-setting
+                                             this can be set with setSelectionCallback
+            _selectionCallback is NOTHING    method selectionCallback on the class is called
+                                             Cannot set to this explicitly,
+                                             use resetSelectionCallback to return to this behaviour
+            _selectionCallback is callable   use the callable,
+                                             this can be set with setSelectionCallback
+        _enableSelectionCallback disables the callback
         """
         if self._enableSelectionCallback and self._selectionCallback is not None:
             # get the unique df-rows from the selections
-            newRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for sel in selected for idx in sel.indexes())
-            oldRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for sel in deselected for idx in sel.indexes())
+            newRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0]
+                                 for sel in selected for idx in sel.indexes())
+            oldRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0]
+                                 for sel in deselected for idx in sel.indexes())
             sRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for idx in self.selectedIndexes())
-
             df = self._df
             # remove any bad rows
             new = df.iloc[(rr for rr in newRows if rr is not None and rr is not False)]
@@ -562,7 +573,6 @@ class TableABC(QtWidgets.QTableView):
                 last = df.iloc[[self.currentIndex().data(INDEX_ROLE)[0]]]
             except Exception:
                 last = []
-
             with self._blockTableSignals('_selectionCallback', blanking=False, disableScroll=True):
                 if self._selectionCallback is NOTHING:
                     # pass the dfs to the class-method callback
@@ -580,7 +590,6 @@ class TableABC(QtWidgets.QTableView):
         # update callbacks - overwrite method
         if not (actionCallback is None or callable(actionCallback)):
             raise ValueError(f'{self.__class__.__name__}.setActionCallback: actionCallback is not None|callable')
-
         self._actionCallback = actionCallback
 
     def resetActionCallback(self):
@@ -598,22 +607,27 @@ class TableABC(QtWidgets.QTableView):
         """
         if not isinstance(value, bool):
             raise ValueError(f'{self.__class__.__name__}.setActionCallbackEnabled: value is not True|False')
-
         self._enableActionCallback = value
 
     def _actionConnect(self, modelIndex):
-        """Handle the callback for a selection
+        """Handle the callback for an action, either return or mouse-double-click.
+        _actionCallback is the controlling attribute defined on the class
+        can be None, NOTHING or callable:
+            _actionCallback is None       callback is disabled, removes the user-setting
+                                          this can be set with setActionCallback
+            _actionCallback is NOTHING    method actionCallback on the class is called
+                                          Cannot set to this explicitly,
+                                          use resetActionCallback to return to this behaviour
+            _actionCallback is callable   use the callable,
+                                          this can be set with setActionCallback
+        _enableActionCallback disables the callback
         """
         if bool(modelIndex.flags() & QtCore.Qt.ItemIsEditable):
             # item is editable so skip the action
             return
-        if not self.actionCallback:
-            return
-
         if self._enableActionCallback and self._actionCallback is not None:
             # get the df-rows from the selection
             sRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for idx in self.selectedIndexes())
-
             df = self._df
             # remove any bad rows
             sel = df.iloc[(rr for rr in sRows if rr is not None and rr is not False)]
@@ -621,7 +635,6 @@ class TableABC(QtWidgets.QTableView):
                 last = df.iloc[[self.currentIndex().data(INDEX_ROLE)[0]] if sRows else []]
             except Exception:
                 last = []
-
             with self._blockTableSignals('_actionCallback', blanking=False, disableScroll=True):
                 if self._actionCallback is NOTHING:
                     # pass the dfs to the class-method callback
@@ -652,7 +665,6 @@ class TableABC(QtWidgets.QTableView):
         :return: a DataFrame with selected rows
         """
         sRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for idx in self.selectedIndexes())
-
         # remove any bad rows
         return self._df.iloc[(rr for rr in sRows if rr is not None and rr is not False)]
 
@@ -703,6 +715,24 @@ class TableABC(QtWidgets.QTableView):
                         if scrollToSelection:
                             self.scrollTo(rowIndex, self.EnsureVisible)
 
+    def clearSelection(self) -> None:
+        """Clear the selection.
+        Call selection callback of there were items selected.
+        Required as selectionCallback signal does not fire for clicking in the blank section
+        of a large table below the last row.
+        """
+        deselection = []
+        if inds := self.selectedIndexes():
+            # capture the last selection before clearing
+            deselection = QtCore.QItemSelection()
+            for indx in inds:
+                deselection.append(QtCore.QItemSelectionRange(indx))
+        # call the superclass
+        super().clearSelection()
+        if inds and not self.signalsBlocked():
+            # simulate event clicked in the empty space, with last selection
+            self._selectionConnect([], deselection)
+
     #=========================================================================================
     # keyboard and mouse handling - modified to allow double-click to keep current selection
     #=========================================================================================
@@ -711,26 +741,37 @@ class TableABC(QtWidgets.QTableView):
     def _keyModifierPressed():
         """Is the user clicking while holding a modifier
         """
-        allKeyModifers = [QtCore.Qt.ShiftModifier, QtCore.Qt.ControlModifier, QtCore.Qt.AltModifier, QtCore.Qt.MetaModifier]
+        allKeyModifers = [QtCore.Qt.ShiftModifier, QtCore.Qt.ControlModifier, QtCore.Qt.AltModifier,
+                          QtCore.Qt.MetaModifier]
         keyMod = QtWidgets.QApplication.keyboardModifiers()
 
         return keyMod in allKeyModifers
 
-    def mousePressEvent(self, e: QtGui.QMouseEvent) -> None:
+    def mousePressEvent(self, event: QtGui.QMouseEvent) -> None:
         """Handle mouse-press event so that double-click keeps any multi-selection
         """
         # doesn't respond in double-click interval - minor behaviour change to ExtendedSelection
-        self._currentIndex = self.indexAt(e.pos())
-        row, col = self.rowAt(e.pos().y()), self.columnAt(e.pos().x())
+        self._currentIndex = self.indexAt(event.pos())
+        row, col = self.rowAt(event.pos().y()), self.columnAt(event.pos().x())
 
         # user can click in the blank space under the table
         self._clickedInTable = bool(self._currentIndex)
-
-        super().mousePressEvent(e)
-        if row < 0 or col < 0:
-            # clicked outside the valid cells of the table
-            #   catches singleSelect if doesn't fire from super() - weird
-            self.clearSelection()
+        super().mousePressEvent(event)
+        if row < 0 or col < 0 and event.button() == QtCore.Qt.LeftButton:
+            #     # clicked outside the valid cells of the table
+            #     #   catches singleSelect if doesn't fire from super() - weird
+            #     self.clearSelection()
+            deselection = []
+            if inds := self.selectedIndexes():
+                # capture the last selection before clearing
+                deselection = QtCore.QItemSelection()
+                for indx in inds:
+                    deselection.append(QtCore.QItemSelectionRange(indx))
+            # call the superclass
+            # super().clearSelection()
+            # if inds and not self.signalsBlocked():
+            #     # simulate event clicked in the empty space, with last selection
+            #     self._selectionConnect([], deselection)
 
     def keyPressEvent(self, event):
         """Handle keyPress events on the table
@@ -740,7 +781,8 @@ class TableABC(QtWidgets.QTableView):
         # key = event.key()
         # cursors = [QtCore.Qt.Key_Up, QtCore.Qt.Key_Down, QtCore.Qt.Key_Left, QtCore.Qt.Key_Right]
         enter = [QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return]
-        allKeyModifers = [QtCore.Qt.ShiftModifier, QtCore.Qt.ControlModifier, QtCore.Qt.AltModifier, QtCore.Qt.MetaModifier]
+        allKeyModifers = [QtCore.Qt.ShiftModifier, QtCore.Qt.ControlModifier, QtCore.Qt.AltModifier,
+                          QtCore.Qt.MetaModifier]
 
         # for MacOS ControlModifier is 'cmd' and MetaModifier is 'ctrl'
         addSelectionMod = [QtCore.Qt.ControlModifier]
@@ -852,7 +894,6 @@ class TableABC(QtWidgets.QTableView):
         self._blockTableEvents(blanking, disableScroll=disableScroll, tableState=tableState)
         try:
             yield  # yield control to the calling process
-
         except Exception as es:
             raise es
         finally:
@@ -905,10 +946,12 @@ class TableABC(QtWidgets.QTableView):
         :return: tuple to tuples
         """
         if not isinstance(positions, typing.Iterable):
-            raise TypeError(f'{self.__class__.__name__}.mapToSource: positions must be an iterable of list|tuples of the form [row, col]')
+            raise TypeError(f'{self.__class__.__name__}.mapToSource: '
+                            f'positions must be an iterable of list|tuples of the form [row, col]')
         if not all(isinstance(pos, (list, tuple)) and
                    len(pos) == 2 and isinstance(pos[0], int) and isinstance(pos[1], int) for pos in positions):
-            raise TypeError(f'{self.__class__.__name__}.mapToSource: positions must be an iterable of list|tuples of the form [row, col]')
+            raise TypeError(f'{self.__class__.__name__}.mapToSource: '
+                            f'positions must be an iterable of list|tuples of the form [row, col]')
 
         sortIndex = self.model()._sortIndex
         df = self.model().df
@@ -1099,7 +1142,8 @@ class TableABC(QtWidgets.QTableView):
         if self._df is None or self._df.empty:
             return
 
-        pos = QtCore.QPoint(pos.x() + 5, pos.y())  # move the popup a bit down; otherwise can trigger an event if the pointer is just on top the first item
+        # move the popup a bit down; otherwise can trigger an event if the pointer is just on top the first item
+        pos = QtCore.QPoint(pos.x() + 5, pos.y())
 
         # call the class setup
         self.setHeaderMenuOptions(menu)

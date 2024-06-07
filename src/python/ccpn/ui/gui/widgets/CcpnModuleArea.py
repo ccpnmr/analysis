@@ -1,9 +1,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -11,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-28 19:23:05 +0100 (Wed, June 28, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-06-07 21:57:29 +0100 (Fri, June 07, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -44,15 +45,14 @@ from ccpn.ui.gui.widgets.MainWindow import MainWindow
 # from ccpn.ui.gui.lib.GuiWindow import GuiWindow
 from ccpn.ui.gui.lib.Shortcuts import Shortcuts
 from ccpn.ui.gui.guiSettings import getColours, LABEL_FOREGROUND
-from ccpn.ui.gui.lib.mouseEvents import SELECT, PICK, MouseModes, \
-    setCurrentMouseMode, getCurrentMouseMode
+from ccpn.ui.gui.lib.mouseEvents import (SELECT, PICK, MouseModes, setCurrentMouseMode, getCurrentMouseMode)
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel
 from ccpn.ui.gui.widgets.GuiTable import GuiTable
 from ccpn.ui.gui.widgets.table.TableABC import TableABC
 from ccpn.ui.gui.widgets.Icon import Icon
 
-from ccpn.framework.Application import getApplication
+from ccpn.framework.Application import getApplication, getMainWindow
 from ccpn.util.Colour import hexToRgb
 from ccpn.util.Common import incrementName
 from ccpn.util.Path import aPath
@@ -134,7 +134,11 @@ class TempAreaWindow(Shortcuts, MainWindow):
         for module in self.tempModuleArea.ccpnModules:
             if isinstance(module, PythonConsoleModule):
                 # move the PythonConsole back to the main ModuleArea or get a C++ error
-                mainArea = self.mainWindow.moduleArea
+                # strange case - IPython in popped-out window, close IPython module,
+                #   new project, window remains behind with bad link to original mainWindow?
+                #   need to dynamically grab the current mainWindow
+                _mainWindow = getMainWindow()
+                mainArea = _mainWindow.moduleArea
                 mainArea.addModule(module)
                 module.hide()
             else:

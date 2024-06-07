@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-05-24 16:01:28 +0100 (Fri, May 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-07 11:04:03 +0200 (Fri, June 07, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -74,6 +74,7 @@ class Tree(object):
             raise RuntimeError(f'addChild(): Cannot be both child and parent ({child})')
         if child in self._children:
             raise RuntimeError (f'addChild(): {child} is already a child of {self}')
+
         child._parent = self
         # child and its children inherit _root from self
         child._setRoot(self._root)

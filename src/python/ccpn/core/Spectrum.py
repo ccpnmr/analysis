@@ -53,8 +53,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-13 15:03:20 +0100 (Mon, May 13, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-06-08 09:52:02 +0200 (Sat, June 08, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -3628,7 +3628,7 @@ class Spectrum(AbstractWrapperObject):
                 getLogger().info('Folder may be read-only')
 
     def _restoreFromSpectrumMetaData(self):
-        """Retore the spectrum metadata from the project/state/spectra json file
+        """Restore the spectrum metadata from the project/state/spectra json file
         """
         self._spectrumTraits.restore(self._metaDataPath)
         self._dataStore.spectrum = self

@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:50 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-06-13 18:17:34 +0100 (Thu, June 13, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -70,9 +70,11 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, \
     ALIASENABLED, ALIASSHADE, ALIASLABELSENABLED, CONTOURTHICKNESS, \
     PEAKLABELSENABLED, MULTIPLETLABELSENABLED, MULTIPLETTYPE, MULTIPLETANNOTATIONTYPE, PEAKSYMBOLSENABLED, PEAKARROWSENABLED, MULTIPLETSYMBOLSENABLED, MULTIPLETARROWSENABLED, ARROWTYPES, ARROWSIZE, ARROWMINIMUM
 from ccpn.ui.gui.lib.GuiSpectrumView import _spectrumViewHasChanged
+
 from ccpn.util.Constants import AXISUNITS
 from ccpn.util.Logging import getLogger
 from ccpn.util import Colour
+from ccpn.util.Common import uniquify
 
 from ccpn.ui._implementation.PeakListView import PeakListView
 from ccpn.ui._implementation.IntegralListView import IntegralListView
@@ -275,6 +277,20 @@ class GuiSpectrumDisplay(CcpnModule):
         self.inactivePeakItemDict = {}  # maps peakListView to apiPeak to set of peaks which are not being displayed
 
         self._spectrumUtilActions = {}  # Filled by _fillToolBar
+
+    @property
+    def spectra(self) -> list[Spectrum]:
+        """
+        :return: a list of spectra displayed in the strips(s)
+        (For V4 compatibility)
+        """
+        return uniquify([sv.spectrum for sv in self.spectrumViews])
+
+    @property
+    def axisCount(self) -> int:
+        """:return the axisCount of the SpectrumDisplay instance
+        """
+        return self.dimensionCount if not self.is1D else 2
 
     def _fillToolBar(self):
         """

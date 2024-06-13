@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-06-06 15:34:52 +0200 (Thu, June 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-13 14:03:15 +0100 (Thu, June 13, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -152,10 +152,13 @@ class NotifierABC(object):
 
         self._debug: bool = debug or DEBUG or self._id in _debugIds
         self._isBlanked: bool = False  # ability to blank notifier
-        self._isRegistered: bool = False  # flag indicating if any Notifier was registered
+        self._isRegistered: bool = False  # flag indicating if the notifier is registered
         self._isExecuting: bool = False  # Flag to indicate notifier callback is executing
         self._objectList: list = []  # A list of object that notifier will be firing on;
                                      # assembled as part of the _doFireNotifiers context manager
+        self._appliesToTheObject: bool = False  # A flag to indicate that the notifier is set to fire only
+                                                # on theObject; i.e. always True for OBSERVE, False for CREATE and
+                                                # varibake for (POST_)DELETE and RENAME.
 
     @property
     def id(self):
@@ -302,7 +305,8 @@ class NotifierABC(object):
 
             # return f'<{self.__class__.__name__} {self.id} (unregistered): theObject=None: {self._trigger!r}->{self._targetName!r}>'
 
-        return f'<{self.__class__.__name__} {self.id} ({_exec}): theObject={_pid}; {self._trigger!r}->{self._targetName!r}>'
+        _name = self.__class__.__name__
+        return f'<{_name} {self.id} ({_exec}): theObject={_pid}; {self._trigger!r}->{self._targetName!r}; appliesToObj={self._appliesToTheObject}>'
 
 
 

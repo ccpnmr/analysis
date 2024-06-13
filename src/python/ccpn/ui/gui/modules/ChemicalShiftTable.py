@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-06-06 18:27:51 +0100 (Thu, June 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-13 16:46:32 +0100 (Thu, June 13, 2024) $"
 __version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
@@ -46,7 +46,7 @@ from ccpn.core.ChemicalShiftList import CS_UNIQUEID, CS_ISDELETED, CS_PID, \
     CS_TABLECOLUMNS, ChemicalShiftState
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.DataFrameObject import DataFrameObject, DATAFRAME_OBJECT
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.modules.CcpnModule import CcpnTableModule, MODULENAME, WIDGETSTATE
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.PulldownListsForObjects import ChemicalShiftListPulldown
@@ -81,7 +81,7 @@ _INTO_CSL = 'into'
 # ChemicalShiftTableModule
 #=========================================================================================
 
-class ChemicalShiftTableModule(CcpnModule):
+class ChemicalShiftTableModule(CcpnTableModule):
     """This class implements the module by wrapping a ChemicalShift instance
     """
     includeSettingsWidget = True
@@ -199,6 +199,7 @@ class ChemicalShiftTableModule(CcpnModule):
     def _closeModule(self):
         """CCPN-INTERNAL: used to close the module
         """
+        self._saveColumns()
         self._modulePulldown.unRegister()
         self._tableWidget._close()
         super()._closeModule()

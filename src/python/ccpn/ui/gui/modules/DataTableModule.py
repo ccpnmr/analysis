@@ -4,9 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-10 17:47:44 +0000 (Fri, March 10, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-06-13 16:46:32 +0100 (Thu, June 13, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,7 +32,7 @@ import pandas as pd
 from collections import OrderedDict
 
 from ccpn.core.DataTable import DataTable as KlassTable
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.modules.CcpnModule import CcpnTableModule
 from ccpn.ui.gui.widgets.Spacer import Spacer
 # from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.Label import Label
@@ -58,7 +59,7 @@ LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
 # DataTableModule
 #=========================================================================================
 
-class DataTableModule(CcpnModule):
+class DataTableModule(CcpnTableModule):
     """This class implements the module by wrapping a DataTable instance
     """
     includeSettingsWidget = True
@@ -217,6 +218,7 @@ class DataTableModule(CcpnModule):
         """
         CCPN-INTERNAL: used to close the module
         """
+        self._saveColumns()
         if self._modulePulldown:
             self._modulePulldown.unRegister()
         if self._tableWidget:

@@ -3,9 +3,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:05 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-06-13 16:46:33 +0100 (Thu, June 13, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,7 +33,7 @@ from functools import partial
 
 from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Multiplet import Multiplet
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.modules.CcpnModule import CcpnTableModule
 from ccpn.ui.gui.modules.MultipletPeakTable import MultipletPeakTableWidget
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
@@ -68,7 +69,7 @@ class _PeakList:
 # MultipletTableModule
 #=========================================================================================
 
-class MultipletTableModule(CcpnModule):
+class MultipletTableModule(CcpnTableModule):
     """This class implements the module by wrapping a MultipletTable instance
     """
     includeSettingsWidget = True
@@ -161,7 +162,7 @@ class MultipletTableModule(CcpnModule):
         return self._mainFrame
 
     @property
-    def tableWidget(self):
+    def _tableWidget(self):
         """Return the table widget in the table frame
         """
         return self._mainFrame._tableWidget
@@ -183,7 +184,7 @@ class MultipletTableModule(CcpnModule):
         self.mainWidget._dropEventCallback = self._mainFrame._processDroppedItems
 
         # connect the signals for the cross-table linking
-        self.tableWidget.updateLinkedTable.connect(self._updatePeakTable)
+        self._tableWidget.updateLinkedTable.connect(self._updatePeakTable)
         self.tableFrame.unitsChanged.connect(self._pulldownUnitsCallback)
 
     def selectTable(self, table):
@@ -194,6 +195,7 @@ class MultipletTableModule(CcpnModule):
     def _closeModule(self):
         """CCPN-INTERNAL: used to close the module
         """
+        self._saveColumns()
         self.tableFrame._cleanupWidget()
         self.peakListTable._close()
         if self.activePulldownClass and self._setCurrentPulldown:
@@ -204,8 +206,8 @@ class MultipletTableModule(CcpnModule):
     def _pulldownUnitsCallback(self, unit):
         """Update both tables with the new units
         """
-        self.tableWidget._setPositionUnit(unit)
-        self.tableWidget._updateAllModule()
+        self._tableWidget._setPositionUnit(unit)
+        self._tableWidget._updateAllModule()
         self.peakListTable._setPositionUnit(unit)
         self.peakListTable._updateAllModule()
 

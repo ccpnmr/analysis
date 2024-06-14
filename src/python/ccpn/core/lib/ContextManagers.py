@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:47 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-06-14 13:40:58 +0100 (Fri, June 14, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -142,7 +142,7 @@ def undoBlockWithSideBar(application=None, debugText=''):
     undo.increaseWaypointBlocking()
 
     if application.ui and application.ui.mainWindow:
-        sidebar = application.ui.mainWindow.sideBar
+        sidebar = application.ui.mainWindow._getSideBar()
         sidebar.increaseSidebarBlocking(withSideBarUpdate=True)
 
     application.project.suspendNotification()
@@ -155,7 +155,7 @@ def undoBlockWithSideBar(application=None, debugText=''):
         _resumeNotification(application)
 
         if application.ui and application.ui.mainWindow:
-            sidebar = application.ui.mainWindow.sideBar
+            sidebar = application.ui.mainWindow._getSideBar()
             sidebar.decreaseSidebarBlocking(withSideBarUpdate=True)
 
         if undo is not None:
@@ -185,7 +185,7 @@ def undoBlockWithoutSideBar(application=None, debugText=''):
     undo.increaseWaypointBlocking()
 
     if application.ui and application.ui.mainWindow:
-        sidebar = application.ui.mainWindow.sideBar
+        sidebar = application.ui.mainWindow._getSideBar()
         sidebar.increaseSidebarBlocking(withSideBarUpdate=False)
 
     application.project.suspendNotification()
@@ -198,7 +198,7 @@ def undoBlockWithoutSideBar(application=None, debugText=''):
         _resumeNotification(application)
 
         if application.ui and application.ui.mainWindow:
-            sidebar = application.ui.mainWindow.sideBar
+            sidebar = application.ui.mainWindow._getSideBar()
             sidebar.decreaseSidebarBlocking(withSideBarUpdate=False)
 
         if undo is not None:
@@ -257,7 +257,7 @@ def rebuildSidebar(application):
         raise RuntimeError('Error getting application')
 
     if application.hasGui:
-        sidebar = application.mainWindow.sideBar
+        sidebar = application.mainWindow._getSideBar()
         sidebar.increaseSidebarBlocking(withSideBarUpdate=True)
         sidebar.clearSideBar()
     else:
@@ -290,7 +290,7 @@ def sidebarBlocking(application=None, blockSidebarOnly=False):
         raise RuntimeError('Error getting application')
 
     if application.ui and application.ui.mainWindow:
-        sidebar = application.ui.mainWindow.sideBar
+        sidebar = application.ui.mainWindow._getSideBar()
         sidebar.increaseSidebarBlocking()
 
     try:
@@ -308,7 +308,7 @@ def sidebarBlocking(application=None, blockSidebarOnly=False):
     finally:
         # clean up after suspending sidebar updates
         if application.ui and application.ui.mainWindow:
-            sidebar = application.ui.mainWindow.sideBar
+            sidebar = application.ui.mainWindow._getSideBar()
             sidebar.decreaseSidebarBlocking()
 
 

@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-06-07 11:04:03 +0200 (Fri, June 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-16 18:12:09 +0100 (Sun, June 16, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -65,9 +65,10 @@ class Tree(object):
         for obj in self.allDecendants():
             obj._root = root
 
-    def _addChild(self, child):
+    def _addChild(self, child, indx=-1):
         """Add child to the tree, child (and its children) inherit root from self
         :parameter child: a Tree instance that is a child of self
+        :parameter indx: position in _children list; default -1, i.e. at the end
         CCPNMRINTERNAL: Used in super classes; hidden for user perspective reasons
         """
         if child == self:
@@ -78,7 +79,11 @@ class Tree(object):
         child._parent = self
         # child and its children inherit _root from self
         child._setRoot(self._root)
-        self._children.append(child)
+
+        if indx < 0:
+            self._children.append(child)
+        else:
+            self._children.insert(indx, child)
 
     def _removeChild(self, child):
         """Remove child from self, child becomes root;
@@ -135,9 +140,10 @@ class Tree(object):
         """
         if self.isRoot:
             return -1
-        if klass is None:
-            klass = self.__class__
-        _children = self._parent._getChildrenByClass(klass=klass)
+        if klass is not None:
+            _children = self._parent._getChildrenByClass(klass=klass)
+        else:
+            _children = self._parent._children
         return _children.index(self)
 
     def _nextIndex(self, klass=None) -> int:

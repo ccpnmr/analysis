@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-06-13 14:03:15 +0100 (Thu, June 13, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-17 08:20:15 +0100 (Mon, June 17, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -76,6 +76,7 @@ class NotifierABC(object):
     CREATE = 'create'
     DELETE = 'delete'
     POST_DELETE = 'postDelete'
+    UNDELETE = 'undelete'
     RENAME = 'rename'
     CHANGE = 'change'
     OBSERVE = 'observe'

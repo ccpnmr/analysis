@@ -139,8 +139,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-26 17:27:53 +0100 (Fri, April 26, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-06-17 17:48:54 +0100 (Mon, June 17, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -433,6 +433,8 @@ class CcpNmrJson(TraitBase):
                               usefull for e.g. testing macro's
         """
         className = cls.__name__
+        # if className == 'SideBarData':
+        #         pass # for debugging module initialisation
         if cls.isRegistered(className) and not overwrite:
             raise RuntimeError('className "%s" is already registered' % className)
         CcpNmrJson._registeredClasses[className] = cls

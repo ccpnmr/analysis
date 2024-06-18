@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-06-17 12:43:16 +0100 (Mon, June 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-18 21:07:38 +0100 (Tue, June 18, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -48,6 +48,8 @@ from collections import OrderedDict
 from typing import Callable, Any, Optional
 from itertools import permutations
 import weakref
+
+from ccpn.core.lib.WeakRefList import _WeakRefList
 
 from ccpn.util.Logging import getLogger
 from ccpn.util.AttributeDict import AttributeDict
@@ -159,7 +161,7 @@ class NotifierABC(object):
                                      # assembled as part of the _doFireNotifiers context manager
         self._appliesToTheObject: bool = False  # A flag to indicate that the notifier is set to fire only
                                                 # on theObject; i.e. always True for OBSERVE, False for CREATE and
-                                                # varibake for (POST_)DELETE and RENAME.
+                                                # variable for (POST_)DELETE and RENAME.
 
     @property
     def id(self):
@@ -259,9 +261,10 @@ class NotifierABC(object):
         """Create and return a dict with all the callback keys.
         Both the obj en object arguments are mapped to the OBJECT key
         """
-        callbackDict = AttributeDict()
-        callbackDict.update(
-        {
+        # if specifiers is not None:
+        #     pass  # for debug breakpoint
+
+        callbackDict = AttributeDict({
             self.NOTIFIER       : self,
             self.THEOBJECT      : self._theObject,
             self.TRIGGER        : self._trigger,
@@ -275,6 +278,7 @@ class NotifierABC(object):
             self.PID            : pid,
             self.SPECIFIERS     : specifiers,
         })
+
         return callbackDict
 
     @staticmethod
@@ -433,21 +437,16 @@ class Notifier(NotifierABC):
         # Limitation check:
         # Various triggers are set to fire for an object of class targetName.
         # (i.e. they are effectively class notifiers)
-        _allowed = False
         if trigger in (NotifierABC.CHANGE, NotifierABC.CREATE, NotifierABC.DELETE, NotifierABC.RENAME):
-            # for these triggers; notifier can only be set on an object whose child classes are of
-            # type targetName
-            # or can be set on project.
+            # for these triggers;
+            # notifier can only be set on an object whose child classes are of type targetName
+            # or
+            # can be set on project.
             _allowedClasses = [] if self._isProject \
                                  else [klass.className for klass in theObject._childClasses]
-            _allowed = self._isProject or targetName in _allowedClasses
-
-        elif trigger == NotifierABC.OBSERVE:
-            _allowed = True
-
-        if not _allowed:
-            raise ValueError(
-                f'Notifier ({trigger!r},{targetName!r}) can not be set on {theObject}')
+            if not (self._isProject or targetName in _allowedClasses):
+                raise ValueError(
+                    f'Notifier ({trigger!r},{targetName!r}) can not be set on {theObject}')
 
         if trigger == Notifier.OBSERVE:
             # OBSERVE special case, as the current underpinning implementation does not allow this directly
@@ -465,6 +464,7 @@ class Notifier(NotifierABC):
                                                 target=Notifier.CHANGE,
                                                 func=self,
                                                 onceOnly=onceOnly)
+            self._appliesToTheObject = True
             # The info needed for unregistering
             self._unregister = (theObject.className, Notifier.CHANGE, func)
 
@@ -545,6 +545,8 @@ class Notifier(NotifierABC):
                 notifierFired = True
 
         elif self._isProject or obj._parent.pid == self.theObject.pid:
+            if len(kwds) > 0:
+                pass  #  for debug breakpoint
             callbackDict = self.newCallbackDict(obj=obj,
                                                 oldpid=parameter2,
                                                 pid=obj.pid,
@@ -1025,8 +1027,79 @@ class NotifierBase(object):
             print(f'{key:20} : {val!r}')
 
     #-----------------------------------------------------------------------------------------
-    # Notifications
+    # Notification firing
     #-----------------------------------------------------------------------------------------
+
+    def _fireSingleNotifier(self, notifier, callbackDict: dict):
+        """Fire notifier passing callbackDict to callback function
+        :param callbackDict: parameters passed to callback function as callbackDict
+        """
+        if not isinstance(notifier, NotifierABC):
+            raise TypeError(f'_fireSingleNotifier(): expected Notifier (sub-)type; got {type(notifier)}')
+
+        if notifier.isExecuting:
+            raise RuntimeError(f'_fireSingleNotifier(): {notifier} is executing')
+
+        if not notifier.isRegistered:
+            getLogger().warning(f'_fireSingleNotifier(): Triggering unregistered notifier {notifier}')
+            return
+
+        if notifier.isBlanked:
+            return
+
+        if notifier._debug:
+            sys.stderr.write(f'>>> _fireSingleNotifier(): {notifier}\n' )
+
+        # get proper callbackDict and update with any values passed in
+        _callbackDict = notifier.newCallbackDict()
+        _callbackDict.update(callbackDict)
+
+        # execute the callback
+        try:
+            # V4NotifierBase._notifierStack.append((V4NotifierBase._notifierContextLevel, notifier))
+            notifier._isExecuting = True
+            notifier._callback(_callbackDict, **notifier._kwds)
+
+        except Exception as es:
+            getLogger().error(f'While firing {notifier}: {es}')
+            raise RuntimeError(f'While firing {notifier}: {es}') from es
+
+        finally:
+            notifier._isExecuting = False
+            # V4NotifierBase._notifierStack.pop()
+
+
+    def _fireRegisteredNotifiers(self, trigger: str, targetName: str | None, callbackDict: dict ):
+        """Fire notifiers registered with self of type trigger, targetName passing kwds to the callbackDict.
+        :parameter trigger: fire Notifiers of type trigger
+        :parameter targetName: targetName of the Notifiers to fire; if None, all notifiers with
+                               trigger are fired
+        :param callbackDict: values passed to callback function as callbackDict
+        """
+        objNotifiers = self._registeredNotifiersDict
+
+        if targetName is None:
+            _notifiers = [_ntf for _ntf in objNotifiers.allNotifiers
+                               if _ntf.trigger == trigger]
+        else:
+            _tmp = objNotifiers.get((trigger,targetName), {})
+            _notifiers = list(_tmp.values())
+
+        # Just a quick check to bailout is there is nothing to do
+        if len(_notifiers) == 0:
+            return
+
+        # Create a weak-reference to notifiers, so if they do get deleted during a callback
+        # the routine still works. It will just loop over fewer notifiers.
+        # NB: deleting the an active notifier is not allowed.
+        _weakNotifiers = _WeakRefList(_notifiers)
+        while (_notifier := _weakNotifiers.pop()) is not None:
+            self._fireSingleNotifier(notifier=_notifier, callbackDict=callbackDict)
+
+    #-----------------------------------------------------------------------------------------
+    # Notification blanking
+    #-----------------------------------------------------------------------------------------
+
     # blanking level - to allow for nested notification disabling
     _notificationBlanking = 0
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-06-14 13:40:58 +0100 (Fri, June 14, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-18 21:07:37 +0100 (Tue, June 18, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -41,6 +41,7 @@ from contextlib import contextmanager, nullcontext, suppress
 from collections.abc import Iterable
 
 from ccpn.core.lib import Util as coreUtil
+from ccpn.core.lib.Notifiers import Notifier
 from ccpn.util.Logging import getLogger
 from ccpn.framework.Application import getApplication
 
@@ -1276,13 +1277,14 @@ def ccpNmrV3CoreSetter(doNotify=True, **actionKwds):
     @decorator.decorator
     def theDecorator(*args, **kwds):
         func = args[0]
+        attributeName = func.__name__
         args = args[1:]  # Optional 'self' is now args[0]
         self = args[0]  # this is the object
-        # value = args[1]
+        value = args[1]
 
         application = getApplication()  # pass it in to reduce overhead
 
-        oldValue = getattr(self, func.__name__)
+        oldValue = getattr(self, attributeName)
 
         with notificationBlanking(application=application):
             with undoStackBlocking(application=application) as addUndoItem:
@@ -1295,10 +1297,10 @@ def ccpNmrV3CoreSetter(doNotify=True, **actionKwds):
 
                 finally:
                     addUndoItem(undo=BlankedPartial(func, self, ('change', actionKwds), False, self, oldValue),
-                                redo=BlankedPartial(func, self, ('change', actionKwds), False, self, args[1]))
+                                redo=BlankedPartial(func, self, ('change', actionKwds), False, self, value))
 
         if doNotify:
-            self._finaliseAction('change', **actionKwds)
+            self._finaliseAction(Notifier.CHANGE, **actionKwds)
 
         return result
 

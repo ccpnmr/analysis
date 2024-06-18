@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-05-22 13:23:19 +0100 (Wed, May 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-18 21:07:38 +0100 (Tue, June 18, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -371,7 +371,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         self.setCurrentNotifier('multiplets', GuiStrip._updateSelectedMultiplets)
 
         self.setNotifier(self.application.project, [Notifier.CHANGE], 'SpectrumDisplay', self._spectrumDisplayChanged)
-        self.setNotifier(self.application.project, [Notifier.CHANGE], 'Strip', self._stripPinnedChanged)
+        # GWV: changed to obeserve notifier on Strip.pinned
+        # self.setNotifier(self.application.project, [Notifier.CHANGE], 'Strip', self._stripPinnedChanged)
         self.setNotifier(self.application.project, [Notifier.CHANGE], 'Project', self._projectNotifierCallback)
 
     # def _activatedkeySequence(self, ev):
@@ -1400,21 +1401,22 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                 strip._updatePlaneAxes()
             # spectrumDisplay._setPlaneAxisWidgets()
 
-    def _stripPinnedChanged(self, data):
-        """Callback on strip pinned state change
-        """
-        trigger = data[Notifier.TRIGGER]
-        strip = data[Notifier.OBJECT]
-
-        if trigger == Notifier.CHANGE and data[Notifier.SPECIFIERS].get('pinnedChanged'):
-            getLogger().debug(f'>>> Strip changed - {strip} {strip.pinned}')
-            strip._updateStripLabelState()
-
-            # disable the other pinned strips - only allow one strip to be pinned
-            # if strip.pinned:
-            #     for st in self.project.strips:
-            #         if st != strip:
-            #             st.pinned = False
+    # GWV: changed to obeserve notifier on Strip.pinned
+    # def _stripPinnedChanged(self, data):
+    #     """Callback on strip pinned state change
+    #     """
+    #     trigger = data[Notifier.TRIGGER]
+    #     strip = data[Notifier.OBJECT]
+    #
+    #     if trigger == Notifier.CHANGE and data[Notifier.SPECIFIERS].get('pinnedChanged'):
+    #         getLogger().debug(f'>>> Strip changed - {strip} {strip.pinned}')
+    #         strip._updateStripLabelState()
+    #
+    #         # disable the other pinned strips - only allow one strip to be pinned
+    #         # if strip.pinned:
+    #         #     for st in self.project.strips:
+    #         #         if st != strip:
+    #         #             st.pinned = False
 
     # def printToFile(self):
     #     self.application.showPrintSpectrumDisplayPopup()

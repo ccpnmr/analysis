@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:50 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-06-18 21:07:38 +0100 (Tue, June 18, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -535,6 +535,9 @@ class GuiStrip(Frame):
         self.setNotifier(self.project, [Notifier.RENAME], 'Strip',
                          self._updateStripLabel,
                          onceOnly=True)
+
+        # Notifier for pinned strips (GWV 18/6/24)
+        self.setNotifier(self, [Notifier.OBSERVE], 'pinned', callback=self._stripPinnedCallback)
 
         # For now, all dropEvents are not strip specific, use spectrumDisplay's handling
         self.setGuiNotifier(self, [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
@@ -1416,6 +1419,11 @@ class GuiStrip(Frame):
         if self.stripLabel:
             self.stripLabel.setLabelColour(CCPNGLWIDGET_HEXHIGHLIGHT if flag else CCPNGLWIDGET_HEXFOREGROUND)
             self.stripLabel.setHighlighted(flag)
+
+    def _stripPinnedCallback(self, callbackDict: dict):
+        """Callback when Strip.pinned is changed
+        """
+        self._updateStripLabelState()
 
     def _updateStripLabelState(self, *args):
         """Update the visible state of the pinned icon.

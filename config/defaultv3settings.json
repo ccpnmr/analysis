@@ -208,6 +208,11 @@
             "Peak Labels"            : 2,
             "Peak Symbols"           : 2,
             "Peak Arrows"            : 2,
+            "Integral Labels"        : 2,
+            "Integral Symbols"       : 2,
+            "Multiplet Labels"       : 2,
+            "Multiplet Symbols"      : 2,
+            "Multiplet Arrows"       : 2,
             "Plot Border"            : 2,
             "Regions"                : 2,
             "Show Cursors"           : 0,
@@ -266,15 +271,15 @@
     },
     "recentFiles"      : [
     ],
-    "popups": {
-        "_openItemNmrChainTable": {
-            "dontShowPopup": false
+    "popups"           : {
+        "_openItemNmrChainTable"  : {
+            "dontShowPopup" : false
         },
-        "_openItemNmrResidueItem": {
-            "dontShowPopup": false
+        "_openItemNmrResidueItem" : {
+            "dontShowPopup" : false
         },
-        "_openItemNmrAtomItem": {
-            "dontShowPopup": false
+        "_openItemNmrAtomItem"    : {
+            "dontShowPopup" : false
         }
     }
 }

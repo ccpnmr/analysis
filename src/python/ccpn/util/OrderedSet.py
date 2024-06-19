@@ -5,18 +5,20 @@ By Raymond Hettinger, http://code.activestate.com/recipes/576694/
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-23 15:18:27 +0100 (Tue, June 23, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2024-06-19 13:15:42 +0100 (Wed, June 19, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,7 +29,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 
-import collections
+import collections.abc
 
 
 class OrderedSet(collections.abc.MutableSet):
@@ -89,6 +91,7 @@ class OrderedSet(collections.abc.MutableSet):
     def __eq__(self, other):
         if isinstance(other, (OrderedSet, FrozenOrderedSet)):
             return len(self) == len(other) and list(self) == list(other)
+        # revert to more lenient set behaviour
         return set(self) == set(other)
 
 
@@ -152,16 +155,18 @@ class FrozenOrderedSet(collections.abc.MutableSet):
     def __eq__(self, other):
         if isinstance(other, (OrderedSet, FrozenOrderedSet)):
             return len(self) == len(other) and list(self) == list(other)
+        # revert to more lenient set behaviour
         return set(self) == set(other)
 
 
 if __name__ == '__main__':
-    # quick for now, but should use some nosetests
-    s = OrderedSet('abracadaba')
-    t = OrderedSet('simsalabim')
+    # quick for now, but should use some nose-tests
+    s = OrderedSet('hgfedcbaace')  # a-h
+    t = OrderedSet('nmlkjihggik')  # g-n
     print('OR - {}'.format(s | t))
     print('AND - {}'.format(s & t))
     print('MINUS - {}'.format(s - t))
+    print('MINUS - {}'.format(t - s))
     print('SAME - {}'.format(s==t))
 
     print('SET s - {}'.format(s))
@@ -169,9 +174,11 @@ if __name__ == '__main__':
     print('POP - {}'.format(s))
     s.pop(last=False)
     print('POP - {}'.format(s))
+    s.discard('d')
+    print('DISCARD - {}'.format(s))
 
-    s = OrderedSet('abracadaba')
-    t = FrozenOrderedSet('simsalabim')
+    s = OrderedSet('hgfedcbaace')
+    t = FrozenOrderedSet('nmlkjihggik')
     print('OR - {}'.format(s | t))
     print('AND - {}'.format(s & t))
     print('MINUS - {}'.format(s - t))
@@ -185,8 +192,15 @@ if __name__ == '__main__':
         t |= 'Z'
     except Exception as es:
         print(str(es))
+    try:
+        t.pop()
+    except Exception as es:
+        print(str(es))
     print('SET t - {}'.format(s))
     print('SAME - {}'.format(s==t))
-    t = FrozenOrderedSet('abrac')
+    t = FrozenOrderedSet('hgfedcb')
     print('SAME - {}'.format(s==t))
     print('SAME - {}'.format(t==s))
+    print('SAME - {}'.format(t=='bcdefgh'))
+    print(t)
+    print(repr(t))

@@ -11,9 +11,10 @@ Geerten 1-7/12/2016; 11/04/2017
 # Licence, Reference and Credits
 #=========================================================================================
 
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -21,9 +22,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-10 17:35:45 +0100 (Tue, October 10, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-06-19 15:10:19 +0100 (Wed, June 19, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -43,8 +44,8 @@ from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
 from ccpn.ui.gui.widgets.MessageDialog import showWarning, showYesNo
 from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.lib.StripLib import navigateToNmrResidueInDisplay, navigateToNmrAtomsInStrip
+from ccpn.ui.gui.modules.CcpnModule import CcpnTableModule
+from ccpn.ui.gui.lib.StripLib import navigateToNmrResidueInDisplay, navigateToNmrAtomsInStrip, markNmrAtoms
 from ccpn.ui.gui.lib._CoreTableFrame import _CoreTableWidgetABC, _CoreTableFrameABC
 from ccpn.util.Logging import getLogger
 
@@ -63,7 +64,7 @@ _INTO = 'into'
 # NmrResidueTableModule
 #=========================================================================================
 
-class NmrResidueTableModule(CcpnModule):
+class NmrResidueTableModule(CcpnTableModule):
     """This class implements the module by wrapping a NmrResidueTable instance
     """
     includeSettingsWidget = True
@@ -131,7 +132,7 @@ class NmrResidueTableModule(CcpnModule):
         return self._mainFrame
 
     @property
-    def tableWidget(self):
+    def _tableWidget(self):
         """Return the table widget in the table frame
         """
         return self._mainFrame._tableWidget
@@ -158,12 +159,24 @@ class NmrResidueTableModule(CcpnModule):
         self._mainFrame.selectTable(table)
 
     def _closeModule(self):
-        if self.nmrResidueTableSettings:
-            self.nmrResidueTableSettings._cleanupWidget()
-        if self.activePulldownClass and self._setCurrentPulldown:
-            self._setCurrentPulldown.unRegister()
-        self.tableFrame._cleanupWidget()
+        # TODO DT Columns dont save?
+        if self.activePulldownClass:
+            if self._setCurrentPulldown:
+                self._setCurrentPulldown.unRegister()
+            if self.nmrResidueTableSettings:
+                self.nmrResidueTableSettings._cleanupWidget()
+        if self.tableFrame:
+         self.tableFrame._cleanupWidget()
         super()._closeModule()
+
+        # if self.activePulldownClass:
+        #     if self._setCurrentPulldown:
+        #         self._setCurrentPulldown.unRegister()
+        #     if self._settings:
+        #         self._settings._cleanupWidget()
+        # if self.tableFrame:
+        #     self.tableFrame._cleanupWidget()
+        # super()._closeModule()
 
 
 KD = 'Kd'
@@ -366,7 +379,6 @@ class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
             currentNmrResidue = data.get(DATAFRAME_OBJECT)
 
             if currentNmrResidue:
-                from ccpn.AnalysisAssign.modules.BackboneAssignmentModule import markNmrAtoms
 
                 # optionally clear the marks
                 # if self.moduleParent.nmrResidueTableSettings.autoClearMarksWidget.checkBox.isChecked():

@@ -4,9 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-03 16:16:04 +0000 (Fri, March 03, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-06-19 15:10:20 +0100 (Wed, June 19, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -39,7 +40,7 @@ from ccpn.core.StructureData import StructureData
 from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.Collection import Collection
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.modules.CcpnModule import CcpnTableModule
 from ccpn.ui.gui.modules.lib.RestraintAITableCommon import _ModuleHandler, \
     _COLLECTION, _COLLECTIONBUTTON, _SPECTRUMDISPLAYS, _RESTRAINTTABLE, _RESTRAINTTABLES, \
     _VIOLATIONTABLES, _VIOLATIONRESULT, _DEFAULTMEANTHRESHOLD, ALL, _CLEARBUTTON, _COMPARISONSETS
@@ -480,7 +481,7 @@ class _ComparisonTree(ProjectTreeCheckBoxes):
 # RestraintAnalysisTableModule
 #=========================================================================================
 
-class RestraintAnalysisTableModule(CcpnModule):
+class RestraintAnalysisTableModule(CcpnTableModule):
     """
     This class implements the module by wrapping a RestraintAnalysisTable instance
     """
@@ -758,7 +759,7 @@ class RestraintAnalysisTableModule(CcpnModule):
         return self.resources.guiFrame
 
     @property
-    def tableWidget(self):
+    def _tableWidget(self):
         """Return the table widget in the table frame
         """
         return self.resources.guiFrame._tableWidget
@@ -824,6 +825,7 @@ class RestraintAnalysisTableModule(CcpnModule):
     def _closeModule(self):
         """CCPN-INTERNAL: used to close the module
         """
+        # TODO DT test column saving
         rss = self.resources
 
         if self.activePulldownClass and self._setCurrentPulldown:
@@ -874,7 +876,7 @@ class RestraintAnalysisTableModule(CcpnModule):
         self._updateSettings(rss._meanLowerLimitSpinBox.getValue(), rss._autoExpandCheckBox.get())
 
         # give the widgets time to refresh
-        QtCore.QTimer.singleShot(0, self.tableWidget._updateTable)
+        QtCore.QTimer.singleShot(0, self._tableWidget._updateTable)
 
     def restoreWidgetsState(self, **widgetsState):
         rss = self.resources
@@ -949,7 +951,7 @@ class RestraintAnalysisTableModule(CcpnModule):
     def _updateMeanLowerLimit(self, value):
         # self.tableFrame.updateMeanLowerLimit(value)
         self.resources._meanLowerLimit = value
-        self.tableWidget._updateTable()
+        self._tableWidget._updateTable()
 
     def _registerNotifiers(self):
         """Register notifiers for the module
@@ -979,13 +981,13 @@ class RestraintAnalysisTableModule(CcpnModule):
         """Update the selected restraint lists from the parent module
         """
         self.resources._restraintTables = restraintTables
-        self.tableWidget._updateTable()
+        self._tableWidget._updateTable()
 
     def updateOutputTables(self, outputTables):
         """Update the selected data lists from the parent module
         """
         self.resources._outputTables = outputTables
-        self.tableWidget._updateTable()
+        self._tableWidget._updateTable()
 
     def updateRestraintViolationTables(self, restraintTables, outputTables):
         """Update all tables and re-populate
@@ -1008,7 +1010,7 @@ class RestraintAnalysisTableModule(CcpnModule):
         """Set the lower limit for visible restraints
         """
         self.resources._meanLowerLimit = value
-        self.tableWidget._updateTable()
+        self._tableWidget._updateTable()
 
     def _updateSettings(self, meanLowerLimit, expand):
         rss = self.resources
@@ -1034,7 +1036,7 @@ class RestraintAnalysisTableModule(CcpnModule):
             self._updateSettings(rss._meanLowerLimitSpinBox.getValue(), rss._autoExpandCheckBox.get())
 
             # give the widgets time to refresh
-            QtCore.QTimer.singleShot(0, self.tableWidget._updateTable)
+            QtCore.QTimer.singleShot(0, self._tableWidget._updateTable)
             return
 
         # check the items in the dropped collection
@@ -1097,7 +1099,7 @@ class RestraintAnalysisTableModule(CcpnModule):
                 self._updateSettings(rss._meanLowerLimitSpinBox.getValue(), rss._autoExpandCheckBox.get())
 
                 # give the widgets time to refresh
-                QtCore.QTimer.singleShot(0, self.tableWidget._updateTable)
+                QtCore.QTimer.singleShot(0, self._tableWidget._updateTable)
 
         else:
             self._resetPulldowns()
@@ -1106,7 +1108,7 @@ class RestraintAnalysisTableModule(CcpnModule):
             self._updateSettings(rss._meanLowerLimitSpinBox.getValue(), rss._autoExpandCheckBox.get())
 
             # give the widgets time to refresh
-            QtCore.QTimer.singleShot(0, self.tableWidget._updateTable)
+            QtCore.QTimer.singleShot(0, self._tableWidget._updateTable)
 
     def _changePeakList(self, pid):
         """Update the settings-widget depending on the peak selection
@@ -1300,7 +1302,7 @@ class RestraintAnalysisTableModule(CcpnModule):
 
             for widgetObj in rss._modulePulldown.textList:
                 if peakList.pid == widgetObj:
-                    self.tableWidget._selectedPeakList = peakList
+                    self._tableWidget._selectedPeakList = peakList
                     rss._modulePulldown.select(peakList.pid)
 
     #=========================================================================================
@@ -1322,7 +1324,7 @@ class RestraintAnalysisTableModule(CcpnModule):
 
             self._updateCollectionButton(True)
             self._updateSettings(rss._meanLowerLimitSpinBox.getValue(), rss._autoExpandCheckBox.get())
-            self.tableWidget._updateTable()
+            self._tableWidget._updateTable()
 
     def _updatePulldownNotify(self, data):
         """Handle notifier for changed, deleted collection
@@ -1397,7 +1399,7 @@ class RestraintAnalysisTableModule(CcpnModule):
             self._updateSettings(rss._meanLowerLimitSpinBox.getValue(), rss._autoExpandCheckBox.get())
             self._updateRestraintViolationTables()
 
-            self.tableWidget._updateTable()
+            self._tableWidget._updateTable()
 
     def _handleDroppedItems(self, pids, objType, pulldown):
         """handle dropping pids onto the table

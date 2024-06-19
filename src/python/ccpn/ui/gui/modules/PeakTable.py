@@ -4,9 +4,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-22 18:27:05 +0000 (Wed, November 22, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-06-19 15:10:20 +0100 (Wed, June 19, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -33,7 +34,7 @@ from ccpn.core.Peak import Peak
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.lib.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.modules.CcpnModule import CcpnTableModule
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown
@@ -54,7 +55,7 @@ ALL = '<all>'
 LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
 
 
-class PeakTableModule(CcpnModule):
+class PeakTableModule(CcpnTableModule):
     """This class implements the module by wrapping a PeakListTable instance
     """
 
@@ -118,7 +119,7 @@ class PeakTableModule(CcpnModule):
         return self._mainFrame
 
     @property
-    def tableWidget(self):
+    def _tableWidget(self):
         """Return the table widget in the table frame
         """
         return self._mainFrame._tableWidget
@@ -160,6 +161,7 @@ class PeakTableModule(CcpnModule):
                 self._settings._cleanupWidget()
         if self.tableFrame:
             self.tableFrame._cleanupWidget()
+
         super()._closeModule()
 
     def _getLastSeenWidgetsState(self):

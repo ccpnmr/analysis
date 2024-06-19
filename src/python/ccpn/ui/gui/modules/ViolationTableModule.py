@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-06-13 16:46:34 +0100 (Thu, June 13, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-19 15:10:20 +0100 (Wed, June 19, 2024) $"
 __version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
@@ -233,13 +233,10 @@ class ViolationTableModule(CcpnTableModule):
         CCPN-INTERNAL: used to close the module
         """
         # TODO DT Test save columns
-        self._saveColumns()
         if self._modulePulldown:
             self._modulePulldown.unRegister()
         if self.rtWidget:
             self.rtWidget.unRegister()
-        if self._tableWidget:
-            self._tableWidget._close()
         if self._metadata:
             self._metadata.close()
         if self.activePulldownClass and self._setCurrentPulldown:

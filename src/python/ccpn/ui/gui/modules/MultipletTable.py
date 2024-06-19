@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-06-13 16:46:33 +0100 (Thu, June 13, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-19 15:10:19 +0100 (Wed, June 19, 2024) $"
 __version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
@@ -195,12 +195,24 @@ class MultipletTableModule(CcpnTableModule):
     def _closeModule(self):
         """CCPN-INTERNAL: used to close the module
         """
-        self._saveColumns()
         self.tableFrame._cleanupWidget()
         self.peakListTable._close()
         if self.activePulldownClass and self._setCurrentPulldown:
             self._setCurrentPulldown.unRegister()
         super()._closeModule()
+
+    def _saveColumns(self, hiddenColumns : list = None):
+        if not hiddenColumns:
+            hiddenColumns = [self._tableWidget.headerColumnMenu.hiddenColumns,
+                             self.peakListTable.headerColumnMenu.hiddenColumns]
+        super()._saveColumns(hiddenColumns=hiddenColumns)
+
+    def _restoreColumns(self, hiddenColumns):
+        try:
+            self._tableWidget.headerColumnMenu.hiddenColumns = hiddenColumns[0]
+            self.peakListTable.headerColumnMenu.hiddenColumns = hiddenColumns[1]
+        except AssertionError as es:
+            getLogger().warning(f'Could not restore table columns: {es}')
 
     @QtCore.pyqtSlot(str)
     def _pulldownUnitsCallback(self, unit):

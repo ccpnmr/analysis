@@ -54,7 +54,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-06-08 09:52:02 +0200 (Sat, June 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-19 18:24:40 +0100 (Wed, June 19, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -3671,19 +3671,19 @@ class Spectrum(AbstractWrapperObject):
             scaleChanged = actionKwds.get(_SCALECHANGED, False)
             allChanged = actionKwds.get(_ALLCHANGED, False)
             rebuildContours = actionKwds.get(_REBUILDCONTOURS, True)
-            if rebuildContours:
-                for specView in self.spectrumViews:
-                    if specView:
-                        # force a rebuild of the contours/etc.
-                        if scaleChanged:
-                            specView.buildContoursOnly = scaleChanged
-                        elif allChanged:
-                            specView.buildContours = allChanged
-                        # other changes may need to be recognised here
-                        specView._finaliseAction(action)
-
-            if actionKwds.get(_IGNORECHILDREN, False):  # here or before specView?
-                return
+            # if rebuildContours:
+            #     for specView in self.spectrumViews:
+            #         if specView:
+            #             # force a rebuild of the contours/etc.
+            #             if scaleChanged:
+            #                 specView.buildContoursOnly = scaleChanged
+            #             elif allChanged:
+            #                 specView.buildContours = allChanged
+            #             # other changes may need to be recognised here
+            #             specView._finaliseAction(action)
+            #
+            # if actionKwds.get(_IGNORECHILDREN, False):  # here or before specView?
+            #     return
 
             if scaleChanged or allChanged:
                 # notify peaks/multiplets/integrals that the scale has changed

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-06-18 21:07:38 +0100 (Tue, June 18, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-19 18:24:40 +0100 (Wed, June 19, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -394,7 +394,7 @@ class GuiStrip(Frame):
         self._overlayArea.raise_()
 
         # initialise the notifiers
-        self.setStripNotifiers()
+        self._setStripNotifiers()
 
         # test aliasing notifiers
         # self._currentVisibleAliasingRange = {}
@@ -488,7 +488,7 @@ class GuiStrip(Frame):
         # widget2.hide()
         widget1.show()
 
-    def setStripNotifiers(self):
+    def _setStripNotifiers(self):
         """Set the notifiers for the strip.
         """
 

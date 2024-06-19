@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-06-18 21:07:38 +0100 (Tue, June 18, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-19 18:24:40 +0100 (Wed, June 19, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -371,7 +371,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         self.setCurrentNotifier('multiplets', GuiStrip._updateSelectedMultiplets)
 
         self.setNotifier(self.application.project, [Notifier.CHANGE], 'SpectrumDisplay', self._spectrumDisplayChanged)
-        # GWV: changed to obeserve notifier on Strip.pinned
+        # GWV: changed to OBSERVE notifier on Strip.pinned
         # self.setNotifier(self.application.project, [Notifier.CHANGE], 'Strip', self._stripPinnedChanged)
         self.setNotifier(self.application.project, [Notifier.CHANGE], 'Project', self._projectNotifierCallback)
 
@@ -1401,7 +1401,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                 strip._updatePlaneAxes()
             # spectrumDisplay._setPlaneAxisWidgets()
 
-    # GWV: changed to obeserve notifier on Strip.pinned
+    # GWV 18/6/24: changed to OBSERVE notifier on Strip.pinned
     # def _stripPinnedChanged(self, data):
     #     """Callback on strip pinned state change
     #     """

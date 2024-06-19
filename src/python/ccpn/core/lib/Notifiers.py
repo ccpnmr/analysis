@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-06-18 21:07:38 +0100 (Tue, June 18, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-19 18:24:40 +0100 (Wed, June 19, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -865,14 +865,14 @@ class NotifierBase(object):
 
         self._objectNotifiersDict.addNotifier(notifier)
 
-    def setNotifier(self, theObject, triggers: list|tuple, targetName: str|None, callback: Callable, **kwds) -> _NotifierList:
+    def setNotifier(self, theObject, triggers: list|tuple, targetName: str|list|tuple|None, callback: Callable, **kwds) -> _NotifierList:
         """Set Notifier for (V3/V4) theObject;
         Store for management; i.e. removal with deleteNotifier() or deleteAllNotifiers()
         methods.
 
         :param theObject: (V3/V4) object to register a notifier with
         :param triggers: list of triggers to trigger callback
-        :param targetName: valid className, attributeName or None (See Notifier doc string for details)
+        :param targetName: valid className, attributeName, list|tuple of attributeNames or None (See Notifier doc string for details)
         :param callback: callback function with signature: callback(callbackDict, **kwds])
         :param **kwds: optional keyword,value arguments passed to callback
 
@@ -883,23 +883,35 @@ class NotifierBase(object):
         if theObject is None:
             raise ValueError(f'setNotifier(): undefined object')
 
-        if not isinstance(triggers, (list,tuple)) or len(triggers) == 0:
-            raise ValueError(f'setNotifier(): invalid triggers "{triggers}"')
+        if not isinstance(triggers, (list,tuple)):
+            raise TypeError(f'setNotifier(): invalid triggers; expected list or tuple, got {type(triggers)}')
+
+        if len(triggers) == 0:
+            raise ValueError(f'setNotifier(): no triggers (len=0)')
 
         if isinstance(theObject, Current) or triggers[0] == CurrentNotifier.CURRENT:
             raise ValueError(f'setNotifier(): Object or trigger refer to Current; use setCurrentNotifier() method instead')
 
+        _targetNames = []
+        if targetName is None or isinstance(targetName, str):
+            _targetNames = [targetName]
+        elif isinstance(targetName, (list,tuple)):
+            _targetNames = targetName
+        else:
+            raise TypeError(f'setNotifier(): invalid targetName; expected str, list, tuple or None, got {type(targetName)}')
+
         result = _NotifierList()
         for _trigger in triggers:
-            _notifier = theObject._newNotifier(
-                                trigger=_trigger,
-                                targetName=targetName,
-                                callback=callback,
-                                setterObject=self,
-                                **kwds
-            )
-            result.append(_notifier)
-            self._addNotifier(_notifier)
+            for _targetName in _targetNames:
+                _notifier = theObject._newNotifier(
+                                    trigger=_trigger,
+                                    targetName=_targetName,
+                                    callback=callback,
+                                    setterObject=self,
+                                    **kwds
+                )
+                result.append(_notifier)
+                self._addNotifier(_notifier)
 
         return result
 

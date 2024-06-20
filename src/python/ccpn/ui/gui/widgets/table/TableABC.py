@@ -4,9 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-11 13:56:26 +0100 (Wed, October 11, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-06-20 16:42:23 +0100 (Thu, June 20, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -64,6 +65,7 @@ class TableABC(QtWidgets.QTableView):
     """
     tableChanged = QtCore.pyqtSignal()
     sortingChanged = QtCore.pyqtSignal(dict)
+    className = None
 
     styleSheet = """QTableView {
                         background-color: %(GUITABLE_BACKGROUND)s;
@@ -93,9 +95,7 @@ class TableABC(QtWidgets.QTableView):
     # QTableView::item - color: %(GUITABLE_ITEM_FOREGROUND)s;
     # QTableView::item:selected - color: %(GUITABLE_SELECTED_FOREGROUND)s;
     # cell uses alternate-background-role for unselected-focused cell
-
     _tableMenuOptions = None
-
     searchMenu = None
     copyCellMenu = None
     deleteMenu = None
@@ -171,6 +171,8 @@ class TableABC(QtWidgets.QTableView):
 
         parameters that are NOTHING can be set on the subclass, these are ignored in the parameter-list
         """
+        if self.className is None:
+            self.className = self.__class__.__name__
         super().__init__(parent)
         self._parent = parent
         if df is None:

@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-06-19 15:10:19 +0100 (Wed, June 19, 2024) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-06-20 16:42:22 +0100 (Thu, June 20, 2024) $"
 __version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,7 @@ from PyQt5 import QtWidgets, QtCore
 from collections import OrderedDict
 from dataclasses import dataclass
 from functools import partial
+import contextlib
 
 from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Multiplet import Multiplet
@@ -72,13 +73,11 @@ class _PeakList:
 class MultipletTableModule(CcpnTableModule):
     """This class implements the module by wrapping a MultipletTable instance
     """
+    className = 'MultipletTableModule'
     includeSettingsWidget = True
     maxSettingsState = 2
     settingsPosition = 'top'
-
     activePulldownClass = MultipletList
-
-    className = 'MultipletTableModule'
     _allowRename = True
 
     def __init__(self, mainWindow=None, name='Multiplet Table',
@@ -126,11 +125,11 @@ class MultipletTableModule(CcpnTableModule):
         outerFrame.getLayout().addWidget(splitter)
 
         # add the frame containing the pulldown and table
-        self._mainFrame = MultipletTableFrame(parent=mainWidget,
-                                              mainWindow=self.mainWindow,
-                                              moduleParent=self,
-                                              multipletList=multipletList, selectFirstItem=selectFirstItem,
-                                              grid=(0, 0))
+        self._mainFrame = _MultipletTableFrame(parent=mainWidget,
+                                               mainWindow=self.mainWindow,
+                                               moduleParent=self,
+                                               multipletList=multipletList, selectFirstItem=selectFirstItem,
+                                               grid=(0, 0))
 
         # # make the table expand to fill the frame
         # self._tableWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
@@ -195,24 +194,50 @@ class MultipletTableModule(CcpnTableModule):
     def _closeModule(self):
         """CCPN-INTERNAL: used to close the module
         """
-        self.tableFrame._cleanupWidget()
-        self.peakListTable._close()
+        if self.tableFrame:
+            self.tableFrame._cleanupWidget()
+        if self.peakListTable:
+            self.peakListTable._close()
         if self.activePulldownClass and self._setCurrentPulldown:
             self._setCurrentPulldown.unRegister()
         super()._closeModule()
 
-    def _saveColumns(self, hiddenColumns : list = None):
-        if not hiddenColumns:
-            hiddenColumns = [self._tableWidget.headerColumnMenu.hiddenColumns,
-                             self.peakListTable.headerColumnMenu.hiddenColumns]
-        super()._saveColumns(hiddenColumns=hiddenColumns)
+    @property
+    def _hiddenColumns(self) -> list[list[str], list[str]] | None:
+        """Return the hidden-columns for the multiplet-table and the attached peak-table.
+        If undefined, returns None.
+        """
+        with contextlib.suppress(Exception):
+            return [self._tableWidget.headerColumnMenu.hiddenColumns,
+                    self.peakListTable.headerColumnMenu.hiddenColumns]
 
-    def _restoreColumns(self, hiddenColumns):
-        try:
-            self._tableWidget.headerColumnMenu.hiddenColumns = hiddenColumns[0]
-            self.peakListTable.headerColumnMenu.hiddenColumns = hiddenColumns[1]
-        except AssertionError as es:
-            getLogger().warning(f'Could not restore table columns: {es}')
+    # @hiddenColumns.setter
+    def _setHiddenColumns(self, value: list[list[str], list[str]] | None = None):
+        """Set the hidden-columns for the multiplet-table and the attached peak-table.
+        """
+        if value is not None:
+            if not (isinstance(value, list) and len(value) == 2 and
+                    (isinstance(ll, list) and all(isinstance(lStr, str) for lStr in ll)
+                     for ll in value)):
+                raise TypeError(f'{self.__class__.__name__}.hiddenColumns must be list[list[str], list[str]] or None')
+            try:
+                self._tableWidget.headerColumnMenu.hiddenColumns = value[0]
+                self.peakListTable.headerColumnMenu.hiddenColumns = value[1]
+                return
+            except Exception as es:
+                getLogger().debug(f'Could not restore table columns: {es}')
+        self._tableWidget.headerColumnMenu.hiddenColumns = []
+        self.peakListTable.headerColumnMenu.hiddenColumns = []
+
+    def _setClassDefaultHidden(self, hiddenColumns: list[list[str], list[str]] | None):
+        """Copy the hidden-columns to the class; to be set when the next table is opened.
+        """
+        if hiddenColumns is not None:
+            self._tableWidget.setClassDefaultColumns(hiddenColumns[0])
+            self.peakListTable.setClassDefaultColumns(hiddenColumns[1])
+        else:
+            self._tableWidget.setClassDefaultColumns([])
+            self.peakListTable.setClassDefaultColumns([])
 
     @QtCore.pyqtSlot(str)
     def _pulldownUnitsCallback(self, unit):
@@ -240,9 +265,8 @@ class _NewMultipletTableWidget(_CoreTableWidgetABC):
     """
     updateLinkedTable = QtCore.pyqtSignal(_PeakList)
 
-    className = 'MultipletTable'
+    className = '_NewMultipletTableWidget'
     attributeName = 'multipletLists'
-
     defaultHidden = ['Pid', 'Spectrum', 'MultipletList', 'Id']
     _internalColumns = ['isDeleted', '_object']  # columns that are always hidden
 
@@ -538,7 +562,7 @@ class _NewMultipletTableWidget(_CoreTableWidgetABC):
 # MultipletTableFrame
 #=========================================================================================
 
-class MultipletTableFrame(_CoreTableFrameABC):
+class _MultipletTableFrame(_CoreTableFrameABC):
     """Frame containing the pulldown and the table widget
     """
     unitsChanged = QtCore.pyqtSignal(str)

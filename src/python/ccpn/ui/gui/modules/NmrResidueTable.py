@@ -22,8 +22,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-06-19 15:10:19 +0100 (Wed, June 19, 2024) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-06-20 16:42:22 +0100 (Thu, June 20, 2024) $"
 __version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
@@ -67,6 +67,7 @@ _INTO = 'into'
 class NmrResidueTableModule(CcpnTableModule):
     """This class implements the module by wrapping a NmrResidueTable instance
     """
+    className = 'NmrResidueTableModule'
     includeSettingsWidget = True
     maxSettingsState = 2
     settingsPosition = 'left'
@@ -78,7 +79,6 @@ class NmrResidueTableModule(CcpnTableModule):
     activePulldownClass = NmrChain
     activePulldownInitialState = False
 
-    className = 'NmrResidueTableModule'
     _allowRename = True
 
     # we are subclassing this Module, hence some more arguments to the init
@@ -159,24 +159,14 @@ class NmrResidueTableModule(CcpnTableModule):
         self._mainFrame.selectTable(table)
 
     def _closeModule(self):
-        # TODO DT Columns dont save?
         if self.activePulldownClass:
             if self._setCurrentPulldown:
                 self._setCurrentPulldown.unRegister()
             if self.nmrResidueTableSettings:
                 self.nmrResidueTableSettings._cleanupWidget()
         if self.tableFrame:
-         self.tableFrame._cleanupWidget()
+            self.tableFrame._cleanupWidget()
         super()._closeModule()
-
-        # if self.activePulldownClass:
-        #     if self._setCurrentPulldown:
-        #         self._setCurrentPulldown.unRegister()
-        #     if self._settings:
-        #         self._settings._cleanupWidget()
-        # if self.tableFrame:
-        #     self.tableFrame._cleanupWidget()
-        # super()._closeModule()
 
 
 KD = 'Kd'
@@ -190,8 +180,7 @@ Deltas = 'Ddelta'
 class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
     """Class to present a nmrResidue Table
     """
-
-    className = 'NmrResidueTable'
+    className = '_NewNmrResidueTableWidget'
     attributeName = 'nmrChains'
 
     defaultHidden = ['Pid', 'NmrChain']
@@ -599,6 +588,7 @@ class NmrResidueTableFrame(_CoreTableFrameABC):
 class _NewCSMNmrResidueTableWidget(_NewNmrResidueTableWidget):
     """Custom nmrResidue Table with extra columns used in the ChemicalShiftsMapping Module
     """
+    className = '_NewCSMNmrResidueTableWidget'
 
     def setCheckBoxCallback(self, checkBoxCallback):
         # enable callback on the checkboxes

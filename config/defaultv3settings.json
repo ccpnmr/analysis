@@ -281,5 +281,7 @@
         "_openItemNmrAtomItem"    : {
             "dontShowPopup" : false
         }
+    },
+    "tables"           : {
     }
 }

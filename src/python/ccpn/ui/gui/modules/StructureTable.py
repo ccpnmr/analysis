@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-06-19 15:10:20 +0100 (Wed, June 19, 2024) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-06-20 16:42:22 +0100 (Thu, June 20, 2024) $"
 __version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
@@ -50,13 +50,11 @@ LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
 class StructureTableModule(CcpnTableModule):
     """This class implements the module by wrapping a StructureTable instance
     """
+    className = 'StructureTableModule'
     includeSettingsWidget = True
     maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
     settingsPosition = 'top'
-
     activePulldownClass = KlassTable
-
-    className = 'StructureTableModule'
     _allowRename = True
 
     # we are subclassing this Module, hence some more arguments to the init
@@ -140,13 +138,13 @@ class StructureTableModule(CcpnTableModule):
     def _closeModule(self):
         """CCPN-INTERNAL: used to close the module
         """
-        # TODO DT test column saving
         if self.activePulldownClass:
             if self._setCurrentPulldown:
                 self._setCurrentPulldown.unRegister()
             if self._settings:
                 self._settings._cleanupWidget()
-        self.tableFrame._cleanupWidget()
+        if self.tableFrame:
+            self.tableFrame._cleanupWidget()
         super()._closeModule()
 
 

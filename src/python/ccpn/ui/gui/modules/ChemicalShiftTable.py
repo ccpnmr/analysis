@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-20 16:42:22 +0100 (Thu, June 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-20 16:54:00 +0100 (Thu, June 20, 2024) $"
 __version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
@@ -320,7 +320,6 @@ class _NewChemicalShiftTable(_ProjectTableABC):
                     getLogger().debug('Restoring default hidden-columns')
             except:
                 getLogger().debug('No stored default hidden-columns')
-        self.headerColumnMenu.setDefaultColumns(dHidden, update=False)
         self.headerColumnMenu.setDefaultColumns([self.columnHeaders[col] for col in dHidden], update=False)
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()

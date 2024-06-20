@@ -6,8 +6,8 @@ Currently this is peaks and multiplets
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-01 19:39:57 +0100 (Thu, June 01, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-12-14 15:10:36 +0000 (Thu, December 14, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -42,7 +42,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import GLString
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_DRAW, GLRENDERMODE_RESCALE, GLRENDERMODE_REBUILD, \
     GLREFRESHMODE_NEVER, GLREFRESHMODE_REBUILD, GLSymbolArray, GLLabelArray
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import getAliasSetting
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import getAliasSetting
 from ccpn.ui.gui.lib.PeakListLib import line_rectangle_intersection
 
 # NOTE:ED - remember these for later, may create larger vertex arrays for symbols, but should be quicker
@@ -77,6 +77,10 @@ _numTimes = 12
 
 DEFAULTLINECOLOUR = '#7f7f7f'
 
+
+#=========================================================================================
+# GLLabelling
+#=========================================================================================
 
 class GLLabelling():
     """Base class to handle symbol and symbol labelling
@@ -247,7 +251,7 @@ class GLLabelling():
 
                             self._removeArrow(spectrumView, objListView, obj)
                             # self._updateHighlightedArrows(spectrumView, objListView)
-                            self._GLArrows[objListView].updateAliasedIndexVBO()
+                            self._GLArrows[objListView].pushAliasedIndexVBO()
                             break
 
     # from ccpn.util.decorators import profile
@@ -266,7 +270,7 @@ class GLLabelling():
 
                             self._appendArrow(spectrumView, objListView, obj)
                             # self._updateHighlightedArrows(spectrumView, objListView)
-                            self._GLArrows[objListView].updateAliasedIndexVBO()
+                            self._GLArrows[objListView].pushAliasedIndexVBO()
                             break
 
     def _changeArrow(self, obj):
@@ -284,7 +288,7 @@ class GLLabelling():
                             self._removeArrow(spectrumView, objListView, obj)
                             self._appendArrow(spectrumView, objListView, obj)
                             # self._updateHighlightedArrows(spectrumView, objListView)
-                            self._GLArrows[objListView].updateAliasedIndexVBO()
+                            self._GLArrows[objListView].pushAliasedIndexVBO()
                             break
 
     def _removeArrow(self, spectrumView, objListView, delObj):
@@ -317,12 +321,13 @@ class GLLabelling():
                 indexEnd = drawList.pids[pp + 7]
                 indexOffset = indexEnd - indexStart
 
+                st, end = 4 * offset, 4 * (offset + numPoints)
                 drawList.indices = np.delete(drawList.indices, np.s_[indexStart:indexEnd])
-                drawList.vertices = np.delete(drawList.vertices, np.s_[2 * offset:2 * (offset + numPoints)])
-                drawList.attribs = np.delete(drawList.attribs, np.s_[offset:offset + numPoints])
-                drawList.offsets = np.delete(drawList.offsets, np.s_[2 * offset:2 * (offset + numPoints)])
+                drawList.vertices = np.delete(drawList.vertices, np.s_[st: end])
+                drawList.attribs = np.delete(drawList.attribs, np.s_[st: end])
+                drawList.offsets = np.delete(drawList.offsets, np.s_[st: end])
+                drawList.colors = np.delete(drawList.colors, np.s_[st: end])
 
-                drawList.colors = np.delete(drawList.colors, np.s_[4 * offset:4 * (offset + numPoints)])
                 drawList.pids = np.delete(drawList.pids, np.s_[pp:pp + GLDefs.LENPID])
                 drawList.numVertices -= numPoints
 
@@ -399,14 +404,14 @@ class GLLabelling():
         if not _isInPlane and not _isInFlankingPlane:
             return
 
-        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+        pIndex = self._spectrumSettings[spectrumView].dimensionIndices
         try:
             # fix the pointPositions
             objPos = obj.pointPositions
-            p0 = (objPos[pIndex[0]] - 1, objPos[pIndex[1]] - 1)
+            pxy = (objPos[pIndex[0]] - 1, objPos[pIndex[1]] - 1)
             _badPos = False
         except Exception:
-            p0 = (0.0, 0.0)
+            pxy = (0.0, 0.0)
             _badPos = True
 
         sx, sy = 0, 0  # keep the original label co-ord
@@ -475,29 +480,29 @@ class GLLabelling():
             iCount, _selected = self._appendArrowIndices(drawList, vertexStart, planeIndex, obj, arrowType)
 
         self._appendArrowItemVertices(_isInFlankingPlane, _isInPlane, _selected, cols, drawList, fade, iCount, indexing,
-                                      obj, p0, pIndex, planeIndex, r, w, alias, sx, sy, rx, ry, tnx, tny)
+                                      obj, pxy, pIndex, planeIndex, r, w, alias, sx, sy, rx, ry, tnx, tny)
 
     def _appendArrowItemVertices(self, _isInFlankingPlane, _isInPlane, _selected, cols,
-                                 drawList, fade, iCount, indexing, obj, p0, pIndex,
+                                 drawList, fade, iCount, indexing, obj, pxy, pIndex,
                                  planeIndex, r, w, alias, sx, sy, rx, ry, tnx, tny):
 
-        drawList.vertices = np.append(drawList.vertices, np.array((p0[0] + sx, p0[1] + sy,
-                                                                   p0[0] + r + rx, p0[1] + w + ry,
-                                                                   p0[0] + r - rx, p0[1] + w - ry,
-                                                                   p0[0] + r, p0[1] + w,
-                                                                   p0[0] + sx + rx + 2 * tnx, p0[1] + sy + ry + 2 * tny,
-                                                                   p0[0] + sx - rx + 2 * tnx, p0[1] + sy - ry + 2 * tny,
+        drawList.vertices = np.append(drawList.vertices, np.array((pxy[0] + sx, pxy[1] + sy, alias, 0.0,
+                                                                   pxy[0] + r + rx, pxy[1] + w + ry, alias, 0.0,
+                                                                   pxy[0] + r - rx, pxy[1] + w - ry, alias, 0.0,
+                                                                   pxy[0] + r, pxy[1] + w, alias, 0.0,
+                                                                   pxy[0] + sx + rx + 2 * tnx, pxy[1] + sy + ry + 2 * tny, alias, 0.0,
+                                                                   pxy[0] + sx - rx + 2 * tnx, pxy[1] + sy - ry + 2 * tny, alias, 0.0,
                                                                    ),
                                                                   dtype=np.float32))
         drawList.colors = np.append(drawList.colors, np.array((*cols, fade) * self.LENARR, dtype=np.float32))
-        drawList.attribs = np.append(drawList.attribs, np.array((alias,) * self.LENARR, dtype=np.float32))
-        drawList.offsets = np.append(drawList.offsets, np.array((p0[0], p0[1]) * self.LENARR, dtype=np.float32))
+        drawList.attribs = np.append(drawList.attribs, np.array((alias, 0.0, 0.0, 0.0) * self.LENARR, dtype=np.float32))
+        drawList.offsets = np.append(drawList.offsets, np.array((pxy[0], pxy[1], 0.0, 0.0) * self.LENARR, dtype=np.float32))
 
         # called extraIndices, extraIndexCount above
         # add extra indices
         _indexCount, extraIndices = self.appendExtraIndices(drawList, indexing.vertexStart + self.LENARR, obj)
         # add extra vertices for the multiplet
-        extraVertices = self.appendExtraVertices(drawList, pIndex, obj, p0, (*cols, fade), fade)
+        extraVertices = self.appendExtraVertices(drawList, pIndex, obj, pxy, (*cols, fade), fade)
         # keep a pointer to the obj
         drawList.pids = np.append(drawList.pids, (obj, drawList.numVertices, (self.LENARR + extraVertices),
                                                   _isInPlane, _isInFlankingPlane, _selected,
@@ -659,17 +664,17 @@ class GLLabelling():
         arrowMinimum = self.strip.arrowMinimum**2  # a bit quicker
         symbolWidth = self.strip.symbolSize / 2.0
 
-        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
-        vPP = spectrumView.spectrum.ppmPerPoints
+        specSet = self._spectrumSettings[spectrumView]
+        vPP = specSet.ppmPerPoint
 
         try:
             r = self._GLParent.symbolX * np.sign(self._GLParent.pixelX)
-            pr = abs(r / vPP[pIndex[0]])
+            pr = abs(r / vPP[0])
         except Exception:
             pr = r
         try:
             w = self._GLParent.symbolY * np.sign(self._GLParent.pixelY)
-            pw = abs(w / vPP[pIndex[1]])
+            pw = abs(w / vPP[1])
         except Exception:
             pw = w
 
@@ -712,11 +717,12 @@ class GLLabelling():
                 objCount += 1
 
         # set up arrays
+        vc = vertCount * 4
         drawList.indices = np.empty(indCount, dtype=np.uint32)
-        drawList.vertices = np.empty(vertCount * 2, dtype=np.float32)
-        drawList.colors = np.empty(vertCount * 4, dtype=np.float32)
-        drawList.attribs = np.empty(vertCount, dtype=np.float32)
-        drawList.offsets = np.empty(vertCount * 2, dtype=np.float32)
+        drawList.vertices = np.empty(vc, dtype=np.float32)
+        drawList.colors = np.empty(vc, dtype=np.float32)
+        drawList.attribs = np.empty(vc, dtype=np.float32)
+        drawList.offsets = np.empty(vc, dtype=np.float32)
         drawList.pids = np.empty(objCount * GLDefs.LENPID, dtype=np.object_)
         drawList.numVertices = 0
 
@@ -740,14 +746,14 @@ class GLLabelling():
         if not _isInPlane and not _isInFlankingPlane:
             return
 
-        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+        pIndex = self._spectrumSettings[spectrumView].dimensionIndices
         try:
             # fix the pointPositions
             objPos = obj.pointPositions
-            p0 = (objPos[pIndex[0]] - 1, objPos[pIndex[1]] - 1)
+            pxy = (objPos[pIndex[0]] - 1, objPos[pIndex[1]] - 1)
             _badPos = False
         except Exception:
-            p0 = (0.0, 0.0)
+            pxy = (0.0, 0.0)
             _badPos = True
 
         sx, sy = 0, 0
@@ -817,22 +823,23 @@ class GLLabelling():
 
         # add extra indices
         self._insertArrowItemVertices(_isInFlankingPlane, _isInPlane, _selected, cols, drawList, fade, iCount, indexing, obj,
-                                      objNum, p0, pIndex, planeIndex, r, vertexPtr, w, alias, sx, sy, rx, ry, tnx, tny)
+                                      objNum, pxy, pIndex, planeIndex, r, vertexPtr, w, alias, sx, sy, rx, ry, tnx, tny)
 
     def _insertArrowItemVertices(self, _isInFlankingPlane, _isInPlane, _selected, cols,
                                  drawList, fade, iCount, indexing, obj,
-                                 objNum, p0, pIndex, planeIndex, r, vertexPtr, w, alias, sx, sy, rx, ry, tnx, tny):
+                                 objNum, pxy, pIndex, planeIndex, r, vertexPtr, w, alias, sx, sy, rx, ry, tnx, tny):
 
-        drawList.vertices[vertexPtr:vertexPtr + self.LENARR2] = (p0[0] + sx, p0[1] + sy,
-                                                                 p0[0] + r + rx, p0[1] + w + ry,
-                                                                 p0[0] + r - rx, p0[1] + w - ry,
-                                                                 p0[0] + r, p0[1] + w,
-                                                                 p0[0] + sx + rx + 2 * tnx, p0[1] + sy + ry + 2 * tny,
-                                                                 p0[0] + sx - rx + 2 * tnx, p0[1] + sy - ry + 2 * tny,
-                                                                 )
-        drawList.colors[2 * vertexPtr:2 * vertexPtr + self.LENARR4] = (*cols, fade) * self.LENARR
-        drawList.attribs[vertexPtr // 2:(vertexPtr // 2) + self.LENARR] = (alias,) * self.LENARR
-        drawList.offsets[vertexPtr:vertexPtr + self.LENARR2] = (p0[0], p0[1]) * self.LENARR
+        st, end = vertexPtr, vertexPtr + self.LENARR4
+        drawList.vertices[st:end] = (pxy[0] + sx, pxy[1] + sy, alias, 0.0,
+                                     pxy[0] + r + rx, pxy[1] + w + ry, alias, 0.0,
+                                     pxy[0] + r - rx, pxy[1] + w - ry, alias, 0.0,
+                                     pxy[0] + r, pxy[1] + w, alias, 0.0,
+                                     pxy[0] + sx + rx + 2 * tnx, pxy[1] + sy + ry + 2 * tny, alias, 0.0,
+                                     pxy[0] + sx - rx + 2 * tnx, pxy[1] + sy - ry + 2 * tny, alias, 0.0,
+                                     )
+        drawList.colors[st:end] = (*cols, fade) * self.LENARR
+        drawList.attribs[st:end] = (alias, 0.0, 0.0, 0.0) * self.LENARR
+        drawList.offsets[st:end] = (pxy[0], pxy[1], 0.0, 0.0) * self.LENARR
 
         # # add extra indices
         # extraIndices, extraIndexCount = self.insertExtraIndices(drawList, indexing.end + iCount, indexing.start + self.LENARR, obj)
@@ -850,7 +857,7 @@ class GLLabelling():
         indexing.end += (iCount + extraIndices)  # len(drawList.indices)
         drawList.numVertices += (self.LENARR + extraVertices)
         indexing.objNum += GLDefs.LENPID
-        indexing.vertexPtr += (2 * (self.LENARR + extraVertices))
+        indexing.vertexPtr += (4 * (self.LENARR + extraVertices))
         indexing.vertexStart += (self.LENARR + extraVertices)
 
     def drawArrows(self, spectrumView):
@@ -960,8 +967,8 @@ class GLLabelling():
             indexStart += numPoints
             vertexStart += numPoints
 
-        drawList.updateIndexVBOIndices()
-        drawList.updateTextArrayVBOColour()
+        drawList.pushIndexVBOIndices()
+        drawList.pushTextArrayVBOColour()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Handle notifiers
@@ -982,7 +989,7 @@ class GLLabelling():
 
                             self._removeSymbol(spectrumView, objListView, obj)
                             # self._updateHighlightedSymbols(spectrumView, objListView)
-                            self._GLSymbols[objListView].updateAliasedIndexVBO()
+                            self._GLSymbols[objListView].pushAliasedIndexVBO()
                             break
 
     # from ccpn.util.decorators import profile
@@ -1002,7 +1009,7 @@ class GLLabelling():
 
                             self._appendSymbol(spectrumView, objListView, obj)
                             # self._updateHighlightedSymbols(spectrumView, objListView)
-                            self._GLSymbols[objListView].updateAliasedIndexVBO()
+                            self._GLSymbols[objListView].pushAliasedIndexVBO()
                             break
 
     def _changeSymbol(self, obj):
@@ -1021,7 +1028,7 @@ class GLLabelling():
                             self._removeSymbol(spectrumView, objListView, obj)
                             self._appendSymbol(spectrumView, objListView, obj)
                             # self._updateHighlightedSymbols(spectrumView, objListView)
-                            self._GLSymbols[objListView].updateAliasedIndexVBO()
+                            self._GLSymbols[objListView].pushAliasedIndexVBO()
                             break
 
     def _deleteLabel(self, obj, parentList, spectrum):
@@ -1061,17 +1068,16 @@ class GLLabelling():
         symbolType = self.strip.symbolType
         symbolWidth = self.strip.symbolSize / 2.0
 
-        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
-        vPP = spectrumView.spectrum.ppmPerPoints
+        vPP = self._spectrumSettings[spectrumView].ppmPerPoint
 
         try:
             r = self._GLParent.symbolX * np.sign(self._GLParent.pixelX)
-            pr = abs(r / vPP[pIndex[0]])
+            pr = abs(r / vPP[0])
         except Exception:
             pr = r
         try:
             w = self._GLParent.symbolY * np.sign(self._GLParent.pixelY)
-            pw = abs(w / vPP[pIndex[1]])
+            pw = abs(w / vPP[1])
         except Exception:
             pw = w
 
@@ -1083,8 +1089,7 @@ class GLLabelling():
         symbolType = self.strip.symbolType
         symbolWidth = self.strip.symbolSize / 2.0
 
-        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
-        vPP = spectrumView.spectrum.ppmPerPoints
+        vPP = self._spectrumSettings[spectrumView].ppmPerPoint
 
         # try:
         #     r = tx * abs(self._GLParent.pixelX)  # change from pixels to ppm
@@ -1099,12 +1104,12 @@ class GLLabelling():
 
         try:
             r = tx  #* np.sign(self._GLParent.pixelX)  # change from pixels to ppm
-            pr = r / vPP[pIndex[0]]  # change from ppm to points
+            pr = r / vPP[0]  # change from ppm to points
         except Exception:
             pr = r
         try:
             w = ty  #* np.sign(self._GLParent.pixelY)
-            pw = w / vPP[pIndex[1]]
+            pw = w / vPP[1]
         except Exception:
             pw = w
 
@@ -1123,14 +1128,14 @@ class GLLabelling():
         # pls = peakListView.peakList
         pls = self.objectList(objListView)
 
-        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+        pIndex = self._spectrumSettings[spectrumView].dimensionIndices
         try:
             # fix the pointPositions
             objPos = obj.pointPositions
-            p0 = (objPos[pIndex[0]] - 1, objPos[pIndex[1]] - 1)
+            pxy = (objPos[pIndex[0]] - 1, objPos[pIndex[1]] - 1)
             _badPos = False
         except Exception:
-            p0 = (0.0, 0.0)
+            pxy = (0.0, 0.0)
             _badPos = True
 
         try:
@@ -1190,7 +1195,7 @@ class GLLabelling():
 
             newString = GLString(text=text,
                                  font=self._GLParent.getSmallFont(),
-                                 x=p0[0], y=p0[1],
+                                 x=pxy[0], y=pxy[1],
                                  ox=r, oy=w,
                                  colour=(*listCol, fade),
                                  GLContext=self._GLParent,
@@ -1213,14 +1218,14 @@ class GLLabelling():
         # use the first object for referencing
         obj = objectList(pls)[0]
 
-        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+        pIndex = self._spectrumSettings[spectrumView].dimensionIndices
         try:
             # fix the pointPositions
             objPos = obj.pointPositions
-            p0 = (objPos[pIndex[0]] - 1, objPos[pIndex[1]] - 1)
+            pxy = (objPos[pIndex[0]] - 1, objPos[pIndex[1]] - 1)
             _badPos = False
         except Exception:
-            p0 = (0.0, 0.0)
+            pxy = (0.0, 0.0)
             _badPos = True
 
         try:
@@ -1279,7 +1284,7 @@ class GLLabelling():
 
             outString = GLString(text=text,
                                  font=self._GLParent.getSmallFont(),
-                                 x=p0[0], y=p0[1],
+                                 x=pxy[0], y=pxy[1],
                                  ox=r, oy=w,
                                  colour=(*listCol, fade),
                                  GLContext=self._GLParent,
@@ -1326,12 +1331,13 @@ class GLLabelling():
                 indexEnd = drawList.pids[pp + 7]
                 indexOffset = indexEnd - indexStart
 
+                st, end = 4 * offset, 4 * (offset + numPoints)
                 drawList.indices = np.delete(drawList.indices, np.s_[indexStart:indexEnd])
-                drawList.vertices = np.delete(drawList.vertices, np.s_[2 * offset:2 * (offset + numPoints)])
-                drawList.attribs = np.delete(drawList.attribs, np.s_[offset:offset + numPoints])
-                drawList.offsets = np.delete(drawList.offsets, np.s_[2 * offset:2 * (offset + numPoints)])
+                drawList.vertices = np.delete(drawList.vertices, np.s_[st: end])
+                drawList.attribs = np.delete(drawList.attribs, np.s_[st: end])
+                drawList.offsets = np.delete(drawList.offsets, np.s_[st: end])
+                drawList.colors = np.delete(drawList.colors, np.s_[st: end])
 
-                drawList.colors = np.delete(drawList.colors, np.s_[4 * offset:4 * (offset + numPoints)])
                 drawList.pids = np.delete(drawList.pids, np.s_[pp:pp + GLDefs.LENPID])
                 drawList.numVertices -= numPoints
 
@@ -1431,14 +1437,20 @@ class GLLabelling():
         if not _isInPlane and not _isInFlankingPlane:
             return
 
-        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+        pIndex = self._spectrumSettings[spectrumView].dimensionIndices
+        try:
+            _alias = obj.aliasing
+            alias = getAliasSetting(_alias[pIndex[0]], _alias[pIndex[1]])
+        except Exception:
+            alias = 0
+
         try:
             # fix the pointPositions
             objPos = obj.pointPositions
-            p0 = (objPos[pIndex[0]] - 1, objPos[pIndex[1]] - 1)
+            pxy = (objPos[pIndex[0]] - 1, objPos[pIndex[1]] - 1)
             _badPos = False
         except Exception:
-            p0 = (0.0, 0.0)
+            pxy = (0.0, 0.0)
             _badPos = True
 
         if self._isSelected(obj):
@@ -1456,12 +1468,6 @@ class GLLabelling():
             pointLineWidths = (None, None)
 
         # frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
-        try:
-            _alias = obj.aliasing
-            alias = getAliasSetting(_alias[pIndex[0]], _alias[pIndex[1]])
-        except Exception:
-            alias = 0
-
         if False:  # not pIndex:
             return
 
@@ -1482,7 +1488,7 @@ class GLLabelling():
 
                 # add extra indices
                 self._insertSymbolItemVertices(_isInFlankingPlane, _isInPlane, _selected, cols, drawList, fade, iCount, indexing, obj,
-                                               objNum, p0, pIndex, planeIndex, r, vertexPtr, w, alias)
+                                               objNum, pxy, pIndex, planeIndex, r, vertexPtr, w, alias)
 
             elif symbolType == 1:  # draw an ellipse at lineWidth
 
@@ -1555,20 +1561,26 @@ class GLLabelling():
                 extraIndices = 0  #self.appendExtraIndices(drawList, indexStart + np2, obj)
 
                 # draw an ellipse at lineWidth
-                drawList.vertices[vertexPtr:vertexPtr + 2 * np2] = tuple(val for an in ang
-                                                                         for val in (p0[0] - r * math.sin(skip * an * angPlus / numPoints),
-                                                                                     p0[1] - w * math.cos(skip * an * angPlus / numPoints),
-                                                                                     p0[0] - r * math.sin((skip * an + 1) * angPlus / numPoints),
-                                                                                     p0[1] - w * math.cos((skip * an + 1) * angPlus / numPoints)))
-                drawList.vertices[vertexPtr + 2 * np2:vertexPtr + 2 * np2 + 10] = (p0[0] - r, p0[1] - w,
-                                                                                   p0[0] + r, p0[1] + w,
-                                                                                   p0[0] + r, p0[1] - w,
-                                                                                   p0[0] - r, p0[1] + w,
-                                                                                   p0[0], p0[1])
+                st, end, step, xtra = vertexPtr, vertexPtr + (4 * np2), np2 + 5, 20
+                # don't include the extra 5 points here
+                drawList.vertices[st:end] = tuple(val for an in ang
+                                                  for val in (pxy[0] - r * math.sin(skip * an * angPlus / numPoints),
+                                                              pxy[1] - w * math.cos(skip * an * angPlus / numPoints),
+                                                              alias, 0.0,
+                                                              pxy[0] - r * math.sin((skip * an + 1) * angPlus / numPoints),
+                                                              pxy[1] - w * math.cos((skip * an + 1) * angPlus / numPoints),
+                                                              alias, 0.0)
+                                                  )
+                drawList.vertices[end:xtra] = (pxy[0] - r, pxy[1] - w, alias, 0.0,
+                                               pxy[0] + r, pxy[1] + w, alias, 0.0,
+                                               pxy[0] + r, pxy[1] - w, alias, 0.0,
+                                               pxy[0] - r, pxy[1] + w, alias, 0.0,
+                                               pxy[0], pxy[1], alias, 0.0,
+                                               )
 
-                drawList.colors[2 * vertexPtr:2 * vertexPtr + 4 * np2 + 20] = (*cols, fade) * (np2 + 5)
-                drawList.attribs[vertexPtr // 2:(vertexPtr // 2) + np2 + 5] = (alias,) * (np2 + 5)
-                drawList.offsets[vertexPtr:vertexPtr + 2 * np2 + 10] = (p0[0], p0[1]) * (np2 + 5)
+                drawList.colors[st:end + xtra] = (*cols, fade) * step
+                drawList.attribs[st:end + xtra] = (alias, 0.0, 0.0, 0.0) * step
+                drawList.offsets[st:end + xtra] = (pxy[0], pxy[1], 0.0, 0.0) * step
 
                 # add extra vertices
                 extraVertices = 0  #self.appendExtraVertices(drawList, obj, p0, [*cols, fade], fade)
@@ -1579,12 +1591,12 @@ class GLLabelling():
                                                                 indexEnd, indexEnd + iCount + extraIndices,
                                                                 planeIndex, 0, 0, 0)
 
-                indexing.start += ((np2 + 5) + extraIndices)
+                indexing.start += (step + extraIndices)
                 indexing.end += (iCount + extraIndices)  # len(drawList.indices)
-                drawList.numVertices += ((np2 + 5) + extraVertices)
+                drawList.numVertices += (step + extraVertices)
                 indexing.objNum += GLDefs.LENPID
-                indexing.vertexPtr += (2 * ((np2 + 5) + extraVertices))
-                indexing.vertexStart += ((np2 + 5) + extraVertices)
+                indexing.vertexPtr += (4 * (step + extraVertices))
+                indexing.vertexStart += (step + extraVertices)
 
             elif symbolType == 2:  # draw a filled ellipse at lineWidth
 
@@ -1617,20 +1629,25 @@ class GLLabelling():
                 extraIndices = 0  #self.appendExtraIndices(drawList, indexStart + np2 + 4, obj)
 
                 # draw an ellipse at lineWidth
-                drawList.vertices[vertexPtr:vertexPtr + 2 * np2] = tuple(val for an in ang
-                                                                         for val in (p0[0] - r * math.sin(skip * an * angPlus / numPoints),
-                                                                                     p0[1] - w * math.cos(skip * an * angPlus / numPoints),
-                                                                                     p0[0] - r * math.sin((skip * an + 1) * angPlus / numPoints),
-                                                                                     p0[1] - w * math.cos((skip * an + 1) * angPlus / numPoints)))
-                drawList.vertices[vertexPtr + 2 * np2:vertexPtr + 2 * np2 + 10] = (p0[0] - r, p0[1] - w,
-                                                                                   p0[0] + r, p0[1] + w,
-                                                                                   p0[0] + r, p0[1] - w,
-                                                                                   p0[0] - r, p0[1] + w,
-                                                                                   p0[0], p0[1])
+                st, end, step, xtra = vertexPtr, vertexPtr + (4 * np2), np2 + 5, 20
+                drawList.vertices[st:end] = tuple(val for an in ang
+                                                  for val in (pxy[0] - r * math.sin(skip * an * angPlus / numPoints),
+                                                              pxy[1] - w * math.cos(skip * an * angPlus / numPoints),
+                                                              alias, 0.0,
+                                                              pxy[0] - r * math.sin((skip * an + 1) * angPlus / numPoints),
+                                                              pxy[1] - w * math.cos((skip * an + 1) * angPlus / numPoints),
+                                                              alias, 0.0)
+                                                  )
+                drawList.vertices[end:end + xtra] = (pxy[0] - r, pxy[1] - w, alias, 0.0,
+                                                     pxy[0] + r, pxy[1] + w, alias, 0.0,
+                                                     pxy[0] + r, pxy[1] - w, alias, 0.0,
+                                                     pxy[0] - r, pxy[1] + w, alias, 0.0,
+                                                     pxy[0], pxy[1], alias, 0.0,
+                                                     )
 
-                drawList.colors[2 * vertexPtr:2 * vertexPtr + 4 * np2 + 20] = (*cols, fade) * (np2 + 5)
-                drawList.attribs[vertexPtr // 2:(vertexPtr // 2) + np2 + 5] = (alias,) * (np2 + 5)
-                drawList.offsets[vertexPtr:vertexPtr + 2 * np2 + 10] = (p0[0], p0[1]) * (np2 + 5)
+                drawList.colors[st:end + xtra] = (*cols, fade) * step
+                drawList.attribs[st:end + xtra] = (alias, 0.0, 0.0, 0.0) * step
+                drawList.offsets[st:end + xtra] = (pxy[0], pxy[1], 0.0, 0.0) * step
 
                 # add extra vertices for the multiplet
                 extraVertices = 0  #self.appendExtraVertices(drawList, obj, p0, [*cols, fade], fade)
@@ -1641,39 +1658,39 @@ class GLLabelling():
                                                                 indexEnd, indexEnd + iCount + extraIndices,
                                                                 planeIndex, 0, 0, 0)
 
-                indexing.start += ((np2 + 5) + extraIndices)
+                indexing.start += (step + extraIndices)
                 indexing.end += (iCount + extraIndices)  # len(drawList.indices)
-                drawList.numVertices += ((np2 + 5) + extraVertices)
+                drawList.numVertices += (step + extraVertices)
                 indexing.objNum += GLDefs.LENPID
-                indexing.vertexPtr += (2 * ((np2 + 5) + extraVertices))
-                indexing.vertexStart += ((np2 + 5) + extraVertices)
+                indexing.vertexPtr += (4 * (step + extraVertices))
+                indexing.vertexStart += (step + extraVertices)
 
             else:
                 raise ValueError('GL Error: bad symbol type')
 
     def _insertSymbolItemVertices(self, _isInFlankingPlane, _isInPlane, _selected, cols,
                                   drawList, fade, iCount, indexing, obj,
-                                  objNum, p0, pIndex, planeIndex, r, vertexPtr, w, alias):
+                                  objNum, pxy, pIndex, planeIndex, r, vertexPtr, w, alias):
 
-        drawList.vertices[vertexPtr:vertexPtr + self.LENSQ2] = (p0[0] - r, p0[1] - w,
-                                                                p0[0] + r, p0[1] + w,
-                                                                p0[0] + r, p0[1] - w,
-                                                                p0[0] - r, p0[1] + w,
-                                                                p0[0], p0[1],
-                                                                p0[0], p0[1] - w,
-                                                                p0[0], p0[1] + w,
-                                                                p0[0] + r, p0[1],
-                                                                p0[0] - r, p0[1]
-                                                                )
-        drawList.colors[2 * vertexPtr:2 * vertexPtr + self.LENSQ4] = (*cols, fade) * self.LENSQ
-        drawList.attribs[vertexPtr // 2:(vertexPtr // 2) + self.LENSQ] = (alias,) * self.LENSQ
-        drawList.offsets[vertexPtr:vertexPtr + self.LENSQ2] = (p0[0], p0[1]) * self.LENSQ
+        st, end = vertexPtr, vertexPtr + self.LENSQ4
+        drawList.vertices[st:end] = (pxy[0] - r, pxy[1] - w, alias, 0.0,
+                                     pxy[0] + r, pxy[1] + w, alias, 0.0,
+                                     pxy[0] + r, pxy[1] - w, alias, 0.0,
+                                     pxy[0] - r, pxy[1] + w, alias, 0.0,
+                                     pxy[0], pxy[1], alias, 0.0,
+                                     pxy[0], pxy[1] - w, alias, 0.0,
+                                     pxy[0], pxy[1] + w, alias, 0.0,
+                                     pxy[0] + r, pxy[1], alias, 0.0,
+                                     pxy[0] - r, pxy[1], alias, 0.0,
+                                     )
+        drawList.colors[st:end] = (*cols, fade) * self.LENSQ
+        drawList.attribs[st:end] = (alias, 0.0, 0.0, 0.0) * self.LENSQ
+        drawList.offsets[st:end] = (pxy[0], pxy[1], 0.0, 0.0) * self.LENSQ
 
         # add extra indices
         extraIndices, extraIndexCount = self.insertExtraIndices(drawList, indexing.end + iCount, indexing.start + self.LENSQ, obj)
         # add extra vertices for the multiplet
-        extraVertices = self.insertExtraVertices(drawList, vertexPtr + self.LENSQ2, pIndex, obj, p0, (*cols, fade), fade)
-
+        extraVertices = self.insertExtraVertices(drawList, vertexPtr + self.LENSQ4, pIndex, obj, pxy, (*cols, fade), fade)
         # keep a pointer to the obj
         drawList.pids[objNum:objNum + GLDefs.LENPID] = (obj, drawList.numVertices, (self.LENSQ + extraVertices),
                                                         _isInPlane, _isInFlankingPlane, _selected,
@@ -1684,7 +1701,7 @@ class GLLabelling():
         indexing.end += (iCount + extraIndices)  # len(drawList.indices)
         drawList.numVertices += (self.LENSQ + extraVertices)
         indexing.objNum += GLDefs.LENPID
-        indexing.vertexPtr += (2 * (self.LENSQ + extraVertices))
+        indexing.vertexPtr += (4 * (self.LENSQ + extraVertices))
         indexing.vertexStart += (self.LENSQ + extraVertices)
 
     # NOTE:ED - new pre-defined indices/vertex lists
@@ -1723,14 +1740,14 @@ class GLLabelling():
         if not _isInPlane and not _isInFlankingPlane:
             return
 
-        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+        pIndex = self._spectrumSettings[spectrumView].dimensionIndices
         try:
             # fix the pointPositions
             objPos = obj.pointPositions
-            p0 = (objPos[pIndex[0]] - 1, objPos[pIndex[1]] - 1)
+            pxy = (objPos[pIndex[0]] - 1, objPos[pIndex[1]] - 1)
             _badPos = False
         except Exception:
-            p0 = (0.0, 0.0)
+            pxy = (0.0, 0.0)
             _badPos = True
 
         try:
@@ -1772,7 +1789,7 @@ class GLLabelling():
                         iCount, _selected = self._appendPlusSymbol(drawList, vertexStart, planeIndex, obj)
 
                 self._appendSymbolItemVertices(_isInFlankingPlane, _isInPlane, _selected, cols, drawList, fade, iCount, indexing,
-                                               obj, p0, pIndex, planeIndex, r, w, alias)
+                                               obj, pxy, pIndex, planeIndex, r, w, alias)
 
             elif symbolType == 1:  # draw an ellipse at lineWidth
 
@@ -1812,20 +1829,27 @@ class GLLabelling():
 
                 # draw an ellipse at lineWidth
                 drawList.vertices = np.append(drawList.vertices, np.array(tuple(val for an in ang
-                                                                                for val in (p0[0] - r * math.sin(skip * an * angPlus / numPoints),
-                                                                                            p0[1] - w * math.cos(skip * an * angPlus / numPoints),
-                                                                                            p0[0] - r * math.sin((skip * an + 1) * angPlus / numPoints),
-                                                                                            p0[1] - w * math.cos((skip * an + 1) * angPlus / numPoints))),
-                                                                          dtype=np.float32))
-                drawList.vertices = np.append(drawList.vertices, np.array((p0[0] - r, p0[1] - w,
-                                                                           p0[0] + r, p0[1] + w,
-                                                                           p0[0] + r, p0[1] - w,
-                                                                           p0[0] - r, p0[1] + w,
-                                                                           p0[0], p0[1]), dtype=np.float32))
+                                                                                for val in (pxy[0] - r * math.sin(skip * an * angPlus / numPoints),
+                                                                                            pxy[1] - w * math.cos(skip * an * angPlus / numPoints),
+                                                                                            alias, 0.0,
+                                                                                            pxy[0] - r * math.sin((skip * an + 1) * angPlus / numPoints),
+                                                                                            pxy[1] - w * math.cos((skip * an + 1) * angPlus / numPoints),
+                                                                                            alias, 0.0)
+                                                                                ),
+                                                                          dtype=np.float32)
+                                              )
+                drawList.vertices = np.append(drawList.vertices, np.array((pxy[0] - r, pxy[1] - w, alias, 0.0,
+                                                                           pxy[0] + r, pxy[1] + w, alias, 0.0,
+                                                                           pxy[0] + r, pxy[1] - w, alias, 0.0,
+                                                                           pxy[0] - r, pxy[1] + w, alias, 0.0,
+                                                                           pxy[0], pxy[1], alias, 0.0,
+                                                                           ), dtype=np.float32)
+                                              )
 
-                drawList.colors = np.append(drawList.colors, np.array((*cols, fade) * (np2 + 5), dtype=np.float32))
-                drawList.attribs = np.append(drawList.attribs, np.array((alias,) * (np2 + 5), dtype=np.float32))
-                drawList.offsets = np.append(drawList.offsets, np.array((p0[0], p0[1]) * (np2 + 5), dtype=np.float32))
+                step = np2 + 5
+                drawList.colors = np.append(drawList.colors, np.array((*cols, fade) * step, dtype=np.float32))
+                drawList.attribs = np.append(drawList.attribs, np.array((alias, 0.0, 0.0, 0.0) * step, dtype=np.float32))
+                drawList.offsets = np.append(drawList.offsets, np.array((pxy[0], pxy[1], 0.0, 0.0) * step, dtype=np.float32))
 
                 # add extra vertices for the multiplet
                 extraVertices = 0  #self.appendExtraVertices(drawList, obj, p0, [*cols, fade], fade)
@@ -1837,12 +1861,12 @@ class GLLabelling():
                                                           planeIndex, 0, 0, 0))
                 # indexEnd = len(drawList.indices)
 
-                # indexList[0] += ((np2 + 5) + extraIndices)
+                # indexList[0] += (step + extraIndices)
                 # indexList[1] = len(drawList.indices)
-                indexing.start += ((np2 + 5) + extraIndices)
+                indexing.start += (step + extraIndices)
                 indexing.end += (iCount + extraIndices)  # len(drawList.indices)
-                drawList.numVertices += ((np2 + 5) + extraVertices)
-                indexing.vertexStart += ((np2 + 5) + extraVertices)
+                drawList.numVertices += (step + extraVertices)
+                indexing.vertexStart += (step + extraVertices)
 
             elif symbolType == 2:  # draw a filled ellipse at lineWidth
 
@@ -1878,21 +1902,28 @@ class GLLabelling():
 
                 # draw an ellipse at lineWidth
                 drawList.vertices = np.append(drawList.vertices, np.array(tuple(val for an in ang
-                                                                                for val in (p0[0] - r * math.sin(skip * an * angPlus / numPoints),
-                                                                                            p0[1] - w * math.cos(skip * an * angPlus / numPoints),
-                                                                                            p0[0] - r * math.sin((skip * an + 1) * angPlus / numPoints),
-                                                                                            p0[1] - w * math.cos((skip * an + 1) * angPlus / numPoints))),
-                                                                          dtype=np.float32))
+                                                                                for val in (pxy[0] - r * math.sin(skip * an * angPlus / numPoints),
+                                                                                            pxy[1] - w * math.cos(skip * an * angPlus / numPoints),
+                                                                                            alias, 0.0,
+                                                                                            pxy[0] - r * math.sin((skip * an + 1) * angPlus / numPoints),
+                                                                                            pxy[1] - w * math.cos((skip * an + 1) * angPlus / numPoints),
+                                                                                            alias, 0.0,)
+                                                                                ),
+                                                                          dtype=np.float32)
+                                              )
 
-                drawList.vertices = np.append(drawList.vertices, np.array((p0[0] - r, p0[1] - w,
-                                                                           p0[0] + r, p0[1] + w,
-                                                                           p0[0] + r, p0[1] - w,
-                                                                           p0[0] - r, p0[1] + w,
-                                                                           p0[0], p0[1]), dtype=np.float32))
+                drawList.vertices = np.append(drawList.vertices, np.array((pxy[0] - r, pxy[1] - w, alias, 0.0,
+                                                                           pxy[0] + r, pxy[1] + w, alias, 0.0,
+                                                                           pxy[0] + r, pxy[1] - w, alias, 0.0,
+                                                                           pxy[0] - r, pxy[1] + w, alias, 0.0,
+                                                                           pxy[0], pxy[1], alias, 0.0,
+                                                                           ), dtype=np.float32)
+                                              )
 
-                drawList.colors = np.append(drawList.colors, np.array((*cols, fade) * (np2 + 5), dtype=np.float32))
-                drawList.attribs = np.append(drawList.attribs, np.array((alias,) * (np2 + 5), dtype=np.float32))
-                drawList.offsets = np.append(drawList.offsets, np.array((p0[0], p0[1]) * (np2 + 5), dtype=np.float32))
+                step = np2 + 5
+                drawList.colors = np.append(drawList.colors, np.array((*cols, fade) * step, dtype=np.float32))
+                drawList.attribs = np.append(drawList.attribs, np.array((alias, 0.0, 0.0, 0.0) * step, dtype=np.float32))
+                drawList.offsets = np.append(drawList.offsets, np.array((pxy[0], pxy[1], 0.0, 0.0) * step, dtype=np.float32))
 
                 # add extra vertices for the multiplet
                 extraVertices = 0  #self.appendExtraVertices(drawList, obj, p0, [*cols, fade], fade)
@@ -1903,37 +1934,38 @@ class GLLabelling():
                                                           indexEnd, indexEnd + iCount + extraIndices,
                                                           planeIndex, 0, 0, 0))
 
-                indexing.start += ((np2 + 5) + extraIndices)
+                indexing.start += (step + extraIndices)
                 indexing.end += (iCount + extraIndices)
-                drawList.numVertices += ((np2 + 5) + extraVertices)
-                indexing.vertexStart += ((np2 + 5) + extraVertices)
+                drawList.numVertices += (step + extraVertices)
+                indexing.vertexStart += (step + extraVertices)
 
             else:
                 raise ValueError('GL Error: bad symbol type')
 
     def _appendSymbolItemVertices(self, _isInFlankingPlane, _isInPlane, _selected, cols,
-                                  drawList, fade, iCount, indexing, obj, p0, pIndex,
+                                  drawList, fade, iCount, indexing, obj, pxy, pIndex,
                                   planeIndex, r, w, alias):
 
-        drawList.vertices = np.append(drawList.vertices, np.array((p0[0] - r, p0[1] - w,
-                                                                   p0[0] + r, p0[1] + w,
-                                                                   p0[0] + r, p0[1] - w,
-                                                                   p0[0] - r, p0[1] + w,
-                                                                   p0[0], p0[1],
-                                                                   p0[0], p0[1] - w,
-                                                                   p0[0], p0[1] + w,
-                                                                   p0[0] + r, p0[1],
-                                                                   p0[0] - r, p0[1]
+        drawList.vertices = np.append(drawList.vertices, np.array((pxy[0] - r, pxy[1] - w, alias, 0.0,
+                                                                   pxy[0] + r, pxy[1] + w, alias, 0.0,
+                                                                   pxy[0] + r, pxy[1] - w, alias, 0.0,
+                                                                   pxy[0] - r, pxy[1] + w, alias, 0.0,
+                                                                   pxy[0], pxy[1], alias, 0.0,
+                                                                   pxy[0], pxy[1] - w, alias, 0.0,
+                                                                   pxy[0], pxy[1] + w, alias, 0.0,
+                                                                   pxy[0] + r, pxy[1], alias, 0.0,
+                                                                   pxy[0] - r, pxy[1], alias, 0.0,
                                                                    ), dtype=np.float32))
         drawList.colors = np.append(drawList.colors, np.array((*cols, fade) * self.LENSQ, dtype=np.float32))
-        drawList.attribs = np.append(drawList.attribs, np.array((alias,) * self.LENSQ, dtype=np.float32))
-        drawList.offsets = np.append(drawList.offsets, np.array((p0[0], p0[1]) * self.LENSQ, dtype=np.float32))
+        drawList.attribs = np.append(drawList.attribs, np.array((alias, 0.0, 0.0, 0.0) * self.LENSQ, dtype=np.float32))
+        drawList.offsets = np.append(drawList.offsets, np.array((pxy[0], pxy[1], 0.0, 0.0) * self.LENSQ, dtype=np.float32))
 
         # called extraIndices, extraIndexCount above
         # add extra indices
         _indexCount, extraIndices = self.appendExtraIndices(drawList, indexing.vertexStart + self.LENSQ, obj)
         # add extra vertices for the multiplet
-        extraVertices = self.appendExtraVertices(drawList, pIndex, obj, p0, (*cols, fade), fade)
+        extraVertices = self.appendExtraVertices(drawList, pIndex, obj,
+                                                 pxy, (*cols, fade), fade, alias)
         # keep a pointer to the obj
         drawList.pids = np.append(drawList.pids, (obj, drawList.numVertices, (self.LENSQ + extraVertices),
                                                   _isInPlane, _isInFlankingPlane, _selected,
@@ -2042,7 +2074,7 @@ class GLLabelling():
                             cols = listCol
 
                         drawStr.setStringColour((*cols, fade))
-                    drawStr.updateTextArrayVBOColour()
+                    drawStr.pushTextArrayVBOColour()
 
     def updateHighlightSymbols(self):
         """Respond to an update highlight notifier and update the highlighted symbols/labels
@@ -2228,8 +2260,8 @@ class GLLabelling():
         else:
             raise ValueError('GL Error: bad symbol type')
 
-        drawList.updateIndexVBOIndices()
-        drawList.updateTextArrayVBOColour()
+        drawList.pushIndexVBOIndices()
+        drawList.pushTextArrayVBOColour()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Rescaling
@@ -2241,6 +2273,8 @@ class GLLabelling():
     def _rescaleSymbols(self, spectrumView, objListView):
         """rescale symbols when the screen dimensions change
         """
+        return
+
         drawList = self._GLSymbols[objListView]
 
         if not drawList.numVertices:
@@ -2323,7 +2357,7 @@ class GLLabelling():
                     drawStr.setStringOffset((tr, tw))
                 else:
                     drawStr.setStringOffset((r, w))
-                drawStr.updateTextArrayVBOAttribs()
+                drawStr.pushTextArrayVBOAttribs()
 
         elif symbolType == 1:
 
@@ -2333,7 +2367,7 @@ class GLLabelling():
                     drawStr.setStringOffset((lr, lw))
                 else:
                     drawStr.setStringOffset((GLDefs.STRINGSCALE * r, GLDefs.STRINGSCALE * w))
-                drawStr.updateTextArrayVBOAttribs()
+                drawStr.pushTextArrayVBOAttribs()
 
         elif symbolType == 2:
 
@@ -2343,7 +2377,7 @@ class GLLabelling():
                     drawStr.setStringOffset((lr, lw))
                 else:
                     drawStr.setStringOffset((GLDefs.STRINGSCALE * r, GLDefs.STRINGSCALE * w))
-                drawStr.updateTextArrayVBOAttribs()
+                drawStr.pushTextArrayVBOAttribs()
 
         else:
             raise ValueError('GL Error: bad symbol type')
@@ -2428,11 +2462,12 @@ class GLLabelling():
                 objCount += 1
 
         # set up arrays
+        vc = vertCount * 4
         drawList.indices = np.empty(indCount, dtype=np.uint32)
-        drawList.vertices = np.empty(vertCount * 2, dtype=np.float32)
-        drawList.colors = np.empty(vertCount * 4, dtype=np.float32)
-        drawList.attribs = np.empty(vertCount, dtype=np.float32)
-        drawList.offsets = np.empty(vertCount * 2, dtype=np.float32)
+        drawList.vertices = np.empty(vc, dtype=np.float32)
+        drawList.colors = np.empty(vc, dtype=np.float32)
+        drawList.attribs = np.empty(vc, dtype=np.float32)
+        drawList.offsets = np.empty(vc, dtype=np.float32)
         drawList.pids = np.empty(objCount * GLDefs.LENPID, dtype=np.object_)
         drawList.numVertices = 0
 
@@ -2748,6 +2783,10 @@ class GLLabelling():
             pass
 
 
+#=========================================================================================
+# GL1dLabelling
+#=========================================================================================
+
 class GL1dLabelling():
     """Class to handle symbol and symbol labelling for generic 1d displays
     """
@@ -2784,13 +2823,13 @@ class GL1dLabelling():
         meritEnabled = objListView.meritEnabled
         meritThreshold = objListView.meritThreshold
 
-        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+        dims = self._spectrumSettings[spectrumView].dimensionIndices
         try:
-            _h = obj.height if obj.height is not None else 0
-            p0 = (obj.pointPositions[pIndex[0]] - 1, _h)
+            _pos = (obj.pointPositions[0] - 1, obj.height if obj.height is not None else 0)
+            pxy = [_pos[dim] for dim in dims]
             _badPos = False
         except Exception:
-            p0 = (0.0, 0.0)
+            pxy = (0.0, 0.0)
             _badPos = True
 
         sx, sy = 0, 0
@@ -2846,7 +2885,7 @@ class GL1dLabelling():
             alias = 0
 
         iCount, _selected = self._appendArrowIndices(drawList, indexing.vertexStart, 0, obj, arrowType)
-        self._appendArrowItemVertices(True, True, _selected, cols, drawList, 1.0, iCount, indexing, obj, p0, pIndex,
+        self._appendArrowItemVertices(True, True, _selected, cols, drawList, 1.0, iCount, indexing, obj, pxy, dims,
                                       0, r, w, alias, sx, sy, rx, ry, tnx, tny)
 
     def _insertArrowItem(self, strip, obj, listCol, indexing, r, w,
@@ -2863,13 +2902,14 @@ class GL1dLabelling():
         if not obj:
             return
 
+        dims = self._spectrumSettings[spectrumView].dimensionIndices
         try:
             objPos = obj.pointPositions
-            _h = obj.height if obj.height is not None else 0
-            p0 = (objPos[0] - 1, _h)
+            _pos = (objPos[0] - 1, obj.height if obj.height is not None else 0)
+            pxy = [_pos[dim] for dim in dims]
             _badPos = False
         except Exception:
-            p0 = (0.0, 0.0)
+            pxy = (0.0, 0.0)
             _badPos = True
 
         sx, sy = 0, 0
@@ -2923,7 +2963,7 @@ class GL1dLabelling():
 
         iCount, _selected = self._makeArrowIndices(drawList, indexEnd, vertexStart, 0, obj, arrowType)
         self._insertArrowItemVertices(True, True, _selected, cols, drawList, 1.0, iCount,
-                                      indexing, obj, objNum, p0, 0, 0, r, vertexPtr, w, alias, sx, sy, rx, ry, tnx, tny)
+                                      indexing, obj, objNum, pxy, dims, 0, r, vertexPtr, w, alias, sx, sy, rx, ry, tnx, tny)
 
     def _removeArrow(self, spectrumView, objListView, delObj):
         """Remove an arrow from the list
@@ -2947,12 +2987,13 @@ class GL1dLabelling():
                 indexEnd = drawList.pids[pp + 7]
                 indexOffset = indexEnd - indexStart
 
+                st, end = 4 * offset, 4 * (offset + numPoints)
                 drawList.indices = np.delete(drawList.indices, np.s_[indexStart:indexEnd])
-                drawList.vertices = np.delete(drawList.vertices, np.s_[2 * offset:2 * (offset + numPoints)])
-                drawList.attribs = np.delete(drawList.attribs, np.s_[offset:offset + numPoints])
-                drawList.offsets = np.delete(drawList.offsets, np.s_[2 * offset:2 * (offset + numPoints)])
+                drawList.vertices = np.delete(drawList.vertices, np.s_[st: end])
+                drawList.attribs = np.delete(drawList.attribs, np.s_[st: end])
+                drawList.offsets = np.delete(drawList.offsets, np.s_[st: end])
+                drawList.colors = np.delete(drawList.colors, np.s_[st: end])
 
-                drawList.colors = np.delete(drawList.colors, np.s_[4 * offset:4 * (offset + numPoints)])
                 drawList.pids = np.delete(drawList.pids, np.s_[pp:pp + GLDefs.LENPID])
                 drawList.numVertices -= numPoints
 
@@ -3030,8 +3071,8 @@ class GL1dLabelling():
             indexStart += numPoints
             vertexStart += numPoints
 
-        drawList.updateIndexVBOIndices()
-        drawList.updateTextArrayVBOColour()
+        drawList.pushIndexVBOIndices()
+        drawList.pushTextArrayVBOColour()
 
     def _buildArrows(self, spectrumView, objListView):
         spectrum = spectrumView.spectrum
@@ -3170,8 +3211,8 @@ class GL1dLabelling():
                 indexStart += numPoints
                 vertexStart += numPoints
 
-            drawList.updateIndexVBOIndices()
-            drawList.updateTextArrayVBOColour()
+            drawList.pushIndexVBOIndices()
+            drawList.pushTextArrayVBOColour()
 
         elif symbolType == 1 or symbolType == 2:
             pass
@@ -3193,13 +3234,13 @@ class GL1dLabelling():
         if not obj:
             return
 
+        dims = self._spectrumSettings[spectrumView].dimensionIndices
         try:
-            objPos = obj.pointPositions
-            _h = obj.height if obj.height is not None else 0
-            p0 = (objPos[0] - 1, _h)
+            _pos = (obj.pointPositions[0] - 1, obj.height if obj.height is not None else 0)
+            pxy = [_pos[dim] for dim in dims]
             _badPos = False
         except Exception:
-            p0 = (0.0, 0.0)
+            pxy = (0.0, 0.0)
             _badPos = True
 
         if self._isSelected(obj):
@@ -3211,7 +3252,10 @@ class GL1dLabelling():
 
         try:
             _alias = obj.aliasing
-            alias = getAliasSetting(_alias[0], 0)
+            if dims[0]:
+                alias = getAliasSetting(0, _alias[0])
+            else:
+                alias = getAliasSetting(_alias[0], 0)
         except Exception:
             alias = 0
 
@@ -3221,7 +3265,7 @@ class GL1dLabelling():
             iCount, _selected = self._makePlusSymbol(drawList, indexEnd, vertexStart, 0, obj)
 
         self._insertSymbolItemVertices(True, True, _selected, cols, drawList, 1.0, iCount,
-                                       indexing, obj, objNum, p0, 0, 0, r, vertexPtr, w, alias)
+                                       indexing, obj, objNum, pxy, dims, 0, r, vertexPtr, w, alias)
 
     def _buildSymbols(self, spectrumView, objListView):
         spectrum = spectrumView.spectrum
@@ -3299,6 +3343,8 @@ class GL1dLabelling():
     def _rescaleSymbols(self, spectrumView, objListView):
         """rescale symbols when the screen dimensions change
         """
+        return
+
         drawList = self._GLSymbols[objListView]
 
         if not drawList.numVertices:
@@ -3359,13 +3405,13 @@ class GL1dLabelling():
         meritEnabled = objListView.meritEnabled
         meritThreshold = objListView.meritThreshold
 
-        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+        dims = self._spectrumSettings[spectrumView].dimensionIndices
         try:
-            _h = obj.height if obj.height is not None else 0
-            p0 = (obj.pointPositions[pIndex[0]] - 1, _h)
+            _pos = (obj.pointPositions[0] - 1, obj.height if obj.height is not None else 0)
+            pxy = [_pos[dim] for dim in dims]
             _badPos = False
         except Exception:
-            p0 = (0.0, 0.0)
+            pxy = (0.0, 0.0)
             _badPos = True
 
         if self._isSelected(obj):
@@ -3380,7 +3426,10 @@ class GL1dLabelling():
 
         try:
             _alias = obj.aliasing
-            alias = getAliasSetting(_alias[0], 0)
+            if dims[0]:
+                alias = getAliasSetting(0, _alias[0])
+            else:
+                alias = getAliasSetting(_alias[0], 0)
         except Exception:
             alias = 0
 
@@ -3391,7 +3440,7 @@ class GL1dLabelling():
             else:  # plus
                 iCount, _selected = self._appendPlusSymbol(drawList, indexing.vertexStart, 0, obj)
 
-            self._appendSymbolItemVertices(True, True, _selected, cols, drawList, 1.0, iCount, indexing, obj, p0, pIndex,
+            self._appendSymbolItemVertices(True, True, _selected, cols, drawList, 1.0, iCount, indexing, obj, pxy, dims,
                                            0, r, w, alias)
 
     def _removeSymbol(self, spectrumView, objListView, delObj):
@@ -3416,12 +3465,13 @@ class GL1dLabelling():
                 indexEnd = drawList.pids[pp + 7]
                 indexOffset = indexEnd - indexStart
 
+                st, end = 4 * offset, 4 * (offset + numPoints)
                 drawList.indices = np.delete(drawList.indices, np.s_[indexStart:indexEnd])
-                drawList.vertices = np.delete(drawList.vertices, np.s_[2 * offset:2 * (offset + numPoints)])
-                drawList.attribs = np.delete(drawList.attribs, np.s_[offset:offset + numPoints])
-                drawList.offsets = np.delete(drawList.offsets, np.s_[2 * offset:2 * (offset + numPoints)])
+                drawList.vertices = np.delete(drawList.vertices, np.s_[st: end])
+                drawList.attribs = np.delete(drawList.attribs, np.s_[st: end])
+                drawList.offsets = np.delete(drawList.offsets, np.s_[st: end])
+                drawList.colors = np.delete(drawList.colors, np.s_[st: end])
 
-                drawList.colors = np.delete(drawList.colors, np.s_[4 * offset:4 * (offset + numPoints)])
                 drawList.pids = np.delete(drawList.pids, np.s_[pp:pp + GLDefs.LENPID])
                 drawList.numVertices -= numPoints
 
@@ -3442,8 +3492,8 @@ class GL1dLabelling():
     def _appendLabel(self, spectrumView, objListView, stringList, obj):
         """Append a new label to the end of the list
         """
-        spectrum = spectrumView.spectrum
-        spectrumFrequency = spectrum.spectrometerFrequencies
+        # spectrum = spectrumView.spectrum
+        # spectrumFrequency = spectrum.spectrometerFrequencies
 
         # pls = peakListView.peakList
         pls = self.objectList(objListView)
@@ -3456,18 +3506,21 @@ class GL1dLabelling():
         else:
             _, _, symbolType, symbolWidth, r, w = self._getSymbolWidths(spectrumView)
 
-        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+        dims = self._spectrumSettings[spectrumView].dimensionIndices
         try:
-            h = obj.height if obj.height is not None else 0
-            p0 = (obj.pointPositions[pIndex[0]] - 1, h)  # need to split into pos, height
+            _pos = (obj.pointPositions[0] - 1, obj.height if obj.height is not None else 0)
+            pxy = [_pos[dim] for dim in dims]
             _badPos = False
         except Exception:
-            p0 = (0.0, 0.0)
+            pxy = (0.0, 0.0)
             _badPos = True
 
         try:
             _alias = obj.aliasing
-            alias = getAliasSetting(_alias[0], 0)
+            if dims[0]:
+                alias = getAliasSetting(0, _alias[0])
+            else:
+                alias = getAliasSetting(_alias[0], 0)
         except Exception:
             alias = 0
 
@@ -3492,7 +3545,7 @@ class GL1dLabelling():
 
         newString = GLString(text=text,
                              font=self._GLParent.getSmallFont(),
-                             x=p0[0], y=p0[1],
+                             x=pxy[0], y=pxy[1],
                              ox=r, oy=w,
                              # ox=symbolWidth, oy=symbolWidth,
                              # x=self._screenZero[0], y=self._screenZero[1]
@@ -3527,7 +3580,7 @@ class GL1dLabelling():
                     drawStr.setStringOffset((tr, tw))
                 else:
                     drawStr.setStringOffset((r, w))
-                drawStr.updateTextArrayVBOAttribs()
+                drawStr.pushTextArrayVBOAttribs()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Drawing

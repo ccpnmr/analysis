@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-28 19:17:56 +0100 (Wed, June 28, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2023-11-02 15:53:00 +0000 (Thu, November 02, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1260,16 +1260,15 @@ class DimensionsTab(Widget):
             self.minAliasingPullDowns[i] = PulldownList(self, grid=(row, i + 1), vAlign='t', )
             self.minAliasingPullDowns[i].activated.connect(partial(self._queueSetMinAliasing, spectrum, self.minAliasingPullDowns[i].getText, i))
 
-        # add preferred order widgets for Nd and
-        if spectrum.dimensionCount > 1:
-            row += 1
-            hLine = HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 1), colour=getColours()[DIVIDER], height=15, divisor=2)
-            hLine.setContentsMargins(5, 0, 0, 0)
+        # add preferred order widgets
+        row += 1
+        hLine = HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 1), colour=getColours()[DIVIDER], height=15, divisor=2)
+        hLine.setContentsMargins(5, 0, 0, 0)
 
-            row += 1
-            self.preferredAxisOrderPulldown = PulldownListCompoundWidget(self, labelText="Preferred Dimension Order",
-                                                                         grid=(row, 0), gridSpan=(1, dimensions + 1), vAlign='t', tipText=getAttributeTipText(Spectrum, 'setDimensionOrdering'))
-            self.preferredAxisOrderPulldown.pulldownList.setCallback(partial(self._queueSetSpectrumOrderingComboIndex, spectrum))
+        row += 1
+        self.preferredAxisOrderPulldown = PulldownListCompoundWidget(self, labelText="Preferred Dimension Order",
+                                                                     grid=(row, 0), gridSpan=(1, dimensions + 1), vAlign='t', tipText=getAttributeTipText(Spectrum, 'setDimensionOrdering'))
+        self.preferredAxisOrderPulldown.pulldownList.setCallback(partial(self._queueSetSpectrumOrderingComboIndex, spectrum))
 
         row += 1
         Spacer(self, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
@@ -1286,8 +1285,15 @@ class DimensionsTab(Widget):
         """
         specOrder = tuple(self.spectrum._preferredAxisOrdering) if self.spectrum._preferredAxisOrdering is not None else None
 
-        axisCodeTexts = tuple([ss.text() for ss in self.axisCodeEdits])
+        axisCodeTexts = tuple(ss.text() for ss in self.axisCodeEdits)
         ll = ['<None>']
+
+        if self.spectrum.dimensionCount == 1:
+            # a bit of a hack, but, for 1d the specOrder is saved as (0,) or (1,) which is potentially dangerous
+            #   but is changed to (0, 1) or (1, 0) for the popup
+            axisCodeTexts += ('intensity',)
+            if len(specOrder) == 1:
+                specOrder += (1-specOrder[0],)
 
         # add permutations for the axes
         axisPerms = permutations([axisCode for axisCode in axisCodeTexts])
@@ -1307,12 +1313,23 @@ class DimensionsTab(Widget):
         if item:
             index = self.preferredAxisOrderPulldown.getIndex()
 
-            axisOrder = tuple(permutations(list(range(len(spectrum.axisCodes)))))
-            value = tuple(axisOrder[index - 1])
-            if value != spectrum._preferredAxisOrdering:
-                return partial(self._setSpectrumOrdering, spectrum, value)
+            axisCodes = spectrum.axisCodes
+            if self.spectrum.dimensionCount > 1:
+                axisOrder = tuple(permutations(list(range(len(axisCodes)))))
+                value = tuple(axisOrder[index - 1])
+                if value != spectrum._preferredAxisOrdering:
+                    return partial(self._setSpectrumOrdering, spectrum, value)
 
-    def _setSpectrumOrdering(self, spectrum, value):
+            else:
+                axisCodes += ['intensity']
+
+                axisOrder = tuple(permutations(list(range(len(axisCodes)))))
+                value = tuple(axisOrder[index - 1])
+                if value != spectrum._preferredAxisOrdering:
+                    return partial(self._setSpectrumOrdering, spectrum, value[:1])  # only store the first value
+
+    @staticmethod
+    def _setSpectrumOrdering(spectrum, value):
         """Set the preferred axis ordering from the pullDown selection
         """
         spectrum._preferredAxisOrdering = value
@@ -1532,9 +1549,8 @@ class DimensionsTab(Widget):
                 # self.minAliasingPullDowns[i].setIndex(int(_close))
                 self.minAliasingPullDowns[i].setIndex(-self.aliasInds[i][0])
 
-            if self.spectrum.dimensionCount > 1:
-                self.preferredAxisOrderPulldown.setPreSelect(self._fillPreferredWidgetFromAxisTexts)
-                self._populatePreferredOrder()
+            self.preferredAxisOrderPulldown.setPreSelect(self._fillPreferredWidgetFromAxisTexts)
+            self._populatePreferredOrder()
 
             self._populateExperimentType()
             self._populateReferenceDimensions()

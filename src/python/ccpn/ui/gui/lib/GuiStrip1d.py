@@ -26,24 +26,27 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import numpy as np
 from PyQt5 import QtWidgets
-from ccpn.util.Colour import hexToRgbRatio
 from functools import partial
-from ccpn.core.PeakList import PeakList
 from ccpn.util import Phasing
+from ccpn.core.PeakList import PeakList
+
+from ccpn.core.lib.ContextManagers import undoStackBlocking
+from ccpn.core.lib.ContextManagers import undoBlockWithSideBar as undoBlock
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, \
     IntegralMenu, MultipletMenu, PhasingMenu, AxisMenu
-from ccpn.ui.gui.widgets.PlaneToolbar import StripHeaderWidget, StripLabelWidget
-import numpy as np
-from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.lib.GuiStripContextMenus import _get1dPhasingMenu, _get1dDefaultMenu, \
     _get1dPeakMenu, _get1dIntegralMenu, _get1dMultipletMenu, _get1dAxisMenu
+from ccpn.ui.gui.lib.StripLib import copyStripAxisPositionsAndWidths
+from ccpn.ui.gui.widgets.PlaneToolbar import StripHeaderWidget, StripLabelWidget
 from ccpn.ui.gui.widgets.Frame import OpenGLOverlayFrame
 from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.util.Colour import colorSchemeTable
-from ccpn.core.lib.ContextManagers import undoBlockWithSideBar as undoBlock
-from ccpn.util.Colour import hexToRgbRatio
-from functools import partial
+from ccpn.util.Colour import colorSchemeTable, hexToRgbRatio
+from ccpn.util.Constants import AXIS_FULLATOMNAME
+from ccpn.util.Logging import getLogger
+
+
 
 class GuiStrip1d(GuiStrip):
     """Strip class for display of 1D spectra
@@ -290,19 +293,57 @@ class GuiStrip1d(GuiStrip):
         except Exception as es:
             getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
 
-    def flipXYAxis(self):
+    def _flipAxes(self, axisOrderIndices, positions=None):
+        """Create a new SpectrumDisplay with the axes flipped to the new axisOrder.
+        If position is None, the centre of the new spectrumDisplay will be the centre of the source strip.
+        Otherwise, positions specifies the centre of the new spectrumDisplay.
+        Widths will be taken from the source strip.
+        :param axisOrderIndices: a list/tuple of the indices of the new axis-order;
+                                 e.g. (1,0) for YXZ order, or (2,0,1) for ZXY, etc.
+                                 redundent for 1D
+        :param positions: True/False use the current mouse-position or the centre of the source strip
+        :return: a Spectrum display instance
+        """
+        # get the correct axis code from the strip
+        axisCodes = [self.axisCodes[idx] for idx in axisOrderIndices][:1]
+        flip1D = not self.spectrumDisplay._flipped
+
+        with undoStackBlocking() as _:  # Do not add to undo/redo stack
+            # create a new spectrum display with the new axis order
+            newDisplay = self.mainWindow.newSpectrumDisplay(self.spectra[0], axisCodes=axisCodes, flip1D=flip1D)
+            for spectrum in self.spectra[1:]:
+                newDisplay.displaySpectrum(spectrum)
+            copyStripAxisPositionsAndWidths(self, newDisplay.strips[0], positions=positions)
+
+        return newDisplay
+
+    def flipXYAxis(self, usePosition=False):
+        """
+        Flip the X and Y axes
+        """
+        if self.spectrumDisplay.dimensionCount > 1:
+            getLogger().warning(f'{self.__class__.__name__}.flipXYaxis: Too many dimensions for 1D XY-flip')
+            return
+
+        try:
+            mDict = usePosition and self.current.mouseMovedDict[AXIS_FULLATOMNAME]
+            positions = [poss[0] if (poss := mDict.get(ax)) else None
+                         for ax in self.axisCodes] if usePosition else None
+            return self._flipAxes(axisOrderIndices=(int(self.spectrumDisplay._flipped),), positions=positions)
+        except Exception as es:
+            getLogger().warning(f'{self.__class__.__name__}.flipXYaxis: {es}')
+
+        getLogger().warning('Function not permitted on nD spectra')
+
+    @staticmethod
+    def flipXZAxis():
         """
         Flip the X and Y axes
         """
         getLogger().warning('Function not permitted on 1D spectra')
 
-    def flipXZAxis(self):
-        """
-        Flip the X and Y axes
-        """
-        getLogger().warning('Function not permitted on 1D spectra')
-
-    def flipYZAxis(self):
+    @staticmethod
+    def flipYZAxis():
         """
         Flip the X and Y axes
         """
@@ -547,7 +588,7 @@ class GuiStrip1d(GuiStrip):
             initialOffset = self._getInitialOffset()
 
             # offset is now a tuple
-            self.offsetWidget.setValue((0.0, initialOffset))
+            self.offsetWidget.setInitialIntensity(initialOffset)
             self.offsetWidget.setVisible(True)
         else:
             self.offsetWidget.setVisible(not self.offsetWidget.isVisible())

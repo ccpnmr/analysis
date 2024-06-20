@@ -6,8 +6,8 @@ Code for exporting OpenGL stripDisplay to pdf and svg files.
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-01 19:39:57 +0100 (Thu, June 01, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-12-20 12:52:26 +0000 (Wed, December 20, 2023) $"
+__version__ = "$Revision: 3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -34,11 +34,11 @@ import numpy as np
 import math
 # import glob
 import contextlib
-# from itertools import zip_longest
+from itertools import product
 from dataclasses import dataclass
 from collections import OrderedDict
 from collections.abc import Iterable
-# from PyQt5 import QtGui
+from PyQt5 import QtGui
 # from PyQt5.QtCore import QStandardPaths
 # from PyQt5.QtGui import QFontDatabase
 # from PyQt5.QtWidgets import QApplication
@@ -60,9 +60,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 
 from ccpn.ui.gui.widgets.Font import getSystemFonts
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import viewportDimensions
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import SPECTRUM_STACKEDMATRIX, SPECTRUM_MATRIX, \
-    GLLINE_STYLES_ARRAY, SPECTRUM_XLIMITS, SPECTRUM_AF, SPECTRUM_ALIASINGINDEX, SPECTRUM_FOLDINGMODE, \
-    SPECTRUM_YLIMITS, SPECTRUM_SCALE, SPECTRUM_STACKEDMATRIXOFFSET
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLLINE_STYLES_ARRAY, getAliasSetting
 
 from ccpn.ui.gui.lib.OpenGL import GL
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLGRIDLINES, GLAXISLABELS, GLAXISMARKS, \
@@ -83,7 +81,6 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLGRIDLINES, GLAXISLABELS, GLA
     GLPRINTFONT, GLUSEPRINTFONT, GLSCALINGAXIS
 # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLWIDGET, GLAXISLINES, GLAXISMARKSINSIDE, \
 #     GLFULLLIST, GLEXTENDEDLIST, GLALIASENABLED, GLALIASLABELSENABLED
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import getAliasSetting
 from ccpn.ui.gui.popups.ExportStripToFile import PAGEPORTRAIT, DEFAULT_FONT, PAGESIZEA6, PAGESIZEA5, \
     PAGESIZEA4, PAGESIZEA3, PAGESIZEA2, PAGESIZEA1, PAGESIZEA0, PAGESIZELETTER, PAGESIZES
 # from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPDF, EXPORTSVG, EXPORTTYPES, \
@@ -378,7 +375,7 @@ class GLExporter():
             fw /= _scale
         else:
             _scale = fw / docWidth
-            fw = docWidth
+            # fw = docWidth
             fh /= _scale
 
         self.modRatio = 1.0
@@ -392,7 +389,7 @@ class GLExporter():
         """Build the main sections of the pdf file from a drawing object
         and add the drawing object to a reportlab document
         """
-        dpi = 72  # drawing object and documents are hard-coded to this
+        # NOTE:ED - dpi = 72  # drawing object and documents are hard-coded to this
 
         # keep aspect ratio of the original screen
         self.margin = 2.0 * cm
@@ -543,7 +540,7 @@ class GLExporter():
                         _axisScale = abs(_axisT - _axisB)
                     _newScale = (_axisScale / _cms) / _scale
 
-            except Exception as es:
+            except Exception:
                 # default to full page
                 _newScale = 1.0
 
@@ -1003,7 +1000,6 @@ class GLExporter():
         >>>     print(data.spectrum)
         """
 
-
         # simple class to export variables from the generator function
         @dataclass
         class _editValues:
@@ -1023,14 +1019,13 @@ class GLExporter():
             alias = None
 
 
-        _data = _editValues()
-
+        data = _editValues()
         # set the display parameters
-        _data.x = _x = self.displayScale * self.mainView.left
-        _data.y = _y = self.displayScale * self.mainView.bottom
-        _data.width = _width = self.displayScale * self.mainView.width
-        _data.height = _height = self.displayScale * self.mainView.height
-        _data.index = 0
+        data.x = _x = self.displayScale * self.mainView.left
+        data.y = _y = self.displayScale * self.mainView.bottom
+        data.width = _width = self.displayScale * self.mainView.width
+        data.height = _height = self.displayScale * self.mainView.height
+        data.index = 0
 
         for spectrumView in self._ordering:
 
@@ -1040,107 +1035,102 @@ class GLExporter():
             if spectrumView.spectrum.pid in self.params[GLSELECTEDPIDS]:
 
                 # get the contour list
-                _data.GLObject = self._parent._contourList[spectrumView] if spectrumView in self._parent._contourList else None
+                data.GLObject = self._parent._contourList[spectrumView] if spectrumView in self._parent._contourList else None
 
                 if spectrumView in self._parent._spectrumSettings.keys():
 
                     # get the spectrum settings for the spectrumView
-                    _data.specSettings = specSettings = self._parent._spectrumSettings[spectrumView]
-                    _data.spectrumView = spectrumView
-                    _data.spectrum = spectrumView.spectrum
-                    _data.dimensionCount = spectrumView.spectrum.dimensionCount
+                    data.specSettings = specSettings = self._parent._spectrumSettings[spectrumView]
+                    data.spectrumView = spectrumView
+                    data.spectrum = spectrumView.spectrum
+                    data.dimensionCount = spectrumView.spectrum.dimensionCount
 
                     if spectrumView.spectrum.dimensionCount > 1:
                         # draw nD spectra
+                        fxMax, fyMax = specSettings.maxSpectrumFrequency
+                        dxAF, dyAF = specSettings.spectralWidth
+                        xScale, yScale = specSettings.scale
+                        alias = specSettings.aliasingIndex
+                        folding = specSettings.foldingMode
 
-                        # self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
-                        #                                            1, GL.GL_FALSE,
-                        #                                            self._spectrumSettings[spectrumView][SPECTRUM_MATRIX])
+                        for ii, jj in product(range(alias[0][0], alias[0][1] + 1),
+                                              range(alias[1][0], alias[1][1] + 1)):
+                            foldX = foldY = 1.0
+                            foldXOffset = foldYOffset = 0
+                            if folding[0] == 'mirror':
+                                foldX = pow(-1, ii)
+                                foldXOffset = -dxAF if foldX < 0 else 0
+                            if folding[1] == 'mirror':
+                                foldY = pow(-1, jj)
+                                foldYOffset = -dyAF if foldY < 0 else 0
 
-                        _, fxMax = specSettings[SPECTRUM_XLIMITS]
-                        _, fyMax = specSettings[SPECTRUM_YLIMITS]
-                        dxAF, dyAF = specSettings[SPECTRUM_AF]
-                        xScale, yScale = specSettings[SPECTRUM_SCALE]
-                        alias = specSettings[SPECTRUM_ALIASINGINDEX]
-                        folding = specSettings[SPECTRUM_FOLDINGMODE]
+                            # build the spectrum transformation matrix
+                            mm = QtGui.QMatrix4x4()
+                            mm.translate(fxMax + (ii * dxAF) + foldXOffset, fyMax + (jj * dyAF) + foldYOffset)
+                            mm.scale(xScale * foldX, yScale * foldY)
+                            data.matrix = mm
+                            data.matrixSymbols = mm
+                            data.alias = getAliasSetting(ii, jj)
 
-                        for ii in range(alias[0][0], alias[0][1] + 1, 1):
-                            for jj in range(alias[1][0], alias[1][1] + 1, 1):
+                            yield data  # pass object
 
-                                foldX = foldY = 1.0
-                                foldXOffset = foldYOffset = 0
-                                if folding[0] == 'mirror':
-                                    foldX = pow(-1, ii)
-                                    foldXOffset = -dxAF if foldX < 0 else 0
-
-                                if folding[1] == 'mirror':
-                                    foldY = pow(-1, jj)
-                                    foldYOffset = -dyAF if foldY < 0 else 0
-
-                                # build the spectrum transformation matrix
-                                specMatrix = np.array([xScale * foldX, 0.0, 0.0, 0.0,
-                                                       0.0, yScale * foldY, 0.0, 0.0,
-                                                       0.0, 0.0, 1.0, 0.0,
-                                                       fxMax + (ii * dxAF) + foldXOffset, fyMax + (jj * dyAF) + foldYOffset, 0.0, 1.0],
-                                                      dtype=np.float32)
-                                _data.matrix = np.transpose(specMatrix.reshape((4, 4)))
-                                _data.matrixSymbols = np.transpose(specMatrix.reshape((4, 4)))
-                                _data.alias = getAliasSetting(ii, jj)
-                                # get the transformation matrix from the spectrumView
-                                # mat = np.transpose(self._parent._spectrumSettings[spectrumView][SPECTRUM_MATRIX].reshape((4, 4)))
-
-                                # # clip all colours first - not sure if needed now, but was causing overflow error in the past
-                                # _colors = np.clip(thisSpec.colors, 0.0, 0.9999)
-
-                                yield _data  # pass object
-
-                                _data.index += 1
+                            data.index += 1
 
                     else:
                         # draw 1D spectra
+                        fxMax, fyMax = specSettings.maxSpectrumFrequency
+                        dxAF, dyAF = specSettings.spectralWidth
+                        xScale, yScale = specSettings.scale
+                        alias = specSettings.aliasingIndex
+                        folding = specSettings.foldingMode
+                        stackX, stackY = specSettings.stackedMatrixOffset
+                        dimX, _ = specSettings.dimensionIndices
 
-                        # assume that the vertexArray is a GL_LINE_STRIP
-                        _, fxMax = specSettings[SPECTRUM_XLIMITS]
-                        dxAF, _ = specSettings[SPECTRUM_AF]
-                        xScale, _ = specSettings[SPECTRUM_SCALE]
-                        alias = specSettings[SPECTRUM_ALIASINGINDEX]
-                        folding = specSettings[SPECTRUM_FOLDINGMODE]
-                        stackX, stackY = specSettings[SPECTRUM_STACKEDMATRIXOFFSET]
-
-                        for ii in range(alias[0][0], alias[0][1] + 1, 1):
-
+                        for ii, jj in product(range(alias[0][0], alias[0][1] + 1),
+                                              range(alias[1][0], alias[1][1] + 1)):
                             foldX = 1.0
                             foldXOffsetSym = foldXOffset = 0
                             if folding[0] == 'mirror':
                                 foldX = pow(-1, ii)
                                 foldXOffset = (2 * fxMax - dxAF) if foldX < 0 else 0
                                 foldXOffsetSym = -dxAF if foldX < 0 else 0
+                            foldY = 1.0
+                            foldYOffsetSym = foldYOffset = 0
+                            if folding[1] == 'mirror':
+                                foldY = pow(-1, jj)
+                                foldYOffset = (2 * fyMax - dyAF) if foldY < 0 else 0
+                                foldYOffsetSym = -dyAF if foldY < 0 else 0
 
+                            # build the spectrum transformation matrix
+                            mm = QtGui.QMatrix4x4()
                             if self._parent._stackingMode:
-                                _matrix = np.array(specSettings[SPECTRUM_STACKEDMATRIX])
+                                mm.translate(stackX, stackY)
+                            mmSym = QtGui.QMatrix4x4()
+                            if self._parent._stackingMode:
+                                mmSym.translate(stackX, stackY)
+
+                            if dimX:  # quick way to check if 1D is flipped
+                                # build the 1D spectrum transformation matrices
+                                mm.translate(0, (jj * dyAF) + foldYOffset)
+                                mm.scale(1.0, foldY, 1.0)
+                                mmSym.translate(0, fyMax + (jj * dyAF) + foldYOffsetSym)
+                                mmSym.scale(1.0, yScale * foldY, 1.0)
                             else:
-                                _matrix = np.array(self._parent._IMatrix)
+                                mm.translate((ii * dxAF) + foldXOffset, 0)
+                                mm.scale(foldX, 1.0, 1.0)
+                                mmSym.translate(fxMax + (ii * dxAF) + foldXOffsetSym, 0)
+                                mmSym.scale(xScale * foldX, 1.0, 1.0)
 
-                            # build the spectrum transformation matrices
-                            _matrixSym = np.array([xScale * foldX, 0.0, 0.0, 0.0,
-                                                   0.0, 1.0, 0.0, 0.0,
-                                                   0.0, 0.0, 1.0, 0.0,
-                                                   fxMax + (ii * dxAF) + foldXOffsetSym + stackX, stackY, 0.0, 1.0],
-                                                  dtype=np.float32)
+                            data.matrix = mm
+                            data.matrixSymbols = mmSym
+                            data.alias = getAliasSetting(ii, jj)
 
-                            # take the stacking matrix and insert the correct x-scaling to map the pointPositions to the screen
-                            _matrix[0] = foldX
-                            _matrix[12] += (ii * dxAF) + foldXOffset  # add to the stacked offset
-                            _data.matrix = np.transpose(_matrix.reshape((4, 4)))
-                            _data.matrixSymbols = np.transpose(_matrixSym.reshape((4, 4)))
-                            _data.alias = getAliasSetting(ii, 0)
+                            yield data  # pass object back to the calling method
 
-                            yield _data  # pass object back to the calling method
+                            data.index += 1
 
-                            _data.index += 1
-
-        if _data.colourGroups:
-            self._appendGroup(drawing=self._mainPlot, colourGroups=_data.colourGroups, name=groupName)
+        if data.colourGroups:
+            self._appendGroup(drawing=self._mainPlot, colourGroups=data.colourGroups, name=groupName)
 
     @staticmethod
     def addLine(colourPath, line):
@@ -1162,10 +1152,11 @@ class GLExporter():
                     ppInd0 = int(data.GLObject.indices[ppInd])
                     ppInd1 = int(data.GLObject.indices[ppInd + 1])
 
-                    vectStart = [data.GLObject.vertices[ppInd0 * 2], data.GLObject.vertices[ppInd0 * 2 + 1], 0.0, 1.0]
-                    vectStart = data.matrix.dot(vectStart)
-                    vectEnd = [data.GLObject.vertices[ppInd1 * 2], data.GLObject.vertices[ppInd1 * 2 + 1], 0.0, 1.0]
-                    vectEnd = data.matrix.dot(vectEnd)
+                    vectStart = QtGui.QVector4D(data.GLObject.vertices[ppInd0 * 2], data.GLObject.vertices[ppInd0 * 2 + 1], 0.0, 1.0)
+                    vectStart = data.matrix * vectStart
+                    vectEnd = QtGui.QVector4D(data.GLObject.vertices[ppInd1 * 2], data.GLObject.vertices[ppInd1 * 2 + 1], 0.0, 1.0)
+                    vectEnd = data.matrix * vectEnd
+
                     newLine = [vectStart[0], vectStart[1], vectEnd[0], vectEnd[1]]
 
                     colour = colors.Color(*data.GLObject.colors[ppInd0 * 4:ppInd0 * 4 + 3], alpha=alphaClip(data.GLObject.colors[ppInd0 * 4 + 3]))
@@ -1388,7 +1379,11 @@ class GLExporter():
 
                 elif spectrumView in self._parent._contourList.keys():
                     # assume that the vertexArray is a GL_LINE_STRIP
-                    mat = np.transpose(self._parent._spectrumSettings[spectrumView][SPECTRUM_STACKEDMATRIX].reshape((4, 4))) if self._parent._stackingMode else None
+                    if spectrumView in self._parent._contourList.keys():
+                        if self._parent._stackingMode:
+                            mat = QtGui.QMatrix4x4(self._parent._spectrumSettings[spectrumView].stackedMatrix)
+                        else:
+                            mat = None
 
                 # draw the integralAreas if they exist
                 for integralArea in self._parent._GLIntegrals._GLSymbols[integralListView]._regions:
@@ -1398,13 +1393,13 @@ class GLExporter():
                         for vv in range(0, len(thisSpec.vertices) - 4, 2):
 
                             if mat is not None:
+                                vectStart = QtGui.QVector4D(thisSpec.vertices[vv], thisSpec.vertices[vv + 1], 0.0, 1.0)
+                                vectStart = mat * vectStart
+                                vectMid = QtGui.QVector4D(thisSpec.vertices[vv + 2], thisSpec.vertices[vv + 3], 0.0, 1.0)
+                                vectMid = mat * vectMid
+                                vectEnd = QtGui.QVector4D(thisSpec.vertices[vv + 4], thisSpec.vertices[vv + 5], 0.0, 1.0)
+                                vectEnd = mat * vectEnd
 
-                                vectStart = [thisSpec.vertices[vv], thisSpec.vertices[vv + 1], 0.0, 1.0]
-                                vectStart = mat.dot(vectStart)
-                                vectMid = [thisSpec.vertices[vv + 2], thisSpec.vertices[vv + 3], 0.0, 1.0]
-                                vectMid = mat.dot(vectMid)
-                                vectEnd = [thisSpec.vertices[vv + 4], thisSpec.vertices[vv + 5], 0.0, 1.0]
-                                vectEnd = mat.dot(vectEnd)
                                 newLine = [vectStart[0], vectStart[1],
                                            vectMid[0], vectMid[1],
                                            vectEnd[0], vectEnd[1]]
@@ -1472,8 +1467,10 @@ class GLExporter():
                                  f'{colour.red}{colour.green}{colour.blue}{colour.alpha}'
 
                     if data.matrixSymbols is not None:
-                        newLine = [drawString.attribs[0], drawString.attribs[1], 0.0, 1.0]
-                        newLine = data.matrixSymbols.dot(newLine)[:2]
+                        newLine = QtGui.QVector4D(drawString.attribs[0], drawString.attribs[1], 0.0, 1.0)
+                        newLine = data.matrixSymbols * newLine
+                        newLine = [newLine.x(), newLine.y()]
+
                     else:
                         newLine = [drawString.attribs[0], drawString.attribs[1]]
 
@@ -1585,8 +1582,10 @@ class GLExporter():
                                  f'{colour.red}{colour.green}{colour.blue}{colour.alpha}'
 
                     if data.matrixSymbols is not None:
-                        newLine = [drawString.attribs[0], drawString.attribs[1], 0.0, 1.0]
-                        newLine = data.matrixSymbols.dot(newLine)[:2]
+                        newLine = QtGui.QVector4D(drawString.attribs[0], drawString.attribs[1], 0.0, 1.0)
+                        newLine = data.matrixSymbols * newLine
+                        newLine = [newLine.x(), newLine.y()]
+
                     else:
                         newLine = [drawString.attribs[0], drawString.attribs[1]]
 
@@ -1679,7 +1678,7 @@ class GLExporter():
             # drawVertexColor
 
             if self._parent._stackingMode:
-                mat = np.transpose(self._parent._spectrumSettings[spectrumView][SPECTRUM_STACKEDMATRIX].reshape((4, 4)))
+                mat = QtGui.QMatrix4x4(self._parent._spectrumSettings[spectrumView].stackedMatrix)
             else:
                 mat = None
 
@@ -2060,14 +2059,14 @@ class GLExporter():
         for colourGroup in colourGroups.values():
             self._mainPlot.add(colourGroup)
 
-    def report(self, w, h, plot):
+    @staticmethod
+    def report(w, h, plot):
         """
         Return the current report for the GL widget.
         This is the vector image for the current strip containing the GL widget,
         it is a reportlab Flowable type object that can be added to reportlab documents.
         :return reportlab.platypus.Flowable:
         """
-        scale = self.displayScale
         return Clipped_Flowable(width=w, height=h,
                                 mainPlot=plot,  #self._mainPlot,
                                 mainDim={PLOTLEFT  : 0,  #scale*view.left,
@@ -2262,11 +2261,10 @@ class GLExporter():
         for vv in range(0, len(indArray.vertices) - 2, 2):
 
             if mat is not None:
-
-                vectStart = [indArray.vertices[vv], indArray.vertices[vv + 1], 0.0, 1.0]
-                vectStart = mat.dot(vectStart)
-                vectEnd = [indArray.vertices[vv + 2], indArray.vertices[vv + 3], 0.0, 1.0]
-                vectEnd = mat.dot(vectEnd)
+                vectStart = QtGui.QVector4D(indArray.vertices[vv], indArray.vertices[vv + 1], 0.0, 1.0)
+                vectStart = mat * vectStart
+                vectEnd = QtGui.QVector4D(indArray.vertices[vv + 2], indArray.vertices[vv + 3], 0.0, 1.0)
+                vectEnd = mat * vectEnd
                 newLine = [vectStart[0], vectStart[1], vectEnd[0], vectEnd[1]]
             else:
                 newLine = list(indArray.vertices[vv:vv + 4])
@@ -2320,12 +2318,13 @@ class GLExporter():
             newLine = []
             for vv in ii0:
                 if mat is not None:
-                    _vec = [indArray.vertices[vv * 2], indArray.vertices[vv * 2 + 1], 0.0, 1.0]
-                    _vec = mat.dot(_vec)
+                    _vec = QtGui.QVector4D(indArray.vertices[vv * 2], indArray.vertices[vv * 2 + 1], 0.0, 1.0)
+                    _vec = mat * _vec
+
                     if ratioLine:
-                        newLine.extend(self._scaleRatioToWindow(_vec[:2]))
+                        newLine.extend(self._scaleRatioToWindow([_vec.x(), _vec.y()]))
                     else:
-                        newLine.extend(_vec[:2])
+                        newLine.extend([_vec.x(), _vec.y()])
 
                 elif ratioLine:
                     # convert ratio to axis coordinates
@@ -2379,9 +2378,10 @@ class GLExporter():
         for spectrumView in self._ordering:
             if spectrumView.isDeleted:
                 continue
-            specSettings = self._parent._spectrumSettings[spectrumView]
+            # specSettings = self._parent._spectrumSettings[spectrumView]
+
             # get the transformation matrix from the spectrumView
-            mat = np.transpose(self._parent._spectrumSettings[spectrumView][SPECTRUM_MATRIX].reshape((4, 4)))
+            mat = QtGui.QMatrix4x4(self._parent._spectrumSettings[spectrumView].matrix)
 
             attribList = getattr(spectrumView, f'{listView}Views')
             validListViews = [pp for pp in attribList
@@ -2402,7 +2402,8 @@ class GLExporter():
                                                splitGroups=splitGroups,
                                                lineWidth=lineWidth)
 
-    def _appendGroup(self, drawing: Drawing = None, colourGroups: dict = None, name: str = None):
+    @staticmethod
+    def _appendGroup(drawing: Drawing = None, colourGroups: dict = None, name: str = None):
         """
         Append a group of polylines to the current drawing object
         :param drawing - drawing to append groups to
@@ -2448,7 +2449,8 @@ class GLExporter():
 
         drawing.add(gr, name=name)
 
-    def between(self, val, l, r):
+    @staticmethod
+    def between(val, l, r):
         return (l - val) * (r - val) <= 0
 
     def pointVisible(self, _parent, lineList, x=0.0, y=0.0, width=0.0, height=0.0):
@@ -2462,7 +2464,7 @@ class GLExporter():
             lineList[1] = y + height * (lineList[1] - axisB) / (axisT - axisB)
             return True
 
-    def lineVisible(self, _parent, lineList, x=0.0, y=0.0, width=0.0, height=0.0, checkIntegral=False):
+    def lineVisible(self, _parent, lineList, x=0.0, y=0.0, width=0.0, height=0.0):
         """return the list of visible lines
         """
         # make into a list of tuples

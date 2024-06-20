@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-06-19 18:24:40 +0100 (Wed, June 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-20 14:34:05 +0100 (Thu, June 20, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -43,6 +43,7 @@ from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.lib.SpectrumLib import DIMENSION_TIME, DIMENSION_SAMPLED
+from ccpn.core.lib.WeakRefList import _WeakRefList
 from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 
 from ccpn.core.lib.Notifiers import Notifier
@@ -262,9 +263,9 @@ class GuiSpectrumDisplay(CcpnModule):
         self.stripScaleFactor = 1.0
 
         self._setNotifiers()
-        # A dict of (spectrum-pid, []) pairs, maintaining the notifiers set for spectrum
-        # Maintained by _setSpectrumNotifiers() and _deleteSpectrumNotifiers()
-        self._spectrumNotifiersDict: dict = {}
+        # # A dict of (spectrum-pid, []) pairs, maintaining the notifiers set for spectrum
+        # # Maintained by _setSpectrumNotifiers() and _deleteSpectrumNotifiers()
+        # self._spectrumNotifiersDict: dict = {}
 
         self._fillToolBar()
 
@@ -692,35 +693,32 @@ class GuiSpectrumDisplay(CcpnModule):
         """Set the OBSERVE notifiers on spectrum.
         Used by displaySpectrum() and _postRestore() to set notifiers for each spectrum
         """
-        _notifiers = self._spectrumNotifiersDict.setdefault(spectrum.pid,[])
-
         # Contours
         targets = """
         positiveContourBase positiveContourFactor positiveContourCount
         negativeContourBase negativeContourFactor negativeContourCount
         """.split()
-        _notifiers.extend(
-            self.setNotifier(spectrum, [Notifier.OBSERVE],
-                                       targetName = targets,
-                                       callback = self._buildContoursCallback
-                             )
-        )
+        self.setNotifier(spectrum, [Notifier.OBSERVE],
+                                   targetName = targets,
+                                   callback = self._buildContoursCallback
+                         )
+
         # pass  # for debugging breakpoint
 
     def _deleteSpectrumNotifiers(self, spectrum: Spectrum):
-        """Delete notifers set on spectrum
-        Used by _closeModule and deleteSpectrum() to remove notifiers set on spectrum
+        """Delete notifiers set by self on spectrum
+        Used by _closeModule and removeSpectrum() to remove notifiers set on spectrum
         """
-        _notifiers = self._spectrumNotifiersDict.get(spectrum.pid,[])
+        _notifiers = spectrum._getRegisteredNotifiersBySetter(setterObject=self)
         for _ntf in _notifiers:
-            _ntf.unRegisterNotifier()
+            self.deleteNotifier(_ntf)
 
     def _setNotifiers(self):
         """Setting notifiers
         """
         self.setNotifier(self.project, [Notifier.RENAME, Notifier.DELETE],
                                         Spectrum.className,
-                                        callback=self._spectrumChanged)
+                                        callback=self._spectrumChangedCallback)
 
         self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
                                        SpectrumView.className,
@@ -856,7 +854,7 @@ class GuiSpectrumDisplay(CcpnModule):
             raise RuntimeError(f'_buildContoursCallback(): {spectrum} not displayed in {self}')
         self._buildContoursForSpectrum(spectrum)
 
-    def _spectrumChanged(self, data):
+    def _spectrumChangedCallback(self, data):
         """Handle notifier for changes to spectrum
         This can also be used after creation of new spectrumView
         """
@@ -891,7 +889,8 @@ class GuiSpectrumDisplay(CcpnModule):
             self.spectrumToolBar._spectrumRename(data)
 
         elif trigger == Notifier.DELETE:
-            self.removeSpectrum(spectrum)
+            if spectrum in self.spectra:
+                self.removeSpectrum(spectrum)
 
     def _spectrumViewChanged(self, data):
         """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame
@@ -907,22 +906,22 @@ class GuiSpectrumDisplay(CcpnModule):
 
         trigger = data[Notifier.TRIGGER]
 
-        # respond to the create/delete notifiers
-        if trigger == Notifier.CREATE:
-            for strip in self.strips:
-                strip._updatePlaneAxes()
+        # # respond to the create/delete notifiers
+        # if trigger == Notifier.CREATE:
+        #     for strip in self.strips:
+        #         strip._updatePlaneAxes()
+        #
+        #     # GWV 19/6/24: this no longer has any effect
+        #     # if spectrumView in self.spectrumViews:
+        #     #     self._spectrumChangedCallback({Notifier.TRIGGER: Notifier.CHANGE,
+        #     #                            Notifier.OBJECT : spectrumView.spectrum})
+        #
+        # elif trigger == Notifier.DELETE:
+        #
+        #     for strip in self.strips:
+        #         strip._updatePlaneAxes()
 
-            # GWV 19/6/24: this no longer has any effect
-            # if spectrumView in self.spectrumViews:
-            #     self._spectrumChanged({Notifier.TRIGGER: Notifier.CHANGE,
-            #                            Notifier.OBJECT : spectrumView.spectrum})
-
-        elif trigger == Notifier.DELETE:
-
-            for strip in self.strips:
-                strip._updatePlaneAxes()
-
-        elif trigger == Notifier.CHANGE:
+        if trigger == Notifier.CHANGE:
             if spectrumView in self.spectrumViews:
                 _spectrumViewHasChanged({Notifier.OBJECT: spectrumView})
 
@@ -2738,6 +2737,7 @@ class GuiSpectrumDisplay(CcpnModule):
         #             raise RuntimeError('Cannot display %s on %s; incompatible isotopeCodes' % (spectrum, self))
 
         # with undoStackRevert(self.application) as revertStack:
+
         with undoBlockWithoutSideBar(self.application):
             # push/pop ordering
             with undoStackBlocking(self.application) as addUndoItem:
@@ -2780,11 +2780,12 @@ class GuiSpectrumDisplay(CcpnModule):
                     self.setToolbarButtons()
                     # addUndoItem(redo=self.setToolbarButtons)  # keep for undo/redo
 
-        if not self._isNew:
-            # Now that the spectrum is added, we need to update the plane-related
-            # axis values
-            for strip in self.strips:
-                strip._updatePlaneAxes()
+        # Now that the spectrum is added, we need to update the plane-related axis values
+        for strip in self.strips:
+            strip._updatePlaneAxes()
+            strip._updateVisibility()
+
+        self._updateAxesVisibility()
 
         # add the notifiers on spectrum
         self._setSpectrumNotifiers(spectrum)
@@ -2814,18 +2815,21 @@ class GuiSpectrumDisplay(CcpnModule):
         with undoStackBlocking() as addUndoItem:
 
             with undoBlock():
-                # block undo additions, as the displaySpectrum and removeSpectrum are
-                # "atomic" operations
+                # block any undo additions, as the displaySpectrum and removeSpectrum are
+                # "atomic" operations, which are being added at the end
 
                 # delete the spectrumView -
                 # for multiple strips will delete all spectrumViews attached to spectrum
-                # GWV 19/6/24: This sound crazy!
+                # GWV 19/6/24: This sounds crazy!
                 specView._delete()
-                self.setToolbarButtons()
                 self._deleteSpectrumNotifiers(spectrum=spectrum)
+                self.setToolbarButtons()
+                # Now that the spectrum has been removed, we need to update the plane-related axis values
+                for strip in self.strips:
+                    strip._updatePlaneAxes()
 
-            addUndoItem(undo=partial(self.displaySpectrum, spectrum=spectrum),
-                        redo=partial(self.removeSpectrum, spectrum=spectrum)
+            addUndoItem(undo=partial(self.displaySpectrum, spectrum=spectrum.pid),
+                        redo=partial(self.removeSpectrum, spectrum=spectrum.pid)
                         )
 
         #end waypoint

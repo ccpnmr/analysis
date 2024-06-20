@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-06-18 21:07:38 +0100 (Tue, June 18, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-20 14:34:05 +0100 (Thu, June 20, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -29,7 +29,7 @@ __date__ = "$Date: 2023-10-16 16:42:30 +0100 (Mon, October 16, 2023) $"
 #=========================================================================================
 #
 import sys
-from typing import Callable, Any, Optional, List
+from typing import Callable, Any, Optional, List, Iterable
 
 from weakref import WeakValueDictionary
 
@@ -57,6 +57,12 @@ class _WeakRefList(object):
         """
         self.weakRefDict[self.nextKey] = item
         self.nextKey += 1
+
+    def extend(self, iterable: Iterable):
+        """Extend self with items in iterable
+        """
+        for item in iterable:
+            self.append(item)
 
     def pop(self):
         """pop and return the first item or None when list is empty

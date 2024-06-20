@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-06-19 18:24:40 +0100 (Wed, June 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-20 14:34:05 +0100 (Thu, June 20, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -192,6 +192,12 @@ class NotifierABC(object):
         """:return the attributeName of self
         """
         return self._attributeName
+
+    @property
+    def setterObject(self):
+        """:return the setterObject  of self
+        """
+        return self._setterObject()  # ._setterObject is a weakRef
 
     @property
     def isRegistered(self) -> bool:
@@ -360,9 +366,8 @@ class Notifier(NotifierABC):
       TargetName does need to denote a valid child-class, except for Project instances
       which can be triggered by all classes.
 
-      The callback provides a dict with several key, value pairs (idea following the Traitlets concept).
-      Note that this dict also contains a reference to the Notifier object itself; this way it can be used
-      to pass-on additional implementation specific information to the callback function.
+      The callback provides a dict with several (key, value) pairs (idea following the Traitlets concept).
+      Note that this dict also contains a reference to the Notifier object itself.
 
     """
 
@@ -371,6 +376,7 @@ class Notifier(NotifierABC):
     # DELETE = 'delete'
     # RENAME = 'rename'
     # CHANGE = 'change'
+    # OBSERVE = 'observe'
     #
     # ANY = '<Any>'
 
@@ -570,7 +576,7 @@ class CurrentNotifier(NotifierABC):
     """
     Current-Notifier class:
 
-    triggers callback function with signature:  callback(callbackDict [, *args] [, **kwargs])
+    triggers callback function with signature:  callback(callbackDict [, **kwargs])
 
     ____________________________________________________________________________________________________________________
 
@@ -1025,6 +1031,11 @@ class NotifierBase(object):
         for notifier in objNotifiers.allNotifiers:
             notifier.unRegisterNotifier()
             del(notifier)
+
+    def _getRegisteredNotifiersBySetter(self, setterObject) -> list[NotifierABC]:
+        """:return a list of the registered notifier with ntf.setterObject == setterObject
+        """
+        return [_ntf for _ntf in self._registeredNotifiersDict.allNotifiers if _ntf.setterObject == setterObject]
 
     def _testCallback(self, callbackDict:dict, **kwds):
         """A method to test callbacks; print kwds, callbackDict

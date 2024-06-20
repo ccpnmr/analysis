@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-06-18 21:07:37 +0100 (Tue, June 18, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-20 14:34:04 +0100 (Thu, June 20, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1267,6 +1267,19 @@ class BlankedPartial(object):
                 self._obj._finaliseAction(self._trigger[0], **self._trigger[1])
             else:
                 self._obj._finaliseAction(self._trigger)
+
+    def __str__(self):
+
+        _func = self._func.func if isinstance(self._func, partial) else self._func
+        _func = str(_func)
+        for _text in ["<ccpn.core.lib.ContextManager",
+                      "<bound method ",
+                      "<function "
+                     ]:
+            if _func.startswith(_text):
+                _func = _func[len(_text):]
+
+        return f'{_func}, obj={self._obj}'
 
 
 def ccpNmrV3CoreSetter(doNotify=True, **actionKwds):

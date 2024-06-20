@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-31 18:51:37 +0100 (Fri, May 31, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-06-20 15:44:52 +0100 (Thu, June 20, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -501,7 +501,7 @@ class Gui(Ui):
 
             return newProject
 
-    def _loadProject(self, dataLoader) -> (Project, None):
+    def _loadProject(self, dataLoader=None, path=None) -> (Project, None):
         """Helper function, loading project from dataLoader instance
         check and query for closing current project
         build the project Gui elements
@@ -509,8 +509,14 @@ class Gui(Ui):
 
         :returns project instance or None
         """
+        from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
         from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
 
+        if dataLoader is None and path is not None:
+            dataLoader = checkPathForDataLoader(path)
+        if dataLoader is None:
+            getLogger().error('No suitable dataLoader found')
+            return None
         if not dataLoader.createNewProject:
             raise RuntimeError(f'DataLoader {dataLoader} does not create a new project')
 
@@ -584,7 +590,7 @@ class Gui(Ui):
         return newProject
 
     # @logCommand('application.') # eventually decorated by  _loadData()
-    def loadProject(self, path=None) -> (Project, None):
+    def loadProject(self, path=None) -> Project | None:
         """Loads project defined by path
         :return a Project instance or None
         """
@@ -701,7 +707,7 @@ class Gui(Ui):
         if self.project.readOnly and not MessageDialog.showYesNo(
                 'Save Project',
                 'The project is marked as read-only.\n'
-                'This can be changed by clicking the lock-icon in the botton-right.\n\n'
+                'This can be changed by clicking the lock-icon in the bottom-right.\n\n'
                 'Do you want to continue saving?\n',
                 ):
             return True

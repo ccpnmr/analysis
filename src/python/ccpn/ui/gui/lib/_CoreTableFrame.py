@@ -4,9 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-08 15:06:47 +0000 (Wed, March 08, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-06-20 16:42:21 +0100 (Thu, June 20, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,6 +30,7 @@ __date__ = "$Date: 2022-04-29 16:52:01 +0100 (Fri, April 29, 2022) $"
 import pandas as pd
 from collections import OrderedDict
 from PyQt5 import QtWidgets, QtCore
+from ccpn.framework.Application import getApplication
 from ccpn.core.lib.DataFrameObject import DataFrameObject
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.Spacer import Spacer
@@ -37,6 +39,9 @@ from ccpn.ui.gui.widgets.table._ProjectTable import _ProjectTableABC
 from ccpn.ui.gui.widgets.Font import getFontHeight
 from ccpn.util.Logging import getLogger
 
+
+_TABLES = 'tables'
+_HIDDENCOLUMNS = 'hiddenColumns'
 
 #=========================================================================================
 # _CoreTableWidgetABC
@@ -68,10 +73,28 @@ class _CoreTableWidgetABC(_ProjectTableABC):
                          **kwds)
 
         self.headerColumnMenu.setInternalColumns(self._internalColumns, update=False)
-        self.headerColumnMenu.setDefaultColumns(self.defaultHidden, update=False)
-
+        dHidden = self.defaultHidden
+        if (app := getApplication()):
+            try:
+                if (hCols := app.preferences[_TABLES][self.__class__.__name__][_HIDDENCOLUMNS]) is not None:
+                    dHidden = hCols
+                    getLogger().debug('Restoring default hidden-columns')
+            except:
+                getLogger().debug('No stored default hidden-columns')
+        self.headerColumnMenu.setDefaultColumns(dHidden, update=False)
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()
+
+    def setClassDefaultColumns(self, texts):
+        """set a list of default column-headers that are hidden when first shown.
+        """
+        if not (app := getApplication()):
+            getLogger().debug('Cannot store hidden-columns')
+            return
+        # store in preferences
+        tables = app.preferences.setdefault(_TABLES, {})
+        table = tables.setdefault(self.__class__.__name__, {})
+        table[_HIDDENCOLUMNS] = texts
 
     #=========================================================================================
     # Properties

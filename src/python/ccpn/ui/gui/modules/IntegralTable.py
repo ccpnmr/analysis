@@ -3,9 +3,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:05 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2024-06-20 16:42:22 +0100 (Thu, June 20, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,7 +33,7 @@ from ccpn.core.IntegralList import IntegralList
 from ccpn.core.Integral import Integral
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.CallBack import CallBack
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.modules.CcpnModule import CcpnTableModule
 from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.ui.gui.widgets.PulldownListsForObjects import IntegralListPulldown
 from ccpn.ui.gui.widgets.SettingsWidgets import ModuleSettingsWidget
@@ -46,16 +47,14 @@ ALL = '<all>'
 LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
 
 
-class IntegralTableModule(CcpnModule):
+class IntegralTableModule(CcpnTableModule):
     """This class implements the module by wrapping a integralTable instance
     """
+    className = 'IntegralTableModule'
     includeSettingsWidget = True
     maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
     settingsPosition = 'top'
-
     activePulldownClass = IntegralList
-
-    className = 'IntegralTableModule'
     _allowRename = True
 
     # we are subclassing this Module, hence some more arguments to the init
@@ -97,11 +96,11 @@ class IntegralTableModule(CcpnModule):
                                                   grid=(0, 0))
 
         # add the frame containing the pulldown and table
-        self._mainFrame = IntegralTableFrame(parent=mainWidget,
-                                             mainWindow=self.mainWindow,
-                                             moduleParent=self,
-                                             integralList=integralList, selectFirstItem=selectFirstItem,
-                                             grid=(0, 0))
+        self._mainFrame = _IntegralTableFrame(parent=mainWidget,
+                                              mainWindow=self.mainWindow,
+                                              moduleParent=self,
+                                              integralList=integralList, selectFirstItem=selectFirstItem,
+                                              grid=(0, 0))
 
     @property
     def tableFrame(self):
@@ -110,7 +109,7 @@ class IntegralTableModule(CcpnModule):
         return self._mainFrame
 
     @property
-    def tableWidget(self):
+    def _tableWidget(self):
         """Return the table widget in the table frame
         """
         return self._mainFrame._tableWidget
@@ -140,7 +139,8 @@ class IntegralTableModule(CcpnModule):
     def _closeModule(self):
         """CCPN-INTERNAL: used to close the module
         """
-        self.tableFrame._cleanupWidget()
+        if self.tableFrame:
+            self.tableFrame._cleanupWidget()
         if self.activePulldownClass and self._setCurrentPulldown:
             self._setCurrentPulldown.unRegister()
         super()._closeModule()
@@ -152,7 +152,6 @@ class IntegralTableModule(CcpnModule):
 class _NewIntegralTableWidget(_CoreTableWidgetABC):
     """Class to present an integralList Table
     """
-    className = 'IntegralTable'
     attributeName = 'integralLists'
 
     defaultHidden = ['Pid', 'Spectrum', 'IntegralList', 'Id']
@@ -337,7 +336,7 @@ class _NewIntegralTableWidget(_CoreTableWidgetABC):
 # IntegralTableFrame
 #=========================================================================================
 
-class IntegralTableFrame(_CoreTableFrameABC):
+class _IntegralTableFrame(_CoreTableFrameABC):
     """Frame containing the pulldown and the table widget
     """
     _TableKlass = _NewIntegralTableWidget

@@ -5,8 +5,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:26 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-06-06 18:27:50 +0100 (Thu, June 06, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1565,7 +1566,7 @@ class GuiSpectrumDisplay(CcpnModule):
             elif not objectsClicked:
                 # mark all nmrResidues.nmrAtoms to the window
                 for nmrResidue in nmrResidues:
-                    self._createNmrResidueMarks(nmrResidue)
+                    self._createNmrResidueMarks(nmrResidue, destStrip)
 
     def _handleSubstances(self, substances):
         # get the widget that is under the cursor, SHOULD be guiWidget
@@ -1646,29 +1647,32 @@ class GuiSpectrumDisplay(CcpnModule):
             elif not objectsClicked:
                 # mark all nmrResidues.nmrAtoms to the window
                 for nmrAtom in nmrAtoms:
-                    self._markNmrAtom(nmrAtom)
+                    self._markNmrAtom(nmrAtom, destStrip)
 
-    def _createNmrResidueMarks(self, nmrResidue):
+    def _createNmrResidueMarks(self, nmrResidue, destStrip):
         """
         Mark a list of nmrAtoms in the spectrum displays
         """
         # showInfo(title='Mark nmrResidue "%s"' % nmrResidue.pid, message='mark nmrResidue in strips')
 
-        from ccpn.AnalysisAssign.modules.BackboneAssignmentModule import nmrAtomsFromOffsets, markNmrAtoms
+        from ccpn.AnalysisAssign.modules.BackboneAssignmentModule import nmrAtomsFromOffsets
+        from ccpn.ui.gui.lib.StripLib import markNmrAtoms
 
+        guiStrip = destStrip.strip
         nmrAtoms = nmrAtomsFromOffsets(nmrResidue)
         if nmrAtoms:
-            markNmrAtoms(self.mainWindow, nmrAtoms)
+            markNmrAtoms(self.mainWindow, nmrAtoms, guiStrip)
 
-    def _markNmrAtom(self, nmrAtom):
+    def _markNmrAtom(self, nmrAtom, destStrip):
         """
         Mark an nmrAtom in the spectrum displays with horizontal/vertical bars
         """
         # showInfo(title='Mark nmrAtom "%s"' % nmrAtom.pid, message='mark nmrAtom in strips')
 
-        from ccpn.AnalysisAssign.modules.BackboneAssignmentModule import markNmrAtoms
+        from ccpn.ui.gui.lib.StripLib import markNmrAtoms
 
-        markNmrAtoms(self.mainWindow, [nmrAtom])
+        guiStrip = destStrip.strip
+        markNmrAtoms(self.mainWindow, [nmrAtom], guiStrip)
 
     def setScrollbarPolicies(self, horizontal='asNeeded', vertical='asNeeded'):
         """Set the scrollbar policies; convenience to expose to the user

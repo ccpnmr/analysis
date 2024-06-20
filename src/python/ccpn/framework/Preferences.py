@@ -5,8 +5,9 @@ This file contains the Preference object and related methods;
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-10 19:01:38 +0100 (Fri, May 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-20 16:42:21 +0100 (Thu, June 20, 2024) $"
 __version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
@@ -135,7 +136,14 @@ class Preferences(AttrDict):
             if isinstance(tab := self[dd], (AttrDict, dict)):
                 for key, value in tab.items():
                     # set to new value if not default
-                    if value != _defPrefs[dd][key]:
+                    try:
+                        if value != _defPrefs[dd][key]:
+                            diffDict.setdefault(dd, {})
+                            diffDict[dd][key] = value
+                    except KeyError:
+                        # store the key in the output
+                        #   these will be discarded on loading preferences until
+                        #   keys are defined in defaultv3settings (but not required now)
                         diffDict.setdefault(dd, {})
                         diffDict[dd][key] = value
 

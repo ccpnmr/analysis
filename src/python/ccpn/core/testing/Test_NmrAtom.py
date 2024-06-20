@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-30 13:47:13 +0100 (Thu, May 30, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-19 11:13:56 +0100 (Wed, June 19, 2024) $"
 __version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
@@ -84,6 +84,25 @@ class NmrAtomTest(WrapperTesting):
         self.assertEqual(atomCX.pid, 'NA:A.888.ILE.CZ')
         self.undo.redo()
         self.assertEqual(atomCX.pid, 'NA:A.888.ILE.Co')
+
+    def test_newNmrAtom(self):
+        nc = self.project.newNmrChain(shortName='X')
+        self.assertEqual(nc.pid, 'NC:X')
+
+        nr = nc.newNmrResidue(sequenceCode='101', residueType='VAL')
+        self.assertEqual(nr.pid, 'NR:X.101.VAL')
+        at1 = nr.newNmrAtom(name='N')
+        self.assertEqual(at1.pid, 'NA:X.101.VAL.N')
+        at2 = nr.newNmrAtom(name='N')
+        self.assertEqual(at2.pid, 'NA:X.101.VAL.N_1')  # creates unique name
+
+        # names are unique per nmrResidue
+        nr = nc.newNmrResidue(sequenceCode='102', residueType='VAL')
+        self.assertEqual(nr.pid, 'NR:X.102.VAL')
+        at1 = nr.newNmrAtom(name='N')
+        self.assertEqual(at1.pid, 'NA:X.102.VAL.N')
+        at2 = nr.newNmrAtom(name='N')
+        self.assertEqual(at2.pid, 'NA:X.102.VAL.N_1')  # creates unique name
 
     def test_newNmrAtomReassign(self):
         nc = self.project.newNmrChain(shortName='X')

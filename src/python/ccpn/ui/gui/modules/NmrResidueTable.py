@@ -23,8 +23,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-06 21:20:47 +0100 (Thu, June 06, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-06-20 16:42:22 +0100 (Thu, June 20, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -44,8 +44,8 @@ from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
 from ccpn.ui.gui.widgets.MessageDialog import showWarning, showYesNo
 from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.lib.StripLib import navigateToNmrResidueInDisplay, navigateToNmrAtomsInStrip
+from ccpn.ui.gui.modules.CcpnModule import CcpnTableModule
+from ccpn.ui.gui.lib.StripLib import navigateToNmrResidueInDisplay, navigateToNmrAtomsInStrip, markNmrAtoms
 from ccpn.ui.gui.lib._CoreTableFrame import _CoreTableWidgetABC, _CoreTableFrameABC
 from ccpn.util.Logging import getLogger
 
@@ -64,9 +64,10 @@ _INTO = 'into'
 # NmrResidueTableModule
 #=========================================================================================
 
-class NmrResidueTableModule(CcpnModule):
+class NmrResidueTableModule(CcpnTableModule):
     """This class implements the module by wrapping a NmrResidueTable instance
     """
+    className = 'NmrResidueTableModule'
     includeSettingsWidget = True
     maxSettingsState = 2
     settingsPosition = 'left'
@@ -78,7 +79,6 @@ class NmrResidueTableModule(CcpnModule):
     activePulldownClass = NmrChain
     activePulldownInitialState = False
 
-    className = 'NmrResidueTableModule'
     _allowRename = True
 
     # we are subclassing this Module, hence some more arguments to the init
@@ -132,7 +132,7 @@ class NmrResidueTableModule(CcpnModule):
         return self._mainFrame
 
     @property
-    def tableWidget(self):
+    def _tableWidget(self):
         """Return the table widget in the table frame
         """
         return self._mainFrame._tableWidget
@@ -160,11 +160,13 @@ class NmrResidueTableModule(CcpnModule):
         self._mainFrame.selectTable(table)
 
     def _closeModule(self):
-        if self.nmrResidueTableSettings:
-            self.nmrResidueTableSettings._cleanupWidget()
-        if self.activePulldownClass and self._setCurrentPulldown:
-            self._setCurrentPulldown.unRegister()
-        self.tableFrame._cleanupWidget()
+        if self.activePulldownClass:
+            if self._setCurrentPulldown:
+                self._setCurrentPulldown.unRegister()
+            if self.nmrResidueTableSettings:
+                self.nmrResidueTableSettings._cleanupWidget()
+        if self.tableFrame:
+            self.tableFrame._cleanupWidget()
         super()._closeModule()
 
 
@@ -179,8 +181,7 @@ Deltas = 'Ddelta'
 class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
     """Class to present a nmrResidue Table
     """
-
-    className = 'NmrResidueTable'
+    className = '_NewNmrResidueTableWidget'
     attributeName = 'nmrChains'
 
     defaultHidden = ['Pid', 'NmrChain']
@@ -371,7 +372,6 @@ class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
             currentNmrResidue = data.get(DATAFRAME_OBJECT)
 
             if currentNmrResidue:
-                from ccpn.AnalysisAssign.modules.BackboneAssignmentModule import markNmrAtoms
 
                 # optionally clear the marks
                 # if self.moduleParent.nmrResidueTableSettings.autoClearMarksWidget.checkBox.isChecked():
@@ -594,6 +594,7 @@ class NmrResidueTableFrame(_CoreTableFrameABC):
 class _NewCSMNmrResidueTableWidget(_NewNmrResidueTableWidget):
     """Custom nmrResidue Table with extra columns used in the ChemicalShiftsMapping Module
     """
+    className = '_NewCSMNmrResidueTableWidget'
 
     def setCheckBoxCallback(self, checkBoxCallback):
         # enable callback on the checkboxes

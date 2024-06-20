@@ -6,8 +6,9 @@ modified by Geerten 1-12/12/2016
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -16,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-17 13:15:08 +0100 (Fri, May 17, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-06-20 16:42:22 +0100 (Thu, June 20, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -174,7 +175,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
                       OR __init__ with closeFunc=<your close function>
     """
-    className = ''  # used for restoring GUI layouts
+    className = None  # used for restoring GUI layouts
     shortClassName = PidShortClassName  # used to create the pid
     longClassName = PidLongClassName  # used to create the long pid
     HORIZONTAL = 'horizontal'
@@ -204,13 +205,14 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self.maximised = False
         self.maximiseRestoreState = None
         self._defaultName = name
+        if self.className is None:
+            # get the class-name from the class
+            self.className = self.__class__.__name__
 
         self.area = None
         self.mainWindow = mainWindow
-
         if self.mainWindow is not None:
             self.area = mainWindow.moduleArea
-
         super().__init__(name=name, area=self.area,
                          autoOrientation=False,
                          closable=closable)
@@ -1592,3 +1594,89 @@ class BorderOverlay(QtWidgets.QWidget):
         p.setPen(QtGui.QPen(self._borderColour, 1))
         p.drawRoundedRect(rgn, 2, 2)
         p.end()
+
+
+#=========================================================================================
+# CcpnTableModule
+#=========================================================================================
+
+class CcpnTableModule(CcpnModule):
+    def __init__(self, mainWindow, name, *args, **kwds):
+        super().__init__(mainWindow=mainWindow, name=name, *args, **kwds)
+
+    @CcpnModule.widgetsState.getter
+    def widgetsState(self):
+        """Add extra parameters to the state-dict for hidden-columns.
+        """
+        state = super().widgetsState
+        if self._hiddenColumns is not None:
+            state |= {'_hiddenColumns': self._hiddenColumns}
+        return state
+
+    @property
+    def _hiddenColumns(self) -> list[str] | None:
+        """Return the hidden-columns for the primary table-widget.
+        If undefined, returns None.
+        """
+        with contextlib.suppress(Exception):
+            return self._tableWidget.headerColumnMenu.hiddenColumns
+
+    def _setHiddenColumns(self, value: list[str] | None = None):
+        """Set the hidden-columns for the primary table-widget.
+        """
+        if value is not None:
+            if not isinstance(value, list):
+                raise TypeError(f'{self.__class__.__name__}.hiddenColumns must be list[str] of None')
+        self._tableWidget.headerColumnMenu.hiddenColumns = value
+
+    def _setClassDefaultHidden(self, hiddenColumns: list[str] | None):
+        """Copy the hidden-columns to the class; to be set when the next table is opened.
+        """
+        self._tableWidget.setClassDefaultColumns(hiddenColumns)
+
+    def _saveColumns(self, hiddenColumns: list[str] | None = None):
+        """Allows hiddenColumns to be saved to widgetState
+
+        Specifically saves to _seenModuleStates dict.
+        Normally called by the closeModule method.
+
+        :param list|None hiddenColumns: list of columns to save as hidden,
+         if blank then will automatically try to use
+         self._tableWidget.headerColumnMenu.hiddenColumns to find values
+        """
+        wState = self.widgetsState  # local state-dict
+        if hiddenColumns is not None:
+            # append hidden-column list
+            wState['_hiddenColumns'] = hiddenColumns
+        else:
+            try:
+                wState['_hiddenColumns'] = self._hiddenColumns
+                self._setClassDefaultHidden(self._hiddenColumns)
+            except Exception as es:
+                getLogger().debug(f'Table Columns for {self.moduleName} unsaved: {es}')
+
+    def _restoreColumns(self, hiddenColumns: list[str] | None):
+        """Restore the hidden columns from the widgetState dict.
+        """
+        try:
+            self._setHiddenColumns(hiddenColumns)
+        except AssertionError as es:
+            getLogger().debug(f'Could not restore table columns: {es}')
+
+    def restoreWidgetsState(self, **widgetsState):
+        """Subclassed version for tables
+        """
+        super().restoreWidgetsState(**widgetsState)
+        try:
+            if (hColumns := widgetsState.get('_hiddenColumns', None)) is not None:
+                self._restoreColumns(hColumns)
+        except Exception as es:
+            print(es)
+
+    def _closeModule(self):
+        """
+        CCPN-INTERNAL: used to close the module
+        """
+        self._saveColumns()
+        super()._closeModule()
+

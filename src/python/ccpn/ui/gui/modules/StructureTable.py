@@ -4,9 +4,10 @@ This file contains StructureTableModule and StructureTable classes
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:06 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2024-06-20 16:42:22 +0100 (Thu, June 20, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -33,7 +34,7 @@ from ccpn.core.StructureEnsemble import StructureEnsemble as KlassTable
 from ccpn.core.DataTable import DataTable
 from ccpn.core.lib.DataFrameObject import DataFrameObject
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.modules.CcpnModule import CcpnTableModule
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.PulldownListsForObjects import StructureEnsemblePulldown as KlassPulldown
 from ccpn.ui.gui.widgets.Column import ColumnClass
@@ -46,16 +47,14 @@ ALL = '<all>'
 LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
 
 
-class StructureTableModule(CcpnModule):
+class StructureTableModule(CcpnTableModule):
     """This class implements the module by wrapping a StructureTable instance
     """
+    className = 'StructureTableModule'
     includeSettingsWidget = True
     maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
     settingsPosition = 'top'
-
     activePulldownClass = KlassTable
-
-    className = 'StructureTableModule'
     _allowRename = True
 
     # we are subclassing this Module, hence some more arguments to the init
@@ -110,7 +109,7 @@ class StructureTableModule(CcpnModule):
         return self._mainFrame
 
     @property
-    def tableWidget(self):
+    def _tableWidget(self):
         """Return the table widget in the table frame
         """
         return self._mainFrame._tableWidget
@@ -144,7 +143,8 @@ class StructureTableModule(CcpnModule):
                 self._setCurrentPulldown.unRegister()
             if self._settings:
                 self._settings._cleanupWidget()
-        self.tableFrame._cleanupWidget()
+        if self.tableFrame:
+            self.tableFrame._cleanupWidget()
         super()._closeModule()
 
 

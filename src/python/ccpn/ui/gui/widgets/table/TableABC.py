@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-07 19:27:14 +0100 (Fri, June 07, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-06-20 16:42:23 +0100 (Thu, June 20, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -65,6 +65,7 @@ class TableABC(QtWidgets.QTableView):
     """
     tableChanged = QtCore.pyqtSignal()
     sortingChanged = QtCore.pyqtSignal(dict)
+    className = None
 
     styleSheet = """QTableView {
                         background-color: %(GUITABLE_BACKGROUND)s;
@@ -94,9 +95,7 @@ class TableABC(QtWidgets.QTableView):
     # QTableView::item - color: %(GUITABLE_ITEM_FOREGROUND)s;
     # QTableView::item:selected - color: %(GUITABLE_SELECTED_FOREGROUND)s;
     # cell uses alternate-background-role for unselected-focused cell
-
     _tableMenuOptions = None
-
     searchMenu = None
     copyCellMenu = None
     deleteMenu = None
@@ -172,6 +171,8 @@ class TableABC(QtWidgets.QTableView):
 
         parameters that are NOTHING can be set on the subclass, these are ignored in the parameter-list
         """
+        if self.className is None:
+            self.className = self.__class__.__name__
         super().__init__(parent)
         self._parent = parent
         if df is None:

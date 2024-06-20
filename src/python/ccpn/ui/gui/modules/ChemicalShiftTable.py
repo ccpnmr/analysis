@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-06 21:20:47 +0100 (Thu, June 06, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-06-20 16:42:22 +0100 (Thu, June 20, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -44,7 +44,8 @@ from ccpn.core.ChemicalShiftList import (CS_UNIQUEID, CS_ISDELETED, CS_PID, CS_S
                                          CS_ALLPEAKSCOUNT, CS_COMMENT, CS_OBJECT, CS_TABLECOLUMNS, ChemicalShiftState)
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.DataFrameObject import DataFrameObject, DATAFRAME_OBJECT
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.framework.Application import getApplication
+from ccpn.ui.gui.modules.CcpnModule import CcpnTableModule
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.PulldownListsForObjects import ChemicalShiftListPulldown
@@ -54,7 +55,7 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.MessageDialog import showYesNo, showWarning
 from ccpn.ui.gui.widgets.SettingsWidgets import ALL
 from ccpn.ui.gui.widgets.Column import COLUMN_COLDEFS, COLUMN_SETEDITVALUE, COLUMN_FORMAT
-from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip
+from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, markNmrAtoms
 from ccpn.ui.gui.widgets.table._ProjectTable import _ProjectTableABC
 from ccpn.util.Logging import getLogger
 
@@ -79,16 +80,14 @@ _INTO_CSL = 'into'
 # ChemicalShiftTableModule
 #=========================================================================================
 
-class ChemicalShiftTableModule(CcpnModule):
+class ChemicalShiftTableModule(CcpnTableModule):
     """This class implements the module by wrapping a ChemicalShift instance
     """
+    className = 'ChemicalShiftTableModule'
     includeSettingsWidget = True
     maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
     settingsPosition = 'left'
-
-    className = 'ChemicalShiftTableModule'
     _allowRename = True
-
     activePulldownClass = None  # e.g., can make the table respond to current peakList
 
     def __init__(self, mainWindow=None, name='Chemical Shift Table',
@@ -197,8 +196,10 @@ class ChemicalShiftTableModule(CcpnModule):
     def _closeModule(self):
         """CCPN-INTERNAL: used to close the module
         """
-        self._modulePulldown.unRegister()
-        self._tableWidget._close()
+        if self._modulePulldown:
+            self._modulePulldown.unRegister()
+        if self._tableWidget:
+            self._tableWidget._close()
         super()._closeModule()
 
 
@@ -212,6 +213,8 @@ blankId = SimpleNamespace(className='notDefined', serial=0)
 OBJECT_CLASS = 0
 OBJECT_PARENT = 1
 MODULEIDS = {}
+_TABLES = 'tables'
+_HIDDENCOLUMNS = 'hiddenColumns'
 
 
 class _NewChemicalShiftTable(_ProjectTableABC):
@@ -306,12 +309,31 @@ class _NewChemicalShiftTable(_ProjectTableABC):
                          **kwds
                          )
 
-        self.headerColumnMenu.setInternalColumns([self.columnHeaders[col] for col in self._internalColumns],
-                                                 update=False)
-        self.headerColumnMenu.setDefaultColumns([self.columnHeaders[col] for col in self.defaultHidden], update=False)
-
+        self.headerColumnMenu.setInternalColumns([self.columnHeaders[col] for col in self._internalColumns], update=False)
+        dHidden = self.defaultHidden
+        if (app := getApplication()):
+            try:
+                if (hCols := app.preferences[_TABLES][self.__class__.__name__][_HIDDENCOLUMNS]) is not None:
+                    dHidden = hCols
+                    getLogger().debug('Restoring default hidden-columns')
+            except:
+                getLogger().debug('No stored default hidden-columns')
+        self.headerColumnMenu.setDefaultColumns([self.columnHeaders[col] for col in dHidden], update=False)
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()
+
+    def setClassDefaultColumns(self, texts):
+        """set a list of default column-headers that are hidden when first shown.
+        """
+        if not (app := getApplication()):
+            getLogger().debug('Cannot store hidden-columns')
+            return
+        # store in preferences
+        tables = app.preferences.setdefault(_TABLES, {})
+        table = tables.setdefault(self.__class__.__name__, {})
+        # remember chemical-shift column mapping
+        table[_HIDDENCOLUMNS] = ([k for tt in texts for k, v in self.columnHeaders.items() if tt == v]
+                                if texts is not None else None)
 
     #=========================================================================================
     # Widget callbacks
@@ -334,7 +356,6 @@ class _NewChemicalShiftTable(_ProjectTableABC):
     def actionCallback(self, selection, lastItem):
         """Notifier DoubleClick action on item in table. Mark a chemicalShift based on attached nmrAtom
         """
-        from ccpn.AnalysisAssign.modules.BackboneAssignmentModule import markNmrAtoms
 
         try:
             if not (objs := list(lastItem[self._OBJECT])):

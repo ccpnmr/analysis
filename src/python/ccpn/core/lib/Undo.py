@@ -18,9 +18,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:48 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-06-20 14:34:05 +0100 (Thu, June 20, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -741,3 +741,36 @@ class Undo(deque):
                 _log(f'   {res}')
                 for sh in res.sortedShifts():
                     _log(f'       {sh}')
+
+    def print(self):
+        """Print self in somewhat readible form (!?)
+        """
+        from ccpn.util.Common import reduceText
+        print(f'==== {self.__class__.__name__}; len={len(self)} ====\n')
+
+        _textLen = 60
+        indx = -1
+        for indx, item in enumerate(self):
+
+            _funcs = []
+            for _func in item:
+                if isinstance(_func, partial):
+                    _func = _func.func
+
+                _func = str(_func)
+
+                # strip some not-useful text
+                for _text in ["<ccpn.core.lib.ContextManager",
+                              "<bound method ",
+                             ]:
+                    if _func.startswith(_text):
+                        _func = _func[len(_text):]
+
+                _funcs.append(_func)
+
+            print(f'{indx:4} : {reduceText(_funcs[0], _textLen)}   {reduceText(_funcs[1], _textLen)}')
+
+        indx += 1
+        print(f'{indx:4} : END_OF_STACK')
+
+

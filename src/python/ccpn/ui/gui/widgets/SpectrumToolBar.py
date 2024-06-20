@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-26 17:27:53 +0100 (Fri, April 26, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-06-14 13:40:58 +0100 (Fri, June 14, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -299,7 +299,7 @@ class SpectrumToolBar(ToolBar):
     def _jumpOnSideBar(self, button):
         spectrum = self.widget.project.getByPid(button.actions()[0].objectName())
         if spectrum:
-            sideBar = self.widget.application.ui.mainWindow.sideBar
+            sideBar = self.widget.application.ui.mainWindow._getSideBar()
             sideBar.selectPid(spectrum.pid)
 
     def _showSpectrumProperties(self, button):

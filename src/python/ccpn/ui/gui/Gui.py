@@ -18,6 +18,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
 __dateModified__ = "$dateModified: 2024-05-31 18:51:37 +0100 (Fri, May 31, 2024) $"
 __version__ = "$Revision: 3.2.2.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-06-14 13:40:58 +0100 (Fri, June 14, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -476,7 +479,8 @@ class Gui(Ui, _Gui):
     def _setupMainWindow(self):
         """Set up mainWindow
         """
-        self.mainWindow.sideBar.buildTree(self.project, clear=True)
+        _sideBar = self.mainWindow._getSideBar()
+        _sideBar.buildTree(self.project, clear=True)
         # self.mainWindow._updateRestoreArchiveMenu()
         self.mainWindow.namespace['current'] = self.application.current
 
@@ -889,8 +893,9 @@ class Gui(Ui, _Gui):
             self.mainWindow._closeMainWindowModules()
             self.mainWindow._closeExtraWindowModules()
             self.mainWindow._stopPythonConsole()
-            self.mainWindow.sideBar.clearSideBar()
-            self.mainWindow.sideBar.deleteLater()
+            _sideBar = self.mainWindow._getSideBar()
+            _sideBar.clearSideBar()
+            _sideBar.deleteLater()
             self.mainWindow.deleteLater()
             self._mainWindow = None
 

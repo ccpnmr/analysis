@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:53 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-06-14 15:52:42 +0100 (Fri, June 14, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -106,6 +106,12 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
 
         # error-flag to disable exec_ if there is an error during initialising
         self.errorFlag = False
+
+        # V4 compatibility
+        if parent is not None:
+            if not isinstance(parent, QtWidgets.QWidget):
+                if hasattr(parent, '_widget'):
+                    parent = parent._widget
 
         super().__init__(parent)
         Base._init(self, setLayout=setLayout, **kwds)
@@ -782,12 +788,11 @@ def handleDialogApply(self):
         cleanUndo = False
 
 
+    error = errorContent()
     try:
         # add an undoBlockWithoutSideBar
         with undoBlockWithoutSideBar():
-
             # transfer control to the calling function
-            error = errorContent()
             yield error
 
     except Exception as es:

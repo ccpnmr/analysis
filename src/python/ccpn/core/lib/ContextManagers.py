@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-22 15:20:30 +0100 (Wed, May 22, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-06-20 14:34:04 +0100 (Thu, June 20, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -42,6 +42,7 @@ from contextlib import contextmanager, nullcontext, suppress
 from collections.abc import Iterable
 
 from ccpn.core.lib import Util as coreUtil
+from ccpn.core.lib.Notifiers import Notifier
 from ccpn.util.Logging import getLogger
 from ccpn.framework.Application import getApplication
 
@@ -143,7 +144,7 @@ def undoBlockWithSideBar(application=None, debugText=''):
     undo.increaseWaypointBlocking()
 
     if application.ui and application.ui.mainWindow:
-        sidebar = application.ui.mainWindow.sideBar
+        sidebar = application.ui.mainWindow._getSideBar()
         sidebar.increaseSidebarBlocking(withSideBarUpdate=True)
 
     application.project.suspendNotification()
@@ -156,7 +157,7 @@ def undoBlockWithSideBar(application=None, debugText=''):
         _resumeNotification(application)
 
         if application.ui and application.ui.mainWindow:
-            sidebar = application.ui.mainWindow.sideBar
+            sidebar = application.ui.mainWindow._getSideBar()
             sidebar.decreaseSidebarBlocking(withSideBarUpdate=True)
 
         if undo is not None:
@@ -186,7 +187,7 @@ def undoBlockWithoutSideBar(application=None, debugText=''):
     undo.increaseWaypointBlocking()
 
     if application.ui and application.ui.mainWindow:
-        sidebar = application.ui.mainWindow.sideBar
+        sidebar = application.ui.mainWindow._getSideBar()
         sidebar.increaseSidebarBlocking(withSideBarUpdate=False)
 
     application.project.suspendNotification()
@@ -199,7 +200,7 @@ def undoBlockWithoutSideBar(application=None, debugText=''):
         _resumeNotification(application)
 
         if application.ui and application.ui.mainWindow:
-            sidebar = application.ui.mainWindow.sideBar
+            sidebar = application.ui.mainWindow._getSideBar()
             sidebar.decreaseSidebarBlocking(withSideBarUpdate=False)
 
         if undo is not None:
@@ -258,7 +259,7 @@ def rebuildSidebar(application):
         raise RuntimeError('Error getting application')
 
     if application.hasGui:
-        sidebar = application.mainWindow.sideBar
+        sidebar = application.mainWindow._getSideBar()
         sidebar.increaseSidebarBlocking(withSideBarUpdate=True)
         sidebar.clearSideBar()
     else:
@@ -291,7 +292,7 @@ def sidebarBlocking(application=None, blockSidebarOnly=False):
         raise RuntimeError('Error getting application')
 
     if application.ui and application.ui.mainWindow:
-        sidebar = application.ui.mainWindow.sideBar
+        sidebar = application.ui.mainWindow._getSideBar()
         sidebar.increaseSidebarBlocking()
 
     try:
@@ -309,7 +310,7 @@ def sidebarBlocking(application=None, blockSidebarOnly=False):
     finally:
         # clean up after suspending sidebar updates
         if application.ui and application.ui.mainWindow:
-            sidebar = application.ui.mainWindow.sideBar
+            sidebar = application.ui.mainWindow._getSideBar()
             sidebar.decreaseSidebarBlocking()
 
 
@@ -1286,6 +1287,19 @@ class BlankedPartial(object):
             else:
                 self._obj._finaliseAction(self._trigger)
 
+    def __str__(self):
+
+        _func = self._func.func if isinstance(self._func, partial) else self._func
+        _func = str(_func)
+        for _text in ["<ccpn.core.lib.ContextManager",
+                      "<bound method ",
+                      "<function "
+                     ]:
+            if _func.startswith(_text):
+                _func = _func[len(_text):]
+
+        return f'{_func}, obj={self._obj}'
+
 
 def ccpNmrV3CoreSetter(doNotify=True, **actionKwds):
     """A decorator wrap the property setters method in an undo block and triggering the
@@ -1295,13 +1309,14 @@ def ccpNmrV3CoreSetter(doNotify=True, **actionKwds):
     @decorator.decorator
     def theDecorator(*args, **kwds):
         func = args[0]
+        attributeName = func.__name__
         args = args[1:]  # Optional 'self' is now args[0]
         self = args[0]  # this is the object
-        # value = args[1]
+        value = args[1]
 
         application = getApplication()  # pass it in to reduce overhead
 
-        oldValue = getattr(self, func.__name__)
+        oldValue = getattr(self, attributeName)
 
         with notificationBlanking(application=application):
             with undoStackBlocking(application=application) as addUndoItem:
@@ -1314,10 +1329,10 @@ def ccpNmrV3CoreSetter(doNotify=True, **actionKwds):
 
                 finally:
                     addUndoItem(undo=BlankedPartial(func, self, ('change', actionKwds), False, self, oldValue),
-                                redo=BlankedPartial(func, self, ('change', actionKwds), False, self, args[1]))
+                                redo=BlankedPartial(func, self, ('change', actionKwds), False, self, value))
 
         if doNotify:
-            self._finaliseAction('change', **actionKwds)
+            self._finaliseAction(Notifier.CHANGE, **actionKwds)
 
         return result
 

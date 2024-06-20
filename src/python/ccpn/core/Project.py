@@ -1217,7 +1217,7 @@ class Project(AbstractWrapperObject):
         # Set up notifiers
         self._registerPresetApiNotifiers()
 
-        # undo
+        # undo; also adds the undo stack to _wrappedData._root._undo
         self._resetUndo(debug=debugLevel <= Logging.DEBUG2, application=application)
 
         self._mainWindow = None  # set by MainWindow.__init__()

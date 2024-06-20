@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-29 15:35:15 +0100 (Wed, May 29, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-06-14 15:52:42 +0100 (Fri, June 14, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -263,7 +263,7 @@ class Framework(NotifierBase):
         # Resources
         sys.stderr.write('==> Loading resources... ')
         self.resources = None
-        self.resources = Resources(self)
+        # self.resources = Resources(self)
         sys.stderr.write('Done!\n')
 
         # get a user interface; nb. ui.start() is called by the application
@@ -1625,14 +1625,15 @@ class Framework(NotifierBase):
     def undo(self):
         from ccpn.core.lib.ContextManagers import busyHandler
 
-        if self.project._undo.canUndo():
-            if not self.project._undo.locked:
+        _undo = self._getUndo()
+        if _undo.canUndo():
+            if not _undo.locked:
                 with busyHandler(title='Busy', text='Undo...', autoClose=False, closeDelay=1000,
                                  raiseErrors=True) as progress:
                     # set extra progress-dialog settings here
                     progress.checkCancelled()  # will raise ProgressCancelled exception if pressed
                     progress.setValue(0)  # update the progress-bar if matches step-size
-                    self.project._undo.undo()
+                    _undo.undo()
         else:
             getLogger().warning('nothing to undo')
 
@@ -1640,14 +1641,15 @@ class Framework(NotifierBase):
     def redo(self):
         from ccpn.core.lib.ContextManagers import busyHandler
 
-        if self.project._undo.canRedo():
-            if not self.project._undo.locked:
+        _undo = self._getUndo()
+        if _undo.canRedo():
+            if not _undo.locked:
                 with busyHandler(title='Busy', text='Redo...', autoClose=False, closeDelay=1000,
                                  raiseErrors=True) as progress:
                     # set extra progress-dialog settings here
                     progress.checkCancelled()  # will raise ProgressCancelled exception if pressed
                     progress.setValue(0)  # update the progress-bar if matches step-size
-                    self.project._undo.redo()
+                    _undo.redo()
         else:
             getLogger().warning('nothing to redo.')
 

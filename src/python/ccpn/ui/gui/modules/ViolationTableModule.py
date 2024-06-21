@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-20 16:42:22 +0100 (Thu, June 20, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-06-21 19:48:44 +0100 (Fri, June 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -280,16 +280,16 @@ class ViolationTableModule(CcpnTableModule):
         """Notifier Callback for selecting restraintTable from the pull down menu
         """
         try:
+            if not self._table:
+                return
             with undoBlockWithoutSideBar():
                 self._table._restraintTableLink = item
-
+            _df = pd.DataFrame({'name'     : self._table.metadata.keys(),
+                                'parameter': self._table.metadata.values()})
+            self._metadata.updateDf(_df, resize=True, setOnHeaderOnly=True)
         except Exception as es:
             # need to immediately set back to stop error on loseFocus which also fires editingFinished
             showWarning('Violation Table', str(es))
-
-        _df = pd.DataFrame({'name'     : self._table.metadata.keys(),
-                            'parameter': self._table.metadata.values()})
-        self._metadata.updateDf(_df, resize=True, setOnHeaderOnly=True)
 
     def _update(self):
         """Update the table
@@ -317,6 +317,7 @@ class ViolationTableModule(CcpnTableModule):
         _df = pd.DataFrame({'name'     : self._table.metadata.keys(),
                             'parameter': self._table.metadata.values()})
         self._metadata.updateDf(_df, resize=True, setOnHeaderOnly=True)
+        self._tableWidget.postUpdateDf()  # populateTable is skipped
 
     def _updateEmptyTable(self):
         """Update with an empty table
@@ -328,6 +329,7 @@ class ViolationTableModule(CcpnTableModule):
         _df = pd.DataFrame({'name'     : [],
                             'parameter': []})
         self._metadata.updateDf(_df, resize=True, setOnHeaderOnly=True)
+        self._tableWidget.postUpdateDf()  # populateEmptyTable is skipped
 
     def _applyComment(self):
         """Set the values in the violationTable
@@ -417,7 +419,6 @@ class _ViolationTableWidget(Table):
 
     defaultHidden = []
     _internalColumns = []
-    _hiddenColumns = []
 
     _defaultEditable = False
     _enableCopyCell = True
@@ -444,7 +445,6 @@ class _ViolationTableWidget(Table):
         self._initTableCommonWidgets(parent, **kwds)
 
         # initialise the currently attached dataFrame
-        self._hiddenColumns = []
         self.dataFrameObject = None
 
         # initialise the table
@@ -454,20 +454,18 @@ class _ViolationTableWidget(Table):
 
         self.moduleParent = moduleParent
 
-        dHidden = self.defaultHidden
-        if (app := getApplication()):
-            try:
-                if (hCols := app.preferences[_TABLES][self.__class__.__name__][_HIDDENCOLUMNS]) is not None:
-                    dHidden = hCols
-                    getLogger().debug('Restoring default hidden-columns')
-            except:
-                getLogger().debug('No stored default hidden-columns')
-        self.headerColumnMenu.setDefaultColumns(dHidden, update=False)
+        self.headerColumnMenu.setInternalColumns(self._internalColumns)
+        self.headerColumnMenu.setDefaultColumns(self.defaultHidden)
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()
 
         # may refactor the remaining modules so this isn't needed
         self._widgetScrollArea.setFixedHeight(self._widgetScrollArea.sizeHint().height())
+
+    def setClassDefaultColumns(self, texts):
+        """set a list of default column-headers that are hidden when first shown.
+        """
+        self.headerColumnMenu.saveColumns(texts)
 
     #=========================================================================================
     # Selection/action callbacks
@@ -540,17 +538,6 @@ class _ViolationTableWidget(Table):
         """Set self to current.guiTable"""
         if self.current is not None:
             self.current.guiTable = self
-
-    def setClassDefaultColumns(self, texts):
-        """set a list of default column-headers that are hidden when first shown.
-        """
-        if not (app := getApplication()):
-            getLogger().debug('Cannot store hidden-columns')
-            return
-        # store in preferences
-        tables = app.preferences.setdefault(_TABLES, {})
-        table = tables.setdefault(self.__class__.__name__, {})
-        table[_HIDDENCOLUMNS] = texts
 
 
 #=========================================================================================

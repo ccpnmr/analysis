@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-20 16:54:00 +0100 (Thu, June 20, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-06-21 19:48:44 +0100 (Fri, June 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -309,31 +309,15 @@ class _NewChemicalShiftTable(_ProjectTableABC):
                          **kwds
                          )
 
-        self.headerColumnMenu.setInternalColumns([self.columnHeaders[col] for col in self._internalColumns], update=False)
-        dHidden = self.defaultHidden
-        if (app := getApplication()):
-            try:
-                if (hCols := app.preferences[_TABLES][self.__class__.__name__][_HIDDENCOLUMNS]) is not None:
-                    dHidden = hCols
-                    getLogger().debug('Restoring default hidden-columns')
-            except:
-                getLogger().debug('No stored default hidden-columns')
-        self.headerColumnMenu.setDefaultColumns([self.columnHeaders[col] for col in dHidden], update=False)
+        self.headerColumnMenu.setInternalColumns([self.columnHeaders[col] for col in self._internalColumns])
+        self.headerColumnMenu.setDefaultColumns([self.columnHeaders[col] for col in self.defaultHidden])
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()
 
     def setClassDefaultColumns(self, texts):
-        """set a list of default column-headers that are hidden when first shown.
+        """Set a list of default column-headers that are hidden when first shown.
         """
-        if not (app := getApplication()):
-            getLogger().debug('Cannot store hidden-columns')
-            return
-        # store in preferences
-        tables = app.preferences.setdefault(_TABLES, {})
-        table = tables.setdefault(self.__class__.__name__, {})
-        # remember chemical-shift column mapping
-        table[_HIDDENCOLUMNS] = ([k for tt in texts for k, v in self.columnHeaders.items() if tt == v]
-                                if texts is not None else None)
+        self.headerColumnMenu.saveColumns(texts)
 
     #=========================================================================================
     # Widget callbacks

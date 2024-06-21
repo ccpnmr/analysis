@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-20 16:42:21 +0100 (Thu, June 20, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-06-21 19:48:43 +0100 (Fri, June 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -72,29 +72,15 @@ class _CoreMITableWidgetABC(_MIProjectTableABC):
                          setLayout=True,
                          **kwds)
 
-        self.headerColumnMenu.setInternalColumns(self._internalColumns, False)
-        dHidden = self.defaultHidden
-        if (app := getApplication()):
-            try:
-                if (hCols := app.preferences[_TABLES][self.__class__.__name__][_HIDDENCOLUMNS]) is not None:
-                    dHidden = hCols
-                    getLogger().debug('Restoring default hidden-columns')
-            except:
-                getLogger().debug('No stored default hidden-columns')
-        self.headerColumnMenu.setDefaultColumns(dHidden, update=False)
+        self.headerColumnMenu.setInternalColumns(self._internalColumns)
+        self.headerColumnMenu.setDefaultColumns(self.defaultHidden)
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()
 
     def setClassDefaultColumns(self, texts):
         """set a list of default column-headers that are hidden when first shown.
         """
-        if not (app := getApplication()):
-            getLogger().debug('Cannot store hidden-columns')
-            return
-        # store in preferences
-        tables = app.preferences.setdefault(_TABLES, {})
-        table = tables.setdefault(self.__class__.__name__, {})
-        table[_HIDDENCOLUMNS] = texts
+        self.headerColumnMenu.saveColumns(texts)
 
     #=========================================================================================
     # Properties

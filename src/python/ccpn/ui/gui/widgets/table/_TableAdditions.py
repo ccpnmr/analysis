@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-20 16:42:23 +0100 (Thu, June 20, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-06-21 19:48:45 +0100 (Fri, June 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,12 +28,13 @@ __date__ = "$Date: 2022-09-09 18:02:40 +0100 (Fri, September 09, 2022) $"
 #=========================================================================================
 
 from PyQt5 import QtWidgets, QtCore
-from collections import OrderedDict
+from collections import OrderedDict, namedtuple
 from functools import partial
 from abc import ABC, abstractmethod
 import typing
 import pandas as pd
 
+from ccpn.framework.Application import getApplication
 from ccpn.ui.gui.widgets.ColumnViewSettings import ColumnViewSettingsPopup
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.SearchWidget import attachSimpleSearchWidget
@@ -42,6 +43,9 @@ from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import copyToClipboard, NOTHING
 from ccpn.util.OrderedSet import OrderedSet
+
+
+menuItem = namedtuple('menuItem', 'name toolTip')
 
 
 #=========================================================================================
@@ -289,7 +293,15 @@ class TableCopyCell(TableMenuABC):
 # Table Header Menu
 #=========================================================================================
 
-_COLUMN_SETTINGS = 'Column Settings...'
+_COLUMN_SETTINGS = menuItem('Column Settings...', 'Show/hide columns')
+_SAVE = menuItem('Save visible columns', 'Save the current visible/hidden columns;\n'
+                                         'new tables will open from the saved state.')
+_RESTORE = menuItem('Restore visible columns', 'Restore the visible/hidden columns from the\n'
+                                               'saved state for this table.')
+_RESET = menuItem('Reset hidden columns', 'Clear the current saved visible/hidden columns;\n'
+                                          'new tables will open with the default state for this table.')
+_TABLES = 'tables'
+_HIDDENCOLUMNS = 'hiddenColumns'
 
 
 class TableHeaderColumns(TableHeaderABC):
@@ -312,13 +324,21 @@ class TableHeaderColumns(TableHeaderABC):
         """Add table-header items to the right-mouse menu
         """
         menu.addSeparator()
-        self._columnSettingsAction = menu.addAction(_COLUMN_SETTINGS, self._showColumnsPopup)
+        self._columnSettingsAction = menu.addAction(_COLUMN_SETTINGS.name, self._showColumnsPopup)
+        self._saveAction = menu.addAction(_SAVE.name, self._saveCurrentColumns)
+        self._restoreAction = menu.addAction(_RESTORE.name, self.restoreColumns)
+        self._resetAction = menu.addAction(_RESET.name, self.resetColumns)
+        self._columnSettingsAction.setToolTip(_COLUMN_SETTINGS.toolTip)
+        self._saveAction.setToolTip(_SAVE.toolTip)
+        self._restoreAction.setToolTip(_RESTORE.toolTip)
+        self._resetAction.setToolTip(_RESET.toolTip)
 
     def setMenuOptions(self, menu):
         """Update the state of options in the right-mouse menu
         """
-        self._columnSettingsAction.setEnabled(self._enabled)
-        self._columnSettingsAction.setVisible(self._menuItemVisible)
+        for itm in {self._columnSettingsAction, self._saveAction, self._restoreAction, self._resetAction}:
+            itm.setEnabled(self._enabled)
+            itm.setVisible(self._menuItemVisible)
 
     #=========================================================================================
     # Properties
@@ -358,36 +378,30 @@ class TableHeaderColumns(TableHeaderABC):
         return self._parent.horizontalHeader()
 
     def showColumn(self, col):
-        # not sure if this is being caught every time
-        if col in (cols := self.columnTexts):
-            self._defaultHiddenColumns |= {cols[col]}
         self._parent.showColumn(col)
 
     def hideColumn(self, col):
-        if col in (cols := self.columnTexts):
-            self._defaultHiddenColumns -= {cols[col]}
         self._parent.hideColumn(col)
 
     #=========================================================================================
     # Implementation
     #=========================================================================================
 
-    def setInternalColumns(self, texts, update=True):
+    def setInternalColumns(self, texts):
         """set a list of internal column-headers that are always hidden.
         """
         self._internalColumns = set(texts or [])
-        if update:
-            self.refreshHiddenColumns()
+        self.refreshHiddenColumns()
 
-    def setDefaultColumns(self, texts, update=True):
+    def setDefaultColumns(self, texts):
         """set a list of default column-headers that are hidden when first shown.
         """
         self._defaultHiddenColumns = set(texts or [])
-        if update:
-            self.refreshHiddenColumns()
+        self.resetToDefaultHiddenColumns()
 
-    def hideInternalColumns(self):
-        """If the table is empty then check visible headers against the last header hidden list
+    def _hideInternalColumns(self):
+        """Hide all columns in the _internal list.
+        Shouldn't need to be called.
         """
         for i, columnName in enumerate(self.columnTexts):
             # remember to hide the special column
@@ -396,7 +410,7 @@ class TableHeaderColumns(TableHeaderABC):
 
     @property
     def columnTexts(self):
-        """return a list of column texts.
+        """Return a list of column texts.
         """
         try:
             return list(self._parent._df.columns)
@@ -404,57 +418,121 @@ class TableHeaderColumns(TableHeaderABC):
             return []
 
     def refreshHiddenColumns(self):
-        """Refresh the visible columns
+        """Refresh the visible columns.
+        To be used after the _internalColumns have been changed
         """
-        hiCols = set(self.hiddenColumns) | self._internalColumns | self._defaultHiddenColumns
-
+        hiCols = set(self.hiddenColumns) | self._internalColumns
         # show the columns in the list
         for col, colName in enumerate(self.columnTexts):
             # always hide the internal columns
             if colName in hiCols:
                 self._hideColumnName(colName)
             else:
-                width = self._parent.columnWidth(col)
                 self._showColumnName(colName)
-                if not width:
-                    self._parent.resizeColumnToContents(col)
+
+    def resetToDefaultHiddenColumns(self):
+        """Reset the hidden columns to default hidden-columns.
+        """
+        hiCols = self._internalColumns | self._defaultHiddenColumns
+        # show the columns in the list
+        for col, colName in enumerate(self.columnTexts):
+            # always hide the internal columns
+            if colName in hiCols:
+                self._hideColumnName(colName)
+            else:
+                self._showColumnName(colName)
 
     def _showColumnName(self, name):
         if name not in self.columnTexts:
             return
-
         if 0 <= (i := self.columnTexts.index(name)):
             self.showColumn(i)
 
     def _hideColumnName(self, name):
         if name not in self.columnTexts:
             return
-
         if 0 <= (i := self.columnTexts.index(name)):
             self.hideColumn(i)
 
+    def isColumnInternal(self, column) -> bool:
+        """Return True if the column is internal and not for external viewing.
+        """
+        if 0 <= column < len(self.columnTexts):
+            return self.columnTexts[column] in self._internalColumns
+        return False
+
+    @property
+    def _allHiddenColumns(self) -> list:
+        """Return a list of all the hidden/internal columns.
+        """
+        return [col for col in self.columnTexts if col in (set(self.hiddenColumns) | self._internalColumns)]
+
+    #=========================================================================================
+    # Menu callbacks
+    #=========================================================================================
+
     def _showColumnsPopup(self):
-        """Show the columns popup-menu
+        """Show the columns popup-menu.
         """
         settingsPopup = ColumnViewSettingsPopup(parent=self._parent, table=self,
-                                                dataFrameObject=self._parent._df,  # NOTE:ED - need to remove dataFrameObject :|
+                                                dataFrameObject=self._parent._df,
+                                                # NOTE:ED - need to remove dataFrameObject :|
                                                 hiddenColumns=self.hiddenColumns,
                                                 )
         settingsPopup.exec_()  # pass exclusive control to the menu and return hidden-columns
 
-    def isColumnInternal(self, column):
-        """Return True if the column is internal and not for external viewing
+    def _saveCurrentColumns(self):
+        """Save the current hidden-columns to preferences.
         """
-        if 0 <= column < len(self.columnTexts):
-            return self.columnTexts[column] in self._internalColumns
+        self.saveColumns(self.hiddenColumns)
 
-        return False
-
-    @property
-    def allHiddenColumns(self):
-        """Return a list of all the hidden/internal columns
+    def saveColumns(self, texts: list | None = None):
+        """Reset the hidden-columns for the default state.
+        If texts is None, will defer to the default hidden columns defined in the table-class.
+        Update the table to the default state.
         """
-        return set(self.hiddenColumns) | self._internalColumns
+        tableName = self._parent.__class__.__name__
+        if not (app := getApplication()):
+            getLogger().debug(f'Cannot save default hidden-columns {tableName}')
+            return
+        # store in preferences
+        tables = app.preferences.setdefault(_TABLES, {})
+        table = tables.setdefault(tableName, {})
+        table[_HIDDENCOLUMNS] = texts
+
+    def resetColumns(self):
+        """Clear the state in preferences and reset the curent columns.
+        """
+        self.saveColumns()
+        self.restoreColumns()
+
+    def restoreColumns(self):
+        """Restore the hidden-columns from the currently saved class-state.
+        """
+        tableName = self._parent.__class__.__name__
+        if not (app := getApplication()):
+            getLogger().debug(f'Cannot restore hidden-columns {tableName}')
+            return
+        try:
+            if (hidden := app.preferences[_TABLES][tableName][_HIDDENCOLUMNS]) is not None:
+                getLogger().debug(f'Restoring default hidden-columns {hidden}')
+                self.hiddenColumns = hidden
+                return
+        except Exception:
+            getLogger().debug(f'No saved state')
+        self.resetToDefaultHiddenColumns()
+
+    def getSavedColumns(self) -> list | None:
+        """Fetch the default hidden-columns.
+        """
+        tableName = self._parent.__class__.__name__
+        if not (app := getApplication()):
+            getLogger().debug(f'Cannot fetch hidden-columns {tableName}')
+            return
+        try:
+            return app.preferences[_TABLES][tableName][_HIDDENCOLUMNS]
+        except Exception:
+            getLogger().debug(f'No saved default hidden-columns')
 
 
 #=========================================================================================
@@ -466,19 +544,20 @@ _EXPORT_OPTION_ALL = 'Export All Columns'
 
 
 class TableExport(TableMenuABC):
-    """Class to handle export options on a menu
+    """Class to handle export options on a menu.
     """
     name = "Export"
 
     def addMenuOptions(self, menu):
-        """Add export options to the right-mouse menu
+        """Add export options to the right-mouse menu.
         """
         menu.addSeparator()
-        self._exportActionVisible = menu.addAction(_EXPORT_OPTION_VISIBLE, partial(self._exportTableDialog, exportAll=False))
+        self._exportActionVisible = menu.addAction(_EXPORT_OPTION_VISIBLE,
+                                                   partial(self._exportTableDialog, exportAll=False))
         self._exportActionAll = menu.addAction(_EXPORT_OPTION_ALL, partial(self._exportTableDialog, exportAll=True))
 
     def setMenuOptions(self, menu):
-        """Update export options in the right-mouse menu
+        """Update export options in the right-mouse menu.
         """
         # disable the export options if not available
         if (actions := [act for act in menu.actions() if act.text() == _EXPORT_OPTION_VISIBLE]):
@@ -503,31 +582,29 @@ class TableExport(TableMenuABC):
     #=========================================================================================
 
     def _exportTableDialog(self, exportAll=True):
-        """export the contents of the table to a file
-        The actual data values are exported, not the visible items which may be rounded due to the table settings
+        """Export the contents of the table to a file.
+        The actual data values are exported, not the visible items which may be rounded due to the table settings.
 
         :param exportAll: True/False - True implies export whole table - but in visible order
-                                    False, export only the visible table
+                                       False, export only the visible table.
         """
         model = self.model()
         df = model._df
         rows, cols = df.shape[0], df.shape[1]
-
         if df is None or df.empty:
             MessageDialog.showWarning('Export Table to File', 'Table does not contain a dataFrame')
-
         else:
             if model._filterIndex is None:
                 rowList = [model._sortIndex[row] for row in range(rows)]
             else:
                 # need to map to the sorted indexes
-                rowList = list(OrderedSet(model._sortIndex[row] for row in range(rows)) & OrderedSet(model._sortIndex[ii] for ii in model._filterIndex))
-
+                rowList = list(OrderedSet(model._sortIndex[row] for row in range(rows)) &
+                               OrderedSet(model._sortIndex[ii] for ii in model._filterIndex))
             if exportAll:
                 colList = list(df.columns)  # assumes that the dataFrame column-headings match the table
             else:
-                colList = [col for ii, col, in enumerate(list(df.columns)) if not self.horizontalHeader().isSectionHidden(ii)]
-
+                colList = [col for ii, col, in enumerate(list(df.columns))
+                           if not self.horizontalHeader().isSectionHidden(ii)]
             self._showExportTableDialog(df, rowList=rowList, colList=colList)
 
     #=========================================================================================
@@ -536,27 +613,33 @@ class TableExport(TableMenuABC):
 
     @staticmethod
     def _dataFrameToExcel(dataFrame, path, sheet_name='Table', columns=None):
+        """Convert dataFrame to excel spreadsheet.
+        """
         if dataFrame is not None:
             path = aPath(path)
             path = path.assureSuffix('xlsx')
-            if columns is not None and isinstance(columns, list):  #this is wrong. columns can be a 1d array
-
+            if columns is not None and isinstance(columns, list):  # this is wrong. columns can be a 1d array
                 indx = isinstance(dataFrame.columns, pd.MultiIndex)
                 dataFrame.to_excel(path, sheet_name=sheet_name, columns=columns, index=indx)
-
             else:
                 dataFrame.to_excel(path, sheet_name=sheet_name, index=False)
 
     @staticmethod
     def _dataFrameToCsv(dataFrame, path, *args):
+        """Convert dataFrame to comma-separated-values.
+        """
         dataFrame.to_csv(path)
 
     @staticmethod
     def _dataFrameToTsv(dataFrame, path, *args):
+        """Convert dataFrame to tab-separated-values.
+        """
         dataFrame.to_csv(path, sep='\t')
 
     @staticmethod
     def _dataFrameToJson(dataFrame, path, *args):
+        """Convert dataFrame to json format.
+        """
         dataFrame.to_json(path, orient='split', default_handler=str)
 
     def _findExportFormats(self, path, dataFrame, sheet_name='Table', filterType=None, columns=None):
@@ -589,14 +672,11 @@ class TableExport(TableMenuABC):
         self.saveDialog._show()
         if path := self.saveDialog.selectedFile():
             if dataFrame is not None and not dataFrame.empty:
-
                 if colList:
                     dataFrame = dataFrame[colList]  # returns a new dataFrame
                 if rowList:
                     dataFrame = dataFrame[:].iloc[rowList]
-
                 ft = self.saveDialog.selectedNameFilter()
-
                 sheet_name = 'Table'
                 self._findExportFormats(path, dataFrame, sheet_name=sheet_name, filterType=ft, columns=colList)
 
@@ -610,19 +690,19 @@ _CLEAR_OPTION = 'Clear Selection'
 
 
 class TableDelete(TableMenuABC):
-    """Class to handle delete options on a menu
+    """Class to handle delete options on a menu.
     """
     name = "Delete"
 
     def addMenuOptions(self, menu):
-        """Add delete options to the right-mouse menu
+        """Add delete options to the right-mouse menu.
         """
         menu.addSeparator()
         self._deleteAction = menu.addAction(_DELETE_OPTION, self.deleteSelectionFromTable)
         self._clearAction = menu.addAction(_CLEAR_OPTION, self._clearSelection)
 
     def setMenuOptions(self, menu):
-        """Update delete options in the right-mouse menu
+        """Update delete options in the right-mouse menu.
         """
         # disable the delete options if not available
         if (actions := [act for act in menu.actions() if act.text() == _DELETE_OPTION]):
@@ -645,12 +725,12 @@ class TableDelete(TableMenuABC):
     #=========================================================================================
 
     def deleteSelectionFromTable(self):
-        """Delete all objects in the selection from the project
+        """Delete all objects in the selection from the project.
         """
         self._parent.deleteSelectionFromTable()
 
     def _clearSelection(self):
-        """Clear the table-selection
+        """Clear the table-selection.
         """
         self._parent.clearSelection()
 
@@ -672,16 +752,15 @@ class TableSearchMenu(TableMenuABC):
     _searchWidget = None
 
     def addMenuOptions(self, menu):
-        """Add search options to the right-mouse menu
+        """Add search options to the right-mouse menu.
         """
         menu.addSeparator()
         self._searchAction = menu.addAction(_SEARCH_OPTION, self.showSearchSettings)
 
     def setMenuOptions(self, menu):
-        """Update search options in the right-mouse menu
+        """Update search options in the right-mouse menu.
         """
         self._initSearchWidget()
-
         # disable the search action if not available
         if (actions := [act for act in menu.actions() if act.text() == _SEARCH_OPTION]):
             actions[0].setEnabled(self._searchWidget is not None)
@@ -705,10 +784,9 @@ class TableSearchMenu(TableMenuABC):
     #=========================================================================================
 
     def showSearchSettings(self):
-        """Display the search frame in the table
+        """Display the search-frame in the table.
         """
         self._initSearchWidget()
-
         if self._searchWidget is not None:
             if not self._searchWidget.isVisible():
                 self._searchWidget.show()
@@ -716,6 +794,8 @@ class TableSearchMenu(TableMenuABC):
                 self._searchWidget.hideSearch()
 
     def hideSearchWidget(self):
+        """Hide the search-frame in the table.
+        """
         if self._searchWidget is not None:
             self._searchWidget.hide()
 
@@ -724,44 +804,37 @@ class TableSearchMenu(TableMenuABC):
     #=========================================================================================
 
     def _initSearchWidget(self):
+        """Initialise the search-frame in the table.
+        """
         if self._enabled and self._searchWidget is None:
             # always assumes that the parent-table is contained within a frame
             if not (widget := attachSimpleSearchWidget(self._parent, self)):
                 getLogger().warning('Filter option not available')
-
             elif (model := self.model()):
                 model.resetFilter()
-
             self._searchWidget = widget
-
         self.update()
 
     def refreshTable(self):
-        """Refresh the table from the search-widget
+        """Refresh the table from the search-widget.
         """
-
         if (model := self.model()) and model._df is not None:
             model.resetFilter()
-
             model.layoutChanged.emit()
             self._parent.tableChanged.emit()
-
         else:
             getLogger().debug(f'{self.__class__.__name__}.refreshTable: defaultDf is not defined')
 
     def setDataFromSearchWidget(self, rows):
-        """Set the data from the search-widget
+        """Set the data from the search-widget.
         """
         if (model := self.model()) and model._df is not None:
-
             model.beginResetModel()
             if model._filterIndex is not None:
                 model._filterIndex = sorted(set(model._filterIndex) & {model._sortIndex.index(ii) for ii in rows})
             else:
                 model._filterIndex = sorted(model._sortIndex.index(ii) for ii in rows)
-
             model.endResetModel()
-
             model.layoutChanged.emit()
 
         # import numpy as np

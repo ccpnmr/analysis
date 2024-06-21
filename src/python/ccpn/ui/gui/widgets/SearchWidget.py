@@ -4,9 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-19 12:24:29 +0100 (Thu, October 19, 2023) $"
-__version__ = "$Revision: 3.2.0.1 $"
+__dateModified__ = "$dateModified: 2024-06-21 19:48:44 +0100 (Fri, June 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -256,7 +257,8 @@ class GuiTableFilter(ScrollArea):
         rows = OrderedSet()
 
         searchColumn = self.columnOptions.getText()
-        visHeadings = self.table._dataFrameObject.visibleColumnHeadings if (searchColumn == VISIBLESEARCH) else searchColumn
+        visHeadings = self.table._dataFrameObject.visibleColumnHeadings if (
+                    searchColumn == VISIBLESEARCH) else searchColumn
 
         _compareErrorCount = 0
         for row in range(self.table.rowCount()):
@@ -571,7 +573,8 @@ class _DFTableFilter(_TableFilterABC):
     def visibleColumns(self, searchColumn=None):
         """Return the list of visible columns
         """
-        return self.tableHandler._dataFrameObject.visibleColumnHeadings if (searchColumn == VISIBLESEARCH) else [searchColumn]
+        return self.tableHandler._dataFrameObject.visibleColumnHeadings if (searchColumn == VISIBLESEARCH) else [
+            searchColumn]
 
     @property
     def df(self):
@@ -602,8 +605,8 @@ class _SimplerDFTableFilter(_TableFilterABC):
         """
         headerMenu = self._parent.headerColumnMenu
 
-        return [col for col in self.df.columns if col not in headerMenu.allHiddenColumns] \
-            if (columnIndex is None) else [self.df.columns[columnIndex]]
+        return ([col for col in self.df.columns if col not in headerMenu._allHiddenColumns]
+                if (columnIndex is None) else [self.df.columns[columnIndex]])
 
     @property
     def df(self):

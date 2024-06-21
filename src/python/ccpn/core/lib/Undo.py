@@ -9,8 +9,9 @@ from ccpn.core.lib.Undo import _deleteAllApiObjects, restoreOriginalLinks, no_op
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -19,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-06-20 14:34:05 +0100 (Thu, June 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-21 14:08:49 +0100 (Fri, June 21, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -742,13 +743,13 @@ class Undo(deque):
                 for sh in res.sortedShifts():
                     _log(f'       {sh}')
 
-    def print(self):
-        """Print self in somewhat readible form (!?)
+    def print(self, textLength = 60):
+        """Print self in somewhat readable form (!?)
         """
         from ccpn.util.Common import reduceText
+
         print(f'==== {self.__class__.__name__}; len={len(self)} ====\n')
 
-        _textLen = 60
         indx = -1
         for indx, item in enumerate(self):
 
@@ -768,9 +769,13 @@ class Undo(deque):
 
                 _funcs.append(_func)
 
-            print(f'{indx:4} : {reduceText(_funcs[0], _textLen)}   {reduceText(_funcs[1], _textLen)}')
+            _ptr = f'>> {indx:2}' if self.nextIndex == indx else f'   {indx:2}'
+            print(f'{_ptr} : {reduceText(_funcs[0], textLength)}   {reduceText(_funcs[1], textLength)}   ')
+            if indx in self.waypoints:
+                print(f'        WAYPOINT')
 
         indx += 1
-        print(f'{indx:4} : END_OF_STACK')
+        _ptr = f'>> {indx:2}' if self.nextIndex == indx else f'   {indx:2}'
+        print(f'{_ptr} : END_OF_STACK')
 
 

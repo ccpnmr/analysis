@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-06-21 11:56:54 +0100 (Fri, June 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-21 14:08:49 +0100 (Fri, June 21, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -826,6 +826,7 @@ class GuiSpectrumDisplay(CcpnModule):
     def _buildContoursForSpectrum(self, spectrum: Spectrum):
         """Rebuild the contours for spectrum
         """
+        # GWV 19/6/24
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
         if self.is1D:
@@ -849,6 +850,7 @@ class GuiSpectrumDisplay(CcpnModule):
     def _buildContoursCallback(self, callbackDict):
         """Callback for changing any of the contour parameters through OBSERVE notifier
         """
+        # GWV 19/6/24
         if (spectrum := callbackDict.get(Notifier.OBJECT)) is None:
             raise RuntimeError(f'_buildContoursCallback(): something has gone very wrong; no spectrum')
         if not spectrum in self.spectra:
@@ -863,7 +865,7 @@ class GuiSpectrumDisplay(CcpnModule):
         trigger = data[Notifier.TRIGGER]
         spectrum = data[Notifier.OBJECT]
 
-        # GWV: 19/6/24: replaced by OBSERVE notifiers on contour=related parameters
+        # GWV: 19/6/24: replaced by OBSERVE notifiers on contour-related parameters of Spectrum
         # if trigger == Notifier.CHANGE:
         #     specViews = self.getSpectrumViewFromSpectrum(spectrum)
         #     if not specViews:
@@ -2721,53 +2723,39 @@ class GuiSpectrumDisplay(CcpnModule):
             raise RuntimeError('Cannot display 1D spectrum on %s' % self)
 
         # check if not already here
-        _specViews = self.getSpectrumViewFromSpectrum(spectrum)
-        if len(_specViews) > 0:
-            getLogger().debug('displaySpectrum: Spectrum %s already in display %s' % (spectrum, self))
-            return _specViews[0]
+        if not self._isNew:
+            _specViews = self.getSpectrumViewFromSpectrum(spectrum)
+            if len(_specViews) > 0:
+                getLogger().debug('displaySpectrum: Spectrum %s already in display %s' % (spectrum, self))
+                return _specViews[0]
 
-        # keep this as may be needed for undo/redo gui operations
-        # with undoStackBlocking() as _:  # Do not add to undo/redo stack
-        #     # _getDimensionsMapping will check the match for axisCodes
-        #     displayOrder = (1, 0) if self.is1D else self._getDimensionsMapping(spectrum)
-        #     # check the isotopeCodes
-        #     dims = displayOrder[0:1] if self.is1D else displayOrder
-        #     # check the isotopeCodes exist and check compatibility
-        #     for ic1, ic2 in zip(self.isotopeCodes or [], spectrum.getByDimensions('isotopeCodes', dims)):
-        #         if ic1 != ic2:
-        #             raise RuntimeError('Cannot display %s on %s; incompatible isotopeCodes' % (spectrum, self))
+        # _getDimensionsMapping will check the match for axisCodes
+        displayOrder = (1, 0) if self.is1D else self._getDimensionsMapping(spectrum)
+        # dimensions are 1-based and not defined for (1D) Intensity axis
+        dims = [1] if self.is1D else displayOrder
 
-        # with undoStackRevert(self.application) as revertStack:
+        if not self._isNew:
+            # There is already a spectrum displayed; ie. the spectrumDisplay has definitions for
+            # its x,y, and z,a,.. plane(s) display axes
 
-        with undoBlockWithoutSideBar(self.application):
-            # push/pop ordering
-            with undoStackBlocking(self.application) as addUndoItem:
+            # check for matching dimension types
+            for dt1, dt2 in zip(self.dimensionTypes or [], spectrum.getByDimensions('dimensionTypes', dims)):
+                if dt1 != dt2:
+                    raise RuntimeError('Cannot display %s on %s; incompatible dimensionTypes' % (spectrum, self))
+                # For now: no multiple spectra with time/sampled axes (current implementation limit)
+                if dt2 == DIMENSION_SAMPLED or dt2 == DIMENSION_TIME:
+                    raise RuntimeError(f'It is currently not possible to open two spectra with a time/sampled domain in the same SpectrumDisplay.\n'
+                                       f'Please open {spectrum.pid} in a separate SpectrumDisplay.')
 
-                # _getDimensionsMapping will check the match for axisCodes
-                displayOrder = (1, 0) if self.is1D else self._getDimensionsMapping(spectrum)
-                # dimensions are 1-based and not defined for (1D) Intensity axis
-                dims = [1] if self.is1D else displayOrder
+            # check the isotopeCodes exist and check compatibility
+            for ic1, ic2 in zip(self.isotopeCodes or [], spectrum.getByDimensions('isotopeCodes', dims)):
+                if ic1 != ic2:
+                    raise RuntimeError('Cannot display %s on %s; incompatible isotopeCodes' % (spectrum, self))
 
-                if not self._isNew:
-                    # There is already a spectrum displayed; ie. the spectrumDisplay has definitions for
-                    # its x,y, and z,a,.. plane(s) display axes
-
-                    # check for matching dimension types
-                    for dt1, dt2 in zip(self.dimensionTypes or [], spectrum.getByDimensions('dimensionTypes', dims)):
-                        if dt1 != dt2:
-                            raise RuntimeError('Cannot display %s on %s; incompatible dimensionTypes' % (spectrum, self))
-                        # For now: no multiple spectra with time/sampled axes (current implementation limit)
-                        if dt2 == DIMENSION_SAMPLED or dt2 == DIMENSION_TIME:
-                            raise RuntimeError(f'It is currently not possible to open two spectra with a time/sampled domain in the same SpectrumDisplay.\n'
-                                               f'Please open {spectrum.pid} in a separate SpectrumDisplay.')
-
-                    # check the isotopeCodes exist and check compatibility
-                    for ic1, ic2 in zip(self.isotopeCodes or [], spectrum.getByDimensions('isotopeCodes', dims)):
-                        if ic1 != ic2:
-                            raise RuntimeError('Cannot display %s on %s; incompatible isotopeCodes' % (spectrum, self))
-
-                # # add toolbar ordering to the undo stack
-                # addUndoItem(undo=self.setToolbarButtons)  # keep for undo/redo
+        with undoStackBlocking() as addUndoItem:
+            with undoBlock():
+                # block any undo additions, as the displaySpectrum and removeSpectrum are
+                # "atomic" operations, which are being added at the end
 
                 # Make spectrumView
                 if (spectrumView := _newSpectrumView(self, spectrum=spectrum, displayOrder=displayOrder)) \
@@ -2776,10 +2764,14 @@ class GuiSpectrumDisplay(CcpnModule):
                     # revertStack(True)
                     getLogger().warning(f'Could not create new spectrumView for {spectrum}')
 
-                else:
-                    self._buildContoursForSpectrum(spectrum=spectrum)
-                    self._setToolbarButtons()
-                    self._setVisibleSpectrum(spectrum, True)
+            addUndoItem(undo=partial(self.removeSpectrum, spectrum=spectrum.pid),
+                        redo=partial(self.displaySpectrum, spectrum=spectrum.pid)
+                        )
+        #end waypoint
+
+        self._buildContoursForSpectrum(spectrum=spectrum)
+        self._setToolbarButtons()
+        self._setVisibleSpectrum(spectrum, True)
 
         # Now that the spectrum is added, we need to update the plane-related axis values
         for strip in self.strips:
@@ -2814,7 +2806,6 @@ class GuiSpectrumDisplay(CcpnModule):
             return
 
         with undoStackBlocking() as addUndoItem:
-
             with undoBlock():
                 # block any undo additions, as the displaySpectrum and removeSpectrum are
                 # "atomic" operations, which are being added at the end

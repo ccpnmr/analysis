@@ -5,8 +5,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-06-20 14:34:05 +0100 (Thu, June 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-21 11:56:54 +0100 (Fri, June 21, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -2777,8 +2778,8 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 else:
                     self._buildContoursForSpectrum(spectrum=spectrum)
-                    self.setToolbarButtons()
-                    # addUndoItem(redo=self.setToolbarButtons)  # keep for undo/redo
+                    self._setToolbarButtons()
+                    self._setVisibleSpectrum(spectrum, True)
 
         # Now that the spectrum is added, we need to update the plane-related axis values
         for strip in self.strips:
@@ -2823,7 +2824,7 @@ class GuiSpectrumDisplay(CcpnModule):
                 # GWV 19/6/24: This sounds crazy!
                 specView._delete()
                 self._deleteSpectrumNotifiers(spectrum=spectrum)
-                self.setToolbarButtons()
+                self._setToolbarButtons()
                 # Now that the spectrum has been removed, we need to update the plane-related axis values
                 for strip in self.strips:
                     strip._updatePlaneAxes()
@@ -2855,7 +2856,7 @@ class GuiSpectrumDisplay(CcpnModule):
                     undo=partial(self._setVisibleSpectrum, spectrum, not visible),
                     redo=partial(self._setVisibleSpectrum, spectrum, visible))
 
-    def setToolbarButtons(self):
+    def _setToolbarButtons(self):
         """Setup the buttons in the toolbar for each spectrum
         """
         if not self.isGrouped and self.strips:

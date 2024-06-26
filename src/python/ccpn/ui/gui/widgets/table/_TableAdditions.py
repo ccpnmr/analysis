@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-21 19:48:45 +0100 (Fri, June 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-26 14:20:35 +0100 (Wed, June 26, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
@@ -493,7 +493,7 @@ class TableHeaderColumns(TableHeaderABC):
         """
         tableName = self._parent.__class__.__name__
         if not (app := getApplication()):
-            getLogger().debug(f'Cannot save default hidden-columns {tableName}')
+            getLogger().debug2(f'Cannot save default hidden-columns {tableName}')
             return
         # store in preferences
         tables = app.preferences.setdefault(_TABLES, {})
@@ -511,15 +511,15 @@ class TableHeaderColumns(TableHeaderABC):
         """
         tableName = self._parent.__class__.__name__
         if not (app := getApplication()):
-            getLogger().debug(f'Cannot restore hidden-columns {tableName}')
+            getLogger().debug2(f'Cannot restore hidden-columns {tableName}')
             return
         try:
             if (hidden := app.preferences[_TABLES][tableName][_HIDDENCOLUMNS]) is not None:
-                getLogger().debug(f'Restoring default hidden-columns {hidden}')
+                getLogger().debug2(f'Restoring default hidden-columns {hidden}')
                 self.hiddenColumns = hidden
                 return
         except Exception:
-            getLogger().debug(f'No saved state')
+            getLogger().debug2(f'No saved state')
         self.resetToDefaultHiddenColumns()
 
     def getSavedColumns(self) -> list | None:
@@ -527,12 +527,12 @@ class TableHeaderColumns(TableHeaderABC):
         """
         tableName = self._parent.__class__.__name__
         if not (app := getApplication()):
-            getLogger().debug(f'Cannot fetch hidden-columns {tableName}')
+            getLogger().debug2(f'Cannot fetch hidden-columns {tableName}')
             return
         try:
             return app.preferences[_TABLES][tableName][_HIDDENCOLUMNS]
         except Exception:
-            getLogger().debug(f'No saved default hidden-columns')
+            getLogger().debug2(f'No saved default hidden-columns')
 
 
 #=========================================================================================

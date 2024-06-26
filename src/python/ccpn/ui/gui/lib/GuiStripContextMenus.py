@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-07 11:48:24 +0100 (Fri, June 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-26 14:29:04 +0100 (Wed, June 26, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
@@ -117,8 +117,10 @@ def _addMenuItems(widget, menu, items, overwrite=False):
             getLogger().warning(f'_addMenuItems error: {str(e)}')
 
 
-##############################  Common default  menu items ##############################
-## These items are used to create both 1D and Nd menus
+#=========================================================================================
+# Common default menu items
+# These items are used to create both 1D and Nd menus
+#=========================================================================================
 
 
 def _toolBarItem(strip):
@@ -144,13 +146,15 @@ def _crosshairItem(strip):
 
 def _gridItem(strip):
     return _SCMitem(name='Grid',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Toggle Grid On/Off', callback=strip.spectrumDisplay.toggleGrid,
+                    typeItem=ItemTypes.get(ITEM), toolTip='Toggle Grid On/Off',
+                    callback=strip.spectrumDisplay.toggleGrid,
                     checkable=True, checked=True, shortcut='GS', stripMethodName='gridAction')
 
 
 def _sideBandsItem(strip):
     return _SCMitem(name='Show MAS Side Bands',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Toggle MAS Side Bands On/Off', callback=strip.spectrumDisplay.toggleSideBands,
+                    typeItem=ItemTypes.get(ITEM), toolTip='Toggle MAS Side Bands On/Off',
+                    callback=strip.spectrumDisplay.toggleSideBands,
                     checkable=True, checked=True, stripMethodName='sideBandsAction')
 
 
@@ -289,7 +293,8 @@ def _clearMarksItem(strip):
 
 def _showEstimateNoisePopup(strip):
     return _SCMitem(name='Estimate Noise...',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Estimate spectral noise in the visible region', shortcut='EN',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Estimate spectral noise in the visible region',
+                    shortcut='EN',
                     callback=strip._showEstimateNoisePopup)
 
 
@@ -299,6 +304,7 @@ def _showNoise(strip):
                     checkable=True, checked=strip._noiseThresholdLinesActive,
                     callback=strip.toggleNoiseThresholdLines)
 
+
 def _showPeakPickingThresholds(strip):
     tt = 'Show the Peak Picking Exclusion Area which enables to select and adjust the thresholds values.'
     return _SCMitem(name='Show Peak Picking Exclusion Area',
@@ -306,9 +312,11 @@ def _showPeakPickingThresholds(strip):
                     checkable=True, checked=strip._pickingExclusionAreaActive,
                     callback=strip.togglePickingExclusionArea)
 
+
 def _makeStripPlot(strip):
     return _SCMitem(name='Make Strip Plot...',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Make a strip plot in the current SpectrumDisplay', shortcut='SP',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Make a strip plot in the current SpectrumDisplay',
+                    shortcut='SP',
                     callback=strip.makeStripPlot)
 
 
@@ -362,20 +370,26 @@ def _newStripPlotFAItem(strip):
                     callback=partial(app.showFlipArbitraryAxisPopup, usePosition=True))
 
 
-##############################  Common Integral menu items ##############################
-## These items are used to create both 1D and Nd integral menus
+#=========================================================================================
+# Common Integral menu items
+# These items are used to create both 1D and Nd integral menus
+#=========================================================================================
 
 def _deleteIntegralItem(strip):
     return _SCMitem(name='Delete Integral(s)',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Delete Integral(s) from project', callback=strip.mainWindow.deleteSelectedItems)
+                    typeItem=ItemTypes.get(ITEM), toolTip='Delete Integral(s) from project',
+                    callback=strip.mainWindow.deleteSelectedItems)
 
 
-##############################  Common Multiplet menu items ##############################
-## These items are used to create both 1D and Nd Multiplet menus
+#=========================================================================================
+# Common Multiplet menu items
+# These items are used to create both 1D and Nd Multiplet menus
+#=========================================================================================
 
 def _deleteMultipletItem(strip):
     return _SCMitem(name='Delete Multiplet(s)',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Delete Multiplet(s) from project', callback=strip.mainWindow.deleteSelectedItems)
+                    typeItem=ItemTypes.get(ITEM), toolTip='Delete Multiplet(s) from project',
+                    callback=strip.mainWindow.deleteSelectedItems)
 
 
 def _mergeMultipletItem(strip):
@@ -384,9 +398,11 @@ def _mergeMultipletItem(strip):
                     toolTip='Merge Multiplet(s) and Peak(s) into a single Multiplet',
                     callback=strip.mainWindow.mergeCurrentMultiplet)
 
-##############################  Common Peak menu items ##############################
-## These items are used to create both 1D and Nd Peak menus
 
+#=========================================================================================
+# Common Peak menu items
+# These items are used to create both 1D and Nd Peak menus
+#=========================================================================================
 
 def _copyPeakItem():
     from ccpn.framework.Application import getApplication
@@ -426,6 +442,27 @@ def _deassignPeaksItem():
     return _SCMitem(name='Deassign Peak(s)',
                     typeItem=ItemTypes.get(ITEM), toolTip='Deassign Peaks',
                     callback=_app.mainWindow.deassignPeaks)
+
+
+def _propagateAssignmentsFromReferenceItem():
+    from ccpn.framework.Application import getApplication
+
+    _app = getApplication()
+    return _SCMitem(name='Propagate Assignments from Reference',
+                    typeItem=ItemTypes.get(ITEM),
+                    toolTip='Propagate assignments to all selected peaks from the clicked peak.\n'
+                            'Tolerances are applied to chemicalShift values.',
+                    callback=_app.mainWindow.propagateAssignmentsFromReference)
+
+
+def _copyAssignmentsFromReferenceItem():
+    from ccpn.framework.Application import getApplication
+
+    _app = getApplication()
+    return _SCMitem(name='Copy Assignments from Reference',
+                    typeItem=ItemTypes.get(ITEM),
+                    toolTip='Copy assignments to all selected peaks from the clicked peak.',
+                    callback=_app.mainWindow.copyAssignmentsFromReference)
 
 
 def _setPeakAliasingItem():
@@ -488,7 +525,8 @@ def _estimateCurrentVolumesItem():
 
     _app = getApplication()
     return _SCMitem(name='Estimate Current Peak Volume(s)',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Estimate peak volumes for the currently selected peaks', shortcut='EC',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Estimate peak volumes for the currently selected peaks',
+                    shortcut='EC',
                     callback=_app.showEstimateCurrentVolumesPopup)
 
 
@@ -507,7 +545,8 @@ def _reorderPeakListAxesItem():
 
     _app = getApplication()
     return _SCMitem(name='Reorder PeakList Axes...',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Reorder axes for all peaks in peakList containing this peak', shortcut='RL',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Reorder axes for all peaks in peakList containing this peak',
+                    shortcut='RL',
                     callback=_app.mainWindow.reorderPeakListAxes)
 
 
@@ -518,7 +557,8 @@ def _arrangePeakLabelsItem():
 
     _app = getApplication()
     return _SCMitem(name=_ARRANGELABELS,
-                    typeItem=ItemTypes.get(ITEM), toolTip='Auto-arrange peak/multiplet labels to minimum overlaps.', shortcut='AV',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Auto-arrange peak/multiplet labels to minimum overlaps.',
+                    shortcut='AV',
                     callback=_app.mainWindow.arrangeLabels)
 
 
@@ -529,7 +569,8 @@ def _resetLabelsItem():
 
     _app = getApplication()
     return _SCMitem(name=_RESETLABELS,
-                    typeItem=ItemTypes.get(ITEM), toolTip='Reset peak/multiplet labels to their default positions.', shortcut='RV',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Reset peak/multiplet labels to their default positions.',
+                    shortcut='RV',
                     callback=_app.mainWindow.resetLabels)
 
 
@@ -615,7 +656,8 @@ def _customiseMenuItem(strip):
 
 def _copyAxesMenuItem(strip):
     return _SCMitem(name='Copy Axes:',
-                    typeItem=ItemTypes.get(MENU), toolTip='Copy selected axis ranges from selected strip to this strip ',
+                    typeItem=ItemTypes.get(MENU),
+                    toolTip='Copy selected axis ranges from selected strip to this strip ',
                     stripMethodName='_copyAxesMenu',
                     callback=None)
 
@@ -629,7 +671,8 @@ def _selectedPeaksMenuItem(strip):
 
 def _flipAxesMenuItem(strip):
     return _SCMitem(name='Flip Axes:',
-                    typeItem=ItemTypes.get(MENU), toolTip='Flip axes of current Spectrum Display and open in a new Spectrum Display  ',
+                    typeItem=ItemTypes.get(MENU),
+                    toolTip='Flip axes of current Spectrum Display and open in a new Spectrum Display  ',
                     stripMethodName='_flipAxesMenu',
                     callback=None)
 
@@ -724,14 +767,16 @@ def _copyAllAxisRangeFromStripMenuItem(strip):
 
 def _copyXAxisCodeRangeFromStripMenuItem(strip):
     return _SCMitem(name=f'Copy Axis Range to {strip.axisCodes[0]} from:',
-                    typeItem=ItemTypes.get(MENU), toolTip=f'Copy axis range to {strip.axisCodes[0]} from selected strip',
+                    typeItem=ItemTypes.get(MENU),
+                    toolTip=f'Copy axis range to {strip.axisCodes[0]} from selected strip',
                     stripMethodName='matchXAxisCodeToMenu',
                     callback=None)
 
 
 def _copyYAxisCodeRangeFromStripMenuItem(strip):
     return _SCMitem(name=f'Copy Axis Range to {strip.axisCodes[1]} from:',
-                    typeItem=ItemTypes.get(MENU), toolTip=f'Copy axis range to {strip.axisCodes[1]} from selected strip',
+                    typeItem=ItemTypes.get(MENU),
+                    toolTip=f'Copy axis range to {strip.axisCodes[1]} from selected strip',
                     stripMethodName='matchYAxisCodeToMenu',
                     callback=None)
 
@@ -764,14 +809,16 @@ def _copyAllAxisRangeFromStripMenuItem2(strip):
 
 def _copyXAxisCodeRangeFromStripMenuItem2(strip):
     return _SCMitem(name=f'Copy Axis Range to {strip.axisCodes[0]} from:',
-                    typeItem=ItemTypes.get(MENU), toolTip=f'Copy axis range to {strip.axisCodes[0]} from selected strip',
+                    typeItem=ItemTypes.get(MENU),
+                    toolTip=f'Copy axis range to {strip.axisCodes[0]} from selected strip',
                     stripMethodName='matchXAxisCodeToMenu2',
                     callback=None)
 
 
 def _copyYAxisCodeRangeFromStripMenuItem2(strip):
     return _SCMitem(name=f'Copy Axis Range to {strip.axisCodes[1]} from:',
-                    typeItem=ItemTypes.get(MENU), toolTip=f'Copy axis range to {strip.axisCodes[1]} from selected strip',
+                    typeItem=ItemTypes.get(MENU),
+                    toolTip=f'Copy axis range to {strip.axisCodes[1]} from selected strip',
                     stripMethodName='matchYAxisCodeToMenu2',
                     callback=None)
 
@@ -830,8 +877,10 @@ def _hideMultipletsSingleActionItems(menu, strip):
                 action.setEnabled(False)
 
 
-##############################  Common Phasing  menu items ##############################
-## These items are used to create both 1D and Nd Phasing menus
+#=========================================================================================
+# Common Phasing menu items
+# These items are used to create both 1D and Nd Phasing menus
+#=========================================================================================
 
 def _addTraceItem(strip):
     return _SCMitem(name='Add Trace',
@@ -890,10 +939,9 @@ def _stackSpectraPhaseItem(strip):
                     callback=strip._toggleStackPhase, stripMethodName='stackActionPhase')
 
 
-########################################################################################################################
-#########################################      1D menus     ############################################################
-########################################################################################################################
-
+#=========================================================================================
+# 1D menus
+#=========================================================================================
 
 def _get1dDefaultMenu(guiStrip1d) -> Menu:
     """
@@ -923,7 +971,7 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
 
         _showEstimateNoisePopup(guiStrip1d),
         _showNoise(guiStrip1d),
-        _showPeakPickingThresholds(guiStrip1d), #FIXME broken
+        _showPeakPickingThresholds(guiStrip1d),  #FIXME broken
         _makeStripPlot(guiStrip1d),
         _separator(),
 
@@ -994,6 +1042,8 @@ def _get1dPeakMenuItems(menuId) -> list:
         _copyPeakItem(),
         _editPeakAssignmentItem(),
         _deassignPeaksItem(),
+        _propagateAssignmentsFromReferenceItem(),
+        _copyAssignmentsFromReferenceItem(),
         _setPeakAliasingItem(),
         _calibrateFromPeaks(),
         _separator(),
@@ -1072,10 +1122,9 @@ def _get1dAxisMenu(guiStrip) -> Menu:
     return _createMenu(guiStrip, items)
 
 
-########################################################################################################################
-#########################################      Nd Menus     ############################################################
-########################################################################################################################
-
+#=========================================================================================
+# Nd Menus
+#=========================================================================================
 
 def _getNdDefaultMenu(guiStripNd) -> Menu:
     """
@@ -1191,6 +1240,8 @@ def _getNdPeakMenuItems(menuId) -> list:
         _copyPeakItem(),
         _editPeakAssignmentItem(),
         _deassignPeaksItem(),
+        _propagateAssignmentsFromReferenceItem(),
+        _copyAssignmentsFromReferenceItem(),
         _setPeakAliasingItem(),
         _separator(),
 

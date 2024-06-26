@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-26 14:20:35 +0100 (Wed, June 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-26 15:41:34 +0100 (Wed, June 26, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
@@ -294,10 +294,10 @@ class TableCopyCell(TableMenuABC):
 #=========================================================================================
 
 _COLUMN_SETTINGS = menuItem('Column Settings...', 'Show/hide columns')
-_SAVE = menuItem('Save visible columns', 'Save the current visible/hidden columns;\n'
-                                         'new tables will open from the saved state.')
-_RESTORE = menuItem('Restore visible columns', 'Restore the visible/hidden columns from the\n'
-                                               'saved state for this table.')
+_SAVE = menuItem('Save hidden columns', 'Save the current visible/hidden columns;\n'
+                                        'new tables will open from the saved state.')
+_RESTORE = menuItem('Restore hidden columns', 'Restore the visible/hidden columns from the\n'
+                                              'saved state for this table.')
 _RESET = menuItem('Reset hidden columns', 'Clear the current saved visible/hidden columns;\n'
                                           'new tables will open with the default state for this table.')
 _TABLES = 'tables'

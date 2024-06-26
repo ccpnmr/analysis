@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-26 14:29:04 +0100 (Wed, June 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-26 14:52:13 +0100 (Wed, June 26, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
@@ -1493,6 +1493,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
     #-----------------------------------------------------------------------------------------
     # Code moved from previously lib.GuiWindow
     #-----------------------------------------------------------------------------------------
+
+    @logCommand('mainWindow.')
     def deassignPeaks(self):
         """Deassign all from selected peaks
         """
@@ -1553,6 +1555,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                 # don't show the popup
                 self.project.deleteObjects(*(obj for _name, itms, _check in deleteItems for obj in itms))
 
+    @logCommand('mainWindow.')
     def propagateAssignments(self):
         from ccpn.core.lib.AssignmentLib import propagateAssignments
 
@@ -1560,14 +1563,12 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         tolerancesByIsotope = {'H': 5.01,
                                'C': 0.2,
                                'N': 2.1}
-        tolerancesByAxisCode = {'Nh': 0.15,
-                                'Hn': 0.01}
         peaks = self.application.current.peaks
         if not peaks:
             return
-        propagateAssignments(peaks=peaks, tolerancesByIsotope=tolerancesByIsotope,
-                             tolerancesByAxisCode=tolerancesByAxisCode)
+        propagateAssignments(peaks=peaks, tolerancesByIsotope=tolerancesByIsotope)
 
+    @logCommand('mainWindow.')
     def copyAssignments(self):
         from ccpn.core.lib.AssignmentLib import copyAssignments
 
@@ -1576,6 +1577,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             return
         copyAssignments(peaks=peaks)
 
+    @logCommand('mainWindow.')
     def propagateAssignmentsFromReference(self):
         from ccpn.core.lib.AssignmentLib import propagateAssignmentsFromReference
 
@@ -1583,18 +1585,15 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         tolerancesByIsotope = {'H': 5.01,
                                'C': 0.2,
                                'N': 2.1}
-        tolerancesByAxisCode = {'Nh': 0.15,
-                                'Hn': 0.01}
         cStrip = self.application.current.strip
         peak = ((cStrip and cStrip._lastClickedObjects and cStrip._lastClickedObjects[0]) or
                 self.application.current.peak)
         if not peak:
             return
         propagateAssignmentsFromReference(None, referencePeak=peak,
-                                          tolerancesByIsotope=tolerancesByIsotope,
-                                          tolerancesByAxisCode=tolerancesByAxisCode
-                                          )
+                                          tolerancesByIsotope=tolerancesByIsotope)
 
+    @logCommand('mainWindow.')
     def copyAssignmentsFromReference(self):
         from ccpn.core.lib.AssignmentLib import copyAssignmentsFromReference
 

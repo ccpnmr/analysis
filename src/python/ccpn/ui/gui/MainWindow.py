@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-26 14:52:13 +0100 (Wed, June 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-27 10:35:17 +0100 (Thu, June 27, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
@@ -1253,7 +1253,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                 self.deleteAllNotifiers()
                 self.application._closeProject()  # close if saved
                 QtWidgets.QApplication.quit()
-                os._exit(0)
+                os._exit(0)  # HARSH! actually crash issue only seems to affect newTestApplication :|
 
             else:
                 if event:  # ejb - don't close the project
@@ -1268,7 +1268,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             self.deleteAllNotifiers()
             self.application._closeProject()
             QtWidgets.QApplication.quit()
-            os._exit(0)
+            os._exit(0)  # HARSH! actually crash issue only seems to affect newTestApplication :|
 
         else:
             if event:

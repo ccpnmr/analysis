@@ -57,7 +57,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-07 11:48:24 +0100 (Fri, June 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-21 19:47:31 +0100 (Fri, June 21, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
@@ -6442,7 +6442,9 @@ class CcpnGLWidget(QOpenGLWidget):
                 _menu = strip._contextMenus.get(MultipletMenu)
                 multiplets = list(self.current.multiplets)
                 if len(multiplets) == 1:
-                    _hideMultipletsSingleActionItems(_menu, strip)
+                    peakMults = {mult for pk in list(self.current.peaks) for mult in pk.multiplets} - set(multiplets)
+                    if peakMults:
+                        _hideMultipletsSingleActionItems(_menu, strip)
                 else:
                     _setEnabledAllItems(_menu, True)
                 strip.contextMenuMode = MultipletMenu

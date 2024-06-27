@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-07 19:27:14 +0100 (Fri, June 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-21 19:48:44 +0100 (Fri, June 21, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
@@ -431,14 +431,11 @@ class _ProjectTableABC(TableABC, Base):
         """
         self._dataFrameObject = None
         _df = pd.DataFrame({val: [] for val in self.columnHeaders.values()})
-
         if self.OBJECTCOLUMN in _df.columns:
             # use the object as the index, object always exists even if isDeleted
             _df.set_index(_df[self.OBJECTCOLUMN], inplace=True, )
-
         self.updateDf(_df, resize=True)
-
-        self.headerColumnMenu.refreshHiddenColumns()
+        self.headerColumnMenu.resetToDefaultHiddenColumns()
 
     #=========================================================================================
     # Build the dataFrame for the table

@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-20 16:42:22 +0100 (Thu, June 20, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-06-21 19:48:44 +0100 (Fri, June 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -359,7 +359,6 @@ class _DataTableWidget(Table):
 
     defaultHidden = []
     _internalColumns = []
-    _hiddenColumns = []
 
     _defaultEditable = False
     _enableCopyCell = True
@@ -388,7 +387,6 @@ class _DataTableWidget(Table):
         self._initTableCommonWidgets(parent, **kwds)
 
         # initialise the currently attached dataFrame
-        self._hiddenColumns = []
         self.dataFrameObject = None
 
         # initialise the table
@@ -398,6 +396,7 @@ class _DataTableWidget(Table):
 
         self.moduleParent = moduleParent
 
+        # Save/restore of hidden-columns doesn't make sense here yet, as core-object dataTables may all be different
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()
 

@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-20 16:42:23 +0100 (Thu, June 20, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-06-21 19:48:44 +0100 (Fri, June 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -856,9 +856,8 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
 
     def postUpdateDf(self):
         # update the visible columns
-        self.headerColumnMenu.hiddenColumns = [col for col in self._df.columns if isinstance(col, tuple) and col[1] in self.defaultHiddenSubgroup]
-        self.headerColumnMenu.refreshHiddenColumns()
-
+        self.headerColumnMenu.saveColumns([col for col in self._df.columns
+                                           if isinstance(col, tuple) and col[1] in self.defaultHiddenSubgroup])
         self.searchMenu.refreshFilter()
 
     # NOTE:ED - not done yet

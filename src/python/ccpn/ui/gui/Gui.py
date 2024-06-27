@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-20 15:44:52 +0100 (Thu, June 20, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-06-27 17:16:46 +0100 (Thu, June 27, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -107,6 +107,8 @@ QtCore.qInstallMessageHandler(qtMessageHandler)
 REMOVEDEBUG = r'\(\S+\.\w+:\d+\)$'
 
 MAXITEMLOGGING = 4
+MAXITEMLOADING = 100
+MAXITEMDEPTH = 5
 
 
 #=========================================================================================
@@ -406,12 +408,10 @@ class Gui(Ui):
                 # there was an error from the dialog
                 getLogger().debug(f'==> Cancelled loading ccpn project "{path}" - error in dialog')
                 ignore = True
-
             if DONT_OPEN in ok:
                 # user selection not to load
                 getLogger().info(f'==> Cancelled loading ccpn project "{path}"')
                 ignore = True
-
             elif MAKE_ARCHIVE in ok:
                 # flag to make a backup archive
                 dataLoader.makeArchive = True
@@ -452,17 +452,27 @@ class Gui(Ui):
                 popup.exec_()
                 ignore = (popup.result == popup.CANCEL_PRESSED)
 
-        elif dataLoader.dataFormat == DirectoryDataLoader.dataFormat and len(dataLoader) > MAXITEMLOGGING:
-            ok = MessageDialog.showYesNoWarning('Directory "%s"\n' % dataLoader.path,
-                                                f'\n'
-                                                'CAUTION: You are trying to load %d items\n'
-                                                '\n'
-                                                'Do you want to continue?' % (len(dataLoader, ))
-                                                )
+        elif dataLoader.dataFormat == DirectoryDataLoader.dataFormat:
+            msg = None
+            if len(dataLoader) > MAXITEMLOADING and dataLoader.maximumDepth > MAXITEMDEPTH:
+                msg = (f'CAUTION: You are trying to load {len(dataLoader, ):d} items.\n'
+                       f'This is a large folder, and is {dataLoader.maximumDepth}-subfolder deep.\n'
+                       f'It may take some time to load.\n\n'
+                       f'Do you want to continue?')
+            elif len(dataLoader) > MAXITEMLOADING:
+                msg = (f'CAUTION: You are trying to load {len(dataLoader, ):d} items.\n'
+                       f'Do you want to continue?')
+            elif dataLoader.maximumDepth > MAXITEMDEPTH:
+                msg = (f'CAUTION: You are trying to load {len(dataLoader, ):d} items.\n'
+                       f'The folder is {dataLoader.maximumDepth}-subfolders deep.\n\n'
+                       f'Do you want to continue?')
+            elif len(dataLoader) > MAXITEMLOGGING:
+                msg = (f'CAUTION: You are trying to load {len(dataLoader, ):d} items\n\n'
+                       f'Do you want to continue?')
+            ignore = (bool(msg) and not MessageDialog.showYesNoWarning(f'Directory {dataLoader.path!r}\n', msg))
 
-            if not ok:
-                ignore = True
-
+        dataLoader.createNewProject = createNewProject
+        dataLoader.ignore = ignore
         return (dataLoader, createNewProject, ignore)
 
     #-----------------------------------------------------------------------------------------

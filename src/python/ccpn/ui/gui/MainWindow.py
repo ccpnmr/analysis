@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-07 21:57:28 +0100 (Fri, June 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-27 10:35:17 +0100 (Thu, June 27, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
@@ -77,6 +77,8 @@ from ccpn.util.Colour import colorSchemeTable
 #from collections import OrderedDict
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.MenuActions import _openItemObject
+
+from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
 
 
 # For readability there should be a class:
@@ -463,10 +465,10 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                           'current'                 : self.application.current,
                           'preferences'             : self.application.preferences,
                           'redo'                    : self.application.redo,
-                          'undo'                  : self.application.undo,
+                          'undo'                    : self.application.undo,
                           'get'                     : self.application.get,
-                          'getByPid'            :  self.application.get,
-                          'getByGid'            : self.application.ui.getByGid,
+                          'getByPid'                : self.application.get,
+                          'getByGid'                : self.application.ui.getByGid,
                           'ui'                      : self.application.ui,
                           'mainWindow'              : self,
                           'project'                 : self.application.project,
@@ -495,7 +497,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         self._sideBarFrame.getLayout().addWidget(self._sidebarSplitter, 0, 0)  # must be inserted this way
 
         # create 2 more containers for the search bar and the results
-        self.searchWidgetContainer = Frame(self._sideBarFrame, setLayout=True, grid=(1, 0))  # in this frame is inserted the search widget
+        self.searchWidgetContainer = Frame(self._sideBarFrame, setLayout=True,
+                                           grid=(1, 0))  # in this frame is inserted the search widget
         self.searchResultsContainer = Frame(self, setLayout=True)  # in this frame is inserted the search widget
         self.searchResultsContainer.setMinimumHeight(100)
 
@@ -606,8 +609,9 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                 self._shortcutsDict[twoLetters] = thecallable
             else:
                 alreadyUsed = self._shortcutsDict.get(twoLetters)
-                getLogger().warning(" Ambiguous shortcut overload: %s. \n Assigning to: %s. \nAlready in use for: \n %s." %
-                                    (twoLetters, thecallable, alreadyUsed))
+                getLogger().warning(
+                        " Ambiguous shortcut overload: %s. \n Assigning to: %s. \nAlready in use for: \n %s." %
+                        (twoLetters, thecallable, alreadyUsed))
 
     def _storeMainMenuShortcuts(self, actions):
         for action in actions:
@@ -1081,7 +1085,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         pluginUserPath = self.application.preferences.general.userPluginPath
         import importlib.util
 
-        filePaths = [(aPath(r) / file) for r, d, f in os.walk(aPath(pluginUserPath)) for file in f if os.path.splitext(file)[1] == '.py']
+        filePaths = [(aPath(r) / file) for r, d, f in os.walk(aPath(pluginUserPath)) for file in f if
+                     os.path.splitext(file)[1] == '.py']
 
         for filePath in filePaths:
             # iterate and load the .py files in the plugins directory
@@ -1230,7 +1235,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             if undos.isDirty():
                 # reply = MessageDialog.showMulti(MESSAGE, DETAIL, [QUIT, CANCEL], checkbox=SAVE_DATA, okText=QUIT,
                 #                                 checked=True)
-                reply = MessageDialog.showMulti(MESSAGE, DETAIL, texts=[SAVE, DONT_SAVE, CANCEL], parent=self, okText=SAVE)
+                reply = MessageDialog.showMulti(MESSAGE, DETAIL, texts=[SAVE, DONT_SAVE, CANCEL], parent=self,
+                                                okText=SAVE)
             else:
                 # reply = QUIT_WITHOUT_SAVING
                 reply = DONT_SAVE
@@ -1247,7 +1253,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                 self.deleteAllNotifiers()
                 self.application._closeProject()  # close if saved
                 QtWidgets.QApplication.quit()
-                os._exit(0)
+                os._exit(0)  # HARSH! actually crash issue only seems to affect newTestApplication :|
 
             else:
                 if event:  # ejb - don't close the project
@@ -1262,7 +1268,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             self.deleteAllNotifiers()
             self.application._closeProject()
             QtWidgets.QApplication.quit()
-            os._exit(0)
+            os._exit(0)  # HARSH! actually crash issue only seems to affect newTestApplication :|
 
         else:
             if event:
@@ -1340,6 +1346,34 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         """
         assert 0 == 1
 
+    def _scanDataLoaders(self, dataLoaders, func: callable = lambda _: True, result=None, depth=0) -> list:
+        """Replace the list comprehension below to allow nested tree of dataLoaders.
+        Assumes that recursive==True in the DirectoryDataLoader __init__
+        """
+        if result is None:
+            result = []
+        for loader in dataLoaders:
+            url, _, createNew, ignore = loader.path, loader, loader.createNewProject, loader.ignore
+            if ignore:
+                continue
+            if getattr(loader, 'dataLoaders', None) is not None and getattr(loader, 'recursive', None) is True:
+                self._scanDataLoaders(loader.dataLoaders, result=result, func=func, depth=depth + 1)
+            elif loader and func(loader):
+                result.append((url, loader, createNew))
+        return result
+
+    def _getStats(self, dataLoaders: list) -> tuple[int, int]:
+        """Get the maximum  count/depth of items in the dataLoader-tree to
+        check before loading.
+        """
+        maxCount, maxDepth = 0, 0
+        for loader in dataLoaders:
+            if isinstance(loader, DirectoryDataLoader):
+                mc, md = self._getStats(loader.dataLoaders)
+                maxCount = max(mc, loader.count)
+                maxDepth = max(md, loader.depth)
+        return maxCount, maxDepth
+
     def _processDroppedItems(self, data) -> list:
         """Handle the dropped urls
         :return list of loaded objects
@@ -1354,12 +1388,11 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         if urls is None:
             return []
 
-        getLogger().info('Handling urls ...')
-
         # dataLoaders: A list of (url, dataLoader, createsNewProject, ignore) tuples.
         # createsNewProject: to evaluate later call _loadProject; eg. for NEF
         # ignore: user opted to skip this one; e.g. a spectrum already present
         dataLoaders = []
+        _loaders = []
         # analyse the Urls
         for url in urls:
             # try finding a data loader, catch any errors for recognised but
@@ -1367,28 +1400,30 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             try:
                 dataLoader, createsNewProject, ignore = self.ui._getDataLoader(url)
                 dataLoaders.append((url, dataLoader, createsNewProject, ignore))
+                # NOTE:ED - hack to get recursive dataLoaders to check valid new-projects first
+                _loaders.append(dataLoader)
 
             except (RuntimeError, ValueError) as es:
                 MessageDialog.showError(f'Loading "{url}"',
                                         f'{es}',
                                         parent=self)
+        if not self._scanDataLoaders(_loaders):
+            # return if everything is empty
+            return []
+        getLogger().info('Handling urls ...')
 
         # All ignored urls
-        urlsToIgnore = [(url, dl, createNew) for url, dl, createNew, ignore in dataLoaders if
-                        (ignore)]
+        urlsToIgnore = self._scanDataLoaders(_loaders, func=lambda dl: dl.ignore)
         # All valid urls
-        allUrlsToLoad = [(url, dl, createNew) for url, dl, createNew, ignore in dataLoaders if
-                         (not ignore)]
-
+        allUrlsToLoad = self._scanDataLoaders(_loaders, func=lambda dl: not dl.ignore)
         # Error urls
-        errorUrls = [(url, dl, createNew) for url, dl, createNew in allUrlsToLoad if
-                     (dl is None)]
+        errorUrls = self._scanDataLoaders(_loaders, func=lambda dl: dl is None)
         # Project urls
-        newProjectUrls = [(url, dl, createNew) for url, dl, createNew in allUrlsToLoad if
-                          (dl is not None and createNew)]
+        newProjectUrls = self._scanDataLoaders(_loaders, func=lambda dl: (dl is not None and
+                                                                          dl.createNewProject))
         # Data urls
-        dataUrls = [(url, dl, createNew) for url, dl, createNew in allUrlsToLoad if
-                    (dl is not None and not createNew)]
+        dataUrls = self._scanDataLoaders(_loaders, func=lambda dl: (dl is not None and not
+        dl.createNewProject))
 
         # Check for the different (potential) errors
         if len(urlsToIgnore) == len(dataLoaders):
@@ -1399,26 +1434,29 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             # We only dropped one item
             if len(errorUrls) == 1:
                 url = errorUrls[0][0]
-                txt = f'Dropped item "{url}" failed to load.\n' + \
-                      f'\nCheck console/log for details'
-                MessageDialog.showError('Load Data', txt, parent=self)
+                MessageDialog.showError('Load Data', f'Dropped item {url!r} failed to load\n'
+                                                     f'Check console/log for details', parent=self)
                 return []
         else:
             # We dropped multiple items
             if len(errorUrls) == len(allUrlsToLoad):
                 # We only found errors; nothing to load
-                MessageDialog.showError('Load Data', 'No dropped items were recognised\nCheck console/log for details', parent=self)
+                MessageDialog.showError('Load Data', 'No dropped items were recognised\n'
+                                                     'Check console/log for details', parent=self)
                 return []
 
             elif len(errorUrls) >= 1:
                 # We found 1 or more errors
-                MessageDialog.showError('Load Data', '%d dropped items were not recognised\nCheck console/log for details' % \
-                                        len(errorUrls), parent=self)
+                MessageDialog.showError('Load Data', f'{len(errorUrls):d} dropped items were not recognised\n'
+                                                     f'Check console/log for details', parent=self)
+                return []
 
         if len(newProjectUrls) > 1:
             # We found more than one dataLoader that would create a new project; not allowed
-            MessageDialog.showError('Load Data', 'More than one (%d) dropped items create a new project' % \
-                                    len(newProjectUrls), parent=self)
+            MessageDialog.showError('Load Data',
+                                    f'Only one new project can be created at a time\n'
+                                    f'{len(newProjectUrls):d} dropped items need to create new projects',
+                                    parent=self)
             return []
 
         if len(newProjectUrls) + len(dataUrls) == 0:
@@ -1455,6 +1493,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
     #-----------------------------------------------------------------------------------------
     # Code moved from previously lib.GuiWindow
     #-----------------------------------------------------------------------------------------
+
+    @logCommand('mainWindow.')
     def deassignPeaks(self):
         """Deassign all from selected peaks
         """
@@ -1514,6 +1554,55 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             else:
                 # don't show the popup
                 self.project.deleteObjects(*(obj for _name, itms, _check in deleteItems for obj in itms))
+
+    @logCommand('mainWindow.')
+    def propagateAssignments(self):
+        from ccpn.core.lib.AssignmentLib import propagateAssignments
+
+        # need another way to select this :| get from preferences?
+        tolerancesByIsotope = {'H': 5.01,
+                               'C': 0.2,
+                               'N': 2.1}
+        peaks = self.application.current.peaks
+        if not peaks:
+            return
+        propagateAssignments(peaks=peaks, tolerancesByIsotope=tolerancesByIsotope)
+
+    @logCommand('mainWindow.')
+    def copyAssignments(self):
+        from ccpn.core.lib.AssignmentLib import copyAssignments
+
+        peaks = self.application.current.peaks
+        if not peaks:
+            return
+        copyAssignments(peaks=peaks)
+
+    @logCommand('mainWindow.')
+    def propagateAssignmentsFromReference(self):
+        from ccpn.core.lib.AssignmentLib import propagateAssignmentsFromReference
+
+        # need another way to select this :| get from preferences?
+        tolerancesByIsotope = {'H': 5.01,
+                               'C': 0.2,
+                               'N': 2.1}
+        cStrip = self.application.current.strip
+        peak = ((cStrip and cStrip._lastClickedObjects and cStrip._lastClickedObjects[0]) or
+                self.application.current.peak)
+        if not peak:
+            return
+        propagateAssignmentsFromReference(None, referencePeak=peak,
+                                          tolerancesByIsotope=tolerancesByIsotope)
+
+    @logCommand('mainWindow.')
+    def copyAssignmentsFromReference(self):
+        from ccpn.core.lib.AssignmentLib import copyAssignmentsFromReference
+
+        cStrip = self.application.current.strip
+        peak = ((cStrip and cStrip._lastClickedObjects and cStrip._lastClickedObjects[0]) or
+                self.application.current.peak)
+        if not peak:
+            return
+        copyAssignmentsFromReference(None, referencePeak=peak)
 
     def _openCopySelectedPeaks(self):
         from ccpn.ui.gui.popups.CopyPeaksPopup import CopyPeaks
@@ -1605,7 +1694,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                                     spectrumView.spectrum.newIntegralList()
 
                                 # stupid bug! mixing views and lists
-                                validIntegralLists = [ilv.integralList for ilv in spectrumView.integralListViews if ilv.isDisplayed]
+                                validIntegralLists = [ilv.integralList for ilv in spectrumView.integralListViews if
+                                                      ilv.isDisplayed]
 
                                 for integralList in validIntegralLists:
 
@@ -2000,7 +2090,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                             _prefsGeneral = self.application.preferences.general
                             defaultColour = _prefsGeneral.defaultMarksColour
                             if not defaultColour.startswith('#'):
-                                colourList = colorSchemeTable[defaultColour] if defaultColour in colorSchemeTable else ['#FF0000']
+                                colourList = colorSchemeTable[defaultColour] if defaultColour in colorSchemeTable else [
+                                    '#FF0000']
                                 _prefsGeneral._defaultMarksCount = _prefsGeneral._defaultMarksCount % len(colourList)
                                 defaultColour = colourList[_prefsGeneral._defaultMarksCount]
                                 _prefsGeneral._defaultMarksCount += 1
@@ -2031,7 +2122,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                     _prefsGeneral = self.application.preferences.general
                     defaultColour = _prefsGeneral.defaultMarksColour
                     if not defaultColour.startswith('#'):
-                        colourList = colorSchemeTable[defaultColour] if defaultColour in colorSchemeTable else ['#FF0000']
+                        colourList = colorSchemeTable[defaultColour] if defaultColour in colorSchemeTable else [
+                            '#FF0000']
                         _prefsGeneral._defaultMarksCount = _prefsGeneral._defaultMarksCount % len(colourList)
                         defaultColour = colourList[_prefsGeneral._defaultMarksCount]
                         _prefsGeneral._defaultMarksCount += 1
@@ -2139,7 +2231,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                 try:
                     peak = peaks[0]
                     peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4,
-                                        minDropFactor=minDropFactor, searchBoxMode=searchBoxMode, searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
+                                        minDropFactor=minDropFactor, searchBoxMode=searchBoxMode,
+                                        searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
                     if peak.spectrum.dimensionCount == 1 and peak.figureOfMerit < 1:
                         showWarning(f'Cannot snap peak', f'Figure of merit below the snapping threshold of 1.')
                 except Exception as es:
@@ -2149,24 +2242,27 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                 with progressManager(self, 'Snapping peaks to extrema'):
 
                     # try:
-                        _is1Ds = [p.spectrum.dimensionCount == 1 for p in peaks]
-                        if all(_is1Ds):
-                            from ccpn.core.lib.PeakPickers.PeakSnapping1D import snap1DPeaks
+                    _is1Ds = [p.spectrum.dimensionCount == 1 for p in peaks]
+                    if all(_is1Ds):
+                        from ccpn.core.lib.PeakPickers.PeakSnapping1D import snap1DPeaks
 
-                            snap1DPeaks(peaks)
-                            nonSnappingPeaks = [pk for pk in peaks if pk.figureOfMerit < 1]
+                        snap1DPeaks(peaks)
+                        nonSnappingPeaks = [pk for pk in peaks if pk.figureOfMerit < 1]
 
-                            msg = 'one of the selected peak' if len(nonSnappingPeaks) == 1 else 'some of the selected peaks'
-                            if len(nonSnappingPeaks) > 0:
-                                showWarning(f'Cannot snap {msg}', f'Figure of merit below the snapping threshold of 1 for {nonSnappingPeaks}')
-                        else:
-                            peaks.sort(key=lambda x: x.position[0] if x.position and None not in x.position else 0, reverse=False)  # reorder peaks by position
-                            for peak in peaks:
-                                peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4,
-                                                    minDropFactor=minDropFactor, searchBoxMode=searchBoxMode, searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
+                        msg = 'one of the selected peak' if len(nonSnappingPeaks) == 1 else 'some of the selected peaks'
+                        if len(nonSnappingPeaks) > 0:
+                            showWarning(f'Cannot snap {msg}',
+                                        f'Figure of merit below the snapping threshold of 1 for {nonSnappingPeaks}')
+                    else:
+                        peaks.sort(key=lambda x: x.position[0] if x.position and None not in x.position else 0,
+                                   reverse=False)  # reorder peaks by position
+                        for peak in peaks:
+                            peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4,
+                                                minDropFactor=minDropFactor, searchBoxMode=searchBoxMode,
+                                                searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
 
-                    # except Exception as es:
-                    #     showWarning('Snap to Extremum', str(es))
+                # except Exception as es:
+                #     showWarning('Snap to Extremum', str(es))
 
             else:
                 getLogger().warning('No selected peak/s. Select a peak first.')
@@ -2390,7 +2486,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             from ccpn.ui.gui.popups.StripPlotPopup import StripPlotPopup
 
             popup = StripPlotPopup(parent=self, mainWindow=self, spectrumDisplay=self.current.strip.spectrumDisplay,
-                                   includePeakLists=includePeakLists, includeNmrChains=includeNmrChains, includeSpectrumTable=includeSpectrumTable)
+                                   includePeakLists=includePeakLists, includeNmrChains=includeNmrChains,
+                                   includeSpectrumTable=includeSpectrumTable)
             popup.exec_()
         else:
             showWarning('Make Strip Plot', 'No selected spectrumDisplay')

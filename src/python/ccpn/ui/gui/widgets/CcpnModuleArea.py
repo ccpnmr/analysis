@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-07 21:57:29 +0100 (Fri, June 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-26 11:56:03 +0100 (Wed, June 26, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
@@ -32,6 +32,7 @@ from pyqtgraph.dockarea.Dock import Dock
 from pyqtgraph.dockarea.DockArea import DockArea, DockDrop
 from pyqtgraph.dockarea.Container import Container
 
+from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 
 from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
@@ -45,7 +46,7 @@ from ccpn.ui.gui.widgets.MainWindow import MainWindow
 # from ccpn.ui.gui.lib.GuiWindow import GuiWindow
 from ccpn.ui.gui.lib.Shortcuts import Shortcuts
 from ccpn.ui.gui.guiSettings import getColours, LABEL_FOREGROUND
-from ccpn.ui.gui.lib.mouseEvents import (SELECT, PICK, MouseModes, setCurrentMouseMode, getCurrentMouseMode)
+from ccpn.ui.gui.lib.mouseEvents import SELECT, PICK, MouseModes, setCurrentMouseMode
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel
 from ccpn.ui.gui.widgets.GuiTable import GuiTable
@@ -209,15 +210,16 @@ class CcpnModuleArea(ModuleArea, DropBase):
 
         # drop an item from the sidebar onto the drop area
         if DropBase.PIDS in data and isinstance(data['event'].source(), (SideBar, SideBarSearchListView)):
-
             # process Pids
             self.mainWindow._processPids(data, position=self.dropArea)
 
         elif DropBase.URLS in data:
             objs = self.mainWindow._processDroppedItems(data)
-
+            # discard opening any further items if project loaded (may be inconsistent with mainWindow)
+            if list(filter(lambda obj: isinstance(obj, Project), objs)):
+                return
             # dropped spectra will automatically open from here
-            spectra = [obj for obj in objs if isinstance(obj, Spectrum)]
+            spectra = list(filter(lambda obj: isinstance(obj, Spectrum), objs))
             _openItemObject(self.mainWindow, spectra, position=self.dropArea)
 
         if hasattr(source, 'implements') and source.implements('dock'):
@@ -229,7 +231,8 @@ class CcpnModuleArea(ModuleArea, DropBase):
 
         event.accept()
 
-    def _maximisedAttrib(self, widget):
+    @staticmethod
+    def _maximisedAttrib(widget):
         try:
             getattr(widget, 'maximised')
             return True
@@ -440,7 +443,8 @@ class CcpnModuleArea(ModuleArea, DropBase):
                 relativeTo = self.docks[relativeTo]
             container = self.getContainer(relativeTo)
             if container is None:
-                raise TypeError("Dock %s is not contained in a DockArea; cannot add another dock relative to it." % relativeTo)
+                raise TypeError(f"Dock {relativeTo} is not contained in a DockArea; "
+                                f"cannot add another dock relative to it.")
             neighbor = relativeTo
 
         ## what container type do we need?
@@ -494,13 +498,13 @@ class CcpnModuleArea(ModuleArea, DropBase):
         :return:
         """
         from ccpn.ui.gui.modules.HelpModule import HelpModule
+
         helpModule = None
         for modName, module in self.modules.items():
             if isinstance(module, HelpModule):
                 if module.parentModuleName == parentModuleName:
                     helpModule = module
         return helpModule
-
 
     def _restoreAsTheLastSeenModule(self, module):
         """
@@ -544,7 +548,9 @@ class CcpnModuleArea(ModuleArea, DropBase):
         Move an existing Dock to a new location.
         """
         ## Moving to the edge of a tabbed dock causes a drop outside the tab box
-        if position in ['left', 'right', 'top', 'bottom'] and neighbor is not None and neighbor.container() is not None and neighbor.container().type() == 'tab':
+        if (position in ['left', 'right', 'top', 'bottom'] and
+                neighbor is not None and neighbor.container() is not None and
+                neighbor.container().type() == 'tab'):
             neighbor = neighbor.container()
         self.addModule(dock, position, neighbor)
 
@@ -673,7 +679,8 @@ class CcpnModuleArea(ModuleArea, DropBase):
 
             if state['main'] is not None:
                 # 2) create container structure, move docks into new containers
-                self._buildFromState(modulesNames, state['main'], docks, self, restoreSpectrumDisplay=restoreSpectrumDisplay)
+                self._buildFromState(modulesNames, state['main'], docks, self,
+                                     restoreSpectrumDisplay=restoreSpectrumDisplay)
 
             ## 3) create floating areas, populate
             for s in state[floatContainer]:
@@ -697,12 +704,13 @@ class CcpnModuleArea(ModuleArea, DropBase):
                     a._buildFromState(modulesNames, s, docks, a, restoreSpectrumDisplay=restoreSpectrumDisplay)
                     a.win.setGeometry(*s[2]['geo'])
                 else:
-                    a._buildFromState(modulesNames, s[0]['main'], docks, a, restoreSpectrumDisplay=restoreSpectrumDisplay)
+                    a._buildFromState(modulesNames, s[0]['main'], docks, a,
+                                      restoreSpectrumDisplay=restoreSpectrumDisplay)
                     a.win.setGeometry(*s[1])
 
             ## 4) Add any remaining docks to the bottom
             for d in docks.values():
-                self.moveDock(d, 'below', None, initTime=True)
+                self.moveDock(d, 'below', None)  #, initTime=True)
 
             ## 5) kill old containers
             # if is not none  delete
@@ -727,7 +735,8 @@ class CcpnModuleArea(ModuleArea, DropBase):
             # try:
             if contents in openedModulesNames:
                 obj = docks[contents]
-                if not isinstance(obj, GuiSpectrumDisplay) or (isinstance(obj, GuiSpectrumDisplay) and restoreSpectrumDisplay):
+                if not isinstance(obj, GuiSpectrumDisplay) or \
+                        (isinstance(obj, GuiSpectrumDisplay) and restoreSpectrumDisplay):
                     obj.restoreWidgetsState(**state)
                 del docks[contents]
             else:
@@ -740,7 +749,8 @@ class CcpnModuleArea(ModuleArea, DropBase):
         # GST only present in v 3.1 layouts
         elif typ == 'area':
             if contents is not None:
-                self._buildFromState(openedModulesNames, contents, docks, root, depth, restoreSpectrumDisplay=restoreSpectrumDisplay)
+                self._buildFromState(openedModulesNames, contents, docks, root, depth,
+                                     restoreSpectrumDisplay=restoreSpectrumDisplay)
             obj = None
 
             # except KeyError:
@@ -754,7 +764,8 @@ class CcpnModuleArea(ModuleArea, DropBase):
 
             if typ != 'dock':
                 for o in contents:
-                    self._buildFromState(openedModulesNames, o, docks, obj, depth + 1, restoreSpectrumDisplay=restoreSpectrumDisplay)
+                    self._buildFromState(openedModulesNames, o, docks, obj, depth + 1,
+                                         restoreSpectrumDisplay=restoreSpectrumDisplay)
                 obj.apoptose(propagate=False)
                 obj.restoreState(state)  ## this has to be done later?
 

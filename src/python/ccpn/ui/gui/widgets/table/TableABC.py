@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-20 16:42:23 +0100 (Thu, June 20, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-06-21 19:48:44 +0100 (Fri, June 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -329,7 +329,7 @@ class TableABC(QtWidgets.QTableView):
         """Actions to be performed after the dataFrame has been updated for the table
         """
         # update the visible columns
-        self.headerColumnMenu.refreshHiddenColumns()
+        self.headerColumnMenu.restoreColumns()
 
     def setModel(self, model: QtCore.QAbstractItemModel) -> None:
         """Set the model for the view
@@ -1162,6 +1162,12 @@ class TableABC(QtWidgets.QTableView):
         """Return True if the column is internal and not for external viewing
         """
         return self.headerColumnMenu.isColumnInternal(column)
+
+    def showColumn(self, column: int) -> None:
+        width = self.columnWidth(column)
+        super().showColumn(column)
+        if not width:
+            self.resizeColumnToContents(column)
 
     #=========================================================================================
     # Table functions

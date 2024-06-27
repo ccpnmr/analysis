@@ -4,19 +4,20 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-15 12:03:57 +0000 (Tue, February 15, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2024-06-06 21:20:48 +0100 (Thu, June 06, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -108,15 +109,15 @@ def _getNmrAtomName(popupinstance, nmrAtom, nmrResidue=None, isotopeCode=None):
         atomNotOfSameIsotopeCode = [x for x in atomNameOptions if x not in atomsNameOptionsByIC]
         atomOfSameIsotopeCode = [x for x in atomNameOptions if x in atomsNameOptionsByIC]
         _atomNameOptions = [nmrAtomName] + \
-                          [OtherByIC] + \
-                          atomOfSameIsotopeCode + \
-                          [OtherNames] + \
-                          atomNotOfSameIsotopeCode
+                           [OtherByIC] + \
+                           atomOfSameIsotopeCode + \
+                           [OtherNames] + \
+                           atomNotOfSameIsotopeCode
         nameSeparators = [OtherNames, OtherByIC]
     else:
         _atomNameOptions = [nmrAtomName] + \
-                          [OtherNames] + \
-                          atomNameOptions
+                           [OtherNames] + \
+                           atomNameOptions
         nameSeparators = [OtherNames]
 
     nameWidget.modifyTexts(_atomNameOptions)
@@ -130,6 +131,10 @@ def _isotopeCodeCallback(cls, value):
     _isotopeCode = value if value in NEF_ATOM_NAMES else None
     _getNmrAtomName(cls, cls.obj, isotopeCode=value)
 
+
+#=========================================================================================
+# NmrAtomNewPopup
+#=========================================================================================
 
 class NmrAtomNewPopup(AttributeEditorPopupABC):
     """
@@ -156,8 +161,10 @@ class NmrAtomNewPopup(AttributeEditorPopupABC):
 
     klass = NmrAtom
     attributes = [('Name', PulldownListCompoundWidget, getattr, None, _getNmrAtomName, None, {'editable': True}),
-                  ('NmrResidue', PulldownListCompoundWidget, getattr, setattr, _getNewNmrResidueTypes, _nmrResidueCallback, {'editable': False},),
-                  ('IsotopeCode', PulldownListCompoundWidget, getattr, setattr, _getNmrAtomIsotopeCodes, _isotopeCodeCallback, {'editable': True}),
+                  ('NmrResidue', PulldownListCompoundWidget, getattr, setattr, _getNewNmrResidueTypes,
+                   _nmrResidueCallback, {'editable': False},),
+                  ('IsotopeCode', PulldownListCompoundWidget, getattr, setattr, _getNmrAtomIsotopeCodes,
+                   _isotopeCodeCallback, {'editable': True}),
                   ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
                   ]
 
@@ -203,6 +210,10 @@ class NmrAtomNewPopup(AttributeEditorPopupABC):
         pass
 
 
+#=========================================================================================
+# NmrAtomEditPopup
+#=========================================================================================
+
 class NmrAtomEditPopup(AttributeEditorPopupABC):
     """
     NmrAtom attributes edit existing popup
@@ -241,7 +252,8 @@ class NmrAtomEditPopup(AttributeEditorPopupABC):
     klass = NmrAtom
     attributes = [('Pid', EntryCompoundWidget, getattr, None, None, None, {}),
                   ('Name', PulldownListCompoundWidget, getattr, None, _getNmrAtomName, None, {'editable': True}),
-                  ('NmrResidue', PulldownListCompoundWidget, getattr, setattr, _getNmrResidueTypes, _nmrResidueCallback, {'editable': False}),
+                  ('NmrResidue', PulldownListCompoundWidget, getattr, setattr, _getNmrResidueTypes, _nmrResidueCallback,
+                   {'editable': False}),
                   ('IsotopeCode', EntryCompoundWidget, getattr, None, None, None, {}),
                   ('Merge to Existing', CheckBoxCompoundWidget, None, None, None, None, {'checkable': True}),
                   ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
@@ -271,14 +283,16 @@ class NmrAtomEditPopup(AttributeEditorPopupABC):
             _ok = True
             if not merge:
                 # popup warning if merge not specified
-                _msg = 'Cannot re-assign NmrAtom to an existing NmrAtom of another NmrResidue without merging.\n\nDo you want to merge?'
-                _ok = showYesNoWarning(str(self.windowTitle()), _msg)
-
+                _msg = ('Cannot re-assign NmrAtom to an existing NmrAtom of another NmrResidue without merging.\n'
+                        'Do you want to merge?')
+                _ok = showYesNoWarning(str(self.windowTitle()), _msg,
+                                       dontShowEnabled=True,
+                                       defaultResponse=True,
+                                       popupId=f'{self.__class__.__name__}Merge')
             if _ok:
                 destNmrAtom.mergeNmrAtoms(self.obj)
                 newComment = ' - '.join(filter(None, [destNmrAtom.comment, comment]))
                 destNmrAtom.comment = newComment
-
         else:
             # assign to a new nmrAtom
             self.obj.assignTo(chainCode=destNmrResidue.nmrChain.shortName,

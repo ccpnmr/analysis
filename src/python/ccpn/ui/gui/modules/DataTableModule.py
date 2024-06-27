@@ -5,8 +5,9 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-08 12:38:21 +0100 (Wed, May 08, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-06-21 19:48:44 +0100 (Fri, June 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,7 +32,7 @@ import pandas as pd
 from collections import OrderedDict
 
 from ccpn.core.DataTable import DataTable as KlassTable
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.modules.CcpnModule import CcpnTableModule
 from ccpn.ui.gui.widgets.Spacer import Spacer
 # from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.Label import Label
@@ -60,14 +61,13 @@ LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
 # DataTableModule
 #=========================================================================================
 
-class DataTableModule(CcpnModule):
+class DataTableModule(CcpnTableModule):
     """This class implements the module by wrapping a DataTable instance
     """
+    className = 'DataTableModule'
     includeSettingsWidget = True
     maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
     settingsPosition = 'top'
-
-    className = f'{KlassTable.className}Module'
     _allowRename = True
 
     activePulldownClass = KlassTable
@@ -131,12 +131,12 @@ class DataTableModule(CcpnModule):
         # self._splitter.setSizes([1000, 2000])
 
         # add the guiTable to the bottom
-        self._tableWidget = _TableWidget(parent=_bottomWidget,
-                                         mainWindow=self.mainWindow,
-                                         moduleParent=self,
-                                         setLayout=True,
-                                         showVerticalHeader=False,
-                                         grid=(0, 0))
+        self._tableWidget = _DataTableWidget(parent=_bottomWidget,
+                                             mainWindow=self.mainWindow,
+                                             moduleParent=self,
+                                             setLayout=True,
+                                             showVerticalHeader=False,
+                                             grid=(0, 0))
 
         Spacer(_topWidget, 5, 5,
                QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
@@ -264,6 +264,7 @@ class DataTableModule(CcpnModule):
         """
         CCPN-INTERNAL: used to close the module
         """
+        self._saveColumns()
         if self._modulePulldown:
             self._modulePulldown.unRegister()
         if self._tableWidget:
@@ -396,16 +397,15 @@ class DataTableModule(CcpnModule):
 # _TableWidget
 #=========================================================================================
 
-class _TableWidget(Table):
+class _DataTableWidget(Table):
     """
     Class to present a DataTable
     """
-    className = '_TableWidget'
+    className = '_DataTableWidget'
     attributeName = KlassTable._pluralLinkName
 
     defaultHidden = []
     _internalColumns = []
-    _hiddenColumns = []
 
     _defaultEditable = False
     _enableCopyCell = True
@@ -434,7 +434,6 @@ class _TableWidget(Table):
         self._initTableCommonWidgets(parent, **kwds)
 
         # initialise the currently attached dataFrame
-        self._hiddenColumns = []
         self.dataFrameObject = None
 
         # initialise the table
@@ -444,6 +443,7 @@ class _TableWidget(Table):
 
         self.moduleParent = moduleParent
 
+        # Save/restore of hidden-columns doesn't make sense here yet, as core-object dataTables may all be different
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()
 
@@ -513,7 +513,7 @@ class _TableWidget(Table):
     #=========================================================================================
 
     def mousePressEvent(self, e: QtGui.QMouseEvent) -> None:
-        super(_TableWidget, self).mousePressEvent(e)
+        super(_DataTableWidget, self).mousePressEvent(e)
 
         self.setCurrent()
 

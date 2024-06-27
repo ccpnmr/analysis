@@ -5,8 +5,9 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-08 12:38:21 +0100 (Wed, May 08, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-06-21 19:48:43 +0100 (Fri, June 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -39,6 +40,9 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.util.Logging import getLogger
 
+
+_TABLES = 'tables'
+_HIDDENCOLUMNS = 'hiddenColumns'
 
 #=========================================================================================
 # _CoreTableWidgetABC
@@ -69,11 +73,15 @@ class _CoreTableWidgetABC(_ProjectTableABC):
                          setLayout=True,
                          **kwds)
 
-        self.headerColumnMenu.setInternalColumns(self._internalColumns, update=False)
-        self.headerColumnMenu.setDefaultColumns(self.defaultHidden, update=False)
-
+        self.headerColumnMenu.setInternalColumns(self._internalColumns)
+        self.headerColumnMenu.setDefaultColumns(self.defaultHidden)
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()
+
+    def setClassDefaultColumns(self, texts):
+        """Set a list of default column-headers that are hidden when first shown.
+        """
+        self.headerColumnMenu.saveColumns(texts)
 
     #=========================================================================================
     # Properties

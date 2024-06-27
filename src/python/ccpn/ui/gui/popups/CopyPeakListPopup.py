@@ -5,8 +5,9 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-04 15:19:21 +0100 (Thu, April 04, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Vicky Higman $"
+__dateModified__ = "$dateModified: 2024-06-03 10:27:55 +0100 (Mon, June 03, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,7 +30,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
-from ccpn.ui.gui.widgets.SettingsWidgets import PeakListSelectionWidget
+from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumSelectionWidget
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
@@ -95,17 +96,16 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
                                 }
 
     def setWidgets(self):
-        # self.sourcePeakListPullDownCW = cw.PulldownListCompoundWidget(self.mainWidget, labelText='Source PeakList',
-        #                                                       grid=(0, 0), callback=self._populateTargetSpectraPullDown)
-        self.sourcePeakListPullDownCW = PeakListSelectionWidget(self.mainWidget,
-                                                                labelText='Source PeakList',
-                                                                grid=(0, 0),
-                                                                standardListItems=[str(pl.pid) for pl in
-                                                                                   self.project.peakLists])
+        self.sourcePeakListPullDownCW = cw.PulldownListCompoundWidget(self.mainWidget, labelText='Source PeakList',
+                                                              grid=(0, 0), callback=self._populateTargetSpectraPullDown)
 
         self.sourcePeakListPullDown = self.sourcePeakListPullDownCW.pulldownList
-        self.targetSpectraPullDownCW = cw.PulldownListCompoundWidget(self.mainWidget, labelText='Target Spectrum',
-                                                                     grid=(1, 0))
+        self.targetSpectraPullDownCW = SpectrumSelectionWidget(self.mainWidget,
+                                                                     labelText='Target Spectra',
+                                                                     grid=(1, 0),
+                                                                     tipText='Select Target Spectra',
+                                                                     standardListItems=[str(sp.pid) for sp in
+                                                                                        self.project.spectra])
         self.targetSpectraPullDown = self.targetSpectraPullDownCW.pulldownList
 
         checkBoxTexts = [_SnapToExtremum, _RefitPeaks, _RefitPeaksAtPosition, _RecalculateVolume]
@@ -138,15 +138,15 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
 
     def _okClicked(self):
         with undoBlockWithoutSideBar():
-            self.targetSpectrum = self.project.getByPid(self.targetSpectraPullDown.getText())
-            # self.sourcePeakList = self.project.getByPid(self.sourcePeakListPullDown.getText())
+            # self.targetSpectrum = self.project.getByPid(self.targetSpectraPullDown.getTexts())
+            self.sourcePeakList = self.project.getByPid(self.sourcePeakListPullDown.getText())
             # self._copyPeakListToSpectrum()
 
-            peakLists = self.project.getObjectsByPids(self.sourcePeakListPullDownCW.getTexts())
+            spectra = self.project.getObjectsByPids(self.targetSpectraPullDownCW.getTexts())
 
             errors = []
-            for pl in peakLists:
-                self.sourcePeakList = pl
+            for sp in spectra:
+                self.targetSpectrum = sp
                 try:
                     self._copyPeakListToSpectrum()
                 except Exception as es:
@@ -225,7 +225,8 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
             self.targetSpectraPullDown.setData(targetPullDownData)
 
             if visibleSpectra:
-                self.targetSpectraPullDown.select(visibleSpectra[0].pid)
+                for vs in visibleSpectra:
+                    self.targetSpectraPullDown.select(vs.pid)
 
     def _getDefaultPeakList(self):
         """:return the default PeakList based on current settings, or None

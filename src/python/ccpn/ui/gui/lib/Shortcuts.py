@@ -5,8 +5,9 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-17 12:03:17 +0100 (Wed, April 17, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-06-26 14:52:13 +0100 (Wed, June 26, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -77,13 +78,13 @@ class Shortcuts:
         addShortCut("u, y", self, partial(mainWindow.createMultipletAxisMarks, 1), context=context)
         addShortCut("u, z", self, partial(mainWindow.createMultipletAxisMarks, 2), context=context)
         addShortCut("u, w", self, partial(mainWindow.createMultipletAxisMarks, 3), context=context)
-        addShortCut("f, n", self,
-                    partial(SpectrumDisplayLib.navigateToCurrentNmrResiduePosition, mainWindow.application),
-                    context=context)
-        addShortCut("f, p", self, partial(SpectrumDisplayLib.navigateToCurrentPeakPosition, mainWindow.application),
-                    context=context)
-        addShortCut("c, a", self, partial(AssignmentLib.propagateAssignments, current=mainWindow.application.current),
-                    context=context)
+        addShortCut("f, n", self, partial(SpectrumDisplayLib.navigateToCurrentNmrResiduePosition,
+                                          mainWindow.application), context=context)
+        addShortCut("f, p", self, partial(SpectrumDisplayLib.navigateToCurrentPeakPosition,
+                                          mainWindow.application), context=context)
+        # addShortCut("p, g", self, mainWindow.propagateAssignments, context=context)  # defined in menu
+        # addShortCut("c, a", self, mainWindow.copyAssignments,
+        #             context=context)
         addShortCut("c, z", self, mainWindow._clearCurrentPeaks, context=context)
         addShortCut("c, o", self, mainWindow.setContourLevels, context=context)
 

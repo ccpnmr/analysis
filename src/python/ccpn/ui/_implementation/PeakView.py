@@ -3,9 +3,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-01 19:39:56 +0100 (Thu, June 01, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-06-07 19:26:08 +0100 (Fri, June 07, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -118,9 +119,11 @@ Peak.peakViews = property(getter, None, None, 'PeakViews associated with Peak.')
 del getter
 
 
-def getTextOffset(self: Peak, peakListView: PeakListView) -> tuple:
+def getTextOffset(self: Peak, peakListView: PeakListView) -> tuple | None:
     """Get textOffset for the peak for the specified peakListView
     """
+    if self.isDeleted:
+        return
     if view := self._wrappedData.findFirstPeakView(peakListView=peakListView._wrappedData.peakListView):
         # bypass the v3-operator in superclass
         tOffset = view.textOffset
@@ -133,9 +136,11 @@ Peak.getTextOffset = getTextOffset
 del getTextOffset
 
 
-def getPeakView(self: Peak, peakListView: PeakListView) -> tuple:
+def getPeakView(self: Peak, peakListView: PeakListView) -> tuple | None:
     """Get peakView for the peak for the specified peakListView.
     """
+    if self.isDeleted:
+        return
     if view := self._wrappedData.findFirstPeakView(peakListView=peakListView._wrappedData.peakListView):
         return self.project._data2Obj.get(view)
 

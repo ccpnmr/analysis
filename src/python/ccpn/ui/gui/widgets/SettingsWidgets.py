@@ -5,8 +5,9 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:28 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__modifiedBy__ = "$modifiedBy: Vicky Higman $"
+__dateModified__ = "$dateModified: 2024-06-03 10:27:55 +0100 (Mon, June 03, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -58,6 +59,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, \
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.ui.gui.widgets.Base import SignalBlocking
+from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.Chain import Chain
 from ccpn.core.PeakList import PeakList
@@ -1783,6 +1785,9 @@ class ObjectSelectionWidget(ListCompoundWidget):
 class ChainSelectionWidget(ObjectSelectionWidget):
     KLASS = Chain
 
+
+class SpectrumSelectionWidget(ObjectSelectionWidget):
+    KLASS = Spectrum
 
 class SpectrumGroupSelectionWidget(ObjectSelectionWidget):
     KLASS = SpectrumGroup

@@ -34,7 +34,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from collections import OrderedDict as od
-from ccpn.framework.lib.spectrumSimulation.SpectrumFromChemicalShiftList import CSL2SPECTRUM_DICT
+from ccpn.framework.lib.peakListSimulation.peakListFromChemicalShiftList import CSL2SPECTRUM_DICT
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.ui.gui.widgets.HLine import HLine, LabeledHLine
 from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame

@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-31 18:51:37 +0100 (Fri, May 31, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-06-26 11:56:02 +0100 (Wed, June 26, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -109,6 +109,8 @@ QtCore.qInstallMessageHandler(qtMessageHandler)
 REMOVEDEBUG = r'\(\S+\.\w+:\d+\)$'
 
 MAXITEMLOGGING = 4
+MAXITEMLOADING = 10
+MAXITEMDEPTH = 2
 
 
 #=========================================================================================
@@ -491,12 +493,10 @@ class Gui(Ui):
                 # there was an error from the dialog
                 getLogger().debug(f'==> Cancelled loading ccpn project "{path}" - error in dialog')
                 ignore = True
-
             if DONT_OPEN in ok:
                 # user selection not to load
                 getLogger().info(f'==> Cancelled loading ccpn project "{path}"')
                 ignore = True
-
             elif MAKE_ARCHIVE in ok:
                 # flag to make a backup archive
                 dataLoader.makeArchive = True
@@ -537,17 +537,27 @@ class Gui(Ui):
                 popup.exec_()
                 ignore = (popup.result == popup.CANCEL_PRESSED)
 
-        elif dataLoader.dataFormat == DirectoryDataLoader.dataFormat and len(dataLoader) > MAXITEMLOGGING:
-            ok = MessageDialog.showYesNoWarning('Directory "%s"\n' % dataLoader.path,
-                                                f'\n'
-                                                'CAUTION: You are trying to load %d items\n'
-                                                '\n'
-                                                'Do you want to continue?' % (len(dataLoader, ))
-                                                )
+        elif dataLoader.dataFormat == DirectoryDataLoader.dataFormat:
+            msg = None
+            if len(dataLoader) > MAXITEMLOADING and dataLoader.maximumDepth > MAXITEMDEPTH:
+                msg = (f'CAUTION: You are trying to load {len(dataLoader, ):d} items.\n'
+                       f'This is a large folder, and is {dataLoader.maximumDepth}-subfolder deep.\n'
+                       f'It may take some time to load.\n\n'
+                       f'Do you want to continue?')
+            elif len(dataLoader) > MAXITEMLOADING:
+                msg = (f'CAUTION: You are trying to load {len(dataLoader, ):d} items.\n'
+                       f'Do you want to continue?')
+            elif dataLoader.maximumDepth > MAXITEMDEPTH:
+                msg = (f'CAUTION: You are trying to load {len(dataLoader, ):d} items.\n'
+                       f'The folder is {dataLoader.maximumDepth}-subfolders deep.\n\n'
+                       f'Do you want to continue?')
+            elif len(dataLoader) > MAXITEMLOGGING:
+                msg = (f'CAUTION: You are trying to load {len(dataLoader, ):d} items\n\n'
+                       f'Do you want to continue?')
+            ignore = (bool(msg) and not MessageDialog.showYesNoWarning(f'Directory {dataLoader.path!r}\n', msg))
 
-            if not ok:
-                ignore = True
-
+        dataLoader.createNewProject = createNewProject
+        dataLoader.ignore = ignore
         return (dataLoader, createNewProject, ignore)
 
     #-----------------------------------------------------------------------------------------
@@ -586,7 +596,7 @@ class Gui(Ui):
 
             return newProject
 
-    def _loadProject(self, dataLoader) -> (Project, None):
+    def _loadProject(self, dataLoader=None, path=None) -> (Project, None):
         """Helper function, loading project from dataLoader instance
         check and query for closing current project
         build the project Gui elements
@@ -594,8 +604,14 @@ class Gui(Ui):
 
         :returns project instance or None
         """
+        from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
         from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
 
+        if dataLoader is None and path is not None:
+            dataLoader = checkPathForDataLoader(path)
+        if dataLoader is None:
+            getLogger().error('No suitable dataLoader found')
+            return None
         if not dataLoader.createNewProject:
             raise RuntimeError(f'DataLoader {dataLoader} does not create a new project')
 
@@ -669,7 +685,7 @@ class Gui(Ui):
         return newProject
 
     # @logCommand('application.') # eventually decorated by  _loadData()
-    def loadProject(self, path=None) -> (Project, None):
+    def loadProject(self, path=None) -> Project | None:
         """Loads project defined by path
         :return a Project instance or None
         """
@@ -786,7 +802,7 @@ class Gui(Ui):
         if self.project.readOnly and not MessageDialog.showYesNo(
                 'Save Project',
                 'The project is marked as read-only.\n'
-                'This can be changed by clicking the lock-icon in the botton-right.\n\n'
+                'This can be changed by clicking the lock-icon in the bottom-right.\n\n'
                 'Do you want to continue saving?\n',
                 ):
             return True

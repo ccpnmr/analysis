@@ -4,9 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:48 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2024-06-27 10:35:17 +0100 (Thu, June 27, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,10 +28,14 @@ __date__ = "$Date: 2022-05-31 10:16:51 +0100 (Tue, May 31, 2022) $"
 #=========================================================================================
 
 from time import sleep
+from PyQt5 import QtCore
+from functools import partial
+
+# don't remove import
+import ccpn.core
 from ccpn.ui.gui.widgets.Application import newTestApplication
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.core.lib.ContextManagers import progressHandler, busyHandler
-from ccpn.framework.Application import getApplication
 from ccpn.util.Logging import getLogger
 
 
@@ -38,74 +43,77 @@ gui = True
 error = True
 
 
-def showTestProgressDialog():
+def showTestProgressDialog(parent=None):
     """Show a test dialog for a few seconds
     """
     start, end = 97, 225
 
-    with progressHandler(minimum=start, maximum=end, steps=20, autoClose=False,
+    with progressHandler(parent, minimum=start, maximum=end, steps=20, autoClose=False,
                          raiseErrors=True) as progress:
 
         progress.setText('counting')  # forces a repaint
         # set extra progress-dialog settings here
-
         for cc in range(start, end + 1):
             progress.checkCancelled()  # will raise ProgressCancelled exception if pressed
             progress.setValue(cc)  # update the progress-bar if matches step-size
-
             if error and cc == 198:
                 # test generating a cancel event
                 progress.cancel()
-
             # wait for fraction of a second
-            sleep(0.03)
+            sleep(0.01)
 
     getLogger().info(f'cancelled: {progress.cancelled}')
     getLogger().info(f'error: {progress.error}')
 
 
-def showTestBusyDialog():
+def showTestBusyDialog(parent=None):
     """Show a test dialog for a few seconds
     """
     start, end = 97, 225
 
-    with busyHandler(minimum=start, maximum=end, steps=20, autoClose=False,
-                     raiseErrors=True) as progress:
-
+    with busyHandler(parent, minimum=start, maximum=end, steps=20,
+                     autoClose=False, raiseErrors=True) as progress:
         progress.setText('counting')  # forces a repaint
         # set extra progress-dialog settings here
-
         for cc in range(start, end + 1):
             progress.checkCancelled()  # will raise ProgressCancelled exception if pressed
             progress.setValue(cc)  # update the progress-bar if matches step-size
-
             if error and cc == 198:
                 # test generating a cancel event
                 progress.cancel()
-
             # wait for fraction of a second
-            sleep(0.03)
+            sleep(0.01)
 
     getLogger().info(f'cancelled: {progress.cancelled}')
     getLogger().info(f'error: {progress.error}')
 
 
-def main():
-    # create a new test application
-    _app = newTestApplication(interface='Gui' if gui else 'NoUi')
-    app = getApplication()
-
+def _initTest(qtApp):
+    app = qtApp._framework
     if app.hasGui:
         # show a waiting popup otherwise the progress may finish before you see it
         app.ui.mainWindow.show()
-        showWarning('progress bar', 'Waiting...')
-
+        showWarning('progress bar', 'Waiting...',
+                    parent=app.ui.mainWindow if app.hasGui else None)
     # show progress dialog
-    showTestProgressDialog()
+    showTestProgressDialog(app.ui.mainWindow if app.hasGui else None)
     if gui:
-        showTestBusyDialog()
+        showTestBusyDialog(parent=app.ui.mainWindow)
+        # shutdown the app - hard shutdown as _closeWindow contains os._exit(0) :|
+        # there is an issue somewhere with newTestApplication - not found yet :(
+        QtCore.QTimer.singleShot(0, qtApp.closeAllWindows)
+    else:
+        QtCore.QTimer.singleShot(0, qtApp.quit)
+    getLogger().info('end _initTest')
 
-    getLogger().info('end Test_Progress')
+
+def main():
+    # create a new test application
+    qtApp = newTestApplication(interface='Gui' if gui else 'NoUi')
+    # wait for a couple of seconds before showing popup
+    QtCore.QTimer.singleShot(2000, partial(_initTest, qtApp))
+    qtApp.start()
+    # NEVER GETS HERE -_closeWindow calls os._exit(0)
 
 
 if __name__ == '__main__':

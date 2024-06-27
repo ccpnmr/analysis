@@ -5,8 +5,9 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-17 12:03:19 +0100 (Wed, April 17, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-06-21 19:48:44 +0100 (Fri, June 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -377,10 +378,10 @@ class _ProjectTableABC(TableABC, Base):
             pulldown.select(selectableObjects[0].pid)
 
         elif othersClassNames := list({obj.className for obj in others if hasattr(obj, 'className')}):
-            title, msg = ('Dropped wrong item.',
-                          f"Do you want to open the {''.join(othersClassNames)} in a new module?") \
-                if len(othersClassNames) == 1 else ('Dropped wrong items.', 'Do you want to open items in new modules?')
-
+            title, msg = (('Dropped wrong item.',
+                           f"Do you want to open the {''.join(othersClassNames)} in a new module?")
+                          if len(othersClassNames) == 1 else
+                          ('Dropped wrong items.', 'Do you want to open items in new modules?'))
             if MessageDialog.showYesNo(title, msg):
                 _openItemObject(self.mainWindow, others)
 
@@ -463,14 +464,11 @@ class _ProjectTableABC(TableABC, Base):
         """
         self._dataFrameObject = None
         _df = pd.DataFrame({val: [] for val in self.columnHeaders.values()})
-
         if self.OBJECTCOLUMN in _df.columns:
             # use the object as the index, object always exists even if isDeleted
             _df.set_index(_df[self.OBJECTCOLUMN], inplace=True, )
-
         self.updateDf(_df, resize=True)
-
-        self.headerColumnMenu.refreshHiddenColumns()
+        self.headerColumnMenu.resetToDefaultHiddenColumns()
 
     #=========================================================================================
     # Build the dataFrame for the table
@@ -700,15 +698,13 @@ class _ProjectTableABC(TableABC, Base):
         with self._blockTableSignals('clearSelection'):
             # get the selected objects from the table
             objList = self.getSelectedObjects() or []
-            self.selectionModel().clearSelection()
-
+            super().clearSelection()  # no signals
             # remove from the current list
             multiple = self.callBackClass._pluralLinkName if self.callBackClass else None
             if (self._df is not None and not self._df.empty) and multiple:
                 if multipleAttr := getattr(self.current, multiple, []):
                     # need to remove objList from multipleAttr - fires only one current change
                     setattr(self.current, multiple, tuple(set(multipleAttr) - set(objList)))
-
             self._lastSelection = [None]
 
     #=========================================================================================
@@ -720,19 +716,15 @@ class _ProjectTableABC(TableABC, Base):
         # skip if the table is empty
         if self._df is None or self._df.empty:
             return
-
         with self._blockTableSignals('_highLightObjs'):
-
             selectionModel = self.selectionModel()
             model = self.model()
             selectionModel.clearSelection()
-
             if selection:
                 if len(selection) > 0 and isinstance(selection[0], pd.Series):
                     # not sure how to handle this
                     return
                 uniqObjs = set(selection)
-
                 _sortIndex = model._sortIndex
                 dfTemp = self._df.reset_index(drop=True)
                 data = [dfTemp[dfTemp[self._OBJECT] == obj] for obj in uniqObjs]
@@ -741,7 +733,6 @@ class _ProjectTableABC(TableABC, Base):
                     for row in rows:
                         rowIndex = model.index(row, 0)
                         selectionModel.select(rowIndex, selectionModel.Select | selectionModel.Rows)
-
                     if scrollToSelection and not self._scrollOverride and minInd is not None:
                         self.scrollTo(minInd, self.EnsureVisible)
 
@@ -749,23 +740,21 @@ class _ProjectTableABC(TableABC, Base):
         """Highlight a list of objects in the table
         """
         objs = []
-
         if objectList:
             # get the list of objects, exclude deleted
             for obj in objectList:
                 if isinstance(obj, str):
                     objFromPid = self.project.getByPid(obj)
-
                     if objFromPid and not objFromPid.isDeleted:
                         objs.append(objFromPid)
-
                 else:
                     objs.append(obj)
-
         if objs:
             self._highLightObjs(objs, scrollToSelection=scrollToSelection)
         else:
-            self.clearSelection()
+            with self._blockTableSignals('highlightObjects'):
+                # clear the selection with no object updates
+                self.selectionModel().clearSelection()
 
     #=========================================================================================
     # Notifier queue handling

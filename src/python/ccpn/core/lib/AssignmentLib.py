@@ -5,8 +5,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:25 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-06-26 14:29:04 +0100 (Wed, June 26, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -62,14 +63,19 @@ NEF_ATOM_NAMES = {'13C': ['C', 'CA', 'CB', 'CG', 'CG1', 'CG2', 'CGx', 'CGy', 'CG
 
 NEF_ATOM_NAMES_SORTED = {'alphas'      : ['CA', 'HA', 'HAx', 'HAy', 'HA2', 'HA3', 'HA%'],
                          'betas'       : ['CB', 'HB', 'HBx', 'HBy', 'HB%', 'HB2', 'HB3'],
-                         'gammas'      : ['CG', 'CGx', 'CGy', 'CG%', 'CG1', 'CG2', 'HG', 'HGx', 'HGy', 'HG%', 'HG2', 'HG3'],
-                         'moreGammas'  : ['HGx%', 'HGy%', 'HG1', 'HG1x', 'HG1y', 'HG1%', 'HG12', 'HG13', 'HG1%', 'HG2%'],
-                         'deltas'      : ['CD', 'CDx', 'CDy', 'CD%', 'CD1', 'CD2', 'HDx', 'HDy', 'HD%', 'HD1', 'HD2', 'HD3'],
+                         'gammas'      : ['CG', 'CGx', 'CGy', 'CG%', 'CG1', 'CG2', 'HG', 'HGx', 'HGy', 'HG%', 'HG2',
+                                          'HG3'],
+                         'moreGammas'  : ['HGx%', 'HGy%', 'HG1', 'HG1x', 'HG1y', 'HG1%', 'HG12', 'HG13', 'HG1%',
+                                          'HG2%'],
+                         'deltas'      : ['CD', 'CDx', 'CDy', 'CD%', 'CD1', 'CD2', 'HDx', 'HDy', 'HD%', 'HD1', 'HD2',
+                                          'HD3'],
                          'moreDeltas'  : ['HDx%', 'HDy%', 'ND1', 'ND2', 'HD1%', 'HD2%', 'HD2x', 'HD2y', 'HD21', 'HD22'],
-                         'epsilons'    : ['CE', 'CEx', 'CEy', 'CE1', 'CE2', 'HE', 'HEx', 'HEy', 'HE%', 'HE1', 'HE2', 'HE3'],
+                         'epsilons'    : ['CE', 'CEx', 'CEy', 'CE1', 'CE2', 'HE', 'HEx', 'HEy', 'HE%', 'HE1', 'HE2',
+                                          'HE3'],
                          'moreEpsilons': ['CE3', 'NE', 'NE1', 'NE2', 'HE2x', 'HE2y', 'HE21', 'HE22', 'HE%'],
                          'zetas'       : ['CZ', 'CZ2', 'CZ3', 'HZ', 'HZ2', 'HZ3', 'HZ%', 'NZ'],
-                         'etas'        : ['CH2', 'HH2', 'HH1x', 'HH1y', 'HH2x', 'HH2y', 'NH1', 'NH2', 'NHx', 'NHy', 'HH21', 'HH22'],
+                         'etas'        : ['CH2', 'HH2', 'HH1x', 'HH1y', 'HH2x', 'HH2y', 'NH1', 'NH2', 'NHx', 'NHy',
+                                          'HH21', 'HH22'],
                          'moreEtas'    : ['HH', 'HH11', 'HH12']
                          }
 
@@ -116,33 +122,32 @@ PROTEIN_NEF_ATOM_NAMES = {
 
 # This is a quick and dirty fix in order to enable the creation of synthetic  1H-13C HSQC peak lists.
 # This should be overhauled once the new NTdb_jsons have been introduced and updated with NEF atom names.
-NEF_ATOM_NAMES_CBONDED = {'CA': ['HA', 'HA2', 'HA3', 'HAx', 'HAy', 'HA%'],
-                  'CB': ['HB', 'HB2', 'HB3', 'HBx', 'HBy', 'HB%'],
-                  'CG': ['HG', 'HG1', 'HG2', 'HG3', 'HGx', 'HGy', 'HG%'],
-                  'CG1': ['HG12', 'HG13', 'HG1x', 'HG1y', 'HG1%', 'HG%'],
-                  'CG2': ['HG2%', 'HG%'],
-                  'CGx': ['HGx%', 'HG%'],
-                  'CGy': ['HGy%', 'HG%'],
-                  'CG%': ['HGx%', 'HGy%', 'HG%'],
-                  'CD': ['HD2', 'HD3', 'HDx', 'HDy', 'HD%'],
-                  'CD1': ['HD1', 'HD1%'],
-                  'CD2': ['HD2', 'HD2%'],
-                  'CDx': ['HDx', 'HDx%', 'HD%'],
-                  'CDy': ['HDy', 'HDy%', 'HD%'],
-                  'CD%': ['HD%'],
-                  'CE': ['HEx%', 'HEy%', 'HE%'],
-                  'CE1': ['HE1'],
-                  'CE2': ['HE2'],
-                  'CE3': ['HE3'],
-                  'CEx': ['HEx', 'HE%'],
-                  'CEy': ['HEy', 'HE%'],
-                  'CE%': ['HE%'],
-                  'CZ': ['HZ'],
-                  'CZ2': ['HZ2'],
-                  'CZ3': ['HZ3'],
-                  'CH2': ['HH2'],
-                  }
-
+NEF_ATOM_NAMES_CBONDED = {'CA' : ['HA', 'HA2', 'HA3', 'HAx', 'HAy', 'HA%'],
+                          'CB' : ['HB', 'HB2', 'HB3', 'HBx', 'HBy', 'HB%'],
+                          'CG' : ['HG', 'HG1', 'HG2', 'HG3', 'HGx', 'HGy', 'HG%'],
+                          'CG1': ['HG12', 'HG13', 'HG1x', 'HG1y', 'HG1%', 'HG%'],
+                          'CG2': ['HG2%', 'HG%'],
+                          'CGx': ['HGx%', 'HG%'],
+                          'CGy': ['HGy%', 'HG%'],
+                          'CG%': ['HGx%', 'HGy%', 'HG%'],
+                          'CD' : ['HD2', 'HD3', 'HDx', 'HDy', 'HD%'],
+                          'CD1': ['HD1', 'HD1%'],
+                          'CD2': ['HD2', 'HD2%'],
+                          'CDx': ['HDx', 'HDx%', 'HD%'],
+                          'CDy': ['HDy', 'HDy%', 'HD%'],
+                          'CD%': ['HD%'],
+                          'CE' : ['HEx%', 'HEy%', 'HE%'],
+                          'CE1': ['HE1'],
+                          'CE2': ['HE2'],
+                          'CE3': ['HE3'],
+                          'CEx': ['HEx', 'HE%'],
+                          'CEy': ['HEy', 'HE%'],
+                          'CE%': ['HE%'],
+                          'CZ' : ['HZ'],
+                          'CZ2': ['HZ2'],
+                          'CZ3': ['HZ3'],
+                          'CH2': ['HH2'],
+                          }
 
 from itertools import combinations
 import typing
@@ -157,7 +162,8 @@ from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList, GAUSSIANMETHOD
 from ccpn.core.Project import Project
 import ccpn.core.lib.AxisCodeLib as AxisCodeLib
-from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidueProbability, getAtomProbability, getResidueAtoms, getCcpCodes, \
+from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidueProbability, getAtomProbability, \
+    getResidueAtoms, getCcpCodes, \
     getSpinSystemScore
 from ccpn.util import Common as commonUtil
 from ccpn.util.Logging import getLogger
@@ -226,7 +232,8 @@ def assignBetas(nmrResidue: NmrResidue, peaks: typing.List[Peak], axisCode='C'):
         peaks[0].assignDimension(axisCode=axisCode, value=[nmrResidue.fetchNmrAtom(name='CB')])
 
 
-def getNmrResiduePrediction(nmrResidue: NmrResidue, chemicalShiftList: ChemicalShiftList, prior: float = 0.05, chemicalShifts=None) -> list:
+def getNmrResiduePrediction(nmrResidue: NmrResidue, chemicalShiftList: ChemicalShiftList, prior: float = 0.05,
+                            chemicalShifts=None) -> list:
     """
     Takes an NmrResidue and a ChemicalShiftList and returns a dictionary of the residue type to
     confidence levels for that NmrResidue.
@@ -238,7 +245,8 @@ def getNmrResiduePrediction(nmrResidue: NmrResidue, chemicalShiftList: ChemicalS
     if not chemicalShifts:
         # get the non-empty shifts of the nmrAtoms
         chemicalShifts = [(nmrAtom._wrappedData, shift) for nmrAtom in nmrResidue.nmrAtoms
-                          for shift in nmrAtom.chemicalShifts if shift.chemicalShiftList == chemicalShiftList and shift.value is not None]
+                          for shift in nmrAtom.chemicalShifts if
+                          shift.chemicalShiftList == chemicalShiftList and shift.value is not None]
 
     for code in CCP_CODES:
         predictions[code] = float(getSpinSystemResidueProbability(spinSystem, chemicalShiftList._wrappedData, code,
@@ -334,13 +342,13 @@ def copyPeakListAssignments(referencePeakList: PeakList, matchPeakList: PeakList
              for ii in mappingArray if ii is not None]
 
 
-def propagateAssignments(peaks: typing.List[Peak] = None, referencePeak: Peak = None, current: object = None,
-                         tolerances: typing.List[float] = None):
+def _propagateAssignments(peaks: typing.List[Peak] = None, referencePeak: Peak = None, current: object = None,
+                          tolerances: typing.List[float] = None):
     """
     Propagates dimensionNmrAtoms for each dimension of the specified peaks to dimensions of other
     peaks.
     """
-
+    # DEPRECATED in favour of new routine below
     if referencePeak:
         peaksIn = [referencePeak, ]
     elif peaks:
@@ -445,12 +453,14 @@ def getAllSpinSystems(project: Project, nmrResidues: typing.List[NmrResidue],
 
         shifts = [[(nmrResidue._wrappedData, [(nmrAtom._wrappedData, shift)
                                               for nmrAtom in nmrResidue.nmrAtoms
-                                              for shift in nmrAtom.chemicalShifts if shift.chemicalShiftList == shiftList and shift.value is not None])
+                                              for shift in nmrAtom.chemicalShifts if
+                                              shift.chemicalShiftList == shiftList and shift.value is not None])
                    for nmrResidue in nmrResidues
                    ]
                   for shiftList in shiftLists]
 
-        chainCodes = [[('Cyss' if (residue.ccpCode == 'Cys' and residue.descriptor == 'link:SG') else residue.ccpCode, residue.molType)
+        chainCodes = [[('Cyss' if (residue.ccpCode == 'Cys' and residue.descriptor == 'link:SG') else residue.ccpCode,
+                        residue.molType)
                        for residue in apiChain.residues] for apiChain in apiChains]
         setChainCodes = [set(chainCode) for chainCode in chainCodes]
 
@@ -944,7 +954,8 @@ def matchingNmrAtomsForPeakDimension(peak: Peak, dim: int, nmrAtoms: typing.List
     return matchingNmrAtoms
 
 
-def withinTolerance(nmrAtom: NmrAtom, position: float, shiftList: ChemicalShiftList, tolerance: float, shifts: dict = None):
+def withinTolerance(nmrAtom: NmrAtom, position: float, shiftList: ChemicalShiftList, tolerance: float,
+                    shifts: dict = None):
     """Decides whether the shift of the nmrAtom is
        within the tolerance to be assigned to the
        peak dimension.
@@ -1086,7 +1097,7 @@ def _matchAxesToNmrAtomIsotopeCode(peak, nmrAtoms):
     return dd
 
 
-def _getNmrAtomForName(nmrAtoms, nmrAtomName):
+def _getNmrAtomForName(nmrAtoms, nmrAtomName) -> NmrAtom | None:
     """
     :return: The NmrAtom object for a given Name or return None. NmrAtoms list should not contain duplicates.
     """
@@ -1153,7 +1164,8 @@ def _assignNmrAtomsToPeaks(peaks, nmrAtoms, exactMatch=False, overwrite=False):
             _ambNmrAtomNames = [name for name in matchedNmrAtomNames if name in ambiguousAxisNmrAtomNames]
 
             ## fill unambiguousNmrAtomsDict and ambiguousNmrAtomsDict dicts.
-            if len(_unambAxisNmrAtomNames) == 1 and len(matchedNmrAtomNames) == 1:  # nothing ambiguous, 1:1 {'H': ['H']}
+            if len(_unambAxisNmrAtomNames) == 1 and len(
+                    matchedNmrAtomNames) == 1:  # nothing ambiguous, 1:1 {'H': ['H']}
                 na = _getNmrAtomForName(nmrAtoms, _unambAxisNmrAtomNames[0])
                 unambiguousNmrAtomsDict[axisCode].add(na)
             if len(matchedNmrAtomNames) > 1:  # make sure nothing appereas as ambiguous and unambiguous. If this happens, keep only as ambiguous {'Hn': ['H', 'M1']} M1 with 1H isotope code
@@ -1239,7 +1251,7 @@ def _fetchNewPeakAssignments(peakList, nmrChain, keepAssignments):
 
         foundMts = {}
         with progressHandler(text='Set up NmrResidues...', maximum=len(peakList.peaks), autoClose=False,
-                                     raiseErrors=False) as progress:
+                             raiseErrors=False) as progress:
 
             with undoBlock():
                 for cc, peak in enumerate(peakList.peaks):
@@ -1279,9 +1291,171 @@ def _fetchNewPeakAssignments(peakList, nmrChain, keepAssignments):
                             # for i, (axis, isotope) in enumerate(axisIso):
                             #     nmrAtom = nmrResidue.fetchNmrAtom(name=str(axis), isotopeCode=isotope)
                             #     peak.assignDimension(axisCode=axis, value=[nmrAtom])
-                            newNmrs = [[nmrResidue.fetchNmrAtom(name=str(axis[0]), isotopeCode=isotope)] for axis, isotope in axisIso]
+                            newNmrs = [[nmrResidue.fetchNmrAtom(name=str(axis[0]), isotopeCode=isotope)] for
+                                       axis, isotope in axisIso]
                             peak.assignDimensions(axisCodes=peak.axisCodes, values=newNmrs)
 
         if progress.error:
             # report any errors
             getLogger().warning(f'fetchNewPeakAssignments: {progress.error}')
+
+
+#=========================================================================================
+# _copyPeakAssignments
+#=========================================================================================
+
+def _findMatchingDimensions(pk, peaks, tolerancesByIsotope, tolerancesByAxisCode):
+    for pk2 in peaks:
+        if pk2.pid != pk.pid:
+            # Check if the peaks have any isotopeCodes in common
+            for ic, axcde in zip(pk.spectrum.isotopeCodes, pk.spectrum.axisCodes):
+                for ic2, axcde2 in zip(pk2.spectrum.isotopeCodes, pk2.spectrum.axisCodes):
+                    if ic == ic2:
+                        _copyPeakAssignments(pk, pk2, axcde, axcde2,
+                                             tolerancesByIsotope, tolerancesByAxisCode)
+
+
+def _copyPeakAssignments(pk, pk2, axcde, axcde2, tolerancesByIsotope, tolerancesByAxisCode):
+    # get assigned nmrAtoms from first or reference Peak
+    nmrAtoms = _getCleanNmrAtomsList(pk, axcde)
+    nmrAtomsToAssign = []
+    for nmrAtom in nmrAtoms:
+        if tolerancesByIsotope is not None and tolerancesByAxisCode is not None:
+            tol = _getTolerance(pk2, axcde2, tolerancesByIsotope, tolerancesByAxisCode)
+            shift = pk2.chemicalShiftList.getChemicalShift(nmrAtom)
+            if shift and shift.figureOfMerit != 0:
+                sValue = shift.value
+                # Do Try/Except in case ChemShiftValue is None
+                try:
+                    diff = abs(sValue - pk2.getByAxisCodes('position', [axcde2], True)[0])
+                    if diff <= tol:
+                        nmrAtomsToAssign.append(nmrAtom)
+                except:
+                    print("The ChemicalShift ", shift.pid, " in ChemicalShiftList", pk2.chemicalShiftList.pid,
+                          "doesn't have a value. Please correct!")
+            # if the NmrAtom doesn't exist in the CSL of the peak it is being copied to, then copy anyway, as there
+            # is no tolerance to be violated
+            else:
+                nmrAtomsToAssign.append(nmrAtom)
+        else:
+            nmrAtomsToAssign.append(nmrAtom)
+    # add assigned nmrAtoms from own peak
+    nmrAtomsFromOwnPeak = _getCleanNmrAtomsList(pk2, axcde2)
+    nmrAtomsToAssign = nmrAtomsToAssign + nmrAtomsFromOwnPeak
+    if nmrAtomsToAssign:
+        nmrAtomsToAssign = list(dict.fromkeys(nmrAtomsToAssign))
+        pk2.assignDimension(axcde2, nmrAtomsToAssign)
+
+
+def _getCleanNmrAtomsList(peak, axCde):
+    assignedNmrAtoms = [na for i in peak.getByAxisCodes('assignments', [axCde], True) for na in i]
+    nmrAtomsList = []
+    # remove assignments that are None
+    for na in assignedNmrAtoms:
+        if na is not None:
+            nmrAtomsList.append(na)
+    if nmrAtomsList:
+        # remove duplicates
+        nmrAtomsList = list(dict.fromkeys(nmrAtomsList))
+        return nmrAtomsList
+    else:
+        return []
+
+
+def _getTolerance(peak, axCde, tolerancesByIsotope, tolerancesByAxisCode):
+    if axCde[0] in tolerancesByIsotope.keys():
+        tol = tolerancesByIsotope[axCde[0]]
+    elif axCde in tolerancesByAxisCode.keys():
+        tol = tolerancesByAxisCode[axCde]
+    else:
+        tol = peak.spectrum.getByAxisCodes('assignmentTolerances', [axCde], True)[0]
+    return tol
+
+
+def _copyPeakAssignmentsEntry(currentPeaks, referencePeak=None,
+                              tolerancesByIsotope=None, tolerancesByAxisCode=None):
+    from ccpn.core.lib.ContextManagers import undoBlockWithSideBar as undoBlock
+
+    with undoBlock():
+        if referencePeak:
+            _findMatchingDimensions(referencePeak, currentPeaks, tolerancesByIsotope, tolerancesByAxisCode)
+        else:
+            for pk in currentPeaks:
+                # only need to copy if peak has assignments
+                if pk.assignments != 0:
+                    _findMatchingDimensions(pk, currentPeaks, tolerancesByIsotope, tolerancesByAxisCode)
+
+
+def propagateAssignments(peaks, tolerancesByIsotope=None, tolerancesByAxisCode=None):
+    """Propagate assignments - assignments are unified across all selected peaks.
+    To match the V2-propagateAssignments, always uses tolerances.
+    """
+    from ccpn.framework.Application import getCurrent
+
+    if not peaks:
+        # do I need to do this?
+        peaks = getCurrent().peaks
+    if not peaks:
+        return
+    if not isinstance(tolerancesByIsotope, dict | type(None)):
+        raise TypeError('tolerancesByIsotope must be dict|None')
+    if not isinstance(tolerancesByAxisCode, dict | type(None)):
+        raise TypeError('tolerancesByAxisCode must be dict|None')
+    if ((tolerancesByIsotope is not None and tolerancesByAxisCode is not None) or
+            (tolerancesByIsotope is None and tolerancesByAxisCode is None)):
+        raise TypeError('Specify one of tolerancesByIsotope or tolerancesByAxisCode')
+    _copyPeakAssignmentsEntry(peaks,
+                              tolerancesByIsotope=tolerancesByIsotope,
+                              tolerancesByAxisCode=tolerancesByAxisCode)
+
+
+def copyAssignments(peaks):
+    """Propagate assignments - assignments are unified across all selected peaks.
+    """
+    from ccpn.framework.Application import getCurrent
+
+    if not peaks:
+        peaks = getCurrent().peaks
+    if not peaks:
+        return
+    _copyPeakAssignmentsEntry(peaks)
+
+
+def propagateAssignmentsFromReference(peaks, referencePeak,
+                                      tolerancesByIsotope=None, tolerancesByAxisCode=None):
+    """Propagate assignments - assignments are propagated from a reference-peak.
+    To match the V2-propagateAssignments, always uses tolerances.
+    """
+    from ccpn.framework.Application import getCurrent
+
+    if not peaks:
+        peaks = getCurrent().peaks
+    if not peaks:
+        return
+    if not referencePeak:
+        raise TypeError('referencePeak not specified')
+    if not isinstance(tolerancesByIsotope, dict | type(None)):
+        raise TypeError('tolerancesByIsotope must be dict|None')
+    if not isinstance(tolerancesByAxisCode, dict | type(None)):
+        raise TypeError('tolerancesByAxisCode must be dict|None')
+    if ((tolerancesByIsotope is not None and tolerancesByAxisCode is not None) or
+            (tolerancesByIsotope is None and tolerancesByAxisCode is None)):
+        raise TypeError('Specify one of tolerancesByIsotope or tolerancesByAxisCode')
+    _copyPeakAssignmentsEntry(peaks, referencePeak=referencePeak,
+                              tolerancesByIsotope=tolerancesByIsotope,
+                              tolerancesByAxisCode=tolerancesByAxisCode
+                              )
+
+
+def copyAssignmentsFromReference(peaks, referencePeak):
+    """Copy assignments - assignments are copied from a reference-peak.
+    """
+    from ccpn.framework.Application import getCurrent
+
+    if not peaks:
+        peaks = getCurrent().peaks
+    if not peaks:
+        return
+    if not referencePeak:
+        raise TypeError('referencePeak not specified')
+    _copyPeakAssignmentsEntry(peaks, referencePeak=referencePeak)

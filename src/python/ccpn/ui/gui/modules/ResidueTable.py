@@ -5,9 +5,10 @@ This file contains ResidueTableModule and ResidueTable classes
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -16,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:05 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2024-06-20 16:42:22 +0100 (Thu, June 20, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -37,7 +38,7 @@ from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import ChainPulldown
 from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot, ModuleSettingsWidget
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.modules.CcpnModule import CcpnTableModule
 from ccpn.ui.gui.lib._CoreTableFrame import _CoreTableWidgetABC, _CoreTableFrameABC
 from ccpn.util.Logging import getLogger
 
@@ -48,16 +49,14 @@ ALL = '<all>'
 LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
 
 
-class ResidueTableModule(CcpnModule):
+class ResidueTableModule(CcpnTableModule):
     """This class implements the module by wrapping a ResidueTable instance
     """
+    className = 'ResidueTableModule'
     includeSettingsWidget = True
     maxSettingsState = 2
     settingsPosition = 'left'
-
     activePulldownClass = Chain
-
-    className = 'ResidueTableModule'
     _allowRename = True
 
     def __init__(self, mainWindow=None, name='Residue Table',
@@ -110,7 +109,7 @@ class ResidueTableModule(CcpnModule):
         return self._mainFrame
 
     @property
-    def tableWidget(self):
+    def _tableWidget(self):
         """Return the table widget in the table frame
         """
         return self._mainFrame._tableWidget
@@ -137,7 +136,8 @@ class ResidueTableModule(CcpnModule):
         self._mainFrame.selectTable(table)
 
     def _closeModule(self):
-        self._mainFrame._cleanupWidget()
+        if self.tableFrame:
+            self.tableFrame._cleanupWidget()
         if self.activePulldownClass and self._setCurrentPulldown:
             self._setCurrentPulldown.unRegister()
         super()._closeModule()
@@ -150,7 +150,7 @@ class ResidueTableModule(CcpnModule):
 class _NewResidueTableWidget(_CoreTableWidgetABC):
     """Class to present a residue Table
     """
-    className = 'ResidueTable'
+    className = '_NewResidueTableWidget'
     attributeName = 'chains'
 
     defaultHidden = ['Pid', 'Chain']

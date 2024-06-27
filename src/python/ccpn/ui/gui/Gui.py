@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-26 11:56:02 +0100 (Wed, June 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-27 17:16:46 +0100 (Thu, June 27, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
@@ -107,8 +107,8 @@ QtCore.qInstallMessageHandler(qtMessageHandler)
 REMOVEDEBUG = r'\(\S+\.\w+:\d+\)$'
 
 MAXITEMLOGGING = 4
-MAXITEMLOADING = 10
-MAXITEMDEPTH = 2
+MAXITEMLOADING = 100
+MAXITEMDEPTH = 5
 
 
 #=========================================================================================

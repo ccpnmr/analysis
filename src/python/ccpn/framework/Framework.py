@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-29 15:35:15 +0100 (Wed, May 29, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-06-28 21:15:26 +0100 (Fri, June 28, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1250,10 +1250,6 @@ class Framework(NotifierBase, GuiBase):
                             self.project._updateLoggerState(flush=not self.project.readOnly)
                             if self.mainWindow:
                                 self.mainWindow._setReadOnlyIcon()
-                        MessageDialog.showWarning('Loading Project',
-                                                  f'There was a problem loading project {dataLoader.path}\n'
-                                                  f'Please check the log for more information.',
-                                                  parent=self.ui.mainWindow)
                         return []
 
                     self._setLastBackupTime()
@@ -1578,11 +1574,9 @@ class Framework(NotifierBase, GuiBase):
 
         if self.project._undo.canUndo():
             if not self.project._undo.locked:
-                with busyHandler(title='Busy', text='Undo...', autoClose=False, closeDelay=1000,
-                                 raiseErrors=True) as progress:
-                    # set extra progress-dialog settings here
-                    progress.checkCancelled()  # will raise ProgressCancelled exception if pressed
-                    progress.setValue(0)  # update the progress-bar if matches step-size
+                # may need to put some more information in this busy popup
+                with busyHandler(self.mainWindow, title='Busy', text='Undo ...',
+                                 autoClose=False, closeDelay=500, raiseErrors=True):
                     self.project._undo.undo()
         else:
             getLogger().warning('nothing to undo')
@@ -1593,11 +1587,8 @@ class Framework(NotifierBase, GuiBase):
 
         if self.project._undo.canRedo():
             if not self.project._undo.locked:
-                with busyHandler(title='Busy', text='Redo...', autoClose=False, closeDelay=1000,
-                                 raiseErrors=True) as progress:
-                    # set extra progress-dialog settings here
-                    progress.checkCancelled()  # will raise ProgressCancelled exception if pressed
-                    progress.setValue(0)  # update the progress-bar if matches step-size
+                with busyHandler(self.mainWindow, title='Busy', text='Redo...',
+                                 autoClose=False, closeDelay=500, raiseErrors=True):
                     self.project._undo.redo()
         else:
             getLogger().warning('nothing to redo.')

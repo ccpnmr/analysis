@@ -15,19 +15,18 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$Author: Luca Mureddu $"
-__dateModified__ = "$Date: 2021-04-27 16:04:57 +0100 (Tue, April 27, 2021) $"
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-01 10:55:43 +0100 (Mon, July 01, 2024) $"
+__dateModified__ = "$dateModified: 2024-07-01 11:04:54 +0100 (Mon, July 01, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: CCPN $"
+__author__ = "$Author: eliza $"
 __date__ = "$Date: 2021-04-27 16:04:57 +0100 (Tue, April 27, 2021) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
 import numpy as np
 import pandas as pd
 from datetime import datetime
@@ -58,6 +57,7 @@ from ccpn.util.Path import aPath
 # from sandbox.Geerten.NTdb.NTdbLib import getNefName
 from ccpn.framework.lib.NTdb.NTdbDefs import getNTdbDefs
 from ccpn.core.lib.AssignmentLib import PROTEIN_NEF_ATOM_NAMES
+
 
 _ntDefs = getNTdbDefs()
 
@@ -242,7 +242,7 @@ THR = aminoAcid()
 THR.name = "THR"
 THR.cg = [['CG2']]
 THR.hb = [['HB']]
-THR.hg = [['HG21', 'HG22', 'HG23'], ['HG2%']] #  'HG1' not included in statistics
+THR.hg = [['HG21', 'HG22', 'HG23'], ['HG2%']]  #  'HG1' not included in statistics
 THR.methyl = [['HG21', 'HG22', 'HG23'], ['HG2%']]
 
 TRP = aminoAcid()
@@ -282,32 +282,31 @@ VAL.hg = [['HG11', 'HG12', 'HG13', 'HG21', 'HG22', 'HG23'],
           ['HG1%', 'HG2%'], ['HGx%', 'HGy%'], ['HG%']]
 VAL.methyl = VAL.hg
 
-# Create a dictionary to help identify the relevent aminoacid
-aaDict = {}
-aaDict['ALA'] = ALA
-aaDict['ARG'] = ARG
-aaDict['ASN'] = ASN
-aaDict['ASP'] = ASP
-aaDict['CYS'] = CYS
-aaDict['GLU'] = GLU
-aaDict['GLN'] = GLN
-aaDict['GLY'] = GLY
-aaDict['HIS'] = HIS
-aaDict['ILE'] = ILE
-aaDict['LEU'] = LEU
-aaDict['LYS'] = LYS
-aaDict['MET'] = MET
-aaDict['PHE'] = PHE
-aaDict['PRO'] = PRO
-aaDict['SER'] = SER
-aaDict['THR'] = THR
-aaDict['TRP'] = TRP
-aaDict['TYR'] = TYR
-aaDict['VAL'] = VAL
+# Create a dictionary to help identify the relevant aminoacid
+aaDict = {'ALA': ALA,
+          'ARG': ARG,
+          'ASN': ASN,
+          'ASP': ASP,
+          'CYS': CYS,
+          'GLU': GLU,
+          'GLN': GLN,
+          'GLY': GLY,
+          'HIS': HIS,
+          'ILE': ILE,
+          'LEU': LEU,
+          'LYS': LYS,
+          'MET': MET,
+          'PHE': PHE,
+          'PRO': PRO,
+          'SER': SER,
+          'THR': THR,
+          'TRP': TRP,
+          'TYR': TYR,
+          'VAL': VAL}
 
 
 class calculateAssignments():
-    def __init__(self, project=None, cslPID=None, chnPID=None, excludeList=[], ignoreN = False):
+    def __init__(self, project=None, cslPID=None, chnPID=None, excludeList=[], ignoreN=False):
         self.project = project
         self.csl = project.getByPid(cslPID)
         self.chain = project.getByPid(chnPID)
@@ -339,15 +338,14 @@ class calculateAssignments():
         for key, residue in aaDict.items():
             for atomGroup in [residue.c, residue.ca, residue.cb, residue.cg,
                               residue.cd, residue.ce, residue.cz, residue.ch,
-                               residue.h, residue.ha, residue.hb, residue.hg,
-                               residue.hd, residue.he, residue.hz, residue.hh, residue.n]:
+                              residue.h, residue.ha, residue.hb, residue.hg,
+                              residue.hd, residue.he, residue.hz, residue.hh, residue.n]:
 
-                 # residue.backbone, residue.methyl, residue.aromatic]:
-                 for atomSet in atomGroup:
-                     for atomName in atomSet:
-                         if atomName not in atomList:
-                             atomList.append(atomName)
-
+                # residue.backbone, residue.methyl, residue.aromatic]:
+                for atomSet in atomGroup:
+                    for atomName in atomSet:
+                        if atomName not in atomList:
+                            atomList.append(atomName)
 
         # Add in any missing atom names from PROTEIN_NEF_ATOM_NAMES dictionary
         for atom_list in PROTEIN_NEF_ATOM_NAMES.values():
@@ -355,8 +353,7 @@ class calculateAssignments():
                 atomList.append(atomName)
 
         # get unique atomNames
-        atomList = sorted(list(set(atomList))) # Optionally sort the list
-
+        atomList = sorted(list(set(atomList)))  # Optionally sort the list
 
         # go through the nmrResidues and see if atom has a chemical shift value
         # (ie is assigned) in a specified chemicalshiftlist
@@ -370,12 +367,12 @@ class calculateAssignments():
             for atomName in atomList:
 
                 naPID = "NA:{chain}.{resiNum}.{resiCode}.{atom}".format(chain=resi.chain.name,
-                                                                                           resiNum=resi.sequenceCode,
-                                                                                           resiCode=resi.residueType,
-                                                                                           atom=atomName)
+                                                                        resiNum=resi.sequenceCode,
+                                                                        resiCode=resi.residueType,
+                                                                        atom=atomName)
 
                 #if int(resi.sequenceCode )==5:
-                 #   print(naPID, project.getByPid(naPID))
+                #   print(naPID, project.getByPid(naPID))
                 try:
                     nmrAtom = project.getByPid(naPID)
 
@@ -685,7 +682,7 @@ class calculateAssignments():
 
         return filtered_df[(filtered_df.drop(columns=excluded_cols)
                             .fillna(
-            value=-999)  # replace NaN values with -999, just so we can run a function (=applymap)
+                value=-999)  # replace NaN values with -999, just so we can run a function (=applymap)
                             .applymap(lambda x: x not in [0, 1, 1.0, -999])  # compare values
                             .any(axis=1))  # check if any value in each row is True
         ]
@@ -817,7 +814,6 @@ class CalculateAssignmentDataPopup(CcpnDialogMainWidget):
         #                                        textAlignment='left')
         self.fullTableName.setMinimumWidth(200)
 
-
         self.checkLabel1 = Label(namesFrame, text="Summary Table", grid=(2, 0), hAlign='right')
         self.checkBox1 = CheckBox.CheckBox(namesFrame, grid=(2, 1), checked=True,
                                            callback=self._updateCallback)
@@ -854,10 +850,10 @@ class CalculateAssignmentDataPopup(CcpnDialogMainWidget):
 
         self.checkLabelIgnoreN = Label(namesFrame, text="Ignore N-terminus N", grid=(5, 0), hAlign='right')
         self.checkBoxignoreN = CheckBox.CheckBox(namesFrame, grid=(5, 1), checked=True,
-                                           callback=self._updateCallback)
+                                                 callback=self._updateCallback)
         self.checkLabelDateTime = Label(namesFrame, text="Add timestamps", grid=(6, 0), hAlign='right')
         self.checkBoxDateTime = CheckBox.CheckBox(namesFrame, grid=(6, 1), checked=False,
-                                           callback=self._updateCallback)
+                                                  callback=self._updateCallback)
 
         self._updateCallback()
 
@@ -901,7 +897,6 @@ class CalculateAssignmentDataPopup(CcpnDialogMainWidget):
                     #     excludeList = self.exludeResidueList.text().split(',')
                     #     excludeList = [int(i) for i in excludeList]
 
-
                     data = calculateAssignments(self.project,
                                                 csl.pid,
                                                 chn.pid,
@@ -911,7 +906,8 @@ class CalculateAssignmentDataPopup(CcpnDialogMainWidget):
                     if self.checkBoxDateTime.isChecked():
                         current_time = datetime.now()
                         date_string = current_time.strftime("_%Y-%m-%d_%H:%M:%S")
-                    else: date_string = ""
+                    else:
+                        date_string = ""
 
                     # values in tables are stored as strings with empty values denoted with a space,
                     # This is to prevent the tables from printing NA values for empty cells and cluttering view
@@ -920,7 +916,8 @@ class CalculateAssignmentDataPopup(CcpnDialogMainWidget):
 
                     if self.checkBox2.isChecked():
                         # report Summary Table
-                        _data2 = data.AssignedResidueTable.dropna(axis=1, how='all').fillna(' ').applymap(lambda x: '-' if x == 0 else x)
+                        _data2 = data.AssignedResidueTable.dropna(axis=1, how='all').fillna(' ').applymap(
+                                lambda x: '-' if x == 0 else x)
                         self.project.newDataTable(name=self.CSsummaryTableName.text() + date_string, data=_data2,
                                                   comment='List of all shifts (including incorrect) for known atoms')
 
@@ -943,7 +940,9 @@ class CalculateAssignmentDataPopup(CcpnDialogMainWidget):
                     if self.checkBox3.isChecked():
                         # report Summary Table
                         #print(data.problemArray.apply(pd.to_numeric, errors='ignore').dtypes)
-                        _data2 = data.problemArray.apply(pd.to_numeric, errors='ignore').round(2).dropna(axis=1, how='all').fillna(' ').astype(str)
+                        _data2 = data.problemArray.apply(pd.to_numeric, errors='ignore').round(2).dropna(axis=1,
+                                                                                                         how='all').fillna(
+                                ' ').astype(str)
                         self.project.newDataTable(name=self.ProblemTableName.text() + date_string, data=_data2,
                                                   comment='Problematic Chemical Shift')
 

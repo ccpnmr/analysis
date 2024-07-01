@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-28 21:15:26 +0100 (Fri, June 28, 2024) $"
+__dateModified__ = "$dateModified: 2024-07-01 16:28:32 +0100 (Mon, July 01, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
@@ -718,42 +718,36 @@ class Framework(NotifierBase, GuiBase):
 
         if self.preferences.general.autoCorrectColours:
             project = self.project
-
-            # change spectrum colours
-            for spectrum in project.spectra:
-                if len(spectrum.axisCodes) > 1:
-                    if spectrum.positiveContourColour and spectrum.positiveContourColour.startswith('#'):
-                        spectrum.positiveContourColour = autoCorrectHexColour(spectrum.positiveContourColour,
-                                                                              getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-                    if spectrum.negativeContourColour and spectrum.negativeContourColour.startswith('#'):
-                        spectrum.negativeContourColour = autoCorrectHexColour(spectrum.negativeContourColour,
-                                                                              getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-                else:
-                    if spectrum.sliceColour.startswith('#'):
-                        spectrum.sliceColour = autoCorrectHexColour(spectrum.sliceColour,
-                                                                    getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-
+            # change sp colours
+            for sp in project.spectra:
+                if len(sp.axisCodes) > 1:
+                    if sp.positiveContourColour and sp.positiveContourColour.startswith('#'):
+                        sp.positiveContourColour = autoCorrectHexColour(sp.positiveContourColour,
+                                                                        getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+                    if sp.negativeContourColour and sp.negativeContourColour.startswith('#'):
+                        sp.negativeContourColour = autoCorrectHexColour(sp.negativeContourColour,
+                                                                        getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+                elif sp.sliceColour and sp.sliceColour.startswith('#'):
+                    sp.sliceColour = autoCorrectHexColour(sp.sliceColour,
+                                                          getColours()[CCPNGLWIDGET_HEXBACKGROUND])
             # change peakList colours
             for objList in project.peakLists:
                 objList.textColour = autoCorrectHexColour(objList.textColour,
                                                           getColours()[CCPNGLWIDGET_HEXBACKGROUND])
                 objList.symbolColour = autoCorrectHexColour(objList.symbolColour,
                                                             getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-
             # change integralList colours
             for objList in project.integralLists:
                 objList.textColour = autoCorrectHexColour(objList.textColour,
                                                           getColours()[CCPNGLWIDGET_HEXBACKGROUND])
                 objList.symbolColour = autoCorrectHexColour(objList.symbolColour,
                                                             getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-
             # change multipletList colours
             for objList in project.multipletLists:
                 objList.textColour = autoCorrectHexColour(objList.textColour,
                                                           getColours()[CCPNGLWIDGET_HEXBACKGROUND])
                 objList.symbolColour = autoCorrectHexColour(objList.symbolColour,
                                                             getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-
             for mark in project.marks:
                 mark.colour = autoCorrectHexColour(mark.colour,
                                                    getColours()[CCPNGLWIDGET_HEXBACKGROUND])

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-28 21:21:59 +0100 (Fri, June 28, 2024) $"
+__dateModified__ = "$dateModified: 2024-07-01 20:52:12 +0100 (Mon, July 01, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
@@ -379,6 +379,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         self.statusBar().showMessage(msg)
         msg2 = 'project = %sProject("%s")' % (('new' if isNew else 'open'), path)
 
+        self.application._getRecentProjectFiles()
         self._fillRecentProjectsMenu()
         self.pythonConsole.setProject(project)
         self._updateWindowTitle()

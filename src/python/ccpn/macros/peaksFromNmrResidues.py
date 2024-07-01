@@ -1,26 +1,55 @@
+"""
+Module Documentation here
+"""
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
+__reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
+                 "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
+#=========================================================================================
+# Last code modification
+#=========================================================================================
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-07-01 15:36:01 +0100 (Mon, July 01, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: Vicky Higman $"
+__date__ = "$Date: 2024-07-01 14:47:20 +0100 (Mon, July 1, 2024) $"
+#=========================================================================================
+# Start of code
+#=========================================================================================
+
 # Still to do:
 # - add Tolerances to pop-up
 # - add ability to assign to new NmrChain
 ###############
 
-
+from contextlib import suppress
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
+import ccpn.ui.gui.widgets.PulldownListsForObjects as objectPulldowns
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Entry import Entry
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.core.lib.ContextManagers import undoBlock
-import ccpn.ui.gui.widgets.PulldownListsForObjects as objectPulldowns
 from ccpn.ui.gui.widgets.ListWidget import ListWidgetPair
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.HLine import HLine
-
+from ccpn.core.NmrResidue import NmrResidue
+from ccpn.core.lib.ContextManagers import undoBlock
 
 
 class peaksFromNmrResidues(CcpnDialogMainWidget):
     title = 'Peaks from NmrResidues'
 
-    def __init__(self, parent=None, mainWindow=None, title=title,  **kwds):
+    def __init__(self, parent=None, mainWindow=None, title=title, **kwds):
         super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
 
         if mainWindow:
@@ -28,7 +57,6 @@ class peaksFromNmrResidues(CcpnDialogMainWidget):
             self.application = mainWindow.application
             self.current = self.application.current
             self.project = mainWindow.project
-
         else:
             self.mainWindow = None
             self.application = None
@@ -37,49 +65,53 @@ class peaksFromNmrResidues(CcpnDialogMainWidget):
 
         # set up the popup
         self._setWidgets()
+        self._populateWidgets()
 
         # enable the buttons
         self.setOkButton(text='Create Peaks', callback=self._createPeaks, tipText='Create Peaks from '
-                                                                                           'NmrResidue Chemical Shifts')
+                                                                                  'NmrResidue Chemical Shifts')
         self.setCancelButton(callback=self.reject)
         self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
-
         # initialise the buttons and dialog size
         self._postInit()
 
     def _setWidgets(self):
 
         row = 0
-        Label(self.mainWidget, text='Select NmrResidue:', grid = (row, 0))
-        self.NRPulldown = objectPulldowns.NmrResiduePulldown(self.mainWidget, labelText='', grid = (row,1))
+        Label(self.mainWidget, text='Select NmrResidue:', grid=(row, 0))
+        self.NRPulldown = objectPulldowns.NmrResiduePulldown(self.mainWidget, labelText='', grid=(row, 1),
+                                                             callback=self._selectCSLfromNmrResidue,
+                                                             mainWindow=self.mainWindow)
 
         row += 1
-        Label(self.mainWidget, text='Select ChemicalShiftList:', grid = (row, 0))
-        self.CLPulldown = objectPulldowns.ChemicalShiftListPulldown(self.mainWidget, labelText='', grid = (row,1))
+        Label(self.mainWidget, text='Select ChemicalShiftList:', grid=(row, 0))
+        self.CLPulldown = objectPulldowns.ChemicalShiftListPulldown(self.mainWidget, labelText='', grid=(row, 1),
+                                                                    mainWindow=self.mainWindow)
 
         row += 1
-        Label(self.mainWidget, text='Select Spectra:', grid = (row, 0))
+        Label(self.mainWidget, text='Select Spectra:', grid=(row, 0))
         # self.SPPulldown = objectPulldowns.SpectrumPulldown(self.mainWidget, labelText='', grid = (row,1))
 
         row += 1
-        self.SPList = ListWidgetPair(self.mainWidget, grid = (row, 0), gridSpan = (1,2))
+        self.SPList = ListWidgetPair(self.mainWidget, grid=(row, 0), gridSpan=(1, 2))
         self._populateSPListFromProj()
 
         row += 1
         self.mainWidget.addSpacer(0, 10, grid=(row, 0))
 
         row += 1
-        Label(self.mainWidget, text='Select PeakList:', grid = (row, 0))
-        self.PLOptions = RadioButtons(self.mainWidget, texts=['First','Last', 'New'],
-                                            direction='h', grid=(row, 1))
+        Label(self.mainWidget, text='Select PeakList:', grid=(row, 0))
+        self.PLOptions = RadioButtons(self.mainWidget, texts=['First', 'Last', 'New'],
+                                      direction='h', grid=(row, 1))
         self.useFirst, self.useLast, self.useNew = self.PLOptions.radioButtons
 
         row += 1
         self.mainWidget.addSpacer(0, 10, grid=(row, 0))
 
         row += 1
-        Label(self.mainWidget, text='Peak creation method:', grid = (row, 0))
-        self.PKOptions = RadioButtons(self.mainWidget, texts=['Place Peaks','Pick Picks'], direction='h', grid=(row, 1))
+        Label(self.mainWidget, text='Peak creation method:', grid=(row, 0))
+        self.PKOptions = RadioButtons(self.mainWidget, texts=['Place Peaks', 'Pick Picks'], direction='h',
+                                      grid=(row, 1))
         self.placePeaks, self.areaPick = self.PKOptions.radioButtons
 
         row += 1
@@ -98,23 +130,35 @@ class peaksFromNmrResidues(CcpnDialogMainWidget):
         HLine(self.mainWidget, grid=(row, 0), gridSpan=(1, 2))
 
         row += 1
-        self.assignToDifferentNmrResidue = CheckBox(self.mainWidget, text='assign Peaks to new NmrResidue', checked=False, grid=(row, 0))
+        self.assignToDifferentNmrResidue = CheckBox(self.mainWidget, text='assign Peaks to new NmrResidue',
+                                                    checked=False, grid=(row, 0))
 
         row += 1
-        Label(self.mainWidget, text='Select NmrChain :', grid = (row, 0))
-        self.newNCPulldown = objectPulldowns.NmrChainPulldown(self.mainWidget, labelText='', grid = (row,1))
+        Label(self.mainWidget, text='Select NmrChain :', grid=(row, 0))
+        self.newNCPulldown = objectPulldowns.NmrChainPulldown(self.mainWidget, labelText='', grid=(row, 1),
+                                                              mainWindow=self.mainWindow)
 
         row += 1
-        Label(self.mainWidget, text='Set SequenceCode:', grid = (row, 0))
-        self.seqCode = Entry(self.mainWidget, labelText='', grid = (row,1))
+        Label(self.mainWidget, text='Set SequenceCode:', grid=(row, 0))
+        self.seqCode = Entry(self.mainWidget, labelText='', grid=(row, 1))
+
+    def _cleanupDialog(self):
+        """Clean-up and unregister notifiers.
+        """
+        for ntfy in {self.NRPulldown, self.CLPulldown, self.newNCPulldown}:
+            if ntfy:
+                ntfy.unRegister()
+
+    def _populateWidgets(self):
+        # populate the CSL pulldown from the first selected nmrResidue
+        self._selectCSLfromNmrResidue(self.NRPulldown.getText())
 
     def _populateSPListFromProj(self):
         if self.project:
-            self.SPList._populate(self.SPList.leftList,self.project.spectra)
+            self.SPList._populate(self.SPList.leftList, self.project.spectra)
 
-
-
-    def _isAliphatic(self, nmratm):
+    @staticmethod
+    def _isAliphatic(nmratm):
         nonAliphatics = [('PHE', 'G'), ('PHE', 'D'), ('PHE', 'E'), ('PHE', 'Z'),
                          ('TYR', 'G'), ('TYR', 'D'), ('TYR', 'E'), ('TYR', 'Z'),
                          ('HIS', 'G'), ('HIS', 'D'), ('HIS', 'E'),
@@ -127,7 +171,8 @@ class peaksFromNmrResidues(CcpnDialogMainWidget):
         else:
             return True
 
-    def _areAssigned(self, nAtom1, nAtom2):
+    @staticmethod
+    def _areAssigned(nAtom1, nAtom2):
         if nAtom1.atom and nAtom2.atom:
             return True
         else:
@@ -160,7 +205,8 @@ class peaksFromNmrResidues(CcpnDialogMainWidget):
                         result = [cs1, cs2]
         return result
 
-    def _getPeakToleranceLimits(self, atm1, atm2, chemShifts):
+    @staticmethod
+    def _getPeakToleranceLimits(atm1, atm2, chemShifts):
         tolerances = {'H': 0.025, 'C': 0.2, 'N': 0.2}  # Tolerances in ppm
         lims = [chemShifts[0].value - tolerances[atm1.name[0]],
                 chemShifts[0].value + tolerances[atm1.name[0]],
@@ -169,6 +215,7 @@ class peaksFromNmrResidues(CcpnDialogMainWidget):
         return lims
 
     def _getPeakList(self, sp):
+        pl = None
         if self.useFirst.isChecked():
             pl = sp.peakLists[0]
         elif self.useLast.isChecked():
@@ -177,7 +224,8 @@ class peaksFromNmrResidues(CcpnDialogMainWidget):
             pl = sp.newPeakList()
         return pl
 
-    def _peakPresent(self, peakList, limits):
+    @staticmethod
+    def _peakPresent(peakList, limits):
         for pk in peakList.peaks:
             if limits[0] < pk.ppmPositions[0] < limits[1] and limits[2] < pk.ppmPositions[1] < limits[3]:
                 return True
@@ -192,7 +240,7 @@ class peaksFromNmrResidues(CcpnDialogMainWidget):
         else:
             newna1 = atm1
             newna2 = atm2
-        for axCode, na in zip(axCodes, [newna1,newna2]):
+        for axCode, na in zip(axCodes, [newna1, newna2]):
             pk.assignDimension(axCode, na)
 
     def _pickPeak(self, atm1, atm2, limits, peakList, axCdes):
@@ -254,10 +302,9 @@ class peaksFromNmrResidues(CcpnDialogMainWidget):
                                                        f'ChemicalShiftList.')
                 break
 
-
     def _createPeaks(self):
         with undoBlock():
-                # sp = self.SPPulldown.getSelectedObject()
+            # sp = self.SPPulldown.getSelectedObject()
             spectrumPids = self.SPList.getRightList()
             for pid in spectrumPids:
                 sp = self.project.getByPid(pid)
@@ -269,7 +316,7 @@ class peaksFromNmrResidues(CcpnDialogMainWidget):
                     showWarning('Incorrect Dimensionality', 'This macro is only set up for 2D spectra.')
                     runMacro = False
                 elif 'Jcoupling' in sp.experimentType or 'Jmultibond' in sp.experimentType:
-                    showWarning( 'Experiment Type not implemented: '+ sp.experimentType,
+                    showWarning('Experiment Type not implemented: ' + sp.experimentType,
                                 'Sorry, this macro won\'t currently work on the experiment '
                                 'type selected for spectrum ' + sp.name + '.')
                     runMacro = False
@@ -286,17 +333,21 @@ class peaksFromNmrResidues(CcpnDialogMainWidget):
 
         return self.accept()
 
+    def _selectCSLfromNmrResidue(self, nmrResidue):
+        from ccpn.util.OrderedSet import OrderedSet
+
+        nmrResidue = self.project.getByPid(nmrResidue) if isinstance(nmrResidue, str) else nmrResidue
+        print(f'=> {nmrResidue}')
+        if not isinstance(nmrResidue, NmrResidue):
+            raise TypeError(f'{nmrResidue} is not an NmrResidue')
+
+        if CSLs := OrderedSet(cs.chemicalShiftList for nmrAtm in nmrResidue.nmrAtoms
+                              for cs in nmrAtm.chemicalShifts):
+            with suppress(Exception):
+                self.CLPulldown.select(list(CSLs)[0].pid)
 
 
 if __name__ == "__main__":
     popup = peaksFromNmrResidues(mainWindow=mainWindow)
     popup.show()
     popup.raise_()
-
-
-
-
-
-
-
-

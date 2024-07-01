@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-28 21:15:26 +0100 (Fri, June 28, 2024) $"
+__dateModified__ = "$dateModified: 2024-07-01 14:34:55 +0100 (Mon, July 01, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
@@ -1135,7 +1135,6 @@ def progressHandler(parent=None, *, title: str = 'Progress',
     from ccpn.framework.Application import getApplication
 
     application = getApplication()
-    # mainWindow = application.ui.mainWindow
     handler = application.ui.getProgressHandler()
     try:
         # get the dialog handler from the gui state - use subclass

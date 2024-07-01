@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Creating a Noesy Peak List from Multiplets</title>
+    <link rel="stylesheet" href="CcpnVideoTutorials.css">
+</head>
+<body>
+<div class="header"><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a
+        href="index.html" class="button">Video<br> Tutorials<br> & Manual</a><a href="https://forums.ccpn.ac.uk"><img
+        src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 15px"></a></div>
+<br>
+<div class="headerBar">Creating a Noesy Peak List from Multiplets</div>
+<div class="tutorial">
+
+    <div class="videoContainer">
+        <div class="videoWrapper">
+            <iframe src="https://www.youtube.com/embed/TEtlvFkq4z8" frameborder="0"
+                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <h2>Creating a Noesy Peak List from Multiplets</h2>
+    <h3>Background</h3>
+    <p>When conducting a structure calculation, you will usually provide the structure calculation program a peak list along with a chemical shift list. The peak list provides peak positions along with peak heights and/or volumes. Optionally, for some programs you can provide assignments as well. The structure calculation program will use the chemical shifts in the chemical shift list to assign the peaks within a certain tolerance (often making multiple assignments per peak) and then iteratively determine the correct assignments that are consistent with a high-quality structure. The peak heights or volumes are used to determine the approximate strength of an NOE and thus distance(s) between the atoms involved.</p>
+    <p>When working with unlabelled peptides a NOESY spectrum may contain mutliplets, i.e. some peaks will be split into two or more components. In this situation, it is no longer possible to use a simple peak list for your structure calculation. The peak positions will be incorrect because they will be on the multiplet components rather than in the centre of the multiplet (which is where the chemical shift in your chemical shift list is likely to be) and the peak heights and/or volumes will also be incorrect, since these will be split across the multiplets, rather than be summed into one. For this reason, if you have a NOESY spectrum containing multiplets, you will need to replace each multiplet with a single peak at the centre of the multiplet and with a height/volume which is the sum of the heights/volumes of the multiplet components.</p>
+    <h3>Creating the Noesy Peak List from Multiplets</h3>
+    <p>Peak-pick your Noesy spectrum as usual. You may find it convenient to use our 2D multiplet peak picker to create mutliplets automatically as part of this process (see our <a href="Multiplets.html">Multiplets page</a> for more details). Alternatively, select each group of peaks belonging to one multiplet and place them into a multiplet with shortcut <span class="action">AM</span> (see our <a href="Multiplets.html">Multiplets page</a> for more details).</p>
+    <p>Go to <span class="action">Macro / Run CCPN Macros / CreateNoesyPeakListFromMutliplets</span>. In the dialog box, select your <span class="action">source PeakList</span>, i.e. the Noesy PeakList you wish to start from. Then choose whether you place your new peaks into a new or an existing PeakList (and if necessary specify which PeakList), and finally click on <span class="action">Create NOESY Peaks</span>.</p>
+</div>
+</body>
+</html>

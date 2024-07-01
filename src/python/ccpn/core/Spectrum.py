@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-28 15:28:39 +0100 (Fri, June 28, 2024) $"
+__dateModified__ = "$dateModified: 2024-07-01 20:19:49 +0100 (Mon, July 01, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
@@ -1359,7 +1359,7 @@ class Spectrum(AbstractWrapperObject):
             _refExperiment = self.project._getReferenceExperimentFromType(_experimentType)
 
         # get the nucleus codes from the current isotope codes
-        nCodes = tuple(val.strip('0123456789') for val in self.isotopeCodes)
+        nCodes = tuple(val.strip('0123456789') for val in self.isotopeCodes if val is not None)
 
         # match against the current reference experiment or passed in value
         apiExperiment = self._wrappedData.experiment

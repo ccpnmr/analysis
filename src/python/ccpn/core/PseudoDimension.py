@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-01 20:20:06 +0100 (Mon, July 01, 2024) $"
+__dateModified__ = "$dateModified: 2024-07-02 15:59:42 +0100 (Tue, July 02, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
@@ -34,6 +34,7 @@ from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import SampledDataDim as ApiSampledDataDim
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ExpDimRef as ApiExpDimRef
+from ccpn.ui.gui.guiSettings import consoleStyle
 
 
 class PseudoDimension(AbstractWrapperObject, SpectrumDimensionAttributes):
@@ -102,7 +103,6 @@ class PseudoDimension(AbstractWrapperObject, SpectrumDimensionAttributes):
         :return: expDimRef instance
         """
         return None
-        # return list(self._expDim.expDimRefs)[0]
 
     @property
     def _key(self) -> str:
@@ -341,11 +341,11 @@ class PseudoDimension(AbstractWrapperObject, SpectrumDimensionAttributes):
 
     @property
     def axisUnit(self) -> str:
-        return 's'
+        return self._dataDim.unit
 
     @axisUnit.setter
     def axisUnit(self, value):
-        pass
+        self._dataDim.unit = value
 
     @property
     def measurementType(self) -> str | None:

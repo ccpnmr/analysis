@@ -310,5 +310,10 @@
         }
     },
     "tables"           : {
+    },
+    "modules": {
+        "profileByReference" : {
+            "databasePath" : ""
+        }
     }
 }

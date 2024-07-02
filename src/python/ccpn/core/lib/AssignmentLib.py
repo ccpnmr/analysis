@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-26 14:29:04 +0100 (Wed, June 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-07-01 14:34:55 +0100 (Mon, July 01, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
@@ -156,6 +156,7 @@ from typing import Sequence
 from collections import defaultdict
 from ccpn.core.NmrAtom import NmrAtom, UnknownIsotopeCode
 from ccpn.core.Chain import Chain
+from ccpn.core.NmrChain import NmrChain
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Peak import Peak
@@ -1239,65 +1240,38 @@ def _assignNmrResiduesToPeaks(peaks, nmrResidues):
         _assignNmrAtomsToPeaks(peaks, nmrResidue.nmrAtoms, exactMatch=False)
 
 
-def _fetchNewPeakAssignments(peakList, nmrChain, keepAssignments):
+def _fetchNewPeakAssignments(peakList: PeakList, nmrChain: NmrChain, keepAssignments: bool):
+    from ccpn.framework.Application import getMainWindow
     from ccpn.core.lib.ContextManagers import progressHandler
-    from ccpn.core.lib.ContextManagers import undoBlockWithSideBar as undoBlock
+    from ccpn.core.lib.Notifiers import Notifier
+    from functools import partial
 
-    # go through all the peaks in the peakList
-    if peakList.peaks:
-        peak = peakList.peaks[0]
-        axisIso = list(zip(peak.axisCodes, peak.spectrum.isotopeCodes))
-        numDims = len(peak.axisCodes)
+    if not peakList.peaks:
+        return
 
-        foundMts = {}
-        with progressHandler(text='Set up NmrResidues...', maximum=len(peakList.peaks), autoClose=False,
-                             raiseErrors=False) as progress:
+    def _updateProgress(pHandler, pks, data):
+        # respond to notifier and update the progress-bar
+        pHandler.checkCancelled()
+        indx = pks.index(data[Notifier.OBJECT])
+        pHandler.setValue(indx)
 
-            with undoBlock():
-                for cc, peak in enumerate(peakList.peaks):
+    # show a progress popup if the operation is taking too long
+    with progressHandler(parent=getMainWindow(),
+                         text='Set up NmrResidues...', maximum=len(peakList.peaks),
+                         autoClose=False, raiseErrors=False) as progress:
+        _peaks = list(peakList.peaks)
+        # add a notifier on a change/create of any peaks in this peakList to update progress-bar
+        _notify = Notifier(peakList,
+                           [Notifier.CREATE, Notifier.CHANGE],
+                           'Peak',
+                           partial(_updateProgress, progress, _peaks))
+        peakList.fetchNewAssignments(nmrChain, keepAssignments)
 
-                    progress.checkCancelled()
-                    progress.setValue(cc)
-
-                    # only process those that are empty OR those not empty when checkbox cleared
-                    dimensionNmrAtoms = peak.dimensionNmrAtoms  # for speed reasons !?
-                    if not keepAssignments or not any(dimensionNmrAtoms):
-                        if peak.multiplets:
-                            existingDims = [[] for _nd in range(numDims)]
-                            for mt in peak.multiplets:
-                                if mt in foundMts:
-                                    for i, (exst, dimNmr) in enumerate(zip(existingDims, foundMts[mt])):
-                                        existingDims[i].append(dimNmr)
-
-                                else:
-                                    # need to create a new residue and nmrAtoms
-                                    thisDims = [[] for _nd in range(numDims)]
-                                    nmrResidue = nmrChain.newNmrResidue()
-                                    for i, (axis, isotope) in enumerate(axisIso):
-                                        nmrAtom = nmrResidue.fetchNmrAtom(name=str(axis[0]), isotopeCode=isotope)
-                                        existingDims[i].append(nmrAtom)
-                                        thisDims[i] = nmrAtom
-
-                                    foundMts[mt] = thisDims
-
-                            # assign all the dimensions
-                            # for i, ((axis, isotope), dims) in enumerate(zip(axisIso, existingDims)):
-                            #     peak.assignDimension(axisCode=axis, value=dims)
-                            peak.assignDimensions(axisCodes=peak.axisCodes, values=existingDims)
-
-                        else:
-                            # make a new nmrResidue with new nmrAtoms and assign to the peak
-                            nmrResidue = nmrChain.newNmrResidue()
-                            # for i, (axis, isotope) in enumerate(axisIso):
-                            #     nmrAtom = nmrResidue.fetchNmrAtom(name=str(axis), isotopeCode=isotope)
-                            #     peak.assignDimension(axisCode=axis, value=[nmrAtom])
-                            newNmrs = [[nmrResidue.fetchNmrAtom(name=str(axis[0]), isotopeCode=isotope)] for
-                                       axis, isotope in axisIso]
-                            peak.assignDimensions(axisCodes=peak.axisCodes, values=newNmrs)
-
-        if progress.error:
-            # report any errors
-            getLogger().warning(f'fetchNewPeakAssignments: {progress.error}')
+    # clean up notifier
+    _notify.unRegister()
+    if progress.error:
+        # report any errors
+        getLogger().warning(f'fetchNewPeakAssignments: {progress.error}')
 
 
 #=========================================================================================

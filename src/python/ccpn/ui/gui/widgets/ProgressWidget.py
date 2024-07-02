@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-27 10:35:17 +0100 (Thu, June 27, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-28 21:15:26 +0100 (Fri, June 28, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
@@ -45,35 +45,34 @@ class ProgressDialog(QtWidgets.QProgressDialog):
         pass
 
 
-    def __init__(self, parent=None, *, title:str='Progress Dialog',
-                 text:str='Busy...', cancelButtonText:str='Cancel',
-                 minimum:int=0, maximum:int=100, steps:int=100,
-                 delay:int=1000, closeDelay:int=250, autoClose:bool=True,
-                 hideCancelButton: bool=False):
-        # super().__init__(labelText=labelText, cancelButtonText=cancelButtonText,
-        #                  minimum=minimum, maximum=maximum, parent=parent)
+    def __init__(self, parent=None, *, title: str = 'Progress Dialog',
+                 text: str = 'Busy...', cancelButtonText: str = 'Cancel',
+                 minimum: int = 0, maximum: int = 100, steps: int = 100,
+                 delay: int = 1000, closeDelay: int = 250, autoClose: bool = True,
+                 hideBar: bool = False, hideCancelButton: bool = False):
         super().__init__(text, cancelButtonText, minimum, maximum, parent,
-                         QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowStaysOnTopHint)
+                         QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Popup)
 
         self.setWindowTitle(title)
-        # self.setText(text)
         self.setAutoReset(autoClose)
         self.setAutoClose(autoClose)
         self.setMinimumDuration(delay)
-        self._closeDelay = closeDelay / 1000 if isinstance(closeDelay, (int, float)) else 0
+        self._closeDelay = closeDelay / 1000 if isinstance(closeDelay, (int, float)) else 0  # changes ms->s
         self._cancelled = False
         self._error = None
-        # self.setRange(minimum, maximum)
+        self._hideCancelButton = hideCancelButton
         self.steps = steps
         # give full control to the dialog
         self.setWindowModality(QtCore.Qt.WindowModal)
-        # self.setWindowFlags(self.windowFlags() | QtCore.Qt.CustomizeWindowHint |
-        #                     QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Popup)
-        # self.setAttribute(QtCore.Qt.WA_AlwaysStackOnTop)
-
+        self.setAttribute(QtCore.Qt.WA_AlwaysStackOnTop)
         # hide the cancel-button
         if hideCancelButton:
             self.setCancelButton(None)
+        # hide the progress-bar
+        self._hideBar = hideBar
+        if hideBar and (ch := self.findChildren(QtWidgets.QProgressBar)):
+            for cc in ch:
+                cc.hide()  # seems to be a frame behind :|
         if not delay:
             self.show()
 
@@ -236,6 +235,7 @@ class ProgressDialog(QtWidgets.QProgressDialog):
         # process any remaining events
         QtWidgets.QApplication.processEvents()
         # pause so that the counter doesn't flicker if too quick
+        #   (timers are in seconds)
         eTime = perf_counter() - sTime
         if (eTime < self._closeDelay) and self.isVisible():
             sleep(self._closeDelay - eTime)
@@ -294,11 +294,11 @@ class ProgressTextBar(tqdm):
         pass
 
 
-    def __init__(self, parent=None, *, title:str='Progress Dialog',
-                 text:str='Busy...', cancelButtonText:str=None,
-                 minimum:int=0, maximum:int=100,
-                 delay:int=1000, closeDelay:int=250, steps:int=100,
-                 autoClose:bool=True, hideCancelButton:bool=True):
+    def __init__(self, parent=None, *, title: str = 'Progress Dialog',
+                 text: str = 'Busy...', cancelButtonText: str = None,
+                 minimum: int = 0, maximum: int = 100,
+                 delay: int = 1000, closeDelay: int = 250, steps: int = 100,
+                 autoClose: bool = True, hideCancelButton: bool = True):
 
         self._minimum = minimum
         self._maximum = maximum
@@ -453,19 +453,15 @@ class BusyDialog(ProgressDialog):
     """A progress-dialog that pops up immediately without a cancel button or progress-bar
     """
 
-    def __init__(self, parent=None, *args, hideBar=True, hideCancelButton=True, **kwds):
+    def __init__(self, parent=None, *args, delay: int = 0,
+                 hideBar: bool = True, hideCancelButton: bool = True, autoClose: bool = False,
+                 **kwds):
         """Initialise the dialog
         """
-        # show the dialog immediately - actually small delay to allow child-widgets to hide
-        kwds.pop('delay', 0)
-        super().__init__(parent, delay=50, *args, **kwds)
-        # hide the progress-bar
-        if hideBar and (ch := self.findChildren(QtWidgets.QProgressBar)):
-            for cc in ch:
-                cc.setVisible(False)
-        # hide the cancel-button
-        if hideCancelButton:
-            self.setCancelButton(None)
+        # show the dialog immediately - or small delay to allow child-widgets to hide
+        super().__init__(parent, delay=delay,
+                         hideBar=hideBar, hideCancelButton=hideCancelButton, autoClose=autoClose,
+                         *args, **kwds)
 
 
 #=========================================================================================

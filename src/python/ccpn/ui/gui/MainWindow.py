@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-27 10:35:17 +0100 (Thu, June 27, 2024) $"
+__dateModified__ = "$dateModified: 2024-07-01 20:52:12 +0100 (Mon, July 01, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
@@ -1473,7 +1473,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         _obj = data.get('theObject')
         _droppedOnSideBar = (_obj is not None and isinstance(_obj, SideBar))
         # dataLoaders: A list of (url, dataLoader, createsNewProject, ignore) tuples.
-        # createsNewProject: to evaluate later call _loadProject; eg. for NEF
+        # createsNewProject: to evaluate later call _loadProject; e.g. for NEF
         # ignore: user opted to skip this one; e.g. a spectrum already present
         dataLoaders = []
         _loaders = []
@@ -1538,8 +1538,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         if len(newProjectUrls) > 1:
             # We found more than one dataLoader that would create a new project; not allowed
             MessageDialog.showError('Load Data',
-                                    f'Only one new project can be created at a time\n'
-                                    f'{len(newProjectUrls):d} dropped items need to create new projects',
+                                    f'Only one new project can be created at a time;\n'
+                                    f'this action will try to create {len(newProjectUrls):d} new projects',
                                     parent=self)
             return []
 

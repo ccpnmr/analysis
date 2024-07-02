@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-27 17:16:46 +0100 (Thu, June 27, 2024) $"
+__dateModified__ = "$dateModified: 2024-07-01 20:52:12 +0100 (Mon, July 01, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
@@ -41,8 +41,9 @@ from ccpn.framework.Application import getApplication
 from ccpn.framework.PathsAndUrls import CCPN_DIRECTORY_SUFFIX, CCPN_SAVEAS_SUB_DIRECTORIES
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import _checkPathForDataLoader
 
-from ccpn.core.lib.ContextManagers import notificationEchoBlocking, catchExceptions, \
-    logCommandManager, undoStackBlocking
+from ccpn.core.lib.ContextManagers import (
+    notificationEchoBlocking, catchExceptions,
+    logCommandManager, undoStackBlocking, busyHandler)
 
 from ccpn.ui.Ui import Ui
 from ccpn.ui.gui import Layout
@@ -58,7 +59,6 @@ from ccpn.ui.gui.popups.ImportStarPopup import StarImporterPopup
 
 # This import initializes relative paths for QT style-sheets.  Do not remove! GWV ????
 from ccpn.ui.gui.guiSettings import FontSettings, consoleStyle
-from ccpn.ui.gui.widgets.Font import getFontHeight
 from ccpn.ui.gui.widgets.Icon import Icon
 
 from ccpn.util.Logging import getLogger
@@ -450,8 +450,7 @@ class Gui(Ui, _Gui):
         # check whether to skip the execution loop for testing with mainWindow
         import builtins
 
-        _skip = getattr(builtins, '_skipExecuteLoop', False)
-        if not _skip:
+        if not (_skip := getattr(builtins, '_skipExecuteLoop', False)):
             self.qtApp.start()
 
     def _registerDetails(self, registered=False, acceptedTerms=False):
@@ -755,18 +754,33 @@ class Gui(Ui, _Gui):
     #-----------------------------------------------------------------------------------------
 
     @logCommand('application.')
-    def newProject(self, name: str = 'newProject') -> (Project, None):
+    def newProject(self, name: str = 'newProject') -> Project | None:
         """Create a new project instance with name; create default project if name=None
         :return a Project instance or None
         """
         from ccpn.core.lib.ProjectLib import checkProjectName
 
         oldMainWindowPos = self.mainWindow.pos()
-        # if not self.project.isTemporary:
-        message = f"Do you really want to create a new project (current project will be closed {' and any changes will be lost' if self.project.isModified else ''})?"
-
-        if not (_ok := MessageDialog.showYesNo('New Project', message, parent=self.mainWindow)):
-            return
+        if self.project and (self.project._undo is None or self.project._undo.isDirty()):
+            # if not self.project.isTemporary:
+            if self.project._undo is None or self.project._undo.isDirty():
+                _CANCEL = 'Cancel'
+                _OK = 'Discard and New'
+                _SAVE = 'Save'
+                msg = (f"The current project has been modified and requires saving. Do you want save the current "
+                       f"project first, or discard the changes and continue creating a new project?")
+                reply = MessageDialog.showMulti('New Project...', msg,
+                                                texts=[_OK, _CANCEL, _SAVE],
+                                                okText=_OK, cancelText=_CANCEL,
+                                                parent=self.mainWindow)
+                if reply == _CANCEL:
+                    # cancel the new-operation
+                    return
+                elif reply == _SAVE:
+                    # save first
+                    if not self.saveProject():
+                        # cancel the new-operation if there was an issue saving
+                        return
 
         if (_name := checkProjectName(name, correctName=True)) != name:
             MessageDialog.showInfo('New Project',
@@ -784,7 +798,7 @@ class Gui(Ui, _Gui):
 
             return newProject
 
-    def _loadProject(self, dataLoader=None, path=None) -> (Project, None):
+    def _loadProject(self, dataLoader=None, path=None) -> Project | bool | None:
         """Helper function, loading project from dataLoader instance
         check and query for closing current project
         build the project Gui elements
@@ -817,11 +831,23 @@ class Gui(Ui, _Gui):
         if self.project:
             # if not self.project.isTemporary:
             if self.project._undo is None or self.project._undo.isDirty():
-                message = f"Do you really want to open a new project (current project will be closed" \
-                          f"{' and any changes will be lost' if self.project.isModified else ''})?"
-
-                if not (_ok := MessageDialog.showYesNo('Load Project', message, parent=self.mainWindow)):
+                _CANCEL = 'Cancel'
+                _OK = 'Discard and Load'
+                _SAVE = 'Save'
+                msg = (f"The current project has been modified and requires saving. Do you want save the current "
+                       f"project first, or discard the changes and continue loading?")
+                reply = MessageDialog.showMulti('Load Project...', msg,
+                                                texts=[_OK, _CANCEL, _SAVE],
+                                                okText=_OK, cancelText=_CANCEL,
+                                                parent=self.mainWindow)
+                if reply == _CANCEL:
+                    # cancel the load-operation
                     return None
+                elif reply == _SAVE:
+                    # save first
+                    if not self.saveProject():
+                        # cancel the load-operation if there was an issue saving
+                        return None
 
             # Some error recovery; store info to re-open the current project (or a new default)
             oldProjectLoader = CcpNmrV3ProjectDataLoader(self.project.path)
@@ -832,12 +858,21 @@ class Gui(Ui, _Gui):
             if self.project:
                 # NOTE:ED - getting a strange QT bug disabling the menu-bar from here
                 #  I think because the main-window isn't visible on the first load :|
-                with MessageDialog.progressManager(self.mainWindow, f'Loading project {dataLoader.path} ... '):
+                with busyHandler(self.mainWindow, title='Loading',
+                                 text=f'Loading project {dataLoader.path} ...', closeDelay=1000):
                     if not (_loaded := dataLoader.load()):
+                        MessageDialog.showWarning('Loading Project',
+                                                  f'There was a problem loading project {dataLoader.path}\n'
+                                                  f'Please check the log for more information.',
+                                                  parent=self.mainWindow)
                         return None
             else:
-                # progress not required on the first load
+                # busy-status not required on the first load
                 if not (_loaded := dataLoader.load()):
+                    MessageDialog.showWarning('Loading Project',
+                                              f'There was a problem loading project {dataLoader.path}\n'
+                                              f'Please check the log for more information.',
+                                              parent=self.mainWindow)
                     return None
             newProject = _loaded[0]
 
@@ -1038,7 +1073,7 @@ class Gui(Ui, _Gui):
         from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
         from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
 
-        result = []
+        result = []  # the load may fail
         errorStringTemplate = f'Loading "{dataLoader.path}" failed:\n\n%s'
         with catchExceptions(errorStringTemplate=errorStringTemplate):
             # For data loads that are possibly time-consuming, use progressManager

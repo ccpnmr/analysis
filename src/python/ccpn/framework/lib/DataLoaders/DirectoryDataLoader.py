@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-26 11:56:02 +0100 (Wed, June 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-28 21:21:59 +0100 (Fri, June 28, 2024) $"
 __version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
@@ -49,6 +49,7 @@ class DirectoryDataLoader(DataLoaderABC):
     suffixes = [NO_SUFFIX, ANY_SUFFIX]  # a list of suffixes that get matched to path
     allowDirectory = True  # Have to allow a directory
     requireDirectory = True  # Require a directory
+    priority = 3  # lower priority, project type checks should come before
 
     recursive = Bool(default_value=False).tag(info='Flag to define recursive behavior')
     dataLoaders = List(default_value=[]).tag(
@@ -63,11 +64,13 @@ class DirectoryDataLoader(DataLoaderABC):
         :param recursive: Recursively include subdirectories
         :param formatFilter: Only include defined dataFormats
         """
+
         super().__init__(path=path)
         self.recursive = recursive
         self.dataLoaders = []
         self.count = 0
         self.depth = depth
+
         # scan all the files in the directory,
         # skipping dotted files and only processing directories if recursion is True
 
@@ -157,6 +160,8 @@ class DirectoryDataLoader(DataLoaderABC):
         for dataLoader in self.dataLoaders:
             if (objs := dataLoader.load()) is not None:  # This will automatically recurse
                 result.extend(objs)
+            # objs = dataLoader.load()  # This will automatically recurse
+            # result.extend(objs)
         return result
 
     def __len__(self):

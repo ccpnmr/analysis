@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-30 13:45:35 +0100 (Thu, May 30, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-06-28 21:11:43 +0100 (Fri, June 28, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -418,6 +418,7 @@ def _createChain(self: Project, compoundName: str = None,
     :return: a new Chain instance.
     """
     from ccpn.core.lib.ChainLib import SequenceHandler, CCPCODE, ISVALID, ERRORS
+
     ccpCodes = []
     if sequence is not None:
         sequenceHandler = SequenceHandler(self.project, moleculeType=molType)
@@ -618,7 +619,7 @@ def _fetchChemCompFromFile(project, filePath):
         with open(filePath) as stream:
             chemComp = loadFromStream(stream, topObject=memopsRoot, topObjId=topObjId, )
             #update the 3letterCode because is needed on  V3 for some reasons...
-            if not chemComp.code3Letter:
+            if chemComp and not chemComp.code3Letter:
                 chemComp.__dict__['code3Letter'] = chemComp.ccpCode.upper()
     # need to copy the xml file to the project to be reopened
     # Not sure why is not done automatically or about a better way of doing it
@@ -684,6 +685,7 @@ def _cloneChain(self: Chain, shortName: str = None):
     # FIXME This is broken for Non-Standard Residues. (probably never tested as it never implemented in V3)
     # Check if there are Non-standards. Clone is not yet available for Non-Standards
     from ccpn.core.lib.ChainLib import SequenceHandler
+
     chain = self
     sequenceHandler = SequenceHandler(chain.project, moleculeType=chain.chainType)
     standardCcpCodes = sequenceHandler.getAvailableCcpCodes(standardsOnly=True)
@@ -692,9 +694,10 @@ def _cloneChain(self: Chain, shortName: str = None):
     for ccpCode in ccpCodes:
         if ccpCode not in standardCcpCodes:
             nonStandardResidues.add(ccpCode)
-    if len(nonStandardResidues)>0:
+    if len(nonStandardResidues) > 0:
         nstdResiduesStr = ', '.join(list(nonStandardResidues))
-        raise ValueError(f'''The chain {chain} contains Non-Standard Residue(s): "{nstdResiduesStr}". Clone is not yet available for this chain''')
+        raise ValueError(f'The chain {chain} contains Non-Standard Residue(s): "{nstdResiduesStr}". '
+                         f'Clone is not yet available for this chain')
 
     apiChain = self._wrappedData
     apiMolSystem = apiChain.molSystem

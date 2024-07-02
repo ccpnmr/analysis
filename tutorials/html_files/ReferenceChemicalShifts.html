@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reference Chemical Shifts</title>
+    <link rel="stylesheet" href="CcpnVideoTutorials.css">
+</head>
+<body>
+<div class="header"><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a
+        href="index.html" class="button">Video<br> Tutorials<br> & Manual</a><a href="https://forums.ccpn.ac.uk"><img
+        src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 15px"></a></div>
+<br>
+<div class="headerBar">Reference Chemical Shifts</div>
+<div class="tutorial">
+
+    <div class="videoContainer">
+        <div class="videoWrapper">
+            <iframe src="https://www.youtube.com/embed/FCTy6mWPWkU" frameborder="0"
+                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <h2>Reference Chemical Shifts</h2>
+    <p>As part of the program we provide the average chemical shifts for atoms in the 20 naturally occurring amino acids in structured proteins. We also show their experimental distributions taken from the BMRB database. Go to <span class="action">Molecules / Reference Chemical Shifts</span> or use shortcut <span class="action">RC</span> to bring up the Reference Chemical Shifts module.</p>
+    <h3>All Distributions</h3>
+    <p>By default, you will first see the backbone heavy-atom chemical shift distributions for all amino acid types.  Use the amino acid buttons to toggle particular amino acids off or on again. You can also switch the <span class="action">Atom Type</span> between <span class="action">Heavy</span> (i.e. <sup>13</sup>C and <sup>15</sup>N) and <span class="action">Hydrogen</span>. Finally, you can also switch the <span class="action">Atom Selection</span> between <span class="action">Backbone</span>, <span class="action">SideChain</span> and <span class="action">All</span>.</p>
+    <p>Note that the mouse cross-hair is correlated between the Reference Chemical Shifts and the SpectrumDisplays. And you can zoom or move Reference Chemical Shift Distributions around as you zoom or move a Spectrum in a SpectrumDisplay.</p>
+    <h3>Amino acid specific distributions</h3>
+    <p>Using the <span class="action">Residue Type</span> drop-down menu you can also switch to see the distributions for individual amino acids. This allows you to toggle individual atoms on/off in addition to seeing the <span class="action">Atom Type</span> and <span class="action">Atom Selection</span> as indicated above.</p>
+    <h3>Marking reference chemical shift positions in spectra</h3>
+    <p>We have created a <a href="https://ccpn.le.ac.uk/download/ccpnmr/RefChemShifts.nef">NEF file containing a 20-amino acid chain with all the Reference Chemical Shifts</a>. You can import this into your project and create marks on your spectra by dragging one of the NmrResidues/NmrAtoms onto a SpectrumDisplay.</p>
+    <p>Import the file by going to <span class="action">File / Import / Nef file</span>, using shortcut <span class="action">IN</span> or by dragging the file into your project. If asked, select to <span class="action">Import</span> the file and then in the NEF Import dialog box tick <span class="action">RefChemShifts.nef</span> on the left hand side which will automatically tick the Chain and ChemicalShiftList below. Click the <span class="action">Import</span> button and you will see that a new Chain, ChemicalShiftList and NmrChain have been added to your project. You can now expand the <span class="action">NC:RefChemShifts</span> NmrChain and drag the NmrResidue for any amino acid type into a SpectrumDisplay. Marks will be drawn at the average chemical shift positions for that amino acid type. Note that some chemical shifts may have quite large distributions / error bars, so this may only give you a general guidance as to where to look for the peaks belonging to particular amino acids. This is particularly true for backbone H and N atoms, i.e. <sup>1</sup>H-<sup>15</sup>N HSQC spectra. However, if you are looking at <sup>1</sup>H-<sup>1</sup>H-TOCSY or NOESY spectra of peptides, this can be very useful. Have a look at our <a href="WorkingWithPeptides.html">Working with Peptides webpage</a> for more advice on features to use when working with peptide data.</p>
+</div>
+</body>
+</html>

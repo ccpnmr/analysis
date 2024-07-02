@@ -229,7 +229,7 @@ def catchExceptions(application=None, errorStringTemplate='Error: "%s"', popupAs
 
 
 @contextmanager
-def rebuildSidebar(application):
+def rebuildSidebar(application=None):
     """
     This context manager clears and blocks the sidebar and rebuilds it afterwards
     """

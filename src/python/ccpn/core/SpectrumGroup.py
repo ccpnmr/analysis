@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-30 13:45:36 +0100 (Thu, May 30, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-07-02 14:41:03 +0100 (Tue, July 02, 2024) $"
+__version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -106,13 +106,12 @@ class SpectrumGroup(AbstractWrapperObject):
         """ CCPN Project SpectrumGroup"""
         return self._wrappedData
 
-    def _getSpectrumGroupChildrenByClass(self, klass):
+    def _getSpectrumGroupChildrenByClass(self, klass) -> tuple | list:
         """Return the list of spectra attached to the spectrumGroup.
         """
-        if klass is Spectrum:
+        if klass is Spectrum and not self.isDeleted:
             return tuple(spectrum for spectrum in self.spectra)
-        else:
-            return []
+        return []
 
     @property
     def _key(self) -> str:

@@ -307,5 +307,10 @@
         }
     },
     "tables"           : {
+    },
+    "modules": {
+        "profileByReference" : {
+            "databasePath" : ""
+        }
     }
 }

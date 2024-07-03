@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-01 20:52:12 +0100 (Mon, July 01, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-07-03 15:54:54 +0100 (Wed, July 03, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1561,13 +1561,12 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         from ccpn.core.lib.AssignmentLib import propagateAssignments
 
         # need another way to select this :| get from preferences?
-        tolerancesByIsotope = {'H': 5.01,
-                               'C': 0.2,
-                               'N': 2.1}
+        tol = {}
         peaks = self.application.current.peaks
         if not peaks:
             return
-        propagateAssignments(peaks=peaks, tolerancesByIsotope=tolerancesByIsotope)
+        # specify one of the tolerances to enable tolerance-checking
+        propagateAssignments(peaks=peaks, tolerancesByIsotope=tol)
 
     @logCommand('mainWindow.')
     def copyAssignments(self):
@@ -1583,16 +1582,15 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         from ccpn.core.lib.AssignmentLib import propagateAssignmentsFromReference
 
         # need another way to select this :| get from preferences?
-        tolerancesByIsotope = {'H': 5.01,
-                               'C': 0.2,
-                               'N': 2.1}
+        tol = {}
         cStrip = self.application.current.strip
         peak = ((cStrip and cStrip._lastClickedObjects and cStrip._lastClickedObjects[0]) or
                 self.application.current.peak)
         if not peak:
             return
+        # specify one of the tolerances to enable tolerance-checking
         propagateAssignmentsFromReference(None, referencePeak=peak,
-                                          tolerancesByIsotope=tolerancesByIsotope)
+                                          tolerancesByIsotope=tol)
 
     @logCommand('mainWindow.')
     def copyAssignmentsFromReference(self):

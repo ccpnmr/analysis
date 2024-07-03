@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-01 14:34:55 +0100 (Mon, July 01, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-07-03 15:54:54 +0100 (Wed, July 03, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1294,7 +1294,7 @@ def _copyPeakAssignments(pk, pk2, axcde, axcde2, tolerancesByIsotope, tolerances
     nmrAtoms = _getCleanNmrAtomsList(pk, axcde)
     nmrAtomsToAssign = []
     for nmrAtom in nmrAtoms:
-        if tolerancesByIsotope is not None and tolerancesByAxisCode is not None:
+        if tolerancesByIsotope is not None or tolerancesByAxisCode is not None:
             tol = _getTolerance(pk2, axcde2, tolerancesByIsotope, tolerancesByAxisCode)
             shift = pk2.chemicalShiftList.getChemicalShift(nmrAtom)
             if shift and shift.figureOfMerit != 0:
@@ -1337,9 +1337,14 @@ def _getCleanNmrAtomsList(peak, axCde):
 
 
 def _getTolerance(peak, axCde, tolerancesByIsotope, tolerancesByAxisCode):
-    if axCde[0] in tolerancesByIsotope.keys():
+    """Get the assignments tolerances for the peak.
+    Either tolerancesByIsotope, tolerancesByAxisCode, or both can be specified.
+    If an isotope-code or axis-code is not found then defaults to the spectrum assignment-tolerances.
+    Isotope-codes have priority over axis-codes.
+    """
+    if tolerancesByIsotope is not None and axCde[0] in tolerancesByIsotope.keys():
         tol = tolerancesByIsotope[axCde[0]]
-    elif axCde in tolerancesByAxisCode.keys():
+    elif tolerancesByAxisCode is not None and axCde in tolerancesByAxisCode.keys():
         tol = tolerancesByAxisCode[axCde]
     else:
         tol = peak.spectrum.getByAxisCodes('assignmentTolerances', [axCde], True)[0]
@@ -1363,6 +1368,11 @@ def _copyPeakAssignmentsEntry(currentPeaks, referencePeak=None,
 def propagateAssignments(peaks, tolerancesByIsotope=None, tolerancesByAxisCode=None):
     """Propagate assignments - assignments are unified across all selected peaks.
     To match the V2-propagateAssignments, always uses tolerances.
+
+    Specify tolerancesByIsotope, tolerancesByAxisCode, or both.
+    If an isotope-code or axis-code is not found then defaults to the spectrum assignment-tolerances for each peak.
+    This can be achieved by setting either to an empty dict {}.
+    Isotope-codes have priority over axis-codes.
     """
     from ccpn.framework.Application import getCurrent
 
@@ -1375,9 +1385,11 @@ def propagateAssignments(peaks, tolerancesByIsotope=None, tolerancesByAxisCode=N
         raise TypeError('tolerancesByIsotope must be dict|None')
     if not isinstance(tolerancesByAxisCode, dict | type(None)):
         raise TypeError('tolerancesByAxisCode must be dict|None')
-    if ((tolerancesByIsotope is not None and tolerancesByAxisCode is not None) or
-            (tolerancesByIsotope is None and tolerancesByAxisCode is None)):
-        raise TypeError('Specify one of tolerancesByIsotope or tolerancesByAxisCode')
+    if (tolerancesByIsotope is None and tolerancesByAxisCode is None):
+        raise TypeError('Specify tolerancesByIsotope, tolerancesByAxisCode, or both')
+    # if ((tolerancesByIsotope is not None and tolerancesByAxisCode is not None) or
+    #         (tolerancesByIsotope is None and tolerancesByAxisCode is None)):
+    #     raise TypeError('Specify one of tolerancesByIsotope or tolerancesByAxisCode')
     _copyPeakAssignmentsEntry(peaks,
                               tolerancesByIsotope=tolerancesByIsotope,
                               tolerancesByAxisCode=tolerancesByAxisCode)
@@ -1399,6 +1411,11 @@ def propagateAssignmentsFromReference(peaks, referencePeak,
                                       tolerancesByIsotope=None, tolerancesByAxisCode=None):
     """Propagate assignments - assignments are propagated from a reference-peak.
     To match the V2-propagateAssignments, always uses tolerances.
+
+    Specify tolerancesByIsotope, tolerancesByAxisCode, or both.
+    If an isotope-code or axis-code is not found then defaults to the spectrum assignment-tolerances for each peak.
+    This can be achieved by setting either to an empty dict {}.
+    Isotope-codes have priority over axis-codes.
     """
     from ccpn.framework.Application import getCurrent
 
@@ -1412,9 +1429,11 @@ def propagateAssignmentsFromReference(peaks, referencePeak,
         raise TypeError('tolerancesByIsotope must be dict|None')
     if not isinstance(tolerancesByAxisCode, dict | type(None)):
         raise TypeError('tolerancesByAxisCode must be dict|None')
-    if ((tolerancesByIsotope is not None and tolerancesByAxisCode is not None) or
-            (tolerancesByIsotope is None and tolerancesByAxisCode is None)):
-        raise TypeError('Specify one of tolerancesByIsotope or tolerancesByAxisCode')
+    if (tolerancesByIsotope is None and tolerancesByAxisCode is None):
+        raise TypeError('Specify tolerancesByIsotope, tolerancesByAxisCode, or both')
+    # if ((tolerancesByIsotope is not None and tolerancesByAxisCode is not None) or
+    #         (tolerancesByIsotope is None and tolerancesByAxisCode is None)):
+    #     raise TypeError('Specify one of tolerancesByIsotope or tolerancesByAxisCode')
     _copyPeakAssignmentsEntry(peaks, referencePeak=referencePeak,
                               tolerancesByIsotope=tolerancesByIsotope,
                               tolerancesByAxisCode=tolerancesByAxisCode

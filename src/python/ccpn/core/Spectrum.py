@@ -55,8 +55,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-30 13:45:36 +0100 (Thu, May 30, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-07-01 20:19:49 +0100 (Mon, July 01, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1359,7 +1359,7 @@ class Spectrum(AbstractWrapperObject):
             _refExperiment = self.project._getReferenceExperimentFromType(_experimentType)
 
         # get the nucleus codes from the current isotope codes
-        nCodes = tuple(val.strip('0123456789') for val in self.isotopeCodes)
+        nCodes = tuple(val.strip('0123456789') for val in self.isotopeCodes if val is not None)
 
         # match against the current reference experiment or passed in value
         apiExperiment = self._wrappedData.experiment
@@ -3770,7 +3770,7 @@ class Spectrum(AbstractWrapperObject):
         """
         from ccpn.core.PeakList import _newPeakList
 
-        return _newPeakList(self, title=title, comment=comment, isSimulated=isSynthetic,
+        return _newPeakList(self, title=title, comment=comment, isSynthetic=isSynthetic,
                             symbolStyle=symbolStyle, symbolColour=symbolColour,
                             textColour=textColour, arrowColour=arrowColour,
                             **kwds)
@@ -4080,13 +4080,16 @@ def _newHdf5Spectrum(project: Project, isotopeCodes: Sequence[str], name: str = 
     if not isIterable(isotopeCodes) or len(isotopeCodes) == 0:
         raise ValueError('invalid isotopeCodes "%s"' % isotopeCodes)
 
+    name = Spectrum._uniqueName(project=project, name=name)
     if path is None:
         path = Path('$INSIDE') / CCPN_SPECTRA_DIRECTORY / name
         path = path.assureSuffix(Hdf5SpectrumDataSource.suffixes[0])
 
+    autoVersioning = parameters.get('autoVersioning', True)
+    overwrite = parameters.get('overwrite', False)
     dataStore = DataStore.newFromPath(path,
                                       dataFormat=Hdf5SpectrumDataSource.dataFormat,
-                                      autoVersioning=True)
+                                      autoVersioning=autoVersioning)
 
     # Initialise a Hdf5 dataSource instance
     dataSource = Hdf5SpectrumDataSource()
@@ -4104,7 +4107,7 @@ def _newHdf5Spectrum(project: Project, isotopeCodes: Sequence[str], name: str = 
             if hasattr(dataSource, param):
                 setattr(dataSource, param, value)
     # Create the file
-    with dataSource.openNewFile(path=dataStore.aPath()) as hdf5File:
+    with dataSource.openNewFile(path=dataStore.aPath(), overwrite=overwrite) as hdf5File:
         hdf5File.writeParameters()
 
     # create a Spectrum instance

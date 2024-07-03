@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-05-29 12:22:38 +0100 (Wed, May 29, 2024) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-07-01 14:34:55 +0100 (Mon, July 01, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -457,15 +457,59 @@ class PeakList(PMIListABC):
                     newPos.append(pos[ii])
                 peak.position = newPos
 
+    @logCommand(get='self')
+    def fetchNewAssignments(self, nmrChain: 'NmrChain', keepAssignments: bool = False):
+        """Fetch new assignments for each peak from the specified nmrChain.
+        Optionally the original assignments can be overwritten or appended to.
+
+        :param nmrChain: source for nmrAtoms.
+        :param keepAssignments: overwrite/append assignments.
+        :return:
+        """
+        if not self.peaks:
+            return
+        peak = self.peaks[0]
+        axisIso = list(zip(peak.axisCodes, peak.spectrum.isotopeCodes))
+        numDims = len(peak.axisCodes)
+        foundMts = {}
+        with undoBlock():
+            for cc, peak in enumerate(self.peaks):
+                # only process those that are empty OR those not empty when checkbox cleared
+                dimensionNmrAtoms = peak.dimensionNmrAtoms  # for speed reasons !?
+                if not keepAssignments or not any(dimensionNmrAtoms):
+                    if peak.multiplets:
+                        existingDims = [[] for _nd in range(numDims)]
+                        for mt in peak.multiplets:
+                            if mt in foundMts:
+                                for i, (exst, dimNmr) in enumerate(zip(existingDims, foundMts[mt])):
+                                    existingDims[i].append(dimNmr)
+                            else:
+                                # need to create a new residue and nmrAtoms
+                                thisDims = [[] for _nd in range(numDims)]
+                                nmrResidue = nmrChain.newNmrResidue()
+                                for i, (axis, isotope) in enumerate(axisIso):
+                                    nmrAtom = nmrResidue.fetchNmrAtom(name=str(axis[0]), isotopeCode=isotope)
+                                    existingDims[i].append(nmrAtom)
+                                    thisDims[i] = nmrAtom
+                                foundMts[mt] = thisDims
+                        # assign all the dimensions
+                        peak.assignDimensions(axisCodes=peak.axisCodes, values=existingDims)
+                    else:
+                        # make a new nmrResidue with new nmrAtoms and assign to the peak
+                        nmrResidue = nmrChain.newNmrResidue()
+                        newNmrs = [[nmrResidue.fetchNmrAtom(name=str(axis[0]), isotopeCode=isotope)] for
+                                   axis, isotope in axisIso]
+                        peak.assignDimensions(axisCodes=peak.axisCodes, values=newNmrs)
+
+    #=========================================================================================
+    # Implementation methods
+    #=========================================================================================
+
     def delete(self):
         """Delete peakList
         """
         # call the delete method from the parent class
         self._parent._deletePeakList(self)
-
-    #=========================================================================================
-    # Implementation methods
-    #=========================================================================================
 
     @classmethod
     def _getAllWrappedData(cls, parent: Spectrum) -> list:
@@ -565,6 +609,7 @@ class PeakList(PMIListABC):
                 if not tempML.multiplets:
                     tempML.delete()
         return tuple(mps)
+
 
 #=========================================================================================
 # Connections to parents:

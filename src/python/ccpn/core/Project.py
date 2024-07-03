@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-29 15:17:50 +0100 (Wed, May 29, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-06-28 21:15:26 +0100 (Fri, June 28, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1301,7 +1301,7 @@ class Project(AbstractWrapperObject):
                         root.override = True
 
                         with progressHandler(title='busy', maximum=len(df) + 1,
-                                             text='Cleaning-up Project', autoClose=True,
+                                             text='Cleaning-up Project',
                                              hideCancelButton=True) as progress:
 
                             retries = []

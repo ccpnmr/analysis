@@ -5,8 +5,9 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-04 15:19:23 +0100 (Thu, April 04, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-07-01 14:34:55 +0100 (Mon, July 01, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -78,7 +79,8 @@ class SetupNmrResiduesPopup(CcpnDialogMainWidget):
         self._acceptButtonText = 'Set up NmrResidues'
         self.BUTTON_CANCEL = 'Cancel'
 
-        self.setOkButton(callback=self._setupNmrResidues, text=self._acceptButtonText, tipText='Set up NmrResidues and close')
+        self.setOkButton(callback=self._setupNmrResidues, text=self._acceptButtonText,
+                         tipText='Set up NmrResidues and close')
         self.setCancelButton(callback=self.reject, text=self.BUTTON_CANCEL, tipText='Cancel and close')
         self.setDefaultButton(CcpnDialogMainWidget.OKBUTTON)
 
@@ -119,9 +121,11 @@ class SetupNmrResiduesPopup(CcpnDialogMainWidget):
         Label(self.mainWidget, text="NmrChain ", grid=(0, 2), tipText=toolTip)
         self.nmrChainPulldown = PulldownList(self.mainWidget, grid=(0, 3), tipText=toolTip)
 
-        self.assignmentCheckBox = CheckBox(self.mainWidget, text="Keep existing assignments", checked=True, grid=(1, 0), gridSpan=(1, 3))
-        self.assignmentCheckBox.setToolTip('Keep the existing assignments attached to the peaks when assigning new nmrAtoms,\n'
-                                           'or delete the assignments for each peak first.')
+        self.assignmentCheckBox = CheckBox(self.mainWidget, text="Keep existing assignments", checked=True, grid=(1, 0),
+                                           gridSpan=(1, 3))
+        self.assignmentCheckBox.setToolTip(
+            'Keep the existing assignments attached to the peaks when assigning new nmrAtoms,\n'
+            'or delete the assignments for each peak first.')
 
         HLine(self.mainWidget, grid=(2, 0), gridSpan=(1, 4), colour=getColours()[DIVIDER], height=20)
         self.useCurrentStrip = CheckBox(self.mainWidget, text="Select peakList from current strip",
@@ -136,7 +140,8 @@ class SetupNmrResiduesPopup(CcpnDialogMainWidget):
             stripPkLists = visiblePkLists = OrderedSet()
             if self.current and (strip := self.current.strip):
                 with contextlib.suppress(Exception):
-                    stripPkLists = OrderedSet(plv.peakList.pid for sv in strip.getSpectrumViews() for plv in sv.peakListViews)
+                    stripPkLists = OrderedSet(plv.peakList.pid for sv in strip.getSpectrumViews()
+                                              for plv in sv.peakListViews)
                     visiblePkLists = OrderedSet(plv.peakList.pid for sv in strip.getSpectrumViews() if sv.isDisplayed
                                                 for plv in sv.peakListViews if plv.isDisplayed)
 
@@ -161,8 +166,8 @@ class SetupNmrResiduesPopup(CcpnDialogMainWidget):
         nmrChain = self.project.getByPid(self.nmrChainPulldown.currentText())
         keepAssignments = self.assignmentCheckBox.isChecked()
 
-        with notificationEchoBlocking():
-            _fetchNewPeakAssignments(peakList, nmrChain, keepAssignments)
+        # method handles undoBlock and notifiers
+        _fetchNewPeakAssignments(peakList, nmrChain, keepAssignments)
 
         # remove if popup does not need to close
         self.accept()

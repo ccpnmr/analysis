@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-21 19:48:44 +0100 (Fri, June 21, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-07-03 13:25:44 +0100 (Wed, July 03, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -532,14 +532,10 @@ class _TableFilterABC(ScrollArea):
                         # remove the found sorted values from the list
                         rows -= {row}
 
-        # if _compareErrorCount > 0:
-        #     getLogger().debug2('Error in comparing values for GuiTable filters, use debug2 for details')
-
         self._listRows = rows
-        if len(rows):
+        if len(rows) and (_model._filterIndex is None or (set(rows) & set(_model._filterIndex))):
             self.tableHandler.setDataFromSearchWidget(rows)
             self.searchButtons.getButton('Reset').setEnabled(True)
-
         elif not ignoreNotFound:
             MessageDialog.showWarning('Not found', 'Query value(s) not found in selected columns.'
                                                    'Try by filtering in a specific column or double check your query.')

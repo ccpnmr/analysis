@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-03 13:25:44 +0100 (Wed, July 03, 2024) $"
+__dateModified__ = "$dateModified: 2024-07-04 18:42:13 +0100 (Thu, July 04, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -257,8 +257,8 @@ class GuiTableFilter(ScrollArea):
         rows = OrderedSet()
 
         searchColumn = self.columnOptions.getText()
-        visHeadings = self.table._dataFrameObject.visibleColumnHeadings if (
-                    searchColumn == VISIBLESEARCH) else searchColumn
+        visHeadings = self.table._dataFrameObject.visibleColumnHeadings \
+            if (searchColumn == VISIBLESEARCH) else searchColumn
 
         _compareErrorCount = 0
         for row in range(self.table.rowCount()):
@@ -396,21 +396,22 @@ class _TableFilterABC(ScrollArea):
                 count = 0
                 while not (self._tabOrder[ind].isEnabled() and self._tabOrder[ind].isVisible()):
                     ind = (ind + (1 if key == QtCore.Qt.Key_Tab else -1)) % len(self._tabOrder)
-
                     count += 1
                     if count > len(self._tabOrder):
                         # have cycled through all the tabs at least once
-                        break  # while not
+                        break
                 else:
                     self._tabOrder[ind].setFocus()
-
+                return True
             if key in [QtCore.Qt.Key_Tab, QtCore.Qt.Key_Backtab]:
                 # simulate an escape-key to clear keySequences
                 escape = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Escape, QtCore.Qt.NoModifier)
                 QtCore.QCoreApplication.sendEvent(self, escape)
                 return True
-
-        return False
+            if key in [QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return]:
+                if source in self.searchButtons.buttons:
+                    ...
+        return super().eventFilter(source, event)
 
     def searchRows(self, df, rows):
         """Return the subset of the df based on rows

@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-09-27 14:17:01 +0100 (Fri, September 27, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-10-03 11:27:21 +0100 (Thu, October 03, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -862,6 +862,7 @@ class Gui(Ui):
         """Loads project defined by path
         :return a Project instance or None
         """
+
         if path is None:
             dialog = FileDialog.ProjectFileDialog(parent=self.mainWindow, acceptMode='open')
             dialog._show()
@@ -872,6 +873,17 @@ class Gui(Ui):
         with self.application.pauseAutoBackups():
             with catchExceptions(errorStringTemplate='Error loading project: %s'):
                 dataLoader, createNewProject, ignore = self._getDataLoader(path)
+
+                newProjectUrls = self._scanDataLoaders([dataLoader], func=lambda dl: (dl is not None and
+                                                                                    dl.createNewProject))
+
+                if len(newProjectUrls) > 1:
+                    # We found more than one dataLoader that would create a new project; not allowed
+                    MessageDialog.showError('Load Data',
+                                            f'Only one new project can be created at a time;\n'
+                                            f'this action will try to create {len(newProjectUrls):d} new projects',
+                                            parent=self.mainWindow)
+
                 if ignore or dataLoader is None or not createNewProject:
                     return None
 
@@ -882,6 +894,22 @@ class Gui(Ui):
                         return objs[0]
 
         return None
+
+    def _scanDataLoaders(self, dataLoaders, func: callable = lambda _: True, result=None, depth=0) -> list:
+        """Replace the list comprehension below to allow nested tree of dataLoaders.
+        Assumes that recursive==True in the DirectoryDataLoader __init__
+        """
+        if result is None:
+            result = []
+        for loader in dataLoaders:
+            url, _, createNew, ignore = loader.path, loader, loader.createNewProject, loader.ignore
+            if ignore:
+                continue
+            if getattr(loader, 'dataLoaders', None) is not None and getattr(loader, 'recursive', None) is True:
+                self._scanDataLoaders(loader.dataLoaders, result=result, func=func, depth=depth + 1)
+            elif loader and func(loader):
+                result.append((url, loader, createNew))
+        return result
 
     def _closeProject(self):
         """Do all gui-related stuff when closing a project

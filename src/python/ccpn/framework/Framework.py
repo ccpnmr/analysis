@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-01 16:28:32 +0100 (Mon, July 01, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-07-04 18:51:59 +0100 (Thu, July 04, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1569,8 +1569,7 @@ class Framework(NotifierBase, GuiBase):
         if self.project._undo.canUndo():
             if not self.project._undo.locked:
                 # may need to put some more information in this busy popup
-                with busyHandler(self.mainWindow, title='Busy', text='Undo ...',
-                                 autoClose=False, closeDelay=500, raiseErrors=True):
+                with busyHandler(title='Busy', text='Undo ...', raiseErrors=True):
                     self.project._undo.undo()
         else:
             getLogger().warning('nothing to undo')
@@ -1581,8 +1580,7 @@ class Framework(NotifierBase, GuiBase):
 
         if self.project._undo.canRedo():
             if not self.project._undo.locked:
-                with busyHandler(self.mainWindow, title='Busy', text='Redo...',
-                                 autoClose=False, closeDelay=500, raiseErrors=True):
+                with busyHandler(title='Busy', text='Redo...', raiseErrors=True):
                     self.project._undo.redo()
         else:
             getLogger().warning('nothing to redo.')

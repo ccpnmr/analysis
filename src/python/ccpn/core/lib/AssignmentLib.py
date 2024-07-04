@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-03 15:54:54 +0100 (Wed, July 03, 2024) $"
+__dateModified__ = "$dateModified: 2024-07-04 18:51:59 +0100 (Thu, July 04, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1241,37 +1241,34 @@ def _assignNmrResiduesToPeaks(peaks, nmrResidues):
 
 
 def _fetchNewPeakAssignments(peakList: PeakList, nmrChain: NmrChain, keepAssignments: bool):
-    from ccpn.framework.Application import getMainWindow
     from ccpn.core.lib.ContextManagers import progressHandler
     from ccpn.core.lib.Notifiers import Notifier
     from functools import partial
 
-    if not peakList.peaks:
+    if not (_peaks := list(peakList.peaks)):
         return
 
-    def _updateProgress(pHandler, pks, data):
+    def _updateProgress(pHandler, data):
         # respond to notifier and update the progress-bar
-        pHandler.checkCancelled()
-        indx = pks.index(data[Notifier.OBJECT])
+        pHandler.checkCancel()
+        indx = _peaks.index(data[Notifier.OBJECT])
         pHandler.setValue(indx)
 
     # show a progress popup if the operation is taking too long
-    with progressHandler(parent=getMainWindow(),
-                         text='Set up NmrResidues...', maximum=len(peakList.peaks),
-                         autoClose=False, raiseErrors=False) as progress:
-        _peaks = list(peakList.peaks)
+    with progressHandler(text='Set up NmrResidues...', maximum=len(_peaks) - 1,
+                         raiseErrors=False) as progress:
         # add a notifier on a change/create of any peaks in this peakList to update progress-bar
         _notify = Notifier(peakList,
                            [Notifier.CREATE, Notifier.CHANGE],
                            'Peak',
-                           partial(_updateProgress, progress, _peaks))
+                           partial(_updateProgress, progress))
         peakList.fetchNewAssignments(nmrChain, keepAssignments)
 
-    # clean up notifier
-    _notify.unRegister()
     if progress.error:
         # report any errors
         getLogger().warning(f'fetchNewPeakAssignments: {progress.error}')
+    # clean up notifier
+    _notify.unRegister()
 
 
 #=========================================================================================

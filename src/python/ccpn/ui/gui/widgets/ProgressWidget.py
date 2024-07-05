@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-04 18:52:00 +0100 (Thu, July 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-07-05 10:50:42 +0100 (Fri, July 05, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -30,9 +30,9 @@ __date__ = "$Date: 2022-04-11 21:54:44 +0100 (Mon, April 11, 2022) $"
 import time
 from tqdm import tqdm
 from time import sleep, perf_counter
-from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5 import QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets.Label import Label
+from ccpn.framework.Application import getMainWindow
 
 
 #=========================================================================================
@@ -45,10 +45,7 @@ class ProgressDialog(QtWidgets.QProgressDialog):
                  text: str = 'Busy...', cancelButtonText: str = 'Cancel',
                  minimum: int = 0, maximum: int = 100, steps: int = 100,
                  delay: int = 1000, closeDelay: int = 250,
-                 hideBar: bool = False, hideCancelButton: bool = False):
-
-        from ccpn.framework.Application import getMainWindow
-
+                 hideBar: bool = False, hideCancelButton: bool = False, **kwds):
         # get the top-level window to attach the dialog to
         #   this cause major issue if attached to a window other than the current modal
         #   can still be set with parent

@@ -4,9 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-15 09:09:11 -0400 (Thu, June 15, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-07-10 17:22:27 +0100 (Wed, July 10, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -93,7 +94,8 @@ class FileDialogABC(QtWidgets.QFileDialog):
     """
     Class to implement open/save dialogs
     """
-    _initialPaths = {}
+    _initialPaths = {}  # for saving last opened directory
+    _lastPreferencePaths = {}  # for checking if prefs have changed
     _fileMode = 'anyFile'
     _text = None
     _updatePathOnReject = True
@@ -158,8 +160,16 @@ class FileDialogABC(QtWidgets.QFileDialog):
             # set the current working path if this is the first time the dialog has been opened
             if self._clsID not in self._initialPaths:
                 self._initialPaths[self._clsID] = _path
+                self._lastPreferencePaths[self._clsID] = _path
+
             directory = self._initialPaths[self._clsID]
             self._setDirectory = False
+
+            if self._lastPreferencePaths[self._clsID] != _path:
+                self._initialPaths[self._clsID] = _path
+                self._lastPreferencePaths[self._clsID] = _path
+                directory = self._initialPaths[self._clsID]
+
         else:
             directory = directory
             # not sure why I put this flag in

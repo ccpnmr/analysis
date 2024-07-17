@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-07-17 17:22:27 +0100 (Wed, July 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-07-17 17:32:16 +0100 (Wed, July 17, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -185,7 +185,7 @@ class Spectrum(AbstractWrapperObject):
 
     @property
     def chemicalShiftList(self):
-        """:return: an instance of ChemicalShiftList, or None
+        """:return: the ChemicalShiftList instance for spectrum
         """
         return self._project._data2Obj.get(self._wrappedData.experiment.shiftList)
 

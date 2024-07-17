@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-05-29 12:22:38 +0100 (Wed, May 29, 2024) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-07-17 17:32:15 +0100 (Wed, July 17, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -89,11 +89,10 @@ class PeakList(PMIListABC):
         self._primaryChildClass = klass
 
     @property
-    def chemicalShiftList(self) -> 'ChemicalShiftList | None':
-        """STUB: hot-fixed later
-        :return: an instance of ChemicalShiftList, or None
+    def chemicalShiftList(self) -> 'ChemicalShiftList':
+        """:return: the chemicalShiftList of the spectrum of self
         """
-        return None
+        return self.spectrum.chemicalShiftList
 
     @property
     def peakListViews(self) -> list['PeakListView']:

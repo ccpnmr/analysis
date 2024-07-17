@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-06-19 18:24:40 +0100 (Wed, June 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-07-17 17:03:21 +0100 (Wed, July 17, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1872,11 +1872,16 @@ class Spectrum(AbstractWrapperObject):
         """
         return self._getSeriesItem(spectrumGroup)
 
-    @logCommand(get='self')
-    def deleteAllPeakLists(self):
-        """Remove all peakLists from the spectrum and create the default empty PeakList
-        """
-        self.project.deleteObjects(*self.peakLists)
+    # GWV: moved to "delete" section in de code
+    # @logCommand(get='self')
+    # def deleteAllPeakLists(self):
+    #     """Remove all peakLists from the spectrum and create a new default empty PeakList
+    #     """
+    #     # The below call results in calling the Spectrum._deletePeakList() method
+    #     # for every PeakList instance of self,
+    #     # which will check and create a new PeakList assuring that there
+    #     # is at least one instance.
+    #     self.project.deleteObjects(*self.peakLists)
 
     def _getSeriesItem(self, spectrumGroup):
         """Return the series item for the current spectrum for the selected spectrumGroup
@@ -3739,8 +3744,11 @@ class Spectrum(AbstractWrapperObject):
 
     @logCommand(get='self')
     def delete(self):
-        """Delete Spectrum"""
+        """Delete Spectrum
+        """
         with undoBlock():
+
+            self._finaliseAction('delete')
 
             _path = self.filePath
             dataFormat = self.dataFormat
@@ -3752,13 +3760,14 @@ class Spectrum(AbstractWrapperObject):
                             partial(self._openFile, path=_path, dataFormat=dataFormat, checkParameters=False)
                             )
 
-            # handle spectrumView ordering - this should be moved to spectrumView or spectrumDisplay via notifier?
-            specDisplays = []
-            specViews = []
-            for sp in self.spectrumViews:
-                if sp._parent.spectrumDisplay not in specDisplays:
-                    specDisplays.append(sp._parent.spectrumDisplay)
-                    specViews.append((sp._parent, sp._parent.spectrumViews.index(sp)))
+            # GWV: 21/6/24: no longer needed
+            # # handle spectrumView ordering - this should be moved to spectrumView or spectrumDisplay via notifier?
+            # specDisplays = []
+            # specViews = []
+            # for sp in self.spectrumViews:
+            #     if sp._parent.spectrumDisplay not in specDisplays:
+            #         specDisplays.append(sp._parent.spectrumDisplay)
+            #         specViews.append((sp._parent, sp._parent.spectrumViews.index(sp)))
 
             listsToDelete = tuple(self.peakLists)
             listsToDelete += tuple(self.integralLists)
@@ -3768,10 +3777,11 @@ class Spectrum(AbstractWrapperObject):
             for obj in listsToDelete:
                 obj._delete()
 
-            with undoStackBlocking() as addUndoItem:
-                # notify spectrumViews of delete/create
-                addUndoItem(undo=partial(self._notifySpectrumViews, 'create'),
-                            redo=partial(self._notifySpectrumViews, 'delete'))
+            # GWV: 21/6/24: no longer needed
+            # with undoStackBlocking() as addUndoItem:
+            #     # notify spectrumViews of delete/create
+            #     addUndoItem(undo=partial(self._notifySpectrumViews, 'create'),
+            #                 redo=partial(self._notifySpectrumViews, 'delete'))
 
             # delete the _wrappedData
             self._delete()
@@ -3791,6 +3801,16 @@ class Spectrum(AbstractWrapperObject):
             getLogger().warning(f'{child} not deleted - not child of {self}')
         else:
             getLogger().warning(f'{child} not deleted')
+
+    @logCommand(get='self')
+    def deleteAllPeakLists(self):
+        """Remove all peakLists from the spectrum and create a new default empty PeakList
+        """
+        # The below call results in calling the Spectrum._deletePeakList() method
+        # for every PeakList instance of self,
+        # which will check and create a new PeakList assuring that there
+        # is at least one instance.
+        self.project.deleteObjects(*self.peakLists)
 
     def _deletePeakList(self, child):
         """Delete child object and ensure that there always exists at least one peakList
@@ -3836,9 +3856,9 @@ class Spectrum(AbstractWrapperObject):
         """get wrappedData (Nmr.DataSources) for all Spectrum children of parent Project"""
         return list(x for y in parent._wrappedData.sortedExperiments() for x in y.sortedDataSources())
 
-    def _notifySpectrumViews(self, action):
-        for sv in self.spectrumViews:
-            sv._finaliseAction(action)
+    # def _notifySpectrumViews(self, action):
+    #     for sv in self.spectrumViews:
+    #         sv._finaliseAction(action)
 
     #-----------------------------------------------------------------------------------------
     # new<Object> and other methods

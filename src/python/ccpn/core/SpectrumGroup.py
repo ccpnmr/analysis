@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-30 13:45:36 +0100 (Thu, May 30, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-07-17 17:03:21 +0100 (Wed, July 17, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -252,7 +252,7 @@ class SpectrumGroup(AbstractWrapperObject):
     @logCommand(get='self')
     def deleteAllPeakLists(self):
         """
-        Remove all peakLists from each spectrum and create their default empty PeakList
+        Remove all peakLists from each spectrum and create a new default empty PeakList
         """
         with undoBlockWithoutSideBar():
             for spectrum in self.spectra:

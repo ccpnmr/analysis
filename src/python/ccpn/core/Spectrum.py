@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-07-17 17:03:21 +0100 (Wed, July 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-07-17 17:22:27 +0100 (Wed, July 17, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -185,10 +185,27 @@ class Spectrum(AbstractWrapperObject):
 
     @property
     def chemicalShiftList(self):
-        """STUB: hot-fixed later
-        :return: an instance of ChemicalShiftList, or None
+        """:return: an instance of ChemicalShiftList, or None
         """
-        return None
+        return self._project._data2Obj.get(self._wrappedData.experiment.shiftList)
+
+    @chemicalShiftList.setter
+    def chemicalShiftList(self, chemicalShiftList):
+        """Set the chemicalShiftList for the spectrum
+        """
+        from ccpn.core.ChemicalShiftList import ChemicalShiftList
+
+        _shiftList = self.getByPid(chemicalShiftList) if isinstance(chemicalShiftList, str) else chemicalShiftList
+        if _shiftList is None:
+            raise ValueError(f'{self.className}.chemicalShiftList: cannot set to None')
+
+        if isinstance(_shiftList, ChemicalShiftList):
+            # add the spectrum to the chemicalShiftList - undo handled in .spectra setter
+            _shiftList.spectra = set(_shiftList.spectra) | {self}
+
+        else:
+            # Don't raise errors here or you crash-out a perfectly valid project/Nef from loading
+            getLogger().warning(f'Could not set chemicalShiftList for Spectrum {self}. Invalid type {_shiftList}.')
 
     @property
     def spectrumDimensions(self) -> tuple:

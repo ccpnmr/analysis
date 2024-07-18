@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-07-10 17:22:27 +0100 (Wed, July 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-07-18 14:03:48 +0100 (Thu, July 18, 2024) $"
 __version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
@@ -458,7 +458,7 @@ class PreferencesFileDialog(FileDialogABC):
 
 
 class SpectrumFileDialog(FileDialogABC):
-    _initialPath = USERDATAPATH
+    # _initialPath = USERDATAPATH
     _text = '{} Spectra'
     _fileMode = 'existingFiles'
     _multiSelect = True

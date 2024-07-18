@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-07-17 17:32:16 +0100 (Wed, July 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-07-18 17:05:41 +0100 (Thu, July 18, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -107,8 +107,8 @@ from ccpn.util.Path import Path, aPath
 # defined here too as imported from Spectrum throughout the code base
 _SCALECHANGED = 'scaleChanged'
 _ALLCHANGED = 'allChanged'
-_REBUILDCONTOURS = 'rebuildContours'
-_UPDATECHEMICALSHIFTS = 'updateChemicalShifts'
+# _REBUILDCONTOURS = 'rebuildContours'
+# _UPDATECHEMICALSHIFTS = 'updateChemicalShifts'
 _IGNORECHILDREN = 'ignoreChildren'
 
 #=========================================================================================
@@ -706,7 +706,7 @@ class Spectrum(AbstractWrapperObject):
 
     @noiseLevel.setter
     @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreSetter(allChanged=True, rebuildContours=False)
+    @ccpNmrV3CoreSetter(allChanged=True)
     def noiseLevel(self, value: float):
         scale = self.scale if self.scale is not None else 1.0
         val = float(value) if value is not None else None
@@ -732,7 +732,7 @@ class Spectrum(AbstractWrapperObject):
 
     @negativeNoiseLevel.setter
     @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreSetter(allChanged=True, rebuildContours=False)
+    @ccpNmrV3CoreSetter(allChanged=True)
     def negativeNoiseLevel(self, value):
         """Stored in Internal """
 
@@ -1474,6 +1474,7 @@ class Spectrum(AbstractWrapperObject):
     @checkSpectrumPropertyValue(iterable=True, allowNone=False, types=(float, int))
     def referencePoints(self, value):
         self._setDimensionalAttributes('referencePoint', value)
+        self.chemicalShiftList.recalculatePeakShifts()
         if self.dimensionCount == 1 and not self.isEmptySpectrum():  # make sure the spectrum will shift correctly on the next redraw.
             self.positions = self.getPpmArray(dimension=1)
 
@@ -1486,9 +1487,10 @@ class Spectrum(AbstractWrapperObject):
 
     @referenceValues.setter
     @checkSpectrumPropertyValue(iterable=True, allowNone=False, types=(float, int))
-    @ccpNmrV3CoreSetter(updateChemicalShifts=True)
+    @ccpNmrV3CoreSetter()
     def referenceValues(self, value):
         self._setDimensionalAttributes('referenceValue', value)
+        self.chemicalShiftList.recalculatePeakShifts()
 
         if self.dimensionCount == 1 and not self.isEmptySpectrum():  # make sure the spectrum will shift correctly on the next redraw.
             self.positions = self.getPpmArray(dimension=1)
@@ -3676,8 +3678,9 @@ class Spectrum(AbstractWrapperObject):
         #     # self._saveSpectrumMetaData()
         #     pass
 
-        if action == 'delete':
-            self._deleteSpectrumMetaData()
+        # GWV 18/7/24: moved to delete
+        # if action == 'delete':
+        #     self._deleteSpectrumMetaData()
 
         # notify peak/integral/multiplet list
         if action in {'create', 'delete'}:
@@ -3693,7 +3696,7 @@ class Spectrum(AbstractWrapperObject):
             # get the changed attribute states - defined in the ccpNmrV3CoreSetter arguments
             scaleChanged = actionKwds.get(_SCALECHANGED, False)
             allChanged = actionKwds.get(_ALLCHANGED, False)
-            rebuildContours = actionKwds.get(_REBUILDCONTOURS, True)
+            # rebuildContours = actionKwds.get(_REBUILDCONTOURS, True)
             # if rebuildContours:
             #     for specView in self.spectrumViews:
             #         if specView:
@@ -3728,9 +3731,9 @@ class Spectrum(AbstractWrapperObject):
                 for integralList in self.integralLists:
                     integralList._finaliseAction(action)
 
-            if self.chemicalShiftList and actionKwds.get(_UPDATECHEMICALSHIFTS, False):
-                # notify the chemical-shifts to recalculate
-                self.chemicalShiftList.recalculatePeakShifts()
+            # if self.chemicalShiftList and actionKwds.get(_UPDATECHEMICALSHIFTS, False):
+            #     # notify the chemical-shifts to recalculate
+            #     self.chemicalShiftList.recalculatePeakShifts()
 
         if action != 'change':
             # update the state of the reference pids in reference-substances
@@ -3767,14 +3770,18 @@ class Spectrum(AbstractWrapperObject):
 
             self._finaliseAction('delete')
 
-            _path = self.filePath
-            dataFormat = self.dataFormat
-            self._close()
-
             with undoStackBlocking() as addUndoItem:
-                # recover the dataSource when undeleting
-                addUndoItem(undo=
-                            partial(self._openFile, path=_path, dataFormat=dataFormat, checkParameters=False)
+
+                self._deleteSpectrumMetaData()
+                addUndoItem(undo=self._saveSpectrumMetaData,
+                            redo=self._deleteSpectrumMetaData
+                            )
+
+                _path = self.filePath
+                dataFormat = self.dataFormat
+                self._close()
+                addUndoItem(undo=partial(self._openFile, path=_path, dataFormat=dataFormat, checkParameters=False),
+                            redo=self._close
                             )
 
             # GWV: 21/6/24: no longer needed
@@ -3786,13 +3793,14 @@ class Spectrum(AbstractWrapperObject):
             #         specDisplays.append(sp._parent.spectrumDisplay)
             #         specViews.append((sp._parent, sp._parent.spectrumViews.index(sp)))
 
-            listsToDelete = tuple(self.peakLists)
-            listsToDelete += tuple(self.integralLists)
-            listsToDelete += tuple(self.multipletLists)
-
-            # delete the connected lists, should undo in the correct order
-            for obj in listsToDelete:
-                obj._delete()
+            # GWV: 18/7/24: no need to delete these individually
+            # listsToDelete = tuple(self.peakLists)
+            # listsToDelete += tuple(self.integralLists)
+            # listsToDelete += tuple(self.multipletLists)
+            #
+            # # delete the connected lists, should undo in the correct order
+            # for obj in listsToDelete:
+            #     obj._delete()
 
             # GWV: 21/6/24: no longer needed
             # with undoStackBlocking() as addUndoItem:

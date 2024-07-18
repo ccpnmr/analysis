@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-06-21 14:08:49 +0100 (Fri, June 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-07-18 17:05:41 +0100 (Thu, July 18, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -772,10 +772,10 @@ class Undo(deque):
             _ptr = f'>> {indx:2}' if self.nextIndex == indx else f'   {indx:2}'
             print(f'{_ptr} : {reduceText(_funcs[0], textLength)}   {reduceText(_funcs[1], textLength)}   ')
             if indx in self.waypoints:
-                print(f'        WAYPOINT')
+                print(f'        > WAYPOINT <')
 
         indx += 1
         _ptr = f'>> {indx:2}' if self.nextIndex == indx else f'   {indx:2}'
-        print(f'{_ptr} : END_OF_STACK')
+        print(f'{_ptr} : > END_OF_STACK <')
 
 

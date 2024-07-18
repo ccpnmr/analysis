@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-07-17 17:32:15 +0100 (Wed, July 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-07-18 17:05:41 +0100 (Thu, July 18, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -260,7 +260,8 @@ class ChemicalShiftList(AbstractWrapperObject):
 
     @property
     def spectra(self) -> Tuple[Spectrum, ...]:
-        """ccpn.Spectra that use ChemicalShiftList to store chemical shifts"""
+        """:return a tuple with the spectra that use this ChemicalShiftList instance
+        """
         ff = self._project._data2Obj.get
         return tuple(sorted(ff(y) for x in self._wrappedData.experiments
                             for y in x.dataSources))

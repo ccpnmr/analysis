@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-07-18 17:05:41 +0100 (Thu, July 18, 2024) $"
+__dateModified__ = "$dateModified: 2024-07-18 17:16:45 +0100 (Thu, July 18, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -831,7 +831,7 @@ class Spectrum(AbstractWrapperObject):
             raise RuntimeError('dataStore not defined')
 
         if value is None:
-            self._close()
+            self._closeFile()
             self._dataStore.path = None
             return
 
@@ -946,7 +946,7 @@ class Spectrum(AbstractWrapperObject):
         oldDataSource = self.dataSource
 
         with undoStackBlocking(self.project.application, self.project) as addUndo:
-            self._close()
+            self._closeFile()
             newDataSource.spectrum = self
             self._spectrumTraits.dataSource = newDataSource
             newDataStore.spectrum = self
@@ -1018,7 +1018,7 @@ class Spectrum(AbstractWrapperObject):
         """
         path = path or self.filePath
 
-        self._close()
+        self._closeFile()
         self._openFile(path=path, dataFormat=self.dataFormat, checkParameters=False)
         if self.dataSource is not None:
             self.dataSource.exportToSpectrum(self, includePath=False)
@@ -3750,10 +3750,10 @@ class Spectrum(AbstractWrapperObject):
         if self.dataSource is not None:
             self.dataSource.clearCache()
 
-    def _close(self):
+    def _closeFile(self):
         """Close any open dataSource
 
-        CCPNINTERNAL: also called by Project.close() to do cleanup
+        CCPNINTERNAL: also called by Project.close() to do cleanup and in CcpnNefReader
         """
         self._clearCache()
         if self.dataSource is not None:
@@ -3777,11 +3777,13 @@ class Spectrum(AbstractWrapperObject):
                             redo=self._deleteSpectrumMetaData
                             )
 
-                _path = self.filePath
-                dataFormat = self.dataFormat
-                self._close()
-                addUndoItem(undo=partial(self._openFile, path=_path, dataFormat=dataFormat, checkParameters=False),
-                            redo=self._close
+                self._closeFile()
+                addUndoItem(undo=partial(self._openFile,
+                                         path=self.filePath,
+                                         dataFormat=self.dataFormat,
+                                         checkParameters=False
+                                         ),
+                            redo=self._closeFile
                             )
 
             # GWV: 21/6/24: no longer needed

@@ -18,9 +18,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-29 15:17:50 +0100 (Wed, May 29, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-07-18 17:16:45 +0100 (Thu, July 18, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1489,7 +1489,7 @@ class Project(AbstractWrapperObject):
 
         # close any spectra
         for sp in self.spectra:
-            sp._close()
+            sp._closeFile()
 
         # only update the logger if there have been changes to the project
         self._updateLoggerState(readOnly=self.isReadOnly or not self.isModified)

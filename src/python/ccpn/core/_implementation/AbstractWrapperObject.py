@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-30 13:45:37 +0100 (Thu, May 30, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-07-23 18:25:51 +0100 (Tue, July 23, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -590,12 +590,13 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         self._wrappedData.__dict__['isModified'] = True
 
     def getParameter(self, namespace: str, parameterName: str):
-        """Returns value of parameterName for namespace; returns None if not present
-        A copy is returned so that the integrity of model is preserved
+        """:returns value of parameterName for namespace or None if not present
         """
         space = self._ccpnInternalData.get(namespace)
         if space is not None:
-            return deepcopy(space.get(parameterName))
+            return space.get(parameterName)
+        else:
+            return None
 
     def hasParameter(self, namespace: str, parameterName: str):
         """Returns true if parameterName for namespace exists"""

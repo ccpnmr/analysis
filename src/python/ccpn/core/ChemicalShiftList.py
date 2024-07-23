@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-07-18 17:05:41 +0100 (Thu, July 18, 2024) $"
+__dateModified__ = "$dateModified: 2024-07-23 13:55:40 +0100 (Tue, July 23, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -268,20 +268,18 @@ class ChemicalShiftList(AbstractWrapperObject):
 
     @spectra.setter
     @logCommand(get='self', isProperty=True)
-    def spectra(self, _spectra: Optional[Sequence[Union[Spectrum, str]]]):
+    def spectra(self, _spectra: Sequence[Union[Spectrum, str]] = ()):
         """Set the list of spectra attached to the chemicalShiftList
         List must be iterable and of type Spectrum or str
         :param _spectra: Iterable or None
         """
-        if _spectra:
-            if not isinstance(_spectra, Iterable):
-                raise ValueError(f'{self.className}.spectra must be an iterable of items of type Spectrum or str')
-            getByPid = self._project.getByPid
-            _spectra = [getByPid(x) if isinstance(x, str) else x for x in _spectra]
-            if not all(isinstance(val, Spectrum) for val in _spectra):
-                raise ValueError(f'{self.className}.spectra must be an iterable of items of type Spectrum or str')
-        else:
-            _spectra = []
+        if not isinstance(_spectra, Iterable):
+            raise ValueError(f'{self.className}.spectra must be an iterable of items of type Spectrum or str')
+
+        getByPid = self._project.getByPid
+        _spectra = [getByPid(x) if isinstance(x, str) else x for x in _spectra]
+        if not all(isinstance(val, Spectrum) for val in _spectra):
+            raise ValueError(f'{self.className}.spectra must be an iterable of items of type Spectrum or str')
 
         # add a spectrum/remove a spectrum
         _createSpectra = set(_spectra) - set(self.spectra)

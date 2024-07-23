@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-07-18 17:16:45 +0100 (Thu, July 18, 2024) $"
+__dateModified__ = "$dateModified: 2024-07-23 13:55:40 +0100 (Tue, July 23, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -3813,31 +3813,32 @@ class Spectrum(AbstractWrapperObject):
             # delete the _wrappedData
             self._delete()
 
-    def _deleteChild(self, child):
-        """Delete child object
-        child is Pid or V3 object
-        If child exists and is a valid child then delete otherwise log a warning
-        """
-        child = self.project.getByPid(child) if isinstance(child, str) else child
 
-        if child and child in self._getChildrenByClass(child):
-            # only delete objects that are valid children - calls private _delete
-            # so now infinite loop with baseclass delete
-            child._delete()
-        elif child:
-            getLogger().warning(f'{child} not deleted - not child of {self}')
-        else:
-            getLogger().warning(f'{child} not deleted')
+    # def _deleteChild(self, child):
+    #     """Delete child object
+    #     child is Pid or V3 object
+    #     If child exists and is a valid child then delete otherwise log a warning
+    #     """
+    #     child = self.project.getByPid(child) if isinstance(child, str) else child
+    #
+    #     if child and child in self._getChildrenByClass(child):
+    #         # only delete objects that are valid children - calls private _delete
+    #         # so now infinite loop with baseclass delete
+    #         child._delete()
+    #     elif child:
+    #         getLogger().warning(f'{child} not deleted - not child of {self}')
+    #     else:
+    #         getLogger().warning(f'{child} not deleted')
 
     @logCommand(get='self')
     def deleteAllPeakLists(self):
         """Remove all peakLists from the spectrum and create a new default empty PeakList
         """
         # The below call results in calling the Spectrum._deletePeakList() method
-        # for every PeakList instance of self,
-        # which will check and create a new PeakList assuring that there
-        # is at least one instance.
-        self.project.deleteObjects(*self.peakLists)
+        # for every PeakList instance of self, which will check and create a new PeakList
+        # assuring that there is at least one instance.
+        with undoBlock():
+            self.project.deleteObjects(*self.peakLists)
 
     def _deletePeakList(self, child):
         """Delete child object and ensure that there always exists at least one peakList

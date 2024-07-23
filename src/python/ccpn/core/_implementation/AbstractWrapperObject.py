@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-30 13:45:37 +0100 (Thu, May 30, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-07-23 13:55:40 +0100 (Tue, July 23, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1181,10 +1181,20 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         self._wrappedData.delete()
 
     def _deleteChild(self, child):
-        """Delete named child object
-        CCPN Internal
+        """Delete child object
+        child is Pid or V3 object or raise TypeError
+        If child exists and is a valid child then delete otherwise raise ValueError
         """
-        raise RuntimeError('Not implemented')
+        child = self.project.getByPid(child) if isinstance(child, str) else child
+        if not isinstance(child, AbstractWrapperObject):
+            raise TypeError(f'Cannot delete {child}; invalid type')
+
+        if child and child in self._getChildrenByClass(child):
+            # only delete objects that are valid children - calls private _delete
+            # so now infinite loop with baseclass delete
+            child._delete()
+        else:
+            raise ValueError(f'Cannot delete {child}: not child of {self}')
 
     @deleteObject()
     def _delete(self):

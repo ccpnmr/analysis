@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-03 13:25:44 +0100 (Wed, July 03, 2024) $"
+__dateModified__ = "$dateModified: 2024-07-24 18:04:27 +0100 (Wed, July 24, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -167,6 +167,7 @@ class _TableModel(QtCore.QAbstractTableModel):
     showEditIcon = False
     defaultFlags = ENABLED | SELECTABLE  # add CHECKABLE to enable check-boxes
     _defaultEditable = True
+    _enableCheckBoxes = False
 
     _guiState = None
 
@@ -495,12 +496,10 @@ class _TableModel(QtCore.QAbstractTableModel):
             if role == DISPLAY_ROLE:
                 # need to discard columns that include check-boxes
                 val = self._df.iat[row, col]
-
                 try:
                     # try and get the function from the column-definitions
                     fmt = self._view._columnDefs._columns[col].format
                     return fmt % val
-
                 except Exception:
                     # fallback - float/np.float - round to 3 decimal places. This should be settable, ideally even by the user,
                     if isinstance(val, (float, np.floating)):
@@ -516,9 +515,11 @@ class _TableModel(QtCore.QAbstractTableModel):
                                 value = f'{val:.{maxDecimalToShow}f}'
                         except Exception:
                             value = str(val)
+                    elif isinstance(val, bool) and self._enableCheckBoxes:
+                        # an empty cell with a checkbox - allow other text?
+                        return None
                     else:
                         value = str(val)
-
                 return value
 
             elif role == VALUE_ROLE:
@@ -538,7 +539,6 @@ class _TableModel(QtCore.QAbstractTableModel):
                 if (indexGui := self._guiState[row, col]):
                     # get the colour from the dict
                     return indexGui.get(role)
-
                 # return the default foreground colour
                 return self._defaultForegroundColour
 
@@ -550,20 +550,19 @@ class _TableModel(QtCore.QAbstractTableModel):
             elif role == TOOLTIP_ROLE:
                 if self._view._toolTipsEnabled:
                     data = self._df.iat[row, col]
-
                     return str(data)
 
             elif role == EDIT_ROLE:
                 data = self._df.iat[row, col]
-
                 # float/np.float - return float
                 if isinstance(data, (float, np.floating)):
                     return float(data)
-
+                elif isinstance(data, bool):
+                    # need to check before int - int also includes bool :|
+                    return data
                 # int/np.integer - return int
                 elif isinstance(data, (int, np.integer)):
                     return int(data)
-
                 return data
 
             elif role == INDEX_ROLE:
@@ -575,9 +574,11 @@ class _TableModel(QtCore.QAbstractTableModel):
                     # get the font from the dict
                     return indexGui.get(role)
 
-            # if role == CHECK_ROLE and col == 0:
-            #     # need flags to include CHECKABLE and return QtCore.Qt.checked/unchecked/PartiallyChecked here
-            #     return CHECKED
+            elif role == CHECK_ROLE and self._enableCheckBoxes:
+                if isinstance((val := self._df.iat[row, col]), bool):
+                    # bool to checkbox state
+                    return CHECKED if val else UNCHECKED
+                return None
 
             # elif role == ICON_ROLE:
             #     # return the pixmap - this works, transfer to _MultiHeader
@@ -605,20 +606,28 @@ class _TableModel(QtCore.QAbstractTableModel):
             # get the source cell
             fRow = self._filterIndex[index.row()] if self._filterIndex is not None else index.row()
             row, col = self._sortIndex[fRow], index.column()
-
             try:
                 if self._df.iat[row, col] != value:
                     self._df.iat[row, col] = value
                     self.dataChanged.emit(index, index)
-
                     return True
-
             except Exception as es:
                 getLogger().debug2(f'error accessing cell {index}  ({row}, {col})   {es}')
 
-            # elif role == CHECK_ROLE:
-            #     # set state in cell/object
-            #     return True
+        elif role == CHECK_ROLE and self._enableCheckBoxes:
+            # set state in cell/object
+            # get the source cell
+            fRow = self._filterIndex[index.row()] if self._filterIndex is not None else index.row()
+            row, col = self._sortIndex[fRow], index.column()
+            try:
+                # checkbox state to bool
+                val = True if (value == CHECKED) else False
+                if self._df.iat[row, col] != val:
+                    self._df.iat[row, col] = val
+                    self.dataChanged.emit(index, index)
+                    return True
+            except Exception as es:
+                getLogger().debug2(f'error accessing cell {index}  ({row}, {col})   {es}')
 
         return False
 

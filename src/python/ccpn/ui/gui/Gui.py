@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-01 20:52:12 +0100 (Mon, July 01, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-07-25 10:11:17 +0100 (Thu, July 25, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -107,7 +107,7 @@ QtCore.qInstallMessageHandler(qtMessageHandler)
 REMOVEDEBUG = r'\(\S+\.\w+:\d+\)$'
 
 MAXITEMLOGGING = 4
-MAXITEMLOADING = 100
+MAXITEMLOADING = 5
 MAXITEMDEPTH = 5
 
 
@@ -452,22 +452,19 @@ class Gui(Ui):
                 ignore = (popup.result == popup.CANCEL_PRESSED)
 
         elif dataLoader.dataFormat == DirectoryDataLoader.dataFormat:
+
             msg = None
-            if len(dataLoader) > MAXITEMLOADING and dataLoader.maximumDepth > MAXITEMDEPTH:
-                msg = (f'CAUTION: You are trying to load {len(dataLoader, ):d} items.\n'
-                       f'This is a large folder, and is {dataLoader.maximumDepth}-subfolder deep.\n'
-                       f'It may take some time to load.\n\n'
-                       f'Do you want to continue?')
-            elif len(dataLoader) > MAXITEMLOADING:
-                msg = (f'CAUTION: You are trying to load {len(dataLoader, ):d} items.\n'
-                       f'Do you want to continue?')
-            elif dataLoader.maximumDepth > MAXITEMDEPTH:
-                msg = (f'CAUTION: You are trying to load {len(dataLoader, ):d} items.\n'
-                       f'The folder is {dataLoader.maximumDepth}-subfolders deep.\n\n'
-                       f'Do you want to continue?')
-            elif len(dataLoader) > MAXITEMLOGGING:
-                msg = (f'CAUTION: You are trying to load {len(dataLoader, ):d} items\n\n'
-                       f'Do you want to continue?')
+            if dataLoader.count > MAXITEMLOADING or dataLoader.depth > MAXITEMDEPTH:
+                _nSpectra = len([dl for dl in dataLoader.dataLoaders if dl.isSpectrumLoader and dl.isValid])
+                _spectra = f', of which {_nSpectra} are spectra' if _nSpectra>0 else ''
+                msg =  f'CAUTION: You are trying to load {dataLoader.count:d} items{_spectra}.\n'
+
+                if dataLoader.depth > MAXITEMDEPTH:
+                    msg += f'The folder is {dataLoader.depth}-subfolders deep.\n\n'
+
+                msg += (f'It may take some time to load.\n\n'
+                        f'Do you want to continue?')
+
             ignore = (bool(msg) and not MessageDialog.showYesNoWarning(f'Directory {dataLoader.path!r}\n', msg))
 
         dataLoader.createNewProject = createNewProject

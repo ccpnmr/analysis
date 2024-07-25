@@ -20,9 +20,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-28 21:21:59 +0100 (Fri, June 28, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-07-25 10:11:17 +0100 (Thu, July 25, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -468,7 +468,13 @@ class DataLoaderABC(TraitBase):
         return result
 
     def __str__(self):
-        return '<%s: %s>' % (self.__class__.__name__, self.path)
+        if self.isValid:
+            _valid = 'valid'
+        elif self.shouldBeValid:
+            _valid = 'shouldBeValid'
+        else:
+            _valid = 'invalid'
+        return f'<{self.__class__.__name__}: {self.path}, {_valid}>'
 
     __repr__ = __str__
 
@@ -484,5 +490,6 @@ class NotFoundDataLoader(DataLoaderABC):
         if not super().checkValid():
             return False
         # Path was valid; set general other error message
+        self.shouldBeValid = False
         self.isValid = False
         self.errorString = f'{self.path}: unable to identify a valid dataLoader'

@@ -9,8 +9,9 @@ See SpectrumDataSourceABC for a description of the attributes and methods
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -18,9 +19,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Vicky Higman $"
-__dateModified__ = "$dateModified: 2024-05-16 10:13:18 +0100 (Thu, May 16, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-07-25 10:11:17 +0100 (Thu, July 25, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -263,8 +264,9 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         return path.exists() and path.is_dir() and isPdata and hasBrukerTopdir and \
             (hasProcFiles or self._hasBinaryData(path))
 
-    def _getDimensionality(self):
-        """Return dimensionality from proc files in self._pdataDir
+    def _getDimensionality(self) -> int:
+        """Determine dimensionality from proc* and binary file in self._pdataDir
+        :return dimensionality [1-8] or 0 if it could not be established
         """
         dimensionality = 0
         for proc in self._procFiles:
@@ -272,18 +274,16 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
             if not _p.exists():
                 break
             dimensionality += 1
+
         # check that correct binary for expected dimensionality is there and if not, try adjusting dimensionality down
-        _dim = 0
-        for _d in range(dimensionality, 0, -1):
-            _rfile = self._pdataDir / str(_d)+_d*'r'
-            if _rfile.exists():
-                _dim = _d
-            else:
-                getLogger().warning(f'{_rfile}: Cannot find binary file, checking for lower dimensionality')
-        if _dim != 0:
-            return _dim
-        else:
-            return dimensionality
+        while dimensionality > 0:
+            _path = self._pdataDir / self._processedDataFilesDict[dimensionality][0]
+            if _path.exists():
+                return dimensionality
+            getLogger().warning(f'Dimensionality {dimensionality}: Cannot find a binary file, checking for lower dimensionality')
+            dimensionality -= 1
+        # if we are here, dimensionality = 0, so we could not determine it
+        return 0
 
     def _findFirstPdataDir(self):
         """Find and return first pdata subdir with valid data, starting from Bruker topDir

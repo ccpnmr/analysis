@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-04 18:06:22 +0100 (Thu, July 04, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-07-18 17:16:45 +0100 (Thu, July 18, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -5795,7 +5795,7 @@ class CcpnNefReader(CcpnNefContent):
             # Optionally change the dataFormat
             if filePath is not None and dataFormat is not None:
                 try:
-                    spectrum._close()
+                    spectrum._closeFile()
                     spectrum._setdataFormat(dataFormat)  # specially override the dataFormat setting
                     spectrum.filePath = filePath  # This will also try to reopen the file
                 except (RuntimeError, ValueError) as es:

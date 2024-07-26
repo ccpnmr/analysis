@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:50 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-06-18 21:07:38 +0100 (Tue, June 18, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -404,7 +404,7 @@ class Strip(AbstractWrapperObject):
         return self._getInternalParameter(self._PINNED) or False
 
     @pinned.setter
-    @ccpNmrV3CoreSetter(pinnedChanged=True)
+    @ccpNmrV3CoreSetter()
     def pinned(self, value):
         """Setter for pinned.
         """

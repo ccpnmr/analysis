@@ -387,7 +387,7 @@ class Gui(Ui, _Gui):
 
                     spectrumDisplay.spectrumToolBar.show()
                     spectrumDisplay.spectrumGroupToolBar.hide()
-                    spectrumDisplay.setToolbarButtons()
+                    spectrumDisplay._setToolbarButtons()
 
                 # some strips may not be instantiated at this point
                 # resize the stripFrame to the spectrumDisplay - ready for first resize event
@@ -477,7 +477,8 @@ class Gui(Ui, _Gui):
     def _setupMainWindow(self):
         """Set up mainWindow
         """
-        self.mainWindow.sideBar.buildTree(self.project, clear=True)
+        _sideBar = self.mainWindow._getSideBar()
+        _sideBar.buildTree(self.project, clear=True)
         # self.mainWindow._updateRestoreArchiveMenu()
         self.mainWindow.namespace['current'] = self.application.current
 
@@ -937,8 +938,9 @@ class Gui(Ui, _Gui):
             self.mainWindow._closeMainWindowModules()
             self.mainWindow._closeExtraWindowModules()
             self.mainWindow._stopPythonConsole()
-            self.mainWindow.sideBar.clearSideBar()
-            self.mainWindow.sideBar.deleteLater()
+            _sideBar = self.mainWindow._getSideBar()
+            _sideBar.clearSideBar()
+            _sideBar.deleteLater()
             self.mainWindow.deleteLater()
             self._mainWindow = None
 

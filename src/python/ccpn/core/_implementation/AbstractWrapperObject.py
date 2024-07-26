@@ -1182,10 +1182,20 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         self._wrappedData.delete()
 
     def _deleteChild(self, child):
-        """Delete named child object
-        CCPN Internal
+        """Delete child object
+        child is Pid or V3 object or raise TypeError
+        If child exists and is a valid child then delete otherwise raise ValueError
         """
-        raise RuntimeError('Not implemented')
+        child = self.project.getByPid(child) if isinstance(child, str) else child
+        if not isinstance(child, AbstractWrapperObject):
+            raise TypeError(f'Cannot delete {child}; invalid type')
+
+        if child and child in self._getChildrenByClass(child):
+            # only delete objects that are valid children - calls private _delete
+            # so now infinite loop with baseclass delete
+            child._delete()
+        else:
+            raise ValueError(f'Cannot delete {child}: not child of {self}')
 
     @deleteObject()
     def _delete(self):

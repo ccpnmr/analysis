@@ -107,8 +107,8 @@ from ccpn.util.Path import Path, aPath
 # defined here too as imported from Spectrum throughout the code base
 _SCALECHANGED = 'scaleChanged'
 _ALLCHANGED = 'allChanged'
-_REBUILDCONTOURS = 'rebuildContours'
-_UPDATECHEMICALSHIFTS = 'updateChemicalShifts'
+# _REBUILDCONTOURS = 'rebuildContours'
+# _UPDATECHEMICALSHIFTS = 'updateChemicalShifts'
 _IGNORECHILDREN = 'ignoreChildren'
 
 #=========================================================================================
@@ -185,10 +185,27 @@ class Spectrum(AbstractWrapperObject):
 
     @property
     def chemicalShiftList(self):
-        """STUB: hot-fixed later
-        :return: an instance of ChemicalShiftList, or None
+        """:return: the ChemicalShiftList instance for spectrum
         """
-        return None
+        return self._project._data2Obj.get(self._wrappedData.experiment.shiftList)
+
+    @chemicalShiftList.setter
+    def chemicalShiftList(self, chemicalShiftList):
+        """Set the chemicalShiftList for the spectrum
+        """
+        from ccpn.core.ChemicalShiftList import ChemicalShiftList
+
+        _shiftList = self.getByPid(chemicalShiftList) if isinstance(chemicalShiftList, str) else chemicalShiftList
+        if _shiftList is None:
+            raise ValueError(f'{self.className}.chemicalShiftList: cannot set to None')
+
+        if isinstance(_shiftList, ChemicalShiftList):
+            # add the spectrum to the chemicalShiftList - undo handled in .spectra setter
+            _shiftList.spectra = set(_shiftList.spectra) | {self}
+
+        else:
+            # Don't raise errors here or you crash-out a perfectly valid project/Nef from loading
+            getLogger().warning(f'Could not set chemicalShiftList for Spectrum {self}. Invalid type {_shiftList}.')
 
     @property
     def spectrumDimensions(self) -> tuple:
@@ -689,7 +706,7 @@ class Spectrum(AbstractWrapperObject):
 
     @noiseLevel.setter
     @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreSetter(allChanged=True, rebuildContours=False)
+    @ccpNmrV3CoreSetter(allChanged=True)
     def noiseLevel(self, value: float):
         scale = self.scale if self.scale is not None else 1.0
         val = float(value) if value is not None else None
@@ -715,7 +732,7 @@ class Spectrum(AbstractWrapperObject):
 
     @negativeNoiseLevel.setter
     @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreSetter(allChanged=True, rebuildContours=False)
+    @ccpNmrV3CoreSetter(allChanged=True)
     def negativeNoiseLevel(self, value):
         """Stored in Internal """
 
@@ -814,7 +831,7 @@ class Spectrum(AbstractWrapperObject):
             raise RuntimeError('dataStore not defined')
 
         if value is None:
-            self._close()
+            self._closeFile()
             self._dataStore.path = None
             return
 
@@ -929,7 +946,7 @@ class Spectrum(AbstractWrapperObject):
         oldDataSource = self.dataSource
 
         with undoStackBlocking(self.project.application, self.project) as addUndo:
-            self._close()
+            self._closeFile()
             newDataSource.spectrum = self
             self._spectrumTraits.dataSource = newDataSource
             newDataStore.spectrum = self
@@ -1001,7 +1018,7 @@ class Spectrum(AbstractWrapperObject):
         """
         path = path or self.filePath
 
-        self._close()
+        self._closeFile()
         self._openFile(path=path, dataFormat=self.dataFormat, checkParameters=False)
         if self.dataSource is not None:
             self.dataSource.exportToSpectrum(self, includePath=False)
@@ -1457,6 +1474,7 @@ class Spectrum(AbstractWrapperObject):
     @checkSpectrumPropertyValue(iterable=True, allowNone=False, types=(float, int))
     def referencePoints(self, value):
         self._setDimensionalAttributes('referencePoint', value)
+        self.chemicalShiftList.recalculatePeakShifts()
         if self.dimensionCount == 1 and not self.isEmptySpectrum():  # make sure the spectrum will shift correctly on the next redraw.
             self.positions = self.getPpmArray(dimension=1)
 
@@ -1469,9 +1487,10 @@ class Spectrum(AbstractWrapperObject):
 
     @referenceValues.setter
     @checkSpectrumPropertyValue(iterable=True, allowNone=False, types=(float, int))
-    @ccpNmrV3CoreSetter(updateChemicalShifts=True)
+    @ccpNmrV3CoreSetter()
     def referenceValues(self, value):
         self._setDimensionalAttributes('referenceValue', value)
+        self.chemicalShiftList.recalculatePeakShifts()
 
         if self.dimensionCount == 1 and not self.isEmptySpectrum():  # make sure the spectrum will shift correctly on the next redraw.
             self.positions = self.getPpmArray(dimension=1)
@@ -1872,11 +1891,16 @@ class Spectrum(AbstractWrapperObject):
         """
         return self._getSeriesItem(spectrumGroup)
 
-    @logCommand(get='self')
-    def deleteAllPeakLists(self):
-        """Remove all peakLists from the spectrum and create the default empty PeakList
-        """
-        self.project.deleteObjects(*self.peakLists)
+    # GWV: moved to "delete" section in de code
+    # @logCommand(get='self')
+    # def deleteAllPeakLists(self):
+    #     """Remove all peakLists from the spectrum and create a new default empty PeakList
+    #     """
+    #     # The below call results in calling the Spectrum._deletePeakList() method
+    #     # for every PeakList instance of self,
+    #     # which will check and create a new PeakList assuring that there
+    #     # is at least one instance.
+    #     self.project.deleteObjects(*self.peakLists)
 
     def _getSeriesItem(self, spectrumGroup):
         """Return the series item for the current spectrum for the selected spectrumGroup
@@ -3633,7 +3657,7 @@ class Spectrum(AbstractWrapperObject):
                 getLogger().info('Folder may be read-only')
 
     def _restoreFromSpectrumMetaData(self):
-        """Retore the spectrum metadata from the project/state/spectra json file
+        """Restore the spectrum metadata from the project/state/spectra json file
         """
         self._spectrumTraits.restore(self._metaDataPath)
         self._dataStore.spectrum = self
@@ -3658,8 +3682,9 @@ class Spectrum(AbstractWrapperObject):
         #     # self._saveSpectrumMetaData()
         #     pass
 
-        if action == 'delete':
-            self._deleteSpectrumMetaData()
+        # GWV 18/7/24: moved to delete
+        # if action == 'delete':
+        #     self._deleteSpectrumMetaData()
 
         # notify peak/integral/multiplet list
         if action in {'create', 'delete'}:
@@ -3675,20 +3700,20 @@ class Spectrum(AbstractWrapperObject):
             # get the changed attribute states - defined in the ccpNmrV3CoreSetter arguments
             scaleChanged = actionKwds.get(_SCALECHANGED, False)
             allChanged = actionKwds.get(_ALLCHANGED, False)
-            rebuildContours = actionKwds.get(_REBUILDCONTOURS, True)
-            if rebuildContours:
-                for specView in self.spectrumViews:
-                    if specView:
-                        # force a rebuild of the contours/etc.
-                        if scaleChanged:
-                            specView.buildContoursOnly = scaleChanged
-                        elif allChanged:
-                            specView.buildContours = allChanged
-                        # other changes may need to be recognised here
-                        specView._finaliseAction(action)
-
-            if actionKwds.get(_IGNORECHILDREN, False):  # here or before specView?
-                return
+            # rebuildContours = actionKwds.get(_REBUILDCONTOURS, True)
+            # if rebuildContours:
+            #     for specView in self.spectrumViews:
+            #         if specView:
+            #             # force a rebuild of the contours/etc.
+            #             if scaleChanged:
+            #                 specView.buildContoursOnly = scaleChanged
+            #             elif allChanged:
+            #                 specView.buildContours = allChanged
+            #             # other changes may need to be recognised here
+            #             specView._finaliseAction(action)
+            #
+            # if actionKwds.get(_IGNORECHILDREN, False):  # here or before specView?
+            #     return
 
             if scaleChanged or allChanged:
                 # notify peaks/multiplets/integrals that the scale has changed
@@ -3710,9 +3735,9 @@ class Spectrum(AbstractWrapperObject):
                 for integralList in self.integralLists:
                     integralList._finaliseAction(action)
 
-            if self.chemicalShiftList and actionKwds.get(_UPDATECHEMICALSHIFTS, False):
-                # notify the chemical-shifts to recalculate
-                self.chemicalShiftList.recalculatePeakShifts()
+            # if self.chemicalShiftList and actionKwds.get(_UPDATECHEMICALSHIFTS, False):
+            #     # notify the chemical-shifts to recalculate
+            #     self.chemicalShiftList.recalculatePeakShifts()
 
         if action != 'change':
             # update the state of the reference pids in reference-substances
@@ -3729,10 +3754,10 @@ class Spectrum(AbstractWrapperObject):
         if self.dataSource is not None:
             self.dataSource.clearCache()
 
-    def _close(self):
+    def _closeFile(self):
         """Close any open dataSource
 
-        CCPNINTERNAL: also called by Project.close() to do cleanup
+        CCPNINTERNAL: also called by Project.close() to do cleanup and in CcpnNefReader
         """
         self._clearCache()
         if self.dataSource is not None:
@@ -3743,58 +3768,81 @@ class Spectrum(AbstractWrapperObject):
 
     @logCommand(get='self')
     def delete(self):
-        """Delete Spectrum"""
+        """Delete Spectrum
+        """
         with undoBlock():
 
-            _path = self.filePath
-            dataFormat = self.dataFormat
-            self._close()
+            self._finaliseAction('delete')
 
             with undoStackBlocking() as addUndoItem:
-                # recover the dataSource when undeleting
-                addUndoItem(undo=
-                            partial(self._openFile, path=_path, dataFormat=dataFormat, checkParameters=False)
+
+                self._deleteSpectrumMetaData()
+                addUndoItem(undo=self._saveSpectrumMetaData,
+                            redo=self._deleteSpectrumMetaData
                             )
 
-            # handle spectrumView ordering - this should be moved to spectrumView or spectrumDisplay via notifier?
-            specDisplays = []
-            specViews = []
-            for sp in self.spectrumViews:
-                if sp._parent.spectrumDisplay not in specDisplays:
-                    specDisplays.append(sp._parent.spectrumDisplay)
-                    specViews.append((sp._parent, sp._parent.spectrumViews.index(sp)))
+                self._closeFile()
+                addUndoItem(undo=partial(self._openFile,
+                                         path=self.filePath,
+                                         dataFormat=self.dataFormat,
+                                         checkParameters=False
+                                         ),
+                            redo=self._closeFile
+                            )
 
-            listsToDelete = tuple(self.peakLists)
-            listsToDelete += tuple(self.integralLists)
-            listsToDelete += tuple(self.multipletLists)
+            # GWV: 21/6/24: no longer needed
+            # # handle spectrumView ordering - this should be moved to spectrumView or spectrumDisplay via notifier?
+            # specDisplays = []
+            # specViews = []
+            # for sp in self.spectrumViews:
+            #     if sp._parent.spectrumDisplay not in specDisplays:
+            #         specDisplays.append(sp._parent.spectrumDisplay)
+            #         specViews.append((sp._parent, sp._parent.spectrumViews.index(sp)))
 
-            # delete the connected lists, should undo in the correct order
-            for obj in listsToDelete:
-                obj._delete()
+            # GWV: 18/7/24: no need to delete these individually
+            # listsToDelete = tuple(self.peakLists)
+            # listsToDelete += tuple(self.integralLists)
+            # listsToDelete += tuple(self.multipletLists)
+            #
+            # # delete the connected lists, should undo in the correct order
+            # for obj in listsToDelete:
+            #     obj._delete()
 
-            with undoStackBlocking() as addUndoItem:
-                # notify spectrumViews of delete/create
-                addUndoItem(undo=partial(self._notifySpectrumViews, 'create'),
-                            redo=partial(self._notifySpectrumViews, 'delete'))
+            # GWV: 21/6/24: no longer needed
+            # with undoStackBlocking() as addUndoItem:
+            #     # notify spectrumViews of delete/create
+            #     addUndoItem(undo=partial(self._notifySpectrumViews, 'create'),
+            #                 redo=partial(self._notifySpectrumViews, 'delete'))
 
             # delete the _wrappedData
             self._delete()
 
-    def _deleteChild(self, child):
-        """Delete child object
-        child is Pid or V3 object
-        If child exists and is a valid child then delete otherwise log a warning
-        """
-        child = self.project.getByPid(child) if isinstance(child, str) else child
 
-        if child and child in self._getChildrenByClass(child):
-            # only delete objects that are valid children - calls private _delete
-            # so now infinite loop with baseclass delete
-            child._delete()
-        elif child:
-            getLogger().warning(f'{child} not deleted - not child of {self}')
-        else:
-            getLogger().warning(f'{child} not deleted')
+    # def _deleteChild(self, child):
+    #     """Delete child object
+    #     child is Pid or V3 object
+    #     If child exists and is a valid child then delete otherwise log a warning
+    #     """
+    #     child = self.project.getByPid(child) if isinstance(child, str) else child
+    #
+    #     if child and child in self._getChildrenByClass(child):
+    #         # only delete objects that are valid children - calls private _delete
+    #         # so now infinite loop with baseclass delete
+    #         child._delete()
+    #     elif child:
+    #         getLogger().warning(f'{child} not deleted - not child of {self}')
+    #     else:
+    #         getLogger().warning(f'{child} not deleted')
+
+    @logCommand(get='self')
+    def deleteAllPeakLists(self):
+        """Remove all peakLists from the spectrum and create a new default empty PeakList
+        """
+        # The below call results in calling the Spectrum._deletePeakList() method
+        # for every PeakList instance of self, which will check and create a new PeakList
+        # assuring that there is at least one instance.
+        with undoBlock():
+            self.project.deleteObjects(*self.peakLists)
 
     def _deletePeakList(self, child):
         """Delete child object and ensure that there always exists at least one peakList
@@ -3840,9 +3888,9 @@ class Spectrum(AbstractWrapperObject):
         """get wrappedData (Nmr.DataSources) for all Spectrum children of parent Project"""
         return list(x for y in parent._wrappedData.sortedExperiments() for x in y.sortedDataSources())
 
-    def _notifySpectrumViews(self, action):
-        for sv in self.spectrumViews:
-            sv._finaliseAction(action)
+    # def _notifySpectrumViews(self, action):
+    #     for sv in self.spectrumViews:
+    #         sv._finaliseAction(action)
 
     #-----------------------------------------------------------------------------------------
     # new<Object> and other methods

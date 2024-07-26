@@ -263,7 +263,7 @@ class Framework(NotifierBase):
         # Resources
         sys.stderr.write('==> Loading resources... ')
         self.resources = None
-        self.resources = Resources(self)
+        # self.resources = Resources(self)
         sys.stderr.write('Done!\n')
 
         # get a user interface; nb. ui.start() is called by the application
@@ -1615,11 +1615,12 @@ class Framework(NotifierBase):
     def undo(self):
         from ccpn.core.lib.ContextManagers import busyHandler
 
-        if self.project._undo.canUndo():
-            if not self.project._undo.locked:
+        _undo = self._getUndo()
+        if _undo.canUndo():
+            if not _undo.locked:
                 # may need to put some more information in this busy popup
                 with busyHandler(title='Busy', text='Undo ...', raiseErrors=True):
-                    self.project._undo.undo()
+                    _undo.undo()
         else:
             getLogger().warning('nothing to undo')
 
@@ -1627,10 +1628,11 @@ class Framework(NotifierBase):
     def redo(self):
         from ccpn.core.lib.ContextManagers import busyHandler
 
-        if self.project._undo.canRedo():
-            if not self.project._undo.locked:
+        _undo = self._getUndo()
+        if _undo.canRedo():
+            if not _undo.locked:
                 with busyHandler(title='Busy', text='Redo...', raiseErrors=True):
-                    self.project._undo.redo()
+                    _undo.redo()
         else:
             getLogger().warning('nothing to redo.')
 

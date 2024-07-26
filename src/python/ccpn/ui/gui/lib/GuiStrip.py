@@ -396,7 +396,7 @@ class GuiStrip(Frame):
         self._overlayArea.raise_()
 
         # initialise the notifiers
-        self.setStripNotifiers()
+        self._setStripNotifiers()
 
         # test aliasing notifiers
         # self._currentVisibleAliasingRange = {}
@@ -496,7 +496,7 @@ class GuiStrip(Frame):
         # widget2.hide()
         widget1.show()
 
-    def setStripNotifiers(self):
+    def _setStripNotifiers(self):
         """Set the notifiers for the strip.
         """
 
@@ -543,6 +543,9 @@ class GuiStrip(Frame):
         self.setNotifier(self.project, [Notifier.RENAME], 'Strip',
                          self._updateStripLabel,
                          onceOnly=True)
+
+        # Notifier for pinned strips (GWV 18/6/24)
+        self.setNotifier(self, [Notifier.OBSERVE], 'pinned', callback=self._stripPinnedCallback)
 
         # For now, all dropEvents are not strip specific, use spectrumDisplay's handling
         self.setGuiNotifier(self, [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
@@ -1426,6 +1429,11 @@ class GuiStrip(Frame):
         if self.stripLabel:
             self.stripLabel.setLabelColour(CCPNGLWIDGET_HEXHIGHLIGHT if flag else CCPNGLWIDGET_HEXFOREGROUND)
             self.stripLabel.setHighlighted(flag)
+
+    def _stripPinnedCallback(self, callbackDict: dict):
+        """Callback when Strip.pinned is changed
+        """
+        self._updateStripLabelState()
 
     def _updateStripLabelState(self, *args):
         """Update the visible state of the pinned icon.

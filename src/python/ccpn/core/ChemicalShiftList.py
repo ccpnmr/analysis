@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-30 13:45:35 +0100 (Thu, May 30, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-07-23 13:55:40 +0100 (Tue, July 23, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -260,27 +260,26 @@ class ChemicalShiftList(AbstractWrapperObject):
 
     @property
     def spectra(self) -> Tuple[Spectrum, ...]:
-        """ccpn.Spectra that use ChemicalShiftList to store chemical shifts"""
+        """:return a tuple with the spectra that use this ChemicalShiftList instance
+        """
         ff = self._project._data2Obj.get
         return tuple(sorted(ff(y) for x in self._wrappedData.experiments
                             for y in x.dataSources))
 
     @spectra.setter
     @logCommand(get='self', isProperty=True)
-    def spectra(self, _spectra: Optional[Sequence[Union[Spectrum, str]]]):
+    def spectra(self, _spectra: Sequence[Union[Spectrum, str]] = ()):
         """Set the list of spectra attached to the chemicalShiftList
         List must be iterable and of type Spectrum or str
         :param _spectra: Iterable or None
         """
-        if _spectra:
-            if not isinstance(_spectra, Iterable):
-                raise ValueError(f'{self.className}.spectra must be an iterable of items of type Spectrum or str')
-            getByPid = self._project.getByPid
-            _spectra = [getByPid(x) if isinstance(x, str) else x for x in _spectra]
-            if not all(isinstance(val, Spectrum) for val in _spectra):
-                raise ValueError(f'{self.className}.spectra must be an iterable of items of type Spectrum or str')
-        else:
-            _spectra = []
+        if not isinstance(_spectra, Iterable):
+            raise ValueError(f'{self.className}.spectra must be an iterable of items of type Spectrum or str')
+
+        getByPid = self._project.getByPid
+        _spectra = [getByPid(x) if isinstance(x, str) else x for x in _spectra]
+        if not all(isinstance(val, Spectrum) for val in _spectra):
+            raise ValueError(f'{self.className}.spectra must be an iterable of items of type Spectrum or str')
 
         # add a spectrum/remove a spectrum
         _createSpectra = set(_spectra) - set(self.spectra)
@@ -912,59 +911,59 @@ class ChemicalShiftList(AbstractWrapperObject):
 #=========================================================================================
 # Connections to parents:
 #=========================================================================================
-
-def getter(self: Spectrum) -> ChemicalShiftList:
-    """Return the chemicalShiftList for the spectrum
-    """
-    return self._project._data2Obj.get(self._apiDataSource.experiment.shiftList)
-
-
-@logCommand(get='self', isProperty=True)
-def chemicalShiftList(self: Spectrum, chemicalShiftList: ChemicalShiftList):
-    """Set the chemicalShiftList for the spectrum
-    """
-    _shiftList = self.getByPid(chemicalShiftList) if isinstance(chemicalShiftList, str) else chemicalShiftList
-    if isinstance(_shiftList, ChemicalShiftList):
-        # add the spectrum to the chemicalShiftList - undo handled in .spectra setter
-        _shiftList.spectra = set(_shiftList.spectra) | {self}
-
-    elif _shiftList is None:
-        # # set the chemicalShiftList to None - undo handled in .spectra setter
-        # _shiftList = self.chemicalShiftList
-        # if _shiftList:
-        #     _shiftList.spectra = set(_shiftList.spectra) - {self}
-        raise ValueError(f'{self.__class__.__name__}.chemicalShiftList: cannot set to None')
-
-    else:
-        # Don't raise errors here or you crash-out a perfectly valid project/Nef from loading
-        from ccpn.util.Logging import getLogger
-
-        getLogger().warning(f'Could not set chemicalShiftList for Spectrum {self}. Invalid ChemicalShiftList.')
-
-
-Spectrum.chemicalShiftList = property(getter, chemicalShiftList, None,
-                                      "ccpn.ChemicalShiftList used for ccpn.Spectrum")
-del chemicalShiftList
-
-
-def getter(self: PeakList) -> ChemicalShiftList:
-    """Return the chemicalShiftList for the peak
-    """
-    return self._project._data2Obj.get(self._wrappedData.shiftList)
-
-
-@logCommand(get='self', isProperty=True)
-def chemicalShiftList(self: PeakList, value: ChemicalShiftList):
-    """Set the chemicalShiftList for the peak
-    """
-    value = self.getByPid(value) if isinstance(value, str) else value
-    self._apiPeakList.shiftList = None if value is None else value._apiShiftList
-
-
-PeakList.chemicalShiftList = property(getter, chemicalShiftList, None,
-                                      "ChemicalShiftList associated with PeakList.")
-del getter
-del chemicalShiftList
+# GWV 17/7/24: moved to Spectrum class
+# def getter(self: Spectrum) -> ChemicalShiftList:
+#     """Return the chemicalShiftList for the spectrum
+#     """
+#     return self._project._data2Obj.get(self._apiDataSource.experiment.shiftList)
+#
+#
+# @logCommand(get='self', isProperty=True)
+# def chemicalShiftList(self: Spectrum, chemicalShiftList: ChemicalShiftList):
+#     """Set the chemicalShiftList for the spectrum
+#     """
+#     _shiftList = self.getByPid(chemicalShiftList) if isinstance(chemicalShiftList, str) else chemicalShiftList
+#     if isinstance(_shiftList, ChemicalShiftList):
+#         # add the spectrum to the chemicalShiftList - undo handled in .spectra setter
+#         _shiftList.spectra = set(_shiftList.spectra) | {self}
+#
+#     elif _shiftList is None:
+#         # # set the chemicalShiftList to None - undo handled in .spectra setter
+#         # _shiftList = self.chemicalShiftList
+#         # if _shiftList:
+#         #     _shiftList.spectra = set(_shiftList.spectra) - {self}
+#         raise ValueError(f'{self.__class__.__name__}.chemicalShiftList: cannot set to None')
+#
+#     else:
+#         # Don't raise errors here or you crash-out a perfectly valid project/Nef from loading
+#         from ccpn.util.Logging import getLogger
+#
+#         getLogger().warning(f'Could not set chemicalShiftList for Spectrum {self}. Invalid ChemicalShiftList.')
+#
+#
+# Spectrum.chemicalShiftList = property(getter, chemicalShiftList, None,
+#                                       "ccpn.ChemicalShiftList used for ccpn.Spectrum")
+# del chemicalShiftList
+#
+# GWV 17/7/24: removed
+# def getter(self: PeakList) -> ChemicalShiftList:
+#     """Return the chemicalShiftList for the peak
+#     """
+#     return self._project._data2Obj.get(self._wrappedData.shiftList)
+#
+#
+# @logCommand(get='self', isProperty=True)
+# def chemicalShiftList(self: PeakList, value: ChemicalShiftList):
+#     """Set the chemicalShiftList for the peak
+#     """
+#     value = self.getByPid(value) if isinstance(value, str) else value
+#     self._apiPeakList.shiftList = None if value is None else value._apiShiftList
+#
+#
+# PeakList.chemicalShiftList = property(getter, chemicalShiftList, None,
+#                                       "ChemicalShiftList associated with PeakList.")
+# del getter
+# del chemicalShiftList
 
 
 #=========================================================================================

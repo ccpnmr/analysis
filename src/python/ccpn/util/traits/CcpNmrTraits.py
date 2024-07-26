@@ -94,9 +94,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:56 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-06-10 09:42:04 +0100 (Mon, June 10, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -819,14 +819,39 @@ class RecursiveSet(Set):
 
 
 class Tuple(_Tuple, _CcpNmrTrait):
-    """Fixing default_value problem
+    """Fixing default_value, minlen, maxlen problem
     """
     def __init__(self, *traits, **kwargs):
         default_value = kwargs.setdefault('default_value', None)
+        minlen = kwargs.setdefault('minlen', 0)
+        maxlen = kwargs.setdefault('maxlen', sys.maxsize)
+
         _Tuple.__init__(self, *traits, **kwargs)
         _CcpNmrTrait.__init__(self)
+
         if default_value is not None:
             self.default_value = default_value
+        self._minlen = minlen
+        self._maxlen = maxlen
+
+    def validate(self, obj, value):
+        """Validate value for obj
+        """
+        if value is None and self.allow_none:
+            return None
+
+        if not isinstance(value, (tuple, list)):
+            raise TypeError(f'{self._fullName(obj=obj)}: {type(value)} not allowed; expect tuple or list')
+
+        if len(value) < self._minlen or len(value) > self._maxlen:
+            raise ValueError(f'{self._fullName(obj=obj)}: expected tuple with minlen,maxlen=({self._minlen},{self._maxlen}); got {value!r}')
+
+        value = tuple(value)
+
+        if len(value) > 0:
+            self.validate_elements(obj=obj, value=value)
+
+        return value
 
     class jsonHandler(ListTraitJsonHandlerABC):
         klass = tuple
@@ -835,19 +860,19 @@ class Tuple(_Tuple, _CcpNmrTrait):
 class CTuple(Tuple):
     """Casting tuple, any iterable
     """
-    def validate(self, obj, values):
+    def validate(self, obj, value):
         # local import, because isotopeRecords in Common cause circular imports £%%$$GRr
         from ccpn.util.Common import isIterable
 
-        if values is None and self.allow_none:
-            return values
+        if value is None and self.allow_none:
+            return value
 
-        if isinstance(values, (tuple, list)):
+        if isinstance(value, (tuple, list)):
             pass
-        elif isIterable(values):
-            values = [val for val in values]
-        values = self.validate_elements(obj, values)
-        return tuple(values)
+        elif isIterable(value):
+            value = [val for val in value]
+
+        return super().validate(obj=obj, value=value)
 
 
 class RecursiveTuple(Tuple):

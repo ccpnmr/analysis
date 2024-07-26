@@ -18,9 +18,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-28 21:15:26 +0100 (Fri, June 28, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-07-18 17:16:45 +0100 (Thu, July 18, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1217,7 +1217,7 @@ class Project(AbstractWrapperObject):
         # Set up notifiers
         self._registerPresetApiNotifiers()
 
-        # undo
+        # undo; also adds the undo stack to _wrappedData._root._undo
         self._resetUndo(debug=debugLevel <= Logging.DEBUG2, application=application)
 
         self._mainWindow = None  # set by MainWindow.__init__()
@@ -1489,7 +1489,7 @@ class Project(AbstractWrapperObject):
 
         # close any spectra
         for sp in self.spectra:
-            sp._close()
+            sp._closeFile()
 
         # only update the logger if there have been changes to the project
         self._updateLoggerState(readOnly=self.isReadOnly or not self.isModified)

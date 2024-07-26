@@ -5,8 +5,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-26 17:27:52 +0100 (Fri, April 26, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-06-21 11:56:53 +0100 (Fri, June 21, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -43,7 +44,7 @@ import ccpn.core.lib.SpectrumLib as specLib
 from ccpn.core.lib import Pid
 
 from ccpn.util import Common as commonUtil
-from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, renameObject
+from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, renameObject, notificationBlanking
 from ccpn.util.Logging import getLogger
 
 from ccpn.core._implementation.updates.update_3_0_4 import _updateSpectumDisplay_3_0_4_to_3_1_0
@@ -218,10 +219,28 @@ class SpectrumDisplay(AbstractWrapperObject):
 
     #-----------------------------------------------------------------------------------------
 
+    @property
+    def spectra(self) -> list[Spectrum]:
+        """
+        :return: a list of spectra displayed in the strips(s)
+        (For V4 compatibility)
+        """
+        return commonUtil.uniquify([sv.spectrum for sv in self.spectrumViews])
+
+    @property
+    def axisCount(self) -> int:
+        """:return the axisCount of the SpectrumDisplay instance
+        """
+        return self.dimensionCount if not self.is1D else 2
+
+    #-----------------------------------------------------------------------------------------
+
     def __init__(self, project: Project, wrappedData):
 
         AbstractWrapperObject.__init__(self, project, wrappedData)
-        self._isNew = False  # Only set by newSpectrumDisplay
+
+        # _isNew: Only set by newSpectrumDisplay and used in .displaySpectrum()
+        self._isNew: bool = False
 
     # @classmethod
     # def _restoreObject(cls, project, apiObj):
@@ -273,6 +292,7 @@ class SpectrumDisplay(AbstractWrapperObject):
             self.setVisibleAxes()
 
         # check that the spectrumView indexing has been set, or is populated correctly
+        specViews = []
         if len(_strips) > 0 and \
                 (specViews := _strips[0].getSpectrumViews()):
             indexing = [v._index for v in specViews]
@@ -281,6 +301,9 @@ class SpectrumDisplay(AbstractWrapperObject):
                 for ind, sv in enumerate(specViews):
                     sv._index = ind
             self._spectrumViewVisibleChanged()
+
+        for sp in self.spectra:
+            self._setSpectrumNotifiers(sp)
 
         super()._postRestore()
 
@@ -733,7 +756,6 @@ class SpectrumDisplay(AbstractWrapperObject):
         """Make copy of strip in self, at position newIndex - or rightmost.
         """
         from ccpn.ui._implementation.Strip import _copyStrip
-
         return _copyStrip(self, strip=strip, newIndex=newIndex)
 
 
@@ -806,14 +828,17 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
     if (display := project._data2Obj.get(apiSpectrumDisplay)) is None:
         raise RuntimeError('Unable to generate new SpectrumDisplay')
 
-    # may need to set other values here, guarantees before strip generation
-    display.stripArrangement = stripDirection
-    if zPlaneNavigationMode:
-        display.zPlaneNavigationMode = zPlaneNavigationMode
-    # GWV: no idea what these are for; just adapted from original code
-    # it gets crazy on 1D-displays
-    # display._useFirstDefault = (False if is1D else True)
-    display.isGrouped = isGrouped
+    # may need to set other values here, guarantees before strip generation;
+    # however, do this without any callbacks, as various objects have set CHANGE, CREATE notifiers
+    # on SpectrumDisplay
+    with notificationBlanking():
+        display.stripArrangement = stripDirection
+        if zPlaneNavigationMode:
+            display.zPlaneNavigationMode = zPlaneNavigationMode
+        # GWV: no idea what these are for; just adapted from original code
+        # it gets crazy on 1D-displays
+        # display._useFirstDefault = (False if is1D else True)
+        display.isGrouped = isGrouped
 
     # Create first strip; looks like we need this before other things, otherwise the api goes crazy
     apiStrip = apiSpectrumDisplay.newBoundStrip()
@@ -885,9 +910,6 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
     # spectrumDisplay
     display._dimensionTypes = spectrumView.dimensionTypes
     display._isotopeCodes = spectrumView.isotopeCodes
-
-    # call any post initialise routines
-    display.setToolbarButtons()
 
     # initialise the strip axes, using the values from spectrumView
     # this will also update any Strip.planeToolbar widgets and the GL

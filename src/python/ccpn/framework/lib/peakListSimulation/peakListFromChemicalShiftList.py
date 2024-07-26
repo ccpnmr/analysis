@@ -6,8 +6,9 @@ This module defines the creation of a Simulated Spectrum from a ChemicalShift Li
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:26 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__modifiedBy__ = "$modifiedBy: Vicky Higman $"
+__dateModified__ = "$dateModified: 2024-07-04 17:09:52 +0100 (Thu, July 04, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -605,6 +606,28 @@ class SimulatedSpectrum_CANCO(SimulatedSpectrumByExperimentTypeABC):
                             ]
                         ]
 
+class SimulatedSpectrum_CANcoCX(SimulatedSpectrumByExperimentTypeABC):
+
+    experimentType      = 'CANcoCX (relayed)'
+    isotopeCodes        = ['13C', '15N', '13C']
+    axisCodes           = ['C', 'N', 'CA']
+    spectralWidths      = [190, 30, 35]
+    referenceValues     = [190, 190, 75]
+    peakAtomNameMappers = None
+
+    @staticmethod
+    def _createAtomNameMappers():
+        from ccpn.core.lib.AssignmentLib import NEF_ATOM_NAMES
+
+        peakMappers = [[],]
+        for catom in NEF_ATOM_NAMES.get('13C', []):
+            atomNameMappers = [AtomNamesMapper(isotopeCode='13C', axisCode='C', offsetNmrAtomNames={0:catom}),
+                                AtomNamesMapper(isotopeCode='15N', axisCode='N', offsetNmrAtomNames={+1: 'N'}),
+                                AtomNamesMapper(isotopeCode='13C', axisCode='CA', offsetNmrAtomNames={+1: 'CA'})]
+            peakMappers.append(atomNameMappers)
+
+        return(peakMappers)
+
 class SimulatedSpectrum_NCACX(SimulatedSpectrumByExperimentTypeABC):
 
     experimentType      = 'NCACX (relayed)'
@@ -668,6 +691,7 @@ CSL2SPECTRUM_DICT = OrderedDict([
                             (SimulatedSpectrum_NCA.experimentType, SimulatedSpectrum_NCA),
                             (SimulatedSpectrum_NCO.experimentType, SimulatedSpectrum_NCO),
                             (SimulatedSpectrum_CANCO.experimentType, SimulatedSpectrum_CANCO),
+                            (SimulatedSpectrum_CANcoCX.experimentType, SimulatedSpectrum_CANcoCX),
                             (SimulatedSpectrum_NCACX.experimentType, SimulatedSpectrum_NCACX),
                             (SimulatedSpectrum_NCOCX.experimentType, SimulatedSpectrum_NCOCX),
                             ])

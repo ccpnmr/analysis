@@ -5,8 +5,9 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-02-26 15:48:56 +0000 (Mon, February 26, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__dateModified__ = "$dateModified: 2024-07-23 15:05:05 +0100 (Tue, July 23, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -88,8 +89,8 @@ class GLRegion(QtWidgets.QWidget):
     # def _mouseDrag(self, values):
     #     self.valuesChanged.emit(list(values))
 
-    def setVisible(self, bool):
-        self.visible = bool
+    def setVisible(self, value):
+        self.visible = value
 
     @property
     def values(self):
@@ -101,11 +102,8 @@ class GLRegion(QtWidgets.QWidget):
 
         # with notificationBlanking():
         self._values = tuple(values)
-        try:
+        if self._glList:
             self._glList.renderMode = GLRENDERMODE_REBUILD
-        except Exception as es:
-            pass
-
         if self._valuesChangedEnabled:
             self.valuesChanged.emit(list(values))
 
@@ -133,8 +131,8 @@ class GLRegion(QtWidgets.QWidget):
     @axisCode.setter
     def axisCode(self, axisCode):
         self._axisCode = axisCode
-        self._glList.renderMode = GLRENDERMODE_REBUILD
-
+        if self._glList:
+            self._glList.renderMode = GLRENDERMODE_REBUILD
         # emit notifiers to repaint the GL windows
         self.GLSignals.emitPaintEvent()
 
@@ -143,31 +141,27 @@ class GLRegion(QtWidgets.QWidget):
         return self._orientation
 
     @orientation.setter
-    def orientation(self, orientation):
-        self._orientation = orientation
-
-        if orientation == 'h':
+    def orientation(self, value):
+        self._orientation = value
+        if value == 'h':
             self._axisCode = self._parent.axisCodes[1]
-        elif orientation == 'v':
+        elif value == 'v':
             self._axisCode = self._parent.axisCodes[0]
         else:
             if not self._axisCode:
                 axisIndex = None
                 for ps, psCode in enumerate(self._parent.axisCodes[0:2]):
                     if self._parent._preferences.matchAxisCode == 0:  # default - match atom type
-
                         if self._axisCode[0] == psCode[0]:
                             axisIndex = ps
                     elif self._parent._preferences.matchAxisCode == 1:  # match full code
                         if self._axisCode == psCode:
                             axisIndex = ps
-
                 if not axisIndex:
                     getLogger().warning('Axis code %s not found in current strip' % self._axisCode)
 
         if self._glList:
             self._glList.renderMode = GLRENDERMODE_REBUILD
-
         # emit notifiers to repaint the GL windows
         self.GLSignals.emitPaintEvent()
 
@@ -176,10 +170,10 @@ class GLRegion(QtWidgets.QWidget):
         return self._brush
 
     @brush.setter
-    def brush(self, brush):
-        self._brush = brush
-        self._glList.renderMode = GLRENDERMODE_REBUILD
-
+    def brush(self, value):
+        self._brush = value
+        if self._glList:
+            self._glList.renderMode = GLRENDERMODE_REBUILD
         # emit notifiers to repaint the GL windows
         self.GLSignals.emitPaintEvent()
 
@@ -188,13 +182,12 @@ class GLRegion(QtWidgets.QWidget):
         return self._colour
 
     @colour.setter
-    def colour(self, colour):
-        self._colour = colour
-        if colour in REGION_COLOURS.keys():
-            self._brush = REGION_COLOURS[colour]
-
-        self._glList.renderMode = GLRENDERMODE_REBUILD
-
+    def colour(self, value):
+        self._colour = value
+        if value in REGION_COLOURS.keys():
+            self._brush = REGION_COLOURS[value]
+        if self._glList:
+            self._glList.renderMode = GLRENDERMODE_REBUILD
         # emit notifiers to repaint the GL windows
         self.GLSignals.emitPaintEvent()
 
@@ -203,10 +196,10 @@ class GLRegion(QtWidgets.QWidget):
         return self._visible
 
     @visible.setter
-    def visible(self, visible):
-        self._visible = visible
-        self._glList.renderMode = GLRENDERMODE_REBUILD
-
+    def visible(self, value):
+        self._visible = value
+        if self._glList:
+            self._glList.renderMode = GLRENDERMODE_REBUILD
         # emit notifiers to repaint the GL windows
         self.GLSignals.emitPaintEvent()
 
@@ -217,8 +210,8 @@ class GLRegion(QtWidgets.QWidget):
     @lineStyle.setter
     def lineStyle(self, style):
         self._lineStyle = style
-        self._glList.renderMode = GLRENDERMODE_REBUILD
-
+        if self._glList:
+            self._glList.renderMode = GLRENDERMODE_REBUILD
         # emit notifiers to repaint the GL windows
         self.GLSignals.emitPaintEvent()
 
@@ -229,8 +222,8 @@ class GLRegion(QtWidgets.QWidget):
     @lineWidth.setter
     def lineWidth(self, width):
         self._lineWidth = width
-        self._glList.renderMode = GLRENDERMODE_REBUILD
-
+        if self._glList:
+            self._glList.renderMode = GLRENDERMODE_REBUILD
         # emit notifiers to repaint the GL windows
         self.GLSignals.emitPaintEvent()
 
@@ -239,10 +232,10 @@ class GLRegion(QtWidgets.QWidget):
         return self._bounds
 
     @bounds.setter
-    def bounds(self, bounds):
-        self._bounds = bounds
-        self._glList.renderMode = GLRENDERMODE_REBUILD
-
+    def bounds(self, value):
+        self._bounds = value
+        if self._glList:
+            self._glList.renderMode = GLRENDERMODE_REBUILD
         # emit notifiers to repaint the GL windows
         self.GLSignals.emitPaintEvent()
 
@@ -274,9 +267,7 @@ class GLRegion(QtWidgets.QWidget):
                     else:
                         solidColour = list(self._brush)
                     solidColour[3] = 1.0
-
                     intArea.colors = np.array(solidColour * intArea.numVertices, dtype=np.float32)
-
                     intArea.defineVertexColorVBO()
 
 
@@ -304,18 +295,13 @@ class GLInfiniteLine(GLRegion):
     @values.setter
     def values(self, value):
         self._values = value
-        try:
+        if self._glList:
             self._glList.renderMode = GLRENDERMODE_REBUILD
-        except Exception as es:
-            pass
-
         if self._valuesChangedEnabled:
             self.valuesChanged.emit(value)
-
         # change the limits in the integral object
         if self._object and not self._object.isDeleted:
             self._object.limits = [(value, value)]
-
         # emit notifiers to repaint the GL windows
         self.GLSignals.emitPaintEvent()
 

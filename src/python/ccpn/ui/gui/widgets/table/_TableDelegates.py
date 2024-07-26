@@ -5,8 +5,9 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:28 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-07-24 18:04:27 +0100 (Wed, July 24, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,7 +33,7 @@ from functools import partial
 from PyQt5 import QtWidgets, QtCore, QtGui
 from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.table._TableCommon import BORDER_ROLE, EDIT_ROLE
+from ccpn.ui.gui.widgets.table._TableCommon import BORDER_ROLE, EDIT_ROLE, VALUE_ROLE
 from ccpn.util.Logging import getLogger
 
 
@@ -212,6 +213,7 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
         super().__init__(parent)
 
         self._parent = parent
+        self.customWidget = None
 
         # set the colours
         self._focusPen = QtGui.QPen(QtGui.QColor(getColours()[BORDERFOCUS]))
@@ -317,12 +319,107 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
 
         painter.restore()
 
-    def updateEditorGeometry(self, widget, itemStyle, index):
-        """Fit editor geometry to the index
+    def createEditor(self, parentWidget, itemStyle, index):
+        """Returns the edit widget.
+
+        :param parentWidget: the table widget.
+        :param itemStyle: style to apply to the editor.
+        :param index: QModelIndex of the cell in the table.
+        :return: editor widget defined by the editClass.
         """
+        if isinstance(index.data(VALUE_ROLE), bool):
+            if self._parent.model()._enableCheckBoxes:
+                # disable the double-click if checkboxes are visible
+                return None
+            widget = _SmallPulldown(None, texts=['True', 'False'])
+            widget.setParent(parentWidget)
+            widget.activated.connect(partial(self._pulldownActivated, widget))
+            widget.closeOnLineEditClick = False
+            self.customWidget = widget
+            return widget
+
+        self.customWidget = None
+        return super().createEditor(parentWidget, itemStyle, index)
+
+    def setEditorData(self, widget, index) -> None:
+        """Populate the editor widget when the cell is edited.
+
+        :param widget: the editor widget.
+        :param index: QModelIndex of the cell in the table.
+        :return:
+        """
+        if not self.customWidget:
+            return super().setEditorData(widget, index)
+
+        # assumes only boolean as custom for the minute
+        mapping = {True: 'True', False: 'False'}
+        try:
+            model = index.model()
+            value = model.data(index, EDIT_ROLE)
+        except Exception as es:
+            getLogger().debug(f'Error handling cell editing: {index.row()} {index.column()} - {es}  {self._parent.model()._sortIndex}')
+        else:
+            if hasattr(widget, 'selectValue'):
+                widget.selectValue(mapping[value])
+            else:
+                raise RuntimeError(f'Widget {widget} does not expose a set method; required for table editing')
+
+    def setModelData(self, widget, mode, index):
+        """Set the object to the new value.
+
+        :param widget: the editor widget.
+        :param mode: editing mode.
+        :param index: QModelIndex of the cell in the table.
+        """
+        if not self.customWidget:
+            return super().setModelData(widget, mode, index)
+
+        mapping = {'True': True, 'False': False}
+        if hasattr(widget, 'get'):
+            value = widget.get()
+        else:
+            raise RuntimeError(f'Widget {widget} does not expose a get method; required for table editing')
+        try:
+            model = index.model()
+            model.setData(index, mapping[value])
+        except Exception as es:
+            getLogger().debug(f'Error handling cell editing: {index.row()} {index.column()} - {es}  {self._parent.model()._sortIndex}  {value}')
+
+    def updateEditorGeometry(self, widget, itemStyle, index):
+        """Ensures that the editor is displayed correctly.
+
+        :param widget: the editor widget.
+        :param itemStyle: style to apply to the editor.
+        :param index: QModelIndex of the cell in the table.
+        :return:
+        """
+        if not self.customWidget:
+            cellRect = itemStyle.rect
+            widget.move(cellRect.topLeft())
+            widget.setGeometry(cellRect)
+            return
+
         cellRect = itemStyle.rect
-        widget.move(cellRect.topLeft())
-        widget.setGeometry(cellRect)
+        pos = widget.mapToGlobal(cellRect.topLeft())
+        x, y = pos.x(), pos.y()
+        hint = widget.sizeHint()
+        width = max(hint.width(), cellRect.width())
+        height = max(hint.height(), cellRect.height())
+        # force the pulldownList to be a popup - will always close when clicking outside
+        widget.setParent(self._parent, QtCore.Qt.Popup)
+        widget.setGeometry(x, y, width, height)
+        # QT delay to popup ensures that focus is correct when opening
+        QtCore.QTimer.singleShot(0, widget.showPopup)
+
+    @staticmethod
+    def _pulldownActivated(widget):
+        """Close the editor widget.
+
+        :param widget: editor widget.
+        :return:
+        """
+        # stop the closed-pulldownList from staying visible after selection
+        widget.close()
 
 
 #=========================================================================================
@@ -447,7 +544,7 @@ class _SimplePulldownTableDelegate(QtWidgets.QStyledItemDelegate):
                 getLogger().debug(f'Error handling cell editing: {index.row()} {index.column()} - {es}  {self._parent.model()._sortIndex}  {value}')
 
         else:
-            super(_SimplePulldownTableDelegate, self).setModelData(widget, mode, index)
+            super().setModelData(widget, mode, index)
 
     def updateEditorGeometry(self, widget, itemStyle, index):
         """Ensures that the editor is displayed correctly.
@@ -473,6 +570,124 @@ class _SimplePulldownTableDelegate(QtWidgets.QStyledItemDelegate):
 
         else:
             super().updateEditorGeometry(widget, itemStyle, index)
+
+    @staticmethod
+    def _pulldownActivated(widget):
+        """Close the editor widget.
+
+        :param widget: editor widget.
+        :return:
+        """
+        # stop the closed-pulldownList from staying visible after selection
+        widget.close()
+
+
+#=========================================================================================
+# Table delegate to handle editing simple pulldown for True/False
+#=========================================================================================
+
+class _BooleanDelegate(QtWidgets.QStyledItemDelegate):
+    """Handle the setting of data when editing the table
+    """
+    modelDataChanged = QtCore.pyqtSignal()
+
+    def __init__(self, parent):
+        """Initialise the delegate.
+
+        :param parent: link to the handling table.
+        """
+        super().__init__(parent)
+        self.customWidget = None
+        self._parent = parent
+
+    def createEditor(self, parentWidget, itemStyle, index):
+        """Returns the edit widget.
+
+        :param parentWidget: the table widget.
+        :param itemStyle: style to apply to the editor.
+        :param index: QModelIndex of the cell in the table.
+        :return: editor widget defined by the editClass.
+        """
+        if isinstance(index.data(VALUE_ROLE), bool):
+            widget = _SmallPulldown(None, texts=['True', 'False'])
+            widget.setParent(parentWidget)
+            widget.activated.connect(partial(self._pulldownActivated, widget))
+            widget.closeOnLineEditClick = False
+            self.customWidget = widget
+            return widget
+
+        self.customWidget = None
+        return super().createEditor(parentWidget, itemStyle, index)
+
+    def setEditorData(self, widget, index) -> None:
+        """Populate the editor widget when the cell is edited.
+
+        :param widget: the editor widget.
+        :param index: QModelIndex of the cell in the table.
+        :return:
+        """
+        if self.customWidget:
+            model = index.model()
+            value = model.data(index, EDIT_ROLE)
+            if not isinstance(value, (list, tuple)):
+                value = (value,)
+            if hasattr(widget, 'selectValue'):
+                widget.selectValue(*value)
+            else:
+                raise RuntimeError(f'Widget {widget} does not expose a set method; required for table editing')
+        else:
+            super().setEditorData(widget, index)
+
+    def setModelData(self, widget, mode, index):
+        """Set the object to the new value.
+
+        :param widget: the editor widget.
+        :param mode: editing mode.
+        :param index: QModelIndex of the cell in the table.
+        """
+        mapping = {'True': True, 'False': False}
+
+        if self.customWidget:
+            if hasattr(widget, 'get'):
+                value = widget.get()
+            else:
+                raise RuntimeError(f'Widget {widget} does not expose a get method; required for table editing')
+            try:
+                model = index.model()
+                model.setData(index, mapping[value])
+            except Exception as es:
+                getLogger().debug(f'Error handling cell editing: {index.row()} {index.column()} - {es}  {self._parent.model()._sortIndex}  {value}')
+        else:
+            super().setModelData(widget, mode, index)
+
+    def updateEditorGeometry(self, widget, itemStyle, index):
+        """Ensures that the editor is displayed correctly.
+
+        :param widget: the editor widget.
+        :param itemStyle: style to apply to the editor.
+        :param index: QModelIndex of the cell in the table.
+        :return:
+        """
+        if self.customWidget:
+            cellRect = itemStyle.rect
+            pos = widget.mapToGlobal(cellRect.topLeft())
+            x, y = pos.x(), pos.y()
+            hint = widget.sizeHint()
+            width = max(hint.width(), cellRect.width())
+            height = max(hint.height(), cellRect.height())
+
+            # force the pulldownList to be a popup - will always close when clicking outside
+            widget.setParent(self._parent, QtCore.Qt.Popup)
+            widget.setGeometry(x, y, width, height)
+            # QT delay to popup ensures that focus is correct when opening
+            QtCore.QTimer.singleShot(0, widget.showPopup)
+
+        else:
+            cellRect = itemStyle.rect
+            widget.move(cellRect.topLeft())
+            widget.setGeometry(cellRect)
+
+            # super().updateEditorGeometry(widget, itemStyle, index)
 
     @staticmethod
     def _pulldownActivated(widget):

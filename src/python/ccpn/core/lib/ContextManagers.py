@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-01 14:34:55 +0100 (Mon, July 01, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-07-04 18:51:59 +0100 (Thu, July 04, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1149,7 +1149,7 @@ def renameObjectNoBlanking(self):
 def progressHandler(parent=None, *, title: str = 'Progress',
                     text: str = 'Busy...', cancelButtonText: str = 'Cancel',
                     minimum: int = 0, maximum: int = 100, steps: int = 100,
-                    delay: int = 1000, closeDelay: int = 250, autoClose: bool = True,
+                    delay: int = 1000, closeDelay: int = 250,
                     hideBar: bool = False, hideCancelButton: bool = False,
                     raiseErrors: bool = True):
     """A context manager to wrap a method in a progress dialog defined by the current gui state.
@@ -1157,13 +1157,13 @@ def progressHandler(parent=None, *, title: str = 'Progress',
     from ccpn.framework.Application import getApplication
 
     application = getApplication()
-    handler = application.ui.getProgressHandler()
     try:
+        handler = application.ui.getProgressHandler()
         # get the dialog handler from the gui state - use subclass
         progress = handler(parent,
                            title=title, text=text, cancelButtonText=cancelButtonText,
-                           steps=steps, minimum=minimum, maximum=maximum,
-                           delay=delay, closeDelay=closeDelay, autoClose=autoClose,
+                           minimum=minimum, maximum=maximum, steps=steps,
+                           delay=delay, closeDelay=closeDelay,
                            hideBar=hideBar, hideCancelButton=hideCancelButton,
                            )
         # need this to force the gui to catch up and display the busy dialog
@@ -1173,7 +1173,7 @@ def progressHandler(parent=None, *, title: str = 'Progress',
     try:
         # transfer control to the calling function
         yield progress
-    except progress.ProgressCancelled:
+    except StopIteration:
         # handle pressing the cancel button, or calling progress.cancel()
         getLogger().debug('progressHandler: cancelled')
     except Exception as es:
@@ -1186,7 +1186,7 @@ def progressHandler(parent=None, *, title: str = 'Progress',
         # set counter to 100%
         progress.finalise()
     finally:
-        # set closing conditions here, or call progress.close() if autoClose not set
+        # set closing conditions here, or call progress.close()
         progress.waitForEvents()
 
 
@@ -1194,22 +1194,19 @@ def progressHandler(parent=None, *, title: str = 'Progress',
 def busyHandler(parent=None, *, title: str = 'Busy',
                 text: str = 'Busy...', cancelButtonText: str = 'Cancel',
                 minimum: int = 0, maximum: int = 100, steps: int = 100,
-                delay: int = 0, closeDelay: int = 500, autoClose: bool = False,
+                delay: int = 500, closeDelay: int = 250,
                 hideBar: bool = True, hideCancelButton: bool = True,
                 raiseErrors: bool = True):
     """A context manager to wrap a method in a busy dialog defined by the current gui state.
     """
-    from ccpn.framework.Application import getApplication
     from ccpn.ui.gui.widgets.ProgressWidget import BusyDialog
 
-    # application = getApplication()
-    # mainWindow = application.ui.mainWindow
     try:
         # get the dialog handler from the gui state - use subclass
         progress = BusyDialog(parent,
                               title=title, text=text, cancelButtonText=cancelButtonText,
-                              steps=steps, minimum=minimum, maximum=maximum,
-                              delay=delay, closeDelay=closeDelay, autoClose=autoClose,
+                              minimum=minimum, maximum=maximum, steps=steps,
+                              delay=delay, closeDelay=closeDelay,
                               hideBar=hideBar, hideCancelButton=hideCancelButton,
                               )
         # need this to force the gui to catch up and display the busy dialog
@@ -1219,7 +1216,7 @@ def busyHandler(parent=None, *, title: str = 'Busy',
     try:
         # transfer control to the calling function
         yield progress
-    except progress.ProgressCancelled:
+    except StopIteration:
         # handle pressing the cancel button, or calling progress.cancel()
         getLogger().debug('busyHandler: cancelled')
     except Exception as es:
@@ -1232,7 +1229,7 @@ def busyHandler(parent=None, *, title: str = 'Busy',
         # set counter to 100%
         progress.finalise()
     finally:
-        # set closing conditions here, or call progress.close() if autoClose not set
+        # set closing conditions here, or call progress.close()
         progress.waitForEvents()
 
 

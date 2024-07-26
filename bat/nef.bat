@@ -19,6 +19,8 @@ call "%CCPNMR_TOP_DIR%\bat\paths"
 for /f %%a in ('%CONDA%\python.exe -c "import sys; print(str(sys.version_info[0])+'.'+str(sys.version_info[1]))"') do set "MAJMINVER=%%a"
 set MODULE=Lib\site-packages\nef_pipelines\main.py
 set ENTRY_MODULE=%CONDA%\%MODULE%
+set NO_PROCESSOR_INFO=1
+set TQDM_DISABLE=1
 
 "%CONDA%\python.exe" -W ignore "%ENTRY_MODULE%" %*
 endlocal

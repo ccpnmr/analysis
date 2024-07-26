@@ -5,8 +5,9 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-09 17:09:47 +0100 (Thu, May 09, 2024) $"
+__dateModified__ = "$dateModified: 2024-07-24 18:04:27 +0100 (Wed, July 24, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -155,14 +156,22 @@ def main():
     import numpy as np
     import random
     from PyQt5 import QtGui, QtWidgets
-
+    from ccpn.ui.gui.widgets.table._TableCommon import CHECKABLE, ENABLED, SELECTABLE
     from ccpn.ui.gui.widgets.Application import TestApplication
+    from ccpn.ui.gui.Gui import _MyAppProxyStyle
 
-    data = [[1, 150, 300, 900, float('nan'), 80.1, 'delta'],
-            [2, 200, 500, 300, float('nan'), 34.2, ['help', 'more', 'chips']],
-            [3, 100, np.nan, 1000, None, -float('Inf'), 'charlie'],
-            [4, 999, np.inf, 500, None, float('Inf'), 'echo'],
-            [5, 300, -np.inf, 450, 700, 150.3, 'bravo']
+
+    aminoAcids = ['alanine', 'arginine',
+                  'asparagine', 'aspartic-acid', 'ambiguous asparagine/aspartic-acid',
+                  'cysteine', 'glutamine', 'glutamic-acid', 'glycine',
+                  'ambiguous glutamine/glutamic acid', 'histidine',
+                  'isoleucine', 'leucine', 'lysine', 'methionine', 'phenylalanine',
+                  'proline', 'serine', 'threonine', 'tryptophan', 'tyrosine', 'valine']
+    data = [[aminoAcids[0], 150, 300, 900, float('nan'), 80.1, 'delta'],
+            [aminoAcids[1], 200, 500, 300, float('nan'), 34.2, ['help', 'more', 'chips']],
+            [aminoAcids[2], 100, np.nan, 1000, True, -float('Inf'), 'charlie'],
+            [aminoAcids[3], 999, np.inf, 500, False, float('Inf'), 'echo'],
+            [aminoAcids[4], 300, -np.inf, 450, 700, 150.3, 'bravo']
             ]
 
     # multiIndex columnHeaders
@@ -172,7 +181,7 @@ def main():
     for ii in range(MAX_ROWS):
         chrs = ''.join(chr(random.randint(65, 68)) for _ in range(5))
         rowIndex.append(chrs[:3])
-        data.append([6 + ii,
+        data.append([aminoAcids[5 + ii],
                      300 + random.randint(1, MAX_ROWS),
                      random.random() * 1e6,
                      450 + random.randint(-100, 400),
@@ -181,9 +190,14 @@ def main():
                      f'bravo{chrs[3:]}' if ii % 2 else f'delta{chrs[3:]}'])
 
     df = pd.DataFrame(data, columns=cols, index=rowIndex)
-
     # show the example table
     app = TestApplication()
+
+    # patch for icon sizes in menus, etc.
+    styles = QtWidgets.QStyleFactory()
+    myStyle = _MyAppProxyStyle(styles.create('fusion'))
+    app.setStyle(myStyle)
+
     win = QtWidgets.QMainWindow()
     frame = QtWidgets.QFrame()
     layout = QtWidgets.QGridLayout()
@@ -192,6 +206,11 @@ def main():
     table = TableABC(None, df=df, focusBorderWidth=1, cellPadding=11,
                      showGrid=True, gridColour='white',
                      setWidthToColumns=False, setHeightToRows=False, _resize=True)
+
+    # these two need to be done together - HACK for the minute, need to add a method
+    table.model()._enableCheckBoxes = True  # make boolean appear as checkboxes (disables double-click on boolean)
+    table.model().defaultFlags = ENABLED | SELECTABLE | CHECKABLE  # checkboxes are clickable
+    table.setEditable(False)  # double-clicking disabled (doesn't affect checkboxes)
 
     for row in range(table.rowCount()):
         for col in range(table.columnCount()):

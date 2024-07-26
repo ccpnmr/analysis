@@ -1,16 +1,18 @@
 """
-Module Documentation here
+Routines to align text-boxes.
+Moves positions to give non-overlapping boxes/rectangles/ellipses and connecting arrows.
 
 Modified again by Ed Brooksbank
-Modified from the original by Christoffer Kjellson.
+Expanded from the original by Christoffer Kjellson.
 Original available from github; https://github.com/ckjellson/textalloc
 """
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -19,13 +21,14 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-01 19:39:57 +0100 (Thu, June 01, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-07-04 18:52:00 +0100 (Thu, July 04, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: Christoffer Kjellson $"
+__author__ = "$Author: Ed Brooksbank $"
 __date__ = "$Date: 2022 $"
+
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -97,38 +100,35 @@ def get_non_overlapping_boxes(
     non_overlapping_boxes = []
     overlapping_boxes_inds = []
 
-    with progressHandler(text='Auto-arranging...', maximum=len(original_boxes), autoClose=True,
+    with progressHandler(text='Auto-arranging...', maximum=len(original_boxes),
                          raiseErrors=False) as progress:
 
         for ii, box in enumerate(original_boxes):
-            progress.checkCancelled()
+            progress.checkCancel()
             progress.setValue(ii)
 
             x_original, y_original, w, h, s = box
 
             # create a set of candidate-boxes centred on the x_original/y_original point
-            candidates = generate_candidates(
-                    w,
-                    h,
-                    x_original,
-                    y_original,
-                    minx_distance,
-                    miny_distance,
-                    maxx_distance,
-                    maxy_distance,
-                    )
-
+            candidates = generate_candidates(w,
+                                             h,
+                                             x_original,
+                                             y_original,
+                                             minx_distance,
+                                             miny_distance,
+                                             maxx_distance,
+                                             maxy_distance,
+                                             )
             # create a set of candidate lines from the candidate-boxes to the x_original/y_original point
-            candidates_lines = generate_candidate_lines(
-                    w,
-                    h,
-                    x_original,
-                    y_original,
-                    minx_distance,
-                    miny_distance,
-                    maxx_distance,
-                    maxy_distance,
-                    )
+            candidates_lines = generate_candidate_lines(w,
+                                                        h,
+                                                        x_original,
+                                                        y_original,
+                                                        minx_distance,
+                                                        miny_distance,
+                                                        maxx_distance,
+                                                        maxy_distance,
+                                                        )
 
             # Check for overlapping with - scatter-points
             if scatter_xy is None:
@@ -200,10 +200,13 @@ def get_non_overlapping_boxes(
                             )
                     )[0]
             if len(ok_candidates) > 0:  # must be more than 10% available?
-                box_arr, box_lines_xyxy = get_best_candidate('full', box_arr, candidates, h, ii, include_new_lines, box_lines_xyxy,
-                                                             non_overlapping_boxes, ok_candidates, s, verbose, w, x_original, y_original)
+                box_arr, box_lines_xyxy = get_best_candidate('full', box_arr, candidates, h, ii, include_new_lines,
+                                                             box_lines_xyxy,
+                                                             non_overlapping_boxes, ok_candidates, s, verbose, w,
+                                                             x_original, y_original)
                 if verbose:
-                    make_a_plot(box_arr, box_lines_xyxy, boxes_xyxy, candidates_lines, ok_candidates, True, True, True, True)
+                    make_a_plot(box_arr, box_lines_xyxy, boxes_xyxy, candidates_lines, ok_candidates,
+                                True, True, True, True)
                 continue
 
             # reduce the conditions of candidacy
@@ -218,11 +221,14 @@ def get_non_overlapping_boxes(
                             )
                     )[0]
             if len(ok_candidates) > 0:
-                box_arr, box_lines_xyxy = get_best_candidate('non_lb', box_arr, candidates, h, ii, include_new_lines, box_lines_xyxy,
-                                                             non_overlapping_boxes, ok_candidates, s, verbose, w, x_original, y_original)
+                box_arr, box_lines_xyxy = get_best_candidate('non_lb', box_arr, candidates, h, ii, include_new_lines,
+                                                             box_lines_xyxy,
+                                                             non_overlapping_boxes, ok_candidates, s, verbose, w,
+                                                             x_original, y_original)
 
                 if verbose:
-                    make_a_plot(box_arr, box_lines_xyxy, boxes_xyxy, candidates_lines, ok_candidates, True, True, True, True)
+                    make_a_plot(box_arr, box_lines_xyxy, boxes_xyxy, candidates_lines, ok_candidates,
+                                True, True, True, True)
                 continue
 
             # reduce the conditions of candidacy further
@@ -235,19 +241,25 @@ def get_non_overlapping_boxes(
                             )
                     )[0]
             if len(ok_candidates) > 0:
-                box_arr, box_lines_xyxy = get_best_candidate('non_ll-non_lb', box_arr, candidates, h, ii, include_new_lines, box_lines_xyxy,
-                                                             non_overlapping_boxes, ok_candidates, s, verbose, w, x_original, y_original)
+                box_arr, box_lines_xyxy = get_best_candidate('non_ll-non_lb', box_arr, candidates, h, ii,
+                                                             include_new_lines, box_lines_xyxy,
+                                                             non_overlapping_boxes, ok_candidates, s, verbose, w,
+                                                             x_original, y_original)
                 if verbose:
-                    make_a_plot(box_arr, box_lines_xyxy, boxes_xyxy, candidates_lines, ok_candidates, True, True, True, True)
+                    make_a_plot(box_arr, box_lines_xyxy, boxes_xyxy, candidates_lines, ok_candidates,
+                                True, True, True, True)
                 continue
 
             if draw_all:
                 ok_candidates = np.where(np.bitwise_and(non_orec, inside))[0]
                 if len(ok_candidates) > 0:
-                    box_arr, box_lines_xyxy = get_best_candidate('last', box_arr, candidates, h, ii, include_new_lines, box_lines_xyxy,
-                                                                 non_overlapping_boxes, ok_candidates, s, verbose, w, x_original, y_original)
+                    box_arr, box_lines_xyxy = get_best_candidate('last', box_arr, candidates, h, ii, include_new_lines,
+                                                                 box_lines_xyxy,
+                                                                 non_overlapping_boxes, ok_candidates, s, verbose, w,
+                                                                 x_original, y_original)
                     if verbose:
-                        make_a_plot(box_arr, box_lines_xyxy, boxes_xyxy, candidates_lines, ok_candidates, True, True, True, True)
+                        make_a_plot(box_arr, box_lines_xyxy, boxes_xyxy, candidates_lines, ok_candidates,
+                                    True, True, True, True)
                     continue
 
             # no free-space can be found, addd to the overlapping list
@@ -283,7 +295,8 @@ def make_a_plot(box_arr, box_lines_xyxy, boxes_xyxy, candidates_lines, ok_candid
     if boxes:
         for ii in range(boxes_xyxy.shape[0]):
             row = boxes_xyxy[ii, :]
-            axS.add_patch(Rectangle(row[:2], row[2] - row[0], row[3] - row[1], linewidth=1, fill=False, color='lightgrey'))
+            axS.add_patch(
+                    Rectangle(row[:2], row[2] - row[0], row[3] - row[1], linewidth=1, fill=False, color='lightgrey'))
 
     if found:
         for ii in range(box_arr.shape[0]):
@@ -352,6 +365,7 @@ def get_best_candidate(code, box_arr, candidates, h, ii, include_new_lines, box_
             # only keep the last few lines to check
             box_lines_xyxy = box_lines_xyxy[1:, :]
         if verbose and code != 'full':
-            print(f'--> adding line ({code})  {ii}: {s}   {len(box_lines_xyxy)}: {new_line}     {offset.shape[0]}    {ok_candidates}')
+            print(f'--> adding line ({code})  {ii}: {s}   {len(box_lines_xyxy)}: '
+                  f'{new_line}     {offset.shape[0]}    {ok_candidates}')
 
     return box_arr, box_lines_xyxy

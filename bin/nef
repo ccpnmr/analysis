@@ -20,6 +20,7 @@ done
 CCPNMR_TOP_DIR="${_pathlink}"
 export CCPNMR_TOP_DIR
 export NO_PROCESSOR_INFO=1
+export TQDM_DISABLE=1
 
 source "${CCPNMR_TOP_DIR}"/bin/paths.sh
 CONDA_PYTHON3="${CONDA}"/bin/python3

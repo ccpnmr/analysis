@@ -5,8 +5,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-21 16:17:11 +0000 (Thu, March 21, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-07-03 17:29:33 +0100 (Wed, July 03, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -124,13 +125,13 @@ class MultipletListView(PMIListViewABC):
     #=========================================================================================
 
     @classmethod
-    def _getAllWrappedData(cls, parent: SpectrumView) -> typing.Optional[list]:
-        """get wrappedData (ccpnmr.gui.Task.MultipletListView) in serial number order"""
+    def _getAllWrappedData(cls, parent: SpectrumView) -> list:
+        """get wrappedData (ccpnmr.gui.Task.MultipletListView) in serial number order.
+        """
         if hasattr(parent._wrappedData, 'stripMultipletListViews'):
             return sorted(parent._wrappedData.stripMultipletListViews,
                           key=operator.attrgetter('multipletListView.multipletListSerial'))
-        else:
-            return None
+        return []
 
     def _propagateAction(self, data):
         from ccpn.core.lib.Notifiers import Notifier

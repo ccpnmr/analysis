@@ -19,9 +19,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-28 21:21:59 +0100 (Fri, June 28, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-07-25 10:11:17 +0100 (Thu, July 25, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -33,7 +33,7 @@ __date__ = "$Date: 2021-06-30 10:28:41 +0000 (Fri, June 30, 2021) $"
 
 from ccpn.util.Logging import getLogger
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import (
-    DataLoaderABC, checkPathForDataLoader,
+    DataLoaderABC, _checkPathForDataLoader, NotFoundDataLoader,
     getDataLoaders, NO_SUFFIX, ANY_SUFFIX)
 from ccpn.util.traits.CcpNmrTraits import Bool, List, Int
 
@@ -54,7 +54,7 @@ class DirectoryDataLoader(DataLoaderABC):
     recursive = Bool(default_value=False).tag(info='Flag to define recursive behavior')
     dataLoaders = List(default_value=[]).tag(
             info='List with dataLoader instances for the files of the directory "path"')
-    count = Int(default_value=0).tag(info='Number of dataLoaders including the recursive ones')
+    count = Int(default_value=0).tag(info='Number of valid dataLoaders including the recursive ones')
     depth = Int(default_value=0).tag(info='Number of subdirectories to traverse from the root')
 
     def __init__(self, path, recursive: bool = True, formatFilter: (tuple, list) = None, depth=0):
@@ -81,49 +81,56 @@ class DirectoryDataLoader(DataLoaderABC):
         _filesToExamine = self.path.listdir(excludeDotFiles=True)
         _filesToExamine.sort()
         _nFilesToExamine = len(_filesToExamine)
+
         # for f in _filesToExamine:
         while len(_filesToExamine) > 0:
-            f = _filesToExamine.pop(0)
+            _path = _filesToExamine.pop(0)
 
             dataLoader = None
-            if f.stem.startswith("."):  # Exclude dotted-files
+            if _path.stem.startswith("."):  # Exclude dotted-files
                 pass
-            elif (f.is_file() and
-                  (dataLoader := checkPathForDataLoader(f, formatFilter=formatFilter)) and
-                  dataLoader.isValid):
-                # check if we can find a data loader for f, using the filter which excludes
-                # a directory data loader
-                self.dataLoaders.append(dataLoader)
-                self.count += 1
-                # remove all files already handled by the dataLoader; this prevents types that
-                # have two files; e.g. a binary data file and a parameter file, to be added twice
-                for _handledFile in dataLoader.getAllFilePaths():
-                    if _handledFile in _filesToExamine:
-                        _filesToExamine.remove(_handledFile)
 
-            # get directories if recursive is True
-            elif f.is_dir():
+            elif _path.is_file():
+                # check if we can find a data loader for _path, using  formatFilter
+                # _checkPathForDataLoader always returns a dataLoader, potentially NotFoundDataLoader
+                dataLoader = _checkPathForDataLoader(path=_path, formatFilter=formatFilter)[-1]
+                if dataLoader.isValid or dataLoader.shouldBeValid:
+                    self.dataLoaders.append(dataLoader)
+                    if dataLoader.isValid:
+                        self.count += 1
+                    # remove all files already handled by the dataLoader; this prevents types that
+                    # have two files; e.g. a binary data file and a parameter file, to be added twice
+                    for _handledFile in dataLoader.getAllFilePaths():
+                        if _handledFile in _filesToExamine:
+                            _filesToExamine.remove(_handledFile)
+
+            elif _path.is_dir():
                 # This situation is harder, as this could be a directory as a Spectrum (e.g Bruker)
                 # which should be included, or yet another directory which inclusion depends on the
                 # recursion flag.
                 _filters = list(formatFilter) if formatFilter is not None else \
-                    list(getDataLoaders().keys())
-                # Find dataLoader for f if it was anything but a general directory
-                if self.dataFormat in _filters:
-                    _filters.remove(self.dataFormat)
-                if (dataLoader := checkPathForDataLoader(f, formatFilter=_filters)) and dataLoader.isValid:
+                           list(getDataLoaders().keys())
+                # Find dataLoader for _path if it was anything but a general directory
+                if DirectoryDataLoader.dataFormat in _filters:
+                    _filters.remove(DirectoryDataLoader.dataFormat)
+
+                # _checkPathForDataLoader always returns a dataLoader, potentially NotFoundDataLoader
+                dataLoader = _checkPathForDataLoader(path=_path, formatFilter=_filters)[-1]
+                if dataLoader.isValid or dataLoader.shouldBeValid:
                     self.dataLoaders.append(dataLoader)
-                    self.count += 1
-                # Haven't found a dataLoader yet; add f using DirectoryLoader if recursive is True
-                if dataLoader is None and recursive:
-                    if (dataLoader := DirectoryDataLoader(path=f,
+                    if dataLoader.isValid:
+                        self.count += 1
+
+                # Haven't found a dataLoader yet; add _path using DirectoryLoader if recursive is True
+                if dataLoader.dataFormat == NotFoundDataLoader.dataFormat and recursive:
+                    if (_dirLoader := DirectoryDataLoader(path=_path,
                                                           recursive=recursive,
                                                           formatFilter=_filters,
                                                           depth=self.depth + 1)) and \
-                            dataLoader.isValid:
-                        # Loadable files were found
-                        self.dataLoaders.append(dataLoader)
-                        self.count += len(dataLoader)
+                            _dirLoader.isValid:
+                        # add dataLoaders
+                        self.dataLoaders.extend(_dirLoader.dataLoaders)
+                        self.count += _dirLoader.count
 
         getLogger().debug2(f'Directory "{self.path}": {self.count} loadable items out of {_nFilesToExamine}')
 
@@ -145,7 +152,9 @@ class DirectoryDataLoader(DataLoaderABC):
         self.errorString = 'Checking validity'
 
         if self.count == 0:
-            self.errorString = f'{self.path}: No recognised files found'
+            _shouldBeValid = len([dl for dl in self.dataLoaders if dl.shouldBeValid])
+            _text = f'; \nhowever {_shouldBeValid} should be valid but encountered errors' if _shouldBeValid>0 else ''
+            self.errorString = f'{self.path}: No valid files found {_text}'
             return False
 
         self.isValid = True
@@ -158,10 +167,8 @@ class DirectoryDataLoader(DataLoaderABC):
         """
         result = []
         for dataLoader in self.dataLoaders:
-            if (objs := dataLoader.load()) is not None:  # This will automatically recurse
+            if dataLoader.isValid and (objs := dataLoader.load()) is not None:
                 result.extend(objs)
-            # objs = dataLoader.load()  # This will automatically recurse
-            # result.extend(objs)
         return result
 
     def __len__(self):

@@ -57,8 +57,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-21 19:47:31 +0100 (Fri, June 21, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-07-24 18:05:24 +0100 (Wed, July 24, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -157,6 +157,8 @@ AXES_MARKER_MIN_PIXEL = 10
 class CcpnGLWidget(QOpenGLWidget):
     """Widget to handle all visible spectra/peaks/integrals/multiplets
     """
+    painted = QtCore.pyqtSignal(object)
+
     AXIS_MARGINRIGHT = 50
     AXIS_MARGINBOTTOM = 25
     AXIS_LINE = 7
@@ -787,13 +789,11 @@ class CcpnGLWidget(QOpenGLWidget):
         self.pixelY = (self.axisT - self.axisB) / vpheight
         self.deltaX = 1.0 / vpwidth
         self.deltaY = 1.0 / vpheight
-        self.strip.pixelSizeChanged.emit((self.pixelX, self.pixelY))
-
         self.symbolX = abs(self._symbolSize * self.pixelX)
         self.symbolY = abs(self._symbolSize * self.pixelY)
+        self.strip.pixelSizeChanged.emit(self.strip, (self.pixelX, self.pixelY))
 
         shader.setMVMatrixToIdentity()
-
         # map mouse coordinates to world coordinates - only needs to change on resize, move soon
         self._aMatrix = shader.getViewportMatrix(self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
 
@@ -3289,6 +3289,9 @@ class CcpnGLWidget(QOpenGLWidget):
             self._updateBackgroundColour = False
             self.setBackgroundColour(self.background, silent=True)
 
+        # MUST be done in paint if a painter is used later
+        GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+
         GL.glClear(GL.GL_COLOR_BUFFER_BIT)
         GL.glEnable(GL.GL_MULTISAMPLE)
 
@@ -3396,6 +3399,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.disableTextClientState()
         self.disableTexture()
+
+        # emit signal to allow user-painting to the strip - experimental
+        self.painted.emit(self.strip)
 
     def enableTexture(self):
         GL.glEnable(GL.GL_BLEND)

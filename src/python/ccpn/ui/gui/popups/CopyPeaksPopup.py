@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-27 10:35:17 +0100 (Thu, June 27, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-07-23 18:24:03 +0100 (Tue, July 23, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,16 +29,16 @@ from functools import partial
 from ccpn.util.Logging import getLogger
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.lib.Notifiers import Notifier, _removeDuplicatedNotifiers
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking, progressHandler
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.ui.gui.widgets.ProgressWidget import ProgressDialog
 from ccpn.util.UpdateScheduler import UpdateScheduler
 from ccpn.util.UpdateQueue import UpdateQueue
+
 
 ALLPEAKS = 'From All Available Peaks In The Project'
 ALLPEAKLISTS = 'From All Available Peaklists In The Project'
@@ -46,6 +46,8 @@ FROMSPECTRUM = 'From An Individual Spectrum'
 SELECTED = 'From Selected Peaks'
 VISIBLESPECTRA = 'From Visible Spectra'
 SELECTANOPTION = '< Select an option to start >'
+
+
 class CopyPeaks(CcpnDialog):
 
     def __init__(self, parent=None, mainWindow=None, title='Copy Peaks to PeakLists',
@@ -79,10 +81,12 @@ class CopyPeaks(CcpnDialog):
         self.spectraLabel2 = Label(self, 'Filter Destination PeakLists', grid=(row, 1), hAlign='l')
         row += 1
         self.selectFromPullDownInitialText = [SELECTED, ALLPEAKS, FROMSPECTRUM]
-        self.selectToPullDownInitialText = [VISIBLESPECTRA, ALLPEAKLISTS,  FROMSPECTRUM]
+        self.selectToPullDownInitialText = [VISIBLESPECTRA, ALLPEAKLISTS, FROMSPECTRUM]
 
-        self.selectFromPullDown = PulldownList(self, texts=self.selectFromPullDownInitialText , callback=self._populatePeakWidget,
-                                               clickToShowCallback=self._setPullDownData, headerText=SELECTANOPTION, grid=(row, 0))
+        self.selectFromPullDown = PulldownList(self, texts=self.selectFromPullDownInitialText,
+                                               callback=self._populatePeakWidget,
+                                               clickToShowCallback=self._setPullDownData, headerText=SELECTANOPTION,
+                                               grid=(row, 0))
         self.selectToPullDown = PulldownList(self, texts=self.selectToPullDownInitialText, headerText=SELECTANOPTION,
                                              callback=self._populatePeakListsWidget,
                                              clickToShowCallback=self._setPullDownData,
@@ -91,8 +95,10 @@ class CopyPeaks(CcpnDialog):
         self.inputPeaksWidgetLabel = Label(self, 'Select Peaks To Copy', grid=(row, 0), hAlign='l')
         self.outputPeakListsWidgetLabel = Label(self, 'Select Destination PeakLists', grid=(row, 1), hAlign='l')
         row += 1
-        self.inputPeaksWidget = ListWidget(self, multiSelect=True, callback=self._activateCopy, tipText=tipText, grid=(row, 0))
-        self.inputPeaksListWidget = ListWidget(self, multiSelect=True, callback=self._activateCopy, tipText=tipText, grid=(row, 1))
+        self.inputPeaksWidget = ListWidget(self, multiSelect=True, callback=self._activateCopy, tipText=tipText,
+                                           grid=(row, 0))
+        self.inputPeaksListWidget = ListWidget(self, multiSelect=True, callback=self._activateCopy, tipText=tipText,
+                                               grid=(row, 1))
         row += 1
         self.selectButtons = ButtonList(self, texts=['Select Current Peaks', 'Clear All'],
                                         callbacks=[self._selectCurrentPeaks, self.clearSelections],
@@ -108,11 +114,11 @@ class CopyPeaks(CcpnDialog):
 
     def _initiateSelectionPullDowns(self):
         isOkToEnableCopy = []
-        if len(self.current.peaks)>0:
+        if len(self.current.peaks) > 0:
             self.selectFromPullDown.select(SELECTED)
             self.inputPeaksWidget.selectAll()
             isOkToEnableCopy.append(True)
-        if len(self.project.spectrumDisplays)>0:
+        if len(self.project.spectrumDisplays) > 0:
             self.selectToPullDown.select(VISIBLESPECTRA)
             if self.inputPeaksListWidget.count() == 1:
                 self.inputPeaksListWidget.selectAll()
@@ -144,7 +150,7 @@ class CopyPeaks(CcpnDialog):
                 peaks = []
                 for peakList in obj.peakLists:
                     peaks.extend(peakList.peaks)
-        if len(peaks)>0:
+        if len(peaks) > 0:
             self.inputPeaksWidget.setObjects(peaks, name='pid')
 
     def _populatePeakListsWidget(self, *args):
@@ -155,7 +161,8 @@ class CopyPeaks(CcpnDialog):
 
             if self.current.strip:
                 spectraFromCurrentStrip = self.current.strip.spectrumDisplay.getVisibleSpectra()
-                allOtherVisibleSpectra = [sp for display in self.project.spectrumDisplays for sp in display.getVisibleSpectra() if sp not in spectraFromCurrentStrip]
+                allOtherVisibleSpectra = [sp for display in self.project.spectrumDisplays for sp in
+                                          display.getVisibleSpectra() if sp not in spectraFromCurrentStrip]
                 spectra = spectraFromCurrentStrip + allOtherVisibleSpectra
                 ### remove the spectra if the current peaks are in the visible spectra ( avoid duplicating the peaks in the same peakList )
                 selectedPeaks = self.current.peaks
@@ -169,9 +176,9 @@ class CopyPeaks(CcpnDialog):
         else:
             obj = self.project.getByPid(value)
             if isinstance(obj, Spectrum):
-                peakLists =obj.peakLists
+                peakLists = obj.peakLists
 
-        if len(peakLists)>0:
+        if len(peakLists) > 0:
             self.inputPeaksListWidget.setObjects(peakLists, name='pid')
 
     def _refreshInputPeaksWidget(self, *args):
@@ -184,53 +191,46 @@ class CopyPeaks(CcpnDialog):
         self.selectFromPullDown.select(spectrum)
 
     def _activateCopy(self):
-        if len(self.inputPeaksListWidget.getSelectedObjects()) > 0 and len(self.inputPeaksWidget.getSelectedObjects()) > 0:
+        if len(self.inputPeaksListWidget.getSelectedObjects()) > 0 and len(
+                self.inputPeaksWidget.getSelectedObjects()) > 0:
             self.copyButtons.buttons[1].setDisabled(False)
 
     def _copyButton(self):
 
-        # TODO:ED trap copying to invalid spectra
-        try:
-            peakLists = self.inputPeaksListWidget.getSelectedObjects()
-            peaks = self.inputPeaksWidget.getSelectedObjects()
+        peakLists = self.inputPeaksListWidget.getSelectedObjects()
+        peaks = self.inputPeaksWidget.getSelectedObjects()
+        numPeaks = len(peaks)
+        numPeakLists = len(peakLists)
+        if numPeaks == 0 or numPeakLists == 0:
+            return
+        # use a larger step-size in the progress-bar if more peaks
+        pDiv = 10 if numPeaks * numPeakLists > 100 else 1
+        totalCopies = (numPeaks * numPeakLists) // pDiv
 
-            numPeaks = len(peaks)
-            numPeakLists = len(peakLists)
-            # use a larger step-size in the progress-bar if more peaks
-            pDiv = 10 if numPeaks * numPeakLists > 100 else 1
-            totalCopies = (numPeaks * numPeakLists) // pDiv
+        # # remember the starting undo-state
+        # undoStack = self.application._getUndo()
+        # originalUndoState = undoStack.undoList
+        with progressHandler(text='Copying Peaks...', maximum=totalCopies, delay=500,
+                             raiseErrors=False, closeDelay=0) as progress:
+            with undoBlockWithoutSideBar():
+                with notificationEchoBlocking():
+                    for peakNumber, peak in enumerate(peaks):
+                        for listNumber, peakList in enumerate(peakLists):
+                            progress.checkCancel()
+                            progress.setValue((numPeaks * listNumber + peakNumber) // pDiv)
+                            peak.copyTo(peakList)
+            getLogger().info('Peaks copied. Finished')
 
-            try:
-                if numPeaks > 0 and numPeakLists > 0:
-                    with undoBlockWithoutSideBar():
-                        with notificationEchoBlocking():
-                            progress = ProgressDialog(self, text='Copying Peaks...', maximum=totalCopies, delay=50)
-                            # so the user gets some feedback that something happened
-                            # progress.setMinimumDuration(0)
-                            # progress.setModal(True)
-                            for peakNumber, peak in enumerate(peaks):
-                                for listNumber, peakList in enumerate(peakLists):
-                                    if progress.wasCanceled():
-                                        progress.setValue(totalCopies)
-                                        raise RuntimeError('Progress was cancelled')
-                                    progress.setValue((numPeaks * listNumber + peakNumber) // pDiv)
-                                    peak.copyTo(peakList)
-
-                            progress.setValue(totalCopies)
-
-                    getLogger().info('Peaks copied. Finished')
-
-            except Exception as es:
-                if isinstance(es, RuntimeError):
-                    raise es
-                getLogger().warning('Error copying peaks: %s' % str(es))
-                showWarning(str(self.windowTitle()), str(es))
-
-        except RuntimeError:
+        if es := progress.error:
+            if isinstance(es, RuntimeError):
+                raise es
+            getLogger().warning('Error copying peaks: %s' % str(es))
+            showWarning(str(self.windowTitle()), str(es))
+        if progress.cancelled:
             getLogger().info('Copy peaks cancelled')
-            # undoManager = self._getUndo()
-            # undoManager.undo()
-
+            # while undoStack.undoList != originalUndoState and undoStack.nextIndex > 0:
+            #     # undo any copied peaks
+            #     undoStack.undo()
         self._closePopup()
 
     def _selectPeaks(self, peaks):
@@ -293,8 +293,8 @@ class CopyPeaks(CcpnDialog):
             self._queuePending = UpdateQueue()
 
         executeQueue = _removeDuplicatedNotifiers(self._queueActive)
-        for itm in executeQueue:
-            # process item if different from previous
+        for itm in executeQueue[:1]:
+            # only need to check that the list is not empty, so only do once
             try:
                 func, data = itm
                 func(data)

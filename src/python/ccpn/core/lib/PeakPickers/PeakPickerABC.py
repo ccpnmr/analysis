@@ -5,8 +5,9 @@ PeakPicker abstract base class
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                )
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -16,9 +17,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-27 10:50:08 +0000 (Tue, February 27, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-07-04 18:51:59 +0100 (Thu, July 04, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -350,7 +351,7 @@ class PeakPickerABC(CcpNmrJson):
         count = len(newPeaks)
         pDiv = (count // 100) + 1
         totalCopies = int(count / pDiv)
-        with progressHandler(text=f'Creating peaks in {peakList.pid}', maximum=len(peaks), autoClose=False,
+        with progressHandler(text=f'Creating peaks in {peakList.pid}', maximum=len(peaks),
                              raiseErrors=False) as progress:
 
             corePeaks = []
@@ -358,7 +359,7 @@ class PeakPickerABC(CcpNmrJson):
             self.spectrum.project._undo.increaseStorageBlocking()
 
             for cc, (pk, pointPositions) in enumerate(newPeaks):
-                progress.checkCancelled()
+                progress.checkCancel()
                 progress.setValue(cc)
 
                 if len(pk.points) != self.dimensionCount:

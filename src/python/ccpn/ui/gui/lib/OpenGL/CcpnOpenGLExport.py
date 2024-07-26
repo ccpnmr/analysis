@@ -5,9 +5,10 @@ Code for exporting OpenGL stripDisplay to pdf and svg files.
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -16,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-20 12:52:26 +0000 (Wed, December 20, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2024-07-25 18:59:48 +0100 (Thu, July 25, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -48,7 +49,7 @@ from reportlab.lib.units import inch, cm
 from reportlab.lib import colors
 # from reportlab.graphics import renderSVG, renderPS, renderPM
 # from reportlab.graphics.renderPM import renderScaledDrawing, PMCanvas, draw
-from reportlab.graphics.shapes import Drawing, Rect, String, PolyLine, Group, Path
+from reportlab.graphics.shapes import Drawing, Rect, String, PolyLine, Group, Path, Polygon
 # from reportlab.graphics.shapes import definePath
 # from reportlab.graphics.renderSVG import draw, renderScaledDrawing, SVGCanvas
 from reportlab.lib.units import mm
@@ -89,7 +90,8 @@ from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPNG
 # from ccpn.util.Colour import colorSchemeTable
 from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.util.Report import Report
-from ccpn.util.Constants import SCALE_PERCENT, SCALE_UNIT_CM, SCALE_UNIT_INCH, SCALE_INCH_UNIT, SCALE_CM_UNIT, SCALING_MODES
+from ccpn.util.Constants import SCALE_PERCENT, SCALE_UNIT_CM, SCALE_UNIT_INCH, SCALE_INCH_UNIT, SCALE_CM_UNIT, \
+    SCALING_MODES
 from ccpn.util.Common import isLinux, isMacOS, isWindowsOS
 from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
@@ -108,6 +110,7 @@ PDFFILL = 'fill'
 PDFFILLMODE = 'fillMode'
 PDFSTROKE = 'stroke'
 PDFSTROKEDASHARRAY = 'strokeDashArray'
+PDFSTROKEDASHOFFSET = 'strokeDashOffset'
 PDFCLOSEPATH = 'closePath'
 PDFLINES = 'lines'
 FRAMEPADDING = 13
@@ -476,7 +479,8 @@ class GLExporter():
         if _scaleMode == SCALING_MODES.index(SCALE_PERCENT):
 
             # modify the displayScale
-            self.displayScale = (self._displayScale * (_scalePercent / 100.0)) if (0 <= _scalePercent <= 100) else self._displayScale
+            self.displayScale = (self._displayScale * (_scalePercent / 100.0)) if (
+                    0 <= _scalePercent <= 100) else self._displayScale
             self.pixWidth = self._pixWidth * self.displayScale
             self.pixHeight = self._pixHeight * self.displayScale
             self.fontScale = self._fontScale * self.displayScale
@@ -664,6 +668,7 @@ class GLExporter():
     def _getStripUpdateRatios(self, strips):
         """Get the ratios for keeping the aspect if strips have _updateAxes set
         """
+        strip = None
         self._updateScalesX = {}
         self._updateScalesY = {}
         for strip in strips:
@@ -692,20 +697,22 @@ class GLExporter():
                 self._updateScalesX[strip.id] = 1.0
                 self._updateScalesY[strip.id] = 1.0
 
-        # repeat the last value depending on strip-direction
-        if self.params[GLSTRIPDIRECTION] == 'Y':
-            self._updateScalesX['axis'] = 1.0
-            self._updateScalesY['axis'] = self._updateScalesY[strip.id]
-        else:
-            self._updateScalesX['axis'] = self._updateScalesX[strip.id]
-            self._updateScalesY['axis'] = 1.0
+        if strip:
+            # repeat the last value depending on strip-direction
+            if self.params[GLSTRIPDIRECTION] == 'Y':
+                self._updateScalesX['axis'] = 1.0
+                self._updateScalesY['axis'] = self._updateScalesY[strip.id]
+            else:
+                self._updateScalesX['axis'] = self._updateScalesX[strip.id]
+                self._updateScalesY['axis'] = 1.0
 
-        return (self._updateScalesX, self._updateScalesY)
+            return (self._updateScalesX, self._updateScalesY)
 
     def _setStripAxes(self):
 
         # set the range for the display
-        self._oldValues = (self.strip._CcpnGLWidget.axisL, self.strip._CcpnGLWidget.axisR, self.strip._CcpnGLWidget.axisT, self.strip._CcpnGLWidget.axisB)
+        self._oldValues = (self.strip._CcpnGLWidget.axisL, self.strip._CcpnGLWidget.axisR,
+                           self.strip._CcpnGLWidget.axisT, self.strip._CcpnGLWidget.axisB)
         self._oldSize = (self.strip._CcpnGLWidget.w, self.strip._CcpnGLWidget.h)
         try:
             self._updateAxes = False
@@ -719,9 +726,11 @@ class GLExporter():
 
                     if self.params[GLSTRIPDIRECTION] == 'Y':
                         if not self.rAxis:
-                            self.strip.spectrumDisplay._rightGLAxis._setAxisRegion(ii, (ddAxis['Min'], ddAxis['Max']), rescale=False, update=False)
+                            self.strip.spectrumDisplay._rightGLAxis._setAxisRegion(ii, (ddAxis['Min'], ddAxis['Max']),
+                                                                                   rescale=False, update=False)
                     elif not self.bAxis:
-                        self.strip.spectrumDisplay._bottomGLAxis._setAxisRegion(ii, (ddAxis['Min'], ddAxis['Max']), rescale=False, update=False)
+                        self.strip.spectrumDisplay._bottomGLAxis._setAxisRegion(ii, (ddAxis['Min'], ddAxis['Max']),
+                                                                                rescale=False, update=False)
                     # else:
                     #     self.strip.setAxisPosition(ii, ddAxis['Centre'], rescale=False, update=False)
                     #     self.strip.setAxisWidth(ii, ddAxis['Width'], rescale=False, update=False)
@@ -826,6 +835,8 @@ class GLExporter():
                 self._addInfiniteLines()
             if self.params[GLSTRIPLABELLING]: self._addOverlayText()
 
+            self.strip.printer.emit(self, self.strip)
+
             # frame the top-left of the main plot area - after other plotting
             self._addPlotBorders(self._mainPlot)
 
@@ -851,7 +862,7 @@ class GLExporter():
                 self.strip._CcpnGLWidget._rescaleAllZoom()
                 self.strip._CcpnGLWidget._buildGL()
                 self.strip._CcpnGLWidget.buildAxisLabels()
-        except Exception as es:
+        except Exception:
             getLogger().debug('There was an issue resetting the strip')
 
     def _resetStripRightBottomAxes(self):
@@ -1035,7 +1046,8 @@ class GLExporter():
             if spectrumView.spectrum.pid in self.params[GLSELECTEDPIDS]:
 
                 # get the contour list
-                data.GLObject = self._parent._contourList[spectrumView] if spectrumView in self._parent._contourList else None
+                data.GLObject = self._parent._contourList[spectrumView] \
+                    if spectrumView in self._parent._contourList else None
 
                 if spectrumView in self._parent._spectrumSettings.keys():
 
@@ -1066,7 +1078,8 @@ class GLExporter():
 
                             # build the spectrum transformation matrix
                             mm = QtGui.QMatrix4x4()
-                            mm.translate(fxMax + (ii * dxAF) + foldXOffset, fyMax + (jj * dyAF) + foldYOffset)
+                            mm.translate(fxMax + (ii * dxAF) + foldXOffset,
+                                         fyMax + (jj * dyAF) + foldYOffset)
                             mm.scale(xScale * foldX, yScale * foldY)
                             data.matrix = mm
                             data.matrixSymbols = mm
@@ -1159,11 +1172,13 @@ class GLExporter():
 
                     newLine = [vectStart[0], vectStart[1], vectEnd[0], vectEnd[1]]
 
-                    colour = colors.Color(*data.GLObject.colors[ppInd0 * 4:ppInd0 * 4 + 3], alpha=alphaClip(data.GLObject.colors[ppInd0 * 4 + 3]))
+                    colour = colors.Color(*data.GLObject.colors[ppInd0 * 4:ppInd0 * 4 + 3],
+                                          alpha=alphaClip(data.GLObject.colors[ppInd0 * 4 + 3]))
                     colourPath = f'spectrumContours{data.spectrumView.pid}{data.index}' \
                                  f'{colour.red}{colour.green}{colour.blue}{colour.alpha}'
 
-                    if newLine := self.lineVisible(self._parent, newLine, x=data.x, y=data.y, width=data.width, height=data.height):
+                    if newLine := self.lineVisible(self._parent, newLine, x=data.x, y=data.y, width=data.width,
+                                                   height=data.height):
                         if colourPath not in data.colourGroups:
                             data.colourGroups[colourPath] = {PDFLINES      : [],
                                                              PDFSTROKEWIDTH: 0.5 * self.baseThickness * self.contourThickness,
@@ -1406,13 +1421,16 @@ class GLExporter():
                             else:
                                 newLine = list(thisSpec.vertices[vv:vv + 6])
 
-                            colour = colors.Color(*thisSpec.colors[vv * 2:vv * 2 + 3], alpha=alphaClip(thisSpec.colors[vv * 2 + 3]))
+                            colour = colors.Color(*thisSpec.colors[vv * 2:vv * 2 + 3],
+                                                  alpha=alphaClip(thisSpec.colors[vv * 2 + 3]))
                             colourPath = f'spectrumViewIntegralFill{spectrumView.pid}' \
                                          f'{colour.red}{colour.green}{colour.blue}{colour.alpha}'
 
-                            if newLine := self.lineVisible(self._parent, newLine, x=_x, y=_y, width=_width, height=_height):
+                            if newLine := self.lineVisible(self._parent, newLine, x=_x, y=_y, width=_width,
+                                                           height=_height):
                                 if colourPath not in colourGroups:
-                                    colourGroups[colourPath] = {PDFLINES: [], PDFFILLCOLOR: colour, PDFSTROKE: None, PDFSTROKECOLOR: None}
+                                    colourGroups[colourPath] = {PDFLINES : [], PDFFILLCOLOR: colour,
+                                                                PDFSTROKE: None, PDFSTROKECOLOR: None}
                                 # colourGroups[colourPath][PDFLINES].append(newLine)
                                 self.addLine(colourGroups[colourPath][PDFLINES], newLine)
 
@@ -1486,7 +1504,8 @@ class GLExporter():
                         for text in textGroup:
                             self._addString(colourGroups, colourPath,
                                             drawString,
-                                            (newLine[0], newLine[1]),  # + (textLine * drawString.font.fontSize * self.fontScale)),
+                                            (newLine[0], newLine[1]),
+                                            # + (textLine * drawString.font.fontSize * self.fontScale)),
                                             colour,
                                             text=text,
                                             offset=textLine
@@ -1537,7 +1556,8 @@ class GLExporter():
                         for text in textGroup:
                             self._addString(colourGroups, colourPath,
                                             drawString,
-                                            (newLine[0], newLine[1]),  # + (textLine * drawString.font.fontSize * self.fontScale)),
+                                            (newLine[0], newLine[1]),
+                                            # + (textLine * drawString.font.fontSize * self.fontScale)),
                                             colour,
                                             text=text,
                                             offset=textLine
@@ -1601,7 +1621,8 @@ class GLExporter():
                         for text in textGroup:
                             self._addString(colourGroups, colourPath,
                                             drawString,
-                                            (newLine[0], newLine[1]),  # + (textLine * drawString.font.fontSize * self.fontScale)),
+                                            (newLine[0], newLine[1]),
+                                            # + (textLine * drawString.font.fontSize * self.fontScale)),
                                             colour,
                                             text=text,
                                             offset=textLine
@@ -2340,7 +2361,8 @@ class GLExporter():
                     indArray.attribs.size != 0 and \
                     abs(indArray.attribs[ii0[0]] - alias) > 0.5:
                 _alias = self.params[GLALIASSHADE] / 100.0
-            colour = (setColour or colors.Color(*indArray.colors[ii0[0] * 4:ii0[0] * 4 + 3], alpha=_alias * alphaClip(indArray.colors[ii0[0] * 4 + 3])))
+            colour = (setColour or colors.Color(*indArray.colors[ii0[0] * 4:ii0[0] * 4 + 3],
+                                                alpha=_alias * alphaClip(indArray.colors[ii0[0] * 4 + 3])))
             colourPath = self._colourID(name, colour)  # 'spectrumView%s%s%s%s%s' % (name,
             # colour.red, colour.green, colour.blue, colour.alpha)
 
@@ -2373,7 +2395,8 @@ class GLExporter():
         if setColour is not None:
             return self._colourID(name, setColour)
 
-    def _appendIndexLineGroupFill(self, indArray=None, listView=None, colourGroups=None, plotDim=None, name=None, mat=None,
+    def _appendIndexLineGroupFill(self, indArray=None, listView=None, colourGroups=None, plotDim=None, name=None,
+                                  mat=None,
                                   fillMode=None, splitGroups=False, lineWidth=0.5):
         for spectrumView in self._ordering:
             if spectrumView.isDeleted:
@@ -2412,8 +2435,6 @@ class GLExporter():
         """
         gr = Group()
         for colourItem in colourGroups.values():
-            # pl = PolyLine(ll[PDFLINES], strokeWidth=ll[PDFSTROKEWIDTH], strokeColor=ll[PDFSTROKECOLOR], strokeLineCap=ll[PDFSTROKELINECAP])
-
             wanted_keys = [PDFSTROKEWIDTH,
                            PDFSTROKECOLOR,
                            PDFSTROKELINECAP,
@@ -2421,31 +2442,24 @@ class GLExporter():
                            PDFFILL,
                            PDFFILLMODE,
                            PDFSTROKE,
-                           PDFSTROKEDASHARRAY]
+                           PDFSTROKEDASHARRAY,
+                           PDFSTROKEDASHOFFSET
+                           ]
 
             newColour = {k: colourItem[k] for k in wanted_keys if k in colourItem}
 
             for ll in colourItem[PDFLINES]:
+                if len(ll) < 4:
+                    continue
                 try:
-                    pl = Path(**newColour)  #  strokeWidth=colourItem[PDFSTROKEWIDTH], strokeColor=colourItem[PDFSTROKECOLOR], strokeLineCap=colourItem[PDFSTROKELINECAP])
-                    if len(ll) == 4:
-                        pl.moveTo(ll[0], ll[1])
-                        pl.lineTo(ll[2], ll[3])
-                    elif len(ll) > 4:
-                        pl.moveTo(ll[0], ll[1])
-                        for vv in range(2, len(ll), 2):
-                            pl.lineTo(ll[vv], ll[vv + 1])
-                        if PDFCLOSEPATH not in colourItem or colourItem[PDFCLOSEPATH] == True:
-                            pl.closePath()
+                    if len(ll) > 4 and colourItem.get(PDFCLOSEPATH) is not False:
+                        pl = Polygon(points=ll, **newColour)
                     else:
-                        # discard any paths that are too short
-                        continue
-
-                except Exception:
-                    pass
-                else:
+                        pl = PolyLine(points=ll, **newColour)
                     # add to the group if path contains at least 1 valid line
                     gr.add(pl)
+                except Exception:
+                    pass
 
         drawing.add(gr, name=name)
 
@@ -2539,7 +2553,7 @@ class GLExporter():
         return outputList
 
     def clipLine(self, _parent, subjectPolygon):
-        """Apply Sutherland-Hodgman algorithm for clipping polygons
+        """Apply clipping to single line
         """
         axisL, axisR, axisT, axisB = self._axisL, self._axisR, self._axisT, self._axisB
 
@@ -2578,18 +2592,17 @@ class GLExporter():
             outputList = []
             if not inputList:
                 break
-
-            ilLen = len(inputList)
-            s = inputList[ilLen - 1]
-
-            for e in inputList:
-                if inside(e):
-                    if not inside(s):
-                        outputList.append(get_intersect())
-                    outputList.append(e)
-                elif inside(s):
+            s, e = inputList[0], inputList[1]
+            if inside(e):
+                if inside(s):
+                    outputList.append(s)
+                else:
                     outputList.append(get_intersect())
-                s = e
+                outputList.append(e)
+            elif inside(s):
+                outputList.append(s)
+                outputList.append(get_intersect())
+            # iterate to next clip-boundary
             cp1 = cp2
         return outputList
 
@@ -2597,7 +2610,9 @@ class GLExporter():
         axisL, axisR, axisT, axisB = self._axisL, self._axisR, self._axisT, self._axisB
 
         fit = next((True for pp in range(0, len(lineList), 2)
-                    if (self.between(lineList[pp], axisL, axisR) and (self.between(lineList[pp + 1], axisT, axisB) or checkIntegral))),
+                    if (self.between(lineList[pp], axisL, axisR) and
+                        (self.between(lineList[pp + 1], axisT, axisB) or
+                         checkIntegral))),
                    False)
 
         for pp in range(0, len(lineList), 2):
@@ -2623,7 +2638,8 @@ class Clipped_Flowable(Flowable):
             pl = self.canv.beginPath()
             pl.moveTo(self.mainDim[PLOTLEFT], self.mainDim[PLOTBOTTOM])
             pl.lineTo(self.mainDim[PLOTLEFT], self.mainDim[PLOTHEIGHT] + self.mainDim[PLOTBOTTOM])
-            pl.lineTo(self.mainDim[PLOTLEFT] + self.mainDim[PLOTWIDTH], self.mainDim[PLOTHEIGHT] + self.mainDim[PLOTBOTTOM])
+            pl.lineTo(self.mainDim[PLOTLEFT] + self.mainDim[PLOTWIDTH],
+                      self.mainDim[PLOTHEIGHT] + self.mainDim[PLOTBOTTOM])
             pl.lineTo(self.mainDim[PLOTLEFT] + self.mainDim[PLOTWIDTH], self.mainDim[PLOTBOTTOM])
             pl.close()
             self.canv.clipPath(pl, fill=0, stroke=0)

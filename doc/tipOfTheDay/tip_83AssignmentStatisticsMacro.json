@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can check your Assignment Statistics and possible assignment problems using a CCPN Macro. Go to <span style=%(purple)s>Macro / Run CCPN Macros / ProteinAssignmentStatistics</span>, select your <span style=%(purple)s>Chain</span> and <span style=%(purple)s>ChemicalShiftList</span>. The resultant tables will be listed in under <span style=%(purple)s>DataTables</span>.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 83,
+  "contents": [
+    "./graphics/AssignmentStatisticsMacro.png"
+  ]
+}

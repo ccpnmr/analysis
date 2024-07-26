@@ -5,8 +5,9 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-05-29 16:00:19 +0100 (Wed, May 29, 2024) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-07-25 18:59:48 +0100 (Thu, July 25, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -186,8 +187,9 @@ class GuiStrip(Frame):
     # inherits NotifierBase
 
     optionsChanged = QtCore.pyqtSignal(dict)
-    stripResized = QtCore.pyqtSignal(tuple)
-    pixelSizeChanged = QtCore.pyqtSignal(tuple)
+    stripResized = QtCore.pyqtSignal(object, tuple)
+    pixelSizeChanged = QtCore.pyqtSignal(object, tuple)
+    printer = QtCore.pyqtSignal(object, object)
 
     # MAXPEAKLABELTYPES = 6
     # MAXPEAKSYMBOLTYPES = 4
@@ -415,6 +417,12 @@ class GuiStrip(Frame):
         self._queueActive = None
         self._lock = QtCore.QMutex()
 
+    @property
+    def painted(self):
+        """pyqtSignal to capture the paint-event.
+        """
+        return self._CcpnGLWidget.painted
+
     def getGLWidget(self):
         """Get the CcpnGLWidget instance """
         return self._CcpnGLWidget
@@ -462,7 +470,7 @@ class GuiStrip(Frame):
         super().resizeEvent(ev)
         # call subclass _resize event
         self._resize()
-        self.stripResized.emit((self.width(), self.height()))
+        self.stripResized.emit(self, (self.width(), self.height()))
 
     def _raiseOverlay(self):
         """Raise the Overlay to apply a colour to the strip.

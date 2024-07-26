@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-21 19:48:44 +0100 (Fri, June 21, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-07-24 18:04:27 +0100 (Wed, July 24, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -112,6 +112,7 @@ class TableABC(QtWidgets.QTableView):
     _rowHeightScale = None
     _tableMenuEnabled = True
     _toolTipsEnabled = True
+    _enableCheckBoxes = False
 
     # define the default TableModel class
     tableModelClass = _TableModel
@@ -366,6 +367,7 @@ class TableABC(QtWidgets.QTableView):
         # set selection callback because the model has changed?
         self.selectionModel().selectionChanged.connect(self._selectionConnect)
         model._defaultEditable = self._defaultEditable
+        model._enableCheckBoxes = self._enableCheckBoxes
 
     def _initTableCommonWidgets(self, parent, height=35, setGuiNotifier=None, **kwds):
         """Initialise the common table elements

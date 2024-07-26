@@ -54,9 +54,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-01 20:19:49 +0100 (Mon, July 01, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-07-25 10:11:17 +0100 (Thu, July 25, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -3208,6 +3208,7 @@ class Spectrum(AbstractWrapperObject):
                 position = [1] * self.dimensionCount  # dims and positions are 1-based
 
                 # loop over the points in the time dimension (1-based)
+                _spectra = []  # temp list to hold values to add in one go, as SpectrumGroup.addSpectrum is slowww!
                 for timePoint in range(1, pseudoDimensionSize + 1):
                     # set the position of the plane we are now doing
                     position[pseudoDimensionIndex] = timePoint
@@ -3217,7 +3218,7 @@ class Spectrum(AbstractWrapperObject):
                     path = aPath(pathTemplate % (timePoint,))
                     sp = self._extractToFile(axisCodes=freqAxisCodes, position=position, path=path,
                                              dataFormat=Hdf5SpectrumDataSource.dataFormat, tag='fromPseudo')
-                    spectrumGroup.addSpectrum(sp, seriesValue)
+                    _spectra.append( (sp, seriesValue) )
 
                     seriesValue += seriesIncrement
 
@@ -3225,6 +3226,9 @@ class Spectrum(AbstractWrapperObject):
                 # _values = self.dataSource.sampledValues[pseudoDimensionIndex]
                 # if _values is not None and len(_values) == len(spectrumGroup.spectra):
                 #     spectrumGroup.series = _values
+
+                spectrumGroup.spectra = [sp for sp, seriesVal in _spectra]
+                spectrumGroup.series = [seriesVal for sp, seriesVal in _spectra]
 
         return spectrumGroup
 
@@ -4080,7 +4084,7 @@ def _newHdf5Spectrum(project: Project, isotopeCodes: Sequence[str], name: str = 
     if not isIterable(isotopeCodes) or len(isotopeCodes) == 0:
         raise ValueError('invalid isotopeCodes "%s"' % isotopeCodes)
 
-    name = Spectrum._uniqueName(project=project, name=name)
+    name = Spectrum._uniqueName(parent=project, name=name)
     if path is None:
         path = Path('$INSIDE') / CCPN_SPECTRA_DIRECTORY / name
         path = path.assureSuffix(Hdf5SpectrumDataSource.suffixes[0])

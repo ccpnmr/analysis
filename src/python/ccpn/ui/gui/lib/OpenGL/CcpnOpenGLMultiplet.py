@@ -4,9 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 15:10:36 +0000 (Thu, December 14, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2024-07-30 18:35:26 +0100 (Tue, July 30, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -253,15 +254,23 @@ class GLmultipletListMethods():
         return iCount, _selected
 
     def _rescaleSymbolOffsets(self, r, w):
-        return np.array([-r, -w, +r, +w, +r, -w, -r, +w, 0, 0, 0, -w, 0, +w, +r, 0, -r, 0,
-                         r * 0.85, w * 0.50,
-                         r * 0.5, w * 0.85,
-                         - r * 0.5, w * 0.85,
-                         - r * 0.85, w * 0.50,
-                         - r * 0.85, - w * 0.50,
-                         - r * 0.5, - w * 0.85,
-                         + r * 0.5, - w * 0.85,
-                         + r * 0.85, - w * 0.50, ], np.float32), self.LENSQ2
+        return np.array([-r, -w, 0, 0,
+                         +r, +w,  0, 0,
+                         +r, -w,  0, 0,
+                         -r, +w,  0, 0,
+                         0, 0,  0, 0,
+                         0, -w,  0, 0,
+                         0, +w,  0, 0,
+                         +r, 0,  0, 0,
+                         -r, 0, 0, 0,
+                         r * 0.85, w * 0.50, 0, 0,
+                         r * 0.5, w * 0.85, 0, 0,
+                         - r * 0.5, w * 0.85, 0, 0,
+                         - r * 0.85, w * 0.50, 0, 0,
+                         - r * 0.85, - w * 0.50, 0, 0,
+                         - r * 0.5, - w * 0.85, 0, 0,
+                         + r * 0.5, - w * 0.85, 0, 0,
+                         + r * 0.85, - w * 0.50,  0, 0], np.float32), self.LENSQ4
 
     # class GLmultipletNdLabelling(GLmultipletListMethods, GLLabelling):  #, GLpeakNdLabelling):
     #     """Class to handle symbol and symbol labelling for Nd displays

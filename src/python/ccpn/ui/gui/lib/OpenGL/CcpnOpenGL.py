@@ -57,7 +57,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-24 18:05:24 +0100 (Wed, July 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-07-30 18:35:26 +0100 (Tue, July 30, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -2380,7 +2380,7 @@ class CcpnGLWidget(QOpenGLWidget):
             top = self.height()
         self._mouseStart = (mx, my)
         sc = self.mouseTransform * QtGui.QVector4D(mx, my, 0.0, 1.0)
-        self._startCoordinate = (sc.x(), sc.y())
+        self._startCoordinate = [sc.x(), sc.y()]
 
         self._startMiddleDrag = False
         self._validRegionPick = False
@@ -4214,7 +4214,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 _top = self.height()
 
             mt = self.mouseTransform * QtGui.QVector4D(mx, my, 0.0, 1.0)
-            result = (mt.x(), mt.y(), mt.z(), mt.w())
+            result = [mt.x(), mt.y(), mt.z(), mt.w()]
 
         else:
             result = self.cursorCoordinate

@@ -44,14 +44,13 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-07 16:25:10 +0100 (Wed, August 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-09 11:25:08 +0100 (Fri, August 09, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: Original by Christoffer Kjellson $"
 __date__ = "$Date: 2022 $"
-
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -176,12 +175,12 @@ def get_non_overlapping_boxes(
                         boxes_xyxy, candidates, x_margin, y_margin
                         )
 
-            # Check for overlapping with - boxes
+            # Check for overlapping with - ellipses
             if ellipses_xyab is None:
                 non_oe = np.zeros((candidates.shape[0],)) == 0
             else:
                 non_oe = non_overlapping_boxes_to_ellipses(
-                        ellipses_xyab, candidates, x_margin, y_margin
+                        candidates, ellipses_xyab, x_margin, y_margin
                         )
 
             # compare with newly created lines
@@ -209,14 +208,16 @@ def get_non_overlapping_boxes(
             else:
                 inside = inside_plot(xmin_bound, ymin_bound, xmax_bound, ymax_bound, candidates)
 
-            # Validate (could use logical_and here, not sure which is quicker)
+            # Validate (bitwise_and is the quickest, faster than njit or logical_and)
             ok_candidates = np.where(
                     np.bitwise_and(
-                            non_ob, np.bitwise_and(
-                                    non_ol, np.bitwise_and(
-                                            non_ll, np.bitwise_and(
-                                                    non_lb, np.bitwise_and(
-                                                            non_op, np.bitwise_and(non_orec, inside))
+                            non_oe, np.bitwise_and(
+                                    non_ob, np.bitwise_and(
+                                            non_ol, np.bitwise_and(
+                                                    non_ll, np.bitwise_and(
+                                                            non_lb, np.bitwise_and(
+                                                                    non_op, np.bitwise_and(non_orec, inside))
+                                                            )
                                                     )
                                             )
                                     )
@@ -228,17 +229,20 @@ def get_non_overlapping_boxes(
                                                              non_overlapping_boxes, ok_candidates, s, verbose, w,
                                                              x_original, y_original)
                 if verbose:
-                    make_a_plot(box_arr, box_lines_xyxy, boxes_xyxy, candidates_lines, ok_candidates,
-                                True, True, True, True)
+                    make_a_plot(box_arr, box_lines_xyxy, boxes_xyxy, ellipses_xyab,
+                                candidates_lines, ok_candidates,
+                                True, True, True, True, True)
                 continue
 
             # reduce the conditions of candidacy
             ok_candidates = np.where(
                     np.bitwise_and(
-                            non_ob, np.bitwise_and(
-                                    non_ol, np.bitwise_and(
-                                            non_ll, np.bitwise_and(
-                                                    non_op, np.bitwise_and(non_orec, inside))
+                            non_oe, np.bitwise_and(
+                                    non_ob, np.bitwise_and(
+                                            non_ol, np.bitwise_and(
+                                                    non_ll, np.bitwise_and(
+                                                            non_op, np.bitwise_and(non_orec, inside))
+                                                    )
                                             )
                                     )
                             )
@@ -250,16 +254,19 @@ def get_non_overlapping_boxes(
                                                              x_original, y_original)
 
                 if verbose:
-                    make_a_plot(box_arr, box_lines_xyxy, boxes_xyxy, candidates_lines, ok_candidates,
-                                True, True, True, True)
+                    make_a_plot(box_arr, box_lines_xyxy, boxes_xyxy, ellipses_xyab,
+                                candidates_lines, ok_candidates,
+                                True, True, True, True, True)
                 continue
 
             # reduce the conditions of candidacy further
             ok_candidates = np.where(
                     np.bitwise_and(
-                            non_ob, np.bitwise_and(
-                                    non_ol, np.bitwise_and(
-                                            non_op, np.bitwise_and(non_orec, inside))
+                            non_oe, np.bitwise_and(
+                                    non_ob, np.bitwise_and(
+                                            non_ol, np.bitwise_and(
+                                                    non_op, np.bitwise_and(non_orec, inside))
+                                            )
                                     )
                             )
                     )[0]
@@ -269,8 +276,9 @@ def get_non_overlapping_boxes(
                                                              non_overlapping_boxes, ok_candidates, s, verbose, w,
                                                              x_original, y_original)
                 if verbose:
-                    make_a_plot(box_arr, box_lines_xyxy, boxes_xyxy, candidates_lines, ok_candidates,
-                                True, True, True, True)
+                    make_a_plot(box_arr, box_lines_xyxy, boxes_xyxy, ellipses_xyab,
+                                candidates_lines, ok_candidates,
+                                True, True, True, True, True)
                 continue
 
             if draw_all:
@@ -281,51 +289,58 @@ def get_non_overlapping_boxes(
                                                                  non_overlapping_boxes, ok_candidates, s, verbose, w,
                                                                  x_original, y_original)
                     if verbose:
-                        make_a_plot(box_arr, box_lines_xyxy, boxes_xyxy, candidates_lines, ok_candidates,
-                                    True, True, True, True)
+                        make_a_plot(box_arr, box_lines_xyxy, boxes_xyxy, ellipses_xyab,
+                                    candidates_lines, ok_candidates,
+                                    True, True, True, True, True)
                     continue
 
-            # no free-space can be found, addd to the overlapping list
+            # no free-space can be found, add to the overlapping list
             overlapping_boxes_inds.append(ii)
             if verbose:
                 print(f'no space found {ii}: {s}')
 
     if verbose:
-        make_a_plot(box_arr, box_lines_xyxy, boxes_xyxy, candidates_lines, ok_candidates, False, True, True, True)
+        make_a_plot(box_arr, box_lines_xyxy, boxes_xyxy, ellipses_xyab,
+                    candidates_lines, ok_candidates,
+                    cand=False, box_lines=True, boxes=True, ellipses=True, found=True)
 
     return non_overlapping_boxes, overlapping_boxes_inds
 
 
-def make_a_plot(box_arr, box_lines_xyxy, boxes_xyxy, candidates_lines, ok_candidates,
-                cand: bool = False, box_lines: bool = False, boxes: bool = False, found: bool = True):
+def make_a_plot(box_arr, box_lines_xyxy, boxes_xyxy, ellipses_xyab, candidates_lines, ok_candidates,
+                cand: bool = False, box_lines: bool = False, boxes: bool = False, ellipses: bool = False,
+                found: bool = True):
     """Make a plot of the candidates and found boxes.
     """
     # plot a figure to check the size
     import matplotlib
 
     matplotlib.use('Qt5Agg')
-    from mpl_toolkits import mplot3d
+    # from mpl_toolkits import mplot3d
     import matplotlib.pyplot as plt
-    from matplotlib.patches import Rectangle
+    from matplotlib.patches import Rectangle, Ellipse
 
     fig = plt.figure(figsize=(10, 8), dpi=100)
     axS = fig.gca()
-    if box_lines:
+    if box_lines and box_lines_xyxy is not None:
         for ii in range(box_lines_xyxy.shape[0]):
             row = box_lines_xyxy[ii, :]
             axS.plot(row[::2], row[1::2], linewidth=1)
-
-    if boxes:
+    if boxes and boxes_xyxy is not None:
         for ii in range(boxes_xyxy.shape[0]):
             row = boxes_xyxy[ii, :]
-            axS.add_patch(
-                    Rectangle(row[:2], row[2] - row[0], row[3] - row[1], linewidth=1, fill=False, color='lightgrey'))
-
-    if found:
+            axS.add_patch(Rectangle(row[:2], row[2] - row[0], row[3] - row[1],
+                                    linewidth=1, fill=False, color='lightgrey'))
+    if ellipses and ellipses_xyab is not None:
+        for ii in range(ellipses_xyab.shape[0]):
+            row = ellipses_xyab[ii, :]
+            # convert semi-major to major axes
+            axS.add_patch(Ellipse(row[:2], 2 * row[2], 2 * row[3],
+                                  linewidth=1, fill=False, color='lightgrey'))
+    if found and box_arr is not None:
         for ii in range(box_arr.shape[0]):
             row = box_arr[ii, :]
             axS.add_patch(Rectangle(row[:2], row[2] - row[0], row[3] - row[1], linewidth=1, fill=False))
-
     if cand:
         for ii in range(candidates_lines[ok_candidates].shape[0]):
             row = candidates_lines[ok_candidates[ii], :]

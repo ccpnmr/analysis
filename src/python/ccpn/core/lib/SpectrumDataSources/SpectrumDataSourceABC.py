@@ -94,7 +94,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-07-30 15:31:16 +0100 (Tue, July 30, 2024) $"
+__dateModified__ = "$dateModified: 2024-07-30 16:39:18 +0100 (Tue, July 30, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -2066,7 +2066,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """
 
         if self.dimensionCount == 1:
-            return self.spectrum.noiseLevel or self.spectrum.estimateNoise()
+            data = self.getSliceData()
+            stdFactor = 0.5
 
         elif self.dimensionCount == 2:
             # 2D: presumably t has data (and potentially water!)

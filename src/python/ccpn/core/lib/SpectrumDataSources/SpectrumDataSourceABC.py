@@ -83,8 +83,9 @@ Example 3 (using Spectrum instance to make a hdf5 duplicate):
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -92,9 +93,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:48 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-07-30 15:31:16 +0100 (Tue, July 30, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -842,8 +843,13 @@ class SpectrumDataSourceABC(CcpNmrJson):
             spectrumAttribute = self.getMetadata(param, 'spectrumAttribute')
             hasSetter = self.getMetadata(param, 'hasSetterInSpectrumClass')
             if spectrumAttribute is not None and doCopy and hasSetter:
-                values = self.getTraitValue(param)
-                setattr(spectrum, spectrumAttribute, values)
+                try:
+                    values = self.getTraitValue(param)
+                    setattr(spectrum, spectrumAttribute, values)
+                except AttributeError as es:
+                    _errMsg = f'Setting {spectrumAttribute!r} of {spectrum} failed'
+                    getLogger().error(_errMsg)
+                    raise AttributeError(_errMsg)
 
     def importFromSpectrum(self, spectrum, includePath=True):
         """copy parameters & path (optionally) from spectrum, set spectrum attribute and return self

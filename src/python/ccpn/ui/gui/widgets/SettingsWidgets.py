@@ -5,8 +5,9 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:28 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-07-31 16:41:49 +0100 (Wed, July 31, 2024) $"
+__version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -37,7 +38,7 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.CheckBoxes import CheckBoxes
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.Font import getTextDimensionsFromFont, getFontHeight
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget, DoubleSpinBoxCompoundWidget
 from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
@@ -965,7 +966,7 @@ class _commonSettings():
             del widget
 
     def _fillSpectrumFrame(self, displays, data=None):
-        """Populate then spectrumFrame with the selectable spectra
+        """Populate the spectrumFrame with the selectable spectra
         """
         if self._spectraWidget:
             self._spectraWidget.hide()
@@ -973,7 +974,7 @@ class _commonSettings():
             self._removeWidget(self._spectraWidget, removeTopWidget=True)
 
         self._spectraWidget = Widget(parent=self.spectrumDisplayOptionsFrame, setLayout=True, hPolicy='minimal',
-                                     grid=(2, 1), gridSpan=(self._spectraRows, 2), vAlign='top', hAlign='left')
+                                     grid=(1, 0), gridSpan=(self._spectraRows, 1), vAlign='top', hAlign='left')
 
         # calculate the maximum number of axes
         self.maxLen, self.axisLabels, self.spectrumIndex, self.validSpectrumViews = self._getSpectraFromDisplays(displays, data)
@@ -1035,11 +1036,71 @@ class _commonSettings():
 
                 spectraWidgets[spectrum.pid] = f
 
+    def _fillAllSpectrumFrame(self, displays, data=None):
+        from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
+
+        if self._spectraWidget:
+            self._spectraWidget.hide()
+            self._spectraWidget.setParent(None)
+            self._removeWidget(self._spectraWidget, removeTopWidget=True)
+
+        self._spectraWidget = Widget(parent=self.spectrumDisplayOptionsFrame, setLayout=True, hPolicy='minimal',
+                                     grid=(1, 0), gridSpan=(1, 2), vAlign='top', hAlign='left')
+
+        for num, display in enumerate(displays):
+            maxLen, axisLabels, _, validSpectrumViews = self._getSpectraFromDisplays([display], data)
+
+            curFrame = MoreLessFrame(self._spectraWidget, name=display.pid, showMore=True, grid=(num, 0), gridSpan=(1,4))
+
+            _frame = curFrame.contentsFrame
+            f_row = 0
+            Label(_frame, text='Restricted Axes', grid=(f_row, 0))
+
+            currentSelection = None
+            if self.axisCodeOptions:
+                currentSelection = self.axisCodeOptions.getSelectedText()
+
+            axisCodeOptions = CheckBoxes(_frame, selectedInd=None, texts=[],
+                                         callback=self._changeAxisCode, grid=(f_row,1))
+            axisCodeOptions.setCheckBoxes(texts=axisLabels, tipTexts=axisLabels)
+
+            # just clear the 'C' axes - this is the usual configuration
+            axisCodeOptions.selectAll()
+            for ii, box in enumerate(axisCodeOptions.checkBoxes):
+                if box.text().upper().startswith('C'):
+                    axisCodeOptions.clearIndex(ii)
+            f_row += 1
+            HLine(_frame, grid=(1, 0), gridSpan=(f_row, 4),
+                  colour=getColours()[SOFTDIVIDER], height=15)
+            f_row += 1
+            Label(_frame, 'Spectrum', grid=(f_row, 0))
+            Label(_frame, '(double-width tolerances)', grid=(f_row, 1), gridSpan=(1, maxLen))
+
+            f_row += 1
+            if self.application:
+                spectraWidgets = {}  # spectrum.pid, frame dict to show/hide
+                for row, spectrum in enumerate(validSpectrumViews.keys()):
+                    f_row += 1
+                    f = _SpectrumRow(parent=_frame,
+                                     application=self.application,
+                                     spectrum=spectrum,
+                                     spectrumDisplay=displays[0],
+                                     row=f_row, startCol=0,
+                                     setLayout=True,
+                                     visible=validSpectrumViews[spectrum])
+                    spectraWidgets[spectrum.pid] = f
+
+
+
     def _spectrumDisplaySelectionPulldownCallback(self, item):
         """Notifier Callback for selecting a spectrumDisplay
         """
         gid = self.spectrumDisplayPulldown.getText()
-        self._fillSpectrumFrame([self.application.getByGid(gid)])
+        if gid == '> All <':
+            gids = [self.application.getByGid(gid) for gid in self.spectrumDisplayPulldown.getTexts() if gid not in ['> All <', '> Select <']]
+            self._fillAllSpectrumFrame(gids)
+        else:
+            self._fillSpectrumFrame([self.application.getByGid(gid)])
 
 
 LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
@@ -1106,8 +1167,10 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
 
         if includeDisplaySettings:
             row += 1
-            self.displaysWidget = SpectrumDisplaySelectionWidget(self, mainWindow=self.mainWindow, grid=(row, 0), gridSpan=(1, 1), texts=texts, displayText=[],
-                                                                 objectWidgetChangedCallback=self._displayWidgetChanged, labelText=labelText)
+            self.displaysWidget = SpectrumDisplaySelectionWidget(self, mainWindow=self.mainWindow, grid=(row, 0),
+                                                                 gridSpan=(1, 1), texts=texts, displayText=[],
+                                                                 objectWidgetChangedCallback=self._displayWidgetChanged,
+                                                                 labelText=labelText)
         else:
             self.displaysWidget = None
 
@@ -1227,25 +1290,30 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
 
         self._spectraWidget = None
         self.axisCodeOptions = None
-
+        row += 1
         if includeSpectrumTable:
+            HLine(self, grid=(row, 0), gridSpan=(1, 2),
+                  colour=getColours()[DIVIDER], height=15)
+            row += 1
+
             # create row's of spectrum information
             self._spectraRows = row + len(texts)
 
             self.spectrumDisplayOptionsFrame = Frame(self, setLayout=True, showBorder=False, fShape='noFrame',
-                                                     grid=(1, 1), gridSpan=(row + 2, 1),
+                                                     grid=(row, 0), gridSpan=(row + 2, 0),
                                                      vAlign='top', hAlign='left')
-
+            # important part
             # add a new pullDown to select the active spectrumDisplay
             self.spectrumDisplayPulldown = SpectrumDisplayPulldown(parent=self.spectrumDisplayOptionsFrame,
                                                                    mainWindow=self.mainWindow, default=None,
-                                                                   grid=(1, 1), gridSpan=(1, 1),
+                                                                   grid=(0, 0), gridSpan=(1, 0),
                                                                    minimumWidths=(0, 100),
                                                                    showSelectName=True,
                                                                    sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
                                                                    callback=self._spectrumDisplaySelectionPulldownCallback,
                                                                    labelText='Pick Peaks in Display'
                                                                    )
+            self.spectrumDisplayPulldown.setTexts(['> All <'] + list(self.spectrumDisplayPulldown.getTexts()))
 
             # self._fillSpectrumFrame(self.displaysWidget._getDisplays())
 

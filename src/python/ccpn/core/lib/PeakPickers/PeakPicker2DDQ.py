@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Vicky Higman $"
-__dateModified__ = "$dateModified: 2024-07-31 14:29:01 +0100 (Wed, July 31, 2024) $"
+__dateModified__ = "$dateModified: 2024-07-31 15:42:58 +0100 (Wed, July 31, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -52,8 +52,16 @@ class PeakPicker2DDQ(PeakPickerNd):
     def _addDQPeaks(self, peaks):
         if len(peaks) >= 1:
             for pk in peaks:
-                if 'DQ' in pk.spectrum.coherenceOrders:
-                    pk.peakList.newPeak([pk.ppmPositions[1] - pk.ppmPositions[0], pk.ppmPositions[1]])
+                if 'DQ' in pk.spectrum.coherenceOrders and 'SQ' in pk.spectrum.coherenceOrders:
+                    for i, co in enumerate(pk.spectrum.coherenceOrders):
+                        if co == 'SQ':
+                            sqdim = i
+                        elif co == 'DQ':
+                            dqdim = i
+                    if dqdim == 0:
+                        pk.peakList.newPeak([pk.ppmPositions[dqdim], pk.ppmPositions[dqdim] - pk.ppmPositions[sqdim]])
+                    elif dqdim == 1:
+                        pk.peakList.newPeak([pk.ppmPositions[dqdim] - pk.ppmPositions[sqdim], pk.ppmPositions[dqdim]])
         else:
             return
 

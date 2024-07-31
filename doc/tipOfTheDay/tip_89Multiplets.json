@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>If a peak is split into a multiplet, then you can select all the constituent Peaks and join them into a Multiplet using the shortcut <span style=%(purple)s>AM</span>. <span style=%(purple)s>Multiplet Lists</span> are nested under you <span style=%(purple)s>Spectra</span> in the sidebar and and show Multiplets above and the constituent Peaks below. Positions are averaged, Heights and Volumes summed.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 89,
+  "contents": [
+    "./graphics/Multiplets.png"
+  ]
+}

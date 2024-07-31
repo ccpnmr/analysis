@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can toggle the main toolbar on and off with the shortcut <span style=%(purple)s>TB</span>. Toggle the Spectrum Toolbar on and off with <span style=%(purple)s>SB</span></p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 86,
+  "contents": [
+    "./graphics/ToggleToolbars.png"
+  ]
+}

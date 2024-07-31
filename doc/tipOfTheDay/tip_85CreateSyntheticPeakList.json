@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can create a synthetic PeakList for a wide variety of Experiment Types by <span style=%(purple)s>right-clicking</span> on a ChemicalShiftList in the sidebar and then selecting <span style=%(purple)s>Create Synthetic PeakList</span>.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 85,
+  "contents": [
+    "./graphics/CreateSyntheticPeakList.png"
+  ]
+}

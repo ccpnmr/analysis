@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-06-13 16:46:32 +0100 (Thu, June 13, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-06-21 19:48:44 +0100 (Fri, June 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -62,11 +62,10 @@ LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
 class DataTableModule(CcpnTableModule):
     """This class implements the module by wrapping a DataTable instance
     """
+    className = 'DataTableModule'
     includeSettingsWidget = True
     maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
     settingsPosition = 'top'
-
-    className = f'{KlassTable.className}Module'
     _allowRename = True
 
     activePulldownClass = KlassTable
@@ -130,12 +129,12 @@ class DataTableModule(CcpnTableModule):
         # self._splitter.setSizes([1000, 2000])
 
         # add the guiTable to the bottom
-        self._tableWidget = _TableWidget(parent=_bottomWidget,
-                                         mainWindow=self.mainWindow,
-                                         moduleParent=self,
-                                         setLayout=True,
-                                         showVerticalHeader=False,
-                                         grid=(0, 0))
+        self._tableWidget = _DataTableWidget(parent=_bottomWidget,
+                                             mainWindow=self.mainWindow,
+                                             moduleParent=self,
+                                             setLayout=True,
+                                             showVerticalHeader=False,
+                                             grid=(0, 0))
 
         Spacer(_topWidget, 5, 5,
                QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
@@ -351,16 +350,15 @@ class DataTableModule(CcpnTableModule):
 # _TableWidget
 #=========================================================================================
 
-class _TableWidget(Table):
+class _DataTableWidget(Table):
     """
     Class to present a DataTable
     """
-    className = '_TableWidget'
+    className = '_DataTableWidget'
     attributeName = KlassTable._pluralLinkName
 
     defaultHidden = []
     _internalColumns = []
-    _hiddenColumns = []
 
     _defaultEditable = False
     _enableCopyCell = True
@@ -389,7 +387,6 @@ class _TableWidget(Table):
         self._initTableCommonWidgets(parent, **kwds)
 
         # initialise the currently attached dataFrame
-        self._hiddenColumns = []
         self.dataFrameObject = None
 
         # initialise the table
@@ -399,6 +396,7 @@ class _TableWidget(Table):
 
         self.moduleParent = moduleParent
 
+        # Save/restore of hidden-columns doesn't make sense here yet, as core-object dataTables may all be different
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()
 
@@ -468,7 +466,7 @@ class _TableWidget(Table):
     #=========================================================================================
 
     def mousePressEvent(self, e: QtGui.QMouseEvent) -> None:
-        super(_TableWidget, self).mousePressEvent(e)
+        super(_DataTableWidget, self).mousePressEvent(e)
 
         self.setCurrent()
 

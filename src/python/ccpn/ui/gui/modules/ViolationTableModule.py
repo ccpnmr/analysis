@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-06-19 15:10:20 +0100 (Wed, June 19, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-06-21 19:48:44 +0100 (Fri, June 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -47,12 +47,15 @@ from ccpn.ui.gui.widgets.table.Table import Table
 # from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 from ccpn.core.lib.Notifiers import Notifier
+from ccpn.framework.Application import getApplication
 from ccpn.util.Logging import getLogger
 
 
 ALL = '<all>'
 _RESTRAINTTABLE = 'restraintTable'
 LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
+_TABLES = 'tables'
+_HIDDENCOLUMNS = 'hiddenColumns'
 
 
 #=========================================================================================
@@ -62,13 +65,11 @@ LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
 class ViolationTableModule(CcpnTableModule):
     """This class implements the module by wrapping a ViolationTable instance
     """
+    className = 'ViolationTableModule'
     includeSettingsWidget = True
     maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
     settingsPosition = 'top'
-
-    className = f'{KlassTable.className}Module'
     _allowRename = True
-
     activePulldownClass = KlassTable
     _includeInLastSeen = False
 
@@ -130,12 +131,12 @@ class ViolationTableModule(CcpnTableModule):
         # self._splitter.setSizes([1000, 2000])
 
         # add the guiTable to the bottom
-        self._tableWidget = _TableWidget(parent=_bottomWidget,
-                                         mainWindow=self.mainWindow,
-                                         moduleParent=self,
-                                         setLayout=True,
-                                         showVerticalHeader=False,
-                                         grid=(0, 0))
+        self._tableWidget = _ViolationTableWidget(parent=_bottomWidget,
+                                                  mainWindow=self.mainWindow,
+                                                  moduleParent=self,
+                                                  setLayout=True,
+                                                  showVerticalHeader=False,
+                                                  grid=(0, 0))
 
         Spacer(_topWidget, 5, 5,
                QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
@@ -232,9 +233,10 @@ class ViolationTableModule(CcpnTableModule):
         """
         CCPN-INTERNAL: used to close the module
         """
-        # TODO DT Test save columns
         if self._modulePulldown:
             self._modulePulldown.unRegister()
+        if self._tableWidget:
+            self._tableWidget._close()
         if self.rtWidget:
             self.rtWidget.unRegister()
         if self._metadata:
@@ -278,16 +280,16 @@ class ViolationTableModule(CcpnTableModule):
         """Notifier Callback for selecting restraintTable from the pull down menu
         """
         try:
+            if not self._table:
+                return
             with undoBlockWithoutSideBar():
                 self._table._restraintTableLink = item
-
+            _df = pd.DataFrame({'name'     : self._table.metadata.keys(),
+                                'parameter': self._table.metadata.values()})
+            self._metadata.updateDf(_df, resize=True, setOnHeaderOnly=True)
         except Exception as es:
             # need to immediately set back to stop error on loseFocus which also fires editingFinished
             showWarning('Violation Table', str(es))
-
-        _df = pd.DataFrame({'name'     : self._table.metadata.keys(),
-                            'parameter': self._table.metadata.values()})
-        self._metadata.updateDf(_df, resize=True, setOnHeaderOnly=True)
 
     def _update(self):
         """Update the table
@@ -315,6 +317,7 @@ class ViolationTableModule(CcpnTableModule):
         _df = pd.DataFrame({'name'     : self._table.metadata.keys(),
                             'parameter': self._table.metadata.values()})
         self._metadata.updateDf(_df, resize=True, setOnHeaderOnly=True)
+        self._tableWidget.postUpdateDf()  # populateTable is skipped
 
     def _updateEmptyTable(self):
         """Update with an empty table
@@ -326,6 +329,7 @@ class ViolationTableModule(CcpnTableModule):
         _df = pd.DataFrame({'name'     : [],
                             'parameter': []})
         self._metadata.updateDf(_df, resize=True, setOnHeaderOnly=True)
+        self._tableWidget.postUpdateDf()  # populateEmptyTable is skipped
 
     def _applyComment(self):
         """Set the values in the violationTable
@@ -406,16 +410,15 @@ class ViolationTableModule(CcpnTableModule):
 # _TableWidget
 #=========================================================================================
 
-class _TableWidget(Table):
+class _ViolationTableWidget(Table):
     """
     Class to present a ViolationTable
     """
-    className = '_TableWidget'
+    className = '_ViolationTableWidget'
     attributeName = KlassTable._pluralLinkName
 
     defaultHidden = []
     _internalColumns = []
-    _hiddenColumns = []
 
     _defaultEditable = False
     _enableCopyCell = True
@@ -434,17 +437,14 @@ class _TableWidget(Table):
             self.project = mainWindow.application.project
             self.current = mainWindow.application.current
         else:
-            self.application = None
-            self.project = None
-            self.current = None
-
+            self.application = self.project = self.current = None
+        self.className  =self.__class__.__name__
         kwds['setLayout'] = True
 
         # Initialise the scroll widget and common settings
         self._initTableCommonWidgets(parent, **kwds)
 
         # initialise the currently attached dataFrame
-        self._hiddenColumns = []
         self.dataFrameObject = None
 
         # initialise the table
@@ -454,11 +454,18 @@ class _TableWidget(Table):
 
         self.moduleParent = moduleParent
 
+        self.headerColumnMenu.setInternalColumns(self._internalColumns)
+        self.headerColumnMenu.setDefaultColumns(self.defaultHidden)
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()
 
         # may refactor the remaining modules so this isn't needed
         self._widgetScrollArea.setFixedHeight(self._widgetScrollArea.sizeHint().height())
+
+    def setClassDefaultColumns(self, texts):
+        """set a list of default column-headers that are hidden when first shown.
+        """
+        self.headerColumnMenu.saveColumns(texts)
 
     #=========================================================================================
     # Selection/action callbacks
@@ -523,7 +530,7 @@ class _TableWidget(Table):
     #=========================================================================================
 
     def mousePressEvent(self, e: QtGui.QMouseEvent) -> None:
-        super(_TableWidget, self).mousePressEvent(e)
+        super(_ViolationTableWidget, self).mousePressEvent(e)
 
         self.setCurrent()
 

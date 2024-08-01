@@ -5,8 +5,9 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,15 +15,14 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-05-29 15:59:29 +0100 (Wed, May 29, 2024) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-06-27 10:35:17 +0100 (Thu, June 27, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
-
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -35,8 +35,8 @@ from ccpn.util.Logging import getLogger
 
 logger = getLogger()
 
-##QT_MAC_WANTS_LAYER: Patch for MacOs >= 11. Without this flag, Testing widgets/windows from PyQt5 don't show at all.
-# Edit: 26-06-2023 With this flag set the QtwebEngine doesn't show/load the html page.
+##QT_MAC_WANTS_LAYER: Patch for MacOS >= 11. Without this flag, Testing widgets/windows from PyQt5 don't show at all.
+# Edit: 26-06-2023 With this flag set the QtWebEngine doesn't show/load the html page.
 os.environ['QT_MAC_WANTS_LAYER'] = '1'
 
 
@@ -157,32 +157,32 @@ def newTestApplication(projectPath=None, useTestProjects=False, skipUserPreferen
         builtins._skipExecuteLoop = True
 
     # build new ccpn application/project
-    _framework = Framework.createFramework(projectPath=projectPath, noLogging=noLogging, noDebugLogging=noDebugLogging,
-                                           noEchoLogging=noEchoLogging,
-                                           _skipUpdates=True,
-                                           skipUserPreferences=skipUserPreferences,
-                                           interface=interface, debug=debug,
-                                           lightColourScheme=True, darkColourScheme=False)
-    _project = _framework.project
+    app._framework = Framework.createFramework(projectPath=projectPath, noLogging=noLogging,
+                                               noDebugLogging=noDebugLogging,
+                                               noEchoLogging=noEchoLogging,
+                                               _skipUpdates=True,
+                                               skipUserPreferences=skipUserPreferences,
+                                               interface=interface, debug=debug,
+                                               lightColourScheme=True, darkColourScheme=False)
+    _project = app._framework.project
     if _project is None:
         raise RuntimeError(f"No project found for project path {projectPath}")
 
     # initialise the undo stack
-    _project._resetUndo(debug=True, application=_framework)
+    _project._resetUndo(debug=True, application=app._framework)
     _project._undo.debug = True
 
-    app.project = _project
-
+    # app.project = _project  # why? just store framework
     # return the new project
     return app
 
 
 if __name__ == '__main__':
-    app = TestApplication()
+    qtApp = TestApplication()
     w = QtWidgets.QWidget()
     w.resize(250, 150)
     w.move(300, 300)
     w.setWindowTitle('testApplication')
     w.show()
 
-    app.start()
+    qtApp.start()

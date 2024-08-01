@@ -9,9 +9,10 @@ work of loading the data into the project.
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -19,9 +20,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-06 22:35:43 +0100 (Fri, October 06, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-07-25 10:11:17 +0100 (Thu, July 25, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -36,7 +37,7 @@ from typing import Tuple
 
 from ccpn.util.Path import Path, aPath
 from ccpn.util.traits.TraitBase import TraitBase
-from ccpn.util.traits.CcpNmrTraits import Unicode, Any, List, Bool, CPath, Odict, CString
+from ccpn.util.traits.CcpNmrTraits import Unicode, Any, List, Bool, CPath, Odict, CString, Int
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import singleton
 
@@ -55,13 +56,13 @@ SPARKYFILE = 'sparkyFile'
 from ccpn.framework.constants import NO_SUFFIX, ANY_SUFFIX
 
 
-def getDataLoaders() -> dict:
+def getDataLoaders() -> OrderedDict:
     """Get data loader classes
     :return: a dictionary of (format-identifier-strings, DataLoader classes) as (key, value) pairs
     """
     #--------------------------------------------------------------------------------------------
     # The following imports are just to assure that all the classes have been imported
-    # hierarchy matters!
+    # hierarchy matters! but, a priority can be specified to help ordering
     # It is local to prevent circular imports
     #--------------------------------------------------------------------------------------------
     from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
@@ -77,6 +78,7 @@ def getDataLoaders() -> dict:
     from ccpn.framework.lib.DataLoaders.PythonDataLoader import PythonDataLoader
     from ccpn.framework.lib.DataLoaders.HtmlDataLoader import HtmlDataLoader
     from ccpn.framework.lib.DataLoaders.SparkyDataLoader import SparkyDataLoader
+    from ccpn.framework.lib.DataLoaders.MmcifDataLoader import MmcifDataLoader
     from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
 
     return DataLoaderABC._dataLoaders
@@ -91,7 +93,7 @@ def getSpectrumLoaders() -> dict:
 
 
 @singleton
-class DataLoaderSuffixDict(dict):
+class DataLoaderSuffixDict(OrderedDict):
     """A class to contain a dict of (suffix, [DataLoader class]-list)
     (key, value) pairs;
 
@@ -163,7 +165,7 @@ def _getPotentialDataLoaders(path) -> list:
 
 def _checkPathForDataLoader(path, formatFilter=None) -> list:
     """Check path if it corresponds to any defined data format.
-    Optionally only include only dataLoader with dataFormat in filter (default: all dataFormats; i.e.
+    Optionally only include dataLoader with dataFormat in filter (default: all dataFormats; i.e.
     no filtering).
 
     :param formatFilter: a tuple/list of dataFormat strings of formats to select for
@@ -254,25 +256,34 @@ class DataLoaderABC(TraitBase):
     # project related
     createNewProject = Bool(default_value=False).tag(info='flag to indicate if a new project will be created')
     newProjectName = CString(default_value='newProject').tag(info='Name for a new project')
-    makeArchive = Bool(default_value=False).tag(info='flag to indicate if a project needs to be archived before loading')
+    makeArchive = Bool(default_value=False).tag(
+        info='flag to indicate if a project needs to be archived before loading')
 
     # new implementation, using newFromPath method and validity testing later on
     isValid = Bool(default_value=False).tag(info='flag to indicate if path denotes a valid dataType')
-    shouldBeValid = Bool(default_value=False).tag(info='flag to indicate that path should denotes a valid dataType, but some elements are missing')
+    shouldBeValid = Bool(default_value=False).tag(
+        info='flag to indicate that path should denotes a valid dataType, but some elements are missing')
     errorString = CString(default_value='').tag(info='error description for validity testing')
-
     ignore = Bool(default_value=False).tag(info='flag to indicate if loader needs ignoring')
 
     # A dict of registered DataLoaders: filled by _registerFormat classmethod, called
     # once after each definition of a new derived class (e.g. PdbDataLoader)
     _dataLoaders = OrderedDict()
+    priority = 0  # priority to order the loaders as there are registered, 0 is lowest and processed last
 
     @classmethod
     def _registerFormat(cls):
-        """register cls.dataFormat"""
+        """register cls.dataFormat
+        """
         if cls.dataFormat in DataLoaderABC._dataLoaders:
             raise RuntimeError('dataLoader "%s" was already registered' % cls.dataFormat)
-        DataLoaderABC._dataLoaders[cls.dataFormat] = cls
+        # get the OrderedDict of higher priority dataLoaders
+        higher = OrderedDict((k, v) for k, v in DataLoaderABC._dataLoaders.items() if v.priority >= cls.priority)
+        # get the OrderedDict of lower priority dataLoaders
+        lower = OrderedDict((k, v) for k, v in DataLoaderABC._dataLoaders.items() if v.priority < cls.priority)
+        DataLoaderABC._dataLoaders.clear()
+        # insert the new cls in the middle
+        DataLoaderABC._dataLoaders |= (higher | OrderedDict([(cls.dataFormat, cls)]) | lower)
 
     #=========================================================================================
     # start of methods
@@ -457,7 +468,13 @@ class DataLoaderABC(TraitBase):
         return result
 
     def __str__(self):
-        return '<%s: %s>' % (self.__class__.__name__, self.path)
+        if self.isValid:
+            _valid = 'valid'
+        elif self.shouldBeValid:
+            _valid = 'shouldBeValid'
+        else:
+            _valid = 'invalid'
+        return f'<{self.__class__.__name__}: {self.path}, {_valid}>'
 
     __repr__ = __str__
 
@@ -473,5 +490,6 @@ class NotFoundDataLoader(DataLoaderABC):
         if not super().checkValid():
             return False
         # Path was valid; set general other error message
+        self.shouldBeValid = False
         self.isValid = False
         self.errorString = f'{self.path}: unable to identify a valid dataLoader'

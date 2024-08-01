@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-06-19 15:10:19 +0100 (Wed, June 19, 2024) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-06-20 16:42:22 +0100 (Thu, June 20, 2024) $"
 __version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
@@ -175,7 +175,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
                       OR __init__ with closeFunc=<your close function>
     """
-    className = ''  # used for restoring GUI layouts
+    className = None  # used for restoring GUI layouts
     shortClassName = PidShortClassName  # used to create the pid
     longClassName = PidLongClassName  # used to create the long pid
     HORIZONTAL = 'horizontal'
@@ -205,13 +205,14 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self.maximised = False
         self.maximiseRestoreState = None
         self._defaultName = name
+        if self.className is None:
+            # get the class-name from the class
+            self.className = self.__class__.__name__
 
         self.area = None
         self.mainWindow = mainWindow
-
         if self.mainWindow is not None:
             self.area = mainWindow.moduleArea
-
         super().__init__(name=name, area=self.area,
                          autoOrientation=False,
                          closable=closable)
@@ -1595,19 +1596,45 @@ class BorderOverlay(QtWidgets.QWidget):
         p.end()
 
 
+#=========================================================================================
+# CcpnTableModule
+#=========================================================================================
+
 class CcpnTableModule(CcpnModule):
-    def __init__(self, mainWindow=None, name=None, *args, **kwds):
+    def __init__(self, mainWindow, name, *args, **kwds):
         super().__init__(mainWindow=mainWindow, name=name, *args, **kwds)
 
-    @property
-    def hiddenColumns(self):
-        return self._tableWidget.headerColumnMenu.hiddenColumns
+    @CcpnModule.widgetsState.getter
+    def widgetsState(self):
+        """Add extra parameters to the state-dict for hidden-columns.
+        """
+        state = super().widgetsState
+        if self._hiddenColumns is not None:
+            state |= {'_hiddenColumns': self._hiddenColumns}
+        return state
 
-    @hiddenColumns.setter
-    def hiddenColumns(self, value: list):
+    @property
+    def _hiddenColumns(self) -> list[str] | None:
+        """Return the hidden-columns for the primary table-widget.
+        If undefined, returns None.
+        """
+        with contextlib.suppress(Exception):
+            return self._tableWidget.headerColumnMenu.hiddenColumns
+
+    def _setHiddenColumns(self, value: list[str] | None = None):
+        """Set the hidden-columns for the primary table-widget.
+        """
+        if value is not None:
+            if not isinstance(value, list):
+                raise TypeError(f'{self.__class__.__name__}.hiddenColumns must be list[str] of None')
         self._tableWidget.headerColumnMenu.hiddenColumns = value
 
-    def _saveColumns(self, hiddenColumns: list = None):
+    def _setClassDefaultHidden(self, hiddenColumns: list[str] | None):
+        """Copy the hidden-columns to the class; to be set when the next table is opened.
+        """
+        self._tableWidget.setClassDefaultColumns(hiddenColumns)
+
+    def _saveColumns(self, hiddenColumns: list[str] | None = None):
         """Allows hiddenColumns to be saved to widgetState
 
         Specifically saves to _seenModuleStates dict.
@@ -1617,40 +1644,39 @@ class CcpnTableModule(CcpnModule):
          if blank then will automatically try to use
          self._tableWidget.headerColumnMenu.hiddenColumns to find values
         """
-        widgetState = super().widgetsState
-        if hiddenColumns:
-            widgetState['_hiddenColumns'] = hiddenColumns
+        wState = self.widgetsState  # local state-dict
+        if hiddenColumns is not None:
+            # append hidden-column list
+            wState['_hiddenColumns'] = hiddenColumns
         else:
             try:
-                widgetState['_hiddenColumns'] = self.hiddenColumns
+                wState['_hiddenColumns'] = self._hiddenColumns
+                self._setClassDefaultHidden(self._hiddenColumns)
             except Exception as es:
-                getLogger().warning(f'Table Columns for {self.moduleName} unsaved: {es}')
-                return
+                getLogger().debug(f'Table Columns for {self.moduleName} unsaved: {es}')
 
-        self.area._seenModuleStates[self.className] = {MODULENAME: self.moduleName, WIDGETSTATE: widgetState}
-
-    def _restoreColumns(self, hiddenColumns):
+    def _restoreColumns(self, hiddenColumns: list[str] | None):
+        """Restore the hidden columns from the widgetState dict.
+        """
         try:
-            self.hiddenColumns = hiddenColumns
+            self._setHiddenColumns(hiddenColumns)
         except AssertionError as es:
-            getLogger().warning(f'Could not restore table columns: {es}')
+            getLogger().debug(f'Could not restore table columns: {es}')
 
     def restoreWidgetsState(self, **widgetsState):
         """Subclassed version for tables
         """
         super().restoreWidgetsState(**widgetsState)
-        widgetState = collections.OrderedDict(sorted(widgetsState.items()))
-        self._restoreColumns(widgetState['_hiddenColumns'])
+        try:
+            if (hColumns := widgetsState.get('_hiddenColumns', None)) is not None:
+                self._restoreColumns(hColumns)
+        except Exception as es:
+            print(es)
 
     def _closeModule(self):
         """
         CCPN-INTERNAL: used to close the module
         """
         self._saveColumns()
-        if self._tableWidget:
-            try:
-                self._tableWidget._close()
-            except Exception:
-                getLogger().debug(f'CcpnTableModule: {self.moduleName} closing _tableWidget incorrectly')
         super()._closeModule()
 

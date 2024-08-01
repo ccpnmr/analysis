@@ -4,8 +4,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import collections
 import pandas as pd
+
 from ccpnmodel.ccpncore.api.ccp.molecule.MolStructure import StructureEnsemble as ApiStructureEnsemble
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -62,7 +63,10 @@ class StructureEnsemble(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiStructureEnsemble._metaclass.qualifiedName()
 
+    #=========================================================================================
     # CCPN properties
+    #=========================================================================================
+
     @property
     def _apiStructureEnsemble(self) -> ApiStructureEnsemble:
         """ CCPN api StructureEnsemble matching StructureEnsemble"""
@@ -119,6 +123,31 @@ class StructureEnsemble(AbstractWrapperObject):
 
         value._containingObject = self
 
+    #=========================================================================================
+    # property STUBS: hot-fixed later
+    #=========================================================================================
+
+    @property
+    def models(self) -> list['Model']:
+        """STUB: hot-fixed later
+        :return: a list of models in the StructureEnsemble
+        """
+        return []
+
+    #=========================================================================================
+    # getter STUBS: hot-fixed later
+    #=========================================================================================
+
+    def getModel(self, relativeId: str) -> 'Model | None':
+        """STUB: hot-fixed later
+        :return: an instance of Model, or None
+        """
+        return None
+
+    #=========================================================================================
+    # Core methods
+    #=========================================================================================
+
     def resetModels(self):
         """Remove models without data, add models to reflect modelNumbers present"""
         data = self.data
@@ -138,15 +167,6 @@ class StructureEnsemble(AbstractWrapperObject):
                     _model = self.newModel()
                     _model._resetSerial(modelNumber)
 
-    #=========================================================================================
-    # Implementation functions
-    #=========================================================================================
-
-    @classmethod
-    def _getAllWrappedData(cls, parent: Project) -> list:
-        """get wrappedData for all NmrConstraintStores linked to NmrProject"""
-        return parent._wrappedData.molSystem.sortedStructureEnsembles()
-
     @renameObject()
     @logCommand(get='self')
     def rename(self, value: str):
@@ -154,6 +174,15 @@ class StructureEnsemble(AbstractWrapperObject):
         NB, the serial remains immutable.
         """
         return self._rename(value)
+
+    #=========================================================================================
+    # Implementation methods
+    #=========================================================================================
+
+    @classmethod
+    def _getAllWrappedData(cls, parent: Project) -> list:
+        """get wrappedData for all NmrConstraintStores linked to NmrProject"""
+        return parent._wrappedData.molSystem.sortedStructureEnsembles()
 
     @classmethod
     def _restoreObject(cls, project, apiObj):
@@ -176,14 +205,11 @@ class StructureEnsemble(AbstractWrapperObject):
 
             else:
                 # make sure that data is the correct type
-                getLogger().debug(f'Failed restoring object {result.pid}: data not of type {EnsembleData} - resetting to an empty table')
+                getLogger().debug(
+                        f'Failed restoring object {result.pid}: data not of type {EnsembleData} - resetting to an empty table')
                 result.data = EnsembleData()
 
         return result
-
-    #=========================================================================================
-    # CCPN functions
-    #=========================================================================================
 
     #===========================================================================================
     # new<Object> and other methods

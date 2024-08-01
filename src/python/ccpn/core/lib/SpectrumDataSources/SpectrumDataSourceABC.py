@@ -1431,7 +1431,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         else:
             return instance
 
-    def _checkFilePath(self, newFile, mode):
+    def _checkFilePath(self, newFile, mode, overwrite=False):
         """Helper function to do checks on path"""
 
         _path = self.path
@@ -1444,7 +1444,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         if newFile and not _path.parent.exists():
             raise FileNotFoundError(f'parent path "{_path.parent}" does not exist')
 
-        if newFile and _path.exists() and mode != self.defaultAppendMode:
+        if newFile and _path.exists() and not overwrite and mode != self.defaultAppendMode:
             raise FileExistsError('path "%s" exists (mode=%s)' % (_path, mode))
 
     def getAllFilePaths(self) -> list:
@@ -1521,7 +1521,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             self.closeFile()
 
     @contextmanager
-    def openNewFile(self, path=None, mode=None):
+    def openNewFile(self, path=None, mode=None, overwrite=False):
         """Open new file, write parameters, and close at the end
         Yields self; i.e. one can do:
 
@@ -1537,7 +1537,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         try:
             self.closeFile()  # Will close if open disgarding everything, do nothing otherwise
             getLogger().debug('%s.openNewFile: calling openFile' % self.__class__.__name__)
-            self.openFile(mode=mode)
+            self.openFile(mode=mode, overwrite=overwrite)
             yield self
 
         except Exception as es:

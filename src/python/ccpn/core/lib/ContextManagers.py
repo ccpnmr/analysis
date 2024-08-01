@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-22 14:13:02 +0100 (Wed, May 22, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-07-04 18:51:59 +0100 (Thu, July 04, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -229,7 +229,7 @@ def catchExceptions(application=None, errorStringTemplate='Error: "%s"', popupAs
 
 
 @contextmanager
-def rebuildSidebar(application):
+def rebuildSidebar(application=None):
     """
     This context manager clears and blocks the sidebar and rebuilds it afterwards
     """
@@ -842,7 +842,7 @@ def newObjectList(klasses):
                 results = func(*args, **kwds)
                 if not results or results[0].__class__.__name__ != klasses[0]:
                     raise RuntimeError(
-                        f'Expected an object of class {repr(klasses[0])}, obtained {results[0].__class__}')
+                            f'Expected an object of class {repr(klasses[0])}, obtained {results[0].__class__}')
 
                 for result in results:
                     if result.__class__.__name__ not in klasses:
@@ -1124,110 +1124,90 @@ def renameObjectNoBlanking(self):
 
 
 @contextmanager
-def progressHandler(title='Progress', text='busy...', minimum=0, maximum=100,
-                    steps=100,
-                    delay=1000, closeDelay=250,
-                    autoClose=True, hideCancelButton=False,
-                    raiseErrors=True):
+def progressHandler(parent=None, *, title: str = 'Progress',
+                    text: str = 'Busy...', cancelButtonText: str = 'Cancel',
+                    minimum: int = 0, maximum: int = 100, steps: int = 100,
+                    delay: int = 1000, closeDelay: int = 250,
+                    hideBar: bool = False, hideCancelButton: bool = False,
+                    raiseErrors: bool = True):
     """A context manager to wrap a method in a progress dialog defined by the current gui state.
     """
     from ccpn.framework.Application import getApplication
 
     application = getApplication()
-    mainWindow = application.ui.mainWindow
-
-    handler = application.ui.getProgressHandler()
-
     try:
+        handler = application.ui.getProgressHandler()
         # get the dialog handler from the gui state - use subclass
-        progress = handler(mainWindow,
-                           title=title, text=text,
-                           steps=steps, minimum=minimum, maximum=maximum,
+        progress = handler(parent,
+                           title=title, text=text, cancelButtonText=cancelButtonText,
+                           minimum=minimum, maximum=maximum, steps=steps,
                            delay=delay, closeDelay=closeDelay,
-                           autoClose=autoClose,
-                           hideCancelButton=hideCancelButton,
+                           hideBar=hideBar, hideCancelButton=hideCancelButton,
                            )
-
         # need this to force the gui to catch up and display the busy dialog
         QtWidgets.QApplication.processEvents()
-
     except Exception as es:
         raise RuntimeError('progressHandler: Error initialising') from es
-
     try:
         # transfer control to the calling function
         yield progress
-
-    except progress.ProgressCancelled:
+    except StopIteration:
         # handle pressing the cancel button, or calling progress.cancel()
         getLogger().debug('progressHandler: cancelled')
-
     except Exception as es:
         # handle other errors
         getLogger().debug(f'progressHandler: {es}')
         progress.error = es
         if raiseErrors:
             raise es
-
     else:
         # set counter to 100%
         progress.finalise()
-
     finally:
-        # set closing conditions here, or call progress.close() if autoClose not set
+        # set closing conditions here, or call progress.close()
         progress.waitForEvents()
 
 
 @contextmanager
-def busyHandler(title='Progress', text='busy...', minimum=0, maximum=100,
-                steps=100,
-                delay=1000, closeDelay=250,
-                autoClose=True, hideCancelButton=True,
-                raiseErrors=True):
+def busyHandler(parent=None, *, title: str = 'Busy',
+                text: str = 'Busy...', cancelButtonText: str = 'Cancel',
+                minimum: int = 0, maximum: int = 100, steps: int = 100,
+                delay: int = 500, closeDelay: int = 250,
+                hideBar: bool = True, hideCancelButton: bool = True,
+                raiseErrors: bool = True):
     """A context manager to wrap a method in a busy dialog defined by the current gui state.
     """
-    from ccpn.framework.Application import getApplication
     from ccpn.ui.gui.widgets.ProgressWidget import BusyDialog
-
-    application = getApplication()
-    mainWindow = application.ui.mainWindow
 
     try:
         # get the dialog handler from the gui state - use subclass
-        progress = BusyDialog(mainWindow,
-                              title=title, text=text,
-                              hideBar=True, hideCancelButton=hideCancelButton,
-                              steps=steps, minimum=minimum, maximum=maximum,
+        progress = BusyDialog(parent,
+                              title=title, text=text, cancelButtonText=cancelButtonText,
+                              minimum=minimum, maximum=maximum, steps=steps,
                               delay=delay, closeDelay=closeDelay,
-                              autoClose=autoClose)
-
+                              hideBar=hideBar, hideCancelButton=hideCancelButton,
+                              )
         # need this to force the gui to catch up and display the busy dialog
         QtWidgets.QApplication.processEvents()
-
     except Exception as es:
         raise RuntimeError('busyHandler: Error initialising') from es
-
     try:
         # transfer control to the calling function
         yield progress
-
-    except progress.ProgressCancelled:
+    except StopIteration:
         # handle pressing the cancel button, or calling progress.cancel()
         getLogger().debug('busyHandler: cancelled')
-
     except Exception as es:
         # handle other errors
         getLogger().debug(f'busyHandler: {es}')
         progress.error = es
         if raiseErrors:
             raise es
-
     else:
         # set counter to 100%
         progress.finalise()
-
     finally:
-        # set closing conditions here, or call progress.close() if autoClose not set
+        # set closing conditions here, or call progress.close()
         progress.waitForEvents()
 
 

@@ -3,19 +3,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:37 +0100 (Tue, July 05, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2024-03-21 16:17:11 +0000 (Thu, March 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,15 +26,14 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from typing import Sequence, Tuple, Union
-import collections
 
+from ccpnmodel.ccpncore.api.ccp.nmr import NmrConstraint
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.RestraintTable import RestraintTable
 from ccpn.core.Peak import Peak
-from ccpnmodel.ccpncore.api.ccp.nmr import NmrConstraint
-from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject
+from ccpn.util.decorators import logCommand
 
 
 class Restraint(AbstractWrapperObject):
@@ -61,7 +60,10 @@ class Restraint(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = NmrConstraint.AbstractConstraint._metaclass.qualifiedName()
 
+    #=========================================================================================
     # CCPN properties
+    #=========================================================================================
+
     @property
     def _apiConstraint(self) -> NmrConstraint.AbstractConstraint:
         """ CCPN API Constraint matching Restraint"""
@@ -218,17 +220,38 @@ class Restraint(AbstractWrapperObject):
         self._wrappedData.figureOfMerit = value
 
     #=========================================================================================
-    # Implementation functions
+    # property STUBS: hot-fixed later
+    #=========================================================================================
+
+    @property
+    def restraintContributions(self) -> list['RestraintContribution']:
+        """STUB: hot-fixed later
+        :return: a list of restraintContributions in the Restraint
+        """
+        return []
+
+    #=========================================================================================
+    # getter STUBS: hot-fixed later
+    #=========================================================================================
+
+    def getRestraintContribution(self, relativeId: str) -> 'RestraintContribution | None':
+        """STUB: hot-fixed later
+        :return: an instance of RestraintContribution, or None
+        """
+        return None
+
+    #=========================================================================================
+    # Core methods
+    #=========================================================================================
+
+    #=========================================================================================
+    # Implementation methods
     #=========================================================================================
 
     @classmethod
     def _getAllWrappedData(cls, parent: RestraintTable) -> list:
         """get wrappedData - all Constraint children of parent ConstraintList"""
         return parent._wrappedData.sortedConstraints()
-
-    #=========================================================================================
-    # CCPN functions
-    #=========================================================================================
 
     #===========================================================================================
     # new<Object> and other methods
@@ -237,10 +260,10 @@ class Restraint(AbstractWrapperObject):
 
     @logCommand(get='self')
     def newRestraintContribution(self, targetValue: float = None, error: float = None,
-                                  weight: float = 1.0, upperLimit: float = None, lowerLimit: float = None,
-                                  additionalUpperLimit: float = None, additionalLowerLimit: float = None,
-                                  scale: float = 1.0, isDistanceDependent: bool = False, combinationId: int = None,
-                                  restraintItems: Sequence = (), **kwds):
+                                 weight: float = 1.0, upperLimit: float = None, lowerLimit: float = None,
+                                 additionalUpperLimit: float = None, additionalLowerLimit: float = None,
+                                 scale: float = 1.0, isDistanceDependent: bool = False, combinationId: int = None,
+                                 restraintItems: Sequence = (), **kwds):
         """Create new RestraintContribution within Restraint.
 
         See the RestraintContribution class for details.
@@ -264,10 +287,13 @@ class Restraint(AbstractWrapperObject):
         from ccpn.core.RestraintContribution import _newRestraintContribution
 
         return _newRestraintContribution(self, targetValue=targetValue, error=error,
-                                  weight=weight, upperLimit=upperLimit, lowerLimit=lowerLimit,
-                                  additionalUpperLimit=additionalUpperLimit, additionalLowerLimit=additionalLowerLimit,
-                                  scale=scale, isDistanceDependent=isDistanceDependent, combinationId=combinationId,
-                                  restraintItems=restraintItems, **kwds)
+                                         weight=weight, upperLimit=upperLimit, lowerLimit=lowerLimit,
+                                         additionalUpperLimit=additionalUpperLimit,
+                                         additionalLowerLimit=additionalLowerLimit,
+                                         scale=scale, isDistanceDependent=isDistanceDependent,
+                                         combinationId=combinationId,
+                                         restraintItems=restraintItems, **kwds)
+
 
 #=========================================================================================
 # Connections to parents:
@@ -299,6 +325,7 @@ Peak.restraints = property(getter, setter, None,
 del getter
 del setter
 
+
 #=========================================================================================
 
 @newObject(Restraint)
@@ -318,7 +345,7 @@ def _newRestraint(self: RestraintTable, figureOfMerit: float = None, comment: st
     :param vectorLength:
     :return: a new Restraint instance.
     """
-    dd = {'figureOfMerit': figureOfMerit, 'vectorLength': vectorLength, 'details': comment,}
+    dd = {'figureOfMerit': figureOfMerit, 'vectorLength': vectorLength, 'details': comment, }
 
     if peaks:
         getByPid = self._project.getByPid
@@ -364,21 +391,6 @@ def _createSimpleRestraint(self: RestraintTable, comment: str = None, figureOfMe
     :param restraintItems:
     :return: a new Restraint instance.
     """
-
-    # defaults = collections.OrderedDict(
-    #         (
-    #             ('comment', None), ('figureOfMerit', None), ('peaks', ()), ('targetValue', None), ('error', None), ('weight', 1.0),
-    #             ('upperLimit', None), ('lowerLimit', None), ('additionalUpperLimit', None),
-    #             ('additionalLowerLimit', None), ('scale', 1.0), ('vectorLength', None), ('restraintItems', ()),
-    #             )
-    #         )
-    # values = locals().copy()
-    # if peaks:
-    #     getByPid = self._project.getByPid
-    #     peaks = [(getByPid(x) if isinstance(x, str) else x) for x in peaks]
-        # this doesn't appear to be used
-        # values['peaks'] = tuple(pk.pid for pk in peaks if isinstance(pk, Peak))
-
     restraint = _newRestraint(self, comment=comment, peaks=peaks, figureOfMerit=figureOfMerit,
                               vectorLength=vectorLength, )
     restraint.newRestraintContribution(targetValue=targetValue, error=error, weight=weight,

@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-06-19 15:10:19 +0100 (Wed, June 19, 2024) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-06-20 16:42:22 +0100 (Thu, June 20, 2024) $"
 __version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,7 @@ from PyQt5 import QtWidgets, QtCore
 from collections import OrderedDict
 from dataclasses import dataclass
 from functools import partial
+import contextlib
 
 from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Multiplet import Multiplet
@@ -72,13 +73,11 @@ class _PeakList:
 class MultipletTableModule(CcpnTableModule):
     """This class implements the module by wrapping a MultipletTable instance
     """
+    className = 'MultipletTableModule'
     includeSettingsWidget = True
     maxSettingsState = 2
     settingsPosition = 'top'
-
     activePulldownClass = MultipletList
-
-    className = 'MultipletTableModule'
     _allowRename = True
 
     def __init__(self, mainWindow=None, name='Multiplet Table',
@@ -107,14 +106,15 @@ class MultipletTableModule(CcpnTableModule):
         self._settings = None
         if self.activePulldownClass:
             # add to settings widget - see sequenceGraph for more detailed example
-            settingsDict = OrderedDict(((LINKTOPULLDOWNCLASS, {'label'   : 'Link to current %s' % self.activePulldownClass.className,
-                                                               'tipText' : 'Set/update current %s when selecting from pulldown' % self.activePulldownClass.className,
-                                                               'callBack': None,
-                                                               'enabled' : True,
-                                                               'checked' : False,
-                                                               '_init'   : None,
-                                                               }),
-                                        ))
+            settingsDict = OrderedDict(
+                    ((LINKTOPULLDOWNCLASS, {'label'   : 'Link to current %s' % self.activePulldownClass.className,
+                                            'tipText' : 'Set/update current %s when selecting from pulldown' % self.activePulldownClass.className,
+                                            'callBack': None,
+                                            'enabled' : True,
+                                            'checked' : False,
+                                            '_init'   : None,
+                                            }),
+                     ))
             self._settings = ModuleSettingsWidget(parent=settingsWidget, mainWindow=self.mainWindow,
                                                   settingsDict=settingsDict,
                                                   grid=(0, 0))
@@ -126,11 +126,11 @@ class MultipletTableModule(CcpnTableModule):
         outerFrame.getLayout().addWidget(splitter)
 
         # add the frame containing the pulldown and table
-        self._mainFrame = MultipletTableFrame(parent=mainWidget,
-                                              mainWindow=self.mainWindow,
-                                              moduleParent=self,
-                                              multipletList=multipletList, selectFirstItem=selectFirstItem,
-                                              grid=(0, 0))
+        self._mainFrame = _MultipletTableFrame(parent=mainWidget,
+                                               mainWindow=self.mainWindow,
+                                               moduleParent=self,
+                                               multipletList=multipletList, selectFirstItem=selectFirstItem,
+                                               grid=(0, 0))
 
         # # make the table expand to fill the frame
         # self._tableWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
@@ -195,24 +195,50 @@ class MultipletTableModule(CcpnTableModule):
     def _closeModule(self):
         """CCPN-INTERNAL: used to close the module
         """
-        self.tableFrame._cleanupWidget()
-        self.peakListTable._close()
+        if self.tableFrame:
+            self.tableFrame._cleanupWidget()
+        if self.peakListTable:
+            self.peakListTable._close()
         if self.activePulldownClass and self._setCurrentPulldown:
             self._setCurrentPulldown.unRegister()
         super()._closeModule()
 
-    def _saveColumns(self, hiddenColumns : list = None):
-        if not hiddenColumns:
-            hiddenColumns = [self._tableWidget.headerColumnMenu.hiddenColumns,
-                             self.peakListTable.headerColumnMenu.hiddenColumns]
-        super()._saveColumns(hiddenColumns=hiddenColumns)
+    @property
+    def _hiddenColumns(self) -> list[list[str], list[str]] | None:
+        """Return the hidden-columns for the multiplet-table and the attached peak-table.
+        If undefined, returns None.
+        """
+        with contextlib.suppress(Exception):
+            return [self._tableWidget.headerColumnMenu.hiddenColumns,
+                    self.peakListTable.headerColumnMenu.hiddenColumns]
 
-    def _restoreColumns(self, hiddenColumns):
-        try:
-            self._tableWidget.headerColumnMenu.hiddenColumns = hiddenColumns[0]
-            self.peakListTable.headerColumnMenu.hiddenColumns = hiddenColumns[1]
-        except AssertionError as es:
-            getLogger().warning(f'Could not restore table columns: {es}')
+    # @hiddenColumns.setter
+    def _setHiddenColumns(self, value: list[list[str], list[str]] | None = None):
+        """Set the hidden-columns for the multiplet-table and the attached peak-table.
+        """
+        if value is not None:
+            if not (isinstance(value, list) and len(value) == 2 and
+                    (isinstance(ll, list) and all(isinstance(lStr, str) for lStr in ll)
+                     for ll in value)):
+                raise TypeError(f'{self.__class__.__name__}.hiddenColumns must be list[list[str], list[str]] or None')
+            try:
+                self._tableWidget.headerColumnMenu.hiddenColumns = value[0]
+                self.peakListTable.headerColumnMenu.hiddenColumns = value[1]
+                return
+            except Exception as es:
+                getLogger().debug(f'Could not restore table columns: {es}')
+        self._tableWidget.headerColumnMenu.hiddenColumns = []
+        self.peakListTable.headerColumnMenu.hiddenColumns = []
+
+    def _setClassDefaultHidden(self, hiddenColumns: list[list[str], list[str]] | None):
+        """Copy the hidden-columns to the class; to be set when the next table is opened.
+        """
+        if hiddenColumns is not None:
+            self._tableWidget.setClassDefaultColumns(hiddenColumns[0])
+            self.peakListTable.setClassDefaultColumns(hiddenColumns[1])
+        else:
+            self._tableWidget.setClassDefaultColumns([])
+            self.peakListTable.setClassDefaultColumns([])
 
     @QtCore.pyqtSlot(str)
     def _pulldownUnitsCallback(self, unit):
@@ -240,9 +266,8 @@ class _NewMultipletTableWidget(_CoreTableWidgetABC):
     """
     updateLinkedTable = QtCore.pyqtSignal(_PeakList)
 
-    className = 'MultipletTable'
+    className = '_NewMultipletTableWidget'
     attributeName = 'multipletLists'
-
     defaultHidden = ['Pid', 'Spectrum', 'MultipletList', 'Id']
     _internalColumns = ['isDeleted', '_object']  # columns that are always hidden
 
@@ -265,6 +290,7 @@ class _NewMultipletTableWidget(_CoreTableWidgetABC):
     _maximumQueueLength = 25
 
     positionsUnit = UNITS[0]  # default
+    _lastPeaks = None
 
     #=========================================================================================
     # Properties
@@ -320,14 +346,11 @@ class _NewMultipletTableWidget(_CoreTableWidgetABC):
         if multiplet:
             if len(multiplet.peaks) > 0:
                 peak = multiplet.peaks[-1]
-
                 if self.current.strip is not None:
                     validPeakListViews = [pp.peakList for pp in self.current.strip.peakListViews if
                                           isinstance(pp.peakList, PeakList)]
-
                     if peak.peakList in validPeakListViews:
                         widths = None
-
                         if peak.peakList.spectrum.dimensionCount <= 2:
                             widths = _getCurrentZoomRatio(self.current.strip.viewRange())
                         navigateToPositionInStrip(strip=self.current.strip, positions=multiplet.position, widths=widths)
@@ -336,33 +359,37 @@ class _NewMultipletTableWidget(_CoreTableWidgetABC):
         else:
             logger.warning('Impossible to navigate to peak position. Set a current strip first')
 
-    def selectionCallback(self, selected, deselected, selection, lastItem):
-        """set as current the selected peaks on the table
-        """
-        super().selectionCallback(selected, deselected, selection, lastItem)
-
-        # update the multiplet-peak table
+    def _selectCurrentCallBack(self, data):
+        super()._selectCurrentCallBack(data)
+        # update the multiplet-peak table on internal selection
         self._updateMultipletPeaksOnTable()
 
     def _updateMultipletPeaksOnTable(self):
         """Populate the multiplet-peak-table with the multiplet-peaks
         """
+        # eed to validate whether the table as changed :|
+        selection = self.getSelectedObjects() or []
+        # select the peaks base on the current highlighted multiplets
+        peaks = tuple(OrderedSet(peak for mt in selection for peak in mt.peaks))
+        if peaks == self._lastPeaks:
+            return
+        # create a dummy structure to hold the list of peaks
         newTable = _PeakList()
-
-        if self.current.multiplets:
-            peaks = tuple(OrderedSet(peak for mt in self.current.multiplets for peak in mt.peaks))
-            if len(peaks) > 0:
-                # create a dummy structure to hold the list of peaks
-                newTable.peaks = peaks
-                newTable.spectrum = peaks[0].spectrum
-
+        newTable.peaks = peaks
+        self._lastPeaks = peaks  # cache for changes
+        newTable.spectrum = peaks[0].spectrum if peaks else None
         # signal the multiplet-peak table to update
         func = partial(self.updateLinkedTable.emit, newTable)
         if self._tableBlockingLevel == 0:
             # if not blocked then emit otherwise defer
             func()
         else:
-            self._deferredFuncs.append(partial(self.updateLinkedTable.emit, newTable))
+            self._deferredFuncs.append(func)
+
+    def _update(self):
+        super()._update()
+        # update the multiplet-peak table on changing the pulldown
+        self._updateMultipletPeaksOnTable()
 
     #=========================================================================================
     # Create table and row methods
@@ -382,7 +409,6 @@ class _NewMultipletTableWidget(_CoreTableWidgetABC):
         """Subclass guiTable to add new items to context menu
         """
         super()._setContextMenu()
-
         # add edit multiplet to the menu
         self._tableMenu.insertSeparator(self._tableMenu.actions()[0])
         a = self._tableMenu.addAction('Edit Multiplet...', self._editMultiplets)
@@ -414,8 +440,10 @@ class _NewMultipletTableWidget(_CoreTableWidgetABC):
         columnDefs = [('#', 'serial', 'Multiplet serial number', None, None),
                       ('Pid', lambda ml: ml.pid, 'Pid of the Multiplet', None, None),
                       ('_object', lambda ml: ml, 'Object', None, None),
-                      ('Spectrum', lambda multiplet: multiplet.multipletList.spectrum.id, 'Spectrum containing the Multiplet', None, None),
-                      ('MultipletList', lambda multiplet: multiplet.multipletList.serial, 'MultipletList containing the Multiplet', None, None),
+                      ('Spectrum', lambda multiplet: multiplet.multipletList.spectrum.id,
+                       'Spectrum containing the Multiplet', None, None),
+                      ('MultipletList', lambda multiplet: multiplet.multipletList.serial,
+                       'MultipletList containing the Multiplet', None, None),
                       # ('Id', lambda multiplet: multiplet.serial, 'Multiplet serial', None, None)
                       ]
 
@@ -438,9 +466,9 @@ class _NewMultipletTableWidget(_CoreTableWidgetABC):
             # line-width column
             for i in range(multipletList.spectrum.dimensionCount):
                 linewidthTipTexts = 'Multiplet line width %s' % str(i + 1)
-                columnDefs.append(
-                        ('LW F%s' % str(i + 1), lambda ml, dim=i: getPeakLinewidth(ml, dim), linewidthTipTexts, None, '%0.3f'))
-
+                columnDefs.append(('LW F%s' % str(i + 1),
+                                   lambda ml, dim=i: getPeakLinewidth(ml, dim),
+                                   linewidthTipTexts, None, '%0.3f'))
         # height column
         heightTipText = 'Magnitude of spectrum intensity at multiplet center (interpolated), unless user edited'
         columnDefs.append(('Height', lambda ml: ml.height, heightTipText, None, None))
@@ -538,7 +566,7 @@ class _NewMultipletTableWidget(_CoreTableWidgetABC):
 # MultipletTableFrame
 #=========================================================================================
 
-class MultipletTableFrame(_CoreTableFrameABC):
+class _MultipletTableFrame(_CoreTableFrameABC):
     """Frame containing the pulldown and the table widget
     """
     unitsChanged = QtCore.pyqtSignal(str)

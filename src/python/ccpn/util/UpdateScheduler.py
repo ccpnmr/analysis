@@ -4,9 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-06 13:28:38 +0000 (Fri, January 06, 2023) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2024-03-21 16:29:25 +0000 (Thu, March 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -374,13 +374,19 @@ class _State(Enum):
 #=========================================================================================
 
 import traceback, sys
+import weakref
 from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtCore import pyqtSignal, pyqtSlot
+from PyQt5.QtCore import pyqtSignal as Signal, pyqtSlot as Slot
+from ccpn.ui.gui.guiSettings import consoleStyle
+
+
+_PROGRESS_CALLBACK = 'progress_callback'
 
 
 class WorkerSignals(QtCore.QObject):
     """
     Defines the signals available from a running worker thread.
+    QRunnable is not derived from QObject and does not support signals :|
 
     Supported signals are:
 
@@ -398,10 +404,16 @@ class WorkerSignals(QtCore.QObject):
 
     """
     # Need a wrapper to hold the signals as QRunnable is not a QObject as such
-    finished = pyqtSignal()
-    error = pyqtSignal(tuple)
-    result = pyqtSignal(object)
-    progress = pyqtSignal(int)
+    started = Signal(object)
+    finished = Signal(object)
+    error = Signal(object, tuple)
+    result = Signal(object, object)
+    progress = Signal(object, int)
+
+    def __init__(self, worker):
+        super().__init__()
+        # keep a link to the parent
+        self._worker = weakref.ref(worker)
 
 
 class Worker(QtCore.QRunnable):
@@ -419,73 +431,81 @@ class Worker(QtCore.QRunnable):
     """
 
     def __init__(self, fn, *args, **kwargs):
-        super(Worker, self).__init__()
+        super().__init__()
 
-        print('  MAKE NEW WORKER')
+        print(f'{consoleStyle.fg.green}NEW WORKER ({id(self)}){consoleStyle.reset}')
         # Store constructor arguments (re-used for processing)
-        self.fn = fn
-        self.args = args
-        self.kwargs = kwargs
-        self.signals = WorkerSignals()
+        self._func = fn
+        self._args = args
+        self._kwargs = kwargs
+        # QRunnable class does not support signals
+        self._signals = WorkerSignals(self)
 
         # Add the callback to our kwargs
-        self.kwargs['progress_callback'] = self.signals.progress
+        self._kwargs[_PROGRESS_CALLBACK] = self._signals.progress
 
-    @pyqtSlot()
+    @Slot()
     def run(self):
         """
         Initialise the runner function with passed args, kwargs.
         """
 
         # Retrieve args/kwargs here; and fire processing using them
+        #   pass the worker-thread(self) as the first argument to all signals
         try:
-            result = self.fn(*self.args, **self.kwargs)
+            self._signals.started.emit(self)
+            result = self._func(self, *self._args, **self._kwargs)
         except Exception:
             traceback.print_exc()
             exctype, value = sys.exc_info()[:2]
-            self.signals.error.emit((exctype, value, traceback.format_exc()))
+            self._signals.error.emit(self, (exctype, value, traceback.format_exc()))
         else:
-            self.signals.result.emit(result)  # Return the result of the processing
+            self._signals.result.emit(self, result)  # Return the result of the processing
         finally:
-            self.signals.finished.emit()  # Done
+            self._signals.finished.emit(self)  # Done
 
 
 class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, *args, **kwargs):
-        super(MainWindow, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
-        self.counter = 0
+        self._setWidgets()
 
-        layout = QtWidgets.QVBoxLayout()
+        self._counter = 0
+        self._threadpool = QtCore.QThreadPool.globalInstance()
+        print(f"Multithreading with maximum {self._threadpool.maxThreadCount():d} threads")
 
-        self.l = QtWidgets.QLabel("Start")
-        b = QtWidgets.QPushButton("DANGER!")
-        b.pressed.connect(self.oh_no)
-
-        layout.addWidget(self.l)
-        layout.addWidget(b)
-
-        w = QtWidgets.QWidget()
-        w.setLayout(layout)
-
-        self.setCentralWidget(w)
-
-        self.show()
-
-        self.threadpool = QtCore.QThreadPool.globalInstance()
-        print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
-
-        self.timer = QTimer()
-        self.timer.setInterval(1000)
-        self.timer.timeout.connect(self.recurring_timer)
-        self.timer.start()
+        # set timer to update the label-widget
+        self._timer = QTimer()
+        self._timer.setInterval(1000)
+        self._timer.timeout.connect(self.recurring_timer)
+        self._timer.start()
 
         # create a timer to close the app if there are no threads in the thread-pool
         QTimer.singleShot(3000, self._kill)
 
+        self.show()
+
+    def _setWidgets(self):
+        """Create the widgets in the popup.
+        """
+        layout = QtWidgets.QVBoxLayout()
+
+        self._label = QtWidgets.QLabel("Start")
+        btn = QtWidgets.QPushButton("DANGER!\nDon't press :)")
+        btn.pressed.connect(self.oh_no)
+
+        layout.addWidget(self._label)
+        layout.addWidget(btn)
+
+        widg = QtWidgets.QWidget()
+        widg.setLayout(layout)
+
+        self.setCentralWidget(widg)
+
     def _kill(self):
-        if self.threadpool.activeThreadCount() == 0:
+        if self._threadpool.activeThreadCount() == 0:
             # close the window, will exit exec_
             self.close()
         else:
@@ -493,38 +513,45 @@ class MainWindow(QtWidgets.QMainWindow):
             QTimer.singleShot(0, self._kill)
 
     @staticmethod
-    def progress_fn(n):
-        print("%d%% done" % n)
+    def progress_fn(thread, n):
+        print(f"{consoleStyle.fg.darkyellow}{n:d}% done ({id(thread)}){consoleStyle.reset}")
 
     @staticmethod
-    def execute_this_fn(progress_callback):
+    def execute_this_fn(thread, progress_callback):
         for n in range(5):
             time.sleep(1)
-            progress_callback.emit(int(n * 100 / 4))
+            progress_callback.emit(thread, int(n * 100 / 4))
 
         return "Done."
 
     @staticmethod
-    def print_output(s):
-        print(f'result {s}')
+    def print_start(thread):
+        print(f'{consoleStyle.fg.darkmagenta}started ({id(thread)}){consoleStyle.reset}')
 
     @staticmethod
-    def thread_complete():
-        print("THREAD COMPLETE!")
+    def print_output(thread, s):
+        print(f'{consoleStyle.fg.darkblue}result ({id(thread)}) - {s}{consoleStyle.reset}')
+
+    @staticmethod
+    def thread_complete(thread):
+        print(f"{consoleStyle.fg.blue}THREAD COMPLETE! ({id(thread)}){consoleStyle.reset}")
 
     def oh_no(self):
         # Pass the function to execute
         worker = Worker(self.execute_this_fn)  # Any other args, kwargs are passed to the run function
-        worker.signals.result.connect(self.print_output)
-        worker.signals.finished.connect(self.thread_complete)
-        worker.signals.progress.connect(self.progress_fn)
+        worker._signals.started.connect(self.print_start)
+        worker._signals.result.connect(self.print_output)
+        worker._signals.finished.connect(self.thread_complete)
+        worker._signals.progress.connect(self.progress_fn)
 
         # Execute
-        self.threadpool.start(worker)
+        self._threadpool.start(worker)
+
 
     def recurring_timer(self):
-        self.counter += 1
-        self.l.setText(f'Counter: {self.counter}   {self.threadpool.activeThreadCount()}')
+        self._counter += 1
+        self._label.setText(f'Time:{self._counter}s'
+                            f'Threads:{self._threadpool.activeThreadCount()}')
 
 
 def main():
@@ -533,7 +560,7 @@ def main():
     app.exec_()
 
     QtCore.QThreadPool.globalInstance().waitForDone()
-    print('KILLED :|')
+    print(f'{consoleStyle.fg.red}KILLED :|{consoleStyle.reset}')
 
 
 if __name__ == '__main__':

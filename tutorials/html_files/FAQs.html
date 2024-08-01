@@ -11,31 +11,47 @@
 <div class="headerBar">FAQs</div>
 <div class="tutorial">
 <h2>FAQs</h2>
-<p><a href="#V2Feat">What has happened to my favourite Version 2 features?</a>
-<br><a href="#ShouldISwitch">Should I switch from Version 2 to Version 3?</a>
-<br><a href="#V2toV3">Can I open Version 2 projects in Version 3?</a>
-<br><a href="#V3toV2">Can I open Version 3 projects in Version 2?</a>
-<br><a href="#RemoteWorking">Can I use CcpNmr Analysis remotely?</a>
-<br><a href="#DataTypes">What data types can I load?</a>
-<br><a href="#ChemBuildMol">How can I get a molecule from ChemBuild into CcpNmr Analysis V3?</a>
+    <h4>Installation</h4>
+        <p><a href="#MacQuarentine">My Mac says "macOS cannot verify the developer... Are you sure you want to open it?". What can I do?</a>
+        <br><a href="#M1M2Mac">The program won't run on my M1/M2 Mac. What can I do?</a>
+        <br><a href="#Windows">The program won't run on my Windows computer. What can I do?</a>
+        <br><a href="#RemoteWorking">Can I use CcpNmr Analysis remotely?</a></p>
+    <h4>Opening files</h4>
+        <p><a href="#DataTypes">What data types can I load?</a>
+        <br><a href="#ProjOpenProb">My project won't open - what should I do?</a></p>
+    <h4>Spectra</h4>
+        <p><a href="#Sync">Can I synchronise axes across my SpectrumDisplays?</a>
+    <h4>Molecules</h4>
+        <p><a href="#ChemBuildMol">How can I get a molecule from ChemBuild into CcpNmr Analysis V3?</a>
+        <br><a href="#Peptides">Can I use CcpNmr Analysis to analyse my peptide spectra?</a>
+        <br><a href="#RNA">Can I use CcpNmr Analysis to analyse my RNA data?</a> </p>
+    <h4>Moving from Version 2</h4>
+        <p><a href="#V2Feat">What has happened to my favourite Version 2 features?</a>
+        <br><a href="#ShouldISwitch">Should I switch from Version 2 to Version 3?</a>
+        <br><a href="#V2toV3">Can I open Version 2 projects in Version 3?</a>
+        <br><a href="#V3toV2">Can I open Version 3 projects in Version 2?</a></p>
 
-<h3 id="V2Feat">What has happened to my favourite Version 2 features?</h3></p>
-<p>Have a look at our <a href="PopularV2FeaturesInV3.html">Popular V2 Features in V3</a> page for a list of V2 features and how they have been implemented in V3. You may also be interested in our <a href="V2ToV3Translation.html">V2 to V3 translation</a> page which gives a direct translation of V2 mouse and keyboard commands to the new V3 commands.</p>
+<h3 id="MacQuarentine">My Mac says "macOS cannot verify the developer... Are you sure you want to open it?". What can I do?</h3>
+    <p>Until we are able to build the software as official Apple Developers (we have been fighting this admin battle for around 3 years now!), the executables will have to be removed from ‘quarantine’ before you can use them on the newer MacOS versions. After extracting the compressed file, please run the following command in the directory where you have placed the ccpnmr3.2.0 directory:
+    <br><span class="action">sudo xattr -rd com.apple.quarantine ccpnmr3.2.0</span>
+    <br>and enter your password. You may see some xattr errors coming up, but these are on the whole nothing to worry about.
+    <br>Alternatively, disable the Gatekeeper by typing:
+    <br><span class="action">sudo spctl –master-disable</span>
+    <br>and enter your password. You should then be able to run Analysis without problems.</p>
 
-<h3 id="ShouldISwitch">Should I switch from Version 2 to Version 3?</h3>
-<p>Overall, V3 is a nicer, more flexible and more user-friendly programme than V2.4, as illustrated in our <a href="https://www.youtube.com/watch?v=k08ZwgZY8yA&t=914s">Switching to CcpNmr Analysis V3</a> talk from our 2019 conference. However, as yet, not all features have been ported from V2.4. Our <a href="PopularV2FeaturesInV3.html">Popular V2 Features in V3</a> page will give you a bit of an idea of whether there are elements of V2.4 that are not yet present in V3 and that you don't want to do without. In general, smaller projects involving assignments and chemical shift mapping will work well in V3. Anything involving structures, relaxation data analysis and regular use of synthetic peaks lists is currently better served in V2.4.</p>
+<h3 id="M1M2Mac">The program won't run on my M1/M2 Mac. What can I do?</h3>
+    <p>The current version for Mac is compiled on an Intel Mac and runs on Macs with M1 and M2 chips in compatibility mode. On some computers this is not automatically enabled and you will get an error saying “Bad CPU type in executable”. If this is the case you will need to manually install the Rosetta program (nothing to do with the Rosetta modelling program!) with the following command in a terminal:
+    <br><span class="action">/usr/sbin/softwareupdate –install-rosetta</span>
+    <br>If you have any other issues, please do get in touch with us at support@ccpn.ac.uk.</p>
 
-<h3 id="V2toV3">Can I open Version 2 projects in Version 3?</h3>
-<p>Yes! This is very easy - Version 2 projects can be opened directly in Version 3. See our <a href="ImportingV2Projects.html">Importing V2 Projects</a> tutorial on how to do this. The only caveat is if your V2 project uses labelling schemes, then at the moment you will have to do a small work-around shown in <a href="https://youtu.be/Cz-DwGuAurY">this video</a>.</p>
+<h3 id="Windows">The program won't run on my Windows computer. What can I do?</h3>
+    <p>The most common reason for our program not running on Windows is that an anti-virus program such as Windows Defender has placed some of the files in quarantine. Sometimes this results in missing files e.g. in the <span class="action">ccpnmr3.x.y/miniconda/Lib/site-packages</span> subfolders (in particular the <span class="action">h5py</span> folder) or files which are 0kB in size. The best things is to contact your IT support and find out how to mark your <span class="action">ccpnmr3.x.y</span> folder as being safe. How to do this will obviously vary from one anti-virus program to another.</p>
+    <p>Another thing to watch out for is that the download .zip file has been properly unzipped. On Windows it often looks as though the folder has been extracted when in fact it hasn't.</p>
 
-<h3 id="V3toV2">Can I open Version 3 projects in Version 2?</h3>
-<p>Yes, but with some caveats. You will need to save the Version 3 project as a NEF file: go to <span class="action">File / Export / NEF File</span> or type <span class="action">EX</span> and save everything with CCPN tags. You can then import the NEF file into Version 2.5 (not 2.4!) by going to <span class="action">Project / Load NEF</span>.
-<br>Please be aware that this process is not foolproof as Version 3 contains features not contained in Version 2. In particular, you are likely to encounter problems if your project contains molecules that are not simply proteins made up of natural amino acids. Similarly, labelling is handled very differently, and any explicit labelling of molecules in Version 3 may cause problems when going back to Version 2.</p>
 
 <h3 id="RemoteWorking">Can I use CcpNmr Analysis remotely?</h3>
 <p>Yes and no. We strongly recommend that you have your project on a local disk. This is because Analysis regularly writes to your project files and is currently not set up to deal with temporary breaks in the connection. You could therefore easily end up with your project in a compromised state which will later make it unreadable. However, if your spectrum files (which are generally what takes up lots of disk space) are on a remote disk/server, then that is fine. Analysis only has to read these files and so there shouldn't be any issues.
 <br>Finally, you can of course also log into a different machine through VNC Viewer (e.g. to <a href="https://nmrbox.org/">NMRBox</a>), TeamViewer or some other such package and work on a remote workstation. In this case, it is simply the graphics which are being relayed back to your local computer. The important thing is that your project is stored on the same computer on which are running CcpNmr Analysis.</p>
-
 <h3 id="DataTypes">What data types can I load?</h3>
 <p>CcpNmr Analysis can read the following types of files:
 <p><span class="action">Bruker data</span>: in order to open Bruker data correctly, Analysis needs to be able to read several files and not just the 1r/2rr/3rrr/.../8rrrrrrrr file (please do not rename these files!). You can drag and drop the 1r/2rr/3rrr file (or the procs file) into Analysis to open the spectrum, but they must be contained within the Bruker file structure so that Analysis can access the other files it needs to read and display the data correctly.</p>
@@ -58,22 +74,43 @@
 <p><span class="action">folder.ccpn</span>: a folder with .ccpn will be opened as a CCPN project</p>
 <p><span class="action">folder</span>: the program will check whether this is a V2 project folder or a folder from a Bruker file tree, alternatively if it contains any other types of files that can be loaded (spectrum, sequence, structure, text etc.), then all of these will be loaded.</p>
 
+<h3 id="ProjOpenProb">My project won't open - what should I do?</h3>
+    <p>First of all, it may be worth seeing if you can restore a backed up version of your project. Have a look at our <a href="Backups.html">Backups</a> page and video to find out more about how to do this. If your backups are also broken (which does sometimes happen), then the best thing is to send us the project at <a href="mailto:support@ccpn.ac.uk">support@ccpn.ac.uk</a>. We can almost always recover it in some way. By sending us the project, you often enable us to identify bugs which have caused the corrupted project and which we can then fix.</p>
+
+<h3 id="Sync">Can I synchronise axes across my SpectrumDisplays?</h3>
+    <p>Yes, you can! We have implemented this as a macro which can link any x and y axes (but not z axes). Have a look at our <a href="SynchronisingAxes.html">Synchronising Axes</a> page to find out how to use this feature.</p>
+
+
 <h3 id="ChemBuildMol">How can I get a molecule from ChemBuild into CcpNmr Analysis V3?</h3>
-<p>As yet, ChemBuild and Analysis V3 are not properly integrated and it may still take us a little while to get this done properly. There are one or two workarounds. Which one you should use (and indeed whether you should bother importing a molecule at all!)  depends on what your ultimate aim is (why are you trying to import what).</p>
-<p>Analysis V3 is currently able to read pdb files and SMILES, but not the CCPN ChemComp .xml files and not mol2 files.
-    <br>pdb files can simply be dragged in, and will then go into the <span class="action">Structural Ensemble</span> part of the data structure (note that currently only ATOM and not HETATM lines are recognised/read in). Once a pdb file has been read in, there is not much you can do with it at the moment. Generating an NmrChain from a Structural Model is on our ToDo list, though.
-    <br>SMILES notations (not files) can be entered in the <span class="action">Substances</span> section:
+    <h4>Non-canonical amino acids</h4>
+    <p>If you want to add a non-canonical amino acid to a Chain in your CcpNmr Analysis project, then you should follow our instructions on <a href="CreatingNoncanonicalAAChemComps.html">Creating non-canonical amino acid ChemComp files</a> and <a href="CreatingChainsWithNoncanonicalAAs.html">Creating Chains with non-canonical amino acids</a>.</p>
+    <h4>Small molecules</h4>
+    <p>Essentially you need to follow the same instructions to those on our <a href="CreatingNoncanonicalAAChemComps.html">Creating non-canonical amino acid ChemComp files</a> and <a href="CreatingChainsWithNoncanonicalAAs.html">Creating Chains with non-canonical amino acids</a> pages. You will need to export your ChemBuild molecule as a ChemComp file, then import it to CcpNmr Analysis and then you can create a Chain from that. You simply need to make sure that when you save your ChemComp file in ChemBuild, you select your <span class="action">Molecule Type</span> to be <span class="action">other</span>. And when you create your Chain in CcpNmr Analysis you also need to make sure that your <span class="action">Molecule Type</span> is set to be <span class="action">other</span>.
+    <p>Note that it is also possible to add SMILES notations (not files) to Analysis in the <span class="action">Substances</span> section:
     <li>double-click on <span class="action">New Substance</span> under <span class="action">Substances</span> in the sidebar</li>
     <li>click on <span class="action">Show more</span></li>
-<li>copy/paste your SMILES into the <span class="action">Smiles box</span></li>
-<li>click <span class="action">Apply</span> or <span class="action">OK</span> and the molecule will be added</li>
-<br>ChemBuild will write pdb files, but not SMILES. If you want your ChemBuild molecule in SMILES notation, you will have to export it as mol2 and then use <a href="http://openbabel.org/wiki/Main_Page">OpenBabel</a> to convert it to SMILES.</p>
-<p>Now on to thinking about why you want to import something from ChemBuild into V3 and the implications for what you might want (and be able) to do:
-<ol><li>If you are wanting to import a small molecule (i.e. not a protein, peptide or DNA/RNA), then you are best off importing your molecules as a SMILES. You can then generate an NmrChain from your substance (double-click on <span class="action">New NmrChain</span> and select <span class="action">Clone from Substance</span>). You can then assign your molecule using the NmrAtoms in that NmrChain (the molecule will go into a single NmrResidue in the NmrChain).</li>
-    <li>If you have a non-standard amino acid in your peptide/protein, the easiest thing is probably to enter the chain using the natural amino acid most closely related to your non-natural one. Create an NmrChain from your Chain (double-click on <span class="action">New NmrChain</span> and select <span class="action">Clone from Chain</span>). Then delete/add NmrAtoms to the natural amino acid to create your non-natural amino acid. You can then use the NmrAtoms to do your assignment. The only drawback with this is that the program will not be able to recognise your non-natural amino acid as being assigned, because there is no equivalent in a Chain. At the moment it isn't possible to modify Chains (except to delete residues), but we will be adding such features in future.</li></ol></p>
-<p>What is worth noting is that you can make quite a few changes to your NmrChains and NmrResidues (by double-clicking on them in the sidebar). So you can import a SMILES as a substance, create an NmrChain from this (the whole molecule will go into a single NmrResidue) and then double-click on the <span class="action">NmrResidue</span> and change the NmrChain, Sequence Code (i.e. Residue Number) and Amino Acid name to those of your choice, and this will be slotted into another NmrChain. (So, in this way, you could have another NmrChain in which you had removed an NmrResidue and then you could replace it with something from a SMILES.)
-</p>
+    <li>copy/paste your SMILES into the <span class="action">Smiles box</span></li>
+    <li>click <span class="action">Apply</span> or <span class="action">OK</span> and the molecule will be added</li>
+    <p>Note that pdb files can also be dragged into a project, and will then go into the <span class="action">Structural Ensemble</span> part of the data structure (note that currently only ATOM and not HETATM lines are recognised/read in). Once a pdb file has been read in, there is not much you can do with it, though. ChemBuild will allow you to import a pdb file and then export it as a ChemComop file.</p>
 
+<h3 id="Peptides">Can I use CcpNmr Analysis to analyse my peptide spectra?</h3>
+    <p>Yes, of course. We are actually currently working on some new features which will help those working with peptides and we hope to create a tutorial for peptide assignment in the near future.</p>
+
+<h3 id="RNA">Can I use CcpNmr Analysis to analyse my RNA or DNA data?</h3>
+    <p>Yes, of course. You can easily add RNA and DNA chains to your project. Although we don't have any features which are particularly geared towards those working with RNA/DNA spectra, you can visualise, navigate and assign your spectra as you would in any other spectral assignment program. We do hope to add some RNA specific functionality and a tutorial at some point.</p>
+
+<h3 id="V2Feat">What has happened to my favourite Version 2 features?</h3>
+<p>Have a look at our <a href="PopularV2FeaturesInV3.html">Popular V2 Features in V3</a> page for a list of V2 features and how they have been implemented in V3. You may also be interested in our <a href="V2ToV3Translation.html">V2 to V3 translation</a> page which gives a direct translation of V2 mouse and keyboard commands to the new V3 commands.</p>
+
+<h3 id="ShouldISwitch">Should I switch from Version 2 to Version 3?</h3>
+<p>Yes! Overall, V3 is a nicer, more flexible and more user-friendly programme than V2.4, as illustrated in our <a href="https://www.youtube.com/watch?v=k08ZwgZY8yA&t=914s">Switching to CcpNmr Analysis V3</a> talk from our 2019 conference. However, there are still a few features which haven't yet been ported from V2.4. Our <a href="PopularV2FeaturesInV3.html">Popular V2 Features in V3</a> page will give you a bit of an idea of whether there are elements of V2.4 that are not yet present in V3 and that you don't want to do without. The main thing to be aware of with Version 2 is that we will stop supporting it from 2025 onwards. This means no bug fixes or lengthy investigations on our part if you can't get something to work. We will also stop creating new builds for new operating systems etc. You will still be able to continue to download and use the program, though, and if you wish, you can compile the source code yourself.</p>
+
+<h3 id="V2toV3">Can I open Version 2 projects in Version 3?</h3>
+<p>Yes! This is very easy - Version 2 projects can be opened directly in Version 3. See our <a href="ImportingV2Projects.html">Importing V2 Projects</a> tutorial on how to do this. The only caveat is if your V2 project uses labelling schemes, then at the moment you will have to do a small work-around shown in <a href="https://youtu.be/Cz-DwGuAurY">this video</a>.</p>
+
+<h3 id="V3toV2">Can I open Version 3 projects in Version 2?</h3>
+<p>Yes, but with some caveats. You will need to save the Version 3 project as a NEF file: go to <span class="action">File / Export / NEF File</span> or type <span class="action">EX</span> and save everything with CCPN tags. You can then import the NEF file into Version 2.5 (not 2.4!) by going to <span class="action">Project / Load NEF</span>.
+<br>Please be aware that this process is not foolproof as Version 3 contains features not contained in Version 2. In particular, you are likely to encounter problems if your project contains molecules that are not simply proteins made up of natural amino acids. Similarly, labelling is handled very differently, and any explicit labelling of molecules in Version 3 may cause problems when going back to Version 2.</p>
 </div>
 </body>
 </html>

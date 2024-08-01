@@ -4,8 +4,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -28,15 +28,14 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from typing import Sequence, Union
 
-from ccpn.core.lib import Pid
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.core.Project import Project
-from ccpn.core.StructureData import StructureData
 from ccpnmodel.ccpncore.lib import Constants as coreConstants
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import AbstractConstraintList as ApiAbstractConstraintList
+from ccpn.core.lib import Pid
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core.StructureData import StructureData
+from ccpn.core.lib.ContextManagers import newObject, renameObject
 from ccpn.util.Tensor import Tensor
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, renameObject
 from ccpn.util.Logging import getLogger
 
 
@@ -262,13 +261,42 @@ class RestraintTable(AbstractWrapperObject):
         self._parent.moleculeFilePath = filePath
 
     #=========================================================================================
-    # Implementation functions
+    # property STUBS: hot-fixed later
     #=========================================================================================
 
-    @classmethod
-    def _getAllWrappedData(cls, parent: StructureData) -> list:
-        """get wrappedData - all ConstraintList children of parent NmrConstraintStore"""
-        return parent._wrappedData.sortedConstraintLists()
+    @property
+    def restraintContributions(self) -> list['RestraintContribution']:
+        """STUB: hot-fixed later
+        :return: a list of restraintContributions in the RestraintTable
+        """
+        return []
+
+    @property
+    def restraints(self) -> list['Restraint']:
+        """STUB: hot-fixed later
+        :return: a list of restraints in the RestraintTable
+        """
+        return []
+
+    #=========================================================================================
+    # getter STUBS: hot-fixed later
+    #=========================================================================================
+
+    def getRestraint(self, relativeId: str) -> 'Restraint | None':
+        """STUB: hot-fixed later
+        :return: an instance of Restraint, or None
+        """
+        return None
+
+    def getRestraintContribution(self, relativeId: str) -> 'RestraintContribution | None':
+        """STUB: hot-fixed later
+        :return: an instance of RestraintContribution, or None
+        """
+        return None
+
+    #=========================================================================================
+    # Core methods
+    #=========================================================================================
 
     @renameObject()
     @logCommand(get='self')
@@ -276,6 +304,15 @@ class RestraintTable(AbstractWrapperObject):
         """Rename RestraintTable, changing its name and Pid.
         """
         return self._rename(value)
+
+    #=========================================================================================
+    # Implementation methods
+    #=========================================================================================
+
+    @classmethod
+    def _getAllWrappedData(cls, parent: StructureData) -> list:
+        """get wrappedData - all ConstraintList children of parent NmrConstraintStore"""
+        return parent._wrappedData.sortedConstraintLists()
 
     def _rename(self, value: str):
         """Generic rename method that individual classes can use for implementation
@@ -291,10 +328,6 @@ class RestraintTable(AbstractWrapperObject):
         self._wrappedData.name = name
 
         return (oldName,)
-
-    #=========================================================================================
-    # CCPN functions
-    #=========================================================================================
 
     #===========================================================================================
     # new<Object> and other methods
@@ -362,7 +395,8 @@ class RestraintTable(AbstractWrapperObject):
         return _createSimpleRestraint(self, comment=comment, figureOfMerit=figureOfMerit,
                                       peaks=peaks, targetValue=targetValue, error=error,
                                       weight=weight, upperLimit=upperLimit, lowerLimit=lowerLimit,
-                                      additionalUpperLimit=additionalUpperLimit, additionalLowerLimit=additionalLowerLimit,
+                                      additionalUpperLimit=additionalUpperLimit,
+                                      additionalLowerLimit=additionalLowerLimit,
                                       scale=scale, vectorLength=vectorLength, restraintItems=restraintItems, **kwds)
 
 

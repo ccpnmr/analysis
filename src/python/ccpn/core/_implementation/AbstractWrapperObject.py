@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-30 13:45:37 +0100 (Thu, May 30, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-07-23 18:25:51 +0100 (Tue, July 23, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -55,6 +55,9 @@ from ccpn.util.Logging import getLogger
 
 _RENAME_SENTINEL = Pid.Pid('Dummy:_rename')
 ILLEGAL_PATH_CHARS = r'<>:"/\|?*&@'
+_DISCARD_METHODS = {'get_OldChemicalShift', 'get_OldChemicalShift', '_oldChemicalShifts', 'get_PeakCluster',
+                    '_peakClusters'}
+_DEBUG = False
 
 
 @functools.total_ordering
@@ -587,12 +590,13 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         self._wrappedData.__dict__['isModified'] = True
 
     def getParameter(self, namespace: str, parameterName: str):
-        """Returns value of parameterName for namespace; returns None if not present
-        A copy is returned so that the integrity of model is preserved
+        """:returns value of parameterName for namespace or None if not present
         """
         space = self._ccpnInternalData.get(namespace)
         if space is not None:
-            return deepcopy(space.get(parameterName))
+            return space.get(parameterName)
+        else:
+            return None
 
     def hasParameter(self, namespace: str, parameterName: str):
         """Returns true if parameterName for namespace exists"""
@@ -1185,6 +1189,12 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
                         return cls._getDescendant(self, relativeId)
 
                     func.__doc__ = "Get contained %s object by relative ID" % classFullName
+                    if not hasattr(ancestor, funcName):
+                        if _DEBUG:
+                            # getLogger is not initialised yet
+                            print(f'--> missing getter stub {ancestor}:{funcName}')
+                        if funcName in _DISCARD_METHODS:
+                            continue
                     setattr(ancestor, funcName, func)
                     _allGetters.setdefault(ancestor.__name__, []).append((1, funcName))
 
@@ -1236,6 +1246,11 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
                     #         'SpectrumDisplay.strips Strip.spectrumViews'.split():
                     #     continue
 
+                    if not hasattr(ancestor, linkName):
+                        if _DEBUG:
+                            print(f'--> missing property stub {ancestor}:{linkName}')
+                        if linkName in _DISCARD_METHODS:
+                            continue
                     setattr(ancestor, linkName, prop)
                     _allGetters.setdefault(ancestor.__name__, []).append((0, linkName))
 

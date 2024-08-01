@@ -4,8 +4,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-05-29 12:22:38 +0100 (Wed, May 29, 2024) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-07-01 14:34:55 +0100 (Mon, July 01, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -86,41 +87,42 @@ class PeakList(PMIListABC):
         self._primaryChildClass = klass
 
     @property
-    def chemicalShiftList(self):
-        """STUB: hot-fixed later"""
+    def chemicalShiftList(self) -> 'ChemicalShiftList | None':
+        """STUB: hot-fixed later
+        :return: an instance of ChemicalShiftList, or None
+        """
+        return None
+
+    @property
+    def peakListViews(self) -> list['PeakListView']:
+        """STUB: hot-fixed later
+        :return: a list of peaks in the PeakList
+        """
+        return []
+
+    #=========================================================================================
+    # property STUBS: hot-fixed later
+    #=========================================================================================
+
+    @property
+    def peaks(self) -> list['Peak']:
+        """STUB: hot-fixed later
+        :return: a list of peaks in the PeakList
+        """
+        return []
+
+    #=========================================================================================
+    # getter STUBS: hot-fixed later
+    #=========================================================================================
+
+    def getPeak(self, relativeId: str) -> 'Peak | None':
+        """STUB: hot-fixed later
+        :return: an instance of Peak, or None
+        """
         return None
 
     #=========================================================================================
-    # Implementation functions
-    #=========================================================================================
-
-    @classmethod
-    def _getAllWrappedData(cls, parent: Spectrum) -> list:
-        """get wrappedData (PeakLists) for all PeakList children of parent Spectrum"""
-        return [x for x in parent._wrappedData.sortedPeakLists() if x.dataType == 'Peak']
-
-    def _finaliseAction(self, action: str):
-        """Subclassed to notify changes to associated peakListViews
-        """
-        if not super()._finaliseAction(action):
-            return
-
-        # this is a can-of-worms for undelete at the minute
-        try:
-            if action in {'change'}:
-                for plv in self.peakListViews:
-                    plv._finaliseAction(action)
-        except Exception as es:
-            raise RuntimeError(f'Error _finalising peakListViews: {str(es)}') from es
-
-    def delete(self):
-        """Delete peakList
-        """
-        # call the delete method from the parent class
-        self._parent._deletePeakList(self)
-
-    #=========================================================================================
-    # CCPN functions
+    # Core methods
     #=========================================================================================
 
     def pickPeaksNd(self, regionToPick: Sequence[float] = None,
@@ -217,7 +219,8 @@ class PeakList(PMIListABC):
                              % (self, self.spectrum.axisCodes, targetSpectrum.axisCodes))
 
         if targetPeakList:
-            targetPeakList = self.project.getByPid(targetPeakList) if isinstance(targetPeakList, str) else targetPeakList
+            targetPeakList = self.project.getByPid(targetPeakList) if isinstance(targetPeakList,
+                                                                                 str) else targetPeakList
             if not isinstance(targetPeakList, PeakList):
                 raise TypeError('targetPeakList is not of type PeakList')
             if targetPeakList not in targetSpectrum.peakLists:
@@ -360,7 +363,8 @@ class PeakList(PMIListABC):
                                      minLinewidth=minLinewidth, exclusionBuffer=exclusionBuffer,
                                      minDropFactor=minDropFactor, checkAllAdjacent=checkAllAdjacent,
                                      fitMethod=fitMethod, excludedRegions=excludedRegions,
-                                     excludedDiagonalDims=excludedDiagonalDims, excludedDiagonalTransform=excludedDiagonalTransform,
+                                     excludedDiagonalDims=excludedDiagonalDims,
+                                     excludedDiagonalTransform=excludedDiagonalTransform,
                                      estimateLineWidths=estimateLineWidths)
         return peaks
 
@@ -453,6 +457,79 @@ class PeakList(PMIListABC):
                     newPos.append(pos[ii])
                 peak.position = newPos
 
+    @logCommand(get='self')
+    def fetchNewAssignments(self, nmrChain: 'NmrChain', keepAssignments: bool = False):
+        """Fetch new assignments for each peak from the specified nmrChain.
+        Optionally the original assignments can be overwritten or appended to.
+
+        :param nmrChain: source for nmrAtoms.
+        :param keepAssignments: overwrite/append assignments.
+        :return:
+        """
+        if not self.peaks:
+            return
+        peak = self.peaks[0]
+        axisIso = list(zip(peak.axisCodes, peak.spectrum.isotopeCodes))
+        numDims = len(peak.axisCodes)
+        foundMts = {}
+        with undoBlock():
+            for cc, peak in enumerate(self.peaks):
+                # only process those that are empty OR those not empty when checkbox cleared
+                dimensionNmrAtoms = peak.dimensionNmrAtoms  # for speed reasons !?
+                if not keepAssignments or not any(dimensionNmrAtoms):
+                    if peak.multiplets:
+                        existingDims = [[] for _nd in range(numDims)]
+                        for mt in peak.multiplets:
+                            if mt in foundMts:
+                                for i, (exst, dimNmr) in enumerate(zip(existingDims, foundMts[mt])):
+                                    existingDims[i].append(dimNmr)
+                            else:
+                                # need to create a new residue and nmrAtoms
+                                thisDims = [[] for _nd in range(numDims)]
+                                nmrResidue = nmrChain.newNmrResidue()
+                                for i, (axis, isotope) in enumerate(axisIso):
+                                    nmrAtom = nmrResidue.fetchNmrAtom(name=str(axis[0]), isotopeCode=isotope)
+                                    existingDims[i].append(nmrAtom)
+                                    thisDims[i] = nmrAtom
+                                foundMts[mt] = thisDims
+                        # assign all the dimensions
+                        peak.assignDimensions(axisCodes=peak.axisCodes, values=existingDims)
+                    else:
+                        # make a new nmrResidue with new nmrAtoms and assign to the peak
+                        nmrResidue = nmrChain.newNmrResidue()
+                        newNmrs = [[nmrResidue.fetchNmrAtom(name=str(axis[0]), isotopeCode=isotope)] for
+                                   axis, isotope in axisIso]
+                        peak.assignDimensions(axisCodes=peak.axisCodes, values=newNmrs)
+
+    #=========================================================================================
+    # Implementation methods
+    #=========================================================================================
+
+    def delete(self):
+        """Delete peakList
+        """
+        # call the delete method from the parent class
+        self._parent._deletePeakList(self)
+
+    @classmethod
+    def _getAllWrappedData(cls, parent: Spectrum) -> list:
+        """get wrappedData (PeakLists) for all PeakList children of parent Spectrum"""
+        return [x for x in parent._wrappedData.sortedPeakLists() if x.dataType == 'Peak']
+
+    def _finaliseAction(self, action: str, **actionKwds):
+        """Subclassed to notify changes to associated peakListViews
+        """
+        if not super()._finaliseAction(action):
+            return
+
+        # this is a can-of-worms for undelete at the minute
+        try:
+            if action in {'change'}:
+                for plv in self.peakListViews:
+                    plv._finaliseAction(action)
+        except Exception as es:
+            raise RuntimeError(f'Error _finalising peakListViews: {str(es)}') from es
+
     #===========================================================================================
     # new<Object> and other methods
     # Call appropriate routines in their respective locations
@@ -532,6 +609,7 @@ class PeakList(PMIListABC):
                 if not tempML.multiplets:
                     tempML.delete()
         return tuple(mps)
+
 
 #=========================================================================================
 # Connections to parents:

@@ -4,9 +4,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-30 14:03:32 +0100 (Fri, June 30, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-06-07 21:57:29 +0100 (Fri, June 07, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,6 +32,7 @@ from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
 from ccpn.util.Logging import getLogger
+from ccpn.framework.Application import getMainWindow
 from ccpn.framework.PathsAndUrls import ccpnModuleHelpPath
 
 
@@ -45,8 +47,8 @@ class PythonConsoleModule(CcpnModule):
     _onlySingleInstance = True
 
     className = 'PythonConsoleModule'
-    # _helpFilePath = ccpnModuleHelpPath / 'PythonConsoleModuleHelp.html'
 
+    # _helpFilePath = ccpnModuleHelpPath / 'PythonConsoleModuleHelp.html'
 
     def __init__(self, mainWindow, name='Python Console', closeFunc=None, **kwds):
         CcpnModule.__init__(self, mainWindow=mainWindow, name=name, closeFunc=closeFunc)
@@ -65,13 +67,15 @@ class PythonConsoleModule(CcpnModule):
             self._menuAction.setChecked(True)
 
         row = 0
-        self.settingsEditorCheckBox = CheckBox(self.settingsWidget, checked=True, text='Show logging window', callback=self._toggleTextEditor,
+        self.settingsEditorCheckBox = CheckBox(self.settingsWidget, checked=True, text='Show logging window',
+                                               callback=self._toggleTextEditor,
                                                grid=(row, 0))
         # self._toggleTextEditor(False)
 
         row += 1
-        self.settingsLoggingCheckBox = CheckBox(self.settingsWidget, checked=True, text='Enable logging', callback=self._toggleLogging,
-                                               grid=(row, 0))
+        self.settingsLoggingCheckBox = CheckBox(self.settingsWidget, checked=True, text='Enable logging',
+                                                callback=self._toggleLogging,
+                                                grid=(row, 0))
 
         # make the widget visible, it is hidden when first instantiated
         self.pythonConsoleWidget.show()
@@ -86,7 +90,7 @@ class PythonConsoleModule(CcpnModule):
             else:
                 self.pythonConsoleWidget.textEditor.hide()
         except RuntimeError as runError:
-            getLogger().warning('PythonConsole module Error: %s'%runError)
+            getLogger().warning('PythonConsole module Error: %s' % runError)
 
     def _toggleLogging(self, value):
         """Enable/disable logging to the logging window of the python console
@@ -96,20 +100,23 @@ class PythonConsoleModule(CcpnModule):
     def enterEvent(self, event):
         # do nothing. Just keep the event.
         event.accept()
-        # don't call super or you lose the cursor while typing, even when casually the mouse cursor
+        # don't call super, or you lose the cursor while typing, even when casually the mouse cursor
         # is on top of the inline documentation. Which is annoying and unproductive.
 
     def leaveEvent(self, event):
         # do nothing. Just keep the event.
         event.accept()
-        # don't call super or you lose the cursor while typing, even when casually the mouse cursor
+        # don't call super, or you lose the cursor while typing, even when casually the mouse cursor
         # is on top of the inline documentation. Which is annoying and unproductive.
 
     def _closeModule(self):
         # self.pythonConsoleWidget._stopChannels()
         self.hide()
-        #
-        # self.mainWindow.pythonConsoleModule = None
-        # if self._menuAction:
-        #     self._menuAction.setChecked(False)
-        # super(PythonConsoleModule, self)._closeModule()
+
+    def hide(self):
+        if (win := self.window()) and win != getMainWindow():
+            getLogger().debug(f'--> hide - currently in {win}')
+            # RESTRICT to mainWindow for the minute
+            # in another window, move to mainWindow
+            self.mainWindow.moduleArea.moveModule(self, position='bottom', neighbor=None)
+        super().hide()

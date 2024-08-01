@@ -4,8 +4,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -27,13 +27,12 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import datetime
-# import pandas as pd
 from typing import Optional
 
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.core.Project import Project
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import NmrConstraintStore as ApiNmrConstraintStore
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import FixedResonance as ApiFixedResonance
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core.Project import Project
 from ccpn.core.lib import Pid
 from ccpn.core.lib.ContextManagers import newObject, renameObject, ccpNmrV3CoreSetter
 from ccpn.util.decorators import logCommand
@@ -66,7 +65,10 @@ class StructureData(AbstractWrapperObject):
     _MoleculeFilePath = '_MoleculeFilePath'
     _MOLECULEFILEPATH = 'moleculeFilePath'
 
+    #=========================================================================================
     # CCPN properties
+    #=========================================================================================
+
     @property
     def _apiStructureData(self) -> ApiNmrConstraintStore:
         """ CCPN NmrConstraintStore matching StructureData"""
@@ -185,6 +187,96 @@ class StructureData(AbstractWrapperObject):
         """
         self._setInternalParameter(self._MOLECULEFILEPATH, filePath)
 
+    #=========================================================================================
+    # property STUBS: hot-fixed later
+    #=========================================================================================
+
+    @property
+    def calculationSteps(self) -> list['CalculationStep']:
+        """STUB: hot-fixed later
+        :return: a list of calculationSteps in the StructureData
+        """
+        return []
+
+    @property
+    def data(self) -> list['Data']:
+        """STUB: hot-fixed later
+        :return: a list of data in the StructureData
+        """
+        return []
+
+    @property
+    def restraintContributions(self) -> list['RestraintContribution']:
+        """STUB: hot-fixed later
+        :return: a list of restraintContributions in the StructureData
+        """
+        return []
+
+    @property
+    def restraintTables(self) -> list['RestraintTable']:
+        """STUB: hot-fixed later
+        :return: a list of restraintTables in the StructureData
+        """
+        return []
+
+    @property
+    def restraints(self) -> list['Restraint']:
+        """STUB: hot-fixed later
+        :return: a list of restraints in the StructureData
+        """
+        return []
+
+    @property
+    def violationTables(self) -> list['ViolationTable']:
+        """STUB: hot-fixed later
+        :return: a list of violationTables in the StructureData
+        """
+        return []
+
+    #=========================================================================================
+    # getter STUBS: hot-fixed later
+    #=========================================================================================
+
+    def getCalculationStep(self, relativeId: str) -> 'CalculationStep | None':
+        """STUB: hot-fixed later
+        :return: an instance of CalculationStep, or None
+        """
+        return None
+
+    def getData(self, relativeId: str) -> 'Data | None':
+        """STUB: hot-fixed later
+        :return: an instance of Data, or None
+        """
+        return None
+
+    def getRestraint(self, relativeId: str) -> 'Restraint | None':
+        """STUB: hot-fixed later
+        :return: an instance of Restraint, or None
+        """
+        return None
+
+    def getRestraintContribution(self, relativeId: str) -> 'RestraintContribution | None':
+        """STUB: hot-fixed later
+        :return: an instance of RestraintContribution, or None
+        """
+        return None
+
+    def getRestraintTable(self, relativeId: str) -> 'RestraintTable | None':
+        """STUB: hot-fixed later
+        :return: an instance of RestraintTable, or None
+        """
+        return None
+
+    def getViolationTable(self, relativeId: str) -> 'ViolationTable | None':
+        """STUB: hot-fixed later
+        :return: an instance of ViolationTable, or None
+        """
+        return None
+
+    #=========================================================================================
+    # Core methods
+    #=========================================================================================
+
     def _fetchFixedResonance(self, assignment: str, checkUniqueness: bool = True) -> ApiFixedResonance:
         """Fetch FixedResonance matching assignment string, creating anew if needed.
 
@@ -241,15 +333,6 @@ class StructureData(AbstractWrapperObject):
         """STUB: hot-fixed later"""
         return ()
 
-    #=========================================================================================
-    # Implementation functions
-    #=========================================================================================
-
-    @classmethod
-    def _getAllWrappedData(cls, parent: Project) -> list:
-        """get wrappedData for all NmrConstraintStores linked to NmrProject"""
-        return parent._wrappedData.sortedNmrConstraintStores()
-
     @renameObject()
     @logCommand(get='self')
     def rename(self, value: str):
@@ -257,6 +340,15 @@ class StructureData(AbstractWrapperObject):
         NB, the serial remains immutable.
         """
         return self._rename(value)
+
+    #=========================================================================================
+    # Implementation methods
+    #=========================================================================================
+
+    @classmethod
+    def _getAllWrappedData(cls, parent: Project) -> list:
+        """get wrappedData for all NmrConstraintStores linked to NmrProject"""
+        return parent._wrappedData.sortedNmrConstraintStores()
 
     @classmethod
     def _restoreObject(cls, project, apiObj):
@@ -298,10 +390,6 @@ class StructureData(AbstractWrapperObject):
     #             data.updateParameters(parameters)
     #
     #     return result
-
-    #=========================================================================================
-    # CCPN functions
-    #=========================================================================================
 
     #===========================================================================================
     # new<Object> and other methods
@@ -416,8 +504,9 @@ class StructureData(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(StructureData)
-def _newStructureData(self: Project, name: str = None, title: str = None, programName: str = None, programVersion: str = None,
-                      dataPath: str = None, creationDate: datetime.datetime = None, uuid: str = None, moleculeFilePath: str = None,
+def _newStructureData(self: Project, name: str = None, title: str = None, programName: str = None,
+                      programVersion: str = None, dataPath: str = None, creationDate: datetime.datetime = None,
+                      uuid: str = None, moleculeFilePath: str = None,
                       comment: str = None) -> StructureData:
     """Create new StructureData
 
@@ -434,7 +523,8 @@ def _newStructureData(self: Project, name: str = None, title: str = None, progra
     """
 
     if title and name:
-        raise TypeError('Cannot create new StructureData with title and name; StructureData.title is deprecated, please use StructureData.name')
+        raise TypeError(
+                'Cannot create new StructureData with title and name; StructureData.title is deprecated, please use StructureData.name')
     if title:
         getLogger().warning('StructureData.title is deprecated, please use StructureData.name')
         name = title

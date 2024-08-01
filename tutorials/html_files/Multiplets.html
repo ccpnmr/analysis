@@ -13,20 +13,28 @@
 
 <div class="videoContainer">
   <div class="videoWrapper">
-    <iframe src="https://www.youtube.com/embed/OR9j0sbwc20" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    <iframe src="https://www.youtube.com/embed/SwxFZ50iqac" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
   </div>
 </div>
 
 
 <h2>Multiplets</h2>
+    <p><b>Updated for version 3.2.4</b></p>
     <h3>Adding Multiplets</h3>
-    <p>You can add multiplets by picking and selecting the peaks that make up a multiplet. Then either <span class="action">right-click</span> on one of the peaks and select <span class="action">New Mutliplet</span> or use the keyboard shortcut <span class="action">AM</span>. Multiplets are shown by a cross with a circle round it and lines linking it to all constituent peaks. A multiplet's chemical shifts are simply the averages of the chemical shifts of its constituent peaks. Multiplets can be added to any 1D or ND spectrum.</p>
+    <p>You can add multiplets by picking and selecting the peaks that make up a multiplet. Then either <span class="action">right-click</span> on one of the peaks and select <span class="action">New Multiplet</span> or use the keyboard shortcut <span class="action">AM</span>. Multiplets are shown by a cross with a circle round it and lines linking it to all constituent peaks. A multiplet's chemical shifts are simply the averages of the chemical shifts of its constituent peaks. It's height and volume are the sum of the heights and volumes of its constituent peaks. Multiplets can be added to any 1D or ND spectrum.</p>
     <h3>Marking Multiplets</h3>
     <p>You can place marks through one or more selected multiplets either by <span class="action">right-clicking</span> on one and selecting <span class="action">Mark Multiplets</span> or with the shortcut <span class="action">UM</span>. The shortcuts <span class="action">UX</span>, <span class="action">UY</span>, <span class="action">UZ</span> and <span class="action">UW</span> will place marks only along the X, Y, Z(1) and Z2 axes of the selected multiplets. </p>
     <h3>Multiplet Lists</h3>
-    <p>Multiplet lists are nested below spectra along with Peak Lists. Open a multiplet list by dragging it into the drop area. On the left-hand side you will see a list of the multiplets and on the right a list of the peaks making up the selected multiplet(s). You can select multiplets and peaks as normal. Selecting them in the table also selects them in your spectra and you can <span class="action">double-click</span> on any of them to navigate to that position in your spectra.</p>
+    <p>Multiplet lists are nested below spectra along with Peak Lists. Open a multiplet list by <span class="action">dragging</span> it into the drop area. At the top you will see a list of the multiplets and below a list of the peaks making up the selected multiplet(s). You can select multiplets and peaks as normal. Selecting them in the table also selects them in your spectra and you can <span class="action">double-click</span> on any of them to navigate to that position in your spectra.</p>
+    <h3>Assigning Multiplets</h3>
+    <p>Multiplets themselves do not have assignments, but the constituent peaks do. If you assign one peak in a multiplet, then other peaks will be assigned in the same way automatically. Similarly, if you create a mutliplet from two peaks with different assignments, or where only one is assigned, then the assignments will each be copied to the other peaks when you create the multiplet.</p>
     <h3>Selecting the peaks in a multiplet</h3>
-    <p>By double-clicking on a multiplet in a spectrum (or several if also holding down the <span class="action">Ctrl/Cmd</span> key) you will select all the constituent peaks. This can be useful if you want to assign/label all peaks the same way in one go in the Peak Assigner. Note that if the Peak Assigner tells you that the peaks diverge, you may have to increase your <span class="action">Assignment Tolerances</span> in the <span class="action">Dimensions</span> tab of your <span class="action">Spectrum Properties</span> dialog (open this by <span class="action">double-clicking</span> on the spectrum in the sidebar).</p>
+    <p>By <span class="action">double-clicking</span> on a multiplet in a spectrum (or several if also holding down the <span class="action">Ctrl/Cmd</span> key) you will select all the constituent peaks.</p>
+    <h3>Merging Multiplets</h3>
+    <p>You can select a mutliplet and any other number of multiplets or peaks and merge them into a single multiplet by <span class="action">right-clicking</span> on a multiplet and selecting <span class="action">Merge Multiplets</span>.</p>
+    <h3>Multiplet Peak Picker</h3>
+    <p>We have introduced a 2D multiplet peak picker. If you go to <span class="action">File / Preferences</span> and then go to the <span class="action">Peaks</span> tab, you can set your <span class="action">Default nD peak picker</span> to be <span class="action">PeakPicker2DMultiplets</span>. This will act exactly the same way as our normal <span class="action">PeakPickerNd</span> peak picker, but for 2D spectra it will automatically group close peaks (closer than 0.015 ppm for <sup>1</sup>H and 0.1 ppm for <sup>15</sup>N/<sup>13</sup>C) into multiplets.</p>
+
 </div>
 </body>
 </html>

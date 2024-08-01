@@ -4,9 +4,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-08-30 19:22:14 +0100 (Wed, August 30, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-07-01 20:52:11 +0100 (Mon, July 01, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -34,6 +35,7 @@ import os
 from ccpn.framework.Version import applicationVersion
 from ccpn.framework.PathsAndUrls import CCPN_EXTENSION
 
+from ccpn.core.Project import Project
 from ccpn.core.lib.Notifiers import NotifierBase
 from ccpn.core.lib.ContextManagers import catchExceptions
 
@@ -173,12 +175,12 @@ class Ui(NotifierBase):
                 regDict[TERMSANDCONDITIONS] = md5
                 Register.saveDict(regDict)
 
-    def loadProject(self, path):
+    def loadProject(self, path) -> Project | None:
         """Just a stub for now; calling MainWindow methods as it initialises the Gui
         """
         return self._loadProject(path=path)
 
-    def _loadProject(self, dataLoader=None, path=None):
+    def _loadProject(self, dataLoader=None, path=None) -> Project | None:
         """Load a project either from a dataLoader instance or from path;
         build the project Gui elements
         :returns project instance or None
@@ -190,11 +192,9 @@ class Ui(NotifierBase):
 
         if dataLoader is None and path is not None:
             dataLoader = checkPathForDataLoader(path)
-
         if dataLoader is None:
             getLogger().error('No suitable dataLoader found')
             return None
-
         if not dataLoader.createNewProject:
             getLogger().error('"%s" does not yield a new project' % dataLoader.path)
             return None
@@ -217,12 +217,7 @@ class Ui(NotifierBase):
             _loaded = dataLoader.load()
             if not _loaded:
                 return
-
             newProject = _loaded[0]
-
-            # if the new project contains invalid spectra then open the popup to see them
-            self._checkForBadSpectra(newProject)
-
         except RuntimeError as es:
             getLogger().error('"%s" did not yield a valid new project (%s)' % (dataLoader.path, str(es)))
 
@@ -232,8 +227,11 @@ class Ui(NotifierBase):
                 if not oldProjectIsTemporary:
                     _app.loadProject(oldProjectPath)
                 return None
+        else:
+            # if the new project contains invalid spectra then open the popup to see them
+            self._checkForBadSpectra(newProject)
 
-        return newProject
+            return newProject
 
     @staticmethod
     def _checkForBadSpectra(project):
@@ -632,8 +630,8 @@ class NoUi(Ui):
                 getLogger().debug(f'Folder {newPath} may be read-only')
                 return False
 
-        self.application._getRecentProjectFiles(oldPath=oldPath)  # this will also update the list
-
+        self.application._getRecentProjectFiles()  # this will update the preferences-list
+        self.mainWindow._fillRecentProjectsMenu()  # Update the menu
         getLogger().info(f'Project successfully saved to "{self.project.path}"')
 
         return True

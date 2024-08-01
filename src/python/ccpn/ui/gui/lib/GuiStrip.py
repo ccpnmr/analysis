@@ -5,8 +5,9 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-05-29 16:00:19 +0100 (Wed, May 29, 2024) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-07-25 18:59:48 +0100 (Thu, July 25, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -183,8 +184,9 @@ class GuiStrip(Frame):
     # inherits NotifierBase
 
     optionsChanged = QtCore.pyqtSignal(dict)
-    stripResized = QtCore.pyqtSignal(tuple)
-    pixelSizeChanged = QtCore.pyqtSignal(tuple)
+    stripResized = QtCore.pyqtSignal(object, tuple)
+    pixelSizeChanged = QtCore.pyqtSignal(object, tuple)
+    printer = QtCore.pyqtSignal(object, object)
 
     # MAXPEAKLABELTYPES = 6
     # MAXPEAKSYMBOLTYPES = 4
@@ -410,6 +412,12 @@ class GuiStrip(Frame):
         self._queueActive = None
         self._lock = QtCore.QMutex()
 
+    @property
+    def painted(self):
+        """pyqtSignal to capture the paint-event.
+        """
+        return self._CcpnGLWidget.painted
+
     def getGLWidget(self):
         """Get the CcpnGLWidget instance """
         return self._CcpnGLWidget
@@ -455,7 +463,7 @@ class GuiStrip(Frame):
         super().resizeEvent(ev)
         # call subclass _resize event
         self._resize()
-        self.stripResized.emit((self.width(), self.height()))
+        self.stripResized.emit(self, (self.width(), self.height()))
 
     def _raiseOverlay(self):
         """Raise the Overlay to apply a colour to the strip.
@@ -810,31 +818,43 @@ class GuiStrip(Frame):
     def _updateSpectrumLabels(self, data):
         """Callback when spectra have changed
         """
+        if self.isDeleted:
+            return
         self._CcpnGLWidget._processSpectrumNotifier(data)
 
     def _updateDisplayedPeaks(self, data):
         """Callback when peaks have changed
         """
+        if self.isDeleted:
+            return
         self._CcpnGLWidget._processPeakNotifier(data)
 
     def _updateDisplayedPeakLists(self, data):
         """Callback when peakLists are created/deleted
         """
+        if self.isDeleted:
+            return
         self._CcpnGLWidget._processPeakListNotifier(data)
 
     def _updateDisplayedNmrAtoms(self, data):
         """Callback when nmrAtoms have changed
         """
+        if self.isDeleted:
+            return
         self._CcpnGLWidget._processNmrAtomNotifier(data)
 
     def _updateDisplayedMultiplets(self, data):
         """Callback when multiplets have changed
         """
+        if self.isDeleted:
+            return
         self._CcpnGLWidget._processMultipletNotifier(data)
 
     def _updateDisplayedMultipletLists(self, data):
         """Callback when multipletLists are created/deleted
         """
+        if self.isDeleted:
+            return
         self._CcpnGLWidget._processMultipletListNotifier(data)
 
     def refreshDevicePixelRatio(self):
@@ -3454,12 +3474,17 @@ class GuiStrip(Frame):
             executeQueue = _removeDuplicatedNotifiers(self._queueActive)
             for itm in executeQueue:
                 # process item if different from previous
-                try:
+                if self.application and self.application._disableQueueException:
                     func, data = itm
-                    # data must be a non-empty dict or None
                     func(data) if data else func()
-                except Exception as es:
-                    getLogger().debug(f'Error in {self.__class__.__name__} update - {es}')
+
+                else:
+                    try:
+                        func, data = itm
+                        # data must be a non-empty dict or None
+                        func(data) if data else func()
+                    except Exception as es:
+                        getLogger().debug(f'Error in {self.__class__.__name__} update - {es}')
 
         if self._logQueue:
             getLogger().debug(f'elapsed time {(time_ns() - _startTime) / 1e9}')

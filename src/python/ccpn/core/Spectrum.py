@@ -54,9 +54,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-30 13:45:36 +0100 (Thu, May 30, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-07-25 10:11:17 +0100 (Thu, July 25, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -170,23 +170,8 @@ class Spectrum(AbstractWrapperObject):
     _NEGATIVENOISELEVEL = 'negativeNoiseLevel'
 
     #-----------------------------------------------------------------------------------------
-    # Attributes of the data structure (incomplete?)
+    # Attributes of the data structure
     #-----------------------------------------------------------------------------------------
-
-    @property
-    def peakLists(self) -> list:
-        """STUB: hot-fixed later"""
-        return []
-
-    @property
-    def multipletLists(self) -> list:
-        """STUB: hot-fixed later"""
-        return []
-
-    @property
-    def integralLists(self) -> list:
-        """STUB: hot-fixed later"""
-        return []
 
     @property
     def spectrumViews(self) -> tuple:
@@ -198,15 +183,10 @@ class Spectrum(AbstractWrapperObject):
 
     @property
     def chemicalShiftList(self):
-        """STUB: hot-fixed later"""
-        return None
-
-    @property
-    def spectrumReferences(self) -> list:
-        """list of spectrumReferences objects
-        STUB: hot-fixed later
+        """STUB: hot-fixed later
+        :return: an instance of ChemicalShiftList, or None
         """
-        return []
+        return None
 
     @property
     def spectrumDimensions(self) -> tuple:
@@ -227,13 +207,10 @@ class Spectrum(AbstractWrapperObject):
         return tuple(self._spectrumDimensions)
 
     @property
-    def spectrumHits(self) -> list:
-        """STUB: hot-fixed later"""
-        return []
-
-    @property
     def sample(self):
-        """STUB: hot-fixed later"""
+        """STUB: hot-fixed later
+        :return: an instance of Sample, or None
+        """
         return None
 
     # Inherited from AbstractWrapperObject
@@ -246,6 +223,131 @@ class Spectrum(AbstractWrapperObject):
     def _parent(self) -> Project:
         """Parent (containing) object."""
         return self._project
+
+    #-----------------------------------------------------------------------------------------
+    # property STUBS: hot-fixed later
+    #-----------------------------------------------------------------------------------------
+
+    @property
+    def integralLists(self) -> list['IntegralList']:
+        """STUB: hot-fixed later
+        :return: a list of integralLists in the Spectrum
+        """
+        return []
+
+    @property
+    def integrals(self) -> list['Integral']:
+        """STUB: hot-fixed later
+        :return: a list of integrals in the Spectrum
+        """
+        return []
+
+    @property
+    def multipletLists(self) -> list['MultipletList']:
+        """STUB: hot-fixed later
+        :return: a list of multipletLists in the Spectrum
+        """
+        return []
+
+    @property
+    def multiplets(self) -> list['Multiplet']:
+        """STUB: hot-fixed later
+        :return: a list of multiplets in the Spectrum
+        """
+        return []
+
+    @property
+    def peakLists(self) -> list['PeakList']:
+        """STUB: hot-fixed later
+        :return: a list of peakLists in the Spectrum
+        """
+        return []
+
+    @property
+    def peaks(self) -> list['Peak']:
+        """STUB: hot-fixed later
+        :return: a list of peaks in the Spectrum
+        """
+        return []
+
+    @property
+    def pseudoDimensions(self) -> list['PseudoDimension']:
+        """STUB: hot-fixed later
+        :return: a list of pseudoDimensions in the Spectrum
+        """
+        return []
+
+    @property
+    def spectrumHits(self) -> list['SpectrumHit']:
+        """STUB: hot-fixed later
+        :return: a list of spectrumHits in the Spectrum
+        """
+        return []
+
+    @property
+    def spectrumReferences(self) -> list['SpectrumReference']:
+        """STUB: hot-fixed later
+        :return: a list of spectrumReferences in the Spectrum
+        """
+        return []
+
+    #-----------------------------------------------------------------------------------------
+    # getter STUBS: hot-fixed later
+    #-----------------------------------------------------------------------------------------
+
+    def getIntegral(self, relativeId: str) -> 'Integral | None':
+        """STUB: hot-fixed later
+        :return: an instance of Integral, or None
+        """
+        return None
+
+    def getIntegralList(self, relativeId: str) -> 'IntegralList | None':
+        """STUB: hot-fixed later
+        :return: an instance of IntegralList, or None
+        """
+        return None
+
+    def getMultiplet(self, relativeId: str) -> 'Multiplet | None':
+        """STUB: hot-fixed later
+        :return: an instance of Multiplet, or None
+        """
+        return None
+
+    def getMultipletList(self, relativeId: str) -> 'MultipletList | None':
+        """STUB: hot-fixed later
+        :return: an instance of MultipletList, or None
+        """
+        return None
+
+    def getPeak(self, relativeId: str) -> 'Peak | None':
+        """STUB: hot-fixed later
+        :return: an instance of Peak, or None
+        """
+        return None
+
+    def getPeakList(self, relativeId: str) -> 'PeakList | None':
+        """STUB: hot-fixed later
+        :return: an instance of PeakList, or None
+        """
+        return None
+
+    def getPseudoDimension(self, relativeId: str) -> 'PseudoDimension | None':
+        """STUB: hot-fixed later
+        :return: an instance of PseudoDimension, or None
+        """
+        return None
+
+    def getSpectrumHit(self, relativeId: str) -> 'SpectrumHit | None':
+        """STUB: hot-fixed later
+        :return: an instance of SpectrumHit, or None
+        """
+        return None
+
+    def getSpectrumReference(self, relativeId: str) -> 'SpectrumReference | None':
+        """STUB: hot-fixed later
+        :return: an instance of SpectrumReference, or None
+        """
+        return None
 
     #-----------------------------------------------------------------------------------------
 
@@ -1257,7 +1359,7 @@ class Spectrum(AbstractWrapperObject):
             _refExperiment = self.project._getReferenceExperimentFromType(_experimentType)
 
         # get the nucleus codes from the current isotope codes
-        nCodes = tuple(val.strip('0123456789') for val in self.isotopeCodes)
+        nCodes = tuple(val.strip('0123456789') for val in self.isotopeCodes if val is not None)
 
         # match against the current reference experiment or passed in value
         apiExperiment = self._wrappedData.experiment
@@ -2250,6 +2352,7 @@ class Spectrum(AbstractWrapperObject):
         """
         if self.dataSource is not None:
             from ccpn.core.lib.SpectrumLib import getNoiseEstimate
+
             noiseObj = getNoiseEstimate(self)
             noise = noiseObj.noiseLevel
         else:
@@ -2268,9 +2371,9 @@ class Spectrum(AbstractWrapperObject):
         if result is None and self.noiseLevel:
             # We have the noiseLevel, we can backcalculate the noise sd
             from ccpn.core.lib.SpectrumLib import  _estimateNoiseSDforSpectrumNoiseLevel
+
             result = _estimateNoiseSDforSpectrumNoiseLevel(self)
             self._setInternalParameter(self._NOISESD, result) #ensure we don't go out of sync with the NoiseLevel.
-
         return result
 
     @_noiseSD.setter
@@ -3105,6 +3208,7 @@ class Spectrum(AbstractWrapperObject):
                 position = [1] * self.dimensionCount  # dims and positions are 1-based
 
                 # loop over the points in the time dimension (1-based)
+                _spectra = []  # temp list to hold values to add in one go, as SpectrumGroup.addSpectrum is slowww!
                 for timePoint in range(1, pseudoDimensionSize + 1):
                     # set the position of the plane we are now doing
                     position[pseudoDimensionIndex] = timePoint
@@ -3114,7 +3218,7 @@ class Spectrum(AbstractWrapperObject):
                     path = aPath(pathTemplate % (timePoint,))
                     sp = self._extractToFile(axisCodes=freqAxisCodes, position=position, path=path,
                                              dataFormat=Hdf5SpectrumDataSource.dataFormat, tag='fromPseudo')
-                    spectrumGroup.addSpectrum(sp, seriesValue)
+                    _spectra.append( (sp, seriesValue) )
 
                     seriesValue += seriesIncrement
 
@@ -3122,6 +3226,9 @@ class Spectrum(AbstractWrapperObject):
                 # _values = self.dataSource.sampledValues[pseudoDimensionIndex]
                 # if _values is not None and len(_values) == len(spectrumGroup.spectra):
                 #     spectrumGroup.series = _values
+
+                spectrumGroup.spectra = [sp for sp, seriesVal in _spectra]
+                spectrumGroup.series = [seriesVal for sp, seriesVal in _spectra]
 
         return spectrumGroup
 
@@ -3667,7 +3774,7 @@ class Spectrum(AbstractWrapperObject):
         """
         from ccpn.core.PeakList import _newPeakList
 
-        return _newPeakList(self, title=title, comment=comment, isSimulated=isSynthetic,
+        return _newPeakList(self, title=title, comment=comment, isSynthetic=isSynthetic,
                             symbolStyle=symbolStyle, symbolColour=symbolColour,
                             textColour=textColour, arrowColour=arrowColour,
                             **kwds)
@@ -3977,13 +4084,16 @@ def _newHdf5Spectrum(project: Project, isotopeCodes: Sequence[str], name: str = 
     if not isIterable(isotopeCodes) or len(isotopeCodes) == 0:
         raise ValueError('invalid isotopeCodes "%s"' % isotopeCodes)
 
+    name = Spectrum._uniqueName(parent=project, name=name)
     if path is None:
         path = Path('$INSIDE') / CCPN_SPECTRA_DIRECTORY / name
         path = path.assureSuffix(Hdf5SpectrumDataSource.suffixes[0])
 
+    autoVersioning = parameters.get('autoVersioning', True)
+    overwrite = parameters.get('overwrite', False)
     dataStore = DataStore.newFromPath(path,
                                       dataFormat=Hdf5SpectrumDataSource.dataFormat,
-                                      autoVersioning=True)
+                                      autoVersioning=autoVersioning)
 
     # Initialise a Hdf5 dataSource instance
     dataSource = Hdf5SpectrumDataSource()
@@ -4001,7 +4111,7 @@ def _newHdf5Spectrum(project: Project, isotopeCodes: Sequence[str], name: str = 
             if hasattr(dataSource, param):
                 setattr(dataSource, param, value)
     # Create the file
-    with dataSource.openNewFile(path=dataStore.aPath()) as hdf5File:
+    with dataSource.openNewFile(path=dataStore.aPath(), overwrite=overwrite) as hdf5File:
         hdf5File.writeParameters()
 
     # create a Spectrum instance

@@ -17,9 +17,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-06-19 15:10:19 +0100 (Wed, June 19, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-06-21 19:48:44 +0100 (Fri, June 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -38,15 +38,14 @@ import pandas as pd
 from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
-from ccpn.core.ChemicalShiftList import CS_UNIQUEID, CS_ISDELETED, CS_PID, \
-    CS_STATIC, CS_STATE, CS_ORPHAN, CS_VALUE, CS_VALUEERROR, CS_FIGUREOFMERIT, CS_ATOMNAME, \
-    CS_NMRATOM, CS_CHAINCODE, CS_SEQUENCECODE, CS_RESIDUETYPE, \
-    CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT, \
-    CS_COMMENT, CS_OBJECT, \
-    CS_TABLECOLUMNS, ChemicalShiftState
+from ccpn.core.ChemicalShiftList import (CS_UNIQUEID, CS_ISDELETED, CS_PID, CS_STATIC, CS_STATE, CS_ORPHAN, CS_VALUE,
+                                         CS_VALUEERROR, CS_FIGUREOFMERIT, CS_ATOMNAME, CS_NMRATOM, CS_CHAINCODE,
+                                         CS_SEQUENCECODE, CS_RESIDUETYPE, CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT,
+                                         CS_ALLPEAKSCOUNT, CS_COMMENT, CS_OBJECT, CS_TABLECOLUMNS, ChemicalShiftState)
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.DataFrameObject import DataFrameObject, DATAFRAME_OBJECT
-from ccpn.ui.gui.modules.CcpnModule import CcpnTableModule, MODULENAME, WIDGETSTATE
+from ccpn.framework.Application import getApplication
+from ccpn.ui.gui.modules.CcpnModule import CcpnTableModule
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.PulldownListsForObjects import ChemicalShiftListPulldown
@@ -84,13 +83,11 @@ _INTO_CSL = 'into'
 class ChemicalShiftTableModule(CcpnTableModule):
     """This class implements the module by wrapping a ChemicalShift instance
     """
+    className = 'ChemicalShiftTableModule'
     includeSettingsWidget = True
     maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
     settingsPosition = 'left'
-
-    className = 'ChemicalShiftTableModule'
     _allowRename = True
-
     activePulldownClass = None  # e.g., can make the table respond to current peakList
 
     def __init__(self, mainWindow=None, name='Chemical Shift Table',
@@ -199,7 +196,10 @@ class ChemicalShiftTableModule(CcpnTableModule):
     def _closeModule(self):
         """CCPN-INTERNAL: used to close the module
         """
-        self._modulePulldown.unRegister()
+        if self._modulePulldown:
+            self._modulePulldown.unRegister()
+        if self._tableWidget:
+            self._tableWidget._close()
         super()._closeModule()
 
 
@@ -213,6 +213,8 @@ blankId = SimpleNamespace(className='notDefined', serial=0)
 OBJECT_CLASS = 0
 OBJECT_PARENT = 1
 MODULEIDS = {}
+_TABLES = 'tables'
+_HIDDENCOLUMNS = 'hiddenColumns'
 
 
 class _NewChemicalShiftTable(_ProjectTableABC):
@@ -307,11 +309,15 @@ class _NewChemicalShiftTable(_ProjectTableABC):
                          **kwds
                          )
 
-        self.headerColumnMenu.setInternalColumns([self.columnHeaders[col] for col in self._internalColumns], update=False)
-        self.headerColumnMenu.setDefaultColumns([self.columnHeaders[col] for col in self.defaultHidden], update=False)
-
+        self.headerColumnMenu.setInternalColumns([self.columnHeaders[col] for col in self._internalColumns])
+        self.headerColumnMenu.setDefaultColumns([self.columnHeaders[col] for col in self.defaultHidden])
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()
+
+    def setClassDefaultColumns(self, texts):
+        """Set a list of default column-headers that are hidden when first shown.
+        """
+        self.headerColumnMenu.saveColumns(texts)
 
     #=========================================================================================
     # Widget callbacks
@@ -389,7 +395,9 @@ class _NewChemicalShiftTable(_ProjectTableABC):
         _midRow = _row[CS_VALUE:CS_ATOMNAME]  # CS_STATIC
         _comment = _row[CS_COMMENT:]
         _pidCol = pd.Series(obj.pid, index=[CS_PID, ])
-        _extraCols = pd.Series(self._derivedFromObject(obj), index=[CS_STATE, CS_ORPHAN, CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT])  # if state required
+        _extraCols = pd.Series(self._derivedFromObject(obj),
+                               index=[CS_STATE, CS_ORPHAN, CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT,
+                                      CS_ALLPEAKSCOUNT])  # if state required
 
         # newRow = newRow.append([_pidCol, _midRow, _extraCols, _comment])  # deprecated
         newRow = pd.concat([newRow, _pidCol, _midRow, _extraCols, _comment])
@@ -640,7 +648,8 @@ class _NewChemicalShiftTable(_ProjectTableABC):
         self._mergeMenuAction = menu.addAction(_MERGE_CST, self._mergeNmrAtoms)
         self._editMenuAction = menu.addAction(_EDIT_CST, self._editNmrAtom)
         self._removeAssignmentsMenuAction = menu.addAction(_REMOVE_CST, partial(self._removeAssignments, delete=False))
-        self._removeAssignmentsDeleteMenuAction = menu.addAction(_REMOVEDEL_CST, partial(self._removeAssignments, delete=True))
+        self._removeAssignmentsDeleteMenuAction = menu.addAction(_REMOVEDEL_CST,
+                                                                 partial(self._removeAssignments, delete=True))
 
         if (_actions := menu.actions()):
             _topMenuItem = _actions[0]
@@ -724,11 +733,16 @@ class _NewChemicalShiftTable(_ProjectTableABC):
                 showWarning('Merge NmrAtoms', 'No matching isotope codes')
             else:
                 ss = 's' if (len(nonMatching) > 1) else ''
-                nonMatchingList = '\n\n\n({} nmrAtom{} with non-matching isotopeCode{})'.format(len(nonMatching), ss, ss) if nonMatching else ''
-                yesNo = showYesNo('Merge NmrAtoms', "Do you want to merge\n\n"
-                                                    "{}   into   {}{}".format('\n'.join([ss.id for ss in matching]),
-                                                                              currentNmrAtom.id,
-                                                                              nonMatchingList))
+                nonMatchingList = (f'\n\n\n({len(nonMatching)} nmrAtom{ss} with non-matching isotopeCode{ss})'
+                                   if nonMatching else '')
+                yesNo = showYesNo('Merge NmrAtoms',
+                                  'Do you want to merge\n'
+                                  '{}  into  {}{}'.format('\n'.join([ss.id for ss in matching]),
+                                                          currentNmrAtom.id,
+                                                          nonMatchingList),
+                                  dontShowEnabled=True,
+                                  defaultResponse=True,
+                                  popupId=f'{self.__class__.__name__}Merge')
                 if yesNo:
                     currentNmrAtom.mergeNmrAtoms(matching)
 
@@ -911,7 +925,8 @@ class _CSLTableDelegate(QtWidgets.QStyledItemDelegate):
                 func(obj, value)
 
         except Exception as es:
-            getLogger().debug('Error handling cell editing: %i %i - %s    %s    %s' % (row, col, str(es), self._parent.model()._sortOrder, value))
+            getLogger().debug('Error handling cell editing: %i %i - %s    %s    %s' % (
+                row, col, str(es), self._parent.model()._sortOrder, value))
 
 
 #=========================================================================================

@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-30 13:45:36 +0100 (Thu, May 30, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-07-04 18:51:59 +0100 (Thu, July 04, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -106,13 +106,12 @@ class SpectrumGroup(AbstractWrapperObject):
         """ CCPN Project SpectrumGroup"""
         return self._wrappedData
 
-    def _getSpectrumGroupChildrenByClass(self, klass):
+    def _getSpectrumGroupChildrenByClass(self, klass) -> tuple | list:
         """Return the list of spectra attached to the spectrumGroup.
         """
-        if klass is Spectrum:
+        if klass is Spectrum and not self.isDeleted:
             return tuple(spectrum for spectrum in self.spectra)
-        else:
-            return []
+        return []
 
     @property
     def _key(self) -> str:
@@ -453,13 +452,11 @@ class SpectrumGroup(AbstractWrapperObject):
                 totalCopies = len(sourcePeakList.peaks)
                 text = 'Copying and refitting peaks' if refit else 'Copying peaks'
 
-                with progressHandler(title=progressHandlerTitle, maximum=totalCopies, text=progressHandlerText, autoClose=True,
-                                     hideCancelButton=True, ) as progress:
-
+                with progressHandler(title=progressHandlerTitle, maximum=totalCopies, text=progressHandlerText,
+                                     hideCancelButton=True) as progress:
                     for i, peak in enumerate(sourcePeakList.peaks):
-                        progress.checkCancelled()
+                        progress.checkCancel()
                         progress.setValue(i)
-
                         for peakList in peakLists:
                             newPeak = peak.copyTo(peakList)
                             collectionName = _getCollectionNameForPeak(newPeak)  #not from Peak to avoid copying wrong assignments.

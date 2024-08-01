@@ -4,9 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-10-19 12:24:29 +0100 (Thu, October 19, 2023) $"
-__version__ = "$Revision: 3.2.0.1 $"
+__dateModified__ = "$dateModified: 2024-07-04 18:42:13 +0100 (Thu, July 04, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -256,7 +257,8 @@ class GuiTableFilter(ScrollArea):
         rows = OrderedSet()
 
         searchColumn = self.columnOptions.getText()
-        visHeadings = self.table._dataFrameObject.visibleColumnHeadings if (searchColumn == VISIBLESEARCH) else searchColumn
+        visHeadings = self.table._dataFrameObject.visibleColumnHeadings \
+            if (searchColumn == VISIBLESEARCH) else searchColumn
 
         _compareErrorCount = 0
         for row in range(self.table.rowCount()):
@@ -394,21 +396,22 @@ class _TableFilterABC(ScrollArea):
                 count = 0
                 while not (self._tabOrder[ind].isEnabled() and self._tabOrder[ind].isVisible()):
                     ind = (ind + (1 if key == QtCore.Qt.Key_Tab else -1)) % len(self._tabOrder)
-
                     count += 1
                     if count > len(self._tabOrder):
                         # have cycled through all the tabs at least once
-                        break  # while not
+                        break
                 else:
                     self._tabOrder[ind].setFocus()
-
+                return True
             if key in [QtCore.Qt.Key_Tab, QtCore.Qt.Key_Backtab]:
                 # simulate an escape-key to clear keySequences
                 escape = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Escape, QtCore.Qt.NoModifier)
                 QtCore.QCoreApplication.sendEvent(self, escape)
                 return True
-
-        return False
+            if key in [QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return]:
+                if source in self.searchButtons.buttons:
+                    ...
+        return super().eventFilter(source, event)
 
     def searchRows(self, df, rows):
         """Return the subset of the df based on rows
@@ -530,14 +533,10 @@ class _TableFilterABC(ScrollArea):
                         # remove the found sorted values from the list
                         rows -= {row}
 
-        # if _compareErrorCount > 0:
-        #     getLogger().debug2('Error in comparing values for GuiTable filters, use debug2 for details')
-
         self._listRows = rows
-        if len(rows):
+        if len(rows) and (_model._filterIndex is None or (set(rows) & set(_model._filterIndex))):
             self.tableHandler.setDataFromSearchWidget(rows)
             self.searchButtons.getButton('Reset').setEnabled(True)
-
         elif not ignoreNotFound:
             MessageDialog.showWarning('Not found', 'Query value(s) not found in selected columns.'
                                                    'Try by filtering in a specific column or double check your query.')
@@ -571,7 +570,8 @@ class _DFTableFilter(_TableFilterABC):
     def visibleColumns(self, searchColumn=None):
         """Return the list of visible columns
         """
-        return self.tableHandler._dataFrameObject.visibleColumnHeadings if (searchColumn == VISIBLESEARCH) else [searchColumn]
+        return self.tableHandler._dataFrameObject.visibleColumnHeadings if (searchColumn == VISIBLESEARCH) else [
+            searchColumn]
 
     @property
     def df(self):
@@ -602,8 +602,8 @@ class _SimplerDFTableFilter(_TableFilterABC):
         """
         headerMenu = self._parent.headerColumnMenu
 
-        return [col for col in self.df.columns if col not in headerMenu.allHiddenColumns] \
-            if (columnIndex is None) else [self.df.columns[columnIndex]]
+        return ([col for col in self.df.columns if col not in headerMenu._allHiddenColumns]
+                if (columnIndex is None) else [self.df.columns[columnIndex]])
 
     @property
     def df(self):

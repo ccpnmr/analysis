@@ -222,7 +222,8 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         if self.hasOpenFile():
             self.closeFile()
 
-        self._checkFilePath(newFile, mode)
+        overwrite = kwds.pop('overwrite', False)
+        self._checkFilePath(newFile, mode, overwrite=overwrite)
 
         try:
             self.disableCache()  # Hdf has its own caching

@@ -4,8 +4,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -28,6 +28,9 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import typing
 from functools import partial
+
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrChain as ApiNmrChain
+from ccpnmodel.ccpncore.lib import Constants
 from ccpn.core.lib import MoleculeLib
 from ccpn.core.Chain import Chain
 from ccpn.core.Project import Project
@@ -39,8 +42,6 @@ from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, renameOb
 from ccpn.util.decorators import logCommand
 from ccpn.util.Logging import getLogger
 from ccpn.util import Common as commonUtil
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrChain as ApiNmrChain
-from ccpnmodel.ccpncore.lib import Constants
 
 
 DEFAULT_NMRCHAINCODE = '@-'
@@ -81,7 +82,10 @@ class NmrChain(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiNmrChain._metaclass.qualifiedName()
 
+    #=========================================================================================
     # CCPN properties
+    #=========================================================================================
+
     @property
     def _apiNmrChain(self) -> ApiNmrChain:
         """ CCPN NmrChain matching NmrChain"""
@@ -160,16 +164,43 @@ class NmrChain(AbstractWrapperObject):
     def mainNmrResidues(self, value):
         self._wrappedData.mainResonanceGroups = [x._wrappedData for x in value]
 
-    # @chain.setter
-    # def chain(self, value:Chain):
-    #   if value is None:
-    #     if self.chain is None:
-    #       return
-    #     else:
-    #       self.deassign()
-    #   else:
-    #     # NB The API code will throw ValueError if there is already an NmrChain with that code
-    #     self.rename(value._wrappedData.code)
+    #=========================================================================================
+    # property STUBS: hot-fixed later
+    #=========================================================================================
+
+    @property
+    def nmrAtoms(self) -> list['NmrAtom']:
+        """STUB: hot-fixed later
+        :return: a list of nmrAtoms in the NmrChain
+        """
+        return []
+
+    @property
+    def nmrResidues(self) -> list['NmrResidue']:
+        """STUB: hot-fixed later
+        :return: a list of nmrResidues in the NmrChain
+        """
+        return []
+
+    #=========================================================================================
+    # getter STUBS: hot-fixed later
+    #=========================================================================================
+
+    def getNmrAtom(self, relativeId: str) -> 'NmrAtom | None':
+        """STUB: hot-fixed later
+        :return: an instance of NmrAtom, or None
+        """
+        return None
+
+    def getNmrResidue(self, relativeId: str) -> 'NmrResidue | None':
+        """STUB: hot-fixed later
+        :return: an instance of NmrResidue, or None
+        """
+        return None
+
+    #=========================================================================================
+    # Core methods
+    #=========================================================================================
 
     @logCommand(get='self')
     @ccpNmrV3CoreUndoBlock(action='rename')
@@ -179,13 +210,11 @@ class NmrChain(AbstractWrapperObject):
         self._wrappedData.code = None
 
     @logCommand(get='self')
-    def assignSingleResidue(self, thisNmrResidue: typing.Union['NmrResidue'], firstResidue: typing.Union['Residue', str]):
+    def assignSingleResidue(self, thisNmrResidue: typing.Union['NmrResidue'],
+                            firstResidue: typing.Union['Residue', str]):
         """Assign a single unconnected residue from the default '@-' chain"""
 
         project = self._project
-
-        # if self.isConnected:
-        #     raise ValueError("assignSingleResidue only allowed for single nmrResidue")
 
         # make sure that object exists
         if isinstance(firstResidue, str):
@@ -318,26 +347,6 @@ class NmrChain(AbstractWrapperObject):
                 self._project._logger.warning("Only %s nmrResidues found in range %s to %s"
                                               % (len(changedNmrResidues), start, stop))
 
-    def _connectNmrResidues(self):
-        updatingNmrChain = None
-        nrs = self.nmrResidues
-        for i in range(len(nrs) - 1):
-            currentItem, nextItem = nrs[i], nrs[i + 1]
-            if currentItem and nextItem:
-                # check that the sequence codes are consecutive
-                if int(nextItem.sequenceCode) == int(currentItem.sequenceCode) + 1:
-                    updatingNmrChain = currentItem.connectNext(nextItem, )
-        return updatingNmrChain
-
-    #=========================================================================================
-    # Implementation functions
-    #=========================================================================================
-
-    @classmethod
-    def _getAllWrappedData(cls, parent: Project) -> list:
-        """get wrappedData (Nmr.NmrChains) for all NmrChain children of parent Project"""
-        return parent._wrappedData.sortedNmrChains()
-
     @renameObject(blockSidebar=True)
     @logCommand(get='self')
     def rename(self, value: str):
@@ -368,19 +377,6 @@ class NmrChain(AbstractWrapperObject):
 
         return (oldName,)
 
-    def _finaliseAction(self, action, **actionKwds):
-        if action in ['delete']:
-            if self._wrappedData.implCode == '@-' and self._wrappedData.nmrProject:
-                raise TypeError("NmrChain '@-' cannot be deleted")
-
-        if not super()._finaliseAction(action, **actionKwds):
-            return
-
-        if action in ['delete', 'create']:
-            # notify any nmrResidues
-            for nmrRes in self.nmrResidues:
-                nmrRes._finaliseAction(action)
-
     def delete(self):
         """Delete self and update the chemicalShift values
         """
@@ -397,8 +393,37 @@ class NmrChain(AbstractWrapperObject):
                 sh.delete()
 
     #=========================================================================================
-    # CCPN functions
+    # Implementation methods
     #=========================================================================================
+
+    @classmethod
+    def _getAllWrappedData(cls, parent: Project) -> list:
+        """get wrappedData (Nmr.NmrChains) for all NmrChain children of parent Project"""
+        return parent._wrappedData.sortedNmrChains()
+
+    def _finaliseAction(self, action, **actionKwds):
+        if action in ['delete']:
+            if self._wrappedData.implCode == '@-' and self._wrappedData.nmrProject:
+                raise TypeError("NmrChain '@-' cannot be deleted")
+
+        if not super()._finaliseAction(action, **actionKwds):
+            return
+
+        if action in ['delete', 'create']:
+            # notify any nmrResidues
+            for nmrRes in self.nmrResidues:
+                nmrRes._finaliseAction(action)
+
+    def _connectNmrResidues(self):
+        updatingNmrChain = None
+        nrs = self.nmrResidues
+        for i in range(len(nrs) - 1):
+            currentItem, nextItem = nrs[i], nrs[i + 1]
+            if currentItem and nextItem:
+                # check that the sequence codes are consecutive
+                if int(nextItem.sequenceCode) == int(currentItem.sequenceCode) + 1:
+                    updatingNmrChain = currentItem.connectNext(nextItem, )
+        return updatingNmrChain
 
     #===========================================================================================
     # new<Object> and other methods

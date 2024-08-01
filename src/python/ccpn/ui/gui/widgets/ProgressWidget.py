@@ -4,9 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-12 16:15:39 +0100 (Wed, April 12, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-07-05 10:50:42 +0100 (Fri, July 05, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,11 +27,12 @@ __date__ = "$Date: 2022-04-11 21:54:44 +0100 (Mon, April 11, 2022) $"
 # Start of code
 #=========================================================================================
 
+import time
 from tqdm import tqdm
 from time import sleep, perf_counter
 from PyQt5 import QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets.Label import Label
+from ccpn.framework.Application import getMainWindow
 
 
 #=========================================================================================
@@ -38,38 +40,46 @@ from ccpn.ui.gui.widgets.Label import Label
 #=========================================================================================
 
 class ProgressDialog(QtWidgets.QProgressDialog):
-    class ProgressCancelled(Exception):
-        """Exception to catch cancelled progress/busy dialogs
-        """
-        pass
 
-
-    def __init__(self, parent, title='Progress Dialog', text='busy...', minimum=0, maximum=100,
-                 delay=1000, steps=100, closeDelay=250, autoClose=True, hideCancelButton=False):
-        super().__init__(parent=parent)
-
+    def __init__(self, parent=None, *, title: str = 'Progress Dialog',
+                 text: str = 'Busy...', cancelButtonText: str = 'Cancel',
+                 minimum: int = 0, maximum: int = 100, steps: int = 100,
+                 delay: int = 1000, closeDelay: int = 250,
+                 hideBar: bool = False, hideCancelButton: bool = False, **kwds):
+        # get the top-level window to attach the dialog to
+        #   this cause major issue if attached to a window other than the current modal
+        #   can still be set with parent
+        parent = (parent or
+                  QtWidgets.QApplication.activeModalWidget() or
+                  QtWidgets.QApplication.activeWindow() or
+                  getMainWindow())
+        # remove the borders/buttons
+        super().__init__(text, cancelButtonText, minimum, maximum, parent,
+                         QtCore.Qt.CustomizeWindowHint)
         self.setWindowTitle(title)
-        self.setText(text)
-        self.setAutoReset(autoClose)
-        self.setAutoClose(autoClose)
+        self.setAutoReset(False)  # reset on maximum-value
+        self.setAutoClose(True)  # close when reset
         self.setMinimumDuration(delay)
-        self._closeDelay = closeDelay / 1000 if isinstance(closeDelay, (int, float)) else 0
+        self._closeDelay = closeDelay / 1000 if isinstance(closeDelay, (int, float)) else 0  # changes ms->s
+        self._delay = delay / 1000.0
         self._cancelled = False
         self._error = None
-
-        self.setRange(minimum, maximum)
+        self._hideCancelButton = hideCancelButton
         self.steps = steps
-
         # give full control to the dialog
-        self.setWindowModality(QtCore.Qt.ApplicationModal)
-        self.setWindowFlags(self.windowFlags() | QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowStaysOnTopHint)
-
+        self.setWindowModality(QtCore.Qt.WindowModal)
+        # self.setAttribute(QtCore.Qt.WA_AlwaysStackOnTop)
         # hide the cancel-button
         if hideCancelButton:
             self.setCancelButton(None)
-
+        # hide the progress-bar
+        self._hideBar = hideBar
+        if hideBar and (ch := self.findChildren(QtWidgets.QProgressBar)):
+            for cc in ch:
+                cc.hide()
         if not delay:
-            self.show()
+            self.forceShow()
+        self._start = time.perf_counter()
 
     #=========================================================================================
     # Properties
@@ -90,12 +100,11 @@ class ProgressDialog(QtWidgets.QProgressDialog):
             raise TypeError(f'{self.__class__.__name__}.steps must be an int or None')
         if isinstance(value, int) and value < 0:
             raise ValueError(f'{self.__class__.__name__}.steps must be a positive int')
-
         if value:
             self._steps = value
             self._step = int((self.maximum() - self.minimum()) // value) + 1
         else:
-            # stepping is disabled, updates for every iteration
+            # stepping is disabled, updates every iteration
             self._steps = None
             self._step = 1
 
@@ -128,8 +137,7 @@ class ProgressDialog(QtWidgets.QProgressDialog):
     #=========================================================================================
 
     def setText(self, text):
-        self._label = Label(self, text=text, margins=(8, 16, 8, 8))
-        self.setLabel(self._label)
+        self.setLabelText(text)
 
     def increment(self, n=1):
         self.setValue(self.value() + n)
@@ -162,7 +170,6 @@ class ProgressDialog(QtWidgets.QProgressDialog):
             b = self.maximum()
             value = float(value) * (b - a)
             value += a
-
         self.setValue(int(value), force=force)
 
     def setValue(self, value, force=False):
@@ -172,28 +179,25 @@ class ProgressDialog(QtWidgets.QProgressDialog):
         :param value: value to set
         :param force: True/False
         """
-        if force or value % self._step == 0:
+        if force or (value % self._step == 0):
             super().setValue(value)
 
     def setMinimum(self, minimum: int) -> None:
         """Set the minimum value
         """
         super().setMinimum(minimum)
-
         self._updateSteps()
 
     def setMaximum(self, maximum: int) -> None:
         """Set the maximum value
         """
         super().setMaximum(maximum)
-
         self._updateSteps()
 
     def setRange(self, minimum: int, maximum: int) -> None:
         """Set the minimum/maximum values
         """
         super().setRange(minimum, maximum)
-
         self._updateSteps()
 
     def _updateSteps(self):
@@ -212,8 +216,15 @@ class ProgressDialog(QtWidgets.QProgressDialog):
     def cancel(self):
         """Cancel the progress-bar or closure
         """
-        self._cancelled = True
-        raise self.ProgressCancelled
+        super().cancel()
+        self.checkCancel()
+
+    def checkCancel(self):
+        """Raise a StopIteration exception if the cancel button has been pressed
+        """
+        if self.wasCanceled():
+            self._cancelled = True
+            raise StopIteration
 
     def finalise(self):
         """Set the progress to 100%
@@ -224,26 +235,17 @@ class ProgressDialog(QtWidgets.QProgressDialog):
         """Process events and sleep if visible (to stop quick popup)
         """
         sTime = perf_counter()
-
         # wait for threads to complete
         _threads = QtCore.QThreadPool.globalInstance()
         _threads.waitForDone()
-
         # process any remaining events
         QtWidgets.QApplication.processEvents()
-
         # pause so that the counter doesn't flicker if too quick
+        #   (timers are in seconds)
         eTime = perf_counter() - sTime
         if (eTime < self._closeDelay) and self.isVisible():
-            sleep(self._closeDelay)
-
+            sleep(self._closeDelay - eTime)
         self.close()
-
-    def checkCancelled(self):
-        """Raise a ProgressCancelled exception if the cancel button is pressed
-        """
-        if self.wasCanceled():
-            self.cancel()
 
 
 #=========================================================================================
@@ -286,29 +288,19 @@ class ProgressWidget(QtWidgets.QProgressBar, Base):
 #=========================================================================================
 
 class ProgressTextBar(tqdm):
-    class ProgressCancelled(Exception):
-        """Exception to catch cancelled progress/busy dialogs
-        """
-        pass
 
-
-    def __init__(self, parent, title='Progress Dialog', text='busy...', minimum=0, maximum=100,
-                 delay=1000, closeDelay=250, steps=100,
-                 autoClose=True, hideCancelButton=True):
-
+    def __init__(self, parent=None, *,
+                 minimum: int = 0, maximum: int = 100, steps: int = 100,
+                 delay: int = 1000, **kwds):
+        # other parameters from ProgressDialog are ignored (harvested by **kwds if required)
         self._minimum = minimum
         self._maximum = maximum
         self.steps = steps
         self._cancelled = False
         self._error = None
-
-        miniters = ((maximum - minimum) / self._steps) if self._steps else 0
-        super().__init__(initial=0, total=maximum - minimum, delay=delay / 1000,
-                         ncols=120, miniters=miniters
+        super().__init__(initial=0, total=maximum - minimum + 1, delay=delay / 1000,
+                         ncols=120, miniters=None
                          )
-        # for compatibility with ProgressDialog above - perform no operation
-        self._closeDelay = closeDelay
-        self._autoClose = autoClose
 
     #=========================================================================================
     # Properties
@@ -337,12 +329,11 @@ class ProgressTextBar(tqdm):
             raise TypeError(f'{self.__class__.__name__}.steps must be an int or None')
         if isinstance(value, int) and value < 0:
             raise ValueError(f'{self.__class__.__name__}.steps must be a positive int')
-
         if value:
             self._steps = value
             self._step = int((self._maximum - self._minimum) // value) + 1
         else:
-            # stepping is disabled, updates for every iteration
+            # stepping is disabled, updates every iteration
             self._steps = None
             self._step = 1
 
@@ -381,15 +372,16 @@ class ProgressTextBar(tqdm):
         self.update(n)
 
     def getValue(self):
+        return self.value()
+
+    def value(self):
         return self.n
 
     def getProportion(self):
         return self.n / (self.total or 1)
 
     def percent(self, decimals=0):
-        frac = self.n / (self.total or 1)
-        percent = frac * 100
-        return round(percent, decimals)
+        return round(100.0 * self.getProportion(), decimals)
 
     # setRange() inbuilt
     # reset() inbuilt
@@ -401,15 +393,17 @@ class ProgressTextBar(tqdm):
             b = self.total
             value = float(value) * (b - a)
             value += a
-
         self.setValue(int(value), force=force)
 
-    def setValue(self, value, force=False):
+    def setValue(self, value=0, force=False):
         """Increment the counter to the required value
         """
-        val = value - self.n - self._minimum
-        if force or val % self._step == 0:
-            self.update(val)
+        self.update(value - self.n - self._minimum + 1)
+
+    def setRange(self, minimum: int, maximum: int) -> None:
+        """Set the minimum/maximum values
+        """
+        self.reset(total=maximum - minimum + 1)
 
     #=========================================================================================
     # Implementation
@@ -418,27 +412,28 @@ class ProgressTextBar(tqdm):
     def cancel(self):
         """Cancel the progress-bar or closure
         """
-        self.disable = True
         self._cancelled = True
-        raise self.ProgressCancelled
+        self.checkCancel()
 
-    @staticmethod
-    def wasCanceled():
-        return False
+    def wasCanceled(self):
+        return self._cancelled
 
-    def checkCancelled(self):
+    def checkCancel(self):
         if self.wasCanceled():
-            self.cancel()
+            self.disable = True
+            self._cancelled = True
+            self.close()
+            raise StopIteration
 
     def finalise(self):
         """Set the progress to 100%
         """
-        self.setValue(self._maximum, force=True)
+        self.update(self.total)
 
     def waitForEvents(self):
         """Process events and sleep if visible (to stop quick popup)
         """
-        self.close()
+        ...
 
 
 #=========================================================================================
@@ -449,21 +444,15 @@ class BusyDialog(ProgressDialog):
     """A progress-dialog that pops up immediately without a cancel button or progress-bar
     """
 
-    def __init__(self, parent, hideBar=True, hideCancelButton=True, *args, **kwds):
+    def __init__(self, parent=None, *args, delay: int = 0,
+                 hideBar: bool = True, hideCancelButton: bool = True,
+                 **kwds):
         """Initialise the dialog
         """
-        # show the dialog immediately
-        kwds.pop('delay', 0)
-        super().__init__(parent, delay=0, *args, **kwds)
-
-        # hide the progress-bar
-        if hideBar and (ch := self.findChildren(QtWidgets.QProgressBar)):
-            for cc in ch:
-                cc.setVisible(False)
-
-        # hide the cancel-button
-        if hideCancelButton:
-            self.setCancelButton(None)
+        # show the dialog immediately - or small delay to allow child-widgets to hide
+        super().__init__(parent, delay=delay,
+                         hideBar=hideBar, hideCancelButton=hideCancelButton,
+                         *args, **kwds)
 
 
 #=========================================================================================

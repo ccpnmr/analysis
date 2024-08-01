@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-30 13:45:37 +0100 (Thu, May 30, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-07-04 18:06:22 +0100 (Thu, July 04, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -97,6 +97,7 @@ from ccpn.util.AttrDict import AttrDict
 from ccpn.util.nef.GenericStarParser import PARSER_MODE_STANDARD
 
 from ccpn.framework.lib.ccpnNef.CcpnNefContent import CcpnNefContent
+from ccpn.ui.gui.guiSettings import FontSettings, consoleStyle
 
 
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
@@ -6650,6 +6651,12 @@ class CcpnNefReader(CcpnNefContent):
                 # finalise last peak
                 if result and assignedNmrAtoms:
                     try:
+                        # set the isotopeCodes to match the peak
+                        ics = result[-1].spectrum.isotopeCodes
+                        for asgns in assignedNmrAtoms:
+                            for ic, na in zip(ics, asgns):
+                                if not na.isotopeCode:
+                                    na._setIsotopeCode(ic)
                         # There is a peak in result, and the peak has assignments to set
                         result[-1].assignedNmrAtoms = assignedNmrAtoms
                     except Exception as es:
@@ -6739,6 +6746,13 @@ class CcpnNefReader(CcpnNefContent):
         # finalise last peak
         if result and assignedNmrAtoms:
             try:
+                # set the isotopeCodes to match the peak
+                #   not sure why duplicated here, and not sure if executes this loop
+                ics = result[-1].spectrum.isotopeCodes
+                for asgns in assignedNmrAtoms:
+                    for ic, na in zip(ics, asgns):
+                        if not na.isotopeCode:
+                            na._setIsotopeCode(ic)
                 # There is a peak in result, and the peak has assignments to set
                 result[-1].assignedNmrAtoms = assignedNmrAtoms
             except Exception as es:
@@ -8123,7 +8137,8 @@ class CcpnNefReader(CcpnNefContent):
         if not name:
             raise ValueError("Cannot produce NmrAtom for atom name: %s" % repr(name))
 
-        if isotopeCode:
+        # this needs addressing and probably requires Q-atoms to be added to resources
+        if isotopeCode and not (isotopeCode == '1H' and name.startswith('Q')):
             prefix = isotopeCode.upper()
             if not name.startswith(prefix):
                 prefix = isotopeCode2Nucleus(isotopeCode)

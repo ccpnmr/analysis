@@ -4,9 +4,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:40 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-07-03 17:29:33 +0100 (Wed, July 03, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,13 +29,14 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import operator
 import typing
-from ccpn.core.MultipletList import MultipletList
-from ccpn.core.Project import Project
-from ccpn.ui._implementation.SpectrumView import SpectrumView
+
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripMultipletListView as ApiStripMultipletListView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import MultipletListView as ApiMultipletListView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
+from ccpn.core.MultipletList import MultipletList
+from ccpn.core.Project import Project
+from ccpn.ui._implementation.SpectrumView import SpectrumView
 from ccpn.ui._implementation.PMIListViewABC import PMIListViewABC
 
 
@@ -98,17 +100,38 @@ class MultipletListView(PMIListViewABC):
         return (self._wrappedData.multipletListView.multipletListSerial,)
 
     #=========================================================================================
+    # property STUBS: hot-fixed later
+    #=========================================================================================
+
+    @property
+    def multipletViews(self) -> list['MultipletView']:
+        """STUB: hot-fixed later
+        :return: a list of multipletViews in the MultipletListView
+        """
+        return []
+
+    #=========================================================================================
+    # getter STUBS: hot-fixed later
+    #=========================================================================================
+
+    def getMultipletView(self, relativeId: str) -> 'MultipletView | None':
+        """STUB: hot-fixed later
+        :return: an instance of MultipletView, or None
+        """
+        return None
+
+    #=========================================================================================
     # Implementation functions
     #=========================================================================================
 
     @classmethod
-    def _getAllWrappedData(cls, parent: SpectrumView) -> typing.Optional[list]:
-        """get wrappedData (ccpnmr.gui.Task.MultipletListView) in serial number order"""
+    def _getAllWrappedData(cls, parent: SpectrumView) -> list:
+        """get wrappedData (ccpnmr.gui.Task.MultipletListView) in serial number order.
+        """
         if hasattr(parent._wrappedData, 'stripMultipletListViews'):
             return sorted(parent._wrappedData.stripMultipletListViews,
                           key=operator.attrgetter('multipletListView.multipletListSerial'))
-        else:
-            return None
+        return []
 
     def _propagateAction(self, data):
         from ccpn.core.lib.Notifiers import Notifier
@@ -149,7 +172,8 @@ Project._apiNotifiers.append(
 def _multipletListAddMultipletListViews(project: Project, apiMultipletList: Nmr.MultipletList):
     """Add ApiMultipletListView when ApiMultipletList is created"""
     for apiSpectrumView in apiMultipletList.dataSource.spectrumViews:
-        apiSpectrumView.newMultipletListView(multipletListSerial=apiMultipletList.serial, multipletList=apiMultipletList)
+        apiSpectrumView.newMultipletListView(multipletListSerial=apiMultipletList.serial,
+                                             multipletList=apiMultipletList)
 
 
 Project._setupApiNotifier(_multipletListAddMultipletListViews, Nmr.MultipletList, 'postInit')
@@ -158,7 +182,8 @@ Project._setupApiNotifier(_multipletListAddMultipletListViews, Nmr.MultipletList
 def _spectrumViewAddMultipletListViews(project: Project, apiSpectrumView: ApiSpectrumView):
     """Add ApiMultipletListView when ApiSpectrumView is created"""
     for apiMultipletList in apiSpectrumView.dataSource.multipletLists:
-        apiSpectrumView.newMultipletListView(multipletListSerial=apiMultipletList.serial, multipletList=apiMultipletList)
+        apiSpectrumView.newMultipletListView(multipletListSerial=apiMultipletList.serial,
+                                             multipletList=apiMultipletList)
 
 
 Project._setupApiNotifier(_spectrumViewAddMultipletListViews, ApiSpectrumView, 'postInit')

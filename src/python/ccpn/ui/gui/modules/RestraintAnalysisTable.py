@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-06-19 15:10:20 +0100 (Wed, June 19, 2024) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-06-20 16:42:22 +0100 (Thu, June 20, 2024) $"
 __version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
@@ -485,7 +485,7 @@ class RestraintAnalysisTableModule(CcpnTableModule):
     """
     This class implements the module by wrapping a RestraintAnalysisTable instance
     """
-
+    className = 'RestraintAnalysisTableModule'
     includeSettingsWidget = True
     maxSettingsState = 2
     settingsPosition = 'left'
@@ -495,8 +495,6 @@ class RestraintAnalysisTableModule(CcpnTableModule):
     includePeakLists = False
     includeNmrChains = False
     includeSpectrumTable = False
-
-    className = 'RestraintAnalysisTableModule'
     _allowRename = True
 
     activePulldownClass = None  # e.g., can make the table respond to current peakList
@@ -825,26 +823,20 @@ class RestraintAnalysisTableModule(CcpnTableModule):
     def _closeModule(self):
         """CCPN-INTERNAL: used to close the module
         """
-        # TODO DT test column saving
         rss = self.resources
-
         if self.activePulldownClass and self._setCurrentPulldown:
             self._setCurrentPulldown.unRegister()
-
         if self._settings:
             self._settings._cleanupWidget()
         if self.tableFrame:
             self.tableFrame._cleanupWidget()
-
         if rss._displayListWidget:
             rss._displayListWidget._close()
         if rss._resTableWidget:
             rss._resTableWidget._close()
         if rss._outTableWidget:
             rss._outTableWidget._close()
-
         self._unRegisterNotifiers()
-
         super()._closeModule()
 
     def _getLastSeenWidgetsState(self):

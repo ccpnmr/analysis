@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-06-19 15:10:20 +0100 (Wed, June 19, 2024) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-06-20 16:42:22 +0100 (Thu, June 20, 2024) $"
 __version__ = "$Revision: 3.2.3 $"
 #=========================================================================================
 # Created
@@ -52,13 +52,11 @@ LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
 class ResidueTableModule(CcpnTableModule):
     """This class implements the module by wrapping a ResidueTable instance
     """
+    className = 'ResidueTableModule'
     includeSettingsWidget = True
     maxSettingsState = 2
     settingsPosition = 'left'
-
     activePulldownClass = Chain
-
-    className = 'ResidueTableModule'
     _allowRename = True
 
     def __init__(self, mainWindow=None, name='Residue Table',
@@ -138,7 +136,8 @@ class ResidueTableModule(CcpnTableModule):
         self._mainFrame.selectTable(table)
 
     def _closeModule(self):
-        self._mainFrame._cleanupWidget()
+        if self.tableFrame:
+            self.tableFrame._cleanupWidget()
         if self.activePulldownClass and self._setCurrentPulldown:
             self._setCurrentPulldown.unRegister()
         super()._closeModule()
@@ -151,7 +150,7 @@ class ResidueTableModule(CcpnTableModule):
 class _NewResidueTableWidget(_CoreTableWidgetABC):
     """Class to present a residue Table
     """
-    className = 'ResidueTable'
+    className = '_NewResidueTableWidget'
     attributeName = 'chains'
 
     defaultHidden = ['Pid', 'Chain']

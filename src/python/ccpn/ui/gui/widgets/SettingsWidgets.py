@@ -59,6 +59,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, \
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.ui.gui.widgets.Base import SignalBlocking
+from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.Chain import Chain
 from ccpn.core.PeakList import PeakList
@@ -1851,6 +1852,9 @@ class ObjectSelectionWidget(ListCompoundWidget):
 class ChainSelectionWidget(ObjectSelectionWidget):
     KLASS = Chain
 
+
+class SpectrumSelectionWidget(ObjectSelectionWidget):
+    KLASS = Spectrum
 
 class SpectrumGroupSelectionWidget(ObjectSelectionWidget):
     KLASS = SpectrumGroup

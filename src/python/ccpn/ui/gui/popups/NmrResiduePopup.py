@@ -2,8 +2,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -12,14 +13,13 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:27 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-06-06 21:20:48 +0100 (Thu, June 06, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
-
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -283,18 +283,18 @@ class NmrResidueEditPopup(AttributeEditorPopupABC):
                 _ok = True
                 if not merge:
                     # popup warning if merge not specified
-                    _msg = 'Cannot move NmrResidue to an existing NmrResidue without merging.\n\nDo you want to merge?'
-                    _ok = showYesNoWarning(str(self.windowTitle()), _msg)
-
+                    _msg = ('Cannot move NmrResidue to an existing NmrResidue without merging.\n'
+                            'Do you want to merge?')
+                    _ok = showYesNoWarning(str(self.windowTitle()), _msg,
+                                           dontShowEnabled=True,
+                                           defaultResponse=True,
+                                           popupId=f'{self.__class__.__name__}Merge')
                 if not _ok:
                     # keep the popup open
                     return True
-
                 destNmrResidue.mergeNmrResidues(self.obj)
-
                 if comment is not None:
                     destNmrResidue.comment = comment
-
             else:
                 errors = []
                 try:
@@ -310,11 +310,15 @@ class NmrResidueEditPopup(AttributeEditorPopupABC):
                             errors.append(f'• {err}')
                 except RuntimeError as err:
                     if 'assigned' in str(err) and not errors:
-                        _msg = f'You are changing the Sequence Code/ResidueType of an assigned nmrResidue.\n' \
+                        _msg = f'You are changing the SequenceCode/ResidueType of an assigned nmrResidue.\n' \
                                'This change will currently not be applied to the attached residue,\n' \
                                'and it will become unassigned.\n\n' \
                                'Do you want to continue?'
-                        _ok = showOkCancelWarning(str(self.windowTitle()), _msg)
+                        _ok = showOkCancelWarning(str(self.windowTitle()), _msg,
+                                                  dontShowEnabled=True,
+                                                  defaultResponse=True,
+                                                  popupId=f'{self.__class__.__name__}Change')
+                        # should it save the current click-action as the default?
                         if _ok:
                             self.obj.deassign()
                             self.obj.residueType = resType
@@ -330,7 +334,6 @@ class NmrResidueEditPopup(AttributeEditorPopupABC):
                             '\n\nCanceling all value changes')
                     _ok = showWarning(str(self.windowTitle()), _msg)
                     return True
-
                 elif comment != (self.obj.comment or None):
                     self.obj.comment = comment
 

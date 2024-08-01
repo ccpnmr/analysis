@@ -4,9 +4,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-23 14:45:09 +0000 (Thu, February 23, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-03-21 16:17:11 +0000 (Thu, March 21, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,13 +28,14 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import operator
 from typing import Tuple
+
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
-from ccpn.core.lib.ContextManagers import newObject, deleteWrapperWithoutSideBar, \
+from ccpn.core.lib.ContextManagers import deleteWrapperWithoutSideBar, \
     ccpNmrV3CoreUndoBlock, ccpNmrV3CoreSetter, newV3Object
 from ccpn.ui._implementation.Strip import Strip
 from ccpn.util.decorators import logCommand
@@ -490,7 +491,93 @@ class SpectrumView(AbstractWrapperObject):
         return self.spectrum.extractPlaneToFile(axisCodes=axisCodes, position=position)
 
     #=========================================================================================
-    # Implementation functions
+    # property STUBS: hot-fixed later
+    #=========================================================================================
+
+    @property
+    def integralListViews(self) -> list['IntegralListView']:
+        """STUB: hot-fixed later
+        :return: a list of integralListViews in the SpectrumView
+        """
+        return []
+
+    @property
+    def integralViews(self) -> list['IntegralView']:
+        """STUB: hot-fixed later
+        :return: a list of integralViews in the SpectrumView
+        """
+        return []
+
+    @property
+    def multipletListViews(self) -> list['MultipletListView']:
+        """STUB: hot-fixed later
+        :return: a list of multipletListViews in the SpectrumView
+        """
+        return []
+
+    @property
+    def multipletViews(self) -> list['MultipletView']:
+        """STUB: hot-fixed later
+        :return: a list of multipletViews in the SpectrumView
+        """
+        return []
+
+    @property
+    def peakListViews(self) -> list['PeakListView']:
+        """STUB: hot-fixed later
+        :return: a list of peakListViews in the SpectrumView
+        """
+        return []
+
+    @property
+    def peakViews(self) -> list['PeakView']:
+        """STUB: hot-fixed later
+        :return: a list of peakViews in the SpectrumView
+        """
+        return []
+
+    #=========================================================================================
+    # getter STUBS: hot-fixed later
+    #=========================================================================================
+
+    def getIntegralListView(self, relativeId: str) -> 'IntegralListView | None':
+        """STUB: hot-fixed later
+        :return: an instance of IntegralListView, or None
+        """
+        return None
+
+    def getIntegralView(self, relativeId: str) -> 'IntegralView | None':
+        """STUB: hot-fixed later
+        :return: an instance of IntegralView, or None
+        """
+        return None
+
+    def getMultipletListView(self, relativeId: str) -> 'MultipletListView | None':
+        """STUB: hot-fixed later
+        :return: an instance of MultipletListView, or None
+        """
+        return None
+
+    def getMultipletView(self, relativeId: str) -> 'MultipletView | None':
+        """STUB: hot-fixed later
+        :return: an instance of MultipletView, or None
+        """
+        return None
+
+    def getPeakListView(self, relativeId: str) -> 'PeakListView | None':
+        """STUB: hot-fixed later
+        :return: an instance of PeakListView, or None
+        """
+        return None
+
+    def getPeakView(self, relativeId: str) -> 'PeakView | None':
+        """STUB: hot-fixed later
+        :return: an instance of PeakView, or None
+        """
+        return None
+
+    #=========================================================================================
+    # Implementation methods
     #=========================================================================================
 
     @classmethod

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Moving Spectra between Chemical Shift Lists</title>
+    <link rel="stylesheet" href="CcpnVideoTutorials.css">
+</head>
+<body>
+<div class="header"><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a
+        href="index.html" class="button">Video<br> Tutorials<br> & Manual</a><a href="https://forums.ccpn.ac.uk"><img
+        src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 15px"></a></div>
+<br>
+<div class="headerBar">Moving Spectra between Chemical Shift Lists</div>
+<div class="tutorial">
+
+    <div class="videoContainer">
+        <div class="videoWrapper">
+            <iframe src="https://www.youtube.com/embed/BeqjTfDTGmo" frameborder="0"
+                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <h2>Moving Spectra between Chemical Shift Lists</h2>
+    <h3>Background</h3>
+    <p>Each spectrum in your project always has to be associated with a Chemical Shift List. When you open a new spectrum, it will by default be associated with the first Chemical Shift List in your project (usually the <span class="action">default</span> list). The important thing to remember is that the Chemical Shifts are always averaged across the peak positions of all Peaks in all Spectra belonging to that Chemical Shift List (unless the Peak's Figure of Merit is set to 0.0). For more detailed information about how Chemical Shifts and Chemical Shifts Lists are handled in CcpNmr Analysis, have a look at our <a href="ChemicalShifts.html">Chemical Shifts page and video</a>.</p>
+    <p>You should, therefore, use different Chemical Shift Lists for each group of spectra recorded under different conditions resulting in (potentially) changed chemical shifts. For example, if you have spectra which were recorded on different constructs or mutants, they should be associated with different Chemical Shift List. Similarly, for a titration, each of your spectra should (ideally) be in a separate Chemical Shift List. So if you record some spectra at a different temperature, a different pH or including different concentrations of a ligand or binding partner, then you should use a different Chemical Shift List.  Otherwise, your Chemical shifts will be averaged across all the spectra in the titration. If you did not put them in different Chemical Shift Lists, the chemical shifts of the peaks that move will contribute towards the chemical shift of that NmrAtom. And when you go to deposit your chemical shifts in the BMRB, some of them might be distorted!
+    <p>If you wanted, you could also create a Chemical Shift List that you use specifically to collect/dump all the Chemical Shifts of Spectra which you don't want to have contributing to your main Chemical Shift list for deposition. This could be for dynamics spectra, RDC spectra, Titrations etc. - anything that shouldn't contribute towards the Chemical Shifts you want to deposit in the BMRB.</p>
+    <h3>Moving Spectra manually</h3>
+    <p>If you <span class="action">double-click</span> on a spectrum in the sidebar to bring up the <span class="action">Spectrum Properties</span> dialog box, you can see in the <span class="action">General</span> tab which <span class="action">Chemical Shift List</span> the Spectrum is associated with. You can also change which Chemical Shift List this is (including creating a new Chemical Shift List) using the drop-down menu.</p>
+    <p>An alternative way to move Spectra between Chemical Shift Lists, is to <span class="action">double-click</span> on a Chemical Shift List in the sidebar. This will show you which spectra are associated with this Chemical Shift List and which are not. You can <span class="action">drag</span> spectra between the <span class="action">Not Included</span> and <span class="action">Included</span> boxes to change which spectra belong to that Chemical Shift List (or <span class="action">double-click</span> on a spectrum to move it to the other box). If you only have one Chemical Shift List in your project, you will not be able to exclude spectra from this. If you move spectra out of the current Chemical Shift List, then they will by default go into the first Chemical Shift List. You can't move spectra <i>out</i> of the top Chemical Shift List - move them <i>into</i> another one instead.</p>
+
+    <h3>Moving Spectra automatically using a macro</h3>
+    <p>In the <span class="action">Macro / Run CCPN Macros</span> menu you will find a macro called <span class="action">moveSGSpectaIntoNewCLs</span>. This will allow you to move all the Spectra in a SpectrumGroup into new Chemical Shift Lists in one go. Running the macro will bring up a little pop-up. There are several options once you have selected the SpectrumGroup you wish to use. You can move your Spectra into
+    <li><span class="action">separate new Chemical Shift Lists</span>: this is suitable if you have a titration in which each Spectrum in your SpectrumGroup should be a separate Chemical Shift List. The Chemical Shift Lists will simply be named according to the spectra.</li>
+    <li><span class="action">same new Chemical Shift List</span>: this will allow you to move all the Spectra in the selected SpectrumGroup in a new ChemicalShiftList whose name you can set yourself. This will be useful if you have spectra recorded on a new construct, mutant, complex or protein.</li>
+    <li><span class="action">existing Chemical Shift List</span>: this will allow you to move all the Spectra in a selected SpectrumGroup into an existing Chemical Shift List which you can select using a drop-down menu. Again, this will be useful if you have spectra recorded on a new construct, mutant, complex or protein, but enables you to add any Spectra that you hav enewly added to the SpectrumGroup to be added to the correct Chemical Shift List as well.</li></p>
+
+</div>
+</body>
+</html>

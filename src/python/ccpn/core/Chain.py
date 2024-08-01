@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-30 13:45:35 +0100 (Thu, May 30, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-06-28 21:11:43 +0100 (Fri, June 28, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,12 +26,11 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from typing import Tuple, Optional, Union, Sequence, Iterable
+from typing import Tuple, Optional, Union, Sequence
 import numpy as np
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
-from ccpn.core.Substance import Substance
-from ccpn.core.Substance import SampleComponent
+from ccpn.core.Substance import Substance, SampleComponent
 from ccpn.core.lib.ContextManagers import newObject, renameObject, undoBlock
 from ccpn.core.lib import Pid
 from ccpn.util import Common as commonUtil
@@ -42,7 +41,9 @@ from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Chain as ApiChain
 from ccpnmodel.ccpncore.api.ccp.molecule import Molecule
 from ccpnmodel.ccpncore.api.ccp.lims import Sample
 
-NotFound = 'NotFound' # used to create missing residues
+
+NotFound = 'NotFound'  # used to create missing residues
+
 
 class Chain(AbstractWrapperObject):
     """A molecular Chain, containing one or more Residues."""
@@ -151,7 +152,41 @@ class Chain(AbstractWrapperObject):
     #     value.chain = self
 
     #=========================================================================================
-    # CCPN functions
+    # property STUBS: hot-fixed later
+    #=========================================================================================
+
+    @property
+    def atoms(self) -> list['Atom']:
+        """STUB: hot-fixed later
+        :return: a list of atoms in the Chain
+        """
+        return []
+
+    @property
+    def residues(self) -> list['Residue']:
+        """STUB: hot-fixed later
+        :return: a list of residues in the Chain
+        """
+        return []
+
+    #=========================================================================================
+    # getter STUBS: hot-fixed later
+    #=========================================================================================
+
+    def getAtom(self, relativeId: str) -> 'Atom | None':
+        """STUB: hot-fixed later
+        :return: an instance of Atom, or None
+        """
+        return None
+
+    def getResidue(self, relativeId: str) -> 'Residue | None':
+        """STUB: hot-fixed later
+        :return: an instance of Residue, or None
+        """
+        return None
+
+    #=========================================================================================
+    # Core methods
     #=========================================================================================
 
     @logCommand(get='self', prefix='newChain=')
@@ -234,7 +269,7 @@ class Chain(AbstractWrapperObject):
         :return:  int. The first SequenceCode
         """
         codes = self._sequenceCodesAsIntegers
-        first = codes[0] if len(codes)>0 else 1
+        first = codes[0] if len(codes) > 0 else 1
         return first
 
     @property
@@ -281,9 +316,11 @@ class Chain(AbstractWrapperObject):
                     name = NmrChain._uniqueName(parent=self.project, name=name)
 
             with undoBlockWithoutSideBar():
-                nmrChain = self.project.newNmrChain(shortName=name, )  #  isConnected=True is not possible with a name different from #  (API errors)!
+                nmrChain = self.project.newNmrChain(
+                        shortName=name, )  #  isConnected=True is not possible with a name different from #  (API errors)!
                 for residue in self.residues:
-                    nmrResidue = nmrChain.newNmrResidue(sequenceCode=residue.sequenceCode, residueType=residue.residueType)
+                    nmrResidue = nmrChain.newNmrResidue(sequenceCode=residue.sequenceCode,
+                                                        residueType=residue.residueType)
                     for atom in residue.atoms:
                         if atom.name:
                             isotopeCode = DEFAULT_ISOTOPE_DICT.get(atom.elementSymbol)
@@ -351,7 +388,7 @@ def _getChain(self: Project, sequence: Union[str, Sequence[str]], compoundName: 
 # @newObject(Chain)
 @undoBlock()
 def _createChain(self: Project, compoundName: str = None,
-                 sequence:str=None,
+                 sequence: str = None,
                  startNumber: int = 1, molType: str = None, isCyclic: bool = False,
                  shortName: str = None, role: str = None, comment: str = None,
                  expandFromAtomSets: bool = True,
@@ -381,6 +418,7 @@ def _createChain(self: Project, compoundName: str = None,
     :return: a new Chain instance.
     """
     from ccpn.core.lib.ChainLib import SequenceHandler, CCPCODE, ISVALID, ERRORS
+
     ccpCodes = []
     if sequence is not None:
         sequenceHandler = SequenceHandler(self.project, moleculeType=molType)
@@ -438,12 +476,11 @@ def _createChain(self: Project, compoundName: str = None,
                              atomNamingSystem='PDB_REMED',
                              pseudoNamingSystem='AQUA')
 
-
     # except Exception as es:
     #     if substance:
-            # clean up and remove the created substance
-            # substance.delete()
-        # raise RuntimeError('Unable to generate new Chain item') from es
+    # clean up and remove the created substance
+    # substance.delete()
+    # raise RuntimeError('Unable to generate new Chain item') from es
 
     for residue in result.residues:
         # Necessary as CCPN V2 default protonation states do not match tne NEF / V3 standard
@@ -564,6 +601,7 @@ def _fetchChemCompFromFile(project, filePath):
     from ccpnmodel.ccpncore.xml.memops.Implementation import loadFromStream
     from ccpn.util.Path import aPath, joinPath
     from ccpn.framework.PathsAndUrls import CCPN_API_DIRECTORY
+
     filePathObj = aPath(filePath)
     memopsRoot = project._wrappedData.root
     basename = filePathObj.basename
@@ -581,7 +619,7 @@ def _fetchChemCompFromFile(project, filePath):
         with open(filePath) as stream:
             chemComp = loadFromStream(stream, topObject=memopsRoot, topObjId=topObjId, )
             #update the 3letterCode because is needed on  V3 for some reasons...
-            if not chemComp.code3Letter:
+            if chemComp and not chemComp.code3Letter:
                 chemComp.__dict__['code3Letter'] = chemComp.ccpCode.upper()
     # need to copy the xml file to the project to be reopened
     # Not sure why is not done automatically or about a better way of doing it
@@ -637,6 +675,7 @@ def _newChainFromChemComp(project, chemComp,
 
             return chain
 
+
 @newObject(Chain)
 def _cloneChain(self: Chain, shortName: str = None):
     """Make copy of chain.
@@ -646,6 +685,7 @@ def _cloneChain(self: Chain, shortName: str = None):
     # FIXME This is broken for Non-Standard Residues. (probably never tested as it never implemented in V3)
     # Check if there are Non-standards. Clone is not yet available for Non-Standards
     from ccpn.core.lib.ChainLib import SequenceHandler
+
     chain = self
     sequenceHandler = SequenceHandler(chain.project, moleculeType=chain.chainType)
     standardCcpCodes = sequenceHandler.getAvailableCcpCodes(standardsOnly=True)
@@ -654,9 +694,10 @@ def _cloneChain(self: Chain, shortName: str = None):
     for ccpCode in ccpCodes:
         if ccpCode not in standardCcpCodes:
             nonStandardResidues.add(ccpCode)
-    if len(nonStandardResidues)>0:
+    if len(nonStandardResidues) > 0:
         nstdResiduesStr = ', '.join(list(nonStandardResidues))
-        raise ValueError(f'''The chain {chain} contains Non-Standard Residue(s): "{nstdResiduesStr}". Clone is not yet available for this chain''')
+        raise ValueError(f'The chain {chain} contains Non-Standard Residue(s): "{nstdResiduesStr}". '
+                         f'Clone is not yet available for this chain')
 
     apiChain = self._wrappedData
     apiMolSystem = apiChain.molSystem

@@ -285,6 +285,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # All classes must be imported in correct order for subsequent code
 # to work
 
+_PRINT_HOTFIXES = False
 _coreImportOrder = (
     'Project',
     'Spectrum',
@@ -604,34 +605,61 @@ _PeakCluster._registerCoreClass()
 _allGetters = {}
 Project._linkWrapperClasses(_allGetters=_allGetters)
 
-# for grp, stubs in sorted(_allGetters.items(), key=lambda val: val[0]):
-#     print(f'~~~~~~~~~~~~~~~~~~~~~~~~~\n{grp}')
-#     for num, stub in sorted(stubs):
-#         if stub.startswith('get'):
-#             print(f'''def {stub}(self) -> '{stub[3:]} | None':
-#     """STUB: hot-fixed later
-#     :return: an instance of {stub[3:]}, or None
-#     """
-#     return []
-# '''
-#                   )
-#         else:
-#             if stub == 'spectra':
-#                 lbl = 'Spectrum'
-#             elif stub == 'axes':
-#                 lbl = 'Axis'
-#             elif stub == 'complexes':
-#                 lbl = 'Complex'
-#             else:
-#                 lbl = stub[0].upper() + (stub[1:-1] if stub.endswith('s') else stub[1:])
-#             print(f'''@property
-# def {stub}(self) -> list['{lbl}']:
-#     """STUB: hot-fixed later
-#     :return: a list of {stub} in the {grp}
-#     """
-#     return []
-# '''
-#                   )
+if _PRINT_HOTFIXES:
+    # print the hotfixes to save to change-log/edit into core classes
+    for grp, stubs in sorted(_allGetters.items(), key=lambda val: val[0]):
+        print(f'\n\n\n#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n# --> {grp}')
+
+        header = True
+        for num, stub in sorted(stubs):
+            if not stub.startswith('get'):
+                if header:
+                    header = False
+                    # header for property section
+                    print(f'#=========================================================================================')
+                    print(f'# property STUBS: hot-fixed later')
+                    print(f'#=========================================================================================\n')
+
+                if stub == 'spectra':
+                    lbl = 'Spectrum'
+                elif stub == 'axes':
+                    lbl = 'Axis'
+                elif stub == 'complexes':
+                    lbl = 'Complex'
+                else:
+                    lbl = stub[0].upper() + (stub[1:-1] if stub.endswith('s') else stub[1:])
+                # print code-stub for property
+                print(f'''@property
+    def {stub}(self) -> list['{lbl}']:
+        """STUB: hot-fixed later
+        :return: a list of {stub} in the {grp}
+        """
+        return []
+    '''
+                      )
+
+        header = True
+        for num, stub in sorted(stubs):
+            if stub.startswith('get'):
+                if header:
+                    header = False
+                    # header for getter section
+                    print(f'#=========================================================================================')
+                    print(f'# getter STUBS: hot-fixed later')
+                    print(f'#=========================================================================================\n')
+
+                # print code-stub for getter
+                print(f'''def {stub}(self, relativeId: str) -> '{stub[3:]} | None':
+        """STUB: hot-fixed later
+        :return: an instance of {stub[3:]}, or None
+        """
+        return None
+    '''
+                      )
+        # header for the next block
+        print(f'#=========================================================================================')
+        print(f'# Core methods')
+        print(f'#=========================================================================================\n')
 
 #=========================================================================================
 # current list of getters for core objects - inserted by _linkWrapperClasses

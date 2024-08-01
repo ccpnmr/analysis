@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-30 13:45:36 +0100 (Thu, May 30, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-07-04 14:28:07 +0100 (Thu, July 04, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,20 +29,19 @@ __date__ = "$Date: 2017-04-10 11:42:40 +0000 (Mon, April 10, 2017) $"
 from datetime import datetime
 from typing import Sequence, Tuple, Optional
 import pandas as pd
+
+from ccpnmodel.ccpncore.api.ccp.lims.Sample import Sample as ApiSample
+from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.core.Project import Project
 from ccpn.core.PseudoDimension import PseudoDimension
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumHit import SpectrumHit
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.util import Common as commonUtil
 from ccpn.core.lib import Pid
-from ccpn.util import Constants
-from ccpnmodel.ccpncore.api.ccp.lims.Sample import Sample as ApiSample
-from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
-from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, renameObject
-from ccpn.util.Constants import AMOUNT_UNITS, IONICSTRENGTH_UNITS
 from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, renameObject, undoBlock
+from ccpn.util import Constants
+from ccpn.util.decorators import logCommand
+from ccpn.util.Constants import AMOUNT_UNITS, IONICSTRENGTH_UNITS
 
 
 DEFAULTAMOUNTUNITS = 'µL'
@@ -374,16 +373,67 @@ class Sample(AbstractWrapperObject):
     def substancePropertyOverlapCount(self, value):
         self._setInternalParameter(self._SUBSTANCEPROPERTYOVERLAPCOUNT, value)
 
+    #=========================================================================================
+    # property STUBS: hot-fixed later
+    #=========================================================================================
+
+    @property
+    def sampleComponents(self) -> list['SampleComponent']:
+        """STUB: hot-fixed later
+        :return: a list of sampleComponents in the Sample
+        """
+        return []
 
     #=========================================================================================
-    # Implementation functions
+    # getter STUBS: hot-fixed later
     #=========================================================================================
 
-    @classmethod
-    def _getAllWrappedData(cls, parent: Project) -> list:
-        """get wrappedData (Sample.Samples) for all Sample children of parent NmrProject.sampleStore
-        Set sampleStore to default if not set"""
-        return parent._wrappedData.sampleStore.sortedSamples()
+    def getSampleComponent(self, relativeId: str) -> 'SampleComponent | None':
+        """STUB: hot-fixed later
+        :return: an instance of SampleComponent, or None
+        """
+        return None
+
+    #=========================================================================================
+    # Core methods
+    #=========================================================================================
+
+    def getSubstances(self):
+        substances = []
+        for sampleComponent in self.sampleComponents:
+            substance = sampleComponent.substance
+            if substance is not None:
+                substances.append(substance)
+        return substances
+
+    def getSampleComponentsSpectra(self):
+        """
+        Gets spectra linked to sampleComponents through substances.
+        These spectra are normally the reference spectra used in screening/metabolomics, and used to match signal
+        to the sample.spectra when a sample it's a mixtures.
+        """
+        spectra = []
+        for substance in self.getSubstances():
+            if substance is not None:
+                referenceSpectra = substance.referenceSpectra
+                if len(referenceSpectra) == 0:
+                    spectrum = self.project.getByPid('SP:' + str(substance.name))  #hack
+                    if spectrum is not None:
+                        spectra.append(spectrum)
+                else:
+                    spectra.extend(referenceSpectra)
+        return sorted(set(spectra), key=spectra.index)
+
+    def getLinkedSubstanceAsDataFrame(self, ):
+        df = pd.DataFrame()
+        for ix, sc in enumerate(self.sampleComponents, start=1):
+            su = sc.substance
+            if su is not None:
+                df.loc[ix, f'{su.className}'] = su.name
+                for header, values in su.getAsDict().items():
+                    if isinstance(values, (int, float, str)):
+                        df.loc[ix, f'{header}'] = values
+        return df
 
     @renameObject()
     @logCommand(get='self')
@@ -391,11 +441,23 @@ class Sample(AbstractWrapperObject):
         """Rename Sample, changing its name and Pid.
         """
         name = self._uniqueName(parent=self.project, name=value)
+
         # rename functions from here
         oldName = self.name
         # self._oldPid = self.pid
         self._wrappedData.__dict__['name'] = name
+
         return (oldName,)
+
+    #=========================================================================================
+    # Implementation methods
+    #=========================================================================================
+
+    @classmethod
+    def _getAllWrappedData(cls, parent: Project) -> list:
+        """get wrappedData (Sample.Samples) for all Sample children of parent NmrProject.sampleStore
+        Set sampleStore to default if not set"""
+        return parent._wrappedData.sampleStore.sortedSamples()
 
     @classmethod
     def _restoreObject(cls, project, apiObj):
@@ -418,47 +480,6 @@ class Sample(AbstractWrapperObject):
                 result._setInternalParameter(newVar, value)
 
         return result
-
-    #=========================================================================================
-    # CCPN functions
-    #=========================================================================================
-
-    def getSubstances(self):
-        substances = []
-        for sampleComponent in self.sampleComponents:
-            substance = sampleComponent.substance
-            if substance is not None:
-               substances.append(substance)
-        return substances
-
-    def getSampleComponentsSpectra(self):
-        """
-        Gets spectra linked to sampleComponents through substances.
-        These spectra are normally the reference spectra used in screening/metabolomics, and used to match signal
-        to the sample.spectra when a sample it's a mixtures.
-        """
-        spectra = []
-        for substance in self.getSubstances():
-            if substance is not None:
-                referenceSpectra = substance.referenceSpectra
-                if len(referenceSpectra)==0:
-                    spectrum = self.project.getByPid('SP:' + str(substance.name)) #hack
-                    if spectrum is not None:
-                        spectra.append(spectrum)
-                else:
-                    spectra.extend(referenceSpectra)
-        return sorted(set(spectra), key=spectra.index)
-
-    def getLinkedSubstanceAsDataFrame(self, ):
-        df = pd.DataFrame()
-        for ix, sc in enumerate(self.sampleComponents, start=1):
-            su = sc.substance
-            if su is not None:
-                df.loc[ix, f'{su.className}'] = su.name
-                for header, values in su.getAsDict().items():
-                    if isinstance(values, (int, float, str)):
-                        df.loc[ix, f'{header}'] = values
-        return df
 
     #===========================================================================================
     # new<Object> and other methods

@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-10 16:08:51 +0100 (Fri, May 10, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-05-10 16:24:09 +0100 (Fri, May 10, 2024) $"
+__version__ = "$Revision: 3.2.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,15 +30,14 @@ from functools import partial
 from typing import Sequence, Tuple, List, Union
 
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
-
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.lib import Pid
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, undoBlockWithoutSideBar, undoStackBlocking, \
     logCommandManager
+from ccpn.util.decorators import logCommand
 from ccpn.util.Logging import getLogger
 
 
@@ -70,23 +69,6 @@ class Window(AbstractWrapperObject):
     def __init__(self, project, wrappedData):
         super().__init__(project=project, wrappedData=wrappedData)
         getLogger().debug(f'Initialised {self.pid}')
-
-    #=========================================================================================
-
-    @property
-    def spectrumDisplays(self):
-        """STUB: hot-fixed later"""
-        return None
-
-    # marks are now contained in project, but groups are accessed through mainWindow/spectrumDisplays
-    # @property
-    # def marks(self):
-    #     """STUB: hot-fixed later"""
-    #     return None
-
-    @property
-    def strips(self):
-        return tuple(strip for display in self.spectrumDisplays for strip in display.strips)
 
     #=========================================================================================
     # CCPN properties
@@ -135,6 +117,7 @@ class Window(AbstractWrapperObject):
     def size(self, value: Sequence):
         self._wrappedData.size = value
 
+    # marks are now contained in project, but groups are accessed through mainWindow/spectrumDisplays
     @property
     def marks(self) -> tuple:
         """Return the associated marks for the mainWindow.
@@ -163,8 +146,154 @@ class Window(AbstractWrapperObject):
         except Exception as es:
             raise RuntimeError(f'{self.__class__.__name__}.marks: Error setting marks {es}') from es
 
+    @property
+    def strips(self):
+        """Return a list of strips in the MainWindow.
+        :return: a list of strips.
+        """
+        return tuple(strip for display in self.spectrumDisplays for strip in display.strips)
+
     #=========================================================================================
-    # Methods
+    # property STUBS: hot-fixed later
+    #=========================================================================================
+
+    @property
+    def axes(self) -> list['Axis']:
+        """STUB: hot-fixed later
+        :return: a list of axes in the MainWindow
+        """
+        return []
+
+    @property
+    def integralListViews(self) -> list['IntegralListView']:
+        """STUB: hot-fixed later
+        :return: a list of integralListViews in the MainWindow
+        """
+        return []
+
+    @property
+    def integralViews(self) -> list['IntegralView']:
+        """STUB: hot-fixed later
+        :return: a list of integralViews in the MainWindow
+        """
+        return []
+
+    @property
+    def multipletListViews(self) -> list['MultipletListView']:
+        """STUB: hot-fixed later
+        :return: a list of multipletListViews in the MainWindow
+        """
+        return []
+
+    @property
+    def multipletViews(self) -> list['MultipletView']:
+        """STUB: hot-fixed later
+        :return: a list of multipletViews in the MainWindow
+        """
+        return []
+
+    @property
+    def peakListViews(self) -> list['PeakListView']:
+        """STUB: hot-fixed later
+        :return: a list of peakListViews in the MainWindow
+        """
+        return []
+
+    @property
+    def peakViews(self) -> list['PeakView']:
+        """STUB: hot-fixed later
+        :return: a list of peakViews in the MainWindow
+        """
+        return []
+
+    @property
+    def spectrumDisplays(self) -> list['SpectrumDisplay']:
+        """STUB: hot-fixed later
+        :return: a list of spectrumDisplays in the MainWindow
+        """
+        return []
+
+    @property
+    def spectrumViews(self) -> list['SpectrumView']:
+        """STUB: hot-fixed later
+        :return: a list of spectrumViews in the MainWindow
+        """
+        return []
+
+    # replaced above
+    # @property
+    # def strips(self) -> list['Strip']:
+    #     """STUB: hot-fixed later
+    #     :return: a list of strips in the MainWindow
+    #     """
+    #     return []
+
+    #=========================================================================================
+    # getter STUBS: hot-fixed later
+    #=========================================================================================
+
+    def getAxis(self, relativeId: str) -> 'Axis | None':
+        """STUB: hot-fixed later
+        :return: an instance of Axis, or None
+        """
+        return None
+
+    def getIntegralListView(self, relativeId: str) -> 'IntegralListView | None':
+        """STUB: hot-fixed later
+        :return: an instance of IntegralListView, or None
+        """
+        return None
+
+    def getIntegralView(self, relativeId: str) -> 'IntegralView | None':
+        """STUB: hot-fixed later
+        :return: an instance of IntegralView, or None
+        """
+        return None
+
+    def getMultipletListView(self, relativeId: str) -> 'MultipletListView | None':
+        """STUB: hot-fixed later
+        :return: an instance of MultipletListView, or None
+        """
+        return None
+
+    def getMultipletView(self, relativeId: str) -> 'MultipletView | None':
+        """STUB: hot-fixed later
+        :return: an instance of MultipletView, or None
+        """
+        return None
+
+    def getPeakListView(self, relativeId: str) -> 'PeakListView | None':
+        """STUB: hot-fixed later
+        :return: an instance of PeakListView, or None
+        """
+        return None
+
+    def getPeakView(self, relativeId: str) -> 'PeakView | None':
+        """STUB: hot-fixed later
+        :return: an instance of PeakView, or None
+        """
+        return None
+
+    def getSpectrumDisplay(self, relativeId: str) -> 'SpectrumDisplay | None':
+        """STUB: hot-fixed later
+        :return: an instance of SpectrumDisplay, or None
+        """
+        return None
+
+    def getSpectrumView(self, relativeId: str) -> 'SpectrumView | None':
+        """STUB: hot-fixed later
+        :return: an instance of SpectrumView, or None
+        """
+        return None
+
+    def getStrip(self, relativeId: str) -> 'Strip | None':
+        """STUB: hot-fixed later
+        :return: an instance of Strip, or None
+        """
+        return None
+
+    #=========================================================================================
+    # Core methods
     #=========================================================================================
 
     @property
@@ -172,10 +301,6 @@ class Window(AbstractWrapperObject):
         """Return the list of pinned strips.
         """
         return list(filter(lambda st: st.pinned, self.strips))
-
-    #=========================================================================================
-    # CCPN Routines
-    #=========================================================================================
 
     def _getModuleInsertList(self, moduleArea):
         """Generate the list of .moveDock instructions that are required to move all modules back to their
@@ -357,7 +482,8 @@ class Window(AbstractWrapperObject):
             spectra = self.project.getByPid(spectra)
 
         if not isinstance(spectra, (Spectrum, SpectrumGroup, list, tuple)):
-            raise ValueError(f'Invalid spectra argument, expected Spectrum, list of Spectra or SpectrumGroup; got "{spectra}"')
+            raise ValueError(
+                    f'Invalid spectra argument, expected Spectrum, list of Spectra or SpectrumGroup; got "{spectra}"')
 
         spectrum = None
         if isinstance(spectra, Spectrum):

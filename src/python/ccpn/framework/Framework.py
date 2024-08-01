@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-29 15:35:15 +0100 (Wed, May 29, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-07-04 18:51:59 +0100 (Thu, July 04, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -588,7 +588,6 @@ class Framework(NotifierBase, GuiBase):
 
         except (PermissionError, FileNotFoundError):
             getLogger().info('Backup failed: Folder may be read-only')
-
         except Exception as es:
             getLogger().warning(f'Project backup failed with error {es}')
 
@@ -719,42 +718,36 @@ class Framework(NotifierBase, GuiBase):
 
         if self.preferences.general.autoCorrectColours:
             project = self.project
-
-            # change spectrum colours
-            for spectrum in project.spectra:
-                if len(spectrum.axisCodes) > 1:
-                    if spectrum.positiveContourColour and spectrum.positiveContourColour.startswith('#'):
-                        spectrum.positiveContourColour = autoCorrectHexColour(spectrum.positiveContourColour,
-                                                                              getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-                    if spectrum.negativeContourColour and spectrum.negativeContourColour.startswith('#'):
-                        spectrum.negativeContourColour = autoCorrectHexColour(spectrum.negativeContourColour,
-                                                                              getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-                else:
-                    if spectrum.sliceColour.startswith('#'):
-                        spectrum.sliceColour = autoCorrectHexColour(spectrum.sliceColour,
-                                                                    getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-
+            # change sp colours
+            for sp in project.spectra:
+                if len(sp.axisCodes) > 1:
+                    if sp.positiveContourColour and sp.positiveContourColour.startswith('#'):
+                        sp.positiveContourColour = autoCorrectHexColour(sp.positiveContourColour,
+                                                                        getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+                    if sp.negativeContourColour and sp.negativeContourColour.startswith('#'):
+                        sp.negativeContourColour = autoCorrectHexColour(sp.negativeContourColour,
+                                                                        getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+                elif sp.sliceColour and sp.sliceColour.startswith('#'):
+                    sp.sliceColour = autoCorrectHexColour(sp.sliceColour,
+                                                          getColours()[CCPNGLWIDGET_HEXBACKGROUND])
             # change peakList colours
             for objList in project.peakLists:
                 objList.textColour = autoCorrectHexColour(objList.textColour,
                                                           getColours()[CCPNGLWIDGET_HEXBACKGROUND])
                 objList.symbolColour = autoCorrectHexColour(objList.symbolColour,
                                                             getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-
             # change integralList colours
             for objList in project.integralLists:
                 objList.textColour = autoCorrectHexColour(objList.textColour,
                                                           getColours()[CCPNGLWIDGET_HEXBACKGROUND])
                 objList.symbolColour = autoCorrectHexColour(objList.symbolColour,
                                                             getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-
             # change multipletList colours
             for objList in project.multipletLists:
                 objList.textColour = autoCorrectHexColour(objList.textColour,
                                                           getColours()[CCPNGLWIDGET_HEXBACKGROUND])
                 objList.symbolColour = autoCorrectHexColour(objList.symbolColour,
                                                             getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-
             for mark in project.marks:
                 mark.colour = autoCorrectHexColour(mark.colour,
                                                    getColours()[CCPNGLWIDGET_HEXBACKGROUND])
@@ -1251,10 +1244,6 @@ class Framework(NotifierBase, GuiBase):
                             self.project._updateLoggerState(flush=not self.project.readOnly)
                             if self.mainWindow:
                                 self.mainWindow._setReadOnlyIcon()
-                        MessageDialog.showWarning('Loading Project',
-                                                  f'There was a problem loading project {dataLoader.path}\n'
-                                                  f'Please check the log for more information.',
-                                                  parent=self.ui.mainWindow)
                         return []
 
                     self._setLastBackupTime()
@@ -1575,17 +1564,24 @@ class Framework(NotifierBase, GuiBase):
 
     @logCommand('application.')
     def undo(self):
+        from ccpn.core.lib.ContextManagers import busyHandler
+
         if self.project._undo.canUndo():
-            with MessageDialog.progressManager(self.ui.mainWindow, 'performing undo'):
-                self.project._undo.undo()
+            if not self.project._undo.locked:
+                # may need to put some more information in this busy popup
+                with busyHandler(title='Busy', text='Undo ...', raiseErrors=True):
+                    self.project._undo.undo()
         else:
             getLogger().warning('nothing to undo')
 
     @logCommand('application.')
     def redo(self):
+        from ccpn.core.lib.ContextManagers import busyHandler
+
         if self.project._undo.canRedo():
-            with MessageDialog.progressManager(self.ui.mainWindow, 'performing redo'):
-                self.project._undo.redo()
+            if not self.project._undo.locked:
+                with busyHandler(title='Busy', text='Redo...', raiseErrors=True):
+                    self.project._undo.redo()
         else:
             getLogger().warning('nothing to redo.')
 

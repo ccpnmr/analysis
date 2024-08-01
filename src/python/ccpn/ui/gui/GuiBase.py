@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-30 16:10:15 +0100 (Thu, May 30, 2024) $"
+__dateModified__ = "$dateModified: 2024-06-27 10:56:18 +0100 (Thu, June 27, 2024) $"
 __version__ = "$Revision: 3.2.2.1 $"
 #=========================================================================================
 # Created
@@ -479,6 +479,7 @@ class GuiBase(object):
     def _saveLayoutAsCallback(self):
         path = _getSaveLayoutPath(self.mainWindow)
         try:
+            print(path)
             Layout.saveLayoutToJson(self.mainWindow, jsonFilePath=path)
             getLogger().info('Layout saved to %s' % path)
         except Exception as es:
@@ -803,7 +804,7 @@ def _getSaveLayoutPath(mainWindow):
     if not newPath:
         return None
 
-    newPath = aPath(newPath)
+    newPath = aPath(newPath).assureSuffix(jsonType)
     if newPath.exists():
         # should not really need to check the second and third condition above, only
         # the Qt dialog stupidly insists a directory exists before you can select it
@@ -813,5 +814,4 @@ def _getSaveLayoutPath(mainWindow):
         if not MessageDialog.showYesNo(title, msg):
             return None
 
-    newPath.assureSuffix(jsonType)
     return newPath

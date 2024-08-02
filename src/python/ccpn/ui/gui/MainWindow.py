@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-03 15:54:54 +0100 (Wed, July 03, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-02 20:05:22 +0100 (Fri, August 02, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1846,7 +1846,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                     if peaks:
                         # only create a multiplet that contains peaks
                         multiplet = multipletList.newMultiplet(peaks=peaks)
-                    self.application.current.multiplet = multiplet
+                        self.application.current.multiplet = multiplet
 
     def mergeCurrentMultiplet(self):
         """Merge current peaks into current multiplet

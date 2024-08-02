@@ -57,7 +57,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-30 18:35:26 +0100 (Tue, July 30, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-02 20:04:51 +0100 (Fri, August 02, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -2446,13 +2446,13 @@ class CcpnGLWidget(QOpenGLWidget):
             # check for dragging of infinite lines, region boundaries, integrals
             self.mousePressInfiniteLine(self._infiniteLines)
 
-            # while len(self._dragRegions) > 1:  # why?
-            #     self._dragRegions.pop()
-            self._dragRegions.clear()
+            while len(self._dragRegions) > 1:  # only keep the first region
+                self._dragRegions.pop()
+            # self._dragRegions.clear()
 
-            # if not self._dragRegions:
-            if not self.mousePressInRegion(self._externalRegions._regions):
-                self.mousePressInIntegralLists()
+            if not self._dragRegions:
+                if not self.mousePressInRegion(self._externalRegions._regions):
+                    self.mousePressInIntegralLists()
 
         if int(ev.buttons() & (Qt.LeftButton | Qt.RightButton)):
             # find the bounds for the region that has currently been clicked
@@ -4365,7 +4365,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 offsets = [self.axisL + (GLDefs.MARKTEXTXOFFSET * self.pixelX),
                            mark.axisPosition + (GLDefs.MARKTEXTYOFFSET * self.pixelY)]
 
-            for pp in range(0, 3 * vertices, 3):
+            for pp in range(0, 4 * vertices, 4):
                 mark.attribs[pp:pp + 2] = offsets
 
             # redefine the mark's VBOs

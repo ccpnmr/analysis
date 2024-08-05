@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-07-31 16:41:49 +0100 (Wed, July 31, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-08-05 10:53:10 +0100 (Mon, August 05, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -978,7 +978,8 @@ class _commonSettings():
                                      grid=(1, 0), gridSpan=(self._spectraRows, 1), vAlign='top', hAlign='left')
 
         # calculate the maximum number of axes
-        self.maxLen, self.axisLabels, self.spectrumIndex, self.validSpectrumViews = self._getSpectraFromDisplays(displays, data)
+        self.maxLen, self.axisLabels, specInd, self.validSpectrumViews = self._getSpectraFromDisplays(displays, data)
+        self.spectrumIndex = [specInd]
         if not self.maxLen:
             return
 
@@ -1038,6 +1039,8 @@ class _commonSettings():
                 spectraWidgets[spectrum.pid] = f
 
     def _fillAllSpectrumFrame(self, displays, data=None):
+        """Populate all spectrumFrames into a moreLessFrame
+        """
         from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
 
         if self._spectraWidget:
@@ -1045,11 +1048,12 @@ class _commonSettings():
             self._spectraWidget.setParent(None)
             self._removeWidget(self._spectraWidget, removeTopWidget=True)
 
-        self._spectraWidget = Widget(parent=self.spectrumDisplayOptionsFrame, setLayout=True, hPolicy='minimal',
-                                     grid=(1, 0), gridSpan=(1, 2), vAlign='top', hAlign='left')
-
+        self._spectraWidget = Widget(parent=self.spectrumDisplayOptionsFrame, setLayout=True,
+                                     grid=(1, 0), gridSpan=(1, 2), vAlign='top')
+        self.spectrumIndex = []
         for num, display in enumerate(displays):
-            maxLen, axisLabels, _, validSpectrumViews = self._getSpectraFromDisplays([display], data)
+            maxLen, axisLabels, specInd, validSpectrumViews = self._getSpectraFromDisplays([display], data)
+            self.spectrumIndex.append(specInd)
 
             curFrame = MoreLessFrame(self._spectraWidget, name=display.pid, showMore=True, grid=(num, 0), gridSpan=(1,4))
 
@@ -1070,9 +1074,6 @@ class _commonSettings():
             for ii, box in enumerate(axisCodeOptions.checkBoxes):
                 if box.text().upper().startswith('C'):
                     axisCodeOptions.clearIndex(ii)
-            f_row += 1
-            HLine(_frame, grid=(1, 0), gridSpan=(f_row, 4),
-                  colour=getColours()[SOFTDIVIDER], height=15)
             f_row += 1
             Label(_frame, 'Spectrum', grid=(f_row, 0))
             Label(_frame, '(double-width tolerances)', grid=(f_row, 1), gridSpan=(1, maxLen))
@@ -1303,12 +1304,13 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
             self.spectrumDisplayOptionsFrame = Frame(self, setLayout=True, showBorder=False, fShape='noFrame',
                                                      grid=(row, 0), gridSpan=(row + 2, 0),
                                                      vAlign='top', hAlign='left')
+            # Spectrum Display Options Frame
             # important part
             # add a new pullDown to select the active spectrumDisplay
             self.spectrumDisplayPulldown = SpectrumDisplayPulldown(parent=self.spectrumDisplayOptionsFrame,
                                                                    mainWindow=self.mainWindow, default=None,
                                                                    grid=(0, 0), gridSpan=(1, 0),
-                                                                   minimumWidths=(0, 100),
+                                                                   minimumWidths=(0, colwidth),
                                                                    showSelectName=True,
                                                                    sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
                                                                    callback=self._spectrumDisplaySelectionPulldownCallback,

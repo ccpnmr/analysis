@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-30 18:35:26 +0100 (Tue, July 30, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-06 09:37:23 +0100 (Tue, August 06, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -429,16 +429,16 @@ class GLLabelling():
 
             pixX, pixY = objListView.pixelSize
             r, w = tx / vPP[pIndex[0]], ty / vPP[pIndex[1]]  # ppm-points
-            sx, sy = line_rectangle_intersection((0, 0), (tx / vPP[pIndex[0]], ty / vPP[pIndex[1]]), (-inr, -inw),
+            sx, sy = line_rectangle_intersection((0, 0),
+                                                 (tx / vPP[pIndex[0]], ty / vPP[pIndex[1]]),
+                                                 (-inr, -inw),
                                                  (inr, inw))
-
             px, py = (tx - (sx * vPP[pIndex[0]])) / abs(pixX), (ty - (sy * vPP[pIndex[1]])) / abs(pixY)
             _ll = px**2 + py**2
             if _ll < arrowMinimum:
                 # line is too short
                 sx, sy = 0, 0
                 r, w = 0.0, 0.0
-
             else:
                 # generate the end-vector perpendicular to the line
                 rx, ry = -ty * abs(pixX), tx * abs(pixY)  # back to pixels, rotated 90degrees
@@ -450,7 +450,6 @@ class GLLabelling():
                 denom = (tnx**2 + tny**2)**0.5
                 tnx = (arrowSize * tnx / denom) * abs(pixX) / vPP[pIndex[0]]  # pixels-points for display
                 tny = (arrowSize * tny / denom) * abs(pixY) / vPP[pIndex[1]]
-
         except Exception:
             sx, sy = 0, 0
             r, w = 0.0, 0.0
@@ -489,16 +488,19 @@ class GLLabelling():
                                  drawList, fade, iCount, indexing, obj, pxy, pIndex,
                                  planeIndex, r, w, alias, sx, sy, rx, ry, tnx, tny):
 
-        drawList.vertices = np.append(drawList.vertices, np.array((pxy[0] + sx, pxy[1] + sy, alias, 0.0,
-                                                                   pxy[0] + r + rx, pxy[1] + w + ry, alias, 0.0,
-                                                                   pxy[0] + r - rx, pxy[1] + w - ry, alias, 0.0,
-                                                                   pxy[0] + r, pxy[1] + w, alias, 0.0,
-                                                                   pxy[0] + sx + rx + 2 * tnx,
-                                                                   pxy[1] + sy + ry + 2 * tny, alias, 0.0,
-                                                                   pxy[0] + sx - rx + 2 * tnx,
-                                                                   pxy[1] + sy - ry + 2 * tny, alias, 0.0,
-                                                                   ),
-                                                                  dtype=np.float32))
+        try:
+            drawList.vertices = np.append(drawList.vertices, np.array((pxy[0] + sx, pxy[1] + sy, alias, 0.0,
+                                                                       pxy[0] + r + rx, pxy[1] + w + ry, alias, 0.0,
+                                                                       pxy[0] + r - rx, pxy[1] + w - ry, alias, 0.0,
+                                                                       pxy[0] + r, pxy[1] + w, alias, 0.0,
+                                                                       pxy[0] + sx + rx + 2 * tnx,
+                                                                       pxy[1] + sy + ry + 2 * tny, alias, 0.0,
+                                                                       pxy[0] + sx - rx + 2 * tnx,
+                                                                       pxy[1] + sy - ry + 2 * tny, alias, 0.0,
+                                                                       ),
+                                                                      dtype=np.float32))
+        except Exception as es:
+            print(es)
         drawList.colors = np.append(drawList.colors, np.array((*cols, fade) * self.LENARR, dtype=np.float32))
         drawList.attribs = np.append(drawList.attribs, np.array((alias, 0.0, 0.0, 0.0) * self.LENARR, dtype=np.float32))
         drawList.offsets = np.append(drawList.offsets,
@@ -777,16 +779,16 @@ class GLLabelling():
 
             pixX, pixY = objListView.pixelSize
             r, w = tx / vPP[pIndex[0]], ty / vPP[pIndex[1]]  # pixel-points
-            sx, sy = line_rectangle_intersection((0, 0), (tx / vPP[pIndex[0]], ty / vPP[pIndex[1]]), (-inr, -inw),
+            sx, sy = line_rectangle_intersection((0, 0),
+                                                 (tx / vPP[pIndex[0]], ty / vPP[pIndex[1]]),
+                                                 (-inr, -inw),
                                                  (inr, inw))
-
             px, py = (tx - (sx * vPP[pIndex[0]])) / abs(pixX), (ty - (sy * vPP[pIndex[1]])) / abs(pixY)
             _ll = px**2 + py**2
             if _ll < arrowMinimum:  # check in pixels?
                 # line is too short
                 sx, sy = 0, 0
                 r, w = 0.0, 0.0
-
             else:
                 # generate the end-vector perpendicular to the line
                 rx, ry = -ty * abs(pixX), tx * abs(pixY)  # back to pixels, rotated 90degrees
@@ -798,7 +800,6 @@ class GLLabelling():
                 denom = (tnx**2 + tny**2)**0.5
                 tnx = (arrowSize * tnx / denom) * abs(pixX) / vPP[pIndex[0]]  # pixels-points for display
                 tny = (arrowSize * tny / denom) * abs(pixY) / vPP[pIndex[1]]
-
         except Exception:
             sx, sy = 0, 0
             r, w = 0.0, 0.0
@@ -1370,9 +1371,11 @@ class GLLabelling():
             pp += GLDefs.LENPID
 
     _squareSymbol = (
-    (np.array((0, 1, 2, 3), dtype=np.uint32), np.array((0, 1, 2, 3, 0, 2, 2, 1, 0, 3, 3, 1), dtype=np.uint32)),
-    (np.array((0, 4, 4, 3, 3, 0), dtype=np.uint32), np.array((0, 4, 4, 3, 3, 0, 0, 2, 2, 1, 3, 1), dtype=np.uint32)),
-    (np.array((2, 4, 4, 1, 1, 2), dtype=np.uint32), np.array((2, 4, 4, 1, 1, 2, 0, 2, 0, 3, 3, 1), dtype=np.uint32)))
+        (np.array((0, 1, 2, 3), dtype=np.uint32), np.array((0, 1, 2, 3, 0, 2, 2, 1, 0, 3, 3, 1), dtype=np.uint32)),
+        (
+        np.array((0, 4, 4, 3, 3, 0), dtype=np.uint32), np.array((0, 4, 4, 3, 3, 0, 0, 2, 2, 1, 3, 1), dtype=np.uint32)),
+        (
+        np.array((2, 4, 4, 1, 1, 2), dtype=np.uint32), np.array((2, 4, 4, 1, 1, 2, 0, 2, 0, 3, 3, 1), dtype=np.uint32)))
     _squareSymbolLen = tuple(tuple(len(sym) for sym in symList) for symList in _squareSymbol)
 
     def _getSquareSymbolCount(self, planeIndex, obj):
@@ -1403,11 +1406,11 @@ class GLLabelling():
         return iCount, _selected
 
     _plusSymbol = (
-    (np.array((5, 6, 7, 8), dtype=np.uint32), np.array((5, 6, 7, 8, 0, 2, 2, 1, 0, 3, 3, 1), dtype=np.uint32)),
-    (np.array((6, 4, 4, 5, 4, 8), dtype=np.uint32),
-     np.array((6, 4, 4, 5, 4, 8, 0, 2, 2, 1, 3, 1, 0, 3), dtype=np.uint32)),
-    (np.array((6, 4, 4, 5, 4, 7), dtype=np.uint32),
-     np.array((6, 4, 4, 5, 4, 7, 0, 2, 2, 1, 3, 1, 0, 3), dtype=np.uint32)))
+        (np.array((5, 6, 7, 8), dtype=np.uint32), np.array((5, 6, 7, 8, 0, 2, 2, 1, 0, 3, 3, 1), dtype=np.uint32)),
+        (np.array((6, 4, 4, 5, 4, 8), dtype=np.uint32),
+         np.array((6, 4, 4, 5, 4, 8, 0, 2, 2, 1, 3, 1, 0, 3), dtype=np.uint32)),
+        (np.array((6, 4, 4, 5, 4, 7), dtype=np.uint32),
+         np.array((6, 4, 4, 5, 4, 7, 0, 2, 2, 1, 3, 1, 0, 3), dtype=np.uint32)))
     _plusSymbolLen = tuple(tuple(len(sym) for sym in symList) for symList in _plusSymbol)
 
     def _getPlusSymbolCount(self, planeIndex, obj):
@@ -1572,10 +1575,10 @@ class GLLabelling():
                     if self._isSelected(obj):
                         _selected = True
                         drawList.indices[indexEnd + np2:indexEnd + np2 + 8] = (
-                        _vertexStart + np2, _vertexStart + np2 + 2,
-                        _vertexStart + np2 + 2, _vertexStart + np2 + 1,
-                        _vertexStart + np2, _vertexStart + np2 + 3,
-                        _vertexStart + np2 + 3, _vertexStart + np2 + 1)
+                            _vertexStart + np2, _vertexStart + np2 + 2,
+                            _vertexStart + np2 + 2, _vertexStart + np2 + 1,
+                            _vertexStart + np2, _vertexStart + np2 + 3,
+                            _vertexStart + np2 + 3, _vertexStart + np2 + 1)
                         iCount += 8
 
                 # add extra indices
@@ -1589,9 +1592,9 @@ class GLLabelling():
                                                               pxy[1] - w * math.cos(skip * an * angPlus / numPoints),
                                                               alias, 0.0,
                                                               pxy[0] - r * math.sin(
-                                                                  (skip * an + 1) * angPlus / numPoints),
+                                                                      (skip * an + 1) * angPlus / numPoints),
                                                               pxy[1] - w * math.cos(
-                                                                  (skip * an + 1) * angPlus / numPoints),
+                                                                      (skip * an + 1) * angPlus / numPoints),
                                                               alias, 0.0)
                                                   )
                 drawList.vertices[end:xtra] = (pxy[0] - r, pxy[1] - w, alias, 0.0,
@@ -1660,9 +1663,9 @@ class GLLabelling():
                                                               pxy[1] - w * math.cos(skip * an * angPlus / numPoints),
                                                               alias, 0.0,
                                                               pxy[0] - r * math.sin(
-                                                                  (skip * an + 1) * angPlus / numPoints),
+                                                                      (skip * an + 1) * angPlus / numPoints),
                                                               pxy[1] - w * math.cos(
-                                                                  (skip * an + 1) * angPlus / numPoints),
+                                                                      (skip * an + 1) * angPlus / numPoints),
                                                               alias, 0.0)
                                                   )
                 drawList.vertices[end:end + xtra] = (pxy[0] - r, pxy[1] - w, alias, 0.0,
@@ -1854,7 +1857,7 @@ class GLLabelling():
                         _selected = True
                         drawList.indices = np.append(drawList.indices,
                                                      np.array((0, 2, 2, 1, 0, 3, 3, 1), dtype=np.uint32) + (
-                                                                 _vertexStart + np2))
+                                                             _vertexStart + np2))
                         iCount += 8
 
                 # add extra indices for the multiplet
@@ -1863,14 +1866,14 @@ class GLLabelling():
                 # draw an ellipse at lineWidth
                 drawList.vertices = np.append(drawList.vertices, np.array(tuple(val for an in ang
                                                                                 for val in (pxy[0] - r * math.sin(
-                    skip * an * angPlus / numPoints),
+                        skip * an * angPlus / numPoints),
                                                                                             pxy[1] - w * math.cos(
-                                                                                                skip * an * angPlus / numPoints),
+                                                                                                    skip * an * angPlus / numPoints),
                                                                                             alias, 0.0,
                                                                                             pxy[0] - r * math.sin((
-                                                                                                                              skip * an + 1) * angPlus / numPoints),
+                                                                                                                          skip * an + 1) * angPlus / numPoints),
                                                                                             pxy[1] - w * math.cos((
-                                                                                                                              skip * an + 1) * angPlus / numPoints),
+                                                                                                                          skip * an + 1) * angPlus / numPoints),
                                                                                             alias, 0.0)
                                                                                 ),
                                                                           dtype=np.float32)
@@ -1943,14 +1946,14 @@ class GLLabelling():
                 # draw an ellipse at lineWidth
                 drawList.vertices = np.append(drawList.vertices, np.array(tuple(val for an in ang
                                                                                 for val in (pxy[0] - r * math.sin(
-                    skip * an * angPlus / numPoints),
+                        skip * an * angPlus / numPoints),
                                                                                             pxy[1] - w * math.cos(
-                                                                                                skip * an * angPlus / numPoints),
+                                                                                                    skip * an * angPlus / numPoints),
                                                                                             alias, 0.0,
                                                                                             pxy[0] - r * math.sin((
-                                                                                                                              skip * an + 1) * angPlus / numPoints),
+                                                                                                                          skip * an + 1) * angPlus / numPoints),
                                                                                             pxy[1] - w * math.cos((
-                                                                                                                              skip * an + 1) * angPlus / numPoints),
+                                                                                                                          skip * an + 1) * angPlus / numPoints),
                                                                                             alias, 0.0,)
                                                                                 ),
                                                                           dtype=np.float32)
@@ -2243,7 +2246,7 @@ class GLLabelling():
                         drawList.indices = np.append(drawList.indices, np.array(tuple(val for an in ang
                                                                                       for val in (indexStart + (2 * an),
                                                                                                   indexStart + (
-                                                                                                              2 * an) + 1)),
+                                                                                                          2 * an) + 1)),
                                                                                 dtype=np.uint32))
 
                         if self._isSelected(obj):
@@ -2895,33 +2898,32 @@ class GL1dLabelling():
         tnx, tny = 0.0, 0.0
         inr, inw = r, w
         try:
-            vPP = spectrumView.spectrum.ppmPerPoints
+            _vpp = spectrumView.spectrum.ppmPerPoints[0], 1.0
+            vPP = [_vpp[dim] for dim in dims]
             # pView = obj.getPeakView(objListView)
             pView = self.getViewFromListView(objListView, obj)
             tx, ty = pView.getIntersect((0, 0))  # ppm intersect
 
             pixX, pixY = objListView.pixelSize
-            r, w = tx / vPP[0], ty  # ppm-points
-            sx, sy = line_rectangle_intersection((0, 0), (tx / vPP[0], ty), (-inr, -inw), (inr, inw))
+            r, w = tx / vPP[0], ty / vPP[1]  # ppm-points
+            sx, sy = line_rectangle_intersection((0, 0), (tx / vPP[0], ty / vPP[1]), (-inr, -inw), (inr, inw))
 
-            _ll = ((tx - (sx * vPP[0])) / abs(pixX))**2 + ((ty - sy) / abs(pixY))**2
+            _ll = ((tx - (sx * vPP[0])) / abs(pixX))**2 + ((ty - (sy * vPP[1])) / abs(pixY))**2
             if _ll < arrowMinimum:  # check in pixels?
                 # line is too short
                 sx, sy = 0, 0
                 r, w = 0.0, 0.0
-
             else:
                 # generate the end-vector perpendicular to the line
                 rx, ry = -ty * abs(pixX), tx * abs(pixY)  # back to pixels, rotated 90degrees
                 denom = (rx**2 + ry**2)**0.5
                 rx = (arrowSize * rx / denom) * abs(pixX) / vPP[0]  # pixels-points for display
-                ry = (arrowSize * ry / denom) * abs(pixY)
+                ry = (arrowSize * ry / denom) * abs(pixY) / vPP[1]
 
                 tnx, tny = tx / abs(pixX), ty / abs(pixY)  # back to pixels, rotated 90degrees
                 denom = (tnx**2 + tny**2)**0.5
                 tnx = (arrowSize * tnx / denom) * abs(pixX) / vPP[0]  # pixels-points for display
-                tny = (arrowSize * tny / denom) * abs(pixY)
-
+                tny = (arrowSize * tny / denom) * abs(pixY) / vPP[1]
         except Exception:
             sx, sy = 0, 0
             r, w = 0.0, 0.0
@@ -2975,33 +2977,32 @@ class GL1dLabelling():
         tnx, tny = 0.0, 0.0
         inr, inw = r, w
         try:
-            vPP = spectrumView.spectrum.ppmPerPoints
+            _vpp = spectrumView.spectrum.ppmPerPoints[0], 1.0
+            vPP = [_vpp[dim] for dim in dims]
             # pView = obj.getPeakView(objListView)
             pView = self.getViewFromListView(objListView, obj)
             tx, ty = pView.getIntersect((0, 0))  # ppm intersect
 
             pixX, pixY = objListView.pixelSize
-            r, w = tx / vPP[0], ty  # ppm-points
-            sx, sy = line_rectangle_intersection((0, 0), (tx / vPP[0], ty), (-inr, -inw), (inr, inw))
+            r, w = tx / vPP[0], ty / vPP[1]  # ppm-points
+            sx, sy = line_rectangle_intersection((0, 0), (tx / vPP[0], ty / vPP[1]), (-inr, -inw), (inr, inw))
 
-            _ll = ((tx - (sx * vPP[0])) / abs(pixX))**2 + ((ty - sy) / abs(pixY))**2
+            _ll = ((tx - (sx * vPP[0])) / abs(pixX))**2 + ((ty - (sy * vPP[1])) / abs(pixY))**2
             if _ll < arrowMinimum:  # check in pixels?
                 # line is too short
                 sx, sy = 0, 0
                 r, w = 0.0, 0.0
-
             else:
                 # generate the end-vector perpendicular to the line
                 rx, ry = -ty * abs(pixX), tx * abs(pixY)  # back to pixels, rotated 90degrees
                 denom = (rx**2 + ry**2)**0.5
                 rx = (arrowSize * rx / denom) * abs(pixX) / vPP[0]  # pixels-points for display
-                ry = (arrowSize * ry / denom) * abs(pixY)
+                ry = (arrowSize * ry / denom) * abs(pixY) / vPP[1]
 
                 tnx, tny = tx / abs(pixX), ty / abs(pixY)  # back to pixels, rotated 90degrees
                 denom = (tnx**2 + tny**2)**0.5
                 tnx = (arrowSize * tnx / denom) * abs(pixX) / vPP[0]  # pixels-points for display
-                tny = (arrowSize * tny / denom) * abs(pixY)
-
+                tny = (arrowSize * tny / denom) * abs(pixY) / vPP[1]
         except Exception:
             sx, sy = 0, 0
             r, w = 0.0, 0.0

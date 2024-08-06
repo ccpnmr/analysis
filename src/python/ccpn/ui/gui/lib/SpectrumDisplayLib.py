@@ -4,9 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-09-07 10:49:43 +0100 (Thu, September 07, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-08-06 09:37:23 +0100 (Tue, August 06, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -56,7 +57,8 @@ def navigateToCurrentPeakPosition(application, selectFirstPeak=False, selectClic
         peak = application.current.peak
 
     if len(application.current.peaks) > 1 and not selectFirstPeak:
-        getLogger().warning('More than one peak selected. Select only one for the "navigateToCurrentPeakPosition" command.')
+        getLogger().warning(
+            'More than one peak selected. Select only one for the "navigateToCurrentPeakPosition" command.')
         return
 
     if len(displays) < 1:
@@ -89,7 +91,8 @@ def navigateToCurrentNmrResiduePosition(application):
     nmrResidue = application.current.nmrResidue
 
     if len(application.current.nmrResidues) > 1:
-        getLogger().warning('More than one nmrResidue selected. Select only one for the "navigateToCurrentNmrResiduePosition" command.')
+        getLogger().warning(
+            'More than one nmrResidue selected. Select only one for the "navigateToCurrentNmrResiduePosition" command.')
         return
 
     if len(displays) < 1:
@@ -183,7 +186,8 @@ def navigateToPeakInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, peak, widt
     # strip.header.headerVisible = True
 
 
-def navigateToNmrResidueInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, nmrResidue, widths=None, markPositions=False):
+def navigateToNmrResidueInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, nmrResidue, widths=None,
+                                markPositions=False):
     spCodes = spectrumDisplay.axisCodes
     newWidths = ['full'] * len(spCodes)
     index = 'YXT'.index(spectrumDisplay.stripArrangement)
@@ -270,17 +274,19 @@ def arrangeLabelPositions(spectrumDisplay: GuiSpectrumDisplay, selected: bool = 
     # ppmWidths = strip.widths
 
     _data2Obj = strip.project._data2Obj
-    pkLabels = [(_data2Obj.get(pLabel.stringObject._wrappedData.findFirstPeakView(peakListView=plv._wrappedData.peakListView)),
-                 pLabel.stringObject,
-               pLabel)
-              for plv, ss in strip._CcpnGLWidget._GLPeaks._GLLabels.items() if plv.isDisplayed
-              for pLabel in ss.stringList]
+    pkLabels = [
+        (_data2Obj.get(pLabel.stringObject._wrappedData.findFirstPeakView(peakListView=plv._wrappedData.peakListView)),
+         pLabel.stringObject,
+         pLabel)
+        for plv, ss in strip._CcpnGLWidget._GLPeaks._GLLabels.items() if plv.isDisplayed
+        for pLabel in ss.stringList if not pLabel.stringObject.isDeleted]
 
-    mltLabels = [(_data2Obj.get(mLabel.stringObject._wrappedData.findFirstMultipletView(multipletListView=mlv._wrappedData.multipletListView)),
+    mltLabels = [(_data2Obj.get(
+        mLabel.stringObject._wrappedData.findFirstMultipletView(multipletListView=mlv._wrappedData.multipletListView)),
                   mLabel.stringObject,
                   mLabel)
-              for mlv, ss in strip._CcpnGLWidget._GLMultiplets._GLLabels.items() if mlv.isDisplayed
-              for mLabel in ss.stringList]
+                 for mlv, ss in strip._CcpnGLWidget._GLMultiplets._GLLabels.items() if mlv.isDisplayed
+                 for mLabel in ss.stringList if not mLabel.stringObject.isDeleted]
 
     posnX = []
     posnY = []
@@ -323,7 +329,10 @@ def arrangeLabelPositions(spectrumDisplay: GuiSpectrumDisplay, selected: bool = 
         # peakDimY = peak.findFirstPeakDim(dim=dims[1])
         try:
             if spectrumDisplay.is1D:
-                posX, posY = pos[0], (obj.height or 0.0)
+                if spectrumDisplay._flipped:
+                    posX, posY = (obj.height or 0.0), pos[0]
+                else:
+                    posX, posY = pos[0], (obj.height or 0.0)
             else:
                 posX, posY = pos[dims[0]], pos[dims[1]]
         except Exception:
@@ -361,23 +370,23 @@ def arrangeLabelPositions(spectrumDisplay: GuiSpectrumDisplay, selected: bool = 
     x_boxes = [np.array([xx - HALF_POINTSIZE, xx + HALF_POINTSIZE]) for xx in posnX]
     y_boxes = [np.array([yy - HALF_POINTSIZE, yy + HALF_POINTSIZE]) for yy in posnY]
 
-    valid_boxes = allocate_text(posnX, posnY, text_list=texts,
-                           x_lims=None,
-                           y_lims=None,
-                           x_boxes=x_boxes, y_boxes=y_boxes,  # boxes to avoid
-                           textsize=14,
-                           x_margin=0,
-                           y_margin=0,
-                           minx_distance=10,  # sort this, have changed internally to pixels
-                           maxx_distance=300,
-                           miny_distance=10,
-                           maxy_distance=300,
-                           include_new_lines=True,
-                           include_new_boxes=True,
-                           verbose=False,
-                           )
+    valid_boxes = allocate_text(posnX, posnY,
+                                text_list=texts,
+                                x_lims=None,
+                                y_lims=None,
+                                x_boxes=x_boxes, y_boxes=y_boxes,  # boxes to avoid
+                                textsize=14,
+                                x_margin=0,
+                                y_margin=0,
+                                minx_distance=10,  # sort this, have changed internally to pixels
+                                maxx_distance=300,
+                                miny_distance=10,
+                                maxy_distance=300,
+                                include_new_lines=True,
+                                include_new_boxes=True,
+                                verbose=False,
+                                )
     non_over, over_ind = valid_boxes
-
 
     with undoBlockWithoutSideBar(app):
         # need to check which over_ind are bad and discard

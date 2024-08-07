@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-04 18:51:59 +0100 (Thu, July 04, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-08-07 09:30:45 +0100 (Wed, August 07, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -43,15 +43,11 @@ try:
     # set the soft limits for the maximum number of open files
     if platform.system() == 'Windows':
         import win32file
-
-
         # set soft limit for Windows
         win32file._setmaxstdio(2048)
 
     else:
         import resource
-
-
         # soft limit imposed by the current configuration, hard limit imposed by the operating system.
         soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
 
@@ -750,46 +746,47 @@ class Framework(NotifierBase):
 
     #-----------------------------------------------------------------------------------------
 
-    def _correctColours(self):
-        """Autocorrect all colours that are too close to the background colour
-        """
-        from ccpn.ui.gui.guiSettings import autoCorrectHexColour, getColours, CCPNGLWIDGET_HEXBACKGROUND
-
-        if self.preferences.general.autoCorrectColours:
-            project = self.project
-            # change sp colours
-            for sp in project.spectra:
-                if len(sp.axisCodes) > 1:
-                    if sp.positiveContourColour and sp.positiveContourColour.startswith('#'):
-                        sp.positiveContourColour = autoCorrectHexColour(sp.positiveContourColour,
-                                                                        getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-                    if sp.negativeContourColour and sp.negativeContourColour.startswith('#'):
-                        sp.negativeContourColour = autoCorrectHexColour(sp.negativeContourColour,
-                                                                        getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-                elif sp.sliceColour and sp.sliceColour.startswith('#'):
-                    sp.sliceColour = autoCorrectHexColour(sp.sliceColour,
-                                                          getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-            # change peakList colours
-            for objList in project.peakLists:
-                objList.textColour = autoCorrectHexColour(objList.textColour,
-                                                          getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-                objList.symbolColour = autoCorrectHexColour(objList.symbolColour,
-                                                            getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-            # change integralList colours
-            for objList in project.integralLists:
-                objList.textColour = autoCorrectHexColour(objList.textColour,
-                                                          getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-                objList.symbolColour = autoCorrectHexColour(objList.symbolColour,
-                                                            getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-            # change multipletList colours
-            for objList in project.multipletLists:
-                objList.textColour = autoCorrectHexColour(objList.textColour,
-                                                          getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-                objList.symbolColour = autoCorrectHexColour(objList.symbolColour,
-                                                            getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-            for mark in project.marks:
-                mark.colour = autoCorrectHexColour(mark.colour,
-                                                   getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+    # GWV 07/08/2024: Moved to Gui.py
+    # def _correctColours(self):
+    #     """Autocorrect all colours that are too close to the background colour
+    #     """
+    #     from ccpn.ui.gui.guiSettings import autoCorrectHexColour, getColours, CCPNGLWIDGET_HEXBACKGROUND
+    #
+    #     if self.preferences.general.autoCorrectColours:
+    #         project = self.project
+    #         # change sp colours
+    #         for sp in project.spectra:
+    #             if len(sp.axisCodes) > 1:
+    #                 if sp.positiveContourColour and sp.positiveContourColour.startswith('#'):
+    #                     sp.positiveContourColour = autoCorrectHexColour(sp.positiveContourColour,
+    #                                                                     getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+    #                 if sp.negativeContourColour and sp.negativeContourColour.startswith('#'):
+    #                     sp.negativeContourColour = autoCorrectHexColour(sp.negativeContourColour,
+    #                                                                     getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+    #             elif sp.sliceColour and sp.sliceColour.startswith('#'):
+    #                 sp.sliceColour = autoCorrectHexColour(sp.sliceColour,
+    #                                                       getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+    #         # change peakList colours
+    #         for objList in project.peakLists:
+    #             objList.textColour = autoCorrectHexColour(objList.textColour,
+    #                                                       getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+    #             objList.symbolColour = autoCorrectHexColour(objList.symbolColour,
+    #                                                         getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+    #         # change integralList colours
+    #         for objList in project.integralLists:
+    #             objList.textColour = autoCorrectHexColour(objList.textColour,
+    #                                                       getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+    #             objList.symbolColour = autoCorrectHexColour(objList.symbolColour,
+    #                                                         getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+    #         # change multipletList colours
+    #         for objList in project.multipletLists:
+    #             objList.textColour = autoCorrectHexColour(objList.textColour,
+    #                                                       getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+    #             objList.symbolColour = autoCorrectHexColour(objList.symbolColour,
+    #                                                         getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+    #         for mark in project.marks:
+    #             mark.colour = autoCorrectHexColour(mark.colour,
+    #                                                getColours()[CCPNGLWIDGET_HEXBACKGROUND])
 
     # GWV 24/1/24: moved to Gui
     # def _initGraphics(self):

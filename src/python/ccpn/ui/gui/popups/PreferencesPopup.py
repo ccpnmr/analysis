@@ -5,8 +5,9 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-17 13:47:45 +0100 (Fri, May 17, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-08-07 09:30:46 +0100 (Wed, August 07, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -349,7 +350,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         if updateColourScheme:
             # change the colour theme
             setColourScheme(self.application.preferences.general.colourScheme)
-            self.application._correctColours()
+            self.application.ui._correctColours()
 
         if updateSpectrumDisplays:
             self._updateSpectrumDisplays()
@@ -1515,17 +1516,18 @@ class PreferencesPopup(CcpnDialogMainWidget):
         """Insert a widget in here to appear in the Peaks and Multiplets Tab. Parent = the Frame obj where the widget should live
         """
         row = -1
+        _gridSpan=(1, 2)  # This tab has two columns
 
         #====== Peak Picking ======
         row += 1
-        _makeLine(parent, grid=(row, 0), text="Peak Picking")
+        _makeLine(parent, grid=(row, 0), text="Peak Picking", gridSpan=_gridSpan)
 
         row += 1
         self.peakFittingMethodLabel = _makeLabel(parent, text="Peak interpolation method", grid=(row, 0))
         self.peakFittingMethod = RadioButtons(parent, texts=PEAKFITTINGDEFAULTS,
                                               callback=self._queueSetPeakFittingMethod,
                                               direction='h',
-                                              grid=(row, 1), hAlign='l', gridSpan=(1, 2),
+                                              grid=(row, 1), hAlign='l', gridSpan=(1, 1),
                                               tipTexts=None,
                                               )
         row += 1
@@ -1611,7 +1613,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         #====== Peak Fitting ======
         row += 1
-        _makeLine(parent, grid=(row, 0), text="Peak Fitting")
+        _makeLine(parent, grid=(row, 0), text="Peak Fitting", gridSpan=_gridSpan)
 
         row += 1
         self.useSearchBoxDoFitLabel = _makeLabel(parent, text="Fit after snap-to-extrema", grid=(row, 0))
@@ -1664,22 +1666,14 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         #======  Peak Symbols ======
         row += 1
-        _makeLine(parent, grid=(row, 0), text="Peak Symbols")
+        _makeLine(parent, grid=(row, 0), text="Peak Symbols", gridSpan=_gridSpan)
 
-        row += 1
-        self.annotationsLabel = _makeLabel(parent, text="Label", grid=(row, 0))
-        self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'NmrAtom Pid', 'Minimal', 'Peak Pid', 'ClusterId', 'Annotation'],
-                                            callback=self._queueSetAnnotations,
-                                            direction='h',
-                                            grid=(row, 1), hAlign='l', gridSpan=(1, 2),
-                                            tipTexts=None,
-                                            )
         row += 1
         self.symbolsLabel = _makeLabel(parent, text="Symbol", grid=(row, 0))
         self.symbol = RadioButtons(parent, texts=['Cross', 'lineWidths', 'Filled lineWidths', 'Plus'],
                                    callback=self._queueSetSymbol,
                                    direction='h',
-                                   grid=(row, 1), hAlign='l', gridSpan=(1, 2),
+                                   grid=(row, 1), hAlign='l', gridSpan=(1, 1),
                                    tipTexts=None,
                                    )
 
@@ -1697,9 +1691,20 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.symbolThicknessData.setMinimumWidth(LineEditsMinimumWidth)
         self.symbolThicknessData.valueChanged.connect(self._queueSetSymbolThickness)
 
+        row += 1
+        self.annotationsLabel = _makeLabel(parent, text="Label", grid=(row, 0))
+        self.annotationsData = RadioButtons(parent,
+                                            texts=['Short', 'Full', 'NmrAtom Pid', 'Minimal', 'Peak Pid', 'ClusterId', 'Annotation'],
+                                            callback=self._queueSetAnnotations,
+                                            direction='v',
+                                            grid=(row, 1), hAlign='l', gridSpan=(1, 1),
+                                            tipTexts=None,
+                                            )
+
+
         #======  Multiplet Symbols ======
         row += 1
-        _makeLine(parent, grid=(row, 0), text='Multiplet Symbols')
+        _makeLine(parent, grid=(row, 0), text='Multiplet Symbols', gridSpan=_gridSpan)
 
         row += 1
         _texts = ['Short', 'Full', 'NmrAtom Pid', 'Minimal', 'Multiplet Pid', 'ClusterId', 'Annotation']
@@ -1710,7 +1715,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                                     objectNames=_names,
                                                     callback=self._queueSetMultipletAnnotation,
                                                     direction='h',
-                                                    grid=(row, 1), gridSpan=(1, 3), hAlign='l',
+                                                    grid=(row, 1), gridSpan=(1, 1), hAlign='l',
                                                     tipTexts=None,
                                                     )
         self.multipletAnnotationData.radioButtons[2].setVisible(False)
@@ -1725,7 +1730,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                             objectNames=_names,
                                             callback=self._queueSetMultipletSymbol,
                                             direction='h',
-                                            grid=(row, 1), gridSpan=(1, 3), hAlign='l',
+                                            grid=(row, 1), gridSpan=(1, 1), hAlign='l',
                                             tipTexts=None,
                                             )
 
@@ -1735,14 +1740,14 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         #======  Peak/Multiplet Arrows ======
         row += 1
-        _makeLine(parent, grid=(row, 0), text='Arrows')
+        _makeLine(parent, grid=(row, 0), text='Arrows', gridSpan=_gridSpan)
 
         row += 1
         self.arrowsLabel = _makeLabel(parent, text="Arrow", grid=(row, 0))
         self.arrow = RadioButtons(parent, texts=['Line', 'Wedge', 'Arrow'],
                                   callback=self._queueSetArrow,
                                   direction='h',
-                                  grid=(row, 1), hAlign='l', gridSpan=(1, 2),
+                                  grid=(row, 1), hAlign='l', gridSpan=(1, 1),
                                   tipTexts=None,
                                   )
 
@@ -1762,14 +1767,14 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         #====== Multiplets other ======
         row += 1
-        _makeLine(parent, grid=(row, 0), text="Multiplets")
+        _makeLine(parent, grid=(row, 0), text="Multiplets", gridSpan=_gridSpan)
 
         row += 1
         self.multipletAveragingLabel = _makeLabel(parent, text="Multiplet averaging", grid=(row, 0))
         self.multipletAveraging = RadioButtons(parent, texts=MULTIPLETAVERAGINGTYPES,
                                                callback=self._queueSetMultipletAveraging,
                                                direction='h',
-                                               grid=(row, 1), hAlign='l', gridSpan=(1, 2),
+                                               grid=(row, 1), hAlign='l', gridSpan=(1, 1),
                                                tipTexts=None,
                                                )
 

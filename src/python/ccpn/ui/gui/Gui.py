@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-07-25 10:11:17 +0100 (Thu, July 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-07 09:30:45 +0100 (Wed, August 07, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -312,9 +312,9 @@ class Gui(Ui, _Gui):
 
         try:
             # initialise any colour changes before generating gui strips
-            self.application._correctColours()
+            self._correctColours()
         except Exception as es:
-            getLogger().warning(f'Impossible to restore colours - {es}')
+            getLogger().warning(f'Error setting colours - {es}')
 
         # Initialise Strips
         for spectrumDisplay in mainWindow.spectrumDisplays:
@@ -403,6 +403,49 @@ class Gui(Ui, _Gui):
                 current.strip = mainWindow.strips[0]
         except Exception as e:
             getLogger().warning(f'Error restoring current.strip: {e}')
+
+    # GWV 07/08/2024: copied from Framewrok
+    def _correctColours(self):
+        """Autocorrect all colours that are too close to the background colour
+        """
+        from ccpn.ui.gui.guiSettings import autoCorrectHexColour, getColours, CCPNGLWIDGET_HEXBACKGROUND
+
+        _app = self.application
+        if _app.preferences.general.autoCorrectColours:
+            project = _app.project
+            # change sp colours
+            for sp in project.spectra:
+                if len(sp.axisCodes) > 1:
+                    if sp.positiveContourColour and sp.positiveContourColour.startswith('#'):
+                        sp.positiveContourColour = autoCorrectHexColour(sp.positiveContourColour,
+                                                                        getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+                    if sp.negativeContourColour and sp.negativeContourColour.startswith('#'):
+                        sp.negativeContourColour = autoCorrectHexColour(sp.negativeContourColour,
+                                                                        getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+                elif sp.sliceColour and sp.sliceColour.startswith('#'):
+                    sp.sliceColour = autoCorrectHexColour(sp.sliceColour,
+                                                          getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+            # change peakList colours
+            for objList in project.peakLists:
+                objList.textColour = autoCorrectHexColour(objList.textColour,
+                                                          getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+                objList.symbolColour = autoCorrectHexColour(objList.symbolColour,
+                                                            getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+            # change integralList colours
+            for objList in project.integralLists:
+                objList.textColour = autoCorrectHexColour(objList.textColour,
+                                                          getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+                objList.symbolColour = autoCorrectHexColour(objList.symbolColour,
+                                                            getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+            # change multipletList colours
+            for objList in project.multipletLists:
+                objList.textColour = autoCorrectHexColour(objList.textColour,
+                                                          getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+                objList.symbolColour = autoCorrectHexColour(objList.symbolColour,
+                                                            getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+            for mark in project.marks:
+                mark.colour = autoCorrectHexColour(mark.colour,
+                                                   getColours()[CCPNGLWIDGET_HEXBACKGROUND])
 
     # GWV 12/2/24; replaced by other implementation
     # def _updateCheckableMenuItems(self):

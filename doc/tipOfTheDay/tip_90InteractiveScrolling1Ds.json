@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can scale 1D spectra relative to one another interactively. Right-click on Spectra to be scaled in the Spectrum Toolbar and tick <span style=%(purple)s>Current</span>. Then press the <span style=%(purple)s>Alt/option</span> key while <span style=%(purple)s>scrolling</span> with the mouse to change the scaling.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 90,
+  "contents": [
+    "./graphics/InteractiveScaling1Ds.png"
+  ]
+}

@@ -1,5 +1,5 @@
 {
-  "header": "<p style=%(para)s>In your <span style=%(purple)s>Preferences</span> (under <span style=%(purple)s>File / Preferences</span>) you can set default paths or folders in which to save your projects, layout and macros. You can also select to use the project path (the directory of the currently open project) as your working path.</p>",
+  "header": "<p style=%(para)s>In your <span style=%(purple)s>Preferences</span> (under <span style=%(purple)s>File / Preferences</span>) you can set default paths or folders in which to save your projects, layouts and macros. You can also select to use the project path (the directory of the currently open project) as your working path.</p>",
   "type": "picture",
   "styles": {
     "style_file": "tipStyles.txt"

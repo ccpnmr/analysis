@@ -5,7 +5,7 @@
     "style_file": "tipStyles.txt"
   },
   "color": "#ffffff",
-  "order": 1,
+  "order": 74,
   "contents": [
     "./graphics/SelectAllPeaks.png"
   ]

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Peaks from NmrResidues macro</title>
+    <link rel="stylesheet" href="CcpnVideoTutorials.css">
+</head>
+<body>
+<div class="header"><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a
+        href="index.html" class="button">Video<br> Tutorials<br> & Manual</a><a href="https://forums.ccpn.ac.uk"><img
+        src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 15px"></a></div>
+<br>
+<div class="headerBar">Peaks from NmrResidues macro</div>
+<div class="tutorial">
+
+    <div class="videoContainer">
+        <div class="videoWrapper">
+            <iframe src="https://www.youtube.com/embed/QLIn4jL6fYU" frameborder="0"
+                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <h2>Peaks from NmrResidues macro</h2>
+    <p>Much of the information in peptide spectra is redundant which means that you will not need all peaks or spectra to assign the atoms in a residue. However, once the atoms in a residue have been assigned, it is helpful to label all the maxima in your Spectra belonging to the atoms in this residue while you go on to assign other residues. You can do this by creating Peaks and labelling them with NmrAtoms (which are grouped into NmrResidues). A CCPN macro called <span class="action">peaksFromNmrResidues</span> can help you do this quickly and efficiently without having to trawl through all the Spectra placing and labelling Peaks manually. (See below for some helpful nomenclature if you are still new to the program.)</p>
+    <p>Before you start, you should ensure that your Specta have been assigned their Experiment Types. Do this by going to <span class="action">Spectra / Experiment Types</span> or using the shortcut <span class="action">ET</span>.</p>
+    <p>To use the macro, go to the <span class="action">Macro</span> menu and select <span class="action">Run CCPN Macros / peaksFromNmrResidues</span>. In the resulting pop-up you can use drop-down menus to select the <span class="action">NmrResidue</span> for which you want to pick and assign peaks. You can also select the <span class="action">ChemicalShiftList</span> from which the peak positions (literally the Chemical Shifts of the NmrAtoms) should be taken. In many situations you may only have one ChemicalShiftList, anyway. You can then select the <span class="action">Spectra</span> where you want to pick and assign peaks (note that not all Experiment Types, e.g. a <sup>1</sup>H-<sup>13</sup>C-HMBC, may be supported at present). Next, select whether you want to place the newly picked peaks into the <span class="action">first, last or a new PeakList</span> of the selected Spectra. You can now select the <span class="action">Peak Creation Method</span>, i.e. whether to place your peaks at the exact position specified by the Chemical Shift List (this will not change the Chemical Shifts of your NmrAtoms, but the peaks will not necessarily lie on top of the exact maxima in your spectra), or whether you want to <span class="action">Pick the Peaks</span> with a small area peak pick (which will fit the peak positions to the maxima in your Spectra, but may change the Chemical Shifts in your Chemical Shift List, since these are averages). Further options include limiting the creation of peaks to those with <span class="action">aliphatic NmrAtoms</span> and <span class="action">checking for existing Peaks</span> so that you don't double up on any existing peaks. The option to <span class="action">assign Peaks to new NmrResidues</span> should only be relevant when using Reference Chemical Shifts as described below. Finally click on <span class="action">Create Peaks</span> to execute the macro.</p>
+
+    <h3>Using the macro to place Reference Chemical Shift Peaks</h3>
+    <p>We have created a <a href="https://ccpn.le.ac.uk/download/ccpnmr/RefChemShifts.nef">NEF file containing a 20-amino acid chain with all the Reference Chemical Shifts</a>. You can import this into your project and use it to mark the reference chemical shifts in your Spectra (see our <a href="ReferenceChemicalShifts.html">Reference Chemical Shifts webpage</a> for more information on this), but also to create peaks at these positions which you can then easily shift into place to match the maxima in your Spectra.</p>
+    <p>Import the .nef file by going to <span class="action">File / Import / Nef file</span>, using shortcut <span class="action">IN</span> or by dragging the .nef file into your project. If asked, select to <span class="action">Import</span> the file and then in the NEF Import dialog box tick <span class="action">RefChemShifts.nef</span> on the left hand side which will automatically tick the Chain and ChemicalShiftList below. Click the <span class="action">Import</span> button and you will see that a new Chain, ChemicalShiftList and NmrChain have been added to your project.</p>
+    <p>Tp place Peaks Run the <span class="action">peaksFromNmrResidues</span> macro as described above, but make sure you select one of the <span class="action">NR:RefCS</span> NmrResidues and the <span class="action">CL:RefCS<span></span> ChemicalShiftList. Finally, you can select the <span class="action">assign Peaks to new NmrResidues</span> option to make sure that your Peaks will be created with the NmrChain and Sequence Code of the peptide you are working on.</p>
+
+    <h3>Nomenclature</h3>
+    <p><span class="action">Peaks</span>: these are the Peak objects (the little cross symbols) that are placed on the maxima in Spectra. They are tabulated in PeakLists. Each Peak has a position associated with it. A Peak may also be <span class="action">assigned</span> which means that it has a peak label (one for each dimension). The peak labels are the <span class="action">NmrAtoms</span> which are grouped into <span class="action">NmrResidues</span>. They correspond to actual <span class="action">(Molecular) Atoms</span> in a peptide, protein or other molecule. Don't confuse a Peak within the program with a maximum in a Spectrum which we naturally think of and colloquially refer to as a peak.</p>
+    <p><span class="action">NmrAtom</span>: these are essentially the peak labels used within the program. However, they are structured as having a <span class="action">Name</span>, belonging to an <span class="action">NmrResidue</span> with a <span class="action">Sequence Code</span> and <span class="action">Residue Type</span> which in turn belongs to an <span class="action">NmrChain</span>. In that sense they obviously correspond to Atoms, Residues and Chains for your actual peptide or protein, but the <span class="action">Residue Type</span> and <span class="action">Name</span> are essentially free text boxes, so you can also be flexible about how you name them and don't have to associate them with a particular real Atom if that information isn't known during the assignment process, for example.</p>
+
+</div>
+</body>
+</html>

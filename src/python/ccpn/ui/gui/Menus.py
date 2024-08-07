@@ -116,7 +116,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-07 10:21:19 +0100 (Wed, August 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-07 12:16:37 +0100 (Wed, August 07, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -325,8 +325,7 @@ class MenusDefs(list):
                 ("Structure Table", partial(app.showStructureTable, selectFirstItem=True), [('shortcut', 'st')]),
 
                 Separator(),
-                ("Restraint Analysis Inspector", self._showRestraintAnalysisInspectorCallback,
-                 [('shortcut', 'at')]),
+                ("Restraint Analysis Inspector", self._showRestraintAnalysisInspectorCallback, [('shortcut', 'at')]),
                 ("Chemical Shift Mapping (Beta)", self._showChemicalShiftMappingCallback, [('shortcut', 'cm')]),
                 ("Relaxation Analysis (Beta)", app.showRelaxationModule, [('shortcut', 'ra')]),
                 ("Notes Editor", partial(app.showNotesEditor, selectFirstItem=True), [('shortcut', 'no')]),
@@ -425,7 +424,7 @@ class MenusDefs(list):
                 ("Open CCPN Macro...", partial(self._openMacroCallback, directory=macroPath)),
 
                 Separator(),
-                ("Run...", app.runMacro, [('shortcut', 'rm')]),
+                ("Run...", self._runMacroCallback, [('shortcut', 'rm')]),
                 (MACRO_RUN_RECENT, DYNAMIC_FILL),
                 (MACRO_RUN_CCPN, DYNAMIC_FILL),
 
@@ -1079,6 +1078,11 @@ class MenusDefs(list):
         path = dialog.selectedFile()
         if path is not None:
             self.ui.newMacroEditor(path=path)
+
+    def _runMacroCallback(self):
+        """Callback for running macro
+        """
+        self.ui.runMacro()
 
     def _defineUserShortcutsCallback(self):
         from ccpn.ui.gui.popups.ShortcutsPopup import ShortcutsPopup

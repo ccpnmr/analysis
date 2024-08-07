@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-07 10:21:19 +0100 (Wed, August 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-07 12:16:37 +0100 (Wed, August 07, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1329,3 +1329,21 @@ class Gui(Ui, _Gui):
         macroEditor = MacroEditor(mainWindow=self.mainWindow, filePath=path, restore=False)
         self.mainWindow._addModule(macroEditor, position=position)
         return macroEditor
+
+    @logCommand('ui.')
+    def runMacro(self, path: str | Path = None):
+        """
+        Runs a python macro if a path is specified, or opens a dialog box for selection of a macro file and then
+        runs the selected macro.
+        :param path: optional path to python file to run as macro
+        """
+        if path is None:
+            fType = '*.py'
+            dialog = FileDialog.MacrosFileDialog(parent=self.mainWindow, acceptMode='run', fileFilter=fType)
+            dialog._show()
+            path = dialog.selectedFile()
+            if not path:
+                return
+
+        # use application to run the macro
+        self.application.runMacro(path)

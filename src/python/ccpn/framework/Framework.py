@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-07 10:21:19 +0100 (Wed, August 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-07 12:16:37 +0100 (Wed, August 07, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -74,7 +74,7 @@ from ccpn.core.Project import Project
 from ccpn.core.lib.Notifiers import NotifierBase
 from ccpn.core.lib.Pid import Pid
 from ccpn.core.lib.ContextManagers import \
-    logCommandManager, undoBlockWithSideBar, rebuildSidebar, inactivity
+    logCommandManager, undoBlockWithSideBar, undoBlock, rebuildSidebar, inactivity
 
 from ccpn.framework.Application import Arguments
 from ccpn.framework import Version
@@ -83,13 +83,13 @@ from ccpn.framework.credits import printCreditsText
 from ccpn.framework.Current import Current
 from ccpn.framework.Translation import defaultLanguage
 from ccpn.framework.Translation import translator
-from ccpn.framework.Preferences import Preferences, \
-    RECENT_MACROS, RECENT_FILES, USER_PLUGIN_PATH
+from ccpn.framework.Preferences import Preferences, USER_PLUGIN_PATH
 from ccpn.framework.PathsAndUrls import \
     userCcpnMacroPath, \
     tipOfTheDayConfig, \
     ccpnCodePath, \
     CCPN_DIRECTORY_SUFFIX
+
 from ccpn.framework.lib.resources.Resources import Resources
 from ccpn.ui.gui.Gui import Gui
 # from ccpn.ui.gui.GuiBase import GuiBase
@@ -2500,22 +2500,26 @@ class Framework(NotifierBase):
     #
     #     ShortcutsPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow).exec_()
 
-    def runMacro(self, macroFile: str = None, extraCommands=None):
+    @logCommand('application.')
+    def runMacro(self, path: str = None, extraCommands=None):
+        """Runs a macro if a macro defined by path
+        :param path: path to Python macro file
+        :param extraCommands:
         """
-        Runs a macro if a macro is specified, or opens a dialog box for selection of a macro file and then
-        runs the selected macro.
-        """
-        if macroFile is None:
-            fType = '*.py'
-            dialog = MacrosFileDialog(parent=self.ui.mainWindow, acceptMode='run', fileFilter=fType)
-            dialog._show()
-            macroFile = dialog.selectedFile()
-            if not macroFile:
-                return
+        if not isinstance(path, (str, Path)):
+            raise TypeError(f'Expected str or Path instance; got {type(path)}')
+
+        _path = aPath(path)
+        if not _path.exists():
+            raise FileNotFoundError(f'{path} does not exist')
+        if not _path.suffix == '.py':
+            raise ValueError(f'Expected a Python file, got {path}')
 
         if extraCommands is None:
-            self.preferences._addRecentMacro(macroFile)
-        self.ui.mainWindow.pythonConsole._runMacro(macroFile, extraCommands=extraCommands)
+            self.preferences._addRecentMacro(_path)
+
+        with undoBlock():
+            self.ui.mainWindow.pythonConsole._runMacro(_path, extraCommands=extraCommands)
 
     #################################################################################################
 

@@ -83,8 +83,9 @@ objCopy2.print()
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                )
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -95,7 +96,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-06-10 09:42:04 +0100 (Mon, June 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-07 12:17:46 +0100 (Wed, August 07, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -233,6 +234,14 @@ class Instance(_Instance, _CcpNmrTrait):
         _Instance.__init__(self, **kwargs)
         _CcpNmrTrait.__init__(self)
 
+    def validate(self, obj, value):
+        if value is None and self.allow_none:
+            return None
+        assert self.klass is not None
+        if not isinstance(value, self.klass):
+            raise TypeError(f'{self._fullName(obj)}: invalid {_classType(value)}; expected {self.info()}')
+        return value
+
 
 class Int(_Int, _CcpNmrTrait):
     def __init__(self, **kwargs):
@@ -301,8 +310,12 @@ class CFloat(Float):
     def validate(self, obj, value):
         if value is None and self.allow_none:
             return value
-        else:
-            return _CFloat.validate(self, obj, value)
+        if not isinstance(value, float):
+            try:
+                value = float(value)
+            except:
+                raise TypeError(f'{self._fullName(obj)}: unable to cast {value} to float')
+        return _CFloat.validate(self, obj, value)
 
     def info(self):
         """:return info string
@@ -316,6 +329,7 @@ class Unicode(_Unicode, _CcpNmrTrait):
     def __init__(self, *args, **kwargs):
         _Unicode.__init__(self, *args, **kwargs)
         _CcpNmrTrait.__init__(self)
+
     def validate(self, obj, value):
         if value is None and self.allow_none:
             return value

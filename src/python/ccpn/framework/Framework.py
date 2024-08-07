@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-07 10:06:56 +0100 (Wed, August 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-07 10:21:19 +0100 (Wed, August 07, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -2119,21 +2119,22 @@ class Framework(NotifierBase):
     #         chemicalShiftTableModule.selectTable(chemicalShiftList)
     #     return chemicalShiftTableModule
 
-    @logCommand('application.')
-    def showNmrResidueTable(self, position='bottom', relativeTo=None,
-                            nmrChain=None, selectFirstItem=False):
-        """Displays Nmr Residue Table
-        """
-        from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTableModule
-
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-        nmrResidueTableModule = NmrResidueTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
-        mainWindow.moduleArea.addModule(nmrResidueTableModule, position=position, relativeTo=relativeTo)
-        if nmrChain:
-            nmrResidueTableModule.selectTable(nmrChain)
-        return nmrResidueTableModule
+    # GWV 07/08/2024: Moved to Gui.py
+    # @logCommand('application.')
+    # def showNmrResidueTable(self, position='bottom', relativeTo=None,
+    #                         nmrChain=None, selectFirstItem=False):
+    #     """Displays Nmr Residue Table
+    #     """
+    #     from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTableModule
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea
+    #     nmrResidueTableModule = NmrResidueTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
+    #     mainWindow.moduleArea.addModule(nmrResidueTableModule, position=position, relativeTo=relativeTo)
+    #     if nmrChain:
+    #         nmrResidueTableModule.selectTable(nmrChain)
+    #     return nmrResidueTableModule
 
     @logCommand('application.')
     def showResidueTable(self, position='bottom', relativeTo=None,

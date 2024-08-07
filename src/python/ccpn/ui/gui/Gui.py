@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-07 10:06:56 +0100 (Wed, August 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-07 10:21:19 +0100 (Wed, August 07, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1242,6 +1242,20 @@ class Gui(Ui, _Gui):
         self.mainWindow._addModule(_module, position=position)
         if chemicalShiftList:
             _module.selectTable(chemicalShiftList)
+        return _module
+
+    @logCommand('ui.')
+    def showNmrResidueTable(self, position='bottom', nmrChain=None):
+        """Show the NmrResidueTable module
+        :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
+        :param nmrChain: optional NmrChain with NmrResidue's to display
+        """
+        from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTableModule
+
+        _module = NmrResidueTableModule(mainWindow=self.mainWindow, selectFirstItem=False)
+        self.mainWindow._addModule(_module, position=position)
+        if nmrChain:
+            _module.selectTable(nmrChain)
         return _module
 
     @logCommand('ui.')

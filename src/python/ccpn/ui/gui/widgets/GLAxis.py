@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-24 18:05:24 +0100 (Wed, July 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-07 13:10:49 +0100 (Wed, August 07, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -56,7 +56,9 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import GLViewports
 from ccpn.ui.gui.lib.mouseEvents import rightMouse
 
+
 AXES_MARKER_MIN_PIXEL = 10
+
 
 class _AxisOverlay(QtWidgets.QWidget):
     """Overlay widget that draws highlight over the current strip during a drag-drop/highlight operation
@@ -123,8 +125,8 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
     AXIS_OFFSET = 3
     AXIS_INSIDE = False
     YAXISUSEEFORMAT = True
-    INVERTXAXIS = True
-    INVERTYAXIS = True
+    XDIRECTION = -1.0
+    YDIRECTION = -1.0
     AXISLOCKEDBUTTON = False
     AXISLOCKEDBUTTONALLSTRIPS = False
     SPECTRUMXZOOM = 5.0e1
@@ -181,7 +183,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         if spectrumDisplay.is1D:
             if spectrumDisplay._flipped:
-                self.INVERTYAXIS = True
+                self.YDIRECTION = -1.0
                 self.XAXES = YAXISUNITS1D
             else:
                 self.YAXES = YAXISUNITS1D
@@ -736,8 +738,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
     def _buildSpectrumSetting(self, spectrumView, stackCount=0):
 
-        delta = [-1.0 if self.INVERTXAXIS else 1.0,
-                 -1.0 if self.INVERTYAXIS else 1.0]
+        delta = [self.XDIRECTION, self.YDIRECTION]
         stack = [stackCount * self._stackingValue[0],
                  stackCount * self._stackingValue[1]]
         self._spectrumSettings[spectrumView] = specVals = spectrumView._getVisibleSpectrumViewParams(delta=delta,
@@ -1562,7 +1563,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self._parentStrip = stripList[0]
 
         axis = self._orderedAxes[0]
-        if self.INVERTXAXIS:
+        if self.XDIRECTION < 0:
             self.axisL = max(axis.region[0], axis.region[1])
             self.axisR = min(axis.region[0], axis.region[1])
         else:
@@ -1570,7 +1571,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             self.axisR = max(axis.region[0], axis.region[1])
 
         axis = self._orderedAxes[1]
-        if self.INVERTYAXIS:
+        if self.YDIRECTION < 0:
             self.axisB = max(axis.region[0], axis.region[1])
             self.axisT = min(axis.region[0], axis.region[1])
         else:
@@ -2824,7 +2825,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
     def _setAxisRegion(self, axisIndex, region, rescale=True, update=True):
         if axisIndex == 0:
-            if self.INVERTXAXIS:
+            if self.XDIRECTION < 0:
                 self.axisL = max(region)
                 self.axisR = min(region)
             else:
@@ -2835,7 +2836,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 self._rescaleXAxis(rescale=rescale, update=update)
 
         elif axisIndex == 1:
-            if self.INVERTYAXIS:
+            if self.YDIRECTION < 0:
                 self.axisB = max(region)
                 self.axisT = min(region)
             else:
@@ -2860,8 +2861,8 @@ class GuiNdWidgetAxis(Gui1dWidgetAxis):
     AXIS_OFFSET = 3
     AXIS_INSIDE = False
     YAXISUSEEFORMAT = False
-    INVERTXAXIS = True
-    INVERTYAXIS = True
+    XDIRECTION = -1.0
+    YDIRECTION = -1.0
     AXISLOCKEDBUTTON = True
     AXISLOCKEDBUTTONALLSTRIPS = True
     SPECTRUMXZOOM = 5.0e1
@@ -2872,9 +2873,7 @@ class GuiNdWidgetAxis(Gui1dWidgetAxis):
     AXIS_MOUSEYOFFSET = AXIS_MARGINBOTTOM + (0 if AXIS_INSIDE else AXIS_LINE)
 
     def _buildSpectrumSetting(self, spectrumView, stackCount=0):
-        delta = [-1.0 if self.INVERTXAXIS else 1.0,
-                 -1.0 if self.INVERTYAXIS else 1.0]
-
+        delta = [self.XDIRECTION, self.YDIRECTION]
         self._spectrumSettings[spectrumView] = specVals = spectrumView._getVisibleSpectrumViewParams(delta=delta)
 
         self._minXRange = min(self._minXRange,

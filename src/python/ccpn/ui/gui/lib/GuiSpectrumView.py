@@ -4,9 +4,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-02 15:52:59 +0000 (Thu, November 02, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2024-08-07 13:10:49 +0100 (Wed, August 07, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -37,17 +38,19 @@ from ccpn.core.lib.Notifiers import Notifier
 from typing import Optional, Tuple
 
 
-SpectrumViewParams = collections.namedtuple('SpectrumViewParams', 'valuePerPoint pointCount minAliasedFrequency maxAliasedFrequency '
-                                                                  'minSpectrumFrequency maxSpectrumFrequency axisReversed '
-                                                                  'spectralWidth aliasingIndex foldingMode regionBounds '
-                                                                  'minFoldingFrequency maxFoldingFrequency isTimeDomain '
-                                                                  'spectrometerFrequency ppmToPoint')
+SpectrumViewParams = collections.namedtuple('SpectrumViewParams',
+                                            'valuePerPoint pointCount minAliasedFrequency maxAliasedFrequency '
+                                            'minSpectrumFrequency maxSpectrumFrequency axisReversed '
+                                            'spectralWidth aliasingIndex foldingMode regionBounds '
+                                            'minFoldingFrequency maxFoldingFrequency isTimeDomain '
+                                            'spectrometerFrequency ppmToPoint')
 TraceParameters = collections.namedtuple('TraceParameters', 'inRange pointPositions startPoint endPoint')
 
 
 @dataclass(slots=True)
 class SpectrumCache():
-    matrix: np.array = None
+    # matrix: np.array = None
+    matrix: QtGui.QMatrix4x4 = None
     stackedMatrix: np.array = None
     spinningRate: float = None
 
@@ -66,7 +69,7 @@ class SpectrumCache():
     maxAliasedFrequency: list = field(default_factory=list)
     aliasingWidth: list = field(default_factory=list)
     aliasingIndex: list = field(default_factory=list)
-    axisReversed: list = field(default_factory=list)
+    axisDirection: list = field(default_factory=list)
 
     minFoldingFrequency: list = field(default_factory=list)
     maxFoldingFrequency: list = field(default_factory=list)
@@ -81,6 +84,7 @@ class SpectrumCache():
     scale: list = field(default_factory=list)
     delta: list = field(default_factory=list)
     stackedMatrixOffset: list = field(default_factory=list)
+    mvMatrices: list[QtGui.QMatrix4x4] = field(default_factory=list)
 
 
 @dataclass
@@ -91,7 +95,7 @@ class AxisCache():
     maxAliasedFrequency: tuple = field(default_factory=tuple)
     minSpectrumFrequency: tuple = field(default_factory=tuple)
     maxSpectrumFrequency: tuple = field(default_factory=tuple)
-    axisReversed: tuple = field(default_factory=tuple)
+    axisDirection: tuple = field(default_factory=tuple)
     spectralWidth: tuple = field(default_factory=tuple)
     aliasingIndex: tuple = field(default_factory=tuple)
     foldingMode: tuple = field(default_factory=tuple)
@@ -309,7 +313,8 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
         aliasingIndexes = self.aliasingIndexes
         regionBounds = tuple(tuple(minFoldingFrequency + ii * spectralWidth
                                    for ii in range(aliasingIndex[0], aliasingIndex[1] + 2))
-                             for minFoldingFrequency, spectralWidth, aliasingIndex in zip(minFoldingFrequencies, spectralWidths, aliasingIndexes))
+                             for minFoldingFrequency, spectralWidth, aliasingIndex in
+                             zip(minFoldingFrequencies, spectralWidths, aliasingIndexes))
 
         # NOTE:ED - fill with defaults if the pointCount is not defined
         #       specialise for 1d depending on the view order
@@ -317,12 +322,15 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
         #       OR let guiSpectrumView1d sort it?
 
         return SpectrumViewParams(self.ppmPerPoints, self.pointCounts,
-                                  tuple(val[0] for val in self.aliasingLimits), tuple(val[1] for val in self.aliasingLimits),
-                                  tuple(min(*val) for val in self.spectrumLimits), tuple(max(*val) for val in self.spectrumLimits),
+                                  tuple(val[0] for val in self.aliasingLimits),
+                                  tuple(val[1] for val in self.aliasingLimits),
+                                  tuple(min(*val) for val in self.spectrumLimits),
+                                  tuple(max(*val) for val in self.spectrumLimits),
                                   self.axesReversed, self.spectralWidths,
                                   self.aliasingIndexes, self.foldingModes,
                                   regionBounds,
-                                  tuple(min(*val) for val in self.foldingLimits), tuple(max(*val) for val in self.foldingLimits),
+                                  tuple(min(*val) for val in self.foldingLimits),
+                                  tuple(max(*val) for val in self.foldingLimits),
                                   self.isTimeDomains, self.spectrometerFrequencies, self.ppmToPoints,
                                   )
 

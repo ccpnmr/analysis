@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-06 09:37:23 +0100 (Tue, August 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-07 13:10:49 +0100 (Wed, August 07, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -406,34 +406,36 @@ class GLLabelling():
         if not _isInPlane and not _isInFlankingPlane:
             return
 
-        pIndex = self._spectrumSettings[spectrumView].dimensionIndices
+        specSet = self._spectrumSettings[spectrumView]
+        vPPX, vPPY = specSet.ppmPerPoint
+        delta = specSet.delta
+        ar = specSet.axisDirection
+        dims = specSet.dimensionIndices
         try:
             # fix the pointPositions
             objPos = obj.pointPositions
-            pxy = (objPos[pIndex[0]] - 1, objPos[pIndex[1]] - 1)
+            pxy = (objPos[dims[0]] - 1, objPos[dims[1]] - 1)
             _badPos = False
         except Exception:
             pxy = (0.0, 0.0)
             _badPos = True
 
-        sx, sy = 0, 0  # keep the original label co-ord
         rx, ry = 0.0, 0.0
         tnx, tny = 0.0, 0.0
         inr, inw = r, w
         try:
             # nightmare to find the intersections between the symbol box and the bounding-box of the text
-            vPP = spectrumView.spectrum.ppmPerPoints
-            # pView = obj.getPeakView(objListView)
             pView = self.getViewFromListView(objListView, obj)
             tx, ty = pView.getIntersect((0, 0))  # ppm intersect
-
             pixX, pixY = objListView.pixelSize
-            r, w = tx / vPP[pIndex[0]], ty / vPP[pIndex[1]]  # ppm-points
+            tx, ty = tx * delta[0] * ar[0], ty * delta[1] * ar[1]
+            pixX, pixY = abs(pixX), abs(pixY)
+            r, w = tx / vPPX, ty / vPPY  # ppm->points
             sx, sy = line_rectangle_intersection((0, 0),
-                                                 (tx / vPP[pIndex[0]], ty / vPP[pIndex[1]]),
+                                                 (tx / vPPX, ty / vPPY),
                                                  (-inr, -inw),
                                                  (inr, inw))
-            px, py = (tx - (sx * vPP[pIndex[0]])) / abs(pixX), (ty - (sy * vPP[pIndex[1]])) / abs(pixY)
+            px, py = (tx - (sx * vPPX)) / pixX, (ty - (sy * vPPY)) / pixY
             _ll = px**2 + py**2
             if _ll < arrowMinimum:
                 # line is too short
@@ -441,15 +443,15 @@ class GLLabelling():
                 r, w = 0.0, 0.0
             else:
                 # generate the end-vector perpendicular to the line
-                rx, ry = -ty * abs(pixX), tx * abs(pixY)  # back to pixels, rotated 90degrees
+                rx, ry = -ty * pixX, tx * pixY  # back to pixels, rotated 90-degrees
                 denom = (rx**2 + ry**2)**0.5
-                rx = (arrowSize * rx / denom) * abs(pixX) / vPP[pIndex[0]]  # pixels-points for display
-                ry = (arrowSize * ry / denom) * abs(pixY) / vPP[pIndex[1]]
-
-                tnx, tny = tx / abs(pixX), ty / abs(pixY)  # back to pixels, rotated 90degrees
+                rx = (arrowSize * rx / denom) * pixX / vPPX  # pixels->points for display
+                ry = (arrowSize * ry / denom) * pixY / vPPY
+                # generate the end-vector parallel to the line
+                tnx, tny = tx / pixX, ty / pixY  # back to pixels, rotated 90-degrees
                 denom = (tnx**2 + tny**2)**0.5
-                tnx = (arrowSize * tnx / denom) * abs(pixX) / vPP[pIndex[0]]  # pixels-points for display
-                tny = (arrowSize * tny / denom) * abs(pixY) / vPP[pIndex[1]]
+                tnx = (arrowSize * tnx / denom) * pixX / vPPX  # pixels->points for display
+                tny = (arrowSize * tny / denom) * pixY / vPPY
         except Exception:
             sx, sy = 0, 0
             r, w = 0.0, 0.0
@@ -457,7 +459,7 @@ class GLLabelling():
         # try:
         #     # fix the lineWidths
         #     objLineWidths = obj.pointLineWidths
-        #     pointLineWidths = (objLineWidths[pIndex[0]], objLineWidths[pIndex[1]])
+        #     pointLineWidths = (objLineWidths[dims[0]], objLineWidths[dims[1]])
         # except Exception:
         #     pointLineWidths = (None, None)
 
@@ -468,10 +470,10 @@ class GLLabelling():
         else:
             cols = listCol
 
-        # frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
+        # frequency = (spectrumFrequency[dims[0]], spectrumFrequency[dims[1]])
         try:
             _alias = obj.aliasing
-            alias = getAliasSetting(_alias[pIndex[0]], _alias[pIndex[1]])
+            alias = getAliasSetting(_alias[dims[0]], _alias[dims[1]])
         except Exception:
             alias = 0
 
@@ -482,7 +484,7 @@ class GLLabelling():
             iCount, _selected = self._appendArrowIndices(drawList, vertexStart, planeIndex, obj, arrowType)
 
         self._appendArrowItemVertices(_isInFlankingPlane, _isInPlane, _selected, cols, drawList, fade, iCount, indexing,
-                                      obj, pxy, pIndex, planeIndex, r, w, alias, sx, sy, rx, ry, tnx, tny)
+                                      obj, pxy, dims, planeIndex, r, w, alias, sx, sy, rx, ry, tnx, tny)
 
     def _appendArrowItemVertices(self, _isInFlankingPlane, _isInPlane, _selected, cols,
                                  drawList, fade, iCount, indexing, obj, pxy, pIndex,
@@ -676,15 +678,16 @@ class GLLabelling():
 
         specSet = self._spectrumSettings[spectrumView]
         vPP = specSet.ppmPerPoint
-
+        delta = specSet.delta
+        ar = specSet.axisDirection
         try:
-            r = self._GLParent.symbolX * np.sign(self._GLParent.pixelX)
-            pr = abs(r / vPP[0])
+            r = self._GLParent.symbolX * delta[0] * ar[0]  #self._GLParent.XDIRECTION  # np.sign(self._GLParent.pixelX)
+            pr = r / vPP[0]
         except Exception:
             pr = r
         try:
-            w = self._GLParent.symbolY * np.sign(self._GLParent.pixelY)
-            pw = abs(w / vPP[1])
+            w = self._GLParent.symbolY * delta[1] * ar[1]  #self._GLParent.YDIRECTION  # np.sign(self._GLParent.pixelY)
+            pw = w / vPP[1]
         except Exception:
             pw = w
 
@@ -757,49 +760,52 @@ class GLLabelling():
         if not _isInPlane and not _isInFlankingPlane:
             return
 
-        pIndex = self._spectrumSettings[spectrumView].dimensionIndices
+        specSet = self._spectrumSettings[spectrumView]
+        vPPX, vPPY = specSet.ppmPerPoint
+        delta = specSet.delta
+        ar = specSet.axisDirection
+        dims = specSet.dimensionIndices
         try:
             # fix the pointPositions
             objPos = obj.pointPositions
-            pxy = (objPos[pIndex[0]] - 1, objPos[pIndex[1]] - 1)
+            pxy = (objPos[dims[0]] - 1, objPos[dims[1]] - 1)
             _badPos = False
         except Exception:
             pxy = (0.0, 0.0)
             _badPos = True
 
-        sx, sy = 0, 0
+        # sx, sy = 0, 0
         rx, ry = 0, 0
         tnx, tny = 0.0, 0.0
         inr, inw = r, w
         try:
-            vPP = spectrumView.spectrum.ppmPerPoints
-            # pView = obj.getPeakView(objListView)
             pView = self.getViewFromListView(objListView, obj)
             tx, ty = pView.getIntersect((0, 0))
-
             pixX, pixY = objListView.pixelSize
-            r, w = tx / vPP[pIndex[0]], ty / vPP[pIndex[1]]  # pixel-points
+            tx, ty = tx * delta[0] * ar[0], ty * delta[1] * ar[1]
+            pixX, pixY = abs(pixX), abs(pixY)
+            r, w = tx / vPPX, ty / vPPY  # pixel->points
             sx, sy = line_rectangle_intersection((0, 0),
-                                                 (tx / vPP[pIndex[0]], ty / vPP[pIndex[1]]),
+                                                 (tx / vPPX, ty / vPPY),
                                                  (-inr, -inw),
                                                  (inr, inw))
-            px, py = (tx - (sx * vPP[pIndex[0]])) / abs(pixX), (ty - (sy * vPP[pIndex[1]])) / abs(pixY)
+            px, py = (tx - (sx * vPPX)) / pixX, (ty - (sy * vPPY)) / pixY
             _ll = px**2 + py**2
-            if _ll < arrowMinimum:  # check in pixels?
+            if _ll < arrowMinimum:
                 # line is too short
                 sx, sy = 0, 0
                 r, w = 0.0, 0.0
             else:
                 # generate the end-vector perpendicular to the line
-                rx, ry = -ty * abs(pixX), tx * abs(pixY)  # back to pixels, rotated 90degrees
+                rx, ry = -ty * pixX, tx * pixY  # back to pixels, rotated 90-degrees
                 denom = (rx**2 + ry**2)**0.5
-                rx = (arrowSize * rx / denom) * abs(pixX) / vPP[pIndex[0]]  # pixels-points for display
-                ry = (arrowSize * ry / denom) * abs(pixY) / vPP[pIndex[1]]
-
-                tnx, tny = tx / abs(pixX), ty / abs(pixY)  # back to pixels, rotated 90degrees
+                rx = (arrowSize * rx / denom) * pixX / vPPX  # pixels->points for display
+                ry = (arrowSize * ry / denom) * pixY / vPPY
+                # generate the end-vector parallel to the line
+                tnx, tny = tx / pixX, ty / pixY  # back to pixels, rotated 90-degrees
                 denom = (tnx**2 + tny**2)**0.5
-                tnx = (arrowSize * tnx / denom) * abs(pixX) / vPP[pIndex[0]]  # pixels-points for display
-                tny = (arrowSize * tny / denom) * abs(pixY) / vPP[pIndex[1]]
+                tnx = (arrowSize * tnx / denom) * pixX / vPPX  # pixels->points for display
+                tny = (arrowSize * tny / denom) * pixY / vPPY
         except Exception:
             sx, sy = 0, 0
             r, w = 0.0, 0.0
@@ -814,14 +820,14 @@ class GLLabelling():
         try:
             # fix the lineWidths
             objLineWidths = obj.pointLineWidths
-            pointLineWidths = (objLineWidths[pIndex[0]], objLineWidths[pIndex[1]])
+            pointLineWidths = (objLineWidths[dims[0]], objLineWidths[dims[1]])
         except Exception:
             pointLineWidths = (None, None)
 
-        # frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
+        # frequency = (spectrumFrequency[dims[0]], spectrumFrequency[dims[1]])
         try:
             _alias = obj.aliasing
-            alias = getAliasSetting(_alias[pIndex[0]], _alias[pIndex[1]])
+            alias = getAliasSetting(_alias[dims[0]], _alias[dims[1]])
         except Exception:
             alias = 0
 
@@ -835,7 +841,7 @@ class GLLabelling():
         # add extra indices
         self._insertArrowItemVertices(_isInFlankingPlane, _isInPlane, _selected, cols, drawList, fade, iCount, indexing,
                                       obj,
-                                      objNum, pxy, pIndex, planeIndex, r, vertexPtr, w, alias, sx, sy, rx, ry, tnx, tny)
+                                      objNum, pxy, dims, planeIndex, r, vertexPtr, w, alias, sx, sy, rx, ry, tnx, tny)
 
     def _insertArrowItemVertices(self, _isInFlankingPlane, _isInPlane, _selected, cols,
                                  drawList, fade, iCount, indexing, obj,
@@ -1083,16 +1089,18 @@ class GLLabelling():
         symbolType = self.strip.symbolType
         symbolWidth = self.strip.symbolSize / 2.0
 
-        vPP = self._spectrumSettings[spectrumView].ppmPerPoint
-
+        specSet = self._spectrumSettings[spectrumView]
+        vPP = specSet.ppmPerPoint
+        delta = specSet.delta
+        ar = specSet.axisDirection
         try:
-            r = self._GLParent.symbolX * np.sign(self._GLParent.pixelX)
-            pr = abs(r / vPP[0])
+            r = self._GLParent.symbolX * delta[0] * ar[0]  # change from pixels to ppm
+            pr = r / vPP[0]
         except Exception:
             pr = r
         try:
-            w = self._GLParent.symbolY * np.sign(self._GLParent.pixelY)
-            pw = abs(w / vPP[1])
+            w = self._GLParent.symbolY * delta[1] * ar[1]
+            pw = w / vPP[1]
         except Exception:
             pw = w
 
@@ -1104,8 +1112,10 @@ class GLLabelling():
         symbolType = self.strip.symbolType
         symbolWidth = self.strip.symbolSize / 2.0
 
-        vPP = self._spectrumSettings[spectrumView].ppmPerPoint
-
+        specSet = self._spectrumSettings[spectrumView]
+        vPP = specSet.ppmPerPoint
+        delta = specSet.delta
+        ar = specSet.axisDirection
         # try:
         #     r = tx * abs(self._GLParent.pixelX)  # change from pixels to ppm
         #     pr = r / vPP[pIndex[0]]  # change from ppm to points
@@ -1116,18 +1126,16 @@ class GLLabelling():
         #     pw = w / vPP[pIndex[1]]
         # except Exception:
         #     pw = w
-
         try:
-            r = tx  #* np.sign(self._GLParent.pixelX)  # change from pixels to ppm
+            r = tx * delta[0] * ar[0]  # change from pixels to ppm
             pr = r / vPP[0]  # change from ppm to points
         except Exception:
             pr = r
         try:
-            w = ty  #* np.sign(self._GLParent.pixelY)
+            w = ty * delta[1] * ar[1]
             pw = w / vPP[1]
         except Exception:
             pw = w
-
         return r, w, symbolType, symbolWidth, pr, pw
 
     def _appendLabel(self, spectrumView, objListView, stringList, obj):
@@ -1373,9 +1381,11 @@ class GLLabelling():
     _squareSymbol = (
         (np.array((0, 1, 2, 3), dtype=np.uint32), np.array((0, 1, 2, 3, 0, 2, 2, 1, 0, 3, 3, 1), dtype=np.uint32)),
         (
-        np.array((0, 4, 4, 3, 3, 0), dtype=np.uint32), np.array((0, 4, 4, 3, 3, 0, 0, 2, 2, 1, 3, 1), dtype=np.uint32)),
+            np.array((0, 4, 4, 3, 3, 0), dtype=np.uint32),
+            np.array((0, 4, 4, 3, 3, 0, 0, 2, 2, 1, 3, 1), dtype=np.uint32)),
         (
-        np.array((2, 4, 4, 1, 1, 2), dtype=np.uint32), np.array((2, 4, 4, 1, 1, 2, 0, 2, 0, 3, 3, 1), dtype=np.uint32)))
+            np.array((2, 4, 4, 1, 1, 2), dtype=np.uint32),
+            np.array((2, 4, 4, 1, 1, 2, 0, 2, 0, 3, 3, 1), dtype=np.uint32)))
     _squareSymbolLen = tuple(tuple(len(sym) for sym in symList) for symList in _squareSymbol)
 
     def _getSquareSymbolCount(self, planeIndex, obj):
@@ -2884,7 +2894,11 @@ class GL1dLabelling():
         meritEnabled = objListView.meritEnabled
         meritThreshold = objListView.meritThreshold
 
-        dims = self._spectrumSettings[spectrumView].dimensionIndices
+        specSet = self._spectrumSettings[spectrumView]
+        vPPX, vPPY = specSet.ppmPerPoint
+        delta = specSet.delta
+        ar = specSet.axisDirection
+        dims = specSet.dimensionIndices
         try:
             _pos = (obj.pointPositions[0] - 1, obj.height if obj.height is not None else 0)
             pxy = [_pos[dim] for dim in dims]
@@ -2893,37 +2907,37 @@ class GL1dLabelling():
             pxy = (0.0, 0.0)
             _badPos = True
 
-        sx, sy = 0, 0
         rx, ry = 0.0, 0.0
         tnx, tny = 0.0, 0.0
         inr, inw = r, w
         try:
-            _vpp = spectrumView.spectrum.ppmPerPoints[0], 1.0
-            vPP = [_vpp[dim] for dim in dims]
-            # pView = obj.getPeakView(objListView)
             pView = self.getViewFromListView(objListView, obj)
             tx, ty = pView.getIntersect((0, 0))  # ppm intersect
-
             pixX, pixY = objListView.pixelSize
-            r, w = tx / vPP[0], ty / vPP[1]  # ppm-points
-            sx, sy = line_rectangle_intersection((0, 0), (tx / vPP[0], ty / vPP[1]), (-inr, -inw), (inr, inw))
-
-            _ll = ((tx - (sx * vPP[0])) / abs(pixX))**2 + ((ty - (sy * vPP[1])) / abs(pixY))**2
-            if _ll < arrowMinimum:  # check in pixels?
+            tx, ty = tx * delta[0] * ar[0], ty * delta[1] * ar[1]
+            pixX, pixY = abs(pixX), abs(pixY)
+            r, w = tx / vPPX, ty / vPPY  # ppm->points
+            sx, sy = line_rectangle_intersection((0, 0),
+                                                 (tx / vPPX, ty / vPPY),
+                                                 (-inr, -inw),
+                                                 (inr, inw))
+            px, py = (tx - (sx * vPPX)) / pixX, (ty - (sy * vPPY)) / pixY
+            _ll = px**2 + py**2
+            if _ll < arrowMinimum:
                 # line is too short
                 sx, sy = 0, 0
                 r, w = 0.0, 0.0
             else:
                 # generate the end-vector perpendicular to the line
-                rx, ry = -ty * abs(pixX), tx * abs(pixY)  # back to pixels, rotated 90degrees
+                rx, ry = -ty * pixX, tx * pixY  # back to pixels, rotated 90-degrees
                 denom = (rx**2 + ry**2)**0.5
-                rx = (arrowSize * rx / denom) * abs(pixX) / vPP[0]  # pixels-points for display
-                ry = (arrowSize * ry / denom) * abs(pixY) / vPP[1]
-
-                tnx, tny = tx / abs(pixX), ty / abs(pixY)  # back to pixels, rotated 90degrees
+                rx = (arrowSize * rx / denom) * pixX / vPPX  # pixels->points for display
+                ry = (arrowSize * ry / denom) * pixY / vPPY
+                # generate the end-vector parallel to the line
+                tnx, tny = tx / pixX, ty / pixY  # back to pixels, rotated 90-degrees
                 denom = (tnx**2 + tny**2)**0.5
-                tnx = (arrowSize * tnx / denom) * abs(pixX) / vPP[0]  # pixels-points for display
-                tny = (arrowSize * tny / denom) * abs(pixY) / vPP[1]
+                tnx = (arrowSize * tnx / denom) * pixX / vPPX  # pixels->points for display
+                tny = (arrowSize * tny / denom) * pixY / vPPY
         except Exception:
             sx, sy = 0, 0
             r, w = 0.0, 0.0
@@ -2962,7 +2976,11 @@ class GL1dLabelling():
         if not obj:
             return
 
-        dims = self._spectrumSettings[spectrumView].dimensionIndices
+        specSet = self._spectrumSettings[spectrumView]
+        vPPX, vPPY = specSet.ppmPerPoint
+        delta = specSet.delta
+        ar = specSet.axisDirection
+        dims = specSet.dimensionIndices
         try:
             objPos = obj.pointPositions
             _pos = (objPos[0] - 1, obj.height if obj.height is not None else 0)
@@ -2972,37 +2990,37 @@ class GL1dLabelling():
             pxy = (0.0, 0.0)
             _badPos = True
 
-        sx, sy = 0, 0
         rx, ry = 0.0, 0.0
         tnx, tny = 0.0, 0.0
         inr, inw = r, w
         try:
-            _vpp = spectrumView.spectrum.ppmPerPoints[0], 1.0
-            vPP = [_vpp[dim] for dim in dims]
-            # pView = obj.getPeakView(objListView)
             pView = self.getViewFromListView(objListView, obj)
             tx, ty = pView.getIntersect((0, 0))  # ppm intersect
-
             pixX, pixY = objListView.pixelSize
-            r, w = tx / vPP[0], ty / vPP[1]  # ppm-points
-            sx, sy = line_rectangle_intersection((0, 0), (tx / vPP[0], ty / vPP[1]), (-inr, -inw), (inr, inw))
-
-            _ll = ((tx - (sx * vPP[0])) / abs(pixX))**2 + ((ty - (sy * vPP[1])) / abs(pixY))**2
-            if _ll < arrowMinimum:  # check in pixels?
+            tx, ty = tx * delta[0] * ar[0], ty * delta[1] * ar[1]
+            pixX, pixY = abs(pixX), abs(pixY)
+            r, w = tx / vPPX, ty / vPPY  # ppm->points
+            sx, sy = line_rectangle_intersection((0, 0),
+                                                 (tx / vPPX, ty / vPPY),
+                                                 (-inr, -inw),
+                                                 (inr, inw))
+            px, py = (tx - (sx * vPPX)) / pixX, (ty - (sy * vPPY)) / pixY
+            _ll = px**2 + py**2
+            if _ll < arrowMinimum:
                 # line is too short
                 sx, sy = 0, 0
                 r, w = 0.0, 0.0
             else:
                 # generate the end-vector perpendicular to the line
-                rx, ry = -ty * abs(pixX), tx * abs(pixY)  # back to pixels, rotated 90degrees
+                rx, ry = -ty * pixX, tx * pixY  # back to pixels, rotated 90-degrees
                 denom = (rx**2 + ry**2)**0.5
-                rx = (arrowSize * rx / denom) * abs(pixX) / vPP[0]  # pixels-points for display
-                ry = (arrowSize * ry / denom) * abs(pixY) / vPP[1]
-
-                tnx, tny = tx / abs(pixX), ty / abs(pixY)  # back to pixels, rotated 90degrees
+                rx = (arrowSize * rx / denom) * pixX / vPPX  # pixels->points for display
+                ry = (arrowSize * ry / denom) * pixY / vPPY
+                # generate the end-vector parallel to the line
+                tnx, tny = tx / pixX, ty / pixY  # back to pixels, rotated 90-degrees
                 denom = (tnx**2 + tny**2)**0.5
-                tnx = (arrowSize * tnx / denom) * abs(pixX) / vPP[0]  # pixels-points for display
-                tny = (arrowSize * tny / denom) * abs(pixY) / vPP[1]
+                tnx = (arrowSize * tnx / denom) * pixX / vPPX  # pixels->points for display
+                tny = (arrowSize * tny / denom) * pixY / vPPY
         except Exception:
             sx, sy = 0, 0
             r, w = 0.0, 0.0

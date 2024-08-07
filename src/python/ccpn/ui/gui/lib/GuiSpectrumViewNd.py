@@ -4,9 +4,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-12-14 14:46:02 +0000 (Thu, December 14, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2024-08-07 13:10:49 +0100 (Wed, August 07, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,7 +30,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import numpy as np
 from itertools import product
 from collections import namedtuple
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtGui
 from numba import jit
 
 from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView, SpectrumCache
@@ -151,7 +152,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         self._updatePhasing()
 
     @staticmethod
-    def _printContourData(printer, contourData, colour, xTile0, xTile1, yTile0, yTile1, xTranslate, xScale, xTotalPointCount, yTranslate, yScale,
+    def _printContourData(printer, contourData, colour, xTile0, xTile1, yTile0, yTile1, xTranslate, xScale,
+                          xTotalPointCount, yTranslate, yScale,
                           yTotalPointCount):
 
         for xTile in range(xTile0, xTile1):
@@ -193,14 +195,18 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         colName = self._getColour('positiveContourColour') or '#E00810'
         if not colName.startswith('#'):
             # get the colour from the gradient table or a single red
-            colListPos = tuple(Colour.scaledRgba(col) for col in Colour.colorSchemeTable[colName]) if colName in Colour.colorSchemeTable else ((1, 0, 0, 1),)
+            colListPos = tuple(Colour.scaledRgba(col) for col in
+                               Colour.colorSchemeTable[colName]) if colName in Colour.colorSchemeTable else (
+            (1, 0, 0, 1),)
         else:
             colListPos = (Colour.scaledRgba(colName),)
 
         colName = self._getColour('negativeContourColour') or '#E00810'
         if not colName.startswith('#'):
             # get the colour from the gradient table or a single red
-            colListNeg = tuple(Colour.scaledRgba(col) for col in Colour.colorSchemeTable[colName]) if colName in Colour.colorSchemeTable else ((1, 0, 0, 1),)
+            colListNeg = tuple(Colour.scaledRgba(col) for col in
+                               Colour.colorSchemeTable[colName]) if colName in Colour.colorSchemeTable else (
+            (1, 0, 0, 1),)
         else:
             colListNeg = (Colour.scaledRgba(colName),)
 
@@ -367,7 +373,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             # else:
             #     _loopArgs = range(axisData.startPoint - 1, axisData.endPoint - 1, -1)
             # for z in _loopArgs:
-            for z in range(axisData.startPoint, axisData.endPoint, 1 if axisData.endPoint > axisData.startPoint else -1):
+            for z in range(axisData.startPoint, axisData.endPoint,
+                           1 if axisData.endPoint > axisData.startPoint else -1):
                 position[dimIndices[2]] = (z % axisData.pointCount) + 1
                 planeData = spectrum.getPlaneData(position, xDim=xDim + 1, yDim=yDim + 1)
                 yield position, planeData
@@ -380,7 +387,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 return
 
             # create a tuple of the ranges for the planes
-            _loopArgs = tuple(range(axis.startPoint, axis.endPoint, 1 if axis.endPoint > axis.startPoint else -1) for axis in axes)
+            _loopArgs = tuple(
+                    range(axis.startPoint, axis.endPoint, 1 if axis.endPoint > axis.startPoint else -1) for axis in
+                    axes)
 
             position = dimensionCount * [1]
             _offset = dimensionCount - len(_loopArgs)  # should always be 2?
@@ -424,8 +433,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         zPointFloat1 = self.spectrum.ppm2point(zRegionValue[1], axisCode=axisCode) - 1.0
 
         # convert to integers
-        zPointInt0, zPointInt1 = (int(zPointFloat0 + (1 if zPointFloat0 >= 0 else 0)),  # this gives first and 1+last integer in range
-                                  int(zPointFloat1 + (1 if zPointFloat1 >= 0 else 0)))  # and takes into account negative ppm2Point
+        zPointInt0, zPointInt1 = (
+        int(zPointFloat0 + (1 if zPointFloat0 >= 0 else 0)),  # this gives first and 1+last integer in range
+        int(zPointFloat1 + (1 if zPointFloat1 >= 0 else 0)))  # and takes into account negative ppm2Point
 
         if zPointInt0 == zPointInt1:
             # only one plane visible, need to 2 points for range()
@@ -473,7 +483,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
             # pass in a smaller valuePerPoint - if there are differences in the z-resolution, otherwise just use local valuePerPoint
             minZWidth = 3 * zValuePerPoint
-            zWidth = (planeCount + 2) * minimumValuePerPoint[dim - 2] if minimumValuePerPoint else (planeCount + 2) * zValuePerPoint
+            zWidth = (planeCount + 2) * minimumValuePerPoint[dim - 2] if minimumValuePerPoint else (
+                                                                                                               planeCount + 2) * zValuePerPoint
             zWidth = max(zWidth, minZWidth)
 
             zRegionValue = (zPosition + 0.5 * zWidth, zPosition - 0.5 * zWidth)  # Note + and - (axis backwards)
@@ -483,8 +494,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             zPointFloat1 = self.spectrum.ppm2point(zRegionValue[1], axisCode=axisCode) - 1
 
             # convert to integers
-            zPointInt0, zPointInt1 = (int(zPointFloat0 + (1 if zPointFloat0 >= 0 else 0)),  # this gives first and 1+last integer in range
-                                      int(zPointFloat1 + (1 if zPointFloat1 >= 0 else 0)))  # and takes into account negative ppm2Point
+            zPointInt0, zPointInt1 = (
+            int(zPointFloat0 + (1 if zPointFloat0 >= 0 else 0)),  # this gives first and 1+last integer in range
+            int(zPointFloat1 + (1 if zPointFloat1 >= 0 else 0)))  # and takes into account negative ppm2Point
 
             if zPointInt0 == zPointInt1:
                 # only one plane visible, need to 2 points for range()
@@ -580,7 +592,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                                         (s, t) implies:
                                             the minimum limit = minSpectrumFrequency - 's' spectral widths - should always be negative or zero
                                             the maximum limit = maxSpectrumFrequency + 't' spectral widths - should always be positive or zero
-            axisReversed                True if the point [pointCount] corresponds to the maximum spectrum frequency
+            axisDirection               1.0 if the point [pointCount] corresponds to the maximum spectrum-frequency
+                                        else -1.0, i.e., ppm increases with point-count
 
             minFoldingFrequency         minimum folding frequency
             maxFoldingFrequency         maximum folding frequency
@@ -602,11 +615,13 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             aliasingIndexes = self.aliasingIndexes
             regionBounds = [[minFoldingFrequency + ii * spectralWidth
                              for ii in range(aliasingIndex[0], aliasingIndex[1] + 2)]
-                            for minFoldingFrequency, spectralWidth, aliasingIndex in zip(minFoldingFrequencies, spectralWidths, aliasingIndexes)]
+                            for minFoldingFrequency, spectralWidth, aliasingIndex in
+                            zip(minFoldingFrequencies, spectralWidths, aliasingIndexes)]
 
             minSpec = [min(*val) for val in self.spectrumLimits][:2]
             maxSpec = [max(*val) for val in self.spectrumLimits][:2]
             specWidth = list(self.spectralWidths[:2])
+            axesReversed = self.axesReversed[:2]
 
             for ii in range(2):
                 # spectrum frequencies are not badly defined
@@ -615,8 +630,38 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                     maxSpec[ii] = 1.0
                     specWidth[ii] = 2.0
 
-            xScale = delta[0] * specWidth[0] / self.pointCounts[0]
-            yScale = delta[1] * specWidth[1] / self.pointCounts[1]
+            # xScale = delta[0] * specWidth[0] / self.pointCounts[0]
+            # yScale = delta[1] * specWidth[1] / self.pointCounts[1]
+            xScale = (-1.0 if axesReversed[0] else 1.0) * specWidth[0] / self.pointCounts[0]
+            yScale = (-1.0 if axesReversed[1] else 1.0) * specWidth[1] / self.pointCounts[1]
+
+            # build the point->ppm matrices here for the display
+            foldX = 1.0 if axesReversed[0] else -1.0
+            foldY = 1.0 if axesReversed[1] else -1.0
+            foldXOffset = spectralWidths[0] if axesReversed[0] else 0
+            foldYOffset = spectralWidths[1] if axesReversed[1] else 0
+            centreMatrix = None
+            mvMatrices = []
+            for ii, jj in product(range(aliasingIndexes[0][0], aliasingIndexes[0][1] + 1),
+                                  range(aliasingIndexes[1][0], aliasingIndexes[1][1] + 1)):
+                # if folding[0] == 'mirror':
+                #     # to be implemented correctly later
+                #     foldX = pow(-1, ii)
+                #     foldXOffset = -dxAF if foldX < 0 else 0
+                # if folding[1] == 'mirror':
+                #     foldY = pow(-1, jj)
+                #     foldYOffset = -dyAF if foldY < 0 else 0
+                mm = QtGui.QMatrix4x4()
+                mm.translate(minSpec[0] + (ii * specWidth[0]) + foldXOffset,
+                             minSpec[1] + (jj * specWidth[1]) + foldYOffset)
+                mm.scale(xScale * foldX, yScale * foldY, 1.0)
+                mvMatrices.append(mm)
+                if ii == 0 and jj == 0:
+                    # SHOULD always be here
+                    centreMatrix = mm
+            if not centreMatrix:
+                raise RuntimeError(f'{self.__class__.__name__}._getVisibleSpectrumViewParams: '
+                                   f'centre matrix not defined')
 
             return SpectrumCache(dimensionIndices=self.dimensionIndices[:2],
                                  pointCount=self.pointCounts[:2],
@@ -632,7 +677,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                                  maxAliasedFrequency=[val[1] for val in self.aliasingLimits][:2],
                                  aliasingWidth=self.aliasingWidths[:2],
                                  aliasingIndex=self.aliasingIndexes[:2],
-                                 axisReversed=self.axesReversed[:2],
+                                 axisDirection=[-1.0 if ar else 1.0 for ar in axesReversed],
 
                                  minFoldingFrequency=[min(*val) for val in self.foldingLimits][:2],
                                  maxFoldingFrequency=[max(*val) for val in self.foldingLimits][:2],
@@ -648,11 +693,12 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                                  delta=delta,
 
                                  stackedMatrixOffset=[0.0, 0.0],
-                                 matrix=np.array([xScale, 0.0, 0.0, 0.0,
-                                                  0.0, yScale, 0.0, 0.0,
-                                                  0.0, 0.0, 1.0, 0.0,
-                                                  maxSpec[0], maxSpec[1], 0.0, 1.0],
-                                                 dtype=np.float32),
+                                 # matrix=np.array([xScale, 0.0, 0.0, 0.0,
+                                 #                  0.0, yScale, 0.0, 0.0,
+                                 #                  0.0, 0.0, 1.0, 0.0,
+                                 #                  maxSpec[0], maxSpec[1], 0.0, 1.0],
+                                 #                 dtype=np.float32),
+                                 matrix=centreMatrix,
                                  stackedMatrix=np.array([1.0, 0.0, 0.0, 0.0,
                                                          0.0, 1.0, 0.0, 0.0,
                                                          0.0, 0.0, 1.0, 0.0,
@@ -660,6 +706,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                                                         dtype=np.float32),
 
                                  spinningRate=self.spectrum.spinningRate,
+                                 mvMatrices=mvMatrices,
                                  )
 
         else:
@@ -679,7 +726,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                                  maxAliasedFrequency=[1.0, 1.0],
                                  aliasingWidth=[2.0, 2.0],
                                  aliasingIndex=[[0, 0], [0, 0]],
-                                 axisReversed=[False, False],
+                                 axisDirection=[1.0, 1.0],
 
                                  minFoldingFrequency=[-1.0, -1.0],
                                  maxFoldingFrequency=[1.0, 1.0],

@@ -57,7 +57,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-02 20:04:51 +0100 (Fri, August 02, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-07 13:10:49 +0100 (Wed, August 07, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -165,8 +165,8 @@ class CcpnGLWidget(QOpenGLWidget):
     AXIS_OFFSET = 3
     AXIS_INSIDE = False
     YAXISUSEEFORMAT = False
-    INVERTXAXIS = True
-    INVERTYAXIS = True
+    XDIRECTION = -1.0
+    YDIRECTION = -1.0
     AXISLOCKEDBUTTON = True
     AXISLOCKEDBUTTONALLSTRIPS = True
     SPECTRUMXZOOM = 1.0e1
@@ -667,12 +667,12 @@ class CcpnGLWidget(QOpenGLWidget):
 
             self._buildSpectrumSetting(spectrumView)
 
-            if self.INVERTXAXIS:
+            if self.XDIRECTION < 0:
                 self.setXRegion(float(self._maxX), float(self._minX))
             else:
                 self.setXRegion(float(self._minX), float(self._maxX))
 
-            if self.INVERTYAXIS:
+            if self.YDIRECTION < 0:
                 self.setYRegion(float(self._minY), float(self._maxY))
             else:
                 self.setYRegion(float(self._maxY), float(self._minY))
@@ -1462,7 +1462,7 @@ class CcpnGLWidget(QOpenGLWidget):
         if axis:
             # trap missing axis for a bad strip
             region = axis.region
-            if self.INVERTXAXIS:
+            if self.XDIRECTION < 0:
                 self.axisL = max(region[0], region[1])
                 self.axisR = min(region[0], region[1])
             else:
@@ -1474,7 +1474,7 @@ class CcpnGLWidget(QOpenGLWidget):
         if axis:
             # trap missing axis for a bad strip
             region = axis.region
-            if self.INVERTYAXIS:
+            if self.YDIRECTION < 0:
                 self.axisB = max(region[0], region[1])
                 self.axisT = min(region[0], region[1])
             else:
@@ -1488,14 +1488,14 @@ class CcpnGLWidget(QOpenGLWidget):
     def zoom(self, xRegion: Tuple[float, float], yRegion: Tuple[float, float]):
         """Zooms strip to the specified region
         """
-        if self.INVERTXAXIS:
+        if self.XDIRECTION < 0:
             self.axisL = max(xRegion[0], xRegion[1])
             self.axisR = min(xRegion[0], xRegion[1])
         else:
             self.axisL = min(xRegion[0], xRegion[1])
             self.axisR = max(xRegion[0], xRegion[1])
 
-        if self.INVERTYAXIS:
+        if self.YDIRECTION < 0:
             self.axisB = max(yRegion[0], yRegion[1])
             self.axisT = min(yRegion[0], yRegion[1])
         else:
@@ -1504,9 +1504,9 @@ class CcpnGLWidget(QOpenGLWidget):
         self._rescaleAllAxes()
 
     def zoomX(self, x1: float, x2: float):
-        """Zooms x axis of strip to the specified region
+        """Zooms x-axis of strip to the specified region
         """
-        if self.INVERTXAXIS:
+        if self.XDIRECTION < 0:
             self.axisL = max(x1, x2)
             self.axisR = min(x1, x2)
         else:
@@ -1515,9 +1515,9 @@ class CcpnGLWidget(QOpenGLWidget):
         self._rescaleXAxis()
 
     def zoomY(self, y1: float, y2: float):
-        """Zooms y axis of strip to the specified region
+        """Zooms y-axis of strip to the specified region
         """
-        if self.INVERTYAXIS:
+        if self.YDIRECTION < 0:
             self.axisB = max(y1, y2)
             self.axisT = min(y1, y2)
         else:
@@ -1684,13 +1684,13 @@ class CcpnGLWidget(QOpenGLWidget):
 
         if axisLimits:
             if xAxis:
-                if self.INVERTXAXIS:
+                if self.XDIRECTION < 0:
                     self.axisL, self.axisR = axisLimits[0:2]
                 else:
                     self.axisR, self.axisL = axisLimits[0:2]
 
             if yAxis:
-                if self.INVERTYAXIS:
+                if self.YDIRECTION < 0:
                     self.axisB, self.axisT = axisLimits[2:4]
                 else:
                     self.axisT, self.axisB = axisLimits[2:4]
@@ -5629,7 +5629,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def setAxisRegion(self, axisIndex, region, rescale=True, update=True):
         if axisIndex == 0:
-            if self.INVERTXAXIS:
+            if self.XDIRECTION < 0:
                 self.axisL = max(region)
                 self.axisR = min(region)
             else:
@@ -5640,7 +5640,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self._rescaleXAxis(rescale=rescale, update=update)
 
         elif axisIndex == 1:
-            if self.INVERTYAXIS:
+            if self.YDIRECTION < 0:
                 self.axisB = max(region)
                 self.axisT = min(region)
             else:
@@ -6366,7 +6366,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                              3 * max(abs(self.pixelX),
                                                      abs(self.pixelY))):
 
-                    if self.INVERTXAXIS:
+                    if self.XDIRECTION < 0:
                         # need to stop float becoming a np.float64
                         self.axisL = float(max(self._startCoordinate[0], self._successiveClicks[0]))
                         self.axisR = float(min(self._startCoordinate[0], self._successiveClicks[0]))
@@ -6374,7 +6374,7 @@ class CcpnGLWidget(QOpenGLWidget):
                         self.axisL = float(min(self._startCoordinate[0], self._successiveClicks[0]))
                         self.axisR = float(max(self._startCoordinate[0], self._successiveClicks[0]))
 
-                    if self.INVERTYAXIS:
+                    if self.YDIRECTION < 0:
                         self.axisB = float(max(self._startCoordinate[1], self._successiveClicks[1]))
                         self.axisT = float(min(self._startCoordinate[1], self._successiveClicks[1]))
                     else:
@@ -6848,7 +6848,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         elif shiftLeftMouse(event):
             # zoom into the region - yellow box
-            if self.INVERTXAXIS:
+            if self.XDIRECTION < 0:
                 # need to stop float becoming a np.float64
                 self.axisL = float(max(self._startCoordinate[0], self._endCoordinate[0]))
                 self.axisR = float(min(self._startCoordinate[0], self._endCoordinate[0]))
@@ -6856,7 +6856,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.axisL = float(min(self._startCoordinate[0], self._endCoordinate[0]))
                 self.axisR = float(max(self._startCoordinate[0], self._endCoordinate[0]))
 
-            if self.INVERTYAXIS:
+            if self.YDIRECTION < 0:
                 self.axisB = float(max(self._startCoordinate[1], self._endCoordinate[1]))
                 self.axisT = float(min(self._startCoordinate[1], self._endCoordinate[1]))
             else:

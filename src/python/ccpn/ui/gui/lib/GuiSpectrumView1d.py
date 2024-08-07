@@ -4,9 +4,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-02 15:52:59 +0000 (Thu, November 02, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2024-08-07 13:10:49 +0100 (Wed, August 07, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,6 +28,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import numpy as np
+from itertools import product
+from PyQt5 import QtGui
 from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView, SpectrumCache
 from ccpn.util.Colour import spectrumColours, colorSchemeTable
 
@@ -153,7 +156,8 @@ class GuiSpectrumView1d(GuiSpectrumView):
                                         (s, t) implies:
                                             the minimum limit = minSpectrumFrequency - 's' spectral widths - should always be negative or zero
                                             the maximum limit = maxSpectrumFrequency + 't' spectral widths - should always be positive or zero
-            axisReversed                True if the point [pointCount] corresponds to the maximum spectrum frequency
+            axisDirection               1.0 if the point [pointCount] corresponds to the maximum spectrum-frequency
+                                        else -1.0, i.e., ppm increases with point-count
 
             minFoldingFrequency         minimum folding frequency
             maxFoldingFrequency         maximum folding frequency
@@ -185,7 +189,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
                               maxAliasedFrequency=[1.0, 1.0],
                               aliasingWidth=[2.0, 2.0],
                               aliasingIndex=[[0, 0], [0, 0]],
-                              axisReversed=[False, False],
+                              axisDirection=[1.0, 1.0],
 
                               minFoldingFrequency=[-1.0, -1.0],
                               maxFoldingFrequency=[1.0, 1.0],
@@ -217,12 +221,13 @@ class GuiSpectrumView1d(GuiSpectrumView):
 
         if self.pointCounts[0]:
             # fill in the required values for the axis defined by whether the spectrum-display is to be flipped
-            minFoldingFrequencies = [min(*val) for val in self.foldingLimits]
-            spectralWidths = self.spectralWidths
-            aliasingIndexes = self.aliasingIndexes
+            minFoldingFrequencies = [min(*val) for val in self.foldingLimits[:2]]
+            spectralWidths = self.spectralWidths[:2]
+            aliasingIndexes = self.aliasingIndexes[:2]
             regionBounds = [[minFoldingFrequency + ii * spectralWidth
                              for ii in range(aliasingIndex[0], aliasingIndex[1] + 2)]
-                            for minFoldingFrequency, spectralWidth, aliasingIndex in zip(minFoldingFrequencies, spectralWidths, aliasingIndexes)]
+                            for minFoldingFrequency, spectralWidth, aliasingIndex in
+                            zip(minFoldingFrequencies, spectralWidths, aliasingIndexes)]
 
             minSpec = [min(*val) for val in self.spectrumLimits][:2]
             maxSpec = [max(*val) for val in self.spectrumLimits][:2]
@@ -273,7 +278,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
             cache.maxAliasedFrequency[dim] = [val[1] for val in self.aliasingLimits][0]
             cache.aliasingWidth[dim] = self.aliasingWidths[0]
             cache.aliasingIndex[dim] = self.aliasingIndexes[0]
-            cache.axisReversed[dim] = self.axesReversed[0]
+            cache.axisDirection[dim] = -1.0 if self.axesReversed[0] else 1.0
 
             cache.minFoldingFrequency[dim] = [min(*val) for val in self.foldingLimits][0]
             cache.maxFoldingFrequency[dim] = [max(*val) for val in self.foldingLimits][0]
@@ -285,7 +290,8 @@ class GuiSpectrumView1d(GuiSpectrumView):
             cache.axisCode[dim] = self.axisCodes[0]
             cache.isotopeCode[dim] = self.isotopeCodes[0]
 
-            cache.scale[dim] = delta[dim] * specWidth[0] / self.pointCounts[0]
+            # cache.scale[dim] = delta[dim] * specWidth[0] / self.pointCounts[0]
+            cache.scale[dim] = (-1.0 if self.axesReversed[0] else 1.0) * specWidth[0] / self.pointCounts[0]
             # cache.delta[dim] = delta[dim]
 
             cache.stackedMatrixOffset = np.array(stacking, dtype=np.float32)
@@ -301,5 +307,31 @@ class GuiSpectrumView1d(GuiSpectrumView):
                                            dtype=np.float32)
 
             cache.spinningRate = self.spectrum.spinningRate
+
+            # # build the point->ppm matrices here for the display
+            # foldX = 1.0 if self.axesReversed[0] else -1.0
+            # foldXOffset = spectralWidths[0] if self.axesReversed[0] else 0
+            # centreMatrix = None
+            # mvMatrices = []
+            # for ii, jj in product(range(aliasingIndexes[0][0], aliasingIndexes[0][1] + 1),
+            #                       range(aliasingIndexes[1][0], aliasingIndexes[1][1] + 1)):
+            #     # if folding[0] == 'mirror':
+            #     #     # to be implemented correctly later
+            #     #     foldX = pow(-1, ii)
+            #     #     foldXOffset = -dxAF if foldX < 0 else 0
+            #     # if folding[1] == 'mirror':
+            #     #     foldY = pow(-1, jj)
+            #     #     foldYOffset = -dyAF if foldY < 0 else 0
+            #     mm = QtGui.QMatrix4x4()
+            #     mm.translate(minSpec[0] + (ii * specWidth[0]) + foldXOffset,
+            #                  minSpec[1] + (jj * specWidth[1]) + foldYOffset)
+            #     mm.scale(xScale * foldX, yScale * foldY, 1.0)
+            #     mvMatrices.append(mm)
+            #     if ii == 0 and jj == 0:
+            #         # SHOULD always be here
+            #         centreMatrix = mm
+            # if not centreMatrix:
+            #     raise RuntimeError(f'{self.__class__.__name__}._getVisibleSpectrumViewParams: '
+            #                        f'centre matrix not defined')
 
             return cache

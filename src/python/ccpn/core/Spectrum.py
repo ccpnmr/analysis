@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-07-25 10:11:17 +0100 (Thu, July 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-07-30 15:31:16 +0100 (Tue, July 30, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -4109,12 +4109,10 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
     # assure unique name
     name = Spectrum._uniqueName(parent=project, name=name)
 
-    getLogger().debug('Creating Spectrum %r (%dD;%s); %s' % (
-        name, dataSource.dimensionCount,
-        'x'.join([str(p) for p in dataSource.pointCounts]),
-        dataStore
-        )
-                      )
+    _dims = dataSource.dimensionCount
+    _points = 'x'.join([str(p) for p in dataSource.pointCounts]),
+    _spectrumString = f'{name!r} ({_dims}D;{_points})'
+    getLogger().debug(f'Creating Spectrum {_spectrumString}; {dataStore}')
 
     apiProject = project._wrappedData
     apiExperiment = apiProject.newExperiment(name=name, numDim=dataSource.dimensionCount)
@@ -4132,7 +4130,7 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
     spectrum._apiExperiment = apiExperiment
 
     # initialise the dimensional SpectrumReference objects
-    with inactivity(debugText=f'Initialising Spectrum {spectrum} SpectrumReference objects'):
+    with inactivity(debugText=f'Initialising Spectrum {_spectrumString} SpectrumReference objects'):
         for dim in dataSource.dimensions:
             _newSpectrumReference(spectrum, dimension=dim, dataSource=dataSource)
 
@@ -4141,23 +4139,23 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
     dataStore.spectrum = spectrum
     dataStore._saveInternal()
     spectrum._spectrumTraits.dataStore = dataStore
-
     # # update dataSource with proper expanded path; GWV 3/11/2022: not required
     # dataSource.setPath(dataStore.aPath())
-
-    # Update all parameters from the dataSource to the Spectrum instance; retain the dataSource instance
-    dataSource.exportToSpectrum(spectrum, includePath=False)
     spectrum._spectrumTraits.dataSource = dataSource
-    # get a peak picker
-    spectrum._getPeakPicker()
 
     # Quietly update some essentials
     with inactivity(debugText=f'Spectrum {spectrum}: initialising'):
+
         # Link to default (i.e. first) chemicalShiftList, make sure it is always there
         spectrum.chemicalShiftList = project.chemicalShiftLists[0]
         # Assure at least one peakList
         if len(spectrum.peakLists) == 0:
             spectrum.newPeakList()
+        # get a peak picker
+        spectrum._getPeakPicker()
+
+        # Update all parameters from the dataSource to the Spectrum instance; retain the dataSource instance
+        dataSource.exportToSpectrum(spectrum, includePath=False)
 
         # Hack to trigger initialisation of contours
         spectrum.positiveContourCount = 0

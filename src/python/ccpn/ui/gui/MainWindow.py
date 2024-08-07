@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-03 15:54:54 +0100 (Wed, July 03, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-07-30 16:39:18 +0100 (Tue, July 30, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1462,6 +1462,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                 maxDepth = max(md, loader.depth)
         return maxCount, maxDepth
 
+    # from ccpn.util.decorators import profile
+    # @profile('/Users/geerten/Code/CCPNV3/profiling/')
     def _processDroppedItems(self, data) -> list:
         """Handle the dropped urls
         :return list of loaded objects

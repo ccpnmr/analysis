@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-07 09:30:45 +0100 (Wed, August 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-07 10:06:56 +0100 (Wed, August 07, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1231,22 +1231,10 @@ class Gui(Ui, _Gui):
     #-----------------------------------------------------------------------------------------
 
     @logCommand('ui.')
-    def showRestraintAnalysisInspector(self, position: str = 'bottom', peakList=None):
-        """Show the RestraintAnalysis Inspector.
-        :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
-        """
-        from ccpn.ui.gui.modules.RestraintAnalysisTable import RestraintAnalysisTableModule
-
-        _module = RestraintAnalysisTableModule(mainWindow=self.mainWindow, selectFirstItem=False)
-        self.mainWindow._addModule(_module, position=position)
-        if peakList:
-            _module.selectPeakList(peakList)
-        return _module
-
-    @logCommand('ui.')
     def showChemicalShiftTable(self, position: str = 'bottom', chemicalShiftList=None):
         """Show the ChemicalShiftTable module
         :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
+        :param chemicalShiftList: optional ChemicalShiftList to display
         """
         from ccpn.ui.gui.modules.ChemicalShiftTable import ChemicalShiftTableModule
 
@@ -1254,6 +1242,20 @@ class Gui(Ui, _Gui):
         self.mainWindow._addModule(_module, position=position)
         if chemicalShiftList:
             _module.selectTable(chemicalShiftList)
+        return _module
+
+    @logCommand('ui.')
+    def showRestraintAnalysisInspector(self, position: str = 'bottom', peakList=None):
+        """Show the RestraintAnalysis Inspector.
+        :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
+        :param peakList: optional PeakList to populate the module
+        """
+        from ccpn.ui.gui.modules.RestraintAnalysisTable import RestraintAnalysisTableModule
+
+        _module = RestraintAnalysisTableModule(mainWindow=self.mainWindow, selectFirstItem=False)
+        self.mainWindow._addModule(_module, position=position)
+        if peakList:
+            _module.selectPeakList(peakList)
         return _module
 
     def showChemicalShiftMapping(self, position: str = 'top'):

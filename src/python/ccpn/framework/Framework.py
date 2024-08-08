@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-08 13:12:40 +0100 (Thu, August 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-08 19:25:50 +0100 (Thu, August 08, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -2240,21 +2240,22 @@ class Framework(NotifierBase):
             structureTableModule.selectTable(structureEnsemble)
         return structureTableModule
 
-    @logCommand('application.')
-    def showDataTable(self, position='bottom', relativeTo=None,
-                      dataTable=None, selectFirstItem=False):
-        """Displays DataTable Table
-        """
-        # from ccpn.ui.gui.modules.DataTableModuleABC import DataTableModuleBC as _module
-        from ccpn.ui.gui.modules.DataTableModule import DataTableModule as _module
-
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-
-        _dataTableModule = _module(mainWindow=mainWindow, table=dataTable, selectFirstItem=selectFirstItem)
-        mainWindow.moduleArea.addModule(_dataTableModule, position=position, relativeTo=relativeTo)
-        return _dataTableModule
+    # GWV 08/08/2024: moved to Gui
+    # @logCommand('application.')
+    # def showDataTable(self, position='bottom', relativeTo=None,
+    #                   dataTable=None, selectFirstItem=False):
+    #     """Displays DataTable Table
+    #     """
+    #     # from ccpn.ui.gui.modules.DataTableModuleABC import DataTableModuleBC as _module
+    #     from ccpn.ui.gui.modules.DataTableModule import DataTableModule as _module
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea
+    #
+    #     _dataTableModule = _module(mainWindow=mainWindow, table=dataTable, selectFirstItem=selectFirstItem)
+    #     mainWindow.moduleArea.addModule(_dataTableModule, position=position, relativeTo=relativeTo)
+    #     return _dataTableModule
 
     @logCommand('application.')
     def showViolationTable(self, position: str = 'bottom', relativeTo: CcpnModule = None,

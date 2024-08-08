@@ -1,11 +1,12 @@
 """
     The menus are specified by a (recursive) list of tuples composed of either:
 
-    - A tuple defining a menu action that is triggered when the menu item is selected;
+    - Action: A tuple defining a menu action that is triggered when the menu item is selected;
       signature:
         (name, callable) tuple or
         (name, callable, options) tuple or
-        (name, callable, options, check-callable) tuple
+        (name, callable, options, checkActive) tuple
+        Action(name, callable, checkActive=None, **opts)
 
         Options is a dict of (option, value) pairs, created by the options() function.
         Valid options (from Action widget):
@@ -16,18 +17,20 @@
             :param enabled: optional enable flag (default: True)
             :param toolTip: optional tooltip
 
-        Signature check-callable, returning True if should be enabled:
-            check-callable(node:MenuNode) -> bool
+        Signature checkActive, returning True if should be enabled:
+            checkActive(node:MenuNode) -> bool
 
-    - A tuple defining a menu with items;
+    - Menu: A tuple defining a menu with items;
       signature:
         (name, list) tuple or
-        (name, list, options(), check-callable) tuple
+        (name, list, options(), checkActive) tuple or
+        Menu(name, *items, checkActive=None)
 
-        where the list defines the (sub-)menu items.
-        A DynamicFill() list, i.e. a zero-length list, denotes a dynamically filled menu.
+    - DynamicMenu: a dynamically filled menu
+      Signature:
+        DynamicMenu(name, checkActivev=None)
 
-        Signature check-callable: see above
+        Signature checkActive: see above
 
     - A section defining operation with signature:
         Section(name)
@@ -113,7 +116,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-08 15:56:20 +0100 (Thu, August 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-08 19:25:50 +0100 (Thu, August 08, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -129,7 +132,7 @@ import os
 import platform
 
 from functools import partial
-from typing import Optional
+from typing import Optional, Callable, Any
 
 from ccpn.framework.PathsAndUrls import \
     macroPath, \
@@ -149,8 +152,8 @@ from ccpn.ui.gui.widgets.FileDialog import \
     ArchivesFileDialog, \
     LayoutsFileDialog, \
     NMRStarFileDialog
-from ccpn.ui.gui.widgets.Menu import Menu, MenuBar
-from ccpn.ui.gui.widgets.Action import Action
+from ccpn.ui.gui.widgets.Menu import Menu as MenuWidget
+from ccpn.ui.gui.widgets.Action import Action as ActionWidget
 
 
 FILE_MENU = 'File'
@@ -199,12 +202,6 @@ def options(**kwds) -> dict:
     return kwds
 
 
-def DynamicFill() -> list:
-    """Convenience; avoids errors
-    """
-    return []
-
-
 def Separator() -> tuple:
     """Convenience; avoids tuple errors
     """
@@ -215,6 +212,32 @@ def Section(name) -> tuple:
     """Convenience; avoids tuple errors
     """
     return (name,)
+
+
+def Action(name: str, callable: Callable, checkActive: Callable = None, **opts) -> tuple:
+    """Create an action defining tuple
+    """
+    result = [name, callable, options(**opts)]
+    if checkActive:
+        result.append(checkActive)
+    return tuple(result)
+
+
+def Menu(name, *items, checkActive: Callable = None) -> tuple:
+    """Create a menu defining tuple
+    """
+    result = [name, list(items)]
+    if checkActive is not None:
+        result.extend(
+                [options(), checkActive]
+        )
+    return tuple(result)
+
+
+def DynamicMenu(name, checkActive: Callable = None) -> tuple:
+    """Create a dynamic menu defining tuple
+    """
+    return Menu(name=name, checkActive=checkActive)
 
 
 def getMenuDefs():
@@ -251,10 +274,6 @@ class MenusDefs(list):
     def ui(self):
         return self.application.ui
 
-    #-----------------------------------------------------------------------------------------
-    # The actual Menu definitions
-    #-----------------------------------------------------------------------------------------
-
     def _defineMenus(self):
         """Set up the menu specification.
         """
@@ -265,240 +284,240 @@ class MenusDefs(list):
         self.clear()
         self.extend([
 
-            (FILE_MENU, [
-                ("New", self._newProjectCallback, options(shortcut = '⌃n')),
-                # Unicode U+2303, NOT the carrot on your keyboard.
+    #-----------------------------------------------------------------------------------------
+    # The actual Menu definitions
+    #-----------------------------------------------------------------------------------------
+    Menu(FILE_MENU,
 
-                Separator(),
-                ("Open...", self._openProjectCallback, options(shortcut = '⌃o')),
-                # Unicode U+2303, NOT the carrot on your keyboard.
-                (FILE_OPEN_RECENT, DynamicFill()),
-                ("Load Data...", self._loadDataCallback, options(shortcut = 'ld')),
+         # Unicode U+2303, NOT the carrot on your keyboard.
+         Action("New", self._newProjectCallback, shortcut='⌃n'),
 
-                Separator(),
-                ("Save", self._saveCallback, options(shortcut = '⌃s'), _projectCanBeSaved),
-                # Unicode U+2303, NOT the carrot on your keyboard.
-                ("Save As...", self._saveAsCallback, options(shortcut = 'sa')),
+         Separator(),
+         Action("Open...", self._openProjectCallback, shortcut='⌃o'),  # Unicode U+2303
+         DynamicMenu(FILE_OPEN_RECENT),
+         Action("Load Data...", self._loadDataCallback, shortcut='ld'),
 
-                Separator(),
-                ("Import", [
-                    ("NEF File", self._importNefCallback, options(shortcut = 'in')),
-                    ("NmrStar File", self._loadNMRStarFileCallback, options(shortcut = 'bi')),
-                    ]
-                 ),
-                ("Export", [
-                    ("NEF File", self._exportNEFCallback, options(shortcut = 'ex')),
-                    ]
-                 ),
+         Separator(),
+         Action("Save", self._saveCallback, shortcut='⌃s', checkActive=_projectCanBeSaved),  # Unicode U+2303
+         Action("Save As...", self._saveAsCallback, shortcut='sa'),
 
-                Separator(),
-                (FILE_LAYOUT, [
-                    ("Save", self._saveLayoutCallback, options(), _projectCanBeSaved),
-                    ("Save as...", self._saveLayoutAsCallback, options(), _projectCanBeSaved),
+         Separator(),
+         Menu("Import",
+            Action("NEF File", self._importNefCallback, shortcut='in'),
+            Action("NmrStar File", self._loadNMRStarFileCallback, shortcut='bi'),
+        ),
+         Menu("Export",
+            Action("NEF File", self._exportNEFCallback, shortcut='ex'),
+        ),
 
-                    Separator(),
-                    ("Restore last", self._restoreLastSavedLayoutCallback, options()),
-                    ("Restore from file...", self._restoreLayoutFromFileCallback, options()),
+         Separator(),
+         Menu(FILE_LAYOUT,
+              Action("Save", self._saveLayoutCallback, checkActive=_projectCanBeSaved),
+              Action("Save as...", self._saveLayoutAsCallback, checkActive=_projectCanBeSaved),
 
-                    Separator(),
-                    (FILE_LAYOUT_OPEN_PREDEFINED, DynamicFill()),
-                    ]
-                 ),
-                ("Summary", self._showProjectSummaryPopup),
+              Separator(),
+              Action("Restore last", self._restoreLastSavedLayoutCallback),
+              Action("Restore from file...", self._restoreLayoutFromFileCallback),
 
-                Separator(),
-                ('Archive', self._archiveProjectCallback, options(), _projectCanBeSaved),
-                ('Restore From Archive...', self._restoreFromArchiveCallback, options(), _projectHasArchives),
+              Separator(),
+              DynamicMenu(FILE_LAYOUT_OPEN_PREDEFINED),
+              ),
+         Action("Summary", self._showProjectSummaryPopup),
 
-                Separator(),
-                ("Preferences...", self._showApplicationPreferences, options(shortcut = '⌃,')),
+         Separator(),
+         Action('Archive', self._archiveProjectCallback, checkActive=_projectCanBeSaved),
+         Action('Restore From Archive...', self._restoreFromArchiveCallback, checkActive=_projectHasArchives),
 
-                Separator(),
-                ("Quit", self._quitCallback, options(shortcut = '⌃q')),  # Unicode U+2303, NOT the carrot on your keyboard.
-                ]
-             ),
+         Separator(),
+         Action("Preferences...", self._showApplicationPreferences, shortcut='⌃,'),
 
-            (EDIT_MENU, [
-                ("Undo", self._undoCallback, options(shortcut = '⌃z')),  # Unicode U+2303, NOT the carrot on your keyboard.
-                ("Redo", self._redoCallback, options(shortcut = '⌃y')),  # Unicode U+2303, NOT the carrot on your keyboard.
+         Separator(),
+         Action("Quit", self._quitCallback, shortcut='⌃q'),  # Unicode U+2303,
+         ),
 
-                Separator(),
-                ("Cut", self._nyi, options(shortcut = '⌃x', enabled = False)),
-                ("Copy", self._nyi, options(shortcut = '⌃c', enabled = False)),
-                ("Paste", self._nyi, options(shortcut = '⌃v', enabled = False)),
-                ("Select all", self._nyi, options(shortcut = '⌃a', enabled = False)),
-                ]
-             ),
+    Menu(EDIT_MENU,
 
-            (VIEW_MENU, [
-                ("Chemical Shift Table", self._showChemicalShiftTableCallback, options(shortcut = 'ct')),
-                ("NmrResidue Table", self._showNmrResidueTableCallback, options(shortcut = 'nt')),
-                ("Residue Table", self._showResidueTableCallback, options(), _projectHasChains),
-                ("Peak Table", self._showPeakTableCallback, options(shortcut = 'pt'), _projectHasSpectra),
-                ("Integral Table", self._showIntegralTableCallback, options(shortcut = 'it'), _projectHasSpectra),
-                ("Multiplet Table", self._showMultipletTableCallback, options(shortcut = 'mt'), _projectHasSpectra),
-                ("Data Table", partial(app.showDataTable, selectFirstItem=True), options(shortcut = 'dt')),
+        Action("Undo", self._undoCallback, shortcut='⌃z'),  # Unicode U+2303,
+        Action("Redo", self._redoCallback, shortcut='⌃y'),  # Unicode U+2303,
 
-                Separator(),
-                ("Restraint Table", partial(app.showRestraintTable, selectFirstItem=True), options(shortcut = 'rt')),
-                ("Violation Table", partial(app.showViolationTable, selectFirstItem=True), options(shortcut = 'vt')),
-                ("Structure Table", partial(app.showStructureTable, selectFirstItem=True), options(shortcut = 'st')),
-                ("Restraint Analysis Inspector", self._showRestraintAnalysisInspectorCallback, options(shortcut = 'at')),
+        Separator(),
+        Action("Cut", self._nyi, shortcut='⌃x', enabled=False),
+        Action("Copy", self._nyi, shortcut='⌃c', enabled=False),
+        Action("Paste", self._nyi, shortcut='⌃v', enabled=False),
+        Action("Select all", self._nyi, shortcut='⌃a', enabled=False),
+    ),
 
-                Separator(),
-                (VIEW_CHEMICAL_SHIFT_MAPPING, self._showChemicalShiftMappingCallback, options(shortcut = 'cm')),
-                ("Relaxation Analysis (Beta)", app.showRelaxationModule, options(shortcut = 'ra')),
-                ("Notes Editor", partial(app.showNotesEditor, selectFirstItem=True), options(shortcut = 'no')),
+    Menu(VIEW_MENU,
 
-                Separator(),
-                ("In Active SpectrumDisplay", [
+         ("Chemical Shift Table", self._showChemicalShiftTableCallback, options(shortcut='ct')),
+         ("NmrResidue Table", self._showNmrResidueTableCallback, options(shortcut='nt')),
+         ("Residue Table", self._showResidueTableCallback, options(), _projectHasChains),
+         ("Peak Table", self._showPeakTableCallback, options(shortcut='pt'), _projectHasSpectra),
+         ("Integral Table", self._showIntegralTableCallback, options(shortcut='it'), _projectHasSpectra),
+         ("Multiplet Table", self._showMultipletTableCallback, options(shortcut='mt'), _projectHasSpectra),
+         ("Data Table", self._showDataTableCallback, options(shortcut='dt')),
 
-                    Section("Show/Hide"),
-                    ("Toolbar", self._toggleToolbarCallback, options(shortcut = 'tb')),
-                    ("Spectrum Toolbar", self._toggleSpectrumToolbarCallback, options(shortcut = 'sb')),
-                    ("Phasing Console", self._togglePhaseConsoleCallback, options(shortcut = 'pc')),
-                    ("Crosshairs", self._toggleCrosshairCallback, options(shortcut = 'ch')),
+         Separator(),
+         ("Restraint Table", partial(app.showRestraintTable, selectFirstItem=True), options(shortcut='rt')),
+         ("Violation Table", partial(app.showViolationTable, selectFirstItem=True), options(shortcut='vt')),
+         ("Structure Table", partial(app.showStructureTable, selectFirstItem=True), options(shortcut='st')),
+         ("Restraint Analysis Inspector", self._showRestraintAnalysisInspectorCallback, options(shortcut='at')),
 
-                    Section("Zoom"),
-                    ("Set Zoom...", self._setZoomCallback, options(shortcut = 'sz')),
-                    ("Reset", self._resetZoomCallback, options(shortcut = 'rz')),
+         Separator(),
+         (VIEW_CHEMICAL_SHIFT_MAPPING, self._showChemicalShiftMappingCallback, options(shortcut='cm')),
+         ("Relaxation Analysis (Beta)", app.showRelaxationModule, options(shortcut='ra')),
+         ("Notes Editor", partial(app.showNotesEditor, selectFirstItem=True), options(shortcut='no')),
 
-                    Section("New SpectrumDisplay with"),
-                    ("Same Axes", self._copyStripCallback, options()),
-                    ("X-Y Axes Flipped", self._flipXYAxisCallback, options(shortcut = 'xy')),
-                    ("X-Z Axes Flipped", self._flipXZAxisCallback, options(shortcut = 'xz')),
-                    ("Y-Z Axes Flipped", self._flipYZAxisCallback, options(shortcut = 'yz')),
-                    ("Axes Flipped...", self._flipArbitraryAxesCallback, options(shortcut = 'fa')),
+         Separator(),
+         Menu("In Active SpectrumDisplay",
 
-                    Section("Labels"),
-                    ("Auto-arrange", self._arrangeLabelsCallback, options(shortcut = 'av')),
-                    ("Reset", self._resetLabelsCallback, options(shortcut = 'rv')),
-                    ],  # end sub-menu
+             Section("Show/Hide"),
+             ("Toolbar", self._toggleToolbarCallback, options(shortcut='tb')),
+             ("Spectrum Toolbar", self._toggleSpectrumToolbarCallback, options(shortcut='sb')),
+             ("Phasing Console", self._togglePhaseConsoleCallback, options(shortcut='pc')),
+             ("Crosshairs", self._toggleCrosshairCallback, options(shortcut='ch')),
 
-                 options(), _hasActiveDisplay
-                 ),
+             Section("Zoom"),
+             ("Set Zoom...", self._setZoomCallback, options(shortcut='sz')),
+             ("Reset", self._resetZoomCallback, options(shortcut='rz')),
 
-                Separator(),
-                (VIEW_SHOW_MODULES, DynamicFill(), options(), _updateShowHideModules),
-                ("Show/hide Sidebar", self._toggleSidebarCallback,
-                                      options(shortcut = ' s', checkable = True, checked = True)
-                ),
-                ("Show/hide Python Console", self._toggleConsoleCallback,
-                                             options(shortcut = '  ', checkable = True, checked = True),
-                                            _updatePythonConsole
-                ),
-                ]
-             ),
+             Section("New SpectrumDisplay with"),
+             ("Same Axes", self._copyStripCallback, options()),
+             ("X-Y Axes Flipped", self._flipXYAxisCallback, options(shortcut='xy')),
+             ("X-Z Axes Flipped", self._flipXZAxisCallback, options(shortcut='xz')),
+             ("Y-Z Axes Flipped", self._flipYZAxisCallback, options(shortcut='yz')),
+             ("Axes Flipped...", self._flipArbitraryAxesCallback, options(shortcut='fa')),
 
-            (SPECTRUM_MENU, [
-                (SPECTRUM_LOAD_SPECTRA, self._loadSpectraCallback, options(shortcut = 'ls')),
-                # ("Spectrum Groups...", self._spectrumGroupsCallback, options(shortcut ='ss')), # multiple edit temporarly disabled
-                # Separator(),
-                ("Validate Paths...", self._validatePathsCallback, options(shortcut = 'vp'), _projectHasSpectra),
-                ("Set Experiment Types...", self._experimentTypesCallback, options(shortcut = 'et'), _projectHasSpectra),
-                ("Copy into Project...", self._copyToProjectCallback, options(), _projectHasSpectra),
+             Section("Labels"),
+             ("Auto-arrange", self._arrangeLabelsCallback, options(shortcut='av')),
+             ("Reset", self._resetLabelsCallback, options(shortcut='rv')),
 
-                Separator(),
-                ("Pick Peaks", [
-                    ("Pick 1D Peaks...", self._peakPick1DCallback, options(shortcut = 'p1'), _projectHasSpectra),
-                    ("Pick nD Peaks...", self._peakPickNDCallback, options(shortcut = 'pp'), _projectHasSpectra),
-                    ], options(), _projectHasSpectra
-                 ),
-                ("Copy PeakList...", self._copyPeakListCallback, options(shortcut = 'cl'), _projectHasSpectra),
-                ("Copy Peaks...", self._copyPeaksCallback, options(shortcut = 'cp'), _projectHasPeaks),
-                ("Peak Collections...", self._peakCollectionsCallback, options(shortcut = 'sc'), _projectHasPeaks),
-                ("Estimate Peak Volumes...", self._estimateVolumesCallback, options(shortcut = 'ev'), _projectHasPeaks),
-                ("Estimate Current Peak Volumes", self._estimateCurrentVolumesCallback, options(shortcut = 'ec'), _projectHasPeaks),
-                ("Reorder PeakList Axes...", self._reorderPeakListAxesCallback, options(shortcut = 'rl'), _projectHasSpectra),
+             checkActive=_hasActiveDisplay
+         ),
 
-                Separator(),
-                ("Pseudo-Spectrum to SpectrumGroup...", self._pseudoSpectrumCallback, options(), _projectHasSpectra),
-                ("Make Projection...", self._makeProjectionCallback, options(shortcut = 'pj'), _projectHasSpectra),
-                ("Convert...", self._convertSpectrumCallback, options(), _projectHasSpectra),
+         Separator(),
+         DynamicMenu(VIEW_SHOW_MODULES, checkActive=_updateShowHideModules),
+         Action("Show/hide Sidebar", self._toggleSidebarCallback,
+                                     shortcut=' s', checkable=True, checked=True
+         ),
+         Action("Show/hide Python Console", self._toggleConsoleCallback,
+                                            shortcut='  ', checkable=True, checked=True,
+                                            checkActive=_updatePythonConsole
+         ),
+    ),
 
-                Separator(),
-                ("Make Strip Plot...", ui.makeStripPlot, options(shortcut = 'sp'), _projectHasSpectra),
-                ("Print to File...", self._printToFileCallback, options(shortcut = '⌃p'), _projectHasSpectra),
-                ]
-             ),
+    Menu(SPECTRUM_MENU,
 
-            (MOLECULES_MENU, [
-                ("New Chain...", self._createChainCallback, options()),
-                ("New Chain from FASTA...", self._loadDataCallback, options()),
+        (SPECTRUM_LOAD_SPECTRA, self._loadSpectraCallback, options(shortcut='ls')),
+        # ("Spectrum Groups...", self._spectrumGroupsCallback, options(shortcut ='ss')), # multiple edit temporarly disabled
+        # Separator(),
+        ("Validate Paths...", self._validatePathsCallback, options(shortcut='vp'), _projectHasSpectra),
+        ("Set Experiment Types...", self._experimentTypesCallback, options(shortcut='et'), _projectHasSpectra),
+        ("Copy into Project...", self._copyToProjectCallback, options(), _projectHasSpectra),
 
-                Separator(),
-                ("Load ChemComp from Xml...", self._loadDataCallback, options()),
-                ("Edit Molecular Bonds...", self._editMolecularBondsCallback, options(), _projectHasChains),
-                # ("Inspect...", self.inspectMolecule, [('enabled', False)]),
+        Separator(),
+        ("Pick Peaks", [
+            ("Pick 1D Peaks...", self._peakPick1DCallback, options(shortcut='p1'), _projectHasSpectra),
+            ("Pick nD Peaks...", self._peakPickNDCallback, options(shortcut='pp'), _projectHasSpectra),
+            ], options(), _projectHasSpectra
+         ),
+        ("Copy PeakList...", self._copyPeakListCallback, options(shortcut='cl'), _projectHasSpectra),
+        ("Copy Peaks...", self._copyPeaksCallback, options(shortcut='cp'), _projectHasPeaks),
+        ("Peak Collections...", self._peakCollectionsCallback, options(shortcut='sc'), _projectHasPeaks),
+        ("Estimate Peak Volumes...", self._estimateVolumesCallback, options(shortcut='ev'), _projectHasPeaks),
+        ("Estimate Current Peak Volumes", self._estimateCurrentVolumesCallback, options(shortcut='ec'), _projectHasPeaks),
+        ("Reorder PeakList Axes...", self._reorderPeakListAxesCallback, options(shortcut='rl'), _projectHasSpectra),
 
-                Separator(),
-                ("Show Residue Information", self._showResidueInformationCallback, options(shortcut = 'ri'), _projectHasChains),
-                ("Show Reference Chemical Shifts", self._showReferenceChemicalShiftsCallback, options(shortcut = 'rc')),
-                ]
-             ),
+        Separator(),
+        ("Pseudo-Spectrum to SpectrumGroup...", self._pseudoSpectrumCallback, options(), _projectHasSpectra),
+        ("Make Projection...", self._makeProjectionCallback, options(shortcut='pj'), _projectHasSpectra),
+        ("Convert...", self._convertSpectrumCallback, options(), _projectHasSpectra),
 
-            (MACRO_MENU, [
-                ("New Macro Editor", self._showMacroEditorCallback, options(shortcut = 'nm')),
+        Separator(),
+        ("Make Strip Plot...", ui.makeStripPlot, options(shortcut='sp'), _projectHasSpectra),
+        ("Print to File...", self._printToFileCallback, options(shortcut='⌃p'), _projectHasSpectra),
 
-                Separator(),
-                ("Open User Macro...", self._openMacroCallback, options(shortcut = 'om')),
-                ("Open CCPN Macro...", partial(self._openMacroCallback, directory=macroPath), options()),
+    ),
 
-                Separator(),
-                ("Run...", self._runMacroCallback, options(shortcut = 'rm')),
-                (MACRO_RUN_RECENT, DynamicFill()),
-                (MACRO_RUN_CCPN, DynamicFill()),
+    Menu(MOLECULES_MENU,
 
-                Separator(),
-                ("Define Macro Shortcuts...", self._defineUserShortcutsCallback, options(shortcut = 'du')),
-                ]
-             ),
+        Action("New Chain...", self._createChainCallback),
+        Action("New Chain from FASTA...", self._loadDataCallback),
 
-            (PLUGINS_MENU, [
-                (CCPN_PLUGINS, DynamicFill()),
-                (USER_PLUGINS, DynamicFill()),
+        Separator(),
+        Action("Load ChemComp from Xml...", self._loadDataCallback),
+        Action("Edit Molecular Bonds...", self._editMolecularBondsCallback, checkActive=_projectHasChains),
+        # ("Inspect...", self.inspectMolecule, [('enabled', False)]),
 
-                Separator(),
-                ("Reload", app._reloadPlugins, options()),
-                ]
-             ),
+        Separator(),
+        Action("Show Residue Information", self._showResidueInformationCallback, shortcut='ri', checkActive=_projectHasChains),
+        Action("Show Reference Chemical Shifts", self._showReferenceChemicalShiftsCallback, shortcut='rc'),
 
-            (HELP_MENU, [
-                (HELP_TUTORIALS, DynamicFill()),
-                (HELP_HOWTOS, DynamicFill()),
+    ),
 
-                Separator(),
-                ("Tip of the Day", partial(app._displayTipOfTheDay, standalone=True), options()),
-                ("Key Concepts", app._displayKeyConcepts, options()),
-                ("Show Shortcuts", self._showShortcuts, options()),
+    Menu(MACRO_MENU,
 
-                Separator(),
-                ("CCPN Homepage", self._showAboutCcpn, options()),
-                ("CCPN V3 Forum", self._showForum, options()),
-                ("CcpNmr API Documentation", self._showVersion3Documentation, options()),
+        Action("New Macro Editor", self._showMacroEditorCallback, shortcut='nm'),
 
-                Separator(),
-                # ("Inspect Code...", self.showCodeInspectionPopup, options(shortcut = 'gv', enabled = False)),
-                # ("Show Issues...", self.showIssuesList),
-                ("Check for Updates...", ui._checkForUpdates, options()),
+        Separator(),
+        Action("Open User Macro...", self._openMacroCallback, shortcut='om'),
+        Action("Open CCPN Macro...", partial(self._openMacroCallback, directory=macroPath)),
 
-                Separator(),
-                ("Register...", self._showRegisterPopup, options()),
-                ("Show License...", self._showCcpnLicense, options()),
-                ("About CcpNmr V3...", self._showAboutPopup, options()),
-                ]
-             ),
+        Separator(),
+        Action("Run...", self._runMacroCallback, shortcut='rm'),
+        DynamicMenu(MACRO_RUN_RECENT),
+        DynamicMenu(MACRO_RUN_CCPN),
 
-            ])  # end extend
+        Separator(),
+        Action("Define Macro Shortcuts...", self._defineUserShortcutsCallback, shortcut='du'),
 
+    ),
+
+    Menu(PLUGINS_MENU,
+
+        DynamicMenu(CCPN_PLUGINS),
+        DynamicMenu(USER_PLUGINS),
+
+        Separator(),
+        Action("Reload", app._reloadPlugins),
+
+    ),
+
+    Menu(HELP_MENU,
+
+        DynamicMenu(HELP_TUTORIALS),
+        DynamicMenu(HELP_HOWTOS),
+
+        Section('Handies'),
+        Action("Tip of the Day", partial(app._displayTipOfTheDay, standalone=True)),
+        Action("Key Concepts", app._displayKeyConcepts),
+        Action("Show Shortcuts", self._showShortcuts),
+
+        Section('CCPN web pages'),
+        Action("Homepage", self._showAboutCcpn),
+        Action("V3 Forum", self._showForum),
+        Action("CcpNmr API Documentation", self._showVersion3Documentation),
+
+        Section('Programme'),
+        # ("Inspect Code...", self.showCodeInspectionPopup, options(shortcut='gv', enabled=False)),
+        # ("Show Issues...", self.showIssuesList),
+        Action("Check for Updates...", ui._checkForUpdates),
+        Action("Register...", self._showRegisterPopup),
+        Action("Show License...", self._showCcpnLicense),
+        Action("About CcpNmr V3...", self._showAboutPopup),
+
+    ),
+
+    #-----------------------------------------------------------------------------------------
+    ])  # end extend
+
+        # Development Menu
+        _devMenu = Menu(DEVELOPMENT_MENU,
+                        DynamicMenu(DEVELOPMENT_DEBUG),
+        )
         # optionally add development menu before Help menu
         if app._isInDebugMode:
-            _menu = \
-            (DEVELOPMENT_MENU, [
-                (DEVELOPMENT_DEBUG, DynamicFill()),
-                ]
-            )
-            self.insertBefore([HELP_MENU], menuDef=_menu)
+            self.insertBefore([HELP_MENU], menuDef=_devMenu)
 
     #-----------------------------------------------------------------------------------------
     # callback methods
@@ -943,6 +962,11 @@ class MenusDefs(list):
         """Callback for showing MultipletTable module
         """
         self.ui.showMultipletTable()
+
+    def _showDataTableCallback(self):
+        """Callback for showing DataTable module
+        """
+        self.ui.showDataTable()
 
     def _toggleToolbarCallback(self):
         if self.current.strip is not None:
@@ -1697,9 +1721,9 @@ class MenuManager(object):
                 raise ValueError(f'makeMenu: {_parent} has no widget')
 
             if node.isAction:
-                node.widget = Action(parent=_parent.widget, text=node.name,
-                                     callback=node.callback, **node.options
-                                     )
+                node.widget = ActionWidget(parent=_parent.widget, text=node.name,
+                                           callback=node.callback, **node.options
+                                          )
                 _parent.widget.addAction(node.widget)
 
             elif node.isMenu:
@@ -1708,7 +1732,7 @@ class MenuManager(object):
 
                 elif node.level == 1:
                     # Adding to menuBar
-                    node.widget = Menu(parent=_parent.widget, title=node.name)
+                    node.widget = MenuWidget(parent=_parent.widget, title=node.name)
                     _parent.widget.addMenu(node.widget)
 
                 # GWV: not quite sure why is needs this way, (i.e. different from addMenu
@@ -1780,16 +1804,7 @@ class MenuManager(object):
     def _fillFileOpenRecentCallback(self, node: MenuNode):
         """callback to fill File->Open recent menu
         """
-        from ccpn.framework.Preferences import RECENT_FILES
-
-        _files = self.application.preferences.get(RECENT_FILES)
-        _defs = [(f, partial(self.application.loadProject, f))
-                 for f in _files
-                 ]
-        _defs.extend([
-            Separator(),
-            ('Clear', self.application.preferences.clearRecentFiles)
-            ])
+        _defs = _fillFileOpenRecentCallback(node)
         self._updateDynamicNode(node=node, defs=_defs)
 
     def _fillFilePredefinedLayoutsCallback(self, node):
@@ -2005,8 +2020,25 @@ def _getSaveLayoutPath(mainWindow):
 
 
 #-----------------------------------------------------------------------------------------
-# Various small helper functions for menu actions dynamic settings
+# Various small helper functions for menu actions dynamic settings;
+# i.e. checking if node is active or for filling dynamic nodes.
+# Pass-in node for all functions.
 #-----------------------------------------------------------------------------------------
+
+def _fillFileOpenRecentCallback(node) -> list:
+    """callback to yield the list of Actions for File->Open Recent
+    """
+    from ccpn.framework.Preferences import RECENT_FILES
+    _app = getApplication()
+
+    _files = _app.preferences.get(RECENT_FILES)
+    _defs = [Action(f, partial(_app.loadProject, f)) for f in _files]
+    _defs.extend([
+        Separator(),
+        Action('Clear', _app.preferences.clearRecentFiles)
+        ])
+    return _defs
+
 
 def _projectCanBeSaved(node) -> bool:
     """callback to test if project can be saved; ie. not temporary and not readOnly

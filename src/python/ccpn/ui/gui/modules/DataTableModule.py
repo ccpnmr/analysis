@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-21 19:48:44 +0100 (Fri, June 21, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-08-08 19:25:50 +0100 (Thu, August 08, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -94,7 +94,7 @@ class DataTableModule(CcpnTableModule):
         self._setCallbacks()
 
         if table is not None:
-            self._selectTable(table)
+            self.selectTable(table)
         elif selectFirstItem:
             self._modulePulldown.selectFirstItem()
 
@@ -276,18 +276,18 @@ class DataTableModule(CcpnTableModule):
 
         super()._closeModule()
 
-    def _selectTable(self, table=None):
-        """
-        Manually select a DataTable from the pullDown
+    def selectTable(self, table=None):
+        """Select a DataTable
         """
         if not isinstance(table, KlassTable):
             getLogger().warning(f'select: Object {table} is not of type {KlassTable.className}')
             return
-        else:
-            for widgetObj in self._modulePulldown.textList:
-                if table.pid == widgetObj:
-                    self._table = table
-                    self._modulePulldown.select(self._table.pid)
+
+        for widgetObj in self._modulePulldown.textList:
+            if table.pid == widgetObj:
+                self._table = table
+                self._modulePulldown.select(self._table.pid)
+                return
 
     def _selectionPulldownCallback(self, item):
         """Notifier Callback for selecting dataTable from the pull down menu

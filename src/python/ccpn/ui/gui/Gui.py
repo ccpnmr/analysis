@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-08 13:12:40 +0100 (Thu, August 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-08 19:25:50 +0100 (Thu, August 08, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1232,7 +1232,7 @@ class Gui(Ui, _Gui):
     # View
     #-----------------------------------------------------------------------------------------
 
-    def _showModule(self, moduleClass, position: str = 'bottom', selection: typing.Any = None):
+    def _showModule(self, moduleClass, position: str = 'bottom', selection: typing.Any = None, selectFirstItem=True):
         """Helper function to avoid code duplication.
         Initiate and add an instance of moduleClass; optionally call setTable with selection
         :param moduleClass: module class to display and instance
@@ -1243,7 +1243,7 @@ class Gui(Ui, _Gui):
         if not issubclass(moduleClass, CcpnModule):
             raise TypeError(f'Expected subclass of {CcpnModule}; got {moduleClass}')
 
-        _module = moduleClass(mainWindow=self.mainWindow, selectFirstItem=False)
+        _module = moduleClass(mainWindow=self.mainWindow, selectFirstItem=selectFirstItem)
         self.mainWindow._addModule(_module, position=position)
         if selection:
             _module.selectTable(selection)
@@ -1301,12 +1301,21 @@ class Gui(Ui, _Gui):
 
     @logCommand('ui.')
     def showMultipletTable(self, position='bottom', multipletList=None):
-        """Show the IntegralTable module
+        """Show the MultipletTable module
         :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
         :param multipletList: optional multipletList to display
         """
         from ccpn.ui.gui.modules.MultipletTable import MultipletTableModule
         return self._showModule(MultipletTableModule, position=position, selection=multipletList)
+
+    @logCommand('ui.')
+    def showDataTable(self, position='bottom', dataTable=None):
+        """Show the DataTable module
+        :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
+        :param dataTable: optional dataTable to display
+        """
+        from ccpn.ui.gui.modules.DataTableModule import DataTableModule
+        return self._showModule(DataTableModule, position=position, selection=dataTable)
 
     @logCommand('ui.')
     def showRestraintAnalysisInspector(self, position: str = 'bottom', peakList=None):

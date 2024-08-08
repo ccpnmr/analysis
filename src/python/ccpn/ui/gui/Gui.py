@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-08 12:27:30 +0100 (Thu, August 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-08 13:12:40 +0100 (Thu, August 08, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1289,6 +1289,24 @@ class Gui(Ui, _Gui):
         if peakList:
             _module.selectTable(peakList)
             _module.selectPeaks(self.current.peaks)
+
+    @logCommand('ui.')
+    def showIntegralTable(self, position='bottom', integralList=None):
+        """Show the IntegralTable module
+        :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
+        :param integralList: optional integralList to display
+        """
+        from ccpn.ui.gui.modules.IntegralTable import IntegralTableModule
+        return self._showModule(IntegralTableModule, position=position, selection=integralList)
+
+    @logCommand('ui.')
+    def showMultipletTable(self, position='bottom', multipletList=None):
+        """Show the IntegralTable module
+        :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
+        :param multipletList: optional multipletList to display
+        """
+        from ccpn.ui.gui.modules.MultipletTable import MultipletTableModule
+        return self._showModule(MultipletTableModule, position=position, selection=multipletList)
 
     @logCommand('ui.')
     def showRestraintAnalysisInspector(self, position: str = 'bottom', peakList=None):

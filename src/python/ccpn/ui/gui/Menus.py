@@ -116,7 +116,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-08 12:27:31 +0100 (Thu, August 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-08 13:12:40 +0100 (Thu, August 08, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -165,6 +165,7 @@ EDIT_MENU = 'Edit'
 
 VIEW_MENU = 'View'
 VIEW_SHOW_MODULES = 'Show/hide Modules'
+VIEW_CHEMICAL_SHIFT_MAPPING = 'Chemical Shift Mapping (Beta)'
 
 SPECTRUM_MENU = 'Spectrum'
 SPECTRUM_LOAD_SPECTRA = 'Load Spectra...'
@@ -317,16 +318,18 @@ class MenusDefs(list):
                 ("NmrResidue Table", self._showNmrResidueTableCallback, [('shortcut', 'nt')]),
                 ("Residue Table", self._showResidueTableCallback, {}),
                 ("Peak Table", self._showPeakTableCallback, [('shortcut', 'pt')], _projectHasSpectra),
-                ("Integral Table", partial(app.showIntegralTable, selectFirstItem=True), [('shortcut', 'it')], _projectHasSpectra),
-                ("Multiplet Table", partial(app.showMultipletTable, selectFirstItem=True), [('shortcut', 'mt')], _projectHasSpectra),
+                ("Integral Table", self._showIntegralTableCallback, [('shortcut', 'it')], _projectHasSpectra),
+                ("Multiplet Table", self._showMultipletTableCallback, [('shortcut', 'mt')], _projectHasSpectra),
                 ("Data Table", partial(app.showDataTable, selectFirstItem=True), [('shortcut', 'dt')]),
+
+                Separator(),
                 ("Restraint Table", partial(app.showRestraintTable, selectFirstItem=True), [('shortcut', 'rt')]),
                 ("Violation Table", partial(app.showViolationTable, selectFirstItem=True), [('shortcut', 'vt')]),
                 ("Structure Table", partial(app.showStructureTable, selectFirstItem=True), [('shortcut', 'st')]),
+                ("Restraint Analysis Inspector", self._showRestraintAnalysisInspectorCallback, [('shortcut', 'at')]),
 
                 Separator(),
-                ("Restraint Analysis Inspector", self._showRestraintAnalysisInspectorCallback, [('shortcut', 'at')]),
-                ("Chemical Shift Mapping (Beta)", self._showChemicalShiftMappingCallback, [('shortcut', 'cm')]),
+                (VIEW_CHEMICAL_SHIFT_MAPPING, self._showChemicalShiftMappingCallback, [('shortcut', 'cm')]),
                 ("Relaxation Analysis (Beta)", app.showRelaxationModule, [('shortcut', 'ra')]),
                 ("Notes Editor", partial(app.showNotesEditor, selectFirstItem=True), [('shortcut', 'no')]),
 
@@ -912,6 +915,16 @@ class MenusDefs(list):
         """Callback for showing PeakTable module
         """
         self.ui.showPeakTable()
+
+    def _showIntegralTableCallback(self):
+        """Callback for showing IntegralTable module
+        """
+        self.ui.showIntegralTable()
+
+    def _showMultipletTableCallback(self):
+        """Callback for showing MultipletTable module
+        """
+        self.ui.showMultipletTable()
 
     def _toggleToolbarCallback(self):
         if self.current.strip is not None:

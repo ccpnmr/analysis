@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-08 12:27:30 +0100 (Thu, August 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-08 13:12:40 +0100 (Thu, August 08, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -2174,37 +2174,39 @@ class Framework(NotifierBase):
     #     mainWindow.moduleArea.addModule(peakTableModule, position=position, relativeTo=relativeTo)
     #     return peakTableModule
 
-    @logCommand('application.')
-    def showMultipletTable(self, position: str = 'left', relativeTo: CcpnModule = None,
-                           multipletList: MultipletList = None, selectFirstItem=False):
-        """Displays multipletList table on left of main window with specified list selected.
-        """
-        from ccpn.ui.gui.modules.MultipletTable import MultipletTableModule
-
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-        multipletTableModule = MultipletTableModule(mainWindow, selectFirstItem=selectFirstItem)
-        mainWindow.moduleArea.addModule(multipletTableModule, position=position, relativeTo=relativeTo)
-        if multipletList:
-            multipletTableModule.selectTable(multipletList)
-        return multipletTableModule
-
-    @logCommand('application.')
-    def showIntegralTable(self, position: str = 'left', relativeTo: CcpnModule = None,
-                          integralList: IntegralList = None, selectFirstItem=False):
-        """Displays integral table on left of main window with specified list selected.
-        """
-        from ccpn.ui.gui.modules.IntegralTable import IntegralTableModule
-
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-        integralTableModule = IntegralTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
-        mainWindow.moduleArea.addModule(integralTableModule, position=position, relativeTo=relativeTo)
-        if integralList:
-            integralTableModule.selectTable(integralList)
-        return integralTableModule
+    # GWV 08/08/2024: moved to Gui
+    # @logCommand('application.')
+    # def showMultipletTable(self, position: str = 'left', relativeTo: CcpnModule = None,
+    #                        multipletList: MultipletList = None, selectFirstItem=False):
+    #     """Displays multipletList table on left of main window with specified list selected.
+    #     """
+    #     from ccpn.ui.gui.modules.MultipletTable import MultipletTableModule
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea
+    #     multipletTableModule = MultipletTableModule(mainWindow, selectFirstItem=selectFirstItem)
+    #     mainWindow.moduleArea.addModule(multipletTableModule, position=position, relativeTo=relativeTo)
+    #     if multipletList:
+    #         multipletTableModule.selectTable(multipletList)
+    #     return multipletTableModule
+    #
+    # GWV 08/08/2024: moved to Gui
+    # @logCommand('application.')
+    # def showIntegralTable(self, position: str = 'left', relativeTo: CcpnModule = None,
+    #                       integralList: IntegralList = None, selectFirstItem=False):
+    #     """Displays integral table on left of main window with specified list selected.
+    #     """
+    #     from ccpn.ui.gui.modules.IntegralTable import IntegralTableModule
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea
+    #     integralTableModule = IntegralTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
+    #     mainWindow.moduleArea.addModule(integralTableModule, position=position, relativeTo=relativeTo)
+    #     if integralList:
+    #         integralTableModule.selectTable(integralList)
+    #     return integralTableModule
 
     @logCommand('application.')
     def showRestraintTable(self, position: str = 'bottom', relativeTo: CcpnModule = None,

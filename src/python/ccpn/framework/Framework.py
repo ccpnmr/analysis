@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-07 12:16:37 +0100 (Wed, August 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-08 12:01:32 +0100 (Thu, August 08, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -2136,21 +2136,22 @@ class Framework(NotifierBase):
     #         nmrResidueTableModule.selectTable(nmrChain)
     #     return nmrResidueTableModule
 
-    @logCommand('application.')
-    def showResidueTable(self, position='bottom', relativeTo=None,
-                         chain=None, selectFirstItem=False):
-        """Displays  Residue Table
-        """
-        from ccpn.ui.gui.modules.ResidueTable import ResidueTableModule
-
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-        residueTableModule = ResidueTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
-        mainWindow.moduleArea.addModule(residueTableModule, position=position, relativeTo=relativeTo)
-        if chain:
-            residueTableModule.selectTable(chain)
-        return residueTableModule
+    # GWV 08/08/2024: moved to Gui
+    # @logCommand('application.')
+    # def showResidueTable(self, position='bottom', relativeTo=None,
+    #                      chain=None, selectFirstItem=False):
+    #     """Displays  Residue Table
+    #     """
+    #     from ccpn.ui.gui.modules.ResidueTable import ResidueTableModule
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea
+    #     residueTableModule = ResidueTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
+    #     mainWindow.moduleArea.addModule(residueTableModule, position=position, relativeTo=relativeTo)
+    #     if chain:
+    #         residueTableModule.selectTable(chain)
+    #     return residueTableModule
 
     @logCommand('application.')
     def showPeakTable(self, position: str = 'left', relativeTo: CcpnModule = None,

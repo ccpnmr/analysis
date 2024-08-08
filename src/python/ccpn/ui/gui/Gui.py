@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-07 12:16:37 +0100 (Wed, August 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-08 12:01:32 +0100 (Thu, August 08, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1230,6 +1230,20 @@ class Gui(Ui, _Gui):
     # View
     #-----------------------------------------------------------------------------------------
 
+    def _showModule(self, moduleClass, position: str = 'bottom', selection: typing.Any = None):
+        """Helper function to avoid code duplication.
+        Initiate and add an instance of moduleClass; optionally call setTable with selection
+        :param moduleClass: module class to display and instance
+        :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
+        :param selection: optional entry to select
+        :return a new ModuleClass instance
+        """
+        _module = moduleClass(mainWindow=self.mainWindow, selectFirstItem=False)
+        self.mainWindow._addModule(_module, position=position)
+        if selection:
+            _module.selectTable(selection)
+        return _module
+
     @logCommand('ui.')
     def showChemicalShiftTable(self, position: str = 'bottom', chemicalShiftList=None):
         """Show the ChemicalShiftTable module
@@ -1237,12 +1251,7 @@ class Gui(Ui, _Gui):
         :param chemicalShiftList: optional ChemicalShiftList to display
         """
         from ccpn.ui.gui.modules.ChemicalShiftTable import ChemicalShiftTableModule
-
-        _module = ChemicalShiftTableModule(mainWindow=self.mainWindow, selectFirstItem=False)
-        self.mainWindow._addModule(_module, position=position)
-        if chemicalShiftList:
-            _module.selectTable(chemicalShiftList)
-        return _module
+        return self._showModule(ChemicalShiftTableModule, position=position, selection=chemicalShiftList)
 
     @logCommand('ui.')
     def showNmrResidueTable(self, position='bottom', nmrChain=None):
@@ -1251,12 +1260,16 @@ class Gui(Ui, _Gui):
         :param nmrChain: optional NmrChain with NmrResidue's to display
         """
         from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTableModule
+        return self._showModule(NmrResidueTableModule, position=position, selection=nmrChain)
 
-        _module = NmrResidueTableModule(mainWindow=self.mainWindow, selectFirstItem=False)
-        self.mainWindow._addModule(_module, position=position)
-        if nmrChain:
-            _module.selectTable(nmrChain)
-        return _module
+    @logCommand('ui.')
+    def showResidueTable(self, position='bottom', chain=None):
+        """Show the ResidueTable module
+        :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
+        :param chain: optional chain with Residue's to display
+        """
+        from ccpn.ui.gui.modules.ResidueTable import ResidueTableModule
+        return self._showModule(ResidueTableModule, position=position, selection=chain)
 
     @logCommand('ui.')
     def showRestraintAnalysisInspector(self, position: str = 'bottom', peakList=None):
@@ -1265,9 +1278,7 @@ class Gui(Ui, _Gui):
         :param peakList: optional PeakList to populate the module
         """
         from ccpn.ui.gui.modules.RestraintAnalysisTable import RestraintAnalysisTableModule
-
-        _module = RestraintAnalysisTableModule(mainWindow=self.mainWindow, selectFirstItem=False)
-        self.mainWindow._addModule(_module, position=position)
+        _module = self._showModule(RestraintAnalysisTableModule, position=position)
         if peakList:
             _module.selectPeakList(peakList)
         return _module
@@ -1277,11 +1288,7 @@ class Gui(Ui, _Gui):
         :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
         """
         from ccpn.ui.gui.modules.experimentAnalysis.ChemicalShiftMappingGuiModule import ChemicalShiftMappingGuiModule
-
-        mainWindow = self.mainWindow
-        _module = ChemicalShiftMappingGuiModule(mainWindow=mainWindow)
-        mainWindow._addModule(_module, position=position)
-        return _module
+        return self._showModule(ChemicalShiftMappingGuiModule, position=position)
 
     #-----------------------------------------------------------------------------------------
     # Molecules

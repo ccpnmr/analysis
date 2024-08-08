@@ -116,7 +116,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-08 12:01:32 +0100 (Thu, August 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-08 12:27:31 +0100 (Thu, August 08, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -315,10 +315,10 @@ class MenusDefs(list):
             (VIEW_MENU, [
                 ("Chemical Shift Table", self._showChemicalShiftTableCallback, [('shortcut', 'ct')]),
                 ("NmrResidue Table", self._showNmrResidueTableCallback, [('shortcut', 'nt')]),
-                ("Residue Table", self._showResidueTableCallback, []),
-                ("Peak Table", partial(app.showPeakTable, selectFirstItem=True), [('shortcut', 'pt')]),
-                ("Integral Table", partial(app.showIntegralTable, selectFirstItem=True), [('shortcut', 'it')]),
-                ("Multiplet Table", partial(app.showMultipletTable, selectFirstItem=True), [('shortcut', 'mt')]),
+                ("Residue Table", self._showResidueTableCallback, {}),
+                ("Peak Table", self._showPeakTableCallback, [('shortcut', 'pt')], _projectHasSpectra),
+                ("Integral Table", partial(app.showIntegralTable, selectFirstItem=True), [('shortcut', 'it')], _projectHasSpectra),
+                ("Multiplet Table", partial(app.showMultipletTable, selectFirstItem=True), [('shortcut', 'mt')], _projectHasSpectra),
                 ("Data Table", partial(app.showDataTable, selectFirstItem=True), [('shortcut', 'dt')]),
                 ("Restraint Table", partial(app.showRestraintTable, selectFirstItem=True), [('shortcut', 'rt')]),
                 ("Violation Table", partial(app.showViolationTable, selectFirstItem=True), [('shortcut', 'vt')]),
@@ -907,6 +907,11 @@ class MenusDefs(list):
         """Callback for showing ResidueTable module
         """
         self.ui.showResidueTable()
+
+    def _showPeakTableCallback(self):
+        """Callback for showing PeakTable module
+        """
+        self.ui.showPeakTable()
 
     def _toggleToolbarCallback(self):
         if self.current.strip is not None:

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-08 12:01:32 +0100 (Thu, August 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-08 12:27:30 +0100 (Thu, August 08, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -49,6 +49,8 @@ from ccpn.ui.Ui import Ui
 from ccpn.ui.gui import Layout
 from ccpn.ui.gui.guiSettings import LIGHT, DARK
 from ccpn.ui.gui.Menus import getMenuDefs
+
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup, NewTermsConditionsPopup
 from ccpn.ui.gui.widgets.Application import Application
@@ -1238,6 +1240,9 @@ class Gui(Ui, _Gui):
         :param selection: optional entry to select
         :return a new ModuleClass instance
         """
+        if not issubclass(moduleClass, CcpnModule):
+            raise TypeError(f'Expected subclass of {CcpnModule}; got {moduleClass}')
+
         _module = moduleClass(mainWindow=self.mainWindow, selectFirstItem=False)
         self.mainWindow._addModule(_module, position=position)
         if selection:
@@ -1270,6 +1275,20 @@ class Gui(Ui, _Gui):
         """
         from ccpn.ui.gui.modules.ResidueTable import ResidueTableModule
         return self._showModule(ResidueTableModule, position=position, selection=chain)
+
+    @logCommand('ui.')
+    def showPeakTable(self, position='bottom', peakList=None):
+        """Show the PeakTable module
+        :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
+        :param peakList: optional peakList with Peaks to display; default derived from current.peaks
+        """
+        from ccpn.ui.gui.modules.PeakTable import PeakTableModule
+        _module = self._showModule(PeakTableModule, position=position)
+        if not peakList and self.current.peak:
+            peakList = self.current.peak.peakList
+        if peakList:
+            _module.selectTable(peakList)
+            _module.selectPeaks(self.current.peaks)
 
     @logCommand('ui.')
     def showRestraintAnalysisInspector(self, position: str = 'bottom', peakList=None):

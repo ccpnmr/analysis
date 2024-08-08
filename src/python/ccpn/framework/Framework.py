@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-08 12:01:32 +0100 (Thu, August 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-08 12:27:30 +0100 (Thu, August 08, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -2153,25 +2153,26 @@ class Framework(NotifierBase):
     #         residueTableModule.selectTable(chain)
     #     return residueTableModule
 
-    @logCommand('application.')
-    def showPeakTable(self, position: str = 'left', relativeTo: CcpnModule = None,
-                      peakList: PeakList = None, selectFirstItem=False):
-        """Displays Peak table on left of main window with specified list selected.
-        """
-        from ccpn.ui.gui.modules.PeakTable import PeakTableModule
-
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-        peakTableModule = PeakTableModule(mainWindow, selectFirstItem=False)  #selection is done by the current peaks.
-        if self.current.peak and not peakList:
-            peakList = self.current.peak.peakList
-        if peakList:
-            peakTableModule.selectTable(peakList)
-            peakTableModule.selectPeaks(self.current.peaks)
-
-        mainWindow.moduleArea.addModule(peakTableModule, position=position, relativeTo=relativeTo)
-        return peakTableModule
+    # GWV 08/08/2024: moved to Gui
+    # @logCommand('application.')
+    # def showPeakTable(self, position: str = 'left', relativeTo: CcpnModule = None,
+    #                   peakList: PeakList = None, selectFirstItem=False):
+    #     """Displays Peak table on left of main window with specified list selected.
+    #     """
+    #     from ccpn.ui.gui.modules.PeakTable import PeakTableModule
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea
+    #     peakTableModule = PeakTableModule(mainWindow, selectFirstItem=False)  #selection is done by the current peaks.
+    #     if self.current.peak and not peakList:
+    #         peakList = self.current.peak.peakList
+    #     if peakList:
+    #         peakTableModule.selectTable(peakList)
+    #         peakTableModule.selectPeaks(self.current.peaks)
+    #
+    #     mainWindow.moduleArea.addModule(peakTableModule, position=position, relativeTo=relativeTo)
+    #     return peakTableModule
 
     @logCommand('application.')
     def showMultipletTable(self, position: str = 'left', relativeTo: CcpnModule = None,

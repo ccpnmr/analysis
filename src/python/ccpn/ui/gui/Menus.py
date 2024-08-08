@@ -1,7 +1,8 @@
 """
     The menus are specified by a (recursive) list of tuples composed of either:
 
-    - A tuple defining a menu action that is triggered when the menu item is selected; signature:
+    - A tuple defining a menu action that is triggered when the menu item is selected;
+      signature:
         (name, callable) tuple or
         (name, callable, options) tuple or
         (name, callable, options, check-callable) tuple
@@ -18,7 +19,8 @@
         Signature check-callable, returning True if should be enabled:
             check-callable(node:MenuNode) -> bool
 
-    - A tuple defining a menu with items; signature:
+    - A tuple defining a menu with items;
+      signature:
         (name, list) tuple or
         (name, list, options(), check-callable) tuple
 
@@ -28,12 +30,10 @@
         Signature check-callable: see above
 
     - A section defining operation with signature:
-        Section(name) or
-        (name,)  tuple
+        Section(name)
 
     - A separator defining operation with signature.
-        Separator() or
-        () tuple
+        Separator()
 
 Use insertAfter() or insertBefore() methods to dynamically add to the MenuDefs instance
 
@@ -93,14 +93,11 @@ FrameWork.  -->
 
 ---------------------------------------------------------------------------------------
 
-
 STRANGE:
 In GuiMainWindow.__init__
         self._project._undo.undoChanged.add(self._undoChangeCallback)
-
-
-
 """
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -116,7 +113,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-08 15:43:20 +0100 (Thu, August 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-08 15:56:20 +0100 (Thu, August 08, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -191,6 +188,10 @@ DEVELOPMENT_DEBUG = 'Debug'
 def options(**kwds) -> dict:
     """Create and return an options dict
     """
+    kwds.setdefault('enabled', True)
+    kwds.setdefault('checkable', False)
+    kwds.setdefault('checked', True)
+
     validOptions = 'shortcut enabled checkable checked icon toolTip'.split()
     errors = [option for option in kwds.keys() if option not in validOptions]
     if len(errors) > 0:

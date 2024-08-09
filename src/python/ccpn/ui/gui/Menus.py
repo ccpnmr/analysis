@@ -116,7 +116,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-09 12:56:32 +0100 (Fri, August 09, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-09 13:48:35 +0100 (Fri, August 09, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -211,19 +211,18 @@ def Separator() -> tuple:
     return ()
 
 
-def Section(name) -> tuple:
-    """Convenience; avoids tuple errors
-    """
-    return (name,)
-
-
-# def Action(name: str, callback: Callable, checkEnabled: CallableOrNone = None, **options) -> tuple:
-#     """Create an action defining tuple
+# def Section(name) -> tuple:
+#     """Convenience; avoids tuple errors
 #     """
-#     result = [name, callback, _optionsDict(**options)]
-#     if checkEnabled:
-#         result.append(checkEnabled)
-#     return tuple(result)
+#     return (name,)
+
+
+class Section():
+    """A class for defining a Section
+    """
+    def __init__(self, name: str):
+        self.name = name
+
 
 class Action():
     """A class for defining a menu action
@@ -1324,7 +1323,7 @@ class MenusDefs(Menu):
             # key is a string:
             _indx = -1
             for _ii, item in enumerate(currentMenu):
-                if isinstance(item, (Menu, Action)):
+                if isinstance(item, (Menu, Action, Section)):
                     if item.name == key:
                         _indx = _ii
                         break
@@ -1375,7 +1374,8 @@ class NodeType(DataEnum):
     SEPARATOR = 1, 'Separator'
     SECTION = 2, 'Section'
     MENU = 3, 'Menu'
-    ACTION = 4, 'Action'
+    DYNAMIC_MENU = 4, 'DynamicMenu'
+    ACTION = 5, 'Action'
 
 
 class MenuNode(Tree):
@@ -1455,6 +1455,12 @@ class MenuNode(Tree):
         """:return True if node is a menu
         """
         return self.nodeType == NodeType.MENU
+
+    @property
+    def isDynamicMenu(self) -> bool:
+        """:return True if node is a dynamic menu
+        """
+        return self.nodeType == NodeType.DYNAMIC_MENU
 
     @property
     def isAction(self) -> bool:
@@ -1552,8 +1558,6 @@ class MenuNode(Tree):
         result = []
         separatorIndex = 0  # This gives each separator a unique name
         for item in theList:
-            if not isinstance(item, (tuple, Menu, Action)):
-                raise RuntimeError(f'addNodesFromList to {self}: Invalid menu definition: \n>>> {_str120(item)}')
 
             if isinstance(item, DynamicMenu):
                 node = self.addNode(name=item.name, nodeType=NodeType.MENU, isDynamic=True)
@@ -1575,6 +1579,11 @@ class MenuNode(Tree):
                     node.setCheckedNode(item.checkEnabled)
                 result.append(node)
 
+            elif isinstance(item, Section):
+                _name = f'Section {item.name}'
+                node = self.addNode(name=_name, nodeType=NodeType.SECTION)
+                result.append(node)
+
             elif len(item) == 0:
                 # A separator
                 name = f'Separator_{separatorIndex}'
@@ -1582,40 +1591,10 @@ class MenuNode(Tree):
                 result.append(node)
                 separatorIndex += 1
 
-            elif len(item) == 1:
-                # A section
-                name = f'Section {item[0]}'
-                node = self.addNode(name=name, nodeType=NodeType.SECTION)
-                result.append(node)
-
-            # Deprecated
-            # elif len(item) in (2, 4) and isinstance(item[1], list):
-            #     # a (sub-)Menu
-            #     name = item[0]
-            #     val = item[1]
-            #     node = self.newFromList(theList=val, parent=self, name=name)
-            #
-            #     checkCallback = item[3] if len(item) >= 4 else None
-            #     if checkCallback is not None:
-            #         node.setCheckedNode(checkCallback)
-            #
-            #     result.extend(node.allObjects())
-
-            # elif len(item) in (2, 3, 4) and callable(item[1]):
-            #     # An action
-            #     name = item[0]
-            #     callback = item[1]
-            #     options = item[2] if len(item) >= 3 else {}
-            #     # Convert any list,tuple of key,value pairs to dict
-            #     if isinstance(options, (list, tuple)):
-            #         options = dict(options)
-            #
-            #     node = self.addNode(name=name, nodeType=NodeType.ACTION, callback=callback, options=options)
-            #
-            #     checkCallback = item[3] if len(item) >= 4 else None
-            #     if checkCallback is not None:
-            #         node.setCheckedNode(checkCallback)
-            #
+            # elif len(item) == 1:
+            #     # A section
+            #     name = f'Section {item[0]}'
+            #     node = self.addNode(name=name, nodeType=NodeType.SECTION)
             #     result.append(node)
 
             else:

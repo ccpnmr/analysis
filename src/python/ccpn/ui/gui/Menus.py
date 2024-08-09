@@ -116,7 +116,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-09 14:38:45 +0100 (Fri, August 09, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-09 15:05:40 +0100 (Fri, August 09, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -197,12 +197,22 @@ class Separator():
     def __init__(self):
         self.name = 'Separator'
 
+    def __str__(self):
+        return f'<{self.__class__.__name__}: {self.name}>'
+
+    __repr__ = __str__
+
 
 class Section():
     """A class for defining a Section
     """
     def __init__(self, name: str):
         self.name = name
+
+    def __str__(self):
+        return f'<{self.__class__.__name__}: {self.name}>'
+
+    __repr__ = __str__
 
 
 class Action():
@@ -228,6 +238,12 @@ class Action():
             raise ValueError(f'Invalid options: {errors!r}')
         return options
 
+    def __str__(self):
+        return f'<{self.__class__.__name__}: {self.name}>'
+
+    __repr__ = __str__
+
+
 class Menu(list):
     """A class representing a menu definition
     """
@@ -237,12 +253,19 @@ class Menu(list):
         self.checkEnabled: CallableOrNone = checkEnabled
         self.callback: CallableOrNone = None
 
+    def __str__(self):
+        return f'<{self.__class__.__name__}: {self.name}>'
+
+    __repr__ = __str__
+
 
 class DynamicMenu(Menu):
     """A class representing a dynamic menu definition
     """
-    def __init__(self, name, callback: CallableOrNone = None, checkEnabled: CallableOrNone = None):
+    def __init__(self, name, callback: Callable, checkEnabled: CallableOrNone = None):
         super().__init__(name, checkEnabled=checkEnabled)
+        if callback is None:
+            raise ValueError(f'DynamicMenu: undefined callback')
         self.callback = callback
 
 
@@ -1398,17 +1421,17 @@ class MenuNode(Tree):
         # to be added after all init's are completed
         Tree.__init__(self, parent=None)
 
-        self.name = name
+        self.name: str = name
         self.nodeType = nodeType
-        self.callback = callback
-        self.options = options
+        self.callback: CallableOrNone = callback
+        self.options: dict = options
 
         # Menu nodes can be dynamically filled
-        self.dynamicCallback = None
+        self.dynamicCallback: CallableOrNone = None
 
         # Action's can be checked for needing enabling
-        self.checkEnable = False
-        self.checkEnableCallback = None
+        self.checkEnable: bool = False
+        self.checkEnableCallback: CallableOrNone = None
 
         # The widget associated with this node
         self.widget = None
@@ -1462,13 +1485,13 @@ class MenuNode(Tree):
 
     #-----------------------------------------------------------------------------------------
 
-    def setDynamicNode(self, callback: Callable):
-        """Make MenuNode a dynamically updated one, defining callback when it is about to show
-        :param callback: a function with signature callback(node:MenuNode) -> list
-        """
-        if not self.isDynamicMenu:
-            raise RuntimeError(f'setDynamicNode: invalid for {self}')
-        self.dynamicCallback = callback
+    # def setDynamicNode(self, callback: Callable):
+    #     """Make MenuNode a dynamically updated one, defining callback when it is about to show
+    #     :param callback: a function with signature callback(node:MenuNode) -> list
+    #     """
+    #     if not self.isDynamicMenu:
+    #         raise RuntimeError(f'setDynamicNode: invalid for {self}')
+    #     self.dynamicCallback = callback
 
     def clearNode(self):
         """For a dynamic Menu node only:
@@ -1553,10 +1576,9 @@ class MenuNode(Tree):
 
             if isinstance(item, DynamicMenu):
                 node = self.addNode(name=item.name, nodeType=NodeType.DYNAMIC_MENU)
+                node.dynamicCallback = item.callback
                 if item.checkEnabled is not None:
                     node.setCheckedNode(item.checkEnabled)
-                if item.callback is not None:
-                    node.setDynamicNode(item.callback)
                 result.append(node)
 
             elif isinstance(item, Menu):

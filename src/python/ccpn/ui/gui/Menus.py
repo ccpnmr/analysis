@@ -116,7 +116,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-09 10:17:58 +0100 (Fri, August 09, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-09 10:33:59 +0100 (Fri, August 09, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -252,13 +252,13 @@ def getMenuDefs():
 
 
 @singleton
-class MenusDefs(list):
+class MenusDefs(Menu):
     """A class (list) to implement the menu definitions and callback routines
     Used by MainWindow to initialise the menuBar
     """
 
     def __init__(self, application):
-        super().__init__()
+        super().__init__(name='root')
         self.application = application
         self._defineMenus()
 
@@ -1572,7 +1572,7 @@ class MenuNode(Tree):
 
             elif len(item) == 1:
                 # A section
-                name = item[0]
+                name = f'Section {item[0]}'
                 node = self.addNode(name=name, nodeType=NodeType.SECTION)
                 result.append(node)
 
@@ -1648,8 +1648,9 @@ class MenuNode(Tree):
             tabs = '\t' * (level - 1) if level > 1 else ''
             if level == 1:
                 tabs = '\n' + tabs
+            _name = node.name if not (node.isSeparator or node.isSection) else f'--- {node.name} ---'
             print(
-                f'{tabs}{node.name!r:25}  (level={node.level}, type={node.nodeType}, dynamic={node.isDynamic}) {node.options}')
+                f'{tabs}{_name!r:25}  (level={node.level}, type={node.nodeType}, dynamic={node.isDynamic}) {node.options}')
             if node.isMenu and node.isDynamic and len(node._children) == 0:
                 print(f'{tabs}\t>>> dynamically filled')
 

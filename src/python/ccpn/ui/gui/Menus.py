@@ -116,7 +116,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-09 12:37:12 +0100 (Fri, August 09, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-09 12:56:32 +0100 (Fri, August 09, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -217,13 +217,22 @@ def Section(name) -> tuple:
     return (name,)
 
 
-def Action(name: str, callback: Callable, checkEnabled: CallableOrNone = None, **options) -> tuple:
-    """Create an action defining tuple
+# def Action(name: str, callback: Callable, checkEnabled: CallableOrNone = None, **options) -> tuple:
+#     """Create an action defining tuple
+#     """
+#     result = [name, callback, _optionsDict(**options)]
+#     if checkEnabled:
+#         result.append(checkEnabled)
+#     return tuple(result)
+
+class Action():
+    """A class for defining a menu action
     """
-    result = [name, callback, _optionsDict(**options)]
-    if checkEnabled:
-        result.append(checkEnabled)
-    return tuple(result)
+    def __init__(self, name: str, callback: Callable, checkEnabled: CallableOrNone = None, **options):
+        self.name = name
+        self.callback = callback
+        self.checkEnabled = checkEnabled
+        self.options = _optionsDict(**options)
 
 
 class Menu(list):
@@ -1315,7 +1324,7 @@ class MenusDefs(Menu):
             # key is a string:
             _indx = -1
             for _ii, item in enumerate(currentMenu):
-                if isinstance(item, Menu):
+                if isinstance(item, (Menu, Action)):
                     if item.name == key:
                         _indx = _ii
                         break
@@ -1543,7 +1552,7 @@ class MenuNode(Tree):
         result = []
         separatorIndex = 0  # This gives each separator a unique name
         for item in theList:
-            if not isinstance(item, (tuple, Menu)):
+            if not isinstance(item, (tuple, Menu, Action)):
                 raise RuntimeError(f'addNodesFromList to {self}: Invalid menu definition: \n>>> {_str120(item)}')
 
             if isinstance(item, DynamicMenu):
@@ -1559,6 +1568,12 @@ class MenuNode(Tree):
                 if item.checkEnabled is not None:
                     node.setCheckedNode(item.checkEnabled)
                 result.extend(node.allObjects())
+
+            elif isinstance(item, Action):
+                node = self.addNode(name=item.name, nodeType=NodeType.ACTION, callback=item.callback, options=item.options)
+                if item.checkEnabled is not None:
+                    node.setCheckedNode(item.checkEnabled)
+                result.append(node)
 
             elif len(item) == 0:
                 # A separator
@@ -1586,22 +1601,22 @@ class MenuNode(Tree):
             #
             #     result.extend(node.allObjects())
 
-            elif len(item) in (2, 3, 4) and callable(item[1]):
-                # An action
-                name = item[0]
-                callback = item[1]
-                options = item[2] if len(item) >= 3 else {}
-                # Convert any list,tuple of key,value pairs to dict
-                if isinstance(options, (list, tuple)):
-                    options = dict(options)
-
-                node = self.addNode(name=name, nodeType=NodeType.ACTION, callback=callback, options=options)
-
-                checkCallback = item[3] if len(item) >= 4 else None
-                if checkCallback is not None:
-                    node.setCheckedNode(checkCallback)
-
-                result.append(node)
+            # elif len(item) in (2, 3, 4) and callable(item[1]):
+            #     # An action
+            #     name = item[0]
+            #     callback = item[1]
+            #     options = item[2] if len(item) >= 3 else {}
+            #     # Convert any list,tuple of key,value pairs to dict
+            #     if isinstance(options, (list, tuple)):
+            #         options = dict(options)
+            #
+            #     node = self.addNode(name=name, nodeType=NodeType.ACTION, callback=callback, options=options)
+            #
+            #     checkCallback = item[3] if len(item) >= 4 else None
+            #     if checkCallback is not None:
+            #         node.setCheckedNode(checkCallback)
+            #
+            #     result.append(node)
 
             else:
                 # this should not happen

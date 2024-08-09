@@ -116,7 +116,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-09 10:33:59 +0100 (Fri, August 09, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-09 12:37:12 +0100 (Fri, August 09, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -233,15 +233,15 @@ class Menu(list):
         super().__init__(items)
         self.name = name
         self.checkEnabled: CallableOrNone = checkEnabled
-        self.fillCallable: CallableOrNone = None
+        self.callback: CallableOrNone = None
 
 
 class DynamicMenu(Menu):
     """A class representing a dynamic menu definition
     """
-    def __init__(self, name, *items, checkActive: Callable = None, fillCallable: Callable = None):
-        super().__init__(name, *items, checkEnabled=checkActive)
-        self.fillCallable = fillCallable
+    def __init__(self, name, callback: CallableOrNone = None, checkEnabled: CallableOrNone = None):
+        super().__init__(name, checkEnabled=checkEnabled)
+        self.callback = callback
 
 
 def getMenuDefs():
@@ -298,7 +298,7 @@ class MenusDefs(Menu):
 
          Separator(),
          Action("Open...", self._openProjectCallback, shortcut='⌃o'),  # Unicode U+2303
-         DynamicMenu(FILE_OPEN_RECENT),
+         DynamicMenu(FILE_OPEN_RECENT, callback=_fillFileOpenRecentCallback),
          Action("Load Data...", self._loadDataCallback, shortcut='ld'),
 
          Separator(),
@@ -324,7 +324,7 @@ class MenusDefs(Menu):
               Action("Restore from file...", self._restoreLayoutFromFileCallback),
 
               Separator(),
-              DynamicMenu(FILE_LAYOUT_OPEN_PREDEFINED),
+              DynamicMenu(FILE_LAYOUT_OPEN_PREDEFINED, callback=_fillFilePredefinedLayoutsCallback),
               ),
          Action("Summary", self._showProjectSummaryPopup),
 
@@ -400,13 +400,10 @@ class MenusDefs(Menu):
          ),
 
          Separator(),
-         DynamicMenu(VIEW_SHOW_MODULES, checkActive=_updateShowHideModules),
-         Action("Show/hide Sidebar", self._toggleSidebarCallback,
-                                     shortcut=' s', checkable=True, checked=True
-         ),
-         Action("Show/hide Python Console", self._toggleConsoleCallback,
-                shortcut='  ', checkable=True, checked=True,
-                checkEnabled=_updatePythonConsole
+         DynamicMenu(VIEW_SHOW_MODULES, callback=_fillViewShowModulesCallback, checkEnabled=_updateShowHideModules),
+         Action("Show/hide Sidebar", self._toggleSidebarCallback, shortcut=' s', checkable=True, checked=True),
+         Action("Show/hide Python Console", self._toggleConsoleCallback, shortcut='  ', checkable=True, checked=True,
+                                            checkEnabled=_updatePythonConsole
          ),
     ),
 
@@ -469,8 +466,8 @@ class MenusDefs(Menu):
 
         Separator(),
         Action("Run...", self._runMacroCallback, shortcut='rm'),
-        DynamicMenu(MACRO_RUN_RECENT),
-        DynamicMenu(MACRO_RUN_CCPN),
+        DynamicMenu(MACRO_RUN_RECENT, callback=_fillMacroRunRecentCallback),
+        DynamicMenu(MACRO_RUN_CCPN, callback=_fillMacroRunCCPNCallback),
 
         Separator(),
         Action("Define Macro Shortcuts...", self._defineUserShortcutsCallback, shortcut='du'),
@@ -479,8 +476,8 @@ class MenusDefs(Menu):
 
     Menu(PLUGINS_MENU,
 
-        DynamicMenu(CCPN_PLUGINS),
-        DynamicMenu(USER_PLUGINS),
+        DynamicMenu(CCPN_PLUGINS, callback=_fillCCPNPluginsCallback),
+        DynamicMenu(USER_PLUGINS, callback=_fillUserPluginsCallback),
 
         Separator(),
         Action("Reload", app._reloadPlugins),
@@ -489,8 +486,8 @@ class MenusDefs(Menu):
 
     Menu(HELP_MENU,
 
-        DynamicMenu(HELP_TUTORIALS),
-        DynamicMenu(HELP_HOWTOS),
+        DynamicMenu(HELP_TUTORIALS, callback=_fillHelpTutorialsCallback),
+        DynamicMenu(HELP_HOWTOS, callback=_fillHelpHowtosCallback),
 
         Section('Handies'),
         Action("Tip of the Day", partial(app._displayTipOfTheDay, standalone=True)),
@@ -517,7 +514,7 @@ class MenusDefs(Menu):
 
         # Development Menu
         _devMenu = Menu(DEVELOPMENT_MENU,
-                        DynamicMenu(DEVELOPMENT_DEBUG),
+                        DynamicMenu(DEVELOPMENT_DEBUG, callback=_fillDevelopmentDebugCallback),
         )
         # optionally add development menu before Help menu
         if app._isInDebugMode:
@@ -1257,7 +1254,7 @@ class MenusDefs(Menu):
     # Implementation methods
     #-----------------------------------------------------------------------------------------
 
-    def insertAfter(self, menuKeys: list, menuDef: tuple):
+    def insertAfter(self, menuKeys: list, menuDef: list):
         """Insert menuDef after the menu/action/section defined by menuKeys, i.e. a list
         of names or indices that recursively define the menu;
         e.g. ['File', 'New']
@@ -1266,7 +1263,7 @@ class MenusDefs(Menu):
             insertAfter(['File', -1], ....)
 
         :param menuKeys: a list of names or position-indices defining the menu/action/section
-        :param menuDef: a list define the menu/action/separator/section to be inserted
+        :param menuDef: a list defining the menu/action/separator/section items to be inserted
         """
         _indx, currentMenu = self._findMenu(menuKeys=menuKeys)
         if _indx < 0:
@@ -1274,7 +1271,7 @@ class MenusDefs(Menu):
             _indx += len(currentMenu)
         currentMenu.insert(_indx + 1, menuDef)
 
-    def insertBefore(self, menuKeys: list, menuDef: tuple):
+    def insertBefore(self, menuKeys: list, menuDef: list):
         """Insert menuDef before the menu/action/section defined by menuKeys, i.e. a list
         of names or indices that recursively define the menu;
         e.g. ['File', 'New']
@@ -1283,7 +1280,7 @@ class MenusDefs(Menu):
             insertBefore(['File', 0], ....)
 
         :param menuKeys: a list of names or position-indices defining the menu/action/section
-        :param menuDef: a list define the menu/action/separator/section to be inserted
+        :param menuDef: a list defining the menu/action/separator/section items to be inserted
         """
         _indx, currentMenu = self._findMenu(menuKeys=menuKeys)
         if _indx < 0:
@@ -1492,14 +1489,6 @@ class MenuNode(Tree):
         if self.widget:
             self.widget.setEnabled(flag)
 
-    # def _aboutToShow(self, callback):
-    #     """Connect the aboutToShow signal of widget of self to callback.
-    #     Use partial to add self to callback
-    #     """
-    #     if not self.isMenu or self.widget is None:
-    #         raise RuntimeError(f'_aboutToShow: Cannot connect to signal')
-    #     self.widget.aboutToShow.connect(partial(callback, self))
-
     #-----------------------------------------------------------------------------------------
 
     def addNode(self, name, **kwds):
@@ -1557,11 +1546,19 @@ class MenuNode(Tree):
             if not isinstance(item, (tuple, Menu)):
                 raise RuntimeError(f'addNodesFromList to {self}: Invalid menu definition: \n>>> {_str120(item)}')
 
-            if isinstance(item, Menu):
-                node = self.newFromList(theList=item, parent=self, name=item.name)
-                result.extend(node.allObjects())
+            if isinstance(item, DynamicMenu):
+                node = self.addNode(name=item.name, nodeType=NodeType.MENU, isDynamic=True)
                 if item.checkEnabled is not None:
                     node.setCheckedNode(item.checkEnabled)
+                if item.callback is not None:
+                    node.setDynamicNode(item.callback)
+                result.append(node)
+
+            elif isinstance(item, Menu):
+                node = self.newFromList(theList=item, parent=self, name=item.name)
+                if item.checkEnabled is not None:
+                    node.setCheckedNode(item.checkEnabled)
+                result.extend(node.allObjects())
 
             elif len(item) == 0:
                 # A separator
@@ -1576,6 +1573,7 @@ class MenuNode(Tree):
                 node = self.addNode(name=name, nodeType=NodeType.SECTION)
                 result.append(node)
 
+            # Deprecated
             # elif len(item) in (2, 4) and isinstance(item[1], list):
             #     # a (sub-)Menu
             #     name = item[0]
@@ -1611,6 +1609,95 @@ class MenuNode(Tree):
                     f'addNodesFromList to {self}: We should not be here! Invalid menu definition: \n>>> {_str120(item)}')
 
         return result
+
+    #-----------------------------------------------------------------------------------------
+
+    def _updateNodeCallback(self):
+        """Callback to update the node:
+        - optionally adding dynamic nodes
+        - checking self for checkEnable
+        - checking child-nodes for checkEnable and enabling/disabling corresponding widgets.
+        """
+        if self.isDynamic and self.dynamicCallback:
+            _menuDefs = self.dynamicCallback(self)
+            self._updateDynamicNode(defs=_menuDefs)
+
+        if self.checkEnable:
+            self.checkEnableCallback(self)
+
+        for child in [_c for _c in self._children if _c.checkEnable]:
+            enabled = child.checkEnableCallback(child)
+            child.setEnabled(enabled)
+
+    def _updateDynamicNode(self, defs: list):
+        """Update dynamic node using defs to generate child-nodes and corresponding
+        Menu widgets.
+        """
+        if not self.isDynamic:
+            raise RuntimeError(f'_updateDynamicNode: not allowed for {self}')
+
+        # clear this node and its decendants
+        self.clearNode()
+        # construct the new descendant nodes from the defs
+        self.addNodesFromList(defs)
+        # make the menu's
+        for _child in self._children:
+            _child.makeMenu()
+
+    def makeMenu(self):
+        """Use node to make its menu's; i.e. adding Menu/Action Widgets
+        Recursively decent into its children
+
+        """
+        if self.isRoot:
+            # MenuNode root's widget is the MenuBar instance; cannot modify that as it is maintanined by MenuManager
+            raise RuntimeError(f'{self} is root; cannot make a menu')
+
+        # We are not root, so should have a parent with a widget
+        if (_parent := self.parent) is None:
+            raise RuntimeError(f'makeMenu: {self} has no parent')
+
+        if _parent.widget is None:
+            raise ValueError(f'makeMenu: {_parent} has no widget')
+
+        if self.isAction:
+            self.widget = ActionWidget(parent=_parent.widget, text=self.name,
+                                       callback=self.callback, **self.options
+                                      )
+            _parent.widget.addAction(self.widget)
+
+        elif self.isMenu:
+            if self.level == 0:
+                raise RuntimeError(f'makeMenu: invalid {self} for level=0 ')
+
+            elif self.level == 1:
+                # Adding to menuBar
+                self.widget = MenuWidget(parent=_parent.widget, title=self.name)
+                _parent.widget.addMenu(self.widget)
+
+            # GWV: not quite sure why is needs this way, (i.e. different from addMenu
+            # for menuBar, but it works)
+            elif self.level > 1:
+                self.widget = _parent.widget.addMenu(self.name)
+
+            # Always set callback for Menu nodes;
+            # this fills dynamic selfs and also enable/disables children depending on checkEnabled
+            self.widget.aboutToShow.connect(self._updateNodeCallback)
+
+        elif self.isSeparator:
+            self.widget = _parent.widget.addSeparator()
+
+        elif self.isSection:
+            # We do not use _parent.widget.addSection as it does not show with native settings
+            # _parent.widget.addSeparator()
+            self.widget = _parent.widget.addItem(text=f'⎯⎯⎯⎯⎯ {self.name} ⎯⎯⎯⎯⎯', enabled=False)
+
+        else:
+            raise RuntimeError(f'Invalid: {self} is ill-defined')
+
+        # recurse into children
+        for _child in self._children:
+            _child.makeMenu()
 
     #-----------------------------------------------------------------------------------------
     # implement some dict-like behaviour
@@ -1680,47 +1767,6 @@ class MenuManager(object):
         # define the MenuNode's tree
         self.menuNodes = MenuNode.newFromList(menuDefs)
 
-        #-------------------------------------------------------------------------------------
-        # define dynamic nodes
-        #-------------------------------------------------------------------------------------
-
-        # File->Open Recent
-        _node = self.menuNodes[FILE_MENU][FILE_OPEN_RECENT]
-        _node.setDynamicNode(callback=self._fillFileOpenRecentCallback)
-        # File->Layout->Open pre-defined
-        _node = self.menuNodes[FILE_MENU][FILE_LAYOUT][FILE_LAYOUT_OPEN_PREDEFINED]
-        _node.setDynamicNode(callback=self._fillFilePredefinedLayoutsCallback)
-
-        # View->Show Modules
-        _node = self.menuNodes[VIEW_MENU][VIEW_SHOW_MODULES]
-        _node.setDynamicNode(callback=self._fillViewShowModulesCallback)
-
-        # Macro->Run Recent
-        _node = self.menuNodes[MACRO_MENU][MACRO_RUN_RECENT]
-        _node.setDynamicNode(callback=self._fillMacroRunRecentCallback)
-        # Macro->Run CCPN
-        _node = self.menuNodes[MACRO_MENU][MACRO_RUN_CCPN]
-        _node.setDynamicNode(callback=self._fillMacroRunCCPNCallback)
-
-        # Plugins->User plugins
-        _node = self.menuNodes[PLUGINS_MENU][USER_PLUGINS]
-        _node.setDynamicNode(callback=self._fillUserPluginsCallback)
-        # Plugins->CCPN plugins
-        _node = self.menuNodes[PLUGINS_MENU][CCPN_PLUGINS]
-        _node.setDynamicNode(callback=self._fillCCPNPluginsCallback)
-
-        # Help->Tutorials
-        _node = self.menuNodes[HELP_MENU][HELP_TUTORIALS]
-        _node.setDynamicNode(callback=self._fillHelpTutorialsCallback)
-        # Help->Howto's
-        _node = self.menuNodes[HELP_MENU][HELP_HOWTOS]
-        _node.setDynamicNode(callback=self._fillHelpHowtosCallback)
-
-        # Development->Debug
-        if self.application._isInDebugMode:
-            _node = self.menuNodes[DEVELOPMENT_MENU][DEVELOPMENT_DEBUG]
-            _node.setDynamicNode(callback=self._fillDevelopmentDebugCallback)
-
     @property
     def project(self):
         """:return The Project instance
@@ -1741,275 +1787,25 @@ class MenuManager(object):
 
     #-----------------------------------------------------------------------------------------
 
-    def makeMenus(self, node: MenuNode = None, useNativeMenus=False):
+    def makeMenus(self, useNativeMenus=False):
         """Use node to make its menu's; i.e. adding Menu/Action to node
         Recursively decent into its children
-        :param node: a MenuNode starting point; default to self.menuNodes
         :param useNativeMenus: flag to use native menu's
         """
-        if node is None:
-            node = self.menuNodes
+        node = self.menuNodes
 
-        if node.isRoot:
-            # MenuNode root's widget is the MenuBar instance
-            self.menuBar.clear()
-            self.menuBar.setNativeMenuBar(useNativeMenus)
-            self.useNativeMenus = useNativeMenus
-            node.widget = self.menuBar
+        if not node.isRoot:
+            raise RuntimeError(f'Ill-defined menuNodes root')
 
-        else:
-            # We are not root, so should have a parent with a widget
-            if (_parent := node.parent) is None:
-                raise RuntimeError(f'makeMenu: {node} has no parent')
-
-            if _parent.widget is None:
-                raise ValueError(f'makeMenu: {_parent} has no widget')
-
-            if node.isAction:
-                node.widget = ActionWidget(parent=_parent.widget, text=node.name,
-                                           callback=node.callback, **node.options
-                                          )
-                _parent.widget.addAction(node.widget)
-
-            elif node.isMenu:
-                if node.level == 0:
-                    raise RuntimeError(f'makeMenu: invalid {node} for level=0 ')
-
-                elif node.level == 1:
-                    # Adding to menuBar
-                    node.widget = MenuWidget(parent=_parent.widget, title=node.name)
-                    _parent.widget.addMenu(node.widget)
-
-                # GWV: not quite sure why is needs this way, (i.e. different from addMenu
-                # for menuBar, but it works)
-                elif node.level > 1:
-                    node.widget = _parent.widget.addMenu(node.name)
-
-                # Always set callback for Menu nodes;
-                node.widget.aboutToShow.connect(partial(self._updateMenuNodeCallback, node))
-
-            elif node.isSeparator:
-                node.widget = _parent.widget.addSeparator()
-
-            elif node.isSection:
-                # We do not use _parent.widget.addSection as it does not show with native settings
-                # _parent.widget.addSeparator()
-                node.widget = _parent.widget.addItem(text=f'⎯⎯⎯⎯⎯ {node.name} ⎯⎯⎯⎯⎯', enabled=False)
-
-            else:
-                raise RuntimeError(f'Invalid: {node} is ill-defined')
-
-            # if node.checkEnable and node.checkEnableCallback is not None:
-            #     # This node needs checking for enabling;
-            #     # set callback on parent which will check all its children
-            #     if node.parent is None or \
-            #         node.parent.widget is None or not node.parent.isMenu:
-            #         raise RuntimeError(f'Unable to activate checkEnable for {node}')
-            #     node.parent.widget.aboutToShow.connect(partial(self._updateMenuNode, node.parent))
+        # MenuNode root's widget is the MenuBar instance
+        self.menuBar.clear()
+        self.menuBar.setNativeMenuBar(useNativeMenus)
+        self.useNativeMenus = useNativeMenus
+        node.widget = self.menuBar
 
         # recurse into children
         for _child in node._children:
-            self.makeMenus(_child)
-
-    #-----------------------------------------------------------------------------------------
-    # Callback's from dynamic nodes
-    #-----------------------------------------------------------------------------------------
-
-    def _updateMenuNodeCallback(self, node: MenuNode):
-        """Callback to update Menu node:
-        - optionally adding dynamic nodes
-        - checking self for checkEnable
-        - checking child-nodes for checkEnable and enabling/disabling corresponding widgets.
-        """
-        if node.isDynamic and node.dynamicCallback:
-            node.dynamicCallback(node)
-
-        if node.checkEnable:
-            node.checkEnableCallback(node)
-
-        for child in [_c for _c in node._children if _c.checkEnable]:
-            enabled = child.checkEnableCallback(child)
-            child.setEnabled(enabled)
-
-    def _updateDynamicNode(self, node: MenuNode, defs: list):
-        """Update dynamic node using defs to generate child-nodes and corresponding
-        Menu widgets.
-        """
-        if not node.isDynamic:
-            raise RuntimeError(f'_updateDynamicNode: not allowed for {node}')
-
-        # clear this node and its decendants
-        node.clearNode()
-        # construct the new decendant nodes from the defs
-        node.addNodesFromList(defs)
-        # make the menu's
-        for _child in node._children:
-            self.makeMenus(_child)
-
-    def _fillFileOpenRecentCallback(self, node: MenuNode):
-        """callback to fill File->Open recent menu
-        """
-        _defs = _fillFileOpenRecentCallback(node)
-        self._updateDynamicNode(node=node, defs=_defs)
-
-    def _fillFilePredefinedLayoutsCallback(self, node):
-        """Callback to fill File->Layouts->Open pre-defined
-        """
-        from ccpn.ui.gui import Layout
-
-        _files = Layout._getPredefinedLayouts()
-        _defs = [(f.basename, partial(self.application._restoreLayoutFromFile, f))
-                 for f in _files
-                 ]
-        self._updateDynamicNode(node=node, defs=_defs)
-
-    def _fillViewShowModulesCallback(self, node) -> bool:
-        """Callback to fill View->Show/hide Modules Menu
-        """
-        _modules = [m for m in self.mainWindow.modules if not m._isPythonConsoleModule]
-        _defs = []
-        count = 1
-        for module in _modules:
-            # create a shortcut command/cntr 1-9,0 for first 10 modules
-            if count <= 10:
-                shortcut = f'⌃{count % 10}'  # Unicode U+2303, NOT the carrot on your keyboard.
-            else:
-                shortcut = None
-
-            _defs.append(
-                    (module.moduleName, partial(self.mainWindow._toggleModule, module=module),
-                     dict(checkable=True, checked=module._showState, shortcut=shortcut)
-                     )
-                    )
-            count += 1
-
-        self._updateDynamicNode(node=node, defs=_defs)
-
-    def _fillMacroRunRecentCallback(self, node):
-        """Callback to fill Macro->Run Recent Menu
-        """
-        from ccpn.framework.Preferences import RECENT_MACROS
-
-        _files = reversed(self.application.preferences.get(RECENT_MACROS))
-        _defs = [(f, partial(self.application.runMacro, f))
-                 for f in _files
-                 ]
-        _defs.extend([
-            Separator(),
-            ('Clear', self.application.preferences.clearRecentMacros)
-            ])
-        self._updateDynamicNode(node=node, defs=_defs)
-
-    def _fillMacroRunCCPNCallback(self, node):
-        """Callback to fill Macro->Run CCPN Menu
-        """
-        from ccpn.framework.PathsAndUrls import macroPaths
-
-        _defs = []
-        # loop over directories to find macro's, skip any that start with underscore,
-        # i.e. '_'
-        for path in macroPaths:
-            _defs.append(
-                    (path.basename,)
-                    )
-            _files = sorted(f for f in path.glob('*.py') if not f.basename.startswith('_'))
-            _defs.extend(
-                    [(f.basename, partial(self.application.runMacro, f)) for f in _files]
-                    )
-        # update the node
-        self._updateDynamicNode(node=node, defs=_defs)
-
-    def _fillUserPluginsCallback(self, node):
-        """Callback to fill Plugins->User Plugins
-        """
-        from ccpn.framework.PathsAndUrls import pluginPath
-        from ccpn.plugins import loadedPlugins, loadedUserPlugins
-        from ccpn.util.Common import camelCaseToString
-
-        _defs = []
-        _defs.extend([
-            (f.PLUGINNAME, partial(self.mainWindow.startPlugin, f)) for f in loadedUserPlugins
-            ])
-
-        self._updateDynamicNode(node=node, defs=_defs)
-
-    def _fillCCPNPluginsCallback(self, node):
-        """Callback to fill Plugins->CCPN Plugins
-        """
-        from ccpn.framework.PathsAndUrls import pluginPath
-        from ccpn.plugins import loadedPlugins, loadedUserPlugins
-        from ccpn.util.Common import camelCaseToString
-
-        _defs = []
-        _defs.extend([
-            (f.PLUGINNAME, partial(self.mainWindow.startPlugin, f)) for f in loadedPlugins
-            ])
-
-        self._updateDynamicNode(node=node, defs=_defs)
-
-    def _fillHelpTutorialsCallback(self, node):
-        """Callback to fill Help->Tutorials Menu
-        """
-        from ccpn.framework.PathsAndUrls import tutorialsPath, definedTutorialPaths
-        from ccpn.util.Common import camelCaseToString
-
-        _defs = [
-            ('Video Tutorials && Manual', self.ui._showCCPNVideos),
-            ('Tutorial Data', self.ui._showTutorialData),
-            Separator(),
-            ]
-
-        # Add the defined tutorials
-        _defs.extend([
-            (camelCaseToString(f.basename), partial(self.ui._showPath, f)) for f in definedTutorialPaths
-            ])
-        _defs.append(Separator())
-
-        # loop over tutorialsPath for pdf's,
-        # skip any that start with underscore, i.e. '_' or we already processed
-        for path in [tutorialsPath]:
-            _files = sorted(f for f in path.glob('*.pdf')
-                            if not f.basename.startswith('_') and f not in definedTutorialPaths
-                            )
-            _defs.extend([
-                (camelCaseToString(f.basename), partial(self.ui._showPath, f)) for f in _files
-                ])
-
-        self._updateDynamicNode(node=node, defs=_defs)
-
-    def _fillHelpHowtosCallback(self, node):
-        """Callback to fill Help->How-to's
-        """
-        from ccpn.framework.PathsAndUrls import howTosPath
-        from ccpn.util.Common import camelCaseToString
-
-        _defs = []
-
-        # loop over tutorialsPath for pdf's,
-        # skip any that start with underscore, i.e. '_' or we already processed
-        for path in [howTosPath]:
-            _files = sorted(f for f in path.glob('*.pdf')
-                            if not f.basename.startswith('_')
-                            )
-            _defs.extend([
-                (camelCaseToString(f.basename), partial(self.ui._showPath, f)) for f in _files
-                ])
-
-        self._updateDynamicNode(node=node, defs=_defs)
-
-    def _fillDevelopmentDebugCallback(self, node):
-        """Callback to fill Development->Debug Menu
-        """
-        _defs = []
-        for _level in range(4):
-            name = 'off' if _level == 0 else f'set level {_level}'
-            _defs.append(
-                    (name, partial(self.application.setDebug, _level),
-                     dict(checkable=True, checked=self.application.debugLevel == _level)
-                     )
-                    )
-
-        self._updateDynamicNode(node=node, defs=_defs)
+            _child.makeMenu()
 
     #-----------------------------------------------------------------------------------------
 
@@ -2066,7 +1862,8 @@ def _getSaveLayoutPath(mainWindow):
 
 #-----------------------------------------------------------------------------------------
 # Various small helper functions for menu actions dynamic settings;
-# i.e. checking if node is active or for filling dynamic nodes.
+# i.e. checking if node is active (e.g. _projectXYZ or _hasXYZ)
+#      or for filling dynamic nodes (e.g. _fillXYZ).
 # Pass-in node for all functions.
 #-----------------------------------------------------------------------------------------
 
@@ -2082,6 +1879,167 @@ def _fillFileOpenRecentCallback(node) -> list:
         Separator(),
         Action('Clear', _app.preferences.clearRecentFiles)
         ])
+    return _defs
+
+
+def _fillFilePredefinedLayoutsCallback(node) -> list:
+    """Callback to fill File->Layouts->Open pre-defined
+    """
+    from ccpn.ui.gui import Layout
+    _app = getApplication()
+
+    _files = Layout._getPredefinedLayouts()
+    _defs = [Action(f.basename, partial(_app._restoreLayoutFromFile, f)) for f in _files]
+    return _defs
+
+
+def _fillViewShowModulesCallback(node) -> list:
+    """Callback to fill View->Show/hide Modules Menu
+    """
+    _app = getApplication()
+    _mainWindow = _app.ui.mainWindow
+
+    _modules = [m for m in _mainWindow.modules if not m._isPythonConsoleModule]
+    _defs = []
+    count = 1
+    for module in _modules:
+        # create a shortcut command/cntr 1-9,0 for first 10 modules
+        if count <= 10:
+            shortcut = f'⌃{count % 10}'  # Unicode U+2303, NOT the carrot on your keyboard.
+        else:
+            shortcut = None
+
+        _defs.append(
+                Action(module.moduleName, partial(_mainWindow._toggleModule, module=module),
+                       checkable=True, checked=module._showState, shortcut=shortcut
+                )
+        )
+        count += 1
+    return _defs
+
+
+def _fillMacroRunRecentCallback(node) -> list:
+    """Callback to fill Macro->Run Recent Menu
+    """
+    from ccpn.framework.Preferences import RECENT_MACROS
+    _app = getApplication()
+
+    _files = reversed(_app.preferences.get(RECENT_MACROS))
+    _defs = [Action(f, partial(_app.runMacro, f)) for f in _files]
+    _defs.extend([
+        Separator(),
+        Action('Clear', _app.preferences.clearRecentMacros)
+    ])
+    return _defs
+
+
+def _fillMacroRunCCPNCallback(node) -> list:
+    """Callback to fill Macro->Run CCPN Menu
+    """
+    from ccpn.framework.PathsAndUrls import macroPaths
+    _app = getApplication()
+
+    _defs = []
+    # loop over directories to find macro's, skip any that start with underscore,
+    # i.e. '_'
+    for path in macroPaths:
+        _defs.append(Section(path.basename))
+        _files = sorted(f for f in path.glob('*.py') if not f.basename.startswith('_'))
+        _defs.extend(
+                [Action(f.basename, partial(_app.runMacro, f)) for f in _files]
+                )
+    return _defs
+
+
+def _fillUserPluginsCallback(node) -> list:
+    """Callback to fill Plugins->User Plugins
+    """
+    from ccpn.plugins import loadedPlugins, loadedUserPlugins
+
+    _app = getApplication()
+    _mainWindow = _app.ui.mainWindow
+    _defs = [Action(f.PLUGINNAME, partial(_mainWindow.startPlugin, f)) for f in loadedUserPlugins]
+    return _defs
+
+
+def _fillCCPNPluginsCallback(node) -> list:
+    """Callback to fill Plugins->CCPN Plugins
+    """
+    from ccpn.plugins import loadedPlugins, loadedUserPlugins
+
+    _app = getApplication()
+    _mainWindow = _app.ui.mainWindow
+    _defs = [Action(f.PLUGINNAME, partial(_mainWindow.startPlugin, f)) for f in loadedPlugins]
+    return _defs
+
+
+def _fillHelpTutorialsCallback(node) -> list:
+    """Callback to fill Help->Tutorials Menu
+    """
+    from ccpn.framework.PathsAndUrls import tutorialsPath, definedTutorialPaths
+    from ccpn.util.Common import camelCaseToString
+
+    _app = getApplication()
+
+    _defs = [
+        Action('Video Tutorials && Manual', _app.ui._showCCPNVideos),
+        Action('Tutorial Data', _app.ui._showTutorialData),
+        Separator(),
+        ]
+
+    # Add the defined tutorials
+    _defs.extend([
+        Action(camelCaseToString(f.basename), partial(_app.ui._showPath, f)) for f in definedTutorialPaths
+        ])
+    _defs.append(Separator())
+
+    # loop over tutorialsPath for pdf's,
+    # skip any that start with underscore, i.e. '_' or we already processed
+    for path in [tutorialsPath]:
+        _files = sorted(f for f in path.glob('*.pdf')
+                        if not f.basename.startswith('_') and f not in definedTutorialPaths
+                        )
+        _defs.extend([
+            Action(camelCaseToString(f.basename), partial(_app.ui._showPath, f)) for f in _files
+            ])
+
+    return _defs
+
+
+def _fillHelpHowtosCallback(node) -> list:
+    """Callback to fill Help->How-to's
+    """
+    from ccpn.framework.PathsAndUrls import howTosPath
+    from ccpn.util.Common import camelCaseToString
+
+    _app = getApplication()
+
+    _defs = []
+    # loop over tutorialsPath for pdf's,
+    # skip any that start with underscore, i.e. '_' or we already processed
+    for path in [howTosPath]:
+        _files = sorted(f for f in path.glob('*.pdf')
+                        if not f.basename.startswith('_')
+                        )
+        _defs.extend([
+            Action(camelCaseToString(f.basename), partial(_app.ui._showPath, f)) for f in _files
+            ])
+
+    return _defs
+
+
+def _fillDevelopmentDebugCallback(node) -> list:
+    """Callback to fill Development->Debug Menu
+    """
+    _app = getApplication()
+
+    _defs = []
+    for _level in range(4):
+        name = 'off' if _level == 0 else f'set level {_level}'
+        _defs.append(Action(name, partial(_app.setDebug, _level),
+                            checkable=True, checked=(_app.debugLevel==_level)
+                            )
+        )
     return _defs
 
 

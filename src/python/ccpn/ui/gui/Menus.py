@@ -1,14 +1,16 @@
 """
-    The menus are specified by a (recursive) list of tuples composed of either:
+    The menus are specified by a (recursive) list composed of either:
 
-    - Action: A tuple defining a menu action that is triggered when the menu item is selected;
+    - Action: triggered when the menu item is selected;
       signature:
+        Action(name, callback, checkEnabled=None, **options)
+
+      deprecated tuple-based signature:
         (name, callable) tuple or
         (name, callable, options) tuple or
-        (name, callable, options, checkActive) tuple
-        Action(name, callable, checkActive=None, **opts)
+        (name, callable, options, checkEnabled) tuple
 
-        Options is a dict of (option, value) pairs, created by the options() function.
+        options is a dict of (option, value) pairs.
         Valid options (from Action widget):
             :param shortcut: optional two letter shortcut
             :param checked: optional checked flag (if checkable, default: True)
@@ -17,20 +19,18 @@
             :param enabled: optional enable flag (default: True)
             :param toolTip: optional tooltip
 
-        Signature checkActive, returning True if should be enabled:
-            checkActive(node:MenuNode) -> bool
+        Signature checkEnabled, returning True if should be enabled:
+            checkEnabled(node:MenuNode) -> bool
 
-    - Menu: A tuple defining a menu with items;
-      signature:
-        (name, list) tuple or
-        (name, list, options(), checkActive) tuple or
-        Menu(name, *items, checkActive=None)
+    - Menu: A menu (list) with items;
+      Signature:
+        Menu(name, *items, checkEnabled=None)
 
     - DynamicMenu: a dynamically filled menu
       Signature:
-        DynamicMenu(name, checkActivev=None)
+        DynamicMenu(name, checkEnabled=None)
 
-        Signature checkActive: see above
+        Signature checkEnabled: see above
 
     - A section defining operation with signature:
         Section(name)
@@ -116,7 +116,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-08 19:25:50 +0100 (Thu, August 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-09 10:17:58 +0100 (Fri, August 09, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -132,7 +132,10 @@ import os
 import platform
 
 from functools import partial
-from typing import Optional, Callable, Any
+from typing import Optional, Callable, Any, TypeAlias
+
+CallableOrNone = Optional[Callable]
+
 
 from ccpn.framework.PathsAndUrls import \
     macroPath, \
@@ -188,7 +191,7 @@ DEVELOPMENT_MENU = 'Development'
 DEVELOPMENT_DEBUG = 'Debug'
 
 
-def options(**kwds) -> dict:
+def _optionsDict(**kwds) -> dict:
     """Create and return an options dict
     """
     kwds.setdefault('enabled', True)
@@ -214,30 +217,31 @@ def Section(name) -> tuple:
     return (name,)
 
 
-def Action(name: str, callable: Callable, checkActive: Callable = None, **opts) -> tuple:
+def Action(name: str, callback: Callable, checkEnabled: CallableOrNone = None, **options) -> tuple:
     """Create an action defining tuple
     """
-    result = [name, callable, options(**opts)]
-    if checkActive:
-        result.append(checkActive)
+    result = [name, callback, _optionsDict(**options)]
+    if checkEnabled:
+        result.append(checkEnabled)
     return tuple(result)
 
 
-def Menu(name, *items, checkActive: Callable = None) -> tuple:
-    """Create a menu defining tuple
+class Menu(list):
+    """A class representing a menu definition
     """
-    result = [name, list(items)]
-    if checkActive is not None:
-        result.extend(
-                [options(), checkActive]
-        )
-    return tuple(result)
+    def __init__(self, name, *items, checkEnabled: CallableOrNone = None):
+        super().__init__(items)
+        self.name = name
+        self.checkEnabled: CallableOrNone = checkEnabled
+        self.fillCallable: CallableOrNone = None
 
 
-def DynamicMenu(name, checkActive: Callable = None) -> tuple:
-    """Create a dynamic menu defining tuple
+class DynamicMenu(Menu):
+    """A class representing a dynamic menu definition
     """
-    return Menu(name=name, checkActive=checkActive)
+    def __init__(self, name, *items, checkActive: Callable = None, fillCallable: Callable = None):
+        super().__init__(name, *items, checkEnabled=checkActive)
+        self.fillCallable = fillCallable
 
 
 def getMenuDefs():
@@ -298,7 +302,7 @@ class MenusDefs(list):
          Action("Load Data...", self._loadDataCallback, shortcut='ld'),
 
          Separator(),
-         Action("Save", self._saveCallback, shortcut='⌃s', checkActive=_projectCanBeSaved),  # Unicode U+2303
+         Action("Save", self._saveCallback, shortcut='⌃s', checkEnabled=_projectCanBeSaved),  # Unicode U+2303
          Action("Save As...", self._saveAsCallback, shortcut='sa'),
 
          Separator(),
@@ -312,8 +316,8 @@ class MenusDefs(list):
 
          Separator(),
          Menu(FILE_LAYOUT,
-              Action("Save", self._saveLayoutCallback, checkActive=_projectCanBeSaved),
-              Action("Save as...", self._saveLayoutAsCallback, checkActive=_projectCanBeSaved),
+              Action("Save", self._saveLayoutCallback, checkEnabled=_projectCanBeSaved),
+              Action("Save as...", self._saveLayoutAsCallback, checkEnabled=_projectCanBeSaved),
 
               Separator(),
               Action("Restore last", self._restoreLastSavedLayoutCallback),
@@ -325,8 +329,8 @@ class MenusDefs(list):
          Action("Summary", self._showProjectSummaryPopup),
 
          Separator(),
-         Action('Archive', self._archiveProjectCallback, checkActive=_projectCanBeSaved),
-         Action('Restore From Archive...', self._restoreFromArchiveCallback, checkActive=_projectHasArchives),
+         Action('Archive', self._archiveProjectCallback, checkEnabled=_projectCanBeSaved),
+         Action('Restore From Archive...', self._restoreFromArchiveCallback, checkEnabled=_projectHasArchives),
 
          Separator(),
          Action("Preferences...", self._showApplicationPreferences, shortcut='⌃,'),
@@ -349,50 +353,50 @@ class MenusDefs(list):
 
     Menu(VIEW_MENU,
 
-         ("Chemical Shift Table", self._showChemicalShiftTableCallback, options(shortcut='ct')),
-         ("NmrResidue Table", self._showNmrResidueTableCallback, options(shortcut='nt')),
-         ("Residue Table", self._showResidueTableCallback, options(), _projectHasChains),
-         ("Peak Table", self._showPeakTableCallback, options(shortcut='pt'), _projectHasSpectra),
-         ("Integral Table", self._showIntegralTableCallback, options(shortcut='it'), _projectHasSpectra),
-         ("Multiplet Table", self._showMultipletTableCallback, options(shortcut='mt'), _projectHasSpectra),
-         ("Data Table", self._showDataTableCallback, options(shortcut='dt')),
+         Action("Chemical Shift Table", self._showChemicalShiftTableCallback, shortcut='ct'),
+         Action("NmrResidue Table", self._showNmrResidueTableCallback, shortcut='nt'),
+         Action("Residue Table", self._showResidueTableCallback, checkEnabled=_projectHasChains),
+         Action("Peak Table", self._showPeakTableCallback, shortcut='pt', checkEnabled=_projectHasSpectra),
+         Action("Integral Table", self._showIntegralTableCallback, shortcut='it', checkEnabled=_projectHasSpectra),
+         Action("Multiplet Table", self._showMultipletTableCallback, shortcut='mt', checkEnabled=_projectHasSpectra),
+         Action("Data Table", self._showDataTableCallback, shortcut='dt'),
 
          Separator(),
-         ("Restraint Table", partial(app.showRestraintTable, selectFirstItem=True), options(shortcut='rt')),
-         ("Violation Table", partial(app.showViolationTable, selectFirstItem=True), options(shortcut='vt')),
-         ("Structure Table", partial(app.showStructureTable, selectFirstItem=True), options(shortcut='st')),
-         ("Restraint Analysis Inspector", self._showRestraintAnalysisInspectorCallback, options(shortcut='at')),
+         Action("Restraint Table", partial(app.showRestraintTable, selectFirstItem=True), shortcut='rt'),
+         Action("Violation Table", partial(app.showViolationTable, selectFirstItem=True), shortcut='vt'),
+         Action("Structure Table", partial(app.showStructureTable, selectFirstItem=True), shortcut='st'),
+         Action("Restraint Analysis Inspector", self._showRestraintAnalysisInspectorCallback, shortcut='at'),
 
          Separator(),
-         (VIEW_CHEMICAL_SHIFT_MAPPING, self._showChemicalShiftMappingCallback, options(shortcut='cm')),
-         ("Relaxation Analysis (Beta)", app.showRelaxationModule, options(shortcut='ra')),
-         ("Notes Editor", partial(app.showNotesEditor, selectFirstItem=True), options(shortcut='no')),
+         Action(VIEW_CHEMICAL_SHIFT_MAPPING, self._showChemicalShiftMappingCallback, shortcut='cm'),
+         Action("Relaxation Analysis (Beta)", app.showRelaxationModule, shortcut='ra'),
+         Action("Notes Editor", partial(app.showNotesEditor, selectFirstItem=True), shortcut='no'),
 
          Separator(),
          Menu("In Active SpectrumDisplay",
 
-             Section("Show/Hide"),
-             ("Toolbar", self._toggleToolbarCallback, options(shortcut='tb')),
-             ("Spectrum Toolbar", self._toggleSpectrumToolbarCallback, options(shortcut='sb')),
-             ("Phasing Console", self._togglePhaseConsoleCallback, options(shortcut='pc')),
-             ("Crosshairs", self._toggleCrosshairCallback, options(shortcut='ch')),
+              Section("Show/Hide"),
+              Action("Toolbar", self._toggleToolbarCallback, shortcut='tb'),
+              Action("Spectrum Toolbar", self._toggleSpectrumToolbarCallback, shortcut='sb'),
+              Action("Phasing Console", self._togglePhaseConsoleCallback, shortcut='pc'),
+              Action("Crosshairs", self._toggleCrosshairCallback, shortcut='ch'),
 
-             Section("Zoom"),
-             ("Set Zoom...", self._setZoomCallback, options(shortcut='sz')),
-             ("Reset", self._resetZoomCallback, options(shortcut='rz')),
+              Section("Zoom"),
+              Action("Set Zoom...", self._setZoomCallback, shortcut='sz'),
+              Action("Reset", self._resetZoomCallback, shortcut='rz'),
 
-             Section("New SpectrumDisplay with"),
-             ("Same Axes", self._copyStripCallback, options()),
-             ("X-Y Axes Flipped", self._flipXYAxisCallback, options(shortcut='xy')),
-             ("X-Z Axes Flipped", self._flipXZAxisCallback, options(shortcut='xz')),
-             ("Y-Z Axes Flipped", self._flipYZAxisCallback, options(shortcut='yz')),
-             ("Axes Flipped...", self._flipArbitraryAxesCallback, options(shortcut='fa')),
+              Section("New SpectrumDisplay with"),
+              Action("Same Axes", self._copyStripCallback),
+              Action("X-Y Axes Flipped", self._flipXYAxisCallback, shortcut='xy'),
+              Action("X-Z Axes Flipped", self._flipXZAxisCallback, shortcut='xz'),
+              Action("Y-Z Axes Flipped", self._flipYZAxisCallback, shortcut='yz'),
+              Action("Axes Flipped...", self._flipArbitraryAxesCallback, shortcut='fa'),
 
-             Section("Labels"),
-             ("Auto-arrange", self._arrangeLabelsCallback, options(shortcut='av')),
-             ("Reset", self._resetLabelsCallback, options(shortcut='rv')),
+              Section("Labels"),
+              Action("Auto-arrange", self._arrangeLabelsCallback, shortcut='av'),
+              Action("Reset", self._resetLabelsCallback, shortcut='rv'),
 
-             checkActive=_hasActiveDisplay
+              checkEnabled=_hasActiveDisplay
          ),
 
          Separator(),
@@ -401,59 +405,59 @@ class MenusDefs(list):
                                      shortcut=' s', checkable=True, checked=True
          ),
          Action("Show/hide Python Console", self._toggleConsoleCallback,
-                                            shortcut='  ', checkable=True, checked=True,
-                                            checkActive=_updatePythonConsole
+                shortcut='  ', checkable=True, checked=True,
+                checkEnabled=_updatePythonConsole
          ),
     ),
 
     Menu(SPECTRUM_MENU,
 
-        (SPECTRUM_LOAD_SPECTRA, self._loadSpectraCallback, options(shortcut='ls')),
-        # ("Spectrum Groups...", self._spectrumGroupsCallback, options(shortcut ='ss')), # multiple edit temporarly disabled
+        Action(SPECTRUM_LOAD_SPECTRA, self._loadSpectraCallback, shortcut='ls'),
+        # Action("Spectrum Groups...", self._spectrumGroupsCallback, shortcut ='ss'), # multiple edit temporarly disabled
         # Separator(),
-        ("Validate Paths...", self._validatePathsCallback, options(shortcut='vp'), _projectHasSpectra),
-        ("Set Experiment Types...", self._experimentTypesCallback, options(shortcut='et'), _projectHasSpectra),
-        ("Copy into Project...", self._copyToProjectCallback, options(), _projectHasSpectra),
+        Action("Validate Paths...", self._validatePathsCallback, shortcut='vp', checkEnabled=_projectHasSpectra),
+        Action("Set Experiment Types...", self._experimentTypesCallback, shortcut='et', checkEnabled=_projectHasSpectra),
+        Action("Copy into Project...", self._copyToProjectCallback, checkEnabled=_projectHasSpectra),
 
         Separator(),
-        ("Pick Peaks", [
-            ("Pick 1D Peaks...", self._peakPick1DCallback, options(shortcut='p1'), _projectHasSpectra),
-            ("Pick nD Peaks...", self._peakPickNDCallback, options(shortcut='pp'), _projectHasSpectra),
-            ], options(), _projectHasSpectra
-         ),
-        ("Copy PeakList...", self._copyPeakListCallback, options(shortcut='cl'), _projectHasSpectra),
-        ("Copy Peaks...", self._copyPeaksCallback, options(shortcut='cp'), _projectHasPeaks),
-        ("Peak Collections...", self._peakCollectionsCallback, options(shortcut='sc'), _projectHasPeaks),
-        ("Estimate Peak Volumes...", self._estimateVolumesCallback, options(shortcut='ev'), _projectHasPeaks),
-        ("Estimate Current Peak Volumes", self._estimateCurrentVolumesCallback, options(shortcut='ec'), _projectHasPeaks),
-        ("Reorder PeakList Axes...", self._reorderPeakListAxesCallback, options(shortcut='rl'), _projectHasSpectra),
+        Menu("Pick Peaks",
+             Action("Pick 1D Peaks...", self._peakPick1DCallback, shortcut='p1', checkEnabled=_projectHasSpectra),
+             Action("Pick nD Peaks...", self._peakPickNDCallback, shortcut='pp', checkEnabled=_projectHasSpectra),
+             checkEnabled=_projectHasSpectra
+             ),
+        Action("Copy PeakList...", self._copyPeakListCallback, shortcut='cl', checkEnabled=_projectHasSpectra),
+        Action("Copy Peaks...", self._copyPeaksCallback, shortcut='cp', checkEnabled=_projectHasPeaks),
+        Action("Peak Collections...", self._peakCollectionsCallback, shortcut='sc', checkEnabled=_projectHasPeaks),
+        Action("Estimate Peak Volumes...", self._estimateVolumesCallback, shortcut='ev', checkEnabled=_projectHasPeaks),
+        Action("Estimate Current Peak Volumes", self._estimateCurrentVolumesCallback, shortcut='ec', checkEnabled=_projectHasPeaks),
+        Action("Reorder PeakList Axes...", self._reorderPeakListAxesCallback, shortcut='rl', checkEnabled=_projectHasSpectra),
 
         Separator(),
-        ("Pseudo-Spectrum to SpectrumGroup...", self._pseudoSpectrumCallback, options(), _projectHasSpectra),
-        ("Make Projection...", self._makeProjectionCallback, options(shortcut='pj'), _projectHasSpectra),
-        ("Convert...", self._convertSpectrumCallback, options(), _projectHasSpectra),
+        Action("Pseudo-Spectrum to SpectrumGroup...", self._pseudoSpectrumCallback, checkEnabled=_projectHasSpectra),
+        Action("Make Projection...", self._makeProjectionCallback, shortcut='pj', checkEnabled=_projectHasSpectra),
+        Action("Convert...", self._convertSpectrumCallback, checkEnabled=_projectHasSpectra),
 
         Separator(),
-        ("Make Strip Plot...", ui.makeStripPlot, options(shortcut='sp'), _projectHasSpectra),
-        ("Print to File...", self._printToFileCallback, options(shortcut='⌃p'), _projectHasSpectra),
+        Action("Make Strip Plot...", ui.makeStripPlot, shortcut='sp', checkEnabled=_projectHasSpectra),
+        Action("Print to File...", self._printToFileCallback, shortcut='⌃p', checkEnabled=_projectHasSpectra),
 
     ),
 
     Menu(MOLECULES_MENU,
 
-        Action("New Chain...", self._createChainCallback),
-        Action("New Chain from FASTA...", self._loadDataCallback),
+         Action("New Chain...", self._createChainCallback),
+         Action("New Chain from FASTA...", self._loadDataCallback),
 
-        Separator(),
-        Action("Load ChemComp from Xml...", self._loadDataCallback),
-        Action("Edit Molecular Bonds...", self._editMolecularBondsCallback, checkActive=_projectHasChains),
-        # ("Inspect...", self.inspectMolecule, [('enabled', False)]),
+         Separator(),
+         Action("Load ChemComp from Xml...", self._loadDataCallback),
+         Action("Edit Molecular Bonds...", self._editMolecularBondsCallback, checkEnabled=_projectHasChains),
+         # Action("Inspect...", self.inspectMolecule, enabled=False),
 
-        Separator(),
-        Action("Show Residue Information", self._showResidueInformationCallback, shortcut='ri', checkActive=_projectHasChains),
-        Action("Show Reference Chemical Shifts", self._showReferenceChemicalShiftsCallback, shortcut='rc'),
+         Separator(),
+         Action("Show Residue Information", self._showResidueInformationCallback, shortcut='ri', checkEnabled=_projectHasChains),
+         Action("Show Reference Chemical Shifts", self._showReferenceChemicalShiftsCallback, shortcut='rc'),
 
-    ),
+         ),
 
     Menu(MACRO_MENU,
 
@@ -499,8 +503,8 @@ class MenusDefs(list):
         Action("CcpNmr API Documentation", self._showVersion3Documentation),
 
         Section('Programme'),
-        # ("Inspect Code...", self.showCodeInspectionPopup, options(shortcut='gv', enabled=False)),
-        # ("Show Issues...", self.showIssuesList),
+        # Action("Inspect Code...", self.showCodeInspectionPopup, shortcut='gv', enabled=False),
+        # Action("Show Issues...", self.showIssuesList),
         Action("Check for Updates...", ui._checkForUpdates),
         Action("Register...", self._showRegisterPopup),
         Action("Show License...", self._showCcpnLicense),
@@ -1287,13 +1291,13 @@ class MenusDefs(list):
             _indx += len(currentMenu)
         currentMenu.insert(_indx, menuDef)
 
-    def _findMenu(self, menuKeys: list, currentMenu=None):
+    def _findMenu(self, menuKeys: list, currentMenu=None) -> tuple[int, list]:
         """(Recursively) find menu/action/section defined by menuKeys, i.e. a list
-        of names or indices that recursively define the menu;
-        e.g. ['File', 'New']
+        of names or indices (0-based) that recursively define the menu;
+        e.g. ['File', 'New'] or ['File', 3]
 
         :param menuKeys: a list of names or position-indices defining the menu/action
-        :param currentMenu: a list to be used for the recursion; defaults to None at intialisation
+        :param currentMenu: a list to be used for the recursion; defaults to None at initialisation
 
         :return (indx, currentMenu) tuple: the index and the menu for which menu[indx] was defined
                                            by the menuKeys list
@@ -1307,23 +1311,46 @@ class MenusDefs(list):
         if currentMenu is None:
             currentMenu = self
 
+        # find the index of first key of menuKeys
         key = menuKeys[0]
+
         if isinstance(key, str):
-            _keys = [t[0] if len(t) > 0 else None for t in currentMenu]
-            try:
-                _indx = _keys.index(key)
-            except ValueError:
-                raise RuntimeError(f'_findMenu: key "{key}" not found')
-        elif isinstance(key, int) and key < len(currentMenu):
-            _indx = key
-        else:
-            raise RuntimeError(f'_findMenu: invalid key "{key}"')
+            # key is a string:
+            _indx = -1
+            for _ii, item in enumerate(currentMenu):
+                if isinstance(item, Menu):
+                    if item.name == key:
+                        _indx = _ii
+                        break
+                elif isinstance(item, tuple):
+                    # old tuple-based definition
+                    _name = item[0] if len(item) > 0 else None
+                    if _name == key:
+                        _indx = _ii
+                        break
+                else:
+                    raise RuntimeError(f'_findMenu: invalid menu-item {item!r}')
 
+        elif isinstance(key, int):
+            # key is an int, ie. an index
+            _indx = key if key < len(currentMenu) else -1
+
+        else:
+            raise RuntimeError(f'_findMenu: invalid menu-key {key!r}')
+
+        # check the index; -1 indicates it was not found
+        if _indx == -1:
+            raise RuntimeError(f'_findMenu: menu-key {key!r} not found')
+
+        # recurse if we are not done
         if len(menuKeys) > 1:
-            return self._findMenu(menuKeys=menuKeys[1:], currentMenu=currentMenu[_indx][1])
+            _menu = currentMenu[_indx]
+            if isinstance(_menu, tuple):
+                # old definitions
+                _menu = _menu[1]
+            return self._findMenu(menuKeys=menuKeys[1:], currentMenu=_menu)
 
-        else:
-            return _indx, currentMenu
+        return _indx, currentMenu
 
     def __str__(self):
         return f'<MenuDef of {self.application}>'
@@ -1346,7 +1373,8 @@ class NodeType(DataEnum):
 
 
 class MenuNode(Tree):
-    """Just a class to define the MenuNode tree structure to store the Menu and Action objects
+    """Just a class to define the MenuNode tree structure to store the MenuWidget and
+    ActionWidget objects
     Has dict like behavior to facilitate lookup,
     e.g. assume a myMenus (nested) object from a MenuDefs instance:
 
@@ -1354,8 +1382,18 @@ class MenuNode(Tree):
 
     """
 
-    def __init__(self, parent, name, nodeType,
-                 isDynamic=False, callback=None, options={}):
+    def __init__(self, parent,
+                 name: str, nodeType: NodeType, isDynamic: bool = False,
+                 callback: CallableOrNone = None, options: dict = {}):
+        """
+        Initialise the node
+        :param parent: parent node; None denotes root
+        :param name: name of the node
+        :param nodeType: type of the node
+        :param isDynamic: flag to indicate a dynamic node
+        :param callback: callback function (for an Action-node)
+        :param options: (keyword,value) options to the Action
+        """
 
         # Make node initially as stand-alone,
         # to be added after all init's are completed
@@ -1420,9 +1458,9 @@ class MenuNode(Tree):
 
     #-----------------------------------------------------------------------------------------
 
-    def setDynamicNode(self, callback):
+    def setDynamicNode(self, callback: Callable):
         """Make MenuNode a dynamically updated one, defining callback when it is about to show
-        :param callback: a function with signature callback(node:MenuNode)
+        :param callback: a function with signature callback(node:MenuNode) -> list
         """
         if not self.isMenu:
             raise RuntimeError(f'setDynamicNode: invalid for {self}')
@@ -1431,14 +1469,14 @@ class MenuNode(Tree):
 
     def clearNode(self):
         """For a dynamic Menu node only:
-        clear self; clear and remove all decendant nodes
+        clear self; clear and remove all descendant nodes
         """
         if not (self.isMenu and self.isDynamic):
             raise RuntimeError(f'clearNode: Cannot clear {self}')
 
         if self.widget:
             self.widget.clear()
-        # remove the decendant nodes;
+        # remove the descendant nodes;
         self._removeAllChildren()
 
     def setCheckedNode(self, callback):
@@ -1477,7 +1515,7 @@ class MenuNode(Tree):
         """Create new Menu node, (Recursively) traverse theList with Menu definitions,
         adding items in theList as child-nodes.
 
-        :param thelist: a list of Menu tuple definitions
+        :param thelist: a list of Menu definitions
         :param parent: the parent Node; None indicates the result to be root
         :param name: name of the resulting node
 
@@ -1516,10 +1554,16 @@ class MenuNode(Tree):
         result = []
         separatorIndex = 0  # This gives each separator a unique name
         for item in theList:
-            if not isinstance(item, tuple):
+            if not isinstance(item, (tuple, Menu)):
                 raise RuntimeError(f'addNodesFromList to {self}: Invalid menu definition: \n>>> {_str120(item)}')
 
-            if len(item) == 0:
+            if isinstance(item, Menu):
+                node = self.newFromList(theList=item, parent=self, name=item.name)
+                result.extend(node.allObjects())
+                if item.checkEnabled is not None:
+                    node.setCheckedNode(item.checkEnabled)
+
+            elif len(item) == 0:
                 # A separator
                 name = f'Separator_{separatorIndex}'
                 node = self.addNode(name=name, nodeType=NodeType.SEPARATOR)
@@ -1532,17 +1576,17 @@ class MenuNode(Tree):
                 node = self.addNode(name=name, nodeType=NodeType.SECTION)
                 result.append(node)
 
-            elif len(item) in (2, 4) and isinstance(item[1], list):
-                # a (sub-)Menu
-                name = item[0]
-                val = item[1]
-                node = self.newFromList(theList=val, parent=self, name=name)
-
-                checkCallback = item[3] if len(item) >= 4 else None
-                if checkCallback is not None:
-                    node.setCheckedNode(checkCallback)
-
-                result.extend(node.allObjects())
+            # elif len(item) in (2, 4) and isinstance(item[1], list):
+            #     # a (sub-)Menu
+            #     name = item[0]
+            #     val = item[1]
+            #     node = self.newFromList(theList=val, parent=self, name=name)
+            #
+            #     checkCallback = item[3] if len(item) >= 4 else None
+            #     if checkCallback is not None:
+            #         node.setCheckedNode(checkCallback)
+            #
+            #     result.extend(node.allObjects())
 
             elif len(item) in (2, 3, 4) and callable(item[1]):
                 # An action
@@ -1588,9 +1632,9 @@ class MenuNode(Tree):
         return list(self._childrenAsDict.values())
 
     def __getitem__(self, key):
-        _vals = dict([(child.name, child) for child in self._children])
+        _vals = self._childrenAsDict
         if key not in _vals:
-            raise KeyError(f'key "{key}" not in {self}')
+            raise KeyError(f'key {key!r} not in {self}')
         return _vals[key]
 
     #-----------------------------------------------------------------------------------------

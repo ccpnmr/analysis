@@ -116,7 +116,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-09 14:07:03 +0100 (Fri, August 09, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-09 14:38:45 +0100 (Fri, August 09, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1383,14 +1383,13 @@ class MenuNode(Tree):
     """
 
     def __init__(self, parent,
-                 name: str, nodeType: NodeType, isDynamic: bool = False,
+                 name: str, nodeType: NodeType,
                  callback: CallableOrNone = None, options: dict = {}):
         """
         Initialise the node
         :param parent: parent node; None denotes root
         :param name: name of the node
         :param nodeType: type of the node
-        :param isDynamic: flag to indicate a dynamic node
         :param callback: callback function (for an Action-node)
         :param options: (keyword,value) options to the Action
         """
@@ -1405,7 +1404,6 @@ class MenuNode(Tree):
         self.options = options
 
         # Menu nodes can be dynamically filled
-        self.isDynamic = isDynamic
         self.dynamicCallback = None
 
         # Action's can be checked for needing enabling
@@ -1468,16 +1466,15 @@ class MenuNode(Tree):
         """Make MenuNode a dynamically updated one, defining callback when it is about to show
         :param callback: a function with signature callback(node:MenuNode) -> list
         """
-        if not self.isMenu:
+        if not self.isDynamicMenu:
             raise RuntimeError(f'setDynamicNode: invalid for {self}')
-        self.isDynamic = True
         self.dynamicCallback = callback
 
     def clearNode(self):
         """For a dynamic Menu node only:
         clear self; clear and remove all descendant nodes
         """
-        if not (self.isMenu and self.isDynamic):
+        if not (self.isDynamicMenu):
             raise RuntimeError(f'clearNode: Cannot clear {self}')
 
         if self.widget:
@@ -1520,10 +1517,12 @@ class MenuNode(Tree):
         :return a the newly created MenuNode instance
         """
         if not isinstance(theList, list):
-            raise ValueError(f'newFromList: expected list; got {type(theList)}')
+            raise TypeError(f'newFromList: expected list; got {type(theList)}')
 
-        isDynamic = (len(theList) == 0)
-        node = cls(parent=parent, name=name, nodeType=NodeType.MENU, isDynamic=isDynamic)
+        if len(theList) == 0:
+            raise ValueError(f'newFromList: empty list')
+
+        node = cls(parent=parent, name=name, nodeType=NodeType.MENU)
         node.addNodesFromList(theList)
         return node
 
@@ -1553,7 +1552,7 @@ class MenuNode(Tree):
         for item in theList:
 
             if isinstance(item, DynamicMenu):
-                node = self.addNode(name=item.name, nodeType=NodeType.MENU, isDynamic=True)
+                node = self.addNode(name=item.name, nodeType=NodeType.DYNAMIC_MENU)
                 if item.checkEnabled is not None:
                     node.setCheckedNode(item.checkEnabled)
                 if item.callback is not None:
@@ -1573,8 +1572,7 @@ class MenuNode(Tree):
                 result.append(node)
 
             elif isinstance(item, Section):
-                _name = f'Section {item.name}'
-                node = self.addNode(name=_name, nodeType=NodeType.SECTION)
+                node = self.addNode(name=item.name, nodeType=NodeType.SECTION)
                 result.append(node)
 
             elif isinstance(item, Separator):
@@ -1583,19 +1581,6 @@ class MenuNode(Tree):
                 node = self.addNode(name=_name, nodeType=NodeType.SEPARATOR)
                 result.append(node)
                 separatorIndex += 1
-
-            # elif len(item) == 0:
-            #     # A separator
-            #     name = f'Separator_{separatorIndex}'
-            #     node = self.addNode(name=name, nodeType=NodeType.SEPARATOR)
-            #     result.append(node)
-            #     separatorIndex += 1
-            #
-            # elif len(item) == 1:
-            #     # A section
-            #     name = f'Section {item[0]}'
-            #     node = self.addNode(name=name, nodeType=NodeType.SECTION)
-            #     result.append(node)
 
             else:
                 # this should not happen
@@ -1612,7 +1597,7 @@ class MenuNode(Tree):
         - checking self for checkEnable
         - checking child-nodes for checkEnable and enabling/disabling corresponding widgets.
         """
-        if self.isDynamic and self.dynamicCallback:
+        if self.isDynamicMenu and self.dynamicCallback:
             _menuDefs = self.dynamicCallback(self)
             self._updateDynamicNode(defs=_menuDefs)
 
@@ -1627,7 +1612,7 @@ class MenuNode(Tree):
         """Update dynamic node using defs to generate child-nodes and corresponding
         Menu widgets.
         """
-        if not self.isDynamic:
+        if not self.isDynamicMenu:
             raise RuntimeError(f'_updateDynamicNode: not allowed for {self}')
 
         # clear this node and its decendants
@@ -1660,7 +1645,7 @@ class MenuNode(Tree):
                                       )
             _parent.widget.addAction(self.widget)
 
-        elif self.isMenu:
+        elif self.isMenu or self.isDynamicMenu:
             if self.level == 0:
                 raise RuntimeError(f'makeMenu: invalid {self} for level=0 ')
 
@@ -1725,18 +1710,21 @@ class MenuNode(Tree):
         print Tree of self with indentation
         """
         for node in self.allObjects():
+
             level = node.level
             tabs = '\t' * (level - 1) if level > 1 else ''
             if level == 1:
                 tabs = '\n' + tabs
             _name = node.name if not (node.isSeparator or node.isSection) else f'--- {node.name} ---'
-            print(
-                f'{tabs}{_name!r:25}  (level={node.level}, type={node.nodeType}, dynamic={node.isDynamic}) {node.options}')
-            if node.isMenu and node.isDynamic and len(node._children) == 0:
+            _options = str(node.options) if node.isAction else ''
+
+            print(f'{tabs}{_name!r:25}  (level={node.level}, type={node.nodeType.description}) {_options}')
+
+            if node.isDynamicMenu and len(node._children) == 0:
                 print(f'{tabs}\t>>> dynamically filled')
 
     def __str__(self):
-        return f'<MenuNode: {self.name!r} (level={self.level}, type={self.nodeType}, dynamic={self.isDynamic}, checked={self.checkEnable})>'
+        return f'<MenuNode: {self.name!r} (level={self.level}, type={self.nodeType.description}, checkEnable={self.checkEnable})>'
 
     __repr__ = __str__
 

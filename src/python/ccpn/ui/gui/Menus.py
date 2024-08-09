@@ -116,7 +116,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-09 13:48:35 +0100 (Fri, August 09, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-09 14:07:03 +0100 (Fri, August 09, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -191,30 +191,11 @@ DEVELOPMENT_MENU = 'Development'
 DEVELOPMENT_DEBUG = 'Debug'
 
 
-def _optionsDict(**kwds) -> dict:
-    """Create and return an options dict
+class Separator():
+    """A class for defining a Separator
     """
-    kwds.setdefault('enabled', True)
-    kwds.setdefault('checkable', False)
-    kwds.setdefault('checked', True)
-
-    validOptions = 'shortcut enabled checkable checked icon toolTip'.split()
-    errors = [option for option in kwds.keys() if option not in validOptions]
-    if len(errors) > 0:
-        raise ValueError(f'Invalid options: {errors!r}')
-    return kwds
-
-
-def Separator() -> tuple:
-    """Convenience; avoids tuple errors
-    """
-    return ()
-
-
-# def Section(name) -> tuple:
-#     """Convenience; avoids tuple errors
-#     """
-#     return (name,)
+    def __init__(self):
+        self.name = 'Separator'
 
 
 class Section():
@@ -227,12 +208,25 @@ class Section():
 class Action():
     """A class for defining a menu action
     """
+    _validOptions = 'shortcut enabled checkable checked icon toolTip'.split()
+
     def __init__(self, name: str, callback: Callable, checkEnabled: CallableOrNone = None, **options):
         self.name = name
         self.callback = callback
         self.checkEnabled = checkEnabled
-        self.options = _optionsDict(**options)
+        self.options = self._optionsDict(**options)
 
+    def _optionsDict(self, **options) -> dict:
+        """Create and return an options dict
+        """
+        options.setdefault('enabled', True)
+        options.setdefault('checkable', False)
+        options.setdefault('checked', True)
+
+        errors = [option for option in options.keys() if option not in self._validOptions]
+        if len(errors) > 0:
+            raise ValueError(f'Invalid options: {errors!r}')
+        return options
 
 class Menu(list):
     """A class representing a menu definition
@@ -1323,7 +1317,7 @@ class MenusDefs(Menu):
             # key is a string:
             _indx = -1
             for _ii, item in enumerate(currentMenu):
-                if isinstance(item, (Menu, Action, Section)):
+                if isinstance(item, (Menu, Action, Section, Separator)):
                     if item.name == key:
                         _indx = _ii
                         break
@@ -1516,8 +1510,8 @@ class MenuNode(Tree):
 
     @classmethod
     def newFromList(cls, theList, parent=None, name='menuRoot'):
-        """Create new Menu node, (Recursively) traverse theList with Menu definitions,
-        adding items in theList as child-nodes.
+        """classmethod: Create new MenuNode instance, (Recursively) traverse
+        theList with Menu definitions, adding items in theList as child-nodes.
 
         :param thelist: a list of Menu definitions
         :param parent: the parent Node; None indicates the result to be root
@@ -1534,12 +1528,11 @@ class MenuNode(Tree):
         return node
 
     def addNodesFromList(self, theList) -> list:
-        """(Recursively) Traverse theList with Menu definitions,
-        adding items in theList as child-nodes.
+        """(Recursively) Traverse theList with Menu definitions, adding items in theList as child-nodes.
         The method effectively parses the menu-definitions list, as defined by the
         MenuDefs class above
 
-        :param theList: a list of Menu tuple definitions (see also MenuDefs class)
+        :param theList: a list with Menu-item definitions (see also MenuDefs class)
 
         :return A list of nodes added
         """
@@ -1553,7 +1546,7 @@ class MenuNode(Tree):
             return _tmp
 
         if not isinstance(theList, list):
-            raise ValueError(f'addNodesFromList to {self}: expected list; got {type(theList)}')
+            raise TypeError(f'addNodesFromList to {self}: expected list; got {type(theList)}')
 
         result = []
         separatorIndex = 0  # This gives each separator a unique name
@@ -1584,13 +1577,20 @@ class MenuNode(Tree):
                 node = self.addNode(name=_name, nodeType=NodeType.SECTION)
                 result.append(node)
 
-            elif len(item) == 0:
+            elif isinstance(item, Separator):
                 # A separator
-                name = f'Separator_{separatorIndex}'
-                node = self.addNode(name=name, nodeType=NodeType.SEPARATOR)
+                _name = f'Separator_{separatorIndex}'
+                node = self.addNode(name=_name, nodeType=NodeType.SEPARATOR)
                 result.append(node)
                 separatorIndex += 1
 
+            # elif len(item) == 0:
+            #     # A separator
+            #     name = f'Separator_{separatorIndex}'
+            #     node = self.addNode(name=name, nodeType=NodeType.SEPARATOR)
+            #     result.append(node)
+            #     separatorIndex += 1
+            #
             # elif len(item) == 1:
             #     # A section
             #     name = f'Section {item[0]}'
@@ -1682,8 +1682,8 @@ class MenuNode(Tree):
             self.widget = _parent.widget.addSeparator()
 
         elif self.isSection:
-            # We do not use _parent.widget.addSection as it does not show with native settings
-            # _parent.widget.addSeparator()
+            # We do not use _parent.widget.addSection as it does not show with native settings!!
+            # Instead, we emulate it as a disabled Item with horizontal line left and right
             self.widget = _parent.widget.addItem(text=f'⎯⎯⎯⎯⎯ {self.name} ⎯⎯⎯⎯⎯', enabled=False)
 
         else:

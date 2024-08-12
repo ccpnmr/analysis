@@ -5,9 +5,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-21 13:24:43 +0000 (Tue, November 21, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-08-12 15:03:31 +0100 (Mon, August 12, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1322,6 +1323,7 @@ class GuiNdWidget(CcpnGLWidget):
             #             index += 2
 
             # NOTE:ED - new bit
+            self.mouseCoordDQ = None
             if self._firstVisible and self._matchingIsotopeCodes:
                 # idx = self._firstVisible.dimensionIndices
                 # spec = self._firstVisible.spectrum
@@ -1331,18 +1333,19 @@ class GuiNdWidget(CcpnGLWidget):
                 # yaxisType = mTypes[idx[1]]
 
                 # extra zero/double-quantum axes
-                if (0 < xaxisType.value < yaxisType.value < 3):
-                    if len(xPosList) == 1 and len(yPosList) == 1:
-                        xPosList.append(yPosList[0])
-                    if len(xPosList) == 2:
+                if (0 < xaxisType.value < yaxisType.value < 3):                # single double quantum (double y coord)
+                    if len(xPosList) == 1 and len(yPosList) == 1:              # should always be true? (sanity check)
+                        xPosList.append(yPosList[0])                           # y position to list
+                    if len(xPosList) == 2:                                     # should always be true? (sanity check)
                         # y is the double-quantum axis
-                        xx = xPosList[1] - xPosList[0]
-                        x, _y = self._scaleAxisToRatio([xx, 0])
-                        if all(abs(x - val) > self.deltaX for val in foundX):
-                            foundX.append(x)
-                            vertices.extend([x, 1.0, x, 0.0])
-                            indices.extend([index, index + 1])
-                            index += 2
+                        xx = xPosList[1] - xPosList[0]                         # y-x (y added prev)
+                        self.mouseCoordDQ = (xx, yPosList[0], 0)               # create dqCoord flags
+                        x, _y = self._scaleAxisToRatio([xx, 0])                # openGL scaling
+                        if all(abs(x - val) > self.deltaX for val in foundX):  # checks not overlapping
+                            foundX.append(x)                                   # previous cursor flag
+                            vertices.extend([x, 1.0, x, 0.0])                  # add the line to the array
+                            indices.extend([index, index + 1])                 # indices array update
+                            index += 2                                         # vertArray index
 
                 elif (0 < yaxisType.value < xaxisType.value < 3):
                     if len(xPosList) == 1 and len(yPosList) == 1:
@@ -1350,6 +1353,8 @@ class GuiNdWidget(CcpnGLWidget):
                     if len(yPosList) == 2:
                         # x is the double-quantum axis
                         yy = yPosList[0] - yPosList[1]
+                        self.mouseCoordDQ = (xPosList[0], yy, 1)
+                        print(self.mouseCoordDQ)
                         _x, y = self._scaleAxisToRatio([0, yy])
                         if all(abs(y - val) > self.deltaY for val in foundY):
                             foundY.append(y)

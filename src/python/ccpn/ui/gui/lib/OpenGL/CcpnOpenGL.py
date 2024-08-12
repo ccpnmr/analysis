@@ -56,8 +56,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-24 18:05:24 +0100 (Wed, July 24, 2024) $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-08-12 15:03:31 +0100 (Mon, August 12, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -430,6 +430,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._buildMouse = True
         self._mouseCoords = [-1.0, -1.0]
         self.mouseString = None
+        self.mouseStringDQ = None
         # self.diffMouseString = None
         self._symbolLabelling = 0
         self._symbolType = 0
@@ -4474,8 +4475,48 @@ class CcpnGLWidget(QOpenGLWidget):
     def updateVTrace(self, visible):
         self._updateVTrace = visible
 
-    def buildMouseCoords(self, refresh=False):
+    def buildMouseCoordsDQ(self, refresh=False):
+        """Builds Mouse Coord text for DQ crosshair."""
+        def valueToRatio(val, x0, x1):
+            if abs(x1 - x0) > 1e-9:
+                return (val - x0) / (x1 - x0)
+            else:
+                return 0.0
+        try:
+            cursorCoordinate = self.mouseCoordDQ
+            mx, my = cursorCoordinate[0], cursorCoordinate[1]
+        except (AttributeError, TypeError):
+            return
 
+        smallFont = self.getSmallFont()
+        newCoords = (f' {self._visibleOrderingAxisCodes[0]}: {self.XMode(mx)}\n'
+                     f' {self._visibleOrderingAxisCodes[1]}: {self.YMode(my)}')
+
+        self.mouseStringDQ = True
+
+        self.mouseStringDQ = GLString(text=newCoords,
+                                    font=smallFont,
+                                    x=valueToRatio(mx - self.pixelX * 85.0, self.axisL, self.axisR),
+                                    y=valueToRatio(my - self.pixelY * self.mouseString.height, self.axisB, self.axisT),
+                                    colour=self.foreground, GLContext=self,
+                                    obj=None)
+
+
+        _offset = self.pixelX * 80.0
+        _mouseOffsetR = valueToRatio(mx, self.axisL, self.axisR)
+        _mouseOffsetL = valueToRatio(mx - _offset, self.axisL, self.axisR)
+        ox = -min(max(_mouseOffsetR - 1.0, 0.0), _mouseOffsetL)
+
+        _offset = self.pixelY * self.mouseString.height
+        _mouseOffsetT = valueToRatio(my, self.axisB, self.axisT)
+        _mouseOffsetB = valueToRatio(my - _offset, self.axisB, self.axisT)
+        oy = -min(max(_mouseOffsetT - 1.0, 0.0), _mouseOffsetB)
+
+        self.mouseStringDQ.setStringOffset((ox, oy))
+        self.mouseStringDQ.updateTextArrayVBOAttribs()
+
+
+    def buildMouseCoords(self, refresh=False):
         def valueToRatio(val, x0, x1):
             if abs(x1 - x0) > 1e-9:
                 return (val - x0) / (x1 - x0)
@@ -4573,8 +4614,8 @@ class CcpnGLWidget(QOpenGLWidget):
                 return
 
             deltaOffset = 0
-            newCoords = ' %s: %s\n %s: %s' % (self._visibleOrderingAxisCodes[0], self.XMode(cursorX),
-                                              self._visibleOrderingAxisCodes[1], self.YMode(cursorY))
+            newCoords = (f' {self._visibleOrderingAxisCodes[0]}: {self.XMode(cursorX)}\n'
+                         f' {self._visibleOrderingAxisCodes[1]}: {self.YMode(cursorY)}')
 
             smallFont = self.getSmallFont()
 
@@ -4602,9 +4643,10 @@ class CcpnGLWidget(QOpenGLWidget):
             _mouseOffsetT = valueToRatio(my + _offset, self.axisB, self.axisT)
             _mouseOffsetB = valueToRatio(my, self.axisB, self.axisT)
             oy = -min(max(_mouseOffsetT - 1.0, 0.0), _mouseOffsetB)
-
             self.mouseString.setStringOffset((ox, oy))
             self.mouseString.updateTextArrayVBOAttribs()
+
+            self.buildMouseCoordsDQ()
 
     def drawMouseCoords(self):
         # if self.underMouse() or self._disableCursorUpdate:  # and self.mouseString:  # crosshairVisible
@@ -4614,6 +4656,9 @@ class CcpnGLWidget(QOpenGLWidget):
             if self.mouseString is not None:
                 # draw the mouse coordinates to the screen
                 self.mouseString.drawTextArrayVBO()
+            if self.mouseStringDQ is not None:
+                self.mouseStringDQ.drawTextArrayVBO()
+
 
     def drawSelectionBox(self):
         # should really use the proper VBOs for this

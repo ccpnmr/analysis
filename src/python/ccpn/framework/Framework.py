@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-08 19:25:50 +0100 (Thu, August 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-12 14:36:38 +0100 (Mon, August 12, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -487,6 +487,7 @@ class Framework(NotifierBase):
             return
 
         if self.preferences.general.checkUpdatesAtStartup and not getattr(self.args, '_skipUpdates', False):
+            sys.stderr.write('==> Checking for updates ...\n')
             self.ui._checkForUpdates()
 
         if not self.ui._checkRegistration():

@@ -116,7 +116,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-09 15:05:40 +0100 (Fri, August 09, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-12 14:36:38 +0100 (Mon, August 12, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -384,7 +384,7 @@ class MenusDefs(Menu):
          Action("Peak Table", self._showPeakTableCallback, shortcut='pt', checkEnabled=_projectHasSpectra),
          Action("Integral Table", self._showIntegralTableCallback, shortcut='it', checkEnabled=_projectHasSpectra),
          Action("Multiplet Table", self._showMultipletTableCallback, shortcut='mt', checkEnabled=_projectHasSpectra),
-         Action("Data Table", self._showDataTableCallback, shortcut='dt'),
+         Action("Data Table", self._showDataTableCallback, shortcut='dt', checkEnabled=_projectHasDataTables),
 
          Separator(),
          Action("Restraint Table", partial(app.showRestraintTable, selectFirstItem=True), shortcut='rt'),
@@ -2094,6 +2094,13 @@ def _projectHasChains(node) -> bool:
     """
     project = getProject()
     return bool(project and project.chains)
+
+
+def _projectHasDataTables(node) -> bool:
+    """callback to test if project has dataTables
+    """
+    project = getProject()
+    return bool(project and project.dataTables)
 
 
 def _hasSpectrumDisplays(node) -> bool:

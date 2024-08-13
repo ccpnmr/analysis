@@ -57,7 +57,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-08-12 15:03:31 +0100 (Mon, August 12, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-13 16:22:43 +0100 (Tue, August 13, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -4475,13 +4475,35 @@ class CcpnGLWidget(QOpenGLWidget):
     def updateVTrace(self, visible):
         self._updateVTrace = visible
 
+    @staticmethod
+    def _valueToRatio(val, x0, x1):
+        if abs(x1 - x0) > 1e-9:
+            return (val - x0) / (x1 - x0)
+        else:
+            return 0.0
+
+    def _ensureOnScreen(self, mx, my, xROff : float = 0, xLOff : float = 0, yTOff : float = 0, yBOff : float = 0) -> list(float, float):
+        """Check the string is constraint to the bounds of the strip
+        :param mx: Crosshair x coordinate
+        :param my: Crosshair y coordinate
+        :param xROff: Offset from right of crosshair
+        :param xLOff: Offset from left of crosshair
+        :param yTOff: Offset from top of crosshair
+        :param yBOff: Offset from bottom of crosshair
+        :return: Offsets - list(ox, oy)
+        """
+        _mouseOffsetR = self._valueToRatio(mx + xROff, self.axisL, self.axisR)
+        _mouseOffsetL = self._valueToRatio(mx + xLOff, self.axisL, self.axisR)
+        ox = -min(max(_mouseOffsetR - 1.0, 0.0), _mouseOffsetL)
+
+        _mouseOffsetT = self._valueToRatio(my + yTOff, self.axisB, self.axisT)
+        _mouseOffsetB = self._valueToRatio(my + yBOff, self.axisB, self.axisT)
+        oy = -min(max(_mouseOffsetT - 1.0, 0.0), _mouseOffsetB)
+
+        return ox, oy
+
     def buildMouseCoordsDQ(self, refresh=False):
         """Builds Mouse Coord text for DQ crosshair."""
-        def valueToRatio(val, x0, x1):
-            if abs(x1 - x0) > 1e-9:
-                return (val - x0) / (x1 - x0)
-            else:
-                return 0.0
         try:
             cursorCoordinate = self.mouseCoordDQ
             mx, my = cursorCoordinate[0], cursorCoordinate[1]
@@ -4495,26 +4517,18 @@ class CcpnGLWidget(QOpenGLWidget):
         self.mouseStringDQ = True
 
         self.mouseStringDQ = GLString(text=newCoords,
-                                    font=smallFont,
-                                    x=valueToRatio(mx - self.pixelX * 85.0, self.axisL, self.axisR),
-                                    y=valueToRatio(my - self.pixelY * self.mouseString.height, self.axisB, self.axisT),
-                                    colour=self.foreground, GLContext=self,
-                                    obj=None)
+                                      font=smallFont,
+                                      x=self._valueToRatio(mx - self.pixelX * 85.0, self.axisL, self.axisR),
+                                      y=self._valueToRatio(my - self.pixelY * self.mouseString.height, self.axisB,
+                                                           self.axisT),
+                                      colour=self.foreground, GLContext=self,
+                                      obj=None)
 
-
-        _offset = self.pixelX * 80.0
-        _mouseOffsetR = valueToRatio(mx, self.axisL, self.axisR)
-        _mouseOffsetL = valueToRatio(mx - _offset, self.axisL, self.axisR)
-        ox = -min(max(_mouseOffsetR - 1.0, 0.0), _mouseOffsetL)
-
-        _offset = self.pixelY * self.mouseString.height
-        _mouseOffsetT = valueToRatio(my, self.axisB, self.axisT)
-        _mouseOffsetB = valueToRatio(my - _offset, self.axisB, self.axisT)
-        oy = -min(max(_mouseOffsetT - 1.0, 0.0), _mouseOffsetB)
-
+        xOff = self.pixelX * 80.0
+        yOff = self.pixelY * self.mouseString.height
+        ox, oy = self._ensureOnScreen(mx, my, xLOff=-xOff, yBOff=-yOff)
         self.mouseStringDQ.setStringOffset((ox, oy))
         self.mouseStringDQ.updateTextArrayVBOAttribs()
-
 
     def buildMouseCoords(self, refresh=False):
         def valueToRatio(val, x0, x1):
@@ -4634,15 +4648,19 @@ class CcpnGLWidget(QOpenGLWidget):
             self._mouseCoords = (cursorCoordinate[0], cursorCoordinate[1])
 
             # check that the string is actually visible, or constraint to the bounds of the strip
-            _offset = self.pixelX * 80.0
-            _mouseOffsetR = valueToRatio(mx + _offset, self.axisL, self.axisR)
-            _mouseOffsetL = valueToRatio(mx, self.axisL, self.axisR)
-            ox = -min(max(_mouseOffsetR - 1.0, 0.0), _mouseOffsetL)
+            # _offset = self.pixelX * 80.0
+            # _mouseOffsetR = valueToRatio(mx + _offset, self.axisL, self.axisR)
+            # _mouseOffsetL = valueToRatio(mx, self.axisL, self.axisR)
+            # ox = -min(max(_mouseOffsetR - 1.0, 0.0), _mouseOffsetL)
+            #
+            # _offset = self.pixelY * self.mouseString.height
+            # _mouseOffsetT = valueToRatio(my + _offset, self.axisB, self.axisT)
+            # _mouseOffsetB = valueToRatio(my, self.axisB, self.axisT)
+            # oy = -min(max(_mouseOffsetT - 1.0, 0.0), _mouseOffsetB)
 
-            _offset = self.pixelY * self.mouseString.height
-            _mouseOffsetT = valueToRatio(my + _offset, self.axisB, self.axisT)
-            _mouseOffsetB = valueToRatio(my, self.axisB, self.axisT)
-            oy = -min(max(_mouseOffsetT - 1.0, 0.0), _mouseOffsetB)
+            xOff = self.pixelX * 80.0
+            yOff = self.pixelY * self.mouseString.height
+            ox, oy = self._ensureOnScreen(mx, my, xROff=xOff, yTOff=yOff)
             self.mouseString.setStringOffset((ox, oy))
             self.mouseString.updateTextArrayVBOAttribs()
 

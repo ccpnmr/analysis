@@ -116,7 +116,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-12 14:36:38 +0100 (Mon, August 12, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-14 17:58:45 +0100 (Wed, August 14, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -148,6 +148,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.Path import aPath
 from ccpn.util.decorators import singleton
 from ccpn.util.Tree import Tree
+from ccpn.util.DataEnum import DataEnum
 
 import ccpn.ui.gui.Layout as Layout
 from ccpn.ui.gui.widgets import MessageDialog
@@ -160,35 +161,27 @@ from ccpn.ui.gui.widgets.Action import Action as ActionWidget
 
 
 FILE_MENU = 'File'
-FILE_OPEN_RECENT = 'Open Recent'
-FILE_LAYOUT = 'Layout'
-FILE_LAYOUT_OPEN_PREDEFINED = 'Open pre-defined'
-
 EDIT_MENU = 'Edit'
-
 VIEW_MENU = 'View'
-VIEW_SHOW_MODULES = 'Show/hide Modules'
-VIEW_CHEMICAL_SHIFT_MAPPING = 'Chemical Shift Mapping (Beta)'
-
+VIEW_CHEMICAL_SHIFT_MAPPING = 'Chemical Shift Mapping (Beta)'  # used in AnalysisAssign
 SPECTRUM_MENU = 'Spectrum'
-SPECTRUM_LOAD_SPECTRA = 'Load Spectra...'
-
 MOLECULES_MENU = 'Molecules'
-
 MACRO_MENU = 'Macro'
-MACRO_RUN_CCPN = 'Run CCPN Macros'
-MACRO_RUN_RECENT = 'Run Recent'
-
 PLUGINS_MENU = 'Plugins'
-USER_PLUGINS = 'User Plugins'
-CCPN_PLUGINS = 'CCPN Plugins'
-
 HELP_MENU = 'Help'
-HELP_TUTORIALS = 'Tutorials'
-HELP_HOWTOS = 'How-Tos'
-
 DEVELOPMENT_MENU = 'Development'
-DEVELOPMENT_DEBUG = 'Debug'
+
+
+class _MenuItemABC():
+    """A class that maintains the name of all Menu items
+    """
+    def __init__(self, name: str):
+        self.name: str = name
+
+    def __str__(self):
+        return f'<{self.__class__.__name__}: {self.name}>'
+
+    __repr__ = __str__
 
 
 class Separator():
@@ -323,7 +316,7 @@ class MenusDefs(Menu):
 
          Separator(),
          Action("Open...", self._openProjectCallback, shortcut='⌃o'),  # Unicode U+2303
-         DynamicMenu(FILE_OPEN_RECENT, callback=_fillFileOpenRecentCallback),
+         DynamicMenu('Open Recent', callback=_fillFileOpenRecentCallback),
          Action("Load Data...", self._loadDataCallback, shortcut='ld'),
 
          Separator(),
@@ -340,7 +333,7 @@ class MenusDefs(Menu):
         ),
 
          Separator(),
-         Menu(FILE_LAYOUT,
+         Menu('Layout',
               Action("Save", self._saveLayoutCallback, checkEnabled=_projectCanBeSaved),
               Action("Save as...", self._saveLayoutAsCallback, checkEnabled=_projectCanBeSaved),
 
@@ -349,7 +342,7 @@ class MenusDefs(Menu):
               Action("Restore from file...", self._restoreLayoutFromFileCallback),
 
               Separator(),
-              DynamicMenu(FILE_LAYOUT_OPEN_PREDEFINED, callback=_fillFilePredefinedLayoutsCallback),
+              DynamicMenu('Open pre-defined', callback=_fillFilePredefinedLayoutsCallback),
               ),
          Action("Summary", self._showProjectSummaryPopup),
 
@@ -425,7 +418,7 @@ class MenusDefs(Menu):
          ),
 
          Separator(),
-         DynamicMenu(VIEW_SHOW_MODULES, callback=_fillViewShowModulesCallback, checkEnabled=_updateShowHideModules),
+         DynamicMenu('Show/hide Modules', callback=_fillViewShowModulesCallback, checkEnabled=_updateShowHideModules),
          Action("Show/hide Sidebar", self._toggleSidebarCallback, shortcut=' s', checkable=True, checked=True),
          Action("Show/hide Python Console", self._toggleConsoleCallback, shortcut='  ', checkable=True, checked=True,
                                             checkEnabled=_updatePythonConsole
@@ -434,7 +427,7 @@ class MenusDefs(Menu):
 
     Menu(SPECTRUM_MENU,
 
-        Action(SPECTRUM_LOAD_SPECTRA, self._loadSpectraCallback, shortcut='ls'),
+        Action('Load Spectra...', self._loadSpectraCallback, shortcut='ls'),
         # Action("Spectrum Groups...", self._spectrumGroupsCallback, shortcut ='ss'), # multiple edit temporarly disabled
         # Separator(),
         Action("Validate Paths...", self._validatePathsCallback, shortcut='vp', checkEnabled=_projectHasSpectra),
@@ -479,7 +472,7 @@ class MenusDefs(Menu):
          Action("Show Residue Information", self._showResidueInformationCallback, shortcut='ri', checkEnabled=_projectHasChains),
          Action("Show Reference Chemical Shifts", self._showReferenceChemicalShiftsCallback, shortcut='rc'),
 
-         ),
+    ),
 
     Menu(MACRO_MENU,
 
@@ -491,8 +484,8 @@ class MenusDefs(Menu):
 
         Separator(),
         Action("Run...", self._runMacroCallback, shortcut='rm'),
-        DynamicMenu(MACRO_RUN_RECENT, callback=_fillMacroRunRecentCallback),
-        DynamicMenu(MACRO_RUN_CCPN, callback=_fillMacroRunCCPNCallback),
+        DynamicMenu('Run Recent', callback=_fillMacroRunRecentCallback),
+        DynamicMenu('Run CCPN Macros', callback=_fillMacroRunCCPNCallback),
 
         Separator(),
         Action("Define Macro Shortcuts...", self._defineUserShortcutsCallback, shortcut='du'),
@@ -501,8 +494,8 @@ class MenusDefs(Menu):
 
     Menu(PLUGINS_MENU,
 
-        DynamicMenu(CCPN_PLUGINS, callback=_fillCCPNPluginsCallback),
-        DynamicMenu(USER_PLUGINS, callback=_fillUserPluginsCallback),
+        DynamicMenu('CCPN Plugins', callback=_fillCCPNPluginsCallback),
+        DynamicMenu('User Plugins', callback=_fillUserPluginsCallback),
 
         Separator(),
         Action("Reload", app._reloadPlugins),
@@ -511,8 +504,8 @@ class MenusDefs(Menu):
 
     Menu(HELP_MENU,
 
-        DynamicMenu(HELP_TUTORIALS, callback=_fillHelpTutorialsCallback),
-        DynamicMenu(HELP_HOWTOS, callback=_fillHelpHowtosCallback),
+        DynamicMenu('Tutorials', callback=_fillHelpTutorialsCallback),
+        DynamicMenu('How-Tos', callback=_fillHelpHowtosCallback),
 
         Section('Handies'),
         Action("Tip of the Day", partial(app._displayTipOfTheDay, standalone=True)),
@@ -539,7 +532,7 @@ class MenusDefs(Menu):
 
         # Development Menu
         _devMenu = Menu(DEVELOPMENT_MENU,
-                        DynamicMenu(DEVELOPMENT_DEBUG, callback=_fillDevelopmentDebugCallback),
+                        DynamicMenu('Debug', callback=_fillDevelopmentDebugCallback),
         )
         # optionally add development menu before Help menu
         if app._isInDebugMode:
@@ -1379,11 +1372,7 @@ class MenusDefs(Menu):
 
     __repr__ = __str__
 
-
 # end class #-----------------------------------------------------------------------------
-
-
-from ccpn.util.DataEnum import DataEnum
 
 
 class NodeType(DataEnum):
@@ -1405,16 +1394,15 @@ class MenuNode(Tree):
 
     """
 
-    def __init__(self, parent,
-                 name: str, nodeType: NodeType,
+    def __init__(self, parent, name: str, nodeType: NodeType,
                  callback: CallableOrNone = None, options: dict = {}):
         """
         Initialise the node
         :param parent: parent node; None denotes root
         :param name: name of the node
         :param nodeType: type of the node
-        :param callback: callback function (for an Action-node)
-        :param options: (keyword,value) options to the Action
+        :param callback: callback function (for an Action or DynamicMenu-node)
+        :param options: (keyword,value) dict of options to the Action
         """
 
         # Make node initially as stand-alone,
@@ -1423,15 +1411,19 @@ class MenuNode(Tree):
 
         self.name: str = name
         self.nodeType = nodeType
+
+        # Actions have a callback function
         self.callback: CallableOrNone = callback
+
+        # Actions (can) have options
         self.options: dict = options
 
-        # Menu nodes can be dynamically filled
-        self.dynamicCallback: CallableOrNone = None
-
-        # Action's can be checked for needing enabling
+        # Action's can be checked by a callback for needing enabling
         self.checkEnable: bool = False
         self.checkEnableCallback: CallableOrNone = None
+
+        # Menu nodes can be dynamically filled and have a callback function
+        self.dynamicCallback: CallableOrNone = None
 
         # The widget associated with this node
         self.widget = None
@@ -1484,14 +1476,6 @@ class MenuNode(Tree):
         return self.nodeType == NodeType.ACTION
 
     #-----------------------------------------------------------------------------------------
-
-    # def setDynamicNode(self, callback: Callable):
-    #     """Make MenuNode a dynamically updated one, defining callback when it is about to show
-    #     :param callback: a function with signature callback(node:MenuNode) -> list
-    #     """
-    #     if not self.isDynamicMenu:
-    #         raise RuntimeError(f'setDynamicNode: invalid for {self}')
-    #     self.dynamicCallback = callback
 
     def clearNode(self):
         """For a dynamic Menu node only:
@@ -1818,6 +1802,7 @@ class MenuManager(object):
 
 
 # end class #-----------------------------------------------------------------------------
+
 
 #-----------------------------------------------------------------------------------------
 # Helper code

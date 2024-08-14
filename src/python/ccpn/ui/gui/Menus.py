@@ -1,5 +1,5 @@
 """
-    The menus are specified by a (recursive) list composed of either:
+    The menus are specified by a (recursive) Menu's (i.e. lists) composed of either:
 
     - Action: triggered when the menu item is selected;
       signature:
@@ -10,8 +10,8 @@
         (name, callable, options) tuple or
         (name, callable, options, checkEnabled) tuple
 
-        options is a dict of (option, value) pairs.
-        Valid options (from Action widget):
+      options is a dict of (option, value) pairs.
+      Valid options (from Action widget):
             :param shortcut: optional two letter shortcut
             :param checked: optional checked flag (if checkable, default: True)
             :param checkable: optional checkable flag (default: False)
@@ -28,9 +28,11 @@
 
     - DynamicMenu: a dynamically filled menu
       Signature:
-        DynamicMenu(name, checkEnabled=None)
+        DynamicMenu(name, callback, checkEnabled=None)
 
         Signature checkEnabled: see above
+        Signature callback:
+            callback(node:MenuNode) -> list
 
     - A section defining operation with signature:
         Section(name)
@@ -116,7 +118,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-14 17:58:45 +0100 (Wed, August 14, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-14 18:44:18 +0100 (Wed, August 14, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -135,7 +137,6 @@ from functools import partial
 from typing import Optional, Callable, Any, TypeAlias
 
 CallableOrNone = Optional[Callable]
-
 
 from ccpn.framework.PathsAndUrls import \
     macroPath, \
@@ -171,11 +172,17 @@ PLUGINS_MENU = 'Plugins'
 HELP_MENU = 'Help'
 DEVELOPMENT_MENU = 'Development'
 
+#-----------------------------------------------------------------------------------------
+# Menu items definitions
+#-----------------------------------------------------------------------------------------
 
 class _MenuItemABC():
-    """A class that maintains the name of all Menu items
+    """A class that maintains the properties of various Menu items; e.g.
+    Separator, Section, Action, Menu and DynamicMenu
     """
     def __init__(self, name: str):
+        if name is None or len(name) == 0:
+            raise ValueError(f'Undefined name for <{self.__class__.__name__}>')
         self.name: str = name
 
     def __str__(self):
@@ -184,37 +191,27 @@ class _MenuItemABC():
     __repr__ = __str__
 
 
-class Separator():
+class Separator(_MenuItemABC):
     """A class for defining a Separator
     """
     def __init__(self):
-        self.name = 'Separator'
-
-    def __str__(self):
-        return f'<{self.__class__.__name__}: {self.name}>'
-
-    __repr__ = __str__
+        super().__init__(name = 'Separator')
 
 
-class Section():
+class Section(_MenuItemABC):
     """A class for defining a Section
     """
     def __init__(self, name: str):
-        self.name = name
-
-    def __str__(self):
-        return f'<{self.__class__.__name__}: {self.name}>'
-
-    __repr__ = __str__
+        super().__init__(name=name)
 
 
-class Action():
+class Action(_MenuItemABC):
     """A class for defining a menu action
     """
     _validOptions = 'shortcut enabled checkable checked icon toolTip'.split()
 
     def __init__(self, name: str, callback: Callable, checkEnabled: CallableOrNone = None, **options):
-        self.name = name
+        super().__init__(name=name)
         self.callback = callback
         self.checkEnabled = checkEnabled
         self.options = self._optionsDict(**options)
@@ -231,36 +228,28 @@ class Action():
             raise ValueError(f'Invalid options: {errors!r}')
         return options
 
-    def __str__(self):
-        return f'<{self.__class__.__name__}: {self.name}>'
 
-    __repr__ = __str__
-
-
-class Menu(list):
-    """A class representing a menu definition
+class Menu(list, _MenuItemABC):
+    """A class representing a list of menu definition
     """
     def __init__(self, name, *items, checkEnabled: CallableOrNone = None):
-        super().__init__(items)
-        self.name = name
+        list.__init__(self, items)
+        _MenuItemABC.__init__(self, name=name)
         self.checkEnabled: CallableOrNone = checkEnabled
         self.callback: CallableOrNone = None
 
-    def __str__(self):
-        return f'<{self.__class__.__name__}: {self.name}>'
 
-    __repr__ = __str__
-
-
-class DynamicMenu(Menu):
+class DynamicMenu(_MenuItemABC):
     """A class representing a dynamic menu definition
     """
     def __init__(self, name, callback: Callable, checkEnabled: CallableOrNone = None):
-        super().__init__(name, checkEnabled=checkEnabled)
         if callback is None:
             raise ValueError(f'DynamicMenu: undefined callback')
+        super().__init__(name=name)
+        self.checkEnabled=checkEnabled
         self.callback = callback
 
+#-----------------------------------------------------------------------------------------
 
 def getMenuDefs():
     """:return The MenuDefs (singleton) instance
@@ -268,36 +257,18 @@ def getMenuDefs():
     app = getApplication()
     return MenusDefs(application=app)
 
+#-----------------------------------------------------------------------------------------
+# Define the actual Menu's
+#-----------------------------------------------------------------------------------------
 
 @singleton
 class MenusDefs(Menu):
-    """A class (list) to implement the menu definitions and callback routines
+    """A Menu class (list) to define the menu definitions and callback routines
     Used by MainWindow to initialise the menuBar
     """
 
-    def __init__(self, application):
-        super().__init__(name='root')
-        self.application = application
-        self._defineMenus()
-
-    @property
-    def project(self):
-        return self.application.project
-
-    @property
-    def current(self):
-        return self.application.current
-
-    @property
-    def mainWindow(self):
-        return self.application.mainWindow
-
-    @property
-    def ui(self):
-        return self.application.ui
-
     def _defineMenus(self):
-        """Set up the menu specification.
+        """Set up the menu specification; called from __init__
         """
         app = self.application
         ui = self.application.ui
@@ -307,8 +278,7 @@ class MenusDefs(Menu):
         self.extend([
 
     #-----------------------------------------------------------------------------------------
-    # The actual Menu definitions
-    #-----------------------------------------------------------------------------------------
+
     Menu(FILE_MENU,
 
          # Unicode U+2303, NOT the carrot on your keyboard.
@@ -530,7 +500,9 @@ class MenusDefs(Menu):
     #-----------------------------------------------------------------------------------------
     ])  # end extend
 
-        # Development Menu
+    #-----------------------------------------------------------------------------------------
+    # Development Menu
+    #-----------------------------------------------------------------------------------------
         _devMenu = Menu(DEVELOPMENT_MENU,
                         DynamicMenu('Debug', callback=_fillDevelopmentDebugCallback),
         )
@@ -1272,6 +1244,27 @@ class MenusDefs(Menu):
     # Implementation methods
     #-----------------------------------------------------------------------------------------
 
+    def __init__(self, application):
+        super().__init__(name='root')
+        self.application = application
+        self._defineMenus()
+
+    @property
+    def project(self):
+        return self.application.project
+
+    @property
+    def current(self):
+        return self.application.current
+
+    @property
+    def mainWindow(self):
+        return self.application.mainWindow
+
+    @property
+    def ui(self):
+        return self.application.ui
+
     def insertAfter(self, menuKeys: list, menuDef: list):
         """Insert menuDef after the menu/action/section defined by menuKeys, i.e. a list
         of names or indices that recursively define the menu;
@@ -1727,7 +1720,7 @@ class MenuNode(Tree):
             print(f'{tabs}{_name!r:25}  (level={node.level}, type={node.nodeType.description}) {_options}')
 
             if node.isDynamicMenu and len(node._children) == 0:
-                print(f'{tabs}\t>>> dynamically filled')
+                print(f'{tabs}\t--> dynamically filled ({node.dynamicCallback})')
 
     def __str__(self):
         return f'<MenuNode: {self.name!r} (level={self.level}, type={self.nodeType.description}, checkEnable={self.checkEnable})>'

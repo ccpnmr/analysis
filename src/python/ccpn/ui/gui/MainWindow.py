@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-07-30 16:39:18 +0100 (Tue, July 30, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-17 11:54:50 +0100 (Sat, August 17, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -54,8 +54,6 @@ from ccpn.ui.gui.lib.mouseEvents import SELECT, PICK, MouseModes, \
 from ccpn.ui.gui.lib import GuiStrip
 from ccpn.ui.gui.lib.Shortcuts import Shortcuts
 from ccpn.ui.gui.guiSettings import getColours
-
-from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 
 from ccpn.ui.gui.widgets.PlotterWidget import plotter
 from ccpn.ui.gui.widgets.Icon import Icon
@@ -1365,6 +1363,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         """
         Displays macro editor with contents of the log.
         """
+        from ccpn.ui.gui.modules.MacroEditor import MacroEditor
+
         editor = MacroEditor(self.moduleArea, self, "Macro Editor")
         with open(self.project._logger.logPath, 'r') as fp:
             l = fp.readlines()
@@ -2546,6 +2546,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         # GWV: Somehow the code (Layout restore?) cannot deal with the PythonConsoleModule
         # being initialised by MainWindow, but hidden until needed. So we initialise it here
         # if there is not PythonConsoleModule
+        from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
+
         _init = False
         if self.pythonConsoleModule is None:
             # No pythonConsole module detected, so create one.

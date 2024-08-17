@@ -5,8 +5,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-05-29 12:23:22 +0100 (Wed, May 29, 2024) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-08-17 11:54:50 +0100 (Sat, August 17, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -33,6 +34,8 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
+
+from ccpn.util.Logging import getLogger
 
 # Width?
 # Allow setting of max length based on data model?
@@ -90,7 +93,8 @@ class Entry(QtWidgets.QLineEdit, Base):
         self.textEdited.connect(self.validate)
 
         self.allowFeedback = allowFeedback
-        self.validator = validator
+        if validator is not None:
+            self.setValidator(validator)
         self.feedback = None
 
     def setValidator(self, a0):
@@ -114,7 +118,22 @@ class Entry(QtWidgets.QLineEdit, Base):
             self.feedback = False
             return
 
-        validity = self.validator.validate(self.text(), 0)[0]
+        # GWV says FIXME
+        _validator = None
+        try:
+            _validator = self.validator()
+        except Exception as es:
+            getLogger().debug(f'Entry.validate(): failed on validator() call; {es}')
+            _validator = getattr(self, 'validator', None)
+
+        if _validator is None:
+            getLogger().debug(f'Entry.validate(): failed on obtaining validator')
+            self.feedback = False
+            validity = 0
+
+        else:
+            validity = _validator.validate(self.text(), 0)[0]
+
         if validity != 2:
             self.feedback = True
         else:

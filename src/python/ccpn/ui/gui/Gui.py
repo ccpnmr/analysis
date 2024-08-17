@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-08 19:25:50 +0100 (Thu, August 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-17 11:54:50 +0100 (Sat, August 17, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1232,40 +1232,47 @@ class Gui(Ui, _Gui):
     # View
     #-----------------------------------------------------------------------------------------
 
-    def _showModule(self, moduleClass, position: str = 'bottom', selection: typing.Any = None, selectFirstItem=True):
+    def _showModule(self, moduleClass, position: str = 'bottom', relativeTo = None,
+                    selection: typing.Any = None, selectFirstItem: bool = True):
         """Helper function to avoid code duplication.
         Initiate and add an instance of moduleClass; optionally call setTable with selection
-        :param moduleClass: module class to display and instance
+        :param moduleClass: module class to display an instance
         :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
+        :param relativeTo: module relative to which position is applied.
         :param selection: optional entry to select
+        :param selectFirstItem: flag to select first item
         :return a new ModuleClass instance
         """
         if not issubclass(moduleClass, CcpnModule):
             raise TypeError(f'Expected subclass of {CcpnModule}; got {moduleClass}')
 
         _module = moduleClass(mainWindow=self.mainWindow, selectFirstItem=selectFirstItem)
-        self.mainWindow._addModule(_module, position=position)
+        self.mainWindow._addModule(_module, position=position, relativeTo=relativeTo)
         if selection:
             _module.selectTable(selection)
         return _module
 
     @logCommand('ui.')
-    def showChemicalShiftTable(self, position: str = 'bottom', chemicalShiftList=None):
+    def showChemicalShiftTable(self, position: str = 'bottom', relativeTo = None, chemicalShiftList=None):
         """Show the ChemicalShiftTable module
         :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
+        :param relativeTo: module relative to which position is applied.
         :param chemicalShiftList: optional ChemicalShiftList to display
         """
         from ccpn.ui.gui.modules.ChemicalShiftTable import ChemicalShiftTableModule
-        return self._showModule(ChemicalShiftTableModule, position=position, selection=chemicalShiftList)
+        return self._showModule(ChemicalShiftTableModule, position=position, relativeTo=relativeTo,
+                                selection=chemicalShiftList)
 
     @logCommand('ui.')
-    def showNmrResidueTable(self, position='bottom', nmrChain=None):
+    def showNmrResidueTable(self, position='bottom', relativeTo = None, nmrChain=None):
         """Show the NmrResidueTable module
         :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
+        :param relativeTo: module relative to which position is applied.
         :param nmrChain: optional NmrChain with NmrResidue's to display
         """
         from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTableModule
-        return self._showModule(NmrResidueTableModule, position=position, selection=nmrChain)
+        return self._showModule(NmrResidueTableModule, position=position, relativeTo=relativeTo,
+                                selection=nmrChain)
 
     @logCommand('ui.')
     def showResidueTable(self, position='bottom', chain=None):

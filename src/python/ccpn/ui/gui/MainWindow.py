@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-19 14:19:24 +0100 (Mon, August 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-19 15:06:22 +0100 (Mon, August 19, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -618,11 +618,11 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         Creates menu bar for main window and creates the appropriate menus according to the arguments
         passed at startup.
         """
-        from ccpn.ui.gui.menus.Menus import MenuManager
+        from ccpn.ui.gui.menus.MenuBarManager import MenuBarManager
 
         _useNativeMenus = getPreferences().get(USE_NATIVE_MENUS)
-        self._menuManager = MenuManager(mainWindow=self, menuDefs=self.ui._menuDefs)
-        self._menuManager.makeMenus(useNativeMenus=_useNativeMenus)
+        self._menuBarManager = MenuBarManager(mainWindow=self, menuDefs=self.ui._menuDefs)
+        self._menuBarManager.makeMenus(useNativeMenus=_useNativeMenus)
 
     #     # self._menuBar = self.menuBar()
     #     # for m in self.ui._menuDefs:

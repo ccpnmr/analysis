@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-19 13:58:06 +0100 (Mon, August 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-19 14:19:24 +0100 (Mon, August 19, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -28,7 +28,6 @@ __date__ = "$Date: 2017-03-16 18:20:01 +0000 (Thu, March 16, 2017) $"
 #=========================================================================================
 
 import sys
-import os
 import typing
 import re
 import platform
@@ -48,7 +47,6 @@ from ccpn.core.lib.ContextManagers import (
 from ccpn.ui.Ui import Ui
 from ccpn.ui.gui import Layout
 from ccpn.ui.gui.guiSettings import LIGHT, DARK
-from ccpn.ui.gui.Menus import getMenuDefs
 
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 
@@ -217,7 +215,7 @@ class Gui(Ui, _Gui):
         """:return the MenuDefs instance
         Subclassed for modification in various AnalysisAssign, AnalysisScreen, ... programmes
         """
-        from ccpn.ui.gui.Menus import getMenuDefs
+        from ccpn.ui.gui.menus.Menus import getMenuDefs
 
         return getMenuDefs()
 
@@ -849,7 +847,6 @@ class Gui(Ui, _Gui):
 
         :returns project instance or None
         """
-        from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
         from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
 

@@ -5,8 +5,9 @@ Module Documentation Here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:55 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-08-19 14:19:25 +0100 (Mon, August 19, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,21 +28,18 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import os
-import shutil
 import numpy as np
 import pandas as pd
 import pyqtgraph as pg
-import ccpn.ui.gui.widgets as Widgets
 from functools import partial
 from collections import OrderedDict as od
 import ccpn.ui.gui.guiSettings as gs
 import ccpn.ui.gui.lib.mouseEvents as me
-import ccpn.ui.gui.lib.GuiStripContextMenus as cm
-from PyQt5 import QtCore, QtGui, QtWidgets
-from ccpn.util.Colour import hexToRgb, hexToRgba, rgbaRatioToHex, darkDefaultSpectrumColours, hexToRgbaArray
+import ccpn.ui.gui.menus.StripContextMenus as cm
+from PyQt5 import QtCore
+from ccpn.util.Colour import hexToRgb, rgbaRatioToHex, hexToRgbaArray
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.lib.MenuActions import _openItemObject
 from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.Frame import Frame
@@ -49,12 +47,10 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.CallBack import CallBack
-from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight
-from ccpn.ui.gui.widgets.Font import Font, DEFAULTFONTNAME, DEFAULTFONTSIZE, getFontHeight, getFont
-from ccpn.util.Common import _getObjectsByPids, splitDataFrameWithinRange
-from ccpn.util.OrderedSet import OrderedSet
-from ccpn.ui.gui.widgets.Icon import Icon, ICON_DIR
+from ccpn.ui.gui.widgets.Font import setWidgetFont
+from ccpn.ui.gui.widgets.Font import getFont
+from ccpn.util.Common import _getObjectsByPids
+from ccpn.ui.gui.widgets.Icon import ICON_DIR
 from ccpn.ui.gui.widgets import MessageDialog
 
 

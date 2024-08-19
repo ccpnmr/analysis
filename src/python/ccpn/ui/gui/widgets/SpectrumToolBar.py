@@ -5,8 +5,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-06-14 13:40:58 +0100 (Fri, June 14, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-19 14:19:25 +0100 (Mon, August 19, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -27,7 +28,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from functools import partial
-from contextlib import contextmanager
 from collections import OrderedDict
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -39,7 +39,7 @@ from ccpn.core.Spectrum import Spectrum
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.MultipletList import MultipletList
 
-from ccpn.framework.Application import getApplication, getCurrent, getProject
+from ccpn.framework.Application import getCurrent, getProject
 
 from ccpn.ui._implementation.PeakListView import PeakListView
 from ccpn.ui._implementation.IntegralListView import IntegralListView
@@ -50,10 +50,10 @@ from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 from ccpn.ui.gui.lib.GuiSpectrumView import _spectrumViewHasChanged
-from ccpn.ui.gui.lib.GuiStripContextMenus import _SCMitem, ItemTypes, ITEM, _addMenuItems, _createMenu, _separator
+from ccpn.ui.gui.menus.StripContextMenus import _SCMitem, ItemTypes, ITEM, _addMenuItems
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
-from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXFOREGROUND, CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_HEXHIGHLIGHT, \
-    getColours, BORDERNOFOCUS_COLOUR
+from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXHIGHLIGHT, \
+    getColours
 
 from ccpn.util import Colour
 
@@ -486,7 +486,6 @@ class SpectrumToolBar(ToolBar):
     def _setupAction(self, spectrumView):
         """Create and setup a new action attached to the spectrum
         """
-        import traceback
 
         spectrum = spectrumView.spectrum
         spectrumName = spectrum.name

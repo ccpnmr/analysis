@@ -1,43 +1,12 @@
-
-import sys
 import os
-import typing
-import re
-import platform
 import subprocess
 
-from PyQt5 import QtWidgets, QtCore, QtGui
-
-from ccpn.core.Project import Project
-
-from ccpn.framework.Application import getApplication
-from ccpn.framework.PathsAndUrls import CCPN_DIRECTORY_SUFFIX, CCPN_SAVEAS_SUB_DIRECTORIES
-from ccpn.framework.lib.DataLoaders.DataLoaderABC import _checkPathForDataLoader
-
-from ccpn.core.lib.ContextManagers import notificationEchoBlocking, catchExceptions, \
-    logCommandManager, undoStackBlocking
-
-from ccpn.ui.Ui import Ui
-from ccpn.ui.gui import Layout
-from ccpn.ui.gui.guiSettings import LIGHT, DARK
-from ccpn.ui.gui.Menus import getMenuDefs
-
-from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup, NewTermsConditionsPopup
-from ccpn.ui.gui.widgets.Application import Application
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets import FileDialog
-from ccpn.ui.gui.widgets.Font import getSystemFonts
-from ccpn.ui.gui.popups.ImportStarPopup import StarImporterPopup
 
 # This import initializes relative paths for QT style-sheets.  Do not remove! GWV ????
-from ccpn.ui.gui.guiSettings import FontSettings, consoleStyle
-from ccpn.ui.gui.widgets.Font import getFontHeight
-from ccpn.ui.gui.widgets.Icon import Icon
 
 from ccpn.util.Logging import getLogger
-from ccpn.util import Logging
-from ccpn.util import Register
-from ccpn.util.Path import aPath, Path
+from ccpn.util.Path import aPath
 from ccpn.util.decorators import logCommand
 
 

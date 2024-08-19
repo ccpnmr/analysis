@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-17 11:54:50 +0100 (Sat, August 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-19 14:19:24 +0100 (Mon, August 19, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -29,20 +29,17 @@ __date__ = "$Date: 2023-01-24 10:28:48 +0000 (Tue, January 24, 2023) $"
 
 import os
 import time
-from functools import partial
 
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtGui import QKeySequence
 from PyQt5.QtCore import pyqtSlot
 
-from ccpn.core import Multiplet
 from ccpn.util import Logging
 from ccpn.core.Project import Project
 
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
 
-from ccpn.framework.Preferences import getPreferences, RECENT_MACROS, USE_NATIVE_MENUS
+from ccpn.framework.Preferences import getPreferences, USE_NATIVE_MENUS
 
 ## MainWindow class
 from ccpn.ui._implementation.Window import Window as _CoreClassMainWindow
@@ -67,7 +64,6 @@ from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 from ccpn.ui.gui.widgets.Label import Label, ActiveLabel
 from ccpn.ui.gui.widgets.MessageDialog import showWarning, progressManager, showInfo, showError
-from ccpn.util.Common import camelCaseToString
 
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
@@ -622,7 +618,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         Creates menu bar for main window and creates the appropriate menus according to the arguments
         passed at startup.
         """
-        from ccpn.ui.gui.Menus import MenuManager
+        from ccpn.ui.gui.menus.Menus import MenuManager
 
         _useNativeMenus = getPreferences().get(USE_NATIVE_MENUS)
         self._menuManager = MenuManager(mainWindow=self, menuDefs=self.ui._menuDefs)
@@ -1472,7 +1468,6 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         # use an undoBlockWithoutSideBar, and ignore logging if MAXITEMLOGGING or more items
         # to stop overloading of the log
 
-        from ccpn.framework.lib.DataLoaders.DataLoaderABC import _getPotentialDataLoaders
         from ccpn.ui.gui.widgets.SideBar import SideBar
 
         urls = [str(url) for url in data.get(DropBase.URLS, []) if len(url) > 0]
@@ -1763,7 +1758,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         """Peak: take self.application.currentPeak as default
         """
 
-        from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking, undoBlockWithoutSideBar
+        from ccpn.core.lib.ContextManagers import notificationEchoBlocking, undoBlockWithoutSideBar
 
         with undoBlockWithoutSideBar():
             with notificationEchoBlocking():
@@ -1820,7 +1815,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         """
         Recalculates the peak height without changing the ppm position
         """
-        from ccpn.core.lib.peakUtils import estimateVolumes, updateHeight
+        from ccpn.core.lib.peakUtils import updateHeight
 
         getLogger().info('Recalculating peak height(s).')
 
@@ -1873,7 +1868,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         """Estimate volumes of peaks selected by right-mouse menu
         If clicking on a selected peak then apply to all selected, otherwise apply to clicked peaks
         """
-        from ccpn.core.lib.peakUtils import estimateVolumes, updateHeight
+        from ccpn.core.lib.peakUtils import estimateVolumes
 
         current = self.application.current
         peaks = current.peaks

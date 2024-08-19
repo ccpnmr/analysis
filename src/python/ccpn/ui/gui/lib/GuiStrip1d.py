@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-05 12:24:47 +0100 (Fri, July 05, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-08-19 14:19:24 +0100 (Mon, August 19, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -28,8 +28,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtWidgets
-from ccpn.util.Colour import hexToRgbRatio
-from functools import partial
 from ccpn.core.PeakList import PeakList
 from ccpn.util import Phasing
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, \
@@ -37,7 +35,7 @@ from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, \
 from ccpn.ui.gui.widgets.PlaneToolbar import StripHeaderWidget, StripLabelWidget
 import numpy as np
 from ccpn.util.Logging import getLogger
-from ccpn.ui.gui.lib.GuiStripContextMenus import _get1dPhasingMenu, _get1dDefaultMenu, \
+from ccpn.ui.gui.menus.StripContextMenus import _get1dPhasingMenu, _get1dDefaultMenu, \
     _get1dPeakMenu, _get1dIntegralMenu, _get1dMultipletMenu, _get1dAxisMenu
 from ccpn.ui.gui.widgets.Frame import OpenGLOverlayFrame
 from ccpn.ui.gui.widgets.Spacer import Spacer

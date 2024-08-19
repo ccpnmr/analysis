@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-17 11:54:50 +0100 (Sat, August 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-19 13:58:06 +0100 (Mon, August 19, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -976,16 +976,22 @@ class _openItemChemicalShiftListTable(OpenItemABC):
 
 
 class _openItemPeakListTable(OpenItemABC):
+    useApplication = False
+    useUi = True
     openItemMethod = 'showPeakTable'
     objectArgumentName = 'peakList'
 
 
 class _openItemIntegralListTable(OpenItemABC):
+    useApplication = False
+    useUi = True
     openItemMethod = 'showIntegralTable'
     objectArgumentName = 'integralList'
 
 
 class _openItemMultipletListTable(OpenItemABC):
+    useApplication = False
+    useUi = True
     openItemMethod = 'showMultipletTable'
     objectArgumentName = 'multipletList'
 
@@ -1035,6 +1041,8 @@ class _openItemNmrClass(OpenItemABC):
 
 
 class _openItemNmrChainTable(_openItemNmrClass):
+    useApplication = False
+    useUi = True
     openItemMethod = 'showNmrResidueTable'
     objectArgumentName = 'nmrChain'
 
@@ -1108,6 +1116,8 @@ class _openItemAtomItem(OpenItemABC):
 
 
 class _openItemChainTable(OpenItemABC):
+    useApplication = False
+    useUi = True
     openItemMethod = 'showResidueTable'
     objectArgumentName = 'chain'
 
@@ -1431,6 +1441,8 @@ class _openItemStructureEnsembleTable(OpenItemABC):
 
 
 class _openItemDataTable(OpenItemABC):
+    useApplication = False
+    useUi = True
     openItemMethod = 'showDataTable'
     objectArgumentName = 'dataTable'
 

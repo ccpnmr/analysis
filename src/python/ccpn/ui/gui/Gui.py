@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-17 11:54:50 +0100 (Sat, August 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-19 13:58:06 +0100 (Mon, August 19, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1275,22 +1275,25 @@ class Gui(Ui, _Gui):
                                 selection=nmrChain)
 
     @logCommand('ui.')
-    def showResidueTable(self, position='bottom', chain=None):
+    def showResidueTable(self, position='bottom', relativeTo = None, chain=None):
         """Show the ResidueTable module
         :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
-        :param chain: optional chain with Residue's to display
+        :param relativeTo: module relative to which position is applied.
+       :param chain: optional chain with Residue's to display
         """
         from ccpn.ui.gui.modules.ResidueTable import ResidueTableModule
-        return self._showModule(ResidueTableModule, position=position, selection=chain)
+        return self._showModule(ResidueTableModule, position=position, relativeTo=relativeTo,
+                                selection=chain)
 
     @logCommand('ui.')
-    def showPeakTable(self, position='bottom', peakList=None):
+    def showPeakTable(self, position='bottom', relativeTo = None, peakList=None):
         """Show the PeakTable module
         :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
+        :param relativeTo: module relative to which position is applied.
         :param peakList: optional peakList with Peaks to display; default derived from current.peaks
         """
         from ccpn.ui.gui.modules.PeakTable import PeakTableModule
-        _module = self._showModule(PeakTableModule, position=position)
+        _module = self._showModule(PeakTableModule, position=position, relativeTo=relativeTo)
         if not peakList and self.current.peak:
             peakList = self.current.peak.peakList
         if peakList:
@@ -1298,58 +1301,67 @@ class Gui(Ui, _Gui):
             _module.selectPeaks(self.current.peaks)
 
     @logCommand('ui.')
-    def showIntegralTable(self, position='bottom', integralList=None):
+    def showIntegralTable(self, position='bottom', relativeTo = None, integralList=None):
         """Show the IntegralTable module
         :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
+        :param relativeTo: module relative to which position is applied.
         :param integralList: optional integralList to display
         """
         from ccpn.ui.gui.modules.IntegralTable import IntegralTableModule
         return self._showModule(IntegralTableModule, position=position, selection=integralList)
 
     @logCommand('ui.')
-    def showMultipletTable(self, position='bottom', multipletList=None):
+    def showMultipletTable(self, position='bottom', relativeTo = None, multipletList=None):
         """Show the MultipletTable module
         :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
+        :param relativeTo: module relative to which position is applied.
         :param multipletList: optional multipletList to display
         """
         from ccpn.ui.gui.modules.MultipletTable import MultipletTableModule
-        return self._showModule(MultipletTableModule, position=position, selection=multipletList)
+        return self._showModule(MultipletTableModule, position=position, relativeTo=relativeTo,
+                                selection=multipletList)
 
     @logCommand('ui.')
-    def showDataTable(self, position='bottom', dataTable=None):
+    def showDataTable(self, position='bottom', relativeTo = None, dataTable=None):
         """Show the DataTable module
         :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
+        :param relativeTo: module relative to which position is applied.
         :param dataTable: optional dataTable to display
         """
         from ccpn.ui.gui.modules.DataTableModule import DataTableModule
-        return self._showModule(DataTableModule, position=position, selection=dataTable)
+        return self._showModule(DataTableModule, position=position, relativeTo=relativeTo,
+                                selection=dataTable)
 
     @logCommand('ui.')
-    def showRestraintAnalysisInspector(self, position: str = 'bottom', peakList=None):
+    def showRestraintAnalysisInspector(self, position: str = 'bottom', relativeTo=None, peakList=None):
         """Show the RestraintAnalysis Inspector.
         :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
+        :param relativeTo: module relative to which position is applied.
         :param peakList: optional PeakList to populate the module
         """
         from ccpn.ui.gui.modules.RestraintAnalysisTable import RestraintAnalysisTableModule
-        _module = self._showModule(RestraintAnalysisTableModule, position=position)
+        _module = self._showModule(RestraintAnalysisTableModule, position=position, relativeTo=relativeTo)
         if peakList:
             _module.selectPeakList(peakList)
         return _module
 
-    def showChemicalShiftMapping(self, position: str = 'top'):
+    def showChemicalShiftMapping(self, position: str = 'top', relativeTo = None):
         """Show the ChemicalShiftMapping module
         :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
+        :param relativeTo: module relative to which position is applied.
         """
         from ccpn.ui.gui.modules.experimentAnalysis.ChemicalShiftMappingGuiModule import ChemicalShiftMappingGuiModule
-        return self._showModule(ChemicalShiftMappingGuiModule, position=position)
+        return self._showModule(ChemicalShiftMappingGuiModule, position=position, relativeTo=relativeTo)
 
     #-----------------------------------------------------------------------------------------
     # Molecules
     #-----------------------------------------------------------------------------------------
 
     @logCommand('ui.')
-    def showResidueInformation(self, position='bottom'):
+    def showResidueInformation(self, position='bottom', relativeTo = None):
         """Displays Residue Information module.
+        :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
+        :param relativeTo: module relative to which position is applied.
         """
         from ccpn.ui.gui.modules.ResidueInformation import ResidueInformation
 
@@ -1361,17 +1373,19 @@ class Gui(Ui, _Gui):
             return
 
         _module = ResidueInformation(mainWindow=self.mainWindow)
-        self.mainWindow._addModule(_module, position=position)
+        self.mainWindow._addModule(_module, position=position, relativeTo=relativeTo)
         return _module
 
     @logCommand('ui.')
-    def showReferenceChemicalShifts(self, position='left'):
+    def showReferenceChemicalShifts(self, position='left', relativeTo = None):
         """Displays Reference Chemical Shifts module.
-        """
+        :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
+        :param relativeTo: module relative to which position is applied.
+       """
         from ccpn.ui.gui.modules.ReferenceChemicalShifts import ReferenceChemicalShifts
 
         _module = ReferenceChemicalShifts(mainWindow=self.mainWindow)
-        self.mainWindow._addModule(_module, position=position)
+        self.mainWindow._addModule(_module, position=position, relativeTo=relativeTo)
         return _module
 
     #-----------------------------------------------------------------------------------------

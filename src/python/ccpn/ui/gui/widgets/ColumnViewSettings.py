@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-17 14:54:47 +0100 (Sat, August 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-19 13:56:37 +0100 (Mon, August 19, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -58,8 +58,10 @@ class ColumnViewSettingsPopup(CcpnDialogMainWidget):
         # initialise the buttons and dialog size
         self._postInit()
 
-    def getHiddenColumns(self):
-        return self.widgetColumnViewSettings.hiddenColumns
+    def getHiddenColumns(self) -> list:
+        # GWV had attribute errors. patched it and says FIXME
+        _collumns = getattr(self.widgetColumnViewSettings, 'hiddenColumns', [])
+        return _collumns
 
     # def setHiddenColumns(self, texts):
     #     self.widgetColumnViewSettings._hiddenColumns = texts
@@ -131,7 +133,7 @@ class ColumnViewSettings(Frame):
     def _initCheckBoxes(self):
         i = 1
         if columns := list(self._df.columns):
-
+            # gwv had attribute errors; patched and says FIXME
             hiddenColumns = getattr(self.tableHandler, 'hiddenColumns', [])
 
             for i, colum in enumerate(columns):

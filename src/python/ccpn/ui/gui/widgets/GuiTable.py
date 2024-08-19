@@ -5,8 +5,9 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-17 13:47:45 +0100 (Fri, May 17, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-08-19 13:57:29 +0100 (Mon, August 19, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -391,11 +392,11 @@ class GuiTable(TableWidget, Base):
 
         # enable the right click menu
         self.searchWidget = None
-        self._setHeaderContextMenu()
         self._enableExport = enableExport
         self._enableDelete = enableDelete
-        self._setContextMenu()
         self._enableSearch = enableSearch
+        self._setHeaderContextMenu()
+        self._setContextMenu()
         self._rightClickedTableItem = None  # last selected item in a table before raising the context menu. Enabled with mousePress event filter
 
         # populate if a dataFrame has been passed in
@@ -1339,7 +1340,7 @@ class GuiTable(TableWidget, Base):
 
     def _setContextMenu(self):
         self.tableMenu = Menu('', self, isFloatWidget=True)
-        setWidgetFont(self.tableMenu, )
+        setWidgetFont(widget=self.tableMenu, )
         self.tableMenu.addAction("Copy clicked cell value", self._copySelectedCell)
         if self._enableExport:
             self.tableMenu.addAction("Export Visible Table", partial(self.exportTableDialog, exportAll=False))

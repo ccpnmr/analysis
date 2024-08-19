@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-19 14:19:24 +0100 (Mon, August 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-19 15:20:00 +0100 (Mon, August 19, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -215,7 +215,7 @@ class Gui(Ui, _Gui):
         """:return the MenuDefs instance
         Subclassed for modification in various AnalysisAssign, AnalysisScreen, ... programmes
         """
-        from ccpn.ui.gui.menus.Menus import getMenuDefs
+        from ccpn.ui.gui.menus.MenuDefs import getMenuDefs
 
         return getMenuDefs()
 

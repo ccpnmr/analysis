@@ -79,7 +79,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-19 15:06:22 +0100 (Mon, August 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-20 08:54:30 +0100 (Tue, August 20, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -103,14 +103,12 @@ from ccpn.framework.PathsAndUrls import \
     macroPath, \
     widgetsPath, \
     CCPN_ARCHIVES_DIRECTORY
-from ccpn.framework.Application import getApplication, getProject, getCurrent
+from ccpn.framework.Application import getApplication, getProject, getCurrent, _ApplicationProperties
 
 from ccpn.util.Common import isWindowsOS
 from ccpn.util.Logging import getLogger
 from ccpn.util.Path import aPath
 from ccpn.util.decorators import singleton
-from ccpn.util.Tree import Tree
-from ccpn.util.DataEnum import DataEnum
 
 import ccpn.ui.gui.Layout as Layout
 from ccpn.ui.gui.widgets import MessageDialog
@@ -118,11 +116,9 @@ from ccpn.ui.gui.widgets.FileDialog import \
     ArchivesFileDialog, \
     LayoutsFileDialog, \
     NMRStarFileDialog
-from ccpn.ui.gui.widgets.Menu import Menu as MenuWidget
-from ccpn.ui.gui.widgets.Action import Action as ActionWidget
+
 
 from ccpn.ui.gui.menus._MenuItems import Menu, Action, Section, Separator, DynamicMenu
-from ccpn.ui.gui.menus._MenuNode import MenuNode
 
 
 FILE_MENU = 'File'
@@ -140,15 +136,14 @@ DEVELOPMENT_MENU = 'Development'
 def getMenuDefs():
     """:return The MenuDefs (singleton) instance
     """
-    app = getApplication()
-    return MenusDefs(application=app)
+    return MenusDefs()
 
 #-----------------------------------------------------------------------------------------
 # Define the actual Menu of the MenuBar
 #-----------------------------------------------------------------------------------------
 
 @singleton
-class MenusDefs(Menu):
+class MenusDefs(Menu, _ApplicationProperties):
     """A Menu class (list) to define the menu definitions and callback routines
     Used by MainWindow to initialise the menuBar
 
@@ -1134,26 +1129,10 @@ class MenusDefs(Menu):
     # Implementation methods
     #-----------------------------------------------------------------------------------------
 
-    def __init__(self, application):
+    def __init__(self):
         super().__init__(name='root')
-        self.application = application
+        _ApplicationProperties.__init__(self)
         self._defineMenus()
-
-    @property
-    def project(self):
-        return self.application.project
-
-    @property
-    def current(self):
-        return self.application.current
-
-    @property
-    def mainWindow(self):
-        return self.application.mainWindow
-
-    @property
-    def ui(self):
-        return self.application.ui
 
     def insertAfter(self, menuKeys: list, menuDef: list):
         """Insert menuDef after the menu/action/section defined by menuKeys, i.e. a list

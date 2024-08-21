@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-08-19 16:41:28 +0100 (Mon, August 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-21 11:50:34 +0100 (Wed, August 21, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1041,11 +1041,16 @@ class _commonSettings():
     def _fillAllSpectrumFrame(self, displays, data=None):
         """Populate all spectrumFrames into a moreLessFrame
         """
-        def _codeDictUpdate(args):
-            display, box = args
-            if not self.axisCodeOptionsDict.get(f'{display}'):
-                self.axisCodeOptionsDict[f'{display}'] = {}
-            self.axisCodeOptionsDict[f'{display}'][box.text()] = box.isChecked()
+        def _codeDictUpdate(displayKey : str = None, checkBox : CheckBox = None):
+            """
+
+            """
+            if (display is None) or (box is None):
+                return
+
+            if not self.axisCodeOptionsDict.get(displayKey):
+                self.axisCodeOptionsDict[displayKey] = {}
+            self.axisCodeOptionsDict[displayKey] = checkBox.parent().getSelectedIndexes()
 
         from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
 
@@ -1075,14 +1080,14 @@ class _commonSettings():
                                          callback=self._changeAxisCode, grid=(f_row,1))
             axisCodeOptions.setCheckBoxes(texts=axisLabels, tipTexts=axisLabels)
             for box in axisCodeOptions.checkBoxes:
-                box.stateChanged.connect(partial(_codeDictUpdate, (display, box)))
+                box.stateChanged.connect(partial(_codeDictUpdate, f'{display}', box))
 
-            if displayDict := self.axisCodeOptionsDict.get(f'{display}'):
-                for box in axisCodeOptions.checkBoxes:
-                    try:
-                        box.setChecked(displayDict[box.text()])
-                    except KeyError:
-                        continue
+            if (displayDict := self.axisCodeOptionsDict.get(f'{display}')) is not None:
+                # if checkboxes previously existed set to same state
+                axisCodeOptions.selectAll()
+                for ii, box in enumerate(axisCodeOptions.checkBoxes):
+                    if ii not in displayDict:
+                        box.setChecked(False)
             else:
                 # just clear the 'C' axes - this is the usual configuration
                 axisCodeOptions.selectAll()
@@ -1351,7 +1356,6 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
 
             # self.spectrumDisplayPulldown.setTexts(['> All <'] + list(self.spectrumDisplayPulldown.getTexts()))
 
-
         # add a spacer in the bottom-right corner to stop everything moving
         rows = self.getLayout().rowCount()
         cols = self.getLayout().columnCount()
@@ -1453,6 +1457,7 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
     def _spectrumViewChanged(self, data):
         """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame
         """
+        # TODO
         if self.includeSpectrumTable:
             # self._fillSpectrumFrame(self.displaysWidget._getDisplays())
             gid = self.spectrumDisplayPulldown.getText()

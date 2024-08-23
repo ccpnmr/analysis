@@ -57,7 +57,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-24 18:05:24 +0100 (Wed, July 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-23 19:23:56 +0100 (Fri, August 23, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -219,62 +219,26 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self._preferences = self.application.preferences.general
         self.globalGL = None
-
         self.stripIDLabel = stripIDLabel or ''
-
         self.setMouseTracking(True)  # generate mouse events when button not pressed
 
         # always respond to mouse events
         self.setFocusPolicy(Qt.StrongFocus)
-
         # initialise all attributes
         self._initialiseAll()
 
         # set a minimum size so that the strips resize nicely
         self.setMinimumSize(self.AXIS_MARGINRIGHT + 10, self.AXIS_MARGINBOTTOM + 10)
-
         # initialise the pyqt-signal notifier
         self.GLSignals = GLNotifier(parent=self, strip=strip)
-
         self.lastPixelRatio = None
-
-        #     # Tell the window that we accept touch events.
-        #     self.setAttribute(Qt.WA_AcceptTouchEvents, True)
-        #     self.setAttribute(Qt.WA_TouchPadAcceptSingleTouchEvents, True)
-        #     # Install an event filter to filter the touch events.
-        #     self.installEventFilter(self)
-        #
-        #     self._touches = {QtCore.QEvent.TouchBegin     : 'Begin',
-        #                      QtCore.QEvent.TouchEnd       : 'End',
-        #                      QtCore.QEvent.TouchCancel    : 'Cancel',
-        #                      QtCore.QEvent.TouchUpdate    : 'Update',
-        #                      }
-        #     self._touching = False
-        #
-        # def eventFilter(self, obj, event):
-        #     """Event filter to handle touch events for touchpad scrolling.
-        #     """
-        #     if event.type() in [QtCore.QEvent.TouchBegin, QtCore.QEvent.TouchUpdate]:
-        #         self._touching = True
-        #         return True
-        #     elif event.type() in [QtCore.QEvent.TouchEnd, QtCore.QEvent.TouchCancel]:
-        #         # cancel touch-mode and clear the scroll queue
-        #         self._touching = False
-        #         return True
-        #
-        #     return super().eventFilter(obj, event)
-
         self._setStyle()
 
     def _setStyle(self):
         self._checkPalette(self.palette())
-        QtWidgets.QApplication.instance().paletteChanged.connect(self._checkPalette)
 
-    def _checkPalette(self, pal: QtGui.QPalette):
-        # print the colours from the updated palette - only 'highlight' seems to be effective
-        # QT modifies this to give different selection shades depending on the widget
-        #   see highlight colour in paintEvent
-        # print(f'--> {self.__class__.__name__} ')
+    def _checkPalette(self, pal: QtGui.QPalette, *args):
+        # this is effectively handled by _preferencesUpdate
         self._setColourScheme(pal)
         # set the flag to update the background in the paint event
         self._updateBackgroundColour = True
@@ -2041,47 +2005,29 @@ class CcpnGLWidget(QOpenGLWidget):
     def _setColourScheme(self, pal: QtGui.QPalette = None):
         """Update colours from colourScheme
         """
-        # colourScheme = getColourScheme()
-        #
-        # pal = pal or self.palette()
-        # base = pal.base().color().lightness()
-        # highlight = pal.highlight().color()
-        # self.highlightColour = QtGui.QColor.fromHslF(highlight.hueF(),
-        #                                # tweak the highlight colour depending on the theme
-        #                                #    needs to go in the correct place
-        #                                0.9 if base > 127 else 0.9,
-        #                                0.4 if base > 127 else 0.6
-        #                                ).getRgbF()
-        # if colourScheme == 'default':
-        #     if base < 127:
-        #         colourScheme = 'dark'
-        #     else:
-        #         colourScheme = 'light'
-        # self.colours = colourSchemes['default'].copy() | colourSchemes[colourScheme]
+        cols = self.colours = getColours()
+        self.hexBackground = cols[CCPNGLWIDGET_HEXBACKGROUND]
+        self.background = cols[CCPNGLWIDGET_BACKGROUND]
+        self.foreground = cols[CCPNGLWIDGET_FOREGROUND]
+        self.buttonForeground = cols[CCPNGLWIDGET_BUTTON_FOREGROUND]
+        self.mousePickColour = cols[CCPNGLWIDGET_PICKCOLOUR]
+        self.gridColour = cols[CCPNGLWIDGET_GRID]
+        self.highlightColour = cols[CCPNGLWIDGET_HIGHLIGHT]
+        self._labellingColour = cols[CCPNGLWIDGET_LABELLING]
+        self._phasingTraceColour = cols[CCPNGLWIDGET_PHASETRACE]
 
-        self.colours = getColours()
-        self.hexBackground = self.colours[CCPNGLWIDGET_HEXBACKGROUND]
-        self.background = self.colours[CCPNGLWIDGET_BACKGROUND]
-        self.foreground = self.colours[CCPNGLWIDGET_FOREGROUND]
-        self.buttonForeground = self.colours[CCPNGLWIDGET_BUTTON_FOREGROUND]
-        self.mousePickColour = self.colours[CCPNGLWIDGET_PICKCOLOUR]
-        self.gridColour = self.colours[CCPNGLWIDGET_GRID]
-        self.highlightColour = self.colours[CCPNGLWIDGET_HIGHLIGHT]
-        self._labellingColour = self.colours[CCPNGLWIDGET_LABELLING]
-        self._phasingTraceColour = self.colours[CCPNGLWIDGET_PHASETRACE]
+        self.zoomAreaColour = cols[CCPNGLWIDGET_ZOOMAREA]
+        self.pickAreaColour = cols[CCPNGLWIDGET_PICKAREA]
+        self.selectAreaColour = cols[CCPNGLWIDGET_SELECTAREA]
+        self.badAreaColour = cols[CCPNGLWIDGET_BADAREA]
 
-        self.zoomAreaColour = self.colours[CCPNGLWIDGET_ZOOMAREA]
-        self.pickAreaColour = self.colours[CCPNGLWIDGET_PICKAREA]
-        self.selectAreaColour = self.colours[CCPNGLWIDGET_SELECTAREA]
-        self.badAreaColour = self.colours[CCPNGLWIDGET_BADAREA]
+        self.zoomLineColour = cols[CCPNGLWIDGET_ZOOMLINE]
+        self.mouseMoveLineColour = cols[CCPNGLWIDGET_MOUSEMOVELINE]
 
-        self.zoomLineColour = self.colours[CCPNGLWIDGET_ZOOMLINE]
-        self.mouseMoveLineColour = self.colours[CCPNGLWIDGET_MOUSEMOVELINE]
-
-        self.zoomAreaColourHard = (*self.colours[CCPNGLWIDGET_ZOOMAREA][0:3], CCPNGLWIDGET_HARDSHADE)
-        self.pickAreaColourHard = (*self.colours[CCPNGLWIDGET_PICKAREA][0:3], CCPNGLWIDGET_HARDSHADE)
-        self.selectAreaColourHard = (*self.colours[CCPNGLWIDGET_SELECTAREA][0:3], CCPNGLWIDGET_HARDSHADE)
-        self.badAreaColourHard = (*self.colours[CCPNGLWIDGET_BADAREA][0:3], CCPNGLWIDGET_HARDSHADE)
+        self.zoomAreaColourHard = (*cols[CCPNGLWIDGET_ZOOMAREA][0:3], CCPNGLWIDGET_HARDSHADE)
+        self.pickAreaColourHard = (*cols[CCPNGLWIDGET_PICKAREA][0:3], CCPNGLWIDGET_HARDSHADE)
+        self.selectAreaColourHard = (*cols[CCPNGLWIDGET_SELECTAREA][0:3], CCPNGLWIDGET_HARDSHADE)
+        self.badAreaColourHard = (*cols[CCPNGLWIDGET_BADAREA][0:3], CCPNGLWIDGET_HARDSHADE)
 
     def _preferencesUpdate(self):
         """update GL values after the preferences have changed
@@ -5981,7 +5927,6 @@ class CcpnGLWidget(QOpenGLWidget):
                     if GLNotifier.GLPREFERENCES in triggers:
                         self._preferencesUpdate()
                         self._rescaleXAxis(update=False)
-                        self.stripIDString.renderMode = GLRENDERMODE_REBUILD
 
                     if GLNotifier.GLPEAKLISTS in triggers:
                         for spectrumView in self._ordering:  # strip.spectrumViews:

@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-27 10:56:18 +0100 (Thu, June 27, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__dateModified__ = "$dateModified: 2024-08-23 19:23:55 +0100 (Fri, August 23, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -71,7 +71,10 @@ class GuiBase(object):
         # For now, initialised by calls in Gui.__init_ as we need programme
         # arguments and preferences to have been initialised
         self._styleSheet = None
-        self._colourScheme = None
+        # self._colourScheme = None
+        self._themeStyle = None
+        self._themeColour = None
+        self._themeSDStyle = None
         self._fontSettings = None
         self._menuSpec = None
 
@@ -357,28 +360,37 @@ class GuiBase(object):
     def _setColourSchemeAndStyleSheet(self):
         """Set the colourScheme and stylesheet as determined by arguments --dark, --light or preferences
         """
+        from ccpn.ui.gui.guiSettings import Theme
+
+        prefsApp = self.preferences.appearance
+        prefsGen = self.preferences.general
+
         if self.args.darkColourScheme:
-            colourScheme = 'dark'
+            th = Theme.DARK
         elif self.args.lightColourScheme:
-            colourScheme = 'light'
+            th = Theme.LIGHT
         else:
-            colourScheme = self.preferences.general.colourScheme
+            th = Theme.getByDataValue((cs := prefsApp.themeStyle) and cs.lower())
 
-        if colourScheme is None:
-            raise RuntimeError('invalid colourScheme')
-        self._colourScheme = colourScheme
+        if th is None:
+            raise RuntimeError('invalid theme')
+        self._themeStyle = th
+        self._themeColour = prefsApp.themeColour
 
-        _qssPath = widgetsPath / ('%sStyleSheet.qss' % colourScheme.capitalize())
+        _qssPath = widgetsPath / ('%sStyleSheet.qss' % th.name)  # assume capitalised
         with _qssPath.open(mode='r') as fp:
             styleSheet = fp.read()
 
         if platform.system() == 'Linux':
-            _qssPath = widgetsPath / ('%sAdditionsLinux.qss' % colourScheme.capitalize())
+            _qssPath = widgetsPath / ('%sAdditionsLinux.qss' % th.name)
             with _qssPath.open(mode='r') as fp:
                 additions = fp.read()
             styleSheet += additions
 
-        self._styleSheet = styleSheet
+        self._styleSheet = None  #styleSheet
+
+        if sd := Theme.getByDataValue((cs := prefsGen.colourScheme) and cs.lower()):
+            self._themeSDStyle = sd
 
     #-----------------------------------------------------------------------------------------
     # callback methods

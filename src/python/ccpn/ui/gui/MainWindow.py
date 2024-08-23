@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-03 15:54:54 +0100 (Wed, July 03, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-23 19:23:55 +0100 (Fri, August 23, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -51,9 +51,10 @@ from ccpn.ui.gui.lib.mouseEvents import SELECT, PICK, MouseModes, \
     setCurrentMouseMode, getCurrentMouseMode
 from ccpn.ui.gui.lib import GuiStrip
 from ccpn.ui.gui.lib.Shortcuts import Shortcuts
-from ccpn.ui.gui.guiSettings import getColours, LIGHT, DARK, DEFAULT, \
-    colourSchemes, BORDERFOCUS, BORDERNOFOCUS, GUITABLE_SELECTED_BACKGROUND, \
-    CCPNGLWIDGET_HEXHIGHLIGHT, setColourScheme
+from ccpn.ui.gui.guiSettings import (getColours, Theme,
+                                     # LIGHT, DARK, DEFAULT,
+    colourSchemes, BORDERFOCUS, BORDERNOFOCUS, GUITABLE_SELECTED_BACKGROUND,
+    CCPNGLWIDGET_HEXHIGHLIGHT, setColourScheme, consoleStyle)
 
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 
@@ -211,71 +212,54 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self.hide()
 
     def show(self):
+        # self._checkPalette(self.palette())
+        # self.application.ui._changeThemeInstant()
+        # catch the initial palette-changed signal
+        QtWidgets.QApplication.instance().sigPaletteChanged.connect(self._checkPalette)
+        super().show()
         # install handler to resize when moving between displays
         #   cannot be done in __init__ as crashes on linux/windows :O
-        self._checkPalette(self.palette())
-        QtWidgets.QApplication.instance().paletteChanged.connect(self._checkPalette)
-        super().show()
         self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
 
-    def _checkPalette(self, pal: QtGui.QPalette):
-        # print the colours from the updated palette - only 'highlight' seems to be effective
-        # QT modifies this to give different selection shades depending on the widget
-        # this seems to clean the stylesheets
-
-        colNames = [
-            'windowText',  # 0
-            'button',  # 1
-            'light',  # 2
-            'midlight',  # 3
-            'dark',  # 4
-            'mid',  # 5
-            'text',  # 6
-            'brightText',  # 7
-            'buttonText',  # 8
-            'base',  # 9
-            'window',  # 10
-            'shadow',  # 11
-            'highlight',  # 12
-            'highlightedText',  # 13
-            'link',  # 14
-            'linkVisited',  # 15
-            'alternateBase',  # 16
-            'noRole',  # 17
-            'toolTipBase',  # 18
-            'toolTipText',  # 19
-            'placeholderText',  # 20
-            ]
-        for colnum, colname in enumerate(colNames):
-            color = pal.color(QtGui.QPalette.Active, QtGui.QPalette.ColorRole(colnum)).name()
-            # print(f"  Role: {colname:20}  {color}")
-        #
+    def _checkPalette(self, pal: QtGui.QPalette, theme: str = None, themeColour: str = None, themeSD: str = None):
         # test the stylesheet of the QTableView
         styleSheet = """
-                        QWidget {
+                        QPushButton {
                             color: palette(text);
                         }
                         QToolTip {
                             background-color: %(TOOLTIP_BACKGROUND)s;
                             color: %(TOOLTIP_FOREGROUND)s;
+                            font-size: %(_fontSize)spt;
+                            border: 1px solid %(TOOLTIP_FOREGROUND)s;
+                            qproperty-margin: 4; 
                         }
-                        
+                        QMenu::item:disabled {
+                            color: palette(dark);
+                        }
+                        QMenuBar {
+                            color: palette(text);
+                        }
+                        QMenuBar::item:disabled {
+                            color: palette(dark);
+                        }
+
+                        /*
                         QGraphicsView {
                             border: 1px solid palette(mid);
                             border-radius: 2px;
                         }
                         QGraphicsView:focus {
-                            border: 1px solid %(BORDER_FOCUS)s;
+                            border: 1px solid palette(highlight);
                             border-radius: 2px;
                         }
                         QGraphicsView:disabled { background-color: palette(midlight); }
-
                         QListView {
                             border: 1px solid palette(mid);
                             border-radius: 2px;
                         }
                         QListView:focus {
-                            border: 1px solid %(BORDER_FOCUS)s;
+                            border: 1px solid palette(highlight);
                             border-radius: 2px;
                         }
                         QListView:disabled { background-color: palette(midlight); }
@@ -284,34 +268,39 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                             border-radius: 2px;
                         }
                         QListWidget:focus {
-                            border: 1px solid %(BORDER_FOCUS)s;
+                            border: 1px solid palette(highlight);
+                            border-radius: 2px;
                         }
                         QListWidget:disabled { background-color: palette(midlight); }
-                        
                         QTreeWidget {
                             border: 1px solid palette(mid);
                             border-radius: 2px;
                         }
                         QTreeWidget:focus {
-                            border: 1px solid %(BORDER_FOCUS)s;
+                            border: 1px solid palette(highlight);
                             border-radius: 2px;
                         }
+                        */
+                        
                         QTreeView {
                             border: 1px solid palette(mid);
                             border-radius: 2px;
                         }
                         QTreeView:focus {
-                            border: 1px solid %(BORDER_FOCUS)s;
+                            border: 1px solid palette(highlight);
                             border-radius: 2px;
                         }
+                        
+                        /*
                         QTextEdit {
                             border: 1px solid palette(mid);
                             border-radius: 2px;
                         }
                         QTextEdit:focus {
-                            border: 1px solid %(BORDER_FOCUS)s;
+                            border: 1px solid palette(highlight);
                             border-radius: 2px;
                         }
+                        */
 
                         /*
                         QPushButton:focus {
@@ -390,8 +379,11 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                         */
                         """
         # set stylesheet
+        # pal = self.palette()  # NOTE:ED - temp
         base = pal.base().color().lightness()  # use as a guide for light/dark theme
-        colours = colourSchemes[DEFAULT].copy() | colourSchemes[DARK if base < 127 else LIGHT].copy()
+        # colours = (colourSchemes[Theme.DEFAULT.name] |
+        #            colourSchemes[Theme.DARK.name if base < 127 else Theme.LIGHT.name])
+        colours = getColours()
         highlight = pal.highlight().color()
         newCol = highlight.fromHslF(highlight.hueF(), 0.95, highlight.lightnessF()**(0.333 if base < 127 else 3.0))
         colours[BORDERFOCUS] = newCol.name()
@@ -400,11 +392,12 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                                                                    0.55 if base > 127 else 0.65,
                                                                    0.80 if base > 127 else 0.35,
                                                                    ).name()
+        colours['_fontSize'] = self.font().pointSize()
         # colours[CCPNGLWIDGET_HEXHIGHLIGHT] = newCol.getRgbF()
         colours['_BORDER_WIDTH'] = 2  # need to grab from the table-instance :|
-        self.setStyleSheet(styleSheet % colours)
+        self.ui.qtApp.setStyleSheet(styleSheet % colours)
 
-        # store the colours in the baseclass
+        # store the colours in the baseclass, is this the best place?
         Base._highlight = highlight
         Base._highlightVivid = QtGui.QColor.fromHslF(highlight.hueF(),
                                                   0.8 if base > 127 else 0.75,
@@ -415,29 +408,35 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                                                   0.55 if base > 127 else 0.65,
                                                   0.80 if base > 127 else 0.35,
                                                   )
+        Base._highlightBorder = QtGui.QColor.fromHslF(highlight.hueF(), 0.95,
+                                                      highlight.lightnessF()**(0.333 if base > 127 else 3.0),
+                                                  )
         Base._basePalette = pal
-        Base._transparent = highlight
+        Base._transparent = pal.highlight().color()  # grab again to stop overwrite
         Base._transparent.setAlpha(40)
+        # pass through the palette-changed to other widgets
+        self.ui.qtApp._sigPaletteChanged.emit(pal, theme, themeColour, themeSD)
+        getLogger().debug(f'{consoleStyle.fg.darkblue}qtApp changePalette event{consoleStyle.reset}')
 
-        if self.application.preferences.general.colourScheme == DEFAULT:
-            # print(f'--> change theme  {base}')
-            # NOTE:ED - should really just fire a signal for the spectrum-displays/strips to respond to
-            setColourScheme(DARK if base < 127 else LIGHT)
-            self.application._correctColours()
-            for display in self.project.spectrumDisplays:
-                for strip in display.strips:
-                    strip._frameGuide.resetColourTheme()
-            # update the chemical-shift mapping plotWidgets
-
-            # colour theme has changed - flag displays to update
-            # prompt the GLwidgets to update
-            from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-
-            GLSignals = GLNotifier(parent=self)
-            GLSignals.emitEvent(triggers=[GLNotifier.GLALLCONTOURS,
-                                          GLNotifier.GLALLPEAKS,
-                                          GLNotifier.GLALLMULTIPLETS,
-                                          GLNotifier.GLPREFERENCES])
+        # if self.application.preferences.general.colourScheme == DEFAULT:
+        #     # print(f'--> change theme  {base}')
+        #     # NOTE:ED - should really just fire a signal for the spectrum-displays/strips to respond to
+        #     setColourScheme(DARK if base < 127 else LIGHT)
+        #     self.application._correctColours()
+        #     for display in self.project.spectrumDisplays:
+        #         for strip in display.strips:
+        #             strip._frameGuide.resetColourTheme()
+        #     # update the chemical-shift mapping plotWidgets
+        #
+        #     # colour theme has changed - flag displays to update
+        #     # prompt the GLwidgets to update
+        #     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+        #
+        #     GLSignals = GLNotifier(parent=self)
+        #     GLSignals.emitEvent(triggers=[GLNotifier.GLALLCONTOURS,
+        #                                   GLNotifier.GLALLPEAKS,
+        #                                   GLNotifier.GLALLMULTIPLETS,
+        #                                   GLNotifier.GLPREFERENCES])
 
     def _initReadOnlyIcon(self):
         """Add icon to the statusBar that reflects the read-only state of the current project

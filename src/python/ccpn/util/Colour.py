@@ -4,9 +4,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-22 21:02:59 -0400 (Thu, June 22, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-08-23 19:23:56 +0100 (Fri, August 23, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -33,6 +34,12 @@ from collections import OrderedDict
 from PyQt5 import QtGui, QtCore
 
 
+_AUTO = '<auto>'
+_DEFAULT = 'default'
+_EMPTY = ''
+_HASH = '#'
+
+
 def _ccpnHex(val):
     """Generate hex value with padded leading zeroes
     """
@@ -41,22 +48,22 @@ def _ccpnHex(val):
 
 
 def rgbaToHex(r, g, b, a=255):
-    return '#' + ''.join([_ccpnHex(x)[2:] for x in (r, g, b, a)])
+    return _HASH + ''.join([_ccpnHex(x)[2:] for x in (r, g, b, a)])
 
 
 def rgbToHex(r, g, b):
-    return '#' + ''.join([_ccpnHex(x)[2:] for x in (r, g, b)])
+    return _HASH + ''.join([_ccpnHex(x)[2:] for x in (r, g, b)])
 
 
 def rgbaRatioToHex(r, g, b, a=1.0):
-    return '#' + ''.join([_ccpnHex(x)[2:] for x in (int(255.0 * r),
+    return _HASH + ''.join([_ccpnHex(x)[2:] for x in (int(255.0 * r),
                                                     int(255.0 * g),
                                                     int(255.0 * b),
                                                     int(255.0 * a))])
 
 
 def rgbRatioToHex(r, g, b):
-    return '#' + ''.join([_ccpnHex(x)[2:] for x in (int(255.0 * r),
+    return _HASH + ''.join([_ccpnHex(x)[2:] for x in (int(255.0 * r),
                                                     int(255.0 * g),
                                                     int(255.0 * b))])
 
@@ -65,7 +72,7 @@ def hexToRgb(hx):
     if not hx:
         return
 
-    hx = hx.lstrip('#')
+    hx = hx.lstrip(_HASH)
     lv = len(hx)
     return tuple(int(hx[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
 
@@ -74,24 +81,42 @@ def hexToRgbRatio(hx):
     if not hx:
         return
 
-    hx = hx.lstrip('#')
+    hx = hx.lstrip(_HASH)
     lv = len(hx)
     return tuple(float(int(hx[i:i + lv // 3], 16)) / 255 for i in range(0, lv, lv // 3))
 
 
-def hexToRgba(hx, transparency=1.0):
+def hexToRgba(hx, alpha: int | str = None) -> tuple | None:
+    """Convert hex string to rgb(a) tuple.
+    hx can be 6|8 hex characters, e.g., #ffffff or #ffffffff.
+    If 8 digits, alpha channel is included as last two hex characters;
+    otherwise, alpha can be seperately specified, as an int or 2-character string.
+    A hash (#) can optionally be placed as prefix to both parameters.
+
+    Returns None if hx not supplied.
+    """
     if hx is None:
         return
 
-    hx = hx.lstrip('#')
-    lv = len(hx)
+    hx = hx.lstrip(_HASH)
+    if (lv := len(hx)) not in {6, 8}:
+        raise ValueError(f'hexToRgba: hx is not the correct length')
+    if lv == 8 and alpha is not None:
+        raise ValueError(f'hexToRgba: alpha is defined twice.')
+    # could use a regex here
+    if isinstance(alpha, str):
+        alpha = alpha.lstrip(_HASH)
+        hx += alpha
+        alpha = None
+        lv += 2
     cols = [int(hx[i:i + lv // 3], 16) for i in range(0, lv, lv // 3)]
-    cols.append(transparency)
+    if alpha is not None:
+        cols.append(alpha)
     return tuple(cols)
 
 
-def hexToRgbaArray(array, transparency=1.0):
-    cc = [hexToRgba(hx, transparency) for hx in array]
+def hexToRgbaArray(array, alpha: int=None):
+    cc = [hexToRgba(hx, alpha) for hx in array]
     return np.array(cc)
 
 
@@ -123,7 +148,7 @@ def gam_sRGB(v):
 
 
 # GRAY VALUE ("brightness")
-def gray(r, g, b, a=1.0):
+def gray(r, g, b):
     return gam_sRGB(
             rY * inv_gam_sRGB(r) +
             gY * inv_gam_sRGB(g) +
@@ -255,7 +280,7 @@ def invertRGBHue(r, g, b):
 def _getRandomColours(numberOfColors):
     import random
 
-    return ["#" + ''.join([random.choice('0123456789ABCDEF') for j in range(6)]) for i in range(numberOfColors)]
+    return ["#" + ''.join([random.choice('0123456789ABCDEF') for _ in range(6)]) for _ in range(numberOfColors)]
 
 
 ERRORCOLOUR = '#FF0000'
@@ -708,7 +733,7 @@ for k, v in spectrumColours.items():
         spectrumLightColours[k] = v
     if gray(*h) < COLOUR_DARK_THRESHOLD:
         spectrumDarkColours[k] = v
-    if gray(*h) > COLOUR_LIGHT_THRESHOLD and gray(*h) < COLOUR_DARK_THRESHOLD:
+    if COLOUR_LIGHT_THRESHOLD < gray(*h) < COLOUR_DARK_THRESHOLD:
         spectrumMediumColours[k] = v
 
 allDarkColours = OrderedDict()
@@ -723,21 +748,50 @@ for k, v in allColours.items():
         allLightColours[k] = v
     if gray(*h) < COLOUR_DARK_THRESHOLD:
         allDarkColours[k] = v
-    if gray(*h) > COLOUR_LIGHT_THRESHOLD and gray(*h) < COLOUR_DARK_THRESHOLD:
+    if COLOUR_LIGHT_THRESHOLD < gray(*h) < COLOUR_DARK_THRESHOLD:
         allMediumColours[k] = v
 
-spectrumHexLightColours = tuple(ky for ky in spectrumLightColours.keys() if ky != '#')
-spectrumHexDarkColours = tuple(ky for ky in spectrumDarkColours.keys() if ky != '#')
-spectrumHexMediumColours = tuple(ky for ky in spectrumMediumColours.keys() if ky != '#')
+spectrumHexLightColours = tuple(ky for ky in spectrumLightColours.keys() if ky != _HASH)
+spectrumHexDarkColours = tuple(ky for ky in spectrumDarkColours.keys() if ky != _HASH)
+spectrumHexMediumColours = tuple(ky for ky in spectrumMediumColours.keys() if ky != _HASH)
 
-spectrumHexDefaultLightColours = tuple(ky for ky in lightDefaultSpectrumColours.keys() if ky != '#')
-spectrumHexDefaultDarkColours = tuple(ky for ky in darkDefaultSpectrumColours.keys() if ky != '#')
+spectrumHexDefaultLightColours = tuple(ky for ky in lightDefaultSpectrumColours.keys() if ky != _HASH)
+spectrumHexDefaultDarkColours = tuple(ky for ky in darkDefaultSpectrumColours.keys() if ky != _HASH)
 
 # override this with spectrumLight/DarkColours when colourScheme is changed
-spectrumHexColours = tuple(ky for ky in spectrumColours.keys() if ky != '#')
-
+spectrumHexColours = tuple(ky for ky in spectrumColours.keys() if ky != _HASH)
 
 # Note that Colour strings are not re-used
+paletteNames = [
+    'windowText',  # 0
+    'button',  # 1
+    'light',  # 2
+    'midlight',  # 3
+    'dark',  # 4
+    'mid',  # 5
+    'text',  # 6
+    'brightText',  # 7
+    'buttonText',  # 8
+    'base',  # 9
+    'window',  # 10
+    'shadow',  # 11
+    'highlight',  # 12
+    'highlightedText',  # 13
+    'link',  # 14
+    'linkVisited',  # 15
+    'alternateBase',  # 16
+    'noRole',  # 17
+    'toolTipBase',  # 18
+    'toolTipText',  # 19
+    'placeholderText',  # 20
+    ]
+# for colnum, colname in enumerate(colNames):
+#     print(f"  QtGui.QPalette.{colname[0].upper()+colname[1:]:20}:  ["
+#           f"{pal.color(QtGui.QPalette.Active, QtGui.QPalette.ColorRole(colnum)).name()!r},   "
+#           f"{pal.color(QtGui.QPalette.Inactive, QtGui.QPalette.ColorRole(colnum)).name()!r},   "
+#           f"{pal.color(QtGui.QPalette.Disabled, QtGui.QPalette.ColorRole(colnum)).name()!r}"
+#           f"],  # {colnum}")
+#
 
 
 class Colour(str):
@@ -758,7 +812,7 @@ class Colour(str):
         if isinstance(value, str):
             value = value.lower()
             name = value
-            if value[0] != '#':
+            if value[0] != _HASH:
                 value = colourNameToHexDict[name]
 
             assert len(value) in {7, 9}, 'len(value) = %d, should be 7 or 9' % len(value)
@@ -798,7 +852,7 @@ class Colour(str):
 
     def hex(self):
 
-        return '#' + ''.join([_ccpnHex(x)[2:] for x in (self.r, self.g, self.b)])
+        return _HASH + ''.join([_ccpnHex(x)[2:] for x in (self.r, self.g, self.b)])
 
     def __repr__(self):
 
@@ -834,7 +888,7 @@ def addNewColourString(colourString):
     New colour has the name 'Colour <n>' where n is the next free number
     """
     # '#' is reserved for auto colour so shouldn't ever be added
-    if colourString != '#' and colourString not in spectrumColours:
+    if colourString != _HASH and colourString not in spectrumColours:
         newIndex = str(len(spectrumColours.items()) + 1)
         spectrumColours[colourString] = f'Colour {newIndex}'
 
@@ -842,7 +896,7 @@ def addNewColourString(colourString):
 def autoCorrectHexColour(colour, referenceHexColour='#ffffff', addNewColour=True):
     """Autocorrect colours if too close to the reference value
     """
-    if colour == '#':
+    if colour == _HASH:
         return colour
 
     g = gray(*hexToRgb(colour))
@@ -910,15 +964,15 @@ def selectPullDownColour(pulldown, colourString, allowAuto=False):
     # try:
     #     pulldown.setCurrentText(spectrumColours[colourString])
     # except:
-    #     if allowAuto and '#' in pulldown.texts:
-    #         pulldown.setCurrentText('#')
+    #     if allowAuto and _HASH in pulldown.texts:
+    #         pulldown.setCurrentText(_HASH)
 
     if colourString in spectrumColours:
         pulldown.setCurrentText(spectrumColours[colourString])
     elif colourString in colorSchemeTable:
         pulldown.setCurrentText(colourString)
-    elif allowAuto and '<auto>' in pulldown.texts:
-        pulldown.setCurrentText('<auto>')
+    elif allowAuto and _AUTO in pulldown.texts:
+        pulldown.setCurrentText(_AUTO)
 
 
 # ICON_SIZE = 20
@@ -933,16 +987,16 @@ def fillColourPulldown(pulldown, allowAuto=False, allowNone=False, includeGradie
 
     pulldown.clear()
     if allowAuto:
-        pulldown.addItem(text='<auto>')
+        pulldown.addItem(text=_AUTO)
     if allowNone:
-        pulldown.addItem(text='')
+        pulldown.addItem(text=_EMPTY)
 
     for item in spectrumColours.items():
         # if item[1] not in pulldown.texts:
 
         colName = item[1]  # colourNameWithSpace(item[1])
 
-        if item[0] != '#':
+        if item[0] != _HASH:
             pix = QtGui.QPixmap(QtCore.QSize(ICON_SIZE, ICON_SIZE))
             pix.fill(QtGui.QColor(item[0]))
             pulldown.addItem(icon=QtGui.QIcon(pix), text=colName)
@@ -976,12 +1030,75 @@ def fillColourPulldown(pulldown, allowAuto=False, allowNone=False, includeGradie
     pulldown.setCurrentText(currText)
 
 
+def closest_pyqt_color_name(hex_color):
+    """Find the closest PyQt color name to the given hex color.
+    """
+    rgb_color = np.array(hexToRgb(hex_color))
+
+    min_distance = float('inf')
+    closest_name = None
+
+    for name in QtGui.QColor.colorNames():
+        # Get the RGB values of the named color
+        test_color = QtGui.QColor(name)
+        test_rgb = np.array([test_color.red(), test_color.green(), test_color.blue()])
+        # Calculate the Euclidean distance
+        distance = np.sqrt(np.sum((rgb_color - test_rgb)**2))
+        if distance < min_distance:
+            min_distance = distance
+            closest_name = name
+
+    return closest_name
+
+
+def coloursFromHue(count=12):
+    names = []
+    for cc in range(count):
+        # 0.8, 0.45 gives slightly nice colours
+        col = QtGui.QColor.fromHslF(cc/count, 1.0, 0.45)  # only the hue is actually used for the minute
+        if not (name := closest_pyqt_color_name(col.name())):
+            raise ValueError('Colour not found')
+        names.append(name)
+    return names
+
+
+def fillPulldownFromNames(pulldown, colourList, allowAuto=False, allowNone=False, default=None):
+    # fill the pulldown with the list of colours
+    # this has no signals blocked otherwise it doesn't paint, and should be signalBlocked elsewhere
+    currText = pulldown.currentText()
+
+    ICON_SIZE = max(pulldown.font().pointSize(), 18)  # seems to be constrained to the pulldown height
+
+    pulldown.clear()
+    if allowAuto:
+        pulldown.addItem(text=_AUTO)
+    if allowNone:
+        pulldown.addItem(text=_EMPTY)
+
+    for name in colourList:
+        if name == _DEFAULT:
+            if default is not None:
+                pix = QtGui.QPixmap(QtCore.QSize(ICON_SIZE, ICON_SIZE))
+                pix.fill(QtGui.QColor(default))
+                pulldown.addItem(icon=QtGui.QIcon(pix), text=name)
+            else:
+                pulldown.addItem(text=name)
+        elif name != _HASH:
+            pix = QtGui.QPixmap(QtCore.QSize(ICON_SIZE, ICON_SIZE))
+            pix.fill(QtGui.QColor(name))
+            pulldown.addItem(icon=QtGui.QIcon(pix), text=name)
+        elif allowAuto:
+            pulldown.addItem(text=name)
+
+    pulldown.setCurrentText(currText)
+
+
 def _setColourPulldown(pulldown, attrib, allowAuto=False, includeGradients=True, allowNone=False):
     """Populate colour pulldown and set to the current colour
     """
     spectrumColourKeys = list(spectrumColours.keys())
     fillColourPulldown(pulldown, allowAuto=allowAuto, includeGradients=includeGradients, allowNone=allowNone)
-    c = attrib.upper() if attrib and attrib.startswith('#') else attrib
+    c = attrib.upper() if attrib and attrib.startswith(_HASH) else attrib
     if c in spectrumColourKeys:
         col = spectrumColours[c]
         pulldown.setCurrentText(col)
@@ -993,7 +1110,7 @@ def _setColourPulldown(pulldown, attrib, allowAuto=False, includeGradients=True,
     else:
         addNewColourString(c)
         fillColourPulldown(pulldown, allowAuto=allowAuto, includeGradients=includeGradients, allowNone=allowNone)
-        if c != '#' or allowAuto is True:
+        if c != _HASH or allowAuto is True:
             col = spectrumColours[c]
             pulldown.setCurrentText(col)
 
@@ -1007,7 +1124,7 @@ def getSpectrumColour(colourName, defaultReturn=None):
 
         if colName in spectrumColours.values():
             col = list(spectrumColours.keys())[list(spectrumColours.values()).index(colName)]
-            return col.upper() if col.startswith('#') else col
+            return col.upper() if col.startswith(_HASH) else col
         elif colName in colorSchemeTable:
             return colName
         else:
@@ -1021,7 +1138,7 @@ def getSpectrumColour(colourName, defaultReturn=None):
 def getAutoColourRgbRatio(inColour=None, sourceObject=None, colourAttribute=None, defaultColour=None):
     try:
         listColour = inColour
-        if listColour == '#':
+        if listColour == _HASH:
             listColour = getattr(sourceObject, colourAttribute, defaultColour)
             if listColour in colorSchemeTable:
                 # get the first item from the colour gradient

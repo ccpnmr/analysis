@@ -2,8 +2,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -12,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-17 12:03:18 +0100 (Wed, April 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-23 19:21:18 +0100 (Fri, August 23, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -95,9 +96,6 @@ class ListCompoundWidget(CompoundBaseWidget):
             horizontal=[(0, 0), (0, 1), (0, 2)],
             )
 
-    LIST_BORDER_WIDTH = 1
-    LIST_BORDER_COLOR = '#a9a9a9'
-
     def __init__(self, parent=None, showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
                  labelText='', texts=None, callback=None, defaults=None,
@@ -145,10 +143,6 @@ class ListCompoundWidget(CompoundBaseWidget):
             for dft in defaults:
                 self.addPulldownItem(dft)
         self._addWidget(self.listWidget)
-
-        styleSheet = '.ListWidget {border-width: %ipx; border-radius: 3px }'
-        styleSheet %= (self.LIST_BORDER_WIDTH, )  #self.LIST_BORDER_COLOR)
-        self.listWidget.setStyleSheet(styleSheet)
 
         if minimumWidths is not None:
             self.setMinimumWidths(minimumWidths)
@@ -387,8 +381,10 @@ class EntryCompoundWidget(CompoundBaseWidget):
 
         if spacer:
             _spacer = Spacer(self, 5, 5,
-                             QtWidgets.QSizePolicy.Expanding if orientation in ['left', 'right'] else QtWidgets.QSizePolicy.Fixed,
-                             QtWidgets.QSizePolicy.Expanding if orientation in ['top', 'bottom'] else QtWidgets.QSizePolicy.Fixed,
+                             QtWidgets.QSizePolicy.Expanding if orientation in ['left',
+                                                                                'right'] else QtWidgets.QSizePolicy.Fixed,
+                             QtWidgets.QSizePolicy.Expanding if orientation in ['top',
+                                                                                'bottom'] else QtWidgets.QSizePolicy.Fixed,
                              grid=(0, 0))
             # self._addWidget(_spacer)
 
@@ -712,8 +708,10 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
 
         if spacer:
             _spacer = Spacer(self, 5, 5,
-                             QtWidgets.QSizePolicy.Expanding if orientation in ['left', 'right'] else QtWidgets.QSizePolicy.Fixed,
-                             QtWidgets.QSizePolicy.Expanding if orientation in ['top', 'bottom'] else QtWidgets.QSizePolicy.Fixed,
+                             QtWidgets.QSizePolicy.Expanding if orientation in ['left',
+                                                                                'right'] else QtWidgets.QSizePolicy.Fixed,
+                             QtWidgets.QSizePolicy.Expanding if orientation in ['top',
+                                                                                'bottom'] else QtWidgets.QSizePolicy.Fixed,
                              grid=(0, 0))
             # self._addWidget(_spacer)
 
@@ -889,8 +887,10 @@ class CheckBoxCompoundWidget(CompoundBaseWidget):
 
         if spacer:
             _spacer = Spacer(self, 5, 5,
-                             QtWidgets.QSizePolicy.Expanding if orientation in ['left', 'right'] else QtWidgets.QSizePolicy.Fixed,
-                             QtWidgets.QSizePolicy.Expanding if orientation in ['top', 'bottom'] else QtWidgets.QSizePolicy.Fixed,
+                             QtWidgets.QSizePolicy.Expanding if orientation in ['left',
+                                                                                'right'] else QtWidgets.QSizePolicy.Fixed,
+                             QtWidgets.QSizePolicy.Expanding if orientation in ['top',
+                                                                                'bottom'] else QtWidgets.QSizePolicy.Fixed,
                              grid=(0, 0))
 
         _layout = self.getLayout()
@@ -1288,8 +1288,10 @@ class SpinBoxCompoundWidget(CompoundBaseWidget):
 
         if spacer:
             _spacer = Spacer(self, 5, 5,
-                             QtWidgets.QSizePolicy.Expanding if orientation in ['left', 'right'] else QtWidgets.QSizePolicy.Fixed,
-                             QtWidgets.QSizePolicy.Expanding if orientation in ['top', 'bottom'] else QtWidgets.QSizePolicy.Fixed,
+                             QtWidgets.QSizePolicy.Expanding if orientation in ['left',
+                                                                                'right'] else QtWidgets.QSizePolicy.Fixed,
+                             QtWidgets.QSizePolicy.Expanding if orientation in ['top',
+                                                                                'bottom'] else QtWidgets.QSizePolicy.Fixed,
                              grid=(0, 0))
             # self._addWidget(_spacer)
 
@@ -1521,8 +1523,10 @@ class ScientificSpinBoxCompoundWidget(CompoundBaseWidget):
 
         if spacer:
             _spacer = Spacer(self, 5, 5,
-                             QtWidgets.QSizePolicy.Expanding if orientation in ['left', 'right'] else QtWidgets.QSizePolicy.Fixed,
-                             QtWidgets.QSizePolicy.Expanding if orientation in ['top', 'bottom'] else QtWidgets.QSizePolicy.Fixed,
+                             QtWidgets.QSizePolicy.Expanding if orientation in ['left',
+                                                                                'right'] else QtWidgets.QSizePolicy.Fixed,
+                             QtWidgets.QSizePolicy.Expanding if orientation in ['top',
+                                                                                'bottom'] else QtWidgets.QSizePolicy.Fixed,
                              grid=(0, 0))
             # self._addWidget(_spacer)
 
@@ -1794,8 +1798,10 @@ class RadioButtonsCompoundWidget(CompoundBaseWidget):
 
         if spacer:
             _spacer = Spacer(self, 5, 5,
-                             QtWidgets.QSizePolicy.Expanding if orientation in ['left', 'right'] else QtWidgets.QSizePolicy.Fixed,
-                             QtWidgets.QSizePolicy.Expanding if orientation in ['top', 'bottom'] else QtWidgets.QSizePolicy.Fixed,
+                             QtWidgets.QSizePolicy.Expanding if orientation in ['left',
+                                                                                'right'] else QtWidgets.QSizePolicy.Fixed,
+                             QtWidgets.QSizePolicy.Expanding if orientation in ['top',
+                                                                                'bottom'] else QtWidgets.QSizePolicy.Fixed,
                              grid=(0, 0))
             # self._addWidget(_spacer)
 
@@ -1950,8 +1956,10 @@ class CompoundViewCompoundWidget(CompoundBaseWidget):
 
         if spacer:
             _spacer = Spacer(self, 5, 5,
-                             QtWidgets.QSizePolicy.Expanding if orientation in ['left', 'right'] else QtWidgets.QSizePolicy.Fixed,
-                             QtWidgets.QSizePolicy.Expanding if orientation in ['top', 'bottom'] else QtWidgets.QSizePolicy.Fixed,
+                             QtWidgets.QSizePolicy.Expanding if orientation in ['left',
+                                                                                'right'] else QtWidgets.QSizePolicy.Fixed,
+                             QtWidgets.QSizePolicy.Expanding if orientation in ['top',
+                                                                                'bottom'] else QtWidgets.QSizePolicy.Fixed,
                              grid=(0, 0))
             self._addWidget(_spacer)
 

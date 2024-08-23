@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-24 18:04:27 +0100 (Wed, July 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-23 19:21:22 +0100 (Fri, August 23, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -74,6 +74,10 @@ class TableABC(QtWidgets.QTableView):
                         gridline-color: %(_GRID_COLOR)s;
                         selection-background-color: %(_SELECTED_BACKGROUND)s;
                         selection-color: palette(text);
+                        color: palette(text);
+                        outline: 0px;
+                    }
+                    QHeaderView {
                         color: palette(text);
                         outline: 0px;
                     }
@@ -264,20 +268,13 @@ class TableABC(QtWidgets.QTableView):
 
     def _setStyle(self):
         self._checkPalette(self.palette())
-        QtWidgets.QApplication.instance().paletteChanged.connect(self._checkPalette)
+        QtWidgets.QApplication.instance()._sigPaletteChanged.connect(self._checkPalette)
 
-    def _checkPalette(self, pal: QtGui.QPalette):
+    def _checkPalette(self, pal: QtGui.QPalette, theme: str = None, themeColour: str = None, themeSD: str = None):
         # print the colours from the updated palette - only 'highlight' seems to be effective
         # QT modifies this to give different selection shades depending on the widget
-        # print(f'--> setting {self.__class__.__name__} styleSheet')
         base = pal.base().color().lightness()
-        highlight = pal.highlight().color()
-        self.highlightColour = QtGui.QColor.fromHslF(highlight.hueF(),
-                                       # tweak the highlight colour depending on the theme
-                                       #    needs to go in the correct place
-                                       0.8 if base > 127 else 0.75,
-                                       0.5 if base > 127 else 0.45
-                                       )
+        self.highlightColour = highlight = pal.highlight().color()
         cols = self._colours
         cols['_BORDER_FOCUS'] = self.highlightColour.name()
         cols['_SELECTED_BACKGROUND'] = highlight.fromHslF(highlight.hueF(),

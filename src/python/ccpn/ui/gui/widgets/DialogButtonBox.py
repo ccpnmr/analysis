@@ -5,8 +5,9 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-23 22:03:03 +0100 (Tue, April 23, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-23 19:21:19 +0100 (Fri, August 23, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -134,40 +135,22 @@ class DialogButtonBox(QtWidgets.QDialogButtonBox, Base):
         self._setStyle()
 
     def _setStyle(self):
-        self._checkPalette(self.palette())
-        QtWidgets.QApplication.instance().paletteChanged.connect(self._checkPalette)
-
-    def _checkPalette(self, pal: QtGui.QPalette):
-        # print the colours from the updated palette - only 'highlight' seems to be effective
-        # QT modifies this to give different selection shades depending on the widget
-        # print(f'--> setting {self.__class__.__name__} styleSheet')
-        base = pal.base().color().lightness()
-        highlight = pal.highlight().color()
-        self.highlightColour = QtGui.QColor.fromHslF(highlight.hueF(),
-                                       # tweak the highlight colour depending on the theme
-                                       #    needs to go in the correct place
-                                       0.8 if base > 127 else 0.75,
-                                       0.5 if base > 127 else 0.45
-                                       )
-        _style = """QPushButton { padding: 2px 8px 2px 8px; }
-                QPushButton:focus {
-                    padding: 0px 1px 0px 1px;
-                    border-color: palette(highlight);
-                    border-style: solid;
-                    border-width: 1px;
-                    border-radius: 2px;
-                }
-                QPushButton:disabled {
-                    color: #808080;
-                    background-color: palette(midlight);
-                }
-                """ % {'BORDER_FOCUS': self.highlightColour.name()}
+        _style = """QPushButton { padding: 3px 5px 3px 5px; }
+                    QPushButton:focus {
+                        padding: 0px;
+                        border-color: palette(highlight);
+                        border-style: solid;
+                        border-width: 1px;
+                        border-radius: 2px;
+                    }
+                    QPushButton:disabled {
+                        color: palette(dark);
+                        background-color: palette(midlight);
+                    }
+                    """
         self.setStyleSheet(_style)
         for button in self.buttons():
-            button.setStyleSheet(_style)  # styleSheet before the palette
-            pal = button.palette()
-            pal.setColor(QtGui.QPalette.Highlight, self.highlightColour)
-            button.setPalette(pal)
+            button.setStyleSheet(_style)
 
     def button(self, which: 'QtWidgets.QDialogButtonBox.StandardButton') -> QtWidgets.QPushButton:
         # subclass 'button' to allow searching for user buttons in _userButtonDict before standardButtons

@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-06 21:20:49 +0100 (Thu, June 06, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-08-23 19:21:20 +0100 (Fri, August 23, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -238,43 +238,25 @@ class MessageDialog(QtWidgets.QMessageBox):
         self._setStyle()
 
     def _setStyle(self):
-        self._checkPalette(self.palette())
-        QtWidgets.QApplication.instance().paletteChanged.connect(self._checkPalette)
-
-    def _checkPalette(self, pal: QtGui.QPalette):
-        # print the colours from the updated palette - only 'highlight' seems to be effective
-        # QT modifies this to give different selection shades depending on the widget
-        # print(f'--> setting {self.__class__.__name__} styleSheet')
-        base = pal.base().color().lightness()
-        highlight = pal.highlight().color()
-        self.highlightColour = QtGui.QColor.fromHslF(highlight.hueF(),
-                                       # tweak the highlight colour depending on the theme
-                                       #    needs to go in the correct place
-                                       0.8 if base > 127 else 0.75,
-                                       0.5 if base > 127 else 0.45
-                                       )
         _style = """QPushButton {
-                    padding: 2px 8px 2px 8px;
+                    padding: 2px 5px 2px 5px;
                 }
                 QPushButton:focus {
-                    padding: 0px 1px 0px 1px;
+                    padding: 0px;
                     border-color: palette(highlight);
                     border-style: solid;
                     border-width: 1px;
                     border-radius: 2px;
                 }
                 QPushButton:disabled {
-                    color: #808080;
+                    color: palette(dark);
                     background-color: palette(midlight);
                 }
-                """ % {'BORDER_FOCUS': self.highlightColour.name(),
-                       '_size': self._frame.font().pointSize()}
+                """
         self.setStyleSheet(_style)
+        # check the other buttons in the dialog
         for button in self.buttons():
-            button.setStyleSheet(_style)  # styleSheet before the palette
-            pal = button.palette()
-            pal.setColor(QtGui.QPalette.Highlight, self.highlightColour)
-            button.setPalette(pal)
+            button.setStyleSheet(_style)
 
     def event(self, event):
         """

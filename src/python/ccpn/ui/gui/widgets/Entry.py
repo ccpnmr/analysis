@@ -5,8 +5,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-05-29 12:23:22 +0100 (Wed, May 29, 2024) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-08-23 19:21:19 +0100 (Fri, August 23, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -96,35 +97,21 @@ class Entry(QtWidgets.QLineEdit, Base):
         self._setStyle()
 
     def _setStyle(self):
-        self._checkPalette(self.palette())
-        QtWidgets.QApplication.instance().paletteChanged.connect(self._checkPalette)
-
-    def _checkPalette(self, pal: QtGui.QPalette):
-        # print the colours from the updated palette - only 'highlight' seems to be effective
-        # QT modifies this to give different selection shades depending on the widget
-        base = pal.base().color().lightness()
-        highlight = pal.highlight().color()
-        self.highlightColour = QtGui.QColor.fromHslF(highlight.hueF(),
-                                       # tweak the highlight colour depending on the theme
-                                       #    needs to go in the correct place
-                                       0.8 if base > 127 else 0.75,
-                                       0.5 if base > 127 else 0.45
-                                       )
         _style = """QLineEdit {
-                    padding: 3px 3px 3px 3px;
-                    border-color: palette(mid);
-                    border-width: 1px;
-                    border-radius: 2px;
-                    border-style: solid;
-                }
-                QLineEdit:focus {
-                    border-color: %(BORDER_FOCUS)s;
-                }
-                QLineEdit:disabled {
-                    color: #808080;
-                    background-color: palette(midlight);
-                }
-                """ % {'BORDER_FOCUS': self.highlightColour.name()}
+                        padding: 3px;
+                        border-color: palette(mid);
+                        border-style: solid;
+                        border-width: 1px;
+                        border-radius: 2px;
+                    }
+                    QLineEdit:focus {
+                        border-color: palette(highlight);
+                    }
+                    QLineEdit:disabled {
+                        color: palette(dark);
+                        background-color: palette(midlight);
+                    }
+                    """
         self.setStyleSheet(_style)
 
     def setValidator(self, a0):

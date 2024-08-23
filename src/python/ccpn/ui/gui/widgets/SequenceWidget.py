@@ -10,8 +10,9 @@ GWV: 22/4/2018: New handling of colours
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -20,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-17 12:03:19 +0100 (Wed, April 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-23 19:21:22 +0100 (Fri, August 23, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -43,10 +44,8 @@ from ccpn.core.NmrChain import NmrChain
 from ccpn.core.lib.Notifiers import Notifier
 
 from ccpn.ui.gui.guiSettings import getColours
-from ccpn.ui.gui.guiSettings import GUICHAINLABEL_TEXT, \
-    GUICHAINRESIDUE_UNASSIGNED, GUICHAINRESIDUE_ASSIGNED, \
-    GUICHAINRESIDUE_POSSIBLE, GUICHAINRESIDUE_WARNING, \
-    SEQUENCEMODULE_DRAGMOVE, SEQUENCEMODULE_TEXT, BORDERNOFOCUS, BORDERFOCUS
+from ccpn.ui.gui.guiSettings import (GUICHAINRESIDUE_ASSIGNED, GUICHAINRESIDUE_POSSIBLE,
+                                     GUICHAINRESIDUE_WARNING, SEQUENCEMODULE_DRAGMOVE)
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.MessageDialog import showYesNo
 from ccpn.util.Logging import getLogger
@@ -80,8 +79,9 @@ class _SequenceWidgetScene(QtWidgets.QGraphicsScene):
         item = parent._getGuiItem(self)
         if item:
             # _highlight is an overlay of the guiNmrResidue but with a highlight colour
-            parent._highlight.setHtml('<div style="color: %s; text-align: center;"><strong>' % parent.colours[SEQUENCEMODULE_DRAGMOVE] +
-                                      item.toPlainText() + '</strong></div>')
+            parent._highlight.setHtml(
+                    '<div style="color: %s; text-align: center;"><strong>' % parent.colours[SEQUENCEMODULE_DRAGMOVE] +
+                    item.toPlainText() + '</strong></div>')
             parent._highlight.setPos(item.pos())
         else:
             parent._highlight.setPlainText('')
@@ -191,9 +191,6 @@ class SequenceWidget():
         self.scrollArea.setWidget(self.scrollContents)
 
         self.colours = getColours()
-        # self.setStyleSheet("""QScrollArea QScrollBar::horizontal {max-height: 20px;}
-        #                       QScrollArea QScrollBar::vertical{max-width:20px;}
-        #                   """)
         self.residueCount = 0
 
         self._parent.layout().addWidget(self.scrollArea)
@@ -207,7 +204,7 @@ class SequenceWidget():
         #self.scrollContents.setFixedHeight(2*self.widgetHeight)
         # self._parent.setMaximumHeight(100)
         # self.scrollContents.setMaximumHeight(100)
-        self._setFocusColour()
+        self._setStyle()
 
         #GWV: explicit initialisation to prevent crashes
         self._chainNotifier = None
@@ -217,14 +214,20 @@ class SequenceWidget():
         self._nmrResidueNotifier = None
         self._registerNotifiers()
 
-    def _setFocusColour(self, focusColour=None, noFocusColour=None):
-        """Set the focus/noFocus colours for the widget
+    def _setStyle(self):
+        """Set the focus/noFocus colours for the widget.
         """
-        styleSheet = """QGraphicsView {
-                            border-width: 1px;
-                            border-radius: 2px;
-                        }"""
-        self.scrollArea.setStyleSheet(styleSheet)
+        _style = """QGraphicsView {
+                        border: 1px solid palette(mid);
+                        border-radius: 2px;
+                    }
+                    QGraphicsView:focus {
+                        border: 1px solid palette(highlight);
+                        border-radius: 2px;
+                    }
+                    QGraphicsView:disabled { background-color: palette(midlight); }
+                    """
+        self.scrollArea.setStyleSheet(_style)
 
     def _getGuiItem(self, scene):
         for item in scene.items():
@@ -287,7 +290,8 @@ class SequenceWidget():
                         toAssign = toAssign[indL:indR + 1]
 
                     else:
-                        showWarning('Sequence Graph', 'nmrResidue %s does not belong to nmrChain' % str(selectedNmrResidue.pid))
+                        showWarning('Sequence Graph',
+                                    'nmrResidue %s does not belong to nmrChain' % str(selectedNmrResidue.pid))
                         return
 
                     # # get the first residue of the chain
@@ -316,7 +320,8 @@ class SequenceWidget():
 
                 residues = [chainRes]
 
-                idStr = 'nmrChain: %s;\nnmrResidue: %s to residue: %s' % (toAssign[0].nmrChain.id, selectedNmrResidue.id, guiRes.residue.id)
+                idStr = 'nmrChain: %s;\nnmrResidue: %s to residue: %s' % (
+                    toAssign[0].nmrChain.id, selectedNmrResidue.id, guiRes.residue.id)
 
             result = showYesNo('Assignment', 'Assign %s?' % idStr)
             if result:
@@ -431,7 +436,8 @@ class SequenceWidget():
             self.widgetHeight = 0
 
         self.chainLabel = GuiChainLabel(self, self.mainWindow, self.scrollArea.scene, position=[0, self.widgetHeight],
-                                        chain=chain, placeholder=placeholder, tryToUseSequenceCodes=tryToUseSequenceCodes)
+                                        chain=chain, placeholder=placeholder,
+                                        tryToUseSequenceCodes=tryToUseSequenceCodes)
         self.scrollArea.scene.addItem(self.chainLabel)
         self.chainLabels[chain] = self.chainLabel
         self.widgetHeight = (0.9 * (self.chainLabel.boundingRect().height())) * len(self.chainLabels)
@@ -509,7 +515,7 @@ class SequenceWidget():
         self._highlight = QtWidgets.QGraphicsTextItem()
         # self._highlight.setDefaultTextColor(QtGui.QColor(self.colours[SEQUENCEMODULE_TEXT]))
 
-        setWidgetFont(self._highlight, size='LARGE')
+        setWidgetFont(self._highlight, size='MEDIUM')
         self._highlight.setPlainText('')
         self.scrollArea.scene.addItem(self._highlight)
 
@@ -532,7 +538,8 @@ class GuiChainLabel(QtWidgets.QGraphicsTextItem):
     along with a dictionary mapping Residue objects and GuiChainResidues, which is required for assignment.
     """
 
-    def __init__(self, sequenceWidget, mainWindow, scene, position, chain, placeholder=None, tryToUseSequenceCodes=False):
+    def __init__(self, sequenceWidget, mainWindow, scene, position, chain, placeholder=None,
+                 tryToUseSequenceCodes=False):
         QtWidgets.QGraphicsTextItem.__init__(self)
 
         self.sequenceWidget = sequenceWidget
@@ -542,15 +549,10 @@ class GuiChainLabel(QtWidgets.QGraphicsTextItem):
         self.project = mainWindow.application.project
 
         self.items = [self]  # keeps track of items specific to this chainLabel
-
         self.colours = getColours()
-        # self.setDefaultTextColor(QtGui.QColor(self.colours[GUICHAINLABEL_TEXT]))
-
-        # self.setFont(self.mainWindow.application._fontSettings.fixedWidthLargeFont)
-        setWidgetFont(self, size='LARGE')
+        setWidgetFont(self, size='MEDIUM')
 
         self.setPos(QtCore.QPointF(position[0], position[1]))
-
         if placeholder:
             self.text = 'No Chains Selected'
         else:
@@ -581,48 +583,36 @@ class GuiChainLabel(QtWidgets.QGraphicsTextItem):
             for idx, residue in enumerate(chain.residues):
                 self._addResidue(idx, residue)
 
-        QtWidgets.QApplication.instance().paletteChanged.connect(self._checkPalette)
+        QtWidgets.QApplication.instance()._sigPaletteChanged.connect(self._checkPalette)
+        self._checkPalette(self.mainWindow.palette())
 
-    def _checkPalette(self, pal: QtGui.QPalette):
-        # print the colours from the updated palette - only 'highlight' seems to be effective
-        # QT modifies this to give different selection shades depending on the widget
-        base = pal.base().color().lightness()
-        _highlightColour = QtGui.QColor.fromHslF(0.625, #highlight.hueF(),
-                                                 # tweak the highlight colour depending on the theme
-                                                 #    needs to go in the correct place
-                                                 0.8 if base > 127 else 0.75,
-                                                 0.5 if base > 127 else 0.65
-                                                 )
-        self.setDefaultTextColor(_highlightColour)
+    def _checkPalette(self, pal: QtGui.QPalette, *args):
+        """Change text colour when theme changes.
+        QGraphicsItems have no palette/stylesheet, so need change-event.
+        """
+        self.setDefaultTextColor(pal.highlight().color())
 
     def _addResidue(self, idx, residue):
-        """
-        Add residue and optional sequenceCode for
-        """
-        if idx % 10 == 9:  # print out every 10
-            numberItem = QtWidgets.QGraphicsTextItem(residue.sequenceCode)
-            # numberItem.setDefaultTextColor(QtGui.QColor(self.colours[GUICHAINLABEL_TEXT]))
-
-            # numberItem.setFont(self.mainWindow.application._fontSettings.helvetica8)
-            setWidgetFont(numberItem, size='SMALL')
-            _spacing = getFontHeight(size='LARGE')
-
-            # xPosition = self.labelPosition + (self.mainWindow.application._fontSettings.textFontHugeSpacing * self.currentIndex)
-            xPosition = self.labelPosition + (_spacing * self.currentIndex)
-
-            numberItem.setPos(QtCore.QPointF(xPosition, self.yPosition))
-            numberItem.setDefaultTextColor(QtGui.QColor('#808080'))
-
-            self.scene.addItem(numberItem)
-            self.items.append(numberItem)
-            self.currentIndex += 1
-
+        """Add residue and optional sequenceCode."""
         newResidue = GuiChainResidue(self, self.mainWindow, residue, self.scene,
                                      self.labelPosition, self.currentIndex, self.yPosition)
         self.scene.addItem(newResidue)
         self.items.append(newResidue)
         self.residueDict[residue.sequenceCode] = newResidue
         self.currentIndex += 1
+
+        if idx % 10 == 9:  # print out every 10
+            numberItem = QtWidgets.QGraphicsTextItem(residue.sequenceCode)
+            setWidgetFont(numberItem, size='TINY')
+            _spacing = getFontHeight(size='MEDIUM')
+            # tweaking to get position at bottom-left
+            xPos = self.labelPosition + (_spacing * self.currentIndex) - (_spacing * 0.25)
+            yPos = self.yPosition + _spacing * 0.5
+            numberItem.setPos(QtCore.QPointF(xPos, yPos))
+            numberItem.setDefaultTextColor(QtGui.QColor('#808080'))  # medium-gray, theme agnostic
+            self.scene.addItem(numberItem)
+            self.items.append(numberItem)
+            self.currentIndex += 1
 
 
 #==========================================================================================
@@ -680,15 +670,10 @@ class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
         self.residue = residue
         self.scene = scene
 
-        # self.setFont(self.mainWindow.application._fontSettings.fixedWidthLargeFont)
-        setWidgetFont(self, size='LARGE')
-        _spacing = getFontHeight(size='LARGE')
-
+        setWidgetFont(self, size='MEDIUM')
+        _spacing = getFontHeight(size='MEDIUM')
         self.colours = getColours()
-        # self.setDefaultTextColor(QtGui.QColor(self.colours[GUICHAINRESIDUE_UNASSIGNED]))
-
         self.setPlainText(residue.shortName)
-        # position = labelPosition + (self.mainWindow.application._fontSettings.textFontHugeSpacing * index)
         position = labelPosition + (_spacing * index)
 
         self.setPos(QtCore.QPointF(position, yPosition))
@@ -697,15 +682,18 @@ class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
         self.setFlags(QtWidgets.QGraphicsItem.ItemIsSelectable | self.flags())
         self._styleResidue()
 
-        QtWidgets.QApplication.instance().paletteChanged.connect(self._checkPalette)
+        QtWidgets.QApplication.instance()._sigPaletteChanged.connect(self._checkPalette)
 
-    def _checkPalette(self, pal: QtGui.QPalette):
-        if not self.assignedState:
-            self.setDefaultTextColor(pal.text().color())
+    def _checkPalette(self, pal: QtGui.QPalette, *args):
+        """Change text colour when theme changes.
+        QGraphicsItems have no palette/stylesheet, so need change-event.
+        """
+        self.setDefaultTextColor(pal.text().color())
+        # might need to do this if the colours are different for light/dark, see assignedState below
+        # self.colours = getColours()
 
     def _styleResidue(self):
-        """
-        A convenience function for applying the correct styling to GuiChainResidues depending on their state.
+        """A convenience function for applying the correct styling to GuiChainResidues depending on their state.
         """
         try:
             if self.residue.nmrResidue is not None:
@@ -718,7 +706,6 @@ class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
     def _setStyleUnAssigned(self):
         self.assignedState = 0
         self.setPlainText(self.residue.shortName)
-        # GUICHAINRESIDUE_UNASSIGNED
 
     def _setStyleAssigned(self):
         self.assignedState = 1

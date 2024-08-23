@@ -6,8 +6,9 @@ Credits to Tim Stevens, University of Cambridge December 2010-2012
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -16,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-17 12:03:18 +0100 (Wed, April 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-23 19:21:18 +0100 (Fri, August 23, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -117,8 +118,6 @@ class CompoundView(QGraphicsView, Base):
         self.editProxy = self.scene().addWidget(self.editWidget)
         self.editProxy.setZValue(2)
 
-        # self.setBackgroundBrush(self.backgroundColor)
-
         # TODO: Add settings for this
         self.showSkeletalFormula = False
         self.showSkeletalFormulaColor = True
@@ -136,19 +135,16 @@ class CompoundView(QGraphicsView, Base):
         if smiles:
             self.setSmiles(self.smiles)
         self._setFocusColour()
-
         self._setStyle()
 
     def _setStyle(self):
         self._checkPalette(self.palette())
-        QtWidgets.QApplication.instance().paletteChanged.connect(self._checkPalette)
+        QtWidgets.QApplication.instance()._sigPaletteChanged.connect(self._checkPalette)
 
-    def _checkPalette(self, pal: QtGui.QPalette):
-        # print the colours from the updated palette - only 'highlight' seems to be effective
-        # QT modifies this to give different selection shades depending on the widget
-        # print(f'--> setting {self.__class__.__name__} styleSheet')
-        base = pal.base()
-        self.setBackgroundBrush(base)
+    def _checkPalette(self, pal: QtGui.QPalette, *args):
+        self.setBackgroundBrush(pal.base())
+        self.background = pal.base().color()
+        self.bondColor = pal.text().color()
 
     def setSmiles(self, smiles):
         """set the smiles"""
@@ -162,15 +158,20 @@ class CompoundView(QGraphicsView, Base):
         self.updateAll()
         self.show()
 
-    def _setFocusColour(self, focusColour=None, noFocusColour=None):
-        """Set the focus/noFocus colours for the widget
-        """
-        styleSheet = """QGraphicsView {
-                            border-width: 1px;
-                            border-radius: 2px;
-                        }
-                        """
-        self.setStyleSheet(styleSheet)
+    def _setFocusColour(self):
+        """Set the focus/noFocus colours for the widget."""
+        _style = """QGraphicsView {
+                        border: 1px solid palette(mid);
+                        border-radius: 2px;
+                        background-color: palette(base);
+                    }
+                    QGraphicsView:focus {
+                        border: 1px solid palette(highlight);
+                        border-radius: 2px;
+                    }
+                    QGraphicsView:disabled { background-color: palette(midlight); }
+                    """
+        self.setStyleSheet(_style)
 
     def minimumSizeHint(self):
         return QtCore.QSize(200, 200)
@@ -1343,6 +1344,8 @@ class AtomLabel(QtWidgets.QGraphicsItem):
         #if n.element != 'C':
         #return
 
+        # paint the floating text - needs to match the theme
+
         useName = self.compoundView.nameAtoms
 
         if useName and self.drawData:
@@ -1355,7 +1358,7 @@ class AtomLabel(QtWidgets.QGraphicsItem):
                 if hasattr(self.compoundView, 'setAtomColorWhite'):
                     painter.setPen(Qt.white)
                 else:
-                    painter.setPen(Qt.black)
+                    painter.setPen(QtGui.QPalette().windowText().color())
 
             painter.drawText(point, text)
         painter.setRenderHint(QtGui.QPainter.Antialiasing, False)
@@ -1610,7 +1613,7 @@ class AromaticItem(AtomGroupItem):
         r1, r2 = self.drawData
         center = self.center
 
-        pen = QtGui.QPen(Qt.black, 1, Qt.SolidLine)
+        pen = QtGui.QPen(QtGui.QPalette().windowText().color(), 1, Qt.SolidLine)
         painter.setPen(pen)
         painter.drawEllipse(center, r1, r2)
 
@@ -2223,7 +2226,8 @@ class AtomItem(QtWidgets.QGraphicsItem):
         drawLine = painter.drawLine
         drawPoly = painter.drawPolygon
 
-        painter.setPen(Qt.black)
+        foreCol = QtGui.QColor('#404040')
+        painter.setPen(foreCol)
         painter.setFont(ELEMENT_FONT)
 
         color = ELEMENT_DATA.get(elem, ELEMENT_DEFAULT)[1]
@@ -2237,12 +2241,12 @@ class AtomItem(QtWidgets.QGraphicsItem):
                 raise NotImplementedError("Needs rewriting - analysisProfile does not exist")
                 backgroundColor = QtGui.QColor()
                 backgroundColor.setRgbF(*self.glWidget._hexToRgba(self.glWidget.spectrumWindow.analysisProfile.bgColor))
-                foregroundColor = Qt.black
+                foregroundColor = foreCol
 
             # Fallback alternative
             else:
-                backgroundColor = Qt.black
-                foregroundColor = Qt.black
+                backgroundColor = Qt.gray
+                foregroundColor = Qt.gray
         else:
             backgroundColor = self.compoundView.backgroundColor
             foregroundColor = Qt.blue
@@ -2512,7 +2516,7 @@ class AtomItem(QtWidgets.QGraphicsItem):
                             poly.append(qPoint(x2, y2))
 
                         drawPoly(poly)
-                        painter.setPen(Qt.black)
+                        painter.setPen(foreCol)
 
                     poly = qPoly()
                     for angle in angles:
@@ -2527,7 +2531,7 @@ class AtomItem(QtWidgets.QGraphicsItem):
                 if self.selected:
                     painter.setPen(HIGHLIGHT)
                     drawEllipse(center, r + 1, r + 1)
-                    painter.setPen(Qt.black)
+                    painter.setPen(foreCol)
 
                 drawEllipse(center, r, r)
                 textPoint = qPoint(x - w2, y + h2)
@@ -2873,7 +2877,7 @@ class BondItem(QtWidgets.QGraphicsItem):
                 raise NotImplementedError("Needs rewriting - analysisProfile does not exist")
                 backgroundColor = QtGui.QColor()
                 backgroundColor.setRgbF(*self.glWidget._hexToRgba(self.glWidget.spectrumWindow.analysisProfile.bgColor))
-                color = Qt.black
+                color = QtGui.QPalette().windowText().color()
             # Fallback
             else:
                 color = self.compoundView.bondColor

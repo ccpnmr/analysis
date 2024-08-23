@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-24 18:05:24 +0100 (Wed, July 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-23 19:21:19 +0100 (Fri, August 23, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -40,14 +40,15 @@ from PyQt5.QtCore import pyqtSlot, Qt
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME, MOUSEDICTSTRIP
 from ccpn.util.Logging import getLogger
-from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_BACKGROUND, \
-    CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR, CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, \
-    CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_PHASETRACE, CCPNGLWIDGET_ZOOMAREA, CCPNGLWIDGET_PICKAREA, \
-    CCPNGLWIDGET_SELECTAREA, CCPNGLWIDGET_ZOOMLINE, CCPNGLWIDGET_MOUSEMOVELINE, CCPNGLWIDGET_HARDSHADE, \
-    colourSchemes, getColourScheme
+from ccpn.ui.gui.guiSettings import (getColours, CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_BACKGROUND,
+    CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR, CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT,
+    CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_PHASETRACE, CCPNGLWIDGET_ZOOMAREA, CCPNGLWIDGET_PICKAREA,
+    CCPNGLWIDGET_SELECTAREA, CCPNGLWIDGET_ZOOMLINE, CCPNGLWIDGET_MOUSEMOVELINE, CCPNGLWIDGET_HARDSHADE,
+                                     getColours)
 from ccpn.ui.gui.lib.GuiStrip import STRIP_MINIMUMHEIGHT, STRIP_MINIMUMWIDTH, AxisMenu
 from ccpn.ui.gui.lib.OpenGL import CcpnOpenGLDefs as GLDefs
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import ZOOMHISTORYSTORE, CURSOR_SOURCE_NONE, CURSOR_SOURCE_OTHER, ZOOMTIMERDELAY, CURSOR_SOURCE_SELF
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import (ZOOMHISTORYSTORE, CURSOR_SOURCE_NONE, CURSOR_SOURCE_OTHER,
+                                               ZOOMTIMERDELAY, CURSOR_SOURCE_SELF)
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_REBUILD, GLRENDERMODE_DRAW, GLVertexArray
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import YAXISUNITS1D, PaintModes
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import GLString
@@ -212,18 +213,13 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         # create an overlay for drag-drop/highlight operations
         self._overlayArea = _AxisOverlay(self)
         self._overlayArea.raise_()
-
         self._setStyle()
 
     def _setStyle(self):
         self._checkPalette(self.palette())
-        QtWidgets.QApplication.instance().paletteChanged.connect(self._checkPalette)
 
-    def _checkPalette(self, pal: QtGui.QPalette):
-        # print the colours from the updated palette - only 'highlight' seems to be effective
-        # QT modifies this to give different selection shades depending on the widget
-        #   see highlight colour in paintEvent
-        # print(f'--> {self.__class__.__name__} ')
+    def _checkPalette(self, pal: QtGui.QPalette, *args):
+        # this is effectively handled by _preferencesUpdate
         self._setColourScheme(pal)
         # set the flag to update the background in the paint event
         self._updateBackgroundColour = True
@@ -1164,43 +1160,25 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
     def _setColourScheme(self, pal: QtGui.QPalette = None):
         """Update colours from colourScheme
         """
-        # colourScheme = getColourScheme()
-        #
-        # pal = pal or self.palette()
-        # base = pal.base().color().lightness()
-        # highlight = pal.highlight().color()
-        # self.highlightColour = QtGui.QColor.fromHslF(highlight.hueF(),
-        #                                # tweak the highlight colour depending on the theme
-        #                                #    needs to go in the correct place
-        #                                0.9 if base > 127 else 0.9,
-        #                                0.4 if base > 127 else 0.6
-        #                                ).getRgbF()
-        # if colourScheme == 'default':
-        #     if base < 127:
-        #         colourScheme = 'dark'
-        #     else:
-        #         colourScheme = 'light'
-        # self.colours = colourSchemes['default'].copy() | colourSchemes[colourScheme]
+        cols = self.colours = getColours()
+        self.hexBackground = cols[CCPNGLWIDGET_HEXBACKGROUND]
+        self.background = cols[CCPNGLWIDGET_BACKGROUND]
+        self.foreground = cols[CCPNGLWIDGET_FOREGROUND]
+        self.mousePickColour = cols[CCPNGLWIDGET_PICKCOLOUR]
+        self.gridColour = cols[CCPNGLWIDGET_GRID]
+        self.highlightColour = cols[CCPNGLWIDGET_HIGHLIGHT]
+        self._labellingColour = cols[CCPNGLWIDGET_LABELLING]
+        self._phasingTraceColour = cols[CCPNGLWIDGET_PHASETRACE]
 
-        self.colours = getColours()
-        self.hexBackground = self.colours[CCPNGLWIDGET_HEXBACKGROUND]
-        self.background = self.colours[CCPNGLWIDGET_BACKGROUND]
-        self.foreground = self.colours[CCPNGLWIDGET_FOREGROUND]
-        self.mousePickColour = self.colours[CCPNGLWIDGET_PICKCOLOUR]
-        self.gridColour = self.colours[CCPNGLWIDGET_GRID]
-        self.highlightColour = self.colours[CCPNGLWIDGET_HIGHLIGHT]
-        self._labellingColour = self.colours[CCPNGLWIDGET_LABELLING]
-        self._phasingTraceColour = self.colours[CCPNGLWIDGET_PHASETRACE]
+        self.zoomAreaColour = cols[CCPNGLWIDGET_ZOOMAREA]
+        self.pickAreaColour = cols[CCPNGLWIDGET_PICKAREA]
+        self.selectAreaColour = cols[CCPNGLWIDGET_SELECTAREA]
+        self.zoomLineColour = cols[CCPNGLWIDGET_ZOOMLINE]
+        self.mouseMoveLineColour = cols[CCPNGLWIDGET_MOUSEMOVELINE]
 
-        self.zoomAreaColour = self.colours[CCPNGLWIDGET_ZOOMAREA]
-        self.pickAreaColour = self.colours[CCPNGLWIDGET_PICKAREA]
-        self.selectAreaColour = self.colours[CCPNGLWIDGET_SELECTAREA]
-        self.zoomLineColour = self.colours[CCPNGLWIDGET_ZOOMLINE]
-        self.mouseMoveLineColour = self.colours[CCPNGLWIDGET_MOUSEMOVELINE]
-
-        self.zoomAreaColourHard = (*self.colours[CCPNGLWIDGET_ZOOMAREA][0:3], CCPNGLWIDGET_HARDSHADE)
-        self.pickAreaColourHard = (*self.colours[CCPNGLWIDGET_PICKAREA][0:3], CCPNGLWIDGET_HARDSHADE)
-        self.selectAreaColourHard = (*self.colours[CCPNGLWIDGET_SELECTAREA][0:3], CCPNGLWIDGET_HARDSHADE)
+        self.zoomAreaColourHard = (*cols[CCPNGLWIDGET_ZOOMAREA][0:3], CCPNGLWIDGET_HARDSHADE)
+        self.pickAreaColourHard = (*cols[CCPNGLWIDGET_PICKAREA][0:3], CCPNGLWIDGET_HARDSHADE)
+        self.selectAreaColourHard = (*cols[CCPNGLWIDGET_SELECTAREA][0:3], CCPNGLWIDGET_HARDSHADE)
 
     def resetRangeLimits(self, allLimits=True):
         # reset zoom limits for the display

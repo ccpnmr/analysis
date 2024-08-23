@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-20 16:42:22 +0100 (Thu, June 20, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-08-23 19:21:55 +0100 (Fri, August 23, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -151,7 +151,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
         self.hStyle = """
                   Dock > QWidget {
-                      border: 1px solid #a9a9a9;
+                      border: 1px solid palette(mid);
                       border-radius: 2px;
                       border-top-left-radius: 0px;
                       border-top-right-radius: 0px;
@@ -159,7 +159,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                   }"""
         self.vStyle = """
                   Dock > QWidget {
-                      border: 1px solid #000;
+                      border: 1px solid palette(mid);
                       border-radius: 0px;
                       border-top-left-radius: 0px;
                       border-bottom-left-radius: 0px;
@@ -228,12 +228,16 @@ class CcpnModule(Dock, DropBase, NotifierBase):
             self._settingsScrollArea = self.settingsWidget._scrollArea
 
             # set the new borders for the settings scroll area - border not needed at the top
-            self._settingsScrollArea.setStyleSheet('ScrollArea { border-left: 1px solid %s;'
-                                                   'border-right: 1px solid %s;'
-                                                   'border-bottom: 1px solid %s;'
-                                                   'background: transparent; }' % (
-                                                       BORDERNOFOCUS_COLOUR, BORDERNOFOCUS_COLOUR,
-                                                       BORDERNOFOCUS_COLOUR))
+            # self._settingsScrollArea.setStyleSheet('ScrollArea { border-left: 1px solid %s;'
+            #                                        'border-right: 1px solid %s;'
+            #                                        'border-bottom: 1px solid %s;'
+            #                                        'background: transparent; }' % (
+            #                                            BORDERNOFOCUS_COLOUR, BORDERNOFOCUS_COLOUR,
+            #                                            BORDERNOFOCUS_COLOUR))
+            self._settingsScrollArea.setStyleSheet('ScrollArea { border-left: 1px solid palette(mid);'
+                                                   'border-right: 1px solid palette(mid);'
+                                                   'border-bottom: 1px solid palette(mid);'
+                                                   'background: transparent; }')
             self.settingsWidget.insertCornerWidget()
 
             if self.settingsPosition in settingsWidgetPositions:
@@ -297,19 +301,11 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         # stop the blue overlay popping up when dragging over a spectrum (no central region)
         self.allowedAreas = ['top', 'left', 'right', 'bottom']
 
-        self._updateStyle()
         self.update()  # make sure that the widgetArea starts the correct size
-
         # set the constraints so the module contracts to the correct size
         self.mainWidget.getLayout().setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
         self.setMinimumSize(6 * self.label.labelSize, 5 * self.label.labelSize)
         self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
-
-        # set the background/fontSize for the tooltips
-        _font = getFont(name=DEFAULTFONT)
-        self.setStyleSheet('QToolTip {{ background-color: {TOOLTIP_BACKGROUND}; '
-                           'color: {TOOLTIP_FOREGROUND}; '
-                           'font-size: {_size}pt ; }}'.format(_size=_font.pointSize(), **getColours()))
 
     #=========================================================================================
     # CCPN Properties
@@ -822,23 +818,6 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                 event.ignore()
                 return
 
-    def _updateStyle(self):
-        """
-        Copied from the parent class to allow for modification in StyleSheet
-        However, that appears not to work (fully);
-
-        GWV: many calls to the updateStyle are triggered during initialization
-             probably from paint event
-        """
-
-        # Padding appears not to work; overridden somewhere else?
-        colours = getColours()
-
-        tempStyle = """CcpnModule {
-                      border: 0px;
-                   }"""
-        self.setStyleSheet(tempStyle)
-
     def findWindow(self):
         current = self
         while current.parent() is not None:
@@ -1033,6 +1012,11 @@ class CcpnModuleLabel(DockLabel):
         # flag to disable dragMoveEvent during a doubleClick
         self._inDoubleClick = False
 
+        QtWidgets.QApplication.instance()._sigPaletteChanged.connect(self._checkPalette)
+
+    def _checkPalette(self, pal: QtGui.QPalette, *args):
+        self.updateStyle()
+
     @property
     def labelName(self):
         return self.module.id
@@ -1085,7 +1069,6 @@ class CcpnModuleLabel(DockLabel):
         self.setDim(hightlighted)
 
     def updateStyle(self):
-
         # get the colours from the colourScheme
         if self.dim:
             fg = getColours()[CCPNMODULELABEL_FOREGROUND]
@@ -1432,6 +1415,11 @@ class DropAreaSelectedOverlay(QtWidgets.QWidget):
         self.dropArea = None
         self.hide()
         self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents)
+        self.setAutoFillBackground(False)
+        # colour from DockAreaOverlay so looks consistent
+        self._highlightBrush = QtGui.QBrush(QtGui.QColor(100, 100, 255, 50))
+        self._highlightPen = QtGui.QPen(QtGui.QColor(50, 50, 150), 3)
+
 
     def setDropArea(self, area):
         """Set the widget coverage, either hidden, or a rectangle covering the module
@@ -1462,10 +1450,8 @@ class DropAreaSelectedOverlay(QtWidgets.QWidget):
         # create a transparent rectangle and painter over the widget
         p = QtGui.QPainter(self)
         rgn = self.rect()
-        color = self.palette().highlight().color()
-        color.setAlpha(100)
-        p.setBrush(color)
-        p.setPen(QtGui.QPen(color, 3))
+        p.setBrush(self._highlightBrush)
+        p.setPen(self._highlightPen)
         p.drawRect(rgn)
         p.end()
 
@@ -1504,22 +1490,19 @@ class BorderOverlay(QtWidgets.QWidget):
         """
         # clear the bottom corners, and draw a rounded rectangle to cover the edges
         p = QtGui.QPainter(self)
+        p.translate(0.5, 0.5)  # move to pixel-centre
+        p.setRenderHint(QtGui.QPainter.Antialiasing, True)
         rgn = self.rect().adjusted(0, 0, -1, -1)
         w = rgn.width()
         h = rgn.height()
         # clear and smooth the bottom corners
-        p.setPen(QtGui.QPen(self._backgroundColour, 1))
+        pal = self.palette()
+        p.setPen(QtGui.QPen(pal.window(), 3))  # background
         p.drawPoints(QtCore.QPoint(0, h),
                      QtCore.QPoint(w, h),
                      )
-        p.setPen(QtGui.QPen(self._blendColour, 1))
-        p.drawPoints(QtCore.QPoint(0, h - 1),
-                     QtCore.QPoint(1, h),
-                     QtCore.QPoint(w, h - 1),
-                     QtCore.QPoint(w - 1, h)
-                     )
         # draw the new rectangle around the module
-        p.setPen(QtGui.QPen(self.palette().mid(), 1))
+        p.setPen(QtGui.QPen(pal.mid(), 1))  # border
         p.drawRoundedRect(rgn, 2, 2)
         p.end()
 

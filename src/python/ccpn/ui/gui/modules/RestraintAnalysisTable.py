@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-20 16:42:22 +0100 (Thu, June 20, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-08-23 19:21:56 +0100 (Fri, August 23, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1197,15 +1197,14 @@ class RestraintAnalysisTableModule(CcpnTableModule):
             self._setPulldownColours(combo, [obj.pid for obj in filt], QtGui.QColor('green'))
         if filtOther:
             self._setPulldownColours(combo, [obj.pid for obj in filtOther], QtGui.QColor('blue'))
-        self._setPulldownTextColour(combo)
 
     def _applyViolationTableFilter(self, *args):
         """Filter the violation-table pulldown when about to show
         """
         rss = self.resources
         table = rss._outTableWidget
-
         combo = table.pulldownList
+
         filt = rss._outputTableFilter.get(rss._thisPeakList) or []
         objs = [vt for vt in self.project.violationTables if vt.getMetadata(_VIOLATIONRESULT)]
 
@@ -1221,13 +1220,11 @@ class RestraintAnalysisTableModule(CcpnTableModule):
             self._setPulldownColours(combo, [obj.pid for obj in filt], QtGui.QColor('green'))
         if filtOther:
             self._setPulldownColours(combo, [obj.pid for obj in filtOther], QtGui.QColor('blue'))
-        self._setPulldownTextColour(combo)
 
     def _applyPeakListFilter(self):
         """Filter the peakList pulldown when about to show
         """
         rss = self.resources
-
         combo = rss._modulePulldown.pulldownList
 
         filt = [rss._thisPeakList] if rss._thisPeakList else []
@@ -1239,9 +1236,9 @@ class RestraintAnalysisTableModule(CcpnTableModule):
             self._setPulldownColours(combo, [obj.pid for obj in filt], QtGui.QColor('green'))
         if filtOther:
             self._setPulldownColours(combo, [obj.pid for obj in filtOther], QtGui.QColor('blue'))
-        self._setPulldownTextColour(combo)
 
-    def _setPulldownColours(self, combo, pids, color=None):
+    @staticmethod
+    def _setPulldownColours(combo, pids, color=None):
         """Colour the pulldown items if they belong to the supplied list
         """
         color = color or QtGui.QColor('blue')
@@ -1251,34 +1248,20 @@ class RestraintAnalysisTableModule(CcpnTableModule):
         for ind in range(len(combo.texts)):
             itm = model.item(ind)
             if ind in _inds:
-                itm.setForeground(color)
-            # itm.setForeground(color if ind in _inds else DEFAULT_COLOR)
-        self._setPulldownTextColour(combo)
+                itm.setData(color, QtCore.Qt.ForegroundRole)
+        # update the pulldown to match the selected item
+        combo.update()
 
-    def _resetPulldownColours(self, combo, color=None):
+    @staticmethod
+    def _resetPulldownColours(combo):
         """Colour the pulldown items if they belong to the supplied list
         """
-        color = color or DEFAULT_COLOR
-
         model = combo.model()
         for ind in range(len(combo.texts)):
             itm = model.item(ind)
-            itm.setForeground(color)
-        self._setPulldownTextColour(combo)
-
-    @staticmethod
-    def _setPulldownTextColour(combo):
-        """Set the colour of the selected pulldown-text
-        """
-        if (model := combo.model()):
-            palette = combo.palette()
-            if (item := model.item(combo.currentIndex())) is not None and item.text():
-                # use the palette to change the colour of the selection text - may not match for other themes
-                palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Text, item.foreground().color())
-            else:
-                palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Text, QtGui.QColor('black'))
-
-            combo.setPalette(palette)
+            itm.setData(None, QtCore.Qt.ForegroundRole)
+        # update the pulldown to match the selected item
+        combo.update()
 
     def _selectPeakList(self, peakList=None):
         """Manually select a PeakList from the pullDown

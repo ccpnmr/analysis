@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-20 15:44:52 +0100 (Thu, June 20, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-08-23 19:27:18 +0100 (Fri, August 23, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -761,7 +761,7 @@ class ValidateSpectraPopup(CcpnDialog):
         _f = MoreLessFrame(self, mainWindow=self.mainWindow,
                            name='Redirections', bold=True, showMore=True,
                            setLayout=True, grid=(row, 0),
-                           _frameMargins=(0, 5, 0, 5),
+                           frameMargins=(0, 5, 0, 5),
                            hPolicy='expanding',
                            )
 
@@ -774,7 +774,7 @@ class ValidateSpectraPopup(CcpnDialog):
         _f = MoreLessFrame(self, mainWindow=self.mainWindow,
                            name='Spectra', bold=True, showMore=True,
                            setLayout=True, grid=(row, 0),
-                           _frameMargins=(0, 5, 0, 5),
+                           frameMargins=(0, 5, 0, 5),
                            hPolicy='expanding',
                            )
         _frame2 = Frame(_f.contentsFrame, setLayout=True, grid=(0, 0), showBorder=_showBorders,
@@ -789,7 +789,7 @@ class ValidateSpectraPopup(CcpnDialog):
         _f = MoreLessFrame(self, mainWindow=self.mainWindow,
                            name='Search / Modify', bold=True, showMore=False,  # closed on default
                            setLayout=True, grid=(row, 0),
-                           _frameMargins=(0, 5, 0, 5),
+                           frameMargins=(0, 5, 0, 5),
                            hPolicy='expanding',
                            )
         _frame3 = Frame(_f.contentsFrame, setLayout=True, grid=(0, 0), showBorder=_showBorders,

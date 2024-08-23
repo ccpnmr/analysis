@@ -17,8 +17,9 @@ SidebarClassTreeItems: A Tree with a number of dynamically added items of type V
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -27,7 +28,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-17 16:53:15 +0100 (Wed, April 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-23 19:28:10 +0100 (Fri, August 23, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -758,7 +759,7 @@ class SidebarClassSpectrumTreeItems(SidebarClassABC):
         """Get the children of <obj> by class type <klass>.
         Get the spectra belonging to spectrumGroup.
         """
-        return obj._getSpectrumGroupChildrenByClass(klass) if not klass.isDeleted else []
+        return obj._getSpectrumGroupChildrenByClass(klass) if not obj.isDeleted else []
 
 
 class SidebarClassNmrResidueTreeItems(SidebarClassABC):
@@ -1239,15 +1240,12 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         """Set the focus/noFocus colours for the widget
         """
         _style = """QTreeWidget {
-                        border-color: palette(mid);
-                        border-width: 1px;
+                        border: 1px solid palette(mid);
                         border-radius: 2px;
-                        border-style: solid;
                     }
                     QTreeWidget:focus {
-                        border-width: 1px;
+                        border: 1px solid palette(highlight);
                         border-radius: 2px;
-                        border-style: solid;
                     }
                     """
         # set stylesheet - this seems to miss the first paint event

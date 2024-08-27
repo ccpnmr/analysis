@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-23 19:21:20 +0100 (Fri, August 23, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-27 16:07:11 +0100 (Tue, August 27, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -96,6 +96,9 @@ class LineEdit(QtWidgets.QLineEdit, Base):
                 QLineEdit:disabled {
                     color: #808080;
                     background-color: palette(midlight);
+                }
+                QLineEdit:read-only {
+                    color: #808080;
                 }
                 """
         self.setStyleSheet(_style)
@@ -233,3 +236,42 @@ class PasswordEdit(LineEdit):
 
         # set password mode
         self.setEchoMode(QtWidgets.QLineEdit.Password)
+
+
+def main():
+    from ccpn.ui.gui.widgets.Application import TestApplication
+    from ccpn.ui.gui.widgets.Widget import Widget
+    from ccpn.ui.gui.widgets.Spacer import Spacer
+
+    class Popup(QtWidgets.QMainWindow):
+        def __init__(self, title):
+            super().__init__()
+            self.layout().setContentsMargins(9, 9, 9, 9)
+
+            self.setWindowTitle(title)
+            mainWidget = Widget(self, setLayout=True)
+            self.setCentralWidget(mainWidget)
+            LineEdit(parent=mainWidget, name='Widget-1', grid=(0, 0), text='Enabled - text')
+            LineEdit(parent=mainWidget, name='Widget-2', grid=(1, 0), text='Disabled - text', enabled=False)
+            widget3 = LineEdit(parent=mainWidget, name='Widget-3', grid=(2, 0), text='Read-only - text')
+            widget3.setReadOnly(True)
+            widget4 = LineEdit(parent=mainWidget, name='Widget-4', grid=(3, 0), text='Disabled|read-only - text',
+                               enabled=False)
+            widget4.setReadOnly(True)
+            Spacer(mainWidget, 1, 1,
+                   QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
+                   grid=(9, 9))
+
+
+    app = TestApplication()
+    # patch for icon sizes in menus, etc.
+    styles = QtWidgets.QStyleFactory()
+    app.setStyle(styles.create('fusion'))
+    popup = Popup(title='Testing enabled/read-only lineEdits')
+    popup.show()
+
+    app.start()
+
+
+if __name__ == '__main__':
+    main()

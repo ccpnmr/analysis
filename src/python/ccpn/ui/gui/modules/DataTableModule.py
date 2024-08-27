@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-21 19:48:44 +0100 (Fri, June 21, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-08-27 13:00:49 +0100 (Tue, August 27, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -402,6 +402,11 @@ class _DataTableWidget(Table):
 
         # may refactor the remaining modules so this isn't needed
         self._widgetScrollArea.setFixedHeight(self._widgetScrollArea.sizeHint().height())
+
+    def setClassDefaultColumns(self, texts):
+        """set a list of default column-headers that are hidden when first shown.
+        """
+        self.headerColumnMenu.saveColumns(texts)
 
     #=========================================================================================
     # Selection/action callbacks

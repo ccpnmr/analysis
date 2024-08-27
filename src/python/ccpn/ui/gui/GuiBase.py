@@ -371,24 +371,22 @@ class GuiBase(object):
             th = Theme.LIGHT
         else:
             th = Theme.getByDataValue((cs := prefsApp.themeStyle) and cs.lower())
-
         if th is None:
             raise RuntimeError('invalid theme')
+
+        thName = str(th.dataValue).capitalize()
         self._themeStyle = th
         self._themeColour = prefsApp.themeColour
 
-        _qssPath = widgetsPath / ('%sStyleSheet.qss' % th.name)  # assume capitalised
+        _qssPath = widgetsPath / ('%sStyleSheet.qss' % thName)  # assume capitalised
         with _qssPath.open(mode='r') as fp:
             styleSheet = fp.read()
-
         if platform.system() == 'Linux':
-            _qssPath = widgetsPath / ('%sAdditionsLinux.qss' % th.name)
+            _qssPath = widgetsPath / ('%sAdditionsLinux.qss' % thName)
             with _qssPath.open(mode='r') as fp:
                 additions = fp.read()
             styleSheet += additions
-
-        self._styleSheet = None  #styleSheet
-
+        self._styleSheet = None  #styleSheet - disabled for the minute
         if sd := Theme.getByDataValue((cs := prefsGen.colourScheme) and cs.lower()):
             self._themeSDStyle = sd
 

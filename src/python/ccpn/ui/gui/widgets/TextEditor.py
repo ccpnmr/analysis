@@ -191,10 +191,10 @@ class TextEditor(QtWidgets.QTextEdit, Base):
                         width: 20px; height: 20px;
                     }
                     """
-        self.setStyleSheet(_style % (_gripIcon._filePath))
+        self.setStyleSheet(_style % aPath(_gripIcon._filePath).as_posix())
 
     # def _addGrip(self):
-    #     # an idea to add a grip handle - can't thing of any other way
+    #     # an idea to add a grip handle - can't think of any other way
     #     self._gripIcon = Icon('icons/grip')
     #     self._gripLabel = Label(self)
     #     self._gripLabel.setPixmap(self._gripIcon.pixmap(16))

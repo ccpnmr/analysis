@@ -57,7 +57,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-24 18:05:24 +0100 (Wed, July 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-28 18:22:04 +0100 (Wed, August 28, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -6642,7 +6642,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                 spectrumView, peak)
 
                                         # if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
-                                        if _isInPlane:
+                                        if _isInPlane or _isInFlankingPlane:
                                             peaks.add(peak)
                                     else:
                                         peaks.add(peak)
@@ -6702,7 +6702,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                         spectrumView, multiplet)
 
                                 # if zPositions[0] < float(multiplet.position[zAxis]) < zPositions[1]:
-                                if _isInPlane:
+                                if _isInPlane or _isInFlankingPlane:
                                     multiplets.add(multiplet)
                             else:
                                 multiplets.add(multiplet)

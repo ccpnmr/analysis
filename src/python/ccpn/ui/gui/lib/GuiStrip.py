@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-25 18:59:48 +0100 (Thu, July 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-28 18:22:04 +0100 (Wed, August 28, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -295,7 +295,8 @@ class GuiStrip(Frame):
             self.symbolType = min(_firstStrip.symbolType, self.spectrumDisplay.MAXPEAKSYMBOLTYPES - 1)
             self.symbolSize = _firstStrip.symbolSize
             self.symbolThickness = _firstStrip.symbolThickness
-            self.multipletLabelling = min(_firstStrip.multipletLabelling, self.spectrumDisplay.MAXMULTIPLETLABELTYPES - 1)
+            self.multipletLabelling = min(_firstStrip.multipletLabelling,
+                                          self.spectrumDisplay.MAXMULTIPLETLABELTYPES - 1)
             self.multipletType = min(_firstStrip.multipletType, self.spectrumDisplay.MAXMULTIPLETSYMBOLTYPES - 1)
 
             self.aliasEnabled = _firstStrip.aliasEnabled
@@ -345,7 +346,8 @@ class GuiStrip(Frame):
             self.symbolType = min(settings[SYMBOLTYPE], self.spectrumDisplay.MAXPEAKSYMBOLTYPES - 1)
             self.symbolSize = settings[SYMBOLSIZE]
             self.symbolThickness = settings[SYMBOLTHICKNESS]
-            self.multipletLabelling = min(settings[MULTIPLETANNOTATIONTYPE], self.spectrumDisplay.MAXMULTIPLETLABELTYPES - 1)
+            self.multipletLabelling = min(settings[MULTIPLETANNOTATIONTYPE],
+                                          self.spectrumDisplay.MAXMULTIPLETLABELTYPES - 1)
             self.multipletType = min(settings[MULTIPLETTYPE], self.spectrumDisplay.MAXMULTIPLETSYMBOLTYPES - 1)
 
             self.contourThickness = settings[CONTOURTHICKNESS]
@@ -434,7 +436,8 @@ class GuiStrip(Frame):
             stripIndex = strips.index(self)
         else:
             stripIndex = len(strips)
-            getLogger().warning('Strip ordering not defined for %s in %s' % (str(self.pid), str(self.spectrumDisplay.pid)))
+            getLogger().warning(
+                    'Strip ordering not defined for %s in %s' % (str(self.pid), str(self.spectrumDisplay.pid)))
 
         if self.spectrumDisplay.stripArrangement == 'Y':
             # strips are arranged in a row
@@ -451,7 +454,8 @@ class GuiStrip(Frame):
             return
 
         else:
-            getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(self.spectrumDisplay.pid))
+            getLogger().warning(
+                    'Strip direction is not defined for spectrumDisplay: %s' % str(self.spectrumDisplay.pid))
             return
 
         self.spectrumDisplay._addStrip(self, tilePosition)
@@ -770,7 +774,7 @@ class GuiStrip(Frame):
             popup = StripPlotPopup(parent=self.mainWindow, mainWindow=self.mainWindow,
                                    spectrumDisplay=self.spectrumDisplay,
                                    includePeakLists=includePeakLists, includeNmrChains=includeNmrChains,
-                                   includeSpectrumTable=includeSpectrumTable, includeNmrChainPullSelection=True,)
+                                   includeSpectrumTable=includeSpectrumTable, includeNmrChainPullSelection=True, )
             popup.exec_()
         else:
             MessageDialog.showWarning('Make Strip Plot', 'No selected spectrumDisplay')
@@ -797,7 +801,8 @@ class GuiStrip(Frame):
 
             else:
                 # popup to calibrate from selected peaks in this display
-                from ccpn.ui.gui.popups.CalibrateSpectraFromPeaksPopup import CalibrateSpectraFromPeaksPopupNd, CalibrateSpectraFromPeaksPopup1d
+                from ccpn.ui.gui.popups.CalibrateSpectraFromPeaksPopup import (CalibrateSpectraFromPeaksPopupNd,
+                                                                               CalibrateSpectraFromPeaksPopup1d)
 
                 if self.spectrumDisplay.is1D:
                     popup = CalibrateSpectraFromPeaksPopup1d(parent=self.mainWindow, mainWindow=self.mainWindow,
@@ -883,11 +888,13 @@ class GuiStrip(Frame):
         """
         pass
 
-    def _createMenuItemForNavigate(self, currentStrip, navigateAxes, navigatePos, showPos, strip, menuFunc, label, includeAxisCodes=True, prefix=None):
+    def _createMenuItemForNavigate(self, currentStrip, navigateAxes, navigatePos, showPos, strip, menuFunc, label,
+                                   includeAxisCodes=True, prefix=None):
         from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip
 
         if includeAxisCodes:
-            item = ', '.join([f"{cc}:{str(x if isinstance(x, str) else round(x, 3))}" for x, cc in zip(showPos, strip.axisCodes)])
+            item = ', '.join([f"{cc}:{str(x if isinstance(x, str) else round(x, 3))}"
+                              for x, cc in zip(showPos, strip.axisCodes)])
 
         else:
             item = ', '.join([str(x if isinstance(x, str) else round(x, 3)) for x in showPos])
@@ -914,7 +921,8 @@ class GuiStrip(Frame):
         # # else:
         # #     print('skipping axisCodes %s %s' % (strip.axisCodes, currentStrip.axisCodes))
 
-    def _createCommonMenuItem(self, currentStrip, includeAxisCodes, label, menuFunc, perm, position, strip, prefix=None):
+    def _createCommonMenuItem(self, currentStrip, includeAxisCodes, label, menuFunc, perm, position, strip,
+                              prefix=None):
         showPos = []
         navigatePos = []
         navigateAxes = []
@@ -982,12 +990,14 @@ class GuiStrip(Frame):
         # add the opposite diagonals for matching axisCodes - always at the top of the list
         indices = getAxisCodeMatchIndices(currentStrip.axisCodes, axisCodes, allMatches=False)
         allIndices = getAxisCodeMatchIndices(currentStrip.axisCodes, axisCodes, allMatches=True)
-        permutationList1 = [jj for jj in product(*(ii or (None,) for ii in allIndices)) if len(set(jj)) == len(currentStrip.axisCodes)]
+        permutationList1 = [jj for jj in product(*(ii or (None,) for ii in allIndices))
+                            if len(set(jj)) == len(currentStrip.axisCodes)]
         for perm in permutationList1:
 
             # skip any that match the original indexing
             if any(ii != jj for ii, jj in zip(perm, indices)):
-                self._createCommonMenuItem(currentStrip, includeAxisCodes, label, menuFunc, perm, position, currentStrip)
+                self._createCommonMenuItem(currentStrip, includeAxisCodes, label, menuFunc, perm, position,
+                                           currentStrip)
 
         menuFunc.addSeparator()
 
@@ -1101,7 +1111,8 @@ class GuiStrip(Frame):
                     for perm2 in newPerms.values():
                         # ignore all Nones
                         if perm2.count(None) != len(perm2):
-                            permItem = self._createCommonMenuItem(currentStrip, includeAxisCodes, label, menuFunc, perm2, position, strip, prefix=prefix)
+                            permItem = self._createCommonMenuItem(currentStrip, includeAxisCodes, label, menuFunc,
+                                                                  perm2, position, strip, prefix=prefix)
                             strCount += 1
                             specCount += 1
 
@@ -1131,7 +1142,8 @@ class GuiStrip(Frame):
         """Adds item to navigate to peak position from context menu.
         """
         if peaks and self._navigateToPeakMenuSelected:
-            self._addItemsToNavigateMenu(peaks[0].position, peaks[0].axisCodes, 'Peak', self._navigateToPeakMenuSelected, includeAxisCodes=True)
+            self._addItemsToNavigateMenu(peaks[0].position, peaks[0].axisCodes, 'Peak',
+                                         self._navigateToPeakMenuSelected, includeAxisCodes=True)
 
     def _addItemsToNavigateToCursorPosMenu(self):
         """Copied from old viewbox. This function apparently take the current cursorPosition
@@ -1174,7 +1186,8 @@ class GuiStrip(Frame):
                     for spectrumDisplay in self.current.project.spectrumDisplays:
                         for strip in spectrumDisplay.strips:
                             if strip != currentStrip:
-                                toolTip = 'Show cursor in strip %s at %s position %s' % (str(strip.id), label, str([round(x, 3) for x in position]))
+                                toolTip = 'Show cursor in strip %s at %s position %s' % (
+                                    str(strip.id), label, str([round(x, 3) for x in position]))
                                 if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
                                     menuFunc.addItem(text=strip.pid,
                                                      callback=partial(self._createMarkAtPosition,
@@ -1365,11 +1378,13 @@ class GuiStrip(Frame):
                             for ii, ind in enumerate(indices):
                                 if ind is not None:
 
-                                    toolTip = 'Copy %s axis range from strip %s' % (str(strip.axisCodes[ii]), str(strip.id))
+                                    toolTip = 'Copy %s axis range from strip %s' % (
+                                        str(strip.axisCodes[ii]), str(strip.id))
                                     if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
                                         axisName.addItem(text='%s from %s' % (str(strip.axisCodes[ii]), str(strip.pid)),
                                                          callback=partial(self._copyAxisCodeFromStrip,
-                                                                          axisIndex=axisIndex, fromStrip=strip, fromAxisId=ii),
+                                                                          axisIndex=axisIndex, fromStrip=strip,
+                                                                          fromAxisId=ii),
                                                          toolTip=toolTip)
                                         count += 1
                                         addSeparator = True
@@ -1557,7 +1572,8 @@ class GuiStrip(Frame):
 
         # TODO:ED remember direction
         self._newPosition = phasingFrame.pivotEntry.get()
-        self.pivotLine = self._CcpnGLWidget.addInfiniteLine(colour='highlight', movable=True, lineStyle='dashed', lineWidth=2.0)
+        self.pivotLine = self._CcpnGLWidget.addInfiniteLine(colour='highlight', movable=True, lineStyle='dashed',
+                                                            lineWidth=2.0)
 
         if not self.pivotLine:
             getLogger().warning('no infiniteLine')
@@ -1593,9 +1609,11 @@ class GuiStrip(Frame):
         #
         # GLSignals = GLNotifier(parent=self)
         if self.spectrumDisplay.is1D:
-            self._CcpnGLWidget.GLSignals.emitEvent(triggers=[self._CcpnGLWidget.GLSignals.GLADD1DPHASING], display=self.spectrumDisplay)
+            self._CcpnGLWidget.GLSignals.emitEvent(triggers=[self._CcpnGLWidget.GLSignals.GLADD1DPHASING],
+                                                   display=self.spectrumDisplay)
         else:
-            self._CcpnGLWidget.GLSignals.emitEvent(triggers=[self._CcpnGLWidget.GLSignals.GLCLEARPHASING], display=self.spectrumDisplay)
+            self._CcpnGLWidget.GLSignals.emitEvent(triggers=[self._CcpnGLWidget.GLSignals.GLCLEARPHASING],
+                                                   display=self.spectrumDisplay)
 
     def _newPositionLineCallback(self):
         if not self.isDeleted:
@@ -1638,7 +1656,8 @@ class GuiStrip(Frame):
         #     spectrumView._turnOffPhasing()
 
         # make sure that all traces are clear
-        self._CcpnGLWidget.GLSignals.emitEvent(triggers=[self._CcpnGLWidget.GLSignals.GLCLEARPHASING], display=self.spectrumDisplay)
+        self._CcpnGLWidget.GLSignals.emitEvent(triggers=[self._CcpnGLWidget.GLSignals.GLCLEARPHASING],
+                                               display=self.spectrumDisplay)
 
         self._CcpnGLWidget.removeInfiniteLine(self.pivotLine)
         self.pivotLine.valuesChanged.disconnect(self._newPositionLineCallback)
@@ -1872,7 +1891,8 @@ class GuiStrip(Frame):
             raise TypeError('Error: multipletLabelling not an int')
 
         oldValue = self._CcpnGLWidget._multipletLabelling
-        self._CcpnGLWidget._multipletLabelling = value if (value in range(self.spectrumDisplay.MAXMULTIPLETLABELTYPES)) else 0
+        self._CcpnGLWidget._multipletLabelling = value if (
+                value in range(self.spectrumDisplay.MAXMULTIPLETLABELTYPES)) else 0
         if value != oldValue:
             self._setMultipletLabelling()
             if self.spectrumViews:
@@ -1892,7 +1912,8 @@ class GuiStrip(Frame):
             raise TypeError('Error: multipletType not an int')
 
         oldValue = self._CcpnGLWidget._multipletType
-        self._CcpnGLWidget._multipletType = value if (value in range(self.spectrumDisplay.MAXMULTIPLETSYMBOLTYPES)) else 0
+        self._CcpnGLWidget._multipletType = value if (
+                value in range(self.spectrumDisplay.MAXMULTIPLETSYMBOLTYPES)) else 0
         if value != oldValue:
             self._setSymbolType()
             if self.spectrumViews:
@@ -2457,7 +2478,8 @@ class GuiStrip(Frame):
                 self.zoomY(*axisRange)
 
         except Exception as es:
-            getLogger().warning('Error copying axis %s from strip %s' % (str(fromStrip.axisCodes[fromAxisId]), str(fromStrip)))
+            getLogger().warning(
+                    'Error copying axis %s from strip %s' % (str(fromStrip.axisCodes[fromAxisId]), str(fromStrip)))
             raise (es)
 
     def _createMarkAtCursorPosition(self, axisIndex=None):
@@ -2757,7 +2779,8 @@ class GuiStrip(Frame):
                 else:
                     spectrumViews[-1].setVisible(True)  #starts the loop again if none is selected
             else:
-                MessageDialog.showWarning('Unable to select spectrum', 'Select a SpectrumDisplay with active spectra first')
+                MessageDialog.showWarning('Unable to select spectrum',
+                                          'Select a SpectrumDisplay with active spectra first')
 
         else:
             # cycle through the spectrumGroups
@@ -2815,7 +2838,8 @@ class GuiStrip(Frame):
                     spectrumViews[-1].setVisible(True)  # starts the loop again if none is selected
 
             else:
-                MessageDialog.showWarning('Unable to select spectrum', 'Select a SpectrumDisplay with active spectra first')
+                MessageDialog.showWarning('Unable to select spectrum',
+                                          'Select a SpectrumDisplay with active spectra first')
 
         else:
             # cycle through the spectrumGroups
@@ -3175,7 +3199,8 @@ class GuiStrip(Frame):
                 positiveThreshold = spectrum.positiveContourBase if spectrum.includePositiveContours else None
                 negativeThreshold = spectrum.negativeContourBase if spectrum.includeNegativeContours else None
                 if spectrum.dimensionCount == 1:
-                    xOffset, yOffset = self._CcpnGLWidget._spectrumSettings[spectrumView].get(SPECTRUM_STACKEDMATRIXOFFSET)
+                    xOffset, yOffset = self._CcpnGLWidget._spectrumSettings[spectrumView].get(
+                            SPECTRUM_STACKEDMATRIXOFFSET)
                     _intensityLimits = np.array(regions[1]) - yOffset
                     _xArray = np.array(regions[0]) - xOffset
                     _sliceTuples = _displayedSpectrum.getSliceTuples([_xArray])
@@ -3266,9 +3291,10 @@ class GuiStrip(Frame):
                 found = True
                 break
         if not found or sv is None:
-            raise RuntimeError('%s._setPositionAndWidth: no appropriate spectrum found for this display to do conversions' %
-                               self.__class__.__name__
-                               )
+            raise RuntimeError(
+                    '%s._setPositionAndWidth: no appropriate spectrum found for this display to do conversions' %
+                    self.__class__.__name__
+                    )
         _specDim = sv.spectrumDimensions[stripAxisIndex]
 
         _axis._incrementByUnit = self._minAxisIncrementByUnit[stripAxisIndex]
@@ -3369,9 +3395,11 @@ class GuiStrip(Frame):
                                                       )
                     else:
                         _axis.unit = AXISUNIT_PPM
-                        limits = _specDim.spectrumLimits
+                        ppos = _specDim.pointCount // 2  # centre(ish)
+                        ppm = _specDim.pointToPpm(ppos)  # align to the nearest integer pointPosition
+                        # round to nearest
                         self._setAxisPositionAndWidth(_axis._index,
-                                                      position=0.5 * (limits[0] + limits[1]),  # The centre
+                                                      position=ppm,  # The centre
                                                       width=_specDim.ppmPerPoint,
                                                       refresh=False
                                                       )
@@ -3457,7 +3485,8 @@ class GuiStrip(Frame):
             self._queuePending = UpdateQueue()
 
         _startTime = time_ns()
-        _useQueueFull = (self._maximumQueueLength not in [0, None] and len(self._queueActive) > self._maximumQueueLength)
+        _useQueueFull = (self._maximumQueueLength not in [0, None] and
+                         len(self._queueActive) > self._maximumQueueLength)
         if self._logQueue:
             # log the queue-time if required
             getLogger().debug(f'_queueProcess  {self}  len: {len(self._queueActive)}  useQueueFull: {_useQueueFull}')

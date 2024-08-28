@@ -13,12 +13,12 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y"
-                )
+                 )
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-04 18:51:59 +0100 (Thu, July 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-28 18:22:04 +0100 (Wed, August 28, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -193,7 +193,8 @@ class PeakPickerABC(CcpNmrJson):
         # attributes not required to be persistent between load/save
         self.lastPickedPeaks = None
         self.sliceTuples = None
-        self._excludePpmRegions = defaultdict(list)  # {axisCode:[[start,stop],...]]} regions to be excluded when picking, e.g.: solvents
+        self._excludePpmRegions = defaultdict(list)
+        # {axisCode:[[start,stop],...]]} regions to be excluded when picking, e.g.: solvents
         # attribute needed for 1D when manually picking within a SpectrumDisplay box
         self._intensityLimits = (np.inf, -np.inf)
 
@@ -318,12 +319,14 @@ class PeakPickerABC(CcpNmrJson):
 
         if self.defaultPointExtension:
             # add default points to extend pick region
-            self.sliceTuples = [(sLeft - self.defaultPointExtension, sRight + self.defaultPointExtension) if sLeft <= sRight else
-                                (sLeft + self.defaultPointExtension, sRight - self.defaultPointExtension)
-                                for sLeft, sRight in self.sliceTuples]
+            self.sliceTuples = [
+                (sLeft - self.defaultPointExtension, sRight + self.defaultPointExtension) if sLeft <= sRight else
+                (sLeft + self.defaultPointExtension, sRight - self.defaultPointExtension)
+                for sLeft, sRight in self.sliceTuples]
 
         # TODO: use Spectrum aliasing definitions once defined
-        data = self.spectrum.dataSource.getRegionData(self.sliceTuples, aliasingFlags=[1] * self.spectrum.dimensionCount)
+        data = self.spectrum.dataSource.getRegionData(self.sliceTuples,
+                                                      aliasingFlags=[1] * self.spectrum.dimensionCount)
         data = data.copy(order='K') * self.spectrum.scale
         peaks = self.findPeaks(data)
         getLogger().debug('%s.pickPeaks: found %d peaks in spectrum %s; sliceTuples = %r' %
@@ -360,6 +363,7 @@ class PeakPickerABC(CcpNmrJson):
 
             for cc, (pk, pointPositions) in enumerate(newPeaks):
                 progress.checkCancel()
+                progress.setText(f'Creating peaks in {peakList.pid}: {cc + 1}/{len(peaks)}')
                 progress.setValue(cc)
 
                 if len(pk.points) != self.dimensionCount:
@@ -381,12 +385,15 @@ class PeakPickerABC(CcpNmrJson):
 
                 if (self.positiveThreshold and pk.height > self.positiveThreshold) or \
                         (self.negativeThreshold and pk.height < self.negativeThreshold):
-                    cPeak = peakList.newPeak(pointPositions=pointPositions, height=pk.height, volume=pk.volume, pointLineWidths=pk.lineWidths)
+                    cPeak = peakList.newPeak(pointPositions=pointPositions, height=pk.height, volume=pk.volume,
+                                             pointLineWidths=pk.lineWidths)
                     if self.autoFit and self.spectrum.dimensionCount > 1:
                         try:
-                            peakParabolicInterpolation(cPeak, update=True) # why we need this? Some peakPicker can have their own and this will override their results.
+                            peakParabolicInterpolation(cPeak,
+                                                       update=True)  # why we need this? Some peakPicker can have their own and this will override their results.
                         except Exception as err:
-                            getLogger().warning(f'Cannot auto using a Parabolic Interpolation for {cPeak}. Error: {err}')
+                            getLogger().warning(
+                                    f'Cannot auto using a Parabolic Interpolation for {cPeak}. Error: {err}')
                     corePeaks.append(cPeak)
 
         if progress.error:
@@ -396,14 +403,23 @@ class PeakPickerABC(CcpNmrJson):
         return corePeaks
 
     def _checkValidPositions(self, peakList, peaks):
-        pointToPeak = OrderedDict((str([int(pp) for pp in pk.pointPositions]), (None, None)) for pk in peakList.peaks if None not in pk.pointPositions)
+        pointToPeak = OrderedDict((str([int(pp) for pp in pk.pointPositions]), (None, None))
+                                  for pk in peakList.peaks if None not in pk.pointPositions)
         pointCounts = self.spectrum.pointCounts
         newStart = len(pointToPeak)
         for pk in peaks:
+            # check within the limits of the defaultPointExtension
+            if any(not (self.defaultPointExtension <= pos < (st[1] - st[0] + 1 - self.defaultPointExtension))
+                   for pos, st in zip(pk.points[::-1], self.sliceTuples)):
+                # do I need to include 0.5 offset to the boundary?
+                getLogger().debug2(f'==> skipping peak, too close to boundary {pk.points[::-1]} '
+                                   f'{self.defaultPointExtension}:{self.sliceTuples}'
+                                   f'{[(st[1] - st[0] + 1 - self.defaultPointExtension) for pos, st in zip(pk.points[::-1], self.sliceTuples)]}')
+                continue
             # correct the peak.points for "offset" (the slice-positions taken) and ordering (i.e. inverse)
             pointPositions = [float(p) + float(self.sliceTuples[idx][0]) for idx, p in enumerate(pk.points[::-1])]
-            hashPositions = str([int((pos - 1) % pCount) + 1 for pos, pCount in zip(pointPositions, pointCounts)])  # API position starts at 1
-
+            hashPositions = str([int((pos - 1) % pCount) + 1 for pos, pCount in
+                                 zip(pointPositions, pointCounts)])  # API position starts at 1
             if hashPositions not in pointToPeak:
                 pointToPeak[hashPositions] = (pk, pointPositions)
 
@@ -416,8 +432,10 @@ class PeakPickerABC(CcpNmrJson):
         :param peakList: core.PeakList instance
         :return: True if pointPositions is valid, i.e. position is available
         """
-        intPositions = [int((pos - 1) % pCount) + 1 for pos, pCount in zip(pointPositions, self.spectrum.pointCounts)]  # API position starts at 1
-        existingPositions = [[int(pp) for pp in pk.pointPositions] for pk in peakList.peaks if None not in pk.pointPositions]
+        intPositions = [int((pos - 1) % pCount) + 1 for pos, pCount in
+                        zip(pointPositions, self.spectrum.pointCounts)]  # API position starts at 1
+        existingPositions = [[int(pp) for pp in pk.pointPositions] for pk in peakList.peaks if
+                             None not in pk.pointPositions]
 
         return intPositions not in existingPositions
 

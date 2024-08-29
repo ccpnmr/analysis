@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-05 12:24:47 +0100 (Fri, July 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-29 11:21:26 +0100 (Thu, August 29, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -46,7 +46,7 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.util.Colour import colorSchemeTable, hexToRgbRatio
 from ccpn.util.Constants import AXIS_FULLATOMNAME
 from ccpn.util.Logging import getLogger
-
+from ccpn.util.decorators import logCommand
 
 
 class GuiStrip1d(GuiStrip):
@@ -294,6 +294,26 @@ class GuiStrip1d(GuiStrip):
         except Exception as es:
             getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
 
+    @logCommand(get='self')
+    def copyStrip(self, usePosition=False):
+        """Copy the strip into new SpectrumDisplay.
+        :param usePosition: True/False use the current mouse-position or the centre of the source strip
+        :return: A new SpectrumDisplay instance
+        """
+        with undoStackBlocking() as _:  # Do not add to undo/redo stack
+            # create a new spectrum display
+            newDisplay = self.mainWindow.newSpectrumDisplay(self.spectra[0], axisCodes=self.axisOrder)
+            for spectrum in self.spectra:
+                newDisplay.displaySpectrum(spectrum)
+
+            try:
+                mDict = usePosition and self.current.mouseMovedDict[AXIS_FULLATOMNAME]
+                positions = [poss[0] if (poss := mDict.get(ax)) else None
+                             for ax in self.axisCodes] if usePosition else None
+                copyStripAxisPositionsAndWidths(self, newDisplay.strips[0], positions=positions)
+            except Exception as es:
+                getLogger().warning(f'{self.__class__.__name__}.copyStrip: {es}')
+
     def _flipAxes(self, axisOrderIndices, positions=None):
         """Create a new SpectrumDisplay with the axes flipped to the new axisOrder.
         If position is None, the centre of the new spectrumDisplay will be the centre of the source strip.
@@ -318,6 +338,7 @@ class GuiStrip1d(GuiStrip):
 
         return newDisplay
 
+    @logCommand(get='self')
     def flipXYAxis(self, usePosition=False):
         """
         Flip the X and Y axes

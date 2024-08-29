@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-07 13:10:50 +0100 (Wed, August 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-29 11:21:26 +0100 (Thu, August 29, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1401,7 +1401,7 @@ class Gui1dWidget(CcpnGLWidget):
     def __init__(self, strip=None, mainWindow=None, stripIDLabel=None):
 
         if strip.spectrumDisplay._flipped:
-            # self.YDIRECTION = -1.0
+            self.YDIRECTION = -1.0
             self.XAXES = YAXISUNITS1D
         else:
             self.YAXES = YAXISUNITS1D

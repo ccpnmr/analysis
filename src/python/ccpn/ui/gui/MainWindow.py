@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-23 19:23:55 +0100 (Fri, August 23, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-29 22:06:46 +0100 (Thu, August 29, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -51,10 +51,8 @@ from ccpn.ui.gui.lib.mouseEvents import SELECT, PICK, MouseModes, \
     setCurrentMouseMode, getCurrentMouseMode
 from ccpn.ui.gui.lib import GuiStrip
 from ccpn.ui.gui.lib.Shortcuts import Shortcuts
-from ccpn.ui.gui.guiSettings import (getColours, Theme,
-                                     # LIGHT, DARK, DEFAULT,
-    colourSchemes, BORDERFOCUS, BORDERNOFOCUS, GUITABLE_SELECTED_BACKGROUND,
-    CCPNGLWIDGET_HEXHIGHLIGHT, setColourScheme, consoleStyle)
+from ccpn.ui.gui.guiSettings import (getColours, BORDERFOCUS, BORDERNOFOCUS,
+                                     GUITABLE_SELECTED_BACKGROUND, consoleStyle)
 
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 
@@ -102,6 +100,7 @@ _MULTIPLET_PEAKS = 16
 
 READONLYCHANGED = 'readOnlyChanged'
 _transparent = QtGui.QColor('orange')
+
 
 # def _paintEvent(widget: QtWidgets.QWidget, event: QtGui.QPaintEvent, func=None) -> None:
 #     result = func(widget, event)
@@ -280,7 +279,6 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                             border: 1px solid palette(highlight);
                             border-radius: 2px;
                         }
-                        */
                         
                         QTreeView {
                             border: 1px solid palette(mid);
@@ -291,7 +289,6 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                             border-radius: 2px;
                         }
                         
-                        /*
                         QTextEdit {
                             border: 1px solid palette(mid);
                             border-radius: 2px;
@@ -300,9 +297,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                             border: 1px solid palette(highlight);
                             border-radius: 2px;
                         }
-                        */
 
-                        /*
                         QPushButton:focus {
                             border-color: %(BORDER_FOCUS)s;
                         }
@@ -328,12 +323,16 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                             border-width: %(_BORDER_WIDTH)spx;
                             border-style: solid;
                             border-radius: 2px;
-                            selection-background-color: %(GUITABLE_SELECTED_BACKGROUND)s;
-                            selection-color: %(GUITABLE_ITEM_FOREGROUND)s;
-                            color: %(GUITABLE_ITEM_FOREGROUND)s;
+                            // use #f8f088 for yellow selection
+                            selection-background-color: qlineargradient(
+                                x1: 0, y1: -150, x2: 0, y2: 200,
+                                stop: 0 palette(highlight), 
+                                stop: 1 palette(base)
+                            );
+                            color: palette(text);
                         }
                         QTableView:focus {
-                            border-color: %(BORDER_FOCUS)s;
+                            border-color: palette(highlight);
                         }
 
                         QComboBox {
@@ -381,8 +380,6 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         # set stylesheet
         # pal = self.palette()  # NOTE:ED - temp
         base = pal.base().color().lightness()  # use as a guide for light/dark theme
-        # colours = (colourSchemes[Theme.DEFAULT.name] |
-        #            colourSchemes[Theme.DARK.name if base < 127 else Theme.LIGHT.name])
         colours = getColours()
         highlight = pal.highlight().color()
         newCol = highlight.fromHslF(highlight.hueF(), 0.95, highlight.lightnessF()**(0.333 if base < 127 else 3.0))
@@ -400,17 +397,17 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         # store the colours in the baseclass, is this the best place?
         Base._highlight = highlight
         Base._highlightVivid = QtGui.QColor.fromHslF(highlight.hueF(),
-                                                  0.8 if base > 127 else 0.75,
-                                                  0.5 if base > 127 else 0.45
-                                                  )
+                                                     0.8 if base > 127 else 0.75,
+                                                     0.5 if base > 127 else 0.45
+                                                     )
         Base._highlightMid = QtGui.QColor.fromHslF(highlight.hueF(), 0.75, 0.65)
         Base._highlightFeint = QtGui.QColor.fromHslF(highlight.hueF(),
-                                                  0.55 if base > 127 else 0.65,
-                                                  0.80 if base > 127 else 0.35,
-                                                  )
+                                                     0.55 if base > 127 else 0.65,
+                                                     0.80 if base > 127 else 0.35,
+                                                     )
         Base._highlightBorder = QtGui.QColor.fromHslF(highlight.hueF(), 0.95,
                                                       highlight.lightnessF()**(0.333 if base > 127 else 3.0),
-                                                  )
+                                                      )
         Base._basePalette = pal
         Base._transparent = pal.highlight().color()  # grab again to stop overwrite
         Base._transparent.setAlpha(40)

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-23 19:21:22 +0100 (Fri, August 23, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-29 22:06:47 +0100 (Thu, August 29, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -72,9 +72,12 @@ class TableABC(QtWidgets.QTableView):
                         border-style: solid;
                         border-radius: 2px;
                         gridline-color: %(_GRID_COLOR)s;
-                        selection-background-color: %(_SELECTED_BACKGROUND)s;
-                        selection-color: palette(text);
-                        color: palette(text);
+                        /* use #f8f088 for yellow selection */
+                        selection-background-color: qlineargradient(
+                                                        x1: 0, y1: -150, x2: 0, y2: 200,
+                                                        stop: 0 palette(highlight),
+                                                        stop: 1 palette(light)
+                                                    );
                         outline: 0px;
                     }
                     QHeaderView {
@@ -82,7 +85,7 @@ class TableABC(QtWidgets.QTableView):
                         outline: 0px;
                     }
                     QTableView:focus {
-                        border-color: %(_BORDER_FOCUS)s;
+                        border-color: palette(highlight);
                     }
                     QTableView::item {
                         padding-top: %(_CELL_PADDING)spx;
@@ -277,15 +280,10 @@ class TableABC(QtWidgets.QTableView):
         self.highlightColour = highlight = pal.highlight().color()
         cols = self._colours
         cols['_BORDER_FOCUS'] = self.highlightColour.name()
-        cols['_SELECTED_BACKGROUND'] = highlight.fromHslF(highlight.hueF(),
-                                                                  # opposite of border
-                                                                   0.65 if base > 127 else 0.6,
-                                                                   0.8 if base > 127 else 0.3,
-                                                                   ).name()
         self.setStyleSheet(self.styleSheet % cols)
         with suppress(Exception):
             # set the colour for the current cell
-            self.itemDelegate()._focusPen = QtGui.QPen(self.highlightColour, 2)
+            self.itemDelegate()._focusPen.setColor(self.highlightColour)
 
     def _setMenuProperties(self, enableCopyCell, enableDelete, enableExport, enableSearch):
         """Add the required menus to the table

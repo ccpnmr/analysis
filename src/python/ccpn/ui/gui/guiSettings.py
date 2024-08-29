@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-23 19:23:55 +0100 (Fri, August 23, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-29 22:06:46 +0100 (Thu, August 29, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -108,7 +108,7 @@ class FontSettings():
                 return self.defaultFonts[(name, size, bold, italic)]
 
             return self.defaultFonts[(name, size, False, False)]
-        except Exception as es:
+        except Exception:
             getLogger().warning('Font ({}, {}, {}, {}) not found'.format(name, size, bold, italic))
             return Font(DEFAULTFONTNAME, DEFAULTFONTSIZE)
 
@@ -408,17 +408,17 @@ colourSchemes = {
             QtGui.QPalette.Dark           : ['#bfbfbf', '#bfbfbf', '#bfbfbf'],  # 4
             QtGui.QPalette.Mid            : ['#a9a9a9', '#a9a9a9', '#a9a9a9'],  # 5
             QtGui.QPalette.Text           : ['#080808', '#080808', '#080808'],  # 6
-            QtGui.QPalette.BrightText     : ['#ffffff', '#ffffff', '#ffffff'],  # 7
+            # QtGui.QPalette.BrightText     : ['#ffffff', '#ffffff', '#ffffff'],  # 7
             QtGui.QPalette.ButtonText     : ['#000000', '#000000', '#939393'],  # 8
             QtGui.QPalette.Base           : ['#ffffff', '#ffffff', '#ececec'],  # 9
             QtGui.QPalette.Window         : ['#ececec', '#ececec', '#ececec'],  # 10
             QtGui.QPalette.Shadow         : ['#000000', '#000000', '#000000'],  # 11
             QtGui.QPalette.Highlight      : ['#b3d7ff', '#dcdcdc', '#dcdcdc'],  # 12 - default(-ish)
-            QtGui.QPalette.HighlightedText: ['#000000', '#000000', '#000000'],  # 13 - these are both dynamic
+            # QtGui.QPalette.HighlightedText: ['#000000', '#000000', '#000000'],  # 13 - these are both dynamic
             QtGui.QPalette.Link           : ['#0068da', '#0000ff', '#0000ff'],  # 14
             QtGui.QPalette.LinkVisited    : ['#ff00ff', '#ff00ff', '#ff00ff'],  # 15
             QtGui.QPalette.AlternateBase  : ['#f5f5f5', '#f5f5f5', '#f5f5f5'],  # 16
-            QtGui.QPalette.NoRole         : ['#000000', '#000000', '#000000'],  # 17
+            # QtGui.QPalette.NoRole         : ['#000000', '#000000', '#000000'],  # 17
             QtGui.QPalette.ToolTipBase    : ['#fafad2', '#fafad2', '#fafad2'],  # 18
             QtGui.QPalette.ToolTipText    : ['#222438', '#222438', '#222438'],  # 19
             QtGui.QPalette.PlaceholderText: ['#aaaaaa', '#aaaaaa', '#aaaaaa'],  # 20
@@ -427,8 +427,8 @@ colourSchemes = {
 
     # Overridden for dark colour scheme
     Theme.DARK.name   : {
-        HEXFOREGROUND               : '#F0FFFF',
-        HEXBACKGROUND               : '#0F0F0F',
+        HEXFOREGROUND                    : '#F0FFFF',
+        HEXBACKGROUND                    : '#0F0F0F',
 
         # these will get replaced when the theme changes
         # CCPNGLWIDGET_HEXFOREGROUND    : '#F0FFFF',
@@ -452,21 +452,21 @@ colourSchemes = {
         CCPNMODULELABEL_BACKGROUND_ACTIVE: '#4045a0',
         CCPNMODULELABEL_FOREGROUND_ACTIVE: '#d0d0d0',
 
-        SPECTRUM_HEXCOLOURS         : spectrumHexLightColours,
-        SPECTRUM_HEXMEDIUMCOLOURS   : spectrumHexMediumColours,
-        SPECTRUM_HEXDEFAULTCOLOURS  : spectrumHexDefaultLightColours,
+        SPECTRUM_HEXCOLOURS              : spectrumHexLightColours,
+        SPECTRUM_HEXMEDIUMCOLOURS        : spectrumHexMediumColours,
+        SPECTRUM_HEXDEFAULTCOLOURS       : spectrumHexDefaultLightColours,
 
-        LABEL_FOREGROUND            : '#e0e0e0',  #'#d8dddd',
-        LABEL_SELECTEDBACKGROUND    : 'mediumseagreen',
-        LABEL_SELECTEDFOREGROUND    : 'black',
-        LABEL_HIGHLIGHT             : 'palegreen',
-        LABEL_DISABLED              : '#2e2e2e',
+        LABEL_FOREGROUND                 : '#e0e0e0',  #'#d8dddd',
+        LABEL_SELECTEDBACKGROUND         : 'mediumseagreen',
+        LABEL_SELECTEDFOREGROUND         : 'black',
+        LABEL_HIGHLIGHT                  : 'palegreen',
+        LABEL_DISABLED                   : '#2e2e2e',
 
-        GUITABLE_ITEM_FOREGROUND    : '#d0d8dd',
-        GUITABLE_SELECTED_FOREGROUND: '#efefef',
-        GUITABLE_SELECTED_BACKGROUND: '#5D5900',
+        GUITABLE_ITEM_FOREGROUND         : '#d0d8dd',
+        GUITABLE_SELECTED_FOREGROUND     : '#efefef',
+        GUITABLE_SELECTED_BACKGROUND     : '#5D5900',
 
-        PALETTE                     : {  # active, inactive, disabled
+        PALETTE                          : {  # active, inactive, disabled
             QtGui.QPalette.WindowText     : ['#cacaca', '#cacaca', '#cacaca'],  # 0 - #f4f4f4
             QtGui.QPalette.Button         : ['#323232', '#323232', '#323232'],  # 1
             QtGui.QPalette.Light          : ['#373737', '#373737', '#373737'],  # 2
@@ -474,17 +474,17 @@ colourSchemes = {
             QtGui.QPalette.Dark           : ['#787878', '#787878', '#787878'],  # 4
             QtGui.QPalette.Mid            : ['#242424', '#242424', '#242424'],  # 5
             QtGui.QPalette.Text           : ['#d2d2d2', '#d2d2d2', '#d2d2d2'],  # 6 - #f7f7f7
-            QtGui.QPalette.BrightText     : ['#373737', '#373737', '#373737'],  # 7
+            # QtGui.QPalette.BrightText     : ['#373737', '#373737', '#373737'],  # 7
             QtGui.QPalette.ButtonText     : ['#000000', '#000000', '#1f1f1f'],  # 8
             QtGui.QPalette.Base           : ['#1e1e1e', '#1e1e1e', '#323232'],  # 9
             QtGui.QPalette.Window         : ['#323232', '#323232', '#323232'],  # 10
             QtGui.QPalette.Shadow         : ['#000000', '#000000', '#000000'],  # 11
             QtGui.QPalette.Highlight      : ['#3f638b', '#464646', '#464646'],  # 12 - default(-ish)
-            QtGui.QPalette.HighlightedText: ['#f4f4f4', '#f4f4f4', '#f4f4f4'],  # 13 - these are both dynamic
+            # QtGui.QPalette.HighlightedText: ['#f4f4f4', '#f4f4f4', '#f4f4f4'],  # 13 - these are both dynamic
             QtGui.QPalette.Link           : ['#419cff', '#0000ff', '#0000ff'],  # 14
             QtGui.QPalette.LinkVisited    : ['#e242e2', '#e242e2', '#e242e2'],  # 15
             QtGui.QPalette.AlternateBase  : ['#2c2c2c', '#2c2c2c', '#2c2c2c'],  # 16
-            QtGui.QPalette.NoRole         : ['#000000', '#000000', '#000000'],  # 17
+            # QtGui.QPalette.NoRole         : ['#000000', '#000000', '#000000'],  # 17
             QtGui.QPalette.ToolTipBase    : ['#fafad2', '#fafad2', '#fafad2'],  # 18
             QtGui.QPalette.ToolTipText    : ['#222438', '#222438', '#222438'],  # 19
             QtGui.QPalette.PlaceholderText: ['#787878', '#787878', '#787878'],  # 20
@@ -568,7 +568,7 @@ colourSchemes[Theme.DEFAULT.name][HIGHLIGHT_VIVID] = \
 colourSchemes[Theme.DEFAULT.name][HIGHLIGHT_FEINT] = \
     colourSchemes[Theme.DARK.name][HIGHLIGHT_VIVID] = highlight.fromHslF(highlight.hueF(), 0.55, 0.80)
 
-DEFAULT_HIGHLIGHT = QtGui.QColor.fromHslF(0.59, 0.95, 0.5)
+DEFAULT_HIGHLIGHT = QtGui.QColor.fromHsvF(0.59, 0.6, 0.9)
 
 
 # lightPalette = {
@@ -657,12 +657,6 @@ def getColourScheme():
     """
     th, col, thSD = getTheme()
     return th
-    # if application := getApplication():
-    #     colourScheme = application._themeStyle
-    #     if isinstance(colourScheme, Theme):
-    #         return colourScheme
-    #     getLogger().warning(f'Undefined colour scheme, setting to {Theme.LIGHT.dataValue!r}')
-    # return Theme.LIGHT
 
 
 def getSDTheme() -> Theme:
@@ -675,12 +669,6 @@ def getSDTheme() -> Theme:
     """
     th, col, thSD = getTheme()
     return thSD
-    # if application := getApplication():
-    #     themeStyle = application._themeSDStyle
-    #     if isinstance(themeStyle, Theme):
-    #         return themeStyle
-    #     getLogger().warning('Undefined theme')
-    # return Theme.LIGHT
 
 
 def getThemeColour() -> str:
@@ -766,20 +754,22 @@ class _ColourDict(dict):
 
             base = pal.base().color().lightness()  # use as a guide for light/dark theme
             if colourName == DEFAULT_COLOR:
-                highlight = DEFAULT_HIGHLIGHT
+                newCol = highlight = DEFAULT_HIGHLIGHT
             else:
-                highlight = QtGui.QColor(colourName)
-            newCol = highlight.fromHslF(highlight.hueF(),
-                                        0.75 if base > 127 else 0.65,
-                                        0.55 if base > 127 else 0.45)
+                newCol = highlight = QtGui.QColor(colourName)
+            if base < 127:
+                # a dark theme, modify the colour slightly
+                newCol = highlight.fromHsvF(highlight.hueF(),
+                                            highlight.hsvSaturationF(),
+                                            highlight.valueF() - 0.2)
             # invert(-ish) to give text colour
-            newColHT = highlight.fromHslF(highlight.hueF(), 0.1, 0.05 if base < 127 else 1.0)
+            newColHT = highlight.fromHsvF(highlight.hueF(), 0.05, 0.05 if base > 127 else 0.9)
             for group in [QtGui.QPalette.Active, QtGui.QPalette.Inactive]:
                 pal.setColor(group, QtGui.QPalette.Highlight, newCol)
                 pal.setColor(group, QtGui.QPalette.HighlightedText, newColHT)
             # grey-out the remaining groups
-            greyCol = highlight.fromHslF(highlight.hueF(), 0.0, 0.5 if base > 127 else 0.45)
-            greyColHT = highlight.fromHslF(highlight.hueF(), 0.0, 0.05 if base < 127 else 1.0)
+            greyCol = highlight.fromHsvF(highlight.hueF(), 0.0, 0.5 if base > 127 else 0.45)
+            greyColHT = highlight.fromHsvF(highlight.hueF(), 0.0, 0.1 if base < 127 else 0.8)
             for group in [QtGui.QPalette.Disabled]:
                 pal.setColor(group, QtGui.QPalette.Highlight, greyCol)
                 pal.setColor(group, QtGui.QPalette.HighlightedText, greyColHT)

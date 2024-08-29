@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-24 18:04:27 +0100 (Wed, July 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-08-29 22:06:47 +0100 (Thu, August 29, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -165,7 +165,8 @@ class _TableDelegate(QtWidgets.QStyledItemDelegate):
                 func(obj, value)
 
         except Exception as es:
-            getLogger().debug('Error handling cell editing: %i %i - %s    %s    %s' % (row, col, str(es), self._parent.model()._sortIndex, value))
+            getLogger().debug(f'Error handling cell editing: {row:d} {col:d} - {str(es)}    '
+                              f'{self._parent.model()._sortIndex}    {value}')
 
     def updateEditorGeometry(self, widget, itemStyle, index):
         """Display the required editor for the cell
@@ -216,9 +217,8 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
         self.customWidget = None
 
         # set the colours
-        self._focusPen = QtGui.QPen(QtGui.QColor(getColours()[BORDERFOCUS]), 2)
-        self._noFocusPen = QtGui.QPen(QtGui.QColor(getColours()[BORDERNOFOCUS]), 2)
-
+        self._focusPen = QtGui.QPen(QtGui.QPalette().highlight().color(), 2)
+        self._noFocusPen = QtGui.QPen(QtGui.QPalette().mid().color(), 2)
         # double the line-widths accounts for the device-pixel-ratio
         self._focusBorderWidth = focusBorderWidth
         self._focusPen.setWidthF(focusBorderWidth * 2.0)
@@ -279,9 +279,6 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
             if back := index.data(QtCore.Qt.BackgroundRole):
                 back = self._mergeColors(back, option.palette.color(QtGui.QPalette.Highlight), 0.18, 0.82)
                 option.palette.setColor(QtGui.QPalette.Highlight, back)
-            if fore := index.data(QtCore.Qt.ForegroundRole):
-                fore = self._mergeColors(fore, option.palette.color(QtGui.QPalette.HighlightedText), 0.5, 0.5)
-                option.palette.setColor(QtGui.QPalette.HighlightedText, fore)
 
         super().paint(painter, option, index)
 
@@ -357,7 +354,8 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
             model = index.model()
             value = model.data(index, EDIT_ROLE)
         except Exception as es:
-            getLogger().debug(f'Error handling cell editing: {index.row()} {index.column()} - {es}  {self._parent.model()._sortIndex}')
+            getLogger().debug(f'Error handling cell editing: {index.row()} {index.column()} - '
+                              f'{es}  {self._parent.model()._sortIndex}')
         else:
             if hasattr(widget, 'selectValue'):
                 widget.selectValue(mapping[value])
@@ -383,7 +381,8 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
             model = index.model()
             model.setData(index, mapping[value])
         except Exception as es:
-            getLogger().debug(f'Error handling cell editing: {index.row()} {index.column()} - {es}  {self._parent.model()._sortIndex}  {value}')
+            getLogger().debug(
+                    f'Error handling cell editing: {index.row()} {index.column()} - {es}  {self._parent.model()._sortIndex}  {value}')
 
     def updateEditorGeometry(self, widget, itemStyle, index):
         """Ensures that the editor is displayed correctly.
@@ -541,7 +540,8 @@ class _SimplePulldownTableDelegate(QtWidgets.QStyledItemDelegate):
                 model.setData(index, value)
 
             except Exception as es:
-                getLogger().debug(f'Error handling cell editing: {index.row()} {index.column()} - {es}  {self._parent.model()._sortIndex}  {value}')
+                getLogger().debug(f'Error handling cell editing: {index.row()} {index.column()} - '
+                                  f'{es}  {self._parent.model()._sortIndex}  {value}')
 
         else:
             super().setModelData(widget, mode, index)
@@ -656,7 +656,8 @@ class _BooleanDelegate(QtWidgets.QStyledItemDelegate):
                 model = index.model()
                 model.setData(index, mapping[value])
             except Exception as es:
-                getLogger().debug(f'Error handling cell editing: {index.row()} {index.column()} - {es}  {self._parent.model()._sortIndex}  {value}')
+                getLogger().debug(f'Error handling cell editing: {index.row()} {index.column()} - '
+                                  f'{es}  {self._parent.model()._sortIndex}  {value}')
         else:
             super().setModelData(widget, mode, index)
 

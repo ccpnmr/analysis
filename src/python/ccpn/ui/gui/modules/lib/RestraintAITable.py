@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-21 19:48:44 +0100 (Fri, June 21, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-08-30 12:57:01 +0100 (Fri, August 30, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -178,7 +178,7 @@ def _checkRestraintInt(offset, value, row, col):
     return '-'
 
 
-class _NewRestraintWidget(_CoreMITableWidgetABC):
+class _NewRestraintTableWidget(_CoreMITableWidgetABC):
     """Class to present a peak-driven Restraint Analysis Inspector Table
     """
     className = '_NewRestraintWidget'
@@ -390,6 +390,10 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
 
         peak = objs[0] if isinstance(objs, (tuple, list)) else objs
 
+        # optionally clear the marks
+        if self.resources._autoClearMarks.isChecked():
+            self.mainWindow.clearMarks()
+
         if dpObjs := self.resources._displayListWidget.getDisplays():
             # check which spectrumDisplays to navigate to - could be spectrumDisplay or strip
             for dp in dpObjs:
@@ -405,7 +409,8 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                         navigateToPositionInStrip(strip=strp,
                                                   positions=peak.position,
                                                   axisCodes=peak.axisCodes,
-                                                  widths=widths)
+                                                  widths=widths,
+                                                  markPositions=self.resources._markPositions.isChecked())
         else:
             getLogger().warning('Impossible to navigate to peak position. Set spectrumDisplays first')
 
@@ -482,18 +487,20 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                     name = cSet.comparisonSetName
 
                     # create new column headings
-                    newCols = [((name, f'{_colID}'), lambda row: _getValueByHeader(row, f'{_colID}'), f'{_colID}', None, None)
-                               for _colID in (HeaderRestraint, HeaderAtoms, HeaderViolation,
-                                              HeaderTarget, HeaderLowerLimit, HeaderUpperLimit,
-                                              HeaderMin, HeaderMax, HeaderMean, HeaderStd,
-                                              HeaderCount1, HeaderCount2)
-                               ]
+                    newCols = [
+                        ((name, f'{_colID}'), lambda row: _getValueByHeader(row, f'{_colID}'), f'{_colID}', None, None)
+                        for _colID in (HeaderRestraint, HeaderAtoms, HeaderViolation,
+                                       HeaderTarget, HeaderLowerLimit, HeaderUpperLimit,
+                                       HeaderMin, HeaderMax, HeaderMean, HeaderStd,
+                                       HeaderCount1, HeaderCount2)
+                        ]
 
                 else:
                     # create new column headings
-                    newCols = [((name, f'{_colID}'), lambda row: _getValueByHeader(row, f'{_colID}'), f'{_colID}', None, None)
-                               for _colID in (HeaderRestraint, HeaderAtoms)
-                               ]
+                    newCols = [
+                        ((name, f'{_colID}'), lambda row: _getValueByHeader(row, f'{_colID}'), f'{_colID}', None, None)
+                        for _colID in (HeaderRestraint, HeaderAtoms)
+                        ]
 
                 _cols.extend(newCols)
 
@@ -503,9 +510,10 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                 name = cSet.comparisonSetName
 
                 # create new column headings
-                newCols = [((name, f'{_colID}'), lambda row: _getValueByHeader(row, f'{_colID}'), f'{_colID}', None, None)
-                           for _colID in (HeaderRestraint, HeaderAtoms)
-                           ]
+                newCols = [
+                    ((name, f'{_colID}'), lambda row: _getValueByHeader(row, f'{_colID}'), f'{_colID}', None, None)
+                    for _colID in (HeaderRestraint, HeaderAtoms)
+                    ]
 
                 _cols.extend(newCols)
 
@@ -551,7 +559,8 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
 
         if cSetLists:
             # make references for quicker access later
-            allResLists = list(OrderedSet(rList for cSet in cSetLists for rList in cSet.getTreeTables(depth=1, selected=True)))
+            allResLists = list(
+                    OrderedSet(rList for cSet in cSetLists for rList in cSet.getTreeTables(depth=1, selected=True)))
             contribs = {res: _getContributions(res) for rList in allResLists for res in rList.restraints}
 
             # make a dict of peak.restraints as this is reverse generated by the api every call to peak.restraints
@@ -568,7 +577,8 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
             resLists = {cSet: cSet.getTreeTables(depth=1, selected=True)
                         for cSet in cSetLists}
             # get the maximum number of restraintItems from each restraint list
-            counts = [np.array([sum(len(contribs[res]) for res in (pkRestraints.get(pk.pid) or ()) if res and res.restraintTable in resLists[cSet]
+            counts = [np.array([sum(len(contribs[res]) for res in (pkRestraints.get(pk.pid) or ()) if
+                                    res and res.restraintTable in resLists[cSet]
                                     )
                                 for pk in pks])
                       for cSet in cSetLists]
@@ -638,7 +648,8 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
             #                     }
             #
             violationResults = {cSet.comparisonSetName: [viols.data.copy()
-                                                         for viols in cSet.getTreeTables(depth=2, selected=True) if viols is not None]
+                                                         for viols in cSet.getTreeTables(depth=2, selected=True) if
+                                                         viols is not None]
                                 for cSet in cSetLists if cSet.getTreeTables(depth=1, selected=True)
                                 }
 
@@ -1019,7 +1030,7 @@ class RestraintFrame(_CoreTableFrameABC):
     # signal emitted when the manually changing the pulldown
     aboutToUpdate = QtCore.pyqtSignal(str)
 
-    _TableKlass = _NewRestraintWidget
+    _TableKlass = _NewRestraintTableWidget
     _PulldownKlass = PeakListPulldown
 
     def __init__(self, parent, mainWindow=None, moduleParent=None, resources=None,

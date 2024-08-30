@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-20 16:42:22 +0100 (Thu, June 20, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-08-30 12:57:01 +0100 (Fri, August 30, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -231,7 +231,8 @@ class _ComparisonTree(ProjectTreeCheckBoxes):
                 child.setText(0, vTable.id)
                 child.setData(1, 0, vTable)
 
-                if validOutput := rTable.pid == vTable.getMetadata(_RESTRAINTTABLE) and vTable.getMetadata(_VIOLATIONRESULT) is True:
+                if validOutput := rTable.pid == vTable.getMetadata(_RESTRAINTTABLE) and vTable.getMetadata(
+                        _VIOLATIONRESULT) is True:
                     validVTables.append(child)
                 child.setDisabled(not validOutput)
 
@@ -481,6 +482,12 @@ class _ComparisonTree(ProjectTreeCheckBoxes):
 # RestraintAnalysisTableModule
 #=========================================================================================
 
+_MEANLOWERLIMIT = 'meanLowerLimit'
+_AUTOEXPAND = 'autoExpand'
+_MARKPOSITIONS = 'markPositions'
+_AUTOCLEARMARKS = 'autoClearMarks'
+
+
 class RestraintAnalysisTableModule(CcpnTableModule):
     """
     This class implements the module by wrapping a RestraintAnalysisTable instance
@@ -627,70 +634,59 @@ class RestraintAnalysisTableModule(CcpnTableModule):
                                                                  'enabled'        : True,
                                                                  'minimumWidths'  : (180, 100, 100)},
                                                     }),
-                                    # ('autoExpand', {'label'   : '',
-                                    #                 'tipText' : '',
-                                    #                 'callBack': self._updateAutoExpand,
-                                    #                 'enabled' : True,
-                                    #                 'checked' : False,
-                                    #                 '_init'   : None,
-                                    #                 'type'    : RadioButtonsCompoundWidget,
-                                    #                 'kwds'    : {'labelText'   : 'Auto-Expand Groups',
-                                    #                              'compoundKwds': {'direction': 'h',
-                                    #                                               'hAlign'   : 'l',
-                                    #                                               'texts'    : ['Collapse', 'Expand', 'Ignore'], }
-                                    #                              }
-                                    #                 }),
-                                    ('meanLowerLimit', {'label'   : 'Mean Value Lower Limit',
-                                                        'callBack': self._updateMeanLowerLimit,
-                                                        'enabled' : True,
-                                                        '_init'   : None,
-                                                        'type'    : DoubleSpinBoxCompoundWidget,
-                                                        'kwds'    : {'labelText'    : 'Mean Value Lower Limit',
-                                                                     'tipText'      : 'Lower threshold for mean value of restraints',
-                                                                     'minimum'      : 0.0,
-                                                                     'maximum'      : 1.0,
-                                                                     'decimals'     : 2,
-                                                                     'step'         : 0.05,
-                                                                     'value'        : _DEFAULTMEANTHRESHOLD,
-                                                                     'minimumWidths': (180, 100, 100)},
-                                                        }),
-                                    ('autoExpand', {'label'   : 'Auto-expand Groups',
-                                                    'tipText' : 'Automatically expand/collapse groups on\nadding new restraintTable, or sorting.',
-                                                    'callBack': self._updateAutoExpand,
-                                                    'enabled' : True,
-                                                    'checked' : False,
-                                                    '_init'   : None,
-                                                    }),
+                                    (_MEANLOWERLIMIT, {'label'   : 'Mean Value Lower Limit',
+                                                       'callBack': self._updateMeanLowerLimit,
+                                                       'enabled' : True,
+                                                       '_init'   : None,
+                                                       'type'    : DoubleSpinBoxCompoundWidget,
+                                                       'kwds'    : {'labelText'    : 'Mean Value Lower Limit',
+                                                                    'tipText'      : 'Lower threshold for mean value of restraints',
+                                                                    'minimum'      : 0.0,
+                                                                    'maximum'      : 1.0,
+                                                                    'decimals'     : 2,
+                                                                    'step'         : 0.05,
+                                                                    'value'        : _DEFAULTMEANTHRESHOLD,
+                                                                    'minimumWidths': (180, 100, 100)},
+                                                       }),
+                                    (_AUTOEXPAND, {'label'   : 'Auto-expand Groups',
+                                                   'tipText' : 'Automatically expand/collapse groups on\nadding new restraintTable, or sorting.',
+                                                   'callBack': self._updateAutoExpand,
+                                                   'enabled' : True,
+                                                   'checked' : False,
+                                                   '_init'   : None,
+                                                   }),
                                     ('sequentialStrips', {'label'   : 'Show sequential strips',
                                                           'tipText' : 'Show nmrResidue in all strips.',
-                                                          'callBack': None,  #self.showNmrChainFromPulldown,
+                                                          'callBack': None,
                                                           'enabled' : True,
                                                           'checked' : False,
                                                           '_init'   : None,
                                                           }),
-                                    ('markPositions', {'label'   : 'Mark positions',
-                                                       'tipText' : 'Mark positions in all strips.',
-                                                       'callBack': None,  #self.showNmrChainFromPulldown,
+                                    (_MARKPOSITIONS, {'label'   : 'Mark positions',
+                                                      'tipText' : 'Mark positions in all strips.',
+                                                      'callBack': None,
+                                                      'enabled' : True,
+                                                      'checked' : True,
+                                                      '_init'   : None,
+                                                      }),
+                                    (_AUTOCLEARMARKS, {'label'   : 'Auto clear marks',
+                                                       'tipText' : 'Auto clear all previous marks',
+                                                       'callBack': None,
                                                        'enabled' : True,
                                                        'checked' : True,
                                                        '_init'   : None,
                                                        }),
-                                    ('autoClearMarks', {'label'   : 'Auto clear marks',
-                                                        'tipText' : 'Auto clear all previous marks',
-                                                        'callBack': None,
-                                                        'enabled' : True,
-                                                        'checked' : True,
-                                                        '_init'   : None,
-                                                        }),
                                     ))
 
         if self.activePulldownClass:
-            settingsDict.update(OrderedDict(((LINKTOPULLDOWNCLASS, {'label'   : f'Link to current {self.activePulldownClass.className}',
-                                                                    'tipText' : f'Set/update current {self.activePulldownClass.className} when selecting from pulldown',
-                                                                    'callBack': None,
-                                                                    'enabled' : True,
-                                                                    'checked' : True,
-                                                                    '_init'   : None}),)))
+            settingsDict.update(
+                    OrderedDict(
+                            ((LINKTOPULLDOWNCLASS, {'label'   : f'Link to current {self.activePulldownClass.className}',
+                                                    'tipText' : f'Set/update current {self.activePulldownClass.className} when selecting from pulldown',
+                                                    'callBack': None,
+                                                    'enabled' : True,
+                                                    'checked' : True,
+                                                    '_init'   : None}),)))
 
         settings = self._settings = ModuleSettingsWidget(parent=self.settingsWidget, mainWindow=self.mainWindow,
                                                          settingsDict=settingsDict,
@@ -713,12 +709,14 @@ class RestraintAnalysisTableModule(CcpnTableModule):
         rss._displayListWidget = settings.getWidget(_SPECTRUMDISPLAYS)
 
         rss._resTableWidget = settings.getWidget(_RESTRAINTTABLES)
-        rss._resTableWidget.listWidget.changed.connect(self._updateRestraintTables)
+        rss._resTableWidget.listChanged.connect(self._updateRestraintTables)
         rss._outTableWidget = settings.getWidget(_VIOLATIONTABLES)
-        rss._outTableWidget.listWidget.changed.connect(self._updateOutputTables)
+        rss._outTableWidget.listChanged.connect(self._updateOutputTables)
 
-        rss._meanLowerLimitSpinBox = settings.checkBoxes['meanLowerLimit']['widget']
-        rss._autoExpandCheckBox = settings.checkBoxes['autoExpand']['widget']
+        rss._meanLowerLimitSpinBox = settings.getWidget(_MEANLOWERLIMIT)
+        rss._autoExpandCheckBox = settings.getWidget(_AUTOEXPAND)
+        rss._markPositions = settings.getWidget(_MARKPOSITIONS)
+        rss._autoClearMarks = settings.getWidget(_AUTOCLEARMARKS)
 
         rss._modulePulldown = self._mainFrame._modulePulldown
         rss.guiFrame = self._mainFrame
@@ -740,7 +738,8 @@ class RestraintAnalysisTableModule(CcpnTableModule):
         self.addNewComparisonSet()
 
         # add spacer to the settings-widget so that the right-hand-side stays aligned
-        self._splitterSpacer = Spacer(fr, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed, grid=(0, 1))
+        self._splitterSpacer = Spacer(fr, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed,
+                                      grid=(0, 1))
 
         # force the comparison-set widget to take up the most vertical space
         layout = self._settings.getLayout()
@@ -890,7 +889,8 @@ class RestraintAnalysisTableModule(CcpnTableModule):
             restraintTables = self.project.restraintTables
         else:
             restraintTables = [self.project.getByPid(rList) for rList in restraintTables]
-            restraintTables = [rList for rList in restraintTables if rList is not None and isinstance(rList, RestraintTable)]
+            restraintTables = [rList for rList in restraintTables if
+                               rList is not None and isinstance(rList, RestraintTable)]
 
         self._updateCollectionButton(True)
         self._updateSettings(rss._meanLowerLimitSpinBox.getValue(), rss._autoExpandCheckBox.get())
@@ -922,7 +922,8 @@ class RestraintAnalysisTableModule(CcpnTableModule):
             restraintTables = self.project.restraintTables
         else:
             restraintTables = [self.project.getByPid(rList) for rList in restraintTables]
-            restraintTables = [rList for rList in restraintTables if rList is not None and isinstance(rList, RestraintTable)]
+            restraintTables = [rList for rList in restraintTables if
+                               rList is not None and isinstance(rList, RestraintTable)]
 
         outputTables = rss._outTableWidget.getTexts()
         if ALL in outputTables:
@@ -954,10 +955,14 @@ class RestraintAnalysisTableModule(CcpnTableModule):
                                                StructureData.__name__, self._updatePulldownNotify, onceOnly=True)
         self._ensembleNotifier = self.setNotifier(self.project, [Notifier.RENAME, Notifier.CREATE, Notifier.DELETE],
                                                   StructureEnsemble.__name__, self._updatePulldownNotify, onceOnly=True)
-        self._restraintTableNotifier = self.setNotifier(self.project, [Notifier.RENAME, Notifier.CREATE, Notifier.DELETE],
-                                                        RestraintTable.__name__, self._updatePulldownNotify, onceOnly=True)
-        self._violationTableNotifier = self.setNotifier(self.project, [Notifier.RENAME, Notifier.CREATE, Notifier.DELETE],
-                                                        ViolationTable.__name__, self._updatePulldownNotify, onceOnly=True)
+        self._restraintTableNotifier = self.setNotifier(self.project,
+                                                        [Notifier.RENAME, Notifier.CREATE, Notifier.DELETE],
+                                                        RestraintTable.__name__, self._updatePulldownNotify,
+                                                        onceOnly=True)
+        self._violationTableNotifier = self.setNotifier(self.project,
+                                                        [Notifier.RENAME, Notifier.CREATE, Notifier.DELETE],
+                                                        ViolationTable.__name__, self._updatePulldownNotify,
+                                                        onceOnly=True)
 
     def _unRegisterNotifiers(self):
         """Register notifiers for the module
@@ -1039,7 +1044,8 @@ class RestraintAnalysisTableModule(CcpnTableModule):
             return
 
         # extract the linked objects in the collection
-        objs = self.project.getObjectsByPids(collection.items, (PeakList, RestraintTable, ViolationTable, StructureData))
+        objs = self.project.getObjectsByPids(collection.items,
+                                             (PeakList, RestraintTable, ViolationTable, StructureData))
         plList = [obj for obj in objs if isinstance(obj, PeakList)]
         rTables = [obj for obj in objs if isinstance(obj, RestraintTable)]
         vTables = [obj for obj in objs if isinstance(obj, ViolationTable)]
@@ -1413,7 +1419,9 @@ class RestraintAnalysisTableModule(CcpnTableModule):
             pulldown.select(selectableObjects[0].pid)
 
         elif othersClassNames := list({obj.className for obj in others if hasattr(obj, 'className')}):
-            title, msg = ('Dropped wrong item.', f"Do you want to open the {''.join(othersClassNames)} in a new module?") if len(othersClassNames) == 1 else ('Dropped wrong items.', 'Do you want to open items in new modules?')
+            title, msg = (
+                'Dropped wrong item.', f"Do you want to open the {''.join(othersClassNames)} in a new module?") if len(
+                    othersClassNames) == 1 else ('Dropped wrong items.', 'Do you want to open items in new modules?')
 
             if showYesNo(title, msg):
                 _openItemObject(self.mainWindow, others)

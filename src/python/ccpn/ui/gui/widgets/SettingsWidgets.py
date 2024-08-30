@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Vicky Higman $"
-__dateModified__ = "$dateModified: 2024-06-03 10:27:55 +0100 (Mon, June 03, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-08-30 12:57:01 +0100 (Fri, August 30, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -221,13 +221,15 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         row += 1
         self.zPlaneNavigationModeLabel = Label(parent, text="Plane Navigation Mode", grid=(row, 0))
         self.zPlaneNavigationModeData = RadioButtons(parent, texts=[val.description for val in ZPlaneNavigationModes],
-                                                     objectNames=[f'zPlaneSDS_{val.dataValue}' for val in ZPlaneNavigationModes],
+                                                     objectNames=[f'zPlaneSDS_{val.dataValue}' for val in
+                                                                  ZPlaneNavigationModes],
                                                      callback=self._zPlaneNavigationModeChanged,
                                                      direction='h',
                                                      grid=(row, 1), hAlign='l', gridSpan=(1, 2),
-                                                     tipTexts=('Plane navigation tools are located at the bottom of the spectrumDisplay,\nand will operate on the selected strip in that spectrumDisplay',
-                                                               'Plane navigation tools are located at the bottom of each strip',
-                                                               'Plane navigation tools are displayed in the upper-left corner of each strip'),
+                                                     tipTexts=(
+                                                         'Plane navigation tools are located at the bottom of the spectrumDisplay,\nand will operate on the selected strip in that spectrumDisplay',
+                                                         'Plane navigation tools are located at the bottom of each strip',
+                                                         'Plane navigation tools are displayed in the upper-left corner of each strip'),
                                                      )
         self.zPlaneNavigationModeLabel.setToolTip('Select where the Plane navigation tools are located')
 
@@ -271,7 +273,8 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             # aspectValue = _aspectRatios[aspect]
             self.aspectLabel[aspect] = Label(self.aspectLabelFrame, text=aspect, grid=(ii, 0), hAlign='r')
 
-            self.aspectData[aspect] = ScientificDoubleSpinBox(self.aspectDataFrame, min=0.01, grid=(ii, 0), hAlign='l', decimals=2,
+            self.aspectData[aspect] = ScientificDoubleSpinBox(self.aspectDataFrame, min=0.01, grid=(ii, 0), hAlign='l',
+                                                              decimals=2,
                                                               objectName=f'aspectSDS_{aspect}')
             # self.aspectData[aspect].setValue(aspectValue)
             self.aspectData[aspect].setMinimumWidth(LineEditsMinimumWidth)
@@ -286,8 +289,10 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
         row += 1
         _buttonFrame = Frame(parent, setLayout=True, grid=(row, 1), gridSpan=(1, 3), hAlign='l')
-        self.setFromDefaultsButton = Button(_buttonFrame, text='Defaults', grid=(0, 0), callback=self.updateFromDefaults)
-        self.setFromScreenButton = Button(_buttonFrame, text='Set from screen', grid=(0, 1), callback=self._setAspectFromScreen)
+        self.setFromDefaultsButton = Button(_buttonFrame, text='Defaults', grid=(0, 0),
+                                            callback=self.updateFromDefaults)
+        self.setFromScreenButton = Button(_buttonFrame, text='Set from screen', grid=(0, 1),
+                                          callback=self._setAspectFromScreen)
 
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 5), colour=getColours()[DIVIDER], height=15)
@@ -308,7 +313,8 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         if self._spectrumDisplay.MAXPEAKLABELTYPES:
             row += 1
             _texts = ['Short', 'Full', 'NmrAtom Pid', 'Minimal', 'Peak Pid', 'ClusterId', 'Annotation']
-            _names = ['annSDS_Short', 'annSDS_Full', 'annSDS_Pid', 'annSDS_Minimal', 'annSDS_Id', 'annSDS_ClusterId', 'annSDS_Annotation']
+            _names = ['annSDS_Short', 'annSDS_Full', 'annSDS_Pid', 'annSDS_Minimal', 'annSDS_Id', 'annSDS_ClusterId',
+                      'annSDS_Annotation']
             _texts = _texts[:self._spectrumDisplay.MAXPEAKLABELTYPES]
             _names = _names[:self._spectrumDisplay.MAXPEAKLABELTYPES]
 
@@ -369,7 +375,8 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         if self._spectrumDisplay.MAXMULTIPLETLABELTYPES:
             row += 1
             _texts = ['Short', 'Full', 'NmrAtom Pid', 'Minimal', 'Multiplet Pid', 'ClusterId', 'Annotation']
-            _names = ['annMDS_Short', 'annMDS_Full', 'annMDS_Pid', 'annMDS_Minimal', 'annMDS_Id', 'annMDS_ClusterId', 'annMDS_Annotation']
+            _names = ['annMDS_Short', 'annMDS_Full', 'annMDS_Pid', 'annMDS_Minimal', 'annMDS_Id', 'annMDS_ClusterId',
+                      'annMDS_Annotation']
             _texts = _texts[:self._spectrumDisplay.MAXMULTIPLETLABELTYPES]
             _names = _names[:self._spectrumDisplay.MAXMULTIPLETLABELTYPES]
 
@@ -595,7 +602,8 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                 SYMBOLSIZE             : self.symbolSizePixelData.value(),
                 SYMBOLTHICKNESS        : self.symbolThicknessData.value(),
                 CONTOURTHICKNESS       : self.contourThicknessData.value(),
-                MULTIPLETANNOTATIONTYPE: self.multipletAnnotationData.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
+                MULTIPLETANNOTATIONTYPE: self.multipletAnnotationData.getIndex(),
+                # if not self._spectrumDisplay.is1D else 0,
                 MULTIPLETTYPE          : self.multipletSymbol.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
                 ALIASENABLED           : self.aliasEnabledData.isChecked(),
                 ALIASSHADE             : int(self.aliasShadeData.get()),
@@ -978,7 +986,8 @@ class _commonSettings():
                                      grid=(2, 1), gridSpan=(self._spectraRows, 2), vAlign='top', hAlign='left')
 
         # calculate the maximum number of axes
-        self.maxLen, self.axisLabels, self.spectrumIndex, self.validSpectrumViews = self._getSpectraFromDisplays(displays, data)
+        self.maxLen, self.axisLabels, self.spectrumIndex, self.validSpectrumViews = self._getSpectraFromDisplays(
+                displays, data)
         if not self.maxLen:
             return
 
@@ -1104,12 +1113,15 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
         row = 0
         colwidth = 180
 
-        texts = [defaultSpectrum.pid] if (defaultSpectrum and defaultSpectrum is not NO_STRIP) else ([ALL] + displayText)
+        texts = [defaultSpectrum.pid] if (defaultSpectrum and defaultSpectrum is not NO_STRIP) else (
+                [ALL] + displayText)
 
         if includeDisplaySettings:
             row += 1
-            self.displaysWidget = SpectrumDisplaySelectionWidget(self, mainWindow=self.mainWindow, grid=(row, 0), gridSpan=(1, 1), texts=texts, displayText=[],
-                                                                 objectWidgetChangedCallback=self._displayWidgetChanged, labelText=labelText)
+            self.displaysWidget = SpectrumDisplaySelectionWidget(self, mainWindow=self.mainWindow, grid=(row, 0),
+                                                                 gridSpan=(1, 1), texts=texts, displayText=[],
+                                                                 objectWidgetChangedCallback=self._displayWidgetChanged,
+                                                                 labelText=labelText)
         else:
             self.displaysWidget = None
 
@@ -1220,7 +1232,8 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
             row += 1
 
             self.ncWidget = NmrChainPulldown(parent=self,
-                                             mainWindow=self.mainWindow, default=None,  #first NmrChain in project (if present)
+                                             mainWindow=self.mainWindow, default=None,
+                                             #first NmrChain in project (if present)
                                              grid=(row, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
                                              showSelectName=True,
                                              sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
@@ -1627,6 +1640,7 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
 
 class ObjectSelectionWidget(ListCompoundWidget):
     KLASS = None
+    listChanged = pyqtSignal()
 
     def __init__(self, parent=None, mainWindow=None, vAlign='top', stretch=(0, 0), hAlign='left',
                  vPolicy='minimal', fixedWidths=(None, None, None), orientation='left',
@@ -1677,6 +1691,7 @@ class ObjectSelectionWidget(ListCompoundWidget):
         model.rowsInserted.connect(self._objectWidgetChanged)
         model.rowsRemoved.connect(self._objectWidgetChanged)
         self.listWidget.cleared.connect(self._objectWidgetChanged)
+        self.listWidget.changed.connect(self._passThroughListChanged)
 
         # Notifiers
         if self.project:
@@ -1693,7 +1708,12 @@ class ObjectSelectionWidget(ListCompoundWidget):
         else:
             self._notifierRename = self._notifierDelete = None
 
+    def _passThroughListChanged(self, *args, **kwds):
+        """Pass through the signal from the listWidget."""
+        self.listChanged.emit()
+
     def _close(self):
+        """Unregister notifiers and close."""
         if self._notifierRename:
             self._notifierRename.unRegister()
             self._notifierRename = None
@@ -1788,6 +1808,7 @@ class ChainSelectionWidget(ObjectSelectionWidget):
 
 class SpectrumSelectionWidget(ObjectSelectionWidget):
     KLASS = Spectrum
+
 
 class SpectrumGroupSelectionWidget(ObjectSelectionWidget):
     KLASS = SpectrumGroup

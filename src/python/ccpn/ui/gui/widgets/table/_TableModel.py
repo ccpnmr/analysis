@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-24 18:04:27 +0100 (Wed, July 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-02 17:56:54 +0100 (Mon, September 02, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -539,8 +539,6 @@ class _TableModel(QtCore.QAbstractTableModel):
                 if (indexGui := self._guiState[row, col]):
                     # get the colour from the dict
                     return indexGui.get(role)
-                # return the default foreground colour
-                return self._defaultForegroundColour
 
             elif role == BORDER_ROLE:
                 if (indexGui := self._guiState[row, col]):

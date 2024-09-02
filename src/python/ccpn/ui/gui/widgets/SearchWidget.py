@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-04 18:42:13 +0100 (Thu, July 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-02 17:56:53 +0100 (Mon, September 02, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,7 @@ __date__ = "$Date: 2018-12-20 15:44:35 +0000 (Thu, December 20, 2018) $"
 import contextlib
 import operator as op
 import numpy as np
-import itertools
+import pandas as pd
 from functools import partial
 from PyQt5 import QtCore, QtWidgets, QtGui
 
@@ -480,6 +480,20 @@ class _TableFilterABC(ScrollArea):
         self.searchButtons.getButton('Reset').setEnabled(False)
         self._listRows = None
 
+    @staticmethod
+    def preFilterTableDf(df: pd.DataFrame) -> pd.DataFrame:
+        """Apply pre-search filtering to the pandas-dataFrame.
+
+        Round visible floats to 3-decimal places.
+
+        :param pd.DataFrame df: source dataFrame
+        :return: filtered dataFrame
+        :rtype: pd.DataFrame
+        """
+        return df.applymap(lambda val: (f'{val:.3f}'
+                                        if isinstance(val, (float, np.floating)) else
+                                        str(val)))
+
     def findOnTable(self, table, matchExactly=False, ignoreNotFound=False):
         if self.condition1.text() == '' or None:
             self.restoreTable(table)
@@ -489,49 +503,35 @@ class _TableFilterABC(ScrollArea):
         condition1Value = self.condition1.text()
         condition2Value = self.condition2.text()
         condition = self.conditionWidget.getText()
-
-        # # check using the actual table - not the underlying dataframe
-        # df = self.df
-        # if condition != Exclude:
-        #     rows = OrderedSet()
-        # else:
-        #     rows = OrderedSet(val for val in range(_model.rowCount()))
-
         searchColNum = self.columnOptions.getObject()
         visHeadings = self.visibleColumns(searchColNum)
-
         _compareErrorCount = 0
         _model = self.tableHandler.model()
+        df = self.preFilterTableDf(self.df)
 
-        df = self.df
-        if condition != Exclude:
-            rows = OrderedSet()
+        # Exclude needs to remove values from the list
+        rows = OrderedSet(iter(range(df.shape[0]))) if condition == Exclude else OrderedSet()
+        if condition in RangeConditions:
+            # assume that string manipulation has been done by preFilterTableDf
+            # or f'{cellText:.3f}' if isinstance(cellText, (float, np.floating)) else str(cellText)
+            dfFound = (df[visHeadings]
+                       .applymap(lambda val: _compareKeysInRange(val,
+                                                                 (condition1Value, condition2Value),
+                                                                 condition))
+                       .select_dtypes(include='bool').any(axis=1))
         else:
-            # Exclude needs to remove values from the list
-            rows = OrderedSet(iter(range(df.shape[0])))
+            dfFound = (df[visHeadings]
+                       .applymap(lambda val: _compareKeys(val, condition1Value, condition))
+                       .select_dtypes(include='bool').any(axis=1))
 
-        for row, column in itertools.product(range(df.shape[0]), range(df.shape[1])):
-            if df.columns[column] in visHeadings:
-
-                # could replace this with a quicker column-based method
-                cellText = df.iat[row, column]
-                # float/np.float - round to 3 decimal places
-                cellText = f'{cellText:.3f}' if isinstance(cellText, (float, np.floating)) else str(cellText)
-
-                if condition in RangeConditions:
-                    match = _compareKeysInRange(cellText, (condition1Value, condition2Value), condition)
-                else:
-                    match = _compareKeys(cellText, condition1Value, condition)
-                    if match is None:
-                        _compareErrorCount += 1
-
-                if match:
-                    if condition != Exclude:
-                        # add the found sorted row to the found list
-                        rows.add(row)
-                    else:
-                        # remove the found sorted values from the list
-                        rows -= {row}
+        # the .index may not be integer
+        foundSet = set(dfFound.index.get_loc(idx) for idx in dfFound.loc[dfFound].index)
+        if condition == Exclude:
+            # remove the found sorted rows from the list
+            rows -= foundSet
+        else:
+            # add the found sorted rows to the found list
+            rows |= foundSet
 
         self._listRows = rows
         if len(rows) and (_model._filterIndex is None or (set(rows) & set(_model._filterIndex))):
@@ -546,7 +546,7 @@ class _TableFilterABC(ScrollArea):
             self.columnOptions.setCurrentText(columnObject.__name__)
             self.condition1.setText(value)
             self.findOnTable(self.tableHandler, matchExactly=False, ignoreNotFound=True)
-        except Exception as es:
+        except Exception:
             getLogger().debug('column not found in table')
 
 

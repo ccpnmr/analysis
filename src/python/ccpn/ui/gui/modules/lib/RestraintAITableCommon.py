@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-30 12:57:01 +0100 (Fri, August 30, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-02 17:56:53 +0100 (Mon, September 02, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -29,10 +29,11 @@ __date__ = "$Date: 2023-01-20 15:57:58 +0100 (Fri, January 20, 2023) $"
 
 from dataclasses import dataclass, field
 from PyQt5 import QtWidgets
-
+import pandas as pd
 from ccpn.ui.gui.lib.GuiStripContextMenus import (_selectedPeaksMenuItem, _addMenuItems,
                                                   _getNdPeakMenuItems, _setEnabledAllItems)
 from ccpn.ui.gui.widgets.table._TableAdditions import TableMenuABC
+from ccpn.ui.gui.widgets.SearchWidget import _TableFilterABC
 
 
 UNITS = ['ppm', 'Hz', 'point']
@@ -174,3 +175,75 @@ class _RestraintOptions(TableMenuABC):
     #=========================================================================================
 
     ...
+
+
+#=========================================================================================
+# _DFTableFilter class uses QTableView and model to access data
+#=========================================================================================
+
+class _RestraintAITableFilter(_TableFilterABC):
+
+    def searchRows(self, df, rows):
+        """Return the subset of the df based on rows
+        """
+        return df.loc[list(rows)]
+
+    @property
+    def columns(self):
+        """Return the full list of columns
+        """
+        return list(self.df.columns)
+
+    def visibleColumns(self, columnIndex=None):
+        """Return the list of visible columns
+        """
+        headerMenu = self._parent.headerColumnMenu
+
+        return ([col for col in self.df.columns if col not in headerMenu._allHiddenColumns]
+                if (columnIndex is None) else [self.df.columns[columnIndex]])
+
+    @property
+    def df(self):
+        """Return the Pandas-dataFrame
+        """
+        return self._parent._df
+
+    @staticmethod
+    def preFilterTableDf(df: pd.DataFrame) -> pd.DataFrame:
+        """Apply pre-search filtering to the pandas-dataFrame.
+
+        Change visible ints/floats in the dataFrame to '-' if restraint-pids are not defined in the row.
+        Allows '-' to be searched.
+
+        :param pd.DataFrame df: source dataFrame
+        :return: filtered dataFrame
+        :rtype: pd.DataFrame
+        """
+        dfCache = df.copy()
+        # apply functions to retrieve displayRole for all columns
+        for colNum, colName in enumerate(dfCache.columns):
+            if colName[1] == HeaderRestraint:
+                # process the following columns based on the restraint-pid
+                # a little hardcoded?
+                mask = dfCache.iloc[:, colNum].apply(lambda val: val not in [None, '', '-'])
+
+                # clean the str for the first columns
+                for col in range(colNum, colNum + 2):
+                    dfCache.iloc[:, col].apply(lambda value: str(value or ''))
+                # clean the float values - hide with a '-' if the restraint-pid is missing
+                for col in range(colNum + 3, colNum + 10):
+                    colMask = dfCache.columns[col]
+                    # True state
+                    dfCache.loc[mask, colMask].apply(lambda value: (f'{value:.3f}'
+                                                                    if (1e-6 < value < 1e6) or value == 0.0 else
+                                                                    f'{value:.3e}'))
+                    # False state - use dash for cleaner table
+                    dfCache.loc[~mask, colMask] = '-'
+                # clean the int values - hide with a '-' if the restraint-pid is missing
+                for col in range(colNum + 10, colNum + 12):
+                    colMask = dfCache.columns[col]
+                    # True state
+                    dfCache.loc[mask, colMask].apply(lambda value: int(value))
+                    # False state - use dash for cleaner table
+                    dfCache.loc[~mask, colMask] = '-'
+        return dfCache

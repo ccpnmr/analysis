@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-30 12:57:01 +0100 (Fri, August 30, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-02 17:56:53 +0100 (Mon, September 02, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -44,10 +44,12 @@ from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.lib._CoreMITableFrame import _CoreMITableWidgetABC
 from ccpn.ui.gui.lib._CoreTableFrame import _CoreTableFrameABC
 import ccpn.ui.gui.modules.PyMolUtil as pyMolUtil
-from ccpn.ui.gui.modules.lib.RestraintAITableCommon import _RestraintOptions, UNITS, \
-    HeaderIndex, HeaderMatch, HeaderObject, HeaderRestraint, HeaderAtoms, HeaderViolation, HeaderTarget, \
-    HeaderLowerLimit, HeaderUpperLimit, HeaderMin, HeaderMax, HeaderMean, HeaderStd, \
-    HeaderCount1, HeaderCount2, _OLDHEADERS, _VIOLATIONRESULT, ALL, PymolScriptName
+from ccpn.ui.gui.modules.lib.RestraintAITableCommon import (
+    _RestraintOptions, UNITS, HeaderIndex, HeaderMatch, HeaderObject, HeaderRestraint,
+    HeaderAtoms, HeaderViolation, HeaderTarget, HeaderLowerLimit, HeaderUpperLimit,
+    HeaderMin, HeaderMax, HeaderMean, HeaderStd,
+    HeaderCount1, HeaderCount2, _OLDHEADERS, _VIOLATIONRESULT, ALL, PymolScriptName,
+    _RestraintAITableFilter)
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Column import ColumnClass, Column
@@ -62,7 +64,6 @@ from ccpn.util.Common import flattenLists
 from ccpn.util.Logging import getLogger
 from ccpn.util.Path import joinPath
 from ccpn.util.OrderedSet import OrderedSet
-
 from ccpn.ui.gui.widgets.table._MITableModel import _MITableModel
 from ccpn.ui.gui.widgets.table._MITableDelegates import _ExpandVerticalCellDelegate
 
@@ -157,7 +158,9 @@ def _checkRestraintFloat(offset, value, row, col):
     """Display the contents of the cell if the restraint-pid is valid - float
     Assumes multi-index
     """
-    # if row[col - offset] not in [None, '', '-']:
+    # row is a pandas-series, with the column-headers as the index
+    # row.index[col][0] is the name of restraint in the top row of the table-header
+    #   e.g. ('run1_xplor', 'Mean') or ('run2_xplor', 'Mean')
     if row[(row.index[col][0], HeaderRestraint)] not in [None, '', '-']:
         try:
             return f'{value:.3f}' if (1e-6 < value < 1e6) or value == 0.0 else f'{value:.3e}'
@@ -171,7 +174,6 @@ def _checkRestraintInt(offset, value, row, col):
     """Display the contents of the cell if the restraint-pid is valid - int
     Assumes multi-index
     """
-    # if row[col - offset]:
     if row[(row.index[col][0], HeaderRestraint)] not in [None, '', '-']:
         return int(value)
 
@@ -278,6 +280,9 @@ class _NewRestraintTableWidget(_CoreMITableWidgetABC):
         for col in self.SPANCOLUMNS:
             # add delegates to show expand/collapse icon
             self.setItemDelegateForColumn(col, delegate)
+
+        # requires a special filter based in the table displayRole
+        self.searchMenu.setFilterKlass(_RestraintAITableFilter)
 
     #=========================================================================================
     # Properties
@@ -431,8 +436,6 @@ class _NewRestraintTableWidget(_CoreMITableWidgetABC):
     #=========================================================================================
     # Table context menu
     #=========================================================================================
-
-    # currently in _PeakTableOptions
 
     def addTableMenuOptions(self, menu):
         self.restraintMenu = _RestraintOptions(self, True)
@@ -869,6 +872,7 @@ class _NewRestraintTableWidget(_CoreMITableWidgetABC):
         # update the visible columns
         self.headerColumnMenu.saveColumns([col for col in self._df.columns
                                            if isinstance(col, tuple) and col[1] in self.defaultHiddenSubgroup])
+        self.headerColumnMenu.refreshHiddenColumns()
         self.searchMenu.refreshFilter()
 
     # NOTE:ED - not done yet

@@ -57,7 +57,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-08-13 16:22:43 +0100 (Tue, August 13, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-03 16:26:24 +0100 (Tue, September 03, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -4482,7 +4482,8 @@ class CcpnGLWidget(QOpenGLWidget):
         else:
             return 0.0
 
-    def _ensureOnScreen(self, mx, my, xROff : float = 0, xLOff : float = 0, yTOff : float = 0, yBOff : float = 0) -> list(float, float):
+    def _ensureOnScreen(self, mx, my, xROff : float = 0, xLOff : float = 0,
+                        yTOff : float = 0, yBOff : float = 0) -> tuple[float, float]:
         """Check the string is constraint to the bounds of the strip
         :param mx: Crosshair x coordinate
         :param my: Crosshair y coordinate
@@ -4490,7 +4491,7 @@ class CcpnGLWidget(QOpenGLWidget):
         :param xLOff: Offset from left of crosshair
         :param yTOff: Offset from top of crosshair
         :param yBOff: Offset from bottom of crosshair
-        :return: Offsets - list(ox, oy)
+        :return: Offsets - tuple[ox, oy]
         """
         _mouseOffsetR = self._valueToRatio(mx + xROff, self.axisL, self.axisR)
         _mouseOffsetL = self._valueToRatio(mx + xLOff, self.axisL, self.axisR)

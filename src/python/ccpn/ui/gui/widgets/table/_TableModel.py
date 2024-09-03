@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-24 18:04:27 +0100 (Wed, July 24, 2024) $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-09-03 15:47:08 +0100 (Tue, September 03, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -207,7 +207,8 @@ class _TableModel(QtCore.QAbstractTableModel):
             bbox = fontMetric.boundingRect
 
             # get an estimate for an average character width/height - must be floats for estimate-column-widths
-            test = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789,./;\<>?:|!@£$%^&*()'
+            # test = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789,./;\<>?:|!@£$%^&*()'
+            test = 'WMB' # Selection of wider letters to prevent collapsing column
             self._chrWidth = bbox(test).width() / len(test)
             self._chrHeight = bbox('A').height() + self._chrPixelPadding
 
@@ -724,6 +725,7 @@ class _TableModel(QtCore.QAbstractTableModel):
             else:
                 # should implement line-splitting here
                 max_length = self._df.iloc[:, col].apply(str).apply(len).max()
+
             maxLen = max(maxLen, max_length) + self._chrPadding
 
             return int(min(self._MAXCHARS, maxLen) * self._chrWidth)

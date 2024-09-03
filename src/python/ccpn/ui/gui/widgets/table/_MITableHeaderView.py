@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-29 22:06:47 +0100 (Thu, August 29, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-03 13:20:31 +0100 (Tue, September 03, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -64,10 +64,10 @@ class _MITableHeaderViewABC(QtWidgets.QTableView):
                         gridline-color: %(_GRID_COLOR)s;
                         /* use #f8f088 for yellow selection */
                         selection-background-color: qlineargradient(
-                                x1: 0, y1: -150, x2: 0, y2: 200,
-                                stop: 0 palette(highlight), 
-                                stop: 1 palette(base)
-                            );
+                                                        x1: 0, y1: -200, x2: 0, y2: 200,
+                                                        stop: 0 palette(highlight), 
+                                                        stop: 1 palette(base)
+                                                    );
                     }
                     QTableView::item {
                         padding: %(_CELL_PADDING)spx;

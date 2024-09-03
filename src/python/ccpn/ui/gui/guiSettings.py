@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-29 22:06:46 +0100 (Thu, August 29, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-03 13:20:31 +0100 (Tue, September 03, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -409,18 +409,18 @@ colourSchemes = {
             QtGui.QPalette.Mid            : ['#a9a9a9', '#a9a9a9', '#a9a9a9'],  # 5
             QtGui.QPalette.Text           : ['#080808', '#080808', '#080808'],  # 6
             # QtGui.QPalette.BrightText     : ['#ffffff', '#ffffff', '#ffffff'],  # 7
-            QtGui.QPalette.ButtonText     : ['#000000', '#000000', '#939393'],  # 8
+            QtGui.QPalette.ButtonText     : ['#060606', '#060606', '#060606'],  # 8
             QtGui.QPalette.Base           : ['#ffffff', '#ffffff', '#ececec'],  # 9
             QtGui.QPalette.Window         : ['#ececec', '#ececec', '#ececec'],  # 10
-            QtGui.QPalette.Shadow         : ['#000000', '#000000', '#000000'],  # 11
+            QtGui.QPalette.Shadow         : ['#22284E', '#181818', '#181818'],  # 11
             QtGui.QPalette.Highlight      : ['#b3d7ff', '#dcdcdc', '#dcdcdc'],  # 12 - default(-ish)
             # QtGui.QPalette.HighlightedText: ['#000000', '#000000', '#000000'],  # 13 - these are both dynamic
             QtGui.QPalette.Link           : ['#0068da', '#0000ff', '#0000ff'],  # 14
             QtGui.QPalette.LinkVisited    : ['#ff00ff', '#ff00ff', '#ff00ff'],  # 15
             QtGui.QPalette.AlternateBase  : ['#f5f5f5', '#f5f5f5', '#f5f5f5'],  # 16
             # QtGui.QPalette.NoRole         : ['#000000', '#000000', '#000000'],  # 17
-            QtGui.QPalette.ToolTipBase    : ['#fafad2', '#fafad2', '#fafad2'],  # 18
-            QtGui.QPalette.ToolTipText    : ['#222438', '#222438', '#222438'],  # 19
+            # QtGui.QPalette.ToolTipBase    : ['#fafad2', '#fafad2', '#fafad2'],  # 18
+            # QtGui.QPalette.ToolTipText    : ['#222438', '#222438', '#222438'],  # 19
             QtGui.QPalette.PlaceholderText: ['#aaaaaa', '#aaaaaa', '#aaaaaa'],  # 20
             }
         },
@@ -471,22 +471,22 @@ colourSchemes = {
             QtGui.QPalette.Button         : ['#323232', '#323232', '#323232'],  # 1
             QtGui.QPalette.Light          : ['#373737', '#373737', '#373737'],  # 2
             QtGui.QPalette.Midlight       : ['#343434', '#343434', '#343434'],  # 3
-            QtGui.QPalette.Dark           : ['#787878', '#787878', '#787878'],  # 4
+            QtGui.QPalette.Dark           : ['#585858', '#585858', '#585858'],  # 4
             QtGui.QPalette.Mid            : ['#242424', '#242424', '#242424'],  # 5
             QtGui.QPalette.Text           : ['#d2d2d2', '#d2d2d2', '#d2d2d2'],  # 6 - #f7f7f7
             # QtGui.QPalette.BrightText     : ['#373737', '#373737', '#373737'],  # 7
-            QtGui.QPalette.ButtonText     : ['#000000', '#000000', '#1f1f1f'],  # 8
+            QtGui.QPalette.ButtonText     : ['#cacaca', '#cacaca', '#cacaca'],  # 8
             QtGui.QPalette.Base           : ['#1e1e1e', '#1e1e1e', '#323232'],  # 9
             QtGui.QPalette.Window         : ['#323232', '#323232', '#323232'],  # 10
-            QtGui.QPalette.Shadow         : ['#000000', '#000000', '#000000'],  # 11
+            QtGui.QPalette.Shadow         : ['#c0c2ca', '#c5c5c5', '#c5c5c5'],  # 11
             QtGui.QPalette.Highlight      : ['#3f638b', '#464646', '#464646'],  # 12 - default(-ish)
             # QtGui.QPalette.HighlightedText: ['#f4f4f4', '#f4f4f4', '#f4f4f4'],  # 13 - these are both dynamic
             QtGui.QPalette.Link           : ['#419cff', '#0000ff', '#0000ff'],  # 14
             QtGui.QPalette.LinkVisited    : ['#e242e2', '#e242e2', '#e242e2'],  # 15
             QtGui.QPalette.AlternateBase  : ['#2c2c2c', '#2c2c2c', '#2c2c2c'],  # 16
             # QtGui.QPalette.NoRole         : ['#000000', '#000000', '#000000'],  # 17
-            QtGui.QPalette.ToolTipBase    : ['#fafad2', '#fafad2', '#fafad2'],  # 18
-            QtGui.QPalette.ToolTipText    : ['#222438', '#222438', '#222438'],  # 19
+            # QtGui.QPalette.ToolTipBase    : ['#fafad2', '#fafad2', '#fafad2'],  # 18
+            # QtGui.QPalette.ToolTipText    : ['#222438', '#222438', '#222438'],  # 19
             QtGui.QPalette.PlaceholderText: ['#787878', '#787878', '#787878'],  # 20
             },
         },

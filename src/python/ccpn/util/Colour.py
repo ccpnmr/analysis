@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-29 22:06:47 +0100 (Thu, August 29, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-03 13:20:31 +0100 (Tue, September 03, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -887,8 +887,7 @@ def closest_pyqt_color_name(hex_color):
 
 
 def coloursFromHue(count=12):
-    return ['palevioletred',
-            'crimson',
+    return ['crimson',
             'tomato',
             'darkorange',
             'gold',

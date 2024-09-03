@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-29 22:06:47 +0100 (Thu, August 29, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-03 13:20:31 +0100 (Tue, September 03, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -72,12 +72,14 @@ class TableABC(QtWidgets.QTableView):
                         border-style: solid;
                         border-radius: 2px;
                         gridline-color: %(_GRID_COLOR)s;
-                        /* use #f8f088 for yellow selection */
+                        /* use #f8f088/palette(highlight) for yellow selection */
                         selection-background-color: qlineargradient(
-                                                        x1: 0, y1: -150, x2: 0, y2: 200,
+                                                        x1: 0, y1: -200, x2: 0, y2: 200,
                                                         stop: 0 palette(highlight),
                                                         stop: 1 palette(light)
                                                     );
+                        selection-color: palette(text);
+                        color: palette(shadow);
                         outline: 0px;
                     }
                     QHeaderView {
@@ -1029,25 +1031,35 @@ class TableABC(QtWidgets.QTableView):
 
         return tuple(sortIndex[row] if 0 <= row < len(sortIndex) else None for row in rows)
 
-    def setForeground(self, row, column, colour):
+    def setForeground(self, row: int, column: int, colour: QtGui.QColor | str):
         """Set the foreground colour for cell at position (row, column).
 
-        :param row: row as integer
-        :param column: column as integer
+        :param int row: row as integer
+        :param int column: column as integer
         :param colour: colour compatible with QtGui.QColor
         """
         if (model := self.model()):
             model.setForeground(row, column, colour)
 
-    def setBackground(self, row, column, colour):
+    def setBackground(self, row: int, column: int, colour: QtGui.QColor | str):
         """Set the background colour for cell at position (row, column).
 
-        :param row: row as integer
-        :param column: column as integer
+        :param int row: row as integer
+        :param int column: column as integer
         :param colour: colour compatible with QtGui.QColor
         """
         if (model := self.model()):
             model.setBackground(row, column, colour)
+
+    def setBorderVisible(self, row: int, column: int, enabled: bool):
+        """Enable the border for cell at position (row, column).
+
+        :param int row: row as integer
+        :param int column: column as integer
+        :param enabled: True/Falsse
+        """
+        if (model := self.model()):
+            model.setBorderVisible(row, column, enabled)
 
     #=========================================================================================
     # Table context menu

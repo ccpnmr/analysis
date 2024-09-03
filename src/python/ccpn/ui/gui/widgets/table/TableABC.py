@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-24 18:04:27 +0100 (Wed, July 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-03 13:20:31 +0100 (Tue, September 03, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -33,7 +33,6 @@ from dataclasses import dataclass
 from contextlib import contextmanager, suppress
 import typing
 
-from ccpn.ui.gui.guiSettings import getColours, GUITABLE_GRIDLINES
 from ccpn.ui.gui.widgets.Font import setWidgetFont, TABLEFONT, getFontHeight
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame
 from ccpn.ui.gui.widgets.Menu import Menu
@@ -68,22 +67,27 @@ class TableABC(QtWidgets.QTableView):
     className = None
 
     styleSheet = """QTableView {
-                        background-color: %(GUITABLE_BACKGROUND)s;
-                        alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
-                        border: %(_BORDER_WIDTH)spx solid %(BORDER_NOFOCUS)s;
+                        border-color: palette(mid);
+                        border-width: %(_BORDER_WIDTH)spx;
+                        border-style: solid;
                         border-radius: 2px;
                         gridline-color: %(_GRID_COLOR)s;
-                        selection-background-color: %(GUITABLE_SELECTED_BACKGROUND)s;
-                        selection-color: %(GUITABLE_SELECTED_FOREGROUND)s;
+                        /* use #f8f088/palette(highlight) for yellow selection */
+                        selection-background-color: qlineargradient(
+                                                        x1: 0, y1: -200, x2: 0, y2: 200,
+                                                        stop: 0 palette(highlight),
+                                                        stop: 1 palette(light)
+                                                    );
+                        selection-color: palette(text);
+                        color: palette(shadow);
+                        outline: 0px;
                     }
-                    QTableView::focus {
-                        background-color: %(GUITABLE_BACKGROUND)s;
-                        alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
-                        border: %(_BORDER_WIDTH)spx solid %(BORDER_FOCUS)s;
-                        border-radius: 2px;
-                        gridline-color: %(_GRID_COLOR)s;
-                        selection-background-color: %(GUITABLE_SELECTED_BACKGROUND)s;
-                        selection-color: %(GUITABLE_SELECTED_FOREGROUND)s;
+                    QHeaderView {
+                        color: palette(text);
+                        outline: 0px;
+                    }
+                    QTableView:focus {
+                        border-color: palette(highlight);
                     }
                     QTableView::item {
                         padding-top: %(_CELL_PADDING)spx;
@@ -127,6 +131,7 @@ class TableABC(QtWidgets.QTableView):
 
     defaultSortColumn = 0  # allow the use of integer or string/tuple values here
     defaultSortOrder = QtCore.Qt.AscendingOrder
+    _newFocus = False
 
     def __init__(self, parent, *, df=None,
                  multiSelect=True, selectRows=True,
@@ -207,6 +212,7 @@ class TableABC(QtWidgets.QTableView):
 
         # initialise the table
         self.updateDf(df, _resize, setHeightToRows, setWidthToColumns, setOnHeaderOnly=setOnHeaderOnly)
+        self._setStyle()
 
     # pyqt5.15 does not allow setting by float
     def setFixedHeight(self, p_int):
@@ -252,20 +258,34 @@ class TableABC(QtWidgets.QTableView):
         """Set the stylesheet options
         """
         # set stylesheet
-        colours = getColours()
+        cols = self._colours = {}  #getColours()
         # add border-width/cell-padding options
-        self._borderWidth = colours['_BORDER_WIDTH'] = borderWidth
-        self._cellPadding = colours['_CELL_PADDING'] = cellPadding  # the extra padding for the selected cell-item
-        self._focusBorderWidth = colours['_FOCUS_BORDER_WIDTH'] = focusBorderWidth
-        self._cellPaddingOffset = colours['_CELL_PADDING_OFFSET'] = cellPadding - focusBorderWidth
+        self._borderWidth = cols['_BORDER_WIDTH'] = borderWidth
+        self._cellPadding = cols['_CELL_PADDING'] = cellPadding  # the extra padding for the selected cell-item
+        self._focusBorderWidth = cols['_FOCUS_BORDER_WIDTH'] = focusBorderWidth
+        self._cellPaddingOffset = cols['_CELL_PADDING_OFFSET'] = cellPadding - focusBorderWidth
         try:
-            col = QtGui.QColor(gridColour).name() if gridColour else colours[GUITABLE_GRIDLINES]
+            col = QtGui.QColor(gridColour).name() if gridColour else 'palette(mid)'
         except Exception:
-            col = colours[GUITABLE_GRIDLINES]
-        self.gridcolour = colours['_GRID_COLOR'] = col
-        self._defaultStyleSheet = self.styleSheet % colours
-        self.setStyleSheet(self._defaultStyleSheet)
+            col = 'palette(mid)'
+        self._gridColour = cols['_GRID_COLOR'] = col
         self.setAlternatingRowColors(alternatingRows)
+
+    def _setStyle(self):
+        self._checkPalette(self.palette())
+        QtWidgets.QApplication.instance()._sigPaletteChanged.connect(self._checkPalette)
+
+    def _checkPalette(self, pal: QtGui.QPalette, theme: str = None, themeColour: str = None, themeSD: str = None):
+        # print the colours from the updated palette - only 'highlight' seems to be effective
+        # QT modifies this to give different selection shades depending on the widget
+        base = pal.base().color().lightness()
+        self.highlightColour = highlight = pal.highlight().color()
+        cols = self._colours
+        cols['_BORDER_FOCUS'] = self.highlightColour.name()
+        self.setStyleSheet(self.styleSheet % cols)
+        with suppress(Exception):
+            # set the colour for the current cell
+            self.itemDelegate()._focusPen.setColor(self.highlightColour)
 
     def _setMenuProperties(self, enableCopyCell, enableDelete, enableExport, enableSearch):
         """Add the required menus to the table
@@ -750,9 +770,18 @@ class TableABC(QtWidgets.QTableView):
 
         return keyMod in allKeyModifers
 
+    def focusInEvent(self, e: QtGui.QFocusEvent) -> None:
+        """Handle grabbing focus - disable first mouse-click from clearing current selection.
+        """
+        self._newFocus = self.viewport().underMouse() and bool(QtGui.QGuiApplication.mouseButtons())
+        super().focusInEvent(e)
+
     def mousePressEvent(self, event: QtGui.QMouseEvent) -> None:
         """Handle mouse-press event so that double-click keeps any multi-selection
         """
+        if self._newFocus:
+            return
+
         # doesn't respond in double-click interval - minor behaviour change to ExtendedSelection
         self._currentIndex = self.indexAt(event.pos())
         row, col = self.rowAt(event.pos().y()), self.columnAt(event.pos().x())
@@ -775,6 +804,21 @@ class TableABC(QtWidgets.QTableView):
             # if inds and not self.signalsBlocked():
             #     # simulate event clicked in the empty space, with last selection
             #     self._selectionConnect([], deselection)
+
+    def mouseReleaseEvent(self, e: QtGui.QMouseEvent) -> None:
+        """Handle mouse-release event, and discard first click if doesn't have focus.
+        """
+        if self._newFocus:
+            self._newFocus = False
+            return
+        super().mouseReleaseEvent(e)
+
+    def mouseMoveEvent(self, e: QtGui.QMouseEvent) -> None:
+        """Handle mouse-move event, and discard if have just grabbed focus.
+        """
+        if self._newFocus:
+            return
+        super().mouseMoveEvent(e)
 
     def keyPressEvent(self, event):
         """Handle keyPress events on the table
@@ -987,25 +1031,35 @@ class TableABC(QtWidgets.QTableView):
 
         return tuple(sortIndex[row] if 0 <= row < len(sortIndex) else None for row in rows)
 
-    def setForeground(self, row, column, colour):
+    def setForeground(self, row: int, column: int, colour: QtGui.QColor | str):
         """Set the foreground colour for cell at position (row, column).
 
-        :param row: row as integer
-        :param column: column as integer
+        :param int row: row as integer
+        :param int column: column as integer
         :param colour: colour compatible with QtGui.QColor
         """
         if (model := self.model()):
             model.setForeground(row, column, colour)
 
-    def setBackground(self, row, column, colour):
+    def setBackground(self, row: int, column: int, colour: QtGui.QColor | str):
         """Set the background colour for cell at position (row, column).
 
-        :param row: row as integer
-        :param column: column as integer
+        :param int row: row as integer
+        :param int column: column as integer
         :param colour: colour compatible with QtGui.QColor
         """
         if (model := self.model()):
             model.setBackground(row, column, colour)
+
+    def setBorderVisible(self, row: int, column: int, enabled: bool):
+        """Enable the border for cell at position (row, column).
+
+        :param int row: row as integer
+        :param int column: column as integer
+        :param enabled: True/Falsse
+        """
+        if (model := self.model()):
+            model.setBorderVisible(row, column, enabled)
 
     #=========================================================================================
     # Table context menu

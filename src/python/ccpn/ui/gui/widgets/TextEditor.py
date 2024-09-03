@@ -5,8 +5,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-02-29 18:19:10 +0000 (Thu, February 29, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__dateModified__ = "$dateModified: 2024-08-23 19:21:22 +0100 (Fri, August 23, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,7 +27,9 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+from PyQt5.Qt import QDesktopServices, QUrl, QApplication, Qt
 from PyQt5 import QtGui, QtWidgets, QtCore, QtPrintSupport
+
 from ccpn.ui.gui.widgets.FileDialog import MacrosFileDialog
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Action import Action
@@ -35,7 +38,6 @@ from ccpn.ui.gui.widgets.Label import Label, ActiveLabel
 from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 from ccpn.util.Path import aPath
-from ccpn.ui.gui.widgets.MessageDialog import showMessage
 
 
 ATTRIBUTE_CHECK_LIST = ('_mouseStart', '_minimumWidth', '_widthStart', '_minimumHeight', '_heightStart')
@@ -80,7 +82,6 @@ class TextEditor(QtWidgets.QTextEdit, Base):
         self.backgroundText = backgroundText
         if self.backgroundText:
             self.setPlaceholderText(str(self.backgroundText))
-
         if not editable:
             self.setReadOnly(True)
             self.setEnabled(False)
@@ -98,28 +99,19 @@ class TextEditor(QtWidgets.QTextEdit, Base):
             self._label.setSelectionCallback(self._toggleWordWrap)
             self._setWrapIcon(wordWrap)
             self._label.setToolTip('Enable/disable Word-wrap')
-
         if addGrip:
-            _gripIcon = Icon('icons/grip')
-
+            # _gripIcon = Icon('icons/grip')
             gripper = QtWidgets.QSizeGrip(self)
-            # layout.addWidget(gripper, 0, QtCore.Qt.AlignRight | QtCore.Qt.AlignBottom)
             layout.addWidget(gripper, 0, 0, 0, 0, QtCore.Qt.AlignRight | QtCore.Qt.AlignBottom)
-            gripper.setStyleSheet("""QSizeGrip {
-                            image: url(%s);
-                            width: 20px; height: 20px;
-            }""" % (_gripIcon._filePath))
-
         self._enableWebLinks = enableWebLinks
 
-        self._setFocusColour()
+        self._setStyle()
 
     def mousePressEvent(self, e):
         """Get the web-link under the mouse.
         """
         if self._enableWebLinks:
             self._anchor = self.anchorAt(e.pos())
-
         super().mousePressEvent(e)
 
     def mouseMoveEvent(self, e):
@@ -132,7 +124,6 @@ class TextEditor(QtWidgets.QTextEdit, Base):
             else:
                 QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.ArrowCursor)
                 self.setToolTip(None)
-
         super().mouseMoveEvent(e)
 
     def mouseReleaseEvent(self, e):
@@ -142,7 +133,6 @@ class TextEditor(QtWidgets.QTextEdit, Base):
             QtGui.QDesktopServices.openUrl(QtCore.QUrl(self._anchor))
             QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.ArrowCursor)
             self._anchor = None
-
         super().mouseReleaseEvent(e)
 
     def leaveEvent(self, event):
@@ -168,10 +158,10 @@ class TextEditor(QtWidgets.QTextEdit, Base):
         layout = self.getLayout()
         layout.setContentsMargins(0, 0, dx, dy)
 
-        self._updateheight()
+        self._updateHeight()
         super(TextEditor, self).resizeEvent(a0)
 
-    def _updateheight(self):
+    def _updateHeight(self):
         # Override the resize event to fit to contents
         if self._fitToContents:
             rowHeight = getFontHeight()
@@ -183,24 +173,28 @@ class TextEditor(QtWidgets.QTextEdit, Base):
                 self.setFixedHeight(self._maxHeight)
                 self._lastRowCount = lineCount
 
-    def _setFocusColour(self, focusColour=None, noFocusColour=None):
+    def _setStyle(self):
         """Set the focus/noFocus colours for the widget
         """
-        focusColour = getColours()[BORDERFOCUS]
-        noFocusColour = getColours()[BORDERNOFOCUS]
-        styleSheet = "QTextEdit { " \
-                     "border: 1px solid;" \
-                     "border-radius: 3px;" \
-                     "border-color: %s;" \
-                     "} " \
-                     "QTextEdit:focus { " \
-                     "border: 1px solid %s; " \
-                     "border-radius: 3px; " \
-                     "}" % (noFocusColour, focusColour)
-        self.setStyleSheet(styleSheet)
+        _gripIcon = Icon('icons/grip')
+        _style = """
+                    QTextEdit {
+                        border: 1px solid palette(mid);
+                        border-radius: 2px;
+                    }
+                    QTextEdit:focus {
+                        border: 1px solid palette(highlight);
+                        border-radius: 2px;
+                    }
+                    QSizeGrip {
+                        image: url(%s);
+                        width: 20px; height: 20px;
+                    }
+                    """
+        self.setStyleSheet(_style % aPath(_gripIcon._filePath).as_posix())
 
     # def _addGrip(self):
-    #     # an idea to add a grip handle - can't thing of any other way
+    #     # an idea to add a grip handle - can't think of any other way
     #     self._gripIcon = Icon('icons/grip')
     #     self._gripLabel = Label(self)
     #     self._gripLabel.setPixmap(self._gripIcon.pixmap(16))
@@ -235,7 +229,7 @@ class TextEditor(QtWidgets.QTextEdit, Base):
 
     def _handle_text_changed(self):
         self._changed = True
-        self._updateheight()
+        self._updateHeight()
 
     def setTextChanged(self, state=True):
         self._changed = state
@@ -325,6 +319,8 @@ class TextBrowser(QtWidgets.QTextBrowser, Base):
             self.setHtmlFilePath(self.htmlFilePath)
 
     def setHtmlFilePath(self, htmlFilePath):
+        from ccpn.ui.gui.widgets.MessageDialog import showMessage  # circular import
+
         path = aPath(htmlFilePath)
         if not path.exists():
             showMessage('Path not found', f'Could not load {path}')
@@ -368,29 +364,26 @@ class PlainTextEditor(QtWidgets.QPlainTextEdit, Base):
         palette = self.viewport().palette()
         self._background = palette.color(self.viewport().backgroundRole())
 
-        self._setFocusColour()
+        self._setStyle()
 
         self._maxWidth = 0
         self._maxHeight = 0
 
-    def _setFocusColour(self, focusColour=None, noFocusColour=None):
-        """Set the focus/noFocus colours for the widget
+    def _setStyle(self, focusColour=None, noFocusColour=None):
+        """Set the focus/noFocus colours for the widget.
         """
-        focusColour = getColours()[BORDERFOCUS]
-        noFocusColour = getColours()[BORDERNOFOCUS]
-        styleSheet = "QPlainTextEdit {" \
-                     "border: 1px solid;" \
-                     "border-radius: 1px;" \
-                     "border-color: %s;" \
-                     "} " \
-                     "QPlainTextEdit:focus {" \
-                     "border: 1px solid %s; " \
-                     "border-radius: 1px;" \
-                     "}" % (noFocusColour, focusColour)
-        self.setStyleSheet(styleSheet)
+        _style = """QPlainTextEdit {
+                        border-width: 1px;
+                        border-radius: 2px;
+                    }
+                    QPlainTextEdit:focus {
+                        border-width: 1px;
+                        border-radius: 1px;
+                    }"""
+        self.setStyleSheet(_style)
 
     def _addGrip(self):
-        # an idea to add a grip handle - can't thing of any other way
+        # an idea to add a grip handle - can't think of any other way
         self._gripIcon = Icon('icons/grip')
         self._gripLabel = Label(self)
         self._gripLabel.setPixmap(self._gripIcon.pixmap(16))
@@ -547,11 +540,10 @@ class PlainTextEditor(QtWidgets.QPlainTextEdit, Base):
 #         self.move(rect.width() - 18, rect.height() - 18)
 
 
-if __name__ == '__main__':
+def main():
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
     from ccpn.ui.gui.widgets.Widget import Widget
-
 
     app = TestApplication()
 
@@ -561,3 +553,7 @@ if __name__ == '__main__':
     popup.show()
     popup.raise_()
     app.start()
+
+
+if __name__ == '__main__':
+    main()

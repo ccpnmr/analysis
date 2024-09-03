@@ -219,50 +219,30 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self._preferences = self.application.preferences.general
         self.globalGL = None
-
         self.stripIDLabel = stripIDLabel or ''
-
         self.setMouseTracking(True)  # generate mouse events when button not pressed
 
         # always respond to mouse events
         self.setFocusPolicy(Qt.StrongFocus)
-
         # initialise all attributes
         self._initialiseAll()
 
         # set a minimum size so that the strips resize nicely
         self.setMinimumSize(self.AXIS_MARGINRIGHT + 10, self.AXIS_MARGINBOTTOM + 10)
-
         # initialise the pyqt-signal notifier
         self.GLSignals = GLNotifier(parent=self, strip=strip)
-
         self.lastPixelRatio = None
+        self._setStyle()
 
-    #     # Tell the window that we accept touch events.
-    #     self.setAttribute(Qt.WA_AcceptTouchEvents, True)
-    #     self.setAttribute(Qt.WA_TouchPadAcceptSingleTouchEvents, True)
-    #     # Install an event filter to filter the touch events.
-    #     self.installEventFilter(self)
-    #
-    #     self._touches = {QtCore.QEvent.TouchBegin     : 'Begin',
-    #                      QtCore.QEvent.TouchEnd       : 'End',
-    #                      QtCore.QEvent.TouchCancel    : 'Cancel',
-    #                      QtCore.QEvent.TouchUpdate    : 'Update',
-    #                      }
-    #     self._touching = False
-    #
-    # def eventFilter(self, obj, event):
-    #     """Event filter to handle touch events for touchpad scrolling.
-    #     """
-    #     if event.type() in [QtCore.QEvent.TouchBegin, QtCore.QEvent.TouchUpdate]:
-    #         self._touching = True
-    #         return True
-    #     elif event.type() in [QtCore.QEvent.TouchEnd, QtCore.QEvent.TouchCancel]:
-    #         # cancel touch-mode and clear the scroll queue
-    #         self._touching = False
-    #         return True
-    #
-    #     return super().eventFilter(obj, event)
+    def _setStyle(self):
+        self._checkPalette(self.palette())
+
+    def _checkPalette(self, pal: QtGui.QPalette, *args):
+        # this is effectively handled by _preferencesUpdate
+        self._setColourScheme(pal)
+        # set the flag to update the background in the paint event
+        self._updateBackgroundColour = True
+        self.update()
 
     def _initialiseAll(self):
         """Initialise all attributes for the display
@@ -2022,32 +2002,32 @@ class CcpnGLWidget(QOpenGLWidget):
 
         return _font
 
-    def _setColourScheme(self):
+    def _setColourScheme(self, pal: QtGui.QPalette = None):
         """Update colours from colourScheme
         """
-        self.colours = getColours()
-        self.hexBackground = self.colours[CCPNGLWIDGET_HEXBACKGROUND]
-        self.background = self.colours[CCPNGLWIDGET_BACKGROUND]
-        self.foreground = self.colours[CCPNGLWIDGET_FOREGROUND]
-        self.buttonForeground = self.colours[CCPNGLWIDGET_BUTTON_FOREGROUND]
-        self.mousePickColour = self.colours[CCPNGLWIDGET_PICKCOLOUR]
-        self.gridColour = self.colours[CCPNGLWIDGET_GRID]
-        self.highlightColour = self.colours[CCPNGLWIDGET_HIGHLIGHT]
-        self._labellingColour = self.colours[CCPNGLWIDGET_LABELLING]
-        self._phasingTraceColour = self.colours[CCPNGLWIDGET_PHASETRACE]
+        cols = self.colours = getColours()
+        self.hexBackground = cols[CCPNGLWIDGET_HEXBACKGROUND]
+        self.background = cols[CCPNGLWIDGET_BACKGROUND]
+        self.foreground = cols[CCPNGLWIDGET_FOREGROUND]
+        self.buttonForeground = cols[CCPNGLWIDGET_BUTTON_FOREGROUND]
+        self.mousePickColour = cols[CCPNGLWIDGET_PICKCOLOUR]
+        self.gridColour = cols[CCPNGLWIDGET_GRID]
+        self.highlightColour = cols[CCPNGLWIDGET_HIGHLIGHT]
+        self._labellingColour = cols[CCPNGLWIDGET_LABELLING]
+        self._phasingTraceColour = cols[CCPNGLWIDGET_PHASETRACE]
 
-        self.zoomAreaColour = self.colours[CCPNGLWIDGET_ZOOMAREA]
-        self.pickAreaColour = self.colours[CCPNGLWIDGET_PICKAREA]
-        self.selectAreaColour = self.colours[CCPNGLWIDGET_SELECTAREA]
-        self.badAreaColour = self.colours[CCPNGLWIDGET_BADAREA]
+        self.zoomAreaColour = cols[CCPNGLWIDGET_ZOOMAREA]
+        self.pickAreaColour = cols[CCPNGLWIDGET_PICKAREA]
+        self.selectAreaColour = cols[CCPNGLWIDGET_SELECTAREA]
+        self.badAreaColour = cols[CCPNGLWIDGET_BADAREA]
 
-        self.zoomLineColour = self.colours[CCPNGLWIDGET_ZOOMLINE]
-        self.mouseMoveLineColour = self.colours[CCPNGLWIDGET_MOUSEMOVELINE]
+        self.zoomLineColour = cols[CCPNGLWIDGET_ZOOMLINE]
+        self.mouseMoveLineColour = cols[CCPNGLWIDGET_MOUSEMOVELINE]
 
-        self.zoomAreaColourHard = (*self.colours[CCPNGLWIDGET_ZOOMAREA][0:3], CCPNGLWIDGET_HARDSHADE)
-        self.pickAreaColourHard = (*self.colours[CCPNGLWIDGET_PICKAREA][0:3], CCPNGLWIDGET_HARDSHADE)
-        self.selectAreaColourHard = (*self.colours[CCPNGLWIDGET_SELECTAREA][0:3], CCPNGLWIDGET_HARDSHADE)
-        self.badAreaColourHard = (*self.colours[CCPNGLWIDGET_BADAREA][0:3], CCPNGLWIDGET_HARDSHADE)
+        self.zoomAreaColourHard = (*cols[CCPNGLWIDGET_ZOOMAREA][0:3], CCPNGLWIDGET_HARDSHADE)
+        self.pickAreaColourHard = (*cols[CCPNGLWIDGET_PICKAREA][0:3], CCPNGLWIDGET_HARDSHADE)
+        self.selectAreaColourHard = (*cols[CCPNGLWIDGET_SELECTAREA][0:3], CCPNGLWIDGET_HARDSHADE)
+        self.badAreaColourHard = (*cols[CCPNGLWIDGET_BADAREA][0:3], CCPNGLWIDGET_HARDSHADE)
 
     def _preferencesUpdate(self):
         """update GL values after the preferences have changed
@@ -3591,7 +3571,7 @@ class CcpnGLWidget(QOpenGLWidget):
                         if not specView.isDeleted and specView.isDisplayed and
                         specView in self._spectrumSettings]
         _firstVisible = ((self._ordering[0], self._spectrumSettings[self._ordering[0]]),) if self._ordering and not \
-            self._ordering[0].isDeleted and self._ordering[0] in self._spectrumSettings else ()
+        self._ordering[0].isDeleted and self._ordering[0] in self._spectrumSettings else ()
         self._visibleOrderingDict = _visibleSpec or _firstVisible
 
         # quick fix to take the set of matching letters from the spectrum axisCodes - append a '*' to denote trailing differences
@@ -5525,7 +5505,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
         return labelling, axesChanged
 
-    def _widthsChangedEnough(self, r1, r2, tol=1e-5):
+    @staticmethod
+    def _widthsChangedEnough(r1, r2, tol=1e-5):
         if len(r1) != len(r2):
             raise ValueError('WidthsChanged must be the same length')
 
@@ -5692,12 +5673,12 @@ class CcpnGLWidget(QOpenGLWidget):
                 elif self.spectrumDisplay.stripArrangement == 'T':
 
                     # NOTE:ED - Tiled plots not fully implemented yet
-                    getLogger().warning(
-                            'Tiled plots not implemented for spectrumDisplay: %s' % str(self.spectrumDisplay.pid))
+                    getLogger().warning(f'Tiled plots not implemented for spectrumDisplay: '
+                                        f'{str(self.spectrumDisplay.pid)}')
 
                 else:
-                    getLogger().warning(
-                            'Strip direction is not defined for spectrumDisplay: %s' % str(self.spectrumDisplay.pid))
+                    getLogger().warning(f'Strip direction is not defined for spectrumDisplay: '
+                                        f'{str(self.spectrumDisplay.pid)}')
 
             else:
                 # paint to update lock button colours
@@ -5946,7 +5927,6 @@ class CcpnGLWidget(QOpenGLWidget):
                     if GLNotifier.GLPREFERENCES in triggers:
                         self._preferencesUpdate()
                         self._rescaleXAxis(update=False)
-                        self.stripIDString.renderMode = GLRENDERMODE_REBUILD
 
                     if GLNotifier.GLPEAKLISTS in triggers:
                         for spectrumView in self._ordering:  # strip.spectrumViews:

@@ -1,9 +1,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -11,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-12 16:56:58 +0100 (Thu, October 12, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-08-23 19:21:56 +0100 (Fri, August 23, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -95,8 +96,14 @@ class FitPlotPanel(GuiPanel):
         self.fittedCurve = None #not sure if this var should Exist
         self.rawDataScatterPlot = None
 
-    def initWidgets(self):
+        QtWidgets.QApplication.instance()._sigPaletteChanged.connect(self._checkPalette)
 
+    def _checkPalette(self, pal: QtGui.QPalette, *args):
+        self.backgroundColour = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
+        if self._bindingPlotView:
+            self._bindingPlotView.setBackground(self.backgroundColour)
+
+    def initWidgets(self):
         self.backgroundColour = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
         self._setExtraWidgets()
         self._selectCurrentCONotifier = Notifier(self.current, [Notifier.CURRENT], targetName='collections',
@@ -331,6 +338,19 @@ class _FittingPlot(pg.PlotItem):
         self.buttonsHidden = True
         self.autoBtn.hide()
         self.crossHair = CrossHair(plotWidget=self)
+
+        self._setStyle()
+
+    def _setStyle(self):
+        self._checkPalette()
+        QtWidgets.QApplication.instance()._sigPaletteChanged.connect(self._checkPalette)
+
+    def _checkPalette(self, *args):
+        self.penColour = rgbaRatioToHex(*getColours()[CCPNGLWIDGET_LABELLING])
+        self.backgroundColour = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
+        self.gridPen = pg.functions.mkPen(self.penColour, width=1, style=QtCore.Qt.SolidLine)
+        self.getAxis('bottom').setPen(self.gridPen)
+        self.getAxis('left').setPen(self.gridPen)
 
     def clear(self):
         """

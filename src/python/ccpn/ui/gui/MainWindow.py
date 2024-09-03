@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-03 15:54:54 +0100 (Wed, July 03, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-03 13:20:31 +0100 (Tue, September 03, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -29,7 +29,7 @@ __date__ = "$Date: 2023-01-24 10:28:48 +0000 (Tue, January 24, 2023) $"
 
 import os
 import time
-from functools import partial
+from functools import partial, partialmethod
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtGui import QKeySequence
@@ -51,10 +51,12 @@ from ccpn.ui.gui.lib.mouseEvents import SELECT, PICK, MouseModes, \
     setCurrentMouseMode, getCurrentMouseMode
 from ccpn.ui.gui.lib import GuiStrip
 from ccpn.ui.gui.lib.Shortcuts import Shortcuts
-from ccpn.ui.gui.guiSettings import getColours
+from ccpn.ui.gui.guiSettings import (getColours, BORDERFOCUS, BORDERNOFOCUS,
+                                     GUITABLE_SELECTED_BACKGROUND, consoleStyle)
 
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 
+from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.PlotterWidget import plotter
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets import MessageDialog
@@ -97,9 +99,38 @@ _INTEGRAL_PEAKS = 8
 _MULTIPLET_PEAKS = 16
 
 READONLYCHANGED = 'readOnlyChanged'
+_transparent = QtGui.QColor('orange')
 
 
-class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
+# def _paintEvent(widget: QtWidgets.QWidget, event: QtGui.QPaintEvent, func=None) -> None:
+#     result = func(widget, event)
+#     if widget.hasFocus():
+#         p = QtGui.QPainter(widget)
+#         p.translate(0.5, 0.5)  # move to pixel-centre
+#         p.setRenderHint(QtGui.QPainter.Antialiasing, True)
+#         col = QtGui.QColor('dodgerblue')  # Base._highlightVivid
+#         col.setAlpha(255)
+#         pen = QtGui.QPen(col)
+#         p.setPen(pen)
+#         p.drawRoundedRect(widget.rect().adjusted(0, 0, -1, -1), 2, 2)
+#         col.setAlpha(40)
+#         p.setPen(col)
+#         p.drawRoundedRect(widget.rect().adjusted(1, 1, -2, -2), 1.7, 1.7)
+#         p.end()
+#     return result
+#
+
+# _paintQLineEdit = QtWidgets.QLineEdit.paintEvent
+# QtWidgets.QLineEdit.paintEvent = partialmethod(_paintEvent, func=_paintQLineEdit)
+# _paintQSpinBox = QtWidgets.QSpinBox.paintEvent
+# QtWidgets.QSpinBox.paintEvent = partialmethod(_paintEvent, func=_paintQSpinBox)
+# _paintQDoubleSpinBox = QtWidgets.QDoubleSpinBox.paintEvent
+# QtWidgets.QDoubleSpinBox.paintEvent = partialmethod(_paintEvent, func=_paintQDoubleSpinBox)
+# _pp = QtWidgets.QToolButton.paintEvent
+# QtWidgets.QToolButton.paintEvent = partialmethod(_paintEvent, func=_pp)
+
+
+class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
     # inherits NotifierBase from _Implementation.Window
 
     WindowMaximiseMinimise = QtCore.pyqtSignal(bool)
@@ -107,9 +138,9 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
     def __init__(self, application=None):
 
         # Shortcuts only inserts methods
-        super(QtWidgets.QMainWindow, self).__init__()
+        super().__init__()
 
-        # format = QtGui.QSurfaceFormat()
+        # format = QtGui.QSurfaceFormat()  # I think these can be removed now
         # format.setSwapInterval(0)
         # QtGui.QSurfaceFormat.setDefaultFormat(format)
 
@@ -180,11 +211,237 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         self.hide()
 
     def show(self):
+        # self._checkPalette(self.palette())
+        # self.application.ui._changeThemeInstant()
+        # catch the initial palette-changed signal
+        QtWidgets.QApplication.instance().sigPaletteChanged.connect(self._checkPalette)
         super().show()
-
         # install handler to resize when moving between displays
         #   cannot be done in __init__ as crashes on linux/windows :O
         self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
+
+    def _checkPalette(self, pal: QtGui.QPalette, theme: str = None, themeColour: str = None, themeSD: str = None):
+        # test the stylesheet of the QTableView
+        styleSheet = """
+                        QPushButton {
+                            color: palette(text);
+                        }
+                        QToolTip {
+                            background-color: %(TOOLTIP_BACKGROUND)s;
+                            color: %(TOOLTIP_FOREGROUND)s;
+                            font-size: %(_fontSize)spt;
+                            border: 1px solid %(TOOLTIP_FOREGROUND)s;
+                            qproperty-margin: 4; 
+                        }
+                        QMenu::item:disabled {
+                            color: palette(dark);
+                        }
+                        QMenu::separator {
+                            height: 1px;
+                            background: qlineargradient(
+                                            x1: 0, y1: -1, x2: 0, y2: 8,
+                                            stop: 0 palette(base),
+                                            stop: 1 palette(text)
+                                        );
+                        }
+                        QMenuBar {
+                            color: palette(text);
+                        }
+                        QMenuBar::item:disabled {
+                            color: palette(dark);
+                        }
+
+                        /*
+                        QGraphicsView {
+                            border: 1px solid palette(mid);
+                            border-radius: 2px;
+                        }
+                        QGraphicsView:focus {
+                            border: 1px solid palette(highlight);
+                            border-radius: 2px;
+                        }
+                        QGraphicsView:disabled { background-color: palette(midlight); }
+                        QListView {
+                            border: 1px solid palette(mid);
+                            border-radius: 2px;
+                        }
+                        QListView:focus {
+                            border: 1px solid palette(highlight);
+                            border-radius: 2px;
+                        }
+                        QListView:disabled { background-color: palette(midlight); }
+                        QListWidget {
+                            border: 1px solid palette(mid);
+                            border-radius: 2px;
+                        }
+                        QListWidget:focus {
+                            border: 1px solid palette(highlight);
+                            border-radius: 2px;
+                        }
+                        QListWidget:disabled { background-color: palette(midlight); }
+                        QTreeWidget {
+                            border: 1px solid palette(mid);
+                            border-radius: 2px;
+                        }
+                        QTreeWidget:focus {
+                            border: 1px solid palette(highlight);
+                            border-radius: 2px;
+                        }
+                        
+                        QTreeView {
+                            border: 1px solid palette(mid);
+                            border-radius: 2px;
+                        }
+                        QTreeView:focus {
+                            border: 1px solid palette(highlight);
+                            border-radius: 2px;
+                        }
+                        
+                        QTextEdit {
+                            border: 1px solid palette(mid);
+                            border-radius: 2px;
+                        }
+                        QTextEdit:focus {
+                            border: 1px solid palette(highlight);
+                            border-radius: 2px;
+                        }
+
+                        QPushButton:focus {
+                            border-color: %(BORDER_FOCUS)s;
+                        }
+                        QPushButton {
+                            padding: 2px 6px 2px 6px;
+                        }
+                        QPushButton:focus {
+                            padding: 0px 1px 0px 1px;
+                            border-color: %(BORDER_FOCUS)s;
+                            border-style: solid;
+                            border-width: 0px;
+                            border-radius: 2px;
+                        }
+                        QPushButton:disabled {
+                            color: #808080;
+                            background-color: palette(midlight);
+                        }
+                        QGraphicsTextItem {
+                            background-color: orange;
+                        }
+                        QTableView {
+                            border-color: palette(mid);
+                            border-width: %(_BORDER_WIDTH)spx;
+                            border-style: solid;
+                            border-radius: 2px;
+                            // use #f8f088 for yellow selection
+                            selection-background-color: qlineargradient(
+                                                            x1: 0, y1: -200, x2: 0, y2: 200,
+                                                            stop: 0 palette(highlight), 
+                                                            stop: 1 palette(base)
+                                                        );
+                            color: palette(text);
+                        }
+                        QTableView:focus {
+                            border-color: palette(highlight);
+                        }
+
+                        QComboBox {
+                            padding: 2px 8px 2px 3px;
+                            combobox-popup: 0;
+                        }
+                        QComboBox:focus { border-color: %(BORDER_FOCUS)s; }
+                        QComboBox:disabled {
+                            color: #808080;
+                            background-color: palette(midlight);
+                        }
+
+                        QDoubleSpinBox {
+                            padding: 3px 3px 3px 3px;
+                            background-color: palette(base);
+                        }
+                        QDoubleSpinBox:disabled { background-color: palette(midlight); }
+                        QSpinBox {
+                            padding: 3px 3px 3px 3px;
+                            background-color: palette(base);
+                        }
+                        QSpinBox:disabled { background-color: palette(midlight); }
+
+                        QLineEdit {
+                            padding: 3px 3px 3px 3px;
+                            border-color: palette(mid);
+                            border-width: 1px;
+                            border-radius: 3px;
+                            border-style: solid;
+                        }
+                        QLineEdit:focus {
+                            border-color: %(BORDER_FOCUS)s;
+                        }
+                        QLineEdit:disabled {
+                            color: #808080;
+                            background-color: palette(midlight);
+                        }
+                        
+                        QLineEdit {
+                            padding: 3px 3px 3px 3px;
+                            background-color: palette(norole);
+                        }
+                        */
+                        """
+        # set stylesheet
+        # pal = self.palette()  # NOTE:ED - temp
+        base = pal.base().color().lightness()  # use as a guide for light/dark theme
+        colours = getColours()
+        highlight = pal.highlight().color()
+        newCol = highlight.fromHslF(highlight.hueF(), 0.95, highlight.lightnessF()**(0.333 if base < 127 else 3.0))
+        colours[BORDERFOCUS] = newCol.name()
+        colours[BORDERNOFOCUS] = pal.mid().color().name()
+        colours[GUITABLE_SELECTED_BACKGROUND] = highlight.fromHslF(highlight.hueF(),
+                                                                   0.55 if base > 127 else 0.65,
+                                                                   0.80 if base > 127 else 0.35,
+                                                                   ).name()
+        colours['_fontSize'] = self.font().pointSize()
+        # colours[CCPNGLWIDGET_HEXHIGHLIGHT] = newCol.getRgbF()
+        colours['_BORDER_WIDTH'] = 2  # need to grab from the table-instance :|
+        self.ui.qtApp.setStyleSheet(styleSheet % colours)
+
+        # store the colours in the baseclass, is this the best place?
+        Base._highlight = highlight
+        Base._highlightVivid = QtGui.QColor.fromHslF(highlight.hueF(),
+                                                     0.8 if base > 127 else 0.75,
+                                                     0.5 if base > 127 else 0.45
+                                                     )
+        Base._highlightMid = QtGui.QColor.fromHslF(highlight.hueF(), 0.75, 0.65)
+        Base._highlightFeint = QtGui.QColor.fromHslF(highlight.hueF(),
+                                                     0.55 if base > 127 else 0.65,
+                                                     0.80 if base > 127 else 0.35,
+                                                     )
+        Base._highlightBorder = QtGui.QColor.fromHslF(highlight.hueF(), 0.95,
+                                                      highlight.lightnessF()**(0.333 if base > 127 else 3.0),
+                                                      )
+        Base._basePalette = pal
+        Base._transparent = pal.highlight().color()  # grab again to stop overwrite
+        Base._transparent.setAlpha(40)
+        # pass through the palette-changed to other widgets
+        self.ui.qtApp._sigPaletteChanged.emit(pal, theme, themeColour, themeSD)
+        getLogger().debug(f'{consoleStyle.fg.darkblue}qtApp changePalette event{consoleStyle.reset}')
+
+        # if self.application.preferences.general.colourScheme == DEFAULT:
+        #     # print(f'--> change theme  {base}')
+        #     # NOTE:ED - should really just fire a signal for the spectrum-displays/strips to respond to
+        #     setColourScheme(DARK if base < 127 else LIGHT)
+        #     self.application._correctColours()
+        #     for display in self.project.spectrumDisplays:
+        #         for strip in display.strips:
+        #             strip._frameGuide.resetColourTheme()
+        #     # update the chemical-shift mapping plotWidgets
+        #
+        #     # colour theme has changed - flag displays to update
+        #     # prompt the GLwidgets to update
+        #     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+        #
+        #     GLSignals = GLNotifier(parent=self)
+        #     GLSignals.emitEvent(triggers=[GLNotifier.GLALLCONTOURS,
+        #                                   GLNotifier.GLALLPEAKS,
+        #                                   GLNotifier.GLALLMULTIPLETS,
+        #                                   GLNotifier.GLPREFERENCES])
 
     def _initReadOnlyIcon(self):
         """Add icon to the statusBar that reflects the read-only state of the current project
@@ -528,9 +785,9 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         self._temporaryWidgetStore.hide()
 
         # set the background/fontSize for the tooltips
-        self.setStyleSheet('QToolTip {{ background-color: {TOOLTIP_BACKGROUND}; '
-                           'color: {TOOLTIP_FOREGROUND}; '
-                           'font-size: {_size}pt ; }}'.format(_size=self.font().pointSize(), **getColours()))
+        # self.setStyleSheet('QToolTip {{ background-color: {TOOLTIP_BACKGROUND}; '
+        #                    'color: {TOOLTIP_FOREGROUND}; '
+        #                    'font-size: {_size}pt ; }}'.format(_size=self.font().pointSize(), **getColours()))
 
     def _setupMenus(self):
         """

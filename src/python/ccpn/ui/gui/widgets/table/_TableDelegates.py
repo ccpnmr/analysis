@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-24 18:04:27 +0100 (Wed, July 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-03 13:20:31 +0100 (Tue, September 03, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -165,7 +165,8 @@ class _TableDelegate(QtWidgets.QStyledItemDelegate):
                 func(obj, value)
 
         except Exception as es:
-            getLogger().debug('Error handling cell editing: %i %i - %s    %s    %s' % (row, col, str(es), self._parent.model()._sortIndex, value))
+            getLogger().debug(f'Error handling cell editing: {row:d} {col:d} - {str(es)}    '
+                              f'{self._parent.model()._sortIndex}    {value}')
 
     def updateEditorGeometry(self, widget, itemStyle, index):
         """Display the required editor for the cell
@@ -216,8 +217,9 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
         self.customWidget = None
 
         # set the colours
-        self._focusPen = QtGui.QPen(QtGui.QColor(getColours()[BORDERFOCUS]))
-        self._noFocusPen = QtGui.QPen(QtGui.QColor(getColours()[BORDERNOFOCUS]))
+        self._focusPen = QtGui.QPen(QtGui.QPalette().highlight().color(), 2)
+        self._noFocusPen = QtGui.QPen(QtGui.QPalette().mid().color(), 2)
+        self._highlightColour = QtGui.QColor('#f8f088')
 
         # double the line-widths accounts for the device-pixel-ratio
         self._focusBorderWidth = focusBorderWidth
@@ -267,22 +269,24 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
         """
         painter.save()
 
-        # Remove dotted border on cell focus.  https://stackoverflow.com/a/55252650/3620725
-        #   or put 'outline: 0px;' into the QTableView stylesheet
         focus = (option.state & QtWidgets.QStyle.State_HasFocus)
-        option.state = option.state & ~QtWidgets.QStyle.State_HasFocus
+        # option.state = option.state & ~QtWidgets.QStyle.State_HasFocus
 
-        if option.state & QtWidgets.QStyle.State_Selected:
-            # fade the background and paint over the top of selected cell
-            # - ensures that different coloured backgrounds are still visible
-            # - does, however, modify the foreground colour :|
-            if back := index.data(QtCore.Qt.BackgroundRole):
-                back = self._mergeColors(back, option.palette.color(QtGui.QPalette.Highlight), 0.18, 0.82)
-                option.palette.setColor(QtGui.QPalette.Highlight, back)
-            if fore := index.data(QtCore.Qt.ForegroundRole):
-                fore = self._mergeColors(fore, option.palette.color(QtGui.QPalette.HighlightedText), 0.5, 0.5)
-                option.palette.setColor(QtGui.QPalette.HighlightedText, fore)
-
+        # pal = QtGui.QPalette()
+        # if option.state & QtWidgets.QStyle.State_Selected:
+        #     # fade the background and paint over the top of selected cell
+        #     # - ensures that different coloured backgrounds are still visible
+        #     # - does, however, modify the foreground colour :|
+        #     col1 = self._highlightColour  # pal.highlight().color()
+        #     col2 = pal.light().color()
+        #     mergeCol = self._mergeColors(col1, col2, 0.5, 0.5)
+        #     if back := index.data(QtCore.Qt.BackgroundRole):
+        #         # back = self._mergeColors(back, option.palette.color(QtGui.QPalette.Highlight), 0.18, 0.82)
+        #         # colour isn't defined if the background uses a qlineargradient :|
+        #         back = self._mergeColors(back, mergeCol, 0.18, 0.82)
+        #         option.palette.setColor(QtGui.QPalette.Highlight, back)
+        #     else:
+        #         option.palette.setColor(QtGui.QPalette.Highlight, mergeCol)
         super().paint(painter, option, index)
 
         # alternative method to add selection border to the focussed cell
@@ -307,13 +311,12 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
 
         if focus:
             painter.setClipRect(option.rect)
-            painter.setPen(self._focusPen)
+            painter.setPen(QtGui.QPen(QtGui.QPalette().highlight(), 2))
             painter.drawRect(option.rect)
-
         elif not focus and index.data(BORDER_ROLE):
             # move the focus rectangle drawing to after, otherwise, alternative-background-color is used
             painter.setClipRect(option.rect)
-            painter.setPen(self._noFocusPen)
+            painter.setPen(QtGui.QPen(QtGui.QPalette().dark(), 2))
             painter.setRenderHint(QtGui.QPainter.Antialiasing)
             painter.drawRoundedRect(option.rect, 4, 4)
 
@@ -357,7 +360,8 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
             model = index.model()
             value = model.data(index, EDIT_ROLE)
         except Exception as es:
-            getLogger().debug(f'Error handling cell editing: {index.row()} {index.column()} - {es}  {self._parent.model()._sortIndex}')
+            getLogger().debug(f'Error handling cell editing: {index.row()} {index.column()} - '
+                              f'{es}  {self._parent.model()._sortIndex}')
         else:
             if hasattr(widget, 'selectValue'):
                 widget.selectValue(mapping[value])
@@ -383,7 +387,8 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
             model = index.model()
             model.setData(index, mapping[value])
         except Exception as es:
-            getLogger().debug(f'Error handling cell editing: {index.row()} {index.column()} - {es}  {self._parent.model()._sortIndex}  {value}')
+            getLogger().debug(
+                    f'Error handling cell editing: {index.row()} {index.column()} - {es}  {self._parent.model()._sortIndex}  {value}')
 
     def updateEditorGeometry(self, widget, itemStyle, index):
         """Ensures that the editor is displayed correctly.
@@ -541,7 +546,8 @@ class _SimplePulldownTableDelegate(QtWidgets.QStyledItemDelegate):
                 model.setData(index, value)
 
             except Exception as es:
-                getLogger().debug(f'Error handling cell editing: {index.row()} {index.column()} - {es}  {self._parent.model()._sortIndex}  {value}')
+                getLogger().debug(f'Error handling cell editing: {index.row()} {index.column()} - '
+                                  f'{es}  {self._parent.model()._sortIndex}  {value}')
 
         else:
             super().setModelData(widget, mode, index)
@@ -656,7 +662,8 @@ class _BooleanDelegate(QtWidgets.QStyledItemDelegate):
                 model = index.model()
                 model.setData(index, mapping[value])
             except Exception as es:
-                getLogger().debug(f'Error handling cell editing: {index.row()} {index.column()} - {es}  {self._parent.model()._sortIndex}  {value}')
+                getLogger().debug(f'Error handling cell editing: {index.row()} {index.column()} - '
+                                  f'{es}  {self._parent.model()._sortIndex}  {value}')
         else:
             super().setModelData(widget, mode, index)
 

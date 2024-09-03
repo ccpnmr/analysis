@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-02 17:56:53 +0100 (Mon, September 02, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-03 18:53:55 +0100 (Tue, September 03, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -223,27 +223,34 @@ class _RestraintAITableFilter(_TableFilterABC):
         # apply functions to retrieve displayRole for all columns
         for colNum, colName in enumerate(dfCache.columns):
             if colName[1] == HeaderRestraint:
+                colPid = colName[0]
+
                 # process the following columns based on the restraint-pid
                 # a little hardcoded?
                 mask = dfCache.iloc[:, colNum].apply(lambda val: val not in [None, '', '-'])
 
                 # clean the str for the first columns
-                for col in range(colNum, colNum + 2):
-                    dfCache.iloc[:, col].apply(lambda value: str(value or ''))
+                for colSub in [HeaderRestraint, HeaderAtoms]:
+                    colCheck = (colPid, colSub)
+                    if colCheck in dfCache.columns:
+                        dfCache.loc[:, colCheck].apply(lambda value: str(value or ''))
                 # clean the float values - hide with a '-' if the restraint-pid is missing
-                for col in range(colNum + 3, colNum + 10):
-                    colMask = dfCache.columns[col]
-                    # True state
-                    dfCache.loc[mask, colMask].apply(lambda value: (f'{value:.3f}'
-                                                                    if (1e-6 < value < 1e6) or value == 0.0 else
-                                                                    f'{value:.3e}'))
-                    # False state - use dash for cleaner table
-                    dfCache.loc[~mask, colMask] = '-'
+                for colSub in [HeaderTarget, HeaderLowerLimit, HeaderUpperLimit,
+                               HeaderMin, HeaderMax, HeaderMean, HeaderStd]:
+                    colCheck = (colPid, colSub)
+                    if colCheck in dfCache.columns:
+                        # True state
+                        dfCache.loc[mask, colCheck].apply(lambda value: (f'{value:.3f}'
+                                                                         if (1e-6 < value < 1e6) or value == 0.0 else
+                                                                         f'{value:.3e}'))
+                        # False state - use dash for cleaner table
+                        dfCache.loc[~mask, colCheck] = '-'
                 # clean the int values - hide with a '-' if the restraint-pid is missing
-                for col in range(colNum + 10, colNum + 12):
-                    colMask = dfCache.columns[col]
-                    # True state
-                    dfCache.loc[mask, colMask].apply(lambda value: int(value))
-                    # False state - use dash for cleaner table
-                    dfCache.loc[~mask, colMask] = '-'
+                for colSub in [HeaderCount1, HeaderCount2]:
+                    colCheck = (colPid, colSub)
+                    if colCheck in dfCache.columns:
+                        # True state
+                        dfCache.loc[mask, colCheck].apply(lambda value: int(value))
+                        # False state - use dash for cleaner table
+                        dfCache.loc[~mask, colCheck] = '-'
         return dfCache

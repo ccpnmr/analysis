@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-02 17:56:53 +0100 (Mon, September 02, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-03 18:53:55 +0100 (Tue, September 03, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -54,6 +54,7 @@ LessThan = '<'
 GreaterThanInclude = '>='
 LessThanInclude = '<='
 Equal = 'Equal'
+NotEqual = 'Not-Equal'
 Include = 'Include'
 Exclude = 'Exclude'
 Between = 'Between'
@@ -61,8 +62,9 @@ NotBetween = 'Not-Between'
 
 SearchConditionsDict = {
     Equal             : op.eq,
+    NotEqual          : op.eq,  # is negated later
     Include           : op.contains,
-    Exclude           : op.contains,  # is negated later - must be a better way though
+    Exclude           : op.contains,  # is negated later
     GreaterThan       : op.gt,
     GreaterThanInclude: op.ge,
     LessThan          : op.lt,
@@ -74,6 +76,7 @@ SearchConditionsDict = {
 CCTT = 'Filter and display only rows that '
 SearchConditionsToolTips = [
     f'{CCTT} contain the exact match to the query.',
+    f'{CCTT} do not contain the exact match to the query.',
     f'{CCTT} include at least a part of the query.',
     f'{CCTT} contain values greater than the query. (Only numbers)',
     f'{CCTT} contain values greater than the query, including limits. (Only numbers)',
@@ -104,17 +107,15 @@ def _compareKeys(a, b, condition):
         getLogger().debug(f'Condition {condition} not available for table filters.')
 
     with contextlib.suppress(Exception):
-
-        if condition == Equal:
+        if condition in [Equal, NotEqual]:
             try:
                 return SearchConditionsDict.get(condition)(float(a), float(b))
             except Exception:
                 return SearchConditionsDict.get(condition)(a, b)
-
         elif condition not in [Include, Exclude]:
             a, b, = float(a), float(b)
-
         return SearchConditionsDict.get(condition)(a, b)
+    return False
 
 
 def _compareKeysInRange(originValue, queryRange, condition):
@@ -133,12 +134,10 @@ def _compareKeysInRange(originValue, queryRange, condition):
         result = np.any((a < cond1) | (a > cond2))
         # print(f' Checking if {value} is not between {cond1} and {cond2}. It is: {result}')
         return result
-
     if condition == Between:
         result = np.all((a >= cond1) & (a <= cond2))
         # print(f' Checking if {value} is between {cond1} and {cond2}. It is: {result}')
         return result
-
     return False
 
 
@@ -510,7 +509,7 @@ class _TableFilterABC(ScrollArea):
         df = self.preFilterTableDf(self.df)
 
         # Exclude needs to remove values from the list
-        rows = OrderedSet(iter(range(df.shape[0]))) if condition == Exclude else OrderedSet()
+        rows = OrderedSet(iter(range(df.shape[0]))) if condition in [Exclude, NotEqual] else OrderedSet()
         if condition in RangeConditions:
             # assume that string manipulation has been done by preFilterTableDf
             # or f'{cellText:.3f}' if isinstance(cellText, (float, np.floating)) else str(cellText)
@@ -518,16 +517,20 @@ class _TableFilterABC(ScrollArea):
                        .applymap(lambda val: _compareKeysInRange(val,
                                                                  (condition1Value, condition2Value),
                                                                  condition))
-                       .select_dtypes(include='bool').any(axis=1))
+                       .select_dtypes(include='bool')
+                       .fillna(False)
+                       .any(axis=1))
         else:
             dfFound = (df[visHeadings]
                        .applymap(lambda val: _compareKeys(val, condition1Value, condition))
-                       .select_dtypes(include='bool').any(axis=1))
+                       .select_dtypes(include='bool')
+                       .fillna(False)
+                       .any(axis=1))
 
         # the .index may not be integer
         foundSet = set(dfFound.index.get_loc(idx) for idx in dfFound.loc[dfFound].index)
-        if condition == Exclude:
-            # remove the found sorted rows from the list
+        if condition in [Exclude, NotEqual]:
+            # remove the found sorted rows from the list - allows negated condition on multiple columns
             rows -= foundSet
         else:
             # add the found sorted rows to the found list

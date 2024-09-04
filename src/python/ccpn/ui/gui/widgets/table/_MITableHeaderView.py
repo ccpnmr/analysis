@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-03 13:20:31 +0100 (Tue, September 03, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-04 18:51:20 +0100 (Wed, September 04, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -31,6 +31,7 @@ import itertools
 import typing
 import numpy as np
 import pandas as pd
+from functools import partial
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import Qt, QItemSelectionModel, QSize
 from PyQt5.QtWidgets import QSizePolicy
@@ -57,26 +58,62 @@ class _MITableHeaderViewABC(QtWidgets.QTableView):
 
     # NOTE:ED - item:selected:background-color cannot be found from option.palette :|
     styleSheet = """QTableView {
-                        background-color: %(GUITABLEHEADER_BACKGROUND)s;
-                        alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
-                        border: %(_BORDER_WIDTH)spx solid palette(mid);
+                        background: qlineargradient(
+                                        x1: 0, y1: -350, x2: 0, y2: 50,
+                                        stop: 0 #8f8f8f, 
+                                        stop: 1 palette(light)
+                                    );
+                        border: 0px;
                         border-radius: 0px;
                         gridline-color: %(_GRID_COLOR)s;
-                        /* use #f8f088 for yellow selection */
+                        /* use #f8f088 for yellow selection, or palette(highlight)
                         selection-background-color: qlineargradient(
-                                                        x1: 0, y1: -200, x2: 0, y2: 200,
+                                                        x1: 0, y1: -300, x2: 0, y2: 200,
                                                         stop: 0 palette(highlight), 
-                                                        stop: 1 palette(base)
-                                                    );
+                                                        stop: 1 palette(light)
+                                                    ); */
+                        selection-background-color: transparent;
+                        selection-color: palette(text);
+                        color: palette(text);
+                        outline: 0px;
                     }
                     QTableView::item {
                         padding: %(_CELL_PADDING)spx;
-                        color: %(GUITABLE_SELECTED_FOREGROUND)s;
-                    }
-                    QTableView::item:focus {
-                        padding: 0px;
+                        /* clashes with the delegate initStyleOption offsets :| 
+                        border-top: 1px solid qlineargradient(
+                                        x1: 0, y1: -200, x2: 0, y2: 150,
+                                        stop: 0 #8f8f8f, 
+                                        stop: 1 palette(window)
+                                    );
+                        border-left: 1px solid qlineargradient(
+                                        x1: 0, y1: -200, x2: 0, y2: 150,
+                                        stop: 0 #8f8f8f, 
+                                        stop: 1 palette(window)
+                                    );  */
                     }
                     """
+
+    # styleSheet = """QTableView {
+    #                     background-color: %(GUITABLEHEADER_BACKGROUND)s;
+    #                     alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
+    #                     border: %(_BORDER_WIDTH)spx solid palette(mid);
+    #                     border-radius: 0px;
+    #                     gridline-color: %(_GRID_COLOR)s;
+    #                     /* use #f8f088 for yellow selection */
+    #                     selection-background-color: qlineargradient(
+    #                                                     x1: 0, y1: -200, x2: 0, y2: 200,
+    #                                                     stop: 0 palette(highlight),
+    #                                                     stop: 1 palette(base)
+    #                                                 );
+    #                 }
+    #                 QTableView::item {
+    #                     padding: %(_CELL_PADDING)spx;
+    #                     color: %(GUITABLE_SELECTED_FOREGROUND)s;
+    #                 }
+    #                 QTableView::item:focus {
+    #                     padding: 0px;
+    #                 }
+    #                 """
 
     headerModelClass = None
     headerDelegateClass = None
@@ -121,6 +158,7 @@ class _MITableHeaderViewABC(QtWidgets.QTableView):
 
         # set selection behaviour to only items
         self.setSelectionBehavior(self.SelectItems)
+        self.setAlternatingRowColors(False)
 
         # Settings
         self.setSizePolicy(QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum))
@@ -134,19 +172,18 @@ class _MITableHeaderViewABC(QtWidgets.QTableView):
         # Link selection to DataTable
         self.selectionModel().selectionChanged.connect(self._headerSelectionChangedCallback)
 
-        # Styling
-        colours = getColours()
         # add border-width/cell-padding options
-        self._borderWidth = colours['_BORDER_WIDTH'] = 0
-        self._frameBorderWidth = colours['_FRAME_BORDER_WIDTH'] = 1
-        self._cellPadding = colours['_CELL_PADDING'] = 2  # the extra padding for the selected cell-item
+        cols = self._colours = {}  #getColours()
+        self._borderWidth = cols['_BORDER_WIDTH'] = 0
+        # self._frameBorderWidth = 1
+        self._cellPadding = cols['_CELL_PADDING'] = 2  # the extra padding for the selected cell-item
         try:
-            col = QtGui.QColor(gridColour).name() if gridColour else colours[GUITABLE_GRIDLINES]
+            col = QtGui.QColor(gridColour).name() if gridColour else 'palette(mid)'
         except Exception:
-            col = colours[GUITABLE_GRIDLINES]
-        self.gridcolour = colours['_GRID_COLOR'] = col
-
-        self.setStyleSheet(self.styleSheet % colours)
+            # grid colour may be ill-defined
+            col = 'palette(mid)'
+        self._gridColour = cols['_GRID_COLOR'] = col
+        self._checkPalette()
         setWidgetFont(self, name=TABLEFONT)
 
         if self.headerDelegateClass:
@@ -157,9 +194,16 @@ class _MITableHeaderViewABC(QtWidgets.QTableView):
         self._dividerColour = (dividerColour and QtGui.QColor(dividerColour)) or QtGui.QColor(
                 getColours()[GUITABLEHEADER_GROUP_GRIDLINES])
 
+        QtWidgets.QApplication.instance().sigPaletteChanged.connect(partial(QtCore.QTimer.singleShot, 0, self._checkPalette))
+
+    def _checkPalette(self):
+        """Update palette in response to palette change event.
+        """
+        self.setStyleSheet(self.styleSheet % self._colours)
+
     @property
     def _df(self):
-        """Return the dataFrame associated with the table
+        """Return the dataFrame associated with the table.
         """
         return self.model()._df
 

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-03 13:20:31 +0100 (Tue, September 03, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-04 18:51:19 +0100 (Wed, September 04, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -32,6 +32,7 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from dataclasses import dataclass
 from contextlib import contextmanager, suppress
 import typing
+from functools import partial
 
 from ccpn.ui.gui.widgets.Font import setWidgetFont, TABLEFONT, getFontHeight
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame
@@ -79,7 +80,7 @@ class TableABC(QtWidgets.QTableView):
                                                         stop: 1 palette(light)
                                                     );
                         selection-color: palette(text);
-                        color: palette(shadow);
+                        color: palette(text);  /* shadow */
                         outline: 0px;
                     }
                     QHeaderView {
@@ -262,7 +263,6 @@ class TableABC(QtWidgets.QTableView):
         # add border-width/cell-padding options
         self._borderWidth = cols['_BORDER_WIDTH'] = borderWidth
         self._cellPadding = cols['_CELL_PADDING'] = cellPadding  # the extra padding for the selected cell-item
-        self._focusBorderWidth = cols['_FOCUS_BORDER_WIDTH'] = focusBorderWidth
         self._cellPaddingOffset = cols['_CELL_PADDING_OFFSET'] = cellPadding - focusBorderWidth
         try:
             col = QtGui.QColor(gridColour).name() if gridColour else 'palette(mid)'
@@ -272,20 +272,14 @@ class TableABC(QtWidgets.QTableView):
         self.setAlternatingRowColors(alternatingRows)
 
     def _setStyle(self):
-        self._checkPalette(self.palette())
-        QtWidgets.QApplication.instance()._sigPaletteChanged.connect(self._checkPalette)
+        self._checkPalette()
+        QtWidgets.QApplication.instance().sigPaletteChanged.connect(partial(QtCore.QTimer.singleShot, 0,
+                                                                            self._checkPalette))
 
-    def _checkPalette(self, pal: QtGui.QPalette, theme: str = None, themeColour: str = None, themeSD: str = None):
-        # print the colours from the updated palette - only 'highlight' seems to be effective
-        # QT modifies this to give different selection shades depending on the widget
-        base = pal.base().color().lightness()
-        self.highlightColour = highlight = pal.highlight().color()
-        cols = self._colours
-        cols['_BORDER_FOCUS'] = self.highlightColour.name()
-        self.setStyleSheet(self.styleSheet % cols)
-        with suppress(Exception):
-            # set the colour for the current cell
-            self.itemDelegate()._focusPen.setColor(self.highlightColour)
+    def _checkPalette(self, *args):
+        """Update palette in response to palette change event.
+        """
+        self.setStyleSheet(self.styleSheet % self._colours)
 
     def _setMenuProperties(self, enableCopyCell, enableDelete, enableExport, enableSearch):
         """Add the required menus to the table

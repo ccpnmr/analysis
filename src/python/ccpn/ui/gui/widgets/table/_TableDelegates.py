@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-03 13:20:31 +0100 (Tue, September 03, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-04 18:51:20 +0100 (Wed, September 04, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -51,7 +51,6 @@ class _TableDelegate(QtWidgets.QStyledItemDelegate):
 
     _focusBorderWidth = 1
     _focusPen = None
-    _noFocusPen = None
 
     def __init__(self, parent, *, objectColumn=None, focusBorderWidth=1):
         """Initialise the delegate
@@ -65,13 +64,11 @@ class _TableDelegate(QtWidgets.QStyledItemDelegate):
 
         # set the colours
         self._focusPen = QtGui.QPen(QtGui.QColor(getColours()[BORDERFOCUS]))
-        self._noFocusPen = QtGui.QPen(QtGui.QColor(getColours()[BORDERNOFOCUS]))
 
         # double the line-widths accounts for the device-pixel-ratio
         self._focusBorderWidth = focusBorderWidth
         self._focusPen.setWidthF(focusBorderWidth * 2.0)
         self._focusPen.setJoinStyle(QtCore.Qt.MiterJoin)  # square ends
-        self._noFocusPen.setWidthF(2.0)
 
         # set the required alternative colour
         self._replaceAlternativeColor = QtGui.QColor(getColours()[BORDERFOCUS])
@@ -79,17 +76,17 @@ class _TableDelegate(QtWidgets.QStyledItemDelegate):
     def paint(self, painter: QtGui.QPainter, option: 'QStyleOptionViewItem', index: QtCore.QModelIndex) -> None:
         """Paint the contents of the cell.
         """
-        painter.save()
+        # This is not a subclass of _TableDelegateABC!!
         focus = (option.state & QtWidgets.QStyle.State_HasFocus)
-        option.state = option.state & ~QtWidgets.QStyle.State_HasFocus
-
+        # option.state = option.state & ~QtWidgets.QStyle.State_HasFocus
         super().paint(painter, option, index)
 
+        painter.save()
         if focus and self._focusBorderWidth:
             painter.setClipRect(option.rect)
+            self._focusPen.setColor(QtGui.QPalette().highlight().color())
             painter.setPen(self._focusPen)
             painter.drawRect(option.rect)
-
         painter.restore()
 
     def createEditor(self, parentWidget, itemStyle, index):  # returns the edit widget
@@ -208,7 +205,6 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
 
     _focusBorderWidth = 1
     _focusPen = None
-    _noFocusPen = None
 
     def __init__(self, parent, focusBorderWidth=1):
         super().__init__(parent)
@@ -217,15 +213,13 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
         self.customWidget = None
 
         # set the colours
-        self._focusPen = QtGui.QPen(QtGui.QPalette().highlight().color(), 2)
-        self._noFocusPen = QtGui.QPen(QtGui.QPalette().mid().color(), 2)
+        self._focusPen = QtGui.QPen(QtGui.QPalette().highlight(), 2)
         self._highlightColour = QtGui.QColor('#f8f088')
 
         # double the line-widths accounts for the device-pixel-ratio
         self._focusBorderWidth = focusBorderWidth
         self._focusPen.setWidthF(focusBorderWidth * 2.0)
         self._focusPen.setJoinStyle(QtCore.Qt.MiterJoin)  # square ends
-        self._noFocusPen.setWidthF(2.0)
 
         # set the required alternative colour
         self._replaceAlternativeColor = QtGui.QColor(getColours()[BORDERFOCUS])
@@ -267,16 +261,13 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
     def paint(self, painter, option, index):
         """Paint the contents of the cell.
         """
-        painter.save()
-
         focus = (option.state & QtWidgets.QStyle.State_HasFocus)
         # option.state = option.state & ~QtWidgets.QStyle.State_HasFocus
 
         # pal = QtGui.QPalette()
         # if option.state & QtWidgets.QStyle.State_Selected:
-        #     # fade the background and paint over the top of selected cell
+        #     # fade the background by modifying the background colour
         #     # - ensures that different coloured backgrounds are still visible
-        #     # - does, however, modify the foreground colour :|
         #     col1 = self._highlightColour  # pal.highlight().color()
         #     col2 = pal.light().color()
         #     mergeCol = self._mergeColors(col1, col2, 0.5, 0.5)
@@ -309,9 +300,11 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
         #         painter.setRenderHint(QtGui.QPainter.Antialiasing)
         #         painter.drawRoundedRect(option.rect, 4, 4)
 
+        painter.save()
         if focus:
             painter.setClipRect(option.rect)
-            painter.setPen(QtGui.QPen(QtGui.QPalette().highlight(), 2))
+            self._focusPen.setColor(QtGui.QPalette().highlight().color())
+            painter.setPen(self._focusPen)
             painter.drawRect(option.rect)
         elif not focus and index.data(BORDER_ROLE):
             # move the focus rectangle drawing to after, otherwise, alternative-background-color is used
@@ -319,7 +312,6 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
             painter.setPen(QtGui.QPen(QtGui.QPalette().dark(), 2))
             painter.setRenderHint(QtGui.QPainter.Antialiasing)
             painter.drawRoundedRect(option.rect, 4, 4)
-
         painter.restore()
 
     def createEditor(self, parentWidget, itemStyle, index):

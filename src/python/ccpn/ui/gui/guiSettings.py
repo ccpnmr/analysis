@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-03 13:20:31 +0100 (Tue, September 03, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-04 18:51:19 +0100 (Wed, September 04, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -759,11 +759,17 @@ class _ColourDict(dict):
                 newCol = highlight = QtGui.QColor(colourName)
             if base < 127:
                 # a dark theme, modify the colour slightly
-                newCol = highlight.fromHsvF(highlight.hueF(),
+                newCol = highlight.fromHsvF(highlight.hsvHueF(),
                                             highlight.hsvSaturationF(),
                                             highlight.valueF() - 0.2)
+            r, g, b, _ = newCol.getRgbF()
+            # highlight-background perceived luminance
+            lumBack = 0.2126 * r + 0.7152 * g + 0.0722 * b
+            lumFore = pal.text().color().valueF()  # text brightness, easy check for theme
+            if (lumBack - 0.6) * (lumFore - 0.5) > 0:
+                lumFore = 1 - lumFore  # invert the brightness (to keep correct dark foreground)
             # invert(-ish) to give text colour
-            newColHT = highlight.fromHsvF(highlight.hueF(), 0.05, 0.05 if base > 127 else 0.9)
+            newColHT = highlight.fromHsvF(highlight.hsvHueF(), 0.05, lumFore)
             for group in [QtGui.QPalette.Active, QtGui.QPalette.Inactive]:
                 pal.setColor(group, QtGui.QPalette.Highlight, newCol)
                 pal.setColor(group, QtGui.QPalette.HighlightedText, newColHT)

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-23 19:23:55 +0100 (Fri, August 23, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-04 18:51:19 +0100 (Wed, September 04, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -76,20 +76,20 @@ def _ccpnExceptionhook(ccpnType, value, tback):
     """This because PyQT raises and catches exceptions,
     but doesn't pass them along instead makes the program crashing miserably.
     """
-    application = getApplication()
-    if application and application._isInDebugMode:
-        sys.stderr.write('_ccpnExceptionhook: type = %s\n' % ccpnType)
-        sys.stderr.write('_ccpnExceptionhook: value = %s\n' % value)
-        sys.stderr.write('_ccpnExceptionhook: tback = %s\n' % tback)
+    if (application := getApplication()):
+        if application._isInDebugMode:
+            sys.stderr.write('_ccpnExceptionhook: type = %s\n' % ccpnType)
+            sys.stderr.write('_ccpnExceptionhook: value = %s\n' % value)
+            sys.stderr.write('_ccpnExceptionhook: tback = %s\n' % tback)
 
-    # this is crashing on Windows 10 Enterprise :|
-    # if application and application.hasGui:
-    #     title = f'{str(ccpnType)[8:-2]}:'
-    #     text = str(value)
-    #     MessageDialog.showError(title=title, message=text)
+        # # this is crashing on Windows 10 Enterprise :|
+        # if application.hasGui:
+        #     title = f'{str(ccpnType)[8:-2]}:'
+        #     text = str(value)
+        #     MessageDialog.showError(title=title, message=text)
 
-    if application.project and not application.project.readOnly:
-        application.project._updateLoggerState(readOnly=False, flush=True)
+        if application.project and not application.project.readOnly:
+            application.project._updateLoggerState(readOnly=False, flush=True)
 
     sys.__excepthook__(ccpnType, value, tback)
 

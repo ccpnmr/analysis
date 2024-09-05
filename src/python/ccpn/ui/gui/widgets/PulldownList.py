@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-23 19:21:21 +0100 (Fri, August 23, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-05 11:44:15 +0100 (Thu, September 05, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -420,6 +420,12 @@ class PulldownList(QtWidgets.QComboBox, Base):
 
         self.texts.append(text)
         self.objects.append(item)
+
+    def clearObjects(self):
+        """Clear thelist of objects.
+        """
+        self.objects = []
+        self.texts = []
 
     def insertText(self, index, text):
         """Insert a text-item into the pulldown

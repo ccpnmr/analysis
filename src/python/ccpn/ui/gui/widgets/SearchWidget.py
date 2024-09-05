@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-03 18:53:55 +0100 (Tue, September 03, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-05 11:44:15 +0100 (Thu, September 05, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -213,6 +213,7 @@ class GuiTableFilter(ScrollArea):
         objectsRange = range(len(texts))
 
         self.columnOptions.clear()
+        self.columnOptions.clearObjects()
         self.columnOptions.addItem(VISIBLESEARCH, item=None)
         for i, text in enumerate(texts):
             self.columnOptions.addItem(text, objectsRange[i])
@@ -446,7 +447,8 @@ class _TableFilterABC(ScrollArea):
         texts = self._parent._df.columns
         objectsRange = range(len(texts))
 
-        self.columnOptions.clear()
+        self.columnOptions.clear()  # doesn't clear the objects :|
+        self.columnOptions.clearObjects()
         self.columnOptions.addItem(VISIBLESEARCH, item=None)
         for i, text in enumerate(texts):
             self.columnOptions.addItem(text, objectsRange[i])
@@ -493,6 +495,21 @@ class _TableFilterABC(ScrollArea):
                                         if isinstance(val, (float, np.floating)) else
                                         str(val)))
 
+    @staticmethod
+    def postFilterTableDf(df: pd.DataFrame, dfFound: pd.Series, condition: str) -> pd.Series:
+        """Apply post-search filtering to the pandas-dataFrame.
+
+        No operation.
+        To be subclassed.
+
+        :param pd.DataFrame df: source dataFrame
+        :param pd.Series dfFound: found mask
+        :param str condition: search criterion
+        :return: post-filtered dataFrame
+        :rtype: pd.Series mask
+        """
+        return dfFound
+
     def findOnTable(self, table, matchExactly=False, ignoreNotFound=False):
         if self.condition1.text() == '' or None:
             self.restoreTable(table)
@@ -527,8 +544,9 @@ class _TableFilterABC(ScrollArea):
                        .fillna(False)
                        .any(axis=1))
 
+        dfFound = self.postFilterTableDf(df, dfFound, condition)
         # the .index may not be integer
-        foundSet = set(dfFound.index.get_loc(idx) for idx in dfFound.loc[dfFound].index)
+        foundSet = set(dfFound.index.get_loc(idx) for idx in dfFound[dfFound].index)
         if condition in [Exclude, NotEqual]:
             # remove the found sorted rows from the list - allows negated condition on multiple columns
             rows -= foundSet

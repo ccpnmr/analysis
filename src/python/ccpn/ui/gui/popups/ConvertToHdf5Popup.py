@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-05 14:47:53 +0200 (Thu, September 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-05 14:50:50 +0200 (Thu, September 05, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -43,13 +43,12 @@ class ConvertToHdf5Popup(CcpnDialogWithOutputPathPopupABC):
         super().__init__(parent=parent, mainWindow=mainWindow, title=title, **kwds)
 
         if self.project:
-            # Only select 3D's for now
             self.validSpectra = [sp for sp in self.project.spectra if not sp.isEmptySpectrum()]
 
             if not self.validSpectra:
                 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
-                showWarning('No valid spectra', 'No non-Hdf5 spectra in current project')
+                showWarning('No valid spectra', 'No spectra that can be converted in current project')
                 self.errorFlag = True
                 return
 

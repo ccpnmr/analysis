@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-04 18:51:20 +0100 (Wed, September 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-05 18:12:51 +0100 (Thu, September 05, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -116,7 +116,7 @@ class _ExpandDelegateABC(QtWidgets.QStyledItemDelegate):
         return super().editorEvent(event, model, option, index)
 
     def _iconRect(self, option, buttonOffset=0):
-        """"Get the co-ordinates of the icon at the button position.
+        """Get the co-ordinates of the icon at the button position.
         """
         # MUST BE SUBCLASSED
         raise NotImplementedError("Code error: function not implemented")
@@ -193,24 +193,6 @@ class _ExpandHorizontalDelegate(_ExpandDelegateABC):
 
         return super().editorEvent(event, model, option, index)
 
-    def initStyleOption(self, option: 'QStyleOptionViewItem', index: QtCore.QModelIndex) -> None:
-        super().initStyleOption(option, index)
-
-        sortColumn = self._table.horizontalHeader().sortIndicatorSection()
-        # tweak to restrict the length of the text
-        offset = 0
-        if sortColumn == index.column() and self._validSort(index) and self._sortEnabled:
-            offset = self._SORTICONSIZE
-        for validSpan, buttonPix in zip(self._validSpans(index), [self._plusIcon, self._minusIcon]):
-            if validSpan:
-                offset += self._ICONSIZE
-
-        if offset:
-            option.rect.adjust(0, 0, -offset, 0)
-
-        # NOTE:ED - need a faster way than this :|
-        #   needs NoFocus or rect doesn't match full cell - check other delegate
-
     def paint(self, painter, option, index):
         """Paint the contents of the cell.
         """
@@ -220,15 +202,16 @@ class _ExpandHorizontalDelegate(_ExpandDelegateABC):
 
         super().paint(painter, option, index)
 
-        # set the clip-rect to not paint outside the widget
+        # set a slightly larger clip-rect
         painter.save()
-        painter.setClipRect(option.rect)
+        rect = option.rect.adjusted(0, 0, 1, 1)
+        painter.setClipRect(rect)
 
         state = QtGui.QIcon.On if (option.state & QtWidgets.QStyle.State_Open) else QtGui.QIcon.Off
-        # if int(option.state & QtWidgets.QStyle.State_Selected):
-        #     backCol = option.palette.color(QtGui.QPalette.Highlight)
-        # else:
-        #     backCol = option.palette.color(QtGui.QPalette.Base)
+        if int(option.state & QtWidgets.QStyle.State_Selected):
+            backCol = option.palette.highlight()
+        else:
+            backCol = option.palette.base()
         buttonOffset = 0
         if sortColumn == index.column() and self._validSort(index) and self._sortEnabled:
             buttonOffset = 1
@@ -237,8 +220,10 @@ class _ExpandHorizontalDelegate(_ExpandDelegateABC):
             pr = QtCore.QRect(0, 0, self._SORTICONSIZE, self._SORTICONSIZE)
             pr.moveCenter(option.rect.center())
             pr.moveRight(option.rect.right() - self._HBORDER)
-            # painter.fillRect(pr, backCol)
+            painter.fillRect(pr, backCol)
 
+            # need to use the generic-base as the cell-base may be a qlineargradient
+            # which has no defined color but can be used for painting
             base = QtGui.QPalette().base().color().valueF()
             if sortOrder == Qt.AscendingOrder:
                 # paint the icon - can use different mode from above if required
@@ -258,12 +243,17 @@ class _ExpandHorizontalDelegate(_ExpandDelegateABC):
                 pr = QtCore.QRect(0, 0, self._ICONSIZE, self._ICONSIZE)
                 pr.moveCenter(option.rect.center())
                 pr.moveRight(option.rect.right() - self._HBORDER - (buttonOffset * self._ICONSIZE))
-                # painter.fillRect(pr, backCol)
-
+                painter.fillRect(pr, backCol)
                 # paint the icon - can use different mode from above if required
                 buttonPix.paint(painter, pr, QtCore.Qt.AlignCenter, QtGui.QIcon.Normal, state)
                 buttonOffset += 1
 
+        # align the new grid-border with the pixel-centres
+        painter.translate(0.5, 0.5)
+        _pen = QtGui.QPen(option.palette.mid(), 1)
+        painter.setPen(_pen)
+        painter.drawLine(rect.topRight(), rect.bottomRight())
+        painter.drawLine(rect.bottomLeft(), rect.bottomRight())
         painter.restore()
 
     def _iconCallback(self, index, visibleButton):
@@ -380,6 +370,7 @@ class _ExpandVerticalDelegate(_ExpandDelegateABC):
     """
     alignBottom = False
     allowIconSpace = False
+    drawGrid = True
 
     def editorEvent(self, event, model, option, index):
         """Handle clicking the icon.
@@ -395,7 +386,8 @@ class _ExpandVerticalDelegate(_ExpandDelegateABC):
 
             buttonOffset = 0
             # search through the buttons to find which is pressed
-            for visibleButton, state in enumerate(self._validSpans(index) if self.alignBottom else reversed(self._validSpans(index))):
+            for visibleButton, state in enumerate(self._validSpans(index)
+                                                  if self.alignBottom else reversed(self._validSpans(index))):
                 if state:
                     # check if the mouse-press is on the icon
                     if self._iconRect(option, buttonOffset).contains(event.pos()):
@@ -409,30 +401,25 @@ class _ExpandVerticalDelegate(_ExpandDelegateABC):
     def paint(self, painter, option, index):
         """Paint the contents of the cell.
         """
-        painter.save()
         focus = (option.state & QtWidgets.QStyle.State_HasFocus)
         option.state = option.state & ~QtWidgets.QStyle.State_HasFocus
 
-        if self.allowIconSpace:
-            # make a space for the expand-icon - allows a normal decoration for the cell
-            option.rect.adjust(0, 0, -self._ICONSIZE - self._HBORDER, 0)
-
         super().paint(painter, option, index)
 
-        if self.allowIconSpace:
-            option.rect.adjust(0, 0, self._ICONSIZE + self._HBORDER, 0)
-
-        # set the clip-rect to not paint outside the widget
-        painter.setClipRect(option.rect)
+        # set a slightly larger clip-rect
+        painter.save()
+        rect = option.rect.adjusted(0, 0, 1, 1)
+        painter.setClipRect(rect)
 
         # set the mode and state for the icons
         state = QtGui.QIcon.On if (option.state & QtWidgets.QStyle.State_Open) else QtGui.QIcon.Off
         if int(option.state & QtWidgets.QStyle.State_Selected):
-            backCol = option.palette.color(QtGui.QPalette.Highlight)
-        elif index.row() % 2 and (self._parent if isinstance(self._parent, QtWidgets.QTableView) else self._table).alternatingRowColors():
-            backCol = option.palette.color(QtGui.QPalette.AlternateBase)
+            backCol = option.palette.highlight()
+        elif index.row() % 2 and (
+                self._parent if isinstance(self._parent, QtWidgets.QTableView) else self._table).alternatingRowColors():
+            backCol = option.palette.alternateBase()
         else:
-            backCol = option.palette.color(QtGui.QPalette.Base)
+            backCol = option.palette.base()
 
         buttonOffset = 0
         if self.alignBottom:
@@ -442,12 +429,10 @@ class _ExpandVerticalDelegate(_ExpandDelegateABC):
                     pr = QtCore.QRect(0, 0, self._ICONSIZE, self._ICONSIZE)
                     pr.moveRight(option.rect.right() - self._HBORDER)
                     pr.moveBottom(option.rect.bottom() - self._VBORDER - (buttonOffset * self._ICONSIZE))
-                    # painter.fillRect(pr, backCol)
-
+                    painter.fillRect(pr, backCol)
                     # paint the icon - can use different mode from above if required
                     buttonPix.paint(painter, pr, QtCore.Qt.AlignCenter, QtGui.QIcon.Normal, state)
                     buttonOffset += 1
-
         else:
             # draw buttons on the right-hand-side if the states are valid
             for validSpan, buttonPix in zip(reversed(self._validSpans(index)), [self._minusIcon, self._plusIcon]):
@@ -455,16 +440,23 @@ class _ExpandVerticalDelegate(_ExpandDelegateABC):
                     pr = QtCore.QRect(0, 0, self._ICONSIZE, self._ICONSIZE)
                     pr.moveRight(option.rect.right() - self._HBORDER)
                     pr.moveTop(option.rect.top() + self._VBORDER + (buttonOffset * self._ICONSIZE))
-                    # painter.fillRect(pr, backCol)
-
+                    painter.fillRect(pr, backCol)
                     # paint the icon - can use different mode from above if required
                     buttonPix.paint(painter, pr, QtCore.Qt.AlignCenter, QtGui.QIcon.Normal, state)
                     buttonOffset += 1
 
+        if self.drawGrid:
+            # draw new grid-lines that don't have the QT grid-bug -> draws extra pixels :|
+            _pen = QtGui.QPen(option.palette.mid(), 1)
+            painter.setPen(_pen)
+            painter.drawLine(rect.topRight(), rect.bottomRight())
+            painter.drawLine(rect.bottomLeft(), rect.bottomRight())
         if focus and self._focusBorderWidth:
+            # draw new focus rect - can't catch the overlay colour from the fusion theme
+            painter.translate(-0.5, -0.5)
+            self._focusPen.setColor(QtGui.QPalette().highlight().color())
             painter.setPen(self._focusPen)
             painter.drawRect(option.rect)
-
         painter.restore()
 
     def _iconCallback(self, index, visibleButton):
@@ -522,6 +514,7 @@ class _ExpandVerticalCellDelegate(_ExpandVerticalDelegate):
 
     alignBottom = False
     allowIconSpace = True
+    drawGrid = False
 
     def _iconCallback(self, index, visibleButton):
         """Process the clicked icon.
@@ -928,7 +921,8 @@ class _TableEditorDelegate(QtWidgets.QStyledItemDelegate):
             self._parent.model().setData(index, value)
 
         except Exception as es:
-            getLogger().debug(f'Error handling cell editing: {index.row()} {index.column()} - {es}  {self._parent.model()._sortIndex}  {value}')
+            getLogger().debug(f'Error handling cell editing: {index.row()} {index.column()} - '
+                              f'{es}  {self._parent.model()._sortIndex}  {value}')
 
     def updateEditorGeometry(self, widget, itemStyle, index):  # ensures that the editor is displayed correctly
         """Update the geometry of the widget to fit the cell-index and the custom-widget
@@ -959,3 +953,29 @@ class _TableEditorDelegate(QtWidgets.QStyledItemDelegate):
         if isinstance(widget, QtWidgets.QLineEdit):
             self._editorValue = widget.text()
             self._returnPressed = True
+
+
+#=========================================================================================
+# _GridDelegate
+#=========================================================================================
+
+class _GridDelegate(QtWidgets.QStyledItemDelegate):
+    """Class to draw modified grid-lines.
+    """
+
+    def paint(self, painter, option, index):
+        """Paint the contents of the cell.
+        """
+        super().paint(painter, option, index)
+
+        # set the clip-rect to not paint outside the widget
+        painter.save()
+        rect = option.rect.adjusted(0, 0, 1, 1)
+        painter.setClipRect(rect)
+
+        painter.translate(0.5, 0.5)
+        _pen = QtGui.QPen(option.palette.mid(), 1)
+        painter.setPen(_pen)
+        painter.drawLine(rect.topRight(), rect.bottomRight())
+        painter.drawLine(rect.bottomLeft(), rect.bottomRight())
+        painter.restore()

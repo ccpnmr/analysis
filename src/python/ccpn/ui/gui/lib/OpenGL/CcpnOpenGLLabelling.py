@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-07 13:10:49 +0100 (Wed, August 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-06 15:02:43 +0100 (Fri, September 06, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1607,12 +1607,12 @@ class GLLabelling():
                                                                       (skip * an + 1) * angPlus / numPoints),
                                                               alias, 0.0)
                                                   )
-                drawList.vertices[end:xtra] = (pxy[0] - r, pxy[1] - w, alias, 0.0,
-                                               pxy[0] + r, pxy[1] + w, alias, 0.0,
-                                               pxy[0] + r, pxy[1] - w, alias, 0.0,
-                                               pxy[0] - r, pxy[1] + w, alias, 0.0,
-                                               pxy[0], pxy[1], alias, 0.0,
-                                               )
+                drawList.vertices[end:end + xtra] = (pxy[0] - r, pxy[1] - w, alias, 0.0,
+                                                     pxy[0] + r, pxy[1] + w, alias, 0.0,
+                                                     pxy[0] + r, pxy[1] - w, alias, 0.0,
+                                                     pxy[0] - r, pxy[1] + w, alias, 0.0,
+                                                     pxy[0], pxy[1], alias, 0.0,
+                                                     )
 
                 drawList.colors[st:end + xtra] = (*cols, fade) * step
                 drawList.attribs[st:end + xtra] = (alias, 0.0, 0.0, 0.0) * step

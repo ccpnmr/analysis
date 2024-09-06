@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-03 13:20:31 +0100 (Tue, September 03, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-09-06 11:32:59 +0100 (Fri, September 06, 2024) $"
+__version__ = "$Revision: 3.2.6 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -51,8 +51,7 @@ from ccpn.ui.gui.lib.mouseEvents import SELECT, PICK, MouseModes, \
     setCurrentMouseMode, getCurrentMouseMode
 from ccpn.ui.gui.lib import GuiStrip
 from ccpn.ui.gui.lib.Shortcuts import Shortcuts
-from ccpn.ui.gui.guiSettings import (getColours, BORDERFOCUS, BORDERNOFOCUS,
-                                     GUITABLE_SELECTED_BACKGROUND, consoleStyle)
+from ccpn.ui.gui.guiSettings import (getColours, GUITABLE_SELECTED_BACKGROUND, consoleStyle)
 
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 
@@ -250,198 +249,28 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                         QMenuBar::item:disabled {
                             color: palette(dark);
                         }
-
-                        /*
-                        QGraphicsView {
-                            border: 1px solid palette(mid);
-                            border-radius: 2px;
-                        }
-                        QGraphicsView:focus {
-                            border: 1px solid palette(highlight);
-                            border-radius: 2px;
-                        }
-                        QGraphicsView:disabled { background-color: palette(midlight); }
-                        QListView {
-                            border: 1px solid palette(mid);
-                            border-radius: 2px;
-                        }
-                        QListView:focus {
-                            border: 1px solid palette(highlight);
-                            border-radius: 2px;
-                        }
-                        QListView:disabled { background-color: palette(midlight); }
-                        QListWidget {
-                            border: 1px solid palette(mid);
-                            border-radius: 2px;
-                        }
-                        QListWidget:focus {
-                            border: 1px solid palette(highlight);
-                            border-radius: 2px;
-                        }
-                        QListWidget:disabled { background-color: palette(midlight); }
-                        QTreeWidget {
-                            border: 1px solid palette(mid);
-                            border-radius: 2px;
-                        }
-                        QTreeWidget:focus {
-                            border: 1px solid palette(highlight);
-                            border-radius: 2px;
-                        }
-                        
-                        QTreeView {
-                            border: 1px solid palette(mid);
-                            border-radius: 2px;
-                        }
-                        QTreeView:focus {
-                            border: 1px solid palette(highlight);
-                            border-radius: 2px;
-                        }
-                        
-                        QTextEdit {
-                            border: 1px solid palette(mid);
-                            border-radius: 2px;
-                        }
-                        QTextEdit:focus {
-                            border: 1px solid palette(highlight);
-                            border-radius: 2px;
-                        }
-
-                        QPushButton:focus {
-                            border-color: %(BORDER_FOCUS)s;
-                        }
-                        QPushButton {
-                            padding: 2px 6px 2px 6px;
-                        }
-                        QPushButton:focus {
-                            padding: 0px 1px 0px 1px;
-                            border-color: %(BORDER_FOCUS)s;
-                            border-style: solid;
-                            border-width: 0px;
-                            border-radius: 2px;
-                        }
-                        QPushButton:disabled {
-                            color: #808080;
-                            background-color: palette(midlight);
-                        }
-                        QGraphicsTextItem {
-                            background-color: orange;
-                        }
-                        QTableView {
-                            border-color: palette(mid);
-                            border-width: %(_BORDER_WIDTH)spx;
-                            border-style: solid;
-                            border-radius: 2px;
-                            // use #f8f088 for yellow selection
-                            selection-background-color: qlineargradient(
-                                                            x1: 0, y1: -200, x2: 0, y2: 200,
-                                                            stop: 0 palette(highlight), 
-                                                            stop: 1 palette(base)
-                                                        );
-                            color: palette(text);
-                        }
-                        QTableView:focus {
-                            border-color: palette(highlight);
-                        }
-
-                        QComboBox {
-                            padding: 2px 8px 2px 3px;
-                            combobox-popup: 0;
-                        }
-                        QComboBox:focus { border-color: %(BORDER_FOCUS)s; }
-                        QComboBox:disabled {
-                            color: #808080;
-                            background-color: palette(midlight);
-                        }
-
-                        QDoubleSpinBox {
-                            padding: 3px 3px 3px 3px;
-                            background-color: palette(base);
-                        }
-                        QDoubleSpinBox:disabled { background-color: palette(midlight); }
-                        QSpinBox {
-                            padding: 3px 3px 3px 3px;
-                            background-color: palette(base);
-                        }
-                        QSpinBox:disabled { background-color: palette(midlight); }
-
-                        QLineEdit {
-                            padding: 3px 3px 3px 3px;
-                            border-color: palette(mid);
-                            border-width: 1px;
-                            border-radius: 3px;
-                            border-style: solid;
-                        }
-                        QLineEdit:focus {
-                            border-color: %(BORDER_FOCUS)s;
-                        }
-                        QLineEdit:disabled {
-                            color: #808080;
-                            background-color: palette(midlight);
-                        }
-                        
-                        QLineEdit {
-                            padding: 3px 3px 3px 3px;
-                            background-color: palette(norole);
-                        }
-                        */
                         """
         # set stylesheet
-        # pal = self.palette()  # NOTE:ED - temp
         base = pal.base().color().lightness()  # use as a guide for light/dark theme
         colours = getColours()
         highlight = pal.highlight().color()
-        newCol = highlight.fromHslF(highlight.hueF(), 0.95, highlight.lightnessF()**(0.333 if base < 127 else 3.0))
-        colours[BORDERFOCUS] = newCol.name()
-        colours[BORDERNOFOCUS] = pal.mid().color().name()
         colours[GUITABLE_SELECTED_BACKGROUND] = highlight.fromHslF(highlight.hueF(),
                                                                    0.55 if base > 127 else 0.65,
                                                                    0.80 if base > 127 else 0.35,
                                                                    ).name()
         colours['_fontSize'] = self.font().pointSize()
-        # colours[CCPNGLWIDGET_HEXHIGHLIGHT] = newCol.getRgbF()
         colours['_BORDER_WIDTH'] = 2  # need to grab from the table-instance :|
         self.ui.qtApp.setStyleSheet(styleSheet % colours)
 
         # store the colours in the baseclass, is this the best place?
         Base._highlight = highlight
-        Base._highlightVivid = QtGui.QColor.fromHslF(highlight.hueF(),
-                                                     0.8 if base > 127 else 0.75,
-                                                     0.5 if base > 127 else 0.45
-                                                     )
         Base._highlightMid = QtGui.QColor.fromHslF(highlight.hueF(), 0.75, 0.65)
-        Base._highlightFeint = QtGui.QColor.fromHslF(highlight.hueF(),
-                                                     0.55 if base > 127 else 0.65,
-                                                     0.80 if base > 127 else 0.35,
-                                                     )
-        Base._highlightBorder = QtGui.QColor.fromHslF(highlight.hueF(), 0.95,
-                                                      highlight.lightnessF()**(0.333 if base > 127 else 3.0),
-                                                      )
         Base._basePalette = pal
         Base._transparent = pal.highlight().color()  # grab again to stop overwrite
         Base._transparent.setAlpha(40)
         # pass through the palette-changed to other widgets
         self.ui.qtApp._sigPaletteChanged.emit(pal, theme, themeColour, themeSD)
         getLogger().debug(f'{consoleStyle.fg.darkblue}qtApp changePalette event{consoleStyle.reset}')
-
-        # if self.application.preferences.general.colourScheme == DEFAULT:
-        #     # print(f'--> change theme  {base}')
-        #     # NOTE:ED - should really just fire a signal for the spectrum-displays/strips to respond to
-        #     setColourScheme(DARK if base < 127 else LIGHT)
-        #     self.application._correctColours()
-        #     for display in self.project.spectrumDisplays:
-        #         for strip in display.strips:
-        #             strip._frameGuide.resetColourTheme()
-        #     # update the chemical-shift mapping plotWidgets
-        #
-        #     # colour theme has changed - flag displays to update
-        #     # prompt the GLwidgets to update
-        #     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-        #
-        #     GLSignals = GLNotifier(parent=self)
-        #     GLSignals.emitEvent(triggers=[GLNotifier.GLALLCONTOURS,
-        #                                   GLNotifier.GLALLPEAKS,
-        #                                   GLNotifier.GLALLMULTIPLETS,
-        #                                   GLNotifier.GLPREFERENCES])
 
     def _initReadOnlyIcon(self):
         """Add icon to the statusBar that reflects the read-only state of the current project

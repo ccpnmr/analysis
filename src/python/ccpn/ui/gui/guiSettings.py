@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-04 18:51:19 +0100 (Wed, September 04, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-09-06 11:32:59 +0100 (Fri, September 06, 2024) $"
+__version__ = "$Revision: 3.2.6 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -754,19 +754,19 @@ class _ColourDict(dict):
 
             base = pal.base().color().lightness()  # use as a guide for light/dark theme
             if colourName == DEFAULT_COLOR:
-                newCol = highlight = DEFAULT_HIGHLIGHT
+                highlight = DEFAULT_HIGHLIGHT
             else:
-                newCol = highlight = QtGui.QColor(colourName)
+                highlight = QtGui.QColor(colourName)
             if base < 127:
                 # a dark theme, modify the colour slightly
-                newCol = highlight.fromHsvF(highlight.hsvHueF(),
-                                            highlight.hsvSaturationF(),
-                                            highlight.valueF() - 0.2)
+                newCol = highlight.darker(120)
+            else:
+                newCol = highlight.lighter(110)
             r, g, b, _ = newCol.getRgbF()
             # highlight-background perceived luminance
             lumBack = 0.2126 * r + 0.7152 * g + 0.0722 * b
             lumFore = pal.text().color().valueF()  # text brightness, easy check for theme
-            if (lumBack - 0.6) * (lumFore - 0.5) > 0:
+            if (lumBack - 0.65) * (lumFore - 0.5) > 0:
                 lumFore = 1 - lumFore  # invert the brightness (to keep correct dark foreground)
             # invert(-ish) to give text colour
             newColHT = highlight.fromHsvF(highlight.hsvHueF(), 0.05, lumFore)

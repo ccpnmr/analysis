@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-05 18:12:51 +0100 (Thu, September 05, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-09-06 11:32:59 +0100 (Fri, September 06, 2024) $"
+__version__ = "$Revision: 3.2.6 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,11 +30,9 @@ __date__ = "$Date: 2023-01-18 15:25:31 +0100 (Wed, January 18, 2023) $"
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtCore import Qt
 
-from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
 from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.util.Logging import getLogger
-
 from ccpn.ui.gui.widgets.table._TableCommon import EDIT_ROLE, BORDER_ROLE, _EDITOR_SETTER, _EDITOR_GETTER
+from ccpn.util.Logging import getLogger
 
 
 #=========================================================================================
@@ -80,15 +78,11 @@ class _ExpandDelegateABC(QtWidgets.QStyledItemDelegate):
         self._plusIcon = Icon('icons/plus-large')
 
         # set the colours
-        self._focusPen = QtGui.QPen(QtGui.QColor(getColours()[BORDERFOCUS]))
-
+        self._focusPen = QtGui.QPen(QtGui.QPalette().highlight().color(), 2)
         # double the line-widths accounts for the device-pixel-ratio
         self._focusBorderWidth = focusBorderWidth
         self._focusPen.setWidthF(focusBorderWidth * 2.0)
         self._focusPen.setJoinStyle(QtCore.Qt.MiterJoin)  # square ends
-
-        # set the required alternative colour
-        self._replaceAlternativeColor = QtGui.QColor(getColours()[BORDERFOCUS])
 
     def editorEvent(self, event, model, option, index):
         """Handle clicking the icon.
@@ -759,15 +753,12 @@ class _ColourDelegate(QtWidgets.QStyledItemDelegate):
         self._parent = parent
 
         # set the colours
-        self._focusPen = QtGui.QPen(QtGui.QColor(getColours()[BORDERFOCUS]))
+        self._focusPen = QtGui.QPen(QtGui.QPalette().highlight().color(), 2)
 
         # double the line-widths accounts for the device-pixel-ratio
         self._focusBorderWidth = focusBorderWidth
         self._focusPen.setWidthF(focusBorderWidth * 2.0)
         self._focusPen.setJoinStyle(QtCore.Qt.MiterJoin)  # square ends
-
-        # set the required alternative colour
-        self._replaceAlternativeColor = QtGui.QColor(getColours()[BORDERFOCUS])
 
     def paint(self, painter, option, index):
         """Paint the contents of the cell.

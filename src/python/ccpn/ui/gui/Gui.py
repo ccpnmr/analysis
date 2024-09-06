@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-04 18:51:19 +0100 (Wed, September 04, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-09-06 11:32:58 +0100 (Fri, September 06, 2024) $"
+__version__ = "$Revision: 3.2.6 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -190,7 +190,8 @@ class _MyAppProxyStyle(QtWidgets.QProxyStyle):
         super().drawComplexControl(control, option, painter, widget)
         if focus:
             # draw new focus-border
-            self._drawBorder(control, painter, widget, col=option.palette.highlight().color())  # Base._highlightVivid)
+            self._drawBorder(control, painter, widget,
+                             col=option.palette.highlight().color())
 
     @staticmethod
     def _drawBorder(control, p, widget, col=None):

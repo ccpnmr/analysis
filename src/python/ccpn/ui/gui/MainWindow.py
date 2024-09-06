@@ -1768,7 +1768,8 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                     if strip.spectrumDisplay.is1D:
                         cursorPosition = self.application.current.cursorPosition
                         if cursorPosition is not None and len(cursorPosition) > 1:
-                            limits = [cursorPosition[0], cursorPosition[0] + 0.01]
+                            pos = cursorPosition[strip.spectrumDisplay._flipped]
+                            limits = [pos, pos + 0.01]
 
                             validViews = [sv for sv in strip.spectrumViews if sv.isDisplayed]
                             currentIntegrals = list(self.current.integrals)
@@ -1928,8 +1929,10 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                         multipletList = spectrum.multipletLists[-1]
                     peaks = [peak for peakList in spectrum.peakLists for peak in peakList.peaks if
                              peak in self.application.current.peaks]
-                    multiplet = multipletList.newMultiplet(peaks=peaks)
-                    self.application.current.multiplet = multiplet
+                    if peaks:
+                        # only create a multiplet that contains peaks
+                        multiplet = multipletList.newMultiplet(peaks=peaks)
+                        self.application.current.multiplet = multiplet
 
     def mergeCurrentMultiplet(self):
         """Merge current peaks into current multiplet

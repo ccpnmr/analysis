@@ -31,16 +31,16 @@ from PyQt5 import QtGui
 import numpy as np
 from itertools import product
 from collections import namedtuple
-from PyQt5 import QtCore
-from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView
+from PyQt5 import QtCore, QtGui
+from numba import jit
+
+from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView, SpectrumCache
 from ccpn.util import Colour
 from ccpn.util.Logging import getLogger
 from ccpn.core.Spectrum import MAXALIASINGRANGE
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking
 from ccpnc.contour import Contourer2d
 
-
-# _NEWCOMPILEDCONTOURS = True
 
 AxisPlaneData = namedtuple('AxisPlaneData', 'startPoint endPoint pointCount')
 
@@ -231,12 +231,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         self.negLevelsPrev = list(negLevels)
         self.zRegionPrev = tuple([tuple(axis.region) for axis in self.strip.orderedAxes[2:] if axis is not None])
 
-        posContoursAll = negContoursAll = None
-        numDims = self.spectrum.dimensionCount
-
-        # if _NEWCOMPILEDCONTOURS:
-
-        # new code for the recompiled glList
+        # posContoursAll = negContoursAll = None
+        # numDims = self.spectrum.dimensionCount
 
         # get the positive/negative contour colour lists
         _posColours = self._interpolateColours(self.posColours, posLevels)
@@ -267,17 +263,20 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                                                           np.array(_negColours, dtype=np.float32),
                                                           not self._application.preferences.general.generateSinglePlaneContours)
 
-
         except Exception as es:
             getLogger().warning(f'Contouring error: {es}')
 
         finally:
             if contourList and contourList[1] > 0:
+
+                # self._expand(contourList[2])  # indices compressed inplace
+
                 # set the contour arrays for the GL object
                 glList.numVertices = contourList[1]
                 glList.indices = contourList[2]
                 glList.vertices = contourList[3]
                 glList.colors = contourList[4]
+
             else:
                 # clear the arrays
                 glList.numVertices = 0
@@ -449,8 +448,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
             # pass in a smaller valuePerPoint - if there are differences in the z-resolution, otherwise just use local valuePerPoint
             minZWidth = 3 * zValuePerPoint
-            zWidth = (planeCount + 2) * minimumValuePerPoint[dim - 2] if minimumValuePerPoint else (
-                                                                                                           planeCount + 2) * zValuePerPoint
+            zWidth = (planeCount + 2) * minimumValuePerPoint[dim - 2] \
+                     if minimumValuePerPoint else (planeCount + 2) * zValuePerPoint
             zWidth = max(zWidth, minZWidth)
 
             zRegionValue = (zPosition + 0.5 * zWidth, zPosition - 0.5 * zWidth)  # Note + and - (axis backwards)
@@ -530,3 +529,194 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             if self._traceScale is None:
                 self._traceScale = 1.0 / max(data) * 0.5
         return data
+
+    def _getVisibleSpectrumViewParams(self, dimRange=None, delta=None, stacking=None) -> SpectrumCache:
+        """Get parameters for axisDim'th axis (zero-origin) of spectrum in display-order.
+
+        Returns SpectrumCache object of the form:
+
+            dimensionIndices            visible order of dimensions
+
+            pointCount                  number of points in the dimension
+            ppmPerPoint                 ppm width spanning a point value
+            ppmToPoint                  method to convert ppm to data-source point value
+
+            minSpectrumFrequency        minimum spectrum frequency
+            maxSpectrumFrequency        maximum spectrum frequency
+                                        spectrum frequencies defined by the ppm positions of points [1] and [pointCount]
+            spectralWidth               maxSpectrumFrequency - minSpectrumFrequency
+            spectrometerFrequency       spectrometer frequency to give correct Hz/ppm/point conversion
+
+            minAliasingFrequency        minimum aliasing frequency
+            maxAliasingFrequency        maximum aliasing frequency
+                                        aliasing frequencies define the span of the spectrum, beyond the range of the defined points
+                                        for aliasingIndex (0, 0) this will correspond to points [0.5], [pointCount + 0.5]
+            aliasingWidth               maxAliasingFrequency - minAliasingFrequency
+            aliasingIndex               a tuple (min, max) defining how many integer multiples the aliasing frequencies span the spectrum
+                                        (0, 0) implies the aliasing range matches the spectral range
+                                        (s, t) implies:
+                                            the minimum limit = minSpectrumFrequency - 's' spectral widths - should always be negative or zero
+                                            the maximum limit = maxSpectrumFrequency + 't' spectral widths - should always be positive or zero
+            axisDirection               1.0 if the point [pointCount] corresponds to the maximum spectrum-frequency
+                                        else -1.0, i.e., ppm increases with point-count
+
+            minFoldingFrequency         minimum folding frequency
+            maxFoldingFrequency         maximum folding frequency
+                                        folding frequencies define the ppm positions of points [0.5] and [pointCount + 0.5]
+                                        currently the exact ppm at which the spectrum is folded
+            foldingWidth                maxFoldingFrequency - minFoldingFrequency
+            foldingMode                 the type of folding: 'circular', 'mirror' or None
+
+            regionBounds                a tuple of ppm values (min, ..., max) in multiples of the spectral width from the lower aliasingLimit
+                                        to the upper aliasingLimit
+            isTimeDomain                True if the axis is a time domain, otherwise False
+
+            delta                       multipliers for the axes, either -1.0|1.0
+            scale                       scaling for each dimension
+        """
+        if self.pointCounts[0]:
+            minFoldingFrequencies = [min(*val) for val in self.foldingLimits]
+            spectralWidths = self.spectralWidths
+            aliasingIndexes = self.aliasingIndexes
+            regionBounds = [[minFoldingFrequency + ii * spectralWidth
+                             for ii in range(aliasingIndex[0], aliasingIndex[1] + 2)]
+                            for minFoldingFrequency, spectralWidth, aliasingIndex in
+                            zip(minFoldingFrequencies, spectralWidths, aliasingIndexes)]
+
+            minSpec = [min(*val) for val in self.spectrumLimits][:2]
+            maxSpec = [max(*val) for val in self.spectrumLimits][:2]
+            specWidth = list(self.spectralWidths[:2])
+            axesReversed = self.axesReversed[:2]
+
+            for ii in range(2):
+                # spectrum frequencies are not badly defined
+                if abs(maxSpec[ii] - minSpec[ii]) < 1e-8:
+                    minSpec[ii] = -1.0
+                    maxSpec[ii] = 1.0
+                    specWidth[ii] = 2.0
+
+            # xScale = delta[0] * specWidth[0] / self.pointCounts[0]
+            # yScale = delta[1] * specWidth[1] / self.pointCounts[1]
+            xScale = (-1.0 if axesReversed[0] else 1.0) * specWidth[0] / self.pointCounts[0]
+            yScale = (-1.0 if axesReversed[1] else 1.0) * specWidth[1] / self.pointCounts[1]
+
+            # build the point->ppm matrices here for the display
+            foldX = 1.0 if axesReversed[0] else -1.0
+            foldY = 1.0 if axesReversed[1] else -1.0
+            foldXOffset = spectralWidths[0] if axesReversed[0] else 0
+            foldYOffset = spectralWidths[1] if axesReversed[1] else 0
+            centreMatrix = None
+            mvMatrices = []
+            for ii, jj in product(range(aliasingIndexes[0][0], aliasingIndexes[0][1] + 1),
+                                  range(aliasingIndexes[1][0], aliasingIndexes[1][1] + 1)):
+                # if folding[0] == 'mirror':
+                #     # to be implemented correctly later
+                #     foldX = pow(-1, ii)
+                #     foldXOffset = -dxAF if foldX < 0 else 0
+                # if folding[1] == 'mirror':
+                #     foldY = pow(-1, jj)
+                #     foldYOffset = -dyAF if foldY < 0 else 0
+                mm = QtGui.QMatrix4x4()
+                mm.translate(minSpec[0] + (ii * specWidth[0]) + foldXOffset,
+                             minSpec[1] + (jj * specWidth[1]) + foldYOffset)
+                mm.scale(xScale * foldX, yScale * foldY, 1.0)
+                mvMatrices.append(mm)
+                if ii == 0 and jj == 0:
+                    # SHOULD always be here
+                    centreMatrix = mm
+            if not centreMatrix:
+                raise RuntimeError(f'{self.__class__.__name__}._getVisibleSpectrumViewParams: '
+                                   f'centre matrix not defined')
+
+            return SpectrumCache(dimensionIndices=self.dimensionIndices[:2],
+                                 pointCount=self.pointCounts[:2],
+                                 ppmPerPoint=self.ppmPerPoints[:2],
+                                 ppmToPoint=self.ppmToPoints[:2],
+
+                                 minSpectrumFrequency=minSpec,
+                                 maxSpectrumFrequency=maxSpec,
+                                 spectralWidth=specWidth,
+                                 spectrometerFrequency=self.spectrometerFrequencies[:2],
+
+                                 minAliasedFrequency=[val[0] for val in self.aliasingLimits][:2],
+                                 maxAliasedFrequency=[val[1] for val in self.aliasingLimits][:2],
+                                 aliasingWidth=self.aliasingWidths[:2],
+                                 aliasingIndex=self.aliasingIndexes[:2],
+                                 axisDirection=[-1.0 if ar else 1.0 for ar in axesReversed],
+
+                                 minFoldingFrequency=[min(*val) for val in self.foldingLimits][:2],
+                                 maxFoldingFrequency=[max(*val) for val in self.foldingLimits][:2],
+                                 foldingWidth=self.foldingWidths[:2],
+                                 foldingMode=self.foldingModes[:2],
+
+                                 regionBounds=regionBounds[:2],
+                                 isTimeDomain=self.isTimeDomains[:2],
+                                 axisCode=self.axisCodes[:2],
+                                 isotopeCode=self.isotopeCodes[:2],
+
+                                 scale=[xScale, yScale],
+                                 delta=delta,
+
+                                 stackedMatrixOffset=[0.0, 0.0],
+                                 # matrix=np.array([xScale, 0.0, 0.0, 0.0,
+                                 #                  0.0, yScale, 0.0, 0.0,
+                                 #                  0.0, 0.0, 1.0, 0.0,
+                                 #                  maxSpec[0], maxSpec[1], 0.0, 1.0],
+                                 #                 dtype=np.float32),
+                                 matrix=centreMatrix,
+                                 stackedMatrix=np.array([1.0, 0.0, 0.0, 0.0,
+                                                         0.0, 1.0, 0.0, 0.0,
+                                                         0.0, 0.0, 1.0, 0.0,
+                                                         0.0, 0.0, 0.0, 1.0],
+                                                        dtype=np.float32),
+
+                                 spinningRate=self.spectrum.spinningRate,
+                                 mvMatrices=mvMatrices,
+                                 )
+
+        else:
+            # points are not defined for the spectrum
+            return SpectrumCache(dimensionIndices=self.dimensionIndices[:2],
+
+                                 pointCount=[1, 1],
+                                 ppmPerPoint=[1.0, 1.0],
+                                 ppmToPoint=[lambda: 0.0, lambda: 0.0],
+
+                                 minSpectrumFrequency=[-1.0, -1.0],
+                                 maxSpectrumFrequency=[1.0, 1.0],
+                                 spectralWidth=[2.0, 2.0],
+                                 spectrometerFrequency=[0.0, 0.0],
+
+                                 minAliasedFrequency=[-1.0, -1.0],
+                                 maxAliasedFrequency=[1.0, 1.0],
+                                 aliasingWidth=[2.0, 2.0],
+                                 aliasingIndex=[[0, 0], [0, 0]],
+                                 axisDirection=[1.0, 1.0],
+
+                                 minFoldingFrequency=[-1.0, -1.0],
+                                 maxFoldingFrequency=[1.0, 1.0],
+                                 foldingWidth=[2.0, 2.0],
+                                 foldingMode=[0, 0],
+
+                                 regionBounds=[[-1.0, 1.0], [-1.0, 1.0]],
+                                 isTimeDomain=[False, False],
+                                 axisCode=['', ''],
+                                 isotopeCode=['', ''],
+
+                                 scale=[1.0, 1.0],
+                                 delta=[1.0, 1.0],
+
+                                 stackedMatrixOffset=[0.0, 0.0],
+                                 matrix=np.array([1.0, 0.0, 0.0, 0.0,
+                                                  0.0, 1.0, 0.0, 0.0,
+                                                  0.0, 0.0, 1.0, 0.0,
+                                                  0.0, 0.0, 0.0, 1.0],
+                                                 dtype=np.float32),
+                                 stackedMatrix=np.array([1.0, 0.0, 0.0, 0.0,
+                                                         0.0, 1.0, 0.0, 0.0,
+                                                         0.0, 0.0, 1.0, 0.0,
+                                                         0.0, 0.0, 0.0, 1.0],
+                                                        dtype=np.float32),
+
+                                 spinningRate=0.0,
+                                 )

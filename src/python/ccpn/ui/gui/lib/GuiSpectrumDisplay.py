@@ -100,7 +100,7 @@ INCLUDE_AXIS_WIDGET = True
 
 
 # GST All this complication is added because the scroll frame appears to have a lower margin added by some part of Qt
-#     that we can't control in PyQt. Specifically even if you overide setContentsMargins on ScrollArea it is never
+#     that we can't control in PyQt. Specifically even if you override setContentsMargins on ScrollArea it is never
 #     called but at the same time ScrollArea gets a lower contents margin of 1 pixel that we didn't ask for... ;-(
 def styleSheetPredicate(target):
     children = [child for child in target.children() if isinstance(child, QtWidgets.QWidget)]
@@ -135,6 +135,10 @@ class ScrollAreaWithPredicateStylesheet(ScrollArea):
         self.modifyStyleSheet(self.checkPredicate())
         return super().resizeEvent(e)
 
+
+#=========================================================================================
+# GuiSpectrumDisplay
+#=========================================================================================
 
 class GuiSpectrumDisplay(CcpnModule):
     """
@@ -441,9 +445,10 @@ class GuiSpectrumDisplay(CcpnModule):
         self._spectrumDisplaySettings = SpectrumDisplaySettings(parent=self.settingsWidget,
                                                                 mainWindow=self.mainWindow, spectrumDisplay=self,
                                                                 grid=(0, 0),
-                                                                xTexts=AXISUNITS, xAxisUnits=xAxisUnits,
-                                                                yTexts=_yTexts, yAxisUnits=_yAx,
-                                                                showYAxis=_showY,
+                                                                xTexts=AXISUNITS, xAxisUnits=_general.xAxisUnits,
+                                                                yTexts=AXISUNITS, yAxisUnits=_general.yAxisUnits,
+                                                                showXAxis=True if _showY else not bool(self._flipped),
+                                                                showYAxis=True if _showY else bool(self._flipped),
                                                                 _baseAspectRatioAxisCode=_general._baseAspectRatioAxisCode,
                                                                 _aspectRatios=_general.aspectRatios,
                                                                 symbolType=_general.symbolType,
@@ -709,6 +714,14 @@ class GuiSpectrumDisplay(CcpnModule):
                                                          SpectrumDisplay.className,
                                                          self._spectrumDisplayChanged,
                                                          onceOnly=True)
+
+    @property
+    def _flipped(self):
+        """Return 0|1 depending on whether the 1d spectrum-display is flipped with intensity on the x-axis.
+        """
+        if self.is1D:
+            return 1 - self.axisCodes.index('intensity')
+        return 0
 
     def setRightOverlayArea(self, value):
         """Set the overlay state for the right axis.

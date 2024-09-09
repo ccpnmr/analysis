@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-29 22:06:46 +0100 (Thu, August 29, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-09-09 19:03:26 +0100 (Mon, September 09, 2024) $"
+__version__ = "$Revision: 3.2.6 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -587,38 +587,35 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             maxSpec = [max(*val) for val in self.spectrumLimits][:2]
             specWidth = list(self.spectralWidths[:2])
             axesReversed = self.axesReversed[:2]
-
             for ii in range(2):
-                # spectrum frequencies are not badly defined
+                # spectrum frequencies are badly defined
                 if abs(maxSpec[ii] - minSpec[ii]) < 1e-8:
                     minSpec[ii] = -1.0
                     maxSpec[ii] = 1.0
                     specWidth[ii] = 2.0
 
-            # xScale = delta[0] * specWidth[0] / self.pointCounts[0]
-            # yScale = delta[1] * specWidth[1] / self.pointCounts[1]
             xScale = (-1.0 if axesReversed[0] else 1.0) * specWidth[0] / self.pointCounts[0]
             yScale = (-1.0 if axesReversed[1] else 1.0) * specWidth[1] / self.pointCounts[1]
 
             # build the point->ppm matrices here for the display
             foldX = 1.0 if axesReversed[0] else -1.0
             foldY = 1.0 if axesReversed[1] else -1.0
-            foldXOffset = spectralWidths[0] if axesReversed[0] else 0
-            foldYOffset = spectralWidths[1] if axesReversed[1] else 0
+            xOffset = maxSpec[0] if axesReversed[0] else minSpec[0]
+            yOffset = maxSpec[1] if axesReversed[1] else minSpec[0]
             centreMatrix = None
             mvMatrices = []
             for ii, jj in product(range(aliasingIndexes[0][0], aliasingIndexes[0][1] + 1),
                                   range(aliasingIndexes[1][0], aliasingIndexes[1][1] + 1)):
                 # if folding[0] == 'mirror':
                 #     # to be implemented correctly later
-                #     foldX = pow(-1, ii)
+                #     foldX = pow(-1, ii)  # WILL CHANGE FOR MIRRORED!
                 #     foldXOffset = -dxAF if foldX < 0 else 0
                 # if folding[1] == 'mirror':
                 #     foldY = pow(-1, jj)
                 #     foldYOffset = -dyAF if foldY < 0 else 0
                 mm = QtGui.QMatrix4x4()
-                mm.translate(minSpec[0] + (ii * specWidth[0]) + foldXOffset,
-                             minSpec[1] + (jj * specWidth[1]) + foldYOffset)
+                mm.translate(xOffset + (ii * specWidth[0]),
+                             yOffset + (jj * specWidth[1]))
                 mm.scale(xScale * foldX, yScale * foldY, 1.0)
                 mvMatrices.append(mm)
                 if ii == 0 and jj == 0:

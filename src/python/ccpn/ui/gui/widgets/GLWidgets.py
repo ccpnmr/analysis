@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-29 11:21:26 +0100 (Thu, August 29, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-09-09 19:03:26 +0100 (Mon, September 09, 2024) $"
+__version__ = "$Revision: 3.2.6 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -76,69 +76,53 @@ class GuiNdWidget(CcpnGLWidget):
             dimX, dimY = spectrumView.dimensionIndices[:2]
 
             for peakListView in spectrumView.peakListViews:
-                if spectrumView.isDisplayed and peakListView.isDisplayed:
+                if not (spectrumView.isDisplayed and
+                        peakListView.isDisplayed and
+                        (labelling := self._GLPeaks._GLLabels.get(peakListView))):
+                    continue
 
-                    # peakList = peakListView.peakList
-                    # pks = np.array(peakList.peaks)
-                    # labels = [(_data2Obj.get(pLabel.stringObject._wrappedData.findFirstPeakView(peakListView=plv._wrappedData.peakListView)),
-                    #            pLabel)
-                    #           for plv, ss in self.strip._CcpnGLWidget._GLPeaks._GLLabels.items() if plv.isDisplayed
-                    #           for pLabel in ss.stringList]
+                for drawList in labelling.stringList:
+                    try:
+                        peak = drawList.stringObject
+                        pView = peak.getPeakView(peakListView)
+                        _pos = peak.ppmPositions
+                        px, py = float(_pos[dimX]), float(_pos[dimY])
+                        tx, ty = pView.textOffset
+                        if not tx and not ty:
+                            # pixels
+                            tx, ty = self._symbolSize, self._symbolSize
+                            # ppm
+                            # tx, ty = self.symbolX, self.symbolY
 
-                    if labelling := self._GLPeaks._GLLabels.get(peakListView):
+                        # find the bounds of the label
+                        # pixels
+                        # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
+                        # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
+                        # ppm
+                        minX, maxX = min(_ll := px + tx * sgnX,
+                                         _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
+                        minY, maxY = min(_ll := py + ty * sgnY,
+                                         _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
 
-                        for drawList in labelling.stringList:
+                        if len(peak.axisCodes) > 2 and zPositions is not None:
+                            # zAxis = spectrumIndices[2]
+                            if (xPositions[0] < px < xPositions[1]
+                                and yPositions[0] < py < yPositions[1]) or \
+                                    (minX < xPosition < maxX and minY < yPosition < maxY):
 
-                            try:
-                                peak = drawList.stringObject
-                                pView = peak.getPeakView(peakListView)
-                                _pos = peak.position
-                                px, py = float(_pos[dimX]), float(_pos[dimY])
-
-                                tx, ty = pView.textOffset
-                                if not tx and not ty:
-                                    # pixels
-                                    tx, ty = self._symbolSize, self._symbolSize
-                                    # ppm
-                                    # tx, ty = self.symbolX, self.symbolY
-
-                                # find the bounds of the label
-                                # pixels
-                                # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
-                                # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
-                                # ppm
-                                minX, maxX = min(_ll := px + tx * sgnX,
-                                                 _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
-                                minY, maxY = min(_ll := py + ty * sgnY,
-                                                 _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
-
-                                if len(peak.axisCodes) > 2 and zPositions is not None:
-                                    # zAxis = spectrumIndices[2]
-
-                                    if (xPositions[0] < px < xPositions[1]
-                                        and yPositions[0] < py < yPositions[1]) or \
-                                            (minX < xPosition < maxX and minY < yPosition < maxY):
-
-                                        # within the XY bounds so check whether inPlane
-                                        _isInPlane, _isInFlankingPlane, planeIndex, fade = \
-                                            self._GLPeaks.objIsInVisiblePlanes(spectrumView, peak)
-
-                                        # if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
-                                        if _isInPlane or _isInFlankingPlane:
-                                            peaks.append(peak)
-                                            # if firstOnly:
-                                            #     return peaks
-
-                                elif (xPositions[0] < px < xPositions[1]
-                                      and yPositions[0] < py < yPositions[1]) or \
-                                        (minX < xPosition < maxX and minY < yPosition < maxY):
+                                # within the XY bounds so check whether inPlane
+                                _isInPlane, _isInFlankingPlane, planeIndex, fade = \
+                                    self._GLPeaks.objIsInVisiblePlanes(spectrumView, peak)
+                                if _isInPlane or _isInFlankingPlane:
                                     peaks.append(peak)
-                                    # if firstOnly:
-                                    #     return peaks if peak in self.current.peaks else []
 
-                            except Exception:
-                                # NOTE:ED - skip for now
-                                continue
+                        elif (xPositions[0] < px < xPositions[1]
+                              and yPositions[0] < py < yPositions[1]) or \
+                                (minX < xPosition < maxX and minY < yPosition < maxY):
+                            peaks.append(peak)
+
+                    except Exception:
+                        continue
 
         # put the selected peaks to the front of the list
         currentPeaks = set(self.current.peaks)
@@ -166,120 +150,53 @@ class GuiNdWidget(CcpnGLWidget):
             dimX, dimY = spectrumView.dimensionIndices[:2]
 
             for peakListView in spectrumView.peakListViews:
-                if spectrumView.isDisplayed and peakListView.isDisplayed:
+                if not (spectrumView.isDisplayed and
+                        peakListView.isDisplayed and
+                        (labelling := self._GLPeaks._GLLabels.get(peakListView))):
+                    continue
 
-                    # peakList = peakListView.peakList
-                    # pks = np.array(peakList.peaks)
-                    # labels = [(_data2Obj.get(pLabel.stringObject._wrappedData.findFirstPeakView(peakListView=plv._wrappedData.peakListView)),
-                    #            pLabel)
-                    #           for plv, ss in self.strip._CcpnGLWidget._GLPeaks._GLLabels.items() if plv.isDisplayed
-                    #           for pLabel in ss.stringList]
+                for drawList in labelling.stringList:
+                    try:
+                        peak = drawList.stringObject
+                        pView = peak.getPeakView(peakListView)
+                        _pos = peak.position
+                        px, py = float(_pos[dimX]), float(_pos[dimY])
+                        tx, ty = pView.textOffset
+                        if not tx and not ty:
+                            # pixels
+                            tx, ty = self._symbolSize, self._symbolSize
+                            # ppm
+                            # tx, ty = self.symbolX, self.symbolY
 
-                    if labelling := self._GLPeaks._GLLabels.get(peakListView):
-                        for drawList in labelling.stringList:
+                        # find the bounds of the label
+                        # pixels
+                        # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
+                        # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
+                        # ppm
+                        minX, maxX = min(_ll := px + tx * sgnX,
+                                         _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
+                        minY, maxY = min(_ll := py + ty * sgnY,
+                                         _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
 
-                            try:
-                                peak = drawList.stringObject
-                                pView = peak.getPeakView(peakListView)
-                                _pos = peak.position
-                                px, py = float(_pos[dimX]), float(_pos[dimY])
-                                tx, ty = pView.textOffset
-                                if not tx and not ty:
-                                    # pixels
-                                    tx, ty = self._symbolSize, self._symbolSize
-                                    # ppm
-                                    # tx, ty = self.symbolX, self.symbolY
-
-                                # find the bounds of the label
-                                # pixels
-                                # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
-                                # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
-                                # ppm
-                                minX, maxX = min(_ll := px + tx * sgnX,
-                                                 _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
-                                minY, maxY = min(_ll := py + ty * sgnY,
-                                                 _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
-
-                                if len(peak.axisCodes) > 2 and zPositions is not None:
-                                    # zAxis = spectrumIndices[2]
-
-                                    if (minX < xPosition < maxX and minY < yPosition < maxY):
-
-                                        # within the XY bounds so check whether inPlane
-                                        _isInPlane, _isInFlankingPlane, planeIndex, fade = \
-                                            self._GLPeaks.objIsInVisiblePlanes(spectrumView, peak)
-
-                                        # if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
-                                        if _isInPlane or _isInFlankingPlane:
-                                            peaks.append(peak)
-                                            # if firstOnly:
-                                            #     return peaks
-
-                                elif (minX < xPosition < maxX and minY < yPosition < maxY):
+                        if len(peak.axisCodes) > 2 and zPositions is not None:
+                            if (minX < xPosition < maxX and minY < yPosition < maxY):
+                                # within the XY bounds so check whether inPlane
+                                _isInPlane, _isInFlankingPlane, planeIndex, fade = \
+                                    self._GLPeaks.objIsInVisiblePlanes(spectrumView, peak)
+                                if _isInPlane or _isInFlankingPlane:
                                     peaks.append(peak)
-                                    # if firstOnly:
-                                    #     return peaks if peak in self.current.peaks else []
 
-                            except Exception:
-                                # NOTE:ED - skip for now
-                                continue
+                        elif (minX < xPosition < maxX and minY < yPosition < maxY):
+                            peaks.append(peak)
+
+                    except Exception:
+                        continue
 
         # put the selected peaks to the front of the list
         currentPeaks = set(self.current.peaks)
         peaks = [pk for pk in peaks if pk in currentPeaks] + [pk for pk in peaks if pk not in currentPeaks]
 
         return peaks[:1] if firstOnly else peaks
-
-    # def _mouseInMultiplet(self, xPosition, yPosition, firstOnly=False):
-    #     """Find the multiplets under the mouse.
-    #     If firstOnly is true, return only the first item, else an empty list
-    #     """
-    #     xPositions = [xPosition - self.symbolX, xPosition + self.symbolX]
-    #     yPositions = [yPosition - self.symbolY, yPosition + self.symbolY]
-    #
-    #     if len(self._orderedAxes) > 2:
-    #         zPositions = self._orderedAxes[2].region
-    #     else:
-    #         zPositions = None
-    #
-    #     multiplets = []
-    #
-    #     for spectrumView in self.strip.spectrumViews:
-    #
-    #         for multipletListView in spectrumView.multipletListViews:
-    #             if spectrumView.isDisplayed and multipletListView.isDisplayed:
-    #
-    #                 multipletList = multipletListView.multipletList
-    #
-    #                 spectrumIndices = spectrumView.dimensionIndices
-    #                 xAxis = spectrumIndices[0]
-    #                 yAxis = spectrumIndices[1]
-    #
-    #                 for multiplet in multipletList.multiplets:
-    #                     if not multiplet.position:
-    #                         continue
-    #
-    #                     if len(multiplet.axisCodes) > 2 and zPositions is not None:
-    #                         zAxis = spectrumIndices[2]
-    #
-    #                         if (xPositions[0] < float(multiplet.position[xAxis]) < xPositions[1]
-    #                                 and yPositions[0] < float(multiplet.position[yAxis]) < yPositions[1]):
-    #
-    #                             # within the XY bounds so check whether inPlane
-    #                             _isInPlane, _isInFlankingPlane, planeIndex, fade = self._GLMultiplets.objIsInVisiblePlanes(spectrumView, multiplet)
-    #
-    #                             # if zPositions[0] < float(multiplet.position[zAxis]) < zPositions[1]:
-    #                             if _isInPlane:
-    #                                 multiplets.append(multiplet)
-    #                                 if firstOnly:
-    #                                     return multiplets
-    #                     elif (xPositions[0] < float(multiplet.position[xAxis]) < xPositions[1]
-    #                           and yPositions[0] < float(multiplet.position[yAxis]) < yPositions[1]):
-    #                         multiplets.append(multiplet)
-    #                         if firstOnly:
-    #                             return multiplets if multiplet in self.current.multiplets else []
-    #
-    #     return multiplets
 
     def _mouseInMultiplet(self, xPosition, yPosition, firstOnly=False):
         """Find the multiplets under the mouse.
@@ -301,69 +218,56 @@ class GuiNdWidget(CcpnGLWidget):
             dimX, dimY = spectrumView.dimensionIndices[:2]
 
             for multipletListView in spectrumView.multipletListViews:
-                if spectrumView.isDisplayed and multipletListView.isDisplayed:
+                if not (spectrumView.isDisplayed and
+                        multipletListView.isDisplayed and
+                        (labelling := self._GLMultiplets._GLLabels.get(multipletListView))):
+                    continue
 
-                    # multipletList = multipletListView.multipletList
-                    # pks = np.array(multipletList.multiplets)
-                    # labels = [(_data2Obj.get(pLabel.stringObject._wrappedData.findFirstMultipletView(multipletListView=plv._wrappedData.multipletListView)),
-                    #            pLabel)
-                    #           for plv, ss in self.strip._CcpnGLWidget._GLMultiplets._GLLabels.items() if plv.isDisplayed
-                    #           for pLabel in ss.stringList]
+                for drawList in labelling.stringList:
+                    try:
+                        multiplet = drawList.stringObject
+                        # NOTE:ED - need to speed this up
+                        pView = multiplet.getMultipletView(multipletListView)
+                        _pos = multiplet.position
+                        px, py = float(_pos[dimX]), float(_pos[dimY])
+                        tx, ty = pView.textOffset
+                        if not tx and not ty:
+                            # pixels
+                            tx, ty = self._symbolSize, self._symbolSize
+                            # ppm
+                            # tx, ty = self.symbolX, self.symbolY
 
-                    if labelling := self._GLMultiplets._GLLabels.get(multipletListView):
+                        # find the bounds of the label
+                        # pixels
+                        # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
+                        # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
+                        # ppm
+                        minX, maxX = min(_ll := px + tx * sgnX,
+                                         _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
+                        minY, maxY = min(_ll := py + ty * sgnY,
+                                         _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
 
-                        for drawList in labelling.stringList:
-
-                            try:
-                                multiplet = drawList.stringObject
-                                # NOTE:ED - need to speed this up
-                                pView = multiplet.getMultipletView(multipletListView)
-                                _pos = multiplet.position
-                                px, py = float(_pos[dimX]), float(_pos[dimY])
-                                tx, ty = pView.textOffset
-                                if not tx and not ty:
-                                    # pixels
-                                    tx, ty = self._symbolSize, self._symbolSize
-                                    # ppm
-                                    # tx, ty = self.symbolX, self.symbolY
-
-                                # find the bounds of the label
-                                # pixels
-                                # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
-                                # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
-                                # ppm
-                                minX, maxX = min(_ll := px + tx * sgnX,
-                                                 _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
-                                minY, maxY = min(_ll := py + ty * sgnY,
-                                                 _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
-
-                                if len(multiplet.axisCodes) > 2 and zPositions is not None:
-                                    # zAxis = spectrumIndices[2]
-
-                                    if (xPositions[0] < px < xPositions[1]
-                                        and yPositions[0] < py < yPositions[1]) or \
-                                            (minX < xPosition < maxX and minY < yPosition < maxY):
-
-                                        # within the XY bounds so check whether inPlane
-                                        _isInPlane, _isInFlankingPlane, planeIndex, fade = \
-                                            self._GLMultiplets.objIsInVisiblePlanes(spectrumView, multiplet)
-
-                                        # if zPositions[0] < float(multiplet.position[zAxis]) < zPositions[1]:
-                                        if _isInPlane or _isInFlankingPlane:
-                                            multiplets.append(multiplet)
-                                            if firstOnly:
-                                                return multiplets
-
-                                elif (xPositions[0] < px < xPositions[1]
-                                      and yPositions[0] < py < yPositions[1]) or \
-                                        (minX < xPosition < maxX and minY < yPosition < maxY):
+                        if len(multiplet.axisCodes) > 2 and zPositions is not None:
+                            if (xPositions[0] < px < xPositions[1]
+                                and yPositions[0] < py < yPositions[1]) or \
+                                    (minX < xPosition < maxX and minY < yPosition < maxY):
+                                # within the XY bounds so check whether inPlane
+                                _isInPlane, _isInFlankingPlane, planeIndex, fade = \
+                                    self._GLMultiplets.objIsInVisiblePlanes(spectrumView, multiplet)
+                                if _isInPlane or _isInFlankingPlane:
                                     multiplets.append(multiplet)
                                     if firstOnly:
-                                        return multiplets if multiplet in self.current.multiplets else []
+                                        return multiplets
 
-                            except Exception:
-                                # NOTE:ED - skip for now
-                                continue
+                        elif (xPositions[0] < px < xPositions[1]
+                              and yPositions[0] < py < yPositions[1]) or \
+                                (minX < xPosition < maxX and minY < yPosition < maxY):
+                            multiplets.append(multiplet)
+                            if firstOnly:
+                                return multiplets if multiplet in self.current.multiplets else []
+
+                    except Exception:
+                        continue
 
         return multiplets
 
@@ -387,64 +291,52 @@ class GuiNdWidget(CcpnGLWidget):
             dimX, dimY = spectrumView.dimensionIndices[:2]
 
             for multipletListView in spectrumView.multipletListViews:
-                if spectrumView.isDisplayed and multipletListView.isDisplayed:
+                if not (spectrumView.isDisplayed and
+                        multipletListView.isDisplayed and
+                        (labelling := self._GLMultiplets._GLLabels.get(multipletListView))):
+                    continue
 
-                    # multipletList = multipletListView.multipletList
-                    # pks = np.array(multipletList.multiplets)
-                    # labels = [(_data2Obj.get(pLabel.stringObject._wrappedData.findFirstMultipletView(multipletListView=plv._wrappedData.multipletListView)),
-                    #            pLabel)
-                    #           for plv, ss in self.strip._CcpnGLWidget._GLMultiplets._GLLabels.items() if plv.isDisplayed
-                    #           for pLabel in ss.stringList]
+                for drawList in labelling.stringList:
 
-                    if labelling := self._GLMultiplets._GLLabels.get(multipletListView):
+                    try:
+                        multiplet = drawList.stringObject
+                        pView = multiplet.getMultipletView(multipletListView)
+                        _pos = multiplet.position
+                        px, py = float(_pos[dimX]), float(_pos[dimY])
+                        tx, ty = pView.textOffset
+                        if not tx and not ty:
+                            # pixels
+                            tx, ty = self._symbolSize, self._symbolSize
+                            # ppm
+                            # tx, ty = self.symbolX, self.symbolY
 
-                        for drawList in labelling.stringList:
+                        # find the bounds of the label
+                        # pixels
+                        # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
+                        # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
+                        # ppm
+                        minX, maxX = min(_ll := px + tx * sgnX,
+                                         _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
+                        minY, maxY = min(_ll := py + ty * sgnY,
+                                         _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
 
-                            try:
-                                multiplet = drawList.stringObject
-                                pView = multiplet.getMultipletView(multipletListView)
-                                _pos = multiplet.position
-                                px, py = float(_pos[dimX]), float(_pos[dimY])
-                                tx, ty = pView.textOffset
-                                if not tx and not ty:
-                                    # pixels
-                                    tx, ty = self._symbolSize, self._symbolSize
-                                    # ppm
-                                    # tx, ty = self.symbolX, self.symbolY
-
-                                # find the bounds of the label
-                                # pixels
-                                # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
-                                # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
-                                # ppm
-                                minX, maxX = min(_ll := px + tx * sgnX,
-                                                 _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
-                                minY, maxY = min(_ll := py + ty * sgnY,
-                                                 _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
-
-                                if len(multiplet.axisCodes) > 2 and zPositions is not None:
-                                    # zAxis = spectrumIndices[2]
-
-                                    if (minX < xPosition < maxX and minY < yPosition < maxY):
-
-                                        # within the XY bounds so check whether inPlane
-                                        _isInPlane, _isInFlankingPlane, planeIndex, fade = \
-                                            self._GLMultiplets.objIsInVisiblePlanes(spectrumView, multiplet)
-
-                                        # if zPositions[0] < float(multiplet.position[zAxis]) < zPositions[1]:
-                                        if _isInPlane or _isInFlankingPlane:
-                                            multiplets.append(multiplet)
-                                            if firstOnly:
-                                                return multiplets
-
-                                elif (minX < xPosition < maxX and minY < yPosition < maxY):
+                        if len(multiplet.axisCodes) > 2 and zPositions is not None:
+                            if (minX < xPosition < maxX and minY < yPosition < maxY):
+                                # within the XY bounds so check whether inPlane
+                                _isInPlane, _isInFlankingPlane, planeIndex, fade = \
+                                    self._GLMultiplets.objIsInVisiblePlanes(spectrumView, multiplet)
+                                if _isInPlane or _isInFlankingPlane:
                                     multiplets.append(multiplet)
                                     if firstOnly:
-                                        return multiplets if multiplet in self.current.multiplets else []
+                                        return multiplets
 
-                            except Exception:
-                                # NOTE:ED - skip for now
-                                continue
+                        elif (minX < xPosition < maxX and minY < yPosition < maxY):
+                            multiplets.append(multiplet)
+                            if firstOnly:
+                                return multiplets if multiplet in self.current.multiplets else []
+
+                    except Exception:
+                        continue
 
         return multiplets
 
@@ -1432,43 +1324,43 @@ class Gui1dWidget(CcpnGLWidget):
             yPositions = np.array(originalyPositions) - yOffset
 
             for peakListView in spectrumView.peakListViews:
-                if spectrumView.isDisplayed and peakListView.isDisplayed:
+                if not (spectrumView.isDisplayed and
+                        peakListView.isDisplayed and
+                        (labelling := self._GLPeaks._GLLabels.get(peakListView))):
+                    continue
 
-                    # peakList = peakListView.peakList
-                    if labelling := self._GLPeaks._GLLabels.get(peakListView):
-                        for drawList in labelling.stringList:
-                            try:
-                                peak = drawList.stringObject
-                                pView = peak.getPeakView(peakListView)
-                                _pos = [float(peak.position[0]), float(peak.height)]
-                                px, py = [_pos[ind] for ind in dims]
-                                tx, ty = pView.textOffset  # always relative to the screen, doesn't need rotating
-                                if not tx and not ty:
-                                    # pixels
-                                    tx, ty = self._symbolSize, self._symbolSize
-                                    # ppm
-                                    # tx, ty = self.symbolX, self.symbolY
+                for drawList in labelling.stringList:
+                    try:
+                        peak = drawList.stringObject
+                        pView = peak.getPeakView(peakListView)
+                        _pos = [float(peak.position[0]), float(peak.height)]
+                        px, py = [_pos[ind] for ind in dims]
+                        tx, ty = pView.textOffset  # always relative to the screen, doesn't need rotating
+                        if not tx and not ty:
+                            # pixels
+                            tx, ty = self._symbolSize, self._symbolSize
+                            # ppm
+                            # tx, ty = self.symbolX, self.symbolY
 
-                                # find the bounds of the label
-                                # pixels
-                                # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
-                                # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
-                                # ppm
-                                minX, maxX = min(_ll := px + tx * sgnX,
-                                                 _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
-                                minY, maxY = min(_ll := py + ty * sgnY,
-                                                 _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
+                        # find the bounds of the label
+                        # pixels
+                        # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
+                        # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
+                        # ppm
+                        minX, maxX = min(_ll := px + tx * sgnX,
+                                         _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
+                        minY, maxY = min(_ll := py + ty * sgnY,
+                                         _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
 
-                                if (xPositions[0] < px < xPositions[1]
-                                    and yPositions[0] < py < yPositions[1]) or \
-                                        (minX < xPosition - xOffset < maxX and minY < yPosition - yOffset < maxY):
-                                    peaks.append(peak)
-                                    # if firstOnly:
-                                    #     return peaks if peak in self.current.peaks else []
+                        if (xPositions[0] < px < xPositions[1]
+                            and yPositions[0] < py < yPositions[1]) or \
+                                (minX < xPosition - xOffset < maxX and minY < yPosition - yOffset < maxY):
+                            peaks.append(peak)
+                            # if firstOnly:
+                            #     return peaks if peak in self.current.peaks else []
 
-                            except Exception:
-                                # NOTE:ED - skip for now
-                                continue
+                    except Exception:
+                        continue
 
         return peaks
 
@@ -1486,41 +1378,41 @@ class Gui1dWidget(CcpnGLWidget):
 
             for peakListView in spectrumView.peakListViews:
                 xOffset, yOffset = self._spectrumSettings[spectrumView].stackedMatrixOffset
-                if spectrumView.isDisplayed and peakListView.isDisplayed:
+                if not (spectrumView.isDisplayed and
+                        peakListView.isDisplayed and
+                        (labelling := self._GLPeaks._GLLabels.get(peakListView))):
+                    continue
 
-                    # peakList = peakListView.peakList
-                    if labelling := self._GLPeaks._GLLabels.get(peakListView):
-                        for drawList in labelling.stringList:
-                            try:
-                                peak = drawList.stringObject
-                                pView = peak.getPeakView(peakListView)
-                                _pos = [float(peak.position[0]), float(peak.height)]
-                                px, py = [_pos[ind] for ind in dims]
-                                tx, ty = pView.textOffset
-                                if not tx and not ty:
-                                    # pixels
-                                    tx, ty = self._symbolSize, self._symbolSize
-                                    # ppm
-                                    # tx, ty = self.symbolX, self.symbolY
+                for drawList in labelling.stringList:
+                    try:
+                        peak = drawList.stringObject
+                        pView = peak.getPeakView(peakListView)
+                        _pos = [float(peak.position[0]), float(peak.height)]
+                        px, py = [_pos[ind] for ind in dims]
+                        tx, ty = pView.textOffset
+                        if not tx and not ty:
+                            # pixels
+                            tx, ty = self._symbolSize, self._symbolSize
+                            # ppm
+                            # tx, ty = self.symbolX, self.symbolY
 
-                                # find the bounds of the label
-                                # pixels
-                                # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
-                                # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
-                                # ppm
-                                minX, maxX = min(_ll := px + tx * sgnX,
-                                                 _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
-                                minY, maxY = min(_ll := py + ty * sgnY,
-                                                 _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
+                        # find the bounds of the label
+                        # pixels
+                        # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
+                        # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
+                        # ppm
+                        minX, maxX = min(_ll := px + tx * sgnX,
+                                         _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
+                        minY, maxY = min(_ll := py + ty * sgnY,
+                                         _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
 
-                                if (minX < xPosition - xOffset < maxX and minY < yPosition - yOffset < maxY):
-                                    peaks.append(peak)
-                                    if firstOnly:
-                                        return peaks if peak in self.current.peaks else []
+                        if (minX < xPosition - xOffset < maxX and minY < yPosition - yOffset < maxY):
+                            peaks.append(peak)
+                            if firstOnly:
+                                return peaks if peak in self.current.peaks else []
 
-                            except Exception:
-                                # NOTE:ED - skip for now
-                                continue
+                    except Exception:
+                        continue
 
         return peaks
 
@@ -1565,43 +1457,44 @@ class Gui1dWidget(CcpnGLWidget):
             yPositions = np.array(originalyPositions) - yOffset
 
             for multipletListView in spectrumView.multipletListViews:
-                if spectrumView.isDisplayed and multipletListView.isDisplayed:
+                if not (spectrumView.isDisplayed and
+                        multipletListView.isDisplayed and
+                        (labelling := self._GLMultiplets._GLLabels.get(multipletListView))):
+                    continue
 
-                    if labelling := self._GLMultiplets._GLLabels.get(multipletListView):
-                        for drawList in labelling.stringList:
-                            try:
-                                multiplet = drawList.stringObject
-                                pView = multiplet.getMultipletView(multipletListView)
-                                _pos = [float(multiplet.position[0]), float(multiplet.height)]
-                                px, py = [_pos[ind] for ind in dims]
-                                tx, ty = pView.textOffset
-                                if not tx and not ty:
-                                    # pixels
-                                    tx, ty = self._symbolSize, self._symbolSize
-                                    # ppm
-                                    # tx, ty = self.symbolX, self.symbolY
+                for drawList in labelling.stringList:
+                    try:
+                        multiplet = drawList.stringObject
+                        pView = multiplet.getMultipletView(multipletListView)
+                        _pos = [float(multiplet.position[0]), float(multiplet.height)]
+                        px, py = [_pos[ind] for ind in dims]
+                        tx, ty = pView.textOffset
+                        if not tx and not ty:
+                            # pixels
+                            tx, ty = self._symbolSize, self._symbolSize
+                            # ppm
+                            # tx, ty = self.symbolX, self.symbolY
 
-                                # find the bounds of the label
-                                # pixels
-                                # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
-                                # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
-                                # ppm
-                                minX, maxX = min(_ll := px + tx * sgnX,
-                                                 _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
-                                minY, maxY = min(_ll := py + ty * sgnY,
-                                                 _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
+                        # find the bounds of the label
+                        # pixels
+                        # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
+                        # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
+                        # ppm
+                        minX, maxX = min(_ll := px + tx * sgnX,
+                                         _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
+                        minY, maxY = min(_ll := py + ty * sgnY,
+                                         _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
 
-                                if (xPositions[0] < px < xPositions[1]
-                                    and yPositions[0] < py < yPositions[1]) or \
-                                        (minX < xPosition - xOffset < maxX and minY < yPosition - yOffset < maxY):
+                        if (xPositions[0] < px < xPositions[1]
+                            and yPositions[0] < py < yPositions[1]) or \
+                                (minX < xPosition - xOffset < maxX and minY < yPosition - yOffset < maxY):
 
-                                    multiplets.append(multiplet)
-                                    if firstOnly:
-                                        return multiplets if multiplet in self.current.multiplets else []
+                            multiplets.append(multiplet)
+                            if firstOnly:
+                                return multiplets if multiplet in self.current.multiplets else []
 
-                            except Exception:
-                                # NOTE:ED - skip for now
-                                continue
+                    except Exception:
+                        continue
 
         return multiplets
 
@@ -1619,40 +1512,41 @@ class Gui1dWidget(CcpnGLWidget):
             xOffset, yOffset = self._spectrumSettings[spectrumView].stackedMatrixOffset
 
             for multipletListView in spectrumView.multipletListViews:
-                if spectrumView.isDisplayed and multipletListView.isDisplayed:
+                if not (spectrumView.isDisplayed and
+                        multipletListView.isDisplayed and
+                        (labelling := self._GLMultiplets._GLLabels.get(multipletListView))):
+                    continue
 
-                    if labelling := self._GLMultiplets._GLLabels.get(multipletListView):
-                        for drawList in labelling.stringList:
-                            try:
-                                multiplet = drawList.stringObject
-                                pView = multiplet.getMultipletView(multipletListView)
-                                _pos = [float(multiplet.position[0]), float(multiplet.height)]
-                                px, py = [_pos[ind] for ind in dims]
-                                tx, ty = pView.textOffset
-                                if not tx and not ty:
-                                    # pixels
-                                    tx, ty = self._symbolSize, self._symbolSize
-                                    # ppm
-                                    # tx, ty = self.symbolX, self.symbolY
+                for drawList in labelling.stringList:
+                    try:
+                        multiplet = drawList.stringObject
+                        pView = multiplet.getMultipletView(multipletListView)
+                        _pos = [float(multiplet.position[0]), float(multiplet.height)]
+                        px, py = [_pos[ind] for ind in dims]
+                        tx, ty = pView.textOffset
+                        if not tx and not ty:
+                            # pixels
+                            tx, ty = self._symbolSize, self._symbolSize
+                            # ppm
+                            # tx, ty = self.symbolX, self.symbolY
 
-                                # find the bounds of the label
-                                # pixels
-                                # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
-                                # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
-                                # ppm
-                                minX, maxX = min(_ll := px + tx * sgnX,
-                                                 _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
-                                minY, maxY = min(_ll := py + ty * sgnY,
-                                                 _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
+                        # find the bounds of the label
+                        # pixels
+                        # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
+                        # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
+                        # ppm
+                        minX, maxX = min(_ll := px + tx * sgnX,
+                                         _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
+                        minY, maxY = min(_ll := py + ty * sgnY,
+                                         _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
 
-                                if (minX < xPosition - xOffset < maxX and minY < yPosition - yOffset < maxY):
-                                    multiplets.append(multiplet)
-                                    if firstOnly:
-                                        return multiplets if multiplet in self.current.multiplets else []
+                        if (minX < xPosition - xOffset < maxX and minY < yPosition - yOffset < maxY):
+                            multiplets.append(multiplet)
+                            if firstOnly:
+                                return multiplets if multiplet in self.current.multiplets else []
 
-                            except Exception:
-                                # NOTE:ED - skip for now
-                                continue
+                    except Exception:
+                        continue
 
         return multiplets
 

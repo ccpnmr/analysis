@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-19 15:20:00 +0100 (Mon, August 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-10 18:10:31 +0100 (Tue, September 10, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -69,6 +69,7 @@ from ccpn.util.decorators import logCommand
 
 from ccpnmodel.ccpncore.memops.ApiError import ApiError
 
+# _Gui contains code shared between V3 and V4
 from ._Gui import _Gui
 
 
@@ -148,7 +149,6 @@ class _MyAppProxyStyle(QtWidgets.QProxyStyle):
 # Gui
 #=========================================================================================
 
-
 def getFontSettings():
     """:return the font settings object, intialised by Gui or None if non-gui
     """
@@ -177,7 +177,8 @@ class Gui(Ui, _Gui):
         self._colourScheme = None
         self._setColourSchemeAndStyleSheet(application.args, application.preferences)
 
-        # Get menu definitions; subclassed by various application-specific Gui's
+        # Get menu definitions;
+        # _getMenuDefs() subclassed by various application-specific Gui's
         self._menuDefs = self._getMenuDefs()
 
         self._initQtApp()
@@ -216,7 +217,6 @@ class Gui(Ui, _Gui):
         Subclassed for modification in various AnalysisAssign, AnalysisScreen, ... programmes
         """
         from ccpn.ui.gui.menus.MenuDefs import getMenuDefs
-
         return getMenuDefs()
 
     def _setColourSchemeAndStyleSheet(self, args, preferences):
@@ -1328,6 +1328,17 @@ class Gui(Ui, _Gui):
         from ccpn.ui.gui.modules.DataTableModule import DataTableModule
         return self._showModule(DataTableModule, position=position, relativeTo=relativeTo,
                                 selection=dataTable)
+
+    @logCommand('ui.')
+    def showRestraintTable(self, position='bottom', relativeTo=None, restraintTable=None):
+        """Show the restraintTable module
+        :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
+        :param relativeTo: module relative to which position is applied.
+        :param restraintTable: optional reatraintTable to display
+        """
+        from ccpn.ui.gui.modules.RestraintTableModule import RestraintTableModule
+        return self._showModule(RestraintTableModule, position=position, relativeTo=relativeTo,
+                                selection=restraintTable)
 
     @logCommand('ui.')
     def showRestraintAnalysisInspector(self, position: str = 'bottom', relativeTo=None, peakList=None):

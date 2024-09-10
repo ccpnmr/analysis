@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-19 13:57:29 +0100 (Mon, August 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-10 18:10:31 +0100 (Tue, September 10, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -107,7 +107,7 @@ class RestraintTableModule(CcpnModule):
                                                 grid=(0, 0))
 
         if restraintTable is not None:
-            self.selectRestraintTable(restraintTable)
+            self.selectTable(restraintTable)
         elif selectFirstItem:
             self.restraintTable.rtWidget.selectFirstItem()
 
@@ -120,7 +120,7 @@ class RestraintTableModule(CcpnModule):
         """
         self.restraintTable._maximise()
 
-    def selectRestraintTable(self, restraintTable=None):
+    def selectTable(self, restraintTable=None):
         """
         Manually select a restraintTable from the pullDown
         """

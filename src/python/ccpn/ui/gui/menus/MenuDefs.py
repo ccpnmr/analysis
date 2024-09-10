@@ -79,7 +79,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-20 08:54:30 +0100 (Tue, August 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-10 18:10:31 +0100 (Tue, September 10, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -235,7 +235,7 @@ class MenusDefs(Menu, _ApplicationProperties):
          Action("Data Table", self._showDataTableCallback, shortcut='dt', checkEnabled=_projectHasDataTables),
 
          Separator(),
-         Action("Restraint Table", partial(app.showRestraintTable, selectFirstItem=True), shortcut='rt'),
+         Action("Restraint Table", self._showRestraintTableCallback, shortcut='rt'),
          Action("Violation Table", partial(app.showViolationTable, selectFirstItem=True), shortcut='vt'),
          Action("Structure Table", partial(app.showStructureTable, selectFirstItem=True), shortcut='st'),
          Action("Restraint Analysis Inspector", self._showRestraintAnalysisInspectorCallback, shortcut='at'),
@@ -843,6 +843,11 @@ class MenusDefs(Menu, _ApplicationProperties):
         """Callback for showing DataTable module
         """
         self.ui.showDataTable()
+
+    def _showRestraintTableCallback(self):
+        """Callback for showing RestraintTable module
+        """
+        self.ui.showRestraintTable()
 
     def _toggleToolbarCallback(self):
         if self.current.strip is not None:

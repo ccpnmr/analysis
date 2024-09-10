@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-10 17:28:09 +0100 (Tue, September 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-10 18:10:31 +0100 (Tue, September 10, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -2210,21 +2210,22 @@ class Framework(NotifierBase):
     #         integralTableModule.selectTable(integralList)
     #     return integralTableModule
 
-    @logCommand('application.')
-    def showRestraintTable(self, position: str = 'bottom', relativeTo: CcpnModule = None,
-                           restraintTable=None, selectFirstItem=False):
-        """Displays Peak table on left of main window with specified list selected.
-        """
-        from ccpn.ui.gui.modules.RestraintTableModule import RestraintTableModule
-
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-        restraintTableModule = RestraintTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
-        mainWindow.moduleArea.addModule(restraintTableModule, position=position, relativeTo=relativeTo)
-        if restraintTable:
-            restraintTableModule.selectRestraintTable(restraintTable)
-        return restraintTableModule
+    # GWV 10/9/2024: to Gui.py
+    # @logCommand('application.')
+    # def showRestraintTable(self, position: str = 'bottom', relativeTo: CcpnModule = None,
+    #                        restraintTable=None, selectFirstItem=False):
+    #     """Displays Peak table on left of main window with specified list selected.
+    #     """
+    #     from ccpn.ui.gui.modules.RestraintTableModule import RestraintTableModule
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea
+    #     restraintTableModule = RestraintTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
+    #     mainWindow.moduleArea.addModule(restraintTableModule, position=position, relativeTo=relativeTo)
+    #     if restraintTable:
+    #         restraintTableModule.selectRestraintTable(restraintTable)
+    #     return restraintTableModule
 
     @logCommand('application.')
     def showStructureTable(self, position='bottom', relativeTo=None,

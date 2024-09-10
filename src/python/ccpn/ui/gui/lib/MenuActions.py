@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-19 13:58:06 +0100 (Mon, August 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-10 18:10:31 +0100 (Tue, September 10, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1189,6 +1189,8 @@ class _openItemNoteTable(OpenItemABC):
 
 
 class _openItemRestraintTable(OpenItemABC):
+    useApplication = False
+    useUi = True
     openItemMethod = 'showRestraintTable'
     objectArgumentName = 'restraintTable'
 

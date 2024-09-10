@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>ChemicalShifts whose ChemicalShiftList is linked to a spectrum but which themselves are not linked to any Peaks are referred to as<span style=%(purple)s>Orphans</span>. Mostly they are left over from assignment mistakes and are not needed in the project. You can delete them all in one go with a CCPN Macro at <span style=%(purple)s>Macro / Run CCPN Macros / deleteOrphanedChemicalShifts</span></p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 84,
+  "contents": [
+    "./graphics/CCPNMacroDeleteOrphans.png"
+  ]
+}

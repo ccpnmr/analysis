@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can change the numbers in number entry boxes in the program's modules and dialog boxes using the <span style=%(purple)s>mouse scroll wheel</span>. If you want the number to increase/decrease by a factor of 10 more, then hold down the <span style=%(purple)s>Ctrl/Cmd</span> key while scrolling</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 88,
+  "contents": [
+    "./graphics/ChangeSpinBoxScrolling.png"
+  ]
+}

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-12 14:36:38 +0100 (Mon, August 12, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-10 17:28:09 +0100 (Tue, September 10, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -147,6 +147,8 @@ class Framework(NotifierBase):
         NotifierBase.__init__(self)
         # GuiBase.__init__(self)
 
+        assert self.applicationName is not None
+        assert self.applicationVersion is not None
         printCreditsText(sys.stderr, self.applicationName, self.applicationVersion)
 
         #-----------------------------------------------------------------------------------------
@@ -244,7 +246,6 @@ class Framework(NotifierBase):
         self._disableModuleException = getattr(self.args, 'disableModuleException', False)
         self._disableQueueException = getattr(self.args, 'disableQueueException', False)
         self._applicationReadOnlyMode = getattr(self.args, 'readOnly', False)
-        self._ccpnLogging = getattr(self.args, 'ccpnLogging', False)
 
         # register dataLoaders for the first and only time
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders

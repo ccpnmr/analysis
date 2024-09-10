@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-19 15:06:22 +0100 (Mon, August 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-10 17:28:09 +0100 (Tue, September 10, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -64,6 +64,7 @@ from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 from ccpn.ui.gui.widgets.Label import Label, ActiveLabel
 from ccpn.ui.gui.widgets.MessageDialog import showWarning, progressManager, showInfo, showError
+from ccpn.util.Common import camelCaseToString
 
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand

@@ -79,7 +79,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-10 18:10:31 +0100 (Tue, September 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-11 10:44:33 +0100 (Wed, September 11, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -182,10 +182,10 @@ class MenusDefs(Menu, _ApplicationProperties):
          Menu("Import",
             Action("NEF File", self._importNefCallback, shortcut='in'),
             Action("NmrStar File", self._loadNMRStarFileCallback, shortcut='bi'),
-        ),
+         ),
          Menu("Export",
             Action("NEF File", self._exportNEFCallback, shortcut='ex'),
-        ),
+         ),
 
          Separator(),
          Menu('Layout',
@@ -198,7 +198,7 @@ class MenusDefs(Menu, _ApplicationProperties):
 
               Separator(),
               DynamicMenu('Open pre-defined', callback=_fillFilePredefinedLayoutsCallback),
-              ),
+         ),
          Action("Summary", self._showProjectSummaryPopup),
 
          Separator(),
@@ -210,7 +210,8 @@ class MenusDefs(Menu, _ApplicationProperties):
 
          Separator(),
          Action("Quit", self._quitCallback, shortcut='⌃q'),  # Unicode U+2303,
-         ),
+
+    ), # end Menu File
 
     Menu(EDIT_MENU,
 
@@ -222,7 +223,8 @@ class MenusDefs(Menu, _ApplicationProperties):
         Action("Copy", self._nyi, shortcut='⌃c', enabled=False),
         Action("Paste", self._nyi, shortcut='⌃v', enabled=False),
         Action("Select all", self._nyi, shortcut='⌃a', enabled=False),
-    ),
+
+    ), # end Menu Edit
 
     Menu(VIEW_MENU,
 
@@ -235,9 +237,9 @@ class MenusDefs(Menu, _ApplicationProperties):
          Action("Data Table", self._showDataTableCallback, shortcut='dt', checkEnabled=_projectHasDataTables),
 
          Separator(),
-         Action("Restraint Table", self._showRestraintTableCallback, shortcut='rt'),
+         Action("Restraint Table", self._showRestraintTableCallback, shortcut='rt', checkEnabled=_projectHasRestraintTables),
          Action("Violation Table", partial(app.showViolationTable, selectFirstItem=True), shortcut='vt'),
-         Action("Structure Table", partial(app.showStructureTable, selectFirstItem=True), shortcut='st'),
+         Action("Structure Ensemble Table", self._showStructureEnsembleTableCallback, shortcut='st', checkEnabled=_projectHasStructureEnsembles),
          Action("Restraint Analysis Inspector", self._showRestraintAnalysisInspectorCallback, shortcut='at'),
 
          Separator(),
@@ -278,7 +280,8 @@ class MenusDefs(Menu, _ApplicationProperties):
          Action("Show/hide Python Console", self._toggleConsoleCallback, shortcut='  ', checkable=True, checked=True,
                                             checkEnabled=_updatePythonConsole
          ),
-    ),
+
+    ), # end Menu View
 
     Menu(SPECTRUM_MENU,
 
@@ -311,7 +314,7 @@ class MenusDefs(Menu, _ApplicationProperties):
         Action("Make Strip Plot...", ui.makeStripPlot, shortcut='sp', checkEnabled=_projectHasSpectra),
         Action("Print to File...", self._printToFileCallback, shortcut='⌃p', checkEnabled=_projectHasSpectra),
 
-    ),
+    ), # end Menu Spectrum
 
     Menu(MOLECULES_MENU,
 
@@ -327,7 +330,7 @@ class MenusDefs(Menu, _ApplicationProperties):
          Action("Show Residue Information", self._showResidueInformationCallback, shortcut='ri', checkEnabled=_projectHasChains),
          Action("Show Reference Chemical Shifts", self._showReferenceChemicalShiftsCallback, shortcut='rc'),
 
-    ),
+    ), # end Menu Molecules
 
     Menu(MACRO_MENU,
 
@@ -345,7 +348,7 @@ class MenusDefs(Menu, _ApplicationProperties):
         Separator(),
         Action("Define Macro Shortcuts...", self._defineUserShortcutsCallback, shortcut='du'),
 
-    ),
+    ),  # end Menu Macro
 
     Menu(PLUGINS_MENU,
 
@@ -355,7 +358,7 @@ class MenusDefs(Menu, _ApplicationProperties):
         Separator(),
         Action("Reload", app._reloadPlugins),
 
-    ),
+    ),  # end Menu Plugins
 
     Menu(HELP_MENU,
 
@@ -380,7 +383,7 @@ class MenusDefs(Menu, _ApplicationProperties):
         Action("Show License...", self._showCcpnLicense),
         Action("About CcpNmr V3...", self._showAboutPopup),
 
-    ),
+    ), # end Menu Help
 
     #-----------------------------------------------------------------------------------------
     ])  # end extend
@@ -848,6 +851,11 @@ class MenusDefs(Menu, _ApplicationProperties):
         """Callback for showing RestraintTable module
         """
         self.ui.showRestraintTable()
+
+    def _showStructureEnsembleTableCallback(self):
+        """Callback for showing StructureEnsembleTable module
+        """
+        self.ui.showStructureEnsembleTable()
 
     def _toggleToolbarCallback(self):
         if self.current.strip is not None:
@@ -1522,6 +1530,20 @@ def _projectHasDataTables(node) -> bool:
     """
     project = getProject()
     return bool(project and project.dataTables)
+
+
+def _projectHasRestraintTables(node) -> bool:
+    """callback to test if project has reatraintTables
+    """
+    project = getProject()
+    return bool(project and project.restraintTables)
+
+
+def _projectHasStructureEnsembles(node) -> bool:
+    """callback to test if project has StructureEnsembles
+    """
+    project = getProject()
+    return bool(project and project.structureEnsembles)
 
 
 def _hasSpectrumDisplays(node) -> bool:

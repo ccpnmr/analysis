@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-10 18:10:31 +0100 (Tue, September 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-11 10:44:32 +0100 (Wed, September 11, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -2227,21 +2227,22 @@ class Framework(NotifierBase):
     #         restraintTableModule.selectRestraintTable(restraintTable)
     #     return restraintTableModule
 
-    @logCommand('application.')
-    def showStructureTable(self, position='bottom', relativeTo=None,
-                           structureEnsemble=None, selectFirstItem=False):
-        """Displays Structure Table
-        """
-        from ccpn.ui.gui.modules.StructureTable import StructureTableModule
-
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-        structureTableModule = StructureTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
-        mainWindow.moduleArea.addModule(structureTableModule, position=position, relativeTo=relativeTo)
-        if structureEnsemble:
-            structureTableModule.selectTable(structureEnsemble)
-        return structureTableModule
+    # GWV 11/9/20245: moved to Gui
+    # @logCommand('application.')
+    # def showStructureTable(self, position='bottom', relativeTo=None,
+    #                        structureEnsemble=None, selectFirstItem=False):
+    #     """Displays Structure Table
+    #     """
+    #     from ccpn.ui.gui.modules.StructureTable import StructureTableModule
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea
+    #     structureTableModule = StructureTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
+    #     mainWindow.moduleArea.addModule(structureTableModule, position=position, relativeTo=relativeTo)
+    #     if structureEnsemble:
+    #         structureTableModule.selectTable(structureEnsemble)
+    #     return structureTableModule
 
     # GWV 08/08/2024: moved to Gui
     # @logCommand('application.')

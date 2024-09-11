@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-11 10:39:22 +0100 (Wed, September 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-11 11:39:51 +0100 (Wed, September 11, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -2578,7 +2578,9 @@ class Project(AbstractWrapperObject):
             name = path.basename
 
             ensemble = EnsembleData.from_mmcif(str(path))
-            se = self.newStructureEnsemble(name=name, data=ensemble)
+            se = self.newStructureEnsemble(name=name, data=ensemble,
+                                           comment=f'Coordinate data from mmCIF {path}'
+                                           )
 
             # create a new ensemble-average in a dataTable
             dTable = self.newDataTable(name=f'{name}-average', data=averageStructure(ensemble))
@@ -2671,8 +2673,10 @@ class Project(AbstractWrapperObject):
                 df1.rename(columns={'index': 'id'}, inplace=True)
 
                 # save the secondary structure dataframe
-                self.newDataTable(name="SecondaryStructure", data=df1,
-                                  comment='Secondary Structure Data from MMCIF')
+                _secTable = self.newDataTable(name=f'{name}-secondaryStructure', data=df1,
+                                              comment=f'Secondary structure data from mmCIF {path}'
+                                              )
+                _secTable.setMetadata('structureEnsemble', se.pid)
 
         return [se]
 

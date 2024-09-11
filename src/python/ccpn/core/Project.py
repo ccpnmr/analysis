@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-07-18 17:16:45 +0100 (Thu, July 18, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-11 10:39:22 +0100 (Wed, September 11, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -2510,8 +2510,68 @@ class Project(AbstractWrapperObject):
         """Load data from mmcif file path into new StructureEnsemble object(s)
         CCPNINTERNAL: called from mmcif dataLoader
         """
-
         from ccpn.util.StructureData import EnsembleData, averageStructure
+
+        # helper functions ------------------------------------------------
+        def _getLoopNames(filename):
+            getLogger().debug(f'Loading MMCIF file: getting loop names from {filename}')
+            loopNames = []
+            loop_ = False
+            with open(filename) as f:
+                for l in f:
+                    l = l.strip()
+                    if len(l) == 0:
+                        continue  # Ignore blank lines
+                    if l.startswith('#'):
+                        loop_ = False
+                        continue
+                    if l.startswith('loop_'):
+                        loop_ = True
+                        continue
+                    if (loop_ == True) and (l.startswith('_')):
+                        loopNames.append(l.split('.')[0])
+
+            return list(set(loopNames))
+
+        def _getLoopData(filename, loopName) -> pd.DataFrame:
+            """
+            Create a Pandas DataFrame from an mmCIF file.
+            """
+            columns = []
+            atomData = []
+            loop_ = False
+            _atom_siteLoop = False
+            with open(filename) as f:
+                for l in f:
+                    l = l.strip()
+                    if len(l) == 0:
+                        continue  # Ignore blank lines
+                    if l.startswith('#'):
+                        loop_ = False
+                        _atom_siteLoop = False
+                        continue
+                    if l.startswith('loop_'):
+                        loop_ = True
+                        _atom_siteLoop = False
+                        continue
+                    if loop_ and l.startswith(loopName + '.'):
+                        _atom_siteLoop = True
+                        columns.append(l.replace(loopName + '.', "").strip())
+                    if _atom_siteLoop and l.startswith('#'):
+                        loop_ = False
+                        _atom_siteLoop = False
+                    if _atom_siteLoop and not l.startswith(loopName + '.'):
+                        split_data = re.findall(r"'[^']*'|\S+", l)
+                        split_data = [item.strip("'") for item in split_data]
+                        atomData.append(split_data)
+
+            df = pd.DataFrame(atomData, columns=columns)
+            # df = df.infer_objects()  # This method returns the DataFrame with inferred data types
+            df['idx'] = np.arange(1, df.shape[0] + 1)  # Create an 'idx' column
+            df.set_index('idx', inplace=True)  # Set 'idx' as the index
+
+            return df
+        # end helper functions ------------------------------------------------
 
         with logCommandManager('application.', 'loadData', path):
             path = aPath(path)
@@ -2524,81 +2584,26 @@ class Project(AbstractWrapperObject):
             dTable = self.newDataTable(name=f'{name}-average', data=averageStructure(ensemble))
             dTable.setMetadata('structureEnsemble', se.pid)
 
-            def getLoopNames(filename):
-                getLogger().info(filename)
-                loopNames = []
-                loop_ = False
-                with open(filename) as f:
-                    for l in f:
-                        l = l.strip()
-                        if len(l) == 0:
-                            continue  # Ignore blank lines
-                        if l.startswith('#'):
-                            loop_ = False
-                            continue
-                        if l.startswith('loop_'):
-                            loop_ = True
-                            continue
-                        if (loop_ == True) and (l.startswith('_')):
-                            loopNames.append(l.split('.')[0])
-
-                return list(set(loopNames))
-
-            loopNames = getLoopNames(path)
-
-            def getLoopData(filename, loopName) -> pd.DataFrame:
-                """
-                Create a Pandas DataFrame from an mmCIF file.
-                """
-                columns = []
-                atomData = []
-                loop_ = False
-                _atom_siteLoop = False
-                with open(filename) as f:
-                    for l in f:
-                        l = l.strip()
-                        if len(l) == 0:
-                            continue  # Ignore blank lines
-                        if l.startswith('#'):
-                            loop_ = False
-                            _atom_siteLoop = False
-                            continue
-                        if l.startswith('loop_'):
-                            loop_ = True
-                            _atom_siteLoop = False
-                            continue
-                        if loop_ and l.startswith(loopName + '.'):
-                            _atom_siteLoop = True
-                            columns.append(l.replace(loopName + '.', "").strip())
-                        if _atom_siteLoop and l.startswith('#'):
-                            loop_ = False
-                            _atom_siteLoop = False
-                        if _atom_siteLoop and not l.startswith(loopName + '.'):
-                            split_data = re.findall(r"'[^']*'|\S+", l)
-                            split_data = [item.strip("'") for item in split_data]
-                            atomData.append(split_data)
-
-                df = pd.DataFrame(atomData, columns=columns)
-                # df = df.infer_objects()  # This method returns the DataFrame with inferred data types
-                df['idx'] = np.arange(1, df.shape[0] + 1)  # Create an 'idx' column
-                df.set_index('idx', inplace=True)  # Set 'idx' as the index
-
-                return df
-
+            # Try getting secondary structure information from mmCif file;
+            # associate with a chain
             try:
-                if len(self.chains) == 1:
-                    chain = self.chains[0]
-                else:
-                    getLogger().info(self.chains)
-                    return
-            except:
-                getLogger().info(self.chains)
-                return
+                loopNames = _getLoopNames(path)
+            except Exception as es:
+                _error = f'Loading mmCif {path}: error getting loop names'
+                getLogger().debug(f'{_error}: {es}')
+                raise RuntimeError(_error)
 
             if (("_struct_conf" in loopNames) or ("_struct_sheet_range" in loopNames)):
                 # generates a Datatable containing secondary structure information from the mmcif file.
 
-                # get chain information
+                # GWV: assuming this test is ok?
+                if len(self.chains) == 1:
+                    chain = self.chains[0]
+                else:
+                    getLogger().warning(f'Loading mmCif {path}: while attempting to extract secondary structure info; expected exactly one chain')
+                    return [se]
+
+                # extract chain information
                 _struct_confDict = {}
 
                 for residue in chain.residues:
@@ -2610,19 +2615,23 @@ class Project(AbstractWrapperObject):
 
                 # try to get secondary structure data from mmcif
                 try:
-                    dfHelix = getLoopData(path, "_struct_conf")
-                except:
+                    _loop = "_struct_conf"
+                    dfHelix = _getLoopData(path, _loop)
+                except Exception as es:
+                    getLogger().debug(f'Loading mmCif {path} loop data {_loop} failed: {es}')
                     dfHelix = None
 
                 try:
-                    dfSheet = getLoopData(path, "_struct_sheet_range")
-                except:
+                    _loop = "_struct_sheet_range"
+                    dfSheet = _getLoopData(path, _loop)
+                except Exception as es:
+                    getLogger().debug(f'Loading mmCif {path} loop data {_loop} failed: {es}')
                     dfSheet = None
 
                 # process the helix data - if there is some
                 if dfHelix is not None:
                     # Iterate over rows in the DataFrame
-                    getLogger().info("dfHelix\n", dfHelix.tail())
+                    getLogger().debug(f'dfHelix {dfHelix.tail()}\n')
                     for index, row in dfHelix.iterrows():
                         # Get the relevant values from the row
                         conf_type_id = row['conf_type_id']
@@ -2634,8 +2643,8 @@ class Project(AbstractWrapperObject):
                             # Set dictionary values for each 'id'
                             try:
                                 _struct_confDict[id]['conf_type_id'] = conf_type_id
-                            except:
-                                getLogger().warning("Not found error. Likely mismatch between Chain and mmcif sequence")
+                            except KeyError:
+                                getLogger().warning(f'Residue {id} not found error. Likely mismatch between {chain} and mmcif sequence')
 
                 # process the sheet data if there is some
                 if dfSheet is not None:
@@ -2651,8 +2660,8 @@ class Project(AbstractWrapperObject):
                             # Set dictionary values for each 'id'
                             try:
                                 _struct_confDict[id]['conf_type_id'] = conf_type_id
-                            except:
-                                getLogger().warning("Not found error. Likely mismatch between Chain and mmcif sequence")
+                            except KeyError:
+                                getLogger().warning(f'Residue {id} not found error. Likely mismatch between {chain} and mmcif sequence')
 
                 # Convert the nested dictionary to a Pandas DataFrame
                 df1 = pd.DataFrame.from_dict(_struct_confDict, orient='index')

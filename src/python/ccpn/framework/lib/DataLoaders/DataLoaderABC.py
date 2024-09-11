@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-07-25 10:11:17 +0100 (Thu, July 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-11 10:39:22 +0100 (Wed, September 11, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -366,7 +366,8 @@ class DataLoaderABC(TraitBase):
             result = loaderFunc(obj, self.path)
 
         except (ValueError, RuntimeError, RuntimeWarning) as es:
-            raise RuntimeError(f'While loading "{self.path}": {es}') from es
+            getLogger().error(f'While loading "{self.path}": {es}')
+            raise RuntimeError(f'{es}') from es
 
         return result
 

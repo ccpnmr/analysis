@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-01 20:52:11 +0100 (Mon, July 01, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-09-11 15:57:18 +0100 (Wed, September 11, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -53,11 +53,9 @@ class Ui(NotifierBase):
     # Can be subclassed
     _hasGui = False
 
-    # GWV 26/2/24: Not used
-    # # Factory functions for UI-specific instantiation of wrapped graphics classes
-    # _factoryFunctions = {}
-
     def __init__(self, application):
+
+        NotifierBase.__init__(self)
 
         # set the forward/backlink with application already here, because subsequent initialisations
         # do require this to be present

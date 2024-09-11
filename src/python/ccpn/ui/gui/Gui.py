@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-11 14:59:18 +0100 (Wed, September 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-11 15:57:19 +0100 (Wed, September 11, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -70,11 +70,11 @@ from ccpn.util.decorators import logCommand
 from ccpnmodel.ccpncore.memops.ApiError import ApiError
 
 # _Gui_V3_V4 contains code shared between V3 and V4
-from ._Gui_V3_V4 import _Gui_V3_V4
+from ccpn.ui.gui._Gui_V3_V4 import _Gui_V3_V4
 
 
 #-----------------------------------------------------------------------------------------
-# Subclass the exception hook fpr PyQT
+# Subclass the exception hook for PyQT
 #-----------------------------------------------------------------------------------------
 
 def _ccpnExceptionhook(ccpnType, value, tback):
@@ -172,8 +172,6 @@ class Gui(Ui, _Gui_V3_V4):
                 # Set up mainWindow
                 self._setupMainWindow()
                 self._restoreSpectrumDisplayModules()
-                # self.application._updateCheckableMenuItems()
-                # self._updateCheckableMenuItems()
                 self._makeActiveWindow()
 
     def _restoreSpectrumDisplayModules(self):
@@ -1274,18 +1272,18 @@ class Gui(Ui, _Gui_V3_V4):
         return self._showModule(StructureTableModule, position=position, relativeTo=relativeTo,
                                 selection=structureEnsemble)
 
-    @logCommand('ui.')
-    def showRestraintAnalysisInspector(self, position: str = 'bottom', relativeTo=None, peakList=None):
-        """Show the RestraintAnalysis Inspector.
-        :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
-        :param relativeTo: module relative to which position is applied.
-        :param peakList: optional PeakList to populate the module
-        """
-        from ccpn.ui.gui.modules.RestraintAnalysisTable import RestraintAnalysisTableModule
-        _module = self._showModule(RestraintAnalysisTableModule, position=position, relativeTo=relativeTo)
-        if peakList:
-            _module.selectPeakList(peakList)
-        return _module
+    # @logCommand('ui.')
+    # def showRestraintAnalysisInspector(self, position: str = 'bottom', relativeTo=None, peakList=None):
+    #     """Show the RestraintAnalysis Inspector.
+    #     :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
+    #     :param relativeTo: module relative to which position is applied.
+    #     :param peakList: optional PeakList to populate the module
+    #     """
+    #     from ccpn.ui.gui.modules.RestraintAnalysisTable import RestraintAnalysisTableModule
+    #     _module = self._showModule(RestraintAnalysisTableModule, position=position, relativeTo=relativeTo)
+    #     if peakList:
+    #         _module.selectPeakList(peakList)
+    #     return _module
 
     def showChemicalShiftMapping(self, position: str = 'top', relativeTo = None):
         """Show the ChemicalShiftMapping module

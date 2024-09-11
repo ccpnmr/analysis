@@ -79,7 +79,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-11 14:59:18 +0100 (Wed, September 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-11 15:57:19 +0100 (Wed, September 11, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -240,7 +240,7 @@ class MenusDefs(Menu, _ApplicationProperties):
          Action("Restraint Table", self._showRestraintTableCallback, shortcut='rt', checkEnabled=_projectHasRestraintTables),
          Action("Violation Table", self._showViolationTableCallback, shortcut='vt', checkEnabled=_projectHasViolationTables),
          Action("Structure Ensemble Table", self._showStructureEnsembleTableCallback, shortcut='st', checkEnabled=_projectHasStructureEnsembles),
-         Action("Restraint Analysis Inspector", self._showRestraintAnalysisInspectorCallback, shortcut='at'),
+         # Action("Restraint Analysis Inspector", self._showRestraintAnalysisInspectorCallback, shortcut='at'),
 
          Separator(),
          Action(VIEW_CHEMICAL_SHIFT_MAPPING, self._showChemicalShiftMappingCallback, shortcut='cm'),
@@ -972,11 +972,11 @@ class MenusDefs(Menu, _ApplicationProperties):
         """Toggles whether crosshairs are displayed in all SpectrumDisplays.
         """
         self.mainWindow.toggleCrosshair()
-
-    def _showRestraintAnalysisInspectorCallback(self):
-        """Callback for showing the RestrainAnalysis inspector
-        """
-        self.ui.showRestraintAnalysisInspector()
+    #
+    # def _showRestraintAnalysisInspectorCallback(self):
+    #     """Callback for showing the RestrainAnalysis inspector
+    #     """
+    #     self.ui.showRestraintAnalysisInspector()
 
     def _showChemicalShiftMappingCallback(self):
         """Callback to show Chemical shift mapping module

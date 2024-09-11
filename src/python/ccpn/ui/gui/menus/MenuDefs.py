@@ -79,7 +79,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-11 10:44:33 +0100 (Wed, September 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-11 14:59:18 +0100 (Wed, September 11, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -238,7 +238,7 @@ class MenusDefs(Menu, _ApplicationProperties):
 
          Separator(),
          Action("Restraint Table", self._showRestraintTableCallback, shortcut='rt', checkEnabled=_projectHasRestraintTables),
-         Action("Violation Table", partial(app.showViolationTable, selectFirstItem=True), shortcut='vt'),
+         Action("Violation Table", self._showViolationTableCallback, shortcut='vt', checkEnabled=_projectHasViolationTables),
          Action("Structure Ensemble Table", self._showStructureEnsembleTableCallback, shortcut='st', checkEnabled=_projectHasStructureEnsembles),
          Action("Restraint Analysis Inspector", self._showRestraintAnalysisInspectorCallback, shortcut='at'),
 
@@ -851,6 +851,11 @@ class MenusDefs(Menu, _ApplicationProperties):
         """Callback for showing RestraintTable module
         """
         self.ui.showRestraintTable()
+
+    def _showViolationTableCallback(self):
+        """Callback for showing ViolationTable module
+        """
+        self.ui.showViolationTable()
 
     def _showStructureEnsembleTableCallback(self):
         """Callback for showing StructureEnsembleTable module
@@ -1533,10 +1538,17 @@ def _projectHasDataTables(node) -> bool:
 
 
 def _projectHasRestraintTables(node) -> bool:
-    """callback to test if project has reatraintTables
+    """callback to test if project has restraintTables
     """
     project = getProject()
     return bool(project and project.restraintTables)
+
+
+def _projectHasViolationTables(node) -> bool:
+    """callback to test if project has violationTables
+    """
+    project = getProject()
+    return bool(project and project.violationTables)
 
 
 def _projectHasStructureEnsembles(node) -> bool:

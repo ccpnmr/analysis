@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-11 14:34:52 +0100 (Wed, September 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-11 14:59:18 +0100 (Wed, September 11, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -2261,28 +2261,29 @@ class Framework(NotifierBase):
     #     mainWindow.moduleArea.addModule(_dataTableModule, position=position, relativeTo=relativeTo)
     #     return _dataTableModule
 
-    @logCommand('application.')
-    def showViolationTable(self, position: str = 'bottom', relativeTo: CcpnModule = None,
-                           violationTable=None, selectFirstItem=False):
-        """Displays Violation table on left of main window with specified list selected.
-        """
-        from ccpn.ui.gui.modules.ViolationTableModule import ViolationTableModule as _module
+    # GWV 9/11/2024: moved to Gui.py
+    # @logCommand('application.')
+    # def showViolationTable(self, position: str = 'bottom', relativeTo: CcpnModule = None,
+    #                        violationTable=None, selectFirstItem=False):
+    #     """Displays Violation table on left of main window with specified list selected.
+    #     """
+    #     from ccpn.ui.gui.modules.ViolationTableModule import ViolationTableModule as _module
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea
+    #
+    #     _violationTableModule = _module(mainWindow=mainWindow, table=violationTable, selectFirstItem=selectFirstItem)
+    #     mainWindow.moduleArea.addModule(_violationTableModule, position=position, relativeTo=relativeTo)
+    #     return _violationTableModule
 
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-
-        _violationTableModule = _module(mainWindow=mainWindow, table=violationTable, selectFirstItem=selectFirstItem)
-        mainWindow.moduleArea.addModule(_violationTableModule, position=position, relativeTo=relativeTo)
-        return _violationTableModule
-
-    @logCommand('application.')
-    def showCollectionModule(self, position='bottom', relativeTo=None,
-                             collection=None, selectFirstItem=False):
-        """Displays Collection Module
-        """
-        MessageDialog.showNYI(parent=self.mainWindow)
-        # pass
+    # @logCommand('application.')
+    # def showCollectionModule(self, position='bottom', relativeTo=None,
+    #                          collection=None, selectFirstItem=False):
+    #     """Displays Collection Module
+    #     """
+    #     MessageDialog.showNYI(parent=self.mainWindow)
+    #     # pass
 
     @logCommand('application.')
     def showNotesEditor(self, position: str = 'bottom', relativeTo: CcpnModule = None,

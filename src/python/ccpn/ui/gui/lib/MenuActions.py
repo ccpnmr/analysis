@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-11 10:44:32 +0100 (Wed, September 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-11 14:59:18 +0100 (Wed, September 11, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1452,6 +1452,8 @@ class _openItemDataTable(OpenItemABC):
 
 
 class _openItemViolationTable(OpenItemABC):
+    useApplication = False
+    useUi = True
     openItemMethod = 'showViolationTable'
     objectArgumentName = 'violationTable'
 

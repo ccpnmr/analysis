@@ -469,7 +469,7 @@ QCheckBox::indicator:disabled, QRadioButton::indicator:disabled
 '''
 
 
-ui.qtApp.setStyleSheet(DarkTheme)
+ui._qtApp.setStyleSheet(DarkTheme)
 
 ## to revert to default run on the console:
-# ui.qtApp.setStyleSheet('')
+# ui._qtApp.setStyleSheet('')

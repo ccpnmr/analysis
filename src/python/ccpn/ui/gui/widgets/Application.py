@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-27 10:35:17 +0100 (Thu, June 27, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-09-11 14:34:52 +0100 (Wed, September 11, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -150,7 +150,7 @@ def newTestApplication(projectPath=None, useTestProjects=False, skipUserPreferen
             projectPath = TEST_PROJECTS_PATH / projectPath
 
     if interface == 'Gui':
-        # store temporary variable so that the qtApp event execution loop can be skipped
+        # store temporary variable so that the _qtApp event execution loop can be skipped
         # allows flow to continue after creation of mainWindow
         import builtins
 

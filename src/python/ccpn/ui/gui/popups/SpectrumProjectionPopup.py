@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-05 14:06:05 +0200 (Thu, September 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-11 14:34:52 +0100 (Wed, September 11, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -60,7 +60,7 @@ class SpectrumProjectionPopup(CcpnDialogWithOutputPathPopupABC):  # ExportDialog
             return
 
         # select a spectrum from current or validSpectra
-        if self.application.current.strip is not None and \
+        if self.application.current and self.application.current.strip is not None and \
                 not self.application.current.strip.isDeleted and \
                 len(self.application.current.strip.spectra) > 0 and \
                 self.application.current.strip.spectra[0].dimensionCount == 3:

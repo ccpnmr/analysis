@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-11 13:07:55 +0100 (Wed, September 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-11 14:34:52 +0100 (Wed, September 11, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -51,7 +51,7 @@ from ccpn.ui.gui.guiSettings import LIGHT, DARK
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup, NewTermsConditionsPopup
-from ccpn.ui.gui.widgets.Application import Application
+from ccpn.ui.gui.widgets.Application import Application as PyQtApplication
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets import FileDialog
 from ccpn.ui.gui.widgets.Font import getSystemFonts
@@ -69,8 +69,8 @@ from ccpn.util.decorators import logCommand
 
 from ccpnmodel.ccpncore.memops.ApiError import ApiError
 
-# _Gui contains code shared between V3 and V4
-from ._Gui import _Gui
+# _Gui_V3_V4 contains code shared between V3 and V4
+from ._Gui_V3_V4 import _Gui_V3_V4
 
 
 #-----------------------------------------------------------------------------------------
@@ -122,30 +122,6 @@ MAXITEMDEPTH = 5
 
 
 #=========================================================================================
-# _MyAppProxyStyle
-#=========================================================================================
-
-class _MyAppProxyStyle(QtWidgets.QProxyStyle):
-    """Class to handle resizing icons in menus
-    """
-
-    def drawControl(self, element, option, painter, widget=None):
-        if (element in {QtWidgets.QStyle.CE_MenuItem} and isinstance(option, QtWidgets.QStyleOptionMenuItem) and
-                (_actionGeometries := getattr(widget, '_actionGeometries', None)) and
-                (action := _actionGeometries.get(str(option.rect))) and
-                (colour := getattr(action, '_foregroundColour', None))):
-            # Customise the foreground colour for the menu-item from the QAction
-            option.palette.setColor(option.palette.Text, colour)
-        return super().drawControl(element, option, painter, widget)
-
-    def standardIcon(self, standardIcon, option=None, widget=None) -> QtGui.QIcon:
-        # change the close-button of the line-edit to a cleaner icon, set by setClearButtonEnabled
-        if standardIcon == QtWidgets.QStyle.SP_LineEditClearButton:
-            return Icon('icons/close-lineedit')
-        return super().standardIcon(standardIcon, option, widget)
-
-
-#=========================================================================================
 # Gui
 #=========================================================================================
 
@@ -159,9 +135,9 @@ def getFontSettings():
         return None
 
 
-class Gui(Ui, _Gui):
+class Gui(Ui, _Gui_V3_V4):
     """Top class for the GUI interface
-    _Gui contains methods shared between V3 and V4
+    _Gui_V3_V4 contains methods shared between V3 and V4
     """
 
     _hasGui = True
@@ -178,34 +154,7 @@ class Gui(Ui, _Gui):
         # Get menu definitions; _getMenuDefs() subclassed by various application-specific Gui's
         self._menuDefs = self._getMenuDefs()
 
-        self._initQtApp()
-
-    def _initQtApp(self):
-        # On the Mac (at least) it does not matter what you set the applicationName to be,
-        # it will come out as the executable you are running (e.g. "python3")
-
-        QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
-        QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
-
-        # NOTE:ED - this is essential for multi-window applications
-        QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts, True)
-
-        # fm = QtGui.QSurfaceFormat()
-        # fm.setSamples(4)
-        # # NOTE:ED - Do not do this, they cause QT to exhibit strange behaviour
-        # # fm.setSwapInterval(0)  # disable VSync
-        # # fm.setSwapBehavior(QtGui.QSurfaceFormat.DoubleBuffer)
-        # QtGui.QSurfaceFormat.setDefaultFormat(fm)
-
-        self.qtApp = Application(self.application.applicationName,
-                                 self.application.applicationVersion,
-                                 organizationName='CCPN',
-                                 organizationDomain='ccpn.ac.uk')
-
-        # patch for icon sizes in menus, etc.
-        styles = QtWidgets.QStyleFactory()
-        myStyle = _MyAppProxyStyle(styles.create('fusion'))
-        self.qtApp.setStyle(myStyle)
+        self._qtApp = self._initQtApp()
 
         # read the current system-fonts
         getSystemFonts()
@@ -457,7 +406,7 @@ class Gui(Ui, _Gui):
         import builtins
 
         if not (_skip := getattr(builtins, '_skipExecuteLoop', False)):
-            self.qtApp.start()
+            self._qtApp.start()
 
     def _registerDetails(self, registered=False, acceptedTerms=False):
         """Display registration popup"""
@@ -478,7 +427,7 @@ class Gui(Ui, _Gui):
 
             self.mainWindow.show()
             popup.exec_()
-            self.qtApp.processEvents()
+            self._qtApp.processEvents()
 
     def _setupMainWindow(self):
         """Set up mainWindow

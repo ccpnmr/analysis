@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-11 10:44:32 +0100 (Wed, September 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-11 14:34:52 +0100 (Wed, September 11, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -91,7 +91,7 @@ from ccpn.framework.PathsAndUrls import \
     CCPN_DIRECTORY_SUFFIX
 
 from ccpn.framework.lib.resources.Resources import Resources
-from ccpn.ui.gui.Gui import Gui
+# from ccpn.ui.gui.Gui import Gui
 # from ccpn.ui.gui.GuiBase import GuiBase
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
@@ -1980,7 +1980,7 @@ class Framework(NotifierBase):
     #         getLogger().warning('Estimate Current Volumes: no current.peaks')
     #         MessageDialog.showWarning('Estimate Current Volumes', 'no current.peaks')
     #
-    # GWV 27/324: copied to _Gui
+    # GWV 27/324: copied to _Gui_V3_V4
     # @logCommand('application.')
     # def makeStripPlot(self, includePeakLists=True, includeNmrChains=True, includeNmrChainPullSelection=True):
     #     """Make a strip plot from peaks or nmrChains
@@ -2532,7 +2532,7 @@ class Framework(NotifierBase):
 
     #################################################################################################
 
-    # GWV 28/3 to _Gui.py
+    # GWV 28/3 to _Gui_V3_V4.py
     # def _systemOpen(self, path):
     #     """Open path to pdf file on system
     #     """

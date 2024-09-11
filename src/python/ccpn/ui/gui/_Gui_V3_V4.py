@@ -2,9 +2,14 @@ import os
 import subprocess
 import platform
 
+from PyQt5 import QtWidgets, QtCore, QtGui
+
 from ccpn.ui.gui.widgets import MessageDialog
+from ccpn.ui.gui.widgets.Application import Application as PyQtApplication
 
 # This import initializes relative paths for QT style-sheets.  Do not remove! GWV ????
+from ccpn.ui.gui.guiSettings import FontSettings, consoleStyle
+from ccpn.ui.gui.widgets.Icon import Icon
 
 from ccpn.util.Logging import getLogger
 from ccpn.util.Path import aPath
@@ -14,10 +19,40 @@ from ccpn.ui.gui.guiSettings import LIGHT, DARK
 
 
 
-class _Gui(object):
+class _Gui_V3_V4(object):
     """
     All methods, to be retained for a 4.x refactored version
     """
+
+    def _initQtApp(self) -> PyQtApplication:
+        # On the Mac (at least) it does not matter what you set the applicationName to be,
+        # it will come out as the executable you are running (e.g. "python3")
+
+        QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+        QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
+
+        # NOTE:ED - this is essential for multi-window applications
+        QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts, True)
+
+        # fm = QtGui.QSurfaceFormat()
+        # fm.setSamples(4)
+        # # NOTE:ED - Do not do this, they cause QT to exhibit strange behaviour
+        # # fm.setSwapInterval(0)  # disable VSync
+        # # fm.setSwapBehavior(QtGui.QSurfaceFormat.DoubleBuffer)
+        # QtGui.QSurfaceFormat.setDefaultFormat(fm)
+
+        _qtApp = PyQtApplication(self.application.applicationName,
+                                 self.application.applicationVersion,
+                                 organizationName='CCPN',
+                                 organizationDomain='ccpn.ac.uk'
+                                )
+
+        # patch for icon sizes in menus, etc.
+        styles = QtWidgets.QStyleFactory()
+        myStyle = _MyAppProxyStyle(styles.create('fusion'))
+        _qtApp.setStyle(myStyle)
+
+        return _qtApp
 
     def _getMenuDefs(self):
         """:return the MenuDefs instance
@@ -199,3 +234,27 @@ class _Gui(object):
     def _showCCPNVideos(self):
         from ccpn.framework.PathsAndUrls import ccpnVideos
         self._showHtmlFile('Video Tutorials', ccpnVideos)
+
+
+#=========================================================================================
+# _MyAppProxyStyle
+#=========================================================================================
+
+class _MyAppProxyStyle(QtWidgets.QProxyStyle):
+    """Class to handle resizing icons in menus
+    """
+
+    def drawControl(self, element, option, painter, widget=None):
+        if (element in {QtWidgets.QStyle.CE_MenuItem} and isinstance(option, QtWidgets.QStyleOptionMenuItem) and
+                (_actionGeometries := getattr(widget, '_actionGeometries', None)) and
+                (action := _actionGeometries.get(str(option.rect))) and
+                (colour := getattr(action, '_foregroundColour', None))):
+            # Customise the foreground colour for the menu-item from the QAction
+            option.palette.setColor(option.palette.Text, colour)
+        return super().drawControl(element, option, painter, widget)
+
+    def standardIcon(self, standardIcon, option=None, widget=None) -> QtGui.QIcon:
+        # change the close-button of the line-edit to a cleaner icon, set by setClearButtonEnabled
+        if standardIcon == QtWidgets.QStyle.SP_LineEditClearButton:
+            return Icon('icons/close-lineedit')
+        return super().standardIcon(standardIcon, option, widget)

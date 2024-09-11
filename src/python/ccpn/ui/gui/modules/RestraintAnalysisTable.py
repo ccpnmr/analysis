@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-11 14:44:29 +0100 (Wed, September 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-11 18:57:16 +0100 (Wed, September 11, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -114,8 +114,6 @@ class _ComparisonTree(ProjectTreeCheckBoxes):
         self.setAcceptDrops(True)
         self.setGuiNotifier(self, [GuiNotifier.DROPEVENT],
                             [DropBase.PIDS], callback=self._processDroppedItems)
-        # self.setDropEventCallback(self._processDroppedItems)
-
         self.setSizeAdjustPolicy(self.AdjustToContents)
         self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.MinimumExpanding)
         if self not in self.resources.comparisonSets:
@@ -763,7 +761,8 @@ class RestraintAnalysisTableModule(CcpnTableModule):
         # self.mainWidget._dropEventCallback = self._processDroppedItems
 
         self.settingsWidget.setAcceptDrops(True)
-        self.settingsWidget.setDropEventCallback(self._processDroppedItems)
+        self.setGuiNotifier(self.settingsWidget, [GuiNotifier.DROPEVENT],
+                            [DropBase.PIDS], callback=self._processDroppedItems)
         rss._resTableWidget.setPreSelect(self._applyRestraintTableFilter)
         rss._outTableWidget.setPreSelect(self._applyViolationTableFilter)
 

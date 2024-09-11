@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-11 13:07:27 +0100 (Wed, September 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-11 18:57:17 +0100 (Wed, September 11, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -232,14 +232,20 @@ class DropBase:
                 # test self and parents to find valid callbacks
                 _widget = self
                 while _widget:
-                    if (_notifiers := _getRegisteredNotifiers(_widget, trigger=GuiNotifier.DROPEVENT)) is None:
-                        _widget = _widget.parent()
-
-                    else:
+                    if (_notifiers := _getRegisteredNotifiers(_widget, trigger=GuiNotifier.DROPEVENT)) is not None:
+                        # NOTE:ED - may need to look at this
+                        #   notifier may process dataDict and decide not to process under some circumstances
+                        #       (and return True)
+                        #   e.g. RestraintAnalysisTable -> collections in comparison-box
+                        #   so need to iterate up the widget stack to parent, possibly .settingsWidget
+                        rejected = False
                         for _n in _notifiers:
-                            _n(dataDict)
-                        event.accept()
-                        break
+                            val = bool(_n(dataDict))
+                            rejected |= val
+                        if not rejected:
+                            event.accept()
+                            break
+                    _widget = _widget.parent()
 
                 else:
                     event.ignore()

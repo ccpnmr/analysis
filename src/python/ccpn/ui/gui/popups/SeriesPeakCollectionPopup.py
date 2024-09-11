@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:53 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-04-04 15:19:23 +0100 (Thu, April 04, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -81,9 +81,6 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
         self.setOkButton(callback=self._okClicked, tipText='Create Collections')
         self.setCloseButton(callback=self.reject, tipText='Close popup')
         self.setDefaultButton(CcpnDialogMainWidget.CLOSEBUTTON)
-
-        # initialise the buttons and dialog size
-        self._postInit()
 
     def setWidgets(self):
         row = 0

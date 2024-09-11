@@ -2,8 +2,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -12,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:52 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-08-23 19:21:56 +0100 (Fri, August 23, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,12 +27,10 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 import numpy as np
 import pandas as pd
 from functools import partial
-
 import pyqtgraph as pg
-from pyqtgraph import functions as fn
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtWidgets, QtGui
 
-from ccpn.core.lib.Notifiers import Notifier, CurrentNotifier
+from ccpn.core.lib.Notifiers import CurrentNotifier
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as seriesVariables
 
@@ -39,9 +38,8 @@ import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBars import MainPlotToolBar
 from ccpn.ui.gui.modules.experimentAnalysis.MainPlotWidgetBC import MainPlotWidget, PlotType
-from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND, GUISTRIP_PIVOT, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_LABELLING
-from ccpn.ui.gui.guiSettings import getColours, DIVIDER
-from ccpn.ui.gui.widgets.BarGraphWidget import BarGraphWidget, TICKOPTIONS, AllTicks, MinimalTicks
+from ccpn.ui.gui.guiSettings import (CCPNGLWIDGET_HEXBACKGROUND, GUISTRIP_PIVOT, CCPNGLWIDGET_HIGHLIGHT,
+                                     CCPNGLWIDGET_LABELLING, getColours)
 from ccpn.ui.gui.widgets.Font import getFont
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.MessageDialog import showMessage
@@ -85,6 +83,13 @@ class MainPlotPanel(GuiPanel):
 
         self.guiModule.mainTableChanged.connect(partial(self._mainTableChanged, False))
         self.guiModule.mainTableSortingChanged.connect(partial(self._mainTableChanged, False))
+        self._setStyle()
+
+    def _setStyle(self):
+        QtWidgets.QApplication.instance()._sigPaletteChanged.connect(self._checkPalette)
+
+    def _checkPalette(self, pal: QtGui.QPalette, *args):
+        self._setColours()
 
     def _setColours(self):
         self.penColour = rgbaRatioToHex(*getColours()[CCPNGLWIDGET_LABELLING])
@@ -95,9 +100,13 @@ class MainPlotPanel(GuiPanel):
         self.scatterPen = pg.functions.mkPen(self.penColour, width=0.5, style=QtCore.Qt.SolidLine)
         self.selectedPointPen = pg.functions.mkPen(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
         self.selectedLabelPen = pg.functions.mkBrush(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
+        if self.mainPlotWidget:
+            self.mainPlotWidget.setBackgroundColour(self.backgroundColour)
+            self.mainPlotWidget.plotItem.getAxis('bottom').setPen(self.gridPen)
+            self.mainPlotWidget.plotItem.getAxis('left').setPen(self.gridPen)
 
     def initWidgets(self):
-        ## this colour def could go in an higher position as they are same for all possible plots
+        ## this colour def could go in a higher position as they are same for all possible plots
         self._setColours()
         self.mainPlotWidget = MainPlotWidget(self,
                                              application=self.application,

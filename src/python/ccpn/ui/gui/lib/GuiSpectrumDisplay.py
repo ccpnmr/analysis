@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-06-21 14:08:49 +0100 (Fri, June 21, 2024) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-08-23 19:25:20 +0100 (Fri, August 23, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -741,7 +741,7 @@ class GuiSpectrumDisplay(CcpnModule):
                                        callback=self._listViewChanged,
                                        onceOnly=True)
 
-        self.setNotifier(self.project, [Notifier.CHANGE, Notifier.RENAME],
+        self.setNotifier(self.project, [Notifier.CHANGE, Notifier.RENAME, Notifier.DELETE],
                                        SpectrumGroup.className,
                                        callback=self._spectrumGroupChanged,
                                        onceOnly=True)
@@ -967,18 +967,20 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         if self.isGrouped and data:
             trigger = data[Notifier.TRIGGER]
+            spectrumGroup = data[Notifier.OBJECT]
             if trigger == Notifier.RENAME:
                 self.spectrumGroupToolBar._spectrumGroupRename(data)
 
             elif trigger == Notifier.CHANGE:
-
-                spectrumGroup = data[Notifier.OBJECT]
                 spectrumGroups = [action.text() for action in self.spectrumGroupToolBar.actions()]
                 if spectrumGroup.pid not in spectrumGroups:
                     return
                 self._colourChanged(spectrumGroup)
-
                 _spectrumGroupViewHasChanged({Notifier.OBJECT: spectrumGroup})
+
+            elif trigger == Notifier.DELETE:
+                # remove from the spectrumGroup toolbar
+                self.spectrumGroupToolBar._removeSpectrumGroup(None, spectrumGroup)
 
     def _colourChanged(self, spectrumGroup):
         if self.is1D:

@@ -126,8 +126,10 @@ class DataTableSelection(CcpnDialogMainWidget):
         self.setOkButton(callback=self._okClicked, tipText='Run Calculation')
         self.setCloseButton(callback=self.reject, tipText='Close popup')
         self.setDefaultButton(CcpnDialogMainWidget.CLOSEBUTTON)
-        # # initialise the buttons and dialog size
-        self._postInit()
+
+    def _postInit(self):
+        # initialise the buttons and dialog size
+        super()._postInit()
 
         self.widgetETAxy = cw.DataTablePulldown(self.mainWidget,
                                                 mainWindow=self.mainWindow,

@@ -4,9 +4,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-27 15:22:39 +0100 (Tue, June 27, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-04-17 12:03:19 +0100 (Wed, April 17, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,10 +26,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets, QtCore
+from PyQt5 import QtGui, QtWidgets
 from pyqtgraph.widgets.VerticalLabel import VerticalLabel as pyqtVerticalLabel
 
-from ccpn.ui.gui.widgets.Base import Base, HALIGN_DICT
+from ccpn.ui.gui.widgets.Base import Base
 from ccpn.framework.Translation import translator
 import ccpn.ui.gui.guiSettings as guiSettings
 from ccpn.ui.gui.widgets.Icon import Icon
@@ -86,8 +86,8 @@ class Label(QtWidgets.QLabel, Base):
 
     def __init__(self, parent=None,
                  text='', textColour=None, textSize=None, bold=False, italic=False,
-                 margins=[2, 1, 2, 1], icon=None, iconSize=(16, 16), **kwds):
-
+                 margins=[2, 1, 2, 1], icon=None, iconSize=(16, 16),
+                 **kwds):
         super().__init__(parent)
         Base._init(self, **kwds)
 
@@ -109,7 +109,7 @@ class Label(QtWidgets.QLabel, Base):
             self.setFont(_font)
 
         colours = guiSettings.getColours()
-        self._colour = textColour or colours[guiSettings.LABEL_FOREGROUND]
+        self._colour = textColour or None #colours[guiSettings.LABEL_FOREGROUND]
         self._setStyleSheet()
 
         if isinstance(icon, Icon):
@@ -131,7 +131,7 @@ class Label(QtWidgets.QLabel, Base):
     def _setStyleSheet(self):
         self.setStyleSheet(self._styleSheet % (  #self._textSize,
             # self._bold,
-            self._colour,
+            self._colour or 'palette(windowText)',
             self._margins[0],
             self._margins[1],
             self._margins[2],
@@ -214,10 +214,7 @@ class ActiveLabel(Label):
 
 
 class VerticalLabel(pyqtVerticalLabel, Base):
-    _styleSheet = """
-    QLabel {
-            font-size: %spt;
-            font-weight: %s;
+    _styleSheet = """QLabel {
             color: %s;
             margin-left: %dpx;
             margin-top: %dpx;
@@ -227,59 +224,69 @@ class VerticalLabel(pyqtVerticalLabel, Base):
             }
     """
 
-    def __init__(self, parent=None, text='', textColour=None, textSize=12, bold=False,
-                 margins=[2, 1, 2, 1], orientation='horizontal', **kwds):
+    def __init__(self, parent=None,
+                 text='', textColour=None, textSize=None, bold=False, italic=False,
+                 margins=[1, 2, 1, 2], icon=None, iconSize=(16, 16),
+                 orientation='vertical', **kwds):
         super().__init__(parent, orientation=orientation, forceWidth=False)
         Base._init(self, **kwds)
 
         text = translator.translate(text)
         self.setText(text)
 
-        # if textColor:
-        #   self.setStyleSheet('QLabel {color: %s}' % textColor)
-        # if textSize and textColor:
-        #   self.setStyleSheet('QLabel {font-size: %s; color: %s;}' % (textSize, textColor))
-        # if bold:
-        #   self.setStyleSheet('QLabel {font-weight: bold;}')
-
         self._textSize = textSize
         self._bold = 'bold' if bold else 'normal'
         self._margins = margins
 
-        # this appears not to pick up the colour as set by the stylesheet!
-        # self._colour = textColor if textColor else self.palette().color(QtGui.QPalette.WindowText).name()
+        if bold or textSize or italic:
+            _font = self.font()
+            if bold:
+                _font.setBold(True)
+            if italic:
+                _font.setItalic(True)
+            if textSize:
+                _font.setPointSize(textSize)
+            self.setFont(_font)
 
         colours = guiSettings.getColours()
-        self._colour = textColour if textColour else colours[guiSettings.LABEL_FOREGROUND]
+        self._colour = textColour or None #colours[guiSettings.LABEL_FOREGROUND]
         self._setStyleSheet()
 
+        if isinstance(icon, Icon):
+            self.setPixmap(icon.pixmap(*iconSize))
+        elif isinstance(icon, QtGui.QPixmap):
+            self.setPixmap(icon)
+
     def get(self):
-        "get the label text"
+        """get the label text"""
         return self.text()
 
     def set(self, text=''):
-        "set label text, applying translator"
+        """set label text, applying translator"""
         text = translator.translate(text)
         self.setText(text)
 
     def _setStyleSheet(self):
-        self.setStyleSheet(self._styleSheet % (self._textSize,
-                                               self._bold,
-                                               self._colour,
-                                               self._margins[0],
-                                               self._margins[1],
-                                               self._margins[2],
-                                               self._margins[3],
-                                               )
+        self.setStyleSheet(self._styleSheet % (  #self._textSize,
+            #self._bold,
+            self._colour,
+            self._margins[0],
+            self._margins[1],
+            self._margins[2],
+            self._margins[3],
+            )
                            )
 
+    def setTextColour(self, colour):
+        """Set the text colour for the label.
+        """
+        self._colour = colour.name()
+        self._setStyleSheet()
 
-if __name__ == '__main__':
+
+def main():
     from ccpn.ui.gui.widgets.Application import TestApplication
-    from ccpn.ui.gui.widgets.Button import Button
-    from ccpn.ui.gui.widgets.Icon import Icon
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
-
 
     mathExamples = [
         r'$\sqrt{\frac{1}{N}\sum_{i=0}^N (\alpha_i*\delta_i)^2}$',
@@ -289,7 +296,9 @@ if __name__ == '__main__':
     app = TestApplication()
     pixmap = maTex2Pixmap(f'A test label with equation:  {mathExamples[0]}')
     popup = CcpnDialog(windowTitle='Test Table', setLayout=True)
-    label = Label(popup, text='', icon=pixmap, grid=(0, 0))
-    popup.show()
-    popup.raise_()
-    app.start()
+    Label(popup, text='', icon=pixmap, grid=(0, 0))
+    popup.exec_()
+
+
+if __name__ == '__main__':
+    main()

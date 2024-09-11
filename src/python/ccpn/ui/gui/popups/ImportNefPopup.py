@@ -3180,8 +3180,9 @@ class ImportNefPopup(CcpnDialogMainWidget):
         self.setCancelButton(callback=self.reject, tipText='Cancel import')
         self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
 
+    def _postInit(self):
         # initialise the buttons and dialog size
-        self._postInit()
+        super()._postInit()
 
         self._okButton = self.getButton(self.OKBUTTON)
         self._cancelButton = self.getButton(self.CANCELBUTTON)

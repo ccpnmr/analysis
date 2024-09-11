@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:53 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-04-23 22:03:03 +0100 (Tue, April 23, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -207,9 +207,6 @@ class _ListWidget(ListWidget):
         self._partner = None
 
         self.itemDoubleClicked.connect(self._itemDoubleClickedCallback)
-
-        self._setFocusColour()
-
         self.setSortingEnabled(sorted)
 
         self._itemFactory = itemFactory
@@ -217,22 +214,6 @@ class _ListWidget(ListWidget):
             self._itemFactory = DefaultItemFactory()
 
         self._feedbackWidget.highlight(False)
-
-    def _setFocusColour(self, focusColour=None, noFocusColour=None):
-        """Set the focus/noFocus colours for the widget
-        """
-        focusColour = getColours()[BORDERFOCUS]
-        noFocusColour = getColours()[BORDERNOFOCUS]
-        styleSheet = "ListWidget { " \
-                     "border: 1px solid;" \
-                     "border-radius: 1px;" \
-                     "border-color: %s;" \
-                     "} " \
-                     "ListWidget:focus { " \
-                     "border: 1px solid %s; " \
-                     "border-radius: 1px; " \
-                     "}" % (noFocusColour, focusColour)
-        self.setStyleSheet(styleSheet)
 
     def startDrag(self, *args, **kwargs):
         super().startDrag(*args, **kwargs)
@@ -517,17 +498,17 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
         self.setDefaultButton(CcpnDialogMainWidget.OKBUTTON)
 
+    def _postInit(self):
         # initialise the buttons and dialog size
-        self._postInit()
+        super()._postInit()
+
         self._applyButton = self.getButton(self.OKBUTTON)
         self._cancelButton = self.getButton(self.CANCELBUTTON)
         self._revertButton = self.getButton(self.RESETBUTTON)
 
         self._connectLists()
-
-        self._allItems = self.getItems()  # A list of all possible items that are part of the group
+        self._allItems = self.getItems()
         self._populateLists()
-
         self._revertButton.setEnabled(False)
 
         # # one cannot be a copy of the other unless it's a deep copy...

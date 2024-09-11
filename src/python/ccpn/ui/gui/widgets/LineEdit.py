@@ -5,8 +5,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:54 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-08-27 16:07:11 +0100 (Tue, August 27, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,23 +32,24 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.ValidatorBase import ValidatorBase
 
-from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
+
 # from ccpn.ui.gui.guiSettings import helveticaItalic12
 # from ccpn.framework.Translation import translator
 
 
 TextAlignment = {
-    'c': QtCore.Qt.AlignHCenter,
-    'l': QtCore.Qt.AlignLeft,
-    'r': QtCore.Qt.AlignRight,
+    'c'     : QtCore.Qt.AlignHCenter,
+    'l'     : QtCore.Qt.AlignLeft,
+    'r'     : QtCore.Qt.AlignRight,
     'center': QtCore.Qt.AlignHCenter,
     'centre': QtCore.Qt.AlignHCenter,
-    'left': QtCore.Qt.AlignLeft,
-    'right': QtCore.Qt.AlignRight
+    'left'  : QtCore.Qt.AlignLeft,
+    'right' : QtCore.Qt.AlignRight
     }
 
 
 class LineEdit(QtWidgets.QLineEdit, Base):
+    highlightColour = None
 
     def __init__(self, parent, text='', textAlignment='c', backgroundText=None,
                  textColor='black', editable=True, **kwds):
@@ -76,8 +78,34 @@ class LineEdit(QtWidgets.QLineEdit, Base):
             self.setPlaceholderText(str(self.backgroundText))
 
         self.setAlignment(TextAlignment[textAlignment])
-        self.setStyleSheet('LineEdit { padding: 3px 3px 3px 3px; }')
         self.setEditable(editable)
+
+        self._setStyle()
+
+    def _setStyle(self):
+        _style = """QLineEdit {
+                    padding: 3px 3px 3px 3px;
+                    background-color: palette(norole);
+                }
+                QLineEdit:disabled {
+                    color: #808080;
+                    background-color: palette(midlight);
+                }
+                QLineEdit:read-only {
+                    color: #808080;
+                }
+                """
+        self.setStyleSheet(_style)
+        # check for Windows and Linux
+        QtWidgets.QApplication.instance()._sigPaletteChanged.connect(self._revalidate)
+
+    def _revalidate(self, palette):
+        if val := self.validator():
+            if hasattr(val, 'baseColour'):
+                # update the base-colour for change of theme
+                val.baseColour = palette.base().color()
+            # force repaint of the widget
+            val.validate(self.text(), 0)
 
     def get(self):
         return self.text()
@@ -106,131 +134,87 @@ class LineEdit(QtWidgets.QLineEdit, Base):
         return self.set(value)
 
 
-    # def paintEvent(self, ev):
-    #     #p.setBrush(QtGui.QBrush(QtGui.QColor(100, 100, 200)))
-    #     #p.setPen(QtGui.QPen(QtGui.QColor(50, 50, 100)))
-    #     #p.drawRect(self.rect().adjusted(0, 0, -1, -1))
-    #
-    #     #p.setPen(QtGui.QPen(QtGui.QColor(255, 255, 255)))
-    #     self._text = self.text()
-    #     self.setText('')
-    #     super(LineEdit, self).paintEvent(ev)
-    #
-    #     p = QtGui.QPainter(self)
-    #     if self.orientation == QtCore.Qt.Vertical:
-    #         p.rotate(-90)
-    #         rgn = QtCore.QRect(-self.height(), 0, self.height(), self.width())
-    #     else:
-    #         rgn = self.contentsRect()
-    #     align = self.alignment()
-    #     #align  = QtCore.Qt.AlignTop|QtCore.Qt.AlignHCenter
-    #
-    #     self.hint = p.drawText(rgn, align, self._text)
-    #     self.setText(self._text)
-    #     p.end()
-    #
-    #     if self.orientation == QtCore.Qt.Vertical:
-    #         self.setMaximumWidth(self.hint.height())
-    #         self.setMinimumWidth(0)
-    #         self.setMaximumHeight(16777215)
-    #     else:
-    #         self.setMaximumHeight(self.hint.height())
-    #         self.setMinimumHeight(0)
-    #         self.setMaximumWidth(16777215)
-    #
-    # def sizeHint(self):
-    #     if self.orientation == QtCore.Qt.Vertical:
-    #         if hasattr(self, 'hint'):
-    #             return QtCore.QSize(self.hint.height(), self.hint.width())
-    #         else:
-    #             return QtCore.QSize(19, 50)
-    #     else:
-    #         if hasattr(self, 'hint'):
-    #             return QtCore.QSize(self.hint.width(), self.hint.height())
-    #         else:
-    #             return QtCore.QSize(50, 19)
-
-class LineEdit2(LineEdit):
-    """A lineEdit with altered colour scheme for readOnly state
-    """
-
-    def __init__(self, parent, text:str='', textAlignment:str='c', backgroundText:str=None,
-                 textColor:str='black', editable:bool=True, callback=None, **kwds):
-        """
-        :param parent: parent widget
-        :param text: text to display (can be changed with set() method)
-        :param textAlignment: 'l', 'c', or 'r' text alignment identifier
-        :param backgroundText: a transparent text that will disappear as soon as you click to type.
-        :param textColor: Colour of the text
-        :param editable: flag to indicate if content is editable
-        :param callback: optional callback function upon completion; i.e. <return> or loss of focus
-        :param kwds: optional keyword arguments passed to Base for widget management
-        """
-
-        super().__init__(parent=parent, text=text, textAlignment=textAlignment,
-                         backgroundText=backgroundText, textColor=textColor, **kwds)
-
-        self.setEditable(editable)
-        # this callback implements the colouring (editable/non-editable)
-        self.textChanged.connect(self._textChangedCallback)
-
-        # user callback
-        self._callback = None
-        self._qtEditingSlot = None
-        self.setCallback(callback)
-
-    def setEditable(self, flag:bool):
-        """Set widget to be editable; i.e. not readOnly"""
-        self.setReadOnly(not flag)
-
-    def setReadOnly(self, flag:bool):
-        """Change the readonly state; adjust background of the widget
-        """
-        super().setReadOnly(flag)
-        self._readOnly = flag
-        self._updateColours()
-
-    def _testCallback(self):
-        """A testing function for the callback functionality"""
-        print(f'Testing callback: "{self.get()}"')
-
-    def setCallback(self, func):
-        """Define the callback function for the editingFinished QT slot
-        """
-        if func is not None:
-            self._qtEditingSlot = self.editingFinished.connect(func)
-            self._callback = func
-        else:
-            if self._qtEditingSlot:
-                self.editingFinished.disconnect()
-
-    def _textChangedCallback(self):
-        """A character was entered"""
-        _text = self.get()
-        if len(_text) <= 1:
-            self._updateColours()
-
-    def _updateColours(self):
-        """Update the colours depending on state of the line edit
-        """
-        if self._readOnly:
-            # Readonly: setting background colour of the widget to lightgrey
-            self.setStyleSheet("""
-            QLineEdit {
-                background-color : #DDDDDD;
-                color : #666666
-            }""")
-
-        else:
-            # Editable: setting background colour of the widget to white
-            _textColour = 'darkgrey' \
-                           if (self.backgroundText and len(self.get()) == 0) \
-                           else self.textColor
-            self.setStyleSheet("""
-            QLineEdit {
-                background : white;
-                color : %s
-            }""" % _textColour)
+# class LineEdit2(LineEdit):
+#     """A lineEdit with altered colour scheme for readOnly state
+#     """
+#
+#     def __init__(self, parent, text:str='', textAlignment:str='c', backgroundText:str=None,
+#                  textColor:str='black', editable:bool=True, callback=None, **kwds):
+#         """
+#         :param parent: parent widget
+#         :param text: text to display (can be changed with set() method)
+#         :param textAlignment: 'l', 'c', or 'r' text alignment identifier
+#         :param backgroundText: a transparent text that will disappear as soon as you click to type.
+#         :param textColor: Colour of the text
+#         :param editable: flag to indicate if content is editable
+#         :param callback: optional callback function upon completion; i.e. <return> or loss of focus
+#         :param kwds: optional keyword arguments passed to Base for widget management
+#         """
+#
+#         super().__init__(parent=parent, text=text, textAlignment=textAlignment,
+#                          backgroundText=backgroundText, textColor=textColor, **kwds)
+#
+#         self.setEditable(editable)
+#         # this callback implements the colouring (editable/non-editable)
+#         self.textChanged.connect(self._textChangedCallback)
+#
+#         # user callback
+#         self._callback = None
+#         self._qtEditingSlot = None
+#         self.setCallback(callback)
+#
+#     def setEditable(self, flag:bool):
+#         """Set widget to be editable; i.e. not readOnly"""
+#         self.setReadOnly(not flag)
+#
+#     def setReadOnly(self, flag:bool):
+#         """Change the readonly state; adjust background of the widget
+#         """
+#         super().setReadOnly(flag)
+#         self._readOnly = flag
+#         self._updateColours()
+#
+#     def _testCallback(self):
+#         """A testing function for the callback functionality"""
+#         print(f'Testing callback: "{self.get()}"')
+#
+#     def setCallback(self, func):
+#         """Define the callback function for the editingFinished QT slot
+#         """
+#         if func is not None:
+#             self._qtEditingSlot = self.editingFinished.connect(func)
+#             self._callback = func
+#         else:
+#             if self._qtEditingSlot:
+#                 self.editingFinished.disconnect()
+#
+#     def _textChangedCallback(self):
+#         """A character was entered"""
+#         _text = self.get()
+#         if len(_text) <= 1:
+#             self._updateColours()
+#
+#     def _updateColours(self):
+#         """Update the colours depending on state of the line edit
+#         """
+#         if self._readOnly:
+#             # Readonly: setting background colour of the widget to lightgrey
+#             self.setStyleSheet("""
+#             QLineEdit {
+#                 background-color : #DDDDDD;
+#                 color : #666666
+#             }""")
+#
+#         else:
+#             # Editable: setting background colour of the widget to white
+#             _textColour = 'darkgrey' \
+#                            if (self.backgroundText and len(self.get()) == 0) \
+#                            else self.textColor
+#             self.setStyleSheet("""
+#             QLineEdit {
+#                 background : white;
+#                 color : %s
+#             }""" % _textColour)
 
 
 class FloatLineEdit(LineEdit):
@@ -279,6 +263,7 @@ class ValidatedLineEdit(LineEdit, ValidatorBase):
 class PasswordEdit(LineEdit):
     """Subclass of LineEdit to handle passwords to be shown as **
     """
+
     def __init__(self, parent, text='', textAlignment='c', backgroundText=None,
                  minimumWidth=100, textColor=None, editable=True, **kwds):
         """
@@ -290,3 +275,42 @@ class PasswordEdit(LineEdit):
 
         # set password mode
         self.setEchoMode(QtWidgets.QLineEdit.Password)
+
+
+def main():
+    from ccpn.ui.gui.widgets.Application import TestApplication
+    from ccpn.ui.gui.widgets.Widget import Widget
+    from ccpn.ui.gui.widgets.Spacer import Spacer
+
+    class Popup(QtWidgets.QMainWindow):
+        def __init__(self, title):
+            super().__init__()
+            self.layout().setContentsMargins(9, 9, 9, 9)
+
+            self.setWindowTitle(title)
+            mainWidget = Widget(self, setLayout=True)
+            self.setCentralWidget(mainWidget)
+            LineEdit(parent=mainWidget, name='Widget-1', grid=(0, 0), text='Enabled - text')
+            LineEdit(parent=mainWidget, name='Widget-2', grid=(1, 0), text='Disabled - text', enabled=False)
+            widget3 = LineEdit(parent=mainWidget, name='Widget-3', grid=(2, 0), text='Read-only - text')
+            widget3.setReadOnly(True)
+            widget4 = LineEdit(parent=mainWidget, name='Widget-4', grid=(3, 0), text='Disabled|read-only - text',
+                               enabled=False)
+            widget4.setReadOnly(True)
+            Spacer(mainWidget, 1, 1,
+                   QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
+                   grid=(9, 9))
+
+
+    app = TestApplication()
+    # patch for icon sizes in menus, etc.
+    styles = QtWidgets.QStyleFactory()
+    app.setStyle(styles.create('fusion'))
+    popup = Popup(title='Testing enabled/read-only lineEdits')
+    popup.show()
+
+    app.start()
+
+
+if __name__ == '__main__':
+    main()

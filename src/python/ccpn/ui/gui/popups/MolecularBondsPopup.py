@@ -76,9 +76,6 @@ class MolecularBondsPopup(CcpnDialogMainWidget):
         self.setCloseButton(callback=self.reject, tipText='Close popup')
         self.setDefaultButton(CcpnDialogMainWidget.CLOSEBUTTON)
 
-        # initialise the buttons and dialog size
-        self._postInit()
-
     def setWidgets(self):
         """Add the widgets to the main-widget area.
         """

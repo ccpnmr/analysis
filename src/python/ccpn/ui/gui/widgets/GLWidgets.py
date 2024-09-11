@@ -5,9 +5,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -16,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-21 13:24:43 +0000 (Tue, November 21, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__dateModified__ = "$dateModified: 2024-08-28 18:22:05 +0100 (Wed, August 28, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -91,7 +92,7 @@ class GuiNdWidget(CcpnGLWidget):
                             try:
                                 peak = drawList.stringObject
                                 # NOTE:ED - need to speed this up
-                                pView = peak.getPeakView(peakListView)  #  _data2Obj.get(peak._wrappedData.findFirstPeakView(peakListView=peakListView._wrappedData.peakListView))
+                                pView = peak.getPeakView(peakListView)
                                 _pos = peak.position
                                 px, py = float(_pos[xAxis]), float(_pos[yAxis])
                                 tx, ty = pView.textOffset
@@ -106,8 +107,10 @@ class GuiNdWidget(CcpnGLWidget):
                                 # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
                                 # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
                                 # ppm
-                                minX, maxX = min(_ll := px + tx * sgnX, _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
-                                minY, maxY = min(_ll := py + ty * sgnY, _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
+                                minX, maxX = min(_ll := px + tx * sgnX,
+                                                 _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
+                                minY, maxY = min(_ll := py + ty * sgnY,
+                                                 _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
 
                                 if len(peak.axisCodes) > 2 and zPositions is not None:
                                     # zAxis = spectrumIndices[2]
@@ -117,17 +120,18 @@ class GuiNdWidget(CcpnGLWidget):
                                             (minX < xPosition < maxX and minY < yPosition < maxY):
 
                                         # within the XY bounds so check whether inPlane
-                                        _isInPlane, _isInFlankingPlane, planeIndex, fade = self._GLPeaks.objIsInVisiblePlanes(spectrumView, peak)
+                                        _isInPlane, _isInFlankingPlane, planeIndex, fade = \
+                                            self._GLPeaks.objIsInVisiblePlanes(spectrumView, peak)
 
                                         # if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
-                                        if _isInPlane:
+                                        if _isInPlane or _isInFlankingPlane:
                                             peaks.append(peak)
                                             # if firstOnly:
                                             #     return peaks
 
                                 elif (xPositions[0] < px < xPositions[1]
                                       and yPositions[0] < py < yPositions[1]) or \
-                                            (minX < xPosition < maxX and minY < yPosition < maxY):
+                                        (minX < xPosition < maxX and minY < yPosition < maxY):
                                     peaks.append(peak)
                                     # if firstOnly:
                                     #     return peaks if peak in self.current.peaks else []
@@ -179,7 +183,7 @@ class GuiNdWidget(CcpnGLWidget):
                             try:
                                 peak = drawList.stringObject
                                 # NOTE:ED - need to speed this up
-                                pView = peak.getPeakView(peakListView)  #  _data2Obj.get(peak._wrappedData.findFirstPeakView(peakListView=peakListView._wrappedData.peakListView))
+                                pView = peak.getPeakView(peakListView)
                                 _pos = peak.position
                                 px, py = float(_pos[xAxis]), float(_pos[yAxis])
                                 tx, ty = pView.textOffset
@@ -194,8 +198,10 @@ class GuiNdWidget(CcpnGLWidget):
                                 # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
                                 # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
                                 # ppm
-                                minX, maxX = min(_ll := px + tx * sgnX, _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
-                                minY, maxY = min(_ll := py + ty * sgnY, _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
+                                minX, maxX = min(_ll := px + tx * sgnX,
+                                                 _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
+                                minY, maxY = min(_ll := py + ty * sgnY,
+                                                 _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
 
                                 if len(peak.axisCodes) > 2 and zPositions is not None:
                                     # zAxis = spectrumIndices[2]
@@ -203,10 +209,11 @@ class GuiNdWidget(CcpnGLWidget):
                                     if (minX < xPosition < maxX and minY < yPosition < maxY):
 
                                         # within the XY bounds so check whether inPlane
-                                        _isInPlane, _isInFlankingPlane, planeIndex, fade = self._GLPeaks.objIsInVisiblePlanes(spectrumView, peak)
+                                        _isInPlane, _isInFlankingPlane, planeIndex, fade = \
+                                            self._GLPeaks.objIsInVisiblePlanes(spectrumView, peak)
 
                                         # if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
-                                        if _isInPlane:
+                                        if _isInPlane or _isInFlankingPlane:
                                             peaks.append(peak)
                                             # if firstOnly:
                                             #     return peaks
@@ -314,7 +321,7 @@ class GuiNdWidget(CcpnGLWidget):
                             try:
                                 multiplet = drawList.stringObject
                                 # NOTE:ED - need to speed this up
-                                pView = multiplet.getMultipletView(multipletListView)  #  _data2Obj.get(multiplet._wrappedData.findFirstMultipletView(multipletListView=multipletListView._wrappedData.multipletListView))
+                                pView = multiplet.getMultipletView(multipletListView)
                                 _pos = multiplet.position
                                 px, py = float(_pos[xAxis]), float(_pos[yAxis])
                                 tx, ty = pView.textOffset
@@ -329,8 +336,10 @@ class GuiNdWidget(CcpnGLWidget):
                                 # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
                                 # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
                                 # ppm
-                                minX, maxX = min(_ll := px + tx * sgnX, _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
-                                minY, maxY = min(_ll := py + ty * sgnY, _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
+                                minX, maxX = min(_ll := px + tx * sgnX,
+                                                 _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
+                                minY, maxY = min(_ll := py + ty * sgnY,
+                                                 _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
 
                                 if len(multiplet.axisCodes) > 2 and zPositions is not None:
                                     # zAxis = spectrumIndices[2]
@@ -340,10 +349,11 @@ class GuiNdWidget(CcpnGLWidget):
                                             (minX < xPosition < maxX and minY < yPosition < maxY):
 
                                         # within the XY bounds so check whether inPlane
-                                        _isInPlane, _isInFlankingPlane, planeIndex, fade = self._GLMultiplets.objIsInVisiblePlanes(spectrumView, multiplet)
+                                        _isInPlane, _isInFlankingPlane, planeIndex, fade = \
+                                            self._GLMultiplets.objIsInVisiblePlanes(spectrumView, multiplet)
 
                                         # if zPositions[0] < float(multiplet.position[zAxis]) < zPositions[1]:
-                                        if _isInPlane:
+                                        if _isInPlane or _isInFlankingPlane:
                                             multiplets.append(multiplet)
                                             if firstOnly:
                                                 return multiplets
@@ -398,7 +408,7 @@ class GuiNdWidget(CcpnGLWidget):
                             try:
                                 multiplet = drawList.stringObject
                                 # NOTE:ED - need to speed this up
-                                pView = multiplet.getMultipletView(multipletListView)  #  _data2Obj.get(multiplet._wrappedData.findFirstMultipletView(multipletListView=multipletListView._wrappedData.multipletListView))
+                                pView = multiplet.getMultipletView(multipletListView)
                                 _pos = multiplet.position
                                 px, py = float(_pos[xAxis]), float(_pos[yAxis])
                                 tx, ty = pView.textOffset
@@ -413,8 +423,10 @@ class GuiNdWidget(CcpnGLWidget):
                                 # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
                                 # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
                                 # ppm
-                                minX, maxX = min(_ll := px + tx * sgnX, _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
-                                minY, maxY = min(_ll := py + ty * sgnY, _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
+                                minX, maxX = min(_ll := px + tx * sgnX,
+                                                 _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
+                                minY, maxY = min(_ll := py + ty * sgnY,
+                                                 _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
 
                                 if len(multiplet.axisCodes) > 2 and zPositions is not None:
                                     # zAxis = spectrumIndices[2]
@@ -422,10 +434,11 @@ class GuiNdWidget(CcpnGLWidget):
                                     if (minX < xPosition < maxX and minY < yPosition < maxY):
 
                                         # within the XY bounds so check whether inPlane
-                                        _isInPlane, _isInFlankingPlane, planeIndex, fade = self._GLMultiplets.objIsInVisiblePlanes(spectrumView, multiplet)
+                                        _isInPlane, _isInFlankingPlane, planeIndex, fade = \
+                                            self._GLMultiplets.objIsInVisiblePlanes(spectrumView, multiplet)
 
                                         # if zPositions[0] < float(multiplet.position[zAxis]) < zPositions[1]:
-                                        if _isInPlane:
+                                        if _isInPlane or _isInFlankingPlane:
                                             multiplets.append(multiplet)
                                             if firstOnly:
                                                 return multiplets
@@ -483,13 +496,15 @@ class GuiNdWidget(CcpnGLWidget):
 
         # make a list of the visible and not-deleted spectrumViews
         # visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isDisplayed]
-        visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isDisplayed]
+        visibleSpectrumViews = [specView for specView in self._ordering
+                                if not specView.isDeleted and specView.isDisplayed]
 
         self._visibleOrdering = visibleSpectrumViews
 
         # set the first visible, or the first in the ordered list
-        self._firstVisible = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[
-            0].isDeleted else None
+        self._firstVisible = (visibleSpectrumViews[0]
+                              if visibleSpectrumViews else
+                              self._ordering[0] if self._ordering and not self._ordering[0].isDeleted else None)
         self.visiblePlaneList = {}
         self.visiblePlaneListPointValues = {}
         self.visiblePlaneDimIndices = {}
@@ -497,7 +512,8 @@ class GuiNdWidget(CcpnGLWidget):
         # generate the new axis labels based on the visible spectrum axisCodes
         self._buildAxisCodesWithWildCards()
 
-        minList = [self._spectrumSettings[sp][SPECTRUM_VALUEPERPOINT] if SPECTRUM_VALUEPERPOINT in self._spectrumSettings[sp] else None
+        minList = [self._spectrumSettings[sp][SPECTRUM_VALUEPERPOINT]
+                   if SPECTRUM_VALUEPERPOINT in self._spectrumSettings[sp] else None
                    for sp in self._ordering if sp in self._spectrumSettings]
 
         minimumValuePerPoint = None
@@ -701,7 +717,8 @@ class GuiNdWidget(CcpnGLWidget):
                     if self._multipletLabelsEnabled:
                         self._GLMultiplets.drawLabels(specView)
 
-    def drawAliasedSymbols(self, peakSymbolsEnabled, peakArrowsEnabled, multipletSymbolsEnabled, multipletArrowsEnabled):
+    def drawAliasedSymbols(self, peakSymbolsEnabled, peakArrowsEnabled, multipletSymbolsEnabled,
+                           multipletArrowsEnabled):
         """Draw all the symbols that require aliasing to multiple regions
         """
         _shader = self.globalGL._shaderProgramAlias.makeCurrent()
@@ -915,7 +932,8 @@ class GuiNdWidget(CcpnGLWidget):
                         specMatrix[:16] = [xScale * foldX, 0.0, 0.0, 0.0,
                                            0.0, yScale * foldY, 0.0, 0.0,
                                            0.0, 0.0, 1.0, 0.0,
-                                           fxMax + (ii * dxAF) + foldXOffset, fyMax + (jj * dyAF) + foldYOffset, 0.0, 1.0]
+                                           fxMax + (ii * dxAF) + foldXOffset, fyMax + (jj * dyAF) + foldYOffset,
+                                           0.0, 1.0]
 
                         # flipping in the same GL region -  xScale = -xScale
                         #                                   offset = fxMax-dxAF
@@ -948,7 +966,8 @@ class GuiNdWidget(CcpnGLWidget):
         """
         index = len(drawList.indices)
         drawList.indices = np.append(drawList.indices, np.array((index, index + 1), dtype=np.uint32))
-        drawList.vertices = np.append(drawList.vertices, np.array(self._drawDiagonalLineV2(x0, x1, y0, y1), dtype=np.float32))
+        drawList.vertices = np.append(drawList.vertices,
+                                      np.array(self._drawDiagonalLineV2(x0, x1, y0, y1), dtype=np.float32))
         drawList.colors = np.append(drawList.colors, np.array(col * 2, dtype=np.float32))
         drawList.numVertices += 2
 
@@ -1025,9 +1044,11 @@ class GuiNdWidget(CcpnGLWidget):
                         if n:
                             # add lines to drawList
                             if xco > yco:
-                                self._addDiagonalLine(drawListSideBands, (xco * x0) + n * spinningRate, (xco * x1) + n * spinningRate, yco * y0, yco * y1, col)
+                                self._addDiagonalLine(drawListSideBands, (xco * x0) + n * spinningRate,
+                                                      (xco * x1) + n * spinningRate, yco * y0, yco * y1, col)
                             else:
-                                self._addDiagonalLine(drawListSideBands, xco * x0, xco * x1, (yco * y0) + n * spinningRate, (yco * y1) + n * spinningRate, col)
+                                self._addDiagonalLine(drawListSideBands, xco * x0, xco * x1,
+                                                      (yco * y0) + n * spinningRate, (yco * y1) + n * spinningRate, col)
 
         drawList.defineIndexVBO()
         drawListSideBands.defineIndexVBO()
@@ -1094,7 +1115,8 @@ class GuiNdWidget(CcpnGLWidget):
             fxMax, fxMin = self._spectrumValues[0].maxSpectrumFrequency, self._spectrumValues[0].minSpectrumFrequency
             xAliasingIndex = self._spectrumValues[0].aliasingIndex
             xFoldingMode = self._spectrumValues[0].foldingMode
-            fxFoldMax, fxFoldMin = self._spectrumValues[0].maxFoldingFrequency, self._spectrumValues[0].minFoldingFrequency
+            fxFoldMax, fxFoldMin = (self._spectrumValues[0].maxFoldingFrequency,
+                                    self._spectrumValues[0].minFoldingFrequency)
 
             # check tolerances
             if not self._widthsChangedEnough((fxMax, 0.0), (fxMin, 0.0), tol=1e-10):
@@ -1107,7 +1129,8 @@ class GuiNdWidget(CcpnGLWidget):
             fyMax, fyMin = self._spectrumValues[1].maxSpectrumFrequency, self._spectrumValues[1].minSpectrumFrequency
             yAliasingIndex = self._spectrumValues[1].aliasingIndex
             yFoldingMode = self._spectrumValues[1].foldingMode
-            fyFoldMax, fyFoldMin = self._spectrumValues[1].maxFoldingFrequency, self._spectrumValues[1].minFoldingFrequency
+            fyFoldMax, fyFoldMin = (self._spectrumValues[1].maxFoldingFrequency,
+                                    self._spectrumValues[1].minFoldingFrequency)
 
             # check tolerances
             if not self._widthsChangedEnough((fyMax, 0.0), (fyMin, 0.0), tol=1e-10):
@@ -1147,7 +1170,8 @@ class GuiNdWidget(CcpnGLWidget):
         # only need the axes for this spectrum
         indices = indices[:spectrumView.spectrum.dimensionCount]
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX] = indices
-        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_REGIONBOUNDS] = (self._spectrumValues[0].regionBounds, self._spectrumValues[1].regionBounds)
+        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_REGIONBOUNDS] = (self._spectrumValues[0].regionBounds,
+                                                                              self._spectrumValues[1].regionBounds)
 
         if len(self._spectrumValues) > 2:
             # store a list for the extra dimensions - should only be one per spectrumDisplay really
@@ -1530,7 +1554,7 @@ class Gui1dWidget(CcpnGLWidget):
                         for drawList in labelling.stringList:
                             try:
                                 peak = drawList.stringObject
-                                pView = peak.getPeakView(peakListView)  # _data2Obj.get(peak._wrappedData.findFirstPeakView(peakListView=peakListView._wrappedData.peakListView))
+                                pView = peak.getPeakView(peakListView)
                                 px, py = float(peak.position[0]), float(peak.height)
                                 tx, ty = pView.textOffset
                                 if not tx and not ty:
@@ -1544,13 +1568,14 @@ class Gui1dWidget(CcpnGLWidget):
                                 # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
                                 # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
                                 # ppm
-                                minX, maxX = min(_ll := px + tx * sgnX, _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
-                                minY, maxY = min(_ll := py + ty * sgnY, _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
+                                minX, maxX = min(_ll := px + tx * sgnX,
+                                                 _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
+                                minY, maxY = min(_ll := py + ty * sgnY,
+                                                 _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
 
                                 if (xPositions[0] < px < xPositions[1]
                                     and yPositions[0] < py < yPositions[1]) or \
                                         (minX < xPosition - xOffset < maxX and minY < yPosition - yOffset < maxY):
-
                                     peaks.append(peak)
                                     # if firstOnly:
                                     #     return peaks if peak in self.current.peaks else []
@@ -1587,7 +1612,7 @@ class Gui1dWidget(CcpnGLWidget):
                         for drawList in labelling.stringList:
                             try:
                                 peak = drawList.stringObject
-                                pView = peak.getPeakView(peakListView)  # _data2Obj.get(peak._wrappedData.findFirstPeakView(peakListView=peakListView._wrappedData.peakListView))
+                                pView = peak.getPeakView(peakListView)
                                 px, py = float(peak.position[0]), float(peak.height)
                                 tx, ty = pView.textOffset
                                 if not tx and not ty:
@@ -1601,8 +1626,10 @@ class Gui1dWidget(CcpnGLWidget):
                                 # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
                                 # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
                                 # ppm
-                                minX, maxX = min(_ll := px + tx * sgnX, _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
-                                minY, maxY = min(_ll := py + ty * sgnY, _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
+                                minX, maxX = min(_ll := px + tx * sgnX,
+                                                 _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
+                                minY, maxY = min(_ll := py + ty * sgnY,
+                                                 _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
 
                                 if (minX < xPosition - xOffset < maxX and minY < yPosition - yOffset < maxY):
                                     peaks.append(peak)
@@ -1688,7 +1715,7 @@ class Gui1dWidget(CcpnGLWidget):
                         for drawList in labelling.stringList:
                             try:
                                 multiplet = drawList.stringObject
-                                pView = multiplet.getMultipletView(multipletListView)  # _data2Obj.get(multiplet._wrappedData.findFirstMultipletView(multipletListView=multipletListView._wrappedData.multipletListView))
+                                pView = multiplet.getMultipletView(multipletListView)
                                 px, py = float(multiplet.position[0]), float(multiplet.height)
                                 tx, ty = pView.textOffset
                                 if not tx and not ty:
@@ -1702,8 +1729,10 @@ class Gui1dWidget(CcpnGLWidget):
                                 # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
                                 # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
                                 # ppm
-                                minX, maxX = min(_ll := px + tx * sgnX, _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
-                                minY, maxY = min(_ll := py + ty * sgnY, _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
+                                minX, maxX = min(_ll := px + tx * sgnX,
+                                                 _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
+                                minY, maxY = min(_ll := py + ty * sgnY,
+                                                 _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
 
                                 if (xPositions[0] < px < xPositions[1]
                                     and yPositions[0] < py < yPositions[1]) or \
@@ -1745,7 +1774,7 @@ class Gui1dWidget(CcpnGLWidget):
                         for drawList in labelling.stringList:
                             try:
                                 multiplet = drawList.stringObject
-                                pView = multiplet.getMultipletView(multipletListView)  # _data2Obj.get(multiplet._wrappedData.findFirstMultipletView(multipletListView=multipletListView._wrappedData.multipletListView))
+                                pView = multiplet.getMultipletView(multipletListView)
                                 px, py = float(multiplet.position[0]), float(multiplet.height)
                                 tx, ty = pView.textOffset
                                 if not tx and not ty:
@@ -1759,8 +1788,10 @@ class Gui1dWidget(CcpnGLWidget):
                                 # minX, maxX = min(_ll := px + tx * pixX, _rr := px + (tx + drawList.width) * pixX), max(_ll, _rr)
                                 # minY, maxY = min(_ll := py + ty * pixY, _rr := py + (ty + drawList.height) * pixY), max(_ll, _rr)
                                 # ppm
-                                minX, maxX = min(_ll := px + tx * sgnX, _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
-                                minY, maxY = min(_ll := py + ty * sgnY, _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
+                                minX, maxX = min(_ll := px + tx * sgnX,
+                                                 _rr := px + tx * sgnX + drawList.width * pixX), max(_ll, _rr)
+                                minY, maxY = min(_ll := py + ty * sgnY,
+                                                 _rr := py + ty * sgnY + drawList.height * pixY), max(_ll, _rr)
 
                                 if (minX < xPosition - xOffset < maxX and minY < yPosition - yOffset < maxY):
                                     multiplets.append(multiplet)
@@ -1941,13 +1972,15 @@ class Gui1dWidget(CcpnGLWidget):
 
         # make a list of the visible and not-deleted spectrumViews
         # visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isDisplayed]
-        visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isDisplayed]
+        visibleSpectrumViews = [specView for specView in self._ordering
+                                if not specView.isDeleted and specView.isDisplayed]
 
         self._visibleOrdering = visibleSpectrumViews
 
         # set the first visible, or the first in the ordered list
-        self._firstVisible = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[
-            0].isDeleted else None
+        self._firstVisible = (visibleSpectrumViews[0]
+                              if visibleSpectrumViews else
+                              self._ordering[0] if self._ordering and not self._ordering[0].isDeleted else None)
 
         # generate the new axis labels based on the visible spectrum axisCodes
         self._buildAxisCodesWithWildCards()
@@ -2051,7 +2084,8 @@ class Gui1dWidget(CcpnGLWidget):
                     if self._multipletLabelsEnabled:
                         self._GLMultiplets.drawLabels(specView)
 
-    def drawAliasedSymbols(self, peakSymbolsEnabled, peakArrowsEnabled, multipletSymbolsEnabled, multipletArrowsEnabled):
+    def drawAliasedSymbols(self, peakSymbolsEnabled, peakArrowsEnabled, multipletSymbolsEnabled,
+                           multipletArrowsEnabled):
         """Draw all the symbols that require aliasing to multiple regions
         """
         _shader = self.globalGL._shaderProgramAlias.makeCurrent()
@@ -2304,7 +2338,8 @@ class Gui1dWidget(CcpnGLWidget):
             fxMax, fxMin = self._spectrumValues[0].maxSpectrumFrequency, self._spectrumValues[0].minSpectrumFrequency
             xAliasingIndex = self._spectrumValues[0].aliasingIndex
             xFoldingMode = self._spectrumValues[0].foldingMode
-            fxFoldMax, fxFoldMin = self._spectrumValues[0].maxFoldingFrequency, self._spectrumValues[0].minFoldingFrequency
+            fxFoldMax, fxFoldMin = (self._spectrumValues[0].maxFoldingFrequency,
+                                    self._spectrumValues[0].minFoldingFrequency)
 
             # check tolerances
             if not self._widthsChangedEnough((fxMax, 0.0), (fxMin, 0.0), tol=1e-10):
@@ -2328,7 +2363,8 @@ class Gui1dWidget(CcpnGLWidget):
             yScale = dy * dyAF / 1.0
 
             # set to 1D limits to twice the width of the spectrum and the intensity limit
-            self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * dxAF / max(self._spectrumValues[0].pointCount, self.SPECTRUMXZOOM))
+            self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * dxAF / max(self._spectrumValues[0].pointCount,
+                                                                                     self.SPECTRUMXZOOM))
             self._maxXRange = max(self._maxXRange, dxAF)
             # self._minYRange = min(self._minYRange, 3.0 * dyAF / self.SPECTRUMYZOOM)
             self._minYRange = min(self._minYRange, self._intensityLimit)
@@ -2342,7 +2378,8 @@ class Gui1dWidget(CcpnGLWidget):
                                                                                         0.0, 1.0, 0.0, 0.0,
                                                                                         0.0, 0.0, 1.0, 0.0,
                                                                                         stX, stY, 0.0, 1.0]
-            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIXOFFSET] = np.array((stX, stY), dtype=np.float32)
+            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIXOFFSET] = np.array((stX, stY),
+                                                                                                 dtype=np.float32)
 
         self._maxYRange = max(self._maxYRange, dyAF)
 
@@ -2353,7 +2390,9 @@ class Gui1dWidget(CcpnGLWidget):
         # create model-view matrix for the spectrum to be drawn
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MATRIX] = np.zeros((16,), dtype=np.float32)
 
-        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MATRIX][:16] = [xScale, 0.0, 0.0, 0.0, 0.0, yScale, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, fxMax, fyMax, 0.0, 1.0]
+        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MATRIX][:16] = [xScale, 0.0, 0.0, 0.0, 0.0, yScale, 0.0,
+                                                                             0.0, 0.0, 0.0, 1.0, 0.0, fxMax, fyMax, 0.0,
+                                                                             1.0]
 
         # setup information for the horizontal/vertical traces
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_XLIMITS] = (fxMin, fxMax)

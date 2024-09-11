@@ -75,7 +75,7 @@ def trace(f):
     return _f
 
 
-def singleton(cls):
+def singleton(cls, *single_args):
     """ Use class as singleton.
     From: https://wiki.python.org/moin/PythonDecoratorLibrary#Singleton
     Annotated by GWV

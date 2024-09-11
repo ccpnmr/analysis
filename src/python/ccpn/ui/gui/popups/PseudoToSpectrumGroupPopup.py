@@ -63,10 +63,6 @@ class PseudoToSpectrumGroupPopup(CcpnDialogWithOutputPathPopupABC):  # ExportDia
         # for CcpnDialogMainWidget:
         self.initialise(self.mainWidget)
         self.populate(self.mainWidget)
-        self.actionButtons()
-
-        # initialise the buttons and dialog size
-        self._postInit()
 
     def initialise(self, userFrame):
         """Create the widgets for the userFrame

@@ -58,9 +58,6 @@ class PeakListPropertiesPopup(PMIListPropertiesPopupABC):
             **kwds,
         )
 
-        # initialise the buttons and dialog size
-        self._postInit()
-
     def _refreshGLItems(self):
         # emit a signal to rebuild all peaks and multiplets
         self.GLSignals.emitEvent(targets=[self.ccpnList], triggers=[GLNotifier.GLPEAKLISTS,

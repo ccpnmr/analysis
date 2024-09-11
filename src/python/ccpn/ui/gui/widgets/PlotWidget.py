@@ -5,8 +5,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,38 +16,32 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:54 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-08-23 19:21:21 +0100 (Fri, August 23, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: Geerten Vuister"
-__date__ = "$Date: 2018-12-20 15:44:35 +0000 (Thu, December 20, 2018) $"
-__date__ = "$Date: 2020-12-03 18:45:05 +0000 (Thu, December 03, 2020) $"
+__date__ = "$Date: 2024-08-07 14:49:14 +0000 (Wed, August 07, 2024) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
-from typing import Sequence
-
 import pyqtgraph as pg
-import numpy as np
-from PyQt5 import QtCore, QtGui, QtWidgets, QtOpenGL
+from PyQt5 import QtCore, QtWidgets, QtOpenGL
 
-from ccpn.ui.gui.guiSettings import getColourScheme, LIGHT
 from ccpn.ui.gui.widgets.ViewBox import ViewBox
 from ccpn.ui.gui.widgets.ViewBox import CrossHair
 from ccpn.ui.gui.widgets.CcpnGridItem import CcpnGridItem
 from ccpn.ui.gui.lib.mouseEvents import rightMouse
+from ccpn.ui.gui.guiSettings import Theme
 from ccpn.util.Constants import MOUSEDICTSTRIP
 from ccpn.util.Colour import Colour
-
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
-import pyqtgraph.opengl as gl
 
 
-#TODO:WAYNE: This class should contain all the nitty gritty of the displaying; including the axis labels and the like
-# as it is only there and is just a small wrapper arount a pyqtgraph class
+#TODO:WAYNE: This class should contain all the nitty-gritty of the displaying; including the axis labels and the like
+# as it is only there and is just a small wrapper around a pyqtgraph class
 # goes together with AxisTextItem (probably can be reduced to a function and included here.
 #TODO:WAYNE: should this inherit from Base??
 
@@ -97,8 +92,7 @@ class PlotWidget(pg.PlotWidget):
         #TODO:GEERTEN: Fix with proper stylesheet
         # Also used in AxisTextItem
         # NOTE: self.highlightColour is also being used in GuiPeakListView for selected peaks
-        _colourScheme = getColourScheme()
-        if _colourScheme == LIGHT:
+        if strip.spectrumDisplay.mainWindow.application._themeStyle == Theme.LIGHT:
             self.background = '#f7ffff'
             self.foreground = '#080000'
             self.gridColour = '#080000'

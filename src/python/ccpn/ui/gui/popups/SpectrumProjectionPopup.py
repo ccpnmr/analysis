@@ -72,8 +72,10 @@ class SpectrumProjectionPopup(CcpnDialogWithOutputPathPopupABC):  # ExportDialog
         self.populate(self.mainWidget)
         self.actionButtons()
 
-        # initialise the buttons and dialog size
-        self._postInit()
+    def actionButtons(self):
+        self.setOkButton(callback=self.makeProjection, text='Make Projection', tipText='Export the projection to file and close dialog')
+        self.setCloseButton(callback=self._rejectDialog, text='Close', tipText='Close')
+        self.setDefaultButton(ExportDialogABC.CLOSEBUTTON)
 
     @property
     def projectionAxisCode(self):

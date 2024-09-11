@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-11 15:57:19 +0100 (Wed, September 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-11 16:16:56 +0100 (Wed, September 11, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1135,6 +1135,29 @@ class Gui(Ui, _Gui_V3_V4):
 
         return result
 
+    @logCommand('ui.')
+    def makeStripPlot(self, includePeakLists=True, includeNmrChains=True, includeNmrChainPullSelection=True):
+        """Make a strip plot from peaks or nmrChains
+        """
+        from ccpn.ui.gui.popups.StripPlotPopup import StripPlotPopup
+
+        if not self.project.peaks and not self.project.nmrResidues and not self.project.nmrChains:
+            getLogger().warning('Cannot make strip plot, nothing to display')
+            MessageDialog.showWarning('Cannot make strip plot,', 'nothing to display')
+            return
+
+        if self.current.strip is None or self.current.strip.isDeleted:
+            MessageDialog.showWarning('Make Strip Plot', 'No selected spectrumDisplay')
+            return
+
+        popup = StripPlotPopup(parent=self.mainWindow, mainWindow=self.mainWindow,
+                               spectrumDisplay=self.current.strip.spectrumDisplay,
+                               includePeakLists=includePeakLists,
+                               includeNmrChains=includeNmrChains,
+                               includeNmrChainPullSelection=includeNmrChainPullSelection,
+                               includeSpectrumTable=False)
+        popup.exec_()
+
     #-----------------------------------------------------------------------------------------
     # View
     #-----------------------------------------------------------------------------------------
@@ -1271,19 +1294,6 @@ class Gui(Ui, _Gui_V3_V4):
         from ccpn.ui.gui.modules.StructureTable import StructureTableModule
         return self._showModule(StructureTableModule, position=position, relativeTo=relativeTo,
                                 selection=structureEnsemble)
-
-    # @logCommand('ui.')
-    # def showRestraintAnalysisInspector(self, position: str = 'bottom', relativeTo=None, peakList=None):
-    #     """Show the RestraintAnalysis Inspector.
-    #     :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
-    #     :param relativeTo: module relative to which position is applied.
-    #     :param peakList: optional PeakList to populate the module
-    #     """
-    #     from ccpn.ui.gui.modules.RestraintAnalysisTable import RestraintAnalysisTableModule
-    #     _module = self._showModule(RestraintAnalysisTableModule, position=position, relativeTo=relativeTo)
-    #     if peakList:
-    #         _module.selectPeakList(peakList)
-    #     return _module
 
     def showChemicalShiftMapping(self, position: str = 'top', relativeTo = None):
         """Show the ChemicalShiftMapping module

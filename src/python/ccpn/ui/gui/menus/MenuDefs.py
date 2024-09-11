@@ -79,7 +79,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-11 15:57:19 +0100 (Wed, September 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-11 16:16:56 +0100 (Wed, September 11, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -150,6 +150,7 @@ class MenusDefs(Menu, _ApplicationProperties):
     Use insertAfter() or insertBefore() methods to dynamically add to the MenuDefs
     instance.
 
+    NB __init__ at end of code!
     """
 
     def _defineMenus(self):
@@ -240,7 +241,6 @@ class MenusDefs(Menu, _ApplicationProperties):
          Action("Restraint Table", self._showRestraintTableCallback, shortcut='rt', checkEnabled=_projectHasRestraintTables),
          Action("Violation Table", self._showViolationTableCallback, shortcut='vt', checkEnabled=_projectHasViolationTables),
          Action("Structure Ensemble Table", self._showStructureEnsembleTableCallback, shortcut='st', checkEnabled=_projectHasStructureEnsembles),
-         # Action("Restraint Analysis Inspector", self._showRestraintAnalysisInspectorCallback, shortcut='at'),
 
          Separator(),
          Action(VIEW_CHEMICAL_SHIFT_MAPPING, self._showChemicalShiftMappingCallback, shortcut='cm'),
@@ -311,7 +311,7 @@ class MenusDefs(Menu, _ApplicationProperties):
         Action("Convert...", self._convertSpectrumCallback, checkEnabled=_projectHasSpectra),
 
         Separator(),
-        Action("Make Strip Plot...", ui.makeStripPlot, shortcut='sp', checkEnabled=_projectHasSpectra),
+        Action("Make Strip Plot...", self._makeStripPlotCallback, shortcut='sp', checkEnabled=_projectHasSpectra),
         Action("Print to File...", self._printToFileCallback, shortcut='⌃p', checkEnabled=_projectHasSpectra),
 
     ), # end Menu Spectrum
@@ -630,6 +630,11 @@ class MenusDefs(Menu, _ApplicationProperties):
 
             popup = ConvertToHdf5Popup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
             popup.exec_()
+
+    def _makeStripPlotCallback(self):
+        """Callback for Spectrum->Make Strip Plot
+        """
+        self.ui.makeStripPlot()
 
     def _copyToProjectCallback(self):
         """Callback for Spectrum -> Copy into Project
@@ -972,11 +977,6 @@ class MenusDefs(Menu, _ApplicationProperties):
         """Toggles whether crosshairs are displayed in all SpectrumDisplays.
         """
         self.mainWindow.toggleCrosshair()
-    #
-    # def _showRestraintAnalysisInspectorCallback(self):
-    #     """Callback for showing the RestrainAnalysis inspector
-    #     """
-    #     self.ui.showRestraintAnalysisInspector()
 
     def _showChemicalShiftMappingCallback(self):
         """Callback to show Chemical shift mapping module

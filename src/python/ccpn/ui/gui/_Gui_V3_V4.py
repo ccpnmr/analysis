@@ -98,28 +98,6 @@ class _Gui_V3_V4(object):
     # Spectrum
     #-----------------------------------------------------------------------------------------
 
-    @logCommand('ui.')
-    def makeStripPlot(self, includePeakLists=True, includeNmrChains=True, includeNmrChainPullSelection=True):
-        """Make a strip plot from peaks or nmrChains
-        """
-        if not self.project.peaks and not self.project.nmrResidues and not self.project.nmrChains:
-            getLogger().warning('Cannot make strip plot, nothing to display')
-            MessageDialog.showWarning('Cannot make strip plot,', 'nothing to display')
-            return
-
-        if self.current.strip is None or self.current.strip.isDeleted:
-            MessageDialog.showWarning('Make Strip Plot', 'No selected spectrumDisplay')
-            return
-
-        from ccpn.ui.gui.popups.StripPlotPopup import StripPlotPopup
-        popup = StripPlotPopup(parent=self.mainWindow, mainWindow=self.mainWindow,
-                               spectrumDisplay=self.current.strip.spectrumDisplay,
-                               includePeakLists=includePeakLists,
-                               includeNmrChains=includeNmrChains,
-                               includeNmrChainPullSelection=includeNmrChainPullSelection,
-                               includeSpectrumTable=False)
-        popup.exec_()
-
     def _flipArbitraryAxes(self, strip, usePosition=False):
         """Flip arbitrary axes of strip (defaults to current.strip)
         :param usePosition: Optionally use current cursor position

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-06 11:32:58 +0100 (Fri, September 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-11 17:55:36 +0100 (Wed, September 11, 2024) $"
 __version__ = "$Revision: 3.2.6 $"
 #=========================================================================================
 # Created
@@ -28,47 +28,38 @@ __date__ = "$Date: 2017-03-16 18:20:01 +0000 (Thu, March 16, 2017) $"
 #=========================================================================================
 
 import sys
-import os
 import typing
 import re
 import json
-import platform
-
 from PyQt5 import QtWidgets, QtCore, QtGui
 from functools import partial
-from ccpn.core.Project import Project
 
 from ccpn.framework.Application import getApplication
 from ccpn.framework.PathsAndUrls import CCPN_DIRECTORY_SUFFIX, CCPN_SAVEAS_SUB_DIRECTORIES
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import _checkPathForDataLoader
 
+from ccpn.core.Project import Project
 from ccpn.core.lib.ContextManagers import (
     notificationEchoBlocking, catchExceptions,
     logCommandManager, undoStackBlocking, busyHandler)
 
 from ccpn.ui.Ui import Ui
 from ccpn.ui.gui import Layout
-from ccpn.ui.gui.guiSettings import LIGHT, DARK
-from ccpn.ui.gui.Menus import getMenuDefs
 
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup, NewTermsConditionsPopup
 from ccpn.ui.gui.widgets.Application import Application
-from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets import FileDialog
 from ccpn.ui.gui.widgets.Font import getSystemFonts
-# from ccpn.ui.gui.widgets.Frame import ScrollableFrame
 from ccpn.ui.gui.popups.ImportStarPopup import StarImporterPopup
 
 # This import initializes relative paths for QT style-sheets.  Do not remove! GWV ????
 from ccpn.ui.gui.guiSettings import (FontSettings, consoleStyle, getTheme,
-                                     getColours, PALETTE, Theme, setColourScheme)
-# from ccpn.ui.gui.widgets.Font import getFontHeight
+                                     Theme, setColourScheme)
 from ccpn.ui.gui.widgets.Icon import Icon
 
 from ccpn.util.Logging import getLogger
-from ccpn.util import Logging
-from ccpn.util import Register
+from ccpn.util import Logging, Register
 from ccpn.util.Path import aPath
 from ccpn.util.decorators import logCommand
 
@@ -97,7 +88,7 @@ def _ccpnExceptionhook(ccpnType, value, tback):
         #     text = str(value)
         #     MessageDialog.showError(title=title, message=text)
 
-        if application.project and not application.project.readOnly:
+        if application.project and not application.project.isReadOnly:
             application.project._updateLoggerState(readOnly=False, flush=True)
 
     sys.__excepthook__(ccpnType, value, tback)
@@ -264,10 +255,10 @@ class Gui(Ui, _Gui):
 
         self._fontSettings = FontSettings(application.preferences)
 
-        # defined by _setColourSchemeAndStyleSheet()
-        self._styleSheet = None
-        self._colourScheme = None
-        self._setColourSchemeAndStyleSheet(application.args, application.preferences)
+        # defined by _changeThemeInstant()
+        self._themeStyle = None
+        self._themeColour = None
+        self._themeSDStyle = None
 
         # Get menu definitions; subclassed by various application-specific Gui's
         self._menuDefs = self._getMenuDefs()
@@ -414,7 +405,7 @@ class Gui(Ui, _Gui):
         if int(base > 127) != themeStates[theme]:
             self._changeThemeInstant(themeStates[theme])
 
-    def initialize(self, mainWindow):
+    def initialize(self, mainWindow, project):
         """UI operations done after every project load/create
         """
         if mainWindow is None:
@@ -1122,7 +1113,7 @@ class Gui(Ui, _Gui):
         from ccpn.core.lib.ProjectLib import checkProjectName
 
         title = 'Project SaveAs'
-        oldPath = Path(self.project.path)
+        oldPath = aPath(self.project.path)
 
         if newPath is None:
             # try to create a new path from the old one

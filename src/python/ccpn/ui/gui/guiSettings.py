@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-06 12:35:04 +0100 (Fri, September 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-11 17:55:36 +0100 (Wed, September 11, 2024) $"
 __version__ = "$Revision: 3.2.6 $"
 #=========================================================================================
 # Created
@@ -632,9 +632,9 @@ def getTheme() -> tuple[Theme, str, Theme]:
     """
     if not (application := getApplication()):
         return Theme.LIGHT, 'dodgerblue', Theme.LIGHT
-    themeStyle = application._themeStyle
-    themeColour = application._themeColour
-    themeSDStyle = application._themeSDStyle
+    themeStyle = application.ui._themeStyle
+    themeColour = application.ui._themeColour
+    themeSDStyle = application.ui._themeSDStyle
     if themeStyle is None:
         themeStyle = Theme.LIGHT
         getLogger().warning(f'getTheme: undefined theme, setting to {themeStyle.dataValue!r}')

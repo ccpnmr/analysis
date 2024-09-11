@@ -19,7 +19,6 @@ from ccpn.core.lib.ContextManagers import notificationEchoBlocking, catchExcepti
 
 from ccpn.ui.Ui import Ui
 from ccpn.ui.gui import Layout
-from ccpn.ui.gui.guiSettings import LIGHT, DARK
 from ccpn.ui.gui.Menus import getMenuDefs
 
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup, NewTermsConditionsPopup

@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-04 18:51:59 +0100 (Thu, July 04, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-09-11 17:55:36 +0100 (Wed, September 11, 2024) $"
+__version__ = "$Revision: 3.2.6 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1258,17 +1258,18 @@ def _fetchNewPeakAssignments(peakList: PeakList, nmrChain: NmrChain, keepAssignm
     with progressHandler(text='Set up NmrResidues...', maximum=len(_peaks) - 1,
                          raiseErrors=False) as progress:
         # add a notifier on a change/create of any peaks in this peakList to update progress-bar
-        _notify = Notifier(peakList,
-                           [Notifier.CREATE, Notifier.CHANGE],
-                           'Peak',
-                           partial(_updateProgress, progress))
+        _notifyCreate = Notifier(peakList, Notifier.CREATE, 'Peak',
+                                 partial(_updateProgress, progress))
+        _notifyChange = Notifier(peakList, Notifier.CHANGE, 'Peak',
+                                 partial(_updateProgress, progress))
         peakList.fetchNewAssignments(nmrChain, keepAssignments)
 
     if progress.error:
         # report any errors
         getLogger().warning(f'fetchNewPeakAssignments: {progress.error}')
     # clean up notifier
-    _notify.unRegister()
+    _notifyCreate.unRegisterNotifier()
+    _notifyChange.unRegisterNotifier()
 
 
 #=========================================================================================

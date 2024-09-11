@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-23 19:21:22 +0100 (Fri, August 23, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-09-11 17:55:36 +0100 (Wed, September 11, 2024) $"
+__version__ = "$Revision: 3.2.6 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -33,7 +33,7 @@ from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 from ccpn.core.SpectrumGroup import SpectrumGroup
-from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.lib.Notifiers import CurrentNotifier
 from ccpn.core.lib import Pid
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.framework.Application import getCurrent
@@ -84,11 +84,10 @@ class SpectrumGroupToolBar(ToolBar):
                                                     );
                             }
                             """
-        self._currentSpectrumNotifier = Notifier(getCurrent(),
-                                  [Notifier.CURRENT],
+        self._currentSpectrumNotifier = CurrentNotifier(
                                   targetName=SpectrumGroup._pluralLinkName,
                                   callback=self._onCurrentNotifier,
-                                  onceOnly=True),
+                                  ),
 
         # self._spectrumGroups = []
 
